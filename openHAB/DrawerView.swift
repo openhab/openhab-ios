@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -16,32 +17,23 @@ import SafariServices
 import SFSafeSymbols
 import SwiftUI
 
-func deriveSitemaps(_ response: Data?) -> [OpenHABSitemap] {
-    var sitemaps = [OpenHABSitemap]()
+private let logger = Logger(subsystem: "org.openhab.app", category: "DrawerView")
 
-    if let response {
-        do {
-            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-            let sitemapsCodingData = try response.decoded(as: [OpenHABSitemap.CodingData].self)
-            for sitemapCodingDatum in sitemapsCodingData {
-                os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
-                sitemaps.append(sitemapCodingDatum.openHABSitemap)
-            }
-        } catch {
-            os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+enum DrawerViewError: Error, CustomDebugStringConvertible {
+    case noRootURL
+
+    var debugDescription: String {
+        switch self {
+        case .noRootURL:
+            "No root URL"
         }
     }
-
-    return sitemaps
 }
 
 struct ImageView: View {
     let url: String
 
-    // App wide data access
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
+    @EnvironmentObject var networkTracker: NetworkTracker
 
     var body: some View {
         if !url.isEmpty {
@@ -52,7 +44,10 @@ struct ImageView: View {
             case _ where url.hasPrefix("http"):
                 return KFImage(URL(string: url)).resizable()
             default:
-                let builtURL = Endpoint.resource(openHABRootUrl: appData?.openHABRootUrl ?? "", path: url.prepare()).url
+                let builtURL = Endpoint.resource(
+                    openHABRootUrl: networkTracker.activeConnection?.configuration.url ?? "",
+                    path: url.prepare()
+                ).url
                 return KFImage(builtURL).resizable()
             }
         } else {
@@ -64,7 +59,7 @@ struct ImageView: View {
 
 // Display the connected URL
 struct ConnectionView: View {
-    @ObservedObject private var networkTracker = NetworkTracker.shared
+    @StateObject private var networkTracker = NetworkTracker.shared
 
     var body: some View {
         HStack {
@@ -86,242 +81,209 @@ struct ConnectionView: View {
 }
 
 struct DrawerView: View {
-    struct MainSectionView: View {
-        var openHABIconwidth: CGFloat
-        var onDismiss: (TargetController) -> Void
-        var dismiss: DismissAction
-
-        var body: some View {
-            Section(header: Text("Main")) {
-                HStack {
-                    Image("openHABIcon")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: openHABIconwidth)
-                    Text("Home")
-                }
-                .onTapGesture {
-                    dismiss()
-                    onDismiss(.webview)
-                }
-            }
-        }
-    }
-
-    struct TilesSectionView: View {
-        var uiTiles: [OpenHABUiTile]
-        var tilesIconwidth: CGFloat
-        var onDismiss: (TargetController) -> Void
-        var dismiss: DismissAction
-
-        var body: some View {
-            Section(header: Text("Tiles")) {
-                ForEach(uiTiles, id: \.url) { tile in
-                    HStack {
-                        ImageView(url: tile.imageUrl)
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: tilesIconwidth)
-                        Text(tile.name)
-                    }
-                    .onTapGesture {
-                        dismiss()
-                        onDismiss(.tile(tile.url))
-                    }
-                }
-            }
-        }
-    }
-
-    //  Handle double-tap gesture for selecting or deselecting the sitemap for the watch
-    struct SitemapsSectionView: View {
-        var sitemaps: [OpenHABSitemap]
-        var sitemapIconwidth: CGFloat
-        var appData: OpenHABDataObject?
-        @Binding var sitemapForWatch: String?
-        var onDismiss: (TargetController) -> Void
-        var dismiss: DismissAction
-
-        var body: some View {
-            Section(header: Text("Sitemaps")) {
-                ForEach(sitemaps, id: \.name) { sitemap in
-                    SitemapRowView(
-                        sitemap: sitemap,
-                        sitemapIconwidth: sitemapIconwidth,
-                        appData: appData,
-                        isWatchSitemap: sitemap.name == sitemapForWatch,
-                        onDismiss: onDismiss,
-                        dismiss: dismiss
-                    )
-                    .onTapGesture(count: 2) {
-                        if sitemap.name == sitemapForWatch {
-                            sitemapForWatch = nil
-                            Preferences.sitemapForWatch = ""
-                        } else {
-                            sitemapForWatch = sitemap.name
-                            Preferences.sitemapForWatch = sitemap.name
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    struct SitemapRowView: View {
-        var sitemap: OpenHABSitemap
-        var sitemapIconwidth: CGFloat
-        var appData: OpenHABDataObject?
-        var isWatchSitemap: Bool
-        var onDismiss: (TargetController) -> Void
-        var dismiss: DismissAction
-
-        var body: some View {
-            HStack {
-                let url = Endpoint.iconForDrawer(rootUrl: appData?.openHABRootUrl ?? "", icon: sitemap.icon).url
-                KFImage(url).placeholder { Image("openHABIcon").resizable() }
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: sitemapIconwidth)
-                Text(sitemap.label)
-                if isWatchSitemap {
-                    Spacer()
-                    Image(systemSymbol: .applewatchWatchface)
-                }
-            }
-            .onTapGesture {
-                dismiss()
-                onDismiss(.sitemap(sitemap.name))
-            }
-        }
-    }
-
-    struct SystemSectionView: View {
-        var openHABIconwidth: CGFloat
-        var onDismiss: (TargetController) -> Void
-        var dismiss: DismissAction
-
-        var body: some View {
-            Section(header: Text("System")) {
-                HStack {
-                    Image(systemSymbol: .gear)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: openHABIconwidth)
-                    Text(LocalizedStringKey("settings"))
-                }
-                .onTapGesture {
-                    dismiss()
-                    onDismiss(.settings)
-                }
-
-                if Preferences.remoteUrl.contains("openhab.org"), !Preferences.demomode {
-                    HStack {
-                        Image(systemSymbol: .bell)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: openHABIconwidth)
-                        Text(LocalizedStringKey("notifications"))
-                    }
-                    .onTapGesture {
-                        dismiss()
-                        onDismiss(.notifications)
-                    }
-                }
-            }
-        }
-    }
-
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var uiTiles: [OpenHABUiTile] = []
     @State private var selectedSection: Int?
-    @State private var connectedUrl: String = "Not connected" // Default label text
-    @ObservedObject private var networkTracker = NetworkTracker.shared
+    @State private var connectedUrl = "Not connected" // Default label text
 
-    var openHABUsername = ""
-    var openHABPassword = ""
+    @EnvironmentObject private var networkTracker: NetworkTracker
 
     var onDismiss: (TargetController) -> Void
     @Environment(\.dismiss) private var dismiss
 
-    // App wide data access
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
-
-    @ScaledMetric var openHABIconwidth = 20.0
-    @ScaledMetric var tilesIconwidth = 20.0
-    @ScaledMetric var sitemapIconwidth = 20.0
+    @ScaledMetric var iconWidth = 20.0
 
     @State private var sitemapForWatch: String?
+
+    var mainSection: some View {
+        Section(header: Text("Main")) {
+            menuEntry(image: Image("openHABIcon").resizable(), goTo: .webview) {
+                Text("Home").accessibilityIdentifier("Home")
+            }
+        }
+    }
+
+    var tilesSection: some View {
+        Section(header: Text("Tiles")) {
+            ForEach(uiTiles, id: \.url) { tile in
+                menuEntry(
+                    image: ImageView(url: tile.imageUrl),
+                    goTo: .tile(tile.url)
+                ) {
+                    Text(tile.name)
+                }
+            }
+        }
+    }
+
+    var sitemapsSection: some View {
+        Section(header: Text("Sitemaps")) {
+            ForEach(sitemaps, id: \.name) { sitemap in
+                menuEntry(
+                    image: sitemapIcon(for: sitemap),
+                    goTo: .sitemap(sitemap.name)
+                ) {
+                    HStack {
+                        Text(sitemap.label)
+                        if sitemap.name == sitemapForWatch {
+                            Spacer()
+                            Image(systemSymbol: .applewatchWatchface)
+                        }
+                    }
+                }
+                .onTapGesture(count: 2) { toggleWatchSitemap(sitemap) }
+            }
+        }
+    }
+
+    var systemSection: some View {
+        Section(header: Text("System")) {
+            systemMenuEntry(image: .gear, text: "settings", goTo: .settings)
+            if Preferences.getNotificationConnection() != nil,
+               !Preferences.currentHomePreferences.demomode {
+                systemMenuEntry(image: .bell, text: "notifications", goTo: .notifications)
+            }
+            systemMenuEntry(image: .house, text: "Manage Homes", goTo: .homeSelection)
+        }
+    }
 
     var body: some View {
         VStack {
             List {
-                MainSectionView(openHABIconwidth: openHABIconwidth, onDismiss: onDismiss, dismiss: dismiss)
-
-                TilesSectionView(uiTiles: uiTiles, tilesIconwidth: tilesIconwidth, onDismiss: onDismiss, dismiss: dismiss)
-
-                SitemapsSectionView(sitemaps: sitemaps, sitemapIconwidth: sitemapIconwidth, appData: appData, sitemapForWatch: $sitemapForWatch, onDismiss: onDismiss, dismiss: dismiss)
-
-                SystemSectionView(openHABIconwidth: openHABIconwidth, onDismiss: onDismiss, dismiss: dismiss)
+                mainSection
+                tilesSection
+                sitemapsSection
+                systemSection
             }
             .listStyle(.inset)
-            .onAppear(perform: loadData)
 
             Spacer()
             ConnectionView()
                 .padding(.bottom, 5)
         }
-    }
-
-    private func loadData() {
-        loadSitemaps()
-        loadUiTiles()
-        sitemapForWatch = Preferences.sitemapForWatch
-    }
-
-    private func loadSitemaps() {
-        NetworkConnection.sitemaps(openHABRootUrl: appData?.openHABRootUrl ?? "") { response in
-            switch response.result {
-            case let .success(data):
-                os_log("Sitemap response", log: .viewCycle, type: .info)
-
-                sitemaps = deriveSitemaps(data)
-
-                if sitemaps.last?.name == "_default", sitemaps.count > 1 {
-                    sitemaps = Array(sitemaps.dropLast())
-                }
-
-                switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
-                case .label: sitemaps.sort { $0.label < $1.label }
-                case .name: sitemaps.sort { $0.name < $1.name }
-                }
-            case let .failure(error):
-                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+        .listStyle(.inset)
+        .task {
+            let activeConnection = networkTracker.activeConnection
+            await updateSitemapsAndUITiles(activeConnection: activeConnection)
+            sitemapForWatch = Preferences.currentHomePreferences.sitemapForWatch
+        }
+        .onReceive(networkTracker.$activeConnection) { activeConnection in
+            Task {
+                await updateSitemapsAndUITiles(activeConnection: activeConnection)
             }
         }
     }
 
-    private func loadUiTiles() {
-        NetworkConnection.uiTiles(openHABRootUrl: appData?.openHABRootUrl ?? "") { response in
-            switch response.result {
-            case .success:
-                os_log("ui tiles response", log: .viewCycle, type: .info)
-                guard let responseData = response.data else {
-                    os_log("Error: did not receive data", log: OSLog.remoteAccess, type: .info)
-                    return
-                }
-                do {
-                    uiTiles = try JSONDecoder().decode([OpenHABUiTile].self, from: responseData)
-                } catch {
-                    os_log("Error: did not receive data %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, error.localizedDescription)
-                }
-            case let .failure(error):
-                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+    private func menuEntry(image: Image, text: Text, goTo target: TargetController) -> some View {
+        HStack {
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: iconWidth, height: iconWidth)
+            text
+        }
+        .onTapGesture {
+            dismiss()
+            onDismiss(target)
+        }
+    }
+
+    private func menuEntry(image: some View,
+                           goTo target: TargetController,
+                           @ViewBuilder label: () -> some View) -> some View {
+        HStack {
+            image
+                .aspectRatio(contentMode: .fit)
+                .frame(width: iconWidth, height: iconWidth)
+            label()
+        }
+        .contentShape(Rectangle()) // entire row tappable
+        .onTapGesture {
+            dismiss()
+            onDismiss(target)
+        }
+    }
+
+    func systemMenuEntry(image: SFSymbol, text: String, goTo target: TargetController) -> some View {
+        menuEntry(image: Image(systemSymbol: image), goTo: target) {
+            Text(LocalizedStringKey(text))
+                .accessibilityLabel(text)
+        }
+    }
+
+    func sitemapIcon(for sitemap: OpenHABSitemap) -> some View {
+        Group {
+            if sitemap.icon.isEmpty {
+                Image("openHABIcon").resizable()
+            } else {
+                let url = Endpoint.iconForDrawer(
+                    rootUrl: networkTracker.activeConnection?.configuration.url ?? "",
+                    icon: sitemap.icon
+                ).url
+                KFImage(url)
+                    .placeholder { Image("openHABIcon").resizable() }
+                    .resizable()
             }
+        }
+        .aspectRatio(contentMode: .fit)
+    }
+
+    func toggleWatchSitemap(_ sitemap: OpenHABSitemap) {
+        Preferences.modifyActiveHome { prefs in
+            if sitemap.name == sitemapForWatch {
+                sitemapForWatch = nil
+                prefs.sitemapForWatch = ""
+                prefs.sitemapForWatchLabel = ""
+            } else {
+                sitemapForWatch = sitemap.name
+                prefs.sitemapForWatch = sitemap.name
+                prefs.sitemapForWatchLabel = sitemap.label
+            }
+        }
+    }
+
+    private func updateSitemapsAndUITiles(activeConnection: ConnectionInfo?) async {
+        guard let activeConnection else { return }
+
+        do {
+            let openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
+
+            do {
+                sitemaps = try await openAPIService.openHABSitemaps()
+                if sitemaps.last?.name == "_default", sitemaps.count > 1 {
+                    sitemaps = Array(sitemaps.dropLast())
+                }
+
+                switch SortSitemapsOrder(rawValue: Preferences.currentHomePreferences.sortSitemapsBy) ?? .label {
+                case .label:
+                    sitemaps.sort { $0.label < $1.label }
+                case .name:
+                    sitemaps.sort { $0.name < $1.name }
+                }
+
+            } catch {
+                logger.error("Failed to fetch sitemaps: \(error.localizedDescription)")
+                sitemaps = []
+            }
+
+            do {
+                uiTiles = try await openAPIService.getUITiles()
+                logger.info("Fetched UI tiles successfully")
+            } catch {
+                logger.error("Failed to fetch UI tiles: \(error.localizedDescription)")
+                uiTiles = []
+            }
+
+        } catch {
+            logger.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
+            sitemaps = []
+            uiTiles = []
         }
     }
 }
 
 #Preview {
+    let networkTracker = NetworkTracker.shared
     DrawerView { _ in }
+        .environmentObject(networkTracker)
 }

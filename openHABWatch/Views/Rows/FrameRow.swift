@@ -9,11 +9,13 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import SwiftUI
 
 struct FrameRow: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var settings: AppSettings
+
     var body: some View {
         HStack {
             Text(widget.labelText?.uppercased() ?? "")
@@ -25,7 +27,7 @@ struct FrameRow: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[6]
-    return FrameRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+    let widget = UserData(preview: true).widgets[6]
+    FrameRow(widget: widget)
+        .environmentObject(AppSettings())
 }

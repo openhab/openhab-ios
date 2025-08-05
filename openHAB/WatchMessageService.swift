@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Foundation
 import OpenHABCore
 import os.log
@@ -17,56 +18,100 @@ import WatchConnectivity
 // This class receives Watch Request for the configuration data like localUrl.
 // The functionality is activated in the AppDelegate.
 class WatchMessageService: NSObject, WCSessionDelegate {
+    @MainActor
     static let singleton = WatchMessageService()
 
-    // This method gets called when the watch requests the data
-    func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
-        os_log("didReceiveMessage %{PUBLIC}@", log: .watch, type: .info, "\(message)")
+    private lazy var logger = Logger(subsystem: "org.openhab.app", category: "WatchMessageService")
 
-        if message["request"] != nil {
-            let applicationDict = buildApplicationDict()
-            replyHandler(applicationDict)
-        }
+    private var cachedWatchPreferences: [String: Data] = [:]
+    private let lock = NSLock()
+
+    private var preferencesSubscription: AnyCancellable?
+
+    // This method gets called when the watch requests the data
+    // ⚠️ This is called off the main thread. Do NOT touch @MainActor stuff.
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
+        guard message["request"] != nil else { return }
+
+        lock.lock()
+        let reply = cachedWatchPreferences
+        lock.unlock()
+
+        replyHandler(reply) // ✅ Used synchronously — no concurrency violation
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        os_log("Received message: %{PUBLIC}@", log: .watch, type: .info, message)
+        logger.info("Received message (no reply): \(message, privacy: .public)")
     }
 
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        os_log("activationDidCompleteWith activationState %{PUBLIC}@ error: %{PUBLIC}@", log: .watch, type: .info, "\(activationState)", "\(String(describing: error))")
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
+        logger.info("WCSession activation completed. State: \(String(describing: activationState)), Error: \(String(describing: error))")
     }
 
     func sessionDidBecomeInactive(_ session: WCSession) {
-        os_log("sessionDidBecomeInactive", log: .watch, type: .info)
+        logger.info("WCSession became inactive.")
     }
 
     func sessionDidDeactivate(_ session: WCSession) {
-        os_log("sessionDidDeactivate", log: .watch, type: .info)
+        logger.info("WCSession deactivated.")
     }
 
-    func buildApplicationDict() -> [String: Any] {
-        let applicationDict: [String: Any] =
-            [
-                "localUrl": Preferences.localUrl,
-                "remoteUrl": Preferences.remoteUrl,
-                "username": Preferences.username,
-                "password": Preferences.password,
-                "alwaysSendCreds": Preferences.alwaysSendCreds,
-                "defaultSitemap": Preferences.defaultSitemap,
-                "ignoreSSL": Preferences.ignoreSSL,
-                // "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates,
-                "sitemapForWatch": Preferences.sitemapForWatch,
-                "iconType": Preferences.iconType
-            ]
+    // MARK: - Sync Preferences
 
-        return applicationDict
+    @MainActor
+    public func subscribeToPreferences() {
+        preferencesSubscription = Preferences.$currentHomePreferences
+            .debounce(for: .seconds(1), scheduler: RunLoop.main)
+            .sink { _ in } receiveValue: { homeSettings in
+                self.syncPreferencesToWatch(homeSettings)
+            }
     }
 
-    public func syncPreferencesToWatch() {
-        if WCSession.default.activationState == .activated {
-            let applicationDict = buildApplicationDict()
-            try? WCSession.default.updateApplicationContext(applicationDict)
+    @MainActor
+    public func syncPreferencesToWatch(_ homeSettings: HomePreferences = Preferences.currentHomePreferences) {
+        guard WCSession.default.activationState == .activated else {
+            logger.warning("WCSession not activated; skipping sync.")
+            return
         }
+
+        let prefs = WatchPreferences(fromPreferences: homeSettings)
+        let context = prefs.encodedWatchPreferences()
+
+        guard cachedWatchPreferences != context else {
+            // avoid update of update unchanged preferences
+            return
+        }
+
+        lock.lock()
+        cachedWatchPreferences = context
+        lock.unlock()
+
+        do {
+            try WCSession.default.updateApplicationContext(context)
+            logger.debug("Successfully updated application context with WatchPreferences.")
+        } catch {
+            logger.error("Failed to encode or update watch context: \(error.localizedDescription)")
+        }
+    }
+}
+
+@MainActor
+extension WatchPreferences {
+    init(fromPreferences preferences: HomePreferences) {
+        self.init(
+            localUrl: preferences.localConnectionConfig.url,
+            remoteUrl: preferences.remoteConnectionConfig.url,
+            username: preferences.remoteConnectionConfig.username,
+            password: preferences.remoteConnectionConfig.password,
+            alwaysSendCreds: preferences.remoteConnectionConfig.alwaysSendBasicAuth,
+            defaultSitemap: preferences.defaultSitemap,
+            ignoreSSL: preferences.remoteConnectionConfig.ignoreSSL,
+            sitemapForWatch: preferences.sitemapForWatch,
+            sitemapForWatchLabel: preferences.sitemapForWatchLabel,
+            iconType: preferences.iconType,
+            demoMode: preferences.demomode,
+            localConnectionConfiguration: preferences.localConnectionConfig,
+            remoteConnectionConfiguration: preferences.remoteConnectionConfig
+        )
     }
 }

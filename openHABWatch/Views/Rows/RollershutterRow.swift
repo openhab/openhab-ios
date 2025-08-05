@@ -9,11 +9,13 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
+import SFSafeSymbols
 import SwiftUI
 
 struct RollershutterRow: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var settings: AppSettings
 
     var body: some View {
         VStack(spacing: -5) {
@@ -44,7 +46,7 @@ struct RollershutterRow: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[5]
-    return RollershutterRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+    let widget = UserData(preview: true).widgets[5]
+    RollershutterRow(widget: widget)
+        .environmentObject(AppSettings())
 }

@@ -9,51 +9,37 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Alamofire
 import Foundation
 import Kingfisher
 
-public class OpenHABAccessTokenAdapter: RequestInterceptor {
-    var appData: DataObject
+public final class OpenHABAccessTokenAdapter {
+    let connectionConfiguration: ConnectionConfiguration?
 
-    public init(appData data: DataObject) {
-        appData = data
-    }
-
-    public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
-        guard appData.openHABAlwaysSendCreds || urlRequest.url?.host?.hasSuffix("myopenhab.org") == true else {
-            // The user did not choose for the credentials to be sent with every request.
-            return completion(.success(urlRequest))
-        }
-
-        let user = appData.openHABUsername
-        let password = appData.openHABPassword
-
-        guard !user.isEmpty, !password.isEmpty else {
-            // In order to set the credentials on the `URLRequestt`, both username and password must be set up.
-            return completion(.success(urlRequest))
-        }
-
-        var urlRequest = urlRequest
-        urlRequest.headers.add(.authorization(username: user, password: password))
-        completion(.success(urlRequest))
+    public init(connectionConfiguration: ConnectionConfiguration) {
+        self.connectionConfiguration = connectionConfiguration
     }
 
     public func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
-        guard appData.openHABAlwaysSendCreds || urlRequest.url?.host?.hasSuffix("myopenhab.org") == true else {
+        guard let connectionConfiguration else { return urlRequest }
+        guard connectionConfiguration.alwaysSendBasicAuth || urlRequest.url?.host?.hasSuffix("myopenhab.org") == true else {
             // The user did not choose for the credentials to be sent with every request.
             return urlRequest
         }
 
-        let user = appData.openHABUsername
-        let password = appData.openHABPassword
+        let user = connectionConfiguration.username
+        let password = connectionConfiguration.password
         guard !user.isEmpty, !password.isEmpty else {
             // In order to set the credentials on the `URLRequestt`, both username and password must be set up.
             return urlRequest
         }
 
         var urlRequest = urlRequest
-        urlRequest.headers.add(.authorization(username: user, password: password))
+
+        // We are handling URLRequests here, so we need to set the header fields
+        // to the request object with String and cannot use the type safe way of HTTPRequest
+        // like request.headerFields[.authorization] = basicAuthHeader()
+        // TODO: revert this!!
+        urlRequest.setValue(basicAuthHeader(username: user, password: password), forHTTPHeaderField: "Authorization")
         return urlRequest
     }
 }

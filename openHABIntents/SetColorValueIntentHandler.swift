@@ -15,62 +15,67 @@ import OpenHABCore
 import os.log
 
 class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
-    func provideItemOptionsCollection(for intent: OpenHABSetColorValueIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.color]) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
+    private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
+
+    func resolveHome(for intent: OpenHABSetColorValueIntent) async -> OpenHABHomeResolutionResult {
+        logger.info("Resolving home for intent: \(intent)")
+        return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
+    }
+
+    func provideHomeOptionsCollection(for intent: OpenHABSetColorValueIntent) async throws -> INObjectCollection<OpenHABHome> {
+        OpenHABIntentHelper.getHomeOptions()
+    }
+
+    func provideItemOptionsCollection(for intent: OpenHABSetColorValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, searchTerm: searchTerm, itemTypes: [.color])
+    }
+
+    func provideItemOptionsCollection(for intent: OpenHABSetColorValueIntent) async throws -> INObjectCollection<NSString> {
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, itemTypes: [.color])
+    }
+
+    func confirm(intent: OpenHABSetColorValueIntent) async -> OpenHABSetColorValueIntentResponse {
+        OpenHABSetColorValueIntentResponse(code: .ready, userActivity: nil)
+    }
+
+    func handle(intent: OpenHABSetColorValueIntent) async -> OpenHABSetColorValueIntentResponse {
+        logger.info("SetColorValueIntent for \(intent.item ?? "")")
+
+        guard let itemName = intent.item, let home = intent.home else {
+            return .failureInvalidItem(
+                NSLocalizedString("empty", comment: "empty item / home name")
+            )
         }
-    }
 
-    func provideItemOptionsCollection(for intent: OpenHABSetColorValueIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.color]) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
-    }
-
-    func confirm(intent: OpenHABSetColorValueIntent, completion: @escaping (OpenHABSetColorValueIntentResponse) -> Void) {
-        completion(OpenHABSetColorValueIntentResponse(code: .ready, userActivity: nil))
-    }
-
-    func handle(intent: OpenHABSetColorValueIntent, completion: @escaping (OpenHABSetColorValueIntentResponse) -> Void) {
-        os_log("SetColorValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
-
-        guard let itemName = intent.item else {
-            completion(OpenHABSetColorValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
-            return
+        guard let homeId = home.uuid, Preferences.storedHomes[homeId] != nil else {
+            return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 
         guard var value = intent.value else {
-            completion(OpenHABSetColorValueIntentResponse.failureInvalidValue(NSLocalizedString("empty", comment: "empty value"), item: intent.item!))
-            return
+            return .failureInvalidValue(
+                NSLocalizedString("empty", comment: "empty value"),
+                item: itemName
+            )
         }
 
         let hsb = value.split(separator: ",")
-        if hsb.count != 3 {
-            completion(OpenHABSetColorValueIntentResponse.failureInvalidValue(value, item: intent.item!))
-            return
+        guard hsb.count == 3,
+              let hue = Int(hsb[0]), (0 ... 360).contains(hue),
+              let sat = Int(hsb[1]), (0 ... 100).contains(sat),
+              let val = Int(hsb[2]), (0 ... 100).contains(val) else {
+            return .failureInvalidValue(value, item: itemName)
         }
-        let hue = Int(hsb[0]) ?? 0
-        let sat = Int(hsb[1]) ?? 0
-        let val = Int(hsb[2]) ?? 0
 
-        if hue < 0 || hue > 360 || sat < 0 || sat > 100 || val < 0 || val > 100 {
-            completion(OpenHABSetColorValueIntentResponse.failureInvalidValue(value, item: intent.item!))
-            return
-        }
         value = "\(hue),\(sat),\(val)"
 
-        OpenHABItemCache.instance.getItem(name: itemName) { item in
-            guard let item else {
-                completion(OpenHABSetColorValueIntentResponse.failureInvalidItem(itemName))
-                return
-            }
-            OpenHABItemCache.instance.sendCommand(item, commandToSend: value)
-
-            completion(OpenHABSetColorValueIntentResponse.success(value: value, item: itemName))
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId), !items.isEmpty else {
+            return .failureInvalidItem(itemName)
         }
+
+        let item = items[0]
+
+        await OpenHABItemCache.instance.sendCommand(to: item, home: homeId, command: value)
+
+        return .success(value: value, item: itemName)
     }
 }

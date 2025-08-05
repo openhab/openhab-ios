@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Alamofire
 import AVFoundation
 import AVKit
 import OpenHABCore
@@ -19,7 +18,9 @@ enum VideoEncoding: String {
     case hls, mjpeg
 }
 
-class VideoUITableViewCell: GenericUITableViewCell {
+class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
+    private let logger = Logger(subsystem: "org.openhab", category: "VideoUITableViewCell")
+
     private var activityIndicator: UIActivityIndicatorView = if #available(iOS 13.0, *) {
         .init(style: .medium)
     } else {
@@ -39,11 +40,8 @@ class VideoUITableViewCell: GenericUITableViewCell {
     private var mainImageView: UIImageView!
     private var playerObserver: NSKeyValueObservation?
     private var aspectRatioConstraint: NSLayoutConstraint?
-    private var mjpegRequest: Alamofire.Request?
+    private var activeTask: Task<Void, Never>?
     private var session: URLSession!
-    private var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -128,20 +126,25 @@ class VideoUITableViewCell: GenericUITableViewCell {
             bringSubviewToFront(playerView)
             let playerItem = AVPlayerItem(asset: AVAsset(url: url))
             playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] playerItem, _ in
+                guard let self else { return }
+
                 switch playerItem.status {
                 case .failed:
-                    os_log("Failed to load video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
-                    self?.url = nil
+                    logger.debug("Failed to load video with URL: \(url.absoluteString)")
+                    Task { @MainActor in
+                        self.url = nil
+                    }
                 case .readyToPlay:
-                    os_log("Loaded video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
+                    logger.debug("Loaded video with URL: \(url.absoluteString)")
                 default: return
                 }
-
-                self?.activityIndicator.isHidden = true
-                if playerItem.status == .readyToPlay, playerItem.presentationSize != .zero {
-                    let aspectRatio = playerItem.presentationSize.width / playerItem.presentationSize.height
-                    self?.updateAspectRatio(forView: self?.playerView, aspectRatio: aspectRatio)
-                    self?.didLoad?()
+                Task { @MainActor in
+                    self.activityIndicator.isHidden = true
+                    if playerItem.status == .readyToPlay, playerItem.presentationSize != .zero {
+                        let aspectRatio = playerItem.presentationSize.width / playerItem.presentationSize.height
+                        self.updateAspectRatio(forView: self.playerView, aspectRatio: aspectRatio)
+                        self.didLoad?()
+                    }
                 }
             }
             playerView?.playerLayer.player = AVPlayer(playerItem: playerItem)
@@ -154,7 +157,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
             return
         }
 
-        if mjpegRequest != nil {
+        if activeTask != nil {
             return
         }
 
@@ -164,38 +167,48 @@ class VideoUITableViewCell: GenericUITableViewCell {
         streamRequest.timeoutInterval = 10.0
 
         let streamImageInitialBytePattern = Data([255, 216])
-        var imageData = Data()
-        mjpegRequest = NetworkConnection.shared.manager.streamRequest(streamRequest)
-            .validate()
-            .responseStream { stream in
-                switch stream.event {
-                case let .stream(result):
-                    switch result {
-                    case let .success(data):
-                        if data.starts(with: streamImageInitialBytePattern) {
-                            if let image = UIImage(data: imageData) {
-                                DispatchQueue.main.async {
-                                    if self.mainImageView?.image == nil {
-                                        let aspectRatio = image.size.width / image.size.height
-                                        self.activityIndicator.isHidden = true
-                                        self.updateAspectRatio(forView: self.mainImageView, aspectRatio: aspectRatio)
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                                            self.didLoad?()
-                                        }
-                                    }
-                                    self.mainImageView?.image = image
+
+        activeTask = Task {
+            do {
+                guard let config = NetworkTracker.shared.activeConnection?.configuration else {
+                    logger.warning("No openHAB configuration found.")
+                    throw HTTPClientError.noConfiguration
+                }
+                let client = HTTPClient(configuration: config)
+                let (byteStream, _) = try await client.processStream(url: url)
+                await handleMJPEGStream(byteStream)
+            } catch {
+                logger.error("Failed to start MJPEG stream: \(error.localizedDescription)")
+            }
+        }
+
+        func handleMJPEGStream(_ byteStream: URLSession.AsyncBytes) async {
+            var imageData = Data()
+
+            do {
+                for try await byte in byteStream {
+                    imageData.append(byte)
+
+                    if imageData.starts(with: streamImageInitialBytePattern), let image = UIImage(data: imageData) {
+                        await MainActor.run {
+                            if self.mainImageView?.image == nil {
+                                let aspectRatio = image.size.width / image.size.height
+                                self.activityIndicator.isHidden = true
+                                self.updateAspectRatio(forView: self.mainImageView, aspectRatio: aspectRatio)
+                                Task {
+                                    try? await Task.sleep(nanoseconds: 10_000_000) // 10ms delay
+                                    self.didLoad?()
                                 }
                             }
-                            imageData = Data()
+                            self.mainImageView?.image = image
                         }
-                        imageData.append(data)
+                        imageData = Data() // Reset for the next image
                     }
-                case let .complete(completion):
-                    os_log("Failed to decode stream", log: .decoding, type: .debug, completion.error?.localizedDescription ?? "")
                 }
+            } catch {
+                logger.error("Failed to process MJPEG stream: \(error.localizedDescription)")
             }
-
-        mjpegRequest?.resume()
+        }
     }
 
     private func updateAspectRatio(forView view: UIView?, aspectRatio: CGFloat) {
@@ -228,8 +241,9 @@ class VideoUITableViewCell: GenericUITableViewCell {
         }
         playerObserver = nil
         playerView?.playerLayer.player = nil
-        mjpegRequest?.cancel()
-        mjpegRequest = nil
+        // Cancel the active task if it is running
+        activeTask?.cancel()
+        activeTask = nil
         mainImageView?.image = nil
     }
 }

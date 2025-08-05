@@ -78,3 +78,4 @@
 "about_settings" = "Om";
 "uselastpath_settings" = "Bruk sist brukte bane?";
 "always_allow_webrtc" = "Always Allow WebRTC";
+"no_active_connection" = "No active connection available. Please check your settings.";

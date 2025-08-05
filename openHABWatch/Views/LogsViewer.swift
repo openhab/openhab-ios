@@ -15,6 +15,54 @@ import SwiftUI
 
 // Thanks to https://useyourloaf.com/blog/fetching-oslog-messages-in-swift/
 
+struct LogsViewer: View {
+    private static let template = NSPredicate(format:
+        "(subsystem BEGINSWITH $PREFIX)")
+
+    @State private var text = "Loading..."
+
+    let myFont = Font
+        .system(size: 10)
+        .monospaced()
+
+    var body: some View {
+        ScrollView {
+            Text(text)
+                .font(myFont)
+                .padding()
+        }
+        .task {
+            text = await fetchLogs()
+        }
+    }
+
+    private func fetchLogs() async -> String {
+        let calendar = Calendar.current
+        guard let dayAgo = calendar.date(
+            byAdding: .day,
+            value: -1,
+            to: Date.now
+        ) else {
+            return "Invalid calendar"
+        }
+
+        do {
+            let predicate = Self.template.withSubstitutionVariables(
+                [
+                    "PREFIX": "org.openhab"
+                ])
+
+            let logs = try await Logger.fetch(
+                since: dayAgo,
+                predicateFormat: predicate.predicateFormat
+            )
+            return logs.joined()
+        } catch {
+            return error.localizedDescription
+        }
+    }
+}
+
 private extension OSLogEntryLog.Level {
     var description: String {
         switch self {
@@ -62,54 +110,6 @@ public extension Logger {
 
         if logs.isEmpty { logs = ["Nothing found"] }
         return logs
-    }
-}
-
-struct LogsViewer: View {
-    @State private var text = "Loading..."
-
-    private static let template = NSPredicate(format:
-        "(subsystem BEGINSWITH $PREFIX)")
-
-    let myFont = Font
-        .system(size: 10)
-        .monospaced()
-
-    private func fetchLogs() async -> String {
-        let calendar = Calendar.current
-        guard let dayAgo = calendar.date(
-            byAdding: .day,
-            value: -1,
-            to: Date.now
-        ) else {
-            return "Invalid calendar"
-        }
-
-        do {
-            let predicate = Self.template.withSubstitutionVariables(
-                [
-                    "PREFIX": "org.openhab"
-                ])
-
-            let logs = try await Logger.fetch(
-                since: dayAgo,
-                predicateFormat: predicate.predicateFormat
-            )
-            return logs.joined()
-        } catch {
-            return error.localizedDescription
-        }
-    }
-
-    var body: some View {
-        ScrollView {
-            Text(text)
-                .font(myFont)
-                .padding()
-        }
-        .task {
-            text = await fetchLogs()
-        }
     }
 }
 

@@ -14,6 +14,8 @@ import MapKit
 import os.log
 import UIKit
 
+private let logger = Logger(subsystem: "org.openhab", category: "String")
+
 public extension String {
     internal var doubleValue: Double {
         let formatter = NumberFormatter()
@@ -78,7 +80,7 @@ public extension String {
     }
 
     internal func toWidgetType() -> OpenHABWidget.WidgetType {
-        OpenHABWidget.WidgetType(rawValue: self)
+        OpenHABWidget.WidgetType(rawValue: self) ?? .unknown
     }
 
     func parseAsBool() -> Bool {
@@ -112,7 +114,7 @@ public extension String {
         let hue = CGFloat(state: values[0], divisor: 360)
         let saturation = CGFloat(state: values[1], divisor: 100)
         let brightness = CGFloat(state: values[2], divisor: 100)
-        os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
+        logger.info("hue saturation brightness: \(hue) \(saturation) \(brightness)")
         return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
     }
 
@@ -134,9 +136,48 @@ public extension String {
         guard hasPrefix(prefix) else { return self }
         return String(dropFirst(prefix.count))
     }
+
+    func isValidURLByRegex() throws -> Bool {
+        let pattern = #"^(https?://)?(localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d+)?(/[^\s]*)?$"#
+
+        let regex = try Regex(pattern).ignoresCase()
+
+        return wholeMatch(of: regex) != nil
+    }
+
+    func testAsValidOpenHABURL() throws {
+        var urlString = self
+
+        guard try urlString.isValidURLByRegex() else {
+            throw URLError(.badURL)
+        }
+
+        if !urlString.contains("://") {
+            urlString = "http://" + urlString
+        }
+
+        guard let components = URLComponents(string: urlString) else {
+            throw URLError(.badURL)
+        }
+
+        let allowedSchemes = ["http", "https"]
+        if let scheme = components.scheme?.lowercased() {
+            if !allowedSchemes.contains(scheme) {
+                throw URLError(.unsupportedURL)
+            }
+        }
+
+        guard let host = components.host, !host.isEmpty else {
+            throw URLError(.badURL)
+        }
+    }
+
+    func removeTrailingSlashes() -> String {
+        replacing(/\/+$/, with: "")
+    }
 }
 
-extension String? {
+public extension String? {
     var orEmpty: String {
         switch self {
         case let .some(value):

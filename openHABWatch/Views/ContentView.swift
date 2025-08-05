@@ -15,54 +15,65 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var viewModel: UserData
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @EnvironmentObject var settings: AppSettings
     @State var title = "openHAB"
 
     var body: some View {
-        ZStack {
-            ScrollView {
-                HStack {
-                    Text(viewModel.openHABSitemapPage?.title ?? "Waiting...")
-                        .font(.body)
-                        .lineLimit(1)
+        Group {
+            if viewModel.isLoadingSitemap {
+                VStack {
+                    Spacer()
+                    ProgressView("Loading sitemap...")
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .font(.footnote)
                     Spacer()
                 }
-                ForEach(viewModel.widgets) { widget in
-                    rowWidget(widget: widget)
+            } else if !viewModel.widgets.isEmpty {
+                ScrollView {
+                    HStack {
+                        Text(viewModel.openHABSitemapPage?.title ?? "Sitemap")
+                            .font(.headline)
+                            .lineLimit(1)
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+
+                    ForEach(viewModel.widgets) { widget in
+                        rowWidget(widget: widget)
+                    }
+                }
+                .navigationBarTitle(Text(title))
+            } else {
+                VStack {
+                    Spacer()
+                    Text("No widgets available.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Spacer()
                 }
             }
-            .navigationBarTitle(Text(title))
-            .alert(isPresented: $viewModel.showCertificateAlert) {
-                Alert(
-                    title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),
-                    message: Text(viewModel.certificateErrorDescription),
-                    primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
-                        if let client = viewModel.currentClient {
-                            client.completeEvaluation(.permitAlways)
-                        }
-                    },
-                    secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
-                        if let client = viewModel.currentClient {
-                            client.completeEvaluation(.deny)
-                        }
+        }
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isLoadingSitemap)
+        .alert(isPresented: $viewModel.showCertificateAlert) {
+            Alert(
+                title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),
+                message: Text(viewModel.certificateErrorDescription),
+                primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
+                    if let client = viewModel.currentClient {
+                        client.delegate.completeEvaluation(.permitAlways)
                     }
-                )
-            }
-            if viewModel.showAlert {
-                Text("Refreshing...")
-                    .onAppear {
-                        DispatchQueue.main.async {
-                            viewModel.refreshUrl()
-                            os_log("reload after alert", log: .default, type: .info)
-                        }
-                        viewModel.showAlert = false
+                },
+                secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
+                    if let client = viewModel.currentClient {
+                        client.delegate.completeEvaluation(.deny)
                     }
-            }
+                }
+            )
         }
     }
 
     // https://www.swiftbysundell.com/tips/adding-swiftui-viewbuilder-to-functions/
-    @ViewBuilder func rowWidget(widget: ObservableOpenHABWidget) -> some View {
+    @ViewBuilder func rowWidget(widget: OpenHABWidget) -> some View {
         switch widget.stateEnum {
         case .switcher:
             SwitchRow(widget: widget)
@@ -110,15 +121,14 @@ struct ContentView: View {
 }
 
 #Preview {
-    Group {
-        ContentView(viewModel: UserData())
+    let userData = UserData()
+    let appSettings = AppSettings()
 
-            .environmentObject({ () -> UserData in
-                let envObj = UserData()
-                return envObj
-            }())
+    return Group {
+        ContentView(viewModel: userData)
+            .environmentObject(userData)
 
-        ContentView(viewModel: UserData())
+        ContentView(viewModel: userData)
     }
-    .environmentObject(ObservableOpenHABDataObject())
+    .environmentObject(appSettings)
 }

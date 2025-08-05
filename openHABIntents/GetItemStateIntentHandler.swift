@@ -15,40 +15,51 @@ import OpenHABCore
 import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
-    func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: nil) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+    private let logger = Logger(subsystem: "org.openhab.app", category: "GetItemStateIntent")
+
+    func resolveHome(for intent: OpenHABGetItemStateIntent) async -> OpenHABHomeResolutionResult {
+        logger.info("Resolving home for intent: \(intent)")
+        return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
     }
 
-    func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: nil) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+    func provideHomeOptionsCollection(for intent: OpenHABGetItemStateIntent) async throws -> INObjectCollection<OpenHABHome> {
+        OpenHABIntentHelper.getHomeOptions()
     }
 
-    func confirm(intent: OpenHABGetItemStateIntent, completion: @escaping (OpenHABGetItemStateIntentResponse) -> Void) {
-        completion(OpenHABGetItemStateIntentResponse(code: .ready, userActivity: nil))
+    func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, searchTerm: searchTerm)
     }
 
-    func handle(intent: OpenHABGetItemStateIntent, completion: @escaping (OpenHABGetItemStateIntentResponse) -> Void) {
-        os_log("GetItemStateIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
+    func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent) async throws -> INObjectCollection<NSString> {
+        await OpenHABIntentHelper.getItemOptions(home: intent.home)
+    }
 
-        guard let itemName = intent.item else {
-            completion(OpenHABGetItemStateIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
-            return
+    func confirm(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
+        OpenHABGetItemStateIntentResponse(code: .ready, userActivity: nil)
+    }
+
+    func handle(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
+        logger.info("GetItemStateIntent for \(intent.item ?? "")")
+
+        guard let itemName = intent.item, let home = intent.home else {
+            return .failureInvalidItem(
+                NSLocalizedString("empty", comment: "empty item / home name")
+            )
         }
 
-        OpenHABItemCache.instance.getItem(name: itemName) { item in
-            guard let item else {
-                completion(OpenHABGetItemStateIntentResponse.failureInvalidItem(itemName))
-                return
-            }
-            completion(OpenHABGetItemStateIntentResponse.success(item: itemName, state: item.state ?? NSLocalizedString("unknown", comment: "unknown item")))
+        guard let homeId = home.uuid, Preferences.storedHomes[homeId] != nil else {
+            return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
+
+        let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId)
+
+        guard let items, items.count == 1 else {
+            return .failureInvalidItem(itemName)
+        }
+
+        return .success(
+            item: itemName,
+            state: items[0].state ?? NSLocalizedString("unknownState", comment: "unknown item state")
+        )
     }
 }

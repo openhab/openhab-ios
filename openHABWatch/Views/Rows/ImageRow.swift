@@ -9,18 +9,25 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Kingfisher
 import OpenHABCore
 import os.log
-import SDWebImageSwiftUI
 import SwiftUI
 
 struct ImageRow: View {
     @State var url: URL?
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @EnvironmentObject var settings: AppSettings
 
     var body: some View {
-        DownloadableImageView(url: url)
-            .transition(.fade(duration: 0.3)).id(url?.absoluteString ?? "")
+        KFImage(url)
+            .placeholder {
+                ProgressView()
+                    .frame(width: 20, height: 20)
+            }
+            .fade(duration: 0.25)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .id(url?.absoluteString ?? "")
     }
 }
 
@@ -34,5 +41,5 @@ struct ImageRow: View {
         iconColor: ""
     ).url
     return ImageRow(url: iconUrl)
-        .environmentObject(ObservableOpenHABDataObject())
+        .environmentObject(AppSettings())
 }

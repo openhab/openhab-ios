@@ -9,85 +9,49 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Alamofire
 import AVFoundation
 import AVKit
 import Combine
+import Foundation
 import Kingfisher
+import OpenAPIRuntime
+import OpenAPIURLSession
 import OpenHABCore
 import os.log
 import SafariServices
-import SVGKit
+import SFSafeSymbols
+import SwiftMessages
 import SwiftUI
 import UIKit
 
-enum Action<I, O> {
-    typealias Sync = (UIViewController, I) -> O
-    typealias Async = (UIViewController, I, @escaping (O) -> Void) -> Void
-}
-
-struct OpenHABImageProcessor: ImageProcessor {
-    // `identifier` should be the same for processors with the same properties/functionality
-    // It will be used when storing and retrieving the image to/from cache.
-    let identifier = "org.openhab.svgprocessor"
-
-    // Convert input data/image to target image and return it.
-    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
-        switch item {
-        case let .image(image):
-            os_log("already an image", log: .default, type: .info)
-            return image
-        case let .data(data):
-            guard !data.isEmpty else { return nil }
-
-            switch data[0] {
-            case 0x3C: // svg
-                // <?xml version="1.0" encoding="UTF-8"?>
-                // <svg
-                let svgkSourceNSData = SVGKSourceNSData.source(from: data, urlForRelativeLinks: nil)
-                let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
-                if parseResults?.parsedDocument != nil, let image = SVGKImage(parsedSVG: parseResults, from: svgkSourceNSData), image.hasSize() {
-                    if image.size.width > 1000 || image.size.height > 1000 {
-                        return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange)
-                    }
-                    return image.uiImage
-                } else {
-                    return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange)
-                }
-            default:
-                return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
-            }
-        }
-    }
-}
-
-class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCellTouchEventDelegate {
+class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDelegate {
     var pageUrl = ""
-    private var selectedWidgetRow: Int = 0
-    private var currentPageOperation: Alamofire.Request?
-    private var commandOperation: Alamofire.Request?
     private var iconType: IconType = .png
     private var openHABRootUrl = ""
-    private var openHABUsername = ""
-    private var openHABPassword = ""
-    private var openHABAlwaysSendCreds = false
+
+    private var activeConnectionInfo: ConnectionInfo?
+
     private var defaultSitemap = ""
+    private var pageId = ""
     private var idleOff = false
     private var sitemaps: [OpenHABSitemap] = []
-    private var currentPage: OpenHABSitemapPage?
-    private var selectionPicker: UIPickerView?
-    private var pageNetworkStatus: NetworkReachabilityManager.NetworkReachabilityStatus?
+    private var currentPage: OpenHABPage?
+    private var pageNetworkStatus: NetworkStatus?
     private var pageNetworkStatusAvailable = false
-    private var toggle: Int = 0
     private var refreshControl: UIRefreshControl?
-    private var filteredPage: OpenHABSitemapPage?
-    private var serverProperties: OpenHABServerProperties?
-    private let search = UISearchController(searchResultsController: nil)
+    private var filteredPage: OpenHABPage?
+    private let searchController = UISearchController(searchResultsController: nil)
     private var isUserInteracting = false
     private var isWaitingToReload = false
+    // Properties in your view controller:
+
+    private var pageHandlingTask: Task<Void, Never>?
+
+    private var pageLoader: PageLoader?
+
     private let logger = Logger(subsystem: "org.openhab.app", category: "OpenHABSitemapViewController")
 
-    var relevantPage: OpenHABSitemapPage? {
+    var relevantPage: OpenHABPage? {
         if isFiltering {
             filteredPage
         } else {
@@ -95,69 +59,77 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         }
     }
 
-    // App wide data access
-    // https://stackoverflow.com/questions/45832155/how-do-i-refactor-my-code-to-call-appdelegate-on-the-main-thread
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
+    var sitemapViewController: OpenHABSitemapViewController?
 
     // MARK: - Private instance methods
 
     var searchBarIsEmpty: Bool {
         // Returns true if the text is empty or nil
-        search.searchBar.text?.isEmpty ?? true
+        searchController.searchBar.text?.isEmpty ?? true
     }
 
     var isFiltering: Bool {
-        search.isActive && !searchBarIsEmpty
+        searchController.isActive && !searchBarIsEmpty
     }
+
+    private var openAPIService: OpenAPIService?
 
     @IBOutlet private var widgetTableView: UITableView!
 
-    // Here goes everything about view loading, appearing, disappearing, entering background and becoming active
     override func viewDidLoad() {
         super.viewDidLoad()
-        os_log("OpenHABSitemapViewController viewDidLoad", log: .default, type: .info)
-
-        pageNetworkStatus = nil
-        sitemaps = []
-        widgetTableView.tableFooterView = UIView()
+        logger.info("OpenHABSitemapViewController viewDidLoad")
 
         registerTableViewCells()
         configureTableView()
+        widgetTableView.tableFooterView = UIView()
 
         refreshControl = UIRefreshControl()
+        refreshControl?.addTarget(self, action: #selector(handleRefresh(_:)), for: .valueChanged)
+        widgetTableView.refreshControl = refreshControl
 
-        refreshControl?.addTarget(self, action: #selector(OpenHABSitemapViewController.handleRefresh(_:)), for: .valueChanged)
-        if let refreshControl {
-            widgetTableView.refreshControl = refreshControl
-        }
-
-        search.searchResultsUpdater = self
-        search.obscuresBackgroundDuringPresentation = false
-        search.searchBar.placeholder = NSLocalizedString("search_items", comment: "")
+        // Setup search controller
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.autocapitalizationType = .none
+        searchController.searchBar.delegate = self
+        searchController.delegate = self
+        searchController.searchBar.placeholder = NSLocalizedString("search_items", comment: "")
         definesPresentationContext = true
 
+        // Assign to navigation item (must be in navigation stack)
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+
+        // Setup active connection
+        guard let config = activeConnectionInfo?.configuration else { return }
+        do {
+            openAPIService = try OpenAPIService(connectionConfiguration: config)
+        } catch {
+            logger.error("Failed to create OpenAPIService: \(error.localizedDescription)")
+        }
+
+        if let service = openAPIService {
+            pageLoader = PageLoader(service: service, pageId: "", defaultSitemap: "")
+        }
+
         #if DEBUG
-        // setup accessibilityIdentifiers for UITest
         widgetTableView.accessibilityIdentifier = "OpenHABSitemapViewControllerWidgetTableView"
         #endif
     }
 
     override func viewDidAppear(_ animated: Bool) {
-        os_log("OpenHABSitemapViewController viewDidAppear", log: .viewCycle, type: .info)
+        logger.info("OpenHABSitemapViewController viewDidAppear")
         super.viewDidAppear(animated)
 
-        // NOTE: workaround for https://github.com/openhab/openhab-ios/issues/420
-        if parent?.navigationItem.searchController == nil {
-            DispatchQueue.main.async {
-                self.parent?.navigationItem.searchController = self.search
-            }
+        if parent?.navigationItem.searchController !== searchController {
+            parent?.navigationItem.searchController = searchController
+            parent?.navigationItem.hidesSearchBarWhenScrolling = true
         }
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        os_log("OpenHABSitemapViewController viewWillAppear", log: .viewCycle, type: .info)
+        logger.info("OpenHABSitemapViewController viewWillAppear")
         super.viewWillAppear(animated)
 
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -169,74 +141,44 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             UIApplication.shared.isIdleTimerDisabled = true
         }
 
-        NetworkTracker.shared.$status
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                os_log("OpenHABViewController tracker status %{PUBLIC}@", log: .viewCycle, type: .info, status.rawValue)
-                switch status {
-                case .connecting:
-                    self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                case .notConnected:
-                    os_log("Tracking error", log: .viewCycle, type: .info)
-                    self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
-                case .connected:
-                    self.hidePopupMessages()
-                case _:
-                    break
-                }
-            }
-            .store(in: &trackerCancellables)
-
-        var activeServerWatcher = NetworkTracker.shared.$activeConnection.eraseToAnyPublisher()
-        // if pageUrl == "" it means we are the first opened OpenHABSitemapViewController
-        if pageUrl == "" {
-            // Set self as root view controller
-            appData?.sitemapViewController = self
+        // if pageUrl is empty, it means we are the first opened OpenHABSitemapViewController
+        if pageUrl.isEmpty {
+            sitemapViewController = self
+//        if navigationController?.viewControllers.first == self {
+            // This is the first sitemap opened
             if currentPage != nil {
                 currentPage?.widgets = []
                 widgetTableView.reloadData()
             }
-            os_log("OpenHABSitemapViewController pageUrl is empty, this is first launch", log: .viewCycle, type: .info)
+            logger.info("OpenHABSitemapViewController pageUrl is empty, this is first launch")
         } else {
-            // we only want to our watcher to notify us about changes, and not the inital value
-            activeServerWatcher = activeServerWatcher.dropFirst().eraseToAnyPublisher()
-            if !pageNetworkStatusChanged() {
-                os_log("OpenHABSitemapViewController pageUrl = %{PUBLIC}@", log: .notifications, type: .info, pageUrl)
-                loadPage(false)
+            if !pageNetworkStatusChanged() || !pageId.isEmpty {
+                // swiftformat:disable:next redundantSelf
+                logger.info("OpenHABSitemapViewController pageUrl \(self.pageUrl)")
+                startPageHandling()
             } else {
-                os_log("OpenHABSitemapViewController network status changed while I was not appearing", log: .viewCycle, type: .info)
+                logger.info("OpenHABSitemapViewController network status changed while it was not appearing")
                 restart()
             }
         }
-        // listen for network changes, if stateWatcher.dropFirst() was NOT called, then this will exectue imediately with current values and then again if the network changes, otherwise it will be called on changes only.
-        activeServerWatcher
-            .receive(on: DispatchQueue.main)
-            .sink { activeConnection in
-                if let activeConnection {
-                    os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeConnection.configuration.url)
-                    self.openHABRootUrl = activeConnection.configuration.url
-                    self.selectSitemap()
-                }
-            }
-            .store(in: &trackerCancellables)
+
+        startTrackNetworkStatus()
+        startWatchingActiveServer()
 
         ImageDownloader.default.authenticationChallengeResponder = self
     }
 
     override func viewWillDisappear(_ animated: Bool) {
-        os_log("OpenHABSitemapViewController viewWillDisappear", log: .viewCycle, type: .info)
-        if currentPageOperation != nil {
-            currentPageOperation?.cancel()
-            currentPageOperation = nil
-        }
+        logger.info("OpenHABSitemapViewController viewWillDisappear")
 
         trackerCancellables.removeAll()
+        stopAllTasks()
 
         super.viewWillDisappear(animated)
 
         if #unavailable(iOS 13.0) {
-            if animated, !search.isActive, !search.isEditing, navigationController.map({ $0.viewControllers.last != self }) ?? false,
-               let searchBarSuperview = search.searchBar.superview,
+            if animated, !searchController.isActive, !searchController.isEditing, navigationController.map({ $0.viewControllers.last != self }) ?? false,
+               let searchBarSuperview = searchController.searchBar.superview,
                let searchBarHeightConstraint = searchBarSuperview.constraints.first(where: {
                    $0.firstAttribute == .height
                        && $0.secondItem == nil
@@ -255,23 +197,19 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     @objc
     override func didEnterBackground(_ notification: Notification?) {
         super.didEnterBackground(notification)
-        os_log("OpenHABSitemapViewController didEnterBackground", log: .viewCycle, type: .info)
-        if currentPageOperation != nil {
-            currentPageOperation?.cancel()
-            currentPageOperation = nil
-        }
+        logger.info("OpenHABSitemapViewController didEnterBackground")
     }
 
     @objc
     override func didBecomeActive(_ notification: Notification?) {
         super.didBecomeActive(notification)
-        os_log("OpenHABSitemapViewController didBecomeActive", log: .viewCycle, type: .info)
+        logger.info("OpenHABSitemapViewController didBecomeActive")
         if isViewLoaded, view.window != nil, !pageUrl.isEmpty {
             if !pageNetworkStatusChanged() {
-                os_log("OpenHABSitemapViewController isViewLoaded, restarting network activity", log: .viewCycle, type: .info)
-                loadPage(false)
+                logger.info("OpenHABSitemapViewController isViewLoaded, restarting network activity")
+                startPageHandling()
             } else {
-                os_log("OpenHABSitemapViewController network status changed while it was inactive", log: .viewCycle, type: .info)
+                logger.info("OpenHABSitemapViewController network status changed while it was inactive")
                 restart()
             }
         }
@@ -283,12 +221,68 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         widgetTableView.reloadData()
     }
 
-    /// Implementation of GenericUITableViewCellTouchEventDelegate
+    private func startTrackNetworkStatus() {
+        let task = Task {
+            for await status in NetworkTracker.shared.$status.values {
+                logger.info("OpenHABViewController tracker status \(status.rawValue)")
+                await MainActor.run {
+                    switch status {
+                    case .connecting:
+                        self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                    case .notConnected:
+                        logger.info("Tracking error")
+//                        self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
+                    case .connected, .allConnected, .someConnected:
+                        self.hidePopupMessages()
+                    }
+                }
+            }
+        }
+        activeTasks.insert(task)
+    }
+
+    func startWatchingActiveServer() {
+        let task = Task {
+            for await activeConnection in NetworkTracker.shared.$activeConnection.values {
+                if let activeConnection {
+                    await MainActor.run {
+                        logger.info("OpenHABSitemapViewController tracker URL \(activeConnection.configuration.url)")
+                        self.openHABRootUrl = activeConnection.configuration.url
+                        self.activeConnectionInfo = activeConnection
+                        self.selectSitemap()
+                    }
+                    break
+                }
+            }
+        }
+        activeTasks.insert(task) // Store the task for cancellation
+    }
+
+    func stopAllTasks() {
+        for task in activeTasks {
+            task.cancel()
+        }
+        activeTasks.removeAll()
+        pageHandlingTask?.cancel()
+        pageHandlingTask = nil
+    }
+
+    override func reloadView() {
+        defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
+        logger.debug("Reload view")
+        selectSitemap()
+    }
+
+    override func viewName() -> String {
+        "sitemap"
+    }
+}
+
+extension OpenHABSitemapViewController: GenericUITableViewCellTouchEventDelegate {
     func touchDown() {
         isUserInteracting = true
     }
 
-    /// Implementation of GenericUITableViewCellTouchEventDelegate
     func touchUp() {
         isUserInteracting = false
         if isWaitingToReload {
@@ -297,7 +291,9 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         }
         isWaitingToReload = false
     }
+}
 
+extension OpenHABSitemapViewController {
     func configureTableView() {
         widgetTableView.dataSource = self
         widgetTableView.delegate = self
@@ -311,17 +307,17 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     @objc
     func handleRefresh(_ refreshControl: UIRefreshControl?) {
-        loadPage(false)
+        startPageHandling()
         widgetTableView.reloadData()
         widgetTableView.layoutIfNeeded()
     }
 
     func restart() {
-        if appData?.sitemapViewController == self {
-            os_log("I am a rootViewController!", log: .viewCycle, type: .info)
+        if sitemapViewController == self {
+            logger.info("I am a rootViewController!")
 
         } else {
-            appData?.sitemapViewController?.pageUrl = ""
+            sitemapViewController?.pageUrl = ""
             navigationController?.popToRootViewController(animated: true)
         }
     }
@@ -330,185 +326,238 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         relevantPage?.widgets[safe: indexPath.row]
     }
 
-    private func updateWidgetTableView() {
+    public func updateWidgetTableView() {
         UIView.performWithoutAnimation {
             widgetTableView.beginUpdates()
             widgetTableView.endUpdates()
         }
     }
 
-    // load our page and show it into UITableView
-    func loadPage(_ longPolling: Bool) {
-        if currentPageOperation != nil {
-            currentPageOperation?.cancel()
-            currentPageOperation = nil
+    func updateUI(with page: OpenHABPage) {
+        currentPage = page
+
+        if isFiltering {
+            filterContentForSearchText(searchController.searchBar.text)
         }
 
-        if pageUrl == "" {
-            return
-        }
-        os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
-
-        // If this is the first request to the page make a bulk call to pageNetworkStatusChanged
-        // to save current reachability status.
-        if !longPolling {
-            _ = pageNetworkStatusChanged()
+        currentPage?.sendCommand = { [weak self] item, command in
+            self?.sendCommand(item, commandToSend: command)
         }
 
-        currentPageOperation = NetworkConnection.page(
-            pageUrl: pageUrl,
-            longPolling: longPolling
-        ) { [weak self] response in
-            guard let self else { return }
-
-            switch response.result {
-            case let .success(data):
-                os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
-                let headers = response.response?.allHeaderFields
-
-                NetworkConnection.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
-                if !NetworkConnection.atmosphereTrackingId.isEmpty {
-                    os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
-                }
-                var openHABSitemapPage: OpenHABSitemapPage?
-                do {
-                    // Self-executing closure
-                    // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                    openHABSitemapPage = try {
-                        let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
-                        return sitemapPageCodingData.openHABSitemapPage
-                    }()
-                } catch {
-                    // Printing the error is the only way to actually get the real issue, localizedDescription is pretty useless here
-                    print(error)
-                    os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
-                    DispatchQueue.main.async {
-                        self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
-                    }
-                }
-
-                currentPage = openHABSitemapPage
-                if isFiltering {
-                    filterContentForSearchText(search.searchBar.text)
-                }
-
-                currentPage?.sendCommand = { [weak self] item, command in
-                    self?.sendCommand(item, commandToSend: command)
-                }
-                // isUserInteracting fixes https://github.com/openhab/openhab-ios/issues/646 where reloading while the user is interacting can have unintended consequences
-                if !isUserInteracting {
-                    widgetTableView.reloadData()
-                    refreshControl?.endRefreshing()
-                } else {
-                    isWaitingToReload = true
-                }
-                parent?.navigationItem.title = currentPage?.title.components(separatedBy: "[")[0]
-
-                loadPage(true)
-            case let .failure(error):
-                os_log("On LoadPage \"%{PUBLIC}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-
-                NetworkConnection.atmosphereTrackingId = ""
-                if (error as NSError?)?.code == -1001, longPolling {
-                    os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
-                    loadPage(false)
-                } else if error.isExplicitlyCancelledError {
-                    os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
-                } else {
-                    // Error
-                    DispatchQueue.main.async {
-                        if (error as NSError?)?.code == -1012 {
-                            self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("ssl_certificate_error", comment: ""), theme: .error)
-                        } else {
-                            self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
-                        }
-                    }
-                }
-            }
+        // isUserInteracting fixes https://github.com/openhab/openhab-ios/issues/646 where reloading while the user is interacting can have unintended consequences
+        if !isUserInteracting {
+            widgetTableView.reloadData()
+            refreshControl?.endRefreshing()
+        } else {
+            isWaitingToReload = true
         }
+        // on initial load ??? refreshControl?.endRefreshing()
 
-        currentPageOperation?.resume()
-
-        os_log("OpenHABSitemapViewController request sent", log: .remoteAccess, type: .error)
+        widgetTableView.reloadData()
+        parent?.navigationItem.title = currentPage?.title.components(separatedBy: "[")[0]
     }
 
     // Select sitemap
     func selectSitemap() {
-        NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
-            switch response.result {
-            case let .success(data):
-                self.sitemaps = deriveSitemaps(data)
-                switch self.sitemaps.count {
+        Task {
+            do {
+                guard let activeConnection = NetworkTracker.shared.activeConnection else {
+                    throw OpenHABSitemapError.noActiveConnection
+                }
+                logger.debug("Running selectSitemap for URL: \(activeConnection.configuration.url)")
+
+                openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
+                sitemaps = try await openAPIService?.openHABSitemaps() ?? []
+
+                guard let openAPIService else {
+                    logger.error("Failed to load openAPIService")
+                    return
+                }
+                await pageLoader?.updateAPIService(newService: openAPIService)
+
+                switch sitemaps.count {
                 case 2...:
                     if !self.defaultSitemap.isEmpty {
-                        if let sitemapToOpen = self.sitemap(byName: self.defaultSitemap) {
+                        if let sitemapToOpen = sitemap(byName: self.defaultSitemap) {
                             if self.currentPage?.pageId != sitemapToOpen.name {
                                 self.currentPage?.widgets.removeAll() // NOTE: remove all widgets to ensure cells get invalidated
                             }
-                            self.pageUrl = sitemapToOpen.homepageLink
-                            self.loadPage(false)
+                            pageUrl = sitemapToOpen.homepageLink
+                            startPageHandling()
                         } else {
-                            self.showSideMenu()
+                            showSideMenu()
                         }
                     } else {
-                        self.showSideMenu()
+                        showSideMenu()
                     }
                 case 1:
-                    self.pageUrl = self.sitemaps[0].homepageLink
-                    self.loadPage(false)
+                    pageUrl = sitemaps[0].homepageLink
+                    startPageHandling()
                 case ...0:
-                    self.showPopupMessage(seconds: 5, title: NSLocalizedString("warning", comment: ""), message: NSLocalizedString("empty_sitemap", comment: ""), theme: .warning)
-                    self.showSideMenu()
+                    showPopupMessage(seconds: 5, title: NSLocalizedString("warning", comment: ""), message: NSLocalizedString("empty_sitemap", comment: ""), theme: .warning)
+                    showSideMenu()
                 default: break
                 }
-                self.widgetTableView.reloadData()
-            case let .failure(error):
-                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                widgetTableView.reloadData()
+            } catch _ as OpenAPIServiceError {
+                logger.debug("OpenAPIService Error on OpenHABSitemapViewController")
+            } catch let error as OpenHABSitemapError {
+                logger.error("OpenHABSitemap Error: \(error.localizedDescription)")
                 DispatchQueue.main.async {
-                    // Error
-                    if (error as NSError?)?.code == -1012 {
-                        self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("ssl_certificate_error", comment: ""), theme: .error)
+                    self.showPopupMessage(
+                        seconds: 5,
+                        title: NSLocalizedString("error", comment: ""),
+                        message: error.localizedDescription,
+                        theme: .error
+                    )
+                }
+            } catch {
+                logger.error("\(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    if let urlError = error as? URLError, urlError.code == .clientCertificateRejected {
+                        self.showPopupMessage(
+                            seconds: 5,
+                            title: NSLocalizedString("error", comment: ""),
+                            message: NSLocalizedString("ssl_certificate_error", comment: ""),
+                            theme: .error
+                        )
                     } else {
-                        self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
+                        self.showPopupMessage(
+                            seconds: 5,
+                            title: NSLocalizedString("error", comment: ""),
+                            message: error.localizedDescription,
+                            theme: .error
+                        )
                     }
                 }
             }
         }
     }
 
-    // This is mainly used for navigting to a specific sitemap and path from notifications
-    func pushSitemap(name: String, path: String?) {
-        // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
-        // since we do not reference the sink cancelable, this will only fire once
-        NetworkTracker.shared.waitForActiveConnection { activeConnection in
-            if let openHABUrl = activeConnection?.configuration.url {
-                os_log("pushSitemap: pushing page", log: .default, type: .error)
-                let newViewController = (self.storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
-                if let path {
-                    newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)/\(path)"
-                } else {
-                    newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)"
-                }
-                newViewController.openHABRootUrl = openHABUrl
-                self.navigationController?.pushViewController(newViewController, animated: true)
-            }
+    // This is mainly used for navigating to a specific sitemap and path from notifications
+    func pushSitemap(name: String, path: String?) async {
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
+            logger.error("pushSitemap: No active connection available")
+            return
         }
-        .store(in: &trackerCancellables)
+
+        logger.info("pushSitemap: pushing page")
+
+        guard let baseUrl = URL(string: activeConnection.configuration.url) else {
+            logger.error("pushSitemap: Invalid base URL")
+            return
+        }
+
+        var url = baseUrl.appendingPathComponent("rest")
+            .appendingPathComponent("sitemaps")
+            .appendingPathComponent(name)
+
+        if let subpath = path {
+            url.appendPathComponent(subpath)
+        }
+
+        guard let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController else {
+            logger.error("pushSitemap: Failed to instantiate OpenHABSitemapViewController")
+            return
+        }
+
+        newViewController.pageUrl = url.absoluteString
+        newViewController.openHABRootUrl = activeConnection.configuration.url
+        navigationController?.pushViewController(newViewController, animated: true)
     }
 
-    // load app settings
+    func startPageHandling() {
+        pageHandlingTask?.cancel()
+
+        guard !pageUrl.isEmpty else {
+            logger.error("startPageHandling: Cannot run with empty pageUrl")
+            return
+        }
+
+        logger.info("🚀 Starting page load and long polling flow...")
+
+        pageHandlingTask = Task {
+            do {
+                // Initial page load
+
+                guard let configuration = NetworkTracker.shared.activeConnection?.configuration else {
+                    throw NetworkTrackerError.noActiveConnection
+                }
+
+                if openAPIService == nil {
+                    openAPIService = try OpenAPIService(connectionConfiguration: configuration)
+                }
+
+                let initialPage = try await openAPIService?.pollDataForPage(
+                    sitemapname: defaultSitemap,
+                    pageId: pageId,
+                    longPolling: false
+                )
+
+                // Alternative 2 to be tested.
+                //                await pageLoader?.updatePageConfig(newPageId: pageId, newSitemap: defaultSitemap)
+                //                guard let page = try await pageLoader?.fetchPage(longPolling: true) else { return }
+                //
+                try Task.checkCancellation()
+                if let page = initialPage {
+                    await MainActor.run {
+                        self.updateUI(with: page)
+                    }
+                }
+
+                // Start long polling loop
+                while !Task.isCancelled {
+                    let page = try await openAPIService?.pollDataForPage(
+                        sitemapname: defaultSitemap,
+                        pageId: pageId,
+                        longPolling: true
+                    )
+                    try Task.checkCancellation()
+
+                    if let page {
+                        await MainActor.run {
+                            self.updateUI(with: page)
+                        }
+                    }
+                }
+            } catch is CancellationError {
+                logger.info("🔁 pageHandlingTask was cancelled")
+            } catch let error as DecodingError {
+                logger.error("DecodingError \(error.localizedDescription)")
+            } catch let error as ClientError {
+                if let urlError = error.underlyingError as? URLError {
+                    switch urlError.code {
+                    case .cancelled:
+                        logger.info("Task was cancelled - URLError code: .cancelled")
+                    case .timedOut:
+                        logger.info("Task timed out - URLError code: .timedOut")
+                    default:
+                        logger.info("URLError: \(urlError.localizedDescription)")
+                    }
+                } else {
+                    logger.error("\(error.localizedDescription)")
+                }
+            } catch let openAPIError as OpenAPIServiceError {
+                logger.info("On pageHandling \(openAPIError)")
+            } catch {
+                logger.error("❌ pageHandlingTask error: \(error.localizedDescription)")
+                await MainActor.run {
+                    self.showPopupMessage(
+                        seconds: 5,
+                        title: NSLocalizedString("error", comment: ""),
+                        message: error.localizedDescription,
+                        theme: .error
+                    )
+                }
+            }
+        }
+    }
+
+    // load settings into local properties
     func loadSettings() {
-        openHABUsername = Preferences.username
-        openHABPassword = Preferences.password
-        openHABAlwaysSendCreds = Preferences.alwaysSendCreds
-        defaultSitemap = Preferences.defaultSitemap
+        defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
         idleOff = Preferences.idleOff
-        iconType = IconType(rawValue: Preferences.iconType) ?? .png
-
-        appData?.openHABUsername = openHABUsername
-        appData?.openHABPassword = openHABPassword
-        appData?.openHABAlwaysSendCreds = openHABAlwaysSendCreds
-
+        iconType = IconType(rawValue: Preferences.currentHomePreferences.iconType) ?? .png
         #if DEBUG
         // always use demo sitemap for UITest
         if ProcessInfo.processInfo.environment["UITest"] != nil {
@@ -526,24 +575,27 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         return nil
     }
 
+    @discardableResult
     func pageNetworkStatusChanged() -> Bool {
-        os_log("OpenHABSitemapViewController pageNetworkStatusChange", log: .remoteAccess, type: .info)
-        if !pageUrl.isEmpty {
-            let pageReachability = NetworkReachabilityManager(host: pageUrl)
-            if !pageNetworkStatusAvailable {
-                pageNetworkStatus = pageReachability?.status
-                pageNetworkStatusAvailable = true
-                return false
-            } else {
-                if pageNetworkStatus == pageReachability?.status {
-                    return false
-                } else {
-                    pageNetworkStatus = pageReachability?.status
-                    return true
-                }
-            }
+        logger.info("OpenHABSitemapViewController pageNetworkStatusChange")
+
+        guard !pageUrl.isEmpty else { return false }
+
+        let currentStatus = NetworkTracker.shared.status
+
+        // First run
+        if !pageNetworkStatusAvailable {
+            pageNetworkStatus = currentStatus
+            pageNetworkStatusAvailable = true
+            return false
         }
-        return false
+
+        if pageNetworkStatus == currentStatus {
+            return false
+        } else {
+            pageNetworkStatus = currentStatus
+            return true
+        }
     }
 
     func filterContentForSearchText(_ searchText: String?, scope: String = "All") {
@@ -559,23 +611,13 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
-        if commandOperation != nil {
-            commandOperation?.cancel()
-            commandOperation = nil
-        }
         if let item, let command {
-            commandOperation = NetworkConnection.sendCommand(item: item, commandToSend: command)
-            commandOperation?.resume()
+            sendCommand(itemname: item.name, command: command)
         }
     }
 
-    override func reloadView() {
-        defaultSitemap = Preferences.defaultSitemap
-        selectSitemap()
-    }
-
-    override func viewName() -> String {
-        "sitemap"
+    func sendCommand(itemname: String, command: String) {
+        Task { try await openAPIService?.sendItemCommand(itemname: itemname, command: command) }
     }
 }
 
@@ -583,13 +625,22 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
 extension OpenHABSitemapViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
+        logger.info("Search updated: \(searchController.searchBar.text ?? "")")
         filterContentForSearchText(searchController.searchBar.text)
+    }
+}
+
+// MARK: - UISearchBarDelegate
+
+extension OpenHABSitemapViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
     }
 }
 
 // MARK: - ColorPickerCellDelegate
 
-extension OpenHABSitemapViewController: ColorPickerCellDelegate {
+extension OpenHABSitemapViewController: @preconcurrency ColorPickerCellDelegate {
     func didPressColorButton(_ cell: ColorPickerCell?) {
         let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
         if let cell {
@@ -605,16 +656,9 @@ extension OpenHABSitemapViewController: ColorPickerCellDelegate {
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
-extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
+extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if currentPage != nil {
-            if isFiltering {
-                return filteredPage?.widgets.count ?? 0
-            }
-            return currentPage?.widgets.count ?? 0
-        } else {
-            return 0
-        }
+        relevantPage?.widgets.count ?? 0
     }
 
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -632,7 +676,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             if let height = widget?.height {
                 // calculate webview/mapview height and return it. Limited to UIScreen.main.bounds.height
                 let heightValue = height * 44
-                os_log("Webview/Mapview height would be %g", log: .viewCycle, type: .info, heightValue)
+                logger.info("Webview/Mapview height would be \(heightValue)")
                 return min(UIScreen.main.bounds.height, CGFloat(heightValue))
             } else {
                 // return default height for webview/mapview as 8 rows
@@ -652,91 +696,39 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             return cell
         }
 
-        let cell: UITableViewCell
-
-        switch widget.type {
-        case .frame:
-            cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
-        case .switchWidget:
-            // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
-            if !widget.mappings.isEmpty {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
-            } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
-            } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterCell
-            } else if !widget.mappingsOrItemOptions.isEmpty {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
-            } else {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
-            }
-        case .setpoint:
-            cell = tableView.dequeueReusableCell(for: indexPath) as SetpointCell
-        case .slider:
-            if widget.switchSupport {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SliderWithSwitchSupportUITableViewCell
-            } else {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
-            }
-        case .selection:
-            cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
-        case .colorpicker:
-            cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerCell
-            (cell as? ColorPickerCell)?.delegate = self
-        case .image, .chart:
-            cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
-            (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
-                self?.updateWidgetTableView()
-            }
-        case .video:
-            cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
-            (cell as? VideoUITableViewCell)?.didLoad = { [weak self] in
-                self?.updateWidgetTableView()
-            }
-        case .webview:
-            cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
-        case .mapview:
-            cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
-        case .input:
-            if [.date, .time, .datetime].contains(widget.inputHint) {
-                let pickerCell = tableView.dequeueReusableCell(for: indexPath) as DatePickerUITableViewCell
-                pickerCell.controller = self
-                cell = pickerCell
-            } else {
-                cell = tableView.dequeueReusableCell(for: indexPath) as TextInputUITableViewCell
-            }
-        case .group, .text, .defaultWidget, .unknown:
-            cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
-        }
+        let provider = WidgetCellFactory.provider(for: widget)
+        let cell = provider.dequeue(from: tableView, at: indexPath)
+        provider.configure(cell: cell, for: widget, controller: self)
 
         var iconColor = widget.iconColor
         if iconColor.isEmpty, traitCollection.userInterfaceStyle == .dark {
             iconColor = "white"
         }
-        // No icon is needed for image, video, frame and web widgets
-        if !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
-            if let urlc = Endpoint.icon(
-                rootUrl: openHABRootUrl,
-                version: appData?.openHABVersion ?? 2,
-                icon: widget.icon,
-                state: widget.iconState(),
-                iconType: iconType,
-                iconColor: iconColor
-            ).url {
-                var imageRequest = URLRequest(url: urlc)
-                imageRequest.timeoutInterval = 10.0
-                cell.imageView?.kf.setImage(
-                    with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-                    placeholder: nil,
-                    options: [.processor(OpenHABImageProcessor())]
-                ) { result in
-                    switch result {
-                    case .success:
-                        DispatchQueue.main.async {
-                            cell.setNeedsLayout()
+        // No icon will be displazed for cells that conform to NoIconDisplayableCell protocol
+        if !(cell is any NoIconDisplayableCell) {
+            if !widget.icon.isEmpty {
+                if let urlc = Endpoint.icon(
+                    rootUrl: openHABRootUrl,
+                    version: NetworkTracker.shared.activeConnection?.version ?? 2,
+                    icon: widget.icon,
+                    state: widget.iconState(),
+                    iconType: iconType,
+                    iconColor: iconColor
+                ).url {
+                    logger.info("URL: \(urlc.absoluteString, privacy: .private) , color: \(iconColor)")
+                    cell.imageView?.kf.setImage(
+                        with: KF.ImageResource(downloadURL: urlc), // , cacheKey: urlc.path + (urlc.query ?? "")),
+                        placeholder: nil,
+                        options: [.processor(OpenHABImageProcessor())]
+                    ) { result in
+                        switch result {
+                        case .success:
+                            DispatchQueue.main.async {
+                                cell.setNeedsLayout()
+                            }
+                        case let .failure(error):
+                            self.logger.error("Image loading failed for widget \(widget.label) : \(error.localizedDescription)")
                         }
-                    case let .failure(error):
-                        os_log("Image loading failed: %{PUBLIC}@", log: .viewCycle, type: .error, error.localizedDescription)
                     }
                 }
             }
@@ -782,31 +774,30 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             widgetTableView.deselectRow(at: index, animated: false)
         }
 
-        guard let widget: OpenHABWidget = relevantWidget(indexPath: indexPath) else {
-            return
-        }
+        guard let widget: OpenHABWidget = relevantWidget(indexPath: indexPath) else { return }
 
-        if widget.linkedPage != nil {
-            if let link = widget.linkedPage?.link {
-                os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
-            }
+        if let linkedPage = widget.linkedPage {
+            logger.info("Selected linked page: \(linkedPage.link)")
+            stopAllTasks()
             let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
-            newViewController.title = widget.linkedPage?.title.components(separatedBy: "[")[0]
-            newViewController.pageUrl = widget.linkedPage?.link ?? ""
+            newViewController.title = linkedPage.title.components(separatedBy: "[")[0]
+            newViewController.pageId = linkedPage.pageId
+            newViewController.pageUrl = linkedPage.link
             newViewController.openHABRootUrl = openHABRootUrl
             navigationController?.pushViewController(newViewController, animated: true)
         } else if widget.type == .selection {
             let selectionItemState = widget.item?.state
             logger.info("Selected selection widget in status: \(selectionItemState ?? "unknown")")
-            let hostingController = UIHostingController(rootView: SelectionView(
-                labelText: widget.labelText,
-                mappings: widget.mappingsOrItemOptions,
-                selectionItemState: selectionItemState,
-                onSelection: { selectedMappingIndex in
+            let hostingController = UIHostingController(
+                rootView: SelectionView(
+                    labelText: widget.labelText,
+                    mappings: widget.mappingsOrItemOptions,
+                    selectionItemState: selectionItemState
+                ) { selectedMappingIndex in
                     let selectedMapping: OpenHABWidgetMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
                     self.sendCommand(widget.item, commandToSend: selectedMapping.command)
                 }
-            ))
+            )
             hostingController.title = widget.labelText
             navigationController?.pushViewController(hostingController, animated: true)
         } else if widget.type == .input {
@@ -835,6 +826,9 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     textField.keyboardType = .default
                 }
                 textExtractor = { $0.textFields?[0].text }
+            case .unknown:
+                textExtractor = nil
+                textFieldAdder = nil
             }
             guard let textExtractor, let textFieldAdder else {
                 return
@@ -847,9 +841,9 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 preferredStyle: .alert
             )
             alert.addTextField(configurationHandler: textFieldAdder)
-            let sendAction = UIAlertAction(title: "Set value", style: .destructive, handler: { [weak self] _ in
+            let sendAction = UIAlertAction(title: "Set value", style: .destructive) { [weak self] _ in
                 self?.sendCommand(widget.item, commandToSend: textExtractor(alert))
-            })
+            }
             alert.addAction(sendAction)
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             alert.preferredAction = sendAction
@@ -858,7 +852,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
     }
 
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if let cell = cell as? GenericCellCacheProtocol {
+        if let cell = cell as? any GenericCellCacheProtocol {
             // invalidate cache only if the cell is not visible or the datasource is empty (eg. sitemap change)
             if tableView.indexPathsForVisibleRows == nil || !tableView.indexPathsForVisibleRows!.contains(indexPath) || currentPage == nil || currentPage!.widgets.isEmpty {
                 cell.invalidateCache()
@@ -866,7 +860,6 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         }
     }
 
-    @available(iOS 13.0, *)
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         if let cell = tableView.cellForRow(at: indexPath) as? GenericUITableViewCell, cell.widget.type == .text, let text = cell.widget?.labelValue ?? cell.widget?.labelText, !text.isEmpty {
             return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
@@ -880,7 +873,9 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
 
         return nil
     }
+}
 
+extension OpenHABSitemapViewController: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let decimalSeparator = NSLocale.current.decimalSeparator ?? ""
         let oldString = (textField.text ?? "")
@@ -919,20 +914,14 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
 // MARK: Kingfisher authentication with NSURLCredential
 
 extension OpenHABSitemapViewController: AuthenticationChallengeResponsible {
-    // sessionDelegate.onReceiveSessionTaskChallenge
     func downloader(_ downloader: ImageDownloader,
-                    task: URLSessionTask,
-                    didReceive challenge: URLAuthenticationChallenge,
-                    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionTaskChallenge(with: challenge)
-        completionHandler(disposition, credential)
+                    didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        await onReceiveSessionChallenge(with: challenge)
     }
 
-    // sessionDelegate.onReceiveSessionChallenge
     func downloader(_ downloader: ImageDownloader,
-                    didReceive challenge: URLAuthenticationChallenge,
-                    completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(with: challenge)
-        completionHandler(disposition, credential)
+                    task: URLSessionTask,
+                    didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        onReceiveSessionTaskChallenge(with: challenge)
     }
 }

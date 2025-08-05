@@ -15,47 +15,54 @@ import OpenHABCore
 import os.log
 
 class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling {
-    func provideItemOptionsCollection(for intent: OpenHABSetStringValueIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.stringItem]) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
+    private let logger = Logger(subsystem: "org.openhab.app", category: "SetStringValueIntent")
+
+    func resolveHome(for intent: OpenHABSetStringValueIntent) async -> OpenHABHomeResolutionResult {
+        logger.info("Resolving home for intent: \(intent)")
+        return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
+    }
+
+    func provideHomeOptionsCollection(for intent: OpenHABSetStringValueIntent) async throws -> INObjectCollection<OpenHABHome> {
+        OpenHABIntentHelper.getHomeOptions()
+    }
+
+    func provideItemOptionsCollection(for intent: OpenHABSetStringValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, searchTerm: searchTerm, itemTypes: [.stringItem])
+    }
+
+    func provideItemOptionsCollection(for intent: OpenHABSetStringValueIntent) async throws -> INObjectCollection<NSString> {
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, itemTypes: [.stringItem])
+    }
+
+    func confirm(intent: OpenHABSetStringValueIntent) async -> OpenHABSetStringValueIntentResponse {
+        OpenHABSetStringValueIntentResponse(code: .ready, userActivity: nil)
+    }
+
+    func handle(intent: OpenHABSetStringValueIntent) async -> OpenHABSetStringValueIntentResponse {
+        logger.info("SetStringValueIntent for \(intent.item ?? "")")
+
+        guard let itemName = intent.item, let home = intent.home else {
+            return .failureInvalidItem(
+                NSLocalizedString("empty", comment: "empty item / home name")
+            )
         }
-    }
 
-    func provideItemOptionsCollection(for intent: OpenHABSetStringValueIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.stringItem]) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
-    }
-
-    func confirm(intent: OpenHABSetStringValueIntent, completion: @escaping (OpenHABSetStringValueIntentResponse) -> Void) {
-        completion(OpenHABSetStringValueIntentResponse(code: .ready, userActivity: nil))
-    }
-
-    func handle(intent: OpenHABSetStringValueIntent, completion: @escaping (OpenHABSetStringValueIntentResponse) -> Void) {
-        os_log("SetStringValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
-
-        guard let itemName = intent.item else {
-            completion(OpenHABSetStringValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
-            return
+        guard let homeId = home.uuid, Preferences.storedHomes[homeId] != nil else {
+            return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 
         guard let value = intent.value else {
-            completion(OpenHABSetStringValueIntentResponse.failureEmptyValue(item: itemName))
-            return
+            return .failureEmptyValue(item: itemName)
         }
 
-        OpenHABItemCache.instance.getItem(name: itemName) { item in
-            guard let item else {
-                completion(OpenHABSetStringValueIntentResponse.failureInvalidItem(itemName))
-                return
-            }
-            OpenHABItemCache.instance.sendCommand(item, commandToSend: value)
-
-            completion(OpenHABSetStringValueIntentResponse.success(value: value, item: itemName))
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId), !items.isEmpty else {
+            return .failureInvalidItem(itemName)
         }
+
+        let item = items[0]
+
+        await OpenHABItemCache.instance.sendCommand(to: item, home: homeId, command: value)
+
+        return .success(value: value, item: itemName)
     }
 }

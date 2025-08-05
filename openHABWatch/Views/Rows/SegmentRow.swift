@@ -14,8 +14,8 @@ import os.log
 import SwiftUI
 
 struct SegmentRow: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var settings: AppSettings
     @State private var pendingValue: String?
 
     var valueBinding: Binding<Int> {
@@ -62,10 +62,10 @@ struct SegmentRow: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[4]
+    let widget = UserData(preview: true).widgets[4]
     return Group {
         SegmentRow(widget: widget)
         SegmentRow(widget: widget)
     }
-    .environmentObject(ObservableOpenHABDataObject())
+    .environmentObject(AppSettings())
 }

@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import OpenHABCore
 import os.log
 import SwiftUI
@@ -21,17 +22,17 @@ class ClientCertificatesViewModel: ObservableObject {
     }
 
     func loadCertificates() {
-        clientCertificates = NetworkConnection.shared.clientCertificateManager.clientIdentities
+        clientCertificates = NetworkTracker.shared.clientCertificateManager.clientIdentities
     }
 
     func deleteCertificate(at index: Int) {
-        let status = NetworkConnection.shared.clientCertificateManager.deleteFromKeychain(index: index)
+        let status = NetworkTracker.shared.clientCertificateManager.deleteFromKeychain(index: index)
         if status == noErr {
             clientCertificates.remove(at: index)
         }
     }
 
     func getIdentityName(for index: Int) -> String {
-        NetworkConnection.shared.clientCertificateManager.getIdentityName(index: index)
+        NetworkTracker.shared.clientCertificateManager.getIdentityName(index: index)
     }
 }

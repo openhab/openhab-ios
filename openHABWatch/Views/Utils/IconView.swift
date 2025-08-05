@@ -9,14 +9,15 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Kingfisher
 import OpenHABCore
 import os.log
-import SDWebImageSwiftUI
+import SFSafeSymbols
 import SwiftUI
 
 struct IconView: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @ObservedObject var widget: OpenHABWidget
+    @ObservedObject var settings = AppSettings.shared
 
     var iconURL: URL? {
         var iconColor = widget.iconColor
@@ -34,13 +35,24 @@ struct IconView: View {
     }
 
     var body: some View {
-        DownloadableImageView(url: iconURL)
-            .transition(.fade(duration: 0.3))
-            .frame(width: 20.0, height: 20.0).id(iconURL?.absoluteString ?? "")
+        KFImage(iconURL)
+            .placeholder {
+                Image(systemSymbol: .circle)
+                    .frame(width: 20, height: 20)
+            }
+            .setProcessor(OpenHABImageProcessor())
+            .fade(duration: 0.25)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 20, height: 20)
+            .id(iconURL?.absoluteString ?? "")
     }
 }
 
 #Preview {
-    let widget = UserData().widgets[3]
-    return IconView(widget: widget, settings: ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
+    let widget2 = UserData(preview: true).widgets[4]
+    IconView(
+        widget: widget2,
+        settings: AppSettings()
+    )
 }

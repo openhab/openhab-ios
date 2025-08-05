@@ -9,59 +9,52 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Alamofire
 import Foundation
 import os.log
 
-public protocol ServerCertificateManagerDelegate: NSObjectProtocol {
+@MainActor
+public protocol ServerCertificateManagerDelegate: AnyObject, Sendable {
     // delegate should ask user for a decision on what to do with invalid certificate
-    func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?)
+    func evaluateServerTrust(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult
     // certificate received from openHAB doesn't match our record, ask user for a decision
-    func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?)
+    func evaluateCertificateMismatch(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult
     // notify delegate that the certificagtes that a user is willing to trust has changed
-    func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?)
+    func acceptedServerCertificatesChanged()
 }
 
-public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating {
+enum ServerCertificateManagerError: Error {
+    case serverTrustEvaluationFailed
+}
+
+public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvaluating {
     // Handle the different responses of the user
-    public enum EvaluateResult {
+    public enum EvaluateResult: Sendable {
         case undecided
         case deny
         case permitOnce
         case permitAlways
     }
 
-    public var evaluateResult: EvaluateResult = .undecided {
-        didSet {
-            if evaluateResult != .undecided {
-                evaluateResultSemaphore.signal()
-            }
-        }
-    }
-
-    private let evaluateResultSemaphore = DispatchSemaphore(value: 0)
-
-    weak var delegate: ServerCertificateManagerDelegate?
+    public weak var delegate: (any ServerCertificateManagerDelegate)?
     // ignoreSSL is a synonym for allowInvalidCertificates, ignoreCertificates
     public var ignoreSSL = false
     public var trustedCertificates: [String: Data] = [:]
 
-    // Init a ServerCertificateManager and set ignore certificates setting
-    public init(ignoreSSL: Bool) {
-        super.init(evaluators: [:])
-        self.ignoreSSL = ignoreSSL
-    }
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "ServerCertificateManager", category: "ServerCert")
 
-    func initializeCertificatesStore() {
-        os_log("Initializing cert store", log: .remoteAccess, type: .info)
+    // Init a ServerCertificateManager and set ignore certificates setting
+    public init(ignoreSSL: Bool = false) {
+        self.ignoreSSL = ignoreSSL
+
+        logger.info("Initializing cert store")
         loadTrustedCertificates()
         if trustedCertificates.isEmpty {
-            os_log("No cert store, creating", log: .remoteAccess, type: .info)
+            logger.info("No cert store, creating")
             trustedCertificates = [:]
             //        [trustedCertificates setObject:@"Bulk" forKey:@"Bulk id to make it non-empty"];
             saveTrustedCertificates()
         } else {
-            os_log("Loaded existing cert store", log: .remoteAccess, type: .info)
+            logger.info("Loaded existing cert store")
         }
     }
 
@@ -79,7 +72,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
             let data = try PropertyListEncoder().encode(trustedCertificates)
             try data.write(to: getPersistensePath())
         } catch {
-            os_log("Could not save trusted certificates", log: .default)
+            logger.info("Could not save trusted certificates")
         }
     }
 
@@ -112,16 +105,16 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
                     return
                 }
             } catch {
-                os_log("Could not load trusted unarchived certificates", log: .default)
+                logger.info("Could not load trusted unarchived certificates")
             }
-            os_log("Could not load trusted codable certificates", log: .default)
+            logger.info("Could not load trusted codable certificates")
         }
     }
 
-    func evaluateTrust(with challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+    func evaluateTrust(with challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         do {
             let serverTrust = challenge.protectionSpace.serverTrust!
-            try evaluate(serverTrust, forHost: challenge.protectionSpace.host)
+            try await evaluate(serverTrust, forHost: challenge.protectionSpace.host)
             return (.useCredential, URLCredential(trust: serverTrust))
         } catch {
             return (.cancelAuthenticationChallenge, nil)
@@ -131,94 +124,72 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
     func wrapperSecTrustEvaluate(serverTrust: SecTrust) -> SecTrustResultType {
         var result: SecTrustResultType = .invalid
 
-        if #available(iOS 12.0, *) {
-            // SecTrustEvaluate is deprecated.
-            // Wrap new API to have same calling pattern as we had prior to deprecation.
+        // SecTrustEvaluate is deprecated.
+        // Wrap new API to have same calling pattern as we had prior to deprecation.
 
-            var error: CFError?
-            _ = SecTrustEvaluateWithError(serverTrust, &error)
-            SecTrustGetTrustResult(serverTrust, &result)
-            return result
-
-        } else {
-            SecTrustEvaluate(serverTrust, &result)
-            return result
-        }
+        var error: CFError?
+        _ = SecTrustEvaluateWithError(serverTrust, &error)
+        SecTrustGetTrustResult(serverTrust, &result)
+        return result
     }
 
-    public func evaluate(_ serverTrust: SecTrust, forHost domain: String) throws {
-        // Evaluates trust received during SSL negotiation and checks it against known ones,
-        // against policy setting to ignore certificate errors and so on.
+    // Evaluates trust received during SSL negotiation and checks it against known ones,
+    // against policy setting to ignore certificate errors and so on.
+    public func evaluate(_ serverTrust: SecTrust, forHost domain: String) async throws {
         let evaluateResult = wrapperSecTrustEvaluate(serverTrust: serverTrust)
 
+        // This means that system thinks this is a legal/usable certificate, just permit the connection
         if evaluateResult.isAny(of: .unspecified, .proceed) || ignoreSSL {
-            // This means system thinks this is a legal/usable certificate, just permit the connection
             return
         }
-        let certificate = getLeafCertificate(trust: serverTrust)
-        let certificateSummary = SecCertificateCopySubjectSummary(certificate!)
-        let certificateData = SecCertificateCopyData(certificate!)
+
+        guard let certificate = getLeafCertificate(trust: serverTrust) else {
+            throw ServerCertificateManagerError.serverTrustEvaluationFailed
+        }
+
+        let certificateSummary = SecCertificateCopySubjectSummary(certificate)
+        let certificateData = SecCertificateCopyData(certificate)
+
         // If we have a certificate for this domain
         // Obtain certificate we have and compare it with the certificate presented by the server
-        if let previousCertificateData = self.certificateData(forDomain: domain) {
-            if CFEqual(previousCertificateData, certificateData) {
-                // If certificate matched one in our store - permit this connection
-                return
-            } else {
-                // We have a certificate for this domain in our memory of decisions, but the certificate we've got now
-                // differs. We need to warn user about possible MiM attack and wait for users decision.
-                // TODO: notify user and wait for decision
-                if let delegate {
-                    self.evaluateResult = .undecided
-                    delegate.evaluateCertificateMismatch(self, summary: certificateSummary as String?, forDomain: domain)
-                    evaluateResultSemaphore.wait()
-                    switch self.evaluateResult {
-                    case .deny:
-                        // User decided to abort connection
-                        throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
-                    case .permitOnce:
-                        // User decided to accept invalid certificate once
-                        return
-                    case .permitAlways:
-                        // User decided to accept invalid certificate and remember decision
-                        // Add certificate to storage
-                        storeCertificateData(certificateData, forDomain: domain)
-                        delegate.acceptedServerCertificatesChanged(self)
-                        return
-                    case .undecided:
-                        // Something went wrong, abort connection
-                        throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
-                    }
-                }
-                throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
-            }
+        let previousData = self.certificateData(forDomain: domain)
+
+        if let previousData, CFEqual(previousData, certificateData) {
+            // If certificate matched one in our store - permit this connection
+            return // trusted
         }
-        // Warn user about invalid certificate and wait for user's decision
-        if let delegate {
-            // Delegate should ask user for decision
-            self.evaluateResult = .undecided
-            delegate.evaluateServerTrust(self, summary: certificateSummary as String?, forDomain: domain)
-            // Wait until we get response from delegate with user's decision
-            evaluateResultSemaphore.wait()
-            switch self.evaluateResult {
-            case .deny:
-                // User decided to abort connection
-                throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
-            case .permitOnce:
-                // User decided to accept invalid certificate once
-                return
-            case .permitAlways:
-                // User decided to accept invalid certificate and remember decision
-                // Add certificate to storage
-                storeCertificateData(certificateData, forDomain: domain)
-                delegate.acceptedServerCertificatesChanged(self)
-                return
-            case .undecided:
-                throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
-            }
+
+        guard let delegate else {
+            throw ServerCertificateManagerError.serverTrustEvaluationFailed
         }
-        // We have no way of handling it so no access!
-        throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
+
+        logger.info("Server trust not valid for \(domain), asking delegate...")
+        let decision: EvaluateResult = if previousData != nil {
+            // mismatch, we have a certificate for this domain in our memory of decisions, but the certificate we've got now
+            // differs. We need to warn user about possible MiM attack and wait for users decision.
+            await delegate.evaluateCertificateMismatch(summary: certificateSummary as String?, forDomain: domain)
+        } else {
+            // new untrusted cert, warn user about invalid certificate and wait for user's decision
+            await delegate.evaluateServerTrust(summary: certificateSummary as String?, forDomain: domain)
+        }
+
+        switch decision {
+        case .deny, .undecided:
+            // User decided to abort connection or something went wrong, abort connection
+            throw ServerCertificateManagerError.serverTrustEvaluationFailed
+        case .permitOnce:
+            // User decided to accept invalid certificate once
+            return
+        case .permitAlways:
+            // User decided to accept invalid certificate and remember decision
+            // Add certificate to storage
+            storeCertificateData(certificateData, forDomain: domain)
+            await delegate.acceptedServerCertificatesChanged()
+            logger.info("User chose to trust cert for \(domain) permanently")
+            return
+        @unknown default:
+            throw ServerCertificateManagerError.serverTrustEvaluationFailed
+        }
     }
 
     func getLeafCertificate(trust: SecTrust?) -> SecCertificate? {
@@ -230,9 +201,5 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
         } else {
             nil
         }
-    }
-
-    override public func serverTrustEvaluator(forHost host: String) -> ServerTrustEvaluating? {
-        self as ServerTrustEvaluating
     }
 }

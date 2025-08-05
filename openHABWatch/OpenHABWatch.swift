@@ -9,17 +9,17 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import SDWebImage
-import SDWebImageSVGCoder
+import OpenHABCore
+import SFSafeSymbols
 import SwiftUI
 import UserNotifications
 
 @main
 struct OpenHABWatch: App {
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @ObservedObject var settings = AppSettings.shared
     // https://developer.apple.com/documentation/watchkit/wkapplicationdelegate
     @WKApplicationDelegateAdaptor(OpenHABWatchAppDelegate.self) var appDelegate
-    @ObservedObject var userData = UserData(sitemapName: ObservableOpenHABDataObject.shared.sitemapName)
+    @ObservedObject var userData = UserData.shared
 
     var body: some Scene {
         WindowGroup {
@@ -50,25 +50,6 @@ struct OpenHABWatch: App {
     }
 
     init() {
-        // Initialize SVGCoder
-        let SVGCoder = SDImageSVGCoder.shared
-        SDImageCodersManager.shared.addCoder(SVGCoder)
-        SDWebImageDownloader.shared.config.operationClass = OpenHABImageDownloaderOperation.self
-        let alwaysSendCreds = settings.openHABAlwaysSendCreds
-        let openHABUsername = settings.openHABUsername
-        let openHABPassword = settings.openHABPassword
-        let requestModifier = SDWebImageDownloaderRequestModifier { (request) -> URLRequest? in
-            guard alwaysSendCreds || request.url?.host?.hasSuffix("myopenhab.org") == true else {
-                return request
-            }
-            guard !openHABUsername.isEmpty, !openHABPassword.isEmpty else {
-                return request
-            }
-            var request = request
-            request.headers.add(.authorization(username: openHABUsername, password: openHABPassword))
-            return request
-        }
-        SDWebImageDownloader.shared.requestModifier = requestModifier
         DispatchQueue.main.async {
             AppMessageService.singleton.requestApplicationContext()
         }

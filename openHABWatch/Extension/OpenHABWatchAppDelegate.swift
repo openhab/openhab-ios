@@ -17,7 +17,7 @@ import WatchKit
 
 class OpenHABWatchAppDelegate: NSObject {
     var session: WCSession
-    let delegate: WCSessionDelegate
+    let delegate: any WCSessionDelegate
 
     override init() {
         delegate = AppMessageService.singleton
@@ -58,23 +58,21 @@ extension OpenHABWatchAppDelegate: WKApplicationDelegate {
             }
         }
     }
-
-    func applicationDidFinishLaunching() {
-//        // Kingfisher setup
-//        ImageDownloader.default.authenticationChallengeResponder = self
-//        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(appData: ObservableOpenHABDataObject.shared))]
-    }
 }
 
 // MARK: - ClientCertificateManagerDelegate
 
 extension OpenHABWatchAppDelegate: ClientCertificateManagerDelegate {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
-    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {}
+    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool {
+        true
+    }
 
     // delegate should ask user for the export password used to decode the PKCS#12
-    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {}
+    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String? {
+        nil
+    }
 
-    // delegate should alert the user that an error occured importing the certificate
+    // delegate should ask user for the export password used to decode the PKCS#12
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {}
 }

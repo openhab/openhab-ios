@@ -1,0 +1,235 @@
+// Copyright (c) 2010-2025 Contributors to the openHAB project
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information.
+//
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
+//
+// SPDX-License-Identifier: EPL-2.0
+
+import FirebaseCrashlytics
+import OpenHABCore
+import os
+import SwiftUI
+
+struct SettingsView: View {
+    @State var settingsDemomode = false
+    @State var settingsIdleOff = true
+    @State var settingsRealTimeSliders = true
+    @State var settingsSendCrashReports = false
+    @State var settingsIconType: IconType = .svg
+    @State var settingsSortSitemapsBy: SortSitemapsOrder = .label
+    @State var settingsDefaultMainUIPath = ""
+    @State var settingsAlwaysAllowWebRTC = true
+    @State var settingsSitemapForWatch = ""
+
+    @State var sitemaps: [OpenHABSitemap] = []
+    @State var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
+    @State var settingsRemoteConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
+    @State var settingsHomeName = ""
+    @State var viewAppearedOnce = false
+    @State var settingsSSECommandItem = ""
+
+    @Environment(\.dismiss) private var dismiss
+
+    private let logger = Logger(subsystem: "org.openhab.app", category: "SettingsView")
+
+    var body: some View {
+        Form {
+            ConnectionSettingsView(
+                settingsDemomode: $settingsDemomode,
+                localConnectionConfiguration: $settingsLocalConnectionConfiguration,
+                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration
+            )
+
+            ApplicationSettingsView(
+                settingsIdleOff: $settingsIdleOff,
+                settingsSSECommandItem: $settingsSSECommandItem
+            )
+
+            MainUISettingsView(
+                settingsAlwaysAllowWebRTC: $settingsAlwaysAllowWebRTC,
+                settingsDefaultMainUIPath: $settingsDefaultMainUIPath
+            )
+
+            SitemapSettingsView(
+                settingsRealTimeSliders: $settingsRealTimeSliders,
+                settingsIconType: $settingsIconType,
+                settingsSortSitemapsBy: $settingsSortSitemapsBy,
+                settingsSitemapForWatch: $settingsSitemapForWatch,
+                sitemaps: $sitemaps
+            )
+
+            DebugSettingsView(
+                settingsSendCrashReports: $settingsSendCrashReports
+            )
+
+            AboutSettingsView()
+        }
+        .formStyle(.grouped)
+        .navigationBarBackButtonHidden(true)
+        .navigationBarTitle("\(settingsHomeName) Settings")
+        .toolbar {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button("Save") {
+                    saveSettings()
+                    NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+                    dismiss()
+                }
+            }
+            ToolbarItemGroup(placement: .cancellationAction) {
+                Button("Cancel") {
+                    dismiss()
+                }
+            }
+        }
+        .task {
+            if !viewAppearedOnce {
+                viewAppearedOnce = true
+                loadSettings()
+                let activeConfiguration = settingsLocalConnectionConfiguration
+                await updateSitemaps(activeConfiguration: activeConfiguration)
+            }
+        }
+    }
+
+    private func updateSitemaps(activeConfiguration: ConnectionConfiguration) async {
+        do {
+            let openAPIService = try OpenAPIService(connectionConfiguration: activeConfiguration)
+
+            sitemaps = try await openAPIService.openHABSitemaps()
+            if sitemaps.last?.name == "_default", sitemaps.count > 1 {
+                sitemaps = Array(sitemaps.dropLast())
+            }
+
+            // Sort the sitemaps according to Settings selection.
+            switch SortSitemapsOrder(rawValue: Preferences.currentHomePreferences.sortSitemapsBy) ?? .label {
+            case .label: sitemaps.sort { $0.label < $1.label }
+            case .name: sitemaps.sort { $0.name < $1.name }
+            }
+        } catch {
+            logger.error("\(error.localizedDescription)")
+            sitemaps = []
+        }
+    }
+
+    private func loadSettings() {
+        #if !DEBUG
+        logger.debug("Loading Settings")
+        #endif
+        settingsDemomode = Preferences.currentHomePreferences.demomode
+        settingsIdleOff = Preferences.idleOff
+        settingsRealTimeSliders = Preferences.currentHomePreferences.realTimeSliders
+        settingsSendCrashReports = Preferences.sendCrashReports
+        settingsIconType = IconType(rawValue: Preferences.currentHomePreferences.iconType) ?? .png
+        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.currentHomePreferences.sortSitemapsBy) ?? .label
+        settingsDefaultMainUIPath = Preferences.currentHomePreferences.defaultMainUIPath
+        settingsAlwaysAllowWebRTC = Preferences.currentHomePreferences.alwaysAllowWebRTC
+        settingsSitemapForWatch = Preferences.currentHomePreferences.sitemapForWatch
+        settingsLocalConnectionConfiguration = Preferences.currentHomePreferences.localConnectionConfig
+        settingsRemoteConnectionConfiguration = Preferences.currentHomePreferences.remoteConnectionConfig
+        settingsHomeName = Preferences.currentHomePreferences.homeName
+        settingsSSECommandItem = Preferences.currentHomePreferences.sseCommandItem
+    }
+
+    func saveSettings() {
+        Preferences.modifyActiveHome { homePreferences in
+            homePreferences.demomode = settingsDemomode
+            homePreferences.realTimeSliders = settingsRealTimeSliders
+            homePreferences.iconType = settingsIconType.rawValue
+            homePreferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
+            homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
+            homePreferences.sitemapForWatch = settingsSitemapForWatch
+            homePreferences.sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
+            homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration
+            homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
+            homePreferences.sseCommandItem = settingsSSECommandItem
+        }
+        Preferences.idleOff = settingsIdleOff
+        Preferences.sendCrashReports = settingsSendCrashReports
+
+        // Apply global UI changes immediately (status bar visibility)
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first?.rootViewController?
+            .setNeedsStatusBarAppearanceUpdate()
+    }
+}
+
+extension UIApplication {
+    var firstKeyWindow: UIWindow? {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .filter { $0.activationState == .foregroundActive }
+            .first?.keyWindow
+    }
+}
+
+#Preview {
+    struct PreviewWrapper: View {
+        @State var settingsDemomode = false
+        @State var settingsIdleOff = true
+        @State var settingsRealTimeSliders = true
+        @State var settingsSendCrashReports = false
+        @State var settingsIconType: IconType = .png
+        @State var settingsSortSitemapsBy: SortSitemapsOrder = .label
+        @State var settingsDefaultMainUIPath = "/overview/"
+        @State var settingsAlwaysAllowWebRTC = true
+        @State var settingsSitemapForWatch = "home"
+        @State var sitemaps: [OpenHABSitemap] = [
+            OpenHABSitemap(
+                name: "home",
+                icon: "",
+                label: "Home",
+                link: "http://192.168.1.100/rest/sitemaps/home",
+                page: nil
+            ),
+            OpenHABSitemap(
+                name: "office",
+                icon: "",
+                label: "Office",
+                link: "http://192.168.1.100/rest/sitemaps/office",
+                page: nil
+            )
+        ]
+        @State var localConnectionConfiguration = ConnectionConfiguration(
+            url: "http://192.168.2.1",
+            username: "user",
+            password: "password123"
+        )
+        @State var remoteConnectionConfiguration = ConnectionConfiguration(
+            url: "http://192.168.2.1",
+            username: "user",
+            password: "password123"
+        )
+
+        var body: some View {
+            NavigationView {
+                SettingsView(
+                    settingsDemomode: settingsDemomode,
+                    settingsIdleOff: settingsIdleOff,
+                    settingsRealTimeSliders: settingsRealTimeSliders,
+                    settingsSendCrashReports: settingsSendCrashReports,
+                    settingsIconType: settingsIconType,
+                    settingsSortSitemapsBy: settingsSortSitemapsBy,
+                    settingsDefaultMainUIPath: settingsDefaultMainUIPath,
+                    settingsAlwaysAllowWebRTC: settingsAlwaysAllowWebRTC,
+                    settingsSitemapForWatch: settingsSitemapForWatch,
+                    sitemaps: sitemaps,
+                    settingsLocalConnectionConfiguration: localConnectionConfiguration,
+                    settingsRemoteConnectionConfiguration: remoteConnectionConfiguration
+                )
+            }
+            .onAppear {
+                // Mock behavior of updateSitemaps
+                if settingsSitemapForWatch.isEmpty, let first = sitemaps.first {
+                    settingsSitemapForWatch = first.name
+                }
+            }
+        }
+    }
+    return PreviewWrapper()
+}

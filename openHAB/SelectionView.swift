@@ -11,6 +11,7 @@
 
 import OpenHABCore
 import os.log
+import SFSafeSymbols
 import SwiftUI
 
 struct SelectionView: View {

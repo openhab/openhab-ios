@@ -9,11 +9,12 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import SwiftUI
 
 struct MapViewRow: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var settings: AppSettings
 
     var body: some View {
         VStack {
@@ -26,7 +27,7 @@ struct MapViewRow: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[9]
-    return MapViewRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+    let widget = UserData(preview: true).widgets[9]
+    MapViewRow(widget: widget)
+        .environmentObject(AppSettings())
 }

@@ -9,10 +9,11 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import SwiftUI
 
 struct DetailTextLabelView: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
+    @ObservedObject var widget: OpenHABWidget
 
     var body: some View {
         if let label = widget.labelValue {
@@ -25,6 +26,6 @@ struct DetailTextLabelView: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[2]
-    return DetailTextLabelView(widget: widget)
+    let widget = UserData(preview: true).widgets[2]
+    DetailTextLabelView(widget: widget)
 }

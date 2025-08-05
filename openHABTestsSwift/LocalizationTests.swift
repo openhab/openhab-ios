@@ -21,7 +21,7 @@ class LocalizationTests: XCTestCase {
 
     private static let falsePositives: [String] = []
 
-    private static let localizedFormatStrings: [(key: String, arguments: [CVarArg])] = [
+    private let localizedFormatStrings: [(key: String, arguments: [any CVarArg])] = [
         (key: "unable_to_decode_certificate", arguments: ["CERTIFICATE_PLACEHOLDER"]),
         (key: "unable_to_add_certificate", arguments: ["CERTIFICATE_PLACEHOLDER"]),
         (key: "ssl_certificate_invalid", arguments: ["PRESENTER", "SITE"]),
@@ -36,13 +36,12 @@ class LocalizationTests: XCTestCase {
 
         for language in LocalizationTests.localizations {
             print("Testing language: '\(language)'.")
-            for tuple in LocalizationTests.localizedFormatStrings {
+            for tuple in localizedFormatStrings {
                 guard let translation = tuple.key.localized(for: language)?.replacingOccurrences(of: "%%", with: "") else {
                     XCTFail("Failed to get translation for key '\(tuple.key)' in language '\(language)'.")
                     continue
                 }
                 XCTAssertNotEqual(translation, "__MISSING__", "Missing translation for key '\(tuple.key)' in language '\(language)'.")
-                // swiftlint:disable:next opening_brace
                 let regex = /%(?:\d+\$)?[+-]?(?:[lh]{0,2})(?:[qLztj])?(?:[ 0]|'.{1})?\d*(?:\\.\d?)?[@dDiuUxXoOfeEgGcCsSpaAFn]/
                 let numberOfMatches = translation.matches(of: regex).count
                 XCTAssertEqual(numberOfMatches, tuple.arguments.count, "Invalid number of format specifiers for key '\(tuple.key)' in language '\(language)'.")
@@ -166,7 +165,7 @@ class LocalizationTests: XCTestCase {
 
         var retVal = true
         for localizableString in localizableStrings where localizableString.value.range(of: "%") != nil {
-            guard !LocalizationTests.localizedFormatStrings.contains(where: { $0.key == localizableString.key }) else { continue }
+            guard !localizedFormatStrings.contains(where: { $0.key == localizableString.key }) else { continue }
 
             retVal = false
             XCTFail("Missing translation with key '\(localizableString.key)' in 'LocalizationTests.localizedFormatStrings'.")
@@ -185,7 +184,7 @@ private extension String {
         return Bundle(path: path)?.localizedString(forKey: self, value: "__MISSING__", table: table)
     }
 
-    func localizedWithFormat(for language: String, arguments: [CVarArg]) -> String? {
+    func localizedWithFormat(for language: String, arguments: [any CVarArg]) -> String? {
         if let string = localized(for: language) {
             return String(format: string, arguments: arguments)
         }

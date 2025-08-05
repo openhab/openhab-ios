@@ -11,7 +11,22 @@
 
 import Foundation
 
-public class OpenHABOptions: Decodable {
+public struct OpenHABOptions: Decodable, Sendable {
     public var value = ""
-    public var label: String?
+    public var label = ""
+
+    public init(value: String = "", label: String = "") {
+        self.value = value
+        self.label = label
+    }
+}
+
+extension OpenHABOptions {
+    init?(_ options: Components.Schemas.StateOption?) {
+        if let options {
+            self.init(value: options.value.orEmpty, label: options.label.orEmpty)
+        } else {
+            return nil
+        }
+    }
 }

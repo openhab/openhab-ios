@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import OpenHABCore
 import os.log
 import SafariServices
@@ -20,39 +21,65 @@ import WebKit
 class OpenHABWebViewController: OpenHABViewController {
     private var currentTarget = ""
     private var openHABTrackedRootUrl = ""
+    private var activeConfig: ConnectionConfiguration?
     private var hideNavBar = false
     private var activityIndicator: UIActivityIndicatorView!
-    private var observation: NSKeyValueObservation?
     private var sseTimer: Timer?
     private var commandQueue: [String] = []
     private var acceptsCommands = false
+    private var views: [UUID: WKWebView] = [:]
+    // TODO: remove myOhViews when we drop iOS 16 support
+    private var myOhViews: [UUID: WKWebView] = [:]
 
     private var js = """
-    window.OHApp = {
-        exitToApp : function(){
-            window.webkit.messageHandlers.Native.postMessage('exitToApp');
-        },
-        goFullscreen : function(){
-            window.webkit.messageHandlers.Native.postMessage('goFullscreen');
-        },
-        sseConnected : function(connected) {
-            window.webkit.messageHandlers.Native.postMessage('sseConnected-' + connected);
-        },
-        ready : function() {
-            window.webkit.messageHandlers.Native.postMessage('ready');
-        },
-    }
-    """
+    (function() {
+        // Main UI Callbacks
+        window.OHApp = {
+            exitToApp : function(){
+                window.webkit.messageHandlers.mainUi.postMessage('exitToApp');
+            },
+            goFullscreen : function(){
+                window.webkit.messageHandlers.mainUi.postMessage('goFullscreen');
+            },
+            sseConnected : function(connected) {
+                window.webkit.messageHandlers.mainUi.postMessage('sseConnected-' + connected);
+            },
+            ready : function() {
+                window.webkit.messageHandlers.mainUi.postMessage('ready');
+            },
+        }
 
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
+        // Detect Path changes in SPA
+        function notifyPathChange() {
+            window.webkit.messageHandlers.pathChanged.postMessage(window.location.pathname);
+        }
+
+        const originalPushState = history.pushState;
+        history.pushState = function() {
+            originalPushState.apply(this, arguments);
+            notifyPathChange();
+        };
+
+        const originalReplaceState = history.replaceState;
+        history.replaceState = function() {
+            originalReplaceState.apply(this, arguments);
+            notifyPathChange();
+        };
+
+        window.addEventListener('popstate', notifyPathChange);
+
+        // Notify initial path on load
+        notifyPathChange();
+    })();
+    """
 
     override open var shouldAutorotate: Bool {
         true
     }
 
-    private lazy var webView: WKWebView = newWebView()
+    private var webView: WKWebView = .init(frame: .zero)
+
+    private var logger = Logger(subsystem: "org.openhab.app", category: "OpenHABWebViewController")
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,9 +88,8 @@ class OpenHABWebViewController: OpenHABViewController {
         activityIndicator = UIActivityIndicatorView()
         activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
-        if #available(iOS 13.0, *) {
-            activityIndicator.style = UIActivityIndicatorView.Style.large
-        }
+        activityIndicator.style = UIActivityIndicatorView.Style.large
+
         view.addSubview(activityIndicator)
     }
 
@@ -76,8 +102,10 @@ class OpenHABWebViewController: OpenHABViewController {
             .receive(on: DispatchQueue.main)
             .sink { activeConnection in
                 if let activeConnection {
-                    os_log("OpenHABWebViewController openHAB URL = %{PUBLIC}@", log: .remoteAccess, type: .info, "\(activeConnection.configuration.url)")
-                    self.openHABTrackedRootUrl = activeConnection.configuration.url
+                    let activeConfiguration = activeConnection.configuration
+                    self.logger.info("OpenHABWebViewController openHAB URL = \(activeConfiguration.url)")
+                    self.openHABTrackedRootUrl = activeConfiguration.url
+                    self.activeConfig = activeConfiguration
                     self.loadWebView(force: false)
                 }
             }
@@ -86,7 +114,7 @@ class OpenHABWebViewController: OpenHABViewController {
         NetworkTracker.shared.$status
             .receive(on: DispatchQueue.main)
             .sink { status in
-                os_log("OpenHABWebViewController tracker status %{PUBLIC}@", log: .viewCycle, type: .info, status.rawValue)
+                self.logger.info("OpenHABWebViewController tracker status \(status.rawValue)")
                 switch status {
                 case .connecting:
                     self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
@@ -94,6 +122,7 @@ class OpenHABWebViewController: OpenHABViewController {
                     self.pageLoadError(message: NSLocalizedString("network_not_available", comment: ""))
                 case .connected:
                     self.hidePopupMessages()
+                default: break
                 }
             }
             .store(in: &trackerCancellables)
@@ -109,43 +138,59 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func startTracker() {
-        if currentTarget == "" {
+        if currentTarget.isEmpty {
             showActivityIndicator(show: true)
         }
     }
 
+    @MainActor
     func loadWebView(force: Bool = false, path: String? = nil) {
-        os_log("loadWebView tracked URL: %{PUBLIC}@ forced %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, openHABTrackedRootUrl, force ? "true" : "false")
-
-        let authStr = "\(Preferences.username):\(Preferences.password)"
-        let newTarget = "\(openHABTrackedRootUrl):\(authStr)"
+        logger.info("loadWebView tracked URL: \(self.activeConfig?.url ?? "") forced \(force ? "true" : "false")")
+        guard let activeConfig else { return }
+        // TODO: Check whether credentials are truly put into newTarget
+        let authStr = "\(activeConfig.username):\(activeConfig.password)"
+        let newTarget = "\(activeConfig.url):\(authStr)"
 
         if !force, currentTarget == newTarget {
             showActivityIndicator(show: false)
             return
         }
         currentTarget = newTarget
-        let url = URL(string: openHABTrackedRootUrl)
+        let url = URL(string: activeConfig.url)
 
         if let modifiedUrl = modifyUrl(orig: url, path: path) {
-            let request = URLRequest(url: modifiedUrl)
-            clearExistingPage()
             acceptsCommands = false
+            let request = URLRequest(url: modifiedUrl)
+            // TODO: remove this check once iOS 16 is dropped
+            let isMyOh = url?.host?.contains("myopenhab.org") ?? false
+            // create new (or resuse existing)
+            let newWebview = webView(for: Preferences.currentHomePreferences.id, isMyopenhab: isMyOh)
+            if newWebview != webView {
+                // Detach old instance
+                webView.stopLoading()
+                webView.navigationDelegate = nil
+                webView.uiDelegate = nil
+                webView.removeFromSuperview()
+                newWebview.navigationDelegate = self
+                newWebview.uiDelegate = self
+                webView = newWebview
+                view.addSubview(newWebview)
+            }
+            logger.info("Loading URL: \(modifiedUrl)")
             webView.load(request)
         }
     }
 
     func modifyUrl(orig: URL?, path: String? = nil) -> URL? {
-        // better way to cone/copy ?
+        // better way to clone/copy ?
         guard let urlString = orig?.absoluteString, var url = URL(string: urlString) else { return orig }
         if url.host == "myopenhab.org" {
             url = URL(string: "https://home.myopenhab.org") ?? url
         }
-
         if let path {
             url = appendPathToURL(baseURL: url, path: path) ?? url
-        } else if !Preferences.defaultMainUIPath.isEmpty {
-            url = appendPathToURL(baseURL: url, path: Preferences.defaultMainUIPath) ?? url
+        } else if !Preferences.currentHomePreferences.defaultMainUIPath.isEmpty {
+            url = appendPathToURL(baseURL: url, path: Preferences.currentHomePreferences.defaultMainUIPath) ?? url
         }
         return url
     }
@@ -186,7 +231,7 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func clearExistingPage() {
-        os_log("clearExistingPage - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
+        logger.info("clearExistingPage")
         setHideNavBar(shouldHide: false)
         // clear out existing page while we load.
         webView.stopLoading()
@@ -194,10 +239,11 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func pageLoadError(message: String) {
-        os_log("pageLoadError - webView.url %{PUBLIC}@ %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description), message)
-        showActivityIndicator(show: false)
+        showActivityIndicator(show: true)
         showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: message, theme: .error)
     }
+
+    // swiftformat:enable redundantSelf
 
     override func reloadView() {
         currentTarget = ""
@@ -223,9 +269,9 @@ class OpenHABWebViewController: OpenHABViewController {
         let jsCode = "window.MainUI.handleCommand('\(command)')"
         webView.evaluateJavaScript(jsCode) { (_, error) in
             if let error {
-                os_log("navigateCommandInternal failed %{PUBLIC}@", log: .wkwebview, type: .error, error.localizedDescription)
+                self.logger.error("navigateCommandInternal failed \(error.localizedDescription)")
             } else {
-                os_log("navigateCommandInternal Success", log: .wkwebview, type: .info)
+                self.logger.info("navigateCommandInternal Success")
             }
         }
     }
@@ -237,54 +283,73 @@ class OpenHABWebViewController: OpenHABViewController {
         }
     }
 
-    private func newWebView() -> WKWebView {
+    func webView(for id: UUID, isMyopenhab: Bool) -> WKWebView {
+        // TODO: remove all iOS < 17 code when we drop iOS 16 support
+        if #unavailable(iOS 17) {
+            if isMyopenhab, let myExsiting = myOhViews[id] {
+                logger.info("Reusing myopenhab webview for id:\(id.uuidString)")
+                return myExsiting
+            }
+        }
+        if let existing = views[id] {
+            logger.info("Reusing webview for id:\(id.uuidString)")
+            return existing
+        }
         let config = WKWebViewConfiguration()
+        config.processPool = WKProcessPool() // isolates credential cache
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
-        config.userContentController.add(self, name: "Native")
+        config.userContentController.add(self, name: "mainUi")
+        config.userContentController.add(self, name: "pathChanged")
         config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
 
-        let webView = WKWebView(frame: view.bounds, configuration: config)
-        // Alow rotation of webview
-        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        webView.scrollView.bounces = false
-        webView.navigationDelegate = self
-        webView.uiDelegate = self
+        // iOS 17 allows Sandboxed profiles, which is fantastic, iOS 16 does not and agressively caches everything
+        if #available(iOS 17, *) {
+            config.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
+        } else if isMyopenhab {
+            // for myopenhab, create a instance that does not persist or share states (private)
+            config.websiteDataStore = .nonPersistent()
+        }
+
+        let webview = WKWebView(frame: view.bounds, configuration: config)
+        webview.navigationDelegate = self
+        webview.uiDelegate = self
+        // Ensure the newly created webview resizes properly on rotation
+        webview.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        webview.scrollView.bounces = false
         // support dark mode and avoid white flashing when loading
-        webView.isOpaque = false
-        webView.backgroundColor = UIColor.clear
+        webview.isOpaque = false
+        webview.backgroundColor = UIColor.clear
         if UIDevice.current.userInterfaceIdiom == .pad {
             // since ios 13 Safari sets the user agent to desktop mode on iPads so the view renders correctly with larger screens
-            webView.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+            webview.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
         }
         if #available(iOS 16.4, *) {
-            webView.isInspectable = true
+            webview.isInspectable = true
         }
-        // watch for URL changes so we can store the last visited path
-        observation = webView.observe(\.url, options: [.new]) { _, _ in
-            if let webviewURL = webView.url {
-                let url = URL(string: webviewURL.path, relativeTo: URL(string: self.openHABTrackedRootUrl))
-                if let path = url?.path {
-                    os_log("navigation change base: %{PUBLIC}@ path: %{PUBLIC}@", log: OSLog.default, type: .info, self.openHABTrackedRootUrl, path)
-                    // append trailing slash as WebUI/Vue/F7 will try and issue a 302 if the url is navigated to directly, this can be problamatic on myopenHAB
-                    self.appData?.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
-                }
+
+        if #unavailable(iOS 17) {
+            if isMyopenhab {
+                myOhViews[id] = webview
+                return webview
             }
         }
-        return webView
-    }
-
-    deinit {
-        observation = nil
+        views[id] = webview
+        return webview
     }
 }
 
 extension OpenHABWebViewController: WKScriptMessageHandler {
+    @MainActor
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        os_log("WKScriptMessage %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, message.name)
-        if let callbackName = message.body as? String {
-            os_log("WKScriptMessage %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, callbackName)
+        logger.info("WKScriptMessage \(message.name)")
+        if message.name == "pathChanged", let newPath = message.body as? String {
+            print("path changed to: \(newPath)")
+            Preferences.currentWebViewPath = newPath
+        }
+        if message.name == "mainUi", let callbackName = message.body as? String {
+            logger.info("WKScriptMessage \(callbackName)")
             switch callbackName {
             case "exitToApp":
                 showSideMenu()
@@ -294,17 +359,20 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                     setHideNavBar(shouldHide: true)
                 }
             case "sseConnected-true":
-                os_log("WKScriptMessage sseConnected is true", log: OSLog.remoteAccess, type: .info)
+                logger.info("WKScriptMessage sseConnected is true")
                 hidePopupMessages()
                 sseTimer?.invalidate()
                 acceptsCommands = true
                 executeQueuedCommands()
             case "sseConnected-false":
-                os_log("WKScriptMessage sseConnected is false", log: OSLog.remoteAccess, type: .info)
+                logger.info("WKScriptMessage sseConnected is false")
                 sseTimer?.invalidate()
-                sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
-                    self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                    self.acceptsCommands = false
+                sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
+                    guard let self else { return }
+                    Task { @MainActor in
+                        self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                        self.acceptsCommands = false
+                    }
                 }
             default: break
             }
@@ -313,92 +381,87 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
 }
 
 extension OpenHABWebViewController: WKNavigationDelegate {
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        var action: WKNavigationActionPolicy?
-
-        defer {
-            decisionHandler(action ?? .allow)
-        }
-
-        guard let url = navigationAction.request.url else { return }
-        os_log("decidePolicyFor - url: %{PUBLIC}@", log: .wkwebview, type: .info, url.absoluteString)
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+        guard let url = navigationAction.request.url else { return .allow }
+        logger.info("decidePolicyFor - url: \(url.absoluteString)")
 
         if navigationAction.navigationType == .linkActivated {
-            action = .cancel // Stop in WebView
-            UIApplication.shared.open(url)
+            await UIApplication.shared.open(url)
+            return .cancel // Stop in WebView
         }
+        return .allow
     }
 
-    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
-                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         if let response = navigationResponse.response as? HTTPURLResponse {
-            dump(response.allHeaderFields)
-            os_log("navigationResponse: %{PUBLIC}@", log: .wkwebview, type: .info, String(response.statusCode))
+            logger.info("navigationResponse: \(response.statusCode)")
+
             if response.statusCode >= 400 {
                 pageLoadError(message: "\(response.statusCode)")
-                decisionHandler(.cancel)
-                return
+                return .cancel
             }
         }
-        decisionHandler(.allow)
+        return .allow
     }
 
-    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        os_log("didStartProvisionalNavigation - webView.url: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation?) {
+        logger.info("didStartProvisionalNavigation - webView.url: \(String(describing: webView.url?.description))")
         showActivityIndicator(show: true)
     }
 
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        os_log("didFail - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
-        let nserror = error as NSError
-        if nserror.code != NSURLErrorCancelled {
-            pageLoadError(message: nserror.localizedDescription)
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {
+        logger.error("didFail - webView.url: \(String(describing: webView.url?.description))")
+
+        if let urlError = error as? URLError, urlError.code == .cancelled {
+            return // Ignore cancelled requests
         }
+
+        pageLoadError(message: error.localizedDescription)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        os_log("didFinish - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
+        logger.info("didFinish - webView.url: \(String(describing: webView.url?.description))")
         showActivityIndicator(show: false)
         hidePopupMessages()
+        // watch for URL changes so we can store the last visited path
+        if let webviewURL = webView.url {
+            let url = URL(string: webviewURL.path, relativeTo: URL(string: openHABTrackedRootUrl))
+            if let path = url?.path {
+                let string = openHABTrackedRootUrl
+                logger.info("navigation change base: \(string) path: \(path)")
+                Preferences.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
+            }
+        }
     }
 
-    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
-                 completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        os_log("Challenge.protectionSpace.authtenticationMethod: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: challenge.protectionSpace.authenticationMethod))
+    func webView(_ webView: WKWebView, respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        logger.info("Challenge.protectionSpace.authenticationMethod: \(String(describing: challenge.protectionSpace.authenticationMethod))")
 
         if let url = modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
                 guard let serverTrust = challenge.protectionSpace.serverTrust else {
-                    completionHandler(.performDefaultHandling, nil)
-                    return
+                    return (.performDefaultHandling, nil)
                 }
                 let credential = URLCredential(trust: serverTrust)
-                DispatchQueue.main.async {
-                    completionHandler(.useCredential, credential)
-                }
+                return (.useCredential, credential)
             } else {
-                var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
-                var credential: URLCredential?
                 if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
-                    (disposition, credential) = onReceiveSessionTaskChallenge(with: challenge)
+                    return onReceiveSessionTaskChallenge(with: challenge)
                 } else {
-                    (disposition, credential) = onReceiveSessionChallenge(with: challenge)
+                    return await onReceiveSessionChallenge(with: challenge)
                 }
-                completionHandler(disposition, credential)
             }
-        } else {
-            completionHandler(.performDefaultHandling, nil)
         }
+        return (.performDefaultHandling, nil)
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-        os_log("webViewWebContentProcessDidTerminate  reloading view", log: .wkwebview, type: .info)
+        logger.warning("webViewWebContentProcessDidTerminate - reloading view")
         reloadView()
     }
 
-    @available(iOS 15, *)
-    func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping (WKPermissionDecision) -> Void) {
-        decisionHandler(Preferences.alwaysAllowWebRTC ? .grant : .prompt)
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+        reloadView()
     }
 }
 
@@ -417,5 +480,12 @@ extension OpenHABWebViewController: WKUIDelegate {
         }
 
         return nil
+    }
+
+    func webView(_ webView: WKWebView,
+                 decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
+                 initiatedBy frame: WKFrameInfo,
+                 type: WKMediaCaptureType) async -> WKPermissionDecision {
+        Preferences.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
     }
 }

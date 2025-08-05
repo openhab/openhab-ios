@@ -14,96 +14,127 @@ import Foundation
 import OpenHABCore
 import os.log
 import UniformTypeIdentifiers
-import UserNotifications
+@preconcurrency import UserNotifications
+
+enum NotificationServiceError: Error {
+    case unknown
+    case noScheme(String?)
+    case failedToParse
+    case failedToDecode
+    case handleNotificationCouldNotAttach
+    case noActiveConnection
+
+    var localizedDescription: String {
+        switch self {
+        case .unknown:
+            "Unknown error"
+        case let .noScheme(searched):
+            "Could not find scheme \(searched ?? "<none>")"
+        case .failedToParse:
+            "Failed to parse JSON"
+        case .failedToDecode:
+            "Failed to decode base64 string to Data"
+        case .handleNotificationCouldNotAttach:
+            "HandleNotification could not attach"
+        case .noActiveConnection:
+            "No active connection"
+        }
+    }
+}
 
 class NotificationService: UNNotificationServiceExtension {
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
     var cancellables = Set<AnyCancellable>()
+    var networkTracker: NetworkTracker?
+    var cloudUserId: String?
+    let logger = Logger(subsystem: "org.openhab.network", category: "NotificationService")
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
-        if let bestAttemptContent {
-            var notificationActions: [UNNotificationAction] = []
-            let userInfo = bestAttemptContent.userInfo
+        guard let bestAttemptContent else { return }
 
-            os_log("didReceive userInfo %{PUBLIC}@", log: .default, type: .info, userInfo)
+        var notificationActions: [UNNotificationAction] = []
+        let userInfo = bestAttemptContent.userInfo
 
-            if let title = userInfo["title"] as? String {
-                bestAttemptContent.title = title
-            }
-            if let message = userInfo["message"] as? String {
-                bestAttemptContent.body = message
-            }
+        logger.info("didReceive userInfo \(userInfo)")
 
-            // Check if the user has defined custom actions in the payload
-            if let actionsArray = parseActions(userInfo), let category = parseCategory(userInfo) {
-                for actionDict in actionsArray {
-                    if let action = actionDict["action"],
-                       let title = actionDict["title"] {
-                        var options: UNNotificationActionOptions = []
-                        // navigate/browser options need to bring the app to the foreground
-                        if action.hasPrefix("ui") || action.hasPrefix("http") || action.hasPrefix("app") {
-                            options = [.foreground]
-                        }
-                        let notificationAction = UNNotificationAction(
-                            identifier: action,
-                            title: title,
-                            options: options
-                        )
-                        notificationActions.append(notificationAction)
+        if let title = userInfo["title"] as? String {
+            bestAttemptContent.title = title
+        }
+        if let message = userInfo["message"] as? String {
+            bestAttemptContent.body = message
+        }
+
+        cloudUserId = userInfo["userId"] as? String
+
+        // Check if the user has defined custom actions in the payload
+        if let actionsArray = parseActions(userInfo), let category = parseCategory(userInfo) {
+            for actionDict in actionsArray {
+                if let action = actionDict["action"],
+                   let title = actionDict["title"] {
+                    var options: UNNotificationActionOptions = []
+                    // navigate/browser options need to bring the app to the foreground
+                    if action.hasPrefix("ui") || action.hasPrefix("http") || action.hasPrefix("app") {
+                        options = [.foreground]
                     }
-                }
-                if !notificationActions.isEmpty {
-                    os_log("didReceive registering %{PUBLIC}@ for category %{PUBLIC}@", log: .default, type: .info, notificationActions, category)
-                    let notificationCategory =
-                        UNNotificationCategory(
-                            identifier: category,
-                            actions: notificationActions,
-                            intentIdentifiers: [],
-                            options: .customDismissAction
-                        )
-                    UNUserNotificationCenter.current().getNotificationCategories { existingCategories in
-                        var updatedCategories = existingCategories
-                        os_log("handleNotification adding category %{PUBLIC}@", log: .default, type: .info, category)
-                        updatedCategories.insert(notificationCategory)
-                        UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
-                    }
+                    let notificationAction = UNNotificationAction(
+                        identifier: action,
+                        title: title,
+                        options: options
+                    )
+                    notificationActions.append(notificationAction)
                 }
             }
+            if !notificationActions.isEmpty {
+                logger.info("didReceive registering \(notificationActions) for category \(category)")
+                let notificationCategory =
+                    UNNotificationCategory(
+                        identifier: category,
+                        actions: notificationActions,
+                        intentIdentifiers: [],
+                        options: .customDismissAction
+                    )
+                UNUserNotificationCenter.current().getNotificationCategories { existingCategories in
+                    var updatedCategories = existingCategories
+                    self.logger.info("handleNotification adding category \(category)")
+                    updatedCategories.insert(notificationCategory)
+                    UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
+                }
+            }
+        }
 
-            // check if there is an attachment to put on the notification
-            // this should be last as we need to wait for media
-            // TODO: we should support relative paths and try the user's openHAB (local,remote) for content
-            if let attachmentURLString = userInfo["media-attachment-url"] as? String {
-                let isItem = attachmentURLString.starts(with: "item:")
-
-                let downloadCompletionHandler: @Sendable (UNNotificationAttachment?) -> Void = { attachment in
-                    if let attachment {
-                        os_log("handleNotification attaching %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
-                        bestAttemptContent.attachments = [attachment]
+        // check if there is an attachment to put on the notification
+        // this should be last as we need to wait for media
+        // TODO: we should support relative paths and try the user's openHAB (local,remote) for content
+        if let attachmentURLString = userInfo["media-attachment-url"] as? String {
+            // HERE we switch to async usage
+            Task {
+                do {
+                    let unNotificationAttachment = if attachmentURLString.starts(with: "item:") {
+                        try await downloadAndAttachItemImage(itemURI: attachmentURLString)
                     } else {
-                        os_log("handleNotification could not attach %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
+                        try await downloadAndAttachMedia(url: attachmentURLString)
                     }
-                    contentHandler(bestAttemptContent)
+                    if let unNotificationAttachment {
+                        bestAttemptContent.attachments = [unNotificationAttachment]
+                    } else {
+                        throw NotificationServiceError.handleNotificationCouldNotAttach
+                    }
+                } catch {
+                    logger.error("Error fetching data: \(error.localizedDescription)")
                 }
-
-                if isItem {
-                    downloadAndAttachItemImage(itemURI: attachmentURLString, completion: downloadCompletionHandler)
-                } else {
-                    downloadAndAttachMedia(url: attachmentURLString, completion: downloadCompletionHandler)
-                }
-            } else {
                 contentHandler(bestAttemptContent)
             }
+
+        } else {
+            contentHandler(bestAttemptContent)
         }
     }
 
     override func serviceExtensionTimeWillExpire() {
-        // Called just before the extension will be terminated by the system.
-        // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
-        os_log("serviceExtensionTimeWillExpire", log: .default, type: .info)
+        logger.info("serviceExtensionTimeWillExpire")
         if let contentHandler, let bestAttemptContent {
             contentHandler(bestAttemptContent)
         }
@@ -117,7 +148,7 @@ class NotificationService: UNNotificationServiceExtension {
                     return actionsArray
                 }
             } catch {
-                os_log("Error parsing actions: %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
+                logger.info("Error parsing actions: \(error.localizedDescription)")
             }
         }
         return nil
@@ -132,98 +163,87 @@ class NotificationService: UNNotificationServiceExtension {
         return nil
     }
 
-    private func downloadAndAttachMedia(url: String, completion: @escaping (UNNotificationAttachment?) -> Void) {
-        let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+    private func downloadForAttachment(attachmentURLString: String) -> (URL?, String?) {
+        var returnValues: (URL?, String?)
+        Task {
+            do {
+                returnValues = if attachmentURLString.starts(with: "item:") {
+                    try await downloadItemImage(itemURI: attachmentURLString)
+                } else {
+                    try await downloadMedia(url: attachmentURLString)
+                }
 
-        let downloadCompletionHandler: @Sendable (URL?, URLResponse?, Error?) -> Void = { (localURL, response, error) in
-            guard let localURL else {
-                os_log("Error downloading media %{PUBLIC}@", log: .default, type: .error, error?.localizedDescription ?? "Unknown error")
-                completion(nil)
-                return
+            } catch {
+                logger.error("Error fetching data: \(error.localizedDescription)")
             }
-            self.attachFile(localURL: localURL, mimeType: response?.mimeType, completion: completion)
         }
+        return returnValues
+    }
+
+    private func downloadAndAttachMedia(url: String) async throws -> UNNotificationAttachment? {
+        let (localURL, mimeType) = try await downloadMedia(url: url)
+        guard let localURL else { return nil }
+        return await attachFile(localURL: localURL, mimeType: mimeType)
+    }
+
+    private func downloadMedia(url: String) async throws -> (URL?, String?) {
+        guard let fullURL = await resolveFullURL(from: url) else { return (nil, nil) }
+
+        guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return (nil, nil) }
+
+        let client = HTTPClient(configuration: activeConfig)
+
+        let (localURL, urlResponse) = try await client.downloadFile(url: fullURL)
+        return (localURL, urlResponse.mimeType)
+    }
+
+    // 🔹 Extracted helper function to determine full URL
+    private func resolveFullURL(from url: String) async -> URL? {
         if url.starts(with: "/") {
-            let connection1 = ConnectionConfiguration(
-                url: Preferences.localUrl,
-                priority: 0
-            )
-            let connection2 = ConnectionConfiguration(
-                url: Preferences.remoteUrl,
-                priority: 1
-            )
-            NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds, ignoreSSLVerification: Preferences.ignoreSSL)
-            NetworkTracker.shared.waitForActiveConnection { activeConnection in
-                if let openHABUrl = activeConnection?.configuration.url, let uurl = URL(string: openHABUrl) {
-                    client.downloadFile(url: uurl.appendingPathComponent(url), completionHandler: downloadCompletionHandler)
-                }
-            }
-            .store(in: &cancellables)
-        } else if let uurl = URL(string: url) {
-            client.downloadFile(url: uurl, completionHandler: downloadCompletionHandler)
+            guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return nil }
+            return URL(string: activeConfig.url)?.appendingPathComponent(url)
+        } else {
+            return URL(string: url)
         }
     }
 
-    func downloadAndAttachItemImage(itemURI: String, completion: @escaping (UNNotificationAttachment?) -> Void) {
-        guard let itemURI = URL(string: itemURI), let scheme = itemURI.scheme else {
-            os_log("Could not find scheme %{PUBLIC}@", log: .default, type: .info)
-            completion(nil)
-            return
-        }
-
-        let itemName = String(itemURI.absoluteString.dropFirst(scheme.count + 1))
-
-        let client = HTTPClient(username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
-        let connection1 = ConnectionConfiguration(
-            url: Preferences.localUrl,
-            priority: 0
-        )
-        let connection2 = ConnectionConfiguration(
-            url: Preferences.remoteUrl,
-            priority: 1
-        )
-        NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds, ignoreSSLVerification: Preferences.ignoreSSL)
-        NetworkTracker.shared.waitForActiveConnection { activeConnection in
-            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
-                client.getItem(baseURL: url, itemName: itemName) { item, error in
-                    guard let item else {
-                        os_log("Could not find item %{PUBLIC}@", log: .default, type: .info, itemName)
-                        completion(nil)
-                        return
-                    }
-                    if let state = item.state {
-                        // Extract MIME type and base64 string
-                        let pattern = /^data:(.*?);base64,(.*)$/
-                        if let firstMatch = state.firstMatch(of: pattern) {
-                            let mimeType = String(firstMatch.1)
-                            let base64String = String(firstMatch.2)
-                            if let imageData = Data(base64Encoded: base64String) {
-                                // Create a temporary file URL
-                                let tempDirectory = FileManager.default.temporaryDirectory
-                                let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
-                                do {
-                                    try imageData.write(to: tempFileURL)
-                                    os_log("Image saved to temporary file: %{PUBLIC}@", log: .default, type: .info, tempFileURL.absoluteString)
-                                    self.attachFile(localURL: tempFileURL, mimeType: mimeType, completion: completion)
-                                    return
-                                } catch {
-                                    os_log("Failed to write image data to file: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-                                }
-                            } else {
-                                os_log("Failed to decode base64 string to Data", log: .default, type: .error)
-                            }
-                        } else {
-                            os_log("Failed to parse data: %{PUBLIC}@", log: .default, type: .error, error?.localizedDescription ?? "")
-                        }
-                    }
-                    completion(nil)
-                }
-            }
-        }
-        .store(in: &cancellables)
+    func downloadAndAttachItemImage(itemURI: String) async throws -> UNNotificationAttachment? {
+        let (tempFileURL, mimeType) = try await downloadItemImage(itemURI: itemURI)
+        guard let tempFileURL else { return nil }
+        return await attachFile(localURL: tempFileURL, mimeType: mimeType)
     }
 
-    func attachFile(localURL: URL, mimeType: String?, completion: @escaping (UNNotificationAttachment?) -> Void) {
+    func downloadItemImage(itemURI: String) async throws -> (URL?, String?) {
+        guard let itemURL = URL(string: itemURI), let scheme = itemURL.scheme else {
+            throw NotificationServiceError.noScheme(itemURI)
+        }
+
+        let itemName = String(itemURL.absoluteString.dropFirst(scheme.count + 1))
+
+        let item = try await networkTracker().getItemByName(id: itemName)
+        guard let state = item?.state else { return (nil, nil) }
+
+        // Extract MIME type and base64 string
+        let pattern = /^data:(.*?);base64,(.*)$/
+        guard let firstMatch = state.firstMatch(of: pattern) else {
+            throw NotificationServiceError.failedToParse
+        }
+
+        let mimeType = String(firstMatch.1)
+        let base64String = String(firstMatch.2)
+        guard let imageData = Data(base64Encoded: base64String) else {
+            throw NotificationServiceError.failedToDecode
+        }
+
+        // Create a temporary file URL
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
+        try imageData.write(to: tempFileURL)
+        logger.info("Image saved to temporary file: \(tempFileURL.absoluteString)")
+        return (tempFileURL, mimeType)
+    }
+
+    func attachFile(localURL: URL, mimeType: String?) async -> UNNotificationAttachment? {
         do {
             let fileManager = FileManager.default
             let tempDirectory = NSTemporaryDirectory()
@@ -239,14 +259,38 @@ class NotificationService: UNNotificationServiceExtension {
                 try fileManager.moveItem(at: tempFile, to: newTempFile)
                 attachment = try UNNotificationAttachment(identifier: UUID().uuidString, url: newTempFile, options: nil)
             } else {
-                os_log("Unrecognized MIME type or file extension", log: .default, type: .error)
+                logger.error("Unrecognized MIME type or file extension")
                 attachment = nil
             }
-            completion(attachment)
-            return
+            return attachment
         } catch {
-            os_log("Failed to create UNNotificationAttachment: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            logger.error("Failed to create UNNotificationAttachment: \(error.localizedDescription)")
         }
-        completion(nil)
+        return nil
+    }
+
+    func networkTracker() async -> NetworkTracker {
+        if let tracker = networkTracker {
+            return tracker
+        }
+
+        let tracker = NetworkTracker.shared
+        let connections: [ConnectionConfiguration]
+
+        if let cloudUserId,
+           let instance = await Preferences.storedHome(forCloudUserId: cloudUserId) {
+            logger.info("Setting up network tracking for \(cloudUserId)")
+            connections = [instance.localConnectionConfig, instance.remoteConnectionConfig]
+        } else {
+            logger.info("Using default connection configurations")
+            connections = await [
+                Preferences.currentHomePreferences.localConnectionConfig,
+                Preferences.currentHomePreferences.remoteConnectionConfig
+            ]
+        }
+
+        await tracker.startTracking(connectionConfigurations: connections)
+        networkTracker = tracker
+        return tracker
     }
 }

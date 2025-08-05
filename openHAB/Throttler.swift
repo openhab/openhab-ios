@@ -9,10 +9,11 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Foundation
 
-// Inspired by http://danielemargutti.com/2017/10/19/throttle-in-swift/
-public class Throttler: ObservableObject {
+// Inspired by http://danielemargutti.com/2017/10/19/throttle-in-swift/\
+class Throttler: ObservableObject {
     private let queue: DispatchQueue = .global(qos: .background)
 
     private var job = DispatchWorkItem {}
@@ -35,8 +36,8 @@ public class Throttler: ObservableObject {
     }
 }
 
-// Inspired by https://ericasadun.com/2017/05/23/5-easy-dispatch-tricks/
-public extension DispatchTime {
+// Inspired by https://ericasadun.com/2017/05/23/5-easy-dispatch-tricks/\
+extension DispatchTime {
     static func secondsFromNow(_ amount: Double) -> DispatchTime {
         DispatchTime.now() + amount
     }

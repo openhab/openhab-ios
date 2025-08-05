@@ -9,12 +9,13 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import os.log
 import SwiftUI
 
 struct GenericRow: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @ObservedObject var widget: OpenHABWidget
+    @ObservedObject var settings = AppSettings.shared
 
     var body: some View {
         HStack {
@@ -28,7 +29,7 @@ struct GenericRow: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[6]
-    return GenericRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+    let widget = UserData(preview: true).widgets[6]
+    GenericRow(widget: widget)
+        .environmentObject(AppSettings())
 }

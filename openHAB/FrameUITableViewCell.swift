@@ -12,7 +12,7 @@
 import OpenHABCore
 import UIKit
 
-class FrameUITableViewCell: GenericUITableViewCell {
+class FrameUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 

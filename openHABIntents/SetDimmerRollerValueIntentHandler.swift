@@ -15,54 +15,60 @@ import OpenHABCore
 import os.log
 
 class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIntentHandling {
-    func provideItemOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.dimmer, OpenHABItem.ItemType.rollershutter]) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
+    private let logger = Logger(subsystem: "org.openhab.app", category: "SetDimmerRollerValueIntent")
+
+    func resolveHome(for intent: OpenHABSetDimmerRollerValueIntent) async -> OpenHABHomeResolutionResult {
+        logger.info("Resolving home for intent: \(intent)")
+        return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
+    }
+
+    func provideHomeOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent) async throws -> INObjectCollection<OpenHABHome> {
+        OpenHABIntentHelper.getHomeOptions()
+    }
+
+    func provideItemOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, searchTerm: searchTerm, itemTypes: [.dimmer, .rollershutter])
+    }
+
+    func provideItemOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent) async throws -> INObjectCollection<NSString> {
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, itemTypes: [.dimmer, .rollershutter])
+    }
+
+    func confirm(intent: OpenHABSetDimmerRollerValueIntent) async -> OpenHABSetDimmerRollerValueIntentResponse {
+        OpenHABSetDimmerRollerValueIntentResponse(code: .ready, userActivity: nil)
+    }
+
+    func handle(intent: OpenHABSetDimmerRollerValueIntent) async -> OpenHABSetDimmerRollerValueIntentResponse {
+        logger.info("SetDimmerRollerValueIntent for \(intent.item ?? "")")
+
+        guard let itemName = intent.item, let home = intent.home else {
+            return .failureInvalidItem(
+                NSLocalizedString("empty", comment: "empty item / home name")
+            )
         }
-    }
 
-    func provideItemOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.dimmer, OpenHABItem.ItemType.rollershutter]) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
-    }
-
-    func confirm(intent: OpenHABSetDimmerRollerValueIntent, completion: @escaping (OpenHABSetDimmerRollerValueIntentResponse) -> Void) {
-        completion(OpenHABSetDimmerRollerValueIntentResponse(code: .ready, userActivity: nil))
-    }
-
-    func handle(intent: OpenHABSetDimmerRollerValueIntent, completion: @escaping (OpenHABSetDimmerRollerValueIntentResponse) -> Void) {
-        os_log("SetDimmerRollerValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
-
-        guard let itemName = intent.item else {
-            completion(OpenHABSetDimmerRollerValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
-            return
+        guard let homeId = home.uuid, Preferences.storedHomes[homeId] != nil else {
+            return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 
         guard let value = intent.value else {
-            completion(OpenHABSetDimmerRollerValueIntentResponse.failureEmptyValue(item: itemName))
-            return
+            return .failureEmptyValue(item: itemName)
         }
 
         let number = Int(truncating: value)
 
-        if number < 0 || number > 100 {
-            completion(OpenHABSetDimmerRollerValueIntentResponse.failureInvalidValue(value, item: itemName))
-            return
+        guard (0 ... 100).contains(number) else {
+            return .failureInvalidValue(value, item: itemName)
         }
 
-        OpenHABItemCache.instance.getItem(name: itemName) { item in
-            guard let item else {
-                completion(OpenHABSetDimmerRollerValueIntentResponse.failureInvalidItem(itemName))
-                return
-            }
-            OpenHABItemCache.instance.sendCommand(item, commandToSend: "\(number)")
-
-            completion(OpenHABSetDimmerRollerValueIntentResponse.success(value: NSNumber(value: number), item: itemName))
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId), !items.isEmpty else {
+            return .failureInvalidItem(itemName)
         }
+
+        let item = items[0]
+
+        await OpenHABItemCache.instance.sendCommand(to: item, home: homeId, command: "\(number)")
+
+        return .success(value: NSNumber(value: number), item: itemName)
     }
 }

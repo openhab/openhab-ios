@@ -14,8 +14,10 @@ import os.log
 import SwiftUI
 
 struct SwitchRow: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    private let logger = Logger(subsystem: "org.openhab", category: "SwitchRow")
+
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var settings: AppSettings
 
     // https://stackoverflow.com/questions/59395501/do-something-when-toggle-state-changes
     var stateBinding: Binding<Bool> {
@@ -23,10 +25,10 @@ struct SwitchRow: View {
             get: { widget.stateEnumBinding.boolState },
             set: {
                 if $0 {
-                    os_log("Switch to ON", log: .viewCycle, type: .info)
+                    logger.info("Switch to ON")
                     widget.sendCommand("ON")
                 } else {
-                    os_log("Switch to OFF", log: .viewCycle, type: .info)
+                    logger.info("Switch to OFF")
                     widget.sendCommand("OFF")
                 }
                 widget.stateEnumBinding = .switcher($0)
@@ -51,7 +53,18 @@ struct SwitchRow: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[2]
-    return SwitchRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+    let widget = UserData(preview: true).widgets[2]
+    SwitchRow(widget: widget)
+        .environmentObject(AppSettings())
+}
+
+#Preview {
+    let widget = UserData(preview: true).widgets[2]
+    let mockSettings = {
+        let obj = AppSettings()
+        obj.openHABRootUrl = PreviewConstants.remoteURLString
+        return obj
+    }()
+    SwitchRow(widget: widget)
+        .environmentObject(mockSettings)
 }

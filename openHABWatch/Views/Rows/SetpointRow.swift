@@ -9,12 +9,14 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import os.log
+import SFSafeSymbols
 import SwiftUI
 
 struct SetpointRow: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var settings: AppSettings
 
     private var isIntStep: Bool {
         widget.step.truncatingRemainder(dividingBy: 1) == 0
@@ -81,7 +83,7 @@ struct SetpointRow: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[3]
-    return SetpointRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+    let widget = UserData(preview: true).widgets[3]
+    SetpointRow(widget: widget)
+        .environmentObject(AppSettings())
 }

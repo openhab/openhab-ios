@@ -15,60 +15,44 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-// swiftlint:disable:next file_types_order
-extension OpenHABCore.Future where Value == ObservableOpenHABSitemapPage.CodingData {
-    func trafo() -> OpenHABCore.Future<ObservableOpenHABSitemapPage> {
-        transformed { data in
-            data.openHABSitemapPage
-        }
-    }
-}
-
+@MainActor
 final class UserData: ObservableObject {
     static let shared = UserData()
-    @Published var widgets: [ObservableOpenHABWidget] = []
+
+    @Published var widgets: [OpenHABWidget] = []
     @Published var showAlert = false
     @Published var errorDescription = ""
     @Published var showCertificateAlert = false
     @Published var certificateErrorDescription = ""
-    let decoder = JSONDecoder()
+    @Published var isLoadingSitemap = false
 
-    var openHABSitemapPage: ObservableOpenHABSitemapPage?
+    private var pageHandlingTask: Task<Void, Never>?
+    @Published var isPolling = false
 
-    private var commandOperation: URLSessionTask?
-    private var currentPageOperation: URLSessionTask?
-    private var cancellables = Set<AnyCancellable>()
+    var openHABSitemapPage: OpenHABPage?
+    var currentClient: HTTPClient?
 
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "UserData")
 
-    // Add property near other published properties
-    var currentClient: HTTPClient?
+    private var cancellables = Set<AnyCancellable>()
 
-    // Add to init() after decoder setup
-    init() {
-        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-
+    #if DEBUG
+    init(preview: Bool = false) {
         let data = PreviewConstants.sitemapJson
-
         do {
-            // Self-executing closure
-            // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-            openHABSitemapPage = try {
-                let sitemapPageCodingData = try data.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
-                return sitemapPageCodingData.openHABSitemapPage
-            }()
+            let sitemapPage = try data.decoded(as: Components.Schemas.PageDTO.self)
+            openHABSitemapPage = OpenHABPage(sitemapPage)
+            widgets = openHABSitemapPage?.widgets ?? []
+            openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                Task { await self?.sendCommand(item, command: command) }
+            }
         } catch {
             logger.error("Should not throw \(error.localizedDescription)")
         }
-
-        widgets = openHABSitemapPage?.widgets ?? []
-
-        openHABSitemapPage?.sendCommand = { [weak self] item, command in
-            self?.sendCommand(item, command: command)
-        }
     }
+    #endif
 
-    init(sitemapName: String = "watch") {
+    init() {
         NotificationCenter.default.addObserver(
             forName: .evaluateServerTrust,
             object: nil,
@@ -78,13 +62,13 @@ final class UserData: ObservableObject {
                   let summary = notification.userInfo?["summary"] as? String,
                   let domain = notification.userInfo?["domain"] as? String,
                   let client = notification.object as? HTTPClient else { return }
-
-            certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), summary, domain)
-            currentClient = client
             DispatchQueue.main.async {
+                self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), summary, domain)
+                self.currentClient = client
                 self.showCertificateAlert = true
             }
         }
+
         NotificationCenter.default.addObserver(
             forName: .evaluateCertificateMismatch,
             object: nil,
@@ -94,10 +78,9 @@ final class UserData: ObservableObject {
                   let summary = notification.userInfo?["summary"] as? String,
                   let domain = notification.userInfo?["domain"] as? String,
                   let client = notification.object as? HTTPClient else { return }
-
-            certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), summary, domain)
-            currentClient = client
             DispatchQueue.main.async {
+                self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), summary, domain)
+                self.currentClient = client
                 self.showCertificateAlert = true
             }
         }
@@ -110,130 +93,144 @@ final class UserData: ObservableObject {
             NetworkTracker.shared.restartTracking()
         }
 
-        updateNetwork()
-
-        NetworkTracker.shared.$activeConnection
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] activeConnection in
-                if let activeConnection {
-                    self?.logger.info("openHABTracked: \(activeConnection.configuration.url)")
-
-                    if !ObservableOpenHABDataObject.shared.haveReceivedAppContext {
-                        AppMessageService.singleton.requestApplicationContext()
-                        self?.errorDescription = NSLocalizedString("settings_not_received", comment: "")
-                        self?.showAlert = true
-                        return
-                    }
-
-                    ObservableOpenHABDataObject.shared.openHABRootUrl = activeConnection.configuration.url
-                    ObservableOpenHABDataObject.shared.openHABVersion = activeConnection.version
-
-                    let url = Endpoint.watchSitemap(openHABRootUrl: activeConnection.configuration.url, sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch).url
-                    self?.loadPage(url: url, longPolling: false, refresh: true)
+        AppSettings.shared.$haveReceivedAppContext
+            .removeDuplicates()
+            .filter { $0 == true }
+            .sink { [weak self] _ in
+                Task {
+                    await self?.updateNetwork()
                 }
             }
             .store(in: &cancellables)
 
-        ObservableOpenHABDataObject.shared.objectRefreshed.sink { _ in
-            // New settings updates from the phone app to start a reconnect
-            self.logger.info("Settings update received, starting reconnect")
-            self.updateNetwork()
-        }
-        .store(in: &cancellables)
-    }
+        AppSettings.shared.$sitemapForWatch
+            .removeDuplicates()
+            .sink { [weak self] newValue in
+                guard !newValue.isEmpty else { return }
+                self?.startPageHandling(sitemapName: newValue)
+            }
+            .store(in: &cancellables)
 
-    func updateNetwork() {
-        if !ObservableOpenHABDataObject.shared.localUrl.isEmpty || !ObservableOpenHABDataObject.shared.remoteUrl.isEmpty {
-            let connection1 = ConnectionConfiguration(
-                url: ObservableOpenHABDataObject.shared.localUrl,
-                priority: 0
-            )
-            let connection2 = ConnectionConfiguration(
-                url: ObservableOpenHABDataObject.shared.remoteUrl,
-                priority: 1
-            )
-            NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: ObservableOpenHABDataObject.shared.openHABUsername, password: ObservableOpenHABDataObject.shared.openHABPassword, alwaysSendBasicAuth: ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds, ignoreSSLVerification: ObservableOpenHABDataObject.shared.ignoreSSL)
+        Task {
+            await observeNetworkChanges()
         }
     }
 
-    func loadPage(url: URL? = nil, longPolling: Bool, refresh: Bool) {
-        logger.info("Loading page \(url?.absoluteString ?? "") longPolling \(longPolling) refresh \(refresh)")
+    /// Observes network connection changes and updates state
+    private func observeNetworkChanges() async {
+        for await activeConnection in NetworkTracker.shared.activeConnectionStream() {
+            guard let activeConnection else { continue }
 
-        // Cancel any running operation
-        if let currentPageOperation, currentPageOperation.state == .running {
-            currentPageOperation.cancel()
+            logger.info("openHABTracked: \(activeConnection.configuration.url)")
+
+            if !AppSettings.shared.haveReceivedAppContext {
+                AppMessageService.singleton.requestApplicationContext()
+                errorDescription = NSLocalizedString("settings_not_received", comment: "")
+                showAlert = true
+                continue
+            }
+
+            AppSettings.shared.openHABRootUrl = activeConnection.configuration.url
+            AppSettings.shared.openHABVersion = activeConnection.version
+
+            // TODO: Check whether there is need to setup requestModifier for Kingfisher
+
+            startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)
         }
+    }
 
-        currentPageOperation = NetworkTracker.shared.httpClient?.loadSitemapData(url: url, longPolling: longPolling, refresh: refresh) { [weak self] data, error in
-            guard let self else { return }
-            currentPageOperation = nil
+    func updateNetwork() async {
+        guard let connection1 = AppSettings.shared.localConnectionConfig,
+              let connection2 = AppSettings.shared.remoteConnectionConfig else {
+            logger.info("No connections defined")
+            return
+        }
+        await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
+    }
 
-            if let error = error as? URLError, error.code == .cancelled {
-                logger.info("Task was canceled")
-                return
-            }
+    func startPageHandling(sitemapName: String, pageId: String = "") {
+        pageHandlingTask?.cancel()
 
-            var errorString: String?
+        pageHandlingTask = Task {
+            do {
+                isLoadingSitemap = true
+                let service = try OpenAPIService(connectionConfiguration: NetworkTracker.shared.activeConnection?.configuration ?? ConnectionConfiguration.remoteDefault)
 
-            if error != nil || data == nil {
-                errorString = error?.localizedDescription ?? "No data received"
-            }
+                let initialPage = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
+                try Task.checkCancellation()
 
-            if errorString == nil {
-                do {
-                    let sitemapPageCodingData = try data!.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
-                    openHABSitemapPage = sitemapPageCodingData.openHABSitemapPage
-                } catch {
-                    logger.error("Decoding error: \(error.localizedDescription)")
-                    errorString = error.localizedDescription
+                await MainActor.run {
+                    self.openHABSitemapPage = initialPage
+                    self.widgets = initialPage?.widgets ?? []
+                    openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                        Task { await self?.sendCommand(item, command: command) }
+                    }
+                    self.isLoadingSitemap = false
                 }
-            }
 
-            if let errorString {
-                DispatchQueue.main.async {
-                    self.logger.error("On LoadPage \"\(errorString)\"")
-                    self.errorDescription = errorString
+                // Long polling loop with backoff
+                var backoffAttempt = 0
+                let maxBackoffDelay: UInt64 = 30_000_000_000 // 30 seconds
+
+                while !Task.isCancelled {
+                    do {
+                        let page = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: true)
+                        try Task.checkCancellation()
+
+                        await MainActor.run {
+                            self.openHABSitemapPage = page
+                            openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                                Task { await self?.sendCommand(item, command: command) }
+                            }
+                            self.widgets = page?.widgets ?? []
+                        }
+
+                        // Reset backoff after success
+                        backoffAttempt = 0
+
+                    } catch {
+                        backoffAttempt += 1
+                        let baseDelay = min(UInt64(pow(2.0, Double(backoffAttempt))) * 1_000_000_000, maxBackoffDelay)
+                        let jitter = UInt64.random(in: 0 ..< (baseDelay / 2))
+                        let totalDelay = baseDelay + jitter
+
+                        logger.warning("Polling failed: \(error.localizedDescription). Retrying in \(Double(totalDelay) / 1_000_000_000.0) seconds.")
+
+                        try await Task.sleep(nanoseconds: totalDelay)
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    logger.error("Page handling failed with error \(error.localizedDescription)")
                     self.widgets = []
+                    self.errorDescription = error.localizedDescription
                     self.showAlert = true
-                }
-                return
-            }
-
-            // Configures then sendCommand closure (existing logic)
-            openHABSitemapPage?.sendCommand = { [weak self] item, command in
-                self?.sendCommand(item, command: command)
-            }
-
-            // Always update UI on the main thread
-            DispatchQueue.main.async {
-                self.widgets = self.openHABSitemapPage?.widgets ?? []
-                self.showAlert = self.widgets.isEmpty
-                if refresh {
-                    self.loadPage(url: url, longPolling: true, refresh: true)
+                    self.isLoadingSitemap = false
                 }
             }
         }
     }
 
-    func sendCommand(_ item: OpenHABItem?, command: String?) {
-        if let commandOperation, commandOperation.state == .running {
-            commandOperation.cancel()
-        }
-        if let item, let command {
-            commandOperation = NetworkTracker.shared.httpClient?.sendCommand(itemName: item.name, command: command) { _, error in
-                if error != nil {
-                    self.logger.error("Error sending command \(command) to \(item.name): \(error!.localizedDescription)")
-                }
-                self.commandOperation = nil
-            }
+    func stopLongPolling() {
+        pageHandlingTask?.cancel()
+        pageHandlingTask = nil
+        isPolling = false
+        isLoadingSitemap = false
+    }
+
+    func sendCommand(_ item: OpenHABItem?, command: String?) async {
+        guard let item, let command else { return }
+        do {
+            try await NetworkTracker.shared.send(to: item, command: command)
+        } catch {
+            logger.info("Could not send command \(command) to \(item.name)")
         }
     }
 
-    func refreshUrl() {
-        if ObservableOpenHABDataObject.shared.haveReceivedAppContext, !ObservableOpenHABDataObject.shared.openHABRootUrl.isEmpty {
-            showAlert = false
-            let url = Endpoint.watchSitemap(openHABRootUrl: ObservableOpenHABDataObject.shared.openHABRootUrl, sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch).url
-            loadPage(url: url, longPolling: false, refresh: true)
-        }
+    func refreshUrl() async {
+        guard AppSettings.shared.haveReceivedAppContext, !AppSettings.shared.openHABRootUrl.isEmpty else { return }
+
+        showAlert = false
+        startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)
     }
 }

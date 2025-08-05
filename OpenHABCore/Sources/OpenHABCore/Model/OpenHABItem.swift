@@ -13,8 +13,8 @@ import CoreLocation
 import os.log
 import UIKit
 
-public final class OpenHABItem: NSObject, CommItem {
-    public enum ItemType: String {
+public struct OpenHABItem: Sendable {
+    public enum ItemType: String, Sendable {
         case color = "Color"
         case contact = "Contact"
         case dateTime = "DateTime"
@@ -28,7 +28,10 @@ public final class OpenHABItem: NSObject, CommItem {
         case rollershutter = "Rollershutter"
         case stringItem = "String"
         case switchItem = "Switch"
+        case undetermined = "" // Relevant only for SitemapWidgetEvent
     }
+
+    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABItem")
 
     public var type: ItemType?
     public var groupType: ItemType?
@@ -94,7 +97,7 @@ public extension OpenHABItem {
                 let hue = CGFloat(state: values[0], divisor: 360)
                 let saturation = CGFloat(state: values[1], divisor: 100)
                 let brightness = CGFloat(state: values[2], divisor: 100)
-                os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
+                logger.info("hue saturation brightness: \(hue) \(saturation) \(brightness)")
                 return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
             } else {
                 return .black
@@ -125,10 +128,10 @@ public extension OpenHABItem {
 
 public extension OpenHABItem {
     struct CodingData: Decodable {
-        let type: String
+        let type: String?
         let groupType: String?
         let name: String
-        let link: String
+        let link: String?
         let state: String?
         let label: String?
         let stateDescription: OpenHABStateDescription.CodingData?
@@ -143,18 +146,30 @@ public extension OpenHABItem.CodingData {
     var openHABItem: OpenHABItem {
         let mappedMembers = members?.map(\.openHABItem) ?? []
         // swiftlint:disable:next line_length
-        return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, commandDescription: commandDescription?.openHABCommandDescription, members: mappedMembers, category: category, options: options)
+        return OpenHABItem(name: name, type: type ?? "", state: state, link: link ?? "", label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, commandDescription: commandDescription?.openHABCommandDescription, members: mappedMembers, category: category, options: options)
     }
 }
 
-extension CGFloat {
-    init(state string: String, divisor: Float) {
-        let numberFormatter = NumberFormatter()
-        numberFormatter.locale = Locale(identifier: "US")
-        if let number = numberFormatter.number(from: string) {
-            self.init(number.floatValue / divisor)
+extension OpenHABItem {
+    init?(_ item: Components.Schemas.EnrichedItemDTO?) {
+        // unitSymbol
+        // tags
+        if let item {
+            self.init(
+                name: item.name.orEmpty,
+                type: item._type.orEmpty,
+                state: item.state.orEmpty,
+                link: item.link.orEmpty,
+                label: item.label.orEmpty,
+                groupType: nil,
+                stateDescription: OpenHABStateDescription(item.stateDescription),
+                commandDescription: OpenHABCommandDescription(item.commandDescription),
+                members: [],
+                category: item.category,
+                options: []
+            )
         } else {
-            self.init(0)
+            return nil
         }
     }
 }

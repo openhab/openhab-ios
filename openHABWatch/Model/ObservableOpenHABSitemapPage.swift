@@ -61,12 +61,6 @@ class ObservableOpenHABSitemapPage: NSObject {
 
 extension ObservableOpenHABSitemapPage {
     struct CodingData: Decodable {
-        let pageId: String?
-        let title: String?
-        let link: String?
-        let leaf: Bool?
-        let widgets: [ObservableOpenHABWidget.CodingData]?
-
         private enum CodingKeys: String, CodingKey {
             case pageId = "id"
             case title
@@ -74,6 +68,12 @@ extension ObservableOpenHABSitemapPage {
             case leaf
             case widgets
         }
+
+        let pageId: String?
+        let title: String?
+        let link: String?
+        let leaf: Bool?
+        let widgets: [ObservableOpenHABWidget.CodingData]?
     }
 }
 

@@ -19,12 +19,16 @@ opt_in_rules:
   - empty_enum_arguments
   - prefer_zero_over_explicit_init
 
+analyzer_rules:
+  - unused_import
+
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
   - todo
 
 included:
   - ../
+
 excluded:
   - ../fastlane
   - ../OpenHABCore/.build
@@ -75,7 +79,9 @@ identifier_name:
     - id
     - a
     - b
+    - g
     - i
+    - r
     - v
 
 private_outlet:
@@ -97,9 +103,17 @@ custom_rules:
      regex: '((?:\s*\n){3,})'
      message: "There are too many line breaks"
      severity: error
+  sf_safe_symbol:
+    name: "Safe SFSymbol"
+    message: "Use `SFSafeSymbols` via `systemSymbol` parameters for type safety."
+    regex: "(Image\\(systemName:)|(NSImage\\(symbolName:)|(Label[^,]+?,\\s*systemImage:)|(UIApplicationShortcutIcon\\(systemImageName:)"
+    severity: warning
 
 file_name:
   suffix_pattern: "Extension?|\\+.*"
 
 opening_brace:
-  allow_multiline_func: true
+  ignore_multiline_function_signatures: true
+
+redundant_type_annotation:
+  consider_default_literal_types_redundant: true

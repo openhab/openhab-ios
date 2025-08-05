@@ -11,28 +11,31 @@
 
 import Combine
 import OpenHABCore
+import os.log
 import SideMenu
 import SwiftMessages
 import UIKit
 
+private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABViewController")
+
 class OpenHABViewController: UIViewController {
     var trackerCancellables = Set<AnyCancellable>()
+
+    var activeTasks = Set<Task<Void, Never>>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        NetworkConnection.shared.assignDelegates(serverDelegate: self, clientDelegate: self)
+        NetworkTracker.shared.clientCertificateManager.delegate = self
+        NetworkTracker.shared.serverCertificateManager.delegate = self
     }
 
     func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme) {
         var config = SwiftMessages.Config()
         config.duration = .seconds(seconds: seconds)
         config.presentationStyle = .bottom
+        config.presentationContext = .view(view)
         SwiftMessages.hideAll()
         SwiftMessages.show(config: config) {
             let view = MessageView.viewFromNib(layout: .cardView)
@@ -81,32 +84,51 @@ class OpenHABViewController: UIViewController {
 
 extension OpenHABViewController: ServerCertificateManagerDelegate {
     // delegate should ask user for a decision on what to do with invalid certificate
-    func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
-        DispatchQueue.main.async {
+    @MainActor
+    func evaluateServerTrust(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult {
+        await withCheckedContinuation { continuation in
             let title = NSLocalizedString("ssl_certificate_warning", comment: "")
             let message = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), certificateSummary ?? "", domain ?? "")
             let alertView = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("abort", comment: ""), style: .default) { _ in policy?.evaluateResult = .deny })
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("once", comment: ""), style: .default) { _ in policy?.evaluateResult = .permitOnce })
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("always", comment: ""), style: .default) { _ in policy?.evaluateResult = .permitAlways })
-            self.present(alertView, animated: true) {}
+
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("abort", comment: ""), style: .default) { _ in
+                continuation.resume(returning: .deny)
+            })
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("once", comment: ""), style: .default) { _ in
+                continuation.resume(returning: .permitOnce)
+            })
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("always", comment: ""), style: .default) { _ in
+                continuation.resume(returning: .permitAlways)
+            })
+
+            self.present(alertView, animated: true, completion: nil)
         }
     }
 
     // certificate received from openHAB doesn't match our record, ask user for a decision
-    func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
-        DispatchQueue.main.async {
+    @MainActor
+    func evaluateCertificateMismatch(summary certificateSummary: String?, forDomain domain: String?) async -> OpenHABCore.ServerCertificateManager.EvaluateResult {
+        await withCheckedContinuation { continuation in
             let title = NSLocalizedString("ssl_certificate_warning", comment: "")
             let message = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), certificateSummary ?? "", domain ?? "")
             let alertView = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("abort", comment: ""), style: .default) { _ in policy?.evaluateResult = .deny })
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("once", comment: ""), style: .default) { _ in policy?.evaluateResult = .permitOnce })
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("always", comment: ""), style: .default) { _ in policy?.evaluateResult = .permitAlways })
-            self.present(alertView, animated: true) {}
+
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("abort", comment: ""), style: .default) { _ in
+                continuation.resume(returning: .deny)
+            })
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("once", comment: ""), style: .default) { _ in
+                continuation.resume(returning: .permitOnce)
+            })
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("always", comment: ""), style: .default) { _ in
+                continuation.resume(returning: .permitAlways)
+            })
+
+            self.present(alertView, animated: true, completion: nil)
         }
     }
 
-    func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?) {
+    @MainActor
+    func acceptedServerCertificatesChanged() {
         // User's decision about trusting server certificates has changed.  Send updates to the paired watch.
         WatchMessageService.singleton.syncPreferencesToWatch()
     }
@@ -114,52 +136,80 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
 
 // MARK: - ClientCertificateManagerDelegate
 
+@MainActor
 extension OpenHABViewController: ClientCertificateManagerDelegate {
-    // delegate should ask user for a decision on whether to import the client certificate into the keychain
-    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {
-        DispatchQueue.main.async {
-            let alertController = UIAlertController(title: NSLocalizedString("certificate_import_title", comment: ""), message: NSLocalizedString("certificate_import_text", comment: ""), preferredStyle: .alert)
-            let okay = UIAlertAction(title: NSLocalizedString("okay", comment: ""), style: .default) { (_: UIAlertAction) in
-                clientCertificateManager!.clientCertificateAccepted(password: nil)
+    // Ask user whether to import the certificate
+    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool {
+        let shouldImport = await withCheckedContinuation { continuation in
+            let alertController = UIAlertController(
+                title: NSLocalizedString("certificate_import_title", comment: ""),
+                message: NSLocalizedString("certificate_import_text", comment: ""),
+                preferredStyle: .alert
+            )
+
+            let okay = UIAlertAction(title: NSLocalizedString("okay", comment: ""), style: .default) { _ in
+                continuation.resume(returning: true)
             }
-            let cancel = UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel) { (_: UIAlertAction) in
-                clientCertificateManager!.clientCertificateRejected()
+
+            let cancel = UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel) { _ in
+                continuation.resume(returning: false)
             }
+
             alertController.addAction(okay)
             alertController.addAction(cancel)
-            self.present(alertController, animated: true, completion: nil)
+
+            self.present(alertController, animated: true)
+        }
+        if shouldImport {
+            await clientCertificateManager!.clientCertificateAccepted(password: nil)
+            return true
+        } else {
+            clientCertificateManager!.clientCertificateRejected()
+            return false
         }
     }
 
-    // delegate should ask user for the export password used to decode the PKCS#12
-    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {
-        DispatchQueue.main.async {
-            let alertController = UIAlertController(title: NSLocalizedString("certificate_import_title", comment: ""), message: NSLocalizedString("certificate_import_password", comment: ""), preferredStyle: .alert)
-            let okay = UIAlertAction(title: NSLocalizedString("okay", comment: ""), style: .default) { (_: UIAlertAction) in
-                let txtField = alertController.textFields?.first
-                let password = txtField?.text
-                clientCertificateManager!.clientCertificateAccepted(password: password)
-            }
-            let cancel = UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel) { (_: UIAlertAction) in
-                clientCertificateManager!.clientCertificateRejected()
-            }
+    // Ask user for password to decode PKCS#12
+    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String? {
+        await withCheckedContinuation { continuation in
+            let alertController = UIAlertController(
+                title: NSLocalizedString("certificate_import_title", comment: ""),
+                message: NSLocalizedString("certificate_import_password", comment: ""),
+                preferredStyle: .alert
+            )
+
             alertController.addTextField { textField in
                 textField.placeholder = NSLocalizedString("password", comment: "")
                 textField.isSecureTextEntry = true
             }
+
+            let okay = UIAlertAction(title: NSLocalizedString("okay", comment: ""), style: .default) { _ in
+                let password = alertController.textFields?.first?.text
+                continuation.resume(returning: password)
+            }
+
+            let cancel = UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel) { _ in
+                continuation.resume(returning: nil)
+            }
+
             alertController.addAction(okay)
             alertController.addAction(cancel)
-            self.present(alertController, animated: true, completion: nil)
+
+            self.present(alertController, animated: true)
         }
     }
 
-    // delegate should alert the user that an error occured importing the certificate
-    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {
-        DispatchQueue.main.async {
-            let alertController = UIAlertController(title: NSLocalizedString("certificate_import_title", comment: ""), message: errMsg, preferredStyle: .alert)
-            let okay = UIAlertAction(title: NSLocalizedString("okay", comment: ""), style: .default)
-            alertController.addAction(okay)
-            self.present(alertController, animated: true, completion: nil)
-        }
+    // Show alert if certificate import failed
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async {
+        let alertController = UIAlertController(
+            title: NSLocalizedString("certificate_import_title", comment: ""),
+            message: errMsg,
+            preferredStyle: .alert
+        )
+
+        let okay = UIAlertAction(title: NSLocalizedString("okay", comment: ""), style: .default)
+        alertController.addAction(okay)
+
+        present(alertController, animated: true)
     }
 }

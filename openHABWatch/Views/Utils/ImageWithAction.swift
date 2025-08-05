@@ -13,10 +13,10 @@ import SFSafeSymbols
 import SwiftUI
 
 struct ImageWithAction: View {
-    var systemName: String
+    var systemSymbol: SFSymbol
     var action: () -> Void
     var body: some View {
-        Image(systemName: systemName)
+        Image(systemSymbol: systemSymbol)
             .font(.system(size: 25))
             .colorMultiply(.blue)
             .saturation(0.8)
@@ -27,5 +27,5 @@ struct ImageWithAction: View {
 }
 
 #Preview {
-    ImageWithAction(systemName: "chevron.up.circle.fill") {}
+    ImageWithAction(systemSymbol: .chevronUpCircleFill) {}
 }

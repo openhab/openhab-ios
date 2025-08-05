@@ -11,15 +11,18 @@
 
 import Foundation
 
-public class OpenHABWidgetMapping: NSObject, Decodable {
+public struct OpenHABWidgetMapping: Decodable, Sendable {
     public var command = ""
     public var label = ""
+
+    public init(command: String?, label: String?) {
+        self.command = command.orEmpty
+        self.label = label.orEmpty
+    }
 }
 
-public extension OpenHABWidgetMapping {
-    convenience init(command: String, label: String) {
-        self.init()
-        self.command = command
-        self.label = label
+extension OpenHABWidgetMapping {
+    init(_ mapping: Components.Schemas.MappingDTO) {
+        self.init(command: mapping.command, label: mapping.label)
     }
 }

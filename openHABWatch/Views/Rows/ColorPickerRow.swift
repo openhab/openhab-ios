@@ -9,12 +9,15 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import os.log
+import SFSafeSymbols
 import SwiftUI
 
 struct ColorPickerRow: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    let logger = Logger(subsystem: "org.openhab", category: "ColorPickerRow")
+    @ObservedObject var widget: OpenHABWidget
+    @ObservedObject var settings = AppSettings.shared
     var body: some View {
         let uiColor = widget.item?.stateAsUIColor()
 
@@ -53,18 +56,18 @@ struct ColorPickerRow: View {
     }
 
     func upButtonPressed() {
-        os_log("ON button pressed", log: .command, type: .info)
+        logger.info("ON button pressed")
         widget.sendCommand("ON")
     }
 
     func downButtonPressed() {
-        os_log("OFF button pressed", log: .command, type: .info)
+        logger.info("OFF button pressed")
         widget.sendCommand("OFF")
     }
 }
 
 #Preview {
-    let widget = UserData().widgets[10]
-    return ColorPickerRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+    let widget = UserData(preview: true).widgets[10]
+    ColorPickerRow(widget: widget)
+        .environmentObject(AppSettings())
 }

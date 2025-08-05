@@ -11,13 +11,14 @@
 
 import Foundation
 import os.log
+import UIKit
 
 public enum ChartStyle {
     case dark
     case light
 }
 
-public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible {
+public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible, Codable {
     case png
     case svg
 
@@ -47,7 +48,9 @@ public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible {
     }
 }
 
-public struct Endpoint {
+public struct Endpoint: Equatable {
+    static let logger = Logger(subsystem: "org.openhab.app", category: "EndPoint")
+
     let baseURL: String
     let path: String
     var queryItems: [URLQueryItem]
@@ -58,16 +61,9 @@ public extension Endpoint {
         var components = URLComponents(string: baseURL)
         components?.path = path
         components?.queryItems = queryItems
-        os_log("URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, components?.url?.absoluteString ?? "")
-        return components?.url
-    }
-
-    static func watchSitemap(openHABRootUrl: String, sitemapName: String) -> Endpoint {
-        Endpoint(
-            baseURL: openHABRootUrl,
-            path: "/rest/sitemaps/\(sitemapName)/\(sitemapName)",
-            queryItems: [URLQueryItem(name: "jsoncallback", value: "callback")]
-        )
+        let url = components?.url
+        //        Endpoint.logger.debug("URL: \(url?.absoluteString ?? "", privacy: .private)")
+        return url
     }
 
     static func appleRegistration(prefsURL: String,
@@ -90,38 +86,6 @@ public extension Endpoint {
             baseURL: prefsURL,
             path: "/api/v1/notifications",
             queryItems: [URLQueryItem(name: "limit", value: "20")]
-        )
-    }
-
-    static func tracker(openHABRootUrl: String) -> Endpoint {
-        Endpoint(
-            baseURL: openHABRootUrl,
-            path: "/rest/",
-            queryItems: []
-        )
-    }
-
-    static func sitemaps(openHABRootUrl: String) -> Endpoint {
-        Endpoint(
-            baseURL: openHABRootUrl,
-            path: "/rest/sitemaps",
-            queryItems: [URLQueryItem(name: "limit", value: "20")]
-        )
-    }
-
-    static func items(openHABRootUrl: String) -> Endpoint {
-        Endpoint(
-            baseURL: openHABRootUrl,
-            path: "/rest/items",
-            queryItems: []
-        )
-    }
-
-    static func uiTiles(openHABRootUrl: String) -> Endpoint {
-        Endpoint(
-            baseURL: openHABRootUrl,
-            path: "/rest/ui/tiles",
-            queryItems: []
         )
     }
 
@@ -168,69 +132,89 @@ public extension Endpoint {
     }
 
     // swiftlint:disable:next function_parameter_count
-    static func icon(rootUrl: String, version: Int, icon: String?, state: String, iconType: IconType, iconColor: String) -> Endpoint {
-        guard var icon, !icon.isEmpty else {
+    static func icon(rootUrl: String, version: Int, icon: String?, state: String?, iconType: IconType, iconColor: String, staticIcon: Bool? = nil) -> Endpoint {
+        guard let icon, !icon.isEmpty else {
             return Endpoint(baseURL: "", path: "", queryItems: [])
         }
 
-        // determineOH2IconPath
-        var queryItems = [
-            URLQueryItem(name: "state", value: state)
-        ]
-        if version >= 4 {
-            let components = icon.components(separatedBy: ":")
-            var source = ""
-            var set = ""
-            if components.count == 3 {
-                source = components[0]
-                set = components[1]
-                icon = components[2]
-            } else if components.count == 2 {
-                source = components[0]
-                if source == "material" {
-                    set = "baseline"
-                } else {
-                    set = "classic"
-                }
-                icon = components[1]
-            }
-            if source == "material" {
-                source = "iconify"
-                icon = icon.replacingOccurrences(of: "_", with: "-")
-                icon = "\(set)-\(icon)"
-                set = "ic"
-            }
-            if source == "f7" {
-                source = "iconify"
-                set = "f7"
-                icon = icon.replacingOccurrences(of: "_", with: "-")
-            }
-            if source == "if" || source == "iconify" {
-                queryItems = [URLQueryItem(name: "height", value: "64")]
-                if !iconColor.isEmpty {
-                    queryItems.append(URLQueryItem(name: "color", value: iconColor))
-                }
-                return Endpoint(
-                    baseURL: "https://api.iconify.design/",
-                    path: "/\(set)/\(icon).svg",
-                    queryItems: queryItems
-                )
-            }
-        }
-        if version >= 3 {
-            queryItems.append(contentsOf: [
-                URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG"),
-                URLQueryItem(name: "anyFormat", value: "true")
-            ])
-        } else {
-            queryItems.append(
-                URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG")
+        guard version >= 2 else {
+            return Endpoint(
+                baseURL: rootUrl,
+                path: "/icon/\(icon)",
+                queryItems: []
             )
         }
 
+        // determineOH2IconPath
+        var queryItems: [URLQueryItem] = []
+
+        var source = "oh"
+        var set = "classic"
+        var iconName = "none"
+
+        let segments = icon.components(separatedBy: ":")
+        switch segments.count {
+        case 1:
+            iconName = segments[0]
+        case 2:
+            source = segments[0]
+            iconName = segments[1]
+            if source == "material" {
+                set = "baseline"
+            }
+        case 3:
+            source = segments[0]
+            set = segments[1]
+            iconName = segments[2]
+        default:
+            break
+        }
+
+        switch source {
+        case "material":
+            source = "iconify"
+            iconName = iconName.replacingOccurrences(of: "_", with: "-")
+            iconName = "\(set)-\(iconName)"
+            set = "ic"
+        case "f7":
+            source = "iconify"
+            set = "f7"
+            iconName = iconName.replacingOccurrences(of: "_", with: "-")
+        default:
+            break
+        }
+
+        if source == "if" || source == "iconify" {
+            queryItems = [URLQueryItem(name: "height", value: "64")]
+            if !iconColor.isEmpty, let colorString = UIColor(fromString: iconColor).toHex() {
+                queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
+            }
+            return Endpoint(
+                baseURL: "https://api.iconify.design/",
+                path: "/\(set)/\(iconName).svg",
+                queryItems: queryItems
+            )
+        }
+
+        // set unknown iconSource to oh:classic:none icon
+        if source != "oh" {
+            set = "classic"
+            iconName = "none"
+        }
+
+        if staticIcon != true {
+            queryItems.append(URLQueryItem(name: "state", value: state ?? "null"))
+        }
+
+        queryItems.append(contentsOf: [
+            URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG"),
+            URLQueryItem(name: "anyFormat", value: "true"),
+            URLQueryItem(name: "iconset", value: set)
+        ])
+
         return Endpoint(
             baseURL: rootUrl,
-            path: "/icon/\(icon)",
+            path: "/icon/\(iconName)",
             queryItems: queryItems
         )
     }

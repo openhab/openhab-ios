@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Alamofire
+import Combine
 import OpenHABCore
 import os.log
 import UIKit
@@ -20,17 +20,18 @@ enum ImageType {
     case empty
 }
 
-class NewImageUITableViewCell: GenericUITableViewCell {
+class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
+    private let logger = Logger(subsystem: "org.openhab", category: "NewImageUITableViewCell")
+
     var didLoad: (() -> Void)?
 
     private var mainImageView: ScaleAspectFitImageView!
     private var refreshTimer: Timer?
-    private var downloadRequest: Alamofire.Request?
     private var chartStyle: ChartStyle = .light
+    private var activeTask: Task<Void, Never>?
+    private var cachedImage: UIImage?
 
-    private var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
+    var openHABRootUrl: String?
 
     private var shouldCache: Bool {
         widget?.refresh == 0
@@ -41,8 +42,12 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         switch widget.type {
         case .chart:
+            guard let openHABRootUrl else {
+                logger.error("Missing openHABRootUrl in NewImageUITableViewCell")
+                return .empty
+            }
             return .link(url: Endpoint.chart(
-                rootUrl: appData!.openHABRootUrl,
+                rootUrl: openHABRootUrl,
                 period: widget.period,
                 type: widget.item?.type,
                 service: widget.service,
@@ -96,10 +101,10 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        if widget?.image == nil {
+        if cachedImage == nil {
             loadImage()
         } else {
-            mainImageView.image = widget?.image
+            mainImageView.image = cachedImage
         }
         // If widget have a refresh rate configured, i.e. different from zero, schedule an image update timer
         if widget.refresh != 0 {
@@ -107,7 +112,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
             refreshTimer = nil
             let refreshInterval = TimeInterval(Double(widget.refresh) / 1000)
             if refreshInterval > 0.09 {
-                os_log("Sheduling image refresh every %g seconds", log: .viewCycle, type: .info, refreshInterval)
+                logger.info("Scheduling image refresh every \(refreshInterval) seconds")
                 refreshTimer = Timer.scheduledTimer(
                     timeInterval: refreshInterval,
                     target: self,
@@ -122,21 +127,21 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     func loadImage() {
         switch widgetPayload {
         case let .embedded(image):
-            widget?.image = image
+            cachedImage = image
             mainImageView.image = image
             didLoad?()
         case let .link(url):
             guard let url else { return }
             loadRemoteImage(withURL: url)
         default:
-            os_log("Failed to determine widget payload.", log: .urlComposition, type: .debug)
+            logger.debug("Failed to determine widget payload.")
         }
     }
 
     private func widgetPayload(fromItem item: OpenHABItem) -> ImageType {
         switch item.type {
         case .image:
-            os_log("Image base64Encoded.", log: .urlComposition, type: .debug)
+            logger.debug("Image base64Encoded.")
             guard let data = item.state?.components(separatedBy: ",")[safe: 1], let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters) else {
                 return .empty
             }
@@ -149,39 +154,36 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     }
 
     private func loadRemoteImage(withURL url: URL) {
-        os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, url.absoluteString)
+        logger.debug("Image URL: \(url.absoluteString)")
 
-        var imageRequest = URLRequest(url: url)
-        imageRequest.timeoutInterval = 10.0
-        if !shouldCache {
-            imageRequest.cachePolicy = .reloadIgnoringCacheData
+        if activeTask != nil {
+            activeTask?.cancel()
+            activeTask = nil
         }
 
-        if downloadRequest != nil {
-            downloadRequest?.cancel()
-            downloadRequest = nil
-        }
-
-        downloadRequest = NetworkConnection.shared.manager.request(imageRequest)
-            .validate(statusCode: 200 ..< 300)
-            .responseData { [weak self] response in
-                switch response.result {
-                case .success:
-                    if let data = response.data {
-                        self?.mainImageView?.image = UIImage(data: data)
-                        self?.widget?.image = UIImage(data: data)
-                        self?.didLoad?()
-                    }
-                case let .failure(error):
-                    os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
+        activeTask = Task {
+            do {
+                guard let config = NetworkTracker.shared.activeConnection?.configuration else {
+                    logger.warning("No openHAB connection found.")
+                    throw HTTPClientError.noConfiguration
                 }
+                let client = HTTPClient(configuration: config)
+                let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, timeout: 10.0, type: .data, cacheingPolicy: !shouldCache ? .reloadIgnoringCacheData : .useProtocolCachePolicy)
+                await MainActor.run {
+                    self.cachedImage = UIImage(data: data)
+                    self.mainImageView?.image = self.cachedImage
+                    self.didLoad?()
+                }
+            } catch {
+                logger.info("Downloading image failed: \(error.localizedDescription)")
             }
-        downloadRequest?.resume()
+        }
     }
 
     @objc
     func refreshImage(_ timer: Timer?) {
-        os_log("Refreshing image on %g seconds schedule", log: .viewCycle, type: .info, Double(widget.refresh) / 1000)
+        // swiftformat:disable:next redundantSelf
+        logger.info("Refreshing image on \(Double(self.widget.refresh) / 1000) seconds schedule")
         loadImage()
     }
 
@@ -198,5 +200,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 extension NewImageUITableViewCell: GenericCellCacheProtocol {
     func invalidateCache() {
         refreshTimer?.invalidate()
+        cachedImage = nil
     }
 }

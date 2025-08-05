@@ -42,7 +42,7 @@ public struct NumberState: CustomStringConvertible, Equatable {
                 // %s in Java is for Strings, but does not work in Swift, see
                 // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Strings/Articles/formatSpecifiers.html)
                 .replacingOccurrences(of: "%s", with: "%@")
-            let formatValue: CVarArg = if format.contains("%d") {
+            let formatValue: any CVarArg = if format.contains("%d") {
                 intValue
             } else if format.contains("%s") {
                 stringValue
