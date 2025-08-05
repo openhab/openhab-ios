@@ -193,7 +193,6 @@ extension Preferences {
     fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
         let preferenceValue = sharedDefaults.object(forKey: key)
         if let preferenceConverted = decoder(preferenceValue) {
-            logger.debug("Preference value \(key) is \(String(describing: preferenceConverted))")
             return preferenceConverted
         } else {
             if let preferenceValue {
