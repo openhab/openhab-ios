@@ -23,8 +23,10 @@ struct ConnectionSettingsView: View {
             .accessibilityIdentifier("Demo Mode")
 
         if !settingsDemomode {
-            SingleConnectionSettingsView(headerText: "Local server", connectionConfig: $localConnectionConfiguration, showNotificationToggle: false)
-            SingleConnectionSettingsView(headerText: "Remote server", connectionConfig: $remoteConnectionConfiguration, showNotificationToggle: true)
+            Group {
+                SingleConnectionSettingsView(headerText: "Local server", connectionConfig: $localConnectionConfiguration, showNotificationToggle: false)
+                SingleConnectionSettingsView(headerText: "Remote server", connectionConfig: $remoteConnectionConfiguration, showNotificationToggle: true)
+            }
         }
     }
 }

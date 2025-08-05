@@ -257,7 +257,7 @@ Also see [Action Syntax](#action-syntax) for more information on actions that ca
 
 ## Shortcuts
 
-The app supports Shortcuts (via Apple's App Intents) which let you control your openHAB installation from the Shortcuts app, Siri voice commands, automations, widgets, or Apple Watch complications.
+The app supports exposes several actions that let you control your openHAB installation from the Shortcuts app.
 
 **Supported actions**
 

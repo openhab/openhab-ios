@@ -554,7 +554,7 @@ extension OpenHABWidget {
             maxValue: widget.maxValue,
             step: widget.step,
             refresh: widget.refresh.map(Int.init),
-            height: 50, // TODO:
+            height: widget.height.map(Double.init),
             isLeaf: true,
             iconColor: widget.iconcolor,
             labelColor: widget.labelcolor,
@@ -563,7 +563,7 @@ extension OpenHABWidget {
             state: widget.state,
             text: "",
             legend: widget.legend,
-            inputHint: InputHint(rawValue: widget.inputHint ?? ""),
+            inputHint: InputHint(rawValue: widget.inputHint ?? "unknown") ?? .unknown,
             encoding: widget.encoding,
             item: OpenHABItem(widget.item),
             linkedPage: OpenHABPage(widget.linkedPage),

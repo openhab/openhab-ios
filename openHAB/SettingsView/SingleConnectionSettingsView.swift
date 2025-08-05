@@ -45,15 +45,13 @@ struct SingleConnectionSettingsView: View {
             VStack(alignment: .leading) {
                 LabeledContent {
                     Spacer()
-                    TextField(
-                        "URL",
-                        text: $connectionConfig.url
-                    )
-                    .fixedSize()
-                    .keyboardType(.URL)
-                    .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true)
-                    .font(.system(.caption))
+                    TextField("URL", text: $connectionConfig.url)
+                        .textContentType(.URL) // Helps iOS identify it as a URL field
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled(true)
+                        .fixedSize()
+                        .font(.system(.caption))
                 } label: {
                     HStack {
                         Text("URL")
