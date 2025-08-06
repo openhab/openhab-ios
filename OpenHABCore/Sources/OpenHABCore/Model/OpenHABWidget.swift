@@ -95,6 +95,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var widgetId = ""
     @Published public var label = ""
     @Published public var icon = ""
+
     public var type: WidgetType = .unknown
     public var url = ""
     public var period = ""

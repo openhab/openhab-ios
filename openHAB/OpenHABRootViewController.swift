@@ -762,6 +762,7 @@ class OpenHABRootViewController: UIViewController {
 
     private func switchView(target: TargetController) {
         let targetView: (UIViewController & OpenHABViewable)
+
         switch target {
         case .sitemap:
             targetView = sitemapViewController
