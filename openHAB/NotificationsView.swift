@@ -80,6 +80,7 @@ final class MockNetworkTracker: NetworkTracking, ObservableObject {
     }
 }
 
+#if DEBUG
 struct NotificationsViewPreview: View {
     var body: some View {
         let mockTracker = MockNetworkTracker(connection: .mock)
@@ -101,6 +102,7 @@ struct NotificationsViewPreview: View {
         }
     }
 }
+#endif
 
 struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: ObservableObject {
     @ObservedObject var networkTracker: Tracker
