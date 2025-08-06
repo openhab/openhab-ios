@@ -36,7 +36,6 @@ final class UserData: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    #if DEBUG
     init(preview: Bool = false) {
         let data = PreviewConstants.sitemapJson
         do {
@@ -50,7 +49,6 @@ final class UserData: ObservableObject {
             logger.error("Should not throw \(error.localizedDescription)")
         }
     }
-    #endif
 
     init() {
         NotificationCenter.default.addObserver(
