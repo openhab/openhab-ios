@@ -120,7 +120,6 @@
 		DA50C7BD2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */; };
 		DA50C7BF2B0A65300009F716 /* SliderWithSwitchSupportUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BE2B0A652F0009F716 /* SliderWithSwitchSupportUITableViewCell.swift */; };
 		DA5ED9BE2C850955004875E0 /* ClientCertificatesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5ED9BD2C850955004875E0 /* ClientCertificatesViewModel.swift */; };
-		DA6454DE2E204B95006005E8 /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* PreviewConstants.swift */; };
 		DA64ACA62DBEAD5600294F60 /* SitemapPageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA64ACA52DBEAD5600294F60 /* SitemapPageViewModel.swift */; };
 		DA64ACA82DBEAD8300294F60 /* SitemapPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */; };
 		DA64ACAA2DBEAD9000294F60 /* SitemapNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA64ACA92DBEAD9000294F60 /* SitemapNavigationView.swift */; };
@@ -129,7 +128,6 @@
 		DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */; };
 		DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */; };
 		DA6B2EF72C8B92E800DF77CF /* SelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */; };
-		DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* PreviewConstants.swift */; };
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
 		DA77E19B2D886D9B007CFF0F /* SingleConnectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA77E19A2D886D9B007CFF0F /* SingleConnectionSettingsView.swift */; };
 		DA7ACD5F2DC3DB130055CFC7 /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = DA7ACD5E2DC3DB130055CFC7 /* SFSafeSymbols */; settings = {ATTRIBUTES = (Required, ); }; };
@@ -356,6 +354,7 @@
 		933D7F0622E7015000621A03 /* OpenHABUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABUITests.swift; sourceTree = "<group>"; };
 		933D7F0822E7015100621A03 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		933D7F0E22E7030600621A03 /* SnapshotHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SnapshotHelper.swift; path = fastlane/SnapshotHelper.swift; sourceTree = SOURCE_ROOT; };
+		934B610B2348D2F9009112D5 /* Color+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		935B484525342B8E00E44CF0 /* URL+Static.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Static.swift"; sourceTree = "<group>"; };
 		935D3412257B7E2F0020A404 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = Resources/nl.lproj/Intents.strings; sourceTree = "<group>"; };
 		935D3419257B7E820020A404 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; name = Base; path = Resources/Base.lproj/Intents.intentdefinition; sourceTree = "<group>"; };
@@ -1021,6 +1020,8 @@
 		DAF457A723DBA2C40018B495 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				DA7224D123828D3300712D20 /* PreviewConstants.swift */,
+				934B610B2348D2F9009112D5 /* Color+Extension.swift */,
 				DAF4578123D630C70018B495 /* IconView.swift */,
 				DAF4578623D798A50018B495 /* TextLabelView.swift */,
 				DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */,
@@ -1195,7 +1196,6 @@
 		DFFD8FCE18EDBD30003B502A /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				DA7224D123828D3300712D20 /* PreviewConstants.swift */,
 				938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */,
 				DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */,
 				938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */,
@@ -1650,7 +1650,6 @@
 				DA162BEC2CD3B53E0040DAE5 /* LogsViewer.swift in Sources */,
 				DAF4578723D798A50018B495 /* TextLabelView.swift in Sources */,
 				DA0749DE23E0B5950057FA83 /* ColorPickerRow.swift in Sources */,
-				DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */,
 				DAF4581E23DC60020018B495 /* ImageRawRow.swift in Sources */,
 				DAD0858B2AE56F0E001D36BE /* OpenHABWatch.swift in Sources */,
 				DAF4578223D630C70018B495 /* IconView.swift in Sources */,
@@ -1730,6 +1729,7 @@
 				DA35E2B02E1EDB86003987BB /* SetpointRowView.swift in Sources */,
 				DA35E2CB2E1F93AD003987BB /* ImageView.swift in Sources */,
 				DAEE35072E224F6000B4A7F1 /* ColorTemperaturePickerRowView.swift in Sources */,
+				DA77E19B2D886D9B007CFF0F /* SingleConnectionSettingsView.swift in Sources */,
 				DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */,
 				DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */,
 				2F6412EE2CE494A80039FB28 /* DatePickerUITableViewCell.swift in Sources */,
@@ -1757,6 +1757,8 @@
 				DA35E2C62E1EEA9D003987BB /* SegmentedRowView.swift in Sources */,
 				DA35E2C72E1EEA9D003987BB /* VideoRowView.swift in Sources */,
 				DA35E2CD2E1F96CA003987BB /* IconView.swift in Sources */,
+				DA4800212D839D3A009CF127 /* AnimatedSecureTextField.swift in Sources */,
+				DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */,
 				DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */,
 				DA9F81872C85020F00B47B72 /* RTFTextView.swift in Sources */,
 				DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */,
@@ -1794,7 +1796,6 @@
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
-				DA6454DE2E204B95006005E8 /* PreviewConstants.swift in Sources */,
 				DA48001C2D837556009CF127 /* SitemapSettingsView.swift in Sources */,
 				938BF9C624EFCC0700E6B52F /* UILabel+Localization.swift in Sources */,
 			);
@@ -2369,7 +2370,6 @@
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 50;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = D6A95UZXVC;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				"DEVELOPMENT_TEAM[sdk=watchos*]" = PBAPXHRAM9;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -2894,7 +2894,7 @@
 			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 8.5.0;
+				minimumVersion = 8.0.0;
 			};
 		};
 		93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {

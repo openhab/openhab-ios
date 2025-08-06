@@ -194,10 +194,10 @@ class OpenHABRootViewController: UIViewController {
                 handleNotificationInternal(state)
             case let .ready(uuid, _):
                 print("SSE Session UUID:", uuid)
-            case let .alive(interval):
-                print("SSE Heartbeat interval:", interval, "s")
             case let .unknown(raw):
                 print("SSE Unknown:", raw)
+            default:
+                break
             }
         }
     }

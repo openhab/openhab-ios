@@ -132,7 +132,6 @@ public actor EventStream<Event: Sendable> {
                 broadcast(.connected)
 
                 for try await sse in eventStream {
-                    logger.info("SSE event: \(sse.event ?? "empty")")
                     for rawMessage in parse(sse) {
                         if let message = rawMessage as? Event {
                             broadcast(.event(message))

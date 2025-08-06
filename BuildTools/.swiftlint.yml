@@ -19,6 +19,9 @@ opt_in_rules:
   - empty_enum_arguments
   - prefer_zero_over_explicit_init
 
+analyzer_rules:
+  - unused_import
+
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
   - todo
