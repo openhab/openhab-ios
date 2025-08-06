@@ -354,7 +354,6 @@
 		933D7F0622E7015000621A03 /* OpenHABUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABUITests.swift; sourceTree = "<group>"; };
 		933D7F0822E7015100621A03 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		933D7F0E22E7030600621A03 /* SnapshotHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SnapshotHelper.swift; path = fastlane/SnapshotHelper.swift; sourceTree = SOURCE_ROOT; };
-		934B610B2348D2F9009112D5 /* Color+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		935B484525342B8E00E44CF0 /* URL+Static.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Static.swift"; sourceTree = "<group>"; };
 		935D3412257B7E2F0020A404 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = Resources/nl.lproj/Intents.strings; sourceTree = "<group>"; };
 		935D3419257B7E820020A404 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; name = Base; path = Resources/Base.lproj/Intents.intentdefinition; sourceTree = "<group>"; };
@@ -476,7 +475,6 @@
 		DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
 		DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
 		DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionView.swift; sourceTree = "<group>"; };
-		DA7224D123828D3300712D20 /* PreviewConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewConstants.swift; sourceTree = "<group>"; };
 		DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppMessageService.swift; sourceTree = "<group>"; };
 		DA77E19A2D886D9B007CFF0F /* SingleConnectionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleConnectionSettingsView.swift; sourceTree = "<group>"; };
 		DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
@@ -562,17 +560,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		DA2AEB752D92D32000897D80 /* Cells */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = Cells;
-			sourceTree = "<group>";
-		};
+		DA2AEB752D92D32000897D80 /* Cells */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Cells; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1030,8 +1018,6 @@
 		DAF457A723DBA2C40018B495 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				DA7224D123828D3300712D20 /* PreviewConstants.swift */,
-				934B610B2348D2F9009112D5 /* Color+Extension.swift */,
 				DAF4578123D630C70018B495 /* IconView.swift */,
 				DAF4578623D798A50018B495 /* TextLabelView.swift */,
 				DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */,
@@ -1410,7 +1396,7 @@
 				BuildIndependentTargetsInParallel = YES;
 				CLASSPREFIX = OpenHAB;
 				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 1620;
+				LastUpgradeCheck = 1640;
 				ORGANIZATIONNAME = "openHAB e.V.";
 				TargetAttributes = {
 					4D6470D22561F935007B03FC = {
@@ -1739,7 +1725,6 @@
 				DA35E2B02E1EDB86003987BB /* SetpointRowView.swift in Sources */,
 				DA35E2CB2E1F93AD003987BB /* ImageView.swift in Sources */,
 				DAEE35072E224F6000B4A7F1 /* ColorTemperaturePickerRowView.swift in Sources */,
-				DA77E19B2D886D9B007CFF0F /* SingleConnectionSettingsView.swift in Sources */,
 				DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */,
 				DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */,
 				2F6412EE2CE494A80039FB28 /* DatePickerUITableViewCell.swift in Sources */,
@@ -1767,8 +1752,6 @@
 				DA35E2C62E1EEA9D003987BB /* SegmentedRowView.swift in Sources */,
 				DA35E2C72E1EEA9D003987BB /* VideoRowView.swift in Sources */,
 				DA35E2CD2E1F96CA003987BB /* IconView.swift in Sources */,
-				DA4800212D839D3A009CF127 /* AnimatedSecureTextField.swift in Sources */,
-				DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */,
 				DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */,
 				DA9F81872C85020F00B47B72 /* RTFTextView.swift in Sources */,
 				DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */,
@@ -1959,8 +1942,8 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = openHABIntents/openHABIntents.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 52;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -1981,7 +1964,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore org.openhab.app.openHABIntents";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore org.openhab.app.openHABIntents";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -2050,8 +2033,8 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 52;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2077,7 +2060,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.NotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore org.openhab.app.NotificationService";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore org.openhab.app.NotificationService";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -2241,8 +2224,8 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = "openHABWatch Extension/openHABWatch Extension.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "Apple Distribution";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 52;
@@ -2269,7 +2252,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore org.openhab.app.watchkitapp";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=watchos*]" = "match AppStore org.openhab.app.watchkitapp";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -2746,8 +2729,8 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = openHAB/openHAB.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 52;
 				DEVELOPMENT_TEAM = "";
@@ -2773,7 +2756,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore org.openhab.app";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore org.openhab.app";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_COMPILATION_MODE = wholemodule;

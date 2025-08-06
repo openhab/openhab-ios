@@ -579,7 +579,7 @@ extension OpenHABWidget {
             state: widget.state,
             text: "",
             legend: widget.legend,
-            inputHint: InputHint(rawValue: widget.inputHint ?? "unknown") ?? .unknown,
+            inputHint: InputHint(rawValue: widget.inputHint ?? "unknown"),
             encoding: widget.encoding,
             item: OpenHABItem(widget.item),
             linkedPage: OpenHABPage(widget.linkedPage),

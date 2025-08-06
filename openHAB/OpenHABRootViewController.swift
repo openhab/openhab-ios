@@ -73,10 +73,9 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
 
     func viewName() -> String { "sitemap" }
 
-    func reloadView() {
-        // Maybe call viewModel.reload() if you wire a viewModel refresh
-        Task {
-            await rootView.viewModel.reload()
+    nonisolated func reloadView() {
+        Task { @MainActor in
+            await viewModel.reload()
         }
     }
 
@@ -761,7 +760,7 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func switchView(target: TargetController) {
-        let targetView: (UIViewController & OpenHABViewable)
+        let targetView: any (UIViewController & OpenHABViewable)
 
         switch target {
         case .sitemap:
@@ -882,8 +881,8 @@ extension OpenHABRootViewController: ModalHandler {
                 switchView(target: to)
                 await (sitemapViewController as? HostingSitemapViewController)?.pushSitemap(name: sitemapName, path: nil)
             case .settings:
-                let hostingController = UIHostingController(rootView: SettingsView())
-                navigationController?.pushViewController(hostingController, animated: true)
+                let hostingController = UIHostingController(rootView: NavigationView { SettingsView() })
+                present(hostingController, animated: true)
             case .notifications:
                 let hostingController = UIHostingController(rootView: NotificationsView())
                 navigationController?.pushViewController(hostingController, animated: true)
