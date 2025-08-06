@@ -19,7 +19,7 @@ struct ApplicationSettingsView: View {
     @Binding var settingsSSECommandItem: String
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "ApplicationSettingsView")
-    @State private var selectedItemName: String? = nil
+    @State private var selectedItemName: String?
 
     var body: some View {
         Section(header: Text(LocalizedStringKey("application_settings"))) {

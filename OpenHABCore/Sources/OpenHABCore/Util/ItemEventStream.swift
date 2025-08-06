@@ -47,13 +47,26 @@ public enum StateStreamMessage: Sendable, Equatable {
 }
 
 public actor EventStream<Event: Sendable> {
+    // Alive and Item State Chnage message structures
+    private struct Alive: Decodable { let type: String; let interval: Int }
+    // Multiple items can come in a single message which makes this a little more complicated
+    private struct ItemStateChanges: Decodable {
+        struct Value: Decodable { let state: String }
+        let wrapped: [String: Value]
+        var first: (String, Value)? { wrapped.first }
+
+        init(from decoder: any Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            wrapped = try container.decode([String: Value].self)
+        }
+    }
+
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier ?? "EventStream",
         category: "SSE"
     )
     private var trackedItems: Set<String> = []
-    private var continuations
-        = [UUID: AsyncStream<StreamOutput<Event>>.Continuation]()
+    private var continuations = [UUID: AsyncStream<StreamOutput<Event>>.Continuation]()
     private var listenTask: Task<Void, Never>?
     private var currentConfig: ConnectionConfiguration?
     private var sessionUUID: String?
@@ -187,20 +200,6 @@ public actor EventStream<Event: Sendable> {
             }
         }
         return [.unknown(raw: sse.data ?? "nil")]
-    }
-
-    // Alive and Item State Chnage message structures
-    private struct Alive: Decodable { let type: String; let interval: Int }
-    // Multiple items can come in a single message which makes this a little more complicated
-    private struct ItemStateChanges: Decodable {
-        struct Value: Decodable { let state: String }
-        let wrapped: [String: Value]
-        init(from decoder: any Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            wrapped = try container.decode([String: Value].self)
-        }
-
-        var first: (String, Value)? { wrapped.first }
     }
 }
 
