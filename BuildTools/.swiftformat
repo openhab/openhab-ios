@@ -4,6 +4,7 @@
 --exclude ../OpenHABCore/swift-openapi-generator
 --exclude ../OpenHABCore/Sources/OpenHABCore/GeneratedSources
 --exclude ../OsLogRewriter/.build
+--exclude ../build
 --symlinks ignore
 
 # disabled rules

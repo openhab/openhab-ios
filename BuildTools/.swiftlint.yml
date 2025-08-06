@@ -40,6 +40,7 @@ excluded:
   - ../openHAB/Intents/Generated
   - ../openHABWatch/Intents/Generated
   - ../OsLogRewriter/.build
+  - ../build
 
 nesting:
     type_level: 2
