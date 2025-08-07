@@ -130,6 +130,8 @@
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
 		DAAC30872CBBF0420041927F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0775262346705F0086C685 /* ContentView.swift */; };
 		DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */; };
+		DABED17B2E451694000B92EF /* BonjourDiscoverySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */; };
+		DABED17D2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */; };
 		DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */; };
 		DAC131122DA32F5D00075AE2 /* Intents.intentdefinition in Resources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
 		DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */; };
@@ -448,6 +450,8 @@
 		DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
+		DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoverySheet.swift; sourceTree = "<group>"; };
+		DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoveryViewModel.swift; sourceTree = "<group>"; };
 		DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandlerTests.swift; sourceTree = "<group>"; };
 		DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinnerViewController.swift; sourceTree = "<group>"; };
 		DAC6608B236F6F4200F4501E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -828,6 +832,7 @@
 		DA48001F2D837CD8009CF127 /* SettingsView */ = {
 			isa = PBXGroup;
 			children = (
+				DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */,
 				65F055432E3D4E41004E98FE /* ItemSelectionView.swift */,
 				652B81032E2193B500648510 /* ScreenSaverSettingsView.swift */,
 				DA4800172D837221009CF127 /* AboutSettingsView.swift */,
@@ -959,6 +964,7 @@
 				652B81082E2193DA00648510 /* ScreenSaver */,
 				DA2AEB752D92D32000897D80 /* Cells */,
 				DA4642312D7EE6CA006C3908 /* LoggerView.swift */,
+				DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */,
 				653B54C1285E714900298ECD /* OpenHABViewController.swift */,
 				DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */,
 				65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */,
@@ -1630,6 +1636,7 @@
 				65570A7D2476D16A00D524EA /* OpenHABWebViewController.swift in Sources */,
 				DA48001E2D837905009CF127 /* ApplicationSettingsView.swift in Sources */,
 				DAF0A28B2C56E3A300A14A6A /* RollershutterCell.swift in Sources */,
+				DABED17B2E451694000B92EF /* BonjourDiscoverySheet.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
 				DA4642322D7EE6CA006C3908 /* LoggerView.swift in Sources */,
 				1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */,
@@ -1661,6 +1668,7 @@
 				DA21EAE22339621C001AB415 /* Throttler.swift in Sources */,
 				DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */,
 				DA6B2EEF2C861BC900DF77CF /* DrawerView.swift in Sources */,
+				DABED17D2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift in Sources */,
 				DA48001A2D83742A009CF127 /* DebugSettingsView.swift in Sources */,
 				938BF9D324EFD0B700E6B52F /* UIViewController+Localization.swift in Sources */,
 				DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */,
