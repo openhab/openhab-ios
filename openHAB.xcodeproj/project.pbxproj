@@ -467,6 +467,7 @@
 		DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderWithSwitchSupportRow.swift; sourceTree = "<group>"; };
 		DA50C7BE2B0A652F0009F716 /* SliderWithSwitchSupportUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderWithSwitchSupportUITableViewCell.swift; sourceTree = "<group>"; };
 		DA5ED9BD2C850955004875E0 /* ClientCertificatesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientCertificatesViewModel.swift; sourceTree = "<group>"; };
+		DA617E3E2E4528E80063A51C /* StringsToXCStrings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringsToXCStrings.swift; sourceTree = "<group>"; };
 		DA64ACA52DBEAD5600294F60 /* SitemapPageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapPageViewModel.swift; sourceTree = "<group>"; };
 		DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapPageView.swift; sourceTree = "<group>"; };
 		DA64ACA92DBEAD9000294F60 /* SitemapNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapNavigationView.swift; sourceTree = "<group>"; };
@@ -739,6 +740,7 @@
 		938BF9C724EFCCC000E6B52F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				DA617E3E2E4528E80063A51C /* StringsToXCStrings.swift */,
 				938BF9C824EFCCC000E6B52F /* Localizable.strings */,
 				938BF9CA24EFCCC000E6B52F /* InfoPlist.strings */,
 			);

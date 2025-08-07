@@ -1,15 +1,20 @@
+// Copyright (c) 2010-2025 Contributors to the openHAB project
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information.
+//
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
+//
+// SPDX-License-Identifier: EPL-2.0
+
 import Foundation
 
 // MARK: - Model
 
 struct XCStringsFlatCatalog: Codable {
-    let version: String
-    let sourceLanguage: String
-    var strings: [String: Entry]
-
     struct Entry: Codable {
-        var localizations: [String: Localization]
-
         struct Localization: Codable {
             var stringUnit: StringUnit
         }
@@ -18,7 +23,13 @@ struct XCStringsFlatCatalog: Codable {
             var value: String
             var state: String
         }
+
+        var localizations: [String: Localization]
     }
+
+    let version: String
+    let sourceLanguage: String
+    var strings: [String: Entry]
 }
 
 // MARK: - Parser
@@ -27,20 +38,22 @@ func parseStringsFile(at url: URL) throws -> [String: String] {
     let contents = try String(contentsOf: url, encoding: .utf8)
     var result: [String: String] = [:]
 
-    let regex = try! Regex(#""(?<key>[^"]+)"\s*=\s*"(?<value>(?:[^"\\]|\\.)*)";"#)
+    let regex = try Regex(#""(?<key>[^"]+)"\s*=\s*"(?<value>(?:[^"\\]|\\.)*)";"#)
 
     for line in contents.split(separator: "\n") {
-        guard let match = try? regex.wholeMatch(in: String(line)) else { continue }
+        guard let match = try? regex.wholeMatch(in: String(line)),
+              let keyValue = match.output["key"],
+              let valueValue = match.output["value"],
+              let key = keyValue.substring,
+              let valueRaw = valueValue.substring else {
+            continue
+        }
 
-        let key = String(match.output["key"]!.substring!)
-        var value = String(match.output["value"]!.substring!)
-
-        // Unescape common sequences
-        value = value
+        let value = valueRaw
             .replacingOccurrences(of: #"\""#, with: "\"")
             .replacingOccurrences(of: #"\\n"#, with: "\n")
 
-        result[key] = value
+        result[String(key)] = value
     }
 
     return result
