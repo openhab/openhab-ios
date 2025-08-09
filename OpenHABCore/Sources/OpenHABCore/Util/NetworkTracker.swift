@@ -101,17 +101,15 @@ public actor ConnectionFailureTracker {
     }
 }
 
-public protocol NetworkTracking: ObservableObject {
-    var activeConnection: ConnectionInfo? { get }
+public class CertificateManagers {
+    public static let clientCertificateManager = ClientCertificateManager()
+    public static let serverCertificateManager = ServerCertificateManager()
 }
 
-/// @available(*, deprecated)
-public final class NetworkTracker: ObservableObject {
+public actor NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
 
-    // @MainActor
     @Published public private(set) var activeConnection: ConnectionInfo?
-    // @MainActor
     @Published public private(set) var status: NetworkStatus = .connecting
 
     private var pathMonitor: any NWPathMonitoring
@@ -121,11 +119,6 @@ public final class NetworkTracker: ObservableObject {
     private let disconnectedRetryInterval: UInt64 = 30 // / amount of time we scan when not connected
 
     private var failureTracker: ConnectionFailureTracker
-
-    // TODO: remove
-    public var clientCertificateManager = ClientCertificateManager()
-    public var serverCertificateManager = ServerCertificateManager()
-    public private(set) var httpClient: HTTPClient?
 
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
@@ -346,7 +339,6 @@ public final class NetworkTracker: ObservableObject {
         }
     }
 
-    @MainActor
     private func setActiveConnection(_ connection: ConnectionInfo?) async {
         guard activeConnection != connection else { return }
 
@@ -360,7 +352,6 @@ public final class NetworkTracker: ObservableObject {
         }
     }
 
-    @MainActor
     private func updateStatus(_ newStatus: NetworkStatus) async {
         guard status != newStatus else { return } // Prevent redundant updates
         status = newStatus
@@ -373,8 +364,6 @@ public final class NetworkTracker: ObservableObject {
         }
     }
 }
-
-extension NetworkTracker: NetworkTracking {}
 
 public extension NetworkTracker {
     func send(to item: OpenHABItem, command: String) async throws {

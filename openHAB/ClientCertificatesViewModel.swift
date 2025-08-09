@@ -22,17 +22,17 @@ class ClientCertificatesViewModel: ObservableObject {
     }
 
     func loadCertificates() {
-        clientCertificates = NetworkTracker.shared.clientCertificateManager.clientIdentities
+        clientCertificates = CertificateManagers.clientCertificateManager.clientIdentities
     }
 
     func deleteCertificate(at index: Int) {
-        let status = NetworkTracker.shared.clientCertificateManager.deleteFromKeychain(index: index)
+        let status = CertificateManagers.clientCertificateManager.deleteFromKeychain(index: index)
         if status == noErr {
             clientCertificates.remove(at: index)
         }
     }
 
     func getIdentityName(for index: Int) -> String {
-        NetworkTracker.shared.clientCertificateManager.getIdentityName(index: index)
+        CertificateManagers.clientCertificateManager.getIdentityName(index: index)
     }
 }

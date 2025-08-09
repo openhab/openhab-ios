@@ -213,7 +213,7 @@ class OpenHABRootViewController: UIViewController {
         ) { _ in
             Task { @MainActor in
                 WatchMessageService.singleton.syncPreferencesToWatch()
-                NetworkTracker.shared.restartTracking()
+                await NetworkTracker.shared.restartTracking()
             }
         }
 
@@ -452,7 +452,7 @@ class OpenHABRootViewController: UIViewController {
                 await NetworkTracker.shared.stopTracking()
                 logger.info("Switching to home \(targetHome.id)")
                 Preferences.switchActiveHome(to: targetHome.id)
-                await NetworkTracker.shared.waitForActiveConnection()
+                _ = await NetworkTracker.shared.waitForActiveConnection()
                 handleNotificationInternal(action)
             }
             return

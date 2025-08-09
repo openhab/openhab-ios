@@ -72,7 +72,15 @@ struct NotificationRow: View {
     }
 }
 
-final class MockNetworkTracker: NetworkTracking, ObservableObject {
+#if DEBUG
+
+protocol NetworkTracking: Actor {
+    var activeConnection: ConnectionInfo? { get }
+}
+
+extension NetworkTracker: NetworkTracking {}
+
+actor MockNetworkTracker: NetworkTracking, ObservableObject {
     @Published var activeConnection: ConnectionInfo?
 
     init(connection: ConnectionInfo?) {
@@ -80,7 +88,6 @@ final class MockNetworkTracker: NetworkTracking, ObservableObject {
     }
 }
 
-#if DEBUG
 struct NotificationsViewPreview: View {
     var body: some View {
         let mockTracker = MockNetworkTracker(connection: .mock)

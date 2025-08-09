@@ -33,15 +33,15 @@ import Foundation
 //            evaluation = determineEvaluation(with: challenge.protectionSpace.host)
 //        case NSURLAuthenticationMethodHTTPDigest, NSURLAuthenticationMethodNTLM,
 //             NSURLAuthenticationMethodNegotiate:
-//            (evaluation.disposition, evaluation.credential) = NetworkTracker.shared.clientCertificateManager.evaluateTrust(with: challenge)
+//            (evaluation.disposition, evaluation.credential) = CertificateManagers.clientCertificateManager.evaluateTrust(with: challenge)
 //            evaluation.error = nil
 //        #if !(os(Linux) || os(Windows))
 //        case NSURLAuthenticationMethodServerTrust:
-//            (evaluation.disposition, evaluation.credential) = NetworkTracker.shared.serverCertificateManager.evaluateTrust(with: challenge)
+//            (evaluation.disposition, evaluation.credential) = CertificateManagers.serverCertificateManager.evaluateTrust(with: challenge)
 //            evaluation.error = nil
 //        case NSURLAuthenticationMethodClientCertificate:
 //            // evaluation = attemptCredentialAuthentication(for: challenge, belongingTo: task)
-//            (evaluation.disposition, evaluation.credential) = NetworkTracker.shared.clientCertificateManager.evaluateTrust(with: challenge)
+//            (evaluation.disposition, evaluation.credential) = CertificateManagers.clientCertificateManager.evaluateTrust(with: challenge)
 //            evaluation.error = nil
 //        #endif
 //        default:

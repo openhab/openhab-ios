@@ -465,7 +465,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
                 return (.useCredential, credential)
             } else {
                 if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
-                    return onReceiveSessionTaskChallenge(with: challenge)
+                    return await onReceiveSessionTaskChallenge(with: challenge)
                 } else {
                     return await onReceiveSessionChallenge(with: challenge)
                 }

@@ -922,6 +922,6 @@ extension OpenHABSitemapViewController: AuthenticationChallengeResponsible {
     func downloader(_ downloader: ImageDownloader,
                     task: URLSessionTask,
                     didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        onReceiveSessionTaskChallenge(with: challenge)
+        await onReceiveSessionTaskChallenge(with: challenge)
     }
 }
