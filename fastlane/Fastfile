@@ -155,11 +155,14 @@ platform :ios do
         type = options[:bump]
 
         if !options[:isfeaturebuild] && type != 'none'
-            increment_version_number_in_xcodeproj(
-                bump_type: type,
-                xcodeproj: 'openHAB.xcodeproj',
-                scheme: 'openHAB'
-            )
+            # Increment version for all targets
+            ['openHAB', 'openHABWatch', 'openHABIntents', 'NotificationService', 'openHABTestsSwift', 'openHABUITests', 'openHABWatchSwiftUI Watch AppTests', 'openHABWatchSwiftUI Watch AppUITests'].each do |target|
+                increment_version_number_in_xcodeproj(
+                    bump_type: type,
+                    xcodeproj: 'openHAB.xcodeproj',
+                    target: target
+                )
+            end
         end
         # increment_version_if_required
         # NOTE: this resolves packages of the project so need to clean

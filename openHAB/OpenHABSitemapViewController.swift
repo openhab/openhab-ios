@@ -27,7 +27,7 @@ import UIKit
 class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDelegate {
     var pageUrl = ""
     private var iconType: IconType = .png
-    private var openHABRootUrl = ""
+    var openHABRootUrl = ""
 
     private var activeConnectionInfo: ConnectionInfo?
 

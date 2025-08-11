@@ -25,6 +25,7 @@ struct ImageCellProvider: WidgetCellProvider {
         cell.didLoad = { [weak controller] in
             controller?.updateWidgetTableView()
         }
+        cell.openHABRootUrl = controller.openHABRootUrl
         cell.widget = widget
         cell.displayWidget()
         cell.touchEventDelegate = controller

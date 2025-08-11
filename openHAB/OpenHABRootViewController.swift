@@ -740,7 +740,21 @@ class OpenHABRootViewController: UIViewController {
                 while let presentedViewController = topMostViewController?.presentedViewController {
                     topMostViewController = presentedViewController
                 }
-                topMostViewController?.present(menu, animated: true)
+
+                guard let presenter = topMostViewController else {
+                    // swiftformat:disable:next redundantSelf
+                    logger.error("No valid view controller found to present side menu")
+                    return
+                }
+
+                // Avoid trying to present the menu on itself
+                if presenter == menu {
+                    // swiftformat:disable:next redundantSelf
+                    logger.error("Cannot present side menu on itself")
+                    return
+                }
+
+                presenter.present(menu, animated: true)
             }
         }
     }
