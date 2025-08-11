@@ -187,24 +187,35 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
             do {
                 for try await byte in byteStream {
+                    // Check for task cancellation to avoid recursive locks
+                    try Task.checkCancellation()
+
                     imageData.append(byte)
 
                     if imageData.starts(with: streamImageInitialBytePattern), let image = UIImage(data: imageData) {
-                        await MainActor.run {
-                            if self.mainImageView?.image == nil {
+                        // Capture weak self to avoid retain cycles and check cancellation
+                        guard !Task.isCancelled else { return }
+
+                        await MainActor.run { [weak self] in
+                            guard let self else { return }
+                            if mainImageView?.image == nil {
                                 let aspectRatio = image.size.width / image.size.height
-                                self.activityIndicator.isHidden = true
-                                self.updateAspectRatio(forView: self.mainImageView, aspectRatio: aspectRatio)
-                                Task {
+                                activityIndicator.isHidden = true
+                                updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
+                                Task { [weak self] in
                                     try? await Task.sleep(nanoseconds: 10_000_000) // 10ms delay
-                                    self.didLoad?()
+                                    await MainActor.run {
+                                        self?.didLoad?()
+                                    }
                                 }
                             }
-                            self.mainImageView?.image = image
+                            mainImageView?.image = image
                         }
                         imageData = Data() // Reset for the next image
                     }
                 }
+            } catch is CancellationError {
+                logger.debug("MJPEG stream was cancelled")
             } catch {
                 logger.error("Failed to process MJPEG stream: \(error.localizedDescription)")
             }
