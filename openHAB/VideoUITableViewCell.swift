@@ -174,16 +174,23 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                     logger.warning("No openHAB configuration found.")
                     throw HTTPClientError.noConfiguration
                 }
+                logger.debug("Starting MJPEG stream for URL: \(url.absoluteString)")
                 let client = HTTPClient(configuration: config)
-                let (byteStream, _) = try await client.processStream(url: url)
+                let (byteStream, response) = try await client.processStream(url: url)
+                logger.debug("Successfully got MJPEG stream response: \(response)")
                 await handleMJPEGStream(byteStream)
             } catch {
                 logger.error("Failed to start MJPEG stream: \(error.localizedDescription)")
+                await MainActor.run {
+                    self.activityIndicator.isHidden = true
+                    self.activityIndicator.stopAnimating()
+                }
             }
         }
 
         func handleMJPEGStream(_ byteStream: URLSession.AsyncBytes) async {
             var imageData = Data()
+            logger.debug("Starting to process MJPEG byte stream")
 
             do {
                 for try await byte in byteStream {
@@ -192,10 +199,16 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
                     imageData.append(byte)
 
+                    // Log first few bytes to see what we're getting
+                    if imageData.count <= 50 {
+                        logger.debug("Received bytes (\(imageData.count)): \(imageData.prefix(50).map { String(format: "%02x", $0) }.joined(separator: " "))")
+                    }
+
                     if imageData.starts(with: streamImageInitialBytePattern), let image = UIImage(data: imageData) {
                         // Capture weak self to avoid retain cycles and check cancellation
                         guard !Task.isCancelled else { return }
 
+                        logger.debug("Successfully decoded MJPEG frame, size: \(image.size.width)x\(image.size.height)")
                         await MainActor.run { [weak self] in
                             guard let self else { return }
                             if mainImageView?.image == nil {
