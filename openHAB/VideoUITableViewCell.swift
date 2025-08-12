@@ -100,6 +100,12 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
     override func displayWidget() {
         url = URL(string: widget.url)
+
+        // Set initial aspect ratio to prevent standard height display
+        // Use 16:9 as default, will be updated when actual video dimensions are available
+        if aspectRatioConstraint == nil {
+            updateAspectRatio(forView: widget.encoding.lowercased() == VideoEncoding.mjpeg.rawValue ? mainImageView : playerView, aspectRatio: 16.0 / 9.0)
+        }
     }
 
     func play() {
