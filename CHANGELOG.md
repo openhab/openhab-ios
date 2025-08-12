@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixes #921 (#922)
+
 - Moved handleMJPEGStream to be a proper instance method (#920)
 - Commit changelog to CHANGELOG.md (#919)
 - Fix for video sizing (#918)
