@@ -1,3 +1,12 @@
+# Changelog
+
+## Unreleased
+
+- Moved handleMJPEGStream to be a proper instance method (#920)
+- Commit changelog to CHANGELOG.md (#919)
+- Fix for video sizing (#918)
+- More logging for Video cells
+
 # Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
