@@ -20,8 +20,8 @@ import SwiftUI
 typealias NotificationLoader = () async -> [OpenHABNotification]
 
 struct NotificationRow: View {
-    var notification: OpenHABNotification
-    var connection: ConnectionInfo
+    @State var notification: OpenHABNotification
+    @State var connection: ConnectionInfo
 
     var body: some View {
         HStack {
@@ -41,6 +41,7 @@ struct NotificationRow: View {
                         .font(.caption)
                         .foregroundStyle(.gray)
                 }
+                Text(notification.payload?.tag ?? "")
             }
         }
 
@@ -88,16 +89,18 @@ struct NotificationsViewPreview: View {
         return NotificationsView(networkTracker: mockTracker, notifications: []) {
             [
                 OpenHABNotification(
+                    id: UUID().uuidString,
                     message: "Preview Notification 1",
-                    created: .now,
                     icon: "sun",
-                    id: UUID().uuidString
+                    created: .now,
+                    v: 0
                 ),
                 OpenHABNotification(
+                    id: UUID().uuidString,
                     message: "Preview Notification 2",
-                    created: .now.addingTimeInterval(-3600),
                     icon: "moon",
-                    id: UUID().uuidString
+                    created: .now.addingTimeInterval(-3600),
+                    v: 1
                 )
             ]
         }
@@ -161,7 +164,7 @@ extension NotificationsView where Tracker == MainActorNetworkTracker {
                 }
 
                 let client = HTTPClient(connectionConfiguration: config)
-                return try await client.notification(urlString: config.url)
+                return try await client.notifications(urlString: config.url)
             } catch {
                 Logger.notificationService.error("Failed to load notifications: \(error.localizedDescription, privacy: .public)")
                 return []
