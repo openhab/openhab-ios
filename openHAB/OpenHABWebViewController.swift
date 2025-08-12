@@ -84,7 +84,7 @@ class OpenHABWebViewController: OpenHABViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
-        view.addSubview(webView)
+        attachWebViewToLayout(webView)
         activityIndicator = UIActivityIndicatorView()
         activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
@@ -174,7 +174,7 @@ class OpenHABWebViewController: OpenHABViewController {
                 newWebview.navigationDelegate = self
                 newWebview.uiDelegate = self
                 webView = newWebview
-                view.addSubview(newWebview)
+                attachWebViewToLayout(newWebview)
             }
             logger.info("Loading URL: \(modifiedUrl)")
             webView.load(request)
@@ -312,11 +312,9 @@ class OpenHABWebViewController: OpenHABViewController {
             config.websiteDataStore = .nonPersistent()
         }
 
-        let webview = WKWebView(frame: view.bounds, configuration: config)
+        let webview = WKWebView(frame: .zero, configuration: config)
         webview.navigationDelegate = self
         webview.uiDelegate = self
-        // Ensure the newly created webview resizes properly on rotation
-        webview.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webview.scrollView.bounces = false
         // support dark mode and avoid white flashing when loading
         webview.isOpaque = false
@@ -329,6 +327,11 @@ class OpenHABWebViewController: OpenHABViewController {
             webview.isInspectable = true
         }
 
+        // Avoid safe-area content insets which can leave a small gap at the bottom on iPad until a reload.
+        webview.scrollView.contentInsetAdjustmentBehavior = .never
+        webview.scrollView.contentInset = .zero
+        webview.scrollView.scrollIndicatorInsets = .zero
+
         if #unavailable(iOS 17) {
             if isMyopenhab {
                 myOhViews[id] = webview
@@ -337,6 +340,22 @@ class OpenHABWebViewController: OpenHABViewController {
         }
         views[id] = webview
         return webview
+    }
+
+    func attachWebViewToLayout(_ webView: WKWebView) {
+        if webView.superview !== view {
+            view.addSubview(webView)
+        }
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            // Render under the bottom system area (dock/home indicator)
+            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            webView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
+        ])
+        view.setNeedsLayout()
+        view.layoutIfNeeded()
     }
 }
 
