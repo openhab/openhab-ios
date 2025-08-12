@@ -100,6 +100,12 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
     override func displayWidget() {
         url = URL(string: widget.url)
+
+        // Set initial aspect ratio to prevent standard height display
+        // Use 16:9 as default, will be updated when actual video dimensions are available
+        if aspectRatioConstraint == nil {
+            updateAspectRatio(forView: widget.encoding.lowercased() == VideoEncoding.mjpeg.rawValue ? mainImageView : playerView, aspectRatio: 16.0 / 9.0)
+        }
     }
 
     func play() {
@@ -163,50 +169,74 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         bringSubviewToFront(mainImageView)
 
-        var streamRequest = URLRequest(url: url)
-        streamRequest.timeoutInterval = 10.0
+        activeTask = Task { [weak self] in
+            guard let self else { return }
 
-        let streamImageInitialBytePattern = Data([255, 216])
-
-        activeTask = Task {
             do {
                 guard let config = NetworkTracker.shared.activeConnection?.configuration else {
                     logger.warning("No openHAB configuration found.")
                     throw HTTPClientError.noConfiguration
                 }
+                logger.debug("Starting MJPEG stream for URL: \(url.absoluteString)")
                 let client = HTTPClient(configuration: config)
-                let (byteStream, _) = try await client.processStream(url: url)
+                let (byteStream, response) = try await client.processStream(url: url)
+                logger.debug("Successfully got MJPEG stream response: \(response)")
                 await handleMJPEGStream(byteStream)
             } catch {
                 logger.error("Failed to start MJPEG stream: \(error.localizedDescription)")
+                await MainActor.run { [weak self] in
+                    self?.activityIndicator.isHidden = true
+                    self?.activityIndicator.stopAnimating()
+                }
             }
         }
+    }
 
-        func handleMJPEGStream(_ byteStream: URLSession.AsyncBytes) async {
-            var imageData = Data()
+    private func handleMJPEGStream(_ byteStream: URLSession.AsyncBytes) async {
+        let streamImageInitialBytePattern = Data([255, 216])
+        var imageData = Data()
+        var isFirstFrame = true
 
-            do {
-                for try await byte in byteStream {
-                    imageData.append(byte)
+        logger.debug("Starting to process MJPEG byte stream")
 
-                    if imageData.starts(with: streamImageInitialBytePattern), let image = UIImage(data: imageData) {
-                        await MainActor.run {
-                            if self.mainImageView?.image == nil {
-                                let aspectRatio = image.size.width / image.size.height
-                                self.activityIndicator.isHidden = true
-                                self.updateAspectRatio(forView: self.mainImageView, aspectRatio: aspectRatio)
-                                Task {
-                                    try? await Task.sleep(nanoseconds: 10_000_000) // 10ms delay
-                                    self.didLoad?()
-                                }
-                            }
-                            self.mainImageView?.image = image
-                        }
-                        imageData = Data() // Reset for the next image
-                    }
+        do {
+            for try await byte in byteStream {
+                guard !Task.isCancelled else {
+                    logger.debug("MJPEG stream task was cancelled")
+                    return
                 }
-            } catch {
-                logger.error("Failed to process MJPEG stream: \(error.localizedDescription)")
+
+                imageData.append(byte)
+
+                if imageData.count <= 50 {
+                    logger.debug("Received bytes (\(imageData.count)): \(imageData.prefix(50).map { String(format: "%02x", $0) }.joined(separator: " "))")
+                }
+
+                if imageData.starts(with: streamImageInitialBytePattern), let image = UIImage(data: imageData) {
+                    logger.debug("Successfully decoded MJPEG frame, size: \(image.size.width)x\(image.size.height)")
+
+                    await MainActor.run { [weak self] in
+                        guard let self else { return }
+
+                        if isFirstFrame {
+                            let aspectRatio = image.size.width / image.size.height
+                            activityIndicator.isHidden = true
+                            updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
+                            isFirstFrame = false
+                            didLoad?()
+                        }
+                        mainImageView?.image = image
+                    }
+                    imageData = Data()
+                }
+            }
+        } catch is CancellationError {
+            logger.debug("MJPEG stream was cancelled")
+        } catch {
+            logger.error("Failed to process MJPEG stream: \(error.localizedDescription)")
+            await MainActor.run { [weak self] in
+                self?.activityIndicator.isHidden = true
+                self?.activityIndicator.stopAnimating()
             }
         }
     }
