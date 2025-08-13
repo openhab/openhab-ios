@@ -17,6 +17,7 @@ import Kingfisher
 import OpenHABCore
 import os.log
 import SDWebImageSVGCoder
+import SFSafeSymbols
 import SwiftMessages
 import UIKit
 @preconcurrency import UserNotifications
@@ -126,7 +127,11 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             SwiftMessages.show(config: config) {
                 let view = MessageView.viewFromNib(layout: .cardView)
                 view.configureTheme(.info)
-                view.configureContent(title: String(localized: "notification", comment: ""), body: message)
+                view.configureContent(
+                    title: String(localized: "notification", comment: ""),
+                    body: message,
+                    iconImage: UIImage(systemSymbol: .exclamationmark)
+                )
                 view.button?.setTitle(String(localized: "dismiss", comment: ""), for: .normal)
                 view.buttonTapHandler = { _ in SwiftMessages.hide() }
 
