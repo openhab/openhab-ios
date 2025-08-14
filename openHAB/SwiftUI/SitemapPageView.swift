@@ -34,7 +34,7 @@ struct SitemapPageView: View {
                         .disabled(true)
                 }
             } else {
-                ForEach(viewModel.relevantWidgets, id: \.id) { widget in
+                ForEach(viewModel.relevantWidgets) { widget in
                     Group {
                         if let linkedPage = widget.linkedPage {
                             NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: linkedPage.title))) {
