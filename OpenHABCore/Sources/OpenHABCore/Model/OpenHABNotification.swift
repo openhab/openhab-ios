@@ -112,7 +112,6 @@ public extension OpenHABNotification {
 /// Convenience method to convert a decoded value into a proper OpenHABNotification instance
 extension OpenHABNotification.CodingData {
     var openHABNotification: OpenHABNotification {
-        print("Passing through convenience")
         return OpenHABNotification(
             id: id,
             message: message,
