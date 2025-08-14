@@ -163,14 +163,22 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             return
         }
 
-        if activeTask != nil {
-            return
+        // Cancel any existing task before starting a new one
+        if let existingTask = activeTask {
+            existingTask.cancel()
+            activeTask = nil
         }
 
         bringSubviewToFront(mainImageView)
 
         activeTask = Task { [weak self] in
             guard let self else { return }
+
+            // Check if task was cancelled before starting work
+            guard !Task.isCancelled else {
+                logger.debug("MJPEG stream task was cancelled before starting")
+                return
+            }
 
             do {
                 guard let config = NetworkTracker.shared.activeConnection?.configuration else {
@@ -182,6 +190,8 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                 let (byteStream, response) = try await client.processStream(url: url)
                 logger.debug("Successfully got MJPEG stream response: \(response)")
                 await handleMJPEGStream(byteStream)
+            } catch is CancellationError {
+                logger.debug("MJPEG stream was cancelled during setup")
             } catch {
                 logger.error("Failed to start MJPEG stream: \(error.localizedDescription)")
                 await MainActor.run { [weak self] in
