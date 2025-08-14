@@ -27,6 +27,7 @@ public struct PushNotificationPayload: Sendable {
     public let actions: [NotificationAction]?
     public let mediaAttachmentUrl: URL?
     public let category: String?
+    public let icon: String?
 
     public var displayMessage: String {
         message ?? NSLocalizedString("message_not_decoded", comment: "")
@@ -42,6 +43,8 @@ public struct PushNotificationPayload: Sendable {
 
         // Handle both actionIdentifier and on-click for backward compatibility
         action = (userInfo["actionIdentifier"] as? String) ?? (userInfo["on-click"] as? String)
+
+        icon = userInfo["icon"] as? String
 
         cloudUserId = userInfo["userId"] as? String
         tag = userInfo["tag"] as? String
