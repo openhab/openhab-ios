@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fix for #924 (#925)
+
 - Fixes #921 (#922)
 
 - Moved handleMJPEGStream to be a proper instance method (#920)

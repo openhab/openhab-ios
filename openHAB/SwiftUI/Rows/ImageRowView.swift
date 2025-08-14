@@ -38,7 +38,6 @@ struct ImageRowView: View {
                 Text(labelText)
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
-
             switch widget.generateImageResult(rootUrl: viewModel.openHABRootUrl ?? "") {
             case let .embedded(data: data):
                 let provider = RawImageDataProvider(data: data, cacheKey: shouldCache ? widget.widgetId : "\(widget.widgetId)-\(forceRefreshKey)")

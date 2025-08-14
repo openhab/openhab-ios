@@ -135,6 +135,8 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         item?.stateDescription?.readOnly
     }
 
+    public var yAxisDecimalPattern: String?
+
     @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
 
     // Text prior to "["
@@ -309,6 +311,8 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
     public func generateImageResult(rootUrl: String,
                                     chartStyle: ChartStyle = .light) -> ImagePayload {
+        print("widget yAxisDecimalPattern: \(yAxisDecimalPattern ?? "")")
+
         switch type {
         case .chart:
             guard let url = Endpoint.chart(
@@ -319,7 +323,8 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
                 name: item?.name,
                 legend: legend,
                 theme: chartStyle,
-                forceAsItem: forceAsItem
+                forceAsItem: forceAsItem,
+                yAxisDecimalPattern: yAxisDecimalPattern
             ).url else {
                 logger.error("Failed to generate chart URL")
                 return .empty
@@ -381,7 +386,8 @@ public extension OpenHABWidget {
                      stateless: Bool? = nil,
                      staticIcon: Bool? = nil,
                      unit: String? = nil,
-                     pattern: String? = nil) {
+                     pattern: String? = nil,
+                     yAxisDecimalPattern: String? = nil) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -444,6 +450,7 @@ public extension OpenHABWidget {
         self.staticIcon = staticIcon
         self.unit = unit
         self.pattern = pattern
+        self.yAxisDecimalPattern = yAxisDecimalPattern
     }
 
     convenience init(icon: String, iconColor: String? = nil) {
@@ -597,7 +604,8 @@ extension OpenHABWidget {
             stateless: widget.stateless,
             staticIcon: widget.staticIcon,
             unit: widget.unit,
-            pattern: widget.pattern
+            pattern: widget.pattern,
+            yAxisDecimalPattern: widget.yAxisDecimalPattern
         )
     }
 }

@@ -48,7 +48,8 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                 name: widget.item?.name,
                 legend: widget.legend,
                 theme: chartStyle,
-                forceAsItem: widget.forceAsItem
+                forceAsItem: widget.forceAsItem,
+                yAxisDecimalPattern: widget.yAxisDecimalPattern
             ).url)
         case .image:
             if let item = widget.item {
