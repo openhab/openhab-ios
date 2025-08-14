@@ -98,7 +98,7 @@ public extension Endpoint {
     }
 
     // swiftlint:disable:next function_parameter_count
-    static func chart(rootUrl: String, period: String?, type: OpenHABItem.ItemType?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light, forceAsItem: Bool?) -> Endpoint {
+    static func chart(rootUrl: String, period: String?, type: OpenHABItem.ItemType?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light, forceAsItem: Bool?, yAxisDecimalPattern: String? = nil) -> Endpoint {
         let random = Int.random(in: 0 ..< 1000)
         var endpoint = Endpoint(
             baseURL: rootUrl,
@@ -121,6 +121,9 @@ public extension Endpoint {
         }
         if let legend {
             endpoint.queryItems.append(URLQueryItem(name: "legend", value: String(legend)))
+        }
+        if let yAxisDecimalPattern {
+            endpoint.queryItems.append(URLQueryItem(name: "yAxisDecimalPattern", value: yAxisDecimalPattern))
         }
         switch theme {
         case .dark:

@@ -97,6 +97,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var staticIcon: Bool?
     public var labelSource = ""
     public var switchSupport = false
+    public var yAxisDecimalPattern: String?
 
     @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
 
@@ -296,7 +297,8 @@ public extension OpenHABWidget {
                      unit: String?,
                      pattern: String?,
                      staticIcon: Bool?,
-                     labelSource: String?) {
+                     labelSource: String?,
+                     yAxisDecimalPattern: String? = nil) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -342,6 +344,7 @@ public extension OpenHABWidget {
         self.staticIcon = staticIcon ?? false
         self.labelSource = labelSource ?? ""
         stateEnumBinding = stateEnum
+        self.yAxisDecimalPattern = yAxisDecimalPattern
     }
 }
 
@@ -467,7 +470,8 @@ extension OpenHABWidget {
             unit: widget.unit,
             pattern: widget.pattern,
             staticIcon: widget.staticIcon,
-            labelSource: widget.labelSource
+            labelSource: widget.labelSource,
+            yAxisDecimalPattern: widget.yAxisDecimalPattern
         )
     }
 }
