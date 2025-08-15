@@ -1,8 +1,17 @@
 # Change Log
+
+## [Unreleased]
+
+## [Version 3.1.7, Build 59] - 2025-08-15Z
+
+- Fix for #927 (#928)
+- Improve Changelog
+
+# Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [Version 3.1.7, Build 59] - 2025-08-15Z
 
 - Fix for #924 (#925)
 - Fixes #921 (#922)
