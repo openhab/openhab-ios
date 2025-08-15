@@ -41,7 +41,7 @@ jobs:
           xcode-version: '16.4.0'
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           fetch-depth: 0
