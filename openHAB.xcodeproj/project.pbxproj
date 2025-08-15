@@ -190,6 +190,8 @@
 		DAF4581823DC4A050018B495 /* ImageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581723DC4A050018B495 /* ImageRow.swift */; };
 		DAF4581E23DC60020018B495 /* ImageRawRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581D23DC60020018B495 /* ImageRawRow.swift */; };
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
+		DAF5AA682E4F3A39004F18D7 /* EmbeddingRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF5AA672E4F3A38004F18D7 /* EmbeddingRowView.swift */; };
+		DAFF80982E4F47830084513E /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = DAFF80972E4F47830084513E /* SDWebImage */; };
 		DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */; };
 		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */; };
 		DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */; };
@@ -536,6 +538,7 @@
 		DAF4581723DC4A050018B495 /* ImageRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRow.swift; sourceTree = "<group>"; };
 		DAF4581D23DC60020018B495 /* ImageRawRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRawRow.swift; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
+		DAF5AA672E4F3A38004F18D7 /* EmbeddingRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddingRowView.swift; sourceTree = "<group>"; };
 		DAF6F4112C67E83B0083883E /* openapiCorrected.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = openapiCorrected.json; sourceTree = "<group>"; };
 		DAFD2FE62E0D96700059A1EB /* OsLogRewriter */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = OsLogRewriter; sourceTree = "<group>"; };
 		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectionUITableViewCell.swift; sourceTree = "<group>"; };
@@ -636,6 +639,7 @@
 				937E4485270B379900A98C26 /* DeviceKit in Frameworks */,
 				DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */,
 				DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */,
+				DAFF80982E4F47830084513E /* SDWebImage in Frameworks */,
 				DACE664A2C63B0760069E514 /* OpenAPIURLSession in Frameworks */,
 				93F8064A27AE7A2E0035A6B0 /* FlexColorPicker in Frameworks */,
 				DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */,
@@ -872,6 +876,7 @@
 				DA35E2CC2E1F96CA003987BB /* IconView.swift */,
 				DAE280092E35F5590028EE24 /* IconURLView.swift */,
 				DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */,
+				DAF5AA672E4F3A38004F18D7 /* EmbeddingRowView.swift */,
 				DA64ACA92DBEAD9000294F60 /* SitemapNavigationView.swift */,
 				DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */,
 				DAC949FF2E21A473007E67B7 /* Rows */,
@@ -1382,6 +1387,7 @@
 				DA9A7EFE2D66915900824156 /* SFSafeSymbols */,
 				DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */,
 				DAC949F92E219F0D007E67B7 /* CommonUI */,
+				DAFF80972E4F47830084513E /* SDWebImage */,
 			);
 			productName = openHAB;
 			productReference = DFB2622718830A3600D3244D /* openHAB.app */;
@@ -1475,6 +1481,7 @@
 				DACE664B2C63B0840069E514 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */,
 				DA3B75AC2C59729200E219AB /* XCRemoteSwiftPackageReference "SFSafeSymbols" */,
 				DA2C4FD32B4F573300D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */,
+				DAFF80962E4F47830084513E /* XCRemoteSwiftPackageReference "SDWebImage" */,
 			);
 			productRefGroup = DFB2622818830A3600D3244D /* Products */;
 			projectDirPath = "";
@@ -1787,6 +1794,7 @@
 				DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
+				DAF5AA682E4F3A39004F18D7 /* EmbeddingRowView.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
 				DA48001C2D837556009CF127 /* SitemapSettingsView.swift in Sources */,
@@ -2694,6 +2702,7 @@
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTS_MACCATALYST = NO;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -2760,6 +2769,7 @@
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore org.openhab.app";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
@@ -2954,6 +2964,14 @@
 				minimumVersion = 1.5.0;
 			};
 		};
+		DAFF80962E4F47830084513E /* XCRemoteSwiftPackageReference "SDWebImage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImage";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.21.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -3084,6 +3102,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DACE664B2C63B0840069E514 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */;
 			productName = OpenAPIRuntime;
+		};
+		DAFF80972E4F47830084513E /* SDWebImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DAFF80962E4F47830084513E /* XCRemoteSwiftPackageReference "SDWebImage" */;
+			productName = SDWebImage;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

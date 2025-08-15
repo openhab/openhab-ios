@@ -15,56 +15,23 @@ import SwiftUI
 
 struct SitemapPageView: View {
     @StateObject public var viewModel = SitemapPageViewModel()
-    @State private var showSelectionSheet = false
-    @State private var showInputAlert = false
-    @State private var selectedWidget: OpenHABWidget?
-    @State private var inputText = ""
 
     private var isLinkedPage: Bool {
         viewModel.isLinked
     }
 
     var body: some View {
-        List {
+        Group {
             if viewModel.isLoading, viewModel.relevantWidgets.isEmpty {
                 // Show skeleton/placeholder rows while loading
-                ForEach(placeholderWidgets, id: \.id) { widget in
+                List(placeholderWidgets, id: \.id) { widget in
                     RowViewFactory.view(for: widget)
                         .redacted(reason: .placeholder)
                         .disabled(true)
                 }
             } else {
-                ForEach(viewModel.relevantWidgets) { widget in
-                    Group {
-                        if let linkedPage = widget.linkedPage {
-                            NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: linkedPage.title))) {
-                                RowViewFactory.view(for: widget)
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.vertical, -6)
-                        } else if widget.type == .selection {
-                            Button {
-                                selectedWidget = widget
-                                showSelectionSheet = true
-                            } label: {
-                                RowViewFactory.view(for: widget)
-                            }
-                            .buttonStyle(.plain)
-                        } else if widget.type == .input {
-                            Button {
-                                selectedWidget = widget
-                                showInputAlert = true
-                            } label: {
-                                RowViewFactory.view(for: widget)
-                            }
-                            .buttonStyle(.plain)
-                        } else {
-                            RowViewFactory.view(for: widget)
-                                .onTapGesture {
-                                    viewModel.widgetTapped(widget)
-                                }
-                        }
-                    }
+                List(viewModel.relevantWidgets) { widget in
+                    EmbeddingRowView(widget: widget)
                 }
             }
         }
@@ -80,32 +47,6 @@ struct SitemapPageView: View {
         }
         .onChange(of: viewModel.networkTracker.activeConnection) { activeConnection in
             viewModel.handleActiveConnectionChange(activeConnection)
-        }
-        .sheet(isPresented: $showSelectionSheet) {
-            if let widget = selectedWidget {
-                SelectionView(
-                    labelText: widget.labelText,
-                    mappings: widget.mappingsOrItemOptions,
-                    selectionItemState: widget.item?.state
-                ) { selectedMappingIndex in
-                    let selectedMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
-                    viewModel.sendCommand(widget.item, commandToSend: selectedMapping.command)
-                    showSelectionSheet = false
-                }
-            }
-        }
-        .alert("Input", isPresented: $showInputAlert) {
-            if let widget = selectedWidget {
-                TextField("Enter value", text: $inputText)
-                Button("Cancel", role: .cancel) {}
-                Button("OK") {
-                    // Handle input submission
-                    showInputAlert = false
-                    if let item = widget.item {
-                        viewModel.sendCommand(item, commandToSend: inputText)
-                    }
-                }
-            }
         }
         .alert("Error", isPresented: .constant(viewModel.error != nil), actions: {
             Button("OK", role: .cancel) {}

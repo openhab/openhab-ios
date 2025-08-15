@@ -45,15 +45,7 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
     init() {
         let viewModel = SitemapPageViewModel()
         self.viewModel = viewModel
-        super.init(rootView: SitemapNavigationView(viewModel: viewModel, onShowSideMenu: {}))
-    }
-
-    func setRootViewController(_ rootViewController: OpenHABRootViewController) {
-        self.rootViewController = rootViewController
-        // Update the closure after initialization
-        rootView = SitemapNavigationView(viewModel: viewModel) { [weak self] in
-            self?.rootViewController?.showSideMenu()
-        }
+        super.init(rootView: SitemapNavigationView(viewModel: viewModel) {})
     }
 
     @available(*, unavailable)
@@ -65,6 +57,14 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
         super.viewDidLoad()
         // Hide UIKit navigation bar since SwiftUI now handles navigation
         navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+
+    func setRootViewController(_ rootViewController: OpenHABRootViewController) {
+        self.rootViewController = rootViewController
+        // Update the closure after initialization
+        rootView = SitemapNavigationView(viewModel: viewModel) { [weak self] in
+            self?.rootViewController?.showSideMenu()
+        }
     }
 
     func getSitemapTitle() -> String {

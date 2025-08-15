@@ -12,8 +12,6 @@
 @preconcurrency import Foundation
 import os
 
-private let logger = Logger(subsystem: "org.openhab", category: "HTTPClient")
-
 public enum HTTPClientError: Error {
     case serverTrustEvaluationFailed(reason: String)
     case noDataforItem
@@ -57,6 +55,8 @@ public enum CertificateEvaluateResult: Sendable {
 }
 
 actor CertificateStore {
+    private let logger = Logger(subsystem: "org.openhab", category: "CertificateStore")
+
     private var trustedCertificates: [String: Data] = [:]
 
     private func getPersistencePath() -> URL {

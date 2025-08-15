@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
+@preconcurrency import Combine
 import OpenAPIRuntime
 import OpenHABCore
 import os.log
@@ -239,13 +239,6 @@ class SitemapPageViewModel: ObservableObject {
         }
     }
 
-    func widgetTapped(_ widget: OpenHABWidget) {
-        if let linkedPage = widget.linkedPage {
-            // Push a new view (handled in the SwiftUI view)
-        }
-        // handle other widget types
-    }
-
     @MainActor
     func pushSitemap(name: String, path: String?) async {
         defaultSitemap = name
@@ -369,7 +362,7 @@ class SitemapPageViewModel: ObservableObject {
     }
 }
 
-extension Published.Publisher {
+extension Published.Publisher where Output: Sendable {
     func stream() -> AsyncStream<Output> {
         AsyncStream { continuation in
             let cancellable = self.sink { value in
