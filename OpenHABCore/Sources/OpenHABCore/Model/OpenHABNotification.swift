@@ -11,19 +11,31 @@
 
 import Foundation
 
-public struct OpenHABNotification: Identifiable, Hashable, Sendable {
-    public struct Payload: Hashable, Sendable {
-        public let onClick: String?
-        public let referenceId: String?
-        public let icon: String?
-        public let mediaAttachmentURL: URL?
-        public let tag: String?
-        public let type: String?
-        public let message: String?
-        public let title: String?
-        public let userId: String?
-    }
+public struct Payload: Hashable, Sendable {
+    public let onClick: String?
+    public let referenceId: String?
+    public let icon: String?
+    public let mediaAttachmentURL: URL?
+    public let tag: String?
+    public let type: String?
+    public let message: String?
+    public let title: String?
+    public let userId: String?
 
+    public init(onClick: String? = nil, referenceId: String? = nil, icon: String? = nil, mediaAttachmentURL: URL? = nil, tag: String? = nil, type: String? = nil, message: String? = nil, title: String? = nil, userId: String? = nil) {
+        self.onClick = onClick
+        self.referenceId = referenceId
+        self.icon = icon
+        self.mediaAttachmentURL = mediaAttachmentURL
+        self.tag = tag
+        self.type = type
+        self.message = message
+        self.title = title
+        self.userId = userId
+    }
+}
+
+public struct OpenHABNotification: Identifiable, Hashable, Sendable {
     // MARK: - Public properties (domain model)
 
     public let id: String
@@ -72,7 +84,7 @@ public extension OpenHABNotification {
             case v = "__v"
         }
 
-        public struct Payload: Decodable {
+        public struct PayloadInternal: Decodable {
             // swiftlint:disable nesting
             private enum CodingKeys: String, CodingKey {
                 case onClick = "on-click"
@@ -103,7 +115,7 @@ public extension OpenHABNotification {
         public let message: String?
         public let icon: String?
         public let severity: String?
-        public let payload: Payload?
+        public let payload: PayloadInternal?
         public let created: Date?
         public let v: Int
     }
@@ -112,13 +124,13 @@ public extension OpenHABNotification {
 /// Convenience method to convert a decoded value into a proper OpenHABNotification instance
 extension OpenHABNotification.CodingData {
     var openHABNotification: OpenHABNotification {
-        return OpenHABNotification(
+        OpenHABNotification(
             id: id,
             message: message,
             icon: icon,
             severity: severity,
             payload: payload.map {
-                OpenHABNotification.Payload(
+                Payload(
                     onClick: $0.onClick,
                     referenceId: $0.referenceId,
                     icon: $0.icon,

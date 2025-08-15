@@ -24,27 +24,36 @@ struct NotificationRow: View {
     @State var connection: ConnectionInfo
 
     var body: some View {
-        HStack {
+        HStack(alignment: .top, spacing: 12)  {
             KFImage(iconUrl)
                 .withOpenHABCredentials(for: connection)
                 .placeholder {
                     Image("openHABIcon").resizable()
                 }
+                .setProcessor(OpenHABImageProcessor())
+                .fade(duration: 0.25)
                 .resizable()
-                .frame(width: 40, height: 40)
-                .clipShape(.rect(cornerRadius: 8))
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 24, height: 24)
+                .id(iconUrl?.absoluteString ?? "")
             VStack(alignment: .leading) {
-                Text(notification.message ?? "")
-                    .font(.body)
-                if let timeStamp = notification.created {
-                    Text(dateString(from: timeStamp))
-                        .font(.caption)
-                        .foregroundStyle(.gray)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(notification.message ?? "")
+                        .font(.body)
+                    if let timeStamp = notification.created {
+                        Text(dateString(from: timeStamp))
+                            .font(.caption)
+                            .foregroundStyle(.gray)
+                    }
                 }
-                Text(notification.payload?.tag ?? "")
+                HStack {
+                    Spacer()
+                    Text(notification.payload?.tag ?? "")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
-
         .padding(.vertical, 8)
     }
 
@@ -92,6 +101,7 @@ struct NotificationsViewPreview: View {
                     id: UUID().uuidString,
                     message: "Preview Notification 1",
                     icon: "sun",
+                    payload: Payload(tag: "test1"),
                     created: .now,
                     v: 0
                 ),

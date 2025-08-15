@@ -145,7 +145,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         }
 
         var iconImage = UIImage(systemSymbol: .exclamationmark)
-        if let rootUrl = NetworkTracker.shared.activeConnection?.configuration.url,
+        if let rootUrl = MainActorNetworkTracker.shared.activeConnection?.configuration.url,
            let url = Endpoint.icon(rootUrl: rootUrl, version: 2, icon: payload.icon, state: nil, iconType: .svg, iconColor: "", staticIcon: false)?.url {
             do {
                 let fetcher = OpenHABImageFetcher()
