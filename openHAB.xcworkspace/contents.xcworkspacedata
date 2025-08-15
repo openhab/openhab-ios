@@ -7,7 +7,4 @@
    <FileRef
       location = "group:openHAB.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:NetworkTrackerViewModel.swift">
-   </FileRef>
 </Workspace>
