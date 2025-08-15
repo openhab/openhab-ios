@@ -85,12 +85,13 @@ public extension String {
 
     func parseAsBool() -> Bool {
         if self == "ON" { return true }
-        if let brightness = parseAsBrightness() { return brightness != 0 }
-        if let decimalValue = Int(self) {
-            return decimalValue > 0
-        } else {
-            return false
+        // Try to parse as Float first
+        if let floatValue = Float(self) {
+            return floatValue > 0
         }
+        if let brightness = parseAsBrightness() { return brightness != 0 }
+        // Fallback
+        return false
     }
 
     func parseAsNumber(format: String? = nil) -> NumberState {

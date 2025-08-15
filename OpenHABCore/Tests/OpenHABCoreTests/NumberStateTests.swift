@@ -56,6 +56,7 @@ final class NumberStateTests: XCTestCase {
         XCTAssertEqual("4,3,1".parseAsBool(), true)
         XCTAssertEqual("1".parseAsBool(), true)
         XCTAssertEqual("0".parseAsBool(), false)
+        XCTAssertEqual("10.1233424".parseAsBool(), true)
         XCTAssertEqual("ON".parseAsNumber(), NumberState(value: 100.0))
         XCTAssertEqual("OFF".parseAsNumber(), NumberState(value: 0.0))
         XCTAssertEqual("24.4 °F".parseAsNumber(), NumberState(value: 24.4, unit: "°F", format: nil))
