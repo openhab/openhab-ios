@@ -7,11 +7,7 @@
 - Fix for #927 (#928)
 - Improve Changelog
 
-# Change Log
-All notable changes to this project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
-
-## [Version 3.1.7, Build 59] - 2025-08-15Z
+## [Version 3.1.6, Build 58] - 2025-08-14Z
 
 - Fix for #924 (#925)
 - Fixes #921 (#922)
