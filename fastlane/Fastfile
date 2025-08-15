@@ -182,8 +182,9 @@ platform :ios do
             merge_commit_filtering: 'exclude_merges'
         )
 
+        
         # Write git commits to CHANGELOG.md
-        File.write('../CHANGELOG.md', "# Changelog\n\n## Unreleased\n\n#{comments}\n\n#{File.read('../CHANGELOG.md').gsub(/^# Changelog\s*\n\n## Unreleased.*?\n\n/m, '') rescue ''}")
+        File.write('../CHANGELOG.md', "# Change Log\n\n## [Unreleased]\n\n#{comments}\n\n#{File.read('../CHANGELOG.md').gsub(/^# Change Log\s*\n\n## \[Unreleased\].*?\n\n/m, '') rescue ''}")
 
         changelog = read_changelog # Read changelog
 
