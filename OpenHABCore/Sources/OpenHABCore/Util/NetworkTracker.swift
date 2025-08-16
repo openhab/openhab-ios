@@ -108,6 +108,21 @@ public class MainActorNetworkTracker: ObservableObject {
     public static let shared = MainActorNetworkTracker()
     @Published public var activeConnection: ConnectionInfo?
     @Published public var status: NetworkStatus = .connecting
+
+    private init() {
+        Task {
+            for await connection in await NetworkTracker.shared.activeConnectionStream() {
+                activeConnection = connection
+                status = await NetworkTracker.shared.status
+            }
+        }
+        Task {
+            for await trackerStatus in await NetworkTracker.shared.statusStream() {
+                activeConnection = await NetworkTracker.shared.activeConnection
+                status = trackerStatus
+            }
+        }
+    }
 }
 
 public actor CertificateManagers {
@@ -118,25 +133,9 @@ public actor CertificateManagers {
 public actor NetworkTracker {
     public static let shared = NetworkTracker()
 
-    @Published public private(set) var activeConnection: ConnectionInfo? {
-        didSet {
-            // NetworkTracker does not always have to run on the main thread,
-            // but some UI code needs updates about the active connection, so we transfer it over
-            Task { @MainActor in
-                await MainActorNetworkTracker.shared.activeConnection = activeConnection
-            }
-        }
-    }
+    @Published public private(set) var activeConnection: ConnectionInfo?
 
-    public private(set) var status: NetworkStatus = .connecting {
-        didSet {
-            // NetworkTracker does not always have to run on the main thread,
-            // but some UI code needs updates about the active connection, so we transfer it over
-            Task { @MainActor in
-                await MainActorNetworkTracker.shared.status = status
-            }
-        }
-    }
+    @Published public private(set) var status: NetworkStatus = .connecting
 
     private var pathMonitor: any NWPathMonitoring
     private var connectionPool: ConnectionPool
@@ -437,6 +436,15 @@ public extension NetworkTracker {
     func activeConnectionStream() -> AsyncStream<ConnectionInfo?> {
         AsyncStream { continuation in
             let cancellable = self.$activeConnection
+                .sink { continuation.yield($0) }
+
+            continuation.onTermination = { [cancellable] _ in cancellable.cancel() }
+        }
+    }
+
+    func statusStream() -> AsyncStream<NetworkStatus> {
+        AsyncStream { continuation in
+            let cancellable = self.$status
                 .sink { continuation.yield($0) }
 
             continuation.onTermination = { [cancellable] _ in cancellable.cancel() }

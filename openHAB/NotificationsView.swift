@@ -15,8 +15,6 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-extension MainActorNetworkTracker: NetworkTracking {}
-
 typealias NotificationLoader = () async -> [OpenHABNotification]
 
 struct NotificationRow: View {
@@ -164,6 +162,8 @@ extension NotificationsView where Tracker == MainActorNetworkTracker {
         }
     }
 }
+
+extension MainActorNetworkTracker: NetworkTracking {}
 
 #if DEBUG
 extension ConnectionInfo {
