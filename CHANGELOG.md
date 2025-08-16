@@ -1,21 +1,20 @@
-# Changelog
+# Change Log
 
-## Unreleased
+## [Unreleased]
+
+## [Version 3.1.7, Build 59] - 2025-08-15Z
+
+- Fix for #927 (#928)
+- Improve Changelog
+
+## [Version 3.1.6, Build 58] - 2025-08-14Z
 
 - Fix for #924 (#925)
-
 - Fixes #921 (#922)
-
 - Moved handleMJPEGStream to be a proper instance method (#920)
 - Commit changelog to CHANGELOG.md (#919)
 - Fix for video sizing (#918)
 - More logging for Video cells
-
-# Change Log
-All notable changes to this project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
-
-## [Unreleased]
 
 ## [Version 3.0.7, Build 29] - 2024-10-31Z
 - Integration of new watch app

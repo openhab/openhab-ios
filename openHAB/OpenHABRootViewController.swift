@@ -497,7 +497,7 @@ class OpenHABRootViewController: UIViewController {
 
         logger.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
         if let cloudUserId, let targetHome = Preferences.storedHome(forCloudUserId: cloudUserId), Preferences.currentHomePreferences.remoteConnectionConfig.cloudUserId != cloudUserId {
-            // if we need to switch homes, disconnnect the tracking fist,and wait for the tracker to start again with the updated preferences
+            // if we need to switch homes, disconnnect the tracking first, and wait for the tracker to start again with the updated preferences
             Task {
                 await NetworkTracker.shared.stopTracking()
                 logger.info("Switching to home \(targetHome.id)")

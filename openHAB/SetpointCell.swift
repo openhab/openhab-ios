@@ -34,7 +34,12 @@ class SetpointCell: GenericUITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        customDetailTextLabel.font = UIFont.monospacedDigitSystemFont(ofSize: customDetailTextLabel.font.pointSize, weight: .regular)
+        Task { @MainActor in
+            customDetailTextLabel.font = UIFont.monospacedDigitSystemFont(
+                ofSize: customDetailTextLabel.font.pointSize,
+                weight: .regular
+            )
+        }
     }
 
     override func displayWidget() {
