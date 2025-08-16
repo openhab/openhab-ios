@@ -151,11 +151,13 @@ struct ScreenSaverSwiftUIView: View {
             let randomY = edgeMargin + estimatedHeight / 2 + CGFloat.random(in: 0 ... availableHeight)
             return CGPoint(x: randomX, y: randomY)
         } else {
-            let safeWidth = max(size.width - estimatedWidth, 0)
-            let safeHeight = max(size.height - estimatedHeight, 0)
-            let fallbackX = estimatedWidth / 2 + (safeWidth > 0 ? CGFloat.random(in: 0 ... safeWidth) : 0)
-            let fallbackY = estimatedHeight / 2 + (safeHeight > 0 ? CGFloat.random(in: 0 ... safeHeight) : 0)
-            return CGPoint(x: min(fallbackX, size.width / 2), y: min(fallbackY, size.height / 2))
+            // Fallback for small screens - use full screen area with minimum margins
+            let minMargin: CGFloat = 10
+            let safeWidth = max(size.width - minMargin * 2, size.width * 0.1)
+            let safeHeight = max(size.height - minMargin * 2, size.height * 0.1)
+            let fallbackX = minMargin + CGFloat.random(in: 0 ... safeWidth)
+            let fallbackY = minMargin + CGFloat.random(in: 0 ... safeHeight)
+            return CGPoint(x: fallbackX, y: fallbackY)
         }
     }
 }
@@ -167,4 +169,5 @@ struct ScreenSaverSwiftUIView: View {
         showsSeconds: false,
         uses24HourTime: true
     ))
+    .frame(width: 400, height: 300)
 }
