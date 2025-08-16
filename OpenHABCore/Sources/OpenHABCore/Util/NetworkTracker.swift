@@ -190,12 +190,14 @@ public actor NetworkTracker {
         // Utilize for await to listen for changes in $activeConnection
         // $activeConnection.values is an AsyncSequence, allowing you to iterate over its values asynchronously.
         // Wait until a non-nil value is received
-        for await connection in $activeConnection.values {
-            if let connection {
-                return connection
+        return await withTimeout(timeout: timeout) {
+            for await connection in await self.$activeConnection.values {
+                if let connection {
+                    return connection
+                }
             }
+            return nil
         }
-        return nil
     }
 
     public func restartTracking() {
