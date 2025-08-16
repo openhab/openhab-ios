@@ -117,7 +117,7 @@ final class ScreenSaverManager: NSObject {
         hostVC.setNeedsStatusBarAppearanceUpdate()
 
         let swiftUIView: any View
-        if #available(iOS 17.0, *) {
+        if #available(iOS 16.0, *) {
             swiftUIView = ScreenSaverSwiftUIView(configuration: configuration)
         } else {
             // Fallback to UIKit version for older iOS

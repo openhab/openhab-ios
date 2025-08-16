@@ -9,17 +9,22 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import os.log
 import SwiftUI
 
 struct ScreenSaverSwiftUIView: View {
+    // Constants for text dimension estimation
+    private static let timeTextWidthMultiplier: CGFloat = 4.0
+    private static let dateTextHeightMultiplier: CGFloat = 1.4
+
     private let logger = Logger(subsystem: "org.openhab", category: "ScreenSaverView")
 
     let configuration: ScreenSaverConfiguration
 
     @State private var currentPosition: CGPoint = .zero
     @State private var screenSize: CGSize = .zero
-    @State private var movementTimer: Timer?
+    @State private var movementTimerPublisher: Timer.TimerPublisher?
 
     var body: some View {
         GeometryReader { geometry in
@@ -57,6 +62,11 @@ struct ScreenSaverSwiftUIView: View {
             .onChange(of: geometry.size) { newSize in
                 screenSize = newSize
                 currentPosition = calculateRandomPosition(for: newSize)
+            }
+            .onReceive(movementTimerPublisher ?? Timer.publish(every: 1000, on: .main, in: .common)) { _ in
+                withAnimation(.easeInOut(duration: configuration.fadeDuration)) {
+                    currentPosition = calculateRandomPosition(for: screenSize)
+                }
             }
         }
     }
@@ -112,18 +122,12 @@ struct ScreenSaverSwiftUIView: View {
 
     private func startMovementTimer(for size: CGSize) {
         stopMovementTimer()
-        movementTimer = Timer.scheduledTimer(withTimeInterval: configuration.movementInterval, repeats: true) { _ in
-            Task { @MainActor in
-                withAnimation(.easeInOut(duration: configuration.fadeDuration)) {
-                    currentPosition = calculateRandomPosition(for: size)
-                }
-            }
-        }
+        movementTimerPublisher = Timer.publish(every: configuration.movementInterval, on: .main, in: .common)
+        _ = movementTimerPublisher?.connect()
     }
 
     private func stopMovementTimer() {
-        movementTimer?.invalidate()
-        movementTimer = nil
+        movementTimerPublisher = nil
     }
 
     private func calculateRandomPosition(for size: CGSize) -> CGPoint {
@@ -136,8 +140,8 @@ struct ScreenSaverSwiftUIView: View {
         // Estimate label size (this is approximate since we can't measure exactly in SwiftUI)
         let shortSide = min(size.width, size.height)
         let timeFontSize = max(shortSide * configuration.timeFontSizeRatio, 48)
-        let estimatedWidth = timeFontSize * 4 // rough estimate for time text width
-        let estimatedHeight = timeFontSize * (configuration.showsDate ? 1.4 : 1.0) // account for date if shown
+        let estimatedWidth = timeFontSize * Self.timeTextWidthMultiplier
+        let estimatedHeight = timeFontSize * (configuration.showsDate ? Self.dateTextHeightMultiplier : 1.0)
 
         let availableWidth = size.width - estimatedWidth - edgeMargin * 2
         let availableHeight = size.height - estimatedHeight - edgeMargin * 2
