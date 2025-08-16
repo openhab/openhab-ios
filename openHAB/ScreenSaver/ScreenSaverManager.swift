@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import os.log
+import SwiftUI
 import UIKit
 
 private class ScreenSaverHostingViewController: UIViewController {
@@ -115,35 +116,71 @@ final class ScreenSaverManager: NSObject {
 
         hostVC.setNeedsStatusBarAppearanceUpdate()
 
-        let saver = ScreenSaverView(configuration: configuration)
-        saver.translatesAutoresizingMaskIntoConstraints = false
-        hostVC.view.addSubview(saver)
+        let swiftUIView: any View
+        if #available(iOS 17.0, *) {
+            swiftUIView = ScreenSaverSwiftUIView(configuration: configuration)
+        } else {
+            // Fallback to UIKit version for older iOS
+            let saver = ScreenSaverView(configuration: configuration)
+            saver.translatesAutoresizingMaskIntoConstraints = false
+            hostVC.view.addSubview(saver)
+            NSLayoutConstraint.activate([
+                saver.leadingAnchor.constraint(equalTo: hostVC.view.leadingAnchor),
+                saver.trailingAnchor.constraint(equalTo: hostVC.view.trailingAnchor),
+                saver.topAnchor.constraint(equalTo: hostVC.view.topAnchor),
+                saver.bottomAnchor.constraint(equalTo: hostVC.view.bottomAnchor)
+            ])
+
+            attachGestureRecognizers(to: overlay)
+
+            saver.alpha = 0
+            UIView.animate(withDuration: 0.3) {
+                saver.alpha = 1.0
+            } completion: { _ in
+                saver.startAnimation()
+            }
+
+            saverView = saver
+            overlayWindow = overlay
+            applyDimming()
+            return
+        }
+
+        let hostingController = UIHostingController(rootView: AnyView(swiftUIView))
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+
+        hostVC.addChild(hostingController)
+        hostVC.view.addSubview(hostingController.view)
+        hostingController.didMove(toParent: hostVC)
+
         NSLayoutConstraint.activate([
-            saver.leadingAnchor.constraint(equalTo: hostVC.view.leadingAnchor),
-            saver.trailingAnchor.constraint(equalTo: hostVC.view.trailingAnchor),
-            saver.topAnchor.constraint(equalTo: hostVC.view.topAnchor),
-            saver.bottomAnchor.constraint(equalTo: hostVC.view.bottomAnchor)
+            hostingController.view.leadingAnchor.constraint(equalTo: hostVC.view.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: hostVC.view.trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: hostVC.view.topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: hostVC.view.bottomAnchor)
         ])
 
         // wake up if the user taps anywhere
         attachGestureRecognizers(to: overlay)
 
-        saver.alpha = 0
+        hostingController.view.alpha = 0
         UIView.animate(withDuration: 0.3) {
-            saver.alpha = 1.0
-        } completion: { _ in
-            saver.startAnimation()
+            hostingController.view.alpha = 1.0
         }
 
-        saverView = saver
+        // Store reference for SwiftUI case (nil for UIKit fallback which handles its own storage)
+        saverView = nil
         overlayWindow = overlay
         applyDimming()
     }
 
     private func dismissSaverIfNeeded() {
-        guard let saver = saverView else { return }
+        guard overlayWindow != nil else { return }
         logger.debug("Dismissing screen saver")
-        saver.stopAnimation()
+        if let saver = saverView {
+            saver.stopAnimation()
+        }
         if configuration.enablesAutoDimming {
             if configuration.restoresBrightness {
                 restoreBrightnessIfNeeded()
@@ -152,16 +189,15 @@ final class ScreenSaverManager: NSObject {
                 UIScreen.main.brightness = target
             }
         }
+        // Animate dismissal for the overlay window
         UIView.animate(withDuration: 0.2) {
-            saver.alpha = 0
+            self.overlayWindow?.alpha = 0
         } completion: { _ in
-            saver.removeFromSuperview()
+            // Clean up overlay window
+            self.overlayWindow?.isHidden = true
+            self.overlayWindow = nil
         }
         saverView = nil
-
-        // Tear down overlay window
-        overlayWindow?.isHidden = true
-        overlayWindow = nil
     }
 
     private func applyDimming() {
