@@ -10,7 +10,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v5
       - name: Cache BuildTools
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           cache-name: cache-buildtools-dependencies
         with:
