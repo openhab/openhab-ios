@@ -106,7 +106,7 @@ public struct HomePreferences: Codable, Sendable, Equatable {
     }
 }
 
-public enum Preferences {
+public actor Preferences {
     /// the currently applied settings set from storedHomes
     @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: Preferences.activeHomeId))
     public private(set) static var currentHomePreferences: HomePreferences
@@ -206,7 +206,7 @@ extension Preferences {
         }
     }
 
-    fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
+    fileprivate static func preferenceChanged<T: Sendable>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
         guard let sanitized = sanitize(newValue) else {
             logger.debug("Preference \(key) new value \(String(describing: newValue)) could not be sanitized, will be ignored")
             return
@@ -217,9 +217,9 @@ extension Preferences {
             return
         }
         logger.debug("Preference \(key) will be changed to value \(String(describing: newValue))")
-        sharedDefaults.set(convertedValue, forKey: key)
+        sharedDefaults.set(convertedValue, forKey: key).self
 
-        DispatchQueue.main.async { [subject] in
+        Task { @MainActor in
             subject.send(sanitized)
         }
     }
