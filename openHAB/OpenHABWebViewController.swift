@@ -98,7 +98,7 @@ class OpenHABWebViewController: OpenHABViewController {
         navigationController?.setNavigationBarHidden(hideNavBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
         parent?.navigationItem.title = "Main View"
-        NetworkTracker.shared.$activeConnection
+        MainActorNetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
             .sink { activeConnection in
                 if let activeConnection {
@@ -111,7 +111,7 @@ class OpenHABWebViewController: OpenHABViewController {
             }
             .store(in: &trackerCancellables)
 
-        NetworkTracker.shared.$status
+        MainActorNetworkTracker.shared.$status
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.logger.info("OpenHABWebViewController tracker status \(status.rawValue)")

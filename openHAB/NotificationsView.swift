@@ -15,6 +15,8 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
+extension MainActorNetworkTracker: NetworkTracking {}
+
 typealias NotificationLoader = () async -> [OpenHABNotification]
 
 struct NotificationRow: View {
@@ -74,13 +76,8 @@ struct NotificationRow: View {
 
 #if DEBUG
 
-protocol NetworkTracking: Actor {
-    var activeConnection: ConnectionInfo? { get }
-}
-
-extension NetworkTracker: NetworkTracking {}
-
-actor MockNetworkTracker: NetworkTracking, ObservableObject {
+@MainActor
+class MockNetworkTracker: NetworkTracking, ObservableObject {
     @Published var activeConnection: ConnectionInfo?
 
     init(connection: ConnectionInfo?) {
@@ -109,7 +106,13 @@ struct NotificationsViewPreview: View {
         }
     }
 }
+
 #endif
+
+@MainActor
+protocol NetworkTracking {
+    var activeConnection: ConnectionInfo? { get }
+}
 
 struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: ObservableObject {
     @ObservedObject var networkTracker: Tracker
@@ -134,9 +137,9 @@ struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: Observab
     }
 }
 
-extension NotificationsView where Tracker == NetworkTracker {
+extension NotificationsView where Tracker == MainActorNetworkTracker {
     init(notifications: [OpenHABNotification] = []) {
-        networkTracker = NetworkTracker.shared
+        networkTracker = MainActorNetworkTracker.shared
         _notifications = State(initialValue: notifications)
         loadNotifications = {
             let logger = Logger(subsystem: "org.openhab.app", category: "NotificationView")

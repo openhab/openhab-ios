@@ -120,7 +120,9 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func startSSEListening() {
-        ItemEventStream.startMonitoringNetwork()
+        Task {
+            await ItemEventStream.startMonitoringNetwork()
+        }
         print("Starting SSE")
         streamTask = Task { [weak self] in
             guard let self else { return }
@@ -245,7 +247,7 @@ class OpenHABRootViewController: UIViewController {
             }
             .store(in: &cancellables)
 
-        NetworkTracker.shared.$activeConnection
+        MainActorNetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
             .sink { [weak self] activeConnection in
                 if let activeConnection {
@@ -277,7 +279,7 @@ class OpenHABRootViewController: UIViewController {
 
         SideMenuManager.default.rightMenuNavigationController?.settings = settings
 
-        let networkTracker = NetworkTracker.shared
+        let networkTracker = MainActorNetworkTracker.shared
         let drawerView = DrawerView { mode in
             self.handleDismiss(mode: mode)
         }
