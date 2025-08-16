@@ -128,7 +128,7 @@ public actor NetworkTracker {
         }
     }
 
-    @Published public private(set) var status: NetworkStatus = .connecting {
+    public private(set) var status: NetworkStatus = .connecting {
         didSet {
             // NetworkTracker does not always have to run on the main thread,
             // but some UI code needs updates about the active connection, so we transfer it over
