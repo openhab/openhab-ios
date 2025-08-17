@@ -42,7 +42,7 @@ enum NotificationServiceError: Error {
     }
 }
 
-class NotificationService: UNNotificationServiceExtension {
+actor NotificationServiceHandler {
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
     var cancellables = Set<AnyCancellable>()
@@ -50,7 +50,7 @@ class NotificationService: UNNotificationServiceExtension {
     var cloudUserId: String?
     let logger = Logger(subsystem: "org.openhab.network", category: "NotificationService")
 
-    override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+    func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         guard let bestAttemptContent else { return }
@@ -133,7 +133,7 @@ class NotificationService: UNNotificationServiceExtension {
         }
     }
 
-    override func serviceExtensionTimeWillExpire() {
+    func serviceExtensionTimeWillExpire() {
         logger.info("serviceExtensionTimeWillExpire")
         if let contentHandler, let bestAttemptContent {
             contentHandler(bestAttemptContent)
@@ -292,5 +292,23 @@ class NotificationService: UNNotificationServiceExtension {
         await tracker.startTracking(connectionConfigurations: connections)
         networkTracker = tracker
         return tracker
+    }
+}
+
+class NotificationService: UNNotificationServiceExtension {
+    private var handler = NotificationServiceHandler()
+
+    override func serviceExtensionTimeWillExpire() {
+        let handler = handler
+        Task {
+            await handler.serviceExtensionTimeWillExpire()
+        }
+    }
+
+    override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @Sendable @escaping (UNNotificationContent) -> Void) {
+        let handler = handler
+        Task {
+            await handler.didReceive(request, withContentHandler: contentHandler)
+        }
     }
 }
