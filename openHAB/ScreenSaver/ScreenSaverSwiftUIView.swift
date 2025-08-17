@@ -25,6 +25,7 @@ struct ScreenSaverSwiftUIView: View {
     @State private var currentPosition: CGPoint = .zero
     @State private var screenSize: CGSize = .zero
     @State private var movementTimerPublisher: Timer.TimerPublisher?
+    @State private var fadeOpacity: Double = 1.0
 
     var body: some View {
         GeometryReader { geometry in
@@ -48,6 +49,7 @@ struct ScreenSaverSwiftUIView: View {
                                 .foregroundColor(.white.opacity(alphaFactor))
                         }
                     }
+                    .opacity(fadeOpacity)
                     .position(currentPosition)
                 }
             }
@@ -64,8 +66,15 @@ struct ScreenSaverSwiftUIView: View {
                 currentPosition = calculateRandomPosition(for: newSize)
             }
             .onReceive(movementTimerPublisher ?? Timer.publish(every: 1000, on: .main, in: .common)) { _ in
-                withAnimation(.easeInOut(duration: configuration.fadeDuration)) {
+                let half = max(configuration.fadeDuration / 2.0, 0.01)
+                withAnimation(.easeInOut(duration: half)) {
+                    fadeOpacity = 0.0
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + half) {
                     currentPosition = calculateRandomPosition(for: screenSize)
+                    withAnimation(.easeInOut(duration: half)) {
+                        fadeOpacity = 1.0
+                    }
                 }
             }
         }
@@ -104,7 +113,7 @@ struct ScreenSaverSwiftUIView: View {
         if let fontName = configuration.fontName {
             return .custom(fontName, size: fontSize)
         } else {
-            return .system(size: fontSize, weight: .thin, design: .monospaced)
+            return .system(size: fontSize, weight: .thin)
         }
     }
 
