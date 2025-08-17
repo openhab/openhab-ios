@@ -109,15 +109,15 @@ public class MainActorNetworkTracker: ObservableObject {
     @Published public var activeConnection: ConnectionInfo?
     @Published public var status: NetworkStatus = .connecting
 
-    private init() {
+    public init(tracker: NetworkTracker = NetworkTracker.shared) {
         Task {
-            for await connection in await NetworkTracker.shared.activeConnectionStream() {
+            for await connection in await tracker.activeConnectionStream() {
                 activeConnection = connection
                 status = await NetworkTracker.shared.status
             }
         }
         Task {
-            for await trackerStatus in await NetworkTracker.shared.statusStream() {
+            for await trackerStatus in await tracker.statusStream() {
                 activeConnection = await NetworkTracker.shared.activeConnection
                 status = trackerStatus
             }
