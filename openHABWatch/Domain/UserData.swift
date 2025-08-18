@@ -88,7 +88,9 @@ final class UserData: ObservableObject {
             object: nil,
             queue: nil
         ) { _ in
-            NetworkTracker.shared.restartTracking()
+            Task { @MainActor in
+                await NetworkTracker.shared.restartTracking()
+            }
         }
 
         AppSettings.shared.$haveReceivedAppContext
