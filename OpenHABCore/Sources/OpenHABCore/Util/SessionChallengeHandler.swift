@@ -14,7 +14,7 @@ import os
 
 private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "org.openhab.app", category: "SessionChallenge")
 
-public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
     logger.info("onReceiveSessionTaskChallenge host: \(String(describing: challenge.protectionSpace.host))")
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
@@ -22,7 +22,9 @@ public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChall
     if challenge.previousFailureCount > 0 {
         return (.cancelAuthenticationChallenge, credential)
     } else if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
-        guard let configuration = NetworkTracker.shared.activeConnection?.configuration else { return (.cancelAuthenticationChallenge, credential) }
+        let networkTracker = NetworkTracker.shared
+        let activeConnection = await networkTracker.activeConnection
+        guard let configuration = activeConnection?.configuration else { return (.cancelAuthenticationChallenge, credential) }
         if challenge.protectionSpace.host == URL(string: configuration.url)?.host || challenge.protectionSpace.host == "home.myopenhab.org" {
             credential = URLCredential(user: configuration.username, password: configuration.password, persistence: .forSession)
             disposition = .useCredential
@@ -35,27 +37,28 @@ public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChall
 }
 
 public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+    logger.warning("onReceiveSessionChallenge is not implemented fully (see TODOs)")
     logger.info("onReceiveSessionChallenge host: \(String(describing: challenge.protectionSpace.host))")
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
-    var credential: URLCredential?
 
     switch challenge.protectionSpace.authenticationMethod {
     case NSURLAuthenticationMethodServerTrust:
         // TODO:
-        return await NetworkTracker.shared.serverCertificateManager.evaluateTrust(with: challenge)
+        return await CertificateManagers.serverCertificateManager.evaluateTrust(with: challenge)
     case NSURLAuthenticationMethodClientCertificate:
-        return NetworkTracker.shared.clientCertificateManager.evaluateTrust(with: challenge)
+        return CertificateManagers.clientCertificateManager.evaluateTrust(with: challenge)
     // attemptCredentialAuthentication
     default:
         if challenge.previousFailureCount > 0 {
             disposition = .cancelAuthenticationChallenge
         } else {
-            credential = NetworkTracker.shared.httpClient?.session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace)
-            if credential != nil {
-                disposition = .useCredential
-            }
+            // TODO: in the last version, the httpClient had never been set and always remained nil. Figure out if and how this worked and if it is still needed
+            // credential = await NetworkTracker.shared.httpClient?.session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace)
+            // if credential != nil {
+            //    disposition = .useCredential
+            // }
         }
-        return (disposition, credential)
+        return (disposition, nil)
     }
 }
 

@@ -181,7 +181,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         if url.isFileURL {
             logger.info("Loading Certificate")
-            let clientCertificateManager = NetworkTracker.shared.clientCertificateManager
+            let clientCertificateManager = CertificateManagers.clientCertificateManager
             Task { @MainActor in
                 await clientCertificateManager.startImportClientCertificate(url: url)
             }

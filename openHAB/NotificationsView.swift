@@ -72,7 +72,10 @@ struct NotificationRow: View {
     }
 }
 
-final class MockNetworkTracker: NetworkTracking, ObservableObject {
+#if DEBUG
+
+@MainActor
+class MockNetworkTracker: NetworkTracking, ObservableObject {
     @Published var activeConnection: ConnectionInfo?
 
     init(connection: ConnectionInfo?) {
@@ -80,7 +83,6 @@ final class MockNetworkTracker: NetworkTracking, ObservableObject {
     }
 }
 
-#if DEBUG
 struct NotificationsViewPreview: View {
     var body: some View {
         let mockTracker = MockNetworkTracker(connection: .mock)
@@ -102,7 +104,13 @@ struct NotificationsViewPreview: View {
         }
     }
 }
+
 #endif
+
+@MainActor
+protocol NetworkTracking {
+    var activeConnection: ConnectionInfo? { get }
+}
 
 struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: ObservableObject {
     @ObservedObject var networkTracker: Tracker
@@ -127,9 +135,9 @@ struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: Observab
     }
 }
 
-extension NotificationsView where Tracker == NetworkTracker {
+extension NotificationsView where Tracker == MainActorNetworkTracker {
     init(notifications: [OpenHABNotification] = []) {
-        networkTracker = NetworkTracker.shared
+        networkTracker = MainActorNetworkTracker.shared
         _notifications = State(initialValue: notifications)
         loadNotifications = {
             let logger = Logger(subsystem: "org.openhab.app", category: "NotificationView")
@@ -154,6 +162,8 @@ extension NotificationsView where Tracker == NetworkTracker {
         }
     }
 }
+
+extension MainActorNetworkTracker: NetworkTracking {}
 
 #if DEBUG
 extension ConnectionInfo {

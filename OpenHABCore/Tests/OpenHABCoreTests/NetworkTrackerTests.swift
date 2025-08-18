@@ -82,17 +82,28 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
     }
 }
 
-final class MockPathMonitor: NWPathMonitoring {
-    private var handler: ((Bool) async -> Void)?
-    var onStartMonitoring: (() -> Void)?
-
-    init(onStartMonitoring: (() -> Void)? = nil) {
-        self.onStartMonitoring = onStartMonitoring
+actor PathMonitor {
+    var handler: ((Bool) -> Void)?
+    func connectionUpdates() -> AsyncStream<Bool> {
+        AsyncStream { continuation in
+            handler = { connectionStatus in
+                continuation.yield(connectionStatus)
+            }
+        }
     }
 
+    func changeState(_ state: Bool) {
+        handler?(state)
+    }
+}
+
+final class MockPathMonitor: NWPathMonitoring {
+    private let monitor: PathMonitor = .init()
+
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
-        self.handler = handler
-        onStartMonitoring?()
+        for await connected in await monitor.connectionUpdates() {
+            await handler(connected)
+        }
     }
 
     func cancel() {
@@ -101,13 +112,14 @@ final class MockPathMonitor: NWPathMonitoring {
 
     /// Call this in your tests to simulate a connection status change
     func simulateConnection(isConnected: Bool) {
-        guard let handler else { return }
-        Task {
-            await handler(isConnected)
+        let monitor = monitor
+        Task.detached {
+            await monitor.changeState(isConnected)
         }
     }
 }
 
+@MainActor
 final class NetworkTrackerTests: XCTestCase {
     func testTrackerSetsConnectedStatusOnNetworkUp() async {
         let expectation = XCTestExpectation(description: "Status becomes .connected")
@@ -124,11 +136,13 @@ final class NetworkTrackerTests: XCTestCase {
         let mockPool = ConnectionPool { _ in mockService }
         let mockMonitor = MockPathMonitor()
 
-        let tracker = NetworkTracker(
+        let networkTracker = NetworkTracker(
             monitor: mockMonitor,
             connectionPool: mockPool,
             failureTracker: ConnectionFailureTracker()
         )
+
+        let tracker = MainActorNetworkTracker(tracker: networkTracker)
 
         var cancellables = Set<AnyCancellable>()
 
@@ -142,7 +156,7 @@ final class NetworkTrackerTests: XCTestCase {
             .store(in: &cancellables)
 
         // Start tracking with your mock config
-        await tracker.startTracking(connectionConfigurations: [config])
+        await networkTracker.startTracking(connectionConfigurations: [config])
 
         // Simulate the network becoming available
         mockMonitor.simulateConnection(isConnected: true)

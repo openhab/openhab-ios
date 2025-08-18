@@ -184,7 +184,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                 return
             }
             do {
-                guard let config = NetworkTracker.shared.activeConnection?.configuration else {
+                guard let config = MainActorNetworkTracker.shared.activeConnection?.configuration else {
                     logger.warning("No openHAB configuration found.")
                     throw HTTPClientError.noConfiguration
                 }
