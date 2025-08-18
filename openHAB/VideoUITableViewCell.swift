@@ -171,7 +171,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             activeTask = nil
         }
         // Increment the stream token for a new task
-        currentStreamToken &+= 1
+        currentStreamToken += 1
         let streamToken = currentStreamToken
 
         bringSubviewToFront(mainImageView)
