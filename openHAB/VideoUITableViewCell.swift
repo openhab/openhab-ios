@@ -277,7 +277,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     @objc
     private func stopPlayback(andResetUrl reset: Bool = true) {
         // Increment the stream token to invalidate any running MJPEG stream tasks
-        currentStreamToken &+= 1
+        currentStreamToken += 1
         if reset {
             url = nil
         }
