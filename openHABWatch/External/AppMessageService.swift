@@ -48,7 +48,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     func requestApplicationContext() {
         WCSession.default.sendMessage(["request": "Preferences"]) { response in
-            DispatchQueue.main.async { () in
+            DispatchQueue.main.async {
                 self.updateValuesFromApplicationContext(response as [String: AnyObject])
             }
         } errorHandler: { error in

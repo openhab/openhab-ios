@@ -416,7 +416,7 @@ public extension NetworkTracker {
     }
 
     func getItems() async throws -> [OpenHABItem] {
-        try await service().getItems() ?? []
+        try await service().getItems()
     }
 
     func getItemByName(id: String) async throws -> OpenHABItem? {

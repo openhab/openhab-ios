@@ -70,8 +70,14 @@ final class ScreenSaverView: UIView {
 
     private func scheduleMovement() {
         movementTimer?.invalidate()
-        movementTimer = Timer.scheduledTimer(withTimeInterval: configuration.movementInterval, repeats: true) { [weak self] _ in
-            self?.moveLabelToRandomPosition(animated: true)
+        movementTimer = Timer.scheduledTimer(withTimeInterval: configuration.movementInterval, repeats: true) { [weak self] timer in
+            guard let self else {
+                timer.invalidate() // self was uninitialized, discard this timer
+                return
+            }
+            Task { @MainActor in
+                self.moveLabelToRandomPosition(animated: true)
+            }
         }
         // perform first move immediately
         moveLabelToRandomPosition(animated: false)
@@ -197,9 +203,5 @@ final class ScreenSaverView: UIView {
             label.alpha = 1.0
             animations()
         }
-    }
-
-    deinit {
-        movementTimer?.invalidate()
     }
 }
