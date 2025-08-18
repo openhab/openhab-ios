@@ -9,197 +9,177 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import os.log
-import UIKit
+import SwiftUI
 
-@MainActor
-final class ScreenSaverView: UIView {
+struct ScreenSaverView: View {
+    // Constants for text dimension estimation
+    private static let timeTextWidthMultiplier: CGFloat = 4.0
+    private static let dateTextHeightMultiplier: CGFloat = 1.4
+
     private let logger = Logger(subsystem: "org.openhab", category: "ScreenSaverView")
 
-    private let configuration: ScreenSaverConfiguration
+    let configuration: ScreenSaverConfiguration
 
-    private lazy var label: UILabel = {
-        let label = UILabel()
-        label.textColor = .white
-        label.textAlignment = .center
-        label.numberOfLines = 2
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.alpha = 0.0 // start invisible
-        return label
-    }()
+    @State private var currentPosition: CGPoint = .zero
+    @State private var screenSize: CGSize = .zero
+    @State private var movementTimerPublisher: Timer.TimerPublisher?
+    @State private var fadeOpacity = 1.0
 
-    private var movementTimer: Timer?
-    private let dateFormatter: DateFormatter = {
-        let df = DateFormatter()
-        df.dateStyle = .medium
-        df.timeStyle = .medium
-        return df
-    }()
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                Color.black
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
+                    }
 
-    init(configuration: ScreenSaverConfiguration) {
-        self.configuration = configuration
-        super.init(frame: .zero)
-        commonInit()
-    }
+                TimelineView(.periodic(from: .now, by: 1.0)) { context in
+                    VStack(spacing: 0) {
+                        if configuration.showsDate {
+                            Text(dateString(for: context.date))
+                                .font(dateFont(for: geometry.size))
+                                .monospacedDigit()
+                                .foregroundColor(.white.opacity(0.85 * alphaFactor))
+                        }
 
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func commonInit() {
-        backgroundColor = UIColor.black
-        addSubview(label)
-        // pin label size but not position (we move it manually)
-        NSLayoutConstraint.activate([
-            label.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor, multiplier: 0.9)
-        ])
-
-        updateLabelText()
-    }
-
-    func startAnimation() {
-        scheduleMovement()
-    }
-
-    func stopAnimation() {
-        movementTimer?.invalidate()
-    }
-
-    // MARK: - Private helpers
-
-    private func scheduleMovement() {
-        movementTimer?.invalidate()
-        movementTimer = Timer.scheduledTimer(withTimeInterval: configuration.movementInterval, repeats: true) { [weak self] _ in
-            self?.moveLabelToRandomPosition(animated: true)
-        }
-        // perform first move immediately
-        moveLabelToRandomPosition(animated: false)
-    }
-
-    private func updateLabelText() {
-        let now = Date()
-
-        // Prepare strings
-        var timeString: String?
-        var dateString: String?
-
-        if configuration.showsTime {
-            let tf = DateFormatter()
-            tf.dateStyle = .none
-            if configuration.showsSeconds {
-                tf.dateFormat = configuration.uses24HourTime ? "H:mm:ss" : "h:mm:ss a"
-            } else {
-                tf.dateFormat = configuration.uses24HourTime ? "H:mm" : "h:mm a"
+                        if configuration.showsTime {
+                            Text(timeString(for: context.date))
+                                .font(timeFont(for: geometry.size))
+                                .monospacedDigit()
+                                .foregroundColor(.white.opacity(alphaFactor))
+                        }
+                    }
+                    .opacity(fadeOpacity)
+                    .position(currentPosition)
+                }
             }
-            timeString = tf.string(from: now)
+            .onAppear {
+                screenSize = geometry.size
+                currentPosition = calculateRandomPosition(for: geometry.size)
+                startMovementTimer(for: geometry.size)
+            }
+            .onDisappear {
+                stopMovementTimer()
+            }
+            .onChange(of: geometry.size) { newSize in
+                screenSize = newSize
+                currentPosition = calculateRandomPosition(for: newSize)
+            }
+            .onReceive(movementTimerPublisher ?? Timer.publish(every: 1000, on: .main, in: .common)) { _ in
+                let half = max(configuration.fadeDuration / 2.0, 0.01)
+                withAnimation(.easeInOut(duration: half)) {
+                    fadeOpacity = 0.0
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + half) {
+                    currentPosition = calculateRandomPosition(for: screenSize)
+                    withAnimation(.easeInOut(duration: half)) {
+                        fadeOpacity = 1.0
+                    }
+                }
+            }
         }
+    }
 
-        if configuration.showsDate {
-            let df = DateFormatter()
-            df.dateStyle = .medium
-            df.timeStyle = .none
-            dateString = df.string(from: now)
+    private var alphaFactor: CGFloat {
+        let clamped = min(max(configuration.dimLevel, 0.0), 1.0)
+        let alpha = 0.5 + 0.5 * sqrt(clamped)
+        return min(1.0, alpha)
+    }
+
+    // MARK: - Private Methods
+
+    private func timeString(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        if configuration.showsSeconds {
+            formatter.dateFormat = configuration.uses24HourTime ? "H:mm:ss" : "h:mm:ss a"
+        } else {
+            formatter.dateFormat = configuration.uses24HourTime ? "H:mm" : "h:mm a"
         }
+        return formatter.string(from: date)
+    }
 
-        // Compute dynamic font sizes based on the current view size.
-        let shortSide = min(bounds.width, bounds.height)
+    private func dateString(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: date)
+    }
+
+    private func timeFont(for size: CGSize) -> Font {
+        let shortSide = min(size.width, size.height)
+        let fontSize = max(shortSide * configuration.timeFontSizeRatio, 48)
+
+        if let fontName = configuration.fontName {
+            return .custom(fontName, size: fontSize)
+        } else {
+            return .system(size: fontSize, weight: .thin)
+        }
+    }
+
+    private func dateFont(for size: CGSize) -> Font {
+        let shortSide = min(size.width, size.height)
         let timeFontSize = max(shortSide * configuration.timeFontSizeRatio, 48)
         let dateFontSize = timeFontSize * configuration.dateFontRelativeSize
 
-        let timeFont: UIFont = if let name = configuration.fontName, let custom = UIFont(name: name, size: timeFontSize) {
-            custom
+        if let fontName = configuration.fontName {
+            return .custom(fontName, size: dateFontSize)
         } else {
-            UIFont.monospacedDigitSystemFont(ofSize: timeFontSize, weight: .thin)
+            return .system(size: dateFontSize, weight: .regular)
         }
-
-        let dateFont: UIFont = if let name = configuration.fontName, let custom = UIFont(name: name, size: dateFontSize) {
-            custom
-        } else {
-            UIFont.systemFont(ofSize: dateFontSize, weight: .regular)
-        }
-
-        // Use a square-root curve so the text dims more gently at first and
-        // only gets very dark at the lowest levels
-        let alphaFactor: CGFloat = {
-            let clamped = min(max(configuration.dimLevel, 0.0), 1.0)
-            // .5 is about as dark as we can go while still visible
-            let alpha = 0.5 + 0.5 * sqrt(clamped)
-            return min(1.0, alpha)
-        }()
-
-        let attributed = NSMutableAttributedString()
-
-        // Date above time
-        if let dateString {
-            let dateAttr: [NSAttributedString.Key: Any] = [
-                .font: dateFont,
-                .foregroundColor: UIColor.white.withAlphaComponent(0.85 * alphaFactor)
-            ]
-            attributed.append(NSAttributedString(string: dateString, attributes: dateAttr))
-        }
-
-        if let timeString {
-            if attributed.length > 0 {
-                attributed.append(NSAttributedString(string: "\n"))
-            }
-            let timeAttr: [NSAttributedString.Key: Any] = [
-                .font: timeFont,
-                .foregroundColor: UIColor.white.withAlphaComponent(alphaFactor)
-            ]
-            attributed.append(NSAttributedString(string: timeString, attributes: timeAttr))
-        }
-
-        label.attributedText = attributed
     }
 
-    private func moveLabelToRandomPosition(animated: Bool) {
-        updateLabelText()
-        // Ensure layout pass so we know label size
-        layoutIfNeeded()
+    private func startMovementTimer(for size: CGSize) {
+        stopMovementTimer()
+        movementTimerPublisher = Timer.publish(every: configuration.movementInterval, on: .main, in: .common)
+        _ = movementTimerPublisher?.connect()
+    }
 
-        let labelSize = label.intrinsicContentSize
-        // Ensure the label fully fits within the view
-        guard bounds.width > labelSize.width, bounds.height > labelSize.height else { return }
+    private func stopMovementTimer() {
+        movementTimerPublisher = nil
+    }
 
-        // Keep the label away from the very edges by introducing a small margin.
+    private func calculateRandomPosition(for size: CGSize) -> CGPoint {
+        guard size.width > 0, size.height > 0 else {
+            return CGPoint(x: size.width / 2, y: size.height / 2)
+        }
+
         let edgeMargin: CGFloat = 20
 
-        // Calculate the area the label can occupy after accounting for the margin on all sides.
-        let availableWidth = bounds.width - labelSize.width - edgeMargin * 2
-        let availableHeight = bounds.height - labelSize.height - edgeMargin * 2
+        // Estimate label size (this is approximate since we can't measure exactly in SwiftUI)
+        let shortSide = min(size.width, size.height)
+        let timeFontSize = max(shortSide * configuration.timeFontSizeRatio, 48)
+        let estimatedWidth = timeFontSize * Self.timeTextWidthMultiplier
+        let estimatedHeight = timeFontSize * (configuration.showsDate ? Self.dateTextHeightMultiplier : 1.0)
 
-        // If the view is too small to honour the margin, fall back to the original screen size.
-        guard availableWidth > 0, availableHeight > 0 else {
-            let fallbackX = CGFloat.random(in: 0 ... (bounds.width - labelSize.width))
-            let fallbackY = CGFloat.random(in: 0 ... (bounds.height - labelSize.height))
-            label.frame = CGRect(origin: CGPoint(x: fallbackX, y: fallbackY), size: labelSize)
-            return
-        }
+        let availableWidth = size.width - estimatedWidth - edgeMargin * 2
+        let availableHeight = size.height - estimatedHeight - edgeMargin * 2
 
-        let randomX = edgeMargin + CGFloat.random(in: 0 ... availableWidth)
-        let randomY = edgeMargin + CGFloat.random(in: 0 ... availableHeight)
-
-        let animations = {
-            self.label.frame = CGRect(origin: CGPoint(x: randomX, y: randomY), size: labelSize)
-        }
-
-        if animated {
-            UIView.animate(withDuration: configuration.fadeDuration, delay: 0, options: [.curveEaseInOut, .allowUserInteraction]) {
-                self.label.alpha = 0.0
-            } completion: { _ in
-                animations()
-                UIView.animate(withDuration: self.configuration.fadeDuration, delay: 0, options: [.curveEaseInOut, .allowUserInteraction]) {
-                    self.label.alpha = 1.0
-                }
-            }
+        if availableWidth > 0, availableHeight > 0 {
+            let randomX = edgeMargin + estimatedWidth / 2 + CGFloat.random(in: 0 ... availableWidth)
+            let randomY = edgeMargin + estimatedHeight / 2 + CGFloat.random(in: 0 ... availableHeight)
+            return CGPoint(x: randomX, y: randomY)
         } else {
-            label.alpha = 1.0
-            animations()
+            // Fallback for small screens - use full screen area with minimum margins
+            let minMargin: CGFloat = 10
+            let safeWidth = max(size.width - minMargin * 2, size.width * 0.1)
+            let safeHeight = max(size.height - minMargin * 2, size.height * 0.1)
+            let fallbackX = minMargin + CGFloat.random(in: 0 ... safeWidth)
+            let fallbackY = minMargin + CGFloat.random(in: 0 ... safeHeight)
+            return CGPoint(x: fallbackX, y: fallbackY)
         }
     }
+}
 
-    deinit {
-        movementTimer?.invalidate()
-    }
+#Preview {
+    ScreenSaverView(configuration: ScreenSaverConfiguration(
+        showsTime: true,
+        showsDate: true,
+        showsSeconds: false,
+        uses24HourTime: true
+    ))
+    .frame(width: 400, height: 300)
 }
