@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [Version 3.1.8, Build 60] - 2025-08-18Z
+
+- Stream Token Guarding: (#939)
+- Restrict         update_code_signing_settings to configuration Release
+- Bump actions/cache from 2 to 4 (#933)
+- Bump webfactory/ssh-agent from 0.9.0 to 0.9.1 (#934)
+- Bump maierj/fastlane-action from 2.2.1 to 3.1.0 (#931)
+- Bump actions/checkout from 2 to 5 (#932)
+- Bump crowdin/github-action from 1.4.9 to 2.9.1 (#930)
+- Enable Dependabot (#929)
+- Typo
+- Cleanup of project
+- Straighten Changelog
+- Addressing swift 6 errors
+
 ## [Version 3.1.7, Build 59] - 2025-08-15Z
 
 - Fix for #927 (#928)
