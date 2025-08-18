@@ -42,6 +42,8 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private var aspectRatioConstraint: NSLayoutConstraint?
     private var activeTask: Task<Void, Never>?
     private var session: URLSession!
+    // Add a stream token to identify the latest MJPEG stream task
+    private var currentStreamToken: UInt = 0
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -168,18 +170,19 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             existingTask.cancel()
             activeTask = nil
         }
+        // Increment the stream token for a new task
+        currentStreamToken &+= 1
+        let streamToken = currentStreamToken
 
         bringSubviewToFront(mainImageView)
 
         activeTask = Task { [weak self] in
             guard let self else { return }
-
             // Check if task was cancelled before starting work
             guard !Task.isCancelled else {
                 logger.debug("MJPEG stream task was cancelled before starting")
                 return
             }
-
             do {
                 guard let config = NetworkTracker.shared.activeConnection?.configuration else {
                     logger.warning("No openHAB configuration found.")
@@ -189,20 +192,22 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                 let client = HTTPClient(configuration: config)
                 let (byteStream, response) = try await client.processStream(url: url)
                 logger.debug("Successfully got MJPEG stream response: \(response)")
-                await handleMJPEGStream(byteStream)
+                await handleMJPEGStream(byteStream, streamToken: streamToken)
             } catch is CancellationError {
                 logger.debug("MJPEG stream was cancelled during setup")
             } catch {
                 logger.error("Failed to start MJPEG stream: \(error.localizedDescription)")
                 await MainActor.run { [weak self] in
-                    self?.activityIndicator.isHidden = true
-                    self?.activityIndicator.stopAnimating()
+                    guard let self, currentStreamToken == streamToken else { return }
+                    activityIndicator.isHidden = true
+                    activityIndicator.stopAnimating()
                 }
             }
         }
     }
 
-    private func handleMJPEGStream(_ byteStream: URLSession.AsyncBytes) async {
+    // Update handleMJPEGStream to take a streamToken and check it before UI updates
+    private func handleMJPEGStream(_ byteStream: URLSession.AsyncBytes, streamToken: UInt) async {
         let streamImageInitialBytePattern = Data([255, 216])
         var imageData = Data()
         var isFirstFrame = true
@@ -215,7 +220,11 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                     logger.debug("MJPEG stream task was cancelled")
                     return
                 }
-
+                // If a new stream has started, exit
+                if streamToken != currentStreamToken {
+                    logger.debug("MJPEG stream token mismatch, exiting stream handler")
+                    return
+                }
                 imageData.append(byte)
 
                 if imageData.count <= 50 {
@@ -226,8 +235,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                     logger.debug("Successfully decoded MJPEG frame, size: \(image.size.width)x\(image.size.height)")
 
                     await MainActor.run { [weak self] in
-                        guard let self else { return }
-
+                        guard let self, currentStreamToken == streamToken else { return }
                         if isFirstFrame {
                             let aspectRatio = image.size.width / image.size.height
                             activityIndicator.isHidden = true
@@ -245,37 +253,31 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         } catch {
             logger.error("Failed to process MJPEG stream: \(error.localizedDescription)")
             await MainActor.run { [weak self] in
-                self?.activityIndicator.isHidden = true
-                self?.activityIndicator.stopAnimating()
+                guard let self, currentStreamToken == streamToken else { return }
+                activityIndicator.isHidden = true
+                activityIndicator.stopAnimating()
             }
         }
     }
 
-    private func updateAspectRatio(forView view: UIView?, aspectRatio: CGFloat) {
-        guard let view else { return }
-
-        if let constraint = aspectRatioConstraint {
-            removeConstraint(constraint)
+    // Add or update the aspect ratio constraint for the given view
+    private func updateAspectRatio(forView view: UIView, aspectRatio: CGFloat) {
+        // Remove the old aspect ratio constraint if it exists
+        if let oldConstraint = aspectRatioConstraint {
+            view.removeConstraint(oldConstraint)
+            aspectRatioConstraint = nil
         }
-        aspectRatioConstraint = nil
-
-        let constraint = NSLayoutConstraint(
-            item: view,
-            attribute: .width,
-            relatedBy: .equal,
-            toItem: view,
-            attribute: .height,
-            multiplier: aspectRatio,
-            constant: 0
-        )
-
-        constraint.priority = UILayoutPriority(rawValue: 999)
-        view.addConstraint(constraint)
+        // Add a new aspect ratio constraint
+        let constraint = view.widthAnchor.constraint(equalTo: view.heightAnchor, multiplier: aspectRatio)
+        constraint.priority = .required
+        constraint.isActive = true
         aspectRatioConstraint = constraint
     }
 
     @objc
     private func stopPlayback(andResetUrl reset: Bool = true) {
+        // Increment the stream token to invalidate any running MJPEG stream tasks
+        currentStreamToken &+= 1
         if reset {
             url = nil
         }
@@ -285,11 +287,5 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         activeTask?.cancel()
         activeTask = nil
         mainImageView?.image = nil
-    }
-}
-
-extension VideoUITableViewCell: GenericCellCacheProtocol {
-    func invalidateCache() {
-        url = nil
     }
 }
