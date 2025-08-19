@@ -31,7 +31,7 @@ struct ApplicationSettingsView: View {
 
             Toggle("Hide Status Bar", isOn: Binding(
                 get: { Preferences.hideStatusBar },
-                set: { Preferences.hideStatusBar = $0; UIApplication.shared.windows.first?.rootViewController?.setNeedsStatusBarAppearanceUpdate() }
+                set: { Preferences.hideStatusBar = $0; UIApplication.shared.keyWindowActiveScene?.rootViewController?.setNeedsStatusBarAppearanceUpdate() }
             ))
 
             NavigationLink("Client Certificates") {
