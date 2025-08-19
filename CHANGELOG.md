@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.1.9, Build 61] - 2025-08-19Z
+
+- Network tracker rework and Preferences improvement for strict concurrency (#937)
+
 ## [Version 3.1.8, Build 60] - 2025-08-18Z
 
 - Stream Token Guarding: (#939)
