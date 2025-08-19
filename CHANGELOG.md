@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.1.10, Build 62] - 2025-08-19Z
+
+- More warning and concurrency issue fixes (#940)
+
 ## [Version 3.1.9, Build 61] - 2025-08-19Z
 
 - Network tracker rework and Preferences improvement for strict concurrency (#937)
