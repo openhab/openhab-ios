@@ -15,6 +15,7 @@ import os.log
 import WatchConnectivity
 import WatchKit
 
+@MainActor
 class OpenHABWatchAppDelegate: NSObject {
     var session: WCSession
     let delegate: any WCSessionDelegate

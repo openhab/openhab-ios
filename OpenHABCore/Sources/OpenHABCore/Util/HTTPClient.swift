@@ -121,7 +121,7 @@ actor CertificateStore {
     }
 }
 
-public final class HTTPClient: NSObject {
+public final class HTTPClient: NSObject, Sendable {
     // MARK: - Properties
 
     public enum SessionType {

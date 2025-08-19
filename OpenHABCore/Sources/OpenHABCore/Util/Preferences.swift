@@ -106,7 +106,7 @@ public struct HomePreferences: Codable, Sendable, Equatable {
     }
 }
 
-public enum Preferences {
+public actor Preferences {
     /// the currently applied settings set from storedHomes
     @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: Preferences.activeHomeId))
     public private(set) static var currentHomePreferences: HomePreferences
@@ -219,9 +219,7 @@ extension Preferences {
         logger.debug("Preference \(key) will be changed to value \(String(describing: newValue))")
         sharedDefaults.set(convertedValue, forKey: key)
 
-        DispatchQueue.main.async { [subject] in
-            subject.send(sanitized)
-        }
+        subject.send(sanitized)
     }
 }
 
