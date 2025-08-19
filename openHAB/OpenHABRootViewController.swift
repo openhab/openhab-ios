@@ -170,7 +170,9 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func startSSEListening() {
-        ItemEventStream.startMonitoringNetwork()
+        Task {
+            await ItemEventStream.startMonitoringNetwork()
+        }
         print("Starting SSE")
         streamTask = Task { [weak self] in
             guard let self else { return }
@@ -263,7 +265,7 @@ class OpenHABRootViewController: UIViewController {
         ) { _ in
             Task { @MainActor in
                 WatchMessageService.singleton.syncPreferencesToWatch()
-                NetworkTracker.shared.restartTracking()
+                await NetworkTracker.shared.restartTracking()
             }
         }
 
@@ -295,7 +297,7 @@ class OpenHABRootViewController: UIViewController {
             }
             .store(in: &cancellables)
 
-        NetworkTracker.shared.$activeConnection
+        MainActorNetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
             .sink { [weak self] activeConnection in
                 if let activeConnection {
@@ -327,7 +329,7 @@ class OpenHABRootViewController: UIViewController {
 
         SideMenuManager.default.rightMenuNavigationController?.settings = settings
 
-        let networkTracker = NetworkTracker.shared
+        let networkTracker = MainActorNetworkTracker.shared
         let drawerView = DrawerView { mode in
             self.handleDismiss(mode: mode)
         }
@@ -502,7 +504,7 @@ class OpenHABRootViewController: UIViewController {
                 await NetworkTracker.shared.stopTracking()
                 logger.info("Switching to home \(targetHome.id)")
                 Preferences.switchActiveHome(to: targetHome.id)
-                await NetworkTracker.shared.waitForActiveConnection()
+                _ = await NetworkTracker.shared.waitForActiveConnection()
                 handleNotificationInternal(action)
             }
             return

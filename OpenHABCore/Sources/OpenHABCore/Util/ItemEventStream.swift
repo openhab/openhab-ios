@@ -214,12 +214,9 @@ public extension ItemEventStream {
         await shared.trackItems(items)
     }
 
-    nonisolated static func startMonitoringNetwork() {
-        Task.detached { [weak hub = Self.shared] in
-            guard let hub else { return }
-            for await conn in NetworkTracker.shared.$activeConnection.values {
-                await hub.updateConnection(conn)
-            }
+    static func startMonitoringNetwork() async {
+        for await conn in await NetworkTracker.shared.activeConnectionStream() {
+            await shared.updateConnection(conn)
         }
     }
 }

@@ -97,7 +97,8 @@ class OpenHABWebViewController: OpenHABViewController {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(hideNavBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
-        NetworkTracker.shared.$activeConnection
+        parent?.navigationItem.title = "Main View"
+        MainActorNetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
             .sink { activeConnection in
                 if let activeConnection {
@@ -110,7 +111,7 @@ class OpenHABWebViewController: OpenHABViewController {
             }
             .store(in: &trackerCancellables)
 
-        NetworkTracker.shared.$status
+        MainActorNetworkTracker.shared.$status
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.logger.info("OpenHABWebViewController tracker status \(status.rawValue)")
@@ -464,7 +465,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
                 return (.useCredential, credential)
             } else {
                 if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
-                    return onReceiveSessionTaskChallenge(with: challenge)
+                    return await onReceiveSessionTaskChallenge(with: challenge)
                 } else {
                     return await onReceiveSessionChallenge(with: challenge)
                 }

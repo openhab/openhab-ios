@@ -39,7 +39,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var openHABRootUrl: String?
 
-    @ObservedObject var networkTracker = NetworkTracker.shared
+    @ObservedObject var networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
     private var activeConnectionInfo: ConnectionInfo?
     private var pageHandlingTask: Task<Void, Never>?

@@ -30,9 +30,36 @@ enum DrawerViewError: Error, CustomDebugStringConvertible {
     }
 }
 
+struct ImageView: View {
+    let url: String
+
+    @EnvironmentObject var networkTracker: MainActorNetworkTracker
+
+    var body: some View {
+        if !url.isEmpty {
+            switch url {
+            case _ where url.hasPrefix("data:image"):
+                let provider = Base64ImageDataProvider(base64String: url.deletingPrefix("data:image/png;base64,"), cacheKey: UUID().uuidString)
+                return KFImage(source: .provider(provider)).resizable()
+            case _ where url.hasPrefix("http"):
+                return KFImage(URL(string: url)).resizable()
+            default:
+                let builtURL = Endpoint.resource(
+                    openHABRootUrl: networkTracker.activeConnection?.configuration.url ?? "",
+                    path: url.prepare()
+                ).url
+                return KFImage(builtURL).resizable()
+            }
+        } else {
+            // This will always fallback to placeholder
+            return KFImage(URL(string: "bundle://openHABIcon")).placeholder { Image("openHABIcon").resizable() }
+        }
+    }
+}
+
 // Display the connected URL
 struct ConnectionView: View {
-    @StateObject private var networkTracker = NetworkTracker.shared
+    @StateObject private var networkTracker = MainActorNetworkTracker.shared
 
     var body: some View {
         HStack {
@@ -59,7 +86,7 @@ struct DrawerView: View {
     @State private var selectedSection: Int?
     @State private var connectedUrl = "Not connected" // Default label text
 
-    @EnvironmentObject private var networkTracker: NetworkTracker
+    @EnvironmentObject private var networkTracker: MainActorNetworkTracker
 
     var onDismiss: (TargetController) -> Void
     @Environment(\.dismiss) private var dismiss
@@ -256,7 +283,7 @@ struct DrawerView: View {
 }
 
 #Preview {
-    let networkTracker = NetworkTracker.shared
+    let networkTracker = MainActorNetworkTracker.shared
     DrawerView { _ in }
         .environmentObject(networkTracker)
 }

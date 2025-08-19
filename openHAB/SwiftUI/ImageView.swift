@@ -17,10 +17,10 @@ import SafariServices
 import SFSafeSymbols
 import SwiftUI
 
-struct ImageView: View {
+struct ImageView2: View {
     let url: String
 
-    @EnvironmentObject var networkTracker: NetworkTracker
+    @EnvironmentObject var networkTracker: MainActorNetworkTracker
 
     var body: some View {
         if !url.isEmpty {

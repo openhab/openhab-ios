@@ -42,7 +42,7 @@ actor IconCacheTracker {
 /// A SwiftUI view that displays widget icons with openHAB-specific styling and caching
 struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
-    @ObservedObject private var networkTracker = NetworkTracker.shared
+    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject var viewModel: SitemapPageViewModel
 

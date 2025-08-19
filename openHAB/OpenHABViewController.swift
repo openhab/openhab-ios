@@ -33,8 +33,8 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
         super.viewDidLoad()
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
-        NetworkTracker.shared.clientCertificateManager.delegate = self
-        NetworkTracker.shared.serverCertificateManager.delegate = self
+        CertificateManagers.clientCertificateManager.delegate = self
+        CertificateManagers.serverCertificateManager.delegate = self
     }
 
     func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme) {

@@ -121,26 +121,31 @@ platform :ios do
         update_code_signing_settings(
             use_automatic_signing: false,
             code_sign_identity: 'Apple Distribution',
+            build_configurations: ["Release"]
         )
         
         update_code_signing_settings(
             targets: 'openHAB',
             profile_name: 'match AppStore org.openhab.app',
+            build_configurations: ["Release"]
         )
         
         update_code_signing_settings(
             targets: 'openHABWatch',
             profile_name: 'match AppStore org.openhab.app.watchkitapp',
+            build_configurations: ["Release"]
         )
         
         update_code_signing_settings(
             targets: 'openHABIntents',
             profile_name: 'match AppStore org.openhab.app.openHABIntents',
+            build_configurations: ["Release"]
         )
         
         update_code_signing_settings(
             targets: 'NotificationService',
             profile_name: 'match AppStore org.openhab.app.NotificationService',
+            build_configurations: ["Release"]
         )
 
         # setup code signing

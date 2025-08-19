@@ -227,7 +227,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
 
     private func startTrackNetworkStatus() {
         let task = Task {
-            for await status in NetworkTracker.shared.$status.values {
+            for await status in MainActorNetworkTracker.shared.$status.values {
                 logger.info("OpenHABViewController tracker status \(status.rawValue)")
                 await MainActor.run {
                     switch status {
@@ -247,7 +247,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
 
     func startWatchingActiveServer() {
         let task = Task {
-            for await activeConnection in NetworkTracker.shared.$activeConnection.values {
+            for await activeConnection in MainActorNetworkTracker.shared.$activeConnection.values {
                 if let activeConnection {
                     await MainActor.run {
                         logger.info("OpenHABSitemapViewController tracker URL \(activeConnection.configuration.url)")
@@ -398,7 +398,7 @@ extension OpenHABSitemapViewController {
     func selectSitemap() {
         Task {
             do {
-                guard let activeConnection = NetworkTracker.shared.activeConnection else {
+                guard let activeConnection = MainActorNetworkTracker.shared.activeConnection else {
                     throw OpenHABSitemapError.noActiveConnection
                 }
                 logger.debug("Running selectSitemap for URL: \(activeConnection.configuration.url)")
@@ -485,11 +485,9 @@ extension OpenHABSitemapViewController {
             do {
                 // Initial page load
 
-                guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
-                    logger.error("Failed to establish connection within timeout")
-                    return
+                guard let configuration = MainActorNetworkTracker.shared.activeConnection?.configuration else {
+                    throw NetworkTrackerError.noActiveConnection
                 }
-                let configuration = activeConnection.configuration
 
                 if openAPIService == nil {
                     openAPIService = try OpenAPIService(connectionConfiguration: configuration)
@@ -588,7 +586,7 @@ extension OpenHABSitemapViewController {
 
         guard !pageUrl.isEmpty else { return false }
 
-        let currentStatus = NetworkTracker.shared.status
+        let currentStatus = MainActorNetworkTracker.shared.status
 
         // First run
         if !pageNetworkStatusAvailable {
@@ -721,7 +719,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             if !widget.icon.isEmpty {
                 if let urlc = Endpoint.icon(
                     rootUrl: openHABRootUrl,
-                    version: NetworkTracker.shared.activeConnection?.version ?? 2,
+                    version: MainActorNetworkTracker.shared.activeConnection?.version ?? 2,
                     icon: widget.icon,
                     state: widget.iconState(),
                     iconType: iconType,
@@ -934,6 +932,6 @@ extension OpenHABSitemapViewController: AuthenticationChallengeResponsible {
     func downloader(_ downloader: ImageDownloader,
                     task: URLSessionTask,
                     didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        onReceiveSessionTaskChallenge(with: challenge)
+        await onReceiveSessionTaskChallenge(with: challenge)
     }
 }

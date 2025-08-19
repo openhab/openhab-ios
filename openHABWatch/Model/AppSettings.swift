@@ -15,7 +15,7 @@ import OpenHABCore
 import SwiftUI
 
 final class AppSettings: ObservableObject {
-    static let shared = AppSettings()
+    @MainActor static let shared = AppSettings()
     var openHABVersion = 2
     var cancellables = Set<AnyCancellable>()
 

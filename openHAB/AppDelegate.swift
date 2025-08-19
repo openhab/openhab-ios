@@ -181,7 +181,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         if url.isFileURL {
             logger.info("Loading Certificate")
-            let clientCertificateManager = NetworkTracker.shared.clientCertificateManager
+            let clientCertificateManager = CertificateManagers.clientCertificateManager
             Task { @MainActor in
                 await clientCertificateManager.startImportClientCertificate(url: url)
             }
@@ -256,7 +256,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     // this is called when clicking a notification while in the background
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier
 
@@ -269,7 +269,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
             let cloudUserId = userInfo["userId"] as? String
 
-            notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
+            await notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
         }
     }
 

@@ -18,7 +18,7 @@ import SwiftUI
 struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = AppSettings.shared
-    @ObservedObject private var networkTracker = NetworkTracker.shared
+    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
 
     @State private var imageLoadingFailed = false
     @State private var retryCount = 0

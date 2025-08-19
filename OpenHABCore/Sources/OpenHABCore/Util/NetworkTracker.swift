@@ -37,12 +37,14 @@ public struct ConnectionInfo: Equatable, Sendable {
 }
 
 public enum NetworkTrackerError: Error, CustomDebugStringConvertible, Sendable {
+    case serviceUnavailable
     case invalidServerVersion
     case failedConnection(String)
     case noActiveConnection
 
     public var debugDescription: String {
         switch self {
+        case .serviceUnavailable: "Could not create OpenAPIService instance"
         case .invalidServerVersion: "Invalid server version"
         case let .failedConnection(url): "Failed to connect to \(url)"
         case .noActiveConnection: "No active server found"
@@ -101,17 +103,38 @@ public actor ConnectionFailureTracker {
     }
 }
 
-public protocol NetworkTracking: ObservableObject {
-    var activeConnection: ConnectionInfo? { get }
+@MainActor
+public class MainActorNetworkTracker: ObservableObject {
+    public static let shared = MainActorNetworkTracker()
+    @Published public var activeConnection: ConnectionInfo?
+    @Published public var status: NetworkStatus = .connecting
+
+    public init(tracker: NetworkTracker = NetworkTracker.shared) {
+        Task {
+            for await connection in await tracker.activeConnectionStream() {
+                activeConnection = connection
+                status = await NetworkTracker.shared.status
+            }
+        }
+        Task {
+            for await trackerStatus in await tracker.statusStream() {
+                activeConnection = await NetworkTracker.shared.activeConnection
+                status = trackerStatus
+            }
+        }
+    }
 }
 
-/// @available(*, deprecated)
-public final class NetworkTracker: ObservableObject {
+public actor CertificateManagers {
+    public static let clientCertificateManager = ClientCertificateManager()
+    public static let serverCertificateManager = ServerCertificateManager()
+}
+
+public actor NetworkTracker {
     public static let shared = NetworkTracker()
 
-    // @MainActor
     @Published public private(set) var activeConnection: ConnectionInfo?
-    // @MainActor
+
     @Published public private(set) var status: NetworkStatus = .connecting
 
     private var pathMonitor: any NWPathMonitoring
@@ -121,11 +144,6 @@ public final class NetworkTracker: ObservableObject {
     private let disconnectedRetryInterval: UInt64 = 30 // / amount of time we scan when not connected
 
     private var failureTracker: ConnectionFailureTracker
-
-    // TODO: remove
-    public var clientCertificateManager = ClientCertificateManager()
-    public var serverCertificateManager = ServerCertificateManager()
-    public private(set) var httpClient: HTTPClient?
 
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
@@ -171,12 +189,14 @@ public final class NetworkTracker: ObservableObject {
         // Utilize for await to listen for changes in $activeConnection
         // $activeConnection.values is an AsyncSequence, allowing you to iterate over its values asynchronously.
         // Wait until a non-nil value is received
-        for await connection in $activeConnection.values {
-            if let connection {
-                return connection
+        return await withTimeout(timeout: timeout) {
+            for await connection in await self.$activeConnection.values {
+                if let connection {
+                    return connection
+                }
             }
+            return nil
         }
-        return nil
     }
 
     public func restartTracking() {
@@ -262,7 +282,7 @@ public final class NetworkTracker: ObservableObject {
         return bestConnection
     }
 
-    private func withTimeout<T: Sendable>(seconds: Double, operation: @escaping () async -> T?) async -> T? {
+    private func withTimeout<T: Sendable>(timeout: TimeInterval, operation: @Sendable @escaping () async -> T?) async -> T? {
         await withTaskGroup(of: T?.self) { group in
             // Start the operation
             group.addTask {
@@ -271,7 +291,7 @@ public final class NetworkTracker: ObservableObject {
 
             // Start the timeout countdown
             group.addTask {
-                try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                try? await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
                 return nil
             }
 
@@ -346,7 +366,6 @@ public final class NetworkTracker: ObservableObject {
         }
     }
 
-    @MainActor
     private func setActiveConnection(_ connection: ConnectionInfo?) async {
         guard activeConnection != connection else { return }
 
@@ -360,7 +379,6 @@ public final class NetworkTracker: ObservableObject {
         }
     }
 
-    @MainActor
     private func updateStatus(_ newStatus: NetworkStatus) async {
         guard status != newStatus else { return } // Prevent redundant updates
         status = newStatus
@@ -374,53 +392,43 @@ public final class NetworkTracker: ObservableObject {
     }
 }
 
-extension NetworkTracker: NetworkTracking {}
-
 public extension NetworkTracker {
+    private func service() async throws -> any OpenAPIServiceProtocol {
+        guard let connection = await waitForActiveConnection()?.configuration else {
+            throw NetworkTrackerError.noActiveConnection
+        }
+        guard let service = try? await connectionPool.getOrCreateService(for: connection) else {
+            throw NetworkTrackerError.serviceUnavailable
+        }
+        return service
+    }
+
     func send(to item: OpenHABItem, command: String) async throws {
         try await send(to: item.name, command: command)
     }
 
     func send(to item: String, command: String) async throws {
-        guard let activeConnection = await waitForActiveConnection() else { return }
-        let configuration = activeConnection.configuration
-        let service = try await connectionPool.getOrCreateService(for: configuration)
-        try await service.sendItemCommand(itemname: item, command: command)
+        try await service().sendItemCommand(itemname: item, command: command)
     }
 
     func updateState(item: OpenHABItem, state: String) async throws {
-        guard let activeConnection = await waitForActiveConnection() else { return }
-        let configuration = activeConnection.configuration
-        let service = try await connectionPool.getOrCreateService(for: configuration)
-        try await service.updateItemState(itemname: item.name, with: state)
+        try await service().updateItemState(itemname: item.name, with: state)
     }
 
     func getItems() async throws -> [OpenHABItem] {
-        guard let activeConnection = await waitForActiveConnection() else { return [] }
-        let configuration = activeConnection.configuration
-        let service = try await connectionPool.getOrCreateService(for: configuration)
-        return try await service.getItems()
+        try await service().getItems()
     }
 
     func getItemByName(id: String) async throws -> OpenHABItem? {
-        guard let activeConnection = await waitForActiveConnection() else { return nil }
-        let configuration = activeConnection.configuration
-        let service = try await connectionPool.getOrCreateService(for: configuration)
-        return try await service.getItemByName(id: id)
+        try await service().getItemByName(id: id)
     }
 
     func pollDataForPage(sitemapname: String, pageId: String = "", longPolling: Bool = false) async throws -> OpenHABPage? {
-        guard let activeConnection = await waitForActiveConnection() else { return nil }
-        let configuration = activeConnection.configuration
-        let service = try await connectionPool.getOrCreateService(for: configuration)
-        return try await service.pollDataForPage(sitemapname: sitemapname, pageId: pageId, longPolling: longPolling)
+        try await service().pollDataForPage(sitemapname: sitemapname, pageId: pageId, longPolling: longPolling)
     }
 
     func runNow(ruleUID: String, payload: [String: String]) async throws {
-        guard let activeConnection = await waitForActiveConnection() else { throw NetworkTrackerError.noActiveConnection }
-        let configuration = activeConnection.configuration
-        let service = try await connectionPool.getOrCreateService(for: configuration)
-        try await service.runNow(ruleUID: ruleUID, payload: payload)
+        try await service().runNow(ruleUID: ruleUID, payload: payload)
     }
 }
 
@@ -428,6 +436,15 @@ public extension NetworkTracker {
     func activeConnectionStream() -> AsyncStream<ConnectionInfo?> {
         AsyncStream { continuation in
             let cancellable = self.$activeConnection
+                .sink { continuation.yield($0) }
+
+            continuation.onTermination = { [cancellable] _ in cancellable.cancel() }
+        }
+    }
+
+    func statusStream() -> AsyncStream<NetworkStatus> {
+        AsyncStream { continuation in
+            let cancellable = self.$status
                 .sink { continuation.yield($0) }
 
             continuation.onTermination = { [cancellable] _ in cancellable.cancel() }

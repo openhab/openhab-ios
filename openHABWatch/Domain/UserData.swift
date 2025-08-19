@@ -89,7 +89,9 @@ final class UserData: ObservableObject {
             object: nil,
             queue: nil
         ) { _ in
-            NetworkTracker.shared.restartTracking()
+            Task { @MainActor in
+                await NetworkTracker.shared.restartTracking()
+            }
         }
 
         AppSettings.shared.$haveReceivedAppContext
@@ -117,7 +119,8 @@ final class UserData: ObservableObject {
 
     /// Observes network connection changes and updates state
     private func observeNetworkChanges() async {
-        for await activeConnection in NetworkTracker.shared.activeConnectionStream() {
+        let activeConnectionStream = await NetworkTracker.shared.activeConnectionStream()
+        for await activeConnection in activeConnectionStream {
             guard let activeConnection else { continue }
 
             logger.info("openHABTracked: \(activeConnection.configuration.url)")
@@ -153,7 +156,8 @@ final class UserData: ObservableObject {
         pageHandlingTask = Task {
             do {
                 isLoadingSitemap = true
-                let service = try OpenAPIService(connectionConfiguration: NetworkTracker.shared.activeConnection?.configuration ?? ConnectionConfiguration.remoteDefault)
+                let activeNetworkConfig = await NetworkTracker.shared.activeConnection?.configuration
+                let service = try OpenAPIService(connectionConfiguration: activeNetworkConfig ?? ConnectionConfiguration.remoteDefault)
 
                 let initialPage = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
                 try Task.checkCancellation()
