@@ -17,7 +17,7 @@ import SafariServices
 import SFSafeSymbols
 import SwiftUI
 
-struct ImageView2: View {
+struct ImageView: View {
     let url: String
 
     @EnvironmentObject var networkTracker: MainActorNetworkTracker
