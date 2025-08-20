@@ -296,7 +296,7 @@ actor NotificationServiceHandler {
 }
 
 class NotificationService: UNNotificationServiceExtension {
-    private var handler = NotificationServiceHandler()
+    private let handler = NotificationServiceHandler()
 
     override func serviceExtensionTimeWillExpire() {
         let handler = handler
