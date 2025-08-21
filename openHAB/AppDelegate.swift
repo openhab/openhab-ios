@@ -100,8 +100,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         activateWatchConnectivity()
 
-        let SVGCoder = SDImageSVGCoder.shared
-        SDImageCodersManager.shared.addCoder(SVGCoder)
+        configureImageCoders()
 
         /// load and start the screensaver
         if let keyWindow = UIApplication.shared.firstKeyWindow {
@@ -125,6 +124,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         return true
+    }
+
+    @MainActor
+    func configureImageCoders() {
+        let svgCoder = SDImageSVGCoder.shared
+        SDImageCodersManager.shared.addCoder(svgCoder)
+        logger.info("SDImageSVGCoder registered")
     }
 
     private func setupFirebase() {
