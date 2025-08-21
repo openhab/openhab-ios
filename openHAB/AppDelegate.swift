@@ -308,9 +308,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
                 // Use closure-based tap gesture insteae of #selector
                 let tapGesture = MessageTapGestureRecognizer {
-                    Task {
-                        self.messageViewTapped(action: action, cloudUserId: cloudUserId)
-                    }
+                    self.messageViewTapped(action: action, cloudUserId: cloudUserId)
                 }
                 view.addGestureRecognizer(tapGesture)
 
