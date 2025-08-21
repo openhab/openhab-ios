@@ -146,9 +146,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
-    // Notification registration depends on iOS version
-    // This is the setup for iOS >10 notifications
-    func registerForPushNotifications() {
+    nonisolated func registerForPushNotifications() {
         #if DEBUG
         // do not request authorization if running UITest
         if ProcessInfo.processInfo.environment["UITest"] != nil {
@@ -163,7 +161,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.logger.info("Notification settings: \(settings)")
 
                 guard settings.authorizationStatus == .authorized else { return }
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     UIApplication.shared.registerForRemoteNotifications()
                 }
             }
