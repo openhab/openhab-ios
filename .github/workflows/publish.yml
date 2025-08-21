@@ -71,8 +71,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config --global user.email "info@openhabfoundation.org"
-          git config --global user.name "openhab-bot"	
+	  git config --global user.email "info@openhabfoundation.org"
+    	  git config --global user.name "openhab-bot"	
 
       - name: Deploy on TestFlight
         if: ${{ github.event.inputs.bump_type != 'none' || github.event_name != 'workflow_dispatch' }}
