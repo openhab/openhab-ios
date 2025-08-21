@@ -320,6 +320,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     // Action to be performed when the notification message view is tapped
+    @MainActor
     func messageViewTapped(action: String?, cloudUserId: String? = nil) {
         notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
         SwiftMessages.hideAll()
