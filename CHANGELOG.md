@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [Version 3.1.13, Build 66] - 2025-08-21Z
+
+- Add missing git configuration for workflow (#941)
+- Revert "Add missing git configuration for workflow"
+- Revert "Add missing git configuration for workflow - edit"
+- Add missing git configuration for workflow - edit
+- Add missing git configuration for workflow
+- Simple concurrency fix attempt at NotificationService warnings (#938)
+
 ## [Version 3.1.10, Build 62] - 2025-08-19Z
 
 - More warning and concurrency issue fixes (#940)
