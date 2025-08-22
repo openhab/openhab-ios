@@ -29,6 +29,35 @@ public struct OpenHABImageProcessor: ImageProcessor {
         identifier = "org.openhab.svgprocessor"
     }
 
+    /// Execute `body` on the main thread synchronously, but avoid deadlock when already on main.
+    @inline(__always)
+    private func mainSync<T: Sendable>(_ body: @Sendable () -> T) -> T {
+        if Thread.isMainThread {
+            // We *are* on main; it's now safe to assert MainActor context if you want.
+            MainActor.assumeIsolated { body() }
+        } else {
+            DispatchQueue.main.sync {
+                body()
+            }
+        }
+    }
+
+    /// Decode SVG on the main thread (UIGraphics-based), with sane defaults.
+    private func decodeSVGOnMain(_ data: Data) -> UIImage? {
+        mainSync {
+            SDImageSVGCoder.shared.decodedImage(
+                with: data,
+                options: nil
+            )
+        }
+    }
+
+    /// Convenience fallback symbol (orange triangle), always original rendering.
+    private func warningSymbol() -> UIImage {
+        let img = UIImage(systemSymbol: .exclamationmarkTriangle)
+        return img.withTintColor(.orange, renderingMode: .alwaysOriginal)
+    }
+
     // Convert input data/image to target image and return it.
     public func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         switch item {
@@ -38,15 +67,13 @@ public struct OpenHABImageProcessor: ImageProcessor {
         case let .data(data):
             guard !data.isEmpty else { return nil }
 
-            switch data[0] {
-            case 0x3C: // Likely SVG, since it starts with '<'
-                logger.info("Processing as SVG, data size: \(data.count)")
+            if isSVG(data: data) {
                 #if os(macOS)
                 if let image = renderSVGWithWebKit(data) {
                     return image
                 }
                 #endif
-                if let image = SDImageSVGCoder.shared.decodedImage(with: data, options: nil) {
+                if let image = decodeSVGOnMain(data) {
                     let size = image.size
                     logger.info("SVG size: \(size.width)x\(size.height)")
                     if size.width > 1000 || size.height > 1000 {
@@ -56,11 +83,9 @@ public struct OpenHABImageProcessor: ImageProcessor {
                     logger.info("SVG decoded successfully")
                     return image
                 } else {
-                    logger.error("Failed to decode SVG, data starts with: \(String(data.prefix(20).map { String(format: "%02x", $0) }.joined()))")
-                    return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange, renderingMode: .alwaysOriginal)
+                    return warningSymbol()
                 }
-            default:
-                logger.error("Not an SVG image")
+            } else {
                 return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
             }
         }
@@ -85,4 +110,12 @@ public struct OpenHABImageProcessor: ImageProcessor {
         return snapshotImage
     }
     #endif
+
+    private func isSVG(data: Data?) -> Bool {
+        guard let data else { return false }
+        if let start = String(data: data.prefix(200), encoding: .utf8) {
+            return start.contains("<svg") || start.hasPrefix("<?xml")
+        }
+        return false
+    }
 }
