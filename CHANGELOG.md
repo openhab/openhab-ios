@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+## [Version 3.1.14, Build 67] - 2025-08-22Z
+
+- Resolve off‑main SVG rendering via UIGraphicsImageRenderer. Detect SVGs and run the decoding/drawing step on the MainActor. Keep everything else background (#943)
+
+## [Version 3.1.13, Build 66] - 2025-08-21Z
+
+- Add missing git configuration for workflow (#941)
+- Revert "Add missing git configuration for workflow"
+- Revert "Add missing git configuration for workflow - edit"
+- Add missing git configuration for workflow - edit
+- Add missing git configuration for workflow
+- Simple concurrency fix attempt at NotificationService warnings (#938)
+
+## [Version 3.1.10, Build 62] - 2025-08-19Z
+
+- More warning and concurrency issue fixes (#940)
+
 ## [Version 3.1.9, Build 61] - 2025-08-19Z
 
 - Network tracker rework and Preferences improvement for strict concurrency (#937)
