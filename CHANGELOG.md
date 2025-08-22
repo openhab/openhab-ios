@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.1.14, Build 67] - 2025-08-22Z
+
+- Resolve off‑main SVG rendering via UIGraphicsImageRenderer. Detect SVGs and run the decoding/drawing step on the MainActor. Keep everything else background (#943)
+
 ## [Version 3.1.13, Build 66] - 2025-08-21Z
 
 - Add missing git configuration for workflow (#941)
