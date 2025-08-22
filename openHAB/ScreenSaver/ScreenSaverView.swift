@@ -24,7 +24,7 @@ struct ScreenSaverView: View {
 
     @State private var currentPosition: CGPoint = .zero
     @State private var screenSize: CGSize = .zero
-    @State private var movementTimerPublisher: Timer.TimerPublisher?
+    @State private var movementTimerCancellable: AnyCancellable?
     @State private var fadeOpacity = 1.0
 
     var body: some View {
@@ -67,18 +67,6 @@ struct ScreenSaverView: View {
             .onChange(of: geometry.size) { newSize in
                 screenSize = newSize
                 currentPosition = calculateRandomPosition(for: newSize)
-            }
-            .onReceive(movementTimerPublisher ?? Timer.publish(every: 1000, on: .main, in: .common)) { _ in
-                let half = max(configuration.fadeDuration / 2.0, 0.01)
-                withAnimation(.easeInOut(duration: half)) {
-                    fadeOpacity = 0.0
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + half) {
-                    currentPosition = calculateRandomPosition(for: screenSize)
-                    withAnimation(.easeInOut(duration: half)) {
-                        fadeOpacity = 1.0
-                    }
-                }
             }
         }
     }
@@ -134,12 +122,25 @@ struct ScreenSaverView: View {
 
     private func startMovementTimer(for size: CGSize) {
         stopMovementTimer()
-        movementTimerPublisher = Timer.publish(every: configuration.movementInterval, on: .main, in: .common)
-        _ = movementTimerPublisher?.connect()
+        movementTimerCancellable = Timer.publish(every: configuration.movementInterval, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in
+                let half = max(configuration.fadeDuration / 2.0, 0.01)
+                withAnimation(.easeInOut(duration: half)) {
+                    fadeOpacity = 0.0
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + half) {
+                    currentPosition = calculateRandomPosition(for: screenSize)
+                    withAnimation(.easeInOut(duration: half)) {
+                        fadeOpacity = 1.0
+                    }
+                }
+            }
     }
 
     private func stopMovementTimer() {
-        movementTimerPublisher = nil
+        movementTimerCancellable?.cancel()
+        movementTimerCancellable = nil
     }
 
     private func calculateRandomPosition(for size: CGSize) -> CGPoint {
