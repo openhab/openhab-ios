@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import OpenHABCore
 import SwiftUI
 
@@ -68,8 +69,8 @@ struct BonjourDiscoverySheet: View {
                 }
             }
         }
-        .onAppear {
-            discovery.discoveredURLs.removeAll()
+        .task {
+            discovery.resetDiscoveredUrls()
             discovery.discoverSequentially()
         }
     }

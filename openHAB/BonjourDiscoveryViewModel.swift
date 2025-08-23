@@ -32,7 +32,8 @@ enum BonjourServiceType: String {
 }
 
 // @available(watchOS, unavailable)
-class BonjourDiscoveryViewModel: ObservableObject {
+@MainActor
+final class BonjourDiscoveryViewModel: ObservableObject {
     @Published public var discoveredURLs: [String] = []
     @Published public var isDiscovering = false
 
@@ -42,6 +43,24 @@ class BonjourDiscoveryViewModel: ObservableObject {
     private let timeoutInterval: TimeInterval = 15
 
     public init() {}
+
+    private func stopDiscovering() {
+        isDiscovering = false
+    }
+
+    private func timeout(serviceType: BonjourServiceType) {
+        browsers[serviceType]?.cancel()
+        browsers[serviceType] = nil
+        timeoutTasks[serviceType] = nil
+    }
+
+    private func addDiscoveredUrl(_ url: String) {
+        discoveredURLs.append(url)
+    }
+
+    func resetDiscoveredUrls() {
+        discoveredURLs.removeAll()
+    }
 }
 
 extension BonjourDiscoveryViewModel {
@@ -58,10 +77,11 @@ extension BonjourDiscoveryViewModel {
 
         var completedDiscoveries = 0
         let totalDiscoveries = 2
-        let completionQueue = DispatchQueue.main
 
-        let checkCompletion = {
-            completionQueue.async {
+        let checkCompletion: @Sendable () -> Void = {
+            // we do not want to return the task, but some linting tool removes a manual return statement if there is nothing else in this closure
+            self.logger.trace("checkCompletion")
+            Task { @MainActor in
                 completedDiscoveries += 1
                 self.logger.debug("Discovery completed: \(completedDiscoveries)/\(totalDiscoveries) (attempt \(attempt))")
                 if completedDiscoveries >= totalDiscoveries {
@@ -70,11 +90,12 @@ extension BonjourDiscoveryViewModel {
 
                     if foundCount == 0, attempt < maxAttempts {
                         self.logger.info("🔄 No servers found on attempt \(attempt), retrying...")
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        Task {
+                            try await Task.sleep(for: .seconds(2))
                             self.discoverAllWithRetry(attempt: attempt + 1, maxAttempts: maxAttempts)
                         }
                     } else {
-                        self.isDiscovering = false
+                        self.stopDiscovering()
                         if foundCount > 0 {
                             self.logger.info("🎉 Discovery completed after \(attempt) attempt(s). Found \(foundCount) server(s) on \(uniqueIPs) IP(s)")
                             for url in self.discoveredURLs {
@@ -97,7 +118,7 @@ extension BonjourDiscoveryViewModel {
         discoverAll()
     }
 
-    private func discover(using serviceType: BonjourServiceType, completion: @escaping () -> Void) {
+    private func discover(using serviceType: BonjourServiceType, completion: @Sendable @escaping () -> Void) {
         logger.info("🔍 Starting \(serviceType.rawValue, privacy: .public) discovery…")
 
         // Cancel existing browser for this service type
@@ -112,7 +133,7 @@ extension BonjourDiscoveryViewModel {
 
         browser.browseResultsChangedHandler = { [weak self] results, _ in
             guard let self else { return }
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 for result in results {
                     switch result.endpoint {
                     case let .hostPort(host, port):
@@ -135,7 +156,7 @@ extension BonjourDiscoveryViewModel {
                 logger.info("🌐 NWBrowser ready for \(serviceType.rawValue, privacy: .public)")
             case let .failed(error):
                 logger.error("❌ NWBrowser failed: \(error.localizedDescription, privacy: .public)")
-                DispatchQueue.main.async { completion() }
+                completion()
             default:
                 break
             }
@@ -144,17 +165,14 @@ extension BonjourDiscoveryViewModel {
         browser.start(queue: .main)
 
         // Timeout with individual tracking
-        let timeoutTask = DispatchWorkItem { [weak self] in
+        let timeoutInterval = timeoutInterval
+        Task { [weak self] in
+            try await Task.sleep(for: .seconds(timeoutInterval))
             guard let self else { return }
-            browsers[serviceType]?.cancel()
-            browsers[serviceType] = nil
-            timeoutTasks[serviceType] = nil
+            timeout(serviceType: serviceType)
             logger.info("⏱️ Discovery for \(serviceType.rawValue, privacy: .public) completed.")
             completion()
         }
-
-        timeoutTasks[serviceType] = timeoutTask
-        DispatchQueue.main.asyncAfter(deadline: .now() + timeoutInterval, execute: timeoutTask)
     }
 
     private func stopAllDiscovery() {
@@ -193,17 +211,21 @@ extension BonjourDiscoveryViewModel {
                 case let .ipv4(addr):
                     let ip = addr.debugDescription.components(separatedBy: "%").first ?? addr.debugDescription
                     logger.debug("🌐 Got ipv4: \(ip, privacy: .public)")
-                    emitURL(scheme: scheme, ip: ip, port: port)
+                    Task {
+                        await emitURL(scheme: scheme, ip: ip, port: port)
+                    }
 
                 case let .name(hostname, _):
                     logger.debug("🌐 Got hostname: \(hostname, privacy: .public)")
 
-                    let addresses = resolveHostWithGetAddrInfo(hostname: hostname)
-                    if let ip = addresses.first {
-                        emitURL(scheme: scheme, ip: ip, port: port)
-                        logger.notice("🔗 Resolved hostname to IPv4: \(ip, privacy: .public)")
-                    } else {
-                        logger.warning("⚠️ Could not resolve hostname: \(hostname, privacy: .public)")
+                    Task {
+                        let addresses = await resolveHostWithGetAddrInfo(hostname: hostname)
+                        if let ip = addresses.first {
+                            await emitURL(scheme: scheme, ip: ip, port: port)
+                            logger.notice("🔗 Resolved hostname to IPv4: \(ip, privacy: .public)")
+                        } else {
+                            logger.warning("⚠️ Could not resolve hostname: \(hostname, privacy: .public)")
+                        }
                     }
 
                 default:
@@ -254,24 +276,22 @@ extension BonjourDiscoveryViewModel {
         let portValue = UInt16(port.rawValue)
         let url = "\(scheme)://\(ip):\(portValue)"
 
-        DispatchQueue.main.async {
-            if !self.discoveredURLs.contains(url) {
-                self.discoveredURLs.append(url)
-                self.logger.notice("🌍 Discovered server: \(url, privacy: .public)")
+        if !discoveredURLs.contains(url) {
+            addDiscoveredUrl(url)
+            logger.notice("🌍 Discovered server: \(url, privacy: .public)")
 
-                // Check for multiple servers on same IP
-                let existingOnSameIP = self.discoveredURLs.filter { existingURL in
-                    guard let existingHost = URL(string: existingURL)?.host,
-                          let newHost = URL(string: url)?.host else { return false }
-                    return existingHost == newHost && existingURL != url
-                }
-
-                if !existingOnSameIP.isEmpty {
-                    self.logger.info("🏠 Multiple servers found on IP \(ip, privacy: .public): \(existingOnSameIP.count + 1) total")
-                }
-            } else {
-                self.logger.debug("🔄 Duplicate URL ignored: \(url, privacy: .public)")
+            // Check for multiple servers on same IP
+            let existingOnSameIP = discoveredURLs.filter { existingURL in
+                guard let existingHost = URL(string: existingURL)?.host,
+                      let newHost = URL(string: url)?.host else { return false }
+                return existingHost == newHost && existingURL != url
             }
+
+            if !existingOnSameIP.isEmpty {
+                logger.info("🏠 Multiple servers found on IP \(ip, privacy: .public): \(existingOnSameIP.count + 1) total")
+            }
+        } else {
+            logger.debug("🔄 Duplicate URL ignored: \(url, privacy: .public)")
         }
     }
 }
