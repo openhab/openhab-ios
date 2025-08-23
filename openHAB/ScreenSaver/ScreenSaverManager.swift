@@ -115,7 +115,7 @@ final class ScreenSaverManager: NSObject {
         hostVC.setNeedsStatusBarAppearanceUpdate()
 
         let swiftUIView = ScreenSaverView(configuration: configuration)
-        let hostingController = UIHostingController(rootView: AnyView(swiftUIView))
+        let hostingController = UIHostingController(rootView: swiftUIView)
         hostingController.view.backgroundColor = .clear
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
 
