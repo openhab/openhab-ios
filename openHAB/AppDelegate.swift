@@ -239,7 +239,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
-extension AppDelegate: UNUserNotificationCenterDelegate {
+extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {
     // this is called when a notification comes in while in the foreground
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
         let userInfo = notification.request.content.userInfo
@@ -260,11 +260,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     // this is called when clicking a notification while in the background
-    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier
 
-        logger.info("Notification clicked: action \(actionIdentifier) userInfo \(userInfo)")
+        logger.info("Notification clicked: action \(actionIdentifier)")
 
         if actionIdentifier != UNNotificationDismissActionIdentifier {
             if actionIdentifier != UNNotificationDefaultActionIdentifier {
@@ -273,8 +273,10 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
             let cloudUserId = userInfo["userId"] as? String
 
-            await notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
+            notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
         }
+
+        completionHandler()
     }
 
     private func displayNotification(message: String, action: String?, cloudUserId: String?) async {
@@ -327,7 +329,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         SwiftMessages.hideAll()
     }
 
-    // ✅ Ensure this runs on the MainActor
     @MainActor
     private func notifyNotificationListeners(action: String?, cloudUserId: String? = nil) {
         // Wake up screen saver immediately on incoming notification interaction
