@@ -24,8 +24,9 @@ struct ScreenSaverView: View {
 
     @State private var currentPosition: CGPoint = .zero
     @State private var screenSize: CGSize = .zero
-    @State private var movementTimerCancellable: AnyCancellable?
     @State private var fadeOpacity = 1.0
+    @State private var movementTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    @State private var isTimerActive = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -56,10 +57,35 @@ struct ScreenSaverView: View {
                     .position(currentPosition)
                 }
             }
+            .onReceive(movementTimer) { _ in
+                guard isTimerActive else { return }
+
+                let half = max(configuration.fadeDuration / 2.0, 0.01)
+
+                Task {
+                    // Fade out on the main actor
+                    await MainActor.run {
+                        withAnimation(.easeInOut(duration: half)) {
+                            fadeOpacity = 0.0
+                        }
+                    }
+
+                    // Wait for half the duration before moving
+                    try? await Task.sleep(nanoseconds: UInt64(half * 1_000_000_000))
+
+                    // Move and fade back in on the main actor
+                    await MainActor.run {
+                        currentPosition = calculateRandomPosition(for: screenSize)
+                        withAnimation(.easeInOut(duration: half)) {
+                            fadeOpacity = 1.0
+                        }
+                    }
+                }
+            }
             .onAppear {
                 screenSize = geometry.size
                 currentPosition = calculateRandomPosition(for: geometry.size)
-                startMovementTimer(for: geometry.size)
+                startMovementTimer()
             }
             .onDisappear {
                 stopMovementTimer()
@@ -125,27 +151,14 @@ struct ScreenSaverView: View {
         }
     }
 
-    private func startMovementTimer(for size: CGSize) {
-        stopMovementTimer()
-        movementTimerCancellable = Timer.publish(every: configuration.movementInterval, on: .main, in: .common)
-            .autoconnect()
-            .sink { _ in
-                let half = max(configuration.fadeDuration / 2.0, 0.01)
-                withAnimation(.easeInOut(duration: half)) {
-                    fadeOpacity = 0.0
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + half) {
-                    currentPosition = calculateRandomPosition(for: screenSize)
-                    withAnimation(.easeInOut(duration: half)) {
-                        fadeOpacity = 1.0
-                    }
-                }
-            }
+    private func startMovementTimer() {
+        // Create a new timer with the correct interval
+        movementTimer = Timer.publish(every: configuration.movementInterval, on: .main, in: .common).autoconnect()
+        isTimerActive = true
     }
 
     private func stopMovementTimer() {
-        movementTimerCancellable?.cancel()
-        movementTimerCancellable = nil
+        isTimerActive = false
     }
 
     private func calculateRandomPosition(for size: CGSize) -> CGPoint {
