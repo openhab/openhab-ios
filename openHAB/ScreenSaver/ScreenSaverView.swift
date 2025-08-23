@@ -102,7 +102,12 @@ struct ScreenSaverView: View {
         let fontSize = max(shortSide * configuration.timeFontSizeRatio, 48)
 
         if let fontName = configuration.fontName {
-            return .custom(fontName, size: fontSize)
+            if isFontAvailable(fontName) {
+                return .custom(fontName, size: fontSize)
+            } else {
+                logger.warning("Custom font '\(fontName)' not found. Falling back to system font.")
+                return .system(size: fontSize, weight: .thin)
+            }
         } else {
             return .system(size: fontSize, weight: .thin)
         }
@@ -172,6 +177,16 @@ struct ScreenSaverView: View {
             let fallbackY = minMargin + CGFloat.random(in: 0 ... safeHeight)
             return CGPoint(x: fallbackX, y: fallbackY)
         }
+    }
+
+    func isFontAvailable(_ fontName: String) -> Bool {
+        #if os(iOS) || os(tvOS) || os(watchOS)
+        return UIFont(name: fontName, size: 12) != nil
+        #elseif os(macOS)
+        return NSFont(name: fontName, size: 12) != nil
+        #else
+        return false
+        #endif
     }
 }
 
