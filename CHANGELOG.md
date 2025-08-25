@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [Version 3.1.16, Build 69] - 2025-08-25Z
+
+- Migration of ScreenSaver to SwiftUI (#935)
+- Completion handler notification delegate instead of async version (#945)
+
 ## [Version 3.1.15, Build 68] - 2025-08-22Z
 
 - Project settings update (#942)
