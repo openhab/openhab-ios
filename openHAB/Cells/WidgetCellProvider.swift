@@ -19,10 +19,10 @@ enum WidgetCellFactory {
         case .switchWidget:
             if !widget.mappings.isEmpty {
                 SegmentedCellProvider()
-            } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                SwitchCellProvider()
             } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
                 RollershutterCellProvider()
+            } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
+                SwitchCellProvider()
             } else if !widget.mappingsOrItemOptions.isEmpty {
                 SegmentedCellProvider()
             } else {

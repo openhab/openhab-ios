@@ -443,6 +443,158 @@ final class JSONParserTests: XCTestCase {
         }
     }
 
+    func testGroupItemWithRollershutterGroupTypeWidgetEnum() {
+        // Test for issue #947: Items of groupType: Rollershutter are not displayed as Rollershutter widgets
+        let jsonInputForGroup = """
+        {
+            "homepage": {
+                "id": "default",
+                "title": "Main Menu",
+                "link": "https://server/rest/sitemaps/default/default",
+                "leaf": false,
+                "timeout": false,
+                "widgets": [
+                {
+                    "widgetId": "00",
+                    "type": "Switch",
+                    "label": "Rollladen Erdgeschoss",
+                    "icon": "blinds",
+                    "mappings": [],
+                    "item": {
+                        "members": [],
+                        "groupType": "Rollershutter",
+                        "function": {
+                            "name": "EQUALITY"
+                        },
+                        "link": "https://server/rest/items/gRollladen_EG",
+                        "state": "UNDEF",
+                        "editable": false,
+                        "type": "Group",
+                        "name": "gRollladen_EG",
+                        "label": "Rollladen Erdgeschoss",
+                        "category": "blinds",
+                        "tags": [],
+                        "groupNames": []
+                    },
+                    "widgets": []
+                }
+                ]
+            }
+        }
+        """
+        let data = Data(jsonInputForGroup.utf8)
+        do {
+            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: data)
+            let widget = codingData.widgets?[0]
+            
+            // Verify parsing
+            XCTAssertEqual(widget?.item?.type, .group, "Item type should be Group")
+            XCTAssertEqual(widget?.item?.groupType, .rollershutter, "Item groupType should be Rollershutter")
+            XCTAssertEqual(widget?.type, .switchWidget, "Widget type should be Switch")
+            
+            // Convert to OpenHABWidget and test stateEnum
+            if let widget = widget {
+                let openHABWidget = widget.openHABWidget
+                
+                // This is the key test: the stateEnum should be .rollershutter, not .switcher
+                switch openHABWidget.stateEnum {
+                case .rollershutter:
+                    // CORRECT: This should happen for Group items with groupType: Rollershutter
+                    XCTAssertTrue(true, "Correctly identified as rollershutter widget")
+                case .switcher:
+                    XCTFail("BUG: Group item with groupType: Rollershutter incorrectly identified as switcher widget")
+                case .segmented:
+                    XCTFail("Group item with groupType: Rollershutter incorrectly identified as segmented widget")
+                default:
+                    XCTFail("Group item with groupType: Rollershutter identified as unexpected widget type: \(openHABWidget.stateEnum)")
+                }
+                
+                // Additional checks
+                XCTAssertTrue(openHABWidget.item?.isOfTypeOrGroupType(.rollershutter) ?? false, "Item should match rollershutter type")
+                XCTAssertFalse(openHABWidget.item?.isOfTypeOrGroupType(.switchItem) ?? true, "Item should not match switchItem type")
+            } else {
+                XCTFail("Failed to create widget from coding data")
+            }
+        } catch {
+            XCTFail("Failed parsing: \(error)")
+        }
+    }
+
+    func testSwitchItemWithRollershutterGroupTypeWidgetEnum() {
+        // Test for issue #947: Switch items of groupType: Rollershutter are not displayed as Rollershutter widgets
+        let jsonInputForSwitchItem = """
+        {
+            "homepage": {
+                "id": "default",
+                "title": "Main Menu",
+                "link": "https://server/rest/sitemaps/default/default",
+                "leaf": false,
+                "timeout": false,
+                "widgets": [
+                {
+                    "widgetId": "01",
+                    "type": "Switch",
+                    "label": "Test Rollershutter",
+                    "icon": "blinds",
+                    "mappings": [],
+                    "item": {
+                        "groupType": "Rollershutter",
+                        "link": "https://server/rest/items/TestRollershutter",
+                        "state": "50",
+                        "editable": false,
+                        "type": "Switch",
+                        "name": "TestRollershutter",
+                        "label": "Test Rollershutter",
+                        "category": "blinds",
+                        "tags": [],
+                        "groupNames": []
+                    },
+                    "widgets": []
+                }
+                ]
+            }
+        }
+        """
+        let data = Data(jsonInputForSwitchItem.utf8)
+        do {
+            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: data)
+            let widget = codingData.widgets?[0]
+            
+            // Verify parsing
+            XCTAssertEqual(widget?.item?.type, .switchItem, "Item type should be Switch")
+            XCTAssertEqual(widget?.item?.groupType, .rollershutter, "Item groupType should be Rollershutter")
+            XCTAssertEqual(widget?.type, .switchWidget, "Widget type should be Switch")
+            
+            // Convert to OpenHABWidget and test stateEnum
+            if let widget = widget {
+                let openHABWidget = widget.openHABWidget
+                
+                // This is the key test: the stateEnum should be .rollershutter, not .switcher
+                // Both isOfTypeOrGroupType(.switchItem) and isOfTypeOrGroupType(.rollershutter) return true,
+                // but rollershutter should take precedence due to the fixed order of conditionals
+                switch openHABWidget.stateEnum {
+                case .rollershutter:
+                    // CORRECT: This should happen for Switch items with groupType: Rollershutter
+                    XCTAssertTrue(true, "Correctly identified as rollershutter widget")
+                case .switcher:
+                    XCTFail("BUG: Switch item with groupType: Rollershutter incorrectly identified as switcher widget")
+                case .segmented:
+                    XCTFail("Switch item with groupType: Rollershutter incorrectly identified as segmented widget")
+                default:
+                    XCTFail("Switch item with groupType: Rollershutter identified as unexpected widget type: \(openHABWidget.stateEnum)")
+                }
+                
+                // Additional checks - both should be true, but rollershutter should take precedence
+                XCTAssertTrue(openHABWidget.item?.isOfTypeOrGroupType(.rollershutter) ?? false, "Item should match rollershutter type")
+                XCTAssertTrue(openHABWidget.item?.isOfTypeOrGroupType(.switchItem) ?? false, "Item should also match switchItem type")
+            } else {
+                XCTFail("Failed to create widget from coding data")
+            }
+        } catch {
+            XCTFail("Failed parsing: \(error)")
+        }
+    }
+
     func testJSONLargeSitemapParseSwift() throws {
         let logger = Logger(subsystem: "org.openhab.app", category: "RecordDecoding")
 
