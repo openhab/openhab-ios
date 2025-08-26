@@ -8393,6 +8393,9 @@
           },
           "editable": {
             "type": "boolean"
+          },
+          "groupType": {
+              "type": "string"
           }
         }
       },
