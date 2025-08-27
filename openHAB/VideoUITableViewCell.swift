@@ -92,6 +92,15 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         fatalError("init(coder:) has not been implemented")
     }
 
+    deinit {
+        // Ensure proper cleanup of observers and tasks
+        if let observer = playerObserver {
+            observer.invalidate()
+        }
+        activeTask?.cancel()
+        NotificationCenter.default.removeObserver(self)
+    }
+
     override func willMove(toSuperview newSuperview: UIView?) {
         super.willMove(toSuperview: newSuperview)
 
@@ -133,6 +142,13 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         if widget.encoding.lowercased() != VideoEncoding.mjpeg.rawValue {
             bringSubviewToFront(playerView)
             let playerItem = AVPlayerItem(asset: AVAsset(url: url))
+            
+            // Properly invalidate any existing observer before setting up a new one
+            if let existingObserver = playerObserver {
+                existingObserver.invalidate()
+                playerObserver = nil
+            }
+            
             playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] playerItem, _ in
                 guard let self else { return }
 
@@ -281,7 +297,13 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         if reset {
             url = nil
         }
+        
+        // Properly invalidate the KVO observer before setting it to nil
+        if let observer = playerObserver {
+            observer.invalidate()
+        }
         playerObserver = nil
+        
         playerView?.playerLayer.player = nil
         // Cancel the active task if it is running
         activeTask?.cancel()
