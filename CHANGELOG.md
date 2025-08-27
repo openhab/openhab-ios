@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.1.17, Build 70] - 2025-08-27Z
+
+- Fix #947 (#949)
+
 ## [Version 3.1.16, Build 69] - 2025-08-25Z
 
 - Migration of ScreenSaver to SwiftUI (#935)
