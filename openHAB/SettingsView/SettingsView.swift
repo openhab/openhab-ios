@@ -123,7 +123,7 @@ struct SettingsView: View {
         settingsIdleOff = Preferences.idleOff
         settingsRealTimeSliders = Preferences.currentHomePreferences.realTimeSliders
         settingsSendCrashReports = Preferences.sendCrashReports
-        settingsIconType = IconType(rawValue: Preferences.currentHomePreferences.iconType) ?? .png
+        settingsIconType = IconType(rawValue: Preferences.currentHomePreferences.iconType) ?? .svg
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.currentHomePreferences.sortSitemapsBy) ?? .label
         settingsDefaultMainUIPath = Preferences.currentHomePreferences.defaultMainUIPath
         settingsAlwaysAllowWebRTC = Preferences.currentHomePreferences.alwaysAllowWebRTC
@@ -174,7 +174,7 @@ extension UIApplication {
         @State var settingsIdleOff = true
         @State var settingsRealTimeSliders = true
         @State var settingsSendCrashReports = false
-        @State var settingsIconType: IconType = .png
+        @State var settingsIconType: IconType = .svg
         @State var settingsSortSitemapsBy: SortSitemapsOrder = .label
         @State var settingsDefaultMainUIPath = "/overview/"
         @State var settingsAlwaysAllowWebRTC = true

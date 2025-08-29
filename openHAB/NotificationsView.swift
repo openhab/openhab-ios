@@ -50,7 +50,7 @@ struct NotificationRow: View {
             version: connection.version,
             icon: notification.icon,
             state: "",
-            iconType: .png,
+            iconType: .svg,
             iconColor: ""
         )
 
