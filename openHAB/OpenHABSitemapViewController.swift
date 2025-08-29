@@ -26,7 +26,7 @@ import UIKit
 
 class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDelegate {
     var pageUrl = ""
-    private var iconType: IconType = .png
+    private var iconType: IconType = .svg
     var openHABRootUrl = ""
 
     private var activeConnectionInfo: ConnectionInfo?
@@ -557,12 +557,12 @@ extension OpenHABSitemapViewController {
     func loadSettings() {
         defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
         idleOff = Preferences.idleOff
-        iconType = IconType(rawValue: Preferences.currentHomePreferences.iconType) ?? .png
+        iconType = IconType(rawValue: Preferences.currentHomePreferences.iconType) ?? .svg
         #if DEBUG
         // always use demo sitemap for UITest
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             defaultSitemap = "demo"
-            iconType = .png
+            iconType = .svg
         }
         #endif
     }
