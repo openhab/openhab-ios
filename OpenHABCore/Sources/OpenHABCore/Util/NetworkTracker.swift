@@ -187,17 +187,14 @@ public actor NetworkTracker {
     public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {
         logger.info("NetworkConnection: waitForActiveConnection")
         // If we already have an active connection, return it immediately
-        if let existing = activeConnection {
-            return existing
-        }
+        if let existing = activeConnection { return existing }
         // Utilize for await to listen for changes in $activeConnection
         // $activeConnection.values is an AsyncSequence, allowing you to iterate over its values asynchronously.
         // Wait until a non-nil value is received
         return await withTimeout(timeout: timeout) {
+            if let current = await self.activeConnection { return current }
             for await connection in await self.$activeConnection.values {
-                if let connection {
-                    return connection
-                }
+                if let connection { return connection }
             }
             return nil
         }
