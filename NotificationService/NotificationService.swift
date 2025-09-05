@@ -96,9 +96,10 @@ actor NotificationServiceHandler {
                         intentIdentifiers: [],
                         options: .customDismissAction
                     )
+                let logger = logger
                 UNUserNotificationCenter.current().getNotificationCategories { existingCategories in
                     var updatedCategories = existingCategories
-                    self.logger.info("handleNotification adding category \(category)")
+                    logger.info("handleNotification adding category \(category)")
                     updatedCategories.insert(notificationCategory)
                     UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
                 }

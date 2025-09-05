@@ -22,41 +22,17 @@ import UIKit
 @preconcurrency import UserNotifications
 import WatchConnectivity
 
-actor AudioPlayerActor {
-    private var player: AVAudioPlayer?
-
-    let logger = Logger(subsystem: "org.openhab", category: "AudioPlayerActor")
-
-    func playSound() {
-        guard let soundPath = Bundle.main.url(forResource: "ping", withExtension: "wav") else {
-            return
-        }
-
-        do {
-            let newPlayer = try AVAudioPlayer(contentsOf: soundPath)
-            newPlayer.numberOfLoops = 0
-            newPlayer.play()
-            player = newPlayer
-        } catch {
-            logger.info("Failed to play sound \(error.localizedDescription)")
-        }
-    }
-
-    func stopSound() {
-        player?.stop()
-    }
-}
-
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     static var appDelegate: AppDelegate!
 
     private let logger = Logger(subsystem: "org.openhab", category: "AppDelegate")
 
-    let audioPlayer = AudioPlayerActor()
     var window: UIWindow?
 
     private var crashlyticsSubscriber: AnyCancellable?
+
+    private let notificationDelegate = NotificationCenterDelegateImpl()
 
     // Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {
@@ -85,6 +61,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UserDefaults.standard.register(defaults: appDefaults)
 
         Preferences.migratePreferences()
+
+        UNUserNotificationCenter.current().delegate = notificationDelegate
 
         registerForPushNotifications()
         logger.info("uniq id: \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
@@ -172,7 +150,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
         }
-        UNUserNotificationCenter.current().delegate = self
     }
 
     func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
@@ -194,7 +171,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // remove the 'openhab' from the url
         let action = url.absoluteString.split(separator: ":").dropFirst().joined(separator: ":")
-        notifyNotificationListeners(action: action)
+        notificationDelegate.notifyNotificationListeners(action: action)
         return true
     }
 
@@ -236,108 +213,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         return .newData
-    }
-}
-
-extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {
-    // this is called when a notification comes in while in the foreground
-    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
-        let userInfo = notification.request.content.userInfo
-        logger.info("Notification received while app is in foreground: \(userInfo)")
-
-        NotificationCenter.default.post(
-            name: .openHABDidReceiveNotification,
-            object: nil,
-            userInfo: userInfo
-        )
-
-        let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
-        let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-        let cloudUserId = userInfo["userId"] as? String
-        await displayNotification(message: message, action: action, cloudUserId: cloudUserId)
-
-        return [] // Modify this if you want to show banners, alerts, etc.
-    }
-
-    // this is called when clicking a notification while in the background
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        var userInfo = response.notification.request.content.userInfo
-        let actionIdentifier = response.actionIdentifier
-
-        logger.info("Notification clicked: action \(actionIdentifier)")
-
-        if actionIdentifier != UNNotificationDismissActionIdentifier {
-            if actionIdentifier != UNNotificationDefaultActionIdentifier {
-                userInfo["actionIdentifier"] = actionIdentifier
-            }
-            let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-            let cloudUserId = userInfo["userId"] as? String
-
-            notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
-        }
-
-        completionHandler()
-    }
-
-    private func displayNotification(message: String, action: String?, cloudUserId: String?) async {
-        logger.info("displayNotification \(message)")
-
-        Task {
-            await audioPlayer.playSound()
-        }
-
-        var config = SwiftMessages.Config()
-        config.duration = .seconds(seconds: 5)
-        config.presentationStyle = .bottom
-
-        class MessageTapGestureRecognizer: UITapGestureRecognizer {
-            private let handler: () -> Void
-
-            init(handler: @escaping () -> Void) {
-                self.handler = handler
-                super.init(target: nil, action: nil)
-                addTarget(self, action: #selector(handleTap))
-            }
-
-            @objc private func handleTap() {
-                handler()
-            }
-        }
-
-        await MainActor.run {
-            SwiftMessages.show(config: config) {
-                let view = MessageView.viewFromNib(layout: .cardView)
-                view.configureTheme(.info)
-                view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
-                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                view.buttonTapHandler = { _ in SwiftMessages.hide() }
-
-                // Use closure-based tap gesture insteae of #selector
-                let tapGesture = MessageTapGestureRecognizer {
-                    self.messageViewTapped(action: action, cloudUserId: cloudUserId)
-                }
-                view.addGestureRecognizer(tapGesture)
-
-                return view
-            }
-        }
-    }
-
-    // Action to be performed when the notification message view is tapped
-    func messageViewTapped(action: String?, cloudUserId: String? = nil) {
-        notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
-        SwiftMessages.hideAll()
-    }
-
-    @MainActor
-    private func notifyNotificationListeners(action: String?, cloudUserId: String? = nil) {
-        // Wake up screen saver immediately on incoming notification interaction
-        NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
-
-        if let navigationController = window?.rootViewController as? UINavigationController,
-           let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
-            rootViewController.handleNotification(action: action, cloudUserId: cloudUserId)
-        }
     }
 }
 
