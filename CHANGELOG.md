@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [Version 3.1.18, Build 71] - 2025-09-05Z
+
+- Fixes waiting for a connection when one already exists (#958)
+- Async version of notificationcenter delegate (#952)
+- Fix for crash on number entry in input field (#957)
+- Bump crowdin/github-action from 2.9.1 to 2.10.0 (#946)
+- Transition to SVG (#955)
+
 ## [Version 3.1.17, Build 70] - 2025-08-27Z
 
 - Fix #947 (#949)
