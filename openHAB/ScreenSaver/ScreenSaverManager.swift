@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import os.log
+import SwiftUI
 import UIKit
 
 private class ScreenSaverHostingViewController: UIViewController {
@@ -28,8 +29,6 @@ final class ScreenSaverManager: NSObject {
     private var idleTimer: Timer?
 
     private weak var window: UIWindow?
-
-    private var saverView: ScreenSaverView?
 
     private var overlayWindow: UIWindow?
 
@@ -51,7 +50,7 @@ final class ScreenSaverManager: NSObject {
 
     public func updateConfiguration(_ newConfiguration: ScreenSaverConfiguration) {
         configuration = newConfiguration
-        if saverView != nil {
+        if overlayWindow != nil {
             dismissSaverIfNeeded()
         }
 
@@ -95,7 +94,7 @@ final class ScreenSaverManager: NSObject {
 
     private func showSaver() {
         guard configuration.isEnabled else { return }
-        guard saverView == nil, let baseWindow = window else { return }
+        guard overlayWindow == nil, let baseWindow = window else { return }
         logger.debug("Presenting screen saver (overlay window)")
 
         let overlay: UIWindow
@@ -115,35 +114,34 @@ final class ScreenSaverManager: NSObject {
 
         hostVC.setNeedsStatusBarAppearanceUpdate()
 
-        let saver = ScreenSaverView(configuration: configuration)
-        saver.translatesAutoresizingMaskIntoConstraints = false
-        hostVC.view.addSubview(saver)
+        let swiftUIView = ScreenSaverView(configuration: configuration)
+        let hostingController = UIHostingController(rootView: swiftUIView)
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+
+        hostVC.addChild(hostingController)
+        hostVC.view.addSubview(hostingController.view)
+        hostingController.didMove(toParent: hostVC)
+
         NSLayoutConstraint.activate([
-            saver.leadingAnchor.constraint(equalTo: hostVC.view.leadingAnchor),
-            saver.trailingAnchor.constraint(equalTo: hostVC.view.trailingAnchor),
-            saver.topAnchor.constraint(equalTo: hostVC.view.topAnchor),
-            saver.bottomAnchor.constraint(equalTo: hostVC.view.bottomAnchor)
+            hostingController.view.leadingAnchor.constraint(equalTo: hostVC.view.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: hostVC.view.trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: hostVC.view.topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: hostVC.view.bottomAnchor)
         ])
 
-        // wake up if the user taps anywhere
-        attachGestureRecognizers(to: overlay)
-
-        saver.alpha = 0
+        hostingController.view.alpha = 0
         UIView.animate(withDuration: 0.3) {
-            saver.alpha = 1.0
-        } completion: { _ in
-            saver.startAnimation()
+            hostingController.view.alpha = 1.0
         }
 
-        saverView = saver
         overlayWindow = overlay
         applyDimming()
     }
 
     private func dismissSaverIfNeeded() {
-        guard let saver = saverView else { return }
+        guard overlayWindow != nil else { return }
         logger.debug("Dismissing screen saver")
-        saver.stopAnimation()
         if configuration.enablesAutoDimming {
             if configuration.restoresBrightness {
                 restoreBrightnessIfNeeded()
@@ -152,16 +150,14 @@ final class ScreenSaverManager: NSObject {
                 UIScreen.main.brightness = target
             }
         }
+        // Animate dismissal for the overlay window
         UIView.animate(withDuration: 0.2) {
-            saver.alpha = 0
+            self.overlayWindow?.alpha = 0
         } completion: { _ in
-            saver.removeFromSuperview()
+            // Clean up overlay window
+            self.overlayWindow?.isHidden = true
+            self.overlayWindow = nil
         }
-        saverView = nil
-
-        // Tear down overlay window
-        overlayWindow?.isHidden = true
-        overlayWindow = nil
     }
 
     private func applyDimming() {

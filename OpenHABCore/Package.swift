@@ -17,7 +17,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/onevcat/Kingfisher.git", from: "8.0.0"),
         .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.1.0"),
         .package(url: "https://github.com/apple/swift-http-types.git", from: "1.0.0"),
         .package(url: "https://github.com/SDWebImage/SDWebImageSVGCoder.git", from: "1.4.0"),
         .package(url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git", from: "6.2.0")
