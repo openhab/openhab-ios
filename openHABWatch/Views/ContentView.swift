@@ -42,6 +42,7 @@ struct ContentView: View {
                         rowWidget(widget: widget)
                     }
                 }
+                .focusable(true)
                 .navigationBarTitle(Text(title))
             } else {
                 VStack {

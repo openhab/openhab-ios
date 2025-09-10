@@ -37,7 +37,7 @@ struct OpenHABWatch: App {
                         Label("Debug", systemSymbol: .circleFill)
                     }
             }
-            .tabViewStyle(.page)
+            .tabViewStyle(.automatic)
             .environmentObject(settings)
             .task {
                 let center = UNUserNotificationCenter.current()
