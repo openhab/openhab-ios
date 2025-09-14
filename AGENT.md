@@ -16,7 +16,7 @@
 - **Dependencies**: Kingfisher (image loading), SwiftUI, Firebase, OpenAPI runtime, SFSafeSymbols
 
 ## Code Style
-- Swift 6
+- Swift 5.10, strict concurrency enabled
 - SwiftUI for new views, UIKit legacy TableViewCells for sitemap rendering
 - Naming: PascalCase classes, camelCase properties/methods, OpenHAB prefix for core types
 - Use SFSafeSymbols for SF Symbols, avoid force unwrapping, prefer optionals

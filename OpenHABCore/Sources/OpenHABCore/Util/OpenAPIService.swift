@@ -188,35 +188,6 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
-    // Will need swift 6.0 SE-0421 and iOS 18 to return an opaque sequence without the type eraser AnyAsyncSequence<Element>
-//    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> some AsyncSequence<OpenHABSitemapWidgetEvent, any Error> {
-//
-//            let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
-//            let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: sitemap)
-//            let decodedSequence = try await client.getSitemapEvents_1(path: path, query: query)
-//                .ok.body.text_event_hyphen_stream
-//                .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
-//            return decodedSequence.compactMap { OpenHABSitemapWidgetEvent($0.data) }
-//        }
-    struct AnyAsyncSequence<Element>: AsyncSequence {
-        public struct Iterator: AsyncIteratorProtocol {
-            private var _next: () async throws -> Element?
-            init<S: AsyncSequence>(_ base: S) where S.Element == Element {
-                var it = base.makeAsyncIterator()
-                _next = { try await it.next() }
-            }
-
-            public mutating func next() async throws -> Element? { try await _next() }
-        }
-
-        public let _make: () -> Iterator
-        init<S: AsyncSequence>(_ base: S) where S.Element == Element {
-            _make = { Iterator(base) }
-        }
-
-        public func makeAsyncIterator() -> Iterator { _make() }
-    }
-
     // Returns subscription id or nil
     func openHABcreateSubscription() async throws -> String? {
         logger.info("Creating subscription")
@@ -225,30 +196,21 @@ public extension OpenAPIService {
         return URL(string: urlString)?.lastPathComponent
     }
 
-    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String)
-        async throws -> AnyAsyncSequence<OpenHABSitemapWidgetEvent> {
+    // Will need swift 6.0 SE-0421 to return an opaque sequence
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> AsyncCompactMapSequence<AsyncThrowingMapSequence<ServerSentEventsDeserializationSequence<ServerSentEventsLineDeserializationSequence<HTTPBody>>, ServerSentEventWithJSONData<Components.Schemas.SitemapWidgetEvent>>, OpenHABSitemapWidgetEvent> {
         let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
         let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: sitemap)
-
-        let seq = try await client.getSitemapEvents_1(path: path, query: query)
+        let decodedSequence = try await client.getSitemapEvents_1(path: path, query: query)
             .ok.body.text_event_hyphen_stream
             .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
-            .compactMap { OpenHABSitemapWidgetEvent($0.data) }
-
-        return AnyAsyncSequence(seq)
+        return decodedSequence.compactMap { OpenHABSitemapWidgetEvent($0.data) }
     }
 
-    func openHABEvents(topics: String? = nil)
-        async throws -> AnyAsyncSequence<OpenHABEvent> {
-        let query: Operations.getEvents.Input.Query =
-            (topics == nil) ? .init() : .init(topics: topics)
-
-        let seq = try await client.getEvents(query: query)
+    func openHABEvents(topics: String? = nil) async throws -> AsyncThrowingMapSequence<ServerSentEventsDeserializationSequence<ServerSentEventsLineDeserializationSequence<HTTPBody>>, ServerSentEventWithJSONData<OpenHABEvent>> {
+        let query: Operations.getEvents.Input.Query = topics == nil ? .init() : Operations.getEvents.Input.Query(topics: topics)
+        return try await client.getEvents(query: query)
             .ok.body.text_event_hyphen_stream
             .asDecodedServerSentEventsWithJSONData(of: OpenHABEvent.self)
-            .compactMap(\.data)
-
-        return AnyAsyncSequence(seq)
     }
 }
 
