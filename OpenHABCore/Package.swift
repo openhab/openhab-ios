@@ -36,22 +36,8 @@ let package = Package(
                 .product(name: "SFSafeSymbols", package: "SFSafeSymbols")
             ],
             swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals"),
-                .enableUpcomingFeature("ConciseMagicFile"),
-                .enableUpcomingFeature("DisableOutwardActorInference"),
-                .enableUpcomingFeature("DynamicActorIsolation"),
                 .enableUpcomingFeature("ExistentialAny"),
-                .enableUpcomingFeature("ForwardTrailingClosures"),
-                .enableUpcomingFeature("GlobalActorIsolatedTypesUsability"),
-                .enableUpcomingFeature("GlobalConcurrency"),
-                .enableUpcomingFeature("ImplicitOpenExistentials"),
-                .enableUpcomingFeature("ImportObjcForwardDeclarations"),
-                .enableUpcomingFeature("InferSendableFromCaptures"),
-//                .enableUpcomingFeature("InternalImportsByDefault"),
-                .enableUpcomingFeature("IsolatedDefaultValues"),
                 .enableUpcomingFeature("MemberImportVisibility"),
-                .enableUpcomingFeature("NonfrozenEnumExhaustivity"),
-                .enableUpcomingFeature("RegionBasedIsolation"),
                 .enableUpcomingFeature("StrictConcurrency"),
                 .unsafeFlags([
                     "-Xfrontend", "-enable-actor-data-race-checks",
