@@ -20,7 +20,7 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if viewModel.isLoadingSitemap {
+            if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {
                 VStack {
                     Spacer()
                     ProgressView("Loading sitemap...")
@@ -41,7 +41,21 @@ struct ContentView: View {
                     ForEach(viewModel.widgets) { widget in
                         rowWidget(widget: widget)
                     }
+
+                    if viewModel.isLoadingSitemap {
+                        HStack {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
+                                .scaleEffect(0.7)
+                            Text("Updating...")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
+                    }
                 }
+                .focusable(true)
                 .navigationBarTitle(Text(title))
             } else {
                 VStack {

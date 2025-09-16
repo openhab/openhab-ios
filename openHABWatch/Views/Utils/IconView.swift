@@ -28,7 +28,7 @@ struct IconView: View {
             rootUrl: settings.openHABRootUrl,
             version: settings.openHABVersion,
             icon: widget.icon,
-            state: widget.item?.state ?? "",
+            state: widget.iconState(),
             iconType: settings.iconType,
             iconColor: iconColor
         ).url
