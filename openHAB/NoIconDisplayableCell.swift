@@ -13,10 +13,4 @@
 import OpenHABCore
 import SwiftUI
 
-// No icon will be displayed for cells that conform to NoIconDisplayableCell protocol
-import OpenHABCore
-import SwiftUI
-
-// No icon will be displayed for cells that conform to NoIconDisplayableCell protocol
-
 protocol NoIconDisplayableCell {}
