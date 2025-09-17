@@ -42,7 +42,7 @@ struct IconView: View {
             rootUrl: activeConnection.configuration.url,
             version: activeConnection.version,
             icon: widget.icon,
-            state: widget.item?.state ?? "",
+            state: widget.iconState(),
             iconType: settings.iconType,
             iconColor: iconColor
         ).url
