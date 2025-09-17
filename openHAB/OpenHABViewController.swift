@@ -16,13 +16,14 @@ import SideMenu
 import SwiftMessages
 import UIKit
 
+@MainActor
 protocol OpenHABViewable: AnyObject {
     func reloadView()
     func viewName() -> String
     func pushSitemap(name: String, path: String?) async
 }
 
-class OpenHABViewController: UIViewController, @MainActor OpenHABViewable {
+class OpenHABViewController: UIViewController, OpenHABViewable {
     private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABViewController")
 
     var trackerCancellables = Set<AnyCancellable>()
