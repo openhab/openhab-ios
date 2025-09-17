@@ -22,7 +22,7 @@ protocol OpenHABViewable: AnyObject {
     func pushSitemap(name: String, path: String?) async
 }
 
-class OpenHABViewController: UIViewController, OpenHABViewable {
+class OpenHABViewController: UIViewController, @MainActor OpenHABViewable {
     private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABViewController")
 
     var trackerCancellables = Set<AnyCancellable>()

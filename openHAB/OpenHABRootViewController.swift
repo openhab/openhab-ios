@@ -37,7 +37,7 @@ protocol ModalHandler: AnyObject {
 
 private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABRootViewController")
 
-class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, OpenHABViewable {
+class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, @MainActor OpenHABViewable {
     private let viewModel: SitemapPageViewModel
 
     private weak var rootViewController: OpenHABRootViewController?
