@@ -11,6 +11,7 @@
 
 import Combine
 import OpenHABCore
+import SFSafeSymbols
 import SwiftUI
 
 struct BonjourDiscoverySheet: View {
@@ -52,7 +53,7 @@ struct BonjourDiscoverySheet: View {
                                 Text(url)
                                 Spacer()
                                 if connectionConfig.url == url {
-                                    Image(systemName: "checkmark")
+                                    Image(systemSymbol: .checkmark)
                                 }
                             }
                         })

@@ -262,7 +262,20 @@ extension BonjourDiscoveryViewModel {
             if let addr = ptr?.pointee.ai_addr {
                 var buffer = [CChar](repeating: 0, count: Int(NI_MAXHOST))
                 if getnameinfo(addr, socklen_t(ptr!.pointee.ai_addrlen), &buffer, socklen_t(buffer.count), nil, 0, NI_NUMERICHOST) == 0 {
-                    result.append(String(cString: buffer))
+                    // Use recommended decoding: truncate at null terminator, then decode as UTF-8
+                    if let endIndex = buffer.firstIndex(of: 0) {
+                        let slice = buffer[..<endIndex].map { UInt8(bitPattern: $0) }
+                        if let host = String(bytes: slice, encoding: .utf8) {
+                            result.append(host)
+                        }
+                    } else {
+                        // No null terminator found; attempt to decode entire buffer safely
+                        let bytes = buffer.map { UInt8(bitPattern: $0) }
+                        if let host = String(bytes: bytes, encoding: .utf8) {
+                            // Trim any trailing control characters just in case
+                            result.append(host.trimmingCharacters(in: .controlCharacters))
+                        }
+                    }
                 }
             }
             ptr = ptr?.pointee.ai_next
