@@ -175,7 +175,7 @@ extension OpenHABItem {
                 state: item.state.orEmpty,
                 link: item.link.orEmpty,
                 label: item.label.orEmpty,
-                groupType: nil,
+                groupType: item.groupType,
                 stateDescription: OpenHABStateDescription(item.stateDescription),
                 commandDescription: OpenHABCommandDescription(item.commandDescription),
                 members: [],

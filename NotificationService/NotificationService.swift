@@ -43,6 +43,7 @@ enum NotificationServiceError: Error {
 }
 
 actor NotificationServiceHandler {
+    static let networkTimeout: TimeInterval = 5
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
     var cancellables = Set<AnyCancellable>()
@@ -96,9 +97,10 @@ actor NotificationServiceHandler {
                         intentIdentifiers: [],
                         options: .customDismissAction
                     )
+                let logger = logger
                 UNUserNotificationCenter.current().getNotificationCategories { existingCategories in
                     var updatedCategories = existingCategories
-                    self.logger.info("handleNotification adding category \(category)")
+                    logger.info("handleNotification adding category \(category)")
                     updatedCategories.insert(notificationCategory)
                     UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
                 }
@@ -189,7 +191,7 @@ actor NotificationServiceHandler {
     private func downloadMedia(url: String) async throws -> (URL?, String?) {
         guard let fullURL = await resolveFullURL(from: url) else { return (nil, nil) }
 
-        guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return (nil, nil) }
+        guard let activeConfig = await networkTracker().waitForActiveConnection(timeout: NotificationServiceHandler.networkTimeout)?.configuration else { return (nil, nil) }
 
         let client = HTTPClient(configuration: activeConfig)
 
@@ -200,7 +202,7 @@ actor NotificationServiceHandler {
     // 🔹 Extracted helper function to determine full URL
     private func resolveFullURL(from url: String) async -> URL? {
         if url.starts(with: "/") {
-            guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return nil }
+            guard let activeConfig = await networkTracker().waitForActiveConnection(timeout: NotificationServiceHandler.networkTimeout)?.configuration else { return nil }
             return URL(string: activeConfig.url)?.appendingPathComponent(url)
         } else {
             return URL(string: url)
@@ -239,7 +241,7 @@ actor NotificationServiceHandler {
         let tempDirectory = FileManager.default.temporaryDirectory
         let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
         try imageData.write(to: tempFileURL)
-        logger.info("Image saved to temporary file: \(tempFileURL.absoluteString)")
+        logger.info("Image saved to temporary file: \(tempFileURL.absoluteString) of type \(mimeType)")
         return (tempFileURL, mimeType)
     }
 

@@ -26,7 +26,7 @@ import UIKit
 
 class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDelegate {
     var pageUrl = ""
-    private var iconType: IconType = .png
+    private var iconType: IconType = .svg
     var openHABRootUrl = ""
 
     private var activeConnectionInfo: ConnectionInfo?
@@ -562,12 +562,12 @@ extension OpenHABSitemapViewController {
     func loadSettings() {
         defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
         idleOff = Preferences.idleOff
-        iconType = IconType(rawValue: Preferences.currentHomePreferences.iconType) ?? .png
+        iconType = IconType(rawValue: Preferences.currentHomePreferences.iconType) ?? .svg
         #if DEBUG
         // always use demo sitemap for UITest
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             defaultSitemap = "demo"
-            iconType = .png
+            iconType = .svg
         }
         #endif
     }
@@ -847,12 +847,14 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             // TODO: proper texts instead of hardcoded values
             let alert = UIAlertController(
                 title: "Enter new value",
-                message: "Current value for \(widget.label) is \(widget.state)",
+                message: "Current value for \((widget.labelText.orEmpty.isEmpty ? "Unknown" : widget.labelText.orEmpty)) is \((widget.labelValue.orEmpty.isEmpty ? "Unknown" : widget.labelValue.orEmpty))",
                 preferredStyle: .alert
             )
             alert.addTextField(configurationHandler: textFieldAdder)
             let sendAction = UIAlertAction(title: "Set value", style: .destructive) { [weak self] _ in
-                self?.sendCommand(widget.item, commandToSend: textExtractor(alert))
+                if let input = textExtractor(alert), !input.isEmpty {
+                    self?.sendCommand(widget.item, commandToSend: input)
+                }
             }
             alert.addAction(sendAction)
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
