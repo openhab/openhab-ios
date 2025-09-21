@@ -23,7 +23,7 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABSetColorValueIntent) async throws -> INObjectCollection<OpenHABHome> {
-        OpenHABIntentHelper.getHomeOptions()
+        await OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetColorValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {

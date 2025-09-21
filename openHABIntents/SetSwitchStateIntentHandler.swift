@@ -32,7 +32,7 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<OpenHABHome> {
-        OpenHABIntentHelper.getHomeOptions()
+        await OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideActionOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {

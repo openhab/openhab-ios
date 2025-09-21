@@ -143,7 +143,7 @@ extension NotificationsView where Tracker == MainActorNetworkTracker {
             let logger = Logger(subsystem: "org.openhab.app", category: "NotificationView")
 
             do {
-                guard let config = Preferences.shared.getNotificationConnection() else {
+                guard let config = await Preferences.shared.getNotificationConnection() else {
                     logger.warning("No openHAB configuration found.")
                     return []
                 }

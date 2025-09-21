@@ -13,6 +13,7 @@ import Foundation
 import Intents
 import OpenHABCore
 
+@Preferences
 public enum OpenHABIntentHelper {
     static func resolveHome(home: OpenHABHome?, item: String?) async -> OpenHABHomeResolutionResult {
         if let home, let homeId = home.uuid {
@@ -32,7 +33,7 @@ public enum OpenHABIntentHelper {
             }
             let potentialHomes = homeIdsWithMatchingItems
                 .compactMap { Preferences.shared.storedHomes[$0] }
-                .map { OpenHABHome(home: $0) }
+                .map { OpenHABHome(homeId: $0.id, homeName: $0.homeName) }
             if potentialHomes.count == 1 {
                 return .success(with: potentialHomes[0])
             } else {
@@ -44,7 +45,7 @@ public enum OpenHABIntentHelper {
     }
 
     static func getHomeOptions() -> INObjectCollection<OpenHABHome> {
-        INObjectCollection(items: Preferences.shared.storedHomes.map { OpenHABHome(home: $0.value) })
+        INObjectCollection(items: Preferences.shared.storedHomes.map { OpenHABHome(homeId: $0.value.id, homeName: $0.value.homeName) })
     }
 
     static func getItemOptions(home: OpenHABHome?, searchTerm: String? = nil, itemTypes: [OpenHABItem.ItemType]? = nil) async -> INObjectCollection<NSString> {
@@ -62,12 +63,16 @@ public enum OpenHABIntentHelper {
     }
 }
 
-extension OpenHABHome {
+extension OpenHABHome: @unchecked Sendable {
     var uuid: UUID? {
         UUID(uuidString: identifier ?? "")
     }
 
-    convenience init(home: HomePreferences) {
-        self.init(identifier: home.id.uuidString, display: home.homeName)
+    convenience init(homeId: UUID, homeName: String) {
+        self.init(identifier: homeId.uuidString, display: homeName)
     }
 }
+
+extension OpenHABHomeResolutionResult: @unchecked Sendable {}
+
+extension INObjectCollection: @unchecked Sendable {}

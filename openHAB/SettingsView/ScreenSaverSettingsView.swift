@@ -14,25 +14,7 @@ import SwiftUI
 import UIKit
 
 struct ScreenSaverSettingsView: View {
-    @State private var config: ScreenSaverConfiguration = {
-        var config = ScreenSaverConfiguration()
-        config.isEnabled = Preferences.shared.screensaverEnabled
-        config.showsTime = Preferences.shared.screensaverShowsTime
-        config.showsDate = Preferences.shared.screensaverShowsDate
-        config.idleInterval = Preferences.shared.screensaverIdleInterval
-        config.movementInterval = Preferences.shared.screensaverMovementInterval
-        config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
-        config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
-        config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
-        config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
-        config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
-        config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
-        config.showsSeconds = Preferences.shared.screensaverShowsSeconds
-        config.uses24HourTime = Preferences.shared.screensaverUse24Hour
-        config.fadeDuration = Preferences.shared.screensaverFadeDuration
-        config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
-        return config
-    }()
+    @State private var config: ScreenSaverConfiguration = ScreenSaverConfiguration()
 
     var body: some View {
         Form {
@@ -189,6 +171,29 @@ struct ScreenSaverSettingsView: View {
             Preferences.shared.screensaverFadeDuration = config.fadeDuration
             Preferences.shared.screensaverRestoreBrightness = config.restoresBrightness
         }
+        .task { @Preferences in
+            var config = ScreenSaverConfiguration()
+            config.isEnabled = Preferences.shared.screensaverEnabled
+            config.showsTime = Preferences.shared.screensaverShowsTime
+            config.showsDate = Preferences.shared.screensaverShowsDate
+            config.idleInterval = Preferences.shared.screensaverIdleInterval
+            config.movementInterval = Preferences.shared.screensaverMovementInterval
+            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
+            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
+            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
+            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
+            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
+            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
+            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
+            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
+            config.fadeDuration = Preferences.shared.screensaverFadeDuration
+            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
+            await changeConfig(config)
+        }
+    }
+    
+    private func changeConfig(_ config: ScreenSaverConfiguration) {
+        self.config = config
     }
 }
 

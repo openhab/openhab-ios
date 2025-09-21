@@ -59,7 +59,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     // MARK: - Sync Preferences
 
     @MainActor
-    public func subscribeToPreferences() {
+    public func subscribeToPreferences() async {
         preferencesSubscription = Preferences.shared.$currentHomePreferences
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { _ in } receiveValue: { homeSettings in

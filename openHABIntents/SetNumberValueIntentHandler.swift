@@ -23,7 +23,7 @@ class SetNumberValueIntentHandler: NSObject, OpenHABSetNumberValueIntentHandling
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABSetNumberValueIntent) async throws -> INObjectCollection<OpenHABHome> {
-        OpenHABIntentHelper.getHomeOptions()
+        await OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetNumberValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
