@@ -16,21 +16,21 @@ import UIKit
 struct ScreenSaverSettingsView: View {
     @State private var config: ScreenSaverConfiguration = {
         var config = ScreenSaverConfiguration()
-        config.isEnabled = Preferences.screensaverEnabled
-        config.showsTime = Preferences.screensaverShowsTime
-        config.showsDate = Preferences.screensaverShowsDate
-        config.idleInterval = Preferences.screensaverIdleInterval
-        config.movementInterval = Preferences.screensaverMovementInterval
-        config.fontName = Preferences.screensaverFontName.isEmpty ? nil : Preferences.screensaverFontName
-        config.timeFontSizeRatio = CGFloat(Preferences.screensaverTimeFontRatio)
-        config.dateFontRelativeSize = CGFloat(Preferences.screensaverDateFontRatio)
-        config.enablesAutoDimming = Preferences.screensaverEnableDimming
-        config.dimLevel = CGFloat(Preferences.screensaverDimLevel)
-        config.wakeBrightnessLevel = CGFloat(Preferences.screensaverWakeBrightness)
-        config.showsSeconds = Preferences.screensaverShowsSeconds
-        config.uses24HourTime = Preferences.screensaverUse24Hour
-        config.fadeDuration = Preferences.screensaverFadeDuration
-        config.restoresBrightness = Preferences.screensaverRestoreBrightness
+        config.isEnabled = Preferences.shared.screensaverEnabled
+        config.showsTime = Preferences.shared.screensaverShowsTime
+        config.showsDate = Preferences.shared.screensaverShowsDate
+        config.idleInterval = Preferences.shared.screensaverIdleInterval
+        config.movementInterval = Preferences.shared.screensaverMovementInterval
+        config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
+        config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
+        config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
+        config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
+        config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
+        config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
+        config.showsSeconds = Preferences.shared.screensaverShowsSeconds
+        config.uses24HourTime = Preferences.shared.screensaverUse24Hour
+        config.fadeDuration = Preferences.shared.screensaverFadeDuration
+        config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
         return config
     }()
 
@@ -173,21 +173,21 @@ struct ScreenSaverSettingsView: View {
         .onDisappear {
             ScreenSaverManager.shared.updateConfiguration(config)
             // Persist to Preferences
-            Preferences.screensaverEnabled = config.isEnabled
-            Preferences.screensaverShowsTime = config.showsTime
-            Preferences.screensaverShowsDate = config.showsDate
-            Preferences.screensaverIdleInterval = config.idleInterval
-            Preferences.screensaverMovementInterval = config.movementInterval
-            Preferences.screensaverFontName = config.fontName ?? ""
-            Preferences.screensaverTimeFontRatio = Double(config.timeFontSizeRatio)
-            Preferences.screensaverDateFontRatio = Double(config.dateFontRelativeSize)
-            Preferences.screensaverEnableDimming = config.enablesAutoDimming
-            Preferences.screensaverDimLevel = Double(config.dimLevel)
-            Preferences.screensaverWakeBrightness = Double(config.wakeBrightnessLevel)
-            Preferences.screensaverShowsSeconds = config.showsSeconds
-            Preferences.screensaverUse24Hour = config.uses24HourTime
-            Preferences.screensaverFadeDuration = config.fadeDuration
-            Preferences.screensaverRestoreBrightness = config.restoresBrightness
+            Preferences.shared.screensaverEnabled = config.isEnabled
+            Preferences.shared.screensaverShowsTime = config.showsTime
+            Preferences.shared.screensaverShowsDate = config.showsDate
+            Preferences.shared.screensaverIdleInterval = config.idleInterval
+            Preferences.shared.screensaverMovementInterval = config.movementInterval
+            Preferences.shared.screensaverFontName = config.fontName ?? ""
+            Preferences.shared.screensaverTimeFontRatio = Double(config.timeFontSizeRatio)
+            Preferences.shared.screensaverDateFontRatio = Double(config.dateFontRelativeSize)
+            Preferences.shared.screensaverEnableDimming = config.enablesAutoDimming
+            Preferences.shared.screensaverDimLevel = Double(config.dimLevel)
+            Preferences.shared.screensaverWakeBrightness = Double(config.wakeBrightnessLevel)
+            Preferences.shared.screensaverShowsSeconds = config.showsSeconds
+            Preferences.shared.screensaverUse24Hour = config.uses24HourTime
+            Preferences.shared.screensaverFadeDuration = config.fadeDuration
+            Preferences.shared.screensaverRestoreBrightness = config.restoresBrightness
         }
     }
 }

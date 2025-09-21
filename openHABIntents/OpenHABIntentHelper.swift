@@ -18,7 +18,7 @@ public enum OpenHABIntentHelper {
         if let home, let homeId = home.uuid {
             // TODO: fuzzy matching / account for potential renaming?
             // TODO: accept potential mismatches if item name is unique
-            let homePrefs = Preferences.storedHomes.first { $0.key == homeId }
+            let homePrefs = await Preferences.shared.storedHomes.first { $0.key == homeId }
             if homePrefs != nil {
                 return .success(with: home)
             } else {
@@ -31,7 +31,7 @@ public enum OpenHABIntentHelper {
                 allItems[uuid]?.filtered(by: item).isEmpty != true
             }
             let potentialHomes = homeIdsWithMatchingItems
-                .compactMap { Preferences.storedHomes[$0] }
+                .compactMap { Preferences.shared.storedHomes[$0] }
                 .map { OpenHABHome(home: $0) }
             if potentialHomes.count == 1 {
                 return .success(with: potentialHomes[0])
@@ -44,7 +44,7 @@ public enum OpenHABIntentHelper {
     }
 
     static func getHomeOptions() -> INObjectCollection<OpenHABHome> {
-        INObjectCollection(items: Preferences.storedHomes.map { OpenHABHome(home: $0.value) })
+        INObjectCollection(items: Preferences.shared.storedHomes.map { OpenHABHome(home: $0.value) })
     }
 
     static func getItemOptions(home: OpenHABHome?, searchTerm: String? = nil, itemTypes: [OpenHABItem.ItemType]? = nil) async -> INObjectCollection<NSString> {

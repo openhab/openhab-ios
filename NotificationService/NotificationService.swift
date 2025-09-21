@@ -280,14 +280,14 @@ actor NotificationServiceHandler {
         let connections: [ConnectionConfiguration]
 
         if let cloudUserId,
-           let instance = Preferences.storedHome(forCloudUserId: cloudUserId) {
+           let instance = await Preferences.shared.storedHome(forCloudUserId: cloudUserId) {
             logger.info("Setting up network tracking for \(cloudUserId)")
-            connections = [instance.localConnectionConfig, instance.remoteConnectionConfig]
+            connections = await [instance.localConnectionConfig, instance.remoteConnectionConfig]
         } else {
             logger.info("Using default connection configurations")
             connections = [
-                Preferences.currentHomePreferences.localConnectionConfig,
-                Preferences.currentHomePreferences.remoteConnectionConfig
+                await Preferences.shared.currentHomePreferences.localConnectionConfig,
+                await Preferences.shared.currentHomePreferences.remoteConnectionConfig
             ]
         }
 

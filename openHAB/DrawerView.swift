@@ -139,8 +139,8 @@ struct DrawerView: View {
     var systemSection: some View {
         Section(header: Text("System")) {
             systemMenuEntry(image: .gear, text: "settings", goTo: .settings)
-            if Preferences.getNotificationConnection() != nil,
-               !Preferences.currentHomePreferences.demomode {
+            if Preferences.shared.getNotificationConnection() != nil,
+               !Preferences.shared.currentHomePreferences.demomode {
                 systemMenuEntry(image: .bell, text: "notifications", goTo: .notifications)
             }
             systemMenuEntry(image: .house, text: "Manage Homes", goTo: .homeSelection)
@@ -165,7 +165,7 @@ struct DrawerView: View {
         .task {
             let activeConnection = networkTracker.activeConnection
             await updateSitemapsAndUITiles(activeConnection: activeConnection)
-            sitemapForWatch = Preferences.currentHomePreferences.sitemapForWatch
+            sitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
         }
         .onReceive(networkTracker.$activeConnection) { activeConnection in
             Task {
@@ -229,7 +229,7 @@ struct DrawerView: View {
     }
 
     func toggleWatchSitemap(_ sitemap: OpenHABSitemap) {
-        Preferences.modifyActiveHome { prefs in
+        Preferences.shared.modifyActiveHome { prefs in
             if sitemap.name == sitemapForWatch {
                 sitemapForWatch = nil
                 prefs.sitemapForWatch = ""
@@ -254,7 +254,7 @@ struct DrawerView: View {
                     sitemaps = Array(sitemaps.dropLast())
                 }
 
-                switch SortSitemapsOrder(rawValue: Preferences.currentHomePreferences.sortSitemapsBy) ?? .label {
+                switch SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label {
                 case .label:
                     sitemaps.sort { $0.label < $1.label }
                 case .name:

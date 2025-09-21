@@ -60,7 +60,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     @MainActor
     public func subscribeToPreferences() {
-        preferencesSubscription = Preferences.$currentHomePreferences
+        preferencesSubscription = Preferences.shared.$currentHomePreferences
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { _ in } receiveValue: { homeSettings in
                 self.syncPreferencesToWatch(homeSettings)
@@ -68,7 +68,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     }
 
     @MainActor
-    public func syncPreferencesToWatch(_ homeSettings: HomePreferences = Preferences.currentHomePreferences) {
+    public func syncPreferencesToWatch(_ homeSettings: HomePreferences = Preferences.shared.currentHomePreferences) {
         guard WCSession.default.activationState == .activated else {
             logger.warning("WCSession not activated; skipping sync.")
             return

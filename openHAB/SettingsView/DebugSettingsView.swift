@@ -26,7 +26,7 @@ struct DebugSettingsView: View {
     var body: some View {
         Toggle("Crash Reporting", isOn: $settingsSendCrashReports)
             .task {
-                settingsSendCrashReports = Preferences.sendCrashReports
+                settingsSendCrashReports = Preferences.shared.sendCrashReports
             }
             .onChange(of: settingsSendCrashReports) { newValue in
                 #if !DEBUG

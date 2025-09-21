@@ -126,8 +126,8 @@ public class MainActorNetworkTracker: ObservableObject {
 }
 
 public actor CertificateManagers {
-    public static let clientCertificateManager = ClientCertificateManager()
-    public static let serverCertificateManager = ServerCertificateManager()
+    @MainActor public static let clientCertificateManager = ClientCertificateManager()
+    @MainActor public static let serverCertificateManager = ServerCertificateManager()
 }
 
 public actor NetworkTracker {
