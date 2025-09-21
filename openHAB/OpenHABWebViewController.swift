@@ -106,9 +106,7 @@ class OpenHABWebViewController: OpenHABViewController {
                     self.logger.info("OpenHABWebViewController openHAB URL = \(activeConfiguration.url)")
                     self.openHABTrackedRootUrl = activeConfiguration.url
                     self.activeConfig = activeConfiguration
-                    Task {
-                        await self.loadWebView(force: false)
-                    }
+                    self.loadWebView(force: false)
                 }
             }
             .store(in: &trackerCancellables)
@@ -253,9 +251,7 @@ class OpenHABWebViewController: OpenHABViewController {
         currentTarget = ""
         clearExistingPage()
         startTracker()
-        Task {
-            await loadWebView(force: true)
-        }
+        loadWebView(force: true)
     }
 
     override func viewName() -> String {
