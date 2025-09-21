@@ -135,7 +135,7 @@ struct SettingsView: View {
     }
 
     func saveSettings() {
-        Preferences.shared.modifyActiveHome { homePreferences in
+        Preferences.shared.modifyActiveHome { @Preferences homePreferences in
             homePreferences.demomode = settingsDemomode
             homePreferences.realTimeSliders = settingsRealTimeSliders
             homePreferences.iconType = settingsIconType.rawValue

@@ -214,7 +214,7 @@ class OpenHABRootViewController: UIViewController {
             queue: nil
         ) { _ in
             Task { @MainActor in
-                WatchMessageService.singleton.syncPreferencesToWatch()
+                await WatchMessageService.singleton.syncPreferencesToWatch()
                 await NetworkTracker.shared.restartTracking()
             }
         }
@@ -521,8 +521,10 @@ class OpenHABRootViewController: UIViewController {
                     switchView(target: .webview)
                 }
                 if path.starts(with: "/") {
-                    // have the webview load this path itself
-                    webViewController.loadWebView(force: true, path: path)
+                    Task {
+                        // have the webview load this path itself
+                        await webViewController.loadWebView(force: true, path: path)
+                    }
                 } else {
                     // have the mainUI handle the navigation
                     webViewController.navigateCommand(path)

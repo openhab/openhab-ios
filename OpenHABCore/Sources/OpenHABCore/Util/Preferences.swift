@@ -114,11 +114,10 @@ public struct HomePreferences: Codable, Sendable, Equatable {
 
 @globalActor
 public actor Preferences {
-    
     public static let shared = Preferences()
-    
+
     private static let defaultHomeId = UUID()
-    
+
     /// the currently applied settings set from storedHomes
     @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: defaultHomeId))
     public private(set) var currentHomePreferences: HomePreferences
@@ -182,7 +181,7 @@ public actor Preferences {
 
     /// settings for different homes
     @UserDefaultObject("storedHomes", defaultValue: [:])
-    public private(set)  var storedHomes: [UUID: HomePreferences]
+    public private(set) var storedHomes: [UUID: HomePreferences]
 
     /// the currently applied settings set from storedHomes
     @UserDefaultObject("activeHomeId", defaultValue: defaultHomeId)
@@ -195,10 +194,10 @@ public actor Preferences {
     private var didMigrateToMultipleHomes: Bool
 
     @Preferences
-    fileprivate var internalPreferenceChangeOngoing = false
-    
+    private var internalPreferenceChangeOngoing = false
+
     @Preferences
-    fileprivate func internalPreferenceChange(_ change: () -> Void) {
+    private func internalPreferenceChange(_ change: () -> Void) {
         internalPreferenceChangeOngoing = true
         change()
         internalPreferenceChangeOngoing = false
@@ -207,8 +206,7 @@ public actor Preferences {
 
 // MARK: Retrieving preference from user defaults, reacting to preference change
 
-fileprivate struct PreferencesAccess {
-
+private enum PreferencesAccess {
     @Preferences fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
         let preferenceValue = sharedDefaults.object(forKey: key)
         if let preferenceConverted = decoder(preferenceValue) {
@@ -332,7 +330,7 @@ public extension Preferences {
         logger.debug("Stored preferences for current home \(homeId.uuidString)")
     }
 
-    func modifyActiveHome(modificationFunction: (inout HomePreferences) -> Void) {
+    func modifyActiveHome(modificationFunction: @Preferences (inout HomePreferences) -> Void) {
         var homePreferences = currentHomePreferences
         modificationFunction(&homePreferences)
         currentHomePreferences = homePreferences

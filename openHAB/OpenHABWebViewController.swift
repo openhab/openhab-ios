@@ -106,7 +106,9 @@ class OpenHABWebViewController: OpenHABViewController {
                     self.logger.info("OpenHABWebViewController openHAB URL = \(activeConfiguration.url)")
                     self.openHABTrackedRootUrl = activeConfiguration.url
                     self.activeConfig = activeConfiguration
-                    self.loadWebView(force: false)
+                    Task {
+                        await self.loadWebView(force: false)
+                    }
                 }
             }
             .store(in: &trackerCancellables)
@@ -160,24 +162,26 @@ class OpenHABWebViewController: OpenHABViewController {
 
         if let modifiedUrl = modifyUrl(orig: url, path: path) {
             acceptsCommands = false
-            let request = URLRequest(url: modifiedUrl)
-            // TODO: remove this check once iOS 16 is dropped
-            let isMyOh = url?.host?.contains("myopenhab.org") ?? false
-            // create new (or resuse existing)
-            let newWebview = webView(for: Preferences.shared.currentHomePreferences.id, isMyopenhab: isMyOh)
-            if newWebview != webView {
-                // Detach old instance
-                webView.stopLoading()
-                webView.navigationDelegate = nil
-                webView.uiDelegate = nil
-                webView.removeFromSuperview()
-                newWebview.navigationDelegate = self
-                newWebview.uiDelegate = self
-                webView = newWebview
-                attachWebViewToLayout(newWebview)
+            Task {
+                let request = URLRequest(url: modifiedUrl)
+                // TODO: remove this check once iOS 16 is dropped
+                let isMyOh = url?.host?.contains("myopenhab.org") ?? false
+                // create new (or resuse existing)
+                let newWebview = await webView(for: Preferences.shared.currentHomePreferences.id, isMyopenhab: isMyOh)
+                if newWebview != webView {
+                    // Detach old instance
+                    webView.stopLoading()
+                    webView.navigationDelegate = nil
+                    webView.uiDelegate = nil
+                    webView.removeFromSuperview()
+                    newWebview.navigationDelegate = self
+                    newWebview.uiDelegate = self
+                    webView = newWebview
+                    attachWebViewToLayout(newWebview)
+                }
+                logger.info("Loading URL: \(modifiedUrl)")
+                webView.load(request)
             }
-            logger.info("Loading URL: \(modifiedUrl)")
-            webView.load(request)
         }
     }
 
@@ -249,7 +253,9 @@ class OpenHABWebViewController: OpenHABViewController {
         currentTarget = ""
         clearExistingPage()
         startTracker()
-        loadWebView(force: true)
+        Task {
+            await loadWebView(force: true)
+        }
     }
 
     override func viewName() -> String {
@@ -365,7 +371,9 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
         logger.info("WKScriptMessage \(message.name)")
         if message.name == "pathChanged", let newPath = message.body as? String {
             print("path changed to: \(newPath)")
-            Preferences.shared.currentWebViewPath = newPath
+            Task { @Preferences in
+                Preferences.shared.currentWebViewPath = newPath
+            }
         }
         if message.name == "mainUi", let callbackName = message.body as? String {
             logger.info("WKScriptMessage \(callbackName)")
@@ -448,7 +456,9 @@ extension OpenHABWebViewController: WKNavigationDelegate {
             if let path = url?.path {
                 let string = openHABTrackedRootUrl
                 logger.info("navigation change base: \(string) path: \(path)")
-                Preferences.shared.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
+                Task { @Preferences in
+                    Preferences.shared.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
+                }
             }
         }
     }
@@ -505,6 +515,6 @@ extension OpenHABWebViewController: WKUIDelegate {
                  decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
                  initiatedBy frame: WKFrameInfo,
                  type: WKMediaCaptureType) async -> WKPermissionDecision {
-        Preferences.shared.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
+        await Preferences.shared.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
     }
 }

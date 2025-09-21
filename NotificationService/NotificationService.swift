@@ -285,9 +285,9 @@ actor NotificationServiceHandler {
             connections = await [instance.localConnectionConfig, instance.remoteConnectionConfig]
         } else {
             logger.info("Using default connection configurations")
-            connections = [
-                await Preferences.shared.currentHomePreferences.localConnectionConfig,
-                await Preferences.shared.currentHomePreferences.remoteConnectionConfig
+            connections = await [
+                Preferences.shared.currentHomePreferences.localConnectionConfig,
+                Preferences.shared.currentHomePreferences.remoteConnectionConfig
             ]
         }
 

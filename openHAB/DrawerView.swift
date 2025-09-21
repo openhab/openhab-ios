@@ -165,7 +165,7 @@ struct DrawerView: View {
         .task {
             let activeConnection = networkTracker.activeConnection
             await updateSitemapsAndUITiles(activeConnection: activeConnection)
-            sitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
+            sitemapForWatch = await Preferences.shared.currentHomePreferences.sitemapForWatch
         }
         .onReceive(networkTracker.$activeConnection) { activeConnection in
             Task {
@@ -253,8 +253,8 @@ struct DrawerView: View {
                 if sitemaps.last?.name == "_default", sitemaps.count > 1 {
                     sitemaps = Array(sitemaps.dropLast())
                 }
-
-                switch SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label {
+                let sortSitemapsBy = await Preferences.shared.currentHomePreferences.sortSitemapsBy
+                switch SortSitemapsOrder(rawValue: sortSitemapsBy) ?? .label {
                 case .label:
                     sitemaps.sort { $0.label < $1.label }
                 case .name:

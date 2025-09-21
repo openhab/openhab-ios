@@ -42,7 +42,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 session.delegate = watchMessageService
                 session.activate()
                 logger.info("Paired watch \(session.isPaired), watch app installed \(session.isWatchAppInstalled)")
-                watchMessageService.subscribeToPreferences()
+                Task {
+                    await watchMessageService.subscribeToPreferences()
+                }
             }
         }
     }

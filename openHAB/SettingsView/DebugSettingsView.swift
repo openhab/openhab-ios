@@ -25,8 +25,8 @@ struct DebugSettingsView: View {
 
     var body: some View {
         Toggle("Crash Reporting", isOn: $settingsSendCrashReports)
-            .task {
-                settingsSendCrashReports = Preferences.shared.sendCrashReports
+            .task { @Preferences in
+                await updateSettingsSendCrashReports(Preferences.shared.sendCrashReports)
             }
             .onChange(of: settingsSendCrashReports) { newValue in
                 #if !DEBUG
@@ -69,6 +69,10 @@ struct DebugSettingsView: View {
     func presentPrivacyPolicy() {
         let vc = SFSafariViewController(url: .privacyPolicy)
         UIApplication.shared.firstKeyWindow?.rootViewController?.present(vc, animated: true)
+    }
+
+    private func updateSettingsSendCrashReports(_ send: Bool) {
+        settingsSendCrashReports = send
     }
 }
 

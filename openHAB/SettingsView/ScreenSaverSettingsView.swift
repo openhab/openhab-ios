@@ -14,7 +14,7 @@ import SwiftUI
 import UIKit
 
 struct ScreenSaverSettingsView: View {
-    @State private var config: ScreenSaverConfiguration = ScreenSaverConfiguration()
+    @State private var config = ScreenSaverConfiguration()
 
     var body: some View {
         Form {
@@ -191,7 +191,7 @@ struct ScreenSaverSettingsView: View {
             await changeConfig(config)
         }
     }
-    
+
     private func changeConfig(_ config: ScreenSaverConfiguration) {
         self.config = config
     }
