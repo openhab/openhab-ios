@@ -13,13 +13,13 @@ import Foundation
 import Intents
 import OpenHABCore
 
-@Preferences
+@MainActor
 public enum OpenHABIntentHelper {
     static func resolveHome(home: OpenHABHome?, item: String?) async -> OpenHABHomeResolutionResult {
         if let home, let homeId = home.uuid {
             // TODO: fuzzy matching / account for potential renaming?
             // TODO: accept potential mismatches if item name is unique
-            let homePrefs = await Preferences.shared.storedHomes.first { $0.key == homeId }
+            let homePrefs = Preferences.shared.storedHomes.first { $0.key == homeId }
             if homePrefs != nil {
                 return .success(with: home)
             } else {
@@ -75,4 +75,4 @@ extension OpenHABHome: @unchecked Sendable {
 
 extension OpenHABHomeResolutionResult: @unchecked Sendable {}
 
-extension INObjectCollection: @unchecked Sendable {}
+extension INObjectCollection: @unchecked @retroactive Sendable {}

@@ -13,7 +13,7 @@
 
 import XCTest
 
-@Preferences
+@MainActor
 final class UserDefaultsTests: XCTestCase {
     // Testing the consistency between Preferences and UserDefaults
     func testConsistency() {

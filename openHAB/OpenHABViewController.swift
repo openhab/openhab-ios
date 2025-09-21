@@ -128,9 +128,9 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
     }
 
     @MainActor
-    func acceptedServerCertificatesChanged() async {
+    func acceptedServerCertificatesChanged() {
         // User's decision about trusting server certificates has changed.  Send updates to the paired watch.
-        await WatchMessageService.singleton.syncPreferencesToWatch()
+        WatchMessageService.singleton.syncPreferencesToWatch()
     }
 }
 

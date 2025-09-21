@@ -214,7 +214,7 @@ class OpenHABRootViewController: UIViewController {
             queue: nil
         ) { _ in
             Task { @MainActor in
-                await WatchMessageService.singleton.syncPreferencesToWatch()
+                WatchMessageService.singleton.syncPreferencesToWatch()
                 await NetworkTracker.shared.restartTracking()
             }
         }
@@ -434,7 +434,7 @@ class OpenHABRootViewController: UIViewController {
             do {
                 let client = HTTPClient(configuration: config)
                 if let cloudUserId = try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) {
-                    await Preferences.shared.setCloudUserId(cloudUserId, for: uuid)
+                    Preferences.shared.setCloudUserId(cloudUserId, for: uuid)
                     logger.info("my.openHAB registration succeeded with cloudUserId \(cloudUserId)")
                 }
                 logger.info("my.openHAB registration succeeded without cloudUserId")
@@ -453,7 +453,7 @@ class OpenHABRootViewController: UIViewController {
             Task {
                 await NetworkTracker.shared.stopTracking()
                 logger.info("Switching to home \(targetHome.id)")
-                await Preferences.shared.switchActiveHome(to: targetHome.id)
+                Preferences.shared.switchActiveHome(to: targetHome.id)
                 _ = await NetworkTracker.shared.waitForActiveConnection()
                 handleNotificationInternal(action)
             }
@@ -523,7 +523,7 @@ class OpenHABRootViewController: UIViewController {
                 if path.starts(with: "/") {
                     Task {
                         // have the webview load this path itself
-                        await webViewController.loadWebView(force: true, path: path)
+                        webViewController.loadWebView(force: true, path: path)
                     }
                 } else {
                     // have the mainUI handle the navigation

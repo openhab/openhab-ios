@@ -57,12 +57,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         logger.info("didFinishLaunchingWithOptions started")
 
-        setupFirebase()
-
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
         UserDefaults.standard.register(defaults: appDefaults)
 
         Preferences.migratePreferences()
+
+        setupFirebase()
 
         UNUserNotificationCenter.current().delegate = notificationDelegate
 

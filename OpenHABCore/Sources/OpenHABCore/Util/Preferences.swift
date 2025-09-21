@@ -15,10 +15,10 @@ import UIKit
 
 private let logger = Logger(subsystem: "org.openhab", category: "Preferences")
 
-@Preferences
+@MainActor
 private let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
 
-@Preferences
+@MainActor
 @propertyWrapper
 public struct UserDefault<T: Sendable> {
     private let key: String
@@ -48,7 +48,7 @@ public struct UserDefault<T: Sendable> {
     }
 }
 
-@Preferences
+@MainActor
 @propertyWrapper
 public struct UserDefaultObject<T: Codable & Sendable> {
     private let key: String
@@ -89,8 +89,8 @@ public struct UserDefaultObject<T: Codable & Sendable> {
     }
 }
 
-@Preferences
-public struct HomePreferences: Codable, Sendable, Equatable {
+@MainActor
+public struct HomePreferences: Codable, Equatable {
     public let id: UUID
     public var defaultView = "web"
     public var demomode = true
@@ -112,7 +112,6 @@ public struct HomePreferences: Codable, Sendable, Equatable {
     }
 }
 
-@globalActor
 public actor Preferences {
     public static let shared = Preferences()
 
@@ -193,10 +192,10 @@ public actor Preferences {
     @UserDefault("didMigrateToMultipleHomes", defaultValue: false)
     private var didMigrateToMultipleHomes: Bool
 
-    @Preferences
+    @MainActor
     private var internalPreferenceChangeOngoing = false
 
-    @Preferences
+    @MainActor
     private func internalPreferenceChange(_ change: () -> Void) {
         internalPreferenceChangeOngoing = true
         change()
@@ -207,7 +206,7 @@ public actor Preferences {
 // MARK: Retrieving preference from user defaults, reacting to preference change
 
 private enum PreferencesAccess {
-    @Preferences fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
+    @MainActor fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
         let preferenceValue = sharedDefaults.object(forKey: key)
         if let preferenceConverted = decoder(preferenceValue) {
             return preferenceConverted
@@ -223,7 +222,7 @@ private enum PreferencesAccess {
         }
     }
 
-    @Preferences fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
+    @MainActor fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
         guard let sanitized = sanitize(newValue) else {
             logger.debug("Preference \(key) new value \(String(describing: newValue)) could not be sanitized, will be ignored")
             return
@@ -242,7 +241,7 @@ private enum PreferencesAccess {
 
 // MARK: Multiple homes
 
-@Preferences
+@MainActor
 public extension Preferences {
     func listStoredHomes() -> [UUID] {
         let preferenceIds = storedHomes
@@ -330,7 +329,7 @@ public extension Preferences {
         logger.debug("Stored preferences for current home \(homeId.uuidString)")
     }
 
-    func modifyActiveHome(modificationFunction: @Preferences (inout HomePreferences) -> Void) {
+    func modifyActiveHome(modificationFunction: @MainActor (inout HomePreferences) -> Void) {
         var homePreferences = currentHomePreferences
         modificationFunction(&homePreferences)
         currentHomePreferences = homePreferences
@@ -338,7 +337,7 @@ public extension Preferences {
     }
 }
 
-@Preferences
+@MainActor
 public extension Preferences {
     func firstStoredHome(where predicate: (HomePreferences) -> Bool) -> (id: UUID, record: HomePreferences)? {
         for (uuid, record) in storedHomes {
@@ -357,7 +356,7 @@ public extension Preferences {
 
 // MARK: Migration
 
-@Preferences
+@MainActor
 public extension Preferences {
     static func migratePreferences() {
         Preferences.shared.initializeStoredHomes()
@@ -438,7 +437,7 @@ public extension Preferences {
 
 // MARK: All connections
 
-@Preferences
+@MainActor
 public extension Preferences {
     func getNotificationConnection() -> ConnectionConfiguration? {
         getNotificationConnection(of: [Preferences.shared.currentHomePreferences.remoteConnectionConfig])

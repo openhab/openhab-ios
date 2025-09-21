@@ -40,8 +40,6 @@ final class MockServerCertificateDelegate: ServerCertificateManagerDelegate, @un
 
 @Suite("ServerCertificateManager Tests")
 struct ServerCertificateManagerTests {
-    init() {}
-
     func createTestContext() -> (manager: ServerCertificateManager, delegate: MockServerCertificateDelegate) {
         let delegate = MockServerCertificateDelegate()
         let manager = ServerCertificateManager()

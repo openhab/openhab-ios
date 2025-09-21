@@ -105,7 +105,7 @@ struct SettingsView: View {
             }
 
             // Sort the sitemaps according to Settings selection.
-            switch await SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label {
+            switch SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label {
             case .label: sitemaps.sort { $0.label < $1.label }
             case .name: sitemaps.sort { $0.name < $1.name }
             }
@@ -135,7 +135,7 @@ struct SettingsView: View {
     }
 
     func saveSettings() {
-        Preferences.shared.modifyActiveHome { @Preferences homePreferences in
+        Preferences.shared.modifyActiveHome { @MainActor homePreferences in
             homePreferences.demomode = settingsDemomode
             homePreferences.realTimeSliders = settingsRealTimeSliders
             homePreferences.iconType = settingsIconType.rawValue

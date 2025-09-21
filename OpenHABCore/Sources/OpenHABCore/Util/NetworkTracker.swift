@@ -271,7 +271,12 @@ public actor NetworkTracker {
                     break
                 }
 
-                if bestConnection == nil || connectionInfo.configuration.priority < bestConnection!.configuration.priority {
+                guard let currentBestConnection = bestConnection else {
+                    bestConnection = connectionInfo
+                    continue
+                }
+
+                if connectionInfo.configuration.priority < currentBestConnection.configuration.priority {
                     bestConnection = connectionInfo
                 }
             }

@@ -171,7 +171,7 @@ struct ScreenSaverSettingsView: View {
             Preferences.shared.screensaverFadeDuration = config.fadeDuration
             Preferences.shared.screensaverRestoreBrightness = config.restoresBrightness
         }
-        .task { @Preferences in
+        .task { @MainActor in
             var config = ScreenSaverConfiguration()
             config.isEnabled = Preferences.shared.screensaverEnabled
             config.showsTime = Preferences.shared.screensaverShowsTime
@@ -188,7 +188,7 @@ struct ScreenSaverSettingsView: View {
             config.uses24HourTime = Preferences.shared.screensaverUse24Hour
             config.fadeDuration = Preferences.shared.screensaverFadeDuration
             config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
-            await changeConfig(config)
+            changeConfig(config)
         }
     }
 
