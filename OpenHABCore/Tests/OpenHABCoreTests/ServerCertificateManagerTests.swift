@@ -9,40 +9,27 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Foundation
 @testable import OpenHABCore
-import XCTest
+@preconcurrency import Security
+import Testing
 
-@MainActor
-func XCTAssertThrowsErrorAsync(
-    _ expression: @escaping () async throws -> some Any,
-    _ message: @autoclosure () -> String = "Expected async error but got success",
-    file: StaticString = #filePath,
-    line: UInt = #line
-) async {
-    do {
-        _ = try await expression()
-        XCTFail(message(), file: file, line: line)
-    } catch {
-        // ✅ Success – an error was thrown
-    }
-}
+final class MockServerCertificateDelegate: ServerCertificateManagerDelegate, @unchecked Sendable {
+    nonisolated(unsafe) var lastCall = ""
+    nonisolated(unsafe) var expectedResult: ServerCertificateManager.EvaluateResult = .permitOnce
+    nonisolated(unsafe) var acceptedChangedCalled = false
 
-final class MockServerCertificateDelegate: ServerCertificateManagerDelegate {
-    var lastCall = ""
-    var expectedResult: ServerCertificateManager.EvaluateResult = .permitOnce
-    var acceptedChangedCalled = false
-
-    func evaluateServerTrust(summary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult {
+    nonisolated func evaluateServerTrust(summary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult {
         lastCall = "evaluateServerTrust"
         return expectedResult
     }
 
-    func evaluateCertificateMismatch(summary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult {
+    nonisolated func evaluateCertificateMismatch(summary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult {
         lastCall = "evaluateCertificateMismatch"
         return expectedResult
     }
 
-    func acceptedServerCertificatesChanged() {
+    nonisolated func acceptedServerCertificatesChanged() {
         acceptedChangedCalled = true
     }
 }
@@ -51,50 +38,39 @@ final class MockServerCertificateDelegate: ServerCertificateManagerDelegate {
 // openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=TestCert"
 // openssl x509 -outform der -in cert.pem -out test-cert.cer
 
-final class ServerCertificateManagerTests: XCTestCase {
-    var manager: ServerCertificateManager!
-    var delegate: MockServerCertificateDelegate!
-
-    override func setUp() {
-        super.setUp()
-        delegate = MockServerCertificateDelegate()
-        manager = ServerCertificateManager()
+@Suite("ServerCertificateManager Tests")
+struct ServerCertificateManagerTests {
+    func createTestContext() -> (manager: ServerCertificateManager, delegate: MockServerCertificateDelegate) {
+        let delegate = MockServerCertificateDelegate()
+        let manager = ServerCertificateManager()
         manager.delegate = delegate
+        return (manager, delegate)
     }
 
-    override func tearDown() {
-        manager = nil
-        delegate = nil
-        super.tearDown()
-    }
-
-    func testIgnoresSSLIfConfigured() async throws {
+    @Test("SSL checking is ignored when configured")
+    func ignoresSSLIfConfigured() async throws {
+        let (manager, _) = createTestContext()
         manager.ignoreSSL = true
         let trust = try dummyTrust()
 
-        do {
-            try await manager.evaluate(trust, forHost: "test.openhab.org")
-        } catch {
-            XCTFail("Expected no error, but got: \(error)")
-        }
+        try await manager.evaluate(trust, forHost: "test.openhab.org")
     }
 
-    func testAcceptsPreviouslyStoredCertificate() async throws {
+    @Test("Previously stored certificate is accepted")
+    func acceptsPreviouslyStoredCertificate() async throws {
+        let (manager, _) = createTestContext()
         let trust = try dummyTrust()
         let domain = "test.openhab.org"
         let cert = manager.getLeafCertificate(trust: trust)!
         let certData = SecCertificateCopyData(cert) as Data
         manager.trustedCertificates[domain] = certData
 
-        do {
-            try await manager.evaluate(trust, forHost: domain)
-        } catch {
-            XCTFail("Expected no error, but got: \(error)")
-        }
+        try await manager.evaluate(trust, forHost: domain)
     }
 
-    @MainActor
-    func testTriggersMismatchDelegateWhenCertsDiffer() async throws {
+    @Test("Certificate mismatch triggers delegate")
+    func triggersMismatchDelegateWhenCertsDiffer() async throws {
+        let (manager, delegate) = createTestContext()
         let trust = try dummyTrust()
         let domain = "test.openhab.org"
         manager.trustedCertificates[domain] = Data([0x01, 0x02]) // fake cert
@@ -102,48 +78,51 @@ final class ServerCertificateManagerTests: XCTestCase {
         delegate.expectedResult = .permitOnce
         try await manager.evaluate(trust, forHost: domain)
 
-        XCTAssertEqual(delegate.lastCall, "evaluateCertificateMismatch")
+        #expect(delegate.lastCall == "evaluateCertificateMismatch")
     }
 
-    @MainActor
-    func testTriggersServerTrustDelegateForNewCert() async throws {
+    @Test("Server trust delegate is triggered for new certificate")
+    func triggersServerTrustDelegateForNewCert() async throws {
+        let (manager, delegate) = createTestContext()
         let trust = try dummyTrust()
         let domain = "unknown.openhab.org"
 
         delegate.expectedResult = .permitOnce
         try await manager.evaluate(trust, forHost: domain)
 
-        XCTAssertEqual(delegate.lastCall, "evaluateServerTrust")
+        #expect(delegate.lastCall == "evaluateServerTrust")
     }
 
-    @MainActor
-    func testThrowsWhenUserDeniesTrust() async throws {
+    @Test("Error is thrown when user denies trust")
+    func throwsWhenUserDeniesTrust() async throws {
+        let (manager, delegate) = createTestContext()
         let trust = try dummyTrust()
         let domain = "deny.openhab.org"
 
         manager.trustedCertificates.removeAll()
-        XCTAssertNil(manager.trustedCertificates[domain]) // Sanity check
+        #expect(manager.trustedCertificates[domain] == nil) // Sanity check
 
         delegate.expectedResult = .deny
 
-        await XCTAssertThrowsErrorAsync {
-            try await self.manager.evaluate(trust, forHost: domain)
+        await #expect(throws: (any Error).self) {
+            try await manager.evaluate(trust, forHost: domain)
         }
     }
 
-    @MainActor
-    func testStoresCertWhenUserAcceptsAlways() async throws {
+    @Test("Certificate is stored when user accepts always")
+    func storesCertWhenUserAcceptsAlways() async throws {
+        let (manager, delegate) = createTestContext()
         let trust = try dummyTrust()
         let domain = "persist.openhab.org"
 
         manager.trustedCertificates.removeAll()
-        XCTAssertNil(manager.trustedCertificates[domain]) // Sanity check
+        #expect(manager.trustedCertificates[domain] == nil) // Sanity check
 
         delegate.expectedResult = .permitAlways
         try await manager.evaluate(trust, forHost: domain)
 
-        XCTAssertNotNil(manager.trustedCertificates[domain])
-        XCTAssertTrue(delegate.acceptedChangedCalled, "Delegate should be notified when cert is stored")
+        #expect(manager.trustedCertificates[domain] != nil)
+        #expect(delegate.acceptedChangedCalled == true, "Delegate should be notified when cert is stored")
     }
 
     // MARK: - Helper
