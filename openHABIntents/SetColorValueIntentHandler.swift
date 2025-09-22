@@ -23,7 +23,7 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABSetColorValueIntent) async throws -> INObjectCollection<OpenHABHome> {
-        OpenHABIntentHelper.getHomeOptions()
+        await OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetColorValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
@@ -47,7 +47,7 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
             )
         }
 
-        guard let homeId = home.uuid, Preferences.storedHomes[homeId] != nil else {
+        guard let homeId = home.uuid, await Preferences.shared.storedHomes[homeId] != nil else {
             return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 

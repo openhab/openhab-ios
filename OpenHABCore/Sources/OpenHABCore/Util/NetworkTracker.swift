@@ -126,8 +126,8 @@ public class MainActorNetworkTracker: ObservableObject {
 }
 
 public actor CertificateManagers {
-    public static let clientCertificateManager = ClientCertificateManager()
-    public static let serverCertificateManager = ServerCertificateManager()
+    @MainActor public static let clientCertificateManager = ClientCertificateManager()
+    @MainActor public static let serverCertificateManager = ServerCertificateManager()
 }
 
 public actor NetworkTracker {
@@ -191,10 +191,15 @@ public actor NetworkTracker {
         // Utilize for await to listen for changes in $activeConnection
         // $activeConnection.values is an AsyncSequence, allowing you to iterate over its values asynchronously.
         // Wait until a non-nil value is received
+        let logger = logger
         return await withTimeout(timeout: timeout) {
+            logger.info("NetworkConnection: Start waiting for active connection connection with timeout")
             if let current = await self.activeConnection { return current }
             for await connection in await self.$activeConnection.values {
-                if let connection { return connection }
+                if let connection {
+                    logger.info("NetworkConnection: active connection received")
+                    return connection
+                }
             }
             return nil
         }
@@ -266,7 +271,12 @@ public actor NetworkTracker {
                     break
                 }
 
-                if bestConnection == nil || connectionInfo.configuration.priority < bestConnection!.configuration.priority {
+                guard let currentBestConnection = bestConnection else {
+                    bestConnection = connectionInfo
+                    continue
+                }
+
+                if connectionInfo.configuration.priority < currentBestConnection.configuration.priority {
                     bestConnection = connectionInfo
                 }
             }
@@ -284,7 +294,8 @@ public actor NetworkTracker {
     }
 
     private func withTimeout<T: Sendable>(timeout: TimeInterval, operation: @Sendable @escaping () async -> T?) async -> T? {
-        await withTaskGroup(of: T?.self) { group in
+        let logger = logger
+        return await withTaskGroup(of: T?.self) { group in
             // Start the operation
             group.addTask {
                 await operation()
@@ -293,6 +304,7 @@ public actor NetworkTracker {
             // Start the timeout countdown
             group.addTask {
                 try? await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+                logger.info("NetworkConnection: Timeout reached")
                 return nil
             }
 

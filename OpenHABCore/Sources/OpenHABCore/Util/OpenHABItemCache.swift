@@ -27,7 +27,7 @@ public actor OpenHABItemCache {
     private init() {}
 
     public func getAllCachedItems() async -> [UUID: [OpenHABItem]] {
-        await reloadCacheIfNeeded(homes: Preferences.listStoredHomes())
+        await reloadCacheIfNeeded(homes: Preferences.shared.listStoredHomes())
         return items
     }
 
@@ -87,7 +87,7 @@ public actor OpenHABItemCache {
     }
 
     public func forceCacheReload() async {
-        let homes = Preferences.listStoredHomes()
+        let homes = await Preferences.shared.listStoredHomes()
         // some house keeping
         let networkTrackersToRemove = networkTrackers.filter { !homes.contains($0.key) }
         for networkTracker in networkTrackersToRemove {
@@ -145,7 +145,7 @@ public actor OpenHABItemCache {
     }
 
     private func assureNetworkTracker(homeId: UUID) async -> NetworkTracker? {
-        if networkTrackers[homeId] == nil, let homePreferences = Preferences.storedHomes[homeId] {
+        if networkTrackers[homeId] == nil, let homePreferences = await Preferences.shared.storedHomes[homeId] {
             let tracker = NetworkTracker()
             networkTrackers[homeId] = tracker
             await tracker.startTracking(connectionConfigurations: [homePreferences.localConnectionConfig, homePreferences.remoteConnectionConfig])

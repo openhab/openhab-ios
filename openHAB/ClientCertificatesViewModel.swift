@@ -17,22 +17,18 @@ import SwiftUI
 class ClientCertificatesViewModel: ObservableObject {
     @Published var clientCertificates: [SecIdentity] = []
 
-    init() {
-        loadCertificates()
-    }
-
-    func loadCertificates() {
+    @MainActor func loadCertificates() {
         clientCertificates = CertificateManagers.clientCertificateManager.clientIdentities
     }
 
-    func deleteCertificate(at index: Int) {
+    @MainActor func deleteCertificate(at index: Int) {
         let status = CertificateManagers.clientCertificateManager.deleteFromKeychain(index: index)
         if status == noErr {
             clientCertificates.remove(at: index)
         }
     }
 
-    func getIdentityName(for index: Int) -> String {
+    @MainActor func getIdentityName(for index: Int) -> String {
         CertificateManagers.clientCertificateManager.getIdentityName(index: index)
     }
 }

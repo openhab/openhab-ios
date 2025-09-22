@@ -23,7 +23,7 @@ class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABSetStringValueIntent) async throws -> INObjectCollection<OpenHABHome> {
-        OpenHABIntentHelper.getHomeOptions()
+        await OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetStringValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
@@ -47,7 +47,7 @@ class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling
             )
         }
 
-        guard let homeId = home.uuid, Preferences.storedHomes[homeId] != nil else {
+        guard let homeId = home.uuid, await Preferences.shared.storedHomes[homeId] != nil else {
             return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 

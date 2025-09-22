@@ -29,7 +29,7 @@ class OpenHABNavigationController: UINavigationController {
     override var childForStatusBarHidden: UIViewController? { nil }
 
     override var prefersStatusBarHidden: Bool {
-        Preferences.hideStatusBar
+        Preferences.shared.hideStatusBar
     }
 
     override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation { .fade }

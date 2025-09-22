@@ -32,7 +32,7 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<OpenHABHome> {
-        OpenHABIntentHelper.getHomeOptions()
+        await OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideActionOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
@@ -63,7 +63,7 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
             )
         }
 
-        guard let homeId = home.uuid, Preferences.storedHomes[homeId] != nil else {
+        guard let homeId = home.uuid, await Preferences.shared.storedHomes[homeId] != nil else {
             return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 
