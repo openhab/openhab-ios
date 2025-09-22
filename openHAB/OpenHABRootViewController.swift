@@ -68,11 +68,11 @@ class OpenHABRootViewController: UIViewController {
 
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABRootViewController.handleApsRegistration(_:)), name: NSNotification.Name("apsRegistered"), object: nil)
 
-        if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !Preferences.sendCrashReports {
+        if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !Preferences.shared.sendCrashReports {
             let alertController = UIAlertController(title: NSLocalizedString("crash_detected", comment: "").capitalized, message: NSLocalizedString("crash_reporting_info", comment: ""), preferredStyle: .alert)
             alertController.addAction(
                 UIAlertAction(title: NSLocalizedString("activate", comment: ""), style: .default) { _ in
-                    Preferences.sendCrashReports = true
+                    Preferences.shared.sendCrashReports = true
                     Crashlytics.crashlytics().sendUnsentReports()
                 }
             )
@@ -94,7 +94,7 @@ class OpenHABRootViewController: UIViewController {
         #if DEBUG
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             // this is here to continue to make existing tests work, need to look at this later
-            Preferences.modifyActiveHome { homePreferences in
+            Preferences.shared.modifyActiveHome { homePreferences in
                 homePreferences.demomode = true
             }
         }
@@ -102,7 +102,7 @@ class OpenHABRootViewController: UIViewController {
         navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
         #endif
         // save this so we know if its changed later
-        isDemoMode = Preferences.currentHomePreferences.demomode
+        isDemoMode = Preferences.shared.currentHomePreferences.demomode
         switchToSavedView()
         setupTracker()
         startSSEListening()
@@ -113,9 +113,9 @@ class OpenHABRootViewController: UIViewController {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = true
         // if we have turned demo mode off/on, reset view
-        if isDemoMode != Preferences.currentHomePreferences.demomode {
+        if isDemoMode != Preferences.shared.currentHomePreferences.demomode {
             switchToSavedView()
-            isDemoMode = Preferences.currentHomePreferences.demomode
+            isDemoMode = Preferences.shared.currentHomePreferences.demomode
         }
     }
 
@@ -154,7 +154,7 @@ class OpenHABRootViewController: UIViewController {
     }
 
     fileprivate func setupTracker() {
-        let serverInfo = Preferences.$currentHomePreferences
+        let serverInfo = Preferences.shared.$currentHomePreferences
 
         // Register for certificate trust notifications
         NotificationCenter.default.addObserver(
@@ -336,7 +336,7 @@ class OpenHABRootViewController: UIViewController {
                 self.modalDismissed(to: .settings)
             }
         case let .sitemap(sitemap):
-            Preferences.modifyActiveHome { homePreferences in
+            Preferences.shared.modifyActiveHome { homePreferences in
                 homePreferences.defaultSitemap = sitemap
             }
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
@@ -380,12 +380,12 @@ class OpenHABRootViewController: UIViewController {
             let connection: ConnectionConfiguration // not only URL, because auth and certs might be relevant for establishing the connection
         }
 
-        let storedOpenHabConnections = Preferences.$storedHomes
+        let storedOpenHabConnections = Preferences.shared.$storedHomes
             .debounce(for: .seconds(1), scheduler: RunLoop.main) // avoid overexcited registrations / deregistrations in batch updates
             .map { updatedPreferences in // we want to recognize changes in the OpenHab URLs for any of the homes
                 Set<UuidWithConnection>(updatedPreferences.compactMap { storedWithUuid in
                     let (uuid, homeConfig) = storedWithUuid
-                    guard let connection = Preferences.getNotificationConnection(of: homeConfig) else { return nil }
+                    guard let connection = Preferences.shared.getNotificationConnection(of: homeConfig) else { return nil }
                     return UuidWithConnection(uuid: uuid, connection: connection)
                 })
             }
@@ -434,7 +434,7 @@ class OpenHABRootViewController: UIViewController {
             do {
                 let client = HTTPClient(configuration: config)
                 if let cloudUserId = try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) {
-                    Preferences.setCloudUserId(cloudUserId, for: uuid)
+                    Preferences.shared.setCloudUserId(cloudUserId, for: uuid)
                     logger.info("my.openHAB registration succeeded with cloudUserId \(cloudUserId)")
                 }
                 logger.info("my.openHAB registration succeeded without cloudUserId")
@@ -448,12 +448,12 @@ class OpenHABRootViewController: UIViewController {
         guard let action else { return }
 
         logger.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
-        if let cloudUserId, let targetHome = Preferences.storedHome(forCloudUserId: cloudUserId), Preferences.currentHomePreferences.remoteConnectionConfig.cloudUserId != cloudUserId {
+        if let cloudUserId, let targetHome = Preferences.shared.storedHome(forCloudUserId: cloudUserId), Preferences.shared.currentHomePreferences.remoteConnectionConfig.cloudUserId != cloudUserId {
             // if we need to switch homes, disconnnect the tracking first, and wait for the tracker to start again with the updated preferences
             Task {
                 await NetworkTracker.shared.stopTracking()
                 logger.info("Switching to home \(targetHome.id)")
-                Preferences.switchActiveHome(to: targetHome.id)
+                Preferences.shared.switchActiveHome(to: targetHome.id)
                 _ = await NetworkTracker.shared.waitForActiveConnection()
                 handleNotificationInternal(action)
             }
@@ -521,8 +521,10 @@ class OpenHABRootViewController: UIViewController {
                     switchView(target: .webview)
                 }
                 if path.starts(with: "/") {
-                    // have the webview load this path itself
-                    webViewController.loadWebView(force: true, path: path)
+                    Task {
+                        // have the webview load this path itself
+                        webViewController.loadWebView(force: true, path: path)
+                    }
                 } else {
                     // have the mainUI handle the navigation
                     webViewController.navigateCommand(path)
@@ -745,8 +747,8 @@ class OpenHABRootViewController: UIViewController {
             currentView = targetView
 
             // Don't save our view in demo mode
-            if !Preferences.currentHomePreferences.demomode {
-                Preferences.modifyActiveHome {
+            if !Preferences.shared.currentHomePreferences.demomode {
+                Preferences.shared.modifyActiveHome {
                     $0.defaultView = currentView.viewName()
                 }
             }
@@ -760,11 +762,11 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func switchToSavedView() {
-        if Preferences.currentHomePreferences.demomode {
+        if Preferences.shared.currentHomePreferences.demomode {
             switchView(target: .sitemap(""))
         } else {
-            logger.info("OpenHABRootViewController switchToSavedView \(Preferences.currentHomePreferences.defaultView == "sitemap" ? "sitemap" : "web")")
-            switchView(target: Preferences.currentHomePreferences.defaultView == "sitemap" ? .sitemap("") : .webview)
+            logger.info("OpenHABRootViewController switchToSavedView \(Preferences.shared.currentHomePreferences.defaultView == "sitemap" ? "sitemap" : "web")")
+            switchView(target: Preferences.shared.currentHomePreferences.defaultView == "sitemap" ? .sitemap("") : .webview)
         }
     }
 
