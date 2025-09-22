@@ -22,7 +22,7 @@ class OpenHABWebViewController: OpenHABViewController {
     private var currentTarget = ""
     private var openHABTrackedRootUrl = ""
     private var activeConfig: ConnectionConfiguration?
-    private var hideNavBar = false
+    private var hideNavigationBar = false
     private var activityIndicator: UIActivityIndicatorView!
     private var sseTimer: Timer?
     private var commandQueue: [String] = []
@@ -95,7 +95,7 @@ class OpenHABWebViewController: OpenHABViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(hideNavBar, animated: animated)
+        setHideNavigationBar(shouldHide: hideNavigationBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
         parent?.navigationItem.title = "Main View"
         MainActorNetworkTracker.shared.$activeConnection
@@ -132,7 +132,7 @@ class OpenHABWebViewController: OpenHABViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         // Show the navigation bar on other view controllers
-        navigationController?.setNavigationBarHidden(false, animated: animated)
+        setHideNavigationBar(shouldHide: false, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = true
         trackerCancellables.removeAll()
     }
@@ -225,14 +225,14 @@ class OpenHABWebViewController: OpenHABViewController {
         }
     }
 
-    func setHideNavBar(shouldHide: Bool) {
-        hideNavBar = shouldHide
-        navigationController?.setNavigationBarHidden(hideNavBar, animated: true)
+    func setHideNavigationBar(shouldHide: Bool, animated: Bool = true) {
+        hideNavigationBar = shouldHide
+        navigationController?.setNavigationBarHidden(hideNavigationBar, animated: animated)
     }
 
     func clearExistingPage() {
         logger.info("clearExistingPage")
-        setHideNavBar(shouldHide: false)
+        setHideNavigationBar(shouldHide: false)
         // clear out existing page while we load.
         webView.stopLoading()
         webView.evaluateJavaScript("document.body.remove()")
@@ -377,7 +377,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
             case "goFullscreen":
                 // check to make sure we are actually the top view before hiding the nav button
                 if isViewLoaded, view.window != nil {
-                    setHideNavBar(shouldHide: true)
+                    setHideNavigationBar(shouldHide: true)
                 }
             case "sseConnected-true":
                 logger.info("WKScriptMessage sseConnected is true")
@@ -433,6 +433,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {
         logger.error("didFail - webView.url: \(String(describing: webView.url?.description))")
 
+        setHideNavigationBar(shouldHide: false)
         if let urlError = error as? URLError, urlError.code == .cancelled {
             return // Ignore cancelled requests
         }
@@ -442,6 +443,8 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         logger.info("didFinish - webView.url: \(String(describing: webView.url?.description))")
+
+        setHideNavigationBar(shouldHide: true)
         showActivityIndicator(show: false)
         hidePopupMessages()
         // watch for URL changes so we can store the last visited path
@@ -484,6 +487,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+        setHideNavigationBar(shouldHide: false)
         reloadView()
     }
 }
