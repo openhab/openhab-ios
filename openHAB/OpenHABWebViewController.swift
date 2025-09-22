@@ -132,7 +132,8 @@ class OpenHABWebViewController: OpenHABViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         // Show the navigation bar on other view controllers
-        setHideNavigationBar(shouldHide: false, animated: animated)
+        // do not change the "navigationBarHidden" flag to restore on reappearing
+        navigationController?.setNavigationBarHidden(false, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = true
         trackerCancellables.removeAll()
     }
@@ -226,6 +227,7 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func setHideNavigationBar(shouldHide: Bool, animated: Bool = true) {
+        logger.debug("Hide navigation bar: \(shouldHide)")
         hideNavigationBar = shouldHide
         navigationController?.setNavigationBarHidden(hideNavigationBar, animated: animated)
     }
