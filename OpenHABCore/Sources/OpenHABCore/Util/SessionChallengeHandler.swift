@@ -14,6 +14,7 @@ import os
 
 private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "org.openhab.app", category: "SessionChallenge")
 
+@MainActor
 public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
     logger.info("onReceiveSessionTaskChallenge host: \(String(describing: challenge.protectionSpace.host))")
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
@@ -36,6 +37,7 @@ public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChall
     return (disposition, credential)
 }
 
+@MainActor
 public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
     logger.warning("onReceiveSessionChallenge is not implemented fully (see TODOs)")
     logger.info("onReceiveSessionChallenge host: \(String(describing: challenge.protectionSpace.host))")

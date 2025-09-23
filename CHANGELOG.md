@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [Version 3.1.20, Build 73] - 2025-09-23Z
+
+- isolate ServerCertificateManager to main actor (#970)
+- Remove the deprecated use of WKProcessPool/processPool in OpenHABWebViewController (#965)
+- Bump rexml from 3.4.1 to 3.4.2 (#969)
+
+## [Version 3.1.19, Build 72] - 2025-09-22Z
+
+- Workaround for compiling in Archive/Release configuration (#968)
+- Migrate openHABCore to Swift 6 (#961)
+- Improve watch app (#962)
+- Prepare for Xcode 26 (#964)
+- Upgrade Xcode (#963)
+- Bump crowdin/github-action from 2.10.0 to 2.11.0 (#959)
+
 ## [Version 3.1.18, Build 71] - 2025-09-05Z
 
 - Fixes waiting for a connection when one already exists (#958)

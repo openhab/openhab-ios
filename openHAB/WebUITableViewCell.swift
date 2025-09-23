@@ -53,8 +53,8 @@ class WebUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         // swiftformat:disable redundantSelf
         logger.info("webview loading url \(self.widget.url)")
         // swiftformat:enable redundantSelf
-        let urlString = widget.url.lowercased().hasPrefix("http://") || widget.url.lowercased().hasPrefix("https://") ? widget.url : Preferences.currentHomePreferences.localConnectionConfig.url + widget.url
-        logger.info("webview final URL: \(urlString)")
+        let urlString = widget.url.lowercased().hasPrefix("http://") || widget.url.lowercased().hasPrefix("https://") ? widget.url : Preferences.shared.currentHomePreferences.localConnectionConfig.url + widget.url
+        os_log("webview final URL: %{PUBLIC}@", log: .default, type: .info, urlString)
         guard url?.absoluteString != urlString else {
             logger.info("webview URL has not changed, abort loading")
             return

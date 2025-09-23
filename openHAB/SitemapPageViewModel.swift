@@ -104,7 +104,7 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     func loadSettings() {
-        defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
+        defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
     }
 
     func startPageHandling() {
@@ -267,7 +267,7 @@ class SitemapPageViewModel: ObservableObject {
                 logger.info("Auto-selected single sitemap: \(self.defaultSitemap)")
 
                 // Save as default for future launches
-                Preferences.modifyActiveHome { homePreferences in
+                Preferences.shared.modifyActiveHome { homePreferences in
                     homePreferences.defaultSitemap = defaultSitemap
                 }
             case 2...:
@@ -277,7 +277,7 @@ class SitemapPageViewModel: ObservableObject {
                 logger.info("Auto-selected first sitemap from \(filteredSitemaps.count) available: \(self.defaultSitemap)")
 
                 // Save as default for future launches
-                Preferences.modifyActiveHome { homePreferences in
+                Preferences.shared.modifyActiveHome { homePreferences in
                     homePreferences.defaultSitemap = defaultSitemap
                 }
             default:

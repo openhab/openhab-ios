@@ -77,13 +77,13 @@ struct IconView: View {
                     .opacity(0.3)
             }
         }
-        .onChange(of: widget.icon) { _ in
+        .onChange(of: widget.icon) {
             resetLoadingState()
         }
-        .onChange(of: widget.iconState()) { _ in
+        .onChange(of: widget.iconState()) {
             resetLoadingState()
         }
-        .onChange(of: networkTracker.activeConnection) { _ in
+        .onChange(of: networkTracker.activeConnection) {
             resetLoadingState()
         }
     }
