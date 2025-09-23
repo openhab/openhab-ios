@@ -112,6 +112,42 @@ public struct HomePreferences: Codable, Equatable {
     }
 }
 
+// MARK: Retrieving preference from user defaults, reacting to preference change
+
+private enum PreferencesAccess {
+    @MainActor fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
+        let preferenceValue = sharedDefaults.object(forKey: key)
+        if let preferenceConverted = decoder(preferenceValue) {
+            return preferenceConverted
+        } else {
+            if let preferenceValue {
+                logger.error("Preference value \(key) was \(String(describing: preferenceValue)) but did not conform to \(T.self). Replace with default value.")
+            } else {
+                logger.info("Preference value \(key) was set for the first time. Using default value.")
+            }
+            let fallback = defaultValue
+            sharedDefaults.set(encoder(fallback), forKey: key)
+            return fallback
+        }
+    }
+
+    @MainActor fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
+        guard let sanitized = sanitize(newValue) else {
+            logger.debug("Preference \(key) new value \(String(describing: newValue)) could not be sanitized, will be ignored")
+            return
+        }
+        let convertedValue = converter(sanitized)
+        guard convertedValue != nil else {
+            logger.debug("Preference \(key) conversion of new value \(String(describing: sanitized)) failed, do not store.")
+            return
+        }
+        logger.debug("Preference \(key) will be changed to value \(String(describing: newValue))")
+        sharedDefaults.set(convertedValue, forKey: key)
+
+        subject.send(sanitized)
+    }
+}
+
 public actor Preferences {
     public static let shared = Preferences()
 
@@ -200,42 +236,6 @@ public actor Preferences {
         internalPreferenceChangeOngoing = true
         change()
         internalPreferenceChangeOngoing = false
-    }
-}
-
-// MARK: Retrieving preference from user defaults, reacting to preference change
-
-private enum PreferencesAccess {
-    @MainActor fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
-        let preferenceValue = sharedDefaults.object(forKey: key)
-        if let preferenceConverted = decoder(preferenceValue) {
-            return preferenceConverted
-        } else {
-            if let preferenceValue {
-                logger.error("Preference value \(key) was \(String(describing: preferenceValue)) but did not conform to \(T.self). Replace with default value.")
-            } else {
-                logger.info("Preference value \(key) was set for the first time. Using default value.")
-            }
-            let fallback = defaultValue
-            sharedDefaults.set(encoder(fallback), forKey: key)
-            return fallback
-        }
-    }
-
-    @MainActor fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
-        guard let sanitized = sanitize(newValue) else {
-            logger.debug("Preference \(key) new value \(String(describing: newValue)) could not be sanitized, will be ignored")
-            return
-        }
-        let convertedValue = converter(sanitized)
-        guard convertedValue != nil else {
-            logger.debug("Preference \(key) conversion of new value \(String(describing: sanitized)) failed, do not store.")
-            return
-        }
-        logger.debug("Preference \(key) will be changed to value \(String(describing: newValue))")
-        sharedDefaults.set(convertedValue, forKey: key)
-
-        subject.send(sanitized)
     }
 }
 
