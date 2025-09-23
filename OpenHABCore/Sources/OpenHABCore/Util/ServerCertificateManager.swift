@@ -26,7 +26,8 @@ enum ServerCertificateManagerError: Error {
     case serverTrustEvaluationFailed
 }
 
-public class ServerCertificateManager: @unchecked Sendable { // ServerTrustManager, ServerTrustEvaluating {
+@MainActor
+public final class ServerCertificateManager { // ServerTrustManager, ServerTrustEvaluating {
     // Handle the different responses of the user
     public enum EvaluateResult: Sendable {
         case undecided

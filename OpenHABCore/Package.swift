@@ -57,7 +57,6 @@ let package = Package(
                 .process("Resources")
             ],
             swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals"),
                 .enableExperimentalFeature("StrictConcurrency")
             ]
         )
