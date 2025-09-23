@@ -144,7 +144,6 @@ public actor NetworkTracker {
     private var connectionPool: ConnectionPool
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
-    private let disconnectedRetryInterval: UInt64 = 30 // / amount of time we scan when not connected
 
     private var failureTracker: ConnectionFailureTracker
 
@@ -164,7 +163,7 @@ public actor NetworkTracker {
         logger.info("Start Network Tracking")
         self.connectionConfigurations = connectionConfigurations
 
-        Task.detached(priority: .utility) { [weak self] in
+        Task(priority: .utility) { [weak self] in
             await self?.pathMonitor.startMonitoring { isConnected in
                 await self?.handleNetworkChange(isConnected: isConnected)
             }
@@ -182,8 +181,11 @@ public actor NetworkTracker {
         await setActiveConnection(nil)
         await attemptConnection()
     }
-
+    
     public func stopTracking() async {
+        retryTask?.cancel()
+        retryTask = nil
+        pathMonitor.cancel()
         await setActiveConnection(nil)
     }
 
