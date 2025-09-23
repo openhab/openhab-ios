@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [Version 3.1.20, Build 73] - 2025-09-23Z
+
+- isolate ServerCertificateManager to main actor (#970)
+- Remove the deprecated use of WKProcessPool/processPool in OpenHABWebViewController (#965)
+- Bump rexml from 3.4.1 to 3.4.2 (#969)
+
 ## [Version 3.1.19, Build 72] - 2025-09-22Z
 
 - Workaround for compiling in Archive/Release configuration (#968)
