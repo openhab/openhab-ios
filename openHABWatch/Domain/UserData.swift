@@ -154,7 +154,6 @@ final class UserData: ObservableObject {
 
     func startPageHandling(sitemapName: String, pageId: String = "") {
         // Don't clear widgets immediately when switching - use cached data during transition
-        let shouldPreserveWidgets = !widgets.isEmpty
         pageHandlingTask?.cancel()
 
         pageHandlingTask = Task {
