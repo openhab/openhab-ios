@@ -24,6 +24,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private var chartStyle: ChartStyle = .light
     private var activeTask: Task<Void, Never>?
     private var cachedImage: UIImage?
+    private var cachedWidgetId: String?
 
     var openHABRootUrl: String?
 
@@ -95,11 +96,38 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         }
     }
 
+    override func prepareForReuse() {
+        super.prepareForReuse()
+
+        // Cancel any active image loading task
+        activeTask?.cancel()
+        activeTask = nil
+
+        // Invalidate and clear timer
+        refreshTimer?.invalidate()
+        refreshTimer = nil
+
+        // Clear cached image and widget ID to prevent showing wrong content in reused cells
+        cachedImage = nil
+        cachedWidgetId = nil
+        mainImageView?.image = nil
+
+        // Reset chart style
+        chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
+    }
+
     override func displayWidget() {
-        if cachedImage == nil {
-            loadImage()
-        } else {
+        // Check if we can reuse the cached image for the same widget
+        let currentWidgetId = widget?.id
+        let canReuseCache = cachedImage != nil && cachedWidgetId == currentWidgetId
+
+        if canReuseCache {
             mainImageView.image = cachedImage
+        } else {
+            // Different widget, clear cache and load new image
+            cachedImage = nil
+            cachedWidgetId = currentWidgetId
+            loadImage()
         }
         // If widget have a refresh rate configured, i.e. different from zero, schedule an image update timer
         if widget.refresh != 0 {
@@ -123,6 +151,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         switch widgetPayload {
         case let .embedded(image):
             cachedImage = image
+            cachedWidgetId = widget?.id
             mainImageView.image = image
             didLoad?()
         case let .link(url):
@@ -166,6 +195,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                 let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, timeout: 10.0, type: .data, cacheingPolicy: !shouldCache ? .reloadIgnoringCacheData : .useProtocolCachePolicy)
                 await MainActor.run {
                     self.cachedImage = UIImage(data: data)
+                    self.cachedWidgetId = self.widget?.id
                     self.mainImageView?.image = self.cachedImage
                     self.didLoad?()
                 }
@@ -196,5 +226,6 @@ extension NewImageUITableViewCell: GenericCellCacheProtocol {
     func invalidateCache() {
         refreshTimer?.invalidate()
         cachedImage = nil
+        cachedWidgetId = nil
     }
 }
