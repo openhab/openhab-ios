@@ -275,6 +275,8 @@ actor NotificationServiceHandler {
         if let tracker = networkTracker {
             return tracker
         }
+        // Ensure Preferences initializes on the MainActor to avoid crashes
+        await MainActor.run { _ = Preferences.shared }
 
         let tracker = NetworkTracker.shared
         let connections: [ConnectionConfiguration]
