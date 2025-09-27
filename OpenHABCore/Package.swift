@@ -1,4 +1,4 @@
-// swift-tools-version:5.10
+// swift-tools-version: 6.1
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -17,7 +17,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/onevcat/Kingfisher.git", from: "8.0.0"),
         .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.1.0"),
         .package(url: "https://github.com/apple/swift-http-types.git", from: "1.0.0"),
         .package(url: "https://github.com/SDWebImage/SDWebImageSVGCoder.git", from: "1.4.0"),
         .package(url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git", from: "6.2.0")
@@ -36,22 +36,8 @@ let package = Package(
                 .product(name: "SFSafeSymbols", package: "SFSafeSymbols")
             ],
             swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals"),
-                .enableUpcomingFeature("ConciseMagicFile"),
-                .enableUpcomingFeature("DisableOutwardActorInference"),
-                .enableUpcomingFeature("DynamicActorIsolation"),
                 .enableUpcomingFeature("ExistentialAny"),
-                .enableUpcomingFeature("ForwardTrailingClosures"),
-                .enableUpcomingFeature("GlobalActorIsolatedTypesUsability"),
-                .enableUpcomingFeature("GlobalConcurrency"),
-                .enableUpcomingFeature("ImplicitOpenExistentials"),
-                .enableUpcomingFeature("ImportObjcForwardDeclarations"),
-                .enableUpcomingFeature("InferSendableFromCaptures"),
-//                .enableUpcomingFeature("InternalImportsByDefault"),
-                .enableUpcomingFeature("IsolatedDefaultValues"),
                 .enableUpcomingFeature("MemberImportVisibility"),
-                .enableUpcomingFeature("NonfrozenEnumExhaustivity"),
-                .enableUpcomingFeature("RegionBasedIsolation"),
                 .enableUpcomingFeature("StrictConcurrency"),
                 .unsafeFlags([
                     "-Xfrontend", "-enable-actor-data-race-checks",
@@ -71,7 +57,6 @@ let package = Package(
                 .process("Resources")
             ],
             swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals"),
                 .enableExperimentalFeature("StrictConcurrency")
             ]
         )

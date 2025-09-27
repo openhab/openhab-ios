@@ -19,14 +19,15 @@ public protocol ServerCertificateManagerDelegate: AnyObject, Sendable {
     // certificate received from openHAB doesn't match our record, ask user for a decision
     func evaluateCertificateMismatch(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult
     // notify delegate that the certificagtes that a user is willing to trust has changed
-    func acceptedServerCertificatesChanged()
+    func acceptedServerCertificatesChanged() async
 }
 
 enum ServerCertificateManagerError: Error {
     case serverTrustEvaluationFailed
 }
 
-public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvaluating {
+@MainActor
+public final class ServerCertificateManager { // ServerTrustManager, ServerTrustEvaluating {
     // Handle the different responses of the user
     public enum EvaluateResult: Sendable {
         case undecided

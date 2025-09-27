@@ -50,7 +50,7 @@ struct NotificationRow: View {
             version: connection.version,
             icon: notification.icon,
             state: "",
-            iconType: .png,
+            iconType: .svg,
             iconColor: ""
         )
 
@@ -143,7 +143,7 @@ extension NotificationsView where Tracker == MainActorNetworkTracker {
             let logger = Logger(subsystem: "org.openhab.app", category: "NotificationView")
 
             do {
-                guard let config = Preferences.getNotificationConnection() else {
+                guard let config = Preferences.shared.getNotificationConnection() else {
                     logger.warning("No openHAB configuration found.")
                     return []
                 }

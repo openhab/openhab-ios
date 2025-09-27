@@ -164,7 +164,7 @@ class OpenHABWebViewController: OpenHABViewController {
             // TODO: remove this check once iOS 16 is dropped
             let isMyOh = url?.host?.contains("myopenhab.org") ?? false
             // create new (or resuse existing)
-            let newWebview = webView(for: Preferences.currentHomePreferences.id, isMyopenhab: isMyOh)
+            let newWebview = webView(for: Preferences.shared.currentHomePreferences.id, isMyopenhab: isMyOh)
             if newWebview != webView {
                 // Detach old instance
                 webView.stopLoading()
@@ -189,8 +189,8 @@ class OpenHABWebViewController: OpenHABViewController {
         }
         if let path {
             url = appendPathToURL(baseURL: url, path: path) ?? url
-        } else if !Preferences.currentHomePreferences.defaultMainUIPath.isEmpty {
-            url = appendPathToURL(baseURL: url, path: Preferences.currentHomePreferences.defaultMainUIPath) ?? url
+        } else if !Preferences.shared.currentHomePreferences.defaultMainUIPath.isEmpty {
+            url = appendPathToURL(baseURL: url, path: Preferences.shared.currentHomePreferences.defaultMainUIPath) ?? url
         }
         return url
     }
@@ -296,7 +296,6 @@ class OpenHABWebViewController: OpenHABViewController {
             return existing
         }
         let config = WKWebViewConfiguration()
-        config.processPool = WKProcessPool() // isolates credential cache
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
@@ -365,7 +364,9 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
         logger.info("WKScriptMessage \(message.name)")
         if message.name == "pathChanged", let newPath = message.body as? String {
             print("path changed to: \(newPath)")
-            Preferences.currentWebViewPath = newPath
+            Task { @MainActor in
+                Preferences.shared.currentWebViewPath = newPath
+            }
         }
         if message.name == "mainUi", let callbackName = message.body as? String {
             logger.info("WKScriptMessage \(callbackName)")
@@ -448,7 +449,9 @@ extension OpenHABWebViewController: WKNavigationDelegate {
             if let path = url?.path {
                 let string = openHABTrackedRootUrl
                 logger.info("navigation change base: \(string) path: \(path)")
-                Preferences.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
+                Task { @MainActor in
+                    Preferences.shared.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
+                }
             }
         }
     }
@@ -505,6 +508,6 @@ extension OpenHABWebViewController: WKUIDelegate {
                  decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
                  initiatedBy frame: WKFrameInfo,
                  type: WKMediaCaptureType) async -> WKPermissionDecision {
-        Preferences.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
+        Preferences.shared.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
     }
 }

@@ -26,6 +26,9 @@ final class UserData: ObservableObject {
     @Published var certificateErrorDescription = ""
     @Published var isLoadingSitemap = false
 
+    // Cache last successful widgets to prevent empty state during reconnections
+    private var cachedWidgets: [OpenHABWidget] = []
+
     private var pageHandlingTask: Task<Void, Never>?
     @Published var isPolling = false
 
@@ -150,6 +153,7 @@ final class UserData: ObservableObject {
     }
 
     func startPageHandling(sitemapName: String, pageId: String = "") {
+        // Don't clear widgets immediately when switching - use cached data during transition
         pageHandlingTask?.cancel()
 
         pageHandlingTask = Task {
@@ -163,7 +167,11 @@ final class UserData: ObservableObject {
 
                 await MainActor.run {
                     self.openHABSitemapPage = initialPage
-                    self.widgets = initialPage?.widgets ?? []
+                    let newWidgets = initialPage?.widgets ?? []
+                    self.widgets = newWidgets
+                    if !newWidgets.isEmpty {
+                        self.cachedWidgets = newWidgets
+                    }
                     openHABSitemapPage?.sendCommand = { [weak self] item, command in
                         Task { await self?.sendCommand(item, command: command) }
                     }
@@ -184,7 +192,11 @@ final class UserData: ObservableObject {
                             openHABSitemapPage?.sendCommand = { [weak self] item, command in
                                 Task { await self?.sendCommand(item, command: command) }
                             }
-                            self.widgets = page?.widgets ?? []
+                            let newWidgets = page?.widgets ?? []
+                            self.widgets = newWidgets
+                            if !newWidgets.isEmpty {
+                                self.cachedWidgets = newWidgets
+                            }
                         }
 
                         // Reset backoff after success
@@ -204,7 +216,13 @@ final class UserData: ObservableObject {
             } catch {
                 await MainActor.run {
                     logger.error("Page handling failed with error \(error.localizedDescription)")
-                    self.widgets = []
+                    // Use cached widgets if available instead of clearing completely
+                    if self.cachedWidgets.isEmpty {
+                        self.widgets = []
+                    } else {
+                        self.widgets = self.cachedWidgets
+                        logger.info("Using cached widgets during connection failure")
+                    }
                     self.errorDescription = error.localizedDescription
                     self.showAlert = true
                     self.isLoadingSitemap = false
