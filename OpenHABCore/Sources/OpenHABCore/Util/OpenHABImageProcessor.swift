@@ -24,7 +24,6 @@ public struct OpenHABImageProcessor: ImageProcessor {
     public let identifier: String
     private let logger = Logger(subsystem: "org.openhab", category: "OpenHABImageProcessor")
 
-    /// - Parameter tint: The tint color used to tint the input image.
     public init() {
         identifier = "org.openhab.svgprocessor"
     }
