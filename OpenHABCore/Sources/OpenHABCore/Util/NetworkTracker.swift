@@ -462,8 +462,9 @@ public extension NetworkTracker {
         try await service().updateItemState(itemname: item.name, with: state)
     }
 
-    func getItems() async throws -> [OpenHABItem] {
-        try await service().getItems()
+    func getStaticItems() async throws -> [OpenHABItem] {
+        let items = try await service().getItems(query: Operations.getItems.Input.Query(staticDataOnly: true))
+        return items.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
     func getItemByName(id: String) async throws -> OpenHABItem? {

@@ -51,15 +51,15 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
             return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 
-        let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId)
+        let item = await OpenHABItemCache.instance.getItemUncached(name: itemName, home: homeId)
 
-        guard let items, items.count == 1 else {
+        guard let item else {
             return .failureInvalidItem(itemName)
         }
 
         return .success(
             item: itemName,
-            state: items[0].state ?? NSLocalizedString("unknownState", comment: "unknown item state")
+            state: item.state ?? NSLocalizedString("unknownState", comment: "unknown item state")
         )
     }
 }

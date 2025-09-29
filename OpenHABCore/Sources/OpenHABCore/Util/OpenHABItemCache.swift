@@ -41,6 +41,14 @@ public actor OpenHABItemCache {
         return items[home]?.filter { $0.name == name }
     }
 
+    public func getItemUncached(name: String, home: UUID) async -> OpenHABItem? {
+        guard let networkTracker = await assureNetworkTracker(homeId: home) else {
+            logger.error("Home \(home) not reachable")
+            return nil
+        }
+        return try? await networkTracker.getItemByName(id: name)
+    }
+
     public func sendCommand(to item: OpenHABItem, home: UUID, command: String) async {
         guard let networkTracker = await assureNetworkTracker(homeId: home) else {
             logger.error("Home \(home) not reachable")
@@ -141,7 +149,7 @@ public actor OpenHABItemCache {
             logger.error("Home \(homeId) not reachable")
             return nil
         }
-        return try? await networkTracker.getItems()
+        return try? await networkTracker.getStaticItems()
     }
 
     private func assureNetworkTracker(homeId: UUID) async -> NetworkTracker? {
