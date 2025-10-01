@@ -181,7 +181,7 @@ public actor NetworkTracker {
         await setActiveConnection(nil)
         await attemptConnection()
     }
-    
+
     public func stopTracking() async {
         retryTask?.cancel()
         retryTask = nil

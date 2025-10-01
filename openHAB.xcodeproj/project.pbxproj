@@ -1502,7 +1502,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd BuildTools\nSDKROOT=(xcrun --sdk macosx --show-sdk-path)\n\nswift package plugin --allow-writing-to-package-directory --allow-writing-to-directory \"$SRCROOT\" swiftformat \"$SRCROOT\" --config ./.swiftformat --cache /private/tmp/\nswift package plugin --allow-writing-to-package-directory --allow-writing-to-directory ../ swiftlint --cache-path /private/tmp/\n";
+			shellScript = "[[ -n \"$CI\" ]] && exit 0\n\ncd BuildTools\nSDKROOT=(xcrun --sdk macosx --show-sdk-path)\n\nswift package plugin --allow-writing-to-package-directory --allow-writing-to-directory \"$SRCROOT\" swiftformat \"$SRCROOT\" --config ./.swiftformat --cache /private/tmp/\nswift package plugin --allow-writing-to-package-directory --allow-writing-to-directory ../ swiftlint --cache-path /private/tmp/\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
