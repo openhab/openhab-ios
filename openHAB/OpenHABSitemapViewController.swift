@@ -441,6 +441,11 @@ extension OpenHABSitemapViewController {
             return
         }
 
+        guard name != pageId || path != nil else {
+            logger.info("pushSitemap: Already at the required sitemap")
+            return
+        }
+
         logger.info("pushSitemap: pushing page")
 
         guard let baseUrl = URL(string: activeConnection.configuration.url) else {
@@ -461,6 +466,9 @@ extension OpenHABSitemapViewController {
             return
         }
 
+        if let pageId = path {
+            newViewController.pageId = pageId
+        }
         newViewController.pageUrl = url.absoluteString
         newViewController.openHABRootUrl = activeConnection.configuration.url
         navigationController?.pushViewController(newViewController, animated: true)
