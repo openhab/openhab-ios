@@ -18,7 +18,7 @@ class IntentHandler: INExtension {
 
         Task { @MainActor in
             // Ensure Preferences initializes on the MainActor to avoid crashes
-            await _ = Preferences.shared
+            _ = Preferences.shared
             await OpenHABItemCache.instance.forceCacheReload()
         }
     }

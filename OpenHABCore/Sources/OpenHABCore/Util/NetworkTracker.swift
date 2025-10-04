@@ -160,7 +160,7 @@ public actor NetworkTracker {
     }
 
     public func startTracking(connectionConfigurations: [ConnectionConfiguration]) async {
-        logger.info("Start Network Tracking")
+        logger.info("Start Network Tracking for \(connectionConfigurations.map { "url: \($0.url), user: \($0.username)" })")
         self.connectionConfigurations = connectionConfigurations
 
         Task(priority: .utility) { [weak self] in
@@ -356,7 +356,7 @@ public actor NetworkTracker {
         }
 
         do {
-            logger.info("testConnection for \(configuration.url)")
+            logger.info("testConnection for url: \(configuration.url) user: \(configuration.username)")
             let connection = try await connectionPool.getOrCreateService(for: configuration)
             let version = try await connection.getRootVersion()
             let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
