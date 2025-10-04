@@ -39,6 +39,10 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
         }
     }
 
+    func getItems(query: OpenHABCore.Operations.getItems.Input.Query) async throws -> [OpenHABCore.OpenHABItem] {
+        try await getItems()
+    }
+
     func getItems() async throws -> [OpenHABCore.OpenHABItem] {
         if shouldFail {
             throw NetworkTrackerError.failedConnection("http://mock")
