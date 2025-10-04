@@ -255,8 +255,10 @@ public actor NetworkTracker {
 
         logger.debug("Checking available connections...")
         if let bestConnection = await findBestConnection() {
+            logger.info("Best connection url: \(bestConnection.configuration.url) user: \(bestConnection.configuration.username)")
             await setActiveConnection(bestConnection)
         } else {
+            logger.info("No connection succeeded")
             await updateStatus(.notConnected)
             await setActiveConnection(nil)
         }

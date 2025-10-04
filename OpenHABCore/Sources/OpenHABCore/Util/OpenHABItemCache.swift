@@ -153,7 +153,8 @@ public actor OpenHABItemCache {
     }
 
     private func loadItems(homeId: UUID) async -> [OpenHABItem]? {
-        guard let networkTracker = await assureNetworkTracker(homeId: homeId) else {
+        guard let networkTracker = await assureNetworkTracker(homeId: homeId),
+              await networkTracker.activeConnection != nil else {
             logger.error("Home \(homeId) not reachable")
             return nil
         }
