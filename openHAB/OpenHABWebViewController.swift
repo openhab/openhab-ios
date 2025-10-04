@@ -298,7 +298,6 @@ class OpenHABWebViewController: OpenHABViewController {
             return existing
         }
         let config = WKWebViewConfiguration()
-        config.processPool = WKProcessPool() // isolates credential cache
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env

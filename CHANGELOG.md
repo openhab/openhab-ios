@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [Version 3.1.21, Build 77] - 2025-10-02Z
+
+- don't run Swiftlint and swiftformat an github actions
+- Fix Fastfile for scheduled deploy to TestFligh.  When bump_type: '' hits the action, fastlane throws
+- Renaming AGENT.md to AGENTS.md to have it considered by GitHub Copilot as well
+- cachedWidgetId - Tracks which widget's content is currently cached (#974)
+- Speedup network tracker by early-exiting connection attempts (#967)
+
+## [Version 3.1.20, Build 73] - 2025-09-23Z
+
+- isolate ServerCertificateManager to main actor (#970)
+- Remove the deprecated use of WKProcessPool/processPool in OpenHABWebViewController (#965)
+- Bump rexml from 3.4.1 to 3.4.2 (#969)
+
 ## [Version 3.1.19, Build 72] - 2025-09-22Z
 
 - Workaround for compiling in Archive/Release configuration (#968)

@@ -38,6 +38,7 @@ final class MockServerCertificateDelegate: ServerCertificateManagerDelegate, @un
 // openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=TestCert"
 // openssl x509 -outform der -in cert.pem -out test-cert.cer
 
+@MainActor
 @Suite("ServerCertificateManager Tests")
 struct ServerCertificateManagerTests {
     func createTestContext() -> (manager: ServerCertificateManager, delegate: MockServerCertificateDelegate) {

@@ -133,6 +133,9 @@ public actor CertificateManagers {
 public actor NetworkTracker {
     public static let shared = NetworkTracker()
 
+    public static let networkTimeout: TimeInterval = 10
+    public static let slowConnectionTimeout: TimeInterval = 1
+
     @Published public private(set) var activeConnection: ConnectionInfo?
 
     @Published public private(set) var status: NetworkStatus = .connecting
@@ -141,7 +144,6 @@ public actor NetworkTracker {
     private var connectionPool: ConnectionPool
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
-    private let disconnectedRetryInterval: UInt64 = 30 // / amount of time we scan when not connected
 
     private var failureTracker: ConnectionFailureTracker
 
@@ -161,7 +163,7 @@ public actor NetworkTracker {
         logger.info("Start Network Tracking")
         self.connectionConfigurations = connectionConfigurations
 
-        Task.detached(priority: .utility) { [weak self] in
+        Task(priority: .utility) { [weak self] in
             await self?.pathMonitor.startMonitoring { isConnected in
                 await self?.handleNetworkChange(isConnected: isConnected)
             }
@@ -181,10 +183,13 @@ public actor NetworkTracker {
     }
 
     public func stopTracking() async {
+        retryTask?.cancel()
+        retryTask = nil
+        pathMonitor.cancel()
         await setActiveConnection(nil)
     }
 
-    public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {
+    public func waitForActiveConnection(timeout: TimeInterval = NetworkTracker.networkTimeout) async -> ConnectionInfo? {
         logger.info("NetworkConnection: waitForActiveConnection")
         // If we already have an active connection, return it immediately
         if let existing = activeConnection { return existing }
@@ -206,7 +211,11 @@ public actor NetworkTracker {
     }
 
     public func restartTracking() {
-        Task { await attemptConnection() }
+        logger.debug("NetworkConnection: restartTracking")
+        Task {
+            await setActiveConnection(nil)
+            await attemptConnection()
+        }
     }
 
     // This gets called periodically when we have an active connection to make sure it's still the best choice
@@ -226,11 +235,17 @@ public actor NetworkTracker {
             logger.debug("Active connection is reachable: \(activeConnection.configuration.url)")
         } catch {
             logger.error("Active connection failed: \(activeConnection.configuration.url) - \(error.localizedDescription)")
+            await setActiveConnection(nil)
             await attemptConnection()
         }
     }
 
     private func attemptConnection() async {
+        guard activeConnection == nil else {
+            // with an active connection there is no need to attempt a reconnection
+            return
+        }
+
         guard !connectionConfigurations.isEmpty else {
             logger.error("No connection configurations available.")
             await updateStatus(.notConnected)
@@ -245,14 +260,13 @@ public actor NetworkTracker {
             await updateStatus(.notConnected)
             await setActiveConnection(nil)
         }
-//        let bestConnection = await findBestConnection()
-//        await setActiveConnection(bestConnection)
     }
 
     private func findBestConnection() async -> ConnectionInfo? {
         let sortedConfigs = connectionConfigurations.sorted { $0.priority < $1.priority }
         var bestConnection: ConnectionInfo?
         var connectedCount = 0
+        let logger = logger
 
         await withTaskGroup(of: ConnectionInfo?.self) { group in
             for config in sortedConfigs {
@@ -261,8 +275,18 @@ public actor NetworkTracker {
                 }
             }
 
+            var timestampWhenFirstConnectionFound = Date.distantFuture
+
             for await connectionInfo in group {
+                let timePassedSinceFirstConnectionFound = timestampWhenFirstConnectionFound.distance(to: Date())
+                if connectedCount >= 1, timePassedSinceFirstConnectionFound >= NetworkTracker.slowConnectionTimeout {
+                    // This will be triggered by the task added when first connection has been found
+                    group.cancelAll()
+                    break
+                }
+
                 guard let connectionInfo else { continue }
+
                 connectedCount += 1
 
                 if connectionInfo.configuration.priority == 0 {
@@ -273,11 +297,20 @@ public actor NetworkTracker {
 
                 guard let currentBestConnection = bestConnection else {
                     bestConnection = connectionInfo
+                    timestampWhenFirstConnectionFound = Date()
+                    // give the others a short time to be found, otherwise cancel early
+                    // do this by adding a task that runs for at most slowConnectionTimeout seconds, and check whether those have passed
+                    group.addTask {
+                        try? await Task.sleep(for: .seconds(NetworkTracker.slowConnectionTimeout))
+                        logger.info("NetworkConnection: Prefer fastest over higher prioritized one, cancel search")
+                        return nil
+                    }
                     continue
                 }
 
                 if connectionInfo.configuration.priority < currentBestConnection.configuration.priority {
                     bestConnection = connectionInfo
+                    group.cancelAll()
                 }
             }
         }
@@ -345,7 +378,8 @@ public actor NetworkTracker {
                 return nil
             }
         } catch let openAPIError as OpenAPIRuntime.ClientError {
-            logger.info("testConnection error - OpenAPIRuntime.RuntimeError encountered for \(configuration.url): \(openAPIError)")
+            logger.info("NetworkConnection: testConnection error - OpenAPIRuntime.RuntimeError encountered for \(configuration.url)")
+            logger.debug("OpenAPIRuntime.RuntimeError is \(openAPIError)")
             return nil
         } catch {
             logger.info("testConnection error - Failed to connect to \(configuration.url) \(error.localizedDescription)")
