@@ -23,11 +23,11 @@ final class RealPathMonitor: NWPathMonitoring, Sendable {
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
         if #available(iOS 17, watchOS 10, *) {
             for await path in monitor {
-                await handler(path.status == .satisfied)
+                await handler(path.status == .satisfied || path.status == .requiresConnection)
             }
         } else {
             for await path in monitor.paths() {
-                await handler(path.status == .satisfied)
+                await handler(path.status == .satisfied || path.status == .requiresConnection)
             }
         }
     }

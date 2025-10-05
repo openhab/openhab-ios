@@ -16,6 +16,8 @@ import os.log
 public actor OpenHABItemCache {
     public static let instance = OpenHABItemCache()
 
+    private static let networkTimeout: TimeInterval = 5
+
     private var networkTrackers: [UUID: NetworkTracker] = [:]
 
     public var items: [UUID: [OpenHABItem]] = [:]
@@ -153,8 +155,7 @@ public actor OpenHABItemCache {
     }
 
     private func loadItems(homeId: UUID) async -> [OpenHABItem]? {
-        guard let networkTracker = await assureNetworkTracker(homeId: homeId),
-              await networkTracker.activeConnection != nil else {
+        guard let networkTracker = await assureNetworkTracker(homeId: homeId) else {
             logger.error("Home \(homeId) not reachable")
             return nil
         }
@@ -163,7 +164,7 @@ public actor OpenHABItemCache {
 
     private func assureNetworkTracker(homeId: UUID) async -> NetworkTracker? {
         if networkTrackers[homeId] == nil, let homePreferences = await Preferences.shared.storedHomes[homeId] {
-            let tracker = NetworkTracker()
+            let tracker = NetworkTracker(timeout: OpenHABItemCache.networkTimeout)
             networkTrackers[homeId] = tracker
             await tracker.startTracking(connectionConfigurations: [homePreferences.localConnectionConfig, homePreferences.remoteConnectionConfig])
         }
