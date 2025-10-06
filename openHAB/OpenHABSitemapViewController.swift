@@ -227,6 +227,8 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
                 logger.info("OpenHABViewController tracker status \(status.rawValue)")
                 await MainActor.run {
                     switch status {
+                    case .started:
+                        showPopupMessage(seconds: 60, title: NSLocalizedString("no_connection_will_reconnect", comment: ""), message: "", theme: .warning)
                     case .connecting:
                         self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
                     case .stopped:

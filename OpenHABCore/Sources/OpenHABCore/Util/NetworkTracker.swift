@@ -18,6 +18,7 @@ import os.log
 
 // TODO: these strings should reference Localizable keys
 public enum NetworkStatus: String, Sendable {
+    case started = "Started"
     case connecting = "Connecting"
     case connected = "Connected"
     case stopped = "Stopped"
@@ -174,7 +175,6 @@ public actor NetworkTracker {
         self.connectionConfigurations = connectionConfigurations
 
         setActiveConnection(nil)
-        updateStatus(.connecting)
 
         Task(priority: .utility) { [weak self] in
             await self?.pathMonitor.startMonitoring { isConnected in
@@ -275,13 +275,17 @@ public actor NetworkTracker {
             return
         }
 
+        updateStatus(.connecting)
+
         logger.debug("Checking available connections...")
         if let bestConnection = await findBestConnection() {
             logger.info("Best connection url: \(bestConnection.configuration.url) user: \(bestConnection.configuration.username)")
             setActiveConnection(bestConnection)
+            updateStatus(.connected)
         } else {
             logger.info("No connection succeeded")
             setActiveConnection(nil)
+            updateStatus(.started)
         }
     }
 
@@ -410,7 +414,7 @@ public actor NetworkTracker {
         } else {
             logger.info("Network status: Disconnected")
             setActiveConnection(nil)
-            updateStatus(.connecting)
+            updateStatus(.started)
             startRetryTask(10)
         }
     }
@@ -421,7 +425,6 @@ public actor NetworkTracker {
         activeConnection = connection
 
         if let connection {
-            updateStatus(.connected)
             // TODO: suspicious call to "shared" instance with specific connection
             KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(connectionConfiguration: connection.configuration))]
         } else {
