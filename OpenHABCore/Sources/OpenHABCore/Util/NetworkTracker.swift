@@ -171,16 +171,15 @@ public actor NetworkTracker {
     public func startTracking(connectionConfigurations: [ConnectionConfiguration]) async {
         logger.info("Start Network Tracking for \(connectionConfigurations.map { "url: \($0.url), user: \($0.username)" })")
 
+        guard status == .stopped else {
+            return
+        }
+
+        updateStatus(.started)
+
         await failureTracker.setConnections(connectionConfigurations)
         self.connectionConfigurations = connectionConfigurations
-
         setActiveConnection(nil)
-
-        Task(priority: .utility) { [weak self] in
-            await self?.pathMonitor.startMonitoring { isConnected in
-                await self?.handleNetworkChange(isConnected: isConnected)
-            }
-        }
 
         Task(priority: .userInitiated) {
             for configuration in connectionConfigurations {
@@ -192,6 +191,10 @@ public actor NetworkTracker {
                 }
             }
             await attemptConnection()
+
+            await self.pathMonitor.startMonitoring { [weak self] isConnected in
+                await self?.handleNetworkChange(isConnected: isConnected)
+            }
         }
     }
 
@@ -234,9 +237,10 @@ public actor NetworkTracker {
         }
     }
 
-    // like startTracking but with the already configured connections
+    // like startTracking but with the already configured connections and a fresh approach
     public func restartTracking() async {
         logger.debug("NetworkConnection: restartTracking")
+        await failureTracker.resetAll() // just to make sure a few more connection attempts happen
         await startTracking(connectionConfigurations: connectionConfigurations)
     }
 
@@ -268,7 +272,13 @@ public actor NetworkTracker {
             return
         }
 
-        guard !connectionConfigurations.isEmpty else {
+        var canAttemptAnyConnection = false
+        for configuration in connectionConfigurations {
+            let shouldAttempt = await failureTracker.shouldAttempt(configuration)
+            canAttemptAnyConnection = canAttemptAnyConnection || shouldAttempt
+        }
+
+        guard canAttemptAnyConnection else {
             logger.error("No connection configurations available.")
             setActiveConnection(nil)
             await stopTracking()
@@ -415,7 +425,7 @@ public actor NetworkTracker {
             logger.info("Network status: Disconnected")
             setActiveConnection(nil)
             updateStatus(.started)
-            startRetryTask(10)
+            startRetryTask(UInt64(networkTimeout))
         }
     }
 
@@ -428,7 +438,7 @@ public actor NetworkTracker {
             // TODO: suspicious call to "shared" instance with specific connection
             KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(connectionConfiguration: connection.configuration))]
         } else {
-            startRetryTask(30)
+            startRetryTask(UInt64(networkTimeout) * 2)
         }
     }
 
