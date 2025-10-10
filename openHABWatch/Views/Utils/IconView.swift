@@ -42,7 +42,7 @@ struct IconView: View {
                     logger.debug("Failed to load image : \(iconURL.absoluteString)")
                 }
                 .onSuccess { _ in
-                    logger.debug("Succesfully loaded image: \(iconURL.absoluteString)")
+                    logger.debug("Successfully loaded image: \(iconURL.absoluteString)")
                 }
                 .setProcessor(OpenHABImageProcessor())
                 .fade(duration: 0.25)
