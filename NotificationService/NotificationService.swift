@@ -191,7 +191,7 @@ actor NotificationServiceHandler {
     private func downloadMedia(url: String) async throws -> (URL?, String?) {
         guard let fullURL = await resolveFullURL(from: url) else { return (nil, nil) }
 
-        guard let activeConfig = await networkTracker().waitForActiveConnection(timeout: NotificationServiceHandler.networkTimeout)?.configuration else { return (nil, nil) }
+        guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return (nil, nil) }
 
         let client = HTTPClient(configuration: activeConfig)
 
@@ -202,7 +202,7 @@ actor NotificationServiceHandler {
     // 🔹 Extracted helper function to determine full URL
     private func resolveFullURL(from url: String) async -> URL? {
         if url.starts(with: "/") {
-            guard let activeConfig = await networkTracker().waitForActiveConnection(timeout: NotificationServiceHandler.networkTimeout)?.configuration else { return nil }
+            guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return nil }
             return URL(string: activeConfig.url)?.appendingPathComponent(url)
         } else {
             return URL(string: url)
@@ -275,8 +275,10 @@ actor NotificationServiceHandler {
         if let tracker = networkTracker {
             return tracker
         }
+        // Ensure Preferences initializes on the MainActor to avoid crashes
+        await MainActor.run { _ = Preferences.shared }
 
-        let tracker = NetworkTracker.shared
+        let tracker = NetworkTracker(timeout: NotificationServiceHandler.networkTimeout)
         let connections: [ConnectionConfiguration]
 
         if let cloudUserId,

@@ -68,7 +68,7 @@ struct ItemSelectionView: View {
         .onAppear {
             Task {
                 do {
-                    items = try await NetworkTracker.shared.getItems().filter { $0.type == .stringItem }
+                    items = try await NetworkTracker.shared.getStaticItems().filter { $0.type == .stringItem }
                 } catch {
                     logger.error("Failed to load items: \(error.localizedDescription)")
                 }

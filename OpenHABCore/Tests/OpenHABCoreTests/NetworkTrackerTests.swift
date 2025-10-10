@@ -12,11 +12,20 @@
 import Combine
 import Foundation
 import Network
+import OSLog
 
 @testable import OpenHABCore
 import XCTest
 
 final actor MockOpenAPIService: OpenAPIServiceProtocol {
+    final class MockError: Error {
+        public var debugDescription: String {
+            "MockConnectionFailure"
+        }
+    }
+
+    let networkTrackerError = MockError()
+
     var shouldFail = false
     var returnedVersion = 123
     var mockServerProperties = OpenHABServerProperties(version: "", links: [])
@@ -29,46 +38,50 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
 
     func sendItemCommand(itemname: String, command: String) async throws {
         if shouldFail {
-            throw NetworkTrackerError.failedConnection("http://mock")
+            throw networkTrackerError
         }
     }
 
     func updateItemState(itemname: String, with: String) async throws {
         if shouldFail {
-            throw NetworkTrackerError.failedConnection("http://mock")
+            throw networkTrackerError
         }
+    }
+
+    func getItems(query: OpenHABCore.Operations.getItems.Input.Query) async throws -> [OpenHABCore.OpenHABItem] {
+        try await getItems()
     }
 
     func getItems() async throws -> [OpenHABCore.OpenHABItem] {
         if shouldFail {
-            throw NetworkTrackerError.failedConnection("http://mock")
+            throw networkTrackerError
         }
         return []
     }
 
     func getItemByName(id: String) async throws -> OpenHABCore.OpenHABItem? {
         if shouldFail {
-            throw NetworkTrackerError.failedConnection("http://mock")
+            throw networkTrackerError
         }
         return nil
     }
 
     func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) async throws -> OpenHABCore.OpenHABPage? {
         if shouldFail {
-            throw NetworkTrackerError.failedConnection("http://mock")
+            throw networkTrackerError
         }
         return nil
     }
 
     func runNow(ruleUID: String, payload: [String: any Sendable]) async throws {
         if shouldFail {
-            throw NetworkTrackerError.failedConnection("http://mock")
+            throw networkTrackerError
         }
     }
 
     func getRootVersion() async throws -> Int {
         if shouldFail {
-            throw NetworkTrackerError.failedConnection("http://mock")
+            throw networkTrackerError
         }
         return returnedVersion
     }
@@ -76,7 +89,7 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
     @discardableResult
     func getRoot() async throws -> OpenHABServerProperties {
         if shouldFail {
-            throw NetworkTrackerError.failedConnection("http://mock")
+            throw networkTrackerError
         }
         return mockServerProperties
     }
@@ -147,8 +160,9 @@ final class NetworkTrackerTests: XCTestCase {
         var cancellables = Set<AnyCancellable>()
 
         tracker.$status
-            .dropFirst() // skip initial `.connecting`
             .sink { status in
+                Logger(subsystem: "org.openhab.test", category: "NetworkTrackerTests")
+                    .info("NetworkTrackerTests: Network status became \(status == .connected ? "connected" : (status == .connecting ? "connecting" : "stopped"))")
                 if status == .connected {
                     expectation.fulfill()
                 }
