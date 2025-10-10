@@ -138,7 +138,6 @@ public extension Endpoint {
     static func icon(rootUrl: String, version: Int, icon: String?, state: String?, iconType: IconType, iconColor: String, staticIcon: Bool? = nil) -> Endpoint? {
         guard let icon, !icon.isEmpty else {
             return nil
-//            return Endpoint(baseURL: "", path: "", queryItems: [])
         }
 
         guard version >= 2 else {
