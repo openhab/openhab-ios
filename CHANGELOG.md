@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [Version 3.1.22, Build 78] - 2025-10-10Z
+
+- Improvement for icon rendering (#979)
+- Enable navigation until full webview load (#972)
+
 ## [Version 3.1.21, Build 77] - 2025-10-02Z
 
 - don't run Swiftlint and swiftformat an github actions

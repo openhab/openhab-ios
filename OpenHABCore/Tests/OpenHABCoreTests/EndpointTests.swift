@@ -15,90 +15,99 @@ import Testing
 
 struct EndpointTests {
     @Test
-    func returnsEmptyEndpointForNilOrEmptyIcon() {
+    func returnsNilEndpointForNilOrEmptyIcon() {
         #expect(
             Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 3, icon: nil, state: "ON", iconType: .png, iconColor: "")
-                == Endpoint(baseURL: "", path: "", queryItems: [])
+                == nil
         )
 
         #expect(
             Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 3, icon: "", state: "OFF", iconType: .svg, iconColor: "blue")
-                == Endpoint(baseURL: "", path: "", queryItems: [])
+                == nil
         )
     }
 
     @Test
-    func buildsClassicIconEndpoint() {
+    func buildsClassicIconEndpoint() throws {
         let result = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 3, icon: "light", state: "ON", iconType: .svg, iconColor: "")
+        let endpoint = try #require(result)
 
-        #expect(result.baseURL == "http://192.168.2.10:8080")
-        #expect(result.path == "/icon/light")
-        #expect(result.queryItems.contains(URLQueryItem(name: "format", value: "SVG")))
-        #expect(result.queryItems.contains(URLQueryItem(name: "state", value: "ON")))
+        #expect(endpoint.baseURL == "http://192.168.2.10:8080")
+        #expect(endpoint.path == "/icon/light")
+        #expect(endpoint.queryItems.contains(URLQueryItem(name: "format", value: "SVG")))
+        #expect(endpoint.queryItems.contains(URLQueryItem(name: "state", value: "ON")))
     }
 
     @Test
-    func buildsMaterialIconWithIconify() {
+    func buildsMaterialIconWithIconify() throws {
         let result = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 3, icon: "material:light_on", state: "", iconType: .svg, iconColor: "")
+        let endpoint = try #require(result)
 
-        #expect(result.baseURL == "https://api.iconify.design/")
-        #expect(result.path == "/ic/baseline-light-on.svg")
-        #expect(result.queryItems.contains(URLQueryItem(name: "height", value: "64")))
+        #expect(endpoint.baseURL == "https://api.iconify.design/")
+        #expect(endpoint.path == "/ic/baseline-light-on.svg")
+        #expect(endpoint.queryItems.contains(URLQueryItem(name: "height", value: "64")))
     }
 
     @Test
-    func buildsF7IconWithIconify() {
+    func buildsF7IconWithIconify() throws {
         let result = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 3, icon: "f7:alarm", state: "", iconType: .svg, iconColor: "")
+        let endpoint = try #require(result)
 
-        #expect(result.baseURL == "https://api.iconify.design/")
-        #expect(result.path == "/f7/alarm.svg")
-        #expect(result.queryItems.contains(URLQueryItem(name: "height", value: "64")))
+        #expect(endpoint.baseURL == "https://api.iconify.design/")
+        #expect(endpoint.path == "/f7/alarm.svg")
+        #expect(endpoint.queryItems.contains(URLQueryItem(name: "height", value: "64")))
     }
 
     @Test
-    func addsColorQueryForIconify() {
+    func addsColorQueryForIconify() throws {
         let result = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 3, icon: "material:door_open", state: "", iconType: .png, iconColor: "#ff0000")
+        let endpoint = try #require(result)
 
-        #expect(result.baseURL == "https://api.iconify.design/")
-        #expect(result.path.contains("door-open.svg"))
-        #expect(result.queryItems.contains(URLQueryItem(name: "color", value: "#FF0000")))
+        #expect(endpoint.baseURL == "https://api.iconify.design/")
+        #expect(endpoint.path.contains("door-open.svg"))
+        #expect(endpoint.queryItems.contains(URLQueryItem(name: "color", value: "#FF0000")))
     }
 
     @Test
-    func returnsPNGIcon() {
+    func returnsPNGIcon() throws {
         let result = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 3, icon: "switch", state: "", iconType: .png, iconColor: "")
+        let endpoint = try #require(result)
 
-        #expect(result.queryItems.contains(URLQueryItem(name: "format", value: "PNG")))
+        #expect(endpoint.queryItems.contains(URLQueryItem(name: "format", value: "PNG")))
     }
 
     @Test
-    func handlesThreeSegmentIcon() {
+    func handlesThreeSegmentIcon() throws {
         let result = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 3, icon: "if:modern:fan", state: "", iconType: .svg, iconColor: "")
+        let endpoint = try #require(result)
 
-        #expect(result.baseURL == "https://api.iconify.design/")
-        #expect(result.path == "/modern/fan.svg")
+        #expect(endpoint.baseURL == "https://api.iconify.design/")
+        #expect(endpoint.path == "/modern/fan.svg")
     }
 
     @Test
-    func defaultsToNoneIconIfMalformed() {
+    func defaultsToNoneIconIfMalformed() throws {
         let result = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 3, icon: "unknown:iconicIcon", state: "ON", iconType: .png, iconColor: "")
+        let endpoint = try #require(result)
 
-        #expect(result.baseURL == "http://192.168.2.10:8080")
-        #expect(result.path == "/icon/none") // fallback to 2-part icon
+        #expect(endpoint.baseURL == "http://192.168.2.10:8080")
+        #expect(endpoint.path == "/icon/none") // fallback to 2-part icon
     }
 
     @Test
-    func version2() {
+    func version2() throws {
         let result = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 2, icon: "switch", state: "OFF", iconType: .svg, iconColor: "")
-        #expect(result.baseURL == "http://192.168.2.10:8080")
-        #expect(result.path == "/icon/switch")
-        #expect(result.queryItems.contains(URLQueryItem(name: "format", value: "SVG")))
-        #expect(result.queryItems.contains(URLQueryItem(name: "state", value: "OFF")))
+        let endpoint = try #require(result)
+
+        #expect(endpoint.baseURL == "http://192.168.2.10:8080")
+        #expect(endpoint.path == "/icon/switch")
+        #expect(endpoint.queryItems.contains(URLQueryItem(name: "format", value: "SVG")))
+        #expect(endpoint.queryItems.contains(URLQueryItem(name: "state", value: "OFF")))
     }
 
     @Test
-    func emptyIconReturnsEmptyEndpoint() {
-        let endpoint = Endpoint.icon(
+    func emptyIconReturnsNilEndpoint() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 3,
             icon: nil,
@@ -106,15 +115,12 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#FF0000"
         )
-
-        #expect(endpoint.baseURL.isEmpty)
-        #expect(endpoint.path.isEmpty)
-        #expect(endpoint.queryItems.isEmpty)
+        #expect(result == nil)
     }
 
     @Test
-    func simpleIconName() {
-        let endpoint = Endpoint.icon(
+    func simpleIconName() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "switch",
@@ -122,6 +128,7 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#00FF00"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.baseURL == "https://example.org")
         #expect(endpoint.path == "/icon/switch")
@@ -130,8 +137,8 @@ struct EndpointTests {
     }
 
     @Test
-    func iconWithThreeSegments_customSource() {
-        let endpoint = Endpoint.icon(
+    func iconWithThreeSegments_customSource() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "f7:solid:home",
@@ -139,14 +146,15 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#ABCDEF"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/f7/home.svg")
         #expect(endpoint.queryItems.contains(URLQueryItem(name: "color", value: "#ABCDEF")))
     }
 
     @Test
-    func iconColorString() {
-        let endpoint = Endpoint.icon(
+    func iconColorString() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "f7:solid:home",
@@ -154,14 +162,15 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "red"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/f7/home.svg")
         #expect(endpoint.queryItems.contains(URLQueryItem(name: "color", value: "#FF0000")))
     }
 
     @Test
-    func ohIcon1() {
-        let endpoint = Endpoint.icon(
+    func ohIcon1() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "light",
@@ -169,14 +178,15 @@ struct EndpointTests {
             iconType: .png,
             iconColor: "red"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/icon/light")
         #expect(endpoint.queryItems.contains(URLQueryItem(name: "format", value: "PNG")))
     }
 
     @Test
-    func ohIcon2() {
-        let endpoint = Endpoint.icon(
+    func ohIcon2() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "oh:light",
@@ -184,14 +194,15 @@ struct EndpointTests {
             iconType: .png,
             iconColor: "red"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/icon/light")
         #expect(endpoint.queryItems.contains(URLQueryItem(name: "format", value: "PNG")))
     }
 
     @Test
-    func ohIcon3() {
-        let endpoint = Endpoint.icon(
+    func ohIcon3() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "oh:classic:light",
@@ -199,14 +210,15 @@ struct EndpointTests {
             iconType: .png,
             iconColor: "red"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/icon/light")
         #expect(endpoint.queryItems.contains(URLQueryItem(name: "format", value: "PNG")))
     }
 
     @Test
-    func ohIcon4() {
-        let endpoint = Endpoint.icon(
+    func ohIcon4() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "oh:custom:light",
@@ -214,6 +226,7 @@ struct EndpointTests {
             iconType: .png,
             iconColor: "red"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/icon/light")
         #expect(endpoint.queryItems.contains(URLQueryItem(name: "format", value: "PNG")))
@@ -228,8 +241,8 @@ struct EndpointTests {
     // Test no state is transmitted
     // Test baseURL
     @Test
-    func materialIcon1() {
-        let endpoint = Endpoint.icon(
+    func materialIcon1() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "material:light",
@@ -237,6 +250,7 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         // underscore should become "-"
         #expect(endpoint.path == "/ic/baseline-light.svg")
@@ -244,8 +258,8 @@ struct EndpointTests {
     }
 
     @Test
-    func materialIcon2() {
-        let endpoint = Endpoint.icon(
+    func materialIcon2() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "material:outline:light",
@@ -253,6 +267,7 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         // underscore should become "-"
         #expect(endpoint.path == "/ic/outline-light.svg")
@@ -260,8 +275,8 @@ struct EndpointTests {
     }
 
     @Test
-    func f7Icons1() {
-        let endpoint = Endpoint.icon(
+    func f7Icons1() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "f7:airplane",
@@ -269,14 +284,15 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/f7/airplane.svg")
         // Test api.iconifyd.design
     }
 
     @Test
-    func f7Icons2() {
-        let endpoint = Endpoint.icon(
+    func f7Icons2() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "f7:IGNORED:airplane",
@@ -284,14 +300,15 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/f7/airplane.svg")
         // Test api.iconifyd.design
     }
 
     @Test
-    func iconifyIcons1() {
-        let endpoint = Endpoint.icon(
+    func iconifyIcons1() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "if:codicon:lightbulb",
@@ -299,13 +316,14 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/codicon/lightbulb.svg")
     }
 
     @Test
-    func iconifyIcons2() {
-        let endpoint = Endpoint.icon(
+    func iconifyIcons2() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "iconify:codicon:lightbulb",
@@ -313,13 +331,14 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/codicon/lightbulb.svg")
     }
 
     @Test
-    func unknownIconSources1() {
-        let endpoint = Endpoint.icon(
+    func unknownIconSources1() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "unknown:ignored",
@@ -327,13 +346,14 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/icon/none")
     }
 
     @Test
-    func unknownIconSources2() {
-        let endpoint = Endpoint.icon(
+    func unknownIconSources2() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "unknown:ignored:ignored",
@@ -341,13 +361,14 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/icon/none")
     }
 
     @Test
-    func noneIcons1() {
-        let endpoint = Endpoint.icon(
+    func noneIcons1() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "none",
@@ -355,13 +376,14 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/icon/none")
     }
 
     @Test
-    func noneIcons2() {
-        let endpoint = Endpoint.icon(
+    func noneIcons2() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "oh:none",
@@ -369,13 +391,14 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/icon/none")
     }
 
     @Test
-    func noneIcons3() {
-        let endpoint = Endpoint.icon(
+    func noneIcons3() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "oh:classic:none",
@@ -383,13 +406,14 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/icon/none")
     }
 
     @Test
-    func noneIcons4() {
-        let endpoint = Endpoint.icon(
+    func noneIcons4() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "oh:foo:none",
@@ -397,13 +421,14 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/icon/none")
     }
 
     @Test
-    func noneIcons5() {
-        let endpoint = Endpoint.icon(
+    func noneIcons5() throws {
+        let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
             icon: "f7:none",
@@ -411,6 +436,7 @@ struct EndpointTests {
             iconType: .svg,
             iconColor: "#000000"
         )
+        let endpoint = try #require(result)
 
         #expect(endpoint.path == "/f7/none.svg")
     }
