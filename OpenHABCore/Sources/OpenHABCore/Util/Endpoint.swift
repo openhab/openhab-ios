@@ -135,9 +135,9 @@ public extension Endpoint {
     }
 
     // swiftlint:disable:next function_parameter_count
-    static func icon(rootUrl: String, version: Int, icon: String?, state: String?, iconType: IconType, iconColor: String, staticIcon: Bool? = nil) -> Endpoint {
+    static func icon(rootUrl: String, version: Int, icon: String?, state: String?, iconType: IconType, iconColor: String, staticIcon: Bool? = nil) -> Endpoint? {
         guard let icon, !icon.isEmpty else {
-            return Endpoint(baseURL: "", path: "", queryItems: [])
+            return nil
         }
 
         guard version >= 2 else {

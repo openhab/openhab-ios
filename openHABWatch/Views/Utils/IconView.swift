@@ -18,6 +18,7 @@ import SwiftUI
 struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = AppSettings.shared
+    let logger = Logger(subsystem: "org.openhab", category: "IconView")
 
     var iconURL: URL? {
         var iconColor = widget.iconColor
@@ -31,21 +32,29 @@ struct IconView: View {
             state: widget.iconState(),
             iconType: settings.iconType,
             iconColor: iconColor
-        ).url
+        )?.url
     }
 
     var body: some View {
-        KFImage(iconURL)
-            .placeholder {
-                Image(systemSymbol: .circle)
-                    .frame(width: 20, height: 20)
-            }
-            .setProcessor(OpenHABImageProcessor())
-            .fade(duration: 0.25)
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 20, height: 20)
-            .id(iconURL?.absoluteString ?? "")
+        if let iconURL {
+            KFImage(iconURL)
+                .onFailure { _ in
+                    logger.debug("Failed to load image : \(iconURL.absoluteString)")
+                }
+                .onSuccess { _ in
+                    logger.debug("Successfully loaded image: \(iconURL.absoluteString)")
+                }
+                .setProcessor(OpenHABImageProcessor())
+                .fade(duration: 0.25)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 20, height: 20)
+                .id(iconURL.absoluteString)
+        } else {
+            Rectangle()
+                .foregroundStyle(.background)
+                .frame(width: 20, height: 20)
+        }
     }
 }
 
