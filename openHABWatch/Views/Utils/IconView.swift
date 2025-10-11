@@ -45,17 +45,13 @@ struct IconView: View {
             state: widget.iconState(),
             iconType: settings.iconType,
             iconColor: iconColor
-        ).url
+        )?.url
     }
 
     var body: some View {
         Group {
             if let iconURL, !imageLoadingFailed {
                 KFImage(iconURL)
-                    .placeholder {
-                        Image(systemSymbol: .circle)
-                            .frame(width: 20, height: 20)
-                    }
                     .onFailure { error in
                         logger.error("Icon loading failed for widget \(widget.label): \(error.localizedDescription)")
                         handleLoadingFailure()
@@ -71,10 +67,10 @@ struct IconView: View {
                     .frame(width: 20, height: 20)
                     .id(iconURL.absoluteString)
             } else {
-                // Show fallback when no icon or failed to load
-                Image(systemSymbol: .circle)
+                // Show nothing when no icon or failed to load
+                Rectangle()
+                    .foregroundStyle(.background)
                     .frame(width: 20, height: 20)
-                    .opacity(0.3)
             }
         }
         .onChange(of: widget.icon) {

@@ -40,7 +40,7 @@ struct ImageRow: View {
         state: "ON",
         iconType: .svg,
         iconColor: ""
-    ).url
-    return ImageRow(url: iconUrl)
+    )?.url
+    ImageRow(url: iconUrl)
         .environmentObject(AppSettings())
 }

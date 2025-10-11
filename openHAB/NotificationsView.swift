@@ -54,7 +54,7 @@ struct NotificationRow: View {
             iconColor: ""
         )
 
-        guard let url = endpoint.url, url.scheme != nil else {
+        guard let url = endpoint?.url, url.scheme != nil else {
             Logger(subsystem: "org.openhab.app", category: "NotificationRow")
                 .warning("Invalid icon URL for icon: \(notification.icon ?? "nil", privacy: .public)")
             return nil

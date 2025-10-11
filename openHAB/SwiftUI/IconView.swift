@@ -83,7 +83,7 @@ struct IconView: View {
             iconType: iconType,
             iconColor: queriedIconColor,
             staticIcon: widget.staticIcon
-        ).url
+        )?.url
     }
 
     var body: some View {

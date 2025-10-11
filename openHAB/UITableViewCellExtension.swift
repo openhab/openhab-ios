@@ -39,7 +39,7 @@ extension UITableViewCell {
             state: widget.iconState(),
             iconType: iconType,
             iconColor: iconColor
-        ).url else {
+        )?.url else {
             return
         }
 

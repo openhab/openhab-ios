@@ -16,6 +16,8 @@ import os.log
 public actor OpenHABItemCache {
     public static let instance = OpenHABItemCache()
 
+    private static let networkTimeout: TimeInterval = 5
+
     private var networkTrackers: [UUID: NetworkTracker] = [:]
 
     public var items: [UUID: [OpenHABItem]] = [:]
@@ -39,6 +41,14 @@ public actor OpenHABItemCache {
     public func getCachedItem(name: String, home: UUID) async -> [OpenHABItem]? {
         await reloadCacheIfNeeded(homes: [home])
         return items[home]?.filter { $0.name == name }
+    }
+
+    public func getItemUncached(name: String, home: UUID) async -> OpenHABItem? {
+        guard let networkTracker = await assureNetworkTracker(homeId: home) else {
+            logger.error("Home \(home) not reachable")
+            return nil
+        }
+        return try? await networkTracker.getItemByName(id: name)
     }
 
     public func sendCommand(to item: OpenHABItem, home: UUID, command: String) async {
@@ -69,13 +79,15 @@ public actor OpenHABItemCache {
 
     public func reloadCacheIfNeeded(homes: [UUID]) async {
         let homesNeedingReload = homes.filter { Date.now.timeIntervalSince(lastLoad[$0] ?? Date.distantPast) > ttl }
+        logger.info("Cache reload needed for homes \(homesNeedingReload)")
         await forceCacheReload(homes: homesNeedingReload)
     }
 
     public func forceCacheReload(homes: [UUID]) async {
-        logger.info("reload items")
+        logger.info("force cache reload for homes: \(homes)")
         do {
             let loadedItems = try await loadNonGroupItemsForHomes(homes)
+            logger.info("Store loaded items in cache")
             homes.forEach { items[$0] = loadedItems[$0] }
             let now = Date.now
             homes.forEach { lastLoad[$0] = now }
@@ -87,10 +99,12 @@ public actor OpenHABItemCache {
     }
 
     public func forceCacheReload() async {
+        logger.info("forced cache reload for all homes")
         let homes = await Preferences.shared.listStoredHomes()
         // some house keeping
         let networkTrackersToRemove = networkTrackers.filter { !homes.contains($0.key) }
         for networkTracker in networkTrackersToRemove {
+            logger.info("Stopping network tracker for nonexisting home \(networkTracker.key)")
             await networkTracker.value.stopTracking()
             networkTrackers.removeValue(forKey: networkTracker.key)
         }
@@ -113,13 +127,16 @@ public actor OpenHABItemCache {
 
     private func loadItemsForHomes(_ homes: [UUID]) async throws -> [UUID: [OpenHABItem]] {
         await withThrowingTaskGroup { @Sendable group in
+            let logger = logger
             for homeId in homes {
                 group.addTask {
+                    logger.info("Loading items for home \(homeId)")
                     // TODO: consider the possibility that two local connections might be the same
                     guard let items = await self.loadItems(homeId: homeId) else {
-                        self.logger.error("Item search for home with id \(homeId) failed")
+                        logger.error("Item search for home with id \(homeId) failed")
                         return (id: homeId, items: [] as [OpenHABItem])
                     }
+                    logger.info("Loaded \(items.count) items for home \(homeId)")
                     return (id: homeId, items: items)
                 }
             }
@@ -128,6 +145,7 @@ public actor OpenHABItemCache {
                 logger.debug("Found \(nextElement.items.count) items for \(nextElement.id)")
                 partialResult[nextElement.id] = nextElement.items
             }
+            logger.info("loading items for homes \(homes) finished")
             guard let allHomeItems else {
                 logger.error("Item search failed!")
                 return [:]
@@ -141,12 +159,12 @@ public actor OpenHABItemCache {
             logger.error("Home \(homeId) not reachable")
             return nil
         }
-        return try? await networkTracker.getItems()
+        return try? await networkTracker.getStaticItems()
     }
 
     private func assureNetworkTracker(homeId: UUID) async -> NetworkTracker? {
         if networkTrackers[homeId] == nil, let homePreferences = await Preferences.shared.storedHomes[homeId] {
-            let tracker = NetworkTracker()
+            let tracker = NetworkTracker(timeout: OpenHABItemCache.networkTimeout)
             networkTrackers[homeId] = tracker
             await tracker.startTracking(connectionConfigurations: [homePreferences.localConnectionConfig, homePreferences.remoteConnectionConfig])
         }
