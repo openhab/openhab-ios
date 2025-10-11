@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.1.23, Build 79] - 2025-10-10Z
+
+- Fixes a number of issues where background processing would crash (#976)
+
 ## [Version 3.1.22, Build 78] - 2025-10-10Z
 
 - Improvement for icon rendering (#979)
