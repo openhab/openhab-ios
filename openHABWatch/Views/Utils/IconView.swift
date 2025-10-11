@@ -23,7 +23,7 @@ struct IconView: View {
     var iconURL: URL? {
         var iconColor = widget.iconColor
         if iconColor.isEmpty {
-            iconColor = "white"
+            iconColor = "#FFFFFF"
         }
         return Endpoint.icon(
             rootUrl: settings.openHABRootUrl,
@@ -59,9 +59,36 @@ struct IconView: View {
 }
 
 #Preview {
-    let widget2 = UserData(preview: true).widgets[4]
+    let testURL = URL(string: "https://picsum.photos/20")!
+    KFImage(testURL)
+        .resizable()
+        .frame(width: 20, height: 20)
+
+    let endpoint = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 4, icon: "switch", state: "2", iconType: .png, iconColor: "blue")
+    KFImage(endpoint?.url)
+        .setProcessor(OpenHABImageProcessor())
+        .resizable()
+        .frame(width: 20, height: 20)
+
+    let settings = AppSettings(debug: true, openHABRootUrl: "http://192.168.2.10:8080")
+    let widget = UserData(preview: true).widgets[4]
+    IconView(
+        widget: widget,
+        settings: settings
+    )
+    
+    let endpoint2 = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 3, icon: "f7:alarm", state: "", iconType: .svg, iconColor: "#FFFFFF")
+//    Text(endpoint2?.url?.absoluteString ?? "nil")
+//        .font(.system(size: 8))
+    KFImage(endpoint2?.url)
+        .setProcessor(OpenHABImageProcessor())
+        .resizable()
+        .frame(width: 20, height: 20)
+
+    let widget2 = UserData(preview: true).widgets[11]
     IconView(
         widget: widget2,
-        settings: AppSettings()
+        settings: settings
     )
+
 }

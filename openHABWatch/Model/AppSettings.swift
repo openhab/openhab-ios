@@ -109,4 +109,10 @@ final class AppSettings: ObservableObject {
             }
             .store(in: &cancellables)
     }
+    
+    convenience init(debug: Bool = false, openHABRootUrl: String = "") {
+        self.init()
+        self.openHABRootUrl = openHABRootUrl
+    }
 }
+
