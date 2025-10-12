@@ -86,4 +86,8 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
             try container.encode(cloudUserId, forKey: .cloudUserId)
         }
     }
+
+    public static func connectionConfigurationsToString(_ connectionConfigurations: any Collection<ConnectionConfiguration>) -> [String] {
+        connectionConfigurations.sorted(by: \.url).map { "url: \($0.url), user: \($0.username)" }
+    }
 }
