@@ -31,7 +31,8 @@ struct IconView: View {
             icon: widget.icon,
             state: widget.iconState(),
             iconType: settings.iconType,
-            iconColor: iconColor
+            iconColor: iconColor,
+            staticIcon: widget.staticIcon
         )?.url
     }
 
@@ -76,7 +77,7 @@ struct IconView: View {
         widget: widget,
         settings: settings
     )
-    
+
     let endpoint2 = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 3, icon: "f7:alarm", state: "", iconType: .svg, iconColor: "#FFFFFF")
 //    Text(endpoint2?.url?.absoluteString ?? "nil")
 //        .font(.system(size: 8))
@@ -90,5 +91,4 @@ struct IconView: View {
         widget: widget2,
         settings: settings
     )
-
 }

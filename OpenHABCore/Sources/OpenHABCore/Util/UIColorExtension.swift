@@ -25,7 +25,7 @@ public enum OHInterfaceStyle: Int {
             return .light
         }
         #else
-            return .light
+        return .light
         #endif
     }
 }
