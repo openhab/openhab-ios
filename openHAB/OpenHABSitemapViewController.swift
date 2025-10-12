@@ -713,7 +713,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     icon: widget.icon,
                     state: widget.iconState(),
                     iconType: iconType,
-                    iconColor: iconColor
+                    iconColor: iconColor,
+                    staticIcon: widget.staticIcon
                 )?.url {
                     logger.info("URL: \(urlc.absoluteString, privacy: .private) , color: \(iconColor)")
                     cell.imageView?.kf.setImage(
