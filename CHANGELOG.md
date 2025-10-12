@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.1.24, Build 80] - 2025-10-12Z
+
+- Improve the handling for f7-icons on Apple Watch and implement static icon (#980)
+
 ## [Version 3.1.23, Build 79] - 2025-10-10Z
 
 - Fixes a number of issues where background processing would crash (#976)
