@@ -64,23 +64,24 @@ struct IconView: View {
     KFImage(testURL)
         .resizable()
         .frame(width: 20, height: 20)
+    
+    // Set localTestingURL to your local openHAB server for preview testing
+    let localTestingURL = "http://192.168.2.10:8080"
 
-    let endpoint = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 4, icon: "switch", state: "2", iconType: .png, iconColor: "blue")
+    let endpoint = Endpoint.icon(rootUrl: localTestingURL, version: 4, icon: "switch", state: "2", iconType: .png, iconColor: "blue")
     KFImage(endpoint?.url)
         .setProcessor(OpenHABImageProcessor())
         .resizable()
         .frame(width: 20, height: 20)
 
-    let settings = AppSettings(debug: true, openHABRootUrl: "http://192.168.2.10:8080")
+    let settings = AppSettings(debug: true, openHABRootUrl: localTestingURL)
     let widget = UserData(preview: true).widgets[4]
     IconView(
         widget: widget,
         settings: settings
     )
 
-    let endpoint2 = Endpoint.icon(rootUrl: "http://192.168.2.10:8080", version: 3, icon: "f7:alarm", state: "", iconType: .svg, iconColor: "#FFFFFF")
-//    Text(endpoint2?.url?.absoluteString ?? "nil")
-//        .font(.system(size: 8))
+    let endpoint2 = Endpoint.icon(rootUrl: localTestingURL, version: 3, icon: "f7:alarm", state: "", iconType: .svg, iconColor: "#FFFFFF")
     KFImage(endpoint2?.url)
         .setProcessor(OpenHABImageProcessor())
         .resizable()
