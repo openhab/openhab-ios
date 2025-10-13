@@ -118,11 +118,10 @@ class OpenHABWebViewController: OpenHABViewController {
                 switch status {
                 case .connecting:
                     self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                case .notConnected:
-                    self.pageLoadError(message: NSLocalizedString("network_not_available", comment: ""))
                 case .connected:
                     self.hidePopupMessages()
-                default: break
+                case .stopped:
+                    self.pageLoadError(message: NSLocalizedString("network_not_available", comment: ""))
                 }
             }
             .store(in: &trackerCancellables)

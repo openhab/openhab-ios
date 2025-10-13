@@ -16,12 +16,17 @@ public enum OHInterfaceStyle: Int {
     case light, dark
 
     public static var current: OHInterfaceStyle {
-        #if os(iOS)
+        #if os(watchOS)
+        return .dark
+        #elseif os(iOS)
         if UITraitCollection.current.userInterfaceStyle == .dark {
             return .dark
+        } else {
+            return .light
         }
-        #endif
+        #else
         return .light
+        #endif
     }
 }
 

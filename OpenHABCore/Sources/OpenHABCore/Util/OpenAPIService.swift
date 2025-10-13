@@ -35,6 +35,9 @@ protocol OpenAPIServiceProtocol: AnyObject, Sendable {
     func sendItemCommand(itemname: String, command: String) async throws
     func updateItemState(itemname: String, with: String) async throws
     func getItems() async throws -> [OpenHABItem]
+    func getItems(
+        query: Operations.getItems.Input.Query
+    ) async throws -> [OpenHABItem]
     func getItemByName(id: String) async throws -> OpenHABItem?
     func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) async throws -> OpenHABPage?
     func runNow(ruleUID: String, payload: [String: any Sendable]) async throws
@@ -303,10 +306,16 @@ public extension OpenAPIService {
 
 // Array of items
 public extension OpenAPIService {
-    func getItems() async throws -> [OpenHABItem] {
-        try await client.getItems()
+    func getItems(
+        query: Operations.getItems.Input.Query
+    ) async throws -> [OpenHABItem] {
+        try await client.getItems(query: query)
             .ok.body.json
             .compactMap(OpenHABItem.init)
+    }
+
+    func getItems() async throws -> [OpenHABItem] {
+        try await getItems(query: .init())
     }
 }
 

@@ -229,10 +229,10 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
                     switch status {
                     case .connecting:
                         self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                    case .notConnected:
+                    case .stopped:
                         logger.info("Tracking error")
-//                        self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
-                    case .connected, .allConnected, .someConnected:
+                        self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
+                    case .connected:
                         self.hidePopupMessages()
                     }
                 }
@@ -721,7 +721,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     icon: widget.icon,
                     state: widget.iconState(),
                     iconType: iconType,
-                    iconColor: iconColor
+                    iconColor: iconColor,
+                    staticIcon: widget.staticIcon
                 )?.url {
                     logger.info("URL: \(urlc.absoluteString, privacy: .private) , color: \(iconColor)")
                     cell.imageView?.kf.setImage(
