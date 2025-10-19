@@ -18,6 +18,7 @@ import os.log
 import SafariServices
 import SFSafeSymbols
 import SideMenu
+import SwiftMessages
 import SwiftUI
 import UIKit
 
@@ -46,6 +47,8 @@ class OpenHABRootViewController: UIViewController {
 
     private var apsRegistrationData: [AnyHashable: Any]?
 
+    private var networkStatusButton: UIButton = .init(type: .custom)
+
     private lazy var webViewController: OpenHABWebViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABWebViewController") as! OpenHABWebViewController
@@ -65,6 +68,7 @@ class OpenHABRootViewController: UIViewController {
         super.viewDidLoad()
         logger.info("OpenHABRootViewController viewDidLoad")
         setupSideMenu()
+        addConnectionStatusIndication()
 
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABRootViewController.handleApsRegistration(_:)), name: NSNotification.Name("apsRegistered"), object: nil)
 
@@ -106,6 +110,36 @@ class OpenHABRootViewController: UIViewController {
         switchToSavedView()
         setupTracker()
         startSSEListening()
+    }
+
+    private func addConnectionStatusIndication() {
+        MainActorNetworkTracker.shared.$status
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                guard let self, let currentView else {
+                    return
+                }
+                logger.info("OpenHABWebViewController tracker status \(status.rawValue)")
+                switch status {
+                case .started:
+                    currentView.showPopupMessage(seconds: -1, title: NSLocalizedString("no_connection_will_reconnect", comment: ""), message: "", theme: .warning, buttonTitle: NSLocalizedString("retry", comment: "retry connection")) {
+                        Task {
+                            await NetworkTracker.shared.restartTracking()
+                        }
+                    }
+                case .connecting:
+                    currentView.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                case .connected:
+                    currentView.hidePopupMessages()
+                case .stopped:
+                    currentView.showPopupMessage(seconds: -1, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error, buttonTitle: NSLocalizedString("retry", comment: "retry connection")) {
+                        Task {
+                            await NetworkTracker.shared.restartTracking()
+                        }
+                    }
+                }
+            }
+            .store(in: &cancellables)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -715,7 +749,7 @@ class OpenHABRootViewController: UIViewController {
 
     private func addView(viewController: UIViewController) {
         addChild(viewController)
-        view.addSubview(viewController.view)
+        view.insertSubview(viewController.view, belowSubview: networkStatusButton)
         viewController.view.frame = view.bounds
         viewController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         viewController.didMove(toParent: self)

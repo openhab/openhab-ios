@@ -233,7 +233,6 @@ public actor NetworkTracker {
         pathMonitor.cancel()
         setActiveConnection(nil)
         await failureTracker.resetAll()
-        connectionConfigurations = []
         updateStatus(.stopped)
     }
 
@@ -269,7 +268,10 @@ public actor NetworkTracker {
     // like startTracking but with the already configured connections and a fresh approach
     public func restartTracking() async {
         logger.debug("Networktracker: restartTracking")
-        await failureTracker.resetAll() // just to make sure a few more connection attempts happen
+        await failureTracker.resetAll() // just to make sure a few more connection attempts happen if necessary
+        if status != .connected {
+            await stopTracking()
+        }
         await startTracking(connectionConfigurations: connectionConfigurations)
     }
 

@@ -162,7 +162,6 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
             }
         }
 
-        startTrackNetworkStatus()
         startWatchingActiveServer()
 
         ImageDownloader.default.authenticationChallengeResponder = self
@@ -219,28 +218,6 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         super.traitCollectionDidChange(previousTraitCollection)
 
         widgetTableView.reloadData()
-    }
-
-    private func startTrackNetworkStatus() {
-        let task = Task {
-            for await status in MainActorNetworkTracker.shared.$status.values {
-                logger.info("OpenHABViewController tracker status \(status.rawValue)")
-                await MainActor.run {
-                    switch status {
-                    case .started:
-                        showPopupMessage(seconds: 60, title: NSLocalizedString("no_connection_will_reconnect", comment: ""), message: "", theme: .warning)
-                    case .connecting:
-                        self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                    case .stopped:
-                        logger.info("Tracking error")
-                        self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
-                    case .connected:
-                        self.hidePopupMessages()
-                    }
-                }
-            }
-        }
-        activeTasks.insert(task)
     }
 
     func startWatchingActiveServer() {

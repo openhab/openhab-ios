@@ -110,23 +110,6 @@ class OpenHABWebViewController: OpenHABViewController {
                 }
             }
             .store(in: &trackerCancellables)
-
-        MainActorNetworkTracker.shared.$status
-            .receive(on: DispatchQueue.main)
-            .sink { [self] status in
-                logger.info("OpenHABWebViewController tracker status \(status.rawValue)")
-                switch status {
-                case .started:
-                    showPopupMessage(seconds: 60, title: NSLocalizedString("no_connection_will_reconnect", comment: ""), message: "", theme: .warning)
-                case .connecting:
-                    showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                case .connected:
-                    hidePopupMessages()
-                case .stopped:
-                    pageLoadError(message: NSLocalizedString("network_not_available", comment: ""))
-                }
-            }
-            .store(in: &trackerCancellables)
         startTracker()
     }
 
