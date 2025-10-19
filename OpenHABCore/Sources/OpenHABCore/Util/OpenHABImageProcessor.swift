@@ -19,7 +19,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
     // `identifier` should be the same for processors with the same properties/functionality
     // It will be used when storing and retrieving the image to/from cache.
     public let identifier: String
-    let maxSize = CGSize(width: 30, height: 30)
+    let maxSize = CGSize(width: 64, height: 64)
 
     private let logger = Logger(subsystem: "org.openhab", category: "OpenHABImageProcessor")
 
@@ -44,13 +44,13 @@ public struct OpenHABImageProcessor: ImageProcessor {
     private func decodeSVGOnMain(_ data: Data, targetSize: CGSize? = nil, preserveAspectRatio: Bool = true) -> UIImage? {
         mainSync {
             var options: [SDImageCoderOption: Any] = [:]
-            
+
             if let size = targetSize {
                 options[.decodeThumbnailPixelSize] = size
                 options[.decodePreserveAspectRatio] = preserveAspectRatio
                 logger.debug("Setting targetSize to \(size)")
             }
-            
+
             return SDImageSVGCoder.shared.decodedImage(
                 with: data,
                 options: options.isEmpty ? nil : options

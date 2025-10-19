@@ -217,7 +217,7 @@ public extension Endpoint {
             URLQueryItem(name: "anyFormat", value: "true"),
             URLQueryItem(name: "iconset", value: set)
         ])
-        
+
         if let widgetId {
             queryItems.append(URLQueryItem(name: "widgetId", value: widgetId))
         }

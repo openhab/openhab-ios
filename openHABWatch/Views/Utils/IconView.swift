@@ -32,7 +32,7 @@ struct IconView: View {
             state: widget.iconState(),
             iconType: settings.iconType,
             iconColor: iconColor,
-            staticIcon: widget.staticIcon,
+            staticIcon: widget.staticIcon
         )?.url
     }
 

@@ -17,7 +17,7 @@ struct SegmentSelectionView: View {
     @ObservedObject var widget: OpenHABWidget
     @Environment(\.dismiss) private var dismiss
     @State private var pendingValue: String?
-    
+
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
@@ -54,12 +54,12 @@ struct SegmentSelectionView: View {
         .navigationTitle("Select Option")
         .navigationBarTitleDisplayMode(.inline)
     }
-    
+
     private func isSelected(index: Int) -> Bool {
         guard case let .segmented(value) = widget.stateEnumBinding else { return false }
         return value == index
     }
-    
+
     private func selectOption(at index: Int) {
         widget.stateEnumBinding = .segmented(index)
         if let selectedCommand = widget.mappingsOrItemOptions[safe: index]?.command {
