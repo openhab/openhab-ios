@@ -112,36 +112,6 @@ class OpenHABRootViewController: UIViewController {
         startSSEListening()
     }
 
-    private func addConnectionStatusIndication() {
-        MainActorNetworkTracker.shared.$status
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] status in
-                guard let self, let currentView else {
-                    return
-                }
-                logger.info("OpenHABWebViewController tracker status \(status.rawValue)")
-                switch status {
-                case .started:
-                    currentView.showPopupMessage(seconds: -1, title: NSLocalizedString("no_connection_will_reconnect", comment: ""), message: "", theme: .warning, buttonTitle: NSLocalizedString("retry", comment: "retry connection")) {
-                        Task {
-                            await NetworkTracker.shared.restartTracking()
-                        }
-                    }
-                case .connecting:
-                    currentView.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                case .connected:
-                    currentView.hidePopupMessages()
-                case .stopped:
-                    currentView.showPopupMessage(seconds: -1, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error, buttonTitle: NSLocalizedString("retry", comment: "retry connection")) {
-                        Task {
-                            await NetworkTracker.shared.restartTracking()
-                        }
-                    }
-                }
-            }
-            .store(in: &cancellables)
-    }
-
     override func viewWillAppear(_ animated: Bool) {
         logger.info("OpenHABRootController viewWillAppear")
         super.viewWillAppear(animated)
@@ -187,7 +157,40 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    fileprivate func setupTracker() {
+    private func addConnectionStatusIndication() {
+        MainActorNetworkTracker.shared.$status
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                guard let self, let currentView else {
+                    return
+                }
+                logger.info("OpenHABWebViewController tracker status \(status.rawValue)")
+                let retryButtonTitle: String = NSLocalizedString("retry", comment: "retry connection")
+                switch status {
+                case .started:
+                    currentView.showPopupMessage(seconds: -1, title: NSLocalizedString("no_connection_will_reconnect", comment: ""), message: "", theme: .warning, buttonTitle: retryButtonTitle) {
+                        Task {
+                            await NetworkTracker.shared.restartTracking()
+                        }
+                    }
+                case .connecting:
+                    currentView.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                case .connected:
+                    currentView.hidePopupMessages()
+                case .stopped:
+                    let error: String = NSLocalizedString("error", comment: "")
+                    let no_network: String = NSLocalizedString("network_not_available", comment: "")
+                    currentView.showPopupMessage(seconds: -1, title: error, message: no_network, theme: .error, buttonTitle: retryButtonTitle) {
+                        Task {
+                            await NetworkTracker.shared.restartTracking()
+                        }
+                    }
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    private func setupTracker() {
         let serverInfo = Preferences.shared.$currentHomePreferences
 
         // Register for certificate trust notifications
@@ -291,7 +294,7 @@ class OpenHABRootViewController: UIViewController {
             .store(in: &cancellables)
     }
 
-    fileprivate func setupSideMenu() {
+    private func setupSideMenu() {
         let hamburgerButtonItem: UIBarButtonItem
         let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
         let buttonImage = UIImage(systemSymbol: .line3Horizontal, withConfiguration: imageConfig)
