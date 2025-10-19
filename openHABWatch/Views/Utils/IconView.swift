@@ -46,7 +46,8 @@ struct IconView: View {
                     logger.debug("Successfully loaded image: \(iconURL.absoluteString)")
                 }
                 .onFailureView {
-                    Image(systemSymbol: .exclamationmarkCircleFill)
+                    Rectangle()
+                        .foregroundStyle(.background)
                 }
                 .setProcessor(OpenHABImageProcessor())
                 .loadTransition(.opacity, animation: .easeInOut(duration: 0.25))
