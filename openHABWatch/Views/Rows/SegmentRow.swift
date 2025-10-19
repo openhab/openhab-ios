@@ -42,21 +42,27 @@ struct SegmentRow: View {
     }
 
     var body: some View {
-        VStack {
+        HStack {
             HStack {
                 IconView(widget: widget, settings: settings)
                 TextLabelView(widget: widget)
                 Spacer()
                 DetailTextLabelView(widget: widget)
             }
-            Picker("Picker", selection: valueBinding) {
-                ForEach(0 ..< widget.mappingsOrItemOptions.count, id: \.self) {
-                    Text(widget.mappingsOrItemOptions[$0].label).tag($0)
+            NavigationLink(destination: LazyView(SegmentSelectionView(widget: widget))) {
+                HStack {
+                    if let selectedIndex = widget.mappingsOrItemOptions.indices.first(where: { index in
+                        guard case let .segmented(value) = widget.stateEnumBinding else { return false }
+                        return value == index
+                    }) {
+                        Text(widget.mappingsOrItemOptions[selectedIndex].label)
+                            .foregroundColor(.secondary)
+                    }
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                        .font(.caption)
                 }
             }
-            .labelsHidden()
-            .frame(height: 100)
-            .padding(.top, 0)
         }
     }
 }

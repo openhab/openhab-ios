@@ -38,15 +38,19 @@ struct IconView: View {
 
     var body: some View {
         if let iconURL {
-            KFImage(iconURL)
+            KFImage.url(iconURL)
                 .onFailure { _ in
                     logger.debug("Failed to load image : \(iconURL.absoluteString)")
                 }
                 .onSuccess { _ in
                     logger.debug("Successfully loaded image: \(iconURL.absoluteString)")
                 }
+                .onFailureView {
+                    Rectangle()
+                        .foregroundStyle(.background)
+                }
                 .setProcessor(OpenHABImageProcessor())
-                .fade(duration: 0.25)
+                .loadTransition(.opacity, animation: .easeInOut(duration: 0.25))
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 20, height: 20)
@@ -64,7 +68,7 @@ struct IconView: View {
     KFImage(testURL)
         .resizable()
         .frame(width: 20, height: 20)
-    
+
     // Set localTestingURL to your local openHAB server for preview testing
     let localTestingURL = "http://192.168.2.10:8080"
 
@@ -81,7 +85,7 @@ struct IconView: View {
         settings: settings
     )
 
-    let endpoint2 = Endpoint.icon(rootUrl: localTestingURL, version: 3, icon: "f7:alarm", state: "", iconType: .svg, iconColor: "#FFFFFF")
+    let endpoint2 = Endpoint.icon(rootUrl: localTestingURL, version: 3, icon: "f7:alarm", state: "", iconType: .svg, iconColor: "yellow")
     KFImage(endpoint2?.url)
         .setProcessor(OpenHABImageProcessor())
         .resizable()

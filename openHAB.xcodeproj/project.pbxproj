@@ -34,7 +34,6 @@
 		933D7F0722E7015100621A03 /* OpenHABUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0622E7015000621A03 /* OpenHABUITests.swift */; };
 		933D7F0F22E7030600621A03 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0E22E7030600621A03 /* SnapshotHelper.swift */; };
 		934E592528F16EBA00162004 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 934E592428F16EBA00162004 /* OpenHABCore */; };
-		934E592728F16EBA00162004 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 934E592628F16EBA00162004 /* Kingfisher */; };
 		934E592928F16EBA00162004 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 934E592828F16EBA00162004 /* DeviceKit */; };
 		935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B484525342B8E00E44CF0 /* URL+Static.swift */; };
 		93685A7A2ADE755C0077A9A6 /* openHABTests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 93685A792ADE755C0077A9A6 /* openHABTests.xctestplan */; };
@@ -42,10 +41,8 @@
 		937E4471270B36D000A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4470270B36D000A98C26 /* OpenHABCore */; };
 		937E4473270B36DD00A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4472270B36DD00A98C26 /* OpenHABCore */; };
 		937E4485270B379900A98C26 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4484270B379900A98C26 /* DeviceKit */; };
-		937E4488270B37A600A98C26 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4487270B37A600A98C26 /* Kingfisher */; };
 		937E448C270B37CA00A98C26 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 937E448B270B37CA00A98C26 /* Kingfisher */; };
 		937E448E270B37D200A98C26 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 937E448D270B37D200A98C26 /* DeviceKit */; };
-		937E4492270B37FE00A98C26 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4491270B37FE00A98C26 /* Kingfisher */; };
 		937E44E2270B393C00A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E44E1270B393C00A98C26 /* OpenHABCore */; };
 		938620C0257E223C00A63200 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 938BF9C824EFCCC000E6B52F /* Localizable.strings */; };
 		938BF89624EFBC5400E6B52F /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938BF89524EFBC5400E6B52F /* LocalizationTests.swift */; };
@@ -130,7 +127,9 @@
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
-		DAAC30872CBBF0420041927F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0775262346705F0086C685 /* ContentView.swift */; };
+		DAAAB2812EA3843100F1B05D /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = DAAAB2802EA3843100F1B05D /* Kingfisher */; };
+		DAAAB2832EA3874500F1B05D /* SegmentSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAAB2822EA3874400F1B05D /* SegmentSelectionView.swift */; };
+		DAAC30872CBBF0420041927F /* SitemapPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0775262346705F0086C685 /* SitemapPageView.swift */; };
 		DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */; };
 		DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */; };
 		DAC131122DA32F5D00075AE2 /* Intents.intentdefinition in Resources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
@@ -359,7 +358,7 @@
 		DA0775152346705D0086C685 /* openHABWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = openHABWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA07751A2346705F0086C685 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DA07751C2346705F0086C685 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		DA0775262346705F0086C685 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		DA0775262346705F0086C685 /* SitemapPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapPageView.swift; sourceTree = "<group>"; };
 		DA07752A2346705F0086C685 /* OpenHABWatchAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchAppDelegate.swift; sourceTree = "<group>"; };
 		DA07752C2346705F0086C685 /* NotificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationController.swift; sourceTree = "<group>"; };
 		DA07752E2346705F0086C685 /* NotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationView.swift; sourceTree = "<group>"; };
@@ -449,6 +448,7 @@
 		DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
+		DAAAB2822EA3874400F1B05D /* SegmentSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentSelectionView.swift; sourceTree = "<group>"; };
 		DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandlerTests.swift; sourceTree = "<group>"; };
 		DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinnerViewController.swift; sourceTree = "<group>"; };
 		DAC6608B236F6F4200F4501E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -514,17 +514,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		DA2AEB752D92D32000897D80 /* Cells */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = Cells;
-			sourceTree = "<group>";
-		};
+		DA2AEB752D92D32000897D80 /* Cells */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Cells; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -532,7 +522,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				934E592728F16EBA00162004 /* Kingfisher in Frameworks */,
 				937E4473270B36DD00A98C26 /* OpenHABCore in Frameworks */,
 				DA2C4FD52B4F573300D1C533 /* SDWebImageSVGCoder in Frameworks */,
 				934E592528F16EBA00162004 /* OpenHABCore in Frameworks */,
@@ -548,7 +537,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA7ACD5F2DC3DB130055CFC7 /* SFSafeSymbols in Frameworks */,
-				937E4492270B37FE00A98C26 /* Kingfisher in Frameworks */,
 				937E44E2270B393C00A98C26 /* OpenHABCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -598,6 +586,7 @@
 				DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */,
 				937E4485270B379900A98C26 /* DeviceKit in Frameworks */,
 				DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */,
+				DAAAB2812EA3843100F1B05D /* Kingfisher in Frameworks */,
 				DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */,
 				DA0245AF2E79E10A000B7883 /* SDWebImage in Frameworks */,
 				93F8064A27AE7A2E0035A6B0 /* FlexColorPicker in Frameworks */,
@@ -608,7 +597,6 @@
 				DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */,
 				93F8063527AE6C620035A6B0 /* FirebaseCrashlytics in Frameworks */,
 				DA9A7EFF2D66915900824156 /* SFSafeSymbols in Frameworks */,
-				937E4488270B37A600A98C26 /* Kingfisher in Frameworks */,
 				937E4471270B36D000A98C26 /* OpenHABCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -848,7 +836,7 @@
 		DA658720236F841F007E2E7F /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				DA0775262346705F0086C685 /* ContentView.swift */,
+				DA0775262346705F0086C685 /* SitemapPageView.swift */,
 				DA162BEB2CD3B53E0040DAE5 /* LogsViewer.swift */,
 				DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */,
 				DAF457A323DB7A820018B495 /* Rows */,
@@ -921,6 +909,7 @@
 		DAF457A323DB7A820018B495 /* Rows */ = {
 			isa = PBXGroup;
 			children = (
+				DAAAB2822EA3874400F1B05D /* SegmentSelectionView.swift */,
 				DA077649234683BC0086C685 /* SwitchRow.swift */,
 				DA0F37CF23D4ACC7007EAB48 /* SliderRow.swift */,
 				DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */,
@@ -1142,7 +1131,6 @@
 			);
 			name = openHABIntents;
 			packageProductDependencies = (
-				937E4491270B37FE00A98C26 /* Kingfisher */,
 				937E44E1270B393C00A98C26 /* OpenHABCore */,
 				DA7ACD5E2DC3DB130055CFC7 /* SFSafeSymbols */,
 			);
@@ -1205,7 +1193,6 @@
 			name = openHABWatch;
 			packageProductDependencies = (
 				934E592428F16EBA00162004 /* OpenHABCore */,
-				934E592628F16EBA00162004 /* Kingfisher */,
 				934E592828F16EBA00162004 /* DeviceKit */,
 				DA2C4FD42B4F573300D1C533 /* SDWebImageSVGCoder */,
 				DA9A7EFC2D668D5900824156 /* SFSafeSymbols */,
@@ -1294,7 +1281,6 @@
 			packageProductDependencies = (
 				937E4470270B36D000A98C26 /* OpenHABCore */,
 				937E4484270B379900A98C26 /* DeviceKit */,
-				937E4487270B37A600A98C26 /* Kingfisher */,
 				93F8063427AE6C620035A6B0 /* FirebaseCrashlytics */,
 				93F8064627AE7A050035A6B0 /* SwiftMessages */,
 				93F8064927AE7A2E0035A6B0 /* FlexColorPicker */,
@@ -1303,6 +1289,7 @@
 				DA9A7EFE2D66915900824156 /* SFSafeSymbols */,
 				DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */,
 				DA0245AE2E79E10A000B7883 /* SDWebImage */,
+				DAAAB2802EA3843100F1B05D /* Kingfisher */,
 			);
 			productName = openHAB;
 			productReference = DFB2622718830A3600D3244D /* openHAB.app */;
@@ -1387,7 +1374,6 @@
 			mainGroup = DFB2621E18830A3600D3244D;
 			packageReferences = (
 				937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */,
-				937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */,
 				93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker" */,
@@ -1395,6 +1381,7 @@
 				DA3B75AC2C59729200E219AB /* XCRemoteSwiftPackageReference "SFSafeSymbols" */,
 				DA2C4FD32B4F573300D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */,
 				DA0245AD2E79E10A000B7883 /* XCRemoteSwiftPackageReference "SDWebImage" */,
+				DAF9D9072EA4F95700416F22 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			productRefGroup = DFB2622818830A3600D3244D /* Products */;
 			projectDirPath = "";
@@ -1570,6 +1557,7 @@
 				DAF4581E23DC60020018B495 /* ImageRawRow.swift in Sources */,
 				DAD0858B2AE56F0E001D36BE /* OpenHABWatch.swift in Sources */,
 				DAF4578223D630C70018B495 /* IconView.swift in Sources */,
+				DAAAB2832EA3874500F1B05D /* SegmentSelectionView.swift in Sources */,
 				DA07752D2346705F0086C685 /* NotificationController.swift in Sources */,
 				DA0749E023E0BF510057FA83 /* ColorSelection.swift in Sources */,
 				DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */,
@@ -1579,7 +1567,7 @@
 				DAF4581623DC48400018B495 /* GenericRow.swift in Sources */,
 				DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */,
 				DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */,
-				DAAC30872CBBF0420041927F /* ContentView.swift in Sources */,
+				DAAC30872CBBF0420041927F /* SitemapPageView.swift in Sources */,
 				DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */,
 				DA0776F0234788010086C685 /* UserData.swift in Sources */,
 				DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */,
@@ -2697,6 +2685,14 @@
 				minimumVersion = 6.2.0;
 			};
 		};
+		DAF9D9072EA4F95700416F22 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.6.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -2712,11 +2708,6 @@
 		934E592428F16EBA00162004 /* OpenHABCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = OpenHABCore;
-		};
-		934E592628F16EBA00162004 /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
-			productName = Kingfisher;
 		};
 		934E592828F16EBA00162004 /* DeviceKit */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -2736,11 +2727,6 @@
 			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
 		};
-		937E4487270B37A600A98C26 /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
-			productName = Kingfisher;
-		};
 		937E448B270B37CA00A98C26 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
@@ -2750,11 +2736,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
-		};
-		937E4491270B37FE00A98C26 /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
-			productName = Kingfisher;
 		};
 		937E44E1270B393C00A98C26 /* OpenHABCore */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -2809,6 +2790,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DA3B75AC2C59729200E219AB /* XCRemoteSwiftPackageReference "SFSafeSymbols" */;
 			productName = SFSafeSymbols;
+		};
+		DAAAB2802EA3843100F1B05D /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Kingfisher;
 		};
 		DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */ = {
 			isa = XCSwiftPackageProductDependency;
