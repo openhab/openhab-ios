@@ -561,7 +561,7 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    private func displayErrorNotification(_ message: String, completionHandler: (() -> Void)? = nil) {
+    private func displayErrorNotification(_ message: String) {
         let content = UNMutableNotificationContent()
         content.title = "Could not send command"
         content.body = message
@@ -571,11 +571,8 @@ class OpenHABRootViewController: UIViewController {
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
 
         // Schedule the request with the notification center
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error {
-                print("Error scheduling notification: \(error.localizedDescription)")
-            }
-        }
+        // no error handler because it only printed and tended to crash in swift6
+        UNUserNotificationCenter.current().add(request)
     }
 
     private func httpCommandAction(_ command: String) {
