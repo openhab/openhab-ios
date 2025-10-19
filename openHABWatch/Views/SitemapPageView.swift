@@ -13,13 +13,14 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct ContentView: View {
+struct SitemapPageView: View {
     @ObservedObject var viewModel: UserData
     @EnvironmentObject var settings: AppSettings
     @State var title = "openHAB"
 
     var body: some View {
-        Group {
+        NavigationStack {
+            Group {
             if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {
                 VStack {
                     Spacer()
@@ -83,6 +84,7 @@ struct ContentView: View {
                     }
                 }
             )
+            }
         }
     }
 
@@ -139,10 +141,10 @@ struct ContentView: View {
     let appSettings = AppSettings()
 
     return Group {
-        ContentView(viewModel: userData)
+        SitemapPageView(viewModel: userData)
             .environmentObject(userData)
 
-        ContentView(viewModel: userData)
+        SitemapPageView(viewModel: userData)
     }
     .environmentObject(appSettings)
 }
