@@ -24,7 +24,7 @@ struct OpenHABWatch: App {
     var body: some Scene {
         WindowGroup {
             TabView {
-                ContentView(viewModel: userData)
+                SitemapPageView(viewModel: userData)
                     .tabItem {
                         Label("Sitemap", systemSymbol: .circleFill)
                     }

@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [Version 3.1.26, Build 82] - 2025-10-20Z
+
+- remove reported source of unexplicable crashes (#985)
+
+## [Version 3.1.25, Build 81] - 2025-10-19Z
+
+- Improve watch icons (#983)
+- improve notifications (#977)
+
 ## [Version 3.1.24, Build 80] - 2025-10-12Z
 
 - Improve the handling for f7-icons on Apple Watch and implement static icon (#980)
