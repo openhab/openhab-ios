@@ -280,38 +280,6 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     override func viewName() -> String {
         "sitemap"
     }
-
-    // This is mainly used for navigting to a specific sitemap and path from notifications
-    override func pushSitemap(name: String, path: String?) async {
-        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
-            logger.error("pushSitemap: No active connection available")
-            return
-        }
-
-        logger.info("pushSitemap: pushing page")
-
-        guard let baseUrl = URL(string: activeConnection.configuration.url) else {
-            logger.error("pushSitemap: Invalid base URL")
-            return
-        }
-
-        var url = baseUrl.appendingPathComponent("rest")
-            .appendingPathComponent("sitemaps")
-            .appendingPathComponent(name)
-
-        if let subpath = path {
-            url.appendPathComponent(subpath)
-        }
-
-        guard let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController else {
-            logger.error("pushSitemap: Failed to instantiate OpenHABSitemapViewController")
-            return
-        }
-
-        newViewController.pageUrl = url.absoluteString
-        newViewController.openHABRootUrl = activeConnection.configuration.url
-        navigationController?.pushViewController(newViewController, animated: true)
-    }
 }
 
 extension OpenHABSitemapViewController: GenericUITableViewCellTouchEventDelegate {
@@ -469,6 +437,46 @@ extension OpenHABSitemapViewController {
                 }
             }
         }
+    }
+
+    // This is mainly used for navigating to a specific sitemap and path from notifications
+    func pushSitemap(name: String, path: String?) async {
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
+            logger.error("pushSitemap: No active connection available")
+            return
+        }
+
+        guard name != pageId || path != nil else {
+            logger.info("pushSitemap: Already at the required sitemap")
+            return
+        }
+
+        logger.info("pushSitemap: pushing page")
+
+        guard let baseUrl = URL(string: activeConnection.configuration.url) else {
+            logger.error("pushSitemap: Invalid base URL")
+            return
+        }
+
+        var url = baseUrl.appendingPathComponent("rest")
+            .appendingPathComponent("sitemaps")
+            .appendingPathComponent(name)
+
+        if let subpath = path {
+            url.appendPathComponent(subpath)
+        }
+
+        guard let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController else {
+            logger.error("pushSitemap: Failed to instantiate OpenHABSitemapViewController")
+            return
+        }
+
+        if let pageId = path {
+            newViewController.pageId = pageId
+        }
+        newViewController.pageUrl = url.absoluteString
+        newViewController.openHABRootUrl = activeConnection.configuration.url
+        navigationController?.pushViewController(newViewController, animated: true)
     }
 
     func startPageHandling() {
@@ -723,7 +731,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     icon: widget.icon,
                     state: widget.iconState(),
                     iconType: iconType,
-                    iconColor: iconColor
+                    iconColor: iconColor,
+                    staticIcon: widget.staticIcon
                 )?.url {
                     logger.info("URL: \(urlc.absoluteString, privacy: .private) , color: \(iconColor)")
                     cell.imageView?.kf.setImage(

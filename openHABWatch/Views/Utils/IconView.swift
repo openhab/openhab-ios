@@ -36,7 +36,7 @@ struct IconView: View {
 
         var iconColor = widget.iconColor
         if iconColor.isEmpty {
-            iconColor = "white"
+            iconColor = "#FFFFFF"
         }
         return Endpoint.icon(
             rootUrl: activeConnection.configuration.url,
@@ -44,30 +44,32 @@ struct IconView: View {
             icon: widget.icon,
             state: widget.iconState(),
             iconType: settings.iconType,
-            iconColor: iconColor
+            iconColor: iconColor,
+            staticIcon: widget.staticIcon
         )?.url
     }
 
     var body: some View {
         Group {
-            if let iconURL, !imageLoadingFailed {
-                KFImage(iconURL)
-                    .onFailure { error in
-                        logger.error("Icon loading failed for widget \(widget.label): \(error.localizedDescription)")
-                        handleLoadingFailure()
+            if let iconURL {
+                KFImage.url(iconURL)
+                    .onFailure { _ in
+                        logger.debug("Failed to load image : \(iconURL.absoluteString)")
                     }
                     .onSuccess { _ in
-                        imageLoadingFailed = false
-                        retryCount = 0
+                        logger.debug("Successfully loaded image: \(iconURL.absoluteString)")
+                    }
+                    .onFailureView {
+                        Rectangle()
+                            .foregroundStyle(.background)
                     }
                     .setProcessor(OpenHABImageProcessor())
-                    .fade(duration: 0.25)
+                    .loadTransition(.opacity, animation: .easeInOut(duration: 0.25))
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 20, height: 20)
                     .id(iconURL.absoluteString)
             } else {
-                // Show nothing when no icon or failed to load
                 Rectangle()
                     .foregroundStyle(.background)
                     .frame(width: 20, height: 20)
@@ -105,9 +107,36 @@ struct IconView: View {
 }
 
 #Preview {
-    let widget2 = UserData(preview: true).widgets[4]
+    let testURL = URL(string: "https://picsum.photos/20")!
+    KFImage(testURL)
+        .resizable()
+        .frame(width: 20, height: 20)
+
+    // Set localTestingURL to your local openHAB server for preview testing
+    let localTestingURL = "http://192.168.2.10:8080"
+
+    let endpoint = Endpoint.icon(rootUrl: localTestingURL, version: 4, icon: "switch", state: "2", iconType: .png, iconColor: "blue")
+    KFImage(endpoint?.url)
+        .setProcessor(OpenHABImageProcessor())
+        .resizable()
+        .frame(width: 20, height: 20)
+
+    let settings = AppSettings(debug: true, openHABRootUrl: localTestingURL)
+    let widget = UserData(preview: true).widgets[4]
+    IconView(
+        widget: widget,
+        settings: settings
+    )
+
+    let endpoint2 = Endpoint.icon(rootUrl: localTestingURL, version: 3, icon: "f7:alarm", state: "", iconType: .svg, iconColor: "yellow")
+    KFImage(endpoint2?.url)
+        .setProcessor(OpenHABImageProcessor())
+        .resizable()
+        .frame(width: 20, height: 20)
+
+    let widget2 = UserData(preview: true).widgets[11]
     IconView(
         widget: widget2,
-        settings: AppSettings()
+        settings: settings
     )
 }

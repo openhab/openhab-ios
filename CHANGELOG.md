@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [Version 3.1.25, Build 81] - 2025-10-19Z
+
+- Improve watch icons (#983)
+- improve notifications (#977)
+
+## [Version 3.1.24, Build 80] - 2025-10-12Z
+
+- Improve the handling for f7-icons on Apple Watch and implement static icon (#980)
+
+## [Version 3.1.23, Build 79] - 2025-10-10Z
+
+- Fixes a number of issues where background processing would crash (#976)
+
 ## [Version 3.1.22, Build 78] - 2025-10-10Z
 
 - Improvement for icon rendering (#979)

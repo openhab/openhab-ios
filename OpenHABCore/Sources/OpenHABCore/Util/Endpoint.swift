@@ -143,7 +143,7 @@ public extension Endpoint {
     }
 
     // swiftlint:disable:next function_parameter_count
-    static func icon(rootUrl: String, version: Int, icon: String?, state: String?, iconType: IconType, iconColor: String, staticIcon: Bool? = nil) -> Endpoint? {
+    static func icon(rootUrl: String, version: Int, icon: String?, state: String?, iconType: IconType, iconColor: String, staticIcon: Bool? = nil, widgetId: String? = nil) -> Endpoint? {
         guard let icon, !icon.isEmpty else {
             return nil
         }
@@ -206,7 +206,9 @@ public extension Endpoint {
                     queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
                 }
             }
-
+            if let widgetId {
+                queryItems.append(URLQueryItem(name: "widgetId", value: widgetId))
+            }
             return Endpoint(
                 baseURL: "https://api.iconify.design/",
                 path: "/\(set)/\(iconName).svg",
@@ -229,6 +231,10 @@ public extension Endpoint {
             URLQueryItem(name: "anyFormat", value: "true"),
             URLQueryItem(name: "iconset", value: set)
         ])
+
+        if let widgetId {
+            queryItems.append(URLQueryItem(name: "widgetId", value: widgetId))
+        }
 
         return Endpoint(
             baseURL: rootUrl,

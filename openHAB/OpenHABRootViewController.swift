@@ -386,9 +386,6 @@ class OpenHABRootViewController: UIViewController {
                 self.modalDismissed(to: .settings)
             }
         case let .sitemap(sitemap):
-            Preferences.shared.modifyActiveHome { homePreferences in
-                homePreferences.defaultSitemap = sitemap
-            }
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
                 self.modalDismissed(to: .sitemap(sitemap))
             }
@@ -516,21 +513,21 @@ class OpenHABRootViewController: UIViewController {
         logger.info("handleNotificationInternal: \(action ?? "<none>")")
 
         guard let action else { return }
+        let actionParts = action.split(separator: ":")
+        let cmd = actionParts.dropFirst().joined(separator: ":")
 
-        let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
-
-        switch true {
-        case action.hasPrefix("ui"):
+        switch actionParts[0] {
+        case "ui":
             uiCommandAction(cmd)
-        case action.hasPrefix("command"):
+        case "command":
             sendCommandAction(cmd)
-        case action.hasPrefix("http"):
+        case "http":
             httpCommandAction(action)
-        case action.hasPrefix("app"):
+        case "app":
             appCommandAction(cmd)
-        case action.hasPrefix("rule"):
+        case "rule":
             ruleCommandAction(cmd)
-        case action.hasPrefix("device"):
+        case "device":
             deviceAction(cmd)
         default:
             return
@@ -553,20 +550,28 @@ class OpenHABRootViewController: UIViewController {
             let path = String(firstMatch.1)
             logger.info("navigateCommandAction path: \(path)")
             if path.starts(with: "/basicui/app?") {
-                if currentView !== sitemapViewController {
-                    switchView(target: .sitemap(""))
+                logger.info("Navigating to sitemap target")
+                let defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
+                guard let urlComponents = URLComponents(string: path) else {
+                    logger.warning("No parameters for specifying sitemap or widget to navigate to")
+                    if currentView !== sitemapViewController {
+                        switchView(target: .sitemap(defaultSitemap))
+                    }
+                    return
                 }
-                if let urlComponents = URLComponents(string: path) {
-                    let queryItems = urlComponents.queryItems
-                    let sitemap = queryItems?.first { $0.name == "sitemap" }?.value
-                    let subview = queryItems?.first { $0.name == "w" }?.value
-                    if let sitemap {
-                        Task {
-                            await sitemapViewController.pushSitemap(name: sitemap, path: subview)
-                        }
+                let queryItems = urlComponents.queryItems
+                let sitemap = queryItems?.first { $0.name == "sitemap" }?.value
+                let widgetId = queryItems?.first { $0.name == "w" }?.value
+                if currentView !== sitemapViewController {
+                    switchView(target: .sitemap(sitemap ?? defaultSitemap))
+                }
+                if let sitemap {
+                    Task { @MainActor in
+                        await (sitemapViewController as? HostingSitemapViewController)?.pushSitemap(name: sitemap, path: widgetId)
                     }
                 }
             } else {
+                logger.info("Navigating to webview target")
                 if currentView != webViewController {
                     switchView(target: .webview)
                 }
@@ -606,7 +611,7 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    private func displayErrorNotification(_ message: String, completionHandler: (() -> Void)? = nil) {
+    private func displayErrorNotification(_ message: String) {
         let content = UNMutableNotificationContent()
         content.title = "Could not send command"
         content.body = message
@@ -616,11 +621,8 @@ class OpenHABRootViewController: UIViewController {
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
 
         // Schedule the request with the notification center
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error {
-                print("Error scheduling notification: \(error.localizedDescription)")
-            }
-        }
+        // no error handler because it only printed and tended to crash in swift6
+        UNUserNotificationCenter.current().add(request)
     }
 
     private func httpCommandAction(_ command: String) {
@@ -703,10 +705,13 @@ class OpenHABRootViewController: UIViewController {
     private func ruleCommandAction(_ command: String) {
         let components = command.split(separator: ":", maxSplits: 2)
 
-        guard components.count == 2 else { return }
+        guard !components.isEmpty else {
+            logger.warning("No rule to execute found in action")
+            return
+        }
 
         let uuid = String(components[0])
-        let propertiesString = String(components[1])
+        let propertiesString = if components.count > 1 { String(components[1]) } else { "" }
 
         let propertyPairs = propertiesString.split(separator: ",")
         var properties: [String: String] = [:]
@@ -781,7 +786,10 @@ class OpenHABRootViewController: UIViewController {
         let targetView: any (UIViewController & OpenHABViewable)
 
         switch target {
-        case .sitemap:
+        case let .sitemap(sitemap):
+            Preferences.shared.modifyActiveHome { preferences in
+                preferences.defaultSitemap = sitemap
+            }
             targetView = sitemapViewController
         case .webview:
             targetView = webViewController
@@ -813,10 +821,12 @@ class OpenHABRootViewController: UIViewController {
 
     private func switchToSavedView() {
         if Preferences.shared.currentHomePreferences.demomode {
-            switchView(target: .sitemap(""))
+            switchView(target: .sitemap("demo"))
         } else {
-            logger.info("OpenHABRootViewController switchToSavedView \(Preferences.shared.currentHomePreferences.defaultView == "sitemap" ? "sitemap" : "web")")
-            switchView(target: Preferences.shared.currentHomePreferences.defaultView == "sitemap" ? .sitemap("") : .webview)
+            let defaultView = Preferences.shared.currentHomePreferences.defaultView
+            let defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
+            logger.info("OpenHABRootViewController switchToSavedView \(defaultView == "sitemap" ? "sitemap/\(defaultSitemap)" : "web")")
+            switchView(target: defaultView == "sitemap" ? .sitemap(defaultSitemap) : .webview)
         }
     }
 

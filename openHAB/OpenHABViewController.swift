@@ -20,7 +20,6 @@ import UIKit
 protocol OpenHABViewable: AnyObject {
     func reloadView()
     func viewName() -> String
-    func pushSitemap(name: String, path: String?) async
 }
 
 class OpenHABViewController: UIViewController, OpenHABViewable {
@@ -84,10 +83,6 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
 
     func viewName() -> String {
         "default"
-    }
-
-    func pushSitemap(name: String, path: String?) async {
-        // No-op for non-sitemap view controllers
     }
 }
 
