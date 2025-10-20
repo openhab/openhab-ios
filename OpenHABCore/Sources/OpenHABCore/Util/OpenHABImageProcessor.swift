@@ -83,7 +83,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
                 }
                 #endif
 
-                // Limit SVG decode size (to prevent memory issues
+                // Limit SVG decode size (to prevent memory issues)
                 if let image = decodeSVGOnMain(data, targetSize: maxSize, preserveAspectRatio: true) {
                     return image
                 } else {

@@ -217,12 +217,7 @@ public extension UIColor {
         }
         // Try hex
         let hexColor = UIColor(hex: string)
-        // If hexColor is gray, input was invalid
-        if hexColor.toHex() == UIColor.gray.toHex() {
-            self.init(cgColor: UIColor.gray.cgColor)
-        } else {
-            self.init(cgColor: hexColor.cgColor)
-        }
+        self.init(cgColor: hexColor.cgColor)
     }
 
     convenience init(hex: String) {
