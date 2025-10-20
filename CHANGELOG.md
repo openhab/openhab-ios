@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.1.26, Build 82] - 2025-10-20Z
+
+- remove reported source of unexplicable crashes (#985)
+
 ## [Version 3.1.25, Build 81] - 2025-10-19Z
 
 - Improve watch icons (#983)
