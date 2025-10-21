@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [Version 3.1.27, Build 83] - 2025-10-21Z
+
+- Networktracker improvements (#981)
+- Bump crowdin/github-action from 2.11.0 to 2.12.0 (#986)
+
 ## [Version 3.1.26, Build 82] - 2025-10-20Z
 
 - remove reported source of unexplicable crashes (#985)
