@@ -79,7 +79,7 @@ extension OpenHABWatchAppDelegate: ClientCertificateManagerDelegate {
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {}
 }
 
-// MARK: Kingfisher authentication with NSURLCredential
+// MARK: Kingfisher authentication with URLCredential
 
 extension OpenHABWatchAppDelegate: AuthenticationChallengeResponsible {
     func downloader(_ downloader: ImageDownloader,
