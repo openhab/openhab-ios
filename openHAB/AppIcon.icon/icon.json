@@ -36,27 +36,13 @@
           "hidden" : false,
           "image-name" : "circle.svg",
           "name" : "circle",
-          "position-specializations" : [
-            {
-              "value" : {
-                "scale" : 1.07,
-                "translation-in-points" : [
-                  1,
-                  1
-                ]
-              }
-            },
-            {
-              "idiom" : "watchOS",
-              "value" : {
-                "scale" : 1.28,
-                "translation-in-points" : [
-                  1,
-                  1
-                ]
-              }
-            }
-          ]
+          "position" : {
+            "scale" : 1.07,
+            "translation-in-points" : [
+              1,
+              1
+            ]
+          }
         },
         {
           "fill-specializations" : [
@@ -74,27 +60,13 @@
           "hidden" : false,
           "image-name" : "roof.svg",
           "name" : "roof",
-          "position-specializations" : [
-            {
-              "value" : {
-                "scale" : 1.07,
-                "translation-in-points" : [
-                  0,
-                  0
-                ]
-              }
-            },
-            {
-              "idiom" : "watchOS",
-              "value" : {
-                "scale" : 1.28,
-                "translation-in-points" : [
-                  0,
-                  0
-                ]
-              }
-            }
-          ]
+          "position" : {
+            "scale" : 1.07,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
         }
       ],
       "lighting" : "individual",
