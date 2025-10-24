@@ -58,7 +58,7 @@ struct SegmentRow: View {
                         Text(widget.mappingsOrItemOptions[selectedIndex].label)
                             .foregroundColor(.secondary)
                     }
-                    Image(systemName: "chevron.right")
+                    Image(systemSymbol: .chevronRight)
                         .foregroundColor(.secondary)
                         .font(.caption)
                 }
