@@ -22,16 +22,16 @@ struct SegmentSelectionView: View {
         ScrollView {
             LazyVStack(spacing: 12) {
                 ForEach(0 ..< widget.mappingsOrItemOptions.count, id: \.self) { index in
-                    Button(action: {
+                    Button {
                         selectOption(at: index)
-                    }) {
+                    } label: {
                         HStack {
                             Text(widget.mappingsOrItemOptions[index].label)
                                 .foregroundColor(.primary)
                                 .multilineTextAlignment(.leading)
                             Spacer()
                             if isSelected(index: index) {
-                                Image(systemName: "checkmark")
+                                Image(systemSymbol: .checkmark)
                                     .foregroundColor(.accentColor)
                                     .font(.caption.weight(.bold))
                             }

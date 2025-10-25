@@ -450,7 +450,7 @@ public extension Preferences {
     // this will support mutliple connection configs, right now we just pass in the remote config
     func getNotificationConnection(of connections: [ConnectionConfiguration?]) -> ConnectionConfiguration? {
         connections
-            .compactMap { $0 }
+            .compactMap(\.self)
             .filter { $0.supportsNotifications == true }
             .sorted { $0.priority > $1.priority }
             .first
