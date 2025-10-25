@@ -689,7 +689,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
 
         var iconColor = widget.iconColor
         if iconColor.isEmpty, traitCollection.userInterfaceStyle == .dark {
-            iconColor = "white"
+            iconColor = "#FFFFFF"
         }
         // No icon will be displazed for cells that conform to NoIconDisplayableCell protocol
         if !(cell is any NoIconDisplayableCell) {
