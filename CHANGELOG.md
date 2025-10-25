@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [Version 3.1.28, Build 84] - 2025-10-25Z
+
+- Handling of dark mode for external icons
+- Handling of authentication challenges (#988)
+- Address some warnings
+
 ## [Version 3.1.27, Build 83] - 2025-10-21Z
 
 - Networktracker improvements (#981)
