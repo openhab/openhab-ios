@@ -244,6 +244,15 @@
       }
     },
     {
+      "identity" : "swift-timeout",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swhitty/swift-timeout.git",
+      "state" : {
+        "revision" : "da7999b795522b1b57fc45fe947732f35517d4ad",
+        "version" : "0.3.1"
+      }
+    },
+    {
       "identity" : "swiftformatplugin",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftFormatPlugin",

@@ -37,9 +37,16 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
         CertificateManagers.serverCertificateManager.delegate = self
     }
 
-    func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme) {
+    func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme,
+                          viewTapAction: (() -> Void)? = nil,
+                          buttonTitle: String = NSLocalizedString("dismiss", comment: ""),
+                          buttonAction: (() -> Void)? = nil) {
         var config = SwiftMessages.Config()
-        config.duration = .seconds(seconds: seconds)
+        if seconds >= 0 {
+            config.duration = .seconds(seconds: seconds)
+        } else {
+            config.duration = .forever
+        }
         config.presentationStyle = .bottom
         config.presentationContext = .view(view)
         SwiftMessages.hideAll()
@@ -48,8 +55,14 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
             // ... configure the view
             view.configureTheme(theme)
             view.configureContent(title: title, body: message)
-            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            view.button?.setTitle(buttonTitle, for: .normal)
+            view.buttonTapHandler = { _ in
+                SwiftMessages.hide()
+                buttonAction?()
+            }
+            view.tapHandler = { _ in
+                viewTapAction?()
+            }
             return view
         }
     }

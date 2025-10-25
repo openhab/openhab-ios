@@ -17,6 +17,7 @@ import XCTest
 final class ConnectionFailureTrackerTests: XCTestCase {
     func testShouldAttemptLogic() async {
         let tracker = ConnectionFailureTracker()
+        await tracker.setEnabled(true)
         let config = ConnectionConfiguration(url: "http://test", username: "", password: "", priority: 1)
 
         var result = await tracker.shouldAttempt(config)
@@ -36,6 +37,7 @@ final class ConnectionFailureTrackerTests: XCTestCase {
 
     func testMaxFailureCount() async {
         let tracker = ConnectionFailureTracker()
+        await tracker.setEnabled(true)
         let config1 = ConnectionConfiguration(url: "http://a", username: "", password: "", priority: 0)
         let config2 = ConnectionConfiguration(url: "http://b", username: "", password: "", priority: 1)
 

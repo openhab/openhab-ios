@@ -72,6 +72,10 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
         return newUrl
     }
 
+    public static func connectionConfigurationsToString(_ connectionConfigurations: any Collection<ConnectionConfiguration>) -> [String] {
+        connectionConfigurations.sorted(by: \.url).map { "url: \($0.url), user: \($0.username)" }
+    }
+
     // 🔹 Ensure normalization on encoding (optional, since we store it normalized)
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
