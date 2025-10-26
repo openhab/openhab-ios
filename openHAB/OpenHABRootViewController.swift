@@ -84,6 +84,17 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
         // Implement pushing logic into SitemapPageViewModel
         await viewModel.pushSitemap(name: name, path: path)
     }
+
+    // swiftlint:disable:next  function_parameter_count
+    func showPopupMessage(seconds: Double,
+                          title: String,
+                          message: String,
+                          theme: Theme,
+                          viewTapAction: (() -> Void)?,
+                          buttonTitle: String,
+                          buttonAction: (() -> Void)?) {}
+
+    func hidePopupMessages() {}
 }
 
 // MARK: - Search Controller Delegates
@@ -218,19 +229,41 @@ class OpenHABRootViewController: UIViewController {
                 let retryButtonTitle: String = NSLocalizedString("retry", comment: "retry connection")
                 switch status {
                 case .started:
-                    currentView.showPopupMessage(seconds: -1, title: NSLocalizedString("no_connection_will_reconnect", comment: ""), message: "", theme: .warning, buttonTitle: retryButtonTitle) {
+                    currentView.showPopupMessage(
+                        seconds: -1,
+                        title: NSLocalizedString("no_connection_will_reconnect", comment: ""),
+                        message: "",
+                        theme: .warning,
+                        viewTapAction: nil,
+                        buttonTitle: retryButtonTitle
+                    ) {
                         Task {
                             await NetworkTracker.shared.restartTracking()
                         }
                     }
                 case .connecting:
-                    currentView.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                    currentView.showPopupMessage(
+                        seconds: 60,
+                        title: NSLocalizedString("connecting", comment: ""),
+                        message: "",
+                        theme: .info,
+                        viewTapAction: nil,
+                        buttonTitle: "",
+                        buttonAction: nil
+                    )
                 case .connected:
                     currentView.hidePopupMessages()
                 case .stopped:
                     let error: String = NSLocalizedString("error", comment: "")
                     let no_network: String = NSLocalizedString("network_not_available", comment: "")
-                    currentView.showPopupMessage(seconds: -1, title: error, message: no_network, theme: .error, buttonTitle: retryButtonTitle) {
+                    currentView.showPopupMessage(
+                        seconds: -1,
+                        title: error,
+                        message: no_network,
+                        theme: .error,
+                        viewTapAction: nil,
+                        buttonTitle: retryButtonTitle
+                    ) {
                         Task {
                             await NetworkTracker.shared.restartTracking()
                         }

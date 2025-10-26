@@ -20,6 +20,15 @@ import UIKit
 protocol OpenHABViewable: AnyObject {
     func reloadView()
     func viewName() -> String
+    // swiftlint:disable:next  function_parameter_count
+    func showPopupMessage(seconds: Double,
+                          title: String,
+                          message: String,
+                          theme: Theme,
+                          viewTapAction: (() -> Void)?,
+                          buttonTitle: String,
+                          buttonAction: (() -> Void)?)
+    func hidePopupMessages()
 }
 
 class OpenHABViewController: UIViewController, OpenHABViewable {
@@ -37,7 +46,10 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
         CertificateManagers.serverCertificateManager.delegate = self
     }
 
-    func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme,
+    func showPopupMessage(seconds: Double,
+                          title: String,
+                          message: String,
+                          theme: Theme,
                           viewTapAction: (() -> Void)? = nil,
                           buttonTitle: String = NSLocalizedString("dismiss", comment: ""),
                           buttonAction: (() -> Void)? = nil) {
