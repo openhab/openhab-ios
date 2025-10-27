@@ -15,17 +15,19 @@ import SwiftUI
 
 // Thanks to https://useyourloaf.com/blog/fetching-oslog-messages-in-swift/
 
-struct LogsViewer: View {
+public struct LogsViewer: View {
     private static let template = NSPredicate(format:
         "(subsystem BEGINSWITH $PREFIX)")
 
     @State private var text = "Loading..."
 
+    public init() {}
+
     let myFont = Font
         .system(size: 10)
         .monospaced()
 
-    var body: some View {
+    public var body: some View {
         ScrollView {
             Text(text)
                 .font(myFont)

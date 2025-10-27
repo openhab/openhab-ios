@@ -37,6 +37,7 @@ struct SitemapPageView: View {
         }
         .environmentObject(viewModel)
         .listStyle(.plain)
+        .listRowSpacing(-8)
         .navigationTitle(viewModel.pageTitle)
         .navigationBarTitleDisplayMode(.inline)
         .refreshable {
