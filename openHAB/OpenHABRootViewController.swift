@@ -36,8 +36,6 @@ protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
 
-private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABRootViewController")
-
 // swiftlint:disable type_body_length
 class OpenHABRootViewController: UIViewController {
     var currentView: OpenHABViewController!
@@ -66,7 +64,7 @@ class OpenHABRootViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        logger.info("OpenHABRootViewController viewDidLoad")
+        Logger.viewController.info("OpenHABRootViewController viewDidLoad")
         setupSideMenu()
         addConnectionStatusIndication()
 
@@ -113,7 +111,7 @@ class OpenHABRootViewController: UIViewController {
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        logger.info("OpenHABRootController viewWillAppear")
+        Logger.viewController.info("OpenHABRootController viewWillAppear")
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = true
         // if we have turned demo mode off/on, reset view
@@ -164,7 +162,7 @@ class OpenHABRootViewController: UIViewController {
                 guard let self, let currentView else {
                     return
                 }
-                logger.info("OpenHABWebViewController tracker status \(status.rawValue)")
+                Logger.viewController.info("OpenHABWebViewController tracker status \(status.rawValue)")
                 let retryButtonTitle: String = NSLocalizedString("retry", comment: "retry connection")
                 switch status {
                 case .started:
@@ -343,7 +341,7 @@ class OpenHABRootViewController: UIViewController {
             url = URL(string: urlString)
         } else {
             guard let rootUrl = activeConnection?.configuration.url else {
-                logger.error("openTileURL failed: no active connection URL")
+                Logger.viewController.error("openTileURL failed: no active connection URL")
                 return
             }
             url = Endpoint.resource(openHABRootUrl: rootUrl, path: urlString.prepare()).url
@@ -403,7 +401,7 @@ class OpenHABRootViewController: UIViewController {
 
     @objc
     func handleApsRegistration(_ note: Notification?) {
-        logger.info("handleApsRegistration")
+        Logger.viewController.info("handleApsRegistration")
         apsRegistrationData = note?.userInfo
         subscribeToOpenhabConnectionChanges()
     }
@@ -435,14 +433,14 @@ class OpenHABRootViewController: UIViewController {
         }
 
         let openhabConnectionSubscription = differences.sink { [weak self] diff in
-            logger.info("openhabConnectionSubscription updated")
+            Logger.viewController.info("openhabConnectionSubscription updated")
             for newHome in diff.newValues {
-                logger.info("openhabConnectionSubscription uuid \(newHome.uuid) registering for push notifications ")
+                Logger.viewController.info("openhabConnectionSubscription uuid \(newHome.uuid) registering for push notifications ")
                 self?.registerHome(uuid: newHome.uuid, connection: newHome.connection)
             }
             for deletedHome in diff.deletedValues {
                 // TODO: implement deregistration
-                logger.warning("APNS Deregistration is missing (wanted to deregister \(deletedHome.connection.url))")
+                Logger.viewController.warning("APNS Deregistration is missing (wanted to deregister \(deletedHome.connection.url))")
             }
         }
 
@@ -451,7 +449,7 @@ class OpenHABRootViewController: UIViewController {
 
     private func registerHome(uuid: UUID, connection: ConnectionConfiguration) {
         guard let apsRegistrationData else {
-            logger.fault("Cannot register homes for push notifications, no notification registration data available")
+            Logger.viewController.fault("Cannot register homes for push notifications, no notification registration data available")
             return
         }
         guard let deviceId = apsRegistrationData["deviceId"] as? String,
@@ -459,7 +457,7 @@ class OpenHABRootViewController: UIViewController {
               let deviceName = apsRegistrationData["deviceName"] as? String else {
             return
         }
-        logger.info("Registering notifications with \(connection.url)")
+        Logger.viewController.info("Registering notifications with \(connection.url)")
         _ = registerHome(uuid, connection, deviceToken, deviceId, deviceName)
     }
 
@@ -469,11 +467,11 @@ class OpenHABRootViewController: UIViewController {
                 let client = HTTPClient(configuration: config)
                 if let cloudUserId = try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) {
                     Preferences.shared.setCloudUserId(cloudUserId, for: uuid)
-                    logger.info("my.openHAB registration succeeded with cloudUserId \(cloudUserId)")
+                    Logger.viewController.info("my.openHAB registration succeeded with cloudUserId \(cloudUserId)")
                 }
-                logger.info("my.openHAB registration succeeded without cloudUserId")
+                Logger.viewController.info("my.openHAB registration succeeded without cloudUserId")
             } catch {
-                logger.error("my.openHAB registration failed \(error.localizedDescription)")
+                Logger.viewController.error("my.openHAB registration failed \(error.localizedDescription)")
             }
         }
     }
@@ -481,12 +479,12 @@ class OpenHABRootViewController: UIViewController {
     func handleNotification(action: String?, cloudUserId: String?) {
         guard let action else { return }
 
-        logger.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
+        Logger.viewController.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
         if let cloudUserId, let targetHome = Preferences.shared.storedHome(forCloudUserId: cloudUserId), Preferences.shared.currentHomePreferences.remoteConnectionConfig.cloudUserId != cloudUserId {
             // if we need to switch homes, disconnnect the tracking first, and wait for the tracker to start again with the updated preferences
             Task {
                 await NetworkTracker.shared.stopTracking()
-                logger.info("Switching to home \(targetHome.id)")
+                Logger.viewController.info("Switching to home \(targetHome.id)")
                 Preferences.shared.switchActiveHome(to: targetHome.id)
                 _ = await NetworkTracker.shared.waitForActiveConnection()
                 handleNotificationInternal(action)
@@ -497,7 +495,7 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func handleNotificationInternal(_ action: String?) {
-        logger.info("handleNotificationInternal: \(action ?? "<none>")")
+        Logger.viewController.info("handleNotificationInternal: \(action ?? "<none>")")
 
         guard let action else { return }
         let actionParts = action.split(separator: ":")
@@ -531,16 +529,16 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func uiCommandAction(_ command: String) {
-        logger.info("navigateCommandAction: \(command)")
+        Logger.viewController.info("navigateCommandAction: \(command)")
         let regexPattern = /^(\/basicui\/app\\?.*|\/.*|.*)$/
         if let firstMatch = command.firstMatch(of: regexPattern) {
             let path = String(firstMatch.1)
-            logger.info("navigateCommandAction path: \(path)")
+            Logger.viewController.info("navigateCommandAction path: \(path)")
             if path.starts(with: "/basicui/app?") {
-                logger.info("Navigating to sitemap target")
+                Logger.viewController.info("Navigating to sitemap target")
                 let defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
                 guard let urlComponents = URLComponents(string: path) else {
-                    logger.warning("No parameters for specifying sitemap or widget to navigate to")
+                    Logger.viewController.warning("No parameters for specifying sitemap or widget to navigate to")
                     if currentView != sitemapViewController {
                         switchView(target: .sitemap(defaultSitemap))
                     }
@@ -558,7 +556,7 @@ class OpenHABRootViewController: UIViewController {
                     }
                 }
             } else {
-                logger.info("Navigating to webview target")
+                Logger.viewController.info("Navigating to webview target")
                 if currentView != webViewController {
                     switchView(target: .webview)
                 }
@@ -573,7 +571,7 @@ class OpenHABRootViewController: UIViewController {
                 }
             }
         } else {
-            logger.error("Invalid regex: \(command)")
+            Logger.viewController.error("Invalid regex: \(command)")
         }
     }
 
@@ -587,13 +585,13 @@ class OpenHABRootViewController: UIViewController {
         let itemCommand = String(components[1])
         Task {
             do {
-                logger.info("Sending command")
+                Logger.viewController.info("Sending command")
                 try await NetworkTracker.shared.send(to: itemName, command: itemCommand)
             } catch NetworkTrackerError.noActiveConnection {
                 displayErrorNotification("Could not find server")
             } catch {
                 displayErrorNotification("Failed to establish a connection: \(error.localizedDescription)")
-                logger.error("Could not send data \(error.localizedDescription)")
+                Logger.viewController.error("Could not send data \(error.localizedDescription)")
             }
         }
     }
@@ -625,7 +623,7 @@ class OpenHABRootViewController: UIViewController {
             let keyValue = pair.split(separator: "=", maxSplits: 1)
             if keyValue[0] == "ios" {
                 if let url = URL(string: String(keyValue[1])) {
-                    logger.error("appCommandAction opening \(String(keyValue[0])) \(String(keyValue[1]))")
+                    Logger.viewController.error("appCommandAction opening \(String(keyValue[0])) \(String(keyValue[1]))")
                     UIApplication.shared.open(url)
                     return
                 }
@@ -693,7 +691,7 @@ class OpenHABRootViewController: UIViewController {
         let components = command.split(separator: ":", maxSplits: 2)
 
         guard !components.isEmpty else {
-            logger.warning("No rule to execute found in action")
+            Logger.viewController.warning("No rule to execute found in action")
             return
         }
 
@@ -713,20 +711,20 @@ class OpenHABRootViewController: UIViewController {
         }
         Task {
             do {
-                logger.error("Sending command")
+                Logger.viewController.error("Sending command")
                 try await NetworkTracker.shared.runNow(ruleUID: uuid, payload: properties)
-                logger.info("Request succeeded")
+                Logger.viewController.info("Request succeeded")
             } catch let error as NetworkTrackerError {
                 displayErrorNotification("\(error.localizedDescription)")
             } catch {
-                logger.error("Could not send data \(error.localizedDescription)")
+                Logger.viewController.error("Could not send data \(error.localizedDescription)")
                 displayErrorNotification("Request to server failed: \(error.localizedDescription)")
             }
         }
     }
 
     func showSideMenu() {
-        logger.info("OpenHABRootViewController showSideMenu")
+        Logger.viewController.info("OpenHABRootViewController showSideMenu")
         if let menu = SideMenuManager.default.rightMenuNavigationController {
             // don't try and push an already visible menu less you crash the app
             dismiss(animated: false) {
@@ -739,14 +737,14 @@ class OpenHABRootViewController: UIViewController {
 
                 guard let presenter = topMostViewController else {
                     // swiftformat:disable:next redundantSelf
-                    logger.error("No valid view controller found to present side menu")
+                    Logger.viewController.error("No valid view controller found to present side menu")
                     return
                 }
 
                 // Avoid trying to present the menu on itself
                 if presenter == menu {
                     // swiftformat:disable:next redundantSelf
-                    logger.error("Cannot present side menu on itself")
+                    Logger.viewController.error("Cannot present side menu on itself")
                     return
                 }
 
@@ -812,7 +810,7 @@ class OpenHABRootViewController: UIViewController {
         } else {
             let defaultView = Preferences.shared.currentHomePreferences.defaultView
             let defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
-            logger.info("OpenHABRootViewController switchToSavedView \(defaultView == "sitemap" ? "sitemap/\(defaultSitemap)" : "web")")
+            Logger.viewController.info("OpenHABRootViewController switchToSavedView \(defaultView == "sitemap" ? "sitemap/\(defaultSitemap)" : "web")")
             switchView(target: defaultView == "sitemap" ? .sitemap(defaultSitemap) : .webview)
         }
     }
@@ -882,7 +880,7 @@ class OpenHABRootViewController: UIViewController {
 
 extension OpenHABRootViewController: SideMenuNavigationControllerDelegate {
     nonisolated func sideMenuWillAppear(menu: SideMenuNavigationController, animated: Bool) {
-        logger.info("OpenHABRootViewController sideMenuWillAppear")
+        Logger.viewController.info("OpenHABRootViewController sideMenuWillAppear")
     }
 }
 

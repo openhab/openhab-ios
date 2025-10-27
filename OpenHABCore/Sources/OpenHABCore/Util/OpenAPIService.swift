@@ -52,8 +52,6 @@ public actor OpenAPIService {
     private var longPolling = false
     private var connectionConfiguration: ConnectionConfiguration
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "OpenAPIService")
-
     /// Creates a new client for OpenAPIService.
     public init(client: any APIProtocol) {
         self.client = client
@@ -124,7 +122,7 @@ public extension OpenAPIService {
         // swiftformat:disable:next redundantSelf
         guard let url else { throw OpenAPIServiceError.noRootURL }
 
-        logger.log("Trying to getSitemaps for : \(url.debugDescription)")
+        Logger.openAPIService.log("Trying to getSitemaps for : \(url.debugDescription)")
         let response = try await client.getSitemaps(.init())
         switch response {
         case let .ok(okresponse):
@@ -222,7 +220,7 @@ public extension OpenAPIService {
 
     // Returns subscription id or nil
     func openHABcreateSubscription() async throws -> String? {
-        logger.info("Creating subscription")
+        Logger.openAPIService.info("Creating subscription")
         let result = try await client.createSitemapEventSubscription()
         guard let urlString = try result.ok.body.json.context?.headers?.Location?.first else { return nil }
         return URL(string: urlString)?.lastPathComponent
@@ -282,7 +280,7 @@ public extension OpenAPIService {
     func pollDataForPage(sitemapname: String, pageId: String = "", longPolling: Bool) async throws -> OpenHABPage? {
         var headers = Operations.pollDataForPage.Input.Headers()
         if longPolling {
-            logger.info("Setting header X-Atmosphere-Transport to long-polling")
+            Logger.openAPIService.info("Setting header X-Atmosphere-Transport to long-polling")
             headers.X_hyphen_Atmosphere_hyphen_Transport = "long-polling"
         }
         let path = if pageId.isEmpty {

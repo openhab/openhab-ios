@@ -60,8 +60,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         case text, number, date, time, datetime, unknown
     }
 
-    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABWidget")
-
     public var id = ""
 
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
@@ -198,7 +196,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
     public func sendItemUpdate(state: NumberState?) {
         guard let item, let state else {
-            logger.info("ItemUpdate for Item or State = nil")
+            Logger.restAPI.info("ItemUpdate for Item or State = nil")
             return
         }
         if item.isOfTypeOrGroupType(.numberWithDimension) {
@@ -216,11 +214,11 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
     public func sendCommand(_ command: String?) {
         guard let item else {
-            logger.info("Command for Item = nil")
+            Logger.restAPI.info("Command for Item = nil")
             return
         }
         guard let sendCommand else {
-            logger.info("sendCommand closure not set")
+            Logger.restAPI.info("sendCommand closure not set")
             return
         }
         sendCommand(item, command)

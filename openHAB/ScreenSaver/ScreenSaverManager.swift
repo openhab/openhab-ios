@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import os.log
 import SwiftUI
 import UIKit
@@ -21,8 +22,6 @@ private class ScreenSaverHostingViewController: UIViewController {
 @MainActor
 final class ScreenSaverManager: NSObject {
     static let shared = ScreenSaverManager()
-
-    private let logger = Logger(subsystem: "org.openhab", category: "ScreenSaver")
 
     private(set) var configuration = ScreenSaverConfiguration()
 
@@ -95,7 +94,7 @@ final class ScreenSaverManager: NSObject {
     private func showSaver() {
         guard configuration.isEnabled else { return }
         guard overlayWindow == nil, let baseWindow = window else { return }
-        logger.debug("Presenting screen saver (overlay window)")
+        Logger.screenSaver.debug("Presenting screen saver (overlay window)")
 
         let overlay: UIWindow
         if let scene = baseWindow.windowScene {
@@ -141,7 +140,7 @@ final class ScreenSaverManager: NSObject {
 
     private func dismissSaverIfNeeded() {
         guard overlayWindow != nil else { return }
-        logger.debug("Dismissing screen saver")
+        Logger.screenSaver.debug("Dismissing screen saver")
         if configuration.enablesAutoDimming {
             if configuration.restoresBrightness {
                 restoreBrightnessIfNeeded()
@@ -183,19 +182,19 @@ final class ScreenSaverManager: NSObject {
     }
 
     @objc private func handleDisableNotification() {
-        logger.debug("Received disable screen saver notification")
+        Logger.screenSaver.debug("Received disable screen saver notification")
         idleTimer?.invalidate()
         dismissSaverIfNeeded()
     }
 
     @objc private func handleWakeNotification() {
-        logger.debug("Received wake screen saver notification")
+        Logger.screenSaver.debug("Received wake screen saver notification")
         resetIdleTimer()
         dismissSaverIfNeeded()
     }
 
     @objc private func handleActivateNotification() {
-        logger.debug("Received activate screen saver notification")
+        Logger.screenSaver.debug("Received activate screen saver notification")
         dismissSaverIfNeeded()
         showSaver()
     }

@@ -12,11 +12,9 @@
 import Foundation
 import os
 
-private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "org.openhab.app", category: "SessionChallenge")
-
 @MainActor
 public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-    logger.info("onReceiveSessionTaskChallenge host: \(String(describing: challenge.protectionSpace.host))")
+    Logger.sessionChallenge.info("onReceiveSessionTaskChallenge host: \(String(describing: challenge.protectionSpace.host))")
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
 
@@ -29,9 +27,9 @@ public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChall
         if challenge.protectionSpace.host == URL(string: configuration.url)?.host || challenge.protectionSpace.host == "home.myopenhab.org" {
             credential = URLCredential(user: configuration.username, password: configuration.password, persistence: .forSession)
             disposition = .useCredential
-            logger.info(".useCredential")
+            Logger.sessionChallenge.info(".useCredential")
         } else {
-            logger.error("No match \(challenge.protectionSpace.host) <> \(configuration.url)")
+            Logger.sessionChallenge.error("No match \(challenge.protectionSpace.host) <> \(configuration.url)")
         }
     }
     return (disposition, credential)
@@ -39,8 +37,8 @@ public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChall
 
 @MainActor
 public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-    logger.warning("onReceiveSessionChallenge is not implemented fully (see TODOs)")
-    logger.info("onReceiveSessionChallenge host: \(String(describing: challenge.protectionSpace.host))")
+    Logger.sessionChallenge.warning("onReceiveSessionChallenge is not implemented fully (see TODOs)")
+    Logger.sessionChallenge.info("onReceiveSessionChallenge host: \(String(describing: challenge.protectionSpace.host))")
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
 
     switch challenge.protectionSpace.authenticationMethod {
@@ -65,8 +63,6 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
 }
 
 final class SessionChallengeHandler {
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "SessionChallengeHandler", category: "Auth")
-
     private let username: String
     private let password: String
     private let localUrl: URL?
@@ -90,7 +86,7 @@ final class SessionChallengeHandler {
     }
 
     func handleSessionTaskChallenge(_ challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        logger.debug("SessionTaskChallenge host: \(challenge.protectionSpace.host, privacy: .public)")
+        Logger.sessionChallengeHandler.debug("SessionTaskChallenge host: \(challenge.protectionSpace.host, privacy: .public)")
 
         if challenge.previousFailureCount > 0 {
             return (.cancelAuthenticationChallenge, nil)
@@ -100,7 +96,7 @@ final class SessionChallengeHandler {
         if authMethod == NSURLAuthenticationMethodHTTPBasic || authMethod == NSURLAuthenticationMethodDefault {
             if isTrustedHost(challenge.protectionSpace.host) {
                 let credential = URLCredential(user: username, password: password, persistence: .forSession)
-                logger.debug("Using HTTP BasicAuth for host: \(challenge.protectionSpace.host, privacy: .public)")
+                Logger.sessionChallengeHandler.debug("Using HTTP BasicAuth for host: \(challenge.protectionSpace.host, privacy: .public)")
                 return (.useCredential, credential)
             }
         }
@@ -109,7 +105,7 @@ final class SessionChallengeHandler {
     }
 
     func handleSessionChallenge(_ challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        logger.debug("SessionChallenge host: \(challenge.protectionSpace.host, privacy: .public)")
+        Logger.sessionChallengeHandler.debug("SessionChallenge host: \(challenge.protectionSpace.host, privacy: .public)")
 
         if challenge.previousFailureCount > 0 {
             return (.cancelAuthenticationChallenge, nil)

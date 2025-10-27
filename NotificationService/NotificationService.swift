@@ -49,7 +49,6 @@ actor NotificationServiceHandler {
     var cancellables = Set<AnyCancellable>()
     var networkTracker: NetworkTracker?
     var cloudUserId: String?
-    let logger = Logger(subsystem: "org.openhab.network", category: "NotificationService")
 
     func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
@@ -59,7 +58,7 @@ actor NotificationServiceHandler {
         var notificationActions: [UNNotificationAction] = []
         let userInfo = bestAttemptContent.userInfo
 
-        logger.info("didReceive userInfo \(userInfo)")
+        Logger.notificationService.info("didReceive userInfo \(userInfo)")
 
         if let title = userInfo["title"] as? String {
             bestAttemptContent.title = title
@@ -89,7 +88,7 @@ actor NotificationServiceHandler {
                 }
             }
             if !notificationActions.isEmpty {
-                logger.info("didReceive registering \(notificationActions) for category \(category)")
+                Logger.notificationService.info("didReceive registering \(notificationActions) for category \(category)")
                 let notificationCategory =
                     UNNotificationCategory(
                         identifier: category,
@@ -97,10 +96,9 @@ actor NotificationServiceHandler {
                         intentIdentifiers: [],
                         options: .customDismissAction
                     )
-                let logger = logger
                 UNUserNotificationCenter.current().getNotificationCategories { existingCategories in
                     var updatedCategories = existingCategories
-                    logger.info("handleNotification adding category \(category)")
+                    Logger.notificationService.info("handleNotification adding category \(category)")
                     updatedCategories.insert(notificationCategory)
                     UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
                 }
@@ -125,7 +123,7 @@ actor NotificationServiceHandler {
                         throw NotificationServiceError.handleNotificationCouldNotAttach
                     }
                 } catch {
-                    logger.error("Error fetching data: \(error.localizedDescription)")
+                    Logger.notificationService.error("Error fetching data: \(error.localizedDescription)")
                 }
                 contentHandler(bestAttemptContent)
             }
@@ -136,7 +134,7 @@ actor NotificationServiceHandler {
     }
 
     func serviceExtensionTimeWillExpire() {
-        logger.info("serviceExtensionTimeWillExpire")
+        Logger.notificationService.info("serviceExtensionTimeWillExpire")
         if let contentHandler, let bestAttemptContent {
             contentHandler(bestAttemptContent)
         }
@@ -150,7 +148,7 @@ actor NotificationServiceHandler {
                     return actionsArray
                 }
             } catch {
-                logger.info("Error parsing actions: \(error.localizedDescription)")
+                Logger.notificationService.info("Error parsing actions: \(error.localizedDescription)")
             }
         }
         return nil
@@ -176,7 +174,7 @@ actor NotificationServiceHandler {
                 }
 
             } catch {
-                logger.error("Error fetching data: \(error.localizedDescription)")
+                Logger.notificationService.error("Error fetching data: \(error.localizedDescription)")
             }
         }
         return returnValues
@@ -241,7 +239,7 @@ actor NotificationServiceHandler {
         let tempDirectory = FileManager.default.temporaryDirectory
         let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
         try imageData.write(to: tempFileURL)
-        logger.info("Image saved to temporary file: \(tempFileURL.absoluteString) of type \(mimeType)")
+        Logger.notificationService.info("Image saved to temporary file: \(tempFileURL.absoluteString) of type \(mimeType)")
         return (tempFileURL, mimeType)
     }
 
@@ -261,12 +259,12 @@ actor NotificationServiceHandler {
                 try fileManager.moveItem(at: tempFile, to: newTempFile)
                 attachment = try UNNotificationAttachment(identifier: UUID().uuidString, url: newTempFile, options: nil)
             } else {
-                logger.error("Unrecognized MIME type or file extension")
+                Logger.notificationService.error("Unrecognized MIME type or file extension")
                 attachment = nil
             }
             return attachment
         } catch {
-            logger.error("Failed to create UNNotificationAttachment: \(error.localizedDescription)")
+            Logger.notificationService.error("Failed to create UNNotificationAttachment: \(error.localizedDescription)")
         }
         return nil
     }
@@ -283,10 +281,10 @@ actor NotificationServiceHandler {
 
         if let cloudUserId,
            let instance = await Preferences.shared.storedHome(forCloudUserId: cloudUserId) {
-            logger.info("Setting up network tracking for \(cloudUserId)")
+            Logger.notificationService.info("Setting up network tracking for \(cloudUserId)")
             connections = await [instance.localConnectionConfig, instance.remoteConnectionConfig]
         } else {
-            logger.info("Using default connection configurations")
+            Logger.notificationService.info("Using default connection configurations")
             connections = await [
                 Preferences.shared.currentHomePreferences.localConnectionConfig,
                 Preferences.shared.currentHomePreferences.remoteConnectionConfig

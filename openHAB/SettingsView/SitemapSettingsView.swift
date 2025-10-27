@@ -22,7 +22,6 @@ struct SitemapSettingsView: View {
     @Binding var sitemaps: [OpenHABSitemap]
 
     @State private var showingCacheAlert = false
-    private let logger = Logger(subsystem: "org.openhab.app", category: "SitemapSettingsView")
 
     var body: some View {
         Section(header: Text(LocalizedStringKey("sitemap_settings"))) {

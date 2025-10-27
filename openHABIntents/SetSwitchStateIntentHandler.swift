@@ -24,10 +24,8 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
         offLabel: "OFF"
     ]
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "SetSwitchStateIntent")
-
     func resolveHome(for intent: OpenHABSetSwitchStateIntent) async -> OpenHABHomeResolutionResult {
-        logger.info("Resolving home for intent: \(intent)")
+        Logger.intentHandling.info("Resolving home for intent: \(intent)")
         return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
     }
 
@@ -36,17 +34,17 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
     }
 
     func provideActionOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
-        logger.info("SetSwitchStateIntentHandler provideActionOptionsCollection")
+        Logger.intentHandling.info("SetSwitchStateIntentHandler provideActionOptionsCollection")
         return INObjectCollection(items: Self.localizedActions as [NSString])
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
-        logger.info("SetSwitchStateIntentHandler provideItemOptionsCollection with searchTerm: \(searchTerm ?? "<none>", privacy: .public)")
+        Logger.intentHandling.info("SetSwitchStateIntentHandler provideItemOptionsCollection with searchTerm: \(searchTerm ?? "<none>", privacy: .public)")
         return await OpenHABIntentHelper.getItemOptions(home: intent.home, searchTerm: searchTerm, itemTypes: [.switchItem])
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
-        logger.info("SetSwitchStateIntentHandler provideItemOptionsCollection")
+        Logger.intentHandling.info("SetSwitchStateIntentHandler provideItemOptionsCollection")
         return await OpenHABIntentHelper.getItemOptions(home: intent.home, itemTypes: [.switchItem])
     }
 
@@ -55,7 +53,7 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
     }
 
     func handle(intent: OpenHABSetSwitchStateIntent) async -> OpenHABSetSwitchStateIntentResponse {
-        logger.info("SetSwitchStateIntent for item: \(intent.item ?? "<none>", privacy: .public)")
+        Logger.intentHandling.info("SetSwitchStateIntent for item: \(intent.item ?? "<none>", privacy: .public)")
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(
