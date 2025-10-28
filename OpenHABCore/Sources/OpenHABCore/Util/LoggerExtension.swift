@@ -16,7 +16,6 @@ import Foundation
 import os.log
 
 public extension Logger {
-    
     private static let subsystem = Bundle.main.bundleIdentifier ?? "org.openhab.app"
 
     static let appDelegate = Logger(subsystem: subsystem, category: "AppDelegate")
