@@ -701,7 +701,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     iconColor: iconColor,
                     staticIcon: widget.staticIcon
                 )?.url {
-                    Logger.sitemapViewController.info("URL: \(urlc.absoluteString, privacy: .private) , color: \(iconColor)")
+                    Logger.sitemapViewController.info("URL for icon: \(urlc.absoluteString, privacy: .public)")
                     cell.imageView?.kf.setImage(
                         with: KF.ImageResource(downloadURL: urlc), // , cacheKey: urlc.path + (urlc.query ?? "")),
                         placeholder: nil,
@@ -713,7 +713,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                                 cell.setNeedsLayout()
                             }
                         case let .failure(error):
-                            Logger.sitemapViewController.error("Image loading failed for widget \(widget.label) : \(error.localizedDescription)")
+                            Logger.sitemapViewController.error("Image loading failed for widget \(widget.label, privacy: .public) : \(error.localizedDescription, privacy: .public)")
                         }
                     }
                 }
