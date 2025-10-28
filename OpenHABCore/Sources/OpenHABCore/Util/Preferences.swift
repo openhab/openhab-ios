@@ -131,12 +131,12 @@ private enum PreferencesAccess {
 
     @MainActor fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
         guard let sanitized = sanitize(newValue) else {
-            Logger.preferences.debug("Preference \(key) new value \(String(describing: newValue)) could not be sanitized, will be ignored")
+            Logger.preferences.debug("Preference \(key) new value \(String(describing: newValue), privacy: .private) could not be sanitized, will be ignored")
             return
         }
         let convertedValue = converter(sanitized)
         guard convertedValue != nil else {
-            Logger.preferences.debug("Preference \(key) conversion of new value \(String(describing: sanitized)) failed, do not store.")
+            Logger.preferences.debug("Preference \(key) conversion of new value \(String(describing: sanitized), privacy: .private) failed, do not store.")
             return
         }
         Logger.preferences.debug("Preference \(key) will be changed to value \(String(describing: newValue), privacy: .private)")
