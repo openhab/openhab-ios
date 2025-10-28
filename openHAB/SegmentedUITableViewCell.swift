@@ -14,8 +14,6 @@ import os.log
 import UIKit
 
 class SegmentedUITableViewCell: GenericUITableViewCell {
-    let logger = Logger(subsystem: "org.openhab", category: "SegmentedUITableViewCell")
-
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
 
     // @IBOutlet private var customTextLabel: UILabel!
@@ -58,7 +56,7 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
             return
         }
 
-        logger.info("Segment pressed \(segmentedControl.selectedSegmentIndex)")
+        Logger.widgets.info("Segment pressed \(segmentedControl.selectedSegmentIndex)")
         widget.sendCommand(mapping.command)
         feedbackGenerator.impactOccurred()
     }

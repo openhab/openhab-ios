@@ -34,8 +34,6 @@ struct SettingsView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "SettingsView")
-
     var body: some View {
         Form {
             ConnectionSettingsView(
@@ -110,7 +108,7 @@ struct SettingsView: View {
             case .name: sitemaps.sort { $0.name < $1.name }
             }
         } catch {
-            logger.error("\(error.localizedDescription)")
+            Logger.settingsView.error("\(error.localizedDescription)")
             sitemaps = []
         }
     }

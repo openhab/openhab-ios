@@ -13,8 +13,6 @@
 import os.log
 import UIKit
 
-private let logger = Logger(subsystem: "org.openhab", category: "Preferences")
-
 @MainActor
 private let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
 
@@ -121,9 +119,9 @@ private enum PreferencesAccess {
             return preferenceConverted
         } else {
             if let preferenceValue {
-                logger.error("Preference value \(key) was \(String(describing: preferenceValue)) but did not conform to \(T.self). Replace with default value.")
+                Logger.preferences.error("Preference value \(key) was \(String(describing: preferenceValue)) but did not conform to \(T.self). Replace with default value.")
             } else {
-                logger.info("Preference value \(key) was set for the first time. Using default value.")
+                Logger.preferences.info("Preference value \(key) was set for the first time. Using default value.")
             }
             let fallback = defaultValue
             sharedDefaults.set(encoder(fallback), forKey: key)
@@ -133,15 +131,15 @@ private enum PreferencesAccess {
 
     @MainActor fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
         guard let sanitized = sanitize(newValue) else {
-            logger.debug("Preference \(key) new value \(String(describing: newValue)) could not be sanitized, will be ignored")
+            Logger.preferences.debug("Preference \(key) new value \(String(describing: newValue), privacy: .private) could not be sanitized, will be ignored")
             return
         }
         let convertedValue = converter(sanitized)
         guard convertedValue != nil else {
-            logger.debug("Preference \(key) conversion of new value \(String(describing: sanitized)) failed, do not store.")
+            Logger.preferences.debug("Preference \(key) conversion of new value \(String(describing: sanitized), privacy: .private) failed, do not store.")
             return
         }
-        logger.debug("Preference \(key) will be changed to value \(String(describing: newValue))")
+        Logger.preferences.debug("Preference \(key) will be changed to value \(String(describing: newValue), privacy: .private)")
         sharedDefaults.set(convertedValue, forKey: key)
 
         subject.send(sanitized)
@@ -326,7 +324,7 @@ public extension Preferences {
         let homeId = Preferences.shared.activeHomeId
         all[homeId] = Preferences.shared.currentHomePreferences
         storedHomes = all
-        logger.debug("Stored preferences for current home \(homeId.uuidString)")
+        Logger.preferences.debug("Stored preferences for current home \(homeId.uuidString)")
     }
 
     func modifyActiveHome(modificationFunction: @MainActor (inout HomePreferences) -> Void) {

@@ -19,8 +19,6 @@ import SwiftUI
 import WebKit
 
 struct HomeSelectionView: View {
-    private let logger = Logger(subsystem: "org.openhab", category: "HomeSelectionView")
-
     @State private var homes: [UUID] = []
 
     @State private var showingNewHomeAlert = false
@@ -188,7 +186,7 @@ struct HomeSelectionView: View {
         guard let toDelete else {
             return
         }
-        logger.info("delete home settings for \(toDelete.uuidString)")
+        Logger.selectionView.info("delete home settings for \(toDelete.uuidString)")
         Preferences.shared.deleteStoredHome(toDelete)
         loadHomesList()
     }
@@ -198,7 +196,7 @@ struct HomeSelectionView: View {
             return
         }
         let newName = newHomeName
-        logger.info("rename home \(toRename.uuidString) to \(newName)")
+        Logger.selectionView.info("rename home \(toRename.uuidString) to \(newName)")
         Preferences.shared.renameHome(toRename, newHomeName: newName)
     }
 

@@ -16,14 +16,10 @@ import os
 
 // swiftlint:disable file_types_order
 package actor LoggingMiddleware {
-    private static var defaultLogger: Logger {
-        Logger(subsystem: "org.openhab.app", category: "logging-middleware")
-    }
-
     private let logger: Logger
     package let bodyLoggingPolicy: BodyLoggingPolicy
 
-    package init(logger: Logger = defaultLogger, bodyLoggingConfiguration: BodyLoggingPolicy = .never) {
+    package init(logger: Logger = Logger.defaultLoggingMiddleware, bodyLoggingConfiguration: BodyLoggingPolicy = .never) {
         self.logger = logger
         bodyLoggingPolicy = bodyLoggingConfiguration
     }

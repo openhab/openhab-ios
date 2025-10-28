@@ -14,8 +14,6 @@ import os.log
 import SwiftUI
 
 struct SliderWithSwitchSupportRow: View {
-    private let logger = Logger(subsystem: "org.openhab", category: "SliderWithSwitchSupportRow")
-
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
     @State private var pendingValue: Double?
@@ -26,7 +24,7 @@ struct SliderWithSwitchSupportRow: View {
                 pendingValue ?? widget.adjustedValue
             },
             set: { newValue in
-                logger.info("SliderWithSwitchSupportRow new value = \(newValue)")
+                Logger.rowViews.info("SliderWithSwitchSupportRow new value = \(newValue)")
                 pendingValue = newValue
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { // 500ms delay
                     if pendingValue == newValue { // Ensure no new updates came in
@@ -47,10 +45,10 @@ struct SliderWithSwitchSupportRow: View {
             },
             set: {
                 if $0 {
-                    logger.info("Switch to ON")
+                    Logger.rowViews.info("Switch to ON")
                     widget.sendCommand(widget.maxValue.valueText(step: widget.step))
                 } else {
-                    logger.info("Switch to OFF")
+                    Logger.rowViews.info("Switch to OFF")
                     widget.sendCommand(widget.minValue.valueText(step: widget.step))
                 }
             }

@@ -161,7 +161,7 @@ final class NetworkTrackerTests: XCTestCase {
 
         tracker.$status
             .sink { status in
-                Logger(subsystem: "org.openhab.test", category: "NetworkTrackerTests")
+                Logger.testNetworkTracker
                     .info("NetworkTrackerTests: Network status became \(status == .connected ? "connected" : (status == .connecting ? "connecting" : (status == .started ? "started" : "stopped")))")
                 if status == .connected {
                     expectation.fulfill()

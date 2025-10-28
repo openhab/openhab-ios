@@ -24,10 +24,8 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
         offLabel: "OFF"
     ]
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
-
     func resolveHome(for intent: OpenHABSetContactStateValueIntent) async -> OpenHABHomeResolutionResult {
-        logger.info("Resolving home for intent: \(intent)")
+        Logger.intentHandling.info("Resolving home for intent: \(intent)")
         return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
     }
 
@@ -52,7 +50,7 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
     }
 
     func handle(intent: OpenHABSetContactStateValueIntent) async -> OpenHABSetContactStateValueIntentResponse {
-        logger.info("SetContactStateValueIntent for \(intent.item ?? "")")
+        Logger.intentHandling.info("SetContactStateValueIntent for \(intent.item ?? "")")
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(

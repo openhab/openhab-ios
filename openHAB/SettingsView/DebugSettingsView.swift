@@ -21,8 +21,6 @@ struct DebugSettingsView: View {
     @State private var hasBeenLoaded = false
     @State var showCrashReportingAlert = false
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "DebugSettingsView")
-
     var body: some View {
         Toggle("Crash Reporting", isOn: $settingsSendCrashReports)
             .task { @MainActor in
