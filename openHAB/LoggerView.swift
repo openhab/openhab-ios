@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import OSLog
 import SFSafeSymbols
 import SwiftUI
@@ -23,7 +24,6 @@ struct LoggerView: View {
     let template = NSPredicate(format: "(subsystem BEGINSWITH $PREFIX)")
     @State private var logs: [LogEntry] = []
     @State private var isLoading = true
-    private let logger = Logger(subsystem: "org.openhab.app", category: "LogViewer")
 
     var body: some View {
         VStack {
@@ -92,7 +92,7 @@ struct LoggerView: View {
 
             return Array(logs.reversed()) // Ensures latest logs appear first
         } catch {
-            logger.error("Error fetching logs: \(error.localizedDescription)")
+            Logger.settingsView.error("Error fetching logs: \(error.localizedDescription)")
             return []
         }
     }

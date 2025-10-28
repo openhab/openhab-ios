@@ -18,7 +18,6 @@ struct ApplicationSettingsView: View {
     @Binding var settingsIdleOff: Bool
     @Binding var settingsSSECommandItem: String
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "ApplicationSettingsView")
     @State private var selectedItemName: String?
 
     var body: some View {

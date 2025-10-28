@@ -11,12 +11,9 @@
 
 import Combine
 import OpenHABCore
-import os.log
 import SideMenu
 import SwiftMessages
 import UIKit
-
-private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABViewController")
 
 class OpenHABViewController: UIViewController {
     var trackerCancellables = Set<AnyCancellable>()

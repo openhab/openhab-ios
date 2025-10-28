@@ -19,8 +19,6 @@ actor PageLoader {
 
     private var lastFetchedPage: OpenHABPage? // Store latest page data
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "PageLoader")
-
     init(service: OpenAPIService, pageId: String, defaultSitemap: String) {
         openAPIService = service
         self.pageId = pageId
@@ -31,16 +29,16 @@ actor PageLoader {
         pageId = newPageId
         defaultSitemap = newSitemap
         // swiftformat:disable:next redundantSelf
-        logger.info("🔄 Updated config: pageId = \(self.pageId), defaultSitemap = \(self.defaultSitemap)")
+        Logger.pageLoader.info("🔄 Updated config: pageId = \(self.pageId), defaultSitemap = \(self.defaultSitemap)")
     }
 
     func updateAPIService(newService: OpenAPIService) {
         openAPIService = newService
-        logger.info("🔄 Updated OpenAPIService instance")
+        Logger.pageLoader.info("🔄 Updated OpenAPIService instance")
     }
 
     func fetchPage(longPolling: Bool) async throws -> OpenHABPage? {
-        logger.info("📡 Fetching page... (longPolling: \(longPolling))")
+        Logger.pageLoader.info("📡 Fetching page... (longPolling: \(longPolling))")
         let page = try await openAPIService.pollDataForPage(
             sitemapname: defaultSitemap,
             pageId: pageId,

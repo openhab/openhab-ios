@@ -14,8 +14,6 @@ import os.log
 import WebKit
 
 class WebUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
-    private let logger = Logger(subsystem: "org.openhab.core", category: "WebUITableViewCell")
-
     private var url: URL?
 
     private var widgetWebView: WKWebView!
@@ -51,12 +49,12 @@ class WebUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
     override func displayWidget() {
         // swiftformat:disable redundantSelf
-        logger.info("webview loading url \(self.widget.url)")
+        Logger.widgets.info("webview loading url \(self.widget.url)")
         // swiftformat:enable redundantSelf
         let urlString = widget.url.lowercased().hasPrefix("http://") || widget.url.lowercased().hasPrefix("https://") ? widget.url : Preferences.shared.currentHomePreferences.localConnectionConfig.url + widget.url
         os_log("webview final URL: %{PUBLIC}@", log: .default, type: .info, urlString)
         guard url?.absoluteString != urlString else {
-            logger.info("webview URL has not changed, abort loading")
+            Logger.widgets.info("webview URL has not changed, abort loading")
             return
         }
 
@@ -70,7 +68,7 @@ class WebUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     }
 
     func setFrame(_ frame: CGRect) {
-        logger.info("setFrame")
+        Logger.widgets.info("setFrame")
         super.frame = frame
         widgetWebView?.reload()
     }
@@ -86,29 +84,29 @@ extension WebUITableViewCell: GenericCellCacheProtocol {
 extension WebUITableViewCell: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
         // swiftformat:disable:next redundantSelf
-        logger.info("webview started loading with URL: \(self.widget.url)")
+        Logger.widgets.info("webview started loading with URL: \(self.widget.url)")
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         // swiftformat:disable:next redundantSelf
-        logger.info("webview finished load with URL: \(self.widget.url)")
+        Logger.widgets.info("webview finished load with URL: \(self.widget.url)")
     }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         if let response = navigationResponse.response as? HTTPURLResponse, response.statusCode >= 400 {
-            logger.debug("webview failed with status code: \(response.statusCode)")
+            Logger.widgets.debug("webview failed with status code: \(response.statusCode)")
             url = nil
         }
         return .allow
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
-        logger.debug("webview failed with error: \(error.localizedDescription)")
+        Logger.widgets.debug("webview failed with error: \(error.localizedDescription)")
         url = nil
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
-        logger.debug("webview failed with error: \(error.localizedDescription)")
+        Logger.widgets.debug("webview failed with error: \(error.localizedDescription)")
         url = nil
     }
 

@@ -25,8 +25,6 @@ import WatchConnectivity
 actor AudioPlayerActor {
     private var player: AVAudioPlayer?
 
-    let logger = Logger(subsystem: "org.openhab", category: "AudioPlayerActor")
-
     func playSound() {
         guard let soundPath = Bundle.main.url(forResource: "ping", withExtension: "wav") else {
             return
@@ -38,7 +36,7 @@ actor AudioPlayerActor {
             newPlayer.play()
             player = newPlayer
         } catch {
-            logger.info("Failed to play sound \(error.localizedDescription)")
+            Logger.notificationCenterDelegateImpl.info("Failed to play sound \(error.localizedDescription)")
         }
     }
 
@@ -49,14 +47,12 @@ actor AudioPlayerActor {
 
 @MainActor
 final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDelegate {
-    private let logger = Logger(subsystem: "org.openhab", category: "NotificationCenterDelegateImpl")
-
     let audioPlayer = AudioPlayerActor()
 
     // this is called when a notification comes in while in the foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
         let userInfo = notification.request.content.userInfo
-        logger.info("Notification received while app is in foreground: \(userInfo)")
+        Logger.notificationCenterDelegateImpl.info("Notification received while app is in foreground: \(userInfo)")
 
         NotificationCenter.default.post(
             name: .openHABDidReceiveNotification,
@@ -77,7 +73,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier
 
-        logger.info("Notification clicked: action \(actionIdentifier) userInfo \(userInfo)")
+        Logger.notificationCenterDelegateImpl.info("Notification clicked: action \(actionIdentifier) userInfo \(userInfo)")
 
         if actionIdentifier != UNNotificationDismissActionIdentifier {
             if actionIdentifier != UNNotificationDefaultActionIdentifier {
@@ -91,7 +87,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
     }
 
     private func displayNotification(message: String, action: String?, cloudUserId: String?) async {
-        logger.info("displayNotification \(message)")
+        Logger.notificationCenterDelegateImpl.info("displayNotification \(message)")
 
         Task {
             await audioPlayer.playSound()

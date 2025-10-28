@@ -18,8 +18,6 @@ protocol ColorPickerCellDelegate: NSObjectProtocol {
 }
 
 class ColorPickerCell: GenericUITableViewCell {
-    private let logger = Logger(subsystem: "org.openhab", category: "ColorPickerCell")
-
     weak var delegate: (any ColorPickerCellDelegate)?
 
     @IBOutlet private var downButton: UIButton!
@@ -27,7 +25,7 @@ class ColorPickerCell: GenericUITableViewCell {
     @IBOutlet private var colorButton: UICircleButton!
 
     required init?(coder: NSCoder) {
-        logger.info("ColorPickerCell initWithCoder")
+        Logger.widgets.info("ColorPickerCell initWithCoder")
 
         super.init(coder: coder)
 
@@ -55,13 +53,13 @@ class ColorPickerCell: GenericUITableViewCell {
 
     @objc
     func upButtonPressed() {
-        logger.info("ON button pressed")
+        Logger.widgets.info("ON button pressed")
         widget.sendCommand("ON")
     }
 
     @objc
     func downButtonPressed() {
-        logger.info("OFF button pressed")
+        Logger.widgets.info("OFF button pressed")
         widget.sendCommand("OFF")
     }
 }
