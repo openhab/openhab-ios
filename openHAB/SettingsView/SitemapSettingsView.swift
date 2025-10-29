@@ -71,7 +71,7 @@ struct SitemapSettingsView: View {
 
     func clearWebsiteCache() {
         #if !DEBUG
-        logger.debug("Clearing image cache")
+        Logger.settingsView.debug("Clearing image cache")
         #endif
         KingfisherManager.shared.cache.clearMemoryCache()
         KingfisherManager.shared.cache.clearDiskCache()

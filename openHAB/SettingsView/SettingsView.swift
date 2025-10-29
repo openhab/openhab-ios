@@ -115,7 +115,7 @@ struct SettingsView: View {
 
     private func loadSettings() {
         #if !DEBUG
-        logger.debug("Loading Settings")
+        Logger.settingsView.debug("Loading Settings")
         #endif
         settingsDemomode = Preferences.shared.currentHomePreferences.demomode
         settingsIdleOff = Preferences.shared.idleOff
