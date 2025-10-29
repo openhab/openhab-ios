@@ -28,7 +28,7 @@ struct DebugSettingsView: View {
             }
             .onChange(of: settingsSendCrashReports) { newValue in
                 #if !DEBUG
-                logger.debug("Detected change on settingsSendCrashReports")
+                Logger.settingsView.debug("Detected change on settingsSendCrashReports")
                 #endif
                 if newValue, hasBeenLoaded {
                     showCrashReportingAlert = true
