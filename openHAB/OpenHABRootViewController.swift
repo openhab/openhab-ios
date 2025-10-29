@@ -200,12 +200,10 @@ class OpenHABRootViewController: UIViewController {
             guard
                 let summary = notification.userInfo?["summary"] as? String,
                 let domain = notification.userInfo?["domain"] as? String,
-                let client = notification.object as? HTTPClient
+                let delegate = notification.object as? HTTPClientDelegate
             else {
                 return
             }
-
-            let delegate = client.delegate
 
             Task { @MainActor in
                 self?.handleCertificateTrust(
@@ -225,13 +223,11 @@ class OpenHABRootViewController: UIViewController {
             guard
                 let summary = notification.userInfo?["summary"] as? String,
                 let domain = notification.userInfo?["domain"] as? String,
-                let client = notification.object as? HTTPClient
+                let delegate = notification.object as? HTTPClientDelegate
 
             else {
                 return
             }
-
-            let delegate = client.delegate
 
             Task { @MainActor in
                 self?.handleCertificateTrust(
@@ -819,7 +815,7 @@ class OpenHABRootViewController: UIViewController {
     @objc func handleCertificateTrust(_ notification: Notification, message: String) {
         guard let summary = notification.userInfo?["summary"] as? String,
               let domain = notification.userInfo?["domain"] as? String,
-              let client = notification.object as? HTTPClient else { return }
+              let delegate = notification.object as? HTTPClientDelegate else { return }
         let title = NSLocalizedString("ssl_certificate_warning", comment: "")
         let message = String(format: NSLocalizedString(message, comment: ""), summary, domain)
         DispatchQueue.main.async {
@@ -831,15 +827,15 @@ class OpenHABRootViewController: UIViewController {
             )
 
             alert.addAction(UIAlertAction(title: "Always", style: .default) { _ in
-                client.delegate.completeEvaluation(.permitAlways)
+                delegate.completeEvaluation(.permitAlways)
             })
 
             alert.addAction(UIAlertAction(title: "Once", style: .default) { _ in
-                client.delegate.completeEvaluation(.permitOnce)
+                delegate.completeEvaluation(.permitOnce)
             })
 
             alert.addAction(UIAlertAction(title: "Deny", style: .cancel) { _ in
-                client.delegate.completeEvaluation(.deny)
+                delegate.completeEvaluation(.deny)
             })
 
             self.present(alert, animated: true)

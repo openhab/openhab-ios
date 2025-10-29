@@ -33,7 +33,7 @@ final class UserData: ObservableObject {
     @Published var isPolling = false
 
     var openHABSitemapPage: OpenHABPage?
-    var currentClient: HTTPClient?
+    var currentClientDelegate: HTTPClientDelegate?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -60,10 +60,10 @@ final class UserData: ObservableObject {
             guard let self,
                   let summary = notification.userInfo?["summary"] as? String,
                   let domain = notification.userInfo?["domain"] as? String,
-                  let client = notification.object as? HTTPClient else { return }
+                  let delegate = notification.object as? HTTPClientDelegate else { return }
             DispatchQueue.main.async {
                 self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), summary, domain)
-                self.currentClient = client
+                self.currentClientDelegate = delegate
                 self.showCertificateAlert = true
             }
         }
@@ -76,10 +76,10 @@ final class UserData: ObservableObject {
             guard let self,
                   let summary = notification.userInfo?["summary"] as? String,
                   let domain = notification.userInfo?["domain"] as? String,
-                  let client = notification.object as? HTTPClient else { return }
+                  let delegate = notification.object as? HTTPClientDelegate else { return }
             DispatchQueue.main.async {
                 self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), summary, domain)
-                self.currentClient = client
+                self.currentClientDelegate = delegate
                 self.showCertificateAlert = true
             }
         }
