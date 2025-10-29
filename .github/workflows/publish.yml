@@ -16,7 +16,7 @@ on:
 
 jobs:
   build_and_deploy:
-    runs-on: macos-15-arm64
+    runs-on: macos-15
     timeout-minutes: 120
     
     env:
