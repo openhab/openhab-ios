@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [Version 3.1.29, Build 85] - 2025-10-29Z
+
+- Use Logger also for RELEASE (#993)
+- Proposal - App Icon supporting Dark mode and iOS 26 Monochrome/Tinted modes (#989)
+- Clearer logging for debugging
+- Complete merge
+- Centralization for all static loggers (#992)
+
 ## [Version 3.1.28, Build 84] - 2025-10-25Z
 
 - Handling of dark mode for external icons
