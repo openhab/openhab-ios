@@ -95,7 +95,7 @@ struct ServerCertificatesView: View {
                 .onDelete(perform: deleteCertificates)
             }
         }
-        .navigationTitle("Server Certificates")
+        .navigationTitle("Accepted Server Certificates")
         .onAppear {
             viewModel.loadCertificates()
         }

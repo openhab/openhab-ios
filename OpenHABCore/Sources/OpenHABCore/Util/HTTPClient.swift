@@ -160,7 +160,7 @@ public actor CertificateStore {
         #endif
     }
 
-    private func saveTrustedCertificates() {
+    private func saveTrustedCertificates() async {
         do {
             let data = try PropertyListEncoder().encode(trustedCertificates)
             let path = getPersistencePath()
@@ -194,32 +194,26 @@ public actor CertificateStore {
             trustedCertificates[domain] = nil
             Logger.httpClient.debug("Removed certificate for domain \(domain)")
         }
-        saveTrustedCertificates()
-
-        // Add a small delay to ensure file operations complete in CI environments
-        try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+        await saveTrustedCertificates()
     }
 
-    public func certificateData(forDomain domain: String) -> Data? {
+    public func certificateData(forDomain domain: String) async -> Data? {
         let data = trustedCertificates[domain]?.data
         Logger.httpClient.debug("Retrieved certificate for domain \(domain): \(data?.count ?? 0) bytes")
         return data
     }
 
-    public func getAllCertificates() -> [String: CertificateEntry] {
+    public func getAllCertificates() async -> [String: CertificateEntry] {
         trustedCertificates
     }
 
-    public func getCertificateInfo(forDomain domain: String) -> CertificateEntry? {
+    public func getCertificateInfo(forDomain domain: String) async -> CertificateEntry? {
         trustedCertificates[domain]
     }
 
     public func removeCertificate(forDomain domain: String) async {
         trustedCertificates.removeValue(forKey: domain)
-        saveTrustedCertificates()
-
-        // Add a small delay to ensure file operations complete in CI environments
-        try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+        await saveTrustedCertificates()
     }
 }
 

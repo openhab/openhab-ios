@@ -37,7 +37,7 @@ struct ApplicationSettingsView: View {
                 ClientCertificatesView()
             }
 
-            NavigationLink("Server Certificates") {
+            NavigationLink("Accepted Server Certificates") {
                 ServerCertificatesView()
             }
 

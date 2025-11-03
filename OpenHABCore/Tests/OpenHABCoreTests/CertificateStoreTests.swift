@@ -59,7 +59,6 @@ struct CertificateStoreTests {
         let firstDate = firstInfo!.dateAccepted
 
         // Overwrite with new data
-        try await Task.sleep(nanoseconds: 5_000_000) // 5ms to ensure date changes
         let second = Data([0x0A, 0x0B])
         await store.storeCertificateData(second, forDomain: domain)
 
@@ -123,24 +122,19 @@ struct CertificateStoreTests {
         await store.removeCertificate(forDomain: domainB)
     }
 
+/// TODO Find solution
 //    @Test("Persistence across instances")
 //    func persistenceAcrossInstances() async throws {
 //        let domain = "persistence-test.openhab.org"
 //        var store: CertificateStore? = makeStore()
 //
-//        Logger.defaultLoggingMiddleware.log("Runings persistenceAcrossInstances")
+//        Logger.defaultLoggingMiddleware.log("Running persistenceAcrossInstances")
 //        let data = Data([0xFE, 0xED, 0xFA, 0xCE])
 //        await store!.storeCertificateData(data, forDomain: domain)
-//
-//        try await Task.sleep(nanoseconds: 100_000_000) // 100ms for CI robustness
 //
 //        // Ensure the store is completely finished with file operations
 //        // by setting it to nil and waiting a moment
 //        store = nil
-//
-//        // Give the file system a moment to ensure the write is complete
-//        // This is especially important in CI environments
-//        try await Task.sleep(nanoseconds: 100_000_000) // 100ms for CI robustness
 //
 //        // Create a new instance which should load from disk
 //        store = makeStore()
