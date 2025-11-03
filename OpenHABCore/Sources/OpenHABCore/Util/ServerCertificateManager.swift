@@ -27,7 +27,7 @@ enum ServerCertificateManagerError: Error {
 }
 
 @MainActor
-public final class ServerCertificateManager { // ServerTrustManager, ServerTrustEvaluating {
+public final class ServerCertificateManager {
     // Handle the different responses of the user
     public enum EvaluateResult: Sendable {
         case undecided
@@ -138,7 +138,7 @@ public final class ServerCertificateManager { // ServerTrustManager, ServerTrust
         let evaluateResult = wrapperSecTrustEvaluate(serverTrust: serverTrust)
 
         // This means that system thinks this is a legal/usable certificate, just permit the connection
-        if evaluateResult.isAny(of: .unspecified, .proceed) || ignoreSSL {
+        if evaluateResult.isAny(of: .proceed) || ignoreSSL {
             return
         }
 

@@ -115,7 +115,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // init Firebase crash reporting
         FirebaseApp.configure()
         FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
-        crashlyticsSubscriber = Preferences.shared.$sendCrashReports.sink { [weak self] in
+        crashlyticsSubscriber = Preferences.shared.$sendCrashReports.sink {
             Crashlytics.crashlytics().setCrashlyticsCollectionEnabled($0)
             Logger.appDelegate.debug("setCrashlyticsCollectionEnabled to \($0)")
         }

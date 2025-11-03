@@ -149,8 +149,8 @@ struct DrawerView: View {
         VStack {
             List {
                 mainSection
-                tilesSection
                 sitemapsSection
+                tilesSection
                 systemSection
             }
             .listStyle(.inset)

@@ -54,8 +54,45 @@ public enum CertificateEvaluateResult: Sendable {
     case permitAlways
 }
 
-actor CertificateStore {
+public actor CertificateStore {
+    public static let shared = CertificateStore()
+
     private var trustedCertificates: [String: Data] = [:]
+
+    public init() {
+        Logger.httpClient.info("Initializing cert store")
+
+        // Inline the path calculation to avoid nonisolated issues
+        let path: URL
+        #if os(watchOS)
+        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+        path = URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
+        #else
+        path = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app")!.appendingPathComponent("trustedCertificates")
+        #endif
+
+        // Load certificates directly in init
+        do {
+            let rawdata = try Data(contentsOf: path)
+            let decoder = PropertyListDecoder()
+            trustedCertificates = try decoder.decode([String: Data].self, from: rawdata)
+            Logger.httpClient.info("Loaded existing cert store")
+        } catch {
+            // if Decodable fails, fall back to NSKeyedArchiver
+            do {
+                let rawdata = try Data(contentsOf: path)
+                if let unarchivedTrustedCertificates = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSDictionary.self, NSString.self, NSData.self], from: rawdata) as? [String: Data] {
+                    trustedCertificates = unarchivedTrustedCertificates
+                    // Will save in new format on first write
+                } else {
+                    trustedCertificates = [:]
+                }
+            } catch {
+                trustedCertificates = [:]
+            }
+            Logger.httpClient.info("No cert store, creating")
+        }
+    }
 
     private func getPersistencePath() -> URL {
         #if os(watchOS)
@@ -96,18 +133,6 @@ actor CertificateStore {
         }
     }
 
-    private func initializeCertificatesStore() {
-        Logger.httpClient.info("Initializing cert store")
-        loadTrustedCertificates()
-        if trustedCertificates.isEmpty {
-            Logger.httpClient.info("No cert store, creating")
-            trustedCertificates = [:]
-            saveTrustedCertificates()
-        } else {
-            Logger.httpClient.info("Loaded existing cert store")
-        }
-    }
-
     public func storeCertificateData(_ certificate: Data?, forDomain domain: String) {
         trustedCertificates[domain] = certificate
         saveTrustedCertificates()
@@ -116,6 +141,15 @@ actor CertificateStore {
     public func certificateData(forDomain domain: String) -> Data? {
         guard let data = trustedCertificates[domain] else { return nil }
         return data
+    }
+
+    public func getAllCertificates() -> [String: Data] {
+        trustedCertificates
+    }
+
+    public func removeCertificate(forDomain domain: String) {
+        trustedCertificates.removeValue(forKey: domain)
+        saveTrustedCertificates()
     }
 }
 

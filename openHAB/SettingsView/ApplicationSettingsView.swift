@@ -37,6 +37,10 @@ struct ApplicationSettingsView: View {
                 ClientCertificatesView()
             }
 
+            NavigationLink("Server Certificates") {
+                ServerCertificatesView()
+            }
+
             NavigationLink {
                 ItemSelectionView(selectedItemName: $selectedItemName)
             } label: {
