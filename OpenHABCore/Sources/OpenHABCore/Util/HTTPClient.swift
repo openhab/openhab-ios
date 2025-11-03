@@ -12,8 +12,6 @@
 @preconcurrency import Foundation
 import os
 
-private let logger = Logger(subsystem: "org.openhab", category: "HTTPClient")
-
 public enum HTTPClientError: Error {
     case serverTrustEvaluationFailed(reason: String)
     case noDataforItem
@@ -73,7 +71,7 @@ actor CertificateStore {
             let data = try PropertyListEncoder().encode(trustedCertificates)
             try data.write(to: getPersistencePath())
         } catch {
-            logger.info("Could not save trusted certificates")
+            Logger.httpClient.info("Could not save trusted certificates")
         }
     }
 
@@ -93,20 +91,20 @@ actor CertificateStore {
                     saveTrustedCertificates() // Ensure that data is written in new format
                 }
             } catch {
-                logger.info("Could not load trusted certificates")
+                Logger.httpClient.info("Could not load trusted certificates")
             }
         }
     }
 
     private func initializeCertificatesStore() {
-        logger.info("Initializing cert store")
+        Logger.httpClient.info("Initializing cert store")
         loadTrustedCertificates()
         if trustedCertificates.isEmpty {
-            logger.info("No cert store, creating")
+            Logger.httpClient.info("No cert store, creating")
             trustedCertificates = [:]
             saveTrustedCertificates()
         } else {
-            logger.info("Loaded existing cert store")
+            Logger.httpClient.info("Loaded existing cert store")
         }
     }
 
@@ -133,8 +131,6 @@ public final class HTTPClient: NSObject, Sendable {
     // this can be changed if we detect another server
     public let baseURL: URL?
 
-    private let logger = Logger(subsystem: "org.openhab.core", category: "HTTPClient")
-
     private let configuration: ConnectionConfiguration
     public let session: URLSession
     public let delegate: HTTPClientDelegate
@@ -152,7 +148,7 @@ public final class HTTPClient: NSObject, Sendable {
         do {
             return try await doRequest(baseURL: url, type: .bytes)
         } catch {
-            logger.error("Failed to fetch MJPEG stream: \(error.localizedDescription)")
+            Logger.httpClient.error("Failed to fetch MJPEG stream: \(error.localizedDescription)")
             throw HTTPClientError.failedtoFetchMJPEG
         }
     }
@@ -210,7 +206,7 @@ public final class HTTPClient: NSObject, Sendable {
                              type: SessionType,
                              cacheingPolicy: URLRequest.CachePolicy = .useProtocolCachePolicy) async throws -> (T, URLResponse) {
         guard var url = baseURL ?? self.baseURL else {
-            logger.info("doRequest ERROR: Base URL is nil")
+            Logger.httpClient.info("doRequest ERROR: Base URL is nil")
             throw HTTPClientError.baseURLIsNil
         }
 
@@ -239,10 +235,10 @@ public final class HTTPClient: NSObject, Sendable {
         let (result, response): (T, URLResponse) = try await performRequest(request: request, type: type)
         if let response = response as? HTTPURLResponse {
             if (400 ... 599).contains(response.statusCode) {
-                logger.error("HTTP error from URL \(url.absoluteString) : \(response.statusCode)")
+                Logger.httpClient.error("HTTP error from URL \(url.absoluteString) : \(response.statusCode)")
                 throw HTTPClientError.httpError(response.statusCode)
             } else {
-                logger.info("Response from URL \(url.absoluteString) : \(response.statusCode)")
+                Logger.httpClient.info("Response from URL \(url.absoluteString) : \(response.statusCode)")
                 return (result, response)
             }
         }

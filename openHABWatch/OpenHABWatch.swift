@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Kingfisher
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
@@ -18,13 +19,13 @@ import UserNotifications
 struct OpenHABWatch: App {
     @ObservedObject var settings = AppSettings.shared
     // https://developer.apple.com/documentation/watchkit/wkapplicationdelegate
-    @WKApplicationDelegateAdaptor(OpenHABWatchAppDelegate.self) var appDelegate
+    @WKApplicationDelegateAdaptor var appDelegate: OpenHABWatchAppDelegate
     @ObservedObject var userData = UserData.shared
 
     var body: some Scene {
         WindowGroup {
             TabView {
-                ContentView(viewModel: userData)
+                SitemapPageView(viewModel: userData)
                     .tabItem {
                         Label("Sitemap", systemSymbol: .circleFill)
                     }
@@ -37,13 +38,15 @@ struct OpenHABWatch: App {
                         Label("Debug", systemSymbol: .circleFill)
                     }
             }
-            .tabViewStyle(.page)
+            .tabViewStyle(.automatic)
             .environmentObject(settings)
             .task {
                 let center = UNUserNotificationCenter.current()
                 _ = try? await center.requestAuthorization(
                     options: [.alert, .sound, .badge]
                 )
+                // Configure Kingfisher to use our app delegate for auth challenges
+                ImageDownloader.default.authenticationChallengeResponder = appDelegate
             }
         }
         WKNotificationScene(controller: NotificationController.self, category: "openHABNotification")

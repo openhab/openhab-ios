@@ -2,6 +2,84 @@
 
 ## [Unreleased]
 
+
+
+## [Version 3.1.29, Build 85] - 2025-10-29Z
+
+- Use Logger also for RELEASE (#993)
+- Proposal - App Icon supporting Dark mode and iOS 26 Monochrome/Tinted modes (#989)
+- Clearer logging for debugging
+- Complete merge
+- Centralization for all static loggers (#992)
+
+## [Version 3.1.28, Build 84] - 2025-10-25Z
+
+- Handling of dark mode for external icons
+- Handling of authentication challenges (#988)
+- Address some warnings
+
+## [Version 3.1.27, Build 83] - 2025-10-21Z
+
+- Networktracker improvements (#981)
+- Bump crowdin/github-action from 2.11.0 to 2.12.0 (#986)
+
+## [Version 3.1.26, Build 82] - 2025-10-20Z
+
+- remove reported source of unexplicable crashes (#985)
+
+## [Version 3.1.25, Build 81] - 2025-10-19Z
+
+- Improve watch icons (#983)
+- improve notifications (#977)
+
+## [Version 3.1.24, Build 80] - 2025-10-12Z
+
+- Improve the handling for f7-icons on Apple Watch and implement static icon (#980)
+
+## [Version 3.1.23, Build 79] - 2025-10-10Z
+
+- Fixes a number of issues where background processing would crash (#976)
+
+## [Version 3.1.22, Build 78] - 2025-10-10Z
+
+- Improvement for icon rendering (#979)
+- Enable navigation until full webview load (#972)
+
+## [Version 3.1.21, Build 77] - 2025-10-02Z
+
+- don't run Swiftlint and swiftformat an github actions
+- Fix Fastfile for scheduled deploy to TestFligh.  When bump_type: '' hits the action, fastlane throws
+- Renaming AGENT.md to AGENTS.md to have it considered by GitHub Copilot as well
+- cachedWidgetId - Tracks which widget's content is currently cached (#974)
+- Speedup network tracker by early-exiting connection attempts (#967)
+
+## [Version 3.1.20, Build 73] - 2025-09-23Z
+
+- isolate ServerCertificateManager to main actor (#970)
+- Remove the deprecated use of WKProcessPool/processPool in OpenHABWebViewController (#965)
+- Bump rexml from 3.4.1 to 3.4.2 (#969)
+
+## [Version 3.1.19, Build 72] - 2025-09-22Z
+
+- Workaround for compiling in Archive/Release configuration (#968)
+- Migrate openHABCore to Swift 6 (#961)
+- Improve watch app (#962)
+- Prepare for Xcode 26 (#964)
+- Upgrade Xcode (#963)
+- Bump crowdin/github-action from 2.10.0 to 2.11.0 (#959)
+
+## [Version 3.1.18, Build 71] - 2025-09-05Z
+
+- Fixes waiting for a connection when one already exists (#958)
+- Async version of notificationcenter delegate (#952)
+- Fix for crash on number entry in input field (#957)
+- Bump crowdin/github-action from 2.9.1 to 2.10.0 (#946)
+- Transition to SVG (#955)
+
+## [Version 3.1.17, Build 70] - 2025-08-27Z
+
+- Fix #947 (#949)
+
 ## [Version 3.1.16, Build 69] - 2025-08-25Z
 
 - Migration of ScreenSaver to SwiftUI (#935)

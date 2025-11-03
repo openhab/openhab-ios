@@ -22,37 +22,77 @@ struct IconView: View {
     var iconURL: URL? {
         var iconColor = widget.iconColor
         if iconColor.isEmpty {
-            iconColor = "white"
+            iconColor = "#FFFFFF"
         }
         return Endpoint.icon(
             rootUrl: settings.openHABRootUrl,
             version: settings.openHABVersion,
             icon: widget.icon,
-            state: widget.item?.state ?? "",
+            state: widget.iconState(),
             iconType: settings.iconType,
-            iconColor: iconColor
-        ).url
+            iconColor: iconColor,
+            staticIcon: widget.staticIcon
+        )?.url
     }
 
     var body: some View {
-        KFImage(iconURL)
-            .placeholder {
-                Image(systemSymbol: .circle)
-                    .frame(width: 20, height: 20)
-            }
-            .setProcessor(OpenHABImageProcessor())
-            .fade(duration: 0.25)
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 20, height: 20)
-            .id(iconURL?.absoluteString ?? "")
+        if let iconURL {
+            KFImage.url(iconURL)
+                .onFailure { _ in
+                    Logger.rowViews.debug("Failed to load image : \(iconURL.absoluteString)")
+                }
+                .onSuccess { _ in
+                    Logger.rowViews.debug("Successfully loaded image: \(iconURL.absoluteString)")
+                }
+                .onFailureView {
+                    Rectangle()
+                        .foregroundStyle(.background)
+                }
+                .setProcessor(OpenHABImageProcessor())
+                .loadTransition(.opacity, animation: .easeInOut(duration: 0.25))
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 20, height: 20)
+                .id(iconURL.absoluteString)
+        } else {
+            Rectangle()
+                .foregroundStyle(.background)
+                .frame(width: 20, height: 20)
+        }
     }
 }
 
 #Preview {
-    let widget2 = UserData(preview: true).widgets[4]
+    let testURL = URL(string: "https://picsum.photos/20")!
+    KFImage(testURL)
+        .resizable()
+        .frame(width: 20, height: 20)
+
+    // Set localTestingURL to your local openHAB server for preview testing
+    let localTestingURL = "http://192.168.2.10:8080"
+
+    let endpoint = Endpoint.icon(rootUrl: localTestingURL, version: 4, icon: "switch", state: "2", iconType: .png, iconColor: "blue")
+    KFImage(endpoint?.url)
+        .setProcessor(OpenHABImageProcessor())
+        .resizable()
+        .frame(width: 20, height: 20)
+
+    let settings = AppSettings(debug: true, openHABRootUrl: localTestingURL)
+    let widget = UserData(preview: true).widgets[4]
+    IconView(
+        widget: widget,
+        settings: settings
+    )
+
+    let endpoint2 = Endpoint.icon(rootUrl: localTestingURL, version: 3, icon: "f7:alarm", state: "", iconType: .svg, iconColor: "yellow")
+    KFImage(endpoint2?.url)
+        .setProcessor(OpenHABImageProcessor())
+        .resizable()
+        .frame(width: 20, height: 20)
+
+    let widget2 = UserData(preview: true).widgets[11]
     IconView(
         widget: widget2,
-        settings: AppSettings()
+        settings: settings
     )
 }

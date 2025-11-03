@@ -284,7 +284,31 @@ enum PreviewConstants {
                            ]
                        },
                        "widgets": []
-            }
+            },
+            {
+                "widgetId": "11",
+                "type": "Switch",
+                "visibility": true,
+                "label": "Licht Keller WC Decke",
+                "icon": "f7:alarm",
+                "mappings": [],
+                "iconcolor": "blue",
+                "item": {
+                    "link": "http://192.168.2.15:8081/rest/items/lcnLightSwitch6_1",
+                    "state": "OFF",
+                    "type": "Switch",
+                    "name": "lcnLightSwitch6_1",
+                    "label": "Licht Keller WC Decke",
+                    "tags": [
+                        "Lighting"
+                    ],
+                    "groupNames": [
+                        "gKellerLicht",
+                        "gLcn"
+                    ]
+                },
+                "widgets": []
+            },
         ]
     }
     """.utf8)

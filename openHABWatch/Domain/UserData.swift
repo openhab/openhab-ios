@@ -26,13 +26,14 @@ final class UserData: ObservableObject {
     @Published var certificateErrorDescription = ""
     @Published var isLoadingSitemap = false
 
+    // Cache last successful widgets to prevent empty state during reconnections
+    private var cachedWidgets: [OpenHABWidget] = []
+
     private var pageHandlingTask: Task<Void, Never>?
     @Published var isPolling = false
 
     var openHABSitemapPage: OpenHABPage?
     var currentClient: HTTPClient?
-
-    private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "UserData")
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -46,7 +47,7 @@ final class UserData: ObservableObject {
                 Task { await self?.sendCommand(item, command: command) }
             }
         } catch {
-            logger.error("Should not throw \(error.localizedDescription)")
+            Logger.userData.error("Should not throw \(error.localizedDescription)")
         }
     }
 
@@ -122,7 +123,7 @@ final class UserData: ObservableObject {
         for await activeConnection in activeConnectionStream {
             guard let activeConnection else { continue }
 
-            logger.info("openHABTracked: \(activeConnection.configuration.url)")
+            Logger.userData.info("openHABTracked: \(activeConnection.configuration.url)")
 
             if !AppSettings.shared.haveReceivedAppContext {
                 AppMessageService.singleton.requestApplicationContext()
@@ -143,13 +144,14 @@ final class UserData: ObservableObject {
     func updateNetwork() async {
         guard let connection1 = AppSettings.shared.localConnectionConfig,
               let connection2 = AppSettings.shared.remoteConnectionConfig else {
-            logger.info("No connections defined")
+            Logger.userData.info("No connections defined")
             return
         }
         await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
     }
 
     func startPageHandling(sitemapName: String, pageId: String = "") {
+        // Don't clear widgets immediately when switching - use cached data during transition
         pageHandlingTask?.cancel()
 
         pageHandlingTask = Task {
@@ -163,7 +165,11 @@ final class UserData: ObservableObject {
 
                 await MainActor.run {
                     self.openHABSitemapPage = initialPage
-                    self.widgets = initialPage?.widgets ?? []
+                    let newWidgets = initialPage?.widgets ?? []
+                    self.widgets = newWidgets
+                    if !newWidgets.isEmpty {
+                        self.cachedWidgets = newWidgets
+                    }
                     openHABSitemapPage?.sendCommand = { [weak self] item, command in
                         Task { await self?.sendCommand(item, command: command) }
                     }
@@ -184,7 +190,11 @@ final class UserData: ObservableObject {
                             openHABSitemapPage?.sendCommand = { [weak self] item, command in
                                 Task { await self?.sendCommand(item, command: command) }
                             }
-                            self.widgets = page?.widgets ?? []
+                            let newWidgets = page?.widgets ?? []
+                            self.widgets = newWidgets
+                            if !newWidgets.isEmpty {
+                                self.cachedWidgets = newWidgets
+                            }
                         }
 
                         // Reset backoff after success
@@ -196,15 +206,21 @@ final class UserData: ObservableObject {
                         let jitter = UInt64.random(in: 0 ..< (baseDelay / 2))
                         let totalDelay = baseDelay + jitter
 
-                        logger.warning("Polling failed: \(error.localizedDescription). Retrying in \(Double(totalDelay) / 1_000_000_000.0) seconds.")
+                        Logger.userData.warning("Polling failed: \(error.localizedDescription). Retrying in \(Double(totalDelay) / 1_000_000_000.0) seconds.")
 
                         try await Task.sleep(nanoseconds: totalDelay)
                     }
                 }
             } catch {
                 await MainActor.run {
-                    logger.error("Page handling failed with error \(error.localizedDescription)")
-                    self.widgets = []
+                    Logger.userData.error("Page handling failed with error \(error.localizedDescription)")
+                    // Use cached widgets if available instead of clearing completely
+                    if self.cachedWidgets.isEmpty {
+                        self.widgets = []
+                    } else {
+                        self.widgets = self.cachedWidgets
+                        Logger.userData.info("Using cached widgets during connection failure")
+                    }
                     self.errorDescription = error.localizedDescription
                     self.showAlert = true
                     self.isLoadingSitemap = false
@@ -225,7 +241,7 @@ final class UserData: ObservableObject {
         do {
             try await NetworkTracker.shared.send(to: item, command: command)
         } catch {
-            logger.info("Could not send command \(command) to \(item.name)")
+            Logger.userData.info("Could not send command \(command) to \(item.name)")
         }
     }
 

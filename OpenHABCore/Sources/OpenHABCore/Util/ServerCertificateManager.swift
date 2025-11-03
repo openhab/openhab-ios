@@ -19,14 +19,15 @@ public protocol ServerCertificateManagerDelegate: AnyObject, Sendable {
     // certificate received from openHAB doesn't match our record, ask user for a decision
     func evaluateCertificateMismatch(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult
     // notify delegate that the certificagtes that a user is willing to trust has changed
-    func acceptedServerCertificatesChanged()
+    func acceptedServerCertificatesChanged() async
 }
 
 enum ServerCertificateManagerError: Error {
     case serverTrustEvaluationFailed
 }
 
-public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvaluating {
+@MainActor
+public final class ServerCertificateManager { // ServerTrustManager, ServerTrustEvaluating {
     // Handle the different responses of the user
     public enum EvaluateResult: Sendable {
         case undecided
@@ -40,21 +41,19 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
     public var ignoreSSL = false
     public var trustedCertificates: [String: Data] = [:]
 
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "ServerCertificateManager", category: "ServerCert")
-
     // Init a ServerCertificateManager and set ignore certificates setting
     public init(ignoreSSL: Bool = false) {
         self.ignoreSSL = ignoreSSL
 
-        logger.info("Initializing cert store")
+        Logger.serverCert.info("Initializing cert store")
         loadTrustedCertificates()
         if trustedCertificates.isEmpty {
-            logger.info("No cert store, creating")
+            Logger.serverCert.info("No cert store, creating")
             trustedCertificates = [:]
             //        [trustedCertificates setObject:@"Bulk" forKey:@"Bulk id to make it non-empty"];
             saveTrustedCertificates()
         } else {
-            logger.info("Loaded existing cert store")
+            Logger.serverCert.info("Loaded existing cert store")
         }
     }
 
@@ -72,7 +71,7 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
             let data = try PropertyListEncoder().encode(trustedCertificates)
             try data.write(to: getPersistensePath())
         } catch {
-            logger.info("Could not save trusted certificates")
+            Logger.serverCert.info("Could not save trusted certificates")
         }
     }
 
@@ -105,9 +104,9 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
                     return
                 }
             } catch {
-                logger.info("Could not load trusted unarchived certificates")
+                Logger.serverCert.info("Could not load trusted unarchived certificates")
             }
-            logger.info("Could not load trusted codable certificates")
+            Logger.serverCert.info("Could not load trusted codable certificates")
         }
     }
 
@@ -163,7 +162,7 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
             throw ServerCertificateManagerError.serverTrustEvaluationFailed
         }
 
-        logger.info("Server trust not valid for \(domain), asking delegate...")
+        Logger.serverCert.info("Server trust not valid for \(domain), asking delegate...")
         let decision: EvaluateResult = if previousData != nil {
             // mismatch, we have a certificate for this domain in our memory of decisions, but the certificate we've got now
             // differs. We need to warn user about possible MiM attack and wait for users decision.
@@ -185,7 +184,7 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
             // Add certificate to storage
             storeCertificateData(certificateData, forDomain: domain)
             await delegate.acceptedServerCertificatesChanged()
-            logger.info("User chose to trust cert for \(domain) permanently")
+            Logger.serverCert.info("User chose to trust cert for \(domain) permanently")
             return
         @unknown default:
             throw ServerCertificateManagerError.serverTrustEvaluationFailed

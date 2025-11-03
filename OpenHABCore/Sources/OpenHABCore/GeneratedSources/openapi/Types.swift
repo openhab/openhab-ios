@@ -2472,6 +2472,8 @@ public enum Components {
             public var metadata: Components.Schemas.EnrichedItemDTO.metadataPayload?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/editable`.
             public var editable: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/groupType`.
+            public var groupType: Swift.String?
             /// Creates a new `EnrichedItemDTO`.
             ///
             /// - Parameters:
@@ -2489,6 +2491,7 @@ public enum Components {
             ///   - commandDescription:
             ///   - metadata:
             ///   - editable:
+            ///   - groupType:
             public init(
                 _type: Swift.String? = nil,
                 name: Swift.String? = nil,
@@ -2503,7 +2506,8 @@ public enum Components {
                 unitSymbol: Swift.String? = nil,
                 commandDescription: Components.Schemas.CommandDescription? = nil,
                 metadata: Components.Schemas.EnrichedItemDTO.metadataPayload? = nil,
-                editable: Swift.Bool? = nil
+                editable: Swift.Bool? = nil,
+                groupType: Swift.String? = nil
             ) {
                 self._type = _type
                 self.name = name
@@ -2519,6 +2523,7 @@ public enum Components {
                 self.commandDescription = commandDescription
                 self.metadata = metadata
                 self.editable = editable
+                self.groupType = groupType
             }
             public enum CodingKeys: String, CodingKey {
                 case _type = "type"
@@ -2535,6 +2540,7 @@ public enum Components {
                 case commandDescription
                 case metadata
                 case editable
+                case groupType
             }
         }
         /// - Remark: Generated from `#/components/schemas/GroupFunctionDTO`.

@@ -62,7 +62,7 @@ platform :ios do
             scheme: 'openHABTestsSwift',
             xcargs: '-skipPackagePluginValidation',
             testplan: 'openHABTests',
-            devices: ['iPhone 16 Pro (18.1)'],
+            devices: ['iPhone 16 Pro (18.4)'],
             clean: true
         )
     end
@@ -108,10 +108,16 @@ platform :ios do
 
     desc 'Build beta'
     lane :beta do |options|
-        options[:bump] = options[:bump] != nil ? options[:bump] : "patch"
+    
+      # Normalize and validate bump type early
+        allowed_bumps = %w[patch minor major none]
+        type = options[:bump].to_s.strip
+        type = 'patch' if type.empty? # default when nil or ''
+
+        UI.user_error!("Invalid bump type '#{type}'. Use one of: #{allowed_bumps.join(', ')}") unless allowed_bumps.include?(type)
+        options[:bump] = type
 
         current_branch = resolve_current_branch
-
         options[:isfeaturebuild] = current_branch != "develop"
 
         # ensure branch is clean

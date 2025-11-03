@@ -19,8 +19,6 @@ enum VideoEncoding: String {
 }
 
 class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
-    private let logger = Logger(subsystem: "org.openhab", category: "VideoUITableViewCell")
-
     private var activityIndicator: UIActivityIndicatorView = if #available(iOS 13.0, *) {
         .init(style: .medium)
     } else {
@@ -154,12 +152,12 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
                 switch playerItem.status {
                 case .failed:
-                    logger.debug("Failed to load video with URL: \(url.absoluteString)")
+                    Logger.widgets.debug("Failed to load video with URL: \(url.absoluteString)")
                     Task { @MainActor in
                         self.url = nil
                     }
                 case .readyToPlay:
-                    logger.debug("Loaded video with URL: \(url.absoluteString)")
+                    Logger.widgets.debug("Loaded video with URL: \(url.absoluteString)")
                 default: return
                 }
                 Task { @MainActor in
@@ -196,23 +194,23 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             guard let self else { return }
             // Check if task was cancelled before starting work
             guard !Task.isCancelled else {
-                logger.debug("MJPEG stream task was cancelled before starting")
+                Logger.widgets.debug("MJPEG stream task was cancelled before starting")
                 return
             }
             do {
                 guard let config = MainActorNetworkTracker.shared.activeConnection?.configuration else {
-                    logger.warning("No openHAB configuration found.")
+                    Logger.widgets.warning("No openHAB configuration found.")
                     throw HTTPClientError.noConfiguration
                 }
-                logger.debug("Starting MJPEG stream for URL: \(url.absoluteString)")
+                Logger.widgets.debug("Starting MJPEG stream for URL: \(url.absoluteString)")
                 let client = HTTPClient(configuration: config)
                 let (byteStream, response) = try await client.processStream(url: url)
-                logger.debug("Successfully got MJPEG stream response: \(response)")
+                Logger.widgets.debug("Successfully got MJPEG stream response: \(response)")
                 await handleMJPEGStream(byteStream, streamToken: streamToken)
             } catch is CancellationError {
-                logger.debug("MJPEG stream was cancelled during setup")
+                Logger.widgets.debug("MJPEG stream was cancelled during setup")
             } catch {
-                logger.error("Failed to start MJPEG stream: \(error.localizedDescription)")
+                Logger.widgets.error("Failed to start MJPEG stream: \(error.localizedDescription)")
                 await MainActor.run { [weak self] in
                     guard let self, currentStreamToken == streamToken else { return }
                     activityIndicator.isHidden = true
@@ -228,27 +226,27 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         var imageData = Data()
         var isFirstFrame = true
 
-        logger.debug("Starting to process MJPEG byte stream")
+        Logger.widgets.debug("Starting to process MJPEG byte stream")
 
         do {
             for try await byte in byteStream {
                 guard !Task.isCancelled else {
-                    logger.debug("MJPEG stream task was cancelled")
+                    Logger.widgets.debug("MJPEG stream task was cancelled")
                     return
                 }
                 // If a new stream has started, exit
                 if streamToken != currentStreamToken {
-                    logger.debug("MJPEG stream token mismatch, exiting stream handler")
+                    Logger.widgets.debug("MJPEG stream token mismatch, exiting stream handler")
                     return
                 }
                 imageData.append(byte)
 
                 if imageData.count <= 50 {
-                    logger.debug("Received bytes (\(imageData.count)): \(imageData.prefix(50).map { String(format: "%02x", $0) }.joined(separator: " "))")
+                    Logger.widgets.debug("Received bytes (\(imageData.count)): \(imageData.prefix(50).map { String(format: "%02x", $0) }.joined(separator: " "))")
                 }
 
                 if imageData.starts(with: streamImageInitialBytePattern), let image = UIImage(data: imageData) {
-                    logger.debug("Successfully decoded MJPEG frame, size: \(image.size.width)x\(image.size.height)")
+                    Logger.widgets.debug("Successfully decoded MJPEG frame, size: \(image.size.width)x\(image.size.height)")
 
                     await MainActor.run { [weak self] in
                         guard let self, currentStreamToken == streamToken else { return }
@@ -265,9 +263,9 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                 }
             }
         } catch is CancellationError {
-            logger.debug("MJPEG stream was cancelled")
+            Logger.widgets.debug("MJPEG stream was cancelled")
         } catch {
-            logger.error("Failed to process MJPEG stream: \(error.localizedDescription)")
+            Logger.widgets.error("Failed to process MJPEG stream: \(error.localizedDescription)")
             await MainActor.run { [weak self] in
                 guard let self, currentStreamToken == streamToken else { return }
                 activityIndicator.isHidden = true

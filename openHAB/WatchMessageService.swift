@@ -21,8 +21,6 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     @MainActor
     static let singleton = WatchMessageService()
 
-    private lazy var logger = Logger(subsystem: "org.openhab.app", category: "WatchMessageService")
-
     private var cachedWatchPreferences: [String: Data] = [:]
     private let lock = NSLock()
 
@@ -41,26 +39,26 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        logger.info("Received message (no reply): \(message, privacy: .public)")
+        Logger.preferences.info("Received message (no reply): \(message, privacy: .public)")
     }
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
-        logger.info("WCSession activation completed. State: \(String(describing: activationState)), Error: \(String(describing: error))")
+        Logger.preferences.info("WCSession activation completed. State: \(String(describing: activationState)), Error: \(String(describing: error))")
     }
 
     func sessionDidBecomeInactive(_ session: WCSession) {
-        logger.info("WCSession became inactive.")
+        Logger.preferences.info("WCSession became inactive.")
     }
 
     func sessionDidDeactivate(_ session: WCSession) {
-        logger.info("WCSession deactivated.")
+        Logger.preferences.info("WCSession deactivated.")
     }
 
     // MARK: - Sync Preferences
 
     @MainActor
-    public func subscribeToPreferences() {
-        preferencesSubscription = Preferences.$currentHomePreferences
+    public func subscribeToPreferences() async {
+        preferencesSubscription = Preferences.shared.$currentHomePreferences
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { _ in } receiveValue: { homeSettings in
                 self.syncPreferencesToWatch(homeSettings)
@@ -68,9 +66,9 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     }
 
     @MainActor
-    public func syncPreferencesToWatch(_ homeSettings: HomePreferences = Preferences.currentHomePreferences) {
+    public func syncPreferencesToWatch(_ homeSettings: HomePreferences = Preferences.shared.currentHomePreferences) {
         guard WCSession.default.activationState == .activated else {
-            logger.warning("WCSession not activated; skipping sync.")
+            Logger.preferences.warning("WCSession not activated; skipping sync.")
             return
         }
 
@@ -88,9 +86,9 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
         do {
             try WCSession.default.updateApplicationContext(context)
-            logger.debug("Successfully updated application context with WatchPreferences.")
+            Logger.preferences.debug("Successfully updated application context with WatchPreferences.")
         } catch {
-            logger.error("Failed to encode or update watch context: \(error.localizedDescription)")
+            Logger.preferences.error("Failed to encode or update watch context: \(error.localizedDescription)")
         }
     }
 }

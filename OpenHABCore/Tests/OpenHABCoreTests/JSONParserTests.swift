@@ -444,8 +444,6 @@ final class JSONParserTests: XCTestCase {
     }
 
     func testJSONLargeSitemapParseSwift() throws {
-        let logger = Logger(subsystem: "org.openhab.app", category: "RecordDecoding")
-
         let jsonFile = "LargeSitemap"
         let testBundle = Bundle.module
         let url = try XCTUnwrap(testBundle.url(forResource: jsonFile, withExtension: "json"))

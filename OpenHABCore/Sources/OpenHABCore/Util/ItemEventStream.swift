@@ -61,10 +61,6 @@ public actor EventStream<Event: Sendable> {
         }
     }
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "EventStream",
-        category: "SSE"
-    )
     private var trackedItems: Set<String> = []
     private var continuations = [UUID: AsyncStream<StreamOutput<Event>>.Continuation]()
     private var listenTask: Task<Void, Never>?
@@ -103,7 +99,7 @@ public actor EventStream<Event: Sendable> {
 
         currentConfig = info?.configuration
 
-        logger.info("Network changed – restarting SSE connection")
+        Logger.restAPI.info("Network changed – restarting SSE connection")
 
         listenTask?.cancel()
         listenTask = nil
@@ -128,7 +124,7 @@ public actor EventStream<Event: Sendable> {
                 items: Array(trackedItems)
             )
         } catch {
-            logger.error("Failed to update item list: \(error.localizedDescription)")
+            Logger.restAPI.error("Failed to update item list: \(error.localizedDescription)")
         }
     }
 
@@ -159,7 +155,7 @@ public actor EventStream<Event: Sendable> {
             } catch {
                 broadcast(.disconnected(error))
                 // give a little time before we try connecting again
-                logger.error("SSE error: \(error.localizedDescription, privacy: .public) – retrying in \(backoff, privacy: .public)s")
+                Logger.restAPI.error("SSE error: \(error.localizedDescription, privacy: .public) – retrying in \(backoff, privacy: .public)s")
                 try? await Task.sleep(for: .seconds(backoff))
                 backoff = min(backoff * 2, maxBackoff)
             }
