@@ -102,8 +102,10 @@ public actor CertificateStore {
                 }
 
                 // Schedule save for after init completes
-                Task { await self.saveTrustedCertificates() }
-                Logger.httpClient.info("Migration completed, will save in new format")
+                Task {
+                    await self.saveTrustedCertificates()
+                    Logger.httpClient.info("Migration completed, will save in new format")
+                }
             }
         } catch {
             // if Decodable fails, fall back to NSKeyedArchiver for very old format
@@ -119,8 +121,10 @@ public actor CertificateStore {
                     }
 
                     // Schedule save for after init completes
-                    Task { await self.saveTrustedCertificates() }
-                    Logger.httpClient.info("Migration from NSKeyedArchiver completed")
+                    Task {
+                        await self.saveTrustedCertificates()
+                        Logger.httpClient.info("Migration from NSKeyedArchiver completed")
+                    }
                 } else {
                     trustedCertificates = [:]
                 }

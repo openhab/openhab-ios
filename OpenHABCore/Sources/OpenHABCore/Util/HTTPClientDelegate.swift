@@ -83,7 +83,7 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
         SecTrustGetTrustResult(serverTrust, &result)
         Logger.httpClientDelegate.info("Trust evaluation result: \(result), error: \(String(describing: error))")
 
-        if result.isAny(of: .proceed) || connectionConfiguration.ignoreSSL {
+        if result.isAny(of: .unspecified, .proceed) || connectionConfiguration.ignoreSSL {
             Logger.httpClientDelegate.info("Certificate is trusted or SSL verification ignored")
             return (.useCredential, URLCredential(trust: serverTrust))
         }
