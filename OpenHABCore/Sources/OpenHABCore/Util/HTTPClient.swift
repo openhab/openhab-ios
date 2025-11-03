@@ -78,10 +78,18 @@ public actor CertificateStore {
         let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
         path = URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
         #else
-        path = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app")!.appendingPathComponent("trustedCertificates")
+        // Try app group container first, fall back to documents directory for testing
+        if let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app") {
+            path = appGroupURL.appendingPathComponent("trustedCertificates")
+        } else {
+            // Fallback for test environment where app group may not be available
+            let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+            path = URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
+        }
         #endif
 
         // Load certificates directly in init
+        Logger.httpClient.debug("Attempting to load certificates from \(path)")
         do {
             let rawdata = try Data(contentsOf: path)
             let decoder = PropertyListDecoder()
@@ -89,11 +97,12 @@ public actor CertificateStore {
             // Try to load new format first
             do {
                 trustedCertificates = try decoder.decode([String: CertificateEntry].self, from: rawdata)
-                Logger.httpClient.info("Loaded existing cert store (new format)")
+                let certCount = trustedCertificates.count
+                Logger.httpClient.info("Loaded existing cert store (new format) with \(certCount) certificates")
             } catch {
                 // Fall back to old format and migrate
                 let oldFormat = try decoder.decode([String: Data].self, from: rawdata)
-                Logger.httpClient.info("Migrating cert store from old format")
+                Logger.httpClient.info("Migrating cert store from old format with \(oldFormat.count) certificates")
 
                 // Convert old format to new format with current date
                 let migrationDate = Date()
@@ -140,30 +149,52 @@ public actor CertificateStore {
         let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
         return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
         #else
-        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app")!.appendingPathComponent("trustedCertificates")
+        // Try app group container first, fall back to documents directory for testing
+        if let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app") {
+            return appGroupURL.appendingPathComponent("trustedCertificates")
+        } else {
+            // Fallback for test environment where app group may not be available
+            let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+            return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
+        }
         #endif
     }
 
     private func saveTrustedCertificates() {
         do {
             let data = try PropertyListEncoder().encode(trustedCertificates)
-            try data.write(to: getPersistencePath())
+            let path = getPersistencePath()
+
+            // Write data with explicit options to ensure it's flushed to disk
+            try data.write(to: path, options: [.atomic])
+
+            // Explicitly sync to ensure data is flushed to disk
+            if let fileHandle = FileHandle(forWritingAtPath: path.path) {
+                fileHandle.synchronizeFile()
+                fileHandle.closeFile()
+            }
+
+            Logger.httpClient.debug("Successfully saved trusted certificates to \(path)")
         } catch {
-            Logger.httpClient.info("Could not save trusted certificates")
+            Logger.httpClient.error("Could not save trusted certificates: \(error)")
         }
     }
 
     public func storeCertificateData(_ certificate: Data?, forDomain domain: String) {
         if let certificate {
             trustedCertificates[domain] = CertificateEntry(data: certificate, dateAccepted: Date())
+            Logger.httpClient.debug("Stored certificate for domain \(domain), size: \(certificate.count) bytes")
         } else {
             trustedCertificates[domain] = nil
+            Logger.httpClient.debug("Removed certificate for domain \(domain)")
         }
         saveTrustedCertificates()
     }
 
     public func certificateData(forDomain domain: String) -> Data? {
-        trustedCertificates[domain]?.data
+        let data = trustedCertificates[domain]?.data
+        Logger.httpClient.debug("Retrieved certificate for domain \(domain): \(data?.count ?? 0) bytes")
+        return data
     }
 
     public func getAllCertificates() -> [String: CertificateEntry] {
