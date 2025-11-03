@@ -165,22 +165,28 @@ public actor CertificateStore {
             let data = try PropertyListEncoder().encode(trustedCertificates)
             let path = getPersistencePath()
 
+            // Ensure parent directory exists
+            let parentDir = path.deletingLastPathComponent()
+            try FileManager.default.createDirectory(at: parentDir, withIntermediateDirectories: true, attributes: nil)
+
             // Write data with explicit options to ensure it's flushed to disk
             try data.write(to: path, options: [.atomic])
 
-            // Explicitly sync to ensure data is flushed to disk
-            if let fileHandle = FileHandle(forWritingAtPath: path.path) {
-                fileHandle.synchronizeFile()
-                fileHandle.closeFile()
+            // Double-check the file was written and can be read back
+            let verifyData = try Data(contentsOf: path)
+            guard verifyData == data else {
+                Logger.httpClient.error("Data verification failed after write")
+                return
             }
 
-            Logger.httpClient.debug("Successfully saved trusted certificates to \(path)")
+            Logger.httpClient.debug("Successfully saved and verified trusted certificates to \(path)")
+
         } catch {
             Logger.httpClient.error("Could not save trusted certificates: \(error)")
         }
     }
 
-    public func storeCertificateData(_ certificate: Data?, forDomain domain: String) {
+    public func storeCertificateData(_ certificate: Data?, forDomain domain: String) async {
         if let certificate {
             trustedCertificates[domain] = CertificateEntry(data: certificate, dateAccepted: Date())
             Logger.httpClient.debug("Stored certificate for domain \(domain), size: \(certificate.count) bytes")
@@ -189,6 +195,9 @@ public actor CertificateStore {
             Logger.httpClient.debug("Removed certificate for domain \(domain)")
         }
         saveTrustedCertificates()
+
+        // Add a small delay to ensure file operations complete in CI environments
+        try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
     }
 
     public func certificateData(forDomain domain: String) -> Data? {
@@ -205,9 +214,12 @@ public actor CertificateStore {
         trustedCertificates[domain]
     }
 
-    public func removeCertificate(forDomain domain: String) {
+    public func removeCertificate(forDomain domain: String) async {
         trustedCertificates.removeValue(forKey: domain)
         saveTrustedCertificates()
+
+        // Add a small delay to ensure file operations complete in CI environments
+        try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
     }
 }
 
