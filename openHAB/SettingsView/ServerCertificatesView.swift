@@ -37,18 +37,14 @@ class ServerCertificatesViewModel: ObservableObject {
             var certInfos: [CertificateInfo] = []
 
             let trustedCertificates = await store.getAllCertificates()
-            for (domain, certificateData) in trustedCertificates {
-                let certificate = SecCertificateCreateWithData(nil, certificateData as CFData)
+            for (domain, certificateEntry) in trustedCertificates {
+                let certificate = SecCertificateCreateWithData(nil, certificateEntry.data as CFData)
                 let summary = certificate.map { SecCertificateCopySubjectSummary($0) as String? } ?? nil
-
-                // Use current date as a placeholder since we don't store the actual date
-                // In a real implementation, you might want to store this metadata
-                let dateAdded = Date()
 
                 certInfos.append(CertificateInfo(
                     domain: domain,
                     summary: summary,
-                    dateAdded: dateAdded
+                    dateAdded: certificateEntry.dateAccepted
                 ))
             }
 

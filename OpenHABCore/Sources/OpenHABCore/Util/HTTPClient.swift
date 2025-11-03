@@ -54,10 +54,20 @@ public enum CertificateEvaluateResult: Sendable {
     case permitAlways
 }
 
+public struct CertificateEntry: Codable, Sendable {
+    public let data: Data
+    public let dateAccepted: Date
+
+    public init(data: Data, dateAccepted: Date = Date()) {
+        self.data = data
+        self.dateAccepted = dateAccepted
+    }
+}
+
 public actor CertificateStore {
     public static let shared = CertificateStore()
 
-    private var trustedCertificates: [String: Data] = [:]
+    private var trustedCertificates: [String: CertificateEntry] = [:]
 
     public init() {
         Logger.httpClient.info("Initializing cert store")
@@ -75,15 +85,42 @@ public actor CertificateStore {
         do {
             let rawdata = try Data(contentsOf: path)
             let decoder = PropertyListDecoder()
-            trustedCertificates = try decoder.decode([String: Data].self, from: rawdata)
-            Logger.httpClient.info("Loaded existing cert store")
+
+            // Try to load new format first
+            do {
+                trustedCertificates = try decoder.decode([String: CertificateEntry].self, from: rawdata)
+                Logger.httpClient.info("Loaded existing cert store (new format)")
+            } catch {
+                // Fall back to old format and migrate
+                let oldFormat = try decoder.decode([String: Data].self, from: rawdata)
+                Logger.httpClient.info("Migrating cert store from old format")
+
+                // Convert old format to new format with current date
+                let migrationDate = Date()
+                for (domain, data) in oldFormat {
+                    trustedCertificates[domain] = CertificateEntry(data: data, dateAccepted: migrationDate)
+                }
+
+                // Schedule save for after init completes
+                Task { await self.saveTrustedCertificates() }
+                Logger.httpClient.info("Migration completed, will save in new format")
+            }
         } catch {
-            // if Decodable fails, fall back to NSKeyedArchiver
+            // if Decodable fails, fall back to NSKeyedArchiver for very old format
             do {
                 let rawdata = try Data(contentsOf: path)
                 if let unarchivedTrustedCertificates = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSDictionary.self, NSString.self, NSData.self], from: rawdata) as? [String: Data] {
-                    trustedCertificates = unarchivedTrustedCertificates
-                    // Will save in new format on first write
+                    Logger.httpClient.info("Migrating cert store from NSKeyedArchiver format")
+
+                    // Convert old format to new format with current date
+                    let migrationDate = Date()
+                    for (domain, data) in unarchivedTrustedCertificates {
+                        trustedCertificates[domain] = CertificateEntry(data: data, dateAccepted: migrationDate)
+                    }
+
+                    // Schedule save for after init completes
+                    Task { await self.saveTrustedCertificates() }
+                    Logger.httpClient.info("Migration from NSKeyedArchiver completed")
                 } else {
                     trustedCertificates = [:]
                 }
@@ -112,39 +149,25 @@ public actor CertificateStore {
         }
     }
 
-    private func loadTrustedCertificates() {
-        var decodableTrustedCertificates: [String: Data] = [:]
-        do {
-            let rawdata = try Data(contentsOf: getPersistencePath())
-            let decoder = PropertyListDecoder()
-            decodableTrustedCertificates = try decoder.decode([String: Data].self, from: rawdata)
-            trustedCertificates = decodableTrustedCertificates
-        } catch {
-            // if Decodable fails, fall back to NSKeyedArchiver
-            do {
-                let rawdata = try Data(contentsOf: getPersistencePath())
-                if let unarchivedTrustedCertificates = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSDictionary.self, NSString.self, NSData.self], from: rawdata) as? [String: Data] {
-                    trustedCertificates = unarchivedTrustedCertificates
-                    saveTrustedCertificates() // Ensure that data is written in new format
-                }
-            } catch {
-                Logger.httpClient.info("Could not load trusted certificates")
-            }
-        }
-    }
-
     public func storeCertificateData(_ certificate: Data?, forDomain domain: String) {
-        trustedCertificates[domain] = certificate
+        if let certificate {
+            trustedCertificates[domain] = CertificateEntry(data: certificate, dateAccepted: Date())
+        } else {
+            trustedCertificates[domain] = nil
+        }
         saveTrustedCertificates()
     }
 
     public func certificateData(forDomain domain: String) -> Data? {
-        guard let data = trustedCertificates[domain] else { return nil }
-        return data
+        trustedCertificates[domain]?.data
     }
 
-    public func getAllCertificates() -> [String: Data] {
+    public func getAllCertificates() -> [String: CertificateEntry] {
         trustedCertificates
+    }
+
+    public func getCertificateInfo(forDomain domain: String) -> CertificateEntry? {
+        trustedCertificates[domain]
     }
 
     public func removeCertificate(forDomain domain: String) {
