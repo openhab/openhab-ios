@@ -16,6 +16,7 @@ import SwiftUI
 
 struct SitemapSettingsView: View {
     @Binding var settingsRealTimeSliders: Bool
+    @Binding var settingsShowSearchField: Bool
     @Binding var settingsIconType: IconType
     @Binding var settingsSortSitemapsBy: SortSitemapsOrder
     @Binding var settingsSitemapForWatch: String
@@ -27,6 +28,10 @@ struct SitemapSettingsView: View {
         Section(header: Text(LocalizedStringKey("sitemap_settings"))) {
             Toggle(isOn: $settingsRealTimeSliders) {
                 Text("Real-time Sliders")
+            }
+
+            Toggle(isOn: $settingsShowSearchField) {
+                Text("Show Search Field")
             }
 
             Button {
@@ -82,6 +87,7 @@ struct SitemapSettingsView: View {
 #Preview {
     struct PreviewWrapper: View {
         @State var realTimeSliders = true
+        @State var showSearchField = true
         @State var iconType: IconType = .svg
         @State var sortSitemapsBy: SortSitemapsOrder = .label
         @State var sitemapForWatch = "Home"
@@ -106,6 +112,7 @@ struct SitemapSettingsView: View {
                 Form {
                     SitemapSettingsView(
                         settingsRealTimeSliders: $realTimeSliders,
+                        settingsShowSearchField: $showSearchField,
                         settingsIconType: $iconType,
                         settingsSortSitemapsBy: $sortSitemapsBy,
                         settingsSitemapForWatch: $sitemapForWatch,

@@ -45,6 +45,7 @@
 "client_certificates" = "Client Certificates";
 "disable_idle_timeout" = "Disable Idle Timeout";
 "real_time_sliders" = "Real-time Sliders";
+"show_search_field" = "Show Search Field";
 "clear_image_cache" = "Clear Image Cache";
 "clear_web_cache" = "Clear Web Cache";
 "cache_cleared" = "Cache Cleared";

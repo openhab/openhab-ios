@@ -34,6 +34,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     private var defaultSitemap = ""
     private var pageId = ""
     private var idleOff = false
+    private var showSearchField = false
     private var sitemaps: [OpenHABSitemap] = []
     private var currentPage: OpenHABPage?
     private var pageNetworkStatus: NetworkStatus?
@@ -86,18 +87,25 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         refreshControl?.addTarget(self, action: #selector(handleRefresh(_:)), for: .valueChanged)
         widgetTableView.refreshControl = refreshControl
 
-        // Setup search controller
-        searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.autocapitalizationType = .none
-        searchController.searchBar.delegate = self
-        searchController.delegate = self
-        searchController.searchBar.placeholder = NSLocalizedString("search_items", comment: "")
-        definesPresentationContext = true
+        // Load showSearchField settinsg
+        showSearchField = Preferences.shared.currentHomePreferences.showSearchField
 
-        // Assign to navigation item (must be in navigation stack)
-        navigationItem.searchController = searchController
-        navigationItem.hidesSearchBarWhenScrolling = false
+        if showSearchField {
+            // Setup search controller
+            searchController.searchResultsUpdater = self
+            searchController.obscuresBackgroundDuringPresentation = false
+            searchController.searchBar.autocapitalizationType = .none
+            searchController.searchBar.delegate = self
+            searchController.delegate = self
+            searchController.searchBar.placeholder = NSLocalizedString("search_items", comment: "")
+            definesPresentationContext = true
+
+            // Assign to navigation item (must be in navigation stack)
+            navigationItem.searchController = searchController
+            navigationItem.hidesSearchBarWhenScrolling = false
+        } else {
+            navigationItem.searchController = nil
+        }
 
         // Setup active connection
         guard let config = activeConnectionInfo?.configuration else { return }
@@ -120,9 +128,16 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         Logger.sitemapViewController.info("OpenHABSitemapViewController viewDidAppear")
         super.viewDidAppear(animated)
 
-        if parent?.navigationItem.searchController !== searchController {
-            parent?.navigationItem.searchController = searchController
-            parent?.navigationItem.hidesSearchBarWhenScrolling = true
+        // Load showSearchField settinsg
+        showSearchField = Preferences.shared.currentHomePreferences.showSearchField
+
+        if showSearchField {
+            if parent?.navigationItem.searchController !== searchController {
+                parent?.navigationItem.searchController = searchController
+                parent?.navigationItem.hidesSearchBarWhenScrolling = true
+            }
+        } else {
+            parent?.navigationItem.searchController = nil
         }
     }
 
@@ -313,7 +328,7 @@ extension OpenHABSitemapViewController {
     func updateUI(with page: OpenHABPage) {
         currentPage = page
 
-        if isFiltering {
+        if showSearchField, isFiltering {
             filterContentForSearchText(searchController.searchBar.text)
         }
 
