@@ -93,6 +93,7 @@ public struct HomePreferences: Codable, Equatable {
     public var defaultView = "web"
     public var demomode = true
     public var realTimeSliders = false
+    public var showSearchField = true
     public var iconType = 0
     public var defaultSitemap = "demo"
     public var sortSitemapsBy = 0
@@ -160,6 +161,9 @@ public actor Preferences {
 
     @UserDefault("idleOff", defaultValue: false)
     public var idleOff: Bool
+
+    @UserDefault("showSearchField", defaultValue: true)
+    public var showSearchField: Bool
 
     @UserDefault("screensaverEnabled", defaultValue: false)
     public var screensaverEnabled: Bool
@@ -376,6 +380,7 @@ public extension Preferences {
             currentHomePreferences.remoteConnectionConfig.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? currentHomePreferences.remoteConnectionConfig.ignoreSSL
             currentHomePreferences.demomode = UserDefaults.standard.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
             currentHomePreferences.realTimeSliders = UserDefaults.standard.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
+            currentHomePreferences.showSearchField = UserDefaults.standard.object(forKey: "showSearchField") as? Bool ?? currentHomePreferences.showSearchField
             currentHomePreferences.iconType = UserDefaults.standard.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
             currentHomePreferences.defaultSitemap = UserDefaults.standard.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
         }
@@ -418,6 +423,7 @@ public extension Preferences {
             currentHomePreferences.defaultView = sharedDefaults.string(forKey: "defaultView") ?? currentHomePreferences.defaultView
             currentHomePreferences.demomode = sharedDefaults.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
             currentHomePreferences.realTimeSliders = sharedDefaults.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
+            currentHomePreferences.showSearchField = sharedDefaults.object(forKey: "showSearchField") as? Bool ?? currentHomePreferences.showSearchField
             currentHomePreferences.iconType = sharedDefaults.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
             currentHomePreferences.defaultSitemap = sharedDefaults.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
             currentHomePreferences.sortSitemapsBy = sharedDefaults.object(forKey: "sortSitemapsBy") as? Int ?? currentHomePreferences.sortSitemapsBy

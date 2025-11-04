@@ -45,6 +45,7 @@
 "client_certificates" = "Klientsertifikater";
 "disable_idle_timeout" = "Deaktiver Tidsavbrudd for Inaktivitet";
 "real_time_sliders" = "Sanntids Skyveknapper";
+"show_search_field" = "Show Search Field";
 "clear_image_cache" = "Tøm Hurtigbuffer for Bilder";
 "clear_web_cache" = "Clear Web Cache";
 "cache_cleared" = "Cache Cleared";
