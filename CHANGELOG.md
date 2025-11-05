@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [Version 3.1.32, Build 88] - 2025-11-05Z
+
+- Challenge handling (#994)
+- Fixes regression where UI actions are not working (#998)
+
 ## [Version 3.1.31, Build 87] - 2025-11-04Z
 
 - Suggestion to make Items Search Field optional in Settings (#995)
