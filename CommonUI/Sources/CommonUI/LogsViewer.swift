@@ -21,8 +21,6 @@ public struct LogsViewer: View {
 
     @State private var text = "Loading..."
 
-    public init() {}
-
     let myFont = Font
         .system(size: 10)
         .monospaced()
@@ -37,6 +35,8 @@ public struct LogsViewer: View {
             text = await fetchLogs()
         }
     }
+
+    public init() {}
 
     private func fetchLogs() async -> String {
         let calendar = Calendar.current

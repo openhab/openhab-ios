@@ -122,7 +122,7 @@ struct CertificateStoreTests {
         await store.removeCertificate(forDomain: domainB)
     }
 
-    /// TODO Find solution
+    ////  TODO Find solution
 //    @Test("Persistence across instances")
 //    func persistenceAcrossInstances() async throws {
 //        let domain = "persistence-test.openhab.org"

@@ -651,9 +651,6 @@
 				93F8064A27AE7A2E0035A6B0 /* FlexColorPicker in Frameworks */,
 				DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */,
 				DAC949FA2E219F0D007E67B7 /* CommonUI in Frameworks */,
-				DA0245AF2E79E10A000B7883 /* SDWebImage in Frameworks */,
-				93F8064A27AE7A2E0035A6B0 /* FlexColorPicker in Frameworks */,
-				DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */,
 				93F8065027AE7A830035A6B0 /* SideMenu in Frameworks */,
 				DFE10414197415F900D94943 /* Security.framework in Frameworks */,
 				93F8064727AE7A050035A6B0 /* SwiftMessages in Frameworks */,
@@ -1412,7 +1409,7 @@
 				BuildIndependentTargetsInParallel = YES;
 				CLASSPREFIX = OpenHAB;
 				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2610;
 				ORGANIZATIONNAME = "openHAB e.V.";
 				TargetAttributes = {
 					4D6470D22561F935007B03FC = {
