@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [Version 3.1.31, Build 87] - 2025-11-04Z
+
+- Suggestion to make Items Search Field optional in Settings (#995)
+- Upgrade to Kingfisher 8.6.1 for improvement on multiple requests on same URL (#996)
+
 
 
 ## [Version 3.1.29, Build 85] - 2025-10-29Z

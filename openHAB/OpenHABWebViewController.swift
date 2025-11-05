@@ -430,6 +430,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         setHideNavigationBar(shouldHide: true)
         showActivityIndicator(show: false)
         hidePopupMessages()
+        acceptsCommands = true
         // watch for URL changes so we can store the last visited path
         if let webviewURL = webView.url {
             let url = URL(string: webviewURL.path, relativeTo: URL(string: openHABTrackedRootUrl))
