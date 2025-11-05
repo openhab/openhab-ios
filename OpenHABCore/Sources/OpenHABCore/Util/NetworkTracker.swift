@@ -89,8 +89,8 @@ public actor ConnectionFailureTracker {
         let connectionsBefore = failureCounts.keys
         Logger.connectionFailureTracker.info("""
         ConnectionFailureTracker: Setting connections for failure tracker.
-            Old connections:\(ConnectionConfiguration.connectionConfigurationsToString(connectionsBefore), privacy: .private)
-            New connections: \(ConnectionConfiguration.connectionConfigurationsToString(connections), privacy: .private)
+            Old connections: \(connectionsBefore.sorted(by: \.url).map { "\($0)" }, privacy: .private)
+            New connections: \(connections.sorted(by: \.url).map { "\($0)" }, privacy: .private)
         """)
 
         failureCounts = failureCounts.filter { connections.contains($0.key) }
@@ -100,7 +100,7 @@ public actor ConnectionFailureTracker {
         }
 
         let connectionsAfter = failureCounts.keys
-        Logger.connectionFailureTracker.debug("ConnectionFailureTracker: Connections after update: \(ConnectionConfiguration.connectionConfigurationsToString(connectionsAfter))")
+        Logger.connectionFailureTracker.debug("ConnectionFailureTracker: Connections after update: \(connectionsAfter.sorted(by: \.url).map { "\($0)" }, privacy: .private)")
     }
 
     func shouldAttempt(_ config: ConnectionConfiguration) -> Bool {
@@ -154,6 +154,7 @@ public class MainActorNetworkTracker: ObservableObject {
 public actor CertificateManagers {
     @MainActor public static let clientCertificateManager = ClientCertificateManager()
     @MainActor public static let serverCertificateManager = ServerCertificateManager()
+    public static let certificateStore = CertificateStore.shared
 }
 
 public actor NetworkTracker {
@@ -190,7 +191,7 @@ public actor NetworkTracker {
 
     /// Creates a task to start the tracking and returns immediately
     public func startTracking(connectionConfigurations: [ConnectionConfiguration]) async {
-        Logger.networkTracker.info("NetworkTracker: Start Network Tracking for \(ConnectionConfiguration.connectionConfigurationsToString(connectionConfigurations), privacy: .private)")
+        Logger.networkTracker.info("NetworkTracker: Start Network Tracking for \(connectionConfigurations.sorted(by: \.url).map { "\($0)" }, privacy: .private)")
 
         let status = status // to prevent linter removing "self" in string interpolation
         guard status == .stopped || Set(connectionConfigurations) != Set(self.connectionConfigurations) else {

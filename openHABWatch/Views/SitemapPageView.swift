@@ -66,13 +66,13 @@ struct SitemapPageView: View {
                     title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),
                     message: Text(viewModel.certificateErrorDescription),
                     primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
-                        if let client = viewModel.currentClient {
-                            client.delegate.completeEvaluation(.permitAlways)
+                        if let delegate = viewModel.currentClientDelegate {
+                            delegate.completeEvaluation(.permitAlways)
                         }
                     },
                     secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
-                        if let client = viewModel.currentClient {
-                            client.delegate.completeEvaluation(.deny)
+                        if let delegate = viewModel.currentClientDelegate {
+                            delegate.completeEvaluation(.deny)
                         }
                     }
                 )

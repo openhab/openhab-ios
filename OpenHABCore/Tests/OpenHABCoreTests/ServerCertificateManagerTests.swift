@@ -29,7 +29,7 @@ final class MockServerCertificateDelegate: ServerCertificateManagerDelegate, @un
         return expectedResult
     }
 
-    nonisolated func acceptedServerCertificatesChanged() {
+    nonisolated func acceptedServerCertificatesChanged() async {
         acceptedChangedCalled = true
     }
 }
@@ -48,33 +48,52 @@ struct ServerCertificateManagerTests {
         return (manager, delegate)
     }
 
+    // Clear all certificates before each test to ensure isolation
+    func clearCertificateStore() async {
+        let store = CertificateManagers.certificateStore
+        let allCerts = await store.getAllCertificates()
+        for domain in allCerts.keys {
+            await store.removeCertificate(forDomain: domain)
+        }
+    }
+
     @Test("SSL checking is ignored when configured")
     func ignoresSSLIfConfigured() async throws {
+        await clearCertificateStore()
+
         let (manager, _) = createTestContext()
         manager.ignoreSSL = true
         let trust = try dummyTrust()
 
-        try await manager.evaluate(trust, forHost: "test.openhab.org")
+        try await manager.evaluate(trust, forHost: "ssl-ignore-test.openhab.org")
     }
 
     @Test("Previously stored certificate is accepted")
     func acceptsPreviouslyStoredCertificate() async throws {
+        await clearCertificateStore()
+
         let (manager, _) = createTestContext()
         let trust = try dummyTrust()
-        let domain = "test.openhab.org"
+        let domain = "accepted-test.openhab.org" // Unique domain
         let cert = manager.getLeafCertificate(trust: trust)!
         let certData = SecCertificateCopyData(cert) as Data
-        manager.trustedCertificates[domain] = certData
+
+        // Store certificate in the shared store
+        await CertificateManagers.certificateStore.storeCertificateData(certData, forDomain: domain)
 
         try await manager.evaluate(trust, forHost: domain)
     }
 
     @Test("Certificate mismatch triggers delegate")
     func triggersMismatchDelegateWhenCertsDiffer() async throws {
+        await clearCertificateStore()
+
         let (manager, delegate) = createTestContext()
         let trust = try dummyTrust()
-        let domain = "test.openhab.org"
-        manager.trustedCertificates[domain] = Data([0x01, 0x02]) // fake cert
+        let domain = "mismatch-test.openhab.org" // Unique domain
+
+        // Store different fake cert data
+        await CertificateManagers.certificateStore.storeCertificateData(Data([0x01, 0x02]), forDomain: domain)
 
         delegate.expectedResult = .permitOnce
         try await manager.evaluate(trust, forHost: domain)
@@ -84,9 +103,11 @@ struct ServerCertificateManagerTests {
 
     @Test("Server trust delegate is triggered for new certificate")
     func triggersServerTrustDelegateForNewCert() async throws {
+        await clearCertificateStore()
+
         let (manager, delegate) = createTestContext()
         let trust = try dummyTrust()
-        let domain = "unknown.openhab.org"
+        let domain = "new-cert-test.openhab.org" // Unique domain
 
         delegate.expectedResult = .permitOnce
         try await manager.evaluate(trust, forHost: domain)
@@ -96,12 +117,16 @@ struct ServerCertificateManagerTests {
 
     @Test("Error is thrown when user denies trust")
     func throwsWhenUserDeniesTrust() async throws {
+        await clearCertificateStore()
+
         let (manager, delegate) = createTestContext()
         let trust = try dummyTrust()
-        let domain = "deny.openhab.org"
+        let domain = "deny-test.openhab.org" // Unique domain
 
-        manager.trustedCertificates.removeAll()
-        #expect(manager.trustedCertificates[domain] == nil) // Sanity check
+        // Ensure no certificate is stored for this domain
+        await CertificateManagers.certificateStore.removeCertificate(forDomain: domain)
+        let storedData = await CertificateManagers.certificateStore.certificateData(forDomain: domain)
+        #expect(storedData == nil) // Sanity check
 
         delegate.expectedResult = .deny
 
@@ -112,17 +137,22 @@ struct ServerCertificateManagerTests {
 
     @Test("Certificate is stored when user accepts always")
     func storesCertWhenUserAcceptsAlways() async throws {
+        await clearCertificateStore()
+
         let (manager, delegate) = createTestContext()
         let trust = try dummyTrust()
-        let domain = "persist.openhab.org"
+        let domain = "persist-test.openhab.org" // Unique domain
 
-        manager.trustedCertificates.removeAll()
-        #expect(manager.trustedCertificates[domain] == nil) // Sanity check
+        // Ensure no certificate is stored initially
+        await CertificateManagers.certificateStore.removeCertificate(forDomain: domain)
+        let initialData = await CertificateManagers.certificateStore.certificateData(forDomain: domain)
+        #expect(initialData == nil) // Sanity check
 
         delegate.expectedResult = .permitAlways
         try await manager.evaluate(trust, forHost: domain)
 
-        #expect(manager.trustedCertificates[domain] != nil)
+        let storedData = await CertificateManagers.certificateStore.certificateData(forDomain: domain)
+        #expect(storedData != nil)
         #expect(delegate.acceptedChangedCalled == true, "Delegate should be notified when cert is stored")
     }
 

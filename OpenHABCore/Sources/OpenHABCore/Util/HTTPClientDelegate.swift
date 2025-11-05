@@ -81,7 +81,7 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
         var error: CFError?
         _ = SecTrustEvaluateWithError(serverTrust, &error)
         SecTrustGetTrustResult(serverTrust, &result)
-        Logger.httpClientDelegate.info("Trust evaluation result: \(result.rawValue), error: \(String(describing: error))")
+        Logger.httpClientDelegate.info("Trust evaluation result: \(result), error: \(String(describing: error))")
 
         if result.isAny(of: .unspecified, .proceed) || connectionConfiguration.ignoreSSL {
             Logger.httpClientDelegate.info("Certificate is trusted or SSL verification ignored")
@@ -183,6 +183,31 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
     public func completeEvaluation(_ result: CertificateEvaluateResult) {
         Task {
             await evaluationState.complete(result)
+        }
+    }
+}
+
+extension SecTrustResultType: @retroactive CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .invalid:
+            return "invalid"
+        case .proceed:
+            return "proceed"
+        case .deny:
+            return "deny"
+        case .unspecified:
+            return "unspecified"
+        case .recoverableTrustFailure:
+            return "recoverableTrustFailure"
+        case .fatalTrustFailure:
+            return "fatalTrustFailure"
+        case .otherError:
+            return "otherError"
+        case .confirm:
+            return "confirm"
+        @unknown default:
+            return "unknown(\(rawValue))"
         }
     }
 }
