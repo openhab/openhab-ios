@@ -24,8 +24,6 @@ public struct OpenHABImageProcessor: ImageProcessor {
     public let identifier: String
     let maxSize = CGSize(width: 64, height: 64)
 
-    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABImageProcessor")
-
     public init() {
         identifier = "org.openhab.svgprocessor"
     }
@@ -51,7 +49,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
             if let size = targetSize {
                 options[.decodeThumbnailPixelSize] = size
                 options[.decodePreserveAspectRatio] = preserveAspectRatio
-                logger.debug("Setting targetSize to \(size)")
+                Logger.openHABImageProcessor.debug("Setting targetSize to \(size)")
             }
 
             return SDImageSVGCoder.shared.decodedImage(
@@ -71,7 +69,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
     public func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         switch item {
         case let .image(image):
-            logger.info("already an image")
+            Logger.openHABImageProcessor.info("already an image")
             return image
         case let .data(data):
             guard !data.isEmpty else { return nil }

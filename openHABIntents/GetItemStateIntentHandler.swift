@@ -15,10 +15,8 @@ import OpenHABCore
 import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
-    private let logger = Logger(subsystem: "org.openhab.app", category: "GetItemStateIntent")
-
     func resolveHome(for intent: OpenHABGetItemStateIntent) async -> OpenHABHomeResolutionResult {
-        logger.info("Resolving home for intent: \(intent)")
+        Logger.intentHandling.info("Resolving home for intent: \(intent)")
         return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
     }
 
@@ -39,7 +37,7 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     }
 
     func handle(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
-        logger.info("GetItemStateIntent for \(intent.item ?? "")")
+        Logger.intentHandling.info("GetItemStateIntent for \(intent.item ?? "")")
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(

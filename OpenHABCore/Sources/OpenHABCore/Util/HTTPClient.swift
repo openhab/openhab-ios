@@ -54,70 +54,166 @@ public enum CertificateEvaluateResult: Sendable {
     case permitAlways
 }
 
-actor CertificateStore {
-    private let logger = Logger(subsystem: "org.openhab", category: "CertificateStore")
+public struct CertificateEntry: Codable, Sendable {
+    public let data: Data
+    public let dateAccepted: Date
 
-    private var trustedCertificates: [String: Data] = [:]
+    public init(data: Data, dateAccepted: Date = Date()) {
+        self.data = data
+        self.dateAccepted = dateAccepted
+    }
+}
+
+public actor CertificateStore {
+    public static let shared = CertificateStore()
+
+    private var trustedCertificates: [String: CertificateEntry] = [:]
+
+    public init() {
+        Logger.httpClient.info("Initializing cert store")
+
+        // Inline the path calculation to avoid nonisolated issues
+        let path: URL
+        #if os(watchOS)
+        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+        path = URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
+        #else
+        // Try app group container first, fall back to documents directory for testing
+        if let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app") {
+            path = appGroupURL.appendingPathComponent("trustedCertificates")
+        } else {
+            // Fallback for test environment where app group may not be available
+            let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+            path = URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
+        }
+        #endif
+
+        // Load certificates directly in init
+        Logger.httpClient.debug("Attempting to load certificates from \(path)")
+        do {
+            let rawdata = try Data(contentsOf: path)
+            let decoder = PropertyListDecoder()
+
+            // Try to load new format first
+            do {
+                trustedCertificates = try decoder.decode([String: CertificateEntry].self, from: rawdata)
+                let certCount = trustedCertificates.count
+                Logger.httpClient.info("Loaded existing cert store (new format) with \(certCount) certificates")
+            } catch {
+                // Fall back to old format and migrate
+                let oldFormat = try decoder.decode([String: Data].self, from: rawdata)
+                Logger.httpClient.info("Migrating cert store from old format with \(oldFormat.count) certificates")
+
+                // Convert old format to new format with current date
+                let migrationDate = Date()
+                for (domain, data) in oldFormat {
+                    trustedCertificates[domain] = CertificateEntry(data: data, dateAccepted: migrationDate)
+                }
+
+                // Schedule save for after init completes
+                Task {
+                    await self.saveTrustedCertificates()
+                    Logger.httpClient.info("Migration completed, will save in new format")
+                }
+            }
+        } catch {
+            // if Decodable fails, fall back to NSKeyedArchiver for very old format
+            do {
+                let rawdata = try Data(contentsOf: path)
+                if let unarchivedTrustedCertificates = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSDictionary.self, NSString.self, NSData.self], from: rawdata) as? [String: Data] {
+                    Logger.httpClient.info("Migrating cert store from NSKeyedArchiver format")
+
+                    // Convert old format to new format with current date
+                    let migrationDate = Date()
+                    for (domain, data) in unarchivedTrustedCertificates {
+                        trustedCertificates[domain] = CertificateEntry(data: data, dateAccepted: migrationDate)
+                    }
+
+                    // Schedule save for after init completes
+                    Task {
+                        await self.saveTrustedCertificates()
+                        Logger.httpClient.info("Migration from NSKeyedArchiver completed")
+                    }
+                } else {
+                    trustedCertificates = [:]
+                }
+            } catch {
+                trustedCertificates = [:]
+            }
+            Logger.httpClient.info("No cert store, creating")
+        }
+    }
 
     private func getPersistencePath() -> URL {
         #if os(watchOS)
         let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
         return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
         #else
-        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app")!.appendingPathComponent("trustedCertificates")
+        // Try app group container first, fall back to documents directory for testing
+        if let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app") {
+            return appGroupURL.appendingPathComponent("trustedCertificates")
+        } else {
+            // Fallback for test environment where app group may not be available
+            let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+            return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
+        }
         #endif
     }
 
-    private func saveTrustedCertificates() {
+    private func saveTrustedCertificates() async {
         do {
             let data = try PropertyListEncoder().encode(trustedCertificates)
-            try data.write(to: getPersistencePath())
-        } catch {
-            logger.info("Could not save trusted certificates")
-        }
-    }
+            let path = getPersistencePath()
 
-    private func loadTrustedCertificates() {
-        var decodableTrustedCertificates: [String: Data] = [:]
-        do {
-            let rawdata = try Data(contentsOf: getPersistencePath())
-            let decoder = PropertyListDecoder()
-            decodableTrustedCertificates = try decoder.decode([String: Data].self, from: rawdata)
-            trustedCertificates = decodableTrustedCertificates
-        } catch {
-            // if Decodable fails, fall back to NSKeyedArchiver
-            do {
-                let rawdata = try Data(contentsOf: getPersistencePath())
-                if let unarchivedTrustedCertificates = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSDictionary.self, NSString.self, NSData.self], from: rawdata) as? [String: Data] {
-                    trustedCertificates = unarchivedTrustedCertificates
-                    saveTrustedCertificates() // Ensure that data is written in new format
-                }
-            } catch {
-                logger.info("Could not load trusted certificates")
+            // Ensure parent directory exists
+            let parentDir = path.deletingLastPathComponent()
+            try FileManager.default.createDirectory(at: parentDir, withIntermediateDirectories: true, attributes: nil)
+
+            // Write data with explicit options to ensure it's flushed to disk
+            try data.write(to: path, options: [.atomic])
+
+            // Double-check the file was written and can be read back
+            let verifyData = try Data(contentsOf: path)
+            guard verifyData == data else {
+                Logger.httpClient.error("Data verification failed after write")
+                return
             }
+
+            Logger.httpClient.debug("Successfully saved and verified trusted certificates to \(path)")
+
+        } catch {
+            Logger.httpClient.error("Could not save trusted certificates: \(error)")
         }
     }
 
-    private func initializeCertificatesStore() {
-        logger.info("Initializing cert store")
-        loadTrustedCertificates()
-        if trustedCertificates.isEmpty {
-            logger.info("No cert store, creating")
-            trustedCertificates = [:]
-            saveTrustedCertificates()
+    public func storeCertificateData(_ certificate: Data?, forDomain domain: String) async {
+        if let certificate {
+            trustedCertificates[domain] = CertificateEntry(data: certificate, dateAccepted: Date())
+            Logger.httpClient.debug("Stored certificate for domain \(domain), size: \(certificate.count) bytes")
         } else {
-            logger.info("Loaded existing cert store")
+            trustedCertificates[domain] = nil
+            Logger.httpClient.debug("Removed certificate for domain \(domain)")
         }
+        await saveTrustedCertificates()
     }
 
-    public func storeCertificateData(_ certificate: Data?, forDomain domain: String) {
-        trustedCertificates[domain] = certificate
-        saveTrustedCertificates()
-    }
-
-    public func certificateData(forDomain domain: String) -> Data? {
-        guard let data = trustedCertificates[domain] else { return nil }
+    public func certificateData(forDomain domain: String) async -> Data? {
+        let data = trustedCertificates[domain]?.data
+        Logger.httpClient.debug("Retrieved certificate for domain \(domain): \(data?.count ?? 0) bytes")
         return data
+    }
+
+    public func getAllCertificates() async -> [String: CertificateEntry] {
+        trustedCertificates
+    }
+
+    public func getCertificateInfo(forDomain domain: String) async -> CertificateEntry? {
+        trustedCertificates[domain]
+    }
+
+    public func removeCertificate(forDomain domain: String) async {
+        trustedCertificates.removeValue(forKey: domain)
+        await saveTrustedCertificates()
     }
 }
 
@@ -132,8 +228,6 @@ public final class HTTPClient: NSObject, Sendable {
 
     // this can be changed if we detect another server
     public let baseURL: URL?
-
-    private let logger = Logger(subsystem: "org.openhab.core", category: "HTTPClient")
 
     private let configuration: ConnectionConfiguration
     public let session: URLSession
@@ -152,7 +246,7 @@ public final class HTTPClient: NSObject, Sendable {
         do {
             return try await doRequest(baseURL: url, type: .bytes)
         } catch {
-            logger.error("Failed to fetch MJPEG stream: \(error.localizedDescription)")
+            Logger.httpClient.error("Failed to fetch MJPEG stream: \(error.localizedDescription)")
             throw HTTPClientError.failedtoFetchMJPEG
         }
     }
@@ -210,7 +304,7 @@ public final class HTTPClient: NSObject, Sendable {
                              type: SessionType,
                              cacheingPolicy: URLRequest.CachePolicy = .useProtocolCachePolicy) async throws -> (T, URLResponse) {
         guard var url = baseURL ?? self.baseURL else {
-            logger.info("doRequest ERROR: Base URL is nil")
+            Logger.httpClient.info("doRequest ERROR: Base URL is nil")
             throw HTTPClientError.baseURLIsNil
         }
 
@@ -239,10 +333,10 @@ public final class HTTPClient: NSObject, Sendable {
         let (result, response): (T, URLResponse) = try await performRequest(request: request, type: type)
         if let response = response as? HTTPURLResponse {
             if (400 ... 599).contains(response.statusCode) {
-                logger.error("HTTP error from URL \(url.absoluteString) : \(response.statusCode)")
+                Logger.httpClient.error("HTTP error from URL \(url.absoluteString) : \(response.statusCode)")
                 throw HTTPClientError.httpError(response.statusCode)
             } else {
-                logger.info("Response from URL \(url.absoluteString) : \(response.statusCode)")
+                Logger.httpClient.info("Response from URL \(url.absoluteString) : \(response.statusCode)")
                 return (result, response)
             }
         }

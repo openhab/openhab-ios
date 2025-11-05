@@ -15,10 +15,8 @@ import OpenHABCore
 import os.log
 
 class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling {
-    private let logger = Logger(subsystem: "org.openhab.app", category: "SetStringValueIntent")
-
     func resolveHome(for intent: OpenHABSetStringValueIntent) async -> OpenHABHomeResolutionResult {
-        logger.info("Resolving home for intent: \(intent)")
+        Logger.intentHandling.info("Resolving home for intent: \(intent)")
         return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
     }
 
@@ -39,7 +37,7 @@ class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling
     }
 
     func handle(intent: OpenHABSetStringValueIntent) async -> OpenHABSetStringValueIntentResponse {
-        logger.info("SetStringValueIntent for \(intent.item ?? "")")
+        Logger.intentHandling.info("SetStringValueIntent for \(intent.item ?? "")")
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(

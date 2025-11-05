@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Kingfisher
 import OpenHABCore
 import os.log
 
@@ -76,4 +77,19 @@ extension OpenHABWatchAppDelegate: ClientCertificateManagerDelegate {
 
     // delegate should ask user for the export password used to decode the PKCS#12
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {}
+}
+
+// MARK: Kingfisher authentication with URLCredential
+
+extension OpenHABWatchAppDelegate: AuthenticationChallengeResponsible {
+    func downloader(_ downloader: ImageDownloader,
+                    didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        await onReceiveSessionChallenge(with: challenge)
+    }
+
+    func downloader(_ downloader: ImageDownloader,
+                    task: URLSessionTask,
+                    didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        await onReceiveSessionTaskChallenge(with: challenge)
+    }
 }

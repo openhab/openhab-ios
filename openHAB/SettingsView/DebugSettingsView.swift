@@ -21,8 +21,6 @@ struct DebugSettingsView: View {
     @State private var hasBeenLoaded = false
     @State var showCrashReportingAlert = false
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "DebugSettingsView")
-
     var body: some View {
         Toggle("Crash Reporting", isOn: $settingsSendCrashReports)
             .task { @MainActor in
@@ -30,7 +28,7 @@ struct DebugSettingsView: View {
             }
             .onChange(of: settingsSendCrashReports) { newValue in
                 #if !DEBUG
-                logger.debug("Detected change on settingsSendCrashReports")
+                Logger.settingsView.debug("Detected change on settingsSendCrashReports")
                 #endif
                 if newValue, hasBeenLoaded {
                     showCrashReportingAlert = true

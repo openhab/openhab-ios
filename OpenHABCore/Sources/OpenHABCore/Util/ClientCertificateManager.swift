@@ -33,8 +33,6 @@ public class ClientCertificateManager {
 
     public var clientIdentities: [SecIdentity] = []
 
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "ClientCertificateManager", category: "ClientCert")
-
     init() {
         loadFromKeychain()
     }
@@ -101,14 +99,14 @@ public class ClientCertificateManager {
             kSecValueRef as String: cert!
         ]
         var status = SecItemDelete(deleteCertQuery as NSDictionary)
-        logger.info("SecItemDelete(cert) result = \(status) ")
+        Logger.clientCert.info("SecItemDelete(cert) result = \(status) ")
         if status == noErr {
             let deleteKeyQuery: [String: Any] = [
                 kSecClass as String: kSecClassKey,
                 kSecValueRef as String: key!
             ]
             status = SecItemDelete(deleteKeyQuery as NSDictionary)
-            logger.info("SecItemDelete(key) result= \(status)")
+            Logger.clientCert.info("SecItemDelete(key) result= \(status)")
         }
 
         // Figure out which certs in the certificate chain also need to be removed.
@@ -127,7 +125,7 @@ public class ClientCertificateManager {
                     ]
                     let status = SecItemDelete(deleteCertQuery as NSDictionary)
                     let summary = SecCertificateCopySubjectSummary(ct) as String? ?? ""
-                    logger.info("SecItemDelete(certChain) \(summary) result = \(status)")
+                    Logger.clientCert.info("SecItemDelete(certChain) \(summary) result = \(status)")
                 }
             }
         }
@@ -162,7 +160,7 @@ public class ClientCertificateManager {
             let shouldImport = await delegate.askForClientCertificateImport(self)
             return shouldImport
         } catch {
-            logger.error("Failed to read certificate from URL: \(error.localizedDescription)")
+            Logger.clientCert.error("Failed to read certificate from URL: \(error.localizedDescription)")
             return false
         }
     }
@@ -178,7 +176,7 @@ public class ClientCertificateManager {
 
         case errSecAuthFailed:
             guard let retryPassword = await delegate?.askForCertificatePassword(self) else {
-                logger.warning("Password prompt cancelled after auth failure")
+                Logger.clientCert.warning("Password prompt cancelled after auth failure")
                 return
             }
             await clientCertificateAccepted(password: retryPassword)
@@ -198,7 +196,7 @@ public class ClientCertificateManager {
     @MainActor
     func addClientCertificateToKeychain() async {
         guard let identity = importingIdentity else {
-            logger.error("No identity available to import")
+            Logger.clientCert.error("No identity available to import")
             return
         }
 
@@ -208,7 +206,7 @@ public class ClientCertificateManager {
         SecIdentityCopyPrivateKey(identity, &clientKey)
 
         guard let cert = clientCert, let key = clientKey else {
-            logger.error("Failed to extract cert or key from identity")
+            Logger.clientCert.error("Failed to extract cert or key from identity")
             return
         }
 
@@ -218,10 +216,10 @@ public class ClientCertificateManager {
         ]
 
         var status = SecItemAdd(certAddQuery as CFDictionary, nil)
-        logger.info("SecItemAdd(cert) result=\(status)")
+        Logger.clientCert.info("SecItemAdd(cert) result=\(status)")
 
         if status == errSecDuplicateItem {
-            logger.warning("Certificate already exists in Keychain")
+            Logger.clientCert.warning("Certificate already exists in Keychain")
             status = noErr // Treat as success, do not trigger error path later
         }
 
@@ -233,7 +231,7 @@ public class ClientCertificateManager {
             ]
 
             status = SecItemAdd(keyAddQuery as CFDictionary, nil)
-            logger.info("SecItemAdd(key) result=\(status)")
+            Logger.clientCert.info("SecItemAdd(key) result=\(status)")
 
             if let certChain = importingCertChain {
                 for chainCert in certChain where chainCert != cert {
@@ -242,10 +240,10 @@ public class ClientCertificateManager {
                         kSecValueRef as String: chainCert
                     ]
                     let chainStatus = SecItemAdd(chainCertQuery as CFDictionary, nil)
-                    logger.info("SecItemAdd(certChain) result=\(chainStatus)")
+                    Logger.clientCert.info("SecItemAdd(certChain) result=\(chainStatus)")
 
                     if chainStatus == errSecDuplicateItem {
-                        logger.info("Cert chain item already exists; skipping")
+                        Logger.clientCert.info("Cert chain item already exists; skipping")
 
                         continue // Ignore duplicates
                     } else if chainStatus != errSecSuccess {
@@ -275,7 +273,7 @@ public class ClientCertificateManager {
         // Import PKCS12 client cert
         var importResult: CFArray?
         guard let importingRawCert else {
-            logger.error("No raw cert data to decode")
+            Logger.clientCert.error("No raw cert data to decode")
             return errSecParam
         }
         let status = SecPKCS12Import(importingRawCert as CFData, [kSecImportExportPassphrase as String: importingPassword ?? ""] as NSDictionary, &importResult)
@@ -286,7 +284,7 @@ public class ClientCertificateManager {
             importingIdentity = identityDictionaries[0][kSecImportItemIdentity as String] as! SecIdentity?
             importingCertChain = identityDictionaries[0][kSecImportItemCertChain as String] as! [SecCertificate]?
         } else {
-            logger.info("SecPKCS12Import failed; result = \(status)")
+            Logger.clientCert.info("SecPKCS12Import failed; result = \(status)")
         }
         return status
     }
@@ -301,7 +299,7 @@ public class ClientCertificateManager {
         SecIdentityCopyCertificate(identity, &cert)
 
         guard let cert else {
-            logger.error("Failed to extract certificate from identity")
+            Logger.clientCert.error("Failed to extract certificate from identity")
             return (.cancelAuthenticationChallenge, nil)
         }
 
@@ -333,12 +331,12 @@ public class ClientCertificateManager {
            let certificates = SecTrustCopyCertificateChain(trust) as? [SecCertificate] {
             let rootCA = certificates[chainSize - 1]
             let anchors = [rootCA]
-            logger.info("Setting anchor for trust evaluation to \(SecCertificateCopySubjectSummary(rootCA)! as String)")
+            Logger.clientCert.info("Setting anchor for trust evaluation to \(SecCertificateCopySubjectSummary(rootCA)! as String)")
             SecTrustSetAnchorCertificates(trust, anchors as CFArray)
             trustResult = SecTrustResultType.proceed
             var trustError: CFError?
             if SecTrustEvaluateWithError(trust, &trustError) != true {
-                logger.info("Trust evaluation failed building client certificate chain after anchor has been set: \(trustError.debugDescription)")
+                Logger.clientCert.info("Trust evaluation failed building client certificate chain after anchor has been set: \(trustError.debugDescription)")
                 SecTrustGetTrustResult(trust, &trustResult)
             }
         }

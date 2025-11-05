@@ -45,6 +45,7 @@
 "client_certificates" = "Certificati Client";
 "disable_idle_timeout" = "Disabilita Timeout Inattività";
 "real_time_sliders" = "Cursori In Tempo Reale";
+"show_search_field" = "Show Search Field";
 "clear_image_cache" = "Pulisci Cache Immagini";
 "clear_web_cache" = "Svuota memoria cache Web";
 "cache_cleared" = "Cache svuotata";

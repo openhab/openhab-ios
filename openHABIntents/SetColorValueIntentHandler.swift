@@ -15,10 +15,8 @@ import OpenHABCore
 import os.log
 
 class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
-    private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
-
     func resolveHome(for intent: OpenHABSetColorValueIntent) async -> OpenHABHomeResolutionResult {
-        logger.info("Resolving home for intent: \(intent)")
+        Logger.intentHandling.info("Resolving home for intent: \(intent)")
         return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
     }
 
@@ -39,7 +37,7 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
     }
 
     func handle(intent: OpenHABSetColorValueIntent) async -> OpenHABSetColorValueIntentResponse {
-        logger.info("SetColorValueIntent for \(intent.item ?? "")")
+        Logger.intentHandling.info("SetColorValueIntent for \(intent.item ?? "")")
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(

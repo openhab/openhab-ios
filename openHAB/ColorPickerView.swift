@@ -24,8 +24,6 @@ struct ColorPickerView: View {
 
     var widget: OpenHABWidget? // OpenHAB widget for sending commands
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "ColorPickerView")
-
     var body: some View {
         VStack {
             // SwiftUI Color Picker
@@ -67,7 +65,7 @@ struct ColorPickerView: View {
     // Send the color update to the widget
     func sendColorUpdate() {
         let command = "\(hue),\(saturation),\(brightness)"
-        logger.debug("Sending command: \(command)")
+        Logger.widgets.debug("Sending command: \(command)")
         widget?.sendCommand(command)
     }
 }

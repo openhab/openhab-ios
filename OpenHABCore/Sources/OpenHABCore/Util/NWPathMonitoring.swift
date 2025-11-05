@@ -15,8 +15,6 @@ import os.log
 
 // Wrap real NWPathMonitor
 final class RealPathMonitor: NWPathMonitoring, Sendable {
-    let logger = Logger(subsystem: "org.openhab", category: "NWPathMonitoring")
-
     private let monitor: NWPathMonitor
 
     init() {
@@ -26,7 +24,7 @@ final class RealPathMonitor: NWPathMonitoring, Sendable {
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
         if #available(iOS 17, watchOS 10, *) {
             for await path in monitor {
-                logger.debug("Path monitor update: \(path.debugDescription)")
+                Logger.nwPathMonitoring.debug("Path monitor update: \(path.debugDescription)")
                 await handler(path.status == .satisfied || path.status == .requiresConnection)
             }
         } else {

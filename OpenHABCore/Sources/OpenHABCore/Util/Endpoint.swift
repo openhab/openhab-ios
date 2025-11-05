@@ -49,8 +49,6 @@ public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible {
 }
 
 public struct Endpoint: Equatable {
-    static let logger = Logger(subsystem: "org.openhab.app", category: "EndPoint")
-
     let baseURL: String
     let path: String
     var queryItems: [URLQueryItem]
@@ -70,7 +68,7 @@ public extension Endpoint {
         components?.path = path
         components?.queryItems = queryItems
         let url = components?.url
-        Endpoint.logger.debug("URL: \(url?.absoluteString ?? "", privacy: .private)")
+        Logger.endpoint.debug("URL: \(url?.absoluteString ?? "", privacy: .private)")
         return url
     }
 
@@ -199,9 +197,9 @@ public extension Endpoint {
             queryItems = [URLQueryItem(name: "height", value: "64")]
             if !iconColor.isEmpty {
                 let uiColor = UIColor(fromString: iconColor)
-                logger.info("\(uiColor.rgbaDescription)")
+                Logger.endpoint.info("\(uiColor.rgbaDescription)")
                 let colorString = uiColor.hexString
-                logger.debug("color : \(colorString ?? "No proper color")")
+                Logger.endpoint.debug("color : \(colorString ?? "No proper color")")
                 if let colorString {
                     queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
                 }

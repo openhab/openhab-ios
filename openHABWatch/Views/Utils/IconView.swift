@@ -25,8 +25,6 @@ struct IconView: View {
     private let maxRetries = 3
     private let retryDelay: TimeInterval = 1.0
 
-    private let logger = Logger(subsystem: "org.openhab", category: "WatchIconView")
-
     var iconURL: URL? {
         guard !widget.icon.isEmpty,
               let activeConnection = networkTracker.activeConnection,
@@ -54,10 +52,10 @@ struct IconView: View {
             if let iconURL {
                 KFImage.url(iconURL)
                     .onFailure { _ in
-                        logger.debug("Failed to load image : \(iconURL.absoluteString)")
+                        Logger.rowViews.debug("Failed to load image : \(iconURL.absoluteString)")
                     }
                     .onSuccess { _ in
-                        logger.debug("Successfully loaded image: \(iconURL.absoluteString)")
+                        Logger.rowViews.debug("Successfully loaded image: \(iconURL.absoluteString)")
                     }
                     .onFailureView {
                         Rectangle()
@@ -89,13 +87,13 @@ struct IconView: View {
     private func handleLoadingFailure() {
         if retryCount < maxRetries {
             retryCount += 1
-            logger.info("Retrying icon load for widget \(widget.label), attempt \(retryCount)/\(maxRetries)")
+            Logger.rowViews.info("Retrying icon load for widget \(widget.label), attempt \(retryCount)/\(maxRetries)")
 
             DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay * Double(retryCount)) {
                 imageLoadingFailed = false
             }
         } else {
-            logger.warning("Max retries reached for widget \(widget.label), giving up")
+            Logger.rowViews.warning("Max retries reached for widget \(widget.label), giving up")
             imageLoadingFailed = true
         }
     }

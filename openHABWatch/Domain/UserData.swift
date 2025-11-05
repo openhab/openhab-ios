@@ -34,9 +34,7 @@ final class UserData: ObservableObject {
     @Published var isPolling = false
 
     var openHABSitemapPage: OpenHABPage?
-    var currentClient: HTTPClient?
-
-    private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "UserData")
+    var currentClientDelegate: HTTPClientDelegate?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -50,7 +48,7 @@ final class UserData: ObservableObject {
                 Task { await self?.sendCommand(item, command: command) }
             }
         } catch {
-            logger.error("Should not throw \(error.localizedDescription)")
+            Logger.userData.error("Should not throw \(error.localizedDescription)")
         }
     }
 
@@ -63,10 +61,10 @@ final class UserData: ObservableObject {
             guard let self,
                   let summary = notification.userInfo?["summary"] as? String,
                   let domain = notification.userInfo?["domain"] as? String,
-                  let client = notification.object as? HTTPClient else { return }
+                  let delegate = notification.object as? HTTPClientDelegate else { return }
             DispatchQueue.main.async {
                 self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), summary, domain)
-                self.currentClient = client
+                self.currentClientDelegate = delegate
                 self.showCertificateAlert = true
             }
         }
@@ -79,10 +77,10 @@ final class UserData: ObservableObject {
             guard let self,
                   let summary = notification.userInfo?["summary"] as? String,
                   let domain = notification.userInfo?["domain"] as? String,
-                  let client = notification.object as? HTTPClient else { return }
+                  let delegate = notification.object as? HTTPClientDelegate else { return }
             DispatchQueue.main.async {
                 self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), summary, domain)
-                self.currentClient = client
+                self.currentClientDelegate = delegate
                 self.showCertificateAlert = true
             }
         }
@@ -126,7 +124,7 @@ final class UserData: ObservableObject {
         for await activeConnection in activeConnectionStream {
             guard let activeConnection else { continue }
 
-            logger.info("openHABTracked: \(activeConnection.configuration.url)")
+            Logger.userData.info("openHABTracked: \(activeConnection.configuration.url)")
 
             if !AppSettings.shared.haveReceivedAppContext {
                 AppMessageService.singleton.requestApplicationContext()
@@ -147,7 +145,7 @@ final class UserData: ObservableObject {
     func updateNetwork() async {
         guard let connection1 = AppSettings.shared.localConnectionConfig,
               let connection2 = AppSettings.shared.remoteConnectionConfig else {
-            logger.info("No connections defined")
+            Logger.userData.info("No connections defined")
             return
         }
         await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
@@ -209,20 +207,20 @@ final class UserData: ObservableObject {
                         let jitter = UInt64.random(in: 0 ..< (baseDelay / 2))
                         let totalDelay = baseDelay + jitter
 
-                        logger.warning("Polling failed: \(error.localizedDescription). Retrying in \(Double(totalDelay) / 1_000_000_000.0) seconds.")
+                        Logger.userData.warning("Polling failed: \(error.localizedDescription). Retrying in \(Double(totalDelay) / 1_000_000_000.0) seconds.")
 
                         try await Task.sleep(nanoseconds: totalDelay)
                     }
                 }
             } catch {
                 await MainActor.run {
-                    logger.error("Page handling failed with error \(error.localizedDescription)")
+                    Logger.userData.error("Page handling failed with error \(error.localizedDescription)")
                     // Use cached widgets if available instead of clearing completely
                     if self.cachedWidgets.isEmpty {
                         self.widgets = []
                     } else {
                         self.widgets = self.cachedWidgets
-                        logger.info("Using cached widgets during connection failure")
+                        Logger.userData.info("Using cached widgets during connection failure")
                     }
                     self.errorDescription = error.localizedDescription
                     self.showAlert = true
@@ -244,7 +242,7 @@ final class UserData: ObservableObject {
         do {
             try await NetworkTracker.shared.send(to: item, command: command)
         } catch {
-            logger.info("Could not send command \(command) to \(item.name)")
+            Logger.userData.info("Could not send command \(command) to \(item.name)")
         }
     }
 

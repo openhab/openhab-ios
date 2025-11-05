@@ -50,8 +50,6 @@ enum DragState {
 }
 
 struct ColorSelection: View {
-    private let logger = Logger(subsystem: "org.openhab", category: "ColorSelection")
-
     @GestureState var thumb: DragState = .inactive
 
     @State var hue = 0.5
@@ -106,7 +104,7 @@ struct ColorSelection: View {
             }
             .onEnded { value in
                 guard case .second(true, let drag?) = value else { return }
-                logger.info("Translation x y = \(drag.translation.width), \(drag.translation.height)")
+                Logger.rowViews.info("Translation x y = \(drag.translation.width), \(drag.translation.height)")
                 xpos += Double(drag.translation.width)
                 ypos += Double(drag.translation.height)
             }

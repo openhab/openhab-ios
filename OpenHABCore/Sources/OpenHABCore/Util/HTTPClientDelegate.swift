@@ -31,8 +31,6 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
     private let connectionConfiguration: ConnectionConfiguration
     private let evaluationState = CertificateEvaluationState()
 
-    private let logger = Logger(subsystem: "org.openhab.core", category: "HTTPClientDelegate")
-
     let store = CertificateStore()
 
     init(with connectionConfiguration: ConnectionConfiguration) {
@@ -49,7 +47,7 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
 
     private func urlSessionInternal(_ session: URLSession, task: URLSessionTask?, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         let authenticationMethod = challenge.protectionSpace.authenticationMethod
-        logger.debug("URLAuthenticationChallenge: \(authenticationMethod)")
+        Logger.httpClientDelegate.debug("URLAuthenticationChallenge: \(authenticationMethod)")
 
         if challenge.previousFailureCount > 0 {
             return (.cancelAuthenticationChallenge, nil)
@@ -72,10 +70,10 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
 
     private func handleServerTrust(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         let domain = challenge.protectionSpace.host
-        logger.info("Handling server trust for domain: \(domain)")
+        Logger.httpClientDelegate.info("Handling server trust for domain: \(domain)")
 
         guard let serverTrust = challenge.protectionSpace.serverTrust else {
-            logger.error("No server trust object available")
+            Logger.httpClientDelegate.error("No server trust object available")
             return (.cancelAuthenticationChallenge, nil)
         }
 
@@ -83,15 +81,15 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
         var error: CFError?
         _ = SecTrustEvaluateWithError(serverTrust, &error)
         SecTrustGetTrustResult(serverTrust, &result)
-        logger.info("Trust evaluation result: \(result.rawValue), error: \(String(describing: error))")
+        Logger.httpClientDelegate.info("Trust evaluation result: \(result), error: \(String(describing: error))")
 
         if result.isAny(of: .unspecified, .proceed) || connectionConfiguration.ignoreSSL {
-            logger.info("Certificate is trusted or SSL verification ignored")
+            Logger.httpClientDelegate.info("Certificate is trusted or SSL verification ignored")
             return (.useCredential, URLCredential(trust: serverTrust))
         }
 
         guard let certificate = getLeafCertificate(trust: serverTrust) else {
-            logger.error("Could not get leaf certificate")
+            Logger.httpClientDelegate.error("Could not get leaf certificate")
             return (.cancelAuthenticationChallenge, nil)
         }
 
@@ -101,10 +99,10 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
         // If we have a certificate for this domain
         if let previousCertificateData = await store.certificateData(forDomain: domain) {
             if CFEqual(previousCertificateData as CFData, certificateData) {
-                logger.info("Using previously trusted certificate for domain: \(domain)")
+                Logger.httpClientDelegate.info("Using previously trusted certificate for domain: \(domain)")
                 return (.useCredential, URLCredential(trust: serverTrust))
             } else {
-                logger.warning("Certificate mismatch detected for domain: \(domain)")
+                Logger.httpClientDelegate.warning("Certificate mismatch detected for domain: \(domain)")
                 // Certificate mismatch - possible MitM attack
                 NotificationCenter.default.post(
                     name: .evaluateCertificateMismatch,
@@ -112,7 +110,7 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
                     userInfo: ["summary": certificateSummary as Any, "domain": domain]
                 )
                 let evaluateResult = await waitForEvaluation()
-                logger.info("User decision for certificate mismatch: \(String(describing: evaluateResult))")
+                Logger.httpClientDelegate.info("User decision for certificate mismatch: \(String(describing: evaluateResult))")
 
                 switch evaluateResult {
                 case .deny:
@@ -130,14 +128,14 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
         }
 
         // New certificate
-        logger.info("New untrusted certificate for domain: \(domain)")
+        Logger.httpClientDelegate.info("New untrusted certificate for domain: \(domain)")
         NotificationCenter.default.post(
             name: .evaluateServerTrust,
             object: self,
             userInfo: ["summary": certificateSummary as Any, "domain": domain]
         )
         let evaluateResult = await waitForEvaluation()
-        logger.info("User decision for new certificate: \(String(describing: evaluateResult))")
+        Logger.httpClientDelegate.info("User decision for new certificate: \(String(describing: evaluateResult))")
 
         switch evaluateResult {
         case .deny:
@@ -185,6 +183,31 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
     public func completeEvaluation(_ result: CertificateEvaluateResult) {
         Task {
             await evaluationState.complete(result)
+        }
+    }
+}
+
+extension SecTrustResultType: @retroactive CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .invalid:
+            return "invalid"
+        case .proceed:
+            return "proceed"
+        case .deny:
+            return "deny"
+        case .unspecified:
+            return "unspecified"
+        case .recoverableTrustFailure:
+            return "recoverableTrustFailure"
+        case .fatalTrustFailure:
+            return "fatalTrustFailure"
+        case .otherError:
+            return "otherError"
+        case .confirm:
+            return "confirm"
+        @unknown default:
+            return "unknown(\(rawValue))"
         }
     }
 }

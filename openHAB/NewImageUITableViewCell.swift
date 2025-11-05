@@ -15,8 +15,6 @@ import os.log
 import UIKit
 
 class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
-    private let logger = Logger(subsystem: "org.openhab", category: "NewImageUITableViewCell")
-
     var didLoad: (() -> Void)?
 
     private var mainImageView: ScaleAspectFitImageView!
@@ -38,7 +36,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         switch widget.type {
         case .chart:
             guard let openHABRootUrl else {
-                logger.error("Missing openHABRootUrl in NewImageUITableViewCell")
+                Logger.widgets.error("Missing openHABRootUrl in NewImageUITableViewCell")
                 return .empty
             }
             return .link(url: Endpoint.chart(
@@ -135,7 +133,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             refreshTimer = nil
             let refreshInterval = TimeInterval(Double(widget.refresh) / 1000)
             if refreshInterval > 0.09 {
-                logger.info("Scheduling image refresh every \(refreshInterval) seconds")
+                Logger.widgets.info("Scheduling image refresh every \(refreshInterval) seconds")
                 refreshTimer = Timer.scheduledTimer(
                     timeInterval: refreshInterval,
                     target: self,
@@ -158,14 +156,14 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             guard let url else { return }
             loadRemoteImage(withURL: url)
         default:
-            logger.debug("Failed to determine widget payload.")
+            Logger.widgets.debug("Failed to determine widget payload.")
         }
     }
 
     private func widgetPayload(fromItem item: OpenHABItem) -> ImageType {
         switch item.type {
         case .image:
-            logger.debug("Image base64Encoded.")
+            Logger.widgets.debug("Image base64Encoded.")
             guard let data = item.state?.components(separatedBy: ",")[safe: 1], let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters) else {
                 return .empty
             }
@@ -178,7 +176,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     }
 
     private func loadRemoteImage(withURL url: URL) {
-        logger.debug("Image URL: \(url.absoluteString)")
+        Logger.widgets.debug("Image URL: \(url.absoluteString)")
 
         if activeTask != nil {
             activeTask?.cancel()
@@ -188,7 +186,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         activeTask = Task {
             do {
                 guard let config = await NetworkTracker.shared.activeConnection?.configuration else {
-                    logger.warning("No openHAB connection found.")
+                    Logger.widgets.warning("No openHAB connection found.")
                     throw HTTPClientError.noConfiguration
                 }
                 let client = HTTPClient(configuration: config)
@@ -200,7 +198,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                     self.didLoad?()
                 }
             } catch {
-                logger.info("Downloading image failed: \(error.localizedDescription)")
+                Logger.widgets.info("Downloading image failed: \(error.localizedDescription)")
             }
         }
     }
@@ -208,7 +206,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     @objc
     func refreshImage(_ timer: Timer?) {
         // swiftformat:disable:next redundantSelf
-        logger.info("Refreshing image on \(Double(self.widget.refresh) / 1000) seconds schedule")
+        Logger.widgets.info("Refreshing image on \(Double(self.widget.refresh) / 1000) seconds schedule")
         loadImage()
     }
 

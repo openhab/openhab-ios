@@ -2,6 +2,27 @@
 
 ## [Unreleased]
 
+## [Version 3.1.31, Build 87] - 2025-11-04Z
+
+- Suggestion to make Items Search Field optional in Settings (#995)
+- Upgrade to Kingfisher 8.6.1 for improvement on multiple requests on same URL (#996)
+
+
+
+## [Version 3.1.29, Build 85] - 2025-10-29Z
+
+- Use Logger also for RELEASE (#993)
+- Proposal - App Icon supporting Dark mode and iOS 26 Monochrome/Tinted modes (#989)
+- Clearer logging for debugging
+- Complete merge
+- Centralization for all static loggers (#992)
+
+## [Version 3.1.28, Build 84] - 2025-10-25Z
+
+- Handling of dark mode for external icons
+- Handling of authentication challenges (#988)
+- Address some warnings
+
 ## [Version 3.1.27, Build 83] - 2025-10-21Z
 
 - Networktracker improvements (#981)

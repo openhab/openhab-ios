@@ -48,8 +48,7 @@ public struct WatchPreferences: Codable {
             let data = try JSONEncoder().encode(self)
             return ["watchPreferences": data]
         } catch {
-            Logger(subsystem: "org.openhab.app", category: "WatchPreferences")
-                .error("Failed to encode WatchPreferences: \(error.localizedDescription)")
+            Logger.preferences.error("Failed to encode WatchPreferences: \(error.localizedDescription)")
             return [:]
         }
     }

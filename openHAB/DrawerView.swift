@@ -17,8 +17,6 @@ import SafariServices
 import SFSafeSymbols
 import SwiftUI
 
-private let logger = Logger(subsystem: "org.openhab.app", category: "DrawerView")
-
 enum DrawerViewError: Error, CustomDebugStringConvertible {
     case noRootURL
 
@@ -124,8 +122,8 @@ struct DrawerView: View {
         VStack {
             List {
                 mainSection
-                tilesSection
                 sitemapsSection
+                tilesSection
                 systemSection
             }
             .listStyle(.inset)
@@ -235,20 +233,20 @@ struct DrawerView: View {
                 }
 
             } catch {
-                logger.error("Failed to fetch sitemaps: \(error.localizedDescription)")
+                Logger.drawerView.error("Failed to fetch sitemaps: \(error.localizedDescription)")
                 sitemaps = []
             }
 
             do {
                 uiTiles = try await openAPIService.getUITiles()
-                logger.info("Fetched UI tiles successfully")
+                Logger.drawerView.info("Fetched UI tiles successfully")
             } catch {
-                logger.error("Failed to fetch UI tiles: \(error.localizedDescription)")
+                Logger.drawerView.error("Failed to fetch UI tiles: \(error.localizedDescription)")
                 uiTiles = []
             }
 
         } catch {
-            logger.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
+            Logger.drawerView.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
             sitemaps = []
             uiTiles = []
         }

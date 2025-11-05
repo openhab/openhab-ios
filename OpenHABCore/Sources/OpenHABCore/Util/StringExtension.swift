@@ -14,8 +14,6 @@ import MapKit
 import os.log
 import UIKit
 
-private let logger = Logger(subsystem: "org.openhab", category: "String")
-
 public extension String {
     internal var doubleValue: Double {
         let formatter = NumberFormatter()
@@ -115,7 +113,6 @@ public extension String {
         let hue = CGFloat(state: values[0], divisor: 360)
         let saturation = CGFloat(state: values[1], divisor: 100)
         let brightness = CGFloat(state: values[2], divisor: 100)
-        logger.info("Parsing statue as UIColor hue saturation brightness: \(hue) \(saturation) \(brightness)")
         return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
     }
 

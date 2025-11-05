@@ -18,6 +18,7 @@ struct SettingsView: View {
     @State var settingsDemomode = false
     @State var settingsIdleOff = true
     @State var settingsRealTimeSliders = true
+    @State var settingsShowSearchField = true
     @State var settingsSendCrashReports = false
     @State var settingsIconType: IconType = .svg
     @State var settingsSortSitemapsBy: SortSitemapsOrder = .label
@@ -33,8 +34,6 @@ struct SettingsView: View {
     @State var settingsSSECommandItem = ""
 
     @Environment(\.dismiss) private var dismiss
-
-    private let logger = Logger(subsystem: "org.openhab.app", category: "SettingsView")
 
     var body: some View {
         Form {
@@ -56,6 +55,7 @@ struct SettingsView: View {
 
             SitemapSettingsView(
                 settingsRealTimeSliders: $settingsRealTimeSliders,
+                settingsShowSearchField: $settingsShowSearchField,
                 settingsIconType: $settingsIconType,
                 settingsSortSitemapsBy: $settingsSortSitemapsBy,
                 settingsSitemapForWatch: $settingsSitemapForWatch,
@@ -110,18 +110,19 @@ struct SettingsView: View {
             case .name: sitemaps.sort { $0.name < $1.name }
             }
         } catch {
-            logger.error("\(error.localizedDescription)")
+            Logger.settingsView.error("\(error.localizedDescription)")
             sitemaps = []
         }
     }
 
     private func loadSettings() {
         #if !DEBUG
-        logger.debug("Loading Settings")
+        Logger.settingsView.debug("Loading Settings")
         #endif
         settingsDemomode = Preferences.shared.currentHomePreferences.demomode
         settingsIdleOff = Preferences.shared.idleOff
         settingsRealTimeSliders = Preferences.shared.currentHomePreferences.realTimeSliders
+        settingsShowSearchField = Preferences.shared.currentHomePreferences.showSearchField
         settingsSendCrashReports = Preferences.shared.sendCrashReports
         settingsIconType = IconType(rawValue: Preferences.shared.currentHomePreferences.iconType) ?? .svg
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label
@@ -138,6 +139,7 @@ struct SettingsView: View {
         Preferences.shared.modifyActiveHome { @MainActor homePreferences in
             homePreferences.demomode = settingsDemomode
             homePreferences.realTimeSliders = settingsRealTimeSliders
+            homePreferences.showSearchField = settingsShowSearchField
             homePreferences.iconType = settingsIconType.rawValue
             homePreferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
             homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
@@ -173,6 +175,7 @@ extension UIApplication {
         @State var settingsDemomode = false
         @State var settingsIdleOff = true
         @State var settingsRealTimeSliders = true
+        @State var settingsShowSearchField = true
         @State var settingsSendCrashReports = false
         @State var settingsIconType: IconType = .svg
         @State var settingsSortSitemapsBy: SortSitemapsOrder = .label
@@ -212,6 +215,7 @@ extension UIApplication {
                     settingsDemomode: settingsDemomode,
                     settingsIdleOff: settingsIdleOff,
                     settingsRealTimeSliders: settingsRealTimeSliders,
+                    settingsShowSearchField: settingsShowSearchField,
                     settingsSendCrashReports: settingsSendCrashReports,
                     settingsIconType: settingsIconType,
                     settingsSortSitemapsBy: settingsSortSitemapsBy,

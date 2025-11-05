@@ -13,8 +13,6 @@ import Foundation
 import os.log
 
 public class OpenHABPage: NSObject, @unchecked Sendable {
-    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABItem")
-
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     public var widgets: [OpenHABWidget] = []
     public var pageId = ""
@@ -45,7 +43,7 @@ public class OpenHABPage: NSObject, @unchecked Sendable {
 
     private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         guard let item else { return }
-        logger.info("SitemapPage sending command \(command.orEmpty) to \(item.name)")
+        Logger.restAPI.info("SitemapPage sending command \(command.orEmpty) to \(item.name)")
         sendCommand?(item, command)
     }
 }
