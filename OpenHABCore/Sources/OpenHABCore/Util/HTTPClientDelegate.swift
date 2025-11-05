@@ -31,7 +31,7 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
     private let connectionConfiguration: ConnectionConfiguration
     private let evaluationState = CertificateEvaluationState()
 
-    let store = CertificateStore()
+    let store = CertificateStore.shared
 
     init(with connectionConfiguration: ConnectionConfiguration) {
         self.connectionConfiguration = connectionConfiguration
