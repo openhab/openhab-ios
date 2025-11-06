@@ -123,23 +123,23 @@ struct CertificateStoreTests {
     }
 
     @Test("Persistence across instances")
-    func persistenceAcrossInstances() async throws {
-        let domain = "persistence-test.openhab.org"
-        var store: CertificateStore? = makeStore()
+        func persistenceAcrossInstances() async throws {
+            let domain = "persistence-test.openhab.org"
+            var store: CertificateStore? = makeStore()
 
-        Logger.defaultLoggingMiddleware.log("Running persistenceAcrossInstances")
-        let data = Data([0xFE, 0xED, 0xFA, 0xCE])
-        await store!.storeCertificateData(data, forDomain: domain)
+            Logger.defaultLoggingMiddleware.log("Running persistenceAcrossInstances")
+            let data = Data([0xFE, 0xED, 0xFA, 0xCE])
+            await store!.storeCertificateData(data, forDomain: domain)
 
-        // Ensure the store is completely finished with file operations
-        // by setting it to nil and waiting a moment
-        store = nil
+            // Ensure the store is completely finished with file operations
+            // by setting it to nil and waiting a moment
+            store = nil
 
-        // Create a new instance which should load from disk
-        store = makeStore()
-        let fetched = await store!.certificateData(forDomain: domain)
-        #expect(fetched == data, "Certificate data should persist across instances")
+            // Create a new instance which should load from disk
+            store = makeStore()
+            let fetched = await store!.certificateData(forDomain: domain)
+            #expect(fetched == data, "Certificate data should persist across instances")
 
-        await store?.removeCertificate(forDomain: domain)
-    }
+            await store?.removeCertificate(forDomain: domain)
+        }
 }
