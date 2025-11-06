@@ -122,7 +122,7 @@ struct SettingsView: View {
         settingsDemomode = Preferences.shared.currentHomePreferences.demomode
         settingsIdleOff = Preferences.shared.idleOff
         settingsRealTimeSliders = Preferences.shared.currentHomePreferences.realTimeSliders
-        settingsShowSearchField = Preferences.shared.currentHomePreferences.showSearchField
+        settingsShowSearchField = Preferences.shared.applicationPreferences.showSearchField
         settingsSendCrashReports = Preferences.shared.sendCrashReports
         settingsIconType = IconType(rawValue: Preferences.shared.currentHomePreferences.iconType) ?? .svg
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label
@@ -139,7 +139,6 @@ struct SettingsView: View {
         Preferences.shared.modifyActiveHome { @MainActor homePreferences in
             homePreferences.demomode = settingsDemomode
             homePreferences.realTimeSliders = settingsRealTimeSliders
-            homePreferences.showSearchField = settingsShowSearchField
             homePreferences.iconType = settingsIconType.rawValue
             homePreferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
             homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
@@ -151,6 +150,10 @@ struct SettingsView: View {
         }
         Preferences.shared.idleOff = settingsIdleOff
         Preferences.shared.sendCrashReports = settingsSendCrashReports
+
+        Preferences.shared.modifyApplicationPreferences { @MainActor applicationPreferences in
+            applicationPreferences.showSearchField = settingsShowSearchField
+        }
 
         // Apply global UI changes immediately (status bar visibility)
         UIApplication.shared.connectedScenes

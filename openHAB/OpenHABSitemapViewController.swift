@@ -88,7 +88,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         widgetTableView.refreshControl = refreshControl
 
         // Load showSearchField settinsg
-        showSearchField = Preferences.shared.currentHomePreferences.showSearchField
+        showSearchField = Preferences.shared.applicationPreferences.showSearchField
 
         if showSearchField {
             // Setup search controller
@@ -129,7 +129,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         super.viewDidAppear(animated)
 
         // Load showSearchField settinsg
-        showSearchField = Preferences.shared.currentHomePreferences.showSearchField
+        showSearchField = Preferences.shared.applicationPreferences.showSearchField
 
         if showSearchField {
             if parent?.navigationItem.searchController !== searchController {
