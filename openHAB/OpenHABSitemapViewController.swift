@@ -87,7 +87,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         refreshControl?.addTarget(self, action: #selector(handleRefresh(_:)), for: .valueChanged)
         widgetTableView.refreshControl = refreshControl
 
-        // Load showSearchField settinsg
+        // Load showSearchField settings
         showSearchField = Preferences.shared.applicationPreferences.showSearchField
 
         if showSearchField {
@@ -128,7 +128,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         Logger.sitemapViewController.info("OpenHABSitemapViewController viewDidAppear")
         super.viewDidAppear(animated)
 
-        // Load showSearchField settinsg
+        // Load showSearchField settings
         showSearchField = Preferences.shared.applicationPreferences.showSearchField
 
         if showSearchField {
