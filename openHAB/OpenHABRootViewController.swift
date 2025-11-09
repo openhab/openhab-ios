@@ -13,6 +13,7 @@ import AVFoundation
 import Combine
 import FirebaseCrashlytics
 import Foundation
+import Kingfisher
 import OpenHABCore
 import os.log
 import SafariServices
@@ -180,6 +181,7 @@ class OpenHABRootViewController: UIViewController {
             switchToSavedView()
             isDemoMode = Preferences.shared.currentHomePreferences.demomode
         }
+        ImageDownloader.default.authenticationChallengeResponder = self
     }
 
     private func startSSEListening() {
@@ -989,5 +991,20 @@ extension OpenHABRootViewController: ModalHandler {
                 navigationController?.pushViewController(hostingController, animated: true)
             }
         }
+    }
+}
+
+// MARK: Kingfisher authentication with URLCredential
+
+extension OpenHABRootViewController: AuthenticationChallengeResponsible {
+    func downloader(_ downloader: ImageDownloader,
+                    didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        await onReceiveSessionChallenge(with: challenge)
+    }
+
+    func downloader(_ downloader: ImageDownloader,
+                    task: URLSessionTask,
+                    didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        await onReceiveSessionTaskChallenge(with: challenge)
     }
 }
