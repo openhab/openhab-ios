@@ -42,6 +42,12 @@ struct SegmentedRowView: View {
             }
             Spacer()
 
+            if let detailTextLabel = widget.labelValue, !detailTextLabel.isEmpty {
+                Text(detailTextLabel)
+                    .foregroundColor(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
+                    .lineLimit(1)
+            }
+
             if !mappings.isEmpty {
                 if isMomentary {
                     HStack {
@@ -56,20 +62,25 @@ struct SegmentedRowView: View {
                         }
                     }
                 } else {
-                    Picker("", selection: Binding<Int>(
-                        get: { selectedIndex ?? -1 },
-                        set: { newIndex in
-                            selectedIndex = newIndex
-                            if let mapping = mappings[safe: newIndex] {
-                                viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+                    HStack {
+                        Picker("", selection: Binding<Int>(
+                            get: { selectedIndex ?? -1 },
+                            set: { newIndex in
+                                selectedIndex = newIndex
+                                if let mapping = mappings[safe: newIndex] {
+                                    viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+                                }
+                            }
+                        )) {
+                            ForEach(mappings.indices, id: \.self) { index in
+                                Text(mappings[index].label).tag(index)
                             }
                         }
-                    )) {
-                        ForEach(mappings.indices, id: \.self) { index in
-                            Text(mappings[index].label).tag(index)
-                        }
+                        .padding(.bottom, -8)
+                        .padding(.top, -8)
+                        .pickerStyle(.segmented)
+                        .controlSize(.small)
                     }
-                    .pickerStyle(.segmented)
                 }
             }
         }

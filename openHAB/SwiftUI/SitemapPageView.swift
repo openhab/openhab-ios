@@ -29,15 +29,16 @@ struct SitemapPageView: View {
                         .redacted(reason: .placeholder)
                         .disabled(true)
                 }
+                .environment(\.defaultMinListRowHeight, 30)
             } else {
                 List(viewModel.relevantWidgets) { widget in
                     EmbeddingRowView(widget: widget)
                 }
+                .environment(\.defaultMinListRowHeight, 30)
             }
         }
         .environmentObject(viewModel)
-        .listStyle(.plain)
-        .listRowSpacing(-8)
+        .listStyle(.inset)
         .navigationTitle(viewModel.pageTitle)
         .navigationBarTitleDisplayMode(.inline)
         .refreshable {

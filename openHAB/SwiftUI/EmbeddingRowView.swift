@@ -27,7 +27,6 @@ struct EmbeddingRowView: View {
                     RowViewFactory.view(for: widget)
                 }
                 .buttonStyle(.plain)
-                .padding(.vertical, -6)
             } else if widget.type == .selection {
                 Button {
                     selectedWidget = widget
@@ -48,7 +47,7 @@ struct EmbeddingRowView: View {
                 RowViewFactory.view(for: widget)
             }
         }
-
+        .padding(.vertical, -8)
         .alert("Input", isPresented: $showInputAlert) {
             if let widget = selectedWidget {
                 TextField("Enter value", text: $inputText)

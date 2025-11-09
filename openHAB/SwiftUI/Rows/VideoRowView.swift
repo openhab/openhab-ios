@@ -36,7 +36,7 @@ struct VideoRowView: View {
                     .frame(height: 200)
                     .cornerRadius(8)
                     .onAppear {
-                        player = AVPlayer(url: videoURL) 
+                        player = AVPlayer(url: videoURL)
                     }
                     .onDisappear {
                         player?.pause()
