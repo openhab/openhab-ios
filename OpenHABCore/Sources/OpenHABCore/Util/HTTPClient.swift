@@ -229,17 +229,44 @@ public final class HTTPClient: NSObject, Sendable {
     // this can be changed if we detect another server
     public let baseURL: URL?
 
-    private let configuration: ConnectionConfiguration
+    private let connectionConfiguration: ConnectionConfiguration
     public let session: URLSession
-    public let delegate: HTTPClientDelegate
+    public let sessionConfiguration: URLSessionConfiguration
+    public let delegate: (any URLSessionDelegate)?
 
     public init(baseURL: URL? = nil, configuration: ConnectionConfiguration) {
-        self.configuration = configuration
+        connectionConfiguration = configuration
         self.baseURL = baseURL
         delegate = HTTPClientDelegate(with: configuration)
         let config = URLSessionConfiguration.default
+        sessionConfiguration = .default
         session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
         super.init()
+    }
+
+    /// Your normal client for requests that may need pinning/auth/etc.
+    public init(baseURL: URL? = nil, connectionConfiguration: ConnectionConfiguration, sessionConfiguration: URLSessionConfiguration,
+                delegate: (any URLSessionDelegate)? = nil) {
+        self.baseURL = baseURL
+        self.delegate = delegate
+        self.connectionConfiguration = connectionConfiguration
+        self.sessionConfiguration = sessionConfiguration
+        session = URLSession(
+            configuration: sessionConfiguration,
+            delegate: delegate,
+            delegateQueue: nil
+        )
+    }
+
+    /// Streaming-only initializer: creates a delegate-free base client.
+    public convenience init(streamingWith configuration: URLSessionConfiguration, connectionConfiguration: ConnectionConfiguration) {
+        let cfg = (configuration.copy() as? URLSessionConfiguration) ?? .ephemeral
+        cfg.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        cfg.timeoutIntervalForRequest = 0
+        cfg.waitsForConnectivity = true
+        cfg.urlCache = nil
+
+        self.init(connectionConfiguration: connectionConfiguration, sessionConfiguration: cfg, delegate: nil)
     }
 
     public func processStream(url: URL) async throws -> (URLSession.AsyncBytes, URLResponse) {
@@ -346,9 +373,9 @@ public final class HTTPClient: NSObject, Sendable {
     private func performRequest<T>(request: URLRequest, type: SessionType = .data) async throws -> (T, URLResponse) {
         var request = request
 
-        let username = configuration.username
-        let password = configuration.password
-        let alwaysSendBasicAuth = configuration.alwaysSendBasicAuth
+        let username = connectionConfiguration.username
+        let password = connectionConfiguration.password
+        let alwaysSendBasicAuth = connectionConfiguration.alwaysSendBasicAuth
 
         if request.url?.host?.hasSuffix("myopenhab.org") == true || alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
             request.setValue(basicAuthHeader(username: username, password: password), forHTTPHeaderField: "Authorization")
@@ -360,7 +387,83 @@ public final class HTTPClient: NSObject, Sendable {
         case .data:
             return try await session.data(for: request) as! (T, URLResponse)
         case .bytes:
-            return try await session.bytes(for: request) as! (T, URLResponse)
+            return try await session.bytes(for: request, delegate: nil) as! (T, URLResponse)
+        }
+    }
+
+    private func dataStream(for request: URLRequest,
+                            base: URLSessionConfiguration) -> AsyncThrowingStream<Data, any Error> {
+        AsyncThrowingStream<Data, any Error> { continuation in
+            // Fresh, safe config for streaming
+            let cfg = URLSessionConfiguration.ephemeral
+            cfg.timeoutIntervalForRequest = 0
+            cfg.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+            cfg.waitsForConnectivity = true
+            cfg.httpAdditionalHeaders = base.httpAdditionalHeaders
+
+            let delegate = StreamBridge(continuation)
+            let session = URLSession(configuration: cfg, delegate: delegate, delegateQueue: nil)
+            let task = session.dataTask(with: request)
+            task.resume()
+
+            let box = SessionBox(session: session, task: task)
+
+            continuation.onTermination = { @Sendable _ in
+                box.task.cancel()
+                box.session.invalidateAndCancel()
+            }
+        }
+    }
+}
+
+public extension HTTPClient {
+
+    /// Convenience: build request from URL.
+    func mjpegFrames(url: URL,
+                     options: MJPEGOptions = .init()) async throws -> AsyncThrowingStream<MJPEGFrame, any Error> {
+        var req = URLRequest(url: url)
+        req.setValue("multipart/x-mixed-replace", forHTTPHeaderField: "Accept")
+
+        // Add Basic Auth header if credentials are available
+        if !connectionConfiguration.username.isEmpty, !connectionConfiguration.password.isEmpty {
+            let credentials = "\(connectionConfiguration.username):\(connectionConfiguration.password)"
+            if let credentialsData = credentials.data(using: .utf8) {
+                let base64Credentials = credentialsData.base64EncodedString()
+                req.setValue("Basic \(base64Credentials)", forHTTPHeaderField: "Authorization")
+            }
+        }
+
+        return try await mjpegFrames(req, options: options)
+    }
+
+    /// Main MJPEG API: returns a stream of frames.
+    ///
+    /// Note: function is `async` only so you can use `try await client.mjpegFrames(...)`
+    /// in existing call sites; it does not itself `await`.
+    func mjpegFrames(_ request: URLRequest,
+                     options: MJPEGOptions = .init()) async throws -> AsyncThrowingStream<MJPEGFrame, any Error> {
+        // Fresh streaming configuration; you can start from `self.configuration` if you want cookies/auth.
+        let cfg = URLSessionConfiguration.ephemeral
+        cfg.timeoutIntervalForRequest = 0
+        cfg.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        cfg.waitsForConnectivity = true
+        cfg.httpAdditionalHeaders = sessionConfiguration.httpAdditionalHeaders
+        cfg.httpCookieStorage = sessionConfiguration.httpCookieStorage
+        cfg.httpCookieAcceptPolicy = sessionConfiguration.httpCookieAcceptPolicy
+        cfg.httpShouldSetCookies = sessionConfiguration.httpShouldSetCookies
+
+        return AsyncThrowingStream<MJPEGFrame, any Error> { continuation in
+            let delegate = MJPEGStreamDelegate(options: options, continuation: continuation, connectionConfiguration: connectionConfiguration)
+            let session = URLSession(configuration: cfg, delegate: delegate, delegateQueue: nil)
+            let task = session.dataTask(with: request)
+            task.resume()
+
+            let box = SessionBox(session: session, task: task)
+
+            continuation.onTermination = { @Sendable _ in
+                box.task.cancel()
+                box.session.invalidateAndCancel()
+            }
         }
     }
 }

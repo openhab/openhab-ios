@@ -40,8 +40,6 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private var aspectRatioConstraint: NSLayoutConstraint?
     private var activeTask: Task<Void, Never>?
     private var session: URLSession!
-    // Add a stream token to identify the latest MJPEG stream task
-    private var currentStreamToken: UInt = 0
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -168,9 +166,6 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             existingTask.cancel()
             activeTask = nil
         }
-        // Increment the stream token for a new task
-        currentStreamToken += 1
-        let streamToken = currentStreamToken
 
         bringSubviewToFront(mainImageView)
 
@@ -187,16 +182,15 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                     throw HTTPClientError.noConfiguration
                 }
                 Logger.widgets.debug("Starting MJPEG stream for URL: \(url.absoluteString)")
-                let client = HTTPClient(configuration: config)
-                let (byteStream, response) = try await client.processStream(url: url)
-                Logger.widgets.debug("Successfully got MJPEG stream response: \(response)")
-                await handleMJPEGStream(byteStream, streamToken: streamToken)
+                let client = HTTPClient(streamingWith: .ephemeral, connectionConfiguration: config)
+                let frameStream = try await client.mjpegFrames(url: url)
+                await handleMJPEGStream(frameStream)
             } catch is CancellationError {
                 Logger.widgets.debug("MJPEG stream was cancelled during setup")
             } catch {
                 Logger.widgets.error("Failed to start MJPEG stream: \(error.localizedDescription)")
                 await MainActor.run { [weak self] in
-                    guard let self, currentStreamToken == streamToken else { return }
+                    guard let self else { return }
                     activityIndicator.isHidden = true
                     activityIndicator.stopAnimating()
                 }
@@ -205,45 +199,23 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     }
 
     // Update handleMJPEGStream to take a streamToken and check it before UI updates
-    private func handleMJPEGStream(_ byteStream: URLSession.AsyncBytes, streamToken: UInt) async {
-        let streamImageInitialBytePattern = Data([255, 216])
-        var imageData = Data()
-        var isFirstFrame = true
-
+    private func handleMJPEGStream(_ frameStream: AsyncThrowingStream<MJPEGFrame, any Error>) async {
         Logger.widgets.debug("Starting to process MJPEG byte stream")
 
         do {
-            for try await byte in byteStream {
-                guard !Task.isCancelled else {
-                    Logger.widgets.debug("MJPEG stream task was cancelled")
-                    return
-                }
-                // If a new stream has started, exit
-                if streamToken != currentStreamToken {
-                    Logger.widgets.debug("MJPEG stream token mismatch, exiting stream handler")
-                    return
-                }
-                imageData.append(byte)
-
-                if imageData.count <= 50 {
-                    Logger.widgets.debug("Received bytes (\(imageData.count)): \(imageData.prefix(50).map { String(format: "%02x", $0) }.joined(separator: " "))")
-                }
-
-                if imageData.starts(with: streamImageInitialBytePattern), let image = UIImage(data: imageData) {
+            for try await frame in frameStream {
+                if let image = UIImage(data: frame.jpeg) {
                     Logger.widgets.debug("Successfully decoded MJPEG frame, size: \(image.size.width)x\(image.size.height)")
 
                     await MainActor.run { [weak self] in
-                        guard let self, currentStreamToken == streamToken else { return }
-                        if isFirstFrame {
-                            let aspectRatio = image.size.width / image.size.height
-                            activityIndicator.isHidden = true
-                            updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
-                            isFirstFrame = false
-                            didLoad?()
-                        }
+                        guard let self else { return }
+                        let aspectRatio = image.size.width / image.size.height
+                        activityIndicator.isHidden = true
+                        updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
+                        didLoad?()
+
                         mainImageView?.image = image
                     }
-                    imageData = Data()
                 }
             }
         } catch is CancellationError {
@@ -251,7 +223,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         } catch {
             Logger.widgets.error("Failed to process MJPEG stream: \(error.localizedDescription)")
             await MainActor.run { [weak self] in
-                guard let self, currentStreamToken == streamToken else { return }
+                guard let self else { return }
                 activityIndicator.isHidden = true
                 activityIndicator.stopAnimating()
             }
@@ -275,7 +247,6 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     @objc
     private func stopPlayback(andResetUrl reset: Bool = true) {
         // Increment the stream token to invalidate any running MJPEG stream tasks
-        currentStreamToken += 1
         if reset {
             url = nil
         }
