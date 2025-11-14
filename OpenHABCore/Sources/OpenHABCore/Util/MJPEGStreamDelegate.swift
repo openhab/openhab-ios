@@ -272,6 +272,7 @@ final class MJPEGStreamDelegate: NSObject, URLSessionDataDelegate, URLSessionTas
     private let options: MJPEGOptions
     private let continuation: AsyncThrowingStream<MJPEGFrame, any Error>.Continuation
     private let connectionConfiguration: ConnectionConfiguration
+    private let httpClientDelegate: HTTPClientDelegate
 
     private var parser: MultipartParser?
     private var lastYield = Date(timeIntervalSince1970: 0)
@@ -286,6 +287,7 @@ final class MJPEGStreamDelegate: NSObject, URLSessionDataDelegate, URLSessionTas
         self.options = options
         self.continuation = continuation
         self.connectionConfiguration = connectionConfiguration
+        httpClientDelegate = HTTPClientDelegate(with: connectionConfiguration)
     }
 
     // MARK: - Helpers
@@ -462,26 +464,14 @@ final class MJPEGStreamDelegate: NSObject, URLSessionDataDelegate, URLSessionTas
     func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         Logger.videoProcessing.debug("MJPEG: Received authentication challenge: \(challenge.protectionSpace.authenticationMethod)")
         Logger.videoProcessing.debug("MJPEG: Host: \(challenge.protectionSpace.host)")
-        // swiftformat:disable:next redundantSelf
-        Logger.videoProcessing.debug("MJPEG: Username: \(self.connectionConfiguration.username)")
 
-        // Handle authentication challenge for MJPEG streams
-        if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic {
-            Logger.videoProcessing.debug("MJPEG: Handling Basic Auth challenge")
-            let credential = URLCredential(user: connectionConfiguration.username, password: connectionConfiguration.password, persistence: .forSession)
-            return (.useCredential, credential)
-        } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-            // swiftformat:disable:next redundantSelf
-            Logger.videoProcessing.debug("MJPEG: Handling Server Trust challenge, ignoreSSL: \(self.connectionConfiguration.ignoreSSL)")
-            // Handle SSL/TLS certificates
-            if connectionConfiguration.ignoreSSL {
-                return (.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
-            } else {
-                return (.performDefaultHandling, nil)
-            }
-        } else {
-            Logger.videoProcessing.debug("MJPEG: Unhandled challenge method: \(challenge.protectionSpace.authenticationMethod)")
-            return (.performDefaultHandling, nil)
-        }
+        // Delegate all authentication handling to HTTPClientDelegate
+        return await httpClientDelegate.urlSession(session, task: task, didReceive: challenge)
+    }
+}
+
+extension MJPEGStreamDelegate: URLSessionDelegate {
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        await httpClientDelegate.urlSession(session, didReceive: challenge)
     }
 }
