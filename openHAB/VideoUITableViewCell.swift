@@ -40,6 +40,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private var aspectRatioConstraint: NSLayoutConstraint?
     private var activeTask: Task<Void, Never>?
     private var session: URLSession!
+    private var currentAspectRatio: CGFloat?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -205,14 +206,17 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         do {
             for try await frame in frameStream {
                 if let image = UIImage(data: frame.jpeg) {
-                    Logger.widgets.debug("Successfully decoded MJPEG frame, size: \(image.size.width)x\(image.size.height)")
-
                     await MainActor.run { [weak self] in
                         guard let self else { return }
                         let aspectRatio = image.size.width / image.size.height
                         activityIndicator.isHidden = true
-                        updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
-                        didLoad?()
+
+                        // Only update aspect ratio if it's different from the current one
+                        if currentAspectRatio != aspectRatio {
+                            updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
+                            currentAspectRatio = aspectRatio
+                            didLoad?()
+                        }
 
                         mainImageView?.image = image
                     }
@@ -256,5 +260,6 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         activeTask?.cancel()
         activeTask = nil
         mainImageView?.image = nil
+        currentAspectRatio = nil
     }
 }

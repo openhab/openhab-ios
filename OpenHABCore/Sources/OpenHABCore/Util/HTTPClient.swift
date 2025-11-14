@@ -238,9 +238,8 @@ public final class HTTPClient: NSObject, Sendable {
         connectionConfiguration = configuration
         self.baseURL = baseURL
         delegate = HTTPClientDelegate(with: configuration)
-        let config = URLSessionConfiguration.default
         sessionConfiguration = .default
-        session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
+        session = URLSession(configuration: sessionConfiguration, delegate: delegate, delegateQueue: nil)
         super.init()
     }
 
@@ -417,7 +416,6 @@ public final class HTTPClient: NSObject, Sendable {
 }
 
 public extension HTTPClient {
-
     /// Convenience: build request from URL.
     func mjpegFrames(url: URL,
                      options: MJPEGOptions = .init()) async throws -> AsyncThrowingStream<MJPEGFrame, any Error> {

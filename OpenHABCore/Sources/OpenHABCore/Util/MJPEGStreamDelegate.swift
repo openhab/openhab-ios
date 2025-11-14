@@ -318,16 +318,10 @@ final class MJPEGStreamDelegate: NSObject, URLSessionDataDelegate, URLSessionTas
     func urlSession(_ session: URLSession,
                     dataTask: URLSessionDataTask,
                     didReceive response: URLResponse) async -> URLSession.ResponseDisposition {
-        Logger.videoProcessing.debug("MJPEG: Response received: \(response)")
-
         // If we've already processed the initial response, handle subsequent responses
         if initialResponseReceived {
-            Logger.videoProcessing.debug("MJPEG: Subsequent response received, allowing...")
-
             // If we have accumulated data from a previous frame, yield it now
             if expectingJPEGResponse, !currentFrameData.isEmpty {
-                // swiftformat:disable:next redundantSelf
-                Logger.videoProcessing.debug("MJPEG: Processing previous JPEG frame, size: \(self.currentFrameData.count) bytes")
                 yieldFrameIfAppropriate(currentFrameData)
             }
 
@@ -335,7 +329,6 @@ final class MJPEGStreamDelegate: NSObject, URLSessionDataDelegate, URLSessionTas
             if let http = response as? HTTPURLResponse,
                let contentType = http.value(forHTTPHeaderField: "Content-Type")?.lowercased(),
                contentType.contains("image/jpeg") {
-                Logger.videoProcessing.debug("MJPEG: Detected individual JPEG frame response")
                 expectingJPEGResponse = true
                 currentFrameData = Data()
             }
@@ -350,17 +343,12 @@ final class MJPEGStreamDelegate: NSObject, URLSessionDataDelegate, URLSessionTas
             return .cancel
         }
 
-        Logger.videoProcessing.debug("MJPEG: HTTP Status: \(http.statusCode)")
-        Logger.videoProcessing.debug("MJPEG: HTTP Headers: \(http.allHeaderFields)")
-
         guard let contentTypeRaw = http.value(forHTTPHeaderField: "Content-Type")?.lowercased() else {
             Logger.videoProcessing.debug("MJPEG: Missing Content-Type header")
             finished = true
             continuation.finish(throwing: URLError(.badServerResponse))
             return .cancel
         }
-
-        print("MJPEG: Content-Type: \(contentTypeRaw)")
 
         guard contentTypeRaw.contains("multipart/x-mixed-replace") else {
             Logger.videoProcessing.debug("MJPEG: Content-Type does not contain 'multipart/x-mixed-replace'")
@@ -376,9 +364,7 @@ final class MJPEGStreamDelegate: NSObject, URLSessionDataDelegate, URLSessionTas
             return .cancel
         }
 
-        Logger.videoProcessing.debug("MJPEG: Boundary token: \(boundaryToken)")
         let norm = Self.normalizeBoundary(boundaryToken)
-        Logger.videoProcessing.debug("MJPEG: Normalized boundary: \(norm)")
         parser = MultipartParser(boundaryToken: norm, options: options)
         initialResponseReceived = true
         return .allow
@@ -388,13 +374,10 @@ final class MJPEGStreamDelegate: NSObject, URLSessionDataDelegate, URLSessionTas
     func urlSession(_ session: URLSession,
                     dataTask: URLSessionDataTask,
                     didReceive data: Data) {
-        Logger.videoProcessing.debug("MJPEG: didReceive data, size \(data.count) bytes")
-
         guard !finished else { return }
 
         // Handle individual JPEG response
         if expectingJPEGResponse {
-            Logger.videoProcessing.debug("MJPEG: Accumulating JPEG frame data")
             currentFrameData.append(data)
             return
         }
@@ -437,8 +420,6 @@ final class MJPEGStreamDelegate: NSObject, URLSessionDataDelegate, URLSessionTas
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
         // Handle completion of individual JPEG response
         if expectingJPEGResponse, !currentFrameData.isEmpty {
-            // swiftformat:disable:next redundantSelf
-            Logger.videoProcessing.debug("MJPEG: Processing individual JPEG frame, sizself.e: \(self.currentFrameData.count) bytes")
             yieldFrameIfAppropriate(currentFrameData)
             expectingJPEGResponse = false
             currentFrameData = Data()
@@ -462,7 +443,6 @@ final class MJPEGStreamDelegate: NSObject, URLSessionDataDelegate, URLSessionTas
             receivedAt: Date()
         )
         continuation.yield(frame)
-        print("MJPEG: Successfully yielded JPEG frame")
     }
 
     private func yieldFrameIfAppropriate(_ jpegData: Data) {
@@ -479,7 +459,7 @@ final class MJPEGStreamDelegate: NSObject, URLSessionDataDelegate, URLSessionTas
         }
     }
 
-    func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         Logger.videoProcessing.debug("MJPEG: Received authentication challenge: \(challenge.protectionSpace.authenticationMethod)")
         Logger.videoProcessing.debug("MJPEG: Host: \(challenge.protectionSpace.host)")
         // swiftformat:disable:next redundantSelf
@@ -489,19 +469,19 @@ final class MJPEGStreamDelegate: NSObject, URLSessionDataDelegate, URLSessionTas
         if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic {
             Logger.videoProcessing.debug("MJPEG: Handling Basic Auth challenge")
             let credential = URLCredential(user: connectionConfiguration.username, password: connectionConfiguration.password, persistence: .forSession)
-            completionHandler(.useCredential, credential)
+            return (.useCredential, credential)
         } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
             // swiftformat:disable:next redundantSelf
             Logger.videoProcessing.debug("MJPEG: Handling Server Trust challenge, ignoreSSL: \(self.connectionConfiguration.ignoreSSL)")
             // Handle SSL/TLS certificates
             if connectionConfiguration.ignoreSSL {
-                completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
+                return (.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
             } else {
-                completionHandler(.performDefaultHandling, nil)
+                return (.performDefaultHandling, nil)
             }
         } else {
             Logger.videoProcessing.debug("MJPEG: Unhandled challenge method: \(challenge.protectionSpace.authenticationMethod)")
-            completionHandler(.performDefaultHandling, nil)
+            return (.performDefaultHandling, nil)
         }
     }
 }
