@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [Version 3.1.33, Build 89] - 2025-11-06Z
+
+- Saving Preferences for Search (#1001)
+- Improve challenge handling - step 2 (#1000)
+
 ## [Version 3.1.32, Build 88] - 2025-11-05Z
 
 - Challenge handling (#994)
