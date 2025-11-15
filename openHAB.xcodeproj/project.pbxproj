@@ -94,7 +94,6 @@
 		DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */; };
 		DA32D1B42C8C98C40018D974 /* IconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32D1B32C8C98C40018D974 /* IconWithAction.swift */; };
 		DA3563D92E5096BE00BC0138 /* ScreenSaverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3563D82E5096BE00BC0138 /* ScreenSaverView.swift */; };
-		DA4642322D7EE6CA006C3908 /* LoggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4642312D7EE6CA006C3908 /* LoggerView.swift */; };
 		DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800132D836892009CF127 /* ConnectionSettingsView.swift */; };
 		DA4800162D836EF0009CF127 /* MainUISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800152D836EF0009CF127 /* MainUISettingsView.swift */; };
 		DA4800182D837221009CF127 /* AboutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800172D837221009CF127 /* AboutSettingsView.swift */; };
@@ -111,6 +110,8 @@
 		DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */; };
 		DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */; };
 		DA6B2EF72C8B92E800DF77CF /* SelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */; };
+		DA7125352EC8924F0067D7B2 /* MJPEGPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7125342EC8924F0067D7B2 /* MJPEGPlayer.swift */; };
+		DA7125372EC892BB0067D7B2 /* LoggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7125362EC892BB0067D7B2 /* LoggerView.swift */; };
 		DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* PreviewConstants.swift */; };
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
 		DA77E19B2D886D9B007CFF0F /* SingleConnectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA77E19A2D886D9B007CFF0F /* SingleConnectionSettingsView.swift */; };
@@ -119,6 +120,7 @@
 		DA7F002D2EB376CF00DE943A /* ServerCertificatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7F002C2EB376CF00DE943A /* ServerCertificatesView.swift */; };
 		DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */ = {isa = PBXBuildFile; fileRef = DA817E79234BF39B00C91824 /* CHANGELOG.md */; };
 		DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */ = {isa = PBXBuildFile; fileRef = DA88F8C522EC377100B408E5 /* ReleaseNotes.md */; };
+		DA94AEB42EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA94AEB32EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift */; };
 		DA95F3332E0F2B1700FE4474 /* OpenHABRootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */; };
 		DA95F3352E0F2C1600FE4474 /* OpenHABSitemapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA95F3342E0F2C1600FE4474 /* OpenHABSitemapViewController.swift */; };
 		DA9721C324E29A8F0092CCFD /* UserDefaultsBacked.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9721C224E29A8F0092CCFD /* UserDefaultsBacked.swift */; };
@@ -420,7 +422,6 @@
 		DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewRow.swift; sourceTree = "<group>"; };
 		DA32D1B32C8C98C40018D974 /* IconWithAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconWithAction.swift; sourceTree = "<group>"; };
 		DA3563D82E5096BE00BC0138 /* ScreenSaverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverView.swift; sourceTree = "<group>"; };
-		DA4642312D7EE6CA006C3908 /* LoggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerView.swift; sourceTree = "<group>"; };
 		DA4800132D836892009CF127 /* ConnectionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionSettingsView.swift; sourceTree = "<group>"; };
 		DA4800152D836EF0009CF127 /* MainUISettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainUISettingsView.swift; sourceTree = "<group>"; };
 		DA4800172D837221009CF127 /* AboutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettingsView.swift; sourceTree = "<group>"; };
@@ -438,6 +439,8 @@
 		DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
 		DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
 		DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionView.swift; sourceTree = "<group>"; };
+		DA7125342EC8924F0067D7B2 /* MJPEGPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MJPEGPlayer.swift; sourceTree = "<group>"; };
+		DA7125362EC892BB0067D7B2 /* LoggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerView.swift; sourceTree = "<group>"; };
 		DA7224D123828D3300712D20 /* PreviewConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewConstants.swift; sourceTree = "<group>"; };
 		DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppMessageService.swift; sourceTree = "<group>"; };
 		DA77E19A2D886D9B007CFF0F /* SingleConnectionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleConnectionSettingsView.swift; sourceTree = "<group>"; };
@@ -445,6 +448,7 @@
 		DA7F002C2EB376CF00DE943A /* ServerCertificatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerCertificatesView.swift; sourceTree = "<group>"; };
 		DA817E79234BF39B00C91824 /* CHANGELOG.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		DA88F8C522EC377100B408E5 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = ReleaseNotes.md; sourceTree = "<group>"; };
+		DA94AEB32EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleMJPEGPlayer.swift; sourceTree = "<group>"; };
 		DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABRootViewController.swift; sourceTree = "<group>"; };
 		DA95F3342E0F2C1600FE4474 /* OpenHABSitemapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSitemapViewController.swift; sourceTree = "<group>"; };
 		DA9721C224E29A8F0092CCFD /* UserDefaultsBacked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsBacked.swift; sourceTree = "<group>"; };
@@ -519,17 +523,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		DA2AEB752D92D32000897D80 /* Cells */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = Cells;
-			sourceTree = "<group>";
-		};
+		DA2AEB752D92D32000897D80 /* Cells */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Cells; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -964,9 +958,11 @@
 				65C2EF482E244C8500A0C19F /* OpenHABNavigationController.swift */,
 				652B81082E2193DA00648510 /* ScreenSaver */,
 				DA2AEB752D92D32000897D80 /* Cells */,
-				DA4642312D7EE6CA006C3908 /* LoggerView.swift */,
+				DA7125362EC892BB0067D7B2 /* LoggerView.swift */,
 				653B54C1285E714900298ECD /* OpenHABViewController.swift */,
 				DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */,
+				DA7125342EC8924F0067D7B2 /* MJPEGPlayer.swift */,
+				DA94AEB32EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift */,
 				65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */,
 				DA95F3342E0F2C1600FE4474 /* OpenHABSitemapViewController.swift */,
 				DA2AEB6D2D92BAD800897D80 /* PageLoader.swift */,
@@ -1639,7 +1635,6 @@
 				DA48001E2D837905009CF127 /* ApplicationSettingsView.swift in Sources */,
 				DAF0A28B2C56E3A300A14A6A /* RollershutterCell.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
-				DA4642322D7EE6CA006C3908 /* LoggerView.swift in Sources */,
 				1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */,
 				2FBCF58C2DEB0B7700CD5D83 /* HomeSelectionView.swift in Sources */,
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
@@ -1659,6 +1654,7 @@
 				652B810A2E2193DA00648510 /* ScreenSaverConfiguration.swift in Sources */,
 				2F55E7BD2DEE44A800EC8350 /* ClientCertificatesView.swift in Sources */,
 				DA6B2EF72C8B92E800DF77CF /* SelectionView.swift in Sources */,
+				DA7125352EC8924F0067D7B2 /* MJPEGPlayer.swift in Sources */,
 				DA4800212D839D3A009CF127 /* AnimatedSecureTextField.swift in Sources */,
 				DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */,
 				DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */,
@@ -1669,6 +1665,7 @@
 				DA21EAE22339621C001AB415 /* Throttler.swift in Sources */,
 				DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */,
 				DA6B2EEF2C861BC900DF77CF /* DrawerView.swift in Sources */,
+				DA94AEB42EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift in Sources */,
 				DA48001A2D83742A009CF127 /* DebugSettingsView.swift in Sources */,
 				938BF9D324EFD0B700E6B52F /* UIViewController+Localization.swift in Sources */,
 				DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */,
@@ -1685,6 +1682,7 @@
 				2F55E7BB2DEE447700EC8350 /* SettingsView.swift in Sources */,
 				DA4800182D837221009CF127 /* AboutSettingsView.swift in Sources */,
 				653B54C2285E714900298ECD /* OpenHABViewController.swift in Sources */,
+				DA7125372EC892BB0067D7B2 /* LoggerView.swift in Sources */,
 				65C2EF492E244C8500A0C19F /* OpenHABNavigationController.swift in Sources */,
 				DA2AEB6E2D92BAD800897D80 /* PageLoader.swift in Sources */,
 				65F055442E3D4E41004E98FE /* ItemSelectionView.swift in Sources */,

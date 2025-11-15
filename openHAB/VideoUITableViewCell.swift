@@ -38,8 +38,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private var mainImageView: UIImageView!
     private var playerObserver: NSKeyValueObservation?
     private var aspectRatioConstraint: NSLayoutConstraint?
-    private var activeTask: Task<Void, Never>?
-    private var session: URLSession!
+    private var mjpegPlayer: SimpleMJPEGPlayer?
     private var currentAspectRatio: CGFloat?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -82,6 +81,8 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         ])
 
         NotificationCenter.default.addObserver(self, selector: #selector(stopPlayback), name: UIApplication.didEnterBackgroundNotification, object: nil)
+
+        setupMJPEGPlayer()
     }
 
     @available(*, unavailable)
@@ -156,82 +157,33 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         }
     }
 
+    private func setupMJPEGPlayer() {
+        mjpegPlayer = SimpleMJPEGPlayer(imageView: mainImageView)
+        mjpegPlayer?.onFirstFrame = { [weak self] aspectRatio in
+            guard let self else { return }
+            activityIndicator.isHidden = true
+            if currentAspectRatio != aspectRatio {
+                updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
+                currentAspectRatio = aspectRatio
+                didLoad?()
+            }
+        }
+        mjpegPlayer?.onError = { [weak self] error in
+            guard let self else { return }
+            Logger.widgets.error("Failed to start MJPEG stream: \(error.localizedDescription)")
+            activityIndicator.isHidden = true
+            activityIndicator.stopAnimating()
+        }
+    }
+
     private func playMjpegStream() {
         guard let url else {
             stopPlayback()
             return
         }
 
-        // Cancel any existing task before starting a new one
-        if let existingTask = activeTask {
-            existingTask.cancel()
-            activeTask = nil
-        }
-
         bringSubviewToFront(mainImageView)
-
-        activeTask = Task { [weak self] in
-            guard let self else { return }
-            // Check if task was cancelled before starting work
-            guard !Task.isCancelled else {
-                Logger.widgets.debug("MJPEG stream task was cancelled before starting")
-                return
-            }
-            do {
-                guard let config = MainActorNetworkTracker.shared.activeConnection?.configuration else {
-                    Logger.widgets.warning("No openHAB configuration found.")
-                    throw HTTPClientError.noConfiguration
-                }
-                Logger.widgets.debug("Starting MJPEG stream for URL: \(url.absoluteString)")
-                let client = HTTPClient(streamingWith: .ephemeral, connectionConfiguration: config)
-                let frameStream = try await client.mjpegFrames(url: url)
-                await handleMJPEGStream(frameStream)
-            } catch is CancellationError {
-                Logger.widgets.debug("MJPEG stream was cancelled during setup")
-            } catch {
-                Logger.widgets.error("Failed to start MJPEG stream: \(error.localizedDescription)")
-                await MainActor.run { [weak self] in
-                    guard let self else { return }
-                    activityIndicator.isHidden = true
-                    activityIndicator.stopAnimating()
-                }
-            }
-        }
-    }
-
-    // Update handleMJPEGStream to take a streamToken and check it before UI updates
-    private func handleMJPEGStream(_ frameStream: AsyncThrowingStream<MJPEGFrame, any Error>) async {
-        Logger.widgets.debug("Starting to process MJPEG byte stream")
-
-        do {
-            for try await frame in frameStream {
-                if let image = UIImage(data: frame.jpeg) {
-                    await MainActor.run { [weak self] in
-                        guard let self else { return }
-                        let aspectRatio = image.size.width / image.size.height
-                        activityIndicator.isHidden = true
-
-                        // Only update aspect ratio if it's different from the current one
-                        if currentAspectRatio != aspectRatio {
-                            updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
-                            currentAspectRatio = aspectRatio
-                            didLoad?()
-                        }
-
-                        mainImageView?.image = image
-                    }
-                }
-            }
-        } catch is CancellationError {
-            Logger.widgets.debug("MJPEG stream was cancelled")
-        } catch {
-            Logger.widgets.error("Failed to process MJPEG stream: \(error.localizedDescription)")
-            await MainActor.run { [weak self] in
-                guard let self else { return }
-                activityIndicator.isHidden = true
-                activityIndicator.stopAnimating()
-            }
-        }
+        mjpegPlayer?.play(url: url)
     }
 
     // Add or update the aspect ratio constraint for the given view
@@ -256,10 +208,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         }
         playerObserver = nil
         playerView?.playerLayer.player = nil
-        // Cancel the active task if it is running
-        activeTask?.cancel()
-        activeTask = nil
-        mainImageView?.image = nil
+        mjpegPlayer?.stop()
         currentAspectRatio = nil
     }
 }
