@@ -16,8 +16,8 @@ import UIKit
 
 @MainActor
 final class SimpleMJPEGPlayer {
-    private var dataTask: URLSessionDataTask?
-    private var session: URLSession?
+    private var streamTask: URLSessionDataTask?
+    private var httpClient: HTTPClient?
     private var delegate: SimpleMJPEGStreamDelegate?
     private let imageView: UIImageView
     private var currentAspectRatio: CGFloat?
@@ -54,33 +54,19 @@ final class SimpleMJPEGPlayer {
             }
         )
 
-        let sessionConfig = URLSessionConfiguration.ephemeral
-        sessionConfig.timeoutIntervalForRequest = 0
-        sessionConfig.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
-
-        session = URLSession(configuration: sessionConfig, delegate: delegate, delegateQueue: nil)
+        httpClient = HTTPClient(streamingWith: .ephemeral, connectionConfiguration: config, delegate: delegate)
 
         var request = URLRequest(url: url)
         request.setValue("multipart/x-mixed-replace", forHTTPHeaderField: "Accept")
 
-        // Add Basic Auth if available
-        if !config.username.isEmpty, !config.password.isEmpty {
-            let credentials = "\(config.username):\(config.password)"
-            if let credentialsData = credentials.data(using: .utf8) {
-                let base64Credentials = credentialsData.base64EncodedString()
-                request.setValue("Basic \(base64Credentials)", forHTTPHeaderField: "Authorization")
-            }
-        }
-
-        dataTask = session?.dataTask(with: request)
-        dataTask?.resume()
+        streamTask = httpClient?.session.dataTask(with: request)
+        streamTask?.resume()
     }
 
     func stop() {
-        dataTask?.cancel()
-        dataTask = nil
-        session?.invalidateAndCancel()
-        session = nil
+        streamTask?.cancel()
+        streamTask = nil
+        httpClient = nil
         delegate = nil
         imageView.image = nil
         currentAspectRatio = nil

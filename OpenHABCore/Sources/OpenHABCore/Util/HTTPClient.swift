@@ -258,14 +258,14 @@ public final class HTTPClient: NSObject, Sendable {
         )
     }
 
-    public convenience init(streamingWith sessionConfiguration: URLSessionConfiguration, connectionConfiguration: ConnectionConfiguration) {
+    public convenience init(streamingWith sessionConfiguration: URLSessionConfiguration, connectionConfiguration: ConnectionConfiguration, delegate: (any URLSessionDelegate)? = nil) {
         let sessionConfiguration = (sessionConfiguration.copy() as? URLSessionConfiguration) ?? .ephemeral
         sessionConfiguration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         sessionConfiguration.timeoutIntervalForRequest = 0
         sessionConfiguration.waitsForConnectivity = true
         sessionConfiguration.urlCache = nil
 
-        self.init(connectionConfiguration: connectionConfiguration, sessionConfiguration: sessionConfiguration, delegate: nil)
+        self.init(connectionConfiguration: connectionConfiguration, sessionConfiguration: sessionConfiguration, delegate: delegate)
     }
 
     public func processStream(url: URL) async throws -> (Data, URLResponse) {
