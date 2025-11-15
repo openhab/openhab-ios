@@ -93,7 +93,6 @@ public struct HomePreferences: Codable, Equatable {
     public var defaultView = "web"
     public var demomode = true
     public var realTimeSliders = false
-    public var showSearchField = true
     public var iconType = 0
     public var defaultSitemap = "demo"
     public var sortSitemapsBy = 0
@@ -111,7 +110,22 @@ public struct HomePreferences: Codable, Equatable {
     }
 }
 
+@MainActor
+public struct ApplicationPreferences: Codable, Equatable {
+    public var showSearchField = true
+}
+
 // MARK: Retrieving preference from user defaults, reacting to preference change
+
+// MARK: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+// MARK: !!
+
+// MARK: When making changes to Preferences, always consider a migration for existing users. Otherwise, they risk to loose their existing preferences.
+
+// MARK: !!
+
+// MARK: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 private enum PreferencesAccess {
     @MainActor fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
@@ -162,8 +176,12 @@ public actor Preferences {
     @UserDefault("idleOff", defaultValue: false)
     public var idleOff: Bool
 
-    @UserDefault("showSearchField", defaultValue: true)
-    public var showSearchField: Bool
+    @UserDefaultObject(
+        "applicationPreferences",
+        defaultValue:
+        ApplicationPreferences()
+    )
+    public private(set) var applicationPreferences: ApplicationPreferences
 
     @UserDefault("screensaverEnabled", defaultValue: false)
     public var screensaverEnabled: Bool
@@ -337,6 +355,12 @@ public extension Preferences {
         currentHomePreferences = homePreferences
         storeActiveHome()
     }
+
+    func modifyApplicationPreferences(modificationFunction: @MainActor (inout ApplicationPreferences) -> Void) {
+        var applicationPreferences = applicationPreferences
+        modificationFunction(&applicationPreferences)
+        self.applicationPreferences = applicationPreferences
+    }
 }
 
 @MainActor
@@ -380,7 +404,6 @@ public extension Preferences {
             currentHomePreferences.remoteConnectionConfig.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? currentHomePreferences.remoteConnectionConfig.ignoreSSL
             currentHomePreferences.demomode = UserDefaults.standard.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
             currentHomePreferences.realTimeSliders = UserDefaults.standard.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
-            currentHomePreferences.showSearchField = UserDefaults.standard.object(forKey: "showSearchField") as? Bool ?? currentHomePreferences.showSearchField
             currentHomePreferences.iconType = UserDefaults.standard.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
             currentHomePreferences.defaultSitemap = UserDefaults.standard.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
         }
@@ -423,7 +446,6 @@ public extension Preferences {
             currentHomePreferences.defaultView = sharedDefaults.string(forKey: "defaultView") ?? currentHomePreferences.defaultView
             currentHomePreferences.demomode = sharedDefaults.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
             currentHomePreferences.realTimeSliders = sharedDefaults.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
-            currentHomePreferences.showSearchField = sharedDefaults.object(forKey: "showSearchField") as? Bool ?? currentHomePreferences.showSearchField
             currentHomePreferences.iconType = sharedDefaults.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
             currentHomePreferences.defaultSitemap = sharedDefaults.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
             currentHomePreferences.sortSitemapsBy = sharedDefaults.object(forKey: "sortSitemapsBy") as? Int ?? currentHomePreferences.sortSitemapsBy

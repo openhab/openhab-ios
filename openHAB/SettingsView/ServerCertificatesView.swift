@@ -11,6 +11,7 @@
 
 import Combine
 import OpenHABCore
+import os.log
 import Security
 import SwiftUI
 
@@ -33,6 +34,7 @@ class ServerCertificatesViewModel: ObservableObject {
 
     func loadCertificates() {
         Task {
+            Logger.serverCert.info("Loading certificates")
             let store = CertificateManagers.certificateStore
             var certInfos: [CertificateInfo] = []
 
