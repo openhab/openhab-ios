@@ -20,7 +20,6 @@ final class SimpleMJPEGPlayer {
     private var httpClient: HTTPClient?
     private var delegate: SimpleMJPEGStreamDelegate?
     private let imageView: UIImageView
-    private var currentAspectRatio: CGFloat?
 
     var onFirstFrame: ((CGFloat) -> Void)?
     var onError: ((any Error) -> Void)?
@@ -69,6 +68,5 @@ final class SimpleMJPEGPlayer {
         httpClient = nil
         delegate = nil
         imageView.image = nil
-        currentAspectRatio = nil
     }
 }

@@ -258,8 +258,8 @@ public final class HTTPClient: NSObject, Sendable {
         )
     }
 
-    public convenience init(streamingWith sessionConfiguration: URLSessionConfiguration, connectionConfiguration: ConnectionConfiguration, delegate: (any URLSessionDelegate)? = nil) {
-        let sessionConfiguration = (sessionConfiguration.copy() as? URLSessionConfiguration) ?? .ephemeral
+    public convenience init(streamingWith: URLSessionConfiguration, connectionConfiguration: ConnectionConfiguration, delegate: (any URLSessionDelegate)? = nil) {
+        let sessionConfiguration = (streamingWith.copy() as? URLSessionConfiguration) ?? .ephemeral
         sessionConfiguration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         sessionConfiguration.timeoutIntervalForRequest = 0
         sessionConfiguration.waitsForConnectivity = true
