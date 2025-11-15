@@ -47,7 +47,8 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         activityIndicator.hidesWhenStopped = true
         playerView = PlayerView()
         contentView.addSubview(playerView)
-        mainImageView = ScaleAspectFitImageView()
+        mainImageView = UIImageView()
+        mainImageView.contentMode = .scaleAspectFit
         contentView.addSubview(mainImageView)
         contentView.addSubview(activityIndicator)
 
@@ -103,9 +104,8 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         // Set initial aspect ratio to prevent standard height display
         // Use 16:9 as default, will be updated when actual video dimensions are available
-        if aspectRatioConstraint == nil {
-            updateAspectRatio(forView: widget.encoding.lowercased() == VideoEncoding.mjpeg.rawValue ? mainImageView : playerView, aspectRatio: 16.0 / 9.0)
-        }
+        let targetView = widget.encoding.lowercased() == VideoEncoding.mjpeg.rawValue ? mainImageView! : playerView!
+        updateAspectRatio(forView: targetView, aspectRatio: 16.0 / 9.0)
     }
 
     func play() {
@@ -190,12 +190,16 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private func updateAspectRatio(forView view: UIView, aspectRatio: CGFloat) {
         // Remove the old aspect ratio constraint if it exists
         if let oldConstraint = aspectRatioConstraint {
-            view.removeConstraint(oldConstraint)
+            oldConstraint.isActive = false
             aspectRatioConstraint = nil
         }
+
+        // Force layout to process constraint removal before adding new one
+        view.layoutIfNeeded()
+
         // Add a new aspect ratio constraint
         let constraint = view.widthAnchor.constraint(equalTo: view.heightAnchor, multiplier: aspectRatio)
-        constraint.priority = .required
+        constraint.priority = UILayoutPriority(rawValue: 998) // Lower than ScaleAspectFitImageView's 999
         constraint.isActive = true
         aspectRatioConstraint = constraint
     }
