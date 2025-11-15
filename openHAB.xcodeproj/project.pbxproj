@@ -110,7 +110,6 @@
 		DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */; };
 		DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */; };
 		DA6B2EF72C8B92E800DF77CF /* SelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */; };
-		DA7125352EC8924F0067D7B2 /* MJPEGPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7125342EC8924F0067D7B2 /* MJPEGPlayer.swift */; };
 		DA7125372EC892BB0067D7B2 /* LoggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7125362EC892BB0067D7B2 /* LoggerView.swift */; };
 		DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* PreviewConstants.swift */; };
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
@@ -439,7 +438,6 @@
 		DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
 		DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
 		DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionView.swift; sourceTree = "<group>"; };
-		DA7125342EC8924F0067D7B2 /* MJPEGPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MJPEGPlayer.swift; sourceTree = "<group>"; };
 		DA7125362EC892BB0067D7B2 /* LoggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerView.swift; sourceTree = "<group>"; };
 		DA7224D123828D3300712D20 /* PreviewConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewConstants.swift; sourceTree = "<group>"; };
 		DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppMessageService.swift; sourceTree = "<group>"; };
@@ -961,7 +959,6 @@
 				DA7125362EC892BB0067D7B2 /* LoggerView.swift */,
 				653B54C1285E714900298ECD /* OpenHABViewController.swift */,
 				DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */,
-				DA7125342EC8924F0067D7B2 /* MJPEGPlayer.swift */,
 				DA94AEB32EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift */,
 				65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */,
 				DA95F3342E0F2C1600FE4474 /* OpenHABSitemapViewController.swift */,
@@ -1654,7 +1651,6 @@
 				652B810A2E2193DA00648510 /* ScreenSaverConfiguration.swift in Sources */,
 				2F55E7BD2DEE44A800EC8350 /* ClientCertificatesView.swift in Sources */,
 				DA6B2EF72C8B92E800DF77CF /* SelectionView.swift in Sources */,
-				DA7125352EC8924F0067D7B2 /* MJPEGPlayer.swift in Sources */,
 				DA4800212D839D3A009CF127 /* AnimatedSecureTextField.swift in Sources */,
 				DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */,
 				DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */,

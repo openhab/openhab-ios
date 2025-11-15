@@ -14,59 +14,6 @@ import OpenHABCore
 import os.log
 import UIKit
 
-// MARK: - Dedicated URLSession Delegate
-
-// final class SimpleMJPEGStreamDelegate: NSObject, URLSessionDataDelegate, @unchecked Sendable {
-//    private var imageData = Data()
-//    private var isFirstFrame = true
-//    private let onFrame: @MainActor (UIImage, Bool) -> Void
-//    private let onError: @MainActor (any Error) -> Void
-//
-//    init(onFrame: @escaping @MainActor (UIImage, Bool) -> Void,
-//         onError: @escaping @MainActor (any Error) -> Void) {
-//        self.onFrame = onFrame
-//        self.onError = onError
-//        super.init()
-//    }
-//
-//    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-//        // Simple JPEG frame detection: look for JPEG header (0xFF, 0xD8)
-//        let jpegHeader = Data([0xFF, 0xD8])
-//
-//        if data.starts(with: jpegHeader) {
-//            // New frame starts - process previous frame if we have data
-//            if !imageData.isEmpty, let image = UIImage(data: imageData) {
-//                let isFirst = isFirstFrame
-//                if isFirstFrame { isFirstFrame = false }
-//
-//                Task { @MainActor in
-//                    self.onFrame(image, isFirst)
-//                }
-//            }
-//            // Start new frame
-//            imageData = data
-//        } else {
-//            // Continue building current frame
-//            imageData.append(data)
-//        }
-//    }
-//
-//    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didCompleteWithError error: Error?) {
-//        if let error, (error as NSError).code != NSURLErrorCancelled {
-//            Task { @MainActor in
-//                self.onError(error)
-//            }
-//        }
-//    }
-//
-//    func reset() {
-//        imageData.removeAll()
-//        isFirstFrame = true
-//    }
-// }
-
-// MARK: - Main Actor Player
-
 @MainActor
 final class SimpleMJPEGPlayer {
     private var dataTask: URLSessionDataTask?

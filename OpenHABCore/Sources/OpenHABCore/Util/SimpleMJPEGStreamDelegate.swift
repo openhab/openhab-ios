@@ -62,7 +62,7 @@ public final class SimpleMJPEGStreamDelegate: NSObject, URLSessionDataDelegate, 
 
     // MARK: - URLSessionTaskDelegate
 
-    func urlSession(_ session: URLSession, task: URLSessionDataTask, didCompleteWithError error: (any Error)?) {
+    public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
         if let error, (error as NSError).code != NSURLErrorCancelled {
             Task { @MainActor in
                 self.onError(error)

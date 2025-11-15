@@ -224,6 +224,7 @@ public final class HTTPClient: NSObject, Sendable {
         case download
         case data
         case bytes
+        case mjpegStream
     }
 
     // this can be changed if we detect another server
@@ -257,20 +258,19 @@ public final class HTTPClient: NSObject, Sendable {
         )
     }
 
-    /// Streaming-only initializer: creates a delegate-free base client.
-    public convenience init(streamingWith configuration: URLSessionConfiguration, connectionConfiguration: ConnectionConfiguration) {
-        let cfg = (configuration.copy() as? URLSessionConfiguration) ?? .ephemeral
-        cfg.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
-        cfg.timeoutIntervalForRequest = 0
-        cfg.waitsForConnectivity = true
-        cfg.urlCache = nil
+    public convenience init(streamingWith sessionConfiguration: URLSessionConfiguration, connectionConfiguration: ConnectionConfiguration) {
+        let sessionConfiguration = (sessionConfiguration.copy() as? URLSessionConfiguration) ?? .ephemeral
+        sessionConfiguration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        sessionConfiguration.timeoutIntervalForRequest = 0
+        sessionConfiguration.waitsForConnectivity = true
+        sessionConfiguration.urlCache = nil
 
-        self.init(connectionConfiguration: connectionConfiguration, sessionConfiguration: cfg, delegate: nil)
+        self.init(connectionConfiguration: connectionConfiguration, sessionConfiguration: sessionConfiguration, delegate: nil)
     }
 
-    public func processStream(url: URL) async throws -> (URLSession.AsyncBytes, URLResponse) {
+    public func processStream(url: URL) async throws -> (Data, URLResponse) {
         do {
-            return try await doRequest(baseURL: url, type: .bytes)
+            return try await doRequest(baseURL: url, type: .mjpegStream)
         } catch {
             Logger.httpClient.error("Failed to fetch MJPEG stream: \(error.localizedDescription)")
             throw HTTPClientError.failedtoFetchMJPEG
@@ -352,6 +352,10 @@ public final class HTTPClient: NSObject, Sendable {
             request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
         }
 
+        if type == .mjpegStream {
+            request.setValue("multipart/x-mixed-replace", forHTTPHeaderField: "Accept")
+        }
+
         if cacheingPolicy != .useProtocolCachePolicy {
             request.cachePolicy = cacheingPolicy
         }
@@ -387,81 +391,8 @@ public final class HTTPClient: NSObject, Sendable {
             return try await session.data(for: request) as! (T, URLResponse)
         case .bytes:
             return try await session.bytes(for: request, delegate: nil) as! (T, URLResponse)
-        }
-    }
-
-    private func dataStream(for request: URLRequest,
-                            base: URLSessionConfiguration) -> AsyncThrowingStream<Data, any Error> {
-        AsyncThrowingStream<Data, any Error> { continuation in
-            // Fresh, safe config for streaming
-            let cfg = URLSessionConfiguration.ephemeral
-            cfg.timeoutIntervalForRequest = 0
-            cfg.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
-            cfg.waitsForConnectivity = true
-            cfg.httpAdditionalHeaders = base.httpAdditionalHeaders
-
-            let delegate = StreamBridge(continuation)
-            let session = URLSession(configuration: cfg, delegate: delegate, delegateQueue: nil)
-            let task = session.dataTask(with: request)
-            task.resume()
-
-            let box = SessionBox(session: session, task: task)
-
-            continuation.onTermination = { @Sendable _ in
-                box.task.cancel()
-                box.session.invalidateAndCancel()
-            }
-        }
-    }
-}
-
-public extension HTTPClient {
-    /// Convenience: build request from URL.
-    func mjpegFrames(url: URL,
-                     options: MJPEGOptions = .init()) async throws -> AsyncThrowingStream<MJPEGFrame, any Error> {
-        var req = URLRequest(url: url)
-        req.setValue("multipart/x-mixed-replace", forHTTPHeaderField: "Accept")
-
-        // Add Basic Auth header if credentials are available
-        if !connectionConfiguration.username.isEmpty, !connectionConfiguration.password.isEmpty {
-            let credentials = "\(connectionConfiguration.username):\(connectionConfiguration.password)"
-            if let credentialsData = credentials.data(using: .utf8) {
-                let base64Credentials = credentialsData.base64EncodedString()
-                req.setValue("Basic \(base64Credentials)", forHTTPHeaderField: "Authorization")
-            }
-        }
-
-        return try await mjpegFrames(req, options: options)
-    }
-
-    /// Main MJPEG API: returns a stream of frames.
-    ///
-    /// Note: function is `async` only so you can use `try await client.mjpegFrames(...)`
-    /// in existing call sites; it does not itself `await`.
-    func mjpegFrames(_ request: URLRequest,
-                     options: MJPEGOptions = .init()) async throws -> AsyncThrowingStream<MJPEGFrame, any Error> {
-        // Fresh streaming configuration; you can start from `self.configuration` if you want cookies/auth.
-        let cfg = URLSessionConfiguration.ephemeral
-        cfg.timeoutIntervalForRequest = 0
-        cfg.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
-        cfg.waitsForConnectivity = true
-        cfg.httpAdditionalHeaders = sessionConfiguration.httpAdditionalHeaders
-        cfg.httpCookieStorage = sessionConfiguration.httpCookieStorage
-        cfg.httpCookieAcceptPolicy = sessionConfiguration.httpCookieAcceptPolicy
-        cfg.httpShouldSetCookies = sessionConfiguration.httpShouldSetCookies
-
-        return AsyncThrowingStream<MJPEGFrame, any Error> { continuation in
-            let delegate = MJPEGStreamDelegate(options: options, continuation: continuation, connectionConfiguration: connectionConfiguration)
-            let session = URLSession(configuration: cfg, delegate: delegate, delegateQueue: nil)
-            let task = session.dataTask(with: request)
-            task.resume()
-
-            let box = SessionBox(session: session, task: task)
-
-            continuation.onTermination = { @Sendable _ in
-                box.task.cancel()
-                box.session.invalidateAndCancel()
-            }
+        case .mjpegStream:
+            return try await session.data(for: request) as! (T, URLResponse)
         }
     }
 }
