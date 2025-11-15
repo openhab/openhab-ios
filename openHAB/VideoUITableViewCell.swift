@@ -40,6 +40,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private var aspectRatioConstraint: NSLayoutConstraint?
     private var mjpegPlayer: SimpleMJPEGPlayer?
     private var currentAspectRatio: CGFloat?
+    private var currentStreamUrl: URL?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -82,8 +83,6 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         ])
 
         NotificationCenter.default.addObserver(self, selector: #selector(stopPlayback), name: UIApplication.didEnterBackgroundNotification, object: nil)
-
-        setupMJPEGPlayer()
     }
 
     @available(*, unavailable)
@@ -96,22 +95,70 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         if newSuperview == nil {
             stopPlayback()
+            // Release stream reference when cell is removed
+            if let currentStreamUrl {
+                VideoStreamManager.shared.releaseStream(for: currentStreamUrl)
+                self.currentStreamUrl = nil
+            }
         }
     }
 
     override func displayWidget() {
-        url = URL(string: widget.url)
+        let newUrl = URL(string: widget.url)
 
-        // Set initial aspect ratio to prevent standard height display
-        // Use 16:9 as default, will be updated when actual video dimensions are available
-        let targetView = widget.encoding.lowercased() == VideoEncoding.mjpeg.rawValue ? mainImageView! : playerView!
-        updateAspectRatio(forView: targetView, aspectRatio: 16.0 / 9.0)
+        // Handle MJPEG streams with VideoStreamManager
+        if widget.encoding.lowercased() == VideoEncoding.mjpeg.rawValue {
+            // Release previous stream if URL changed
+            if let currentStreamUrl, currentStreamUrl != newUrl {
+                VideoStreamManager.shared.releaseStream(for: currentStreamUrl)
+            }
+
+            if let newUrl {
+                currentStreamUrl = newUrl
+                mjpegPlayer = VideoStreamManager.shared.getOrCreateStream(
+                    for: newUrl,
+                    imageView: mainImageView,
+                    onFirstFrame: { [weak self] aspectRatio in
+                        guard let self else { return }
+                        activityIndicator.isHidden = true
+                        if currentAspectRatio != aspectRatio {
+                            updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
+                            currentAspectRatio = aspectRatio
+                            didLoad?()
+                        }
+                    },
+                    onError: { [weak self] error in
+                        guard let self else { return }
+                        Logger.widgets.error("Failed to start MJPEG stream: \(error.localizedDescription)")
+                        activityIndicator.isHidden = true
+                        activityIndicator.stopAnimating()
+                    }
+                )
+
+                // Set initial aspect ratio for MJPEG
+                updateAspectRatio(forView: mainImageView, aspectRatio: 16.0 / 9.0)
+
+                // Start activity indicator
+                bringSubviewToFront(activityIndicator)
+                activityIndicator.isHidden = false
+                activityIndicator.startAnimating()
+                bringSubviewToFront(mainImageView)
+            }
+        } else {
+            // Handle HLS and other video formats as before
+            if url?.absoluteString != newUrl?.absoluteString {
+                url = newUrl
+            }
+            let targetView = playerView!
+            updateAspectRatio(forView: targetView, aspectRatio: 16.0 / 9.0)
+        }
     }
 
     func play() {
         switch widget.encoding.lowercased() {
         case VideoEncoding.mjpeg.rawValue:
-            playMjpegStream()
+            // MJPEG streams are already managed by VideoStreamManager in displayWidget()
+            break
         default:
             playerView.player?.play()
         }
@@ -157,35 +204,6 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         }
     }
 
-    private func setupMJPEGPlayer() {
-        mjpegPlayer = SimpleMJPEGPlayer(imageView: mainImageView)
-        mjpegPlayer?.onFirstFrame = { [weak self] aspectRatio in
-            guard let self else { return }
-            activityIndicator.isHidden = true
-            if currentAspectRatio != aspectRatio {
-                updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
-                currentAspectRatio = aspectRatio
-                didLoad?()
-            }
-        }
-        mjpegPlayer?.onError = { [weak self] error in
-            guard let self else { return }
-            Logger.widgets.error("Failed to start MJPEG stream: \(error.localizedDescription)")
-            activityIndicator.isHidden = true
-            activityIndicator.stopAnimating()
-        }
-    }
-
-    private func playMjpegStream() {
-        guard let url else {
-            stopPlayback()
-            return
-        }
-
-        bringSubviewToFront(mainImageView)
-        mjpegPlayer?.play(url: url)
-    }
-
     // Add or update the aspect ratio constraint for the given view
     private func updateAspectRatio(forView view: UIView, aspectRatio: CGFloat) {
         // Remove the old aspect ratio constraint if it exists
@@ -206,13 +224,17 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
     @objc
     private func stopPlayback(andResetUrl reset: Bool = true) {
-        // Increment the stream token to invalidate any running MJPEG stream tasks
-        if reset {
-            url = nil
+        // For MJPEG streams, don't stop the shared stream - just clear our reference
+        if widget?.encoding.lowercased() == VideoEncoding.mjpeg.rawValue {
+            mjpegPlayer = nil
+        } else {
+            // For HLS and other formats, stop as usual
+            if reset {
+                url = nil
+            }
+            playerObserver = nil
+            playerView?.playerLayer.player = nil
         }
-        playerObserver = nil
-        playerView?.playerLayer.player = nil
-        mjpegPlayer?.stop()
         currentAspectRatio = nil
     }
 }

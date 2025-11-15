@@ -19,13 +19,23 @@ final class SimpleMJPEGPlayer {
     private var streamTask: URLSessionDataTask?
     private var httpClient: HTTPClient?
     private var delegate: SimpleMJPEGStreamDelegate?
-    private let imageView: UIImageView
+    private var imageView: UIImageView
 
     var onFirstFrame: ((CGFloat) -> Void)?
     var onError: ((any Error) -> Void)?
 
     init(imageView: UIImageView) {
         self.imageView = imageView
+    }
+
+    func updateImageView(_ newImageView: UIImageView, onFirstFrame: ((CGFloat) -> Void)? = nil, onError: ((any Error) -> Void)? = nil) {
+        imageView = newImageView
+        if let onFirstFrame {
+            self.onFirstFrame = onFirstFrame
+        }
+        if let onError {
+            self.onError = onError
+        }
     }
 
     func play(url: URL) {
