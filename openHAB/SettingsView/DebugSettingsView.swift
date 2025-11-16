@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Combine
+import CommonUI
 import OpenHABCore
 import os.log
 import SafariServices
@@ -57,7 +58,7 @@ struct DebugSettingsView: View {
             }
         Section(header: Text(LocalizedStringKey("debug"))) {
             NavigationLink {
-                LoggerView()
+                LogsViewer()
             } label: {
                 Text("Logs")
             }
