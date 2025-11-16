@@ -2,10 +2,6 @@
 
 ## [Unreleased]
 
-## [Version 3.2.0, Build 90] - 2025-11-16Z
-
-- Make mjpeg handling work again (#1004)
-
 ## [Version 3.1.33, Build 89] - 2025-11-06Z
 
 - Saving Preferences for Search (#1001)
