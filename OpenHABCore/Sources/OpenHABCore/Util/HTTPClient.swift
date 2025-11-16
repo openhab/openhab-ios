@@ -224,27 +224,64 @@ public final class HTTPClient: NSObject, Sendable {
         case download
         case data
         case bytes
+        case mjpegStream
     }
 
     // this can be changed if we detect another server
     public let baseURL: URL?
 
-    private let configuration: ConnectionConfiguration
+    private let connectionConfiguration: ConnectionConfiguration
     public let session: URLSession
-    public let delegate: HTTPClientDelegate
+    public let sessionConfiguration: URLSessionConfiguration
+    public let delegate: (any URLSessionDelegate)?
 
-    public init(baseURL: URL? = nil, configuration: ConnectionConfiguration) {
-        self.configuration = configuration
+    /// Creates HTTPClient with default session configuration and HTTPClientDelegate
+    public convenience init(baseURL: URL? = nil, connectionConfiguration: ConnectionConfiguration) {
+        self.init(
+            baseURL: baseURL,
+            connectionConfiguration: connectionConfiguration,
+            sessionConfiguration: .default,
+            delegate: HTTPClientDelegate(with: connectionConfiguration)
+        )
+    }
+
+    /// Creates HTTPClient with custom session configuration and optional delegate
+    public init(baseURL: URL? = nil, connectionConfiguration: ConnectionConfiguration, sessionConfiguration: URLSessionConfiguration,
+                delegate: (any URLSessionDelegate)? = nil) {
         self.baseURL = baseURL
-        delegate = HTTPClientDelegate(with: configuration)
-        let config = URLSessionConfiguration.default
-        session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
+        self.delegate = delegate
+        self.connectionConfiguration = connectionConfiguration
+        self.sessionConfiguration = sessionConfiguration
+        session = URLSession(
+            configuration: sessionConfiguration,
+            delegate: delegate,
+            delegateQueue: nil
+        )
         super.init()
     }
 
-    public func processStream(url: URL) async throws -> (URLSession.AsyncBytes, URLResponse) {
+    /// Creates HTTPClient optimized for streaming with modified session configuration
+    public convenience init(streamingWith sessionConfiguration: URLSessionConfiguration,
+                            baseURL: URL? = nil,
+                            connectionConfiguration: ConnectionConfiguration,
+                            delegate: (any URLSessionDelegate)? = nil) {
+        let streamingSessionConfiguration = (sessionConfiguration.copy() as? URLSessionConfiguration) ?? .ephemeral
+        streamingSessionConfiguration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        streamingSessionConfiguration.timeoutIntervalForRequest = 0
+        streamingSessionConfiguration.waitsForConnectivity = true
+        streamingSessionConfiguration.urlCache = nil
+
+        self.init(
+            baseURL: baseURL,
+            connectionConfiguration: connectionConfiguration,
+            sessionConfiguration: streamingSessionConfiguration,
+            delegate: delegate
+        )
+    }
+
+    public func processStream(url: URL) async throws -> (Data, URLResponse) {
         do {
-            return try await doRequest(baseURL: url, type: .bytes)
+            return try await doRequest(baseURL: url, type: .mjpegStream)
         } catch {
             Logger.httpClient.error("Failed to fetch MJPEG stream: \(error.localizedDescription)")
             throw HTTPClientError.failedtoFetchMJPEG
@@ -326,6 +363,10 @@ public final class HTTPClient: NSObject, Sendable {
             request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
         }
 
+        if type == .mjpegStream {
+            request.setValue("multipart/x-mixed-replace", forHTTPHeaderField: "Accept")
+        }
+
         if cacheingPolicy != .useProtocolCachePolicy {
             request.cachePolicy = cacheingPolicy
         }
@@ -346,9 +387,9 @@ public final class HTTPClient: NSObject, Sendable {
     private func performRequest<T>(request: URLRequest, type: SessionType = .data) async throws -> (T, URLResponse) {
         var request = request
 
-        let username = configuration.username
-        let password = configuration.password
-        let alwaysSendBasicAuth = configuration.alwaysSendBasicAuth
+        let username = connectionConfiguration.username
+        let password = connectionConfiguration.password
+        let alwaysSendBasicAuth = connectionConfiguration.alwaysSendBasicAuth
 
         if request.url?.host?.hasSuffix("myopenhab.org") == true || alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
             request.setValue(basicAuthHeader(username: username, password: password), forHTTPHeaderField: "Authorization")
@@ -360,7 +401,9 @@ public final class HTTPClient: NSObject, Sendable {
         case .data:
             return try await session.data(for: request) as! (T, URLResponse)
         case .bytes:
-            return try await session.bytes(for: request) as! (T, URLResponse)
+            return try await session.bytes(for: request, delegate: nil) as! (T, URLResponse)
+        case .mjpegStream:
+            return try await session.data(for: request) as! (T, URLResponse)
         }
     }
 }
