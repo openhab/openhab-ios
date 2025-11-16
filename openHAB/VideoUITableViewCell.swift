@@ -47,9 +47,11 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         activityIndicator.hidesWhenStopped = true
         playerView = PlayerView()
+        playerView.isHidden = true // Start hidden, will be shown when needed
         contentView.addSubview(playerView)
         mainImageView = UIImageView()
         mainImageView.contentMode = .scaleAspectFit
+        mainImageView.isHidden = true // Start hidden, will be shown when needed
         contentView.addSubview(mainImageView)
         contentView.addSubview(activityIndicator)
 
@@ -103,11 +105,42 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         }
     }
 
+    override func prepareForReuse() {
+        super.prepareForReuse()
+
+        // Clean up any previous state
+        stopPlayback()
+        if let currentStreamUrl {
+            VideoStreamManager.shared.releaseStream(for: currentStreamUrl)
+            self.currentStreamUrl = nil
+        }
+        mjpegPlayer = nil
+        currentAspectRatio = nil
+
+        // Reset view states
+        mainImageView.image = nil
+        mainImageView.isHidden = true
+        playerView.isHidden = true
+        activityIndicator.stopAnimating()
+        activityIndicator.isHidden = true
+
+        // Remove aspect ratio constraint
+        if let aspectRatioConstraint {
+            aspectRatioConstraint.isActive = false
+            self.aspectRatioConstraint = nil
+        }
+    }
+
     override func displayWidget() {
         let newUrl = URL(string: widget.url)
 
         // Handle MJPEG streams with VideoStreamManager
         if widget.encoding.lowercased() == VideoEncoding.mjpeg.rawValue {
+            // Stop any HLS playback and hide player view
+            playerView?.playerLayer.player = nil
+            playerView.isHidden = true
+            mainImageView.isHidden = false
+
             // Only process if URL has changed, similar to HLS handling
             if currentStreamUrl?.absoluteString != newUrl?.absoluteString {
                 // Release previous stream if URL changed
@@ -150,7 +183,17 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                 }
             }
         } else {
-            // Handle HLS and other video formats as before
+            // Handle HLS and other video formats
+            // Clear any MJPEG stream and hide image view
+            if let currentStreamUrl {
+                VideoStreamManager.shared.releaseStream(for: currentStreamUrl)
+                self.currentStreamUrl = nil
+            }
+            mjpegPlayer = nil
+            mainImageView.image = nil
+            mainImageView.isHidden = true
+            playerView.isHidden = false
+
             if url?.absoluteString != newUrl?.absoluteString {
                 url = newUrl
             }
@@ -181,6 +224,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         }
 
         if widget.encoding.lowercased() != VideoEncoding.mjpeg.rawValue {
+            Logger.videoProcessing.info("Loading HLS video from: \(url.absoluteString)")
             bringSubviewToFront(playerView)
             let playerItem = AVPlayerItem(asset: AVAsset(url: url))
             playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] playerItem, _ in

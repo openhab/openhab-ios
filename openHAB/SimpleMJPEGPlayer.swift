@@ -77,6 +77,7 @@ final class SimpleMJPEGPlayer {
         streamTask = nil
         httpClient = nil
         delegate = nil
-        imageView.image = nil
+        // Don't clear the image view when stopping - this allows sharing between cells
+        // The VideoStreamManager will handle proper cleanup
     }
 }
