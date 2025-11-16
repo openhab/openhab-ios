@@ -38,9 +38,11 @@ final class BonjourDiscoveryViewModel: ObservableObject {
     @Published public var isDiscovering = false
 
     private var browsers: [BonjourServiceType: NWBrowser] = [:]
-    private var timeoutTasks: [BonjourServiceType: DispatchWorkItem] = [:]
+    private var timeoutTasks: [BonjourServiceType: Task<Void, Never>] = [:]
+    private var pendingResolutions: Set<String> = []
+    // Removed discoveredServers deduplication as it was preventing multiple addresses for same service
     private let logger = Logger(subsystem: "org.openhab", category: "BonjourDiscovery")
-    private let timeoutInterval: TimeInterval = 15
+    private let timeoutInterval: TimeInterval = 20
 
     public init() {}
 
@@ -51,6 +53,7 @@ final class BonjourDiscoveryViewModel: ObservableObject {
     private func timeout(serviceType: BonjourServiceType) {
         browsers[serviceType]?.cancel()
         browsers[serviceType] = nil
+        timeoutTasks[serviceType]?.cancel()
         timeoutTasks[serviceType] = nil
     }
 
@@ -60,6 +63,7 @@ final class BonjourDiscoveryViewModel: ObservableObject {
 
     func resetDiscoveredUrls() {
         discoveredURLs.removeAll()
+        pendingResolutions.removeAll()
     }
 }
 
@@ -72,37 +76,51 @@ extension BonjourDiscoveryViewModel {
         isDiscovering = true
         if attempt == 1 {
             discoveredURLs.removeAll()
+            pendingResolutions.removeAll()
         }
         stopAllDiscovery()
 
         var completedDiscoveries = 0
+        var discoveryCompleted = false
         let totalDiscoveries = 2
 
         let checkCompletion: @Sendable () -> Void = {
-            // we do not want to return the task, but some linting tool removes a manual return statement if there is nothing else in this closure
             self.logger.trace("checkCompletion")
             Task { @MainActor in
-                completedDiscoveries += 1
-                self.logger.debug("Discovery completed: \(completedDiscoveries)/\(totalDiscoveries) (attempt \(attempt))")
-                if completedDiscoveries >= totalDiscoveries {
-                    let foundCount = self.discoveredURLs.count
-                    let uniqueIPs = Set(self.discoveredURLs.compactMap { URL(string: $0)?.host }).count
+                guard !discoveryCompleted else { return }
 
-                    if foundCount == 0, attempt < maxAttempts {
-                        self.logger.info("🔄 No servers found on attempt \(attempt), retrying...")
-                        Task {
-                            try await Task.sleep(for: .seconds(2))
-                            self.discoverAllWithRetry(attempt: attempt + 1, maxAttempts: maxAttempts)
-                        }
-                    } else {
-                        self.stopDiscovering()
-                        if foundCount > 0 {
-                            self.logger.info("🎉 Discovery completed after \(attempt) attempt(s). Found \(foundCount) server(s) on \(uniqueIPs) IP(s)")
-                            for url in self.discoveredURLs {
-                                self.logger.info("  📍 \(url, privacy: .public)")
+                completedDiscoveries += 1
+                self.logger.debug("Discovery browsing completed: \(completedDiscoveries)/\(totalDiscoveries) (attempt \(attempt))")
+                if completedDiscoveries >= totalDiscoveries {
+                    // Wait a bit more for pending hostname resolutions to complete
+                    self.logger.debug("All browsers finished, waiting for pending resolutions: \(self.pendingResolutions.count)")
+                    Task {
+                        // Wait up to 8 more seconds for hostname resolutions
+                        for i in 1 ... 8 {
+                            do {
+                                try await Task.sleep(for: .seconds(1))
+                            } catch {
+                                break
                             }
-                        } else {
-                            self.logger.info("🔍 Discovery completed after \(attempt) attempt(s). No openHAB servers found.")
+                            let shouldComplete = await MainActor.run {
+                                self.pendingResolutions.isEmpty && !discoveryCompleted
+                            }
+                            if shouldComplete {
+                                await MainActor.run {
+                                    discoveryCompleted = true
+                                    self.logger.debug("All resolutions completed after \(i) second(s)")
+                                    self.completeDiscovery(attempt: attempt, maxAttempts: maxAttempts)
+                                }
+                                return
+                            }
+                        }
+                        // Force completion after timeout
+                        await MainActor.run {
+                            if !discoveryCompleted {
+                                discoveryCompleted = true
+                                self.logger.debug("Resolution timeout reached, completing with \(self.pendingResolutions.count) pending")
+                                self.completeDiscovery(attempt: attempt, maxAttempts: maxAttempts)
+                            }
                         }
                     }
                 }
@@ -114,8 +132,31 @@ extension BonjourDiscoveryViewModel {
         discover(using: .http, completion: checkCompletion)
     }
 
-    public func discoverSequentially() {
-        discoverAll()
+    private func completeDiscovery(attempt: Int, maxAttempts: Int) {
+        let foundCount = discoveredURLs.count
+        let uniqueIPs = Set(discoveredURLs.compactMap { URL(string: $0)?.host }).count
+
+        if foundCount == 0, attempt < maxAttempts {
+            logger.info("🔄 No servers found on attempt \(attempt), retrying...")
+            Task {
+                do {
+                    try await Task.sleep(for: .seconds(2))
+                } catch {
+                    return
+                }
+                discoverAllWithRetry(attempt: attempt + 1, maxAttempts: maxAttempts)
+            }
+        } else {
+            stopDiscovering()
+            if foundCount > 0 {
+                logger.info("🎉 Discovery completed after \(attempt) attempt(s). Found \(foundCount) server(s) on \(uniqueIPs) IP(s)")
+                for url in discoveredURLs {
+                    logger.info("  📍 \(url, privacy: .public)")
+                }
+            } else {
+                logger.info("🔍 Discovery completed after \(attempt) attempt(s). No openHAB servers found.")
+            }
+        }
     }
 
     private func discover(using serviceType: BonjourServiceType, completion: @Sendable @escaping () -> Void) {
@@ -155,8 +196,13 @@ extension BonjourDiscoveryViewModel {
             case .ready:
                 logger.info("🌐 NWBrowser ready for \(serviceType.rawValue, privacy: .public)")
             case let .failed(error):
-                logger.error("❌ NWBrowser failed: \(error.localizedDescription, privacy: .public)")
-                completion()
+                logger.error("❌ NWBrowser failed for \(serviceType.rawValue, privacy: .public): \(error.localizedDescription, privacy: .public)")
+
+                // Don't call completion here immediately, let the timeout handle it
+                // This prevents premature completion when one browser fails but the other succeeds
+                Task { @MainActor in
+                    timeout(serviceType: serviceType)
+                }
             default:
                 break
             }
@@ -166,13 +212,21 @@ extension BonjourDiscoveryViewModel {
 
         // Timeout with individual tracking
         let timeoutInterval = timeoutInterval
-        Task { [weak self] in
-            try await Task.sleep(for: .seconds(timeoutInterval))
+        let timeoutTask = Task { [weak self] in
+            do {
+                try await Task.sleep(for: .seconds(timeoutInterval))
+            } catch {
+                return
+            }
             guard let self else { return }
-            timeout(serviceType: serviceType)
-            logger.info("⏱️ Discovery for \(serviceType.rawValue, privacy: .public) completed.")
-            completion()
+            await MainActor.run {
+                logger.debug("🕐 Timeout reached for \(serviceType.rawValue, privacy: .public), pending resolutions: \(self.pendingResolutions.count)")
+                timeout(serviceType: serviceType)
+                logger.info("⏱️ Discovery for \(serviceType.rawValue, privacy: .public) completed.")
+                completion()
+            }
         }
+        timeoutTasks[serviceType] = timeoutTask
     }
 
     private func stopAllDiscovery() {
@@ -185,6 +239,7 @@ extension BonjourDiscoveryViewModel {
             task.cancel()
         }
         timeoutTasks.removeAll()
+        pendingResolutions.removeAll()
     }
 
     private func resolve(endpoint: NWEndpoint, scheme: String) {
@@ -193,16 +248,38 @@ extension BonjourDiscoveryViewModel {
             return
         }
 
+        // Normalize service name to prevent duplicates from numbered instances like "openhab-ssl (1)", "openhab-ssl (2)"
+        let normalizedName = name.replacingOccurrences(of: #" \(\d+\)"#, with: "", options: .regularExpression)
+        let serviceKey = "\(normalizedName).\(type).\(domain)"
+
+        pendingResolutions.insert(serviceKey)
         logger.debug("🔍 Resolving \(scheme, privacy: .public) service: \(name, privacy: .public) (\(type, privacy: .public))")
         let serviceEndpoint = NWEndpoint.service(name: name, type: type, domain: domain, interface: nil)
 
         let parameters = NWParameters.tcp
         parameters.includePeerToPeer = true
+        parameters.requiredInterfaceType = .other // Allow all interface types (wifi, ethernet, etc.)
 
         let connection = NWConnection(to: serviceEndpoint, using: parameters)
 
+        // Add connection timeout
+        Task {
+            do {
+                try await Task.sleep(for: .seconds(10)) // 10 second timeout for individual connections
+            } catch {
+                return
+            }
+            logger.warning("⏰ Connection timeout for \(serviceKey, privacy: .public)")
+            Task { @MainActor in
+                pendingResolutions.remove(serviceKey)
+            }
+            connection.cancel()
+        }
+
         connection.stateUpdateHandler = { [weak self] state in
             guard let self else { return }
+
+            logger.debug("🔗 Connection state for \(serviceKey, privacy: .public): \(String(describing: state))")
 
             if case .ready = state,
                let resolved = connection.currentPath?.remoteEndpoint,
@@ -210,29 +287,63 @@ extension BonjourDiscoveryViewModel {
                 switch host {
                 case let .ipv4(addr):
                     let ip = addr.debugDescription.components(separatedBy: "%").first ?? addr.debugDescription
-                    logger.debug("🌐 Got ipv4: \(ip, privacy: .public)")
-                    Task {
-                        await emitURL(scheme: scheme, ip: ip, port: port)
+                    logger.debug("🌐 Got IPv4: \(ip, privacy: .public)")
+                    Task { @MainActor in
+                        emitURL(scheme: scheme, ip: ip, port: port)
+                        pendingResolutions.remove(serviceKey)
+                    }
+
+                case let .ipv6(addr):
+                    let ip = addr.debugDescription.components(separatedBy: "%").first ?? addr.debugDescription
+
+                    // Skip link-local and localhost IPv6 addresses
+                    if !ip.hasPrefix("fe80:"), !ip.hasPrefix("::1"), !ip.hasPrefix("fc00:"), !ip.hasPrefix("fd") {
+                        logger.debug("🌐 Got IPv6: \(ip, privacy: .public)")
+                        Task { @MainActor in
+                            emitURL(scheme: scheme, ip: "[\(ip)]", port: port) // IPv6 needs brackets in URLs
+                            pendingResolutions.remove(serviceKey)
+                        }
+                    } else {
+                        logger.debug("⚪ Skipped link-local IPv6: \(ip, privacy: .public)")
+                        Task { @MainActor in
+                            pendingResolutions.remove(serviceKey)
+                        }
                     }
 
                 case let .name(hostname, _):
                     logger.debug("🌐 Got hostname: \(hostname, privacy: .public)")
 
-                    Task {
-                        let addresses = await resolveHostWithGetAddrInfo(hostname: hostname)
-                        if let ip = addresses.first {
-                            await emitURL(scheme: scheme, ip: ip, port: port)
-                            logger.notice("🔗 Resolved hostname to IPv4: \(ip, privacy: .public)")
-                        } else {
+                    Task { @MainActor in
+                        let addresses = resolveHostWithGetAddrInfo(hostname: hostname)
+                        if addresses.isEmpty {
                             logger.warning("⚠️ Could not resolve hostname: \(hostname, privacy: .public)")
+                        } else {
+                            for ip in addresses {
+                                emitURL(scheme: scheme, ip: ip, port: port)
+                                let addressType = ip.contains(":") ? "IPv6" : "IPv4"
+                                logger.notice("🔗 Resolved hostname to \(addressType): \(ip, privacy: .public)")
+                            }
+                            logger.info("🌐 Resolved hostname '\(hostname, privacy: .public)' to \(addresses.count) address(es)")
                         }
+                        pendingResolutions.remove(serviceKey)
                     }
 
                 default:
                     logger.debug("❌ Unsupported host: \(String(describing: host))")
+                    Task { @MainActor in
+                        pendingResolutions.remove(serviceKey)
+                    }
                 }
 
                 connection.cancel()
+            } else if case let .failed(error) = state {
+                logger.warning("❌ Connection failed for \(serviceKey, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                Task { @MainActor in
+                    pendingResolutions.remove(serviceKey)
+                }
+                connection.cancel()
+            } else if case let .waiting(error) = state {
+                logger.debug("⏳ Connection waiting for \(serviceKey, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
         }
 
@@ -242,7 +353,7 @@ extension BonjourDiscoveryViewModel {
     func resolveHostWithGetAddrInfo(hostname: String) -> [String] {
         var hints = addrinfo(
             ai_flags: AI_PASSIVE,
-            ai_family: AF_INET,
+            ai_family: AF_UNSPEC, // Allow both IPv4 and IPv6
             ai_socktype: SOCK_STREAM,
             ai_protocol: 0,
             ai_addrlen: 0,
@@ -266,14 +377,33 @@ extension BonjourDiscoveryViewModel {
                     if let endIndex = buffer.firstIndex(of: 0) {
                         let slice = buffer[..<endIndex].map { UInt8(bitPattern: $0) }
                         if let host = String(bytes: slice, encoding: .utf8) {
-                            result.append(host)
+                            // Filter out link-local and localhost addresses
+                            if !host.hasPrefix("fe80:"), !host.hasPrefix("127."), !host.hasPrefix("::1"),
+                               !host.hasPrefix("fc00:"), !host.hasPrefix("fd") {
+                                // Format IPv6 addresses with brackets for URL compatibility
+                                if host.contains(":"), !host.hasPrefix("[") {
+                                    result.append("[\(host)]")
+                                } else {
+                                    result.append(host)
+                                }
+                            }
                         }
                     } else {
                         // No null terminator found; attempt to decode entire buffer safely
                         let bytes = buffer.map { UInt8(bitPattern: $0) }
                         if let host = String(bytes: bytes, encoding: .utf8) {
                             // Trim any trailing control characters just in case
-                            result.append(host.trimmingCharacters(in: .controlCharacters))
+                            let cleanHost = host.trimmingCharacters(in: .controlCharacters)
+                            // Filter out unwanted addresses
+                            if !cleanHost.hasPrefix("fe80:"), !cleanHost.hasPrefix("127."), !cleanHost.hasPrefix("::1"),
+                               !cleanHost.hasPrefix("fc00:"), !cleanHost.hasPrefix("fd") {
+                                // Format IPv6 addresses with brackets for URL compatibility
+                                if cleanHost.contains(":"), !cleanHost.hasPrefix("[") {
+                                    result.append("[\(cleanHost)]")
+                                } else {
+                                    result.append(cleanHost)
+                                }
+                            }
                         }
                     }
                 }
@@ -293,15 +423,22 @@ extension BonjourDiscoveryViewModel {
             addDiscoveredUrl(url)
             logger.notice("🌍 Discovered server: \(url, privacy: .public)")
 
-            // Check for multiple servers on same IP
-            let existingOnSameIP = discoveredURLs.filter { existingURL in
+            // Group by server (inspired by flametouch AddressCluster approach)
+            let serversOnSameIP = discoveredURLs.filter { existingURL in
                 guard let existingHost = URL(string: existingURL)?.host,
                       let newHost = URL(string: url)?.host else { return false }
-                return existingHost == newHost && existingURL != url
+                return existingHost == newHost
             }
 
-            if !existingOnSameIP.isEmpty {
-                logger.info("🏠 Multiple servers found on IP \(ip, privacy: .public): \(existingOnSameIP.count + 1) total")
+            if serversOnSameIP.count > 1 {
+                let httpUrls = serversOnSameIP.filter { $0.hasPrefix("http://") }
+                let httpsUrls = serversOnSameIP.filter { $0.hasPrefix("https://") }
+
+                logger.info("🏠 Server cluster on IP \(ip, privacy: .public): HTTP=\(httpUrls.count), HTTPS=\(httpsUrls.count)")
+
+                if !httpUrls.isEmpty, !httpsUrls.isEmpty {
+                    logger.info("✅ Complete openHAB server found on \(ip, privacy: .public) (both HTTP & HTTPS)")
+                }
             }
         } else {
             logger.debug("🔄 Duplicate URL ignored: \(url, privacy: .public)")

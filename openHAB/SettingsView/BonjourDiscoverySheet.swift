@@ -72,7 +72,7 @@ struct BonjourDiscoverySheet: View {
         }
         .task {
             discovery.resetDiscoveredUrls()
-            discovery.discoverSequentially()
+            discovery.discoverAll()
         }
     }
 }
