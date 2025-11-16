@@ -460,7 +460,7 @@ class OpenHABRootViewController: UIViewController {
     private func registerHome(_ uuid: UUID, _ config: ConnectionConfiguration, _ deviceToken: String, _ deviceId: String, _ deviceName: String) -> Task<Void, Never> {
         Task {
             do {
-                let client = HTTPClient(configuration: config)
+                let client = HTTPClient(connectionConfiguration: config)
                 if let cloudUserId = try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) {
                     Preferences.shared.setCloudUserId(cloudUserId, for: uuid)
                     Logger.viewController.info("my.openHAB registration succeeded with cloudUserId \(cloudUserId)")

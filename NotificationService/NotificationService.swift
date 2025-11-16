@@ -191,7 +191,7 @@ actor NotificationServiceHandler {
 
         guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return (nil, nil) }
 
-        let client = HTTPClient(configuration: activeConfig)
+        let client = HTTPClient(connectionConfiguration: activeConfig)
 
         let (localURL, urlResponse) = try await client.downloadFile(url: fullURL)
         return (localURL, urlResponse.mimeType)

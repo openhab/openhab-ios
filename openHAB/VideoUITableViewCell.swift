@@ -108,41 +108,46 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         // Handle MJPEG streams with VideoStreamManager
         if widget.encoding.lowercased() == VideoEncoding.mjpeg.rawValue {
-            // Release previous stream if URL changed
-            if let currentStreamUrl, currentStreamUrl != newUrl {
-                VideoStreamManager.shared.releaseStream(for: currentStreamUrl)
-            }
+            // Only process if URL has changed, similar to HLS handling
+            if currentStreamUrl?.absoluteString != newUrl?.absoluteString {
+                // Release previous stream if URL changed
+                if let currentStreamUrl {
+                    VideoStreamManager.shared.releaseStream(for: currentStreamUrl)
+                }
 
-            if let newUrl {
-                currentStreamUrl = newUrl
-                mjpegPlayer = VideoStreamManager.shared.getOrCreateStream(
-                    for: newUrl,
-                    imageView: mainImageView,
-                    onFirstFrame: { [weak self] aspectRatio in
-                        guard let self else { return }
-                        activityIndicator.isHidden = true
-                        if currentAspectRatio != aspectRatio {
-                            updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
-                            currentAspectRatio = aspectRatio
-                            didLoad?()
+                if let newUrl {
+                    currentStreamUrl = newUrl
+                    mjpegPlayer = VideoStreamManager.shared.getOrCreateStream(
+                        for: newUrl,
+                        imageView: mainImageView,
+                        onFirstFrame: { [weak self] aspectRatio in
+                            guard let self else { return }
+                            activityIndicator.isHidden = true
+                            if currentAspectRatio != aspectRatio {
+                                updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
+                                currentAspectRatio = aspectRatio
+                                didLoad?()
+                            }
+                        },
+                        onError: { [weak self] error in
+                            guard let self else { return }
+                            Logger.widgets.error("Failed to start MJPEG stream: \(error.localizedDescription)")
+                            activityIndicator.isHidden = true
+                            activityIndicator.stopAnimating()
                         }
-                    },
-                    onError: { [weak self] error in
-                        guard let self else { return }
-                        Logger.widgets.error("Failed to start MJPEG stream: \(error.localizedDescription)")
-                        activityIndicator.isHidden = true
-                        activityIndicator.stopAnimating()
-                    }
-                )
+                    )
 
-                // Set initial aspect ratio for MJPEG
-                updateAspectRatio(forView: mainImageView, aspectRatio: 16.0 / 9.0)
+                    // Set initial aspect ratio for MJPEG
+                    updateAspectRatio(forView: mainImageView, aspectRatio: 16.0 / 9.0)
 
-                // Start activity indicator
-                bringSubviewToFront(activityIndicator)
-                activityIndicator.isHidden = false
-                activityIndicator.startAnimating()
-                bringSubviewToFront(mainImageView)
+                    // Start activity indicator
+                    bringSubviewToFront(activityIndicator)
+                    activityIndicator.isHidden = false
+                    activityIndicator.startAnimating()
+                    bringSubviewToFront(mainImageView)
+                } else {
+                    currentStreamUrl = nil
+                }
             }
         } else {
             // Handle HLS and other video formats as before
@@ -217,7 +222,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         // Add a new aspect ratio constraint
         let constraint = view.widthAnchor.constraint(equalTo: view.heightAnchor, multiplier: aspectRatio)
-        constraint.priority = UILayoutPriority(rawValue: 998) // Lower than ScaleAspectFitImageView's 999
+        constraint.priority = UILayoutPriority(rawValue: 998) // Lower than UIImageView's 999
         constraint.isActive = true
         aspectRatioConstraint = constraint
     }

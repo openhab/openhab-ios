@@ -149,7 +149,7 @@ extension NotificationsView where Tracker == MainActorNetworkTracker {
                     return []
                 }
 
-                let client = HTTPClient(configuration: config)
+                let client = HTTPClient(connectionConfiguration: config)
                 return try await client.notification(urlString: config.url)
             } catch {
                 Logger.notificationService.error("Failed to load notifications: \(error.localizedDescription, privacy: .public)")

@@ -235,16 +235,17 @@ public final class HTTPClient: NSObject, Sendable {
     public let sessionConfiguration: URLSessionConfiguration
     public let delegate: (any URLSessionDelegate)?
 
-    public init(baseURL: URL? = nil, configuration: ConnectionConfiguration) {
-        connectionConfiguration = configuration
-        self.baseURL = baseURL
-        delegate = HTTPClientDelegate(with: configuration)
-        sessionConfiguration = .default
-        session = URLSession(configuration: sessionConfiguration, delegate: delegate, delegateQueue: nil)
-        super.init()
+    /// Creates HTTPClient with default session configuration and HTTPClientDelegate
+    public convenience init(baseURL: URL? = nil, connectionConfiguration: ConnectionConfiguration) {
+        self.init(
+            baseURL: baseURL,
+            connectionConfiguration: connectionConfiguration,
+            sessionConfiguration: .default,
+            delegate: HTTPClientDelegate(with: connectionConfiguration)
+        )
     }
 
-    /// Your normal client for requests that may need pinning/auth/etc.
+    /// Creates HTTPClient with custom session configuration and optional delegate
     public init(baseURL: URL? = nil, connectionConfiguration: ConnectionConfiguration, sessionConfiguration: URLSessionConfiguration,
                 delegate: (any URLSessionDelegate)? = nil) {
         self.baseURL = baseURL
@@ -256,16 +257,26 @@ public final class HTTPClient: NSObject, Sendable {
             delegate: delegate,
             delegateQueue: nil
         )
+        super.init()
     }
 
-    public convenience init(streamingWith: URLSessionConfiguration, connectionConfiguration: ConnectionConfiguration, delegate: (any URLSessionDelegate)? = nil) {
-        let sessionConfiguration = (streamingWith.copy() as? URLSessionConfiguration) ?? .ephemeral
-        sessionConfiguration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
-        sessionConfiguration.timeoutIntervalForRequest = 0
-        sessionConfiguration.waitsForConnectivity = true
-        sessionConfiguration.urlCache = nil
+    /// Creates HTTPClient optimized for streaming with modified session configuration
+    public convenience init(streamingWith sessionConfiguration: URLSessionConfiguration,
+                            baseURL: URL? = nil,
+                            connectionConfiguration: ConnectionConfiguration,
+                            delegate: (any URLSessionDelegate)? = nil) {
+        let streamingSessionConfiguration = (sessionConfiguration.copy() as? URLSessionConfiguration) ?? .ephemeral
+        streamingSessionConfiguration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        streamingSessionConfiguration.timeoutIntervalForRequest = 0
+        streamingSessionConfiguration.waitsForConnectivity = true
+        streamingSessionConfiguration.urlCache = nil
 
-        self.init(connectionConfiguration: connectionConfiguration, sessionConfiguration: sessionConfiguration, delegate: delegate)
+        self.init(
+            baseURL: baseURL,
+            connectionConfiguration: connectionConfiguration,
+            sessionConfiguration: streamingSessionConfiguration,
+            delegate: delegate
+        )
     }
 
     public func processStream(url: URL) async throws -> (Data, URLResponse) {
