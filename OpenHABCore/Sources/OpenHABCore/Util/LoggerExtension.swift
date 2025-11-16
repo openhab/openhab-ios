@@ -74,6 +74,8 @@ public extension Logger {
 
     static let userData = Logger(subsystem: subsystem, category: "UserData")
 
+    static let videoProcessing = Logger(subsystem: subsystem, category: "VideoProcessing")
+
     static let viewController = Logger(subsystem: subsystem, category: "viewController")
 
     static let widgets = Logger(subsystem: subsystem, category: "Widgets")

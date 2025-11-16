@@ -195,7 +195,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                     Logger.widgets.warning("No openHAB connection found.")
                     throw HTTPClientError.noConfiguration
                 }
-                let client = HTTPClient(configuration: config)
+                let client = HTTPClient(connectionConfiguration: config)
                 let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, timeout: 10.0, type: .data, cacheingPolicy: !shouldCache ? .reloadIgnoringCacheData : .useProtocolCachePolicy)
                 await MainActor.run {
                     self.cachedImage = UIImage(data: data)
