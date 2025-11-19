@@ -26,12 +26,11 @@ public enum OpenHABIntentHelper {
             } else {
                 // Fallback to first available home if requested home doesn't exist
                 Logger.intentHandling.warning("Home \(homeId) not found for resolveHome. Available homes: \(storedHomes.keys)")
-                guard let firstHome = storedHomes.first else {
-                    Logger.intentHandling.error("No homes available at all!")
+                guard let resolvedHomeId = await resolveHomeId(homeId),
+                      let homeValue = storedHomes[resolvedHomeId] else {
                     return .unsupported()
                 }
-                Logger.intentHandling.info("Falling back to first available home: \(firstHome.key)")
-                let fallbackHome = await OpenHABHome(homeId: firstHome.value.id, homeName: firstHome.value.homeName)
+                let fallbackHome = await OpenHABHome(homeId: homeValue.id, homeName: homeValue.homeName)
                 return .success(with: fallbackHome)
             }
         } else if let item {
@@ -77,21 +76,9 @@ public enum OpenHABIntentHelper {
         if let home, let homeId = home.uuid {
             Logger.intentHandling.info("Getting cached items for specific home: \(homeId)")
 
-            // Validate home exists before trying to load
-            let storedHomes = await Preferences.shared.storedHomes
-
-            // If requested home doesn't exist, fallback to first available home
-            let actualHomeId: UUID
-            if storedHomes[homeId] != nil {
-                actualHomeId = homeId
-            } else {
-                Logger.intentHandling.warning("Home \(homeId) not found in storedHomes. Available homes: \(storedHomes.keys)")
-                guard let firstHome = storedHomes.keys.first else {
-                    Logger.intentHandling.error("No homes available at all!")
-                    return []
-                }
-                Logger.intentHandling.info("Falling back to first available home: \(firstHome)")
-                actualHomeId = firstHome
+            // Validate home exists before trying to load and fallback to first available home if needed
+            guard let actualHomeId = await resolveHomeId(homeId) else {
+                return []
             }
 
             let items = await OpenHABItemCache.instance.getCachedItems(home: actualHomeId) ?? []
@@ -127,6 +114,29 @@ public enum OpenHABIntentHelper {
 
             return flatItems
         }
+    }
+
+    /// Resolves a home ID with fallback logic for deleted homes.
+    /// If the requested home exists, returns it. Otherwise, falls back to the first available home (sorted by UUID).
+    /// - Parameter homeId: The requested home UUID
+    /// - Returns: The resolved home UUID, or nil if no homes are available
+    static func resolveHomeId(_ homeId: UUID) async -> UUID? {
+        let storedHomes = await Preferences.shared.storedHomes
+
+        // If requested home exists, return it
+        if storedHomes[homeId] != nil {
+            return homeId
+        }
+
+        // Fallback to first available home (sorted for deterministic behavior)
+        Logger.intentHandling.warning("Home \(homeId) not found in handle. Falling back to first available home")
+        guard let firstHome = storedHomes.keys.sorted(by: { $0.uuidString < $1.uuidString }).first else {
+            Logger.intentHandling.error("No homes available at all!")
+            return nil
+        }
+
+        Logger.intentHandling.info("Falling back to first available home: \(firstHome)")
+        return firstHome
     }
 }
 
