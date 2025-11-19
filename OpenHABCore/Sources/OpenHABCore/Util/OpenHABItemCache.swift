@@ -32,11 +32,23 @@ public actor OpenHABItemCache {
     }
 
     public func getCachedItems(home: UUID) async -> [OpenHABItem]? {
+        // Validate home exists in storedHomes before trying to load
+        let storedHomes = await Preferences.shared.storedHomes
+        guard storedHomes[home] != nil else {
+            Logger.itemCache.error("Cannot get cached items: home \(home) not found in storedHomes. Available homes: \(storedHomes.keys)")
+            return nil
+        }
         await reloadCacheIfNeeded(homes: [home])
         return items[home]
     }
 
     public func getCachedItem(name: String, home: UUID) async -> [OpenHABItem]? {
+        // Validate home exists in storedHomes before trying to load
+        let storedHomes = await Preferences.shared.storedHomes
+        guard storedHomes[home] != nil else {
+            Logger.itemCache.error("Cannot get cached item: home \(home) not found in storedHomes. Available homes: \(storedHomes.keys)")
+            return nil
+        }
         await reloadCacheIfNeeded(homes: [home])
         return items[home]?.filter { $0.name == name }
     }
@@ -86,11 +98,17 @@ public actor OpenHABItemCache {
         do {
             let loadedItems = try await loadNonGroupItemsForHomes(homes)
             Logger.itemCache.info("Store loaded items in cache")
-            homes.forEach { items[$0] = loadedItems[$0] }
+            // Update cache with loaded items, ensuring we don't write nil
+            for homeId in homes {
+                items[homeId] = loadedItems[homeId] ?? []
+            }
             let now = Date.now
             homes.forEach { lastLoad[$0] = now }
-            let itemCounts = items.map { ($0.key, $0.value.count) }
-            Logger.itemCache.info("Loaded \(itemCounts) items to cache")
+            // Log only the items that were just loaded, not the entire cache
+            let justLoadedCounts = loadedItems.map { ($0.key, $0.value.count) }
+            Logger.itemCache.info("Just loaded \(justLoadedCounts) items")
+            let totalCacheCount = items.map { ($0.key, $0.value.count) }
+            Logger.itemCache.info("Total cache now contains \(totalCacheCount) items")
         } catch {
             Logger.itemCache.error("Could not reload \(error.localizedDescription)")
         }
@@ -153,19 +171,34 @@ public actor OpenHABItemCache {
 
     private func loadItems(homeId: UUID) async -> [OpenHABItem]? {
         guard let networkTracker = await assureNetworkTracker(homeId: homeId) else {
-            Logger.itemCache.error("Home \(homeId) not reachable")
+            Logger.itemCache.error("Home \(homeId) not reachable - not found in storedHomes")
             return nil
         }
-        return try? await networkTracker.getStaticItems()
+        do {
+            let items = try await networkTracker.getStaticItems()
+            Logger.itemCache.info("Successfully loaded \(items.count) items for home \(homeId)")
+            return items
+        } catch {
+            Logger.itemCache.error("Failed to load items for home \(homeId): \(error.localizedDescription)")
+            return nil
+        }
     }
 
     private func assureNetworkTracker(homeId: UUID) async -> NetworkTracker? {
-        if networkTrackers[homeId] == nil, let homePreferences = await Preferences.shared.storedHomes[homeId] {
+        if networkTrackers[homeId] == nil {
+            guard let homePreferences = await Preferences.shared.storedHomes[homeId] else {
+                Logger.itemCache.error("Home \(homeId) not found in storedHomes")
+                return nil
+            }
+            Logger.itemCache.info("Creating network tracker for home \(homeId)")
+            Logger.itemCache.info("Local: \(homePreferences.localConnectionConfig.url), Remote: \(homePreferences.remoteConnectionConfig.url)")
             let tracker = NetworkTracker(timeout: OpenHABItemCache.networkTimeout)
             networkTrackers[homeId] = tracker
             await tracker.startTracking(connectionConfigurations: [homePreferences.localConnectionConfig, homePreferences.remoteConnectionConfig])
+            Logger.itemCache.info("Network tracker started for home \(homeId)")
+        } else {
+            Logger.itemCache.info("Using existing network tracker for home \(homeId)")
         }
-        // TODO: do we need to make sure / wait that the connection is live?
         return networkTrackers[homeId]
     }
 }

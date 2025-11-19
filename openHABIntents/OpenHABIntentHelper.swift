@@ -12,18 +12,27 @@
 import Foundation
 import Intents
 import OpenHABCore
+import os
 
-@MainActor
 public enum OpenHABIntentHelper {
     static func resolveHome(home: OpenHABHome?, item: String?) async -> OpenHABHomeResolutionResult {
         if let home, let homeId = home.uuid {
             // TODO: fuzzy matching / account for potential renaming?
             // TODO: accept potential mismatches if item name is unique
-            let homePrefs = Preferences.shared.storedHomes.first { $0.key == homeId }
+            let storedHomes = await Preferences.shared.storedHomes
+            let homePrefs = storedHomes.first { $0.key == homeId }
             if homePrefs != nil {
                 return .success(with: home)
             } else {
-                return .unsupported() // given home is not found in preferences
+                // Fallback to first available home if requested home doesn't exist
+                Logger.intentHandling.warning("Home \(homeId) not found for resolveHome. Available homes: \(storedHomes.keys)")
+                guard let firstHome = storedHomes.first else {
+                    Logger.intentHandling.error("No homes available at all!")
+                    return .unsupported()
+                }
+                Logger.intentHandling.info("Falling back to first available home: \(firstHome.key)")
+                let fallbackHome = await OpenHABHome(homeId: firstHome.value.id, homeName: firstHome.value.homeName)
+                return .success(with: fallbackHome)
             }
         } else if let item {
             // try to find the home by home-specific item selection
@@ -31,9 +40,13 @@ public enum OpenHABIntentHelper {
             let homeIdsWithMatchingItems = allItems.map(\.key).filter { uuid in
                 allItems[uuid]?.filtered(by: item).isEmpty != true
             }
-            let potentialHomes = homeIdsWithMatchingItems
-                .compactMap { Preferences.shared.storedHomes[$0] }
-                .map { OpenHABHome(homeId: $0.id, homeName: $0.homeName) }
+            let storedHomes = await Preferences.shared.storedHomes
+            var potentialHomes: [OpenHABHome] = []
+            await MainActor.run {
+                potentialHomes = homeIdsWithMatchingItems
+                    .compactMap { storedHomes[$0] }
+                    .map { OpenHABHome(homeId: $0.id, homeName: $0.homeName) }
+            }
             if potentialHomes.count == 1 {
                 return .success(with: potentialHomes[0])
             } else {
@@ -44,21 +57,75 @@ public enum OpenHABIntentHelper {
         }
     }
 
-    static func getHomeOptions() -> INObjectCollection<OpenHABHome> {
-        INObjectCollection(items: Preferences.shared.storedHomes.map { OpenHABHome(homeId: $0.value.id, homeName: $0.value.homeName) })
+    static func getHomeOptions() async -> INObjectCollection<OpenHABHome> {
+        let storedHomes = await Preferences.shared.storedHomes
+        return await MainActor.run {
+            INObjectCollection(items: storedHomes.map { OpenHABHome(homeId: $0.value.id, homeName: $0.value.homeName) })
+        }
     }
 
     static func getItemOptions(home: OpenHABHome?, searchTerm: String? = nil, itemTypes: [OpenHABItem.ItemType]? = nil) async -> INObjectCollection<NSString> {
+        Logger.intentHandling.info("getItemOptions called with home: \(home?.identifier ?? "nil"), searchTerm: \(searchTerm ?? "nil")")
         let allItems = await getAllItems(home: home)
+        Logger.intentHandling.info("getAllItems returned \(allItems.count) items")
         let items = allItems.filtered(by: searchTerm, for: itemTypes)
+        Logger.intentHandling.info("After filtering: \(items.count) items")
         return INObjectCollection(items: items.map(\.name).map { $0 as NSString })
     }
 
     private static func getAllItems(home: OpenHABHome?) async -> [OpenHABItem] {
         if let home, let homeId = home.uuid {
-            await OpenHABItemCache.instance.getCachedItems(home: homeId) ?? []
+            Logger.intentHandling.info("Getting cached items for specific home: \(homeId)")
+
+            // Validate home exists before trying to load
+            let storedHomes = await Preferences.shared.storedHomes
+
+            // If requested home doesn't exist, fallback to first available home
+            let actualHomeId: UUID
+            if storedHomes[homeId] != nil {
+                actualHomeId = homeId
+            } else {
+                Logger.intentHandling.warning("Home \(homeId) not found in storedHomes. Available homes: \(storedHomes.keys)")
+                guard let firstHome = storedHomes.keys.first else {
+                    Logger.intentHandling.error("No homes available at all!")
+                    return []
+                }
+                Logger.intentHandling.info("Falling back to first available home: \(firstHome)")
+                actualHomeId = firstHome
+            }
+
+            let items = await OpenHABItemCache.instance.getCachedItems(home: actualHomeId) ?? []
+            Logger.intentHandling.info("Found \(items.count) items for home \(actualHomeId)")
+
+            // If no items found, try to reload the cache once
+            if items.isEmpty {
+                Logger.intentHandling.info("No items found, forcing cache reload for home \(actualHomeId)")
+                await OpenHABItemCache.instance.forceCacheReload(homes: [actualHomeId])
+                let reloadedItems = await OpenHABItemCache.instance.getCachedItems(home: actualHomeId) ?? []
+                Logger.intentHandling.info("After reload: Found \(reloadedItems.count) items for home \(actualHomeId)")
+                return reloadedItems
+            }
+
+            return items
         } else {
-            await OpenHABItemCache.instance.getAllCachedItems().flatMap(\.value)
+            Logger.intentHandling.info("Getting all cached items from all homes")
+            let allItems = await OpenHABItemCache.instance.getAllCachedItems()
+            Logger.intentHandling.info("All cached items: \(allItems.map { ($0.key, $0.value.count) })")
+            let flatItems = allItems.flatMap(\.value)
+            Logger.intentHandling.info("Total flattened items: \(flatItems.count)")
+
+            // If no items found, try to reload the cache once
+            if flatItems.isEmpty {
+                Logger.intentHandling.info("No items found, forcing full cache reload")
+                await OpenHABItemCache.instance.forceCacheReload()
+                let reloadedAllItems = await OpenHABItemCache.instance.getAllCachedItems()
+                Logger.intentHandling.info("After reload: All cached items: \(reloadedAllItems.map { ($0.key, $0.value.count) })")
+                let reloadedFlatItems = reloadedAllItems.flatMap(\.value)
+                Logger.intentHandling.info("After reload: Total flattened items: \(reloadedFlatItems.count)")
+                return reloadedFlatItems
+            }
+
+            return flatItems
         }
     }
 }

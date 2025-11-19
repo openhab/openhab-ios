@@ -179,7 +179,9 @@ struct HomeSelectionView: View {
     }
 
     private func loadHomesList() {
-        homes = Preferences.shared.listStoredHomes()
+        Task { @MainActor in
+            homes = await Preferences.shared.listStoredHomes()
+        }
     }
 
     private func delete(home toDelete: UUID?) {

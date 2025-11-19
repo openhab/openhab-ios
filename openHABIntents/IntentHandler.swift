@@ -11,6 +11,7 @@
 
 import Intents
 import OpenHABCore
+import os
 
 class IntentHandler: INExtension {
     override init() {
@@ -19,7 +20,10 @@ class IntentHandler: INExtension {
         Task { @MainActor in
             // Ensure Preferences initializes on the MainActor to avoid crashes
             _ = Preferences.shared
+            let homes = await Preferences.shared.listStoredHomes()
+            Logger.intentHandling.info("IntentHandler init: Found \(homes.count) stored homes: \(homes)")
             await OpenHABItemCache.instance.forceCacheReload()
+            Logger.intentHandling.info("IntentHandler init: Cache reload completed")
         }
     }
 

@@ -45,8 +45,21 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
             )
         }
 
-        guard let homeId = home.uuid, await Preferences.shared.storedHomes[homeId] != nil else {
+        guard let homeId = home.uuid else {
             return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
+        }
+
+        // Apply fallback if home doesn't exist
+        let storedHomes = await Preferences.shared.storedHomes
+        let actualHomeId: UUID
+        if storedHomes[homeId] != nil {
+            actualHomeId = homeId
+        } else {
+            Logger.intentHandling.warning("Home \(homeId) not found in handle. Falling back to first available home")
+            guard let firstHome = storedHomes.first else {
+                return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
+            }
+            actualHomeId = firstHome.key
         }
 
         guard var value = intent.value else {
@@ -66,13 +79,13 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
 
         value = "\(hue),\(sat),\(val)"
 
-        guard let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId), !items.isEmpty else {
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: actualHomeId), !items.isEmpty else {
             return .failureInvalidItem(itemName)
         }
 
         let item = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: item, home: homeId, command: value)
+        await OpenHABItemCache.instance.sendCommand(to: item, home: actualHomeId, command: value)
 
         return .success(value: value, item: itemName)
     }

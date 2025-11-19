@@ -263,7 +263,7 @@ public actor Preferences {
 
 @MainActor
 public extension Preferences {
-    func listStoredHomes() -> [UUID] {
+    func listStoredHomes() async -> [UUID] {
         let preferenceIds = storedHomes
             .sorted { e1, e2 in
                 e1.value.homeName <= e2.value.homeName

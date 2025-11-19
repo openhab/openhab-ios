@@ -25,11 +25,13 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
-        await OpenHABIntentHelper.getItemOptions(home: intent.home, searchTerm: searchTerm)
+        Logger.intentHandling.info("provideItemOptionsCollection called with home: \(intent.home?.identifier ?? "nil"), searchTerm: \(searchTerm ?? "nil")")
+        return await OpenHABIntentHelper.getItemOptions(home: intent.home, searchTerm: searchTerm)
     }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent) async throws -> INObjectCollection<NSString> {
-        await OpenHABIntentHelper.getItemOptions(home: intent.home)
+        Logger.intentHandling.info("provideItemOptionsCollection called with home: \(intent.home?.identifier ?? "nil")")
+        return await OpenHABIntentHelper.getItemOptions(home: intent.home)
     }
 
     func confirm(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
@@ -45,11 +47,24 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
             )
         }
 
-        guard let homeId = home.uuid, await Preferences.shared.storedHomes[homeId] != nil else {
+        guard let homeId = home.uuid else {
             return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 
-        let item = await OpenHABItemCache.instance.getItemUncached(name: itemName, home: homeId)
+        // Apply fallback if home doesn't exist
+        let storedHomes = await Preferences.shared.storedHomes
+        let actualHomeId: UUID
+        if storedHomes[homeId] != nil {
+            actualHomeId = homeId
+        } else {
+            Logger.intentHandling.warning("Home \(homeId) not found in handle. Falling back to first available home")
+            guard let firstHome = storedHomes.first else {
+                return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
+            }
+            actualHomeId = firstHome.key
+        }
+
+        let item = await OpenHABItemCache.instance.getItemUncached(name: itemName, home: actualHomeId)
 
         guard let item else {
             return .failureInvalidItem(itemName)
