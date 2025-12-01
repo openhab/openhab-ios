@@ -79,12 +79,11 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     }
 
     @MainActor
-    public func syncPreferencesToWatch(_ homeSettings: HomePreferences? = nil) async {
+    public func syncPreferencesToWatch(_ homeSettings: HomePreferences? = nil) {
         guard WCSession.default.activationState == .activated else {
             Logger.preferences.warning("WCSession not activated; skipping sync.")
             return
         }
-        
         let settings = homeSettings ?? Preferences.shared.currentHomePreferences
         let prefs = WatchPreferences(fromPreferences: settings)
         let context = prefs.encodedWatchPreferences()

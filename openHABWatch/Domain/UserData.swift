@@ -125,7 +125,6 @@ final class UserData: ObservableObject {
                 Logger.userData.info("Connection config changed, updating network")
                 Task {
                     await self?.updateNetwork()
-                    Logger.userData.info("✅ Network updated, observeNetworkChanges will reload when ready")
                 }
             }
             .store(in: &cancellables)
@@ -141,11 +140,10 @@ final class UserData: ObservableObject {
         let activeConnectionStream = await NetworkTracker.shared.activeConnectionStream()
         for await activeConnection in activeConnectionStream {
             guard let activeConnection else {
-                Logger.userData.info("⚠️ No active connection available")
                 continue
             }
 
-            Logger.userData.info("🌍 Active connection established: \(activeConnection.configuration.url)")
+            Logger.userData.info("Active connection established: \(activeConnection.configuration.url)")
 
             if !AppSettings.shared.haveReceivedAppContext {
                 Logger.userData.info("📥 Requesting app context from iOS")
@@ -160,7 +158,6 @@ final class UserData: ObservableObject {
 
             // TODO: Check whether there is need to setup requestModifier for Kingfisher
 
-            Logger.userData.info("🚀 Network ready, loading sitemap: \(AppSettings.shared.sitemapForWatch)")
             startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch, force: true)
         }
     }
@@ -178,21 +175,15 @@ final class UserData: ObservableObject {
     }
 
     func startPageHandling(sitemapName: String, pageId: String = "", force: Bool = false) {
-        Logger.userData.info("📍 startPageHandling called for sitemap: \(sitemapName), force: \(force)")
-
         // Handle concurrent loads based on force parameter
         if currentlyLoadingSitemap == sitemapName, pageHandlingTask != nil, !(pageHandlingTask?.isCancelled ?? true) {
             if force {
-                Logger.userData.info("🔄 Force reload requested for \(sitemapName), cancelling current task")
                 pageHandlingTask?.cancel()
             } else {
-                Logger.userData.info("⏭️ Already loading sitemap \(sitemapName), skipping duplicate call")
                 return
             }
         } else if currentlyLoadingSitemap != sitemapName, pageHandlingTask != nil, !(pageHandlingTask?.isCancelled ?? true) {
             // Switching to a different sitemap
-            // swiftformat:disable:next redundantSelf
-            Logger.userData.info("🔄 Switching from \(self.currentlyLoadingSitemap ?? "none") to \(sitemapName), cancelling previous")
             pageHandlingTask?.cancel()
         }
         currentlyLoadingSitemap = sitemapName
