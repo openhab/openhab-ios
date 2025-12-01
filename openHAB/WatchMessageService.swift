@@ -31,10 +31,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         guard message["request"] != nil else { return }
 
-        lock.lock()
-        let reply = cachedWatchPreferences
-        lock.unlock()
-
+        let reply = getCachedPreferences()
         replyHandler(reply) // ✅ Used synchronously — no concurrency violation
     }
 
@@ -54,6 +51,20 @@ class WatchMessageService: NSObject, WCSessionDelegate {
         Logger.preferences.info("WCSession deactivated.")
     }
 
+    // MARK: - Cache Management
+
+    private func getCachedPreferences() -> [String: Data] {
+        lock.lock()
+        defer { lock.unlock() }
+        return cachedWatchPreferences
+    }
+
+    private func updateCachedPreferences(_ context: [String: Data]) {
+        lock.lock()
+        defer { lock.unlock() }
+        cachedWatchPreferences = context
+    }
+
     // MARK: - Sync Preferences
 
     @MainActor
@@ -61,28 +72,33 @@ class WatchMessageService: NSObject, WCSessionDelegate {
         preferencesSubscription = Preferences.shared.$currentHomePreferences
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { _ in } receiveValue: { homeSettings in
-                self.syncPreferencesToWatch(homeSettings)
+                Task { @MainActor in
+                    await self.syncPreferencesToWatch(homeSettings)
+                }
             }
     }
 
     @MainActor
-    public func syncPreferencesToWatch(_ homeSettings: HomePreferences = Preferences.shared.currentHomePreferences) {
+    public func syncPreferencesToWatch(_ homeSettings: HomePreferences? = nil) async {
         guard WCSession.default.activationState == .activated else {
             Logger.preferences.warning("WCSession not activated; skipping sync.")
             return
         }
 
-        let prefs = WatchPreferences(fromPreferences: homeSettings)
+        let settings: HomePreferences = if let homeSettings {
+            homeSettings
+        } else {
+            Preferences.shared.currentHomePreferences
+        }
+        let prefs = WatchPreferences(fromPreferences: settings)
         let context = prefs.encodedWatchPreferences()
 
-        guard cachedWatchPreferences != context else {
+        guard getCachedPreferences() != context else {
             // avoid update of update unchanged preferences
             return
         }
 
-        lock.lock()
-        cachedWatchPreferences = context
-        lock.unlock()
+        updateCachedPreferences(context)
 
         do {
             try WCSession.default.updateApplicationContext(context)

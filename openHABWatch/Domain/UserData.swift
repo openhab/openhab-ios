@@ -28,11 +28,12 @@ final class UserData: ObservableObject {
 
     // Cache last successful widgets to prevent empty state during reconnections
     private var cachedWidgets: [OpenHABWidget] = []
+    private var currentlyLoadingSitemap: String?
 
     private var pageHandlingTask: Task<Void, Never>?
     @Published var isPolling = false
 
-    var openHABSitemapPage: OpenHABPage?
+    @Published var openHABSitemapPage: OpenHABPage?
     var currentClientDelegate: HTTPClientDelegate?
 
     private var cancellables = Set<AnyCancellable>()
@@ -104,11 +105,28 @@ final class UserData: ObservableObject {
             }
             .store(in: &cancellables)
 
+        // Observe sitemap changes - update network, observeNetworkChanges will trigger load
         AppSettings.shared.$sitemapForWatch
-            .removeDuplicates()
             .sink { [weak self] newValue in
                 guard !newValue.isEmpty else { return }
-                self?.startPageHandling(sitemapName: newValue)
+                Logger.userData.info("Sitemap changed to: \(newValue)")
+                Task {
+                    await self?.updateNetwork()
+                    Logger.userData.info("✅ Network updated, observeNetworkChanges will load sitemap when ready")
+                }
+            }
+            .store(in: &cancellables)
+
+        // Also observe connection config changes - update network when server changes
+        AppSettings.shared.$localConnectionConfig
+            .combineLatest(AppSettings.shared.$remoteConnectionConfig)
+            .dropFirst() // Skip initial values
+            .sink { [weak self] _, _ in
+                Logger.userData.info("Connection config changed, updating network")
+                Task {
+                    await self?.updateNetwork()
+                    Logger.userData.info("✅ Network updated, observeNetworkChanges will reload when ready")
+                }
             }
             .store(in: &cancellables)
 
@@ -119,13 +137,18 @@ final class UserData: ObservableObject {
 
     /// Observes network connection changes and updates state
     private func observeNetworkChanges() async {
+        Logger.userData.info("👀 Starting to observe network changes")
         let activeConnectionStream = await NetworkTracker.shared.activeConnectionStream()
         for await activeConnection in activeConnectionStream {
-            guard let activeConnection else { continue }
+            guard let activeConnection else {
+                Logger.userData.info("⚠️ No active connection available")
+                continue
+            }
 
-            Logger.userData.info("openHABTracked: \(activeConnection.configuration.url)")
+            Logger.userData.info("🌍 Active connection established: \(activeConnection.configuration.url)")
 
             if !AppSettings.shared.haveReceivedAppContext {
+                Logger.userData.info("📥 Requesting app context from iOS")
                 AppMessageService.singleton.requestApplicationContext()
                 errorDescription = NSLocalizedString("settings_not_received", comment: "")
                 showAlert = true
@@ -137,33 +160,59 @@ final class UserData: ObservableObject {
 
             // TODO: Check whether there is need to setup requestModifier for Kingfisher
 
-            startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)
+            Logger.userData.info("🚀 Network ready, loading sitemap: \(AppSettings.shared.sitemapForWatch)")
+            startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch, force: true)
         }
     }
 
     func updateNetwork() async {
+        Logger.userData.info("🔧 updateNetwork called")
         guard let connection1 = AppSettings.shared.localConnectionConfig,
               let connection2 = AppSettings.shared.remoteConnectionConfig else {
-            Logger.userData.info("No connections defined")
+            Logger.userData.info("❌ No connections defined")
             return
         }
+        Logger.userData.info("🔌 Starting network tracking with local: \(connection1.url), remote: \(connection2.url)")
         await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
+        Logger.userData.info("✅ Network tracking started")
     }
 
-    func startPageHandling(sitemapName: String, pageId: String = "") {
-        // Don't clear widgets immediately when switching - use cached data during transition
-        pageHandlingTask?.cancel()
+    func startPageHandling(sitemapName: String, pageId: String = "", force: Bool = false) {
+        Logger.userData.info("📍 startPageHandling called for sitemap: \(sitemapName), force: \(force)")
+
+        // Prevent duplicate concurrent loads of the same sitemap
+        if currentlyLoadingSitemap == sitemapName && pageHandlingTask != nil && !(pageHandlingTask?.isCancelled ?? true) {
+            if force {
+                Logger.userData.info("⏭️ Already loading same sitemap \(sitemapName), not interrupting")
+            } else {
+                Logger.userData.info("⏭️ Already loading sitemap \(sitemapName), skipping duplicate call")
+            }
+            return
+        }
+
+        // Only cancel if switching to a different sitemap
+        if currentlyLoadingSitemap != sitemapName {
+            Logger.userData.info("🔄 Switching from \(self.currentlyLoadingSitemap ?? "none") to \(sitemapName), cancelling previous")
+            pageHandlingTask?.cancel()
+        }
+        currentlyLoadingSitemap = sitemapName
 
         pageHandlingTask = Task {
+            defer {
+                currentlyLoadingSitemap = nil
+            }
             do {
                 isLoadingSitemap = true
+                Logger.userData.info("🔄 Loading sitemap: \(sitemapName)")
                 let activeNetworkConfig = await NetworkTracker.shared.activeConnection?.configuration
+                Logger.userData.info("🌐 Active connection: \(activeNetworkConfig?.url ?? "none")")
                 let service = try OpenAPIService(connectionConfiguration: activeNetworkConfig ?? ConnectionConfiguration.remoteDefault)
 
                 let initialPage = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
                 try Task.checkCancellation()
 
                 await MainActor.run {
+                    Logger.userData.info("✅ Loaded \(initialPage?.widgets.count ?? 0) widgets for sitemap: \(sitemapName)")
                     self.openHABSitemapPage = initialPage
                     let newWidgets = initialPage?.widgets ?? []
                     self.widgets = newWidgets
@@ -174,6 +223,7 @@ final class UserData: ObservableObject {
                         Task { await self?.sendCommand(item, command: command) }
                     }
                     self.isLoadingSitemap = false
+                    Logger.userData.info("🎨 UI should now update with \(newWidgets.count) widgets")
                 }
 
                 // Long polling loop with backoff
