@@ -105,14 +105,15 @@ final class UserData: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // Observe sitemap changes - update network, observeNetworkChanges will trigger load
+        // Observe sitemap changes - reload the sitemap when it changes
         AppSettings.shared.$sitemapForWatch
+            .dropFirst()
             .sink { [weak self] newValue in
                 guard !newValue.isEmpty else { return }
-                Logger.userData.info("Sitemap changed to: \(newValue)")
                 Task {
-                    await self?.updateNetwork()
-                    Logger.userData.info("✅ Network updated, observeNetworkChanges will load sitemap when ready")
+                    await MainActor.run {
+                        self?.startPageHandling(sitemapName: newValue, force: true)
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -181,7 +182,7 @@ final class UserData: ObservableObject {
         Logger.userData.info("📍 startPageHandling called for sitemap: \(sitemapName), force: \(force)")
 
         // Prevent duplicate concurrent loads of the same sitemap
-        if currentlyLoadingSitemap == sitemapName && pageHandlingTask != nil && !(pageHandlingTask?.isCancelled ?? true) {
+        if currentlyLoadingSitemap == sitemapName, pageHandlingTask != nil, !(pageHandlingTask?.isCancelled ?? true) {
             if force {
                 Logger.userData.info("⏭️ Already loading same sitemap \(sitemapName), not interrupting")
             } else {
@@ -192,6 +193,7 @@ final class UserData: ObservableObject {
 
         // Only cancel if switching to a different sitemap
         if currentlyLoadingSitemap != sitemapName {
+            // swiftformat:disable:next redundantSelf
             Logger.userData.info("🔄 Switching from \(self.currentlyLoadingSitemap ?? "none") to \(sitemapName), cancelling previous")
             pageHandlingTask?.cancel()
         }
@@ -237,13 +239,13 @@ final class UserData: ObservableObject {
 
                         await MainActor.run {
                             self.openHABSitemapPage = page
-                            openHABSitemapPage?.sendCommand = { [weak self] item, command in
-                                Task { await self?.sendCommand(item, command: command) }
-                            }
                             let newWidgets = page?.widgets ?? []
                             self.widgets = newWidgets
                             if !newWidgets.isEmpty {
                                 self.cachedWidgets = newWidgets
+                            }
+                            openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                                Task { await self?.sendCommand(item, command: command) }
                             }
                         }
 
