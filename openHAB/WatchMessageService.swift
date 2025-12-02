@@ -84,17 +84,13 @@ class WatchMessageService: NSObject, WCSessionDelegate {
             Logger.preferences.warning("WCSession not activated; skipping sync.")
             return
         }
-
-        let settings: HomePreferences = if let homeSettings {
-            homeSettings
-        } else {
-            Preferences.shared.currentHomePreferences
-        }
+        
+        let settings = homeSettings ?? Preferences.shared.currentHomePreferences
         let prefs = WatchPreferences(fromPreferences: settings)
         let context = prefs.encodedWatchPreferences()
 
         guard getCachedPreferences() != context else {
-            // avoid update of update unchanged preferences
+            // avoid updating unchanged preferences
             return
         }
 

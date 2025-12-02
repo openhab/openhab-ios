@@ -108,12 +108,11 @@ final class UserData: ObservableObject {
         // Observe sitemap changes - reload the sitemap when it changes
         AppSettings.shared.$sitemapForWatch
             .dropFirst()
+            .removeDuplicates()
             .sink { [weak self] newValue in
                 guard !newValue.isEmpty else { return }
                 Task {
-                    await MainActor.run {
-                        self?.startPageHandling(sitemapName: newValue, force: true)
-                    }
+                    self?.startPageHandling(sitemapName: newValue, force: true)
                 }
             }
             .store(in: &cancellables)
@@ -181,18 +180,17 @@ final class UserData: ObservableObject {
     func startPageHandling(sitemapName: String, pageId: String = "", force: Bool = false) {
         Logger.userData.info("📍 startPageHandling called for sitemap: \(sitemapName), force: \(force)")
 
-        // Prevent duplicate concurrent loads of the same sitemap
+        // Handle concurrent loads based on force parameter
         if currentlyLoadingSitemap == sitemapName, pageHandlingTask != nil, !(pageHandlingTask?.isCancelled ?? true) {
             if force {
-                Logger.userData.info("⏭️ Already loading same sitemap \(sitemapName), not interrupting")
+                Logger.userData.info("🔄 Force reload requested for \(sitemapName), cancelling current task")
+                pageHandlingTask?.cancel()
             } else {
                 Logger.userData.info("⏭️ Already loading sitemap \(sitemapName), skipping duplicate call")
+                return
             }
-            return
-        }
-
-        // Only cancel if switching to a different sitemap
-        if currentlyLoadingSitemap != sitemapName {
+        } else if currentlyLoadingSitemap != sitemapName, pageHandlingTask != nil, !(pageHandlingTask?.isCancelled ?? true) {
+            // Switching to a different sitemap
             // swiftformat:disable:next redundantSelf
             Logger.userData.info("🔄 Switching from \(self.currentlyLoadingSitemap ?? "none") to \(sitemapName), cancelling previous")
             pageHandlingTask?.cancel()
@@ -200,9 +198,6 @@ final class UserData: ObservableObject {
         currentlyLoadingSitemap = sitemapName
 
         pageHandlingTask = Task {
-            defer {
-                currentlyLoadingSitemap = nil
-            }
             do {
                 isLoadingSitemap = true
                 Logger.userData.info("🔄 Loading sitemap: \(sitemapName)")
@@ -216,13 +211,14 @@ final class UserData: ObservableObject {
                 await MainActor.run {
                     Logger.userData.info("✅ Loaded \(initialPage?.widgets.count ?? 0) widgets for sitemap: \(sitemapName)")
                     self.openHABSitemapPage = initialPage
+                    // Set command handler BEFORE updating widgets to prevent race condition
+                    openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                        Task { await self?.sendCommand(item, command: command) }
+                    }
                     let newWidgets = initialPage?.widgets ?? []
                     self.widgets = newWidgets
                     if !newWidgets.isEmpty {
                         self.cachedWidgets = newWidgets
-                    }
-                    openHABSitemapPage?.sendCommand = { [weak self] item, command in
-                        Task { await self?.sendCommand(item, command: command) }
                     }
                     self.isLoadingSitemap = false
                     Logger.userData.info("🎨 UI should now update with \(newWidgets.count) widgets")
@@ -239,13 +235,14 @@ final class UserData: ObservableObject {
 
                         await MainActor.run {
                             self.openHABSitemapPage = page
+                            // Set command handler BEFORE updating widgets to prevent race condition
+                            openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                                Task { await self?.sendCommand(item, command: command) }
+                            }
                             let newWidgets = page?.widgets ?? []
                             self.widgets = newWidgets
                             if !newWidgets.isEmpty {
                                 self.cachedWidgets = newWidgets
-                            }
-                            openHABSitemapPage?.sendCommand = { [weak self] item, command in
-                                Task { await self?.sendCommand(item, command: command) }
                             }
                         }
 
@@ -276,6 +273,8 @@ final class UserData: ObservableObject {
                     self.errorDescription = error.localizedDescription
                     self.showAlert = true
                     self.isLoadingSitemap = false
+                    // Clear loading state only after error handling is complete
+                    self.currentlyLoadingSitemap = nil
                 }
             }
         }
