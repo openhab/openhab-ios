@@ -190,6 +190,14 @@ final class UserData: ObservableObject {
         currentlyLoadingSitemap = sitemapName
 
         pageHandlingTask = Task {
+            defer {
+                // Always clear task references when task completes (cancelled or error)
+                Task { @MainActor in
+                    self.pageHandlingTask = nil
+                    self.currentlyLoadingSitemap = nil
+                }
+            }
+
             do {
                 isLoadingSitemap = true
                 let activeNetworkConfig = await NetworkTracker.shared.activeConnection?.configuration
@@ -261,8 +269,6 @@ final class UserData: ObservableObject {
                     self.errorDescription = error.localizedDescription
                     self.showAlert = true
                     self.isLoadingSitemap = false
-                    // Clear loading state only after error handling is complete
-                    self.currentlyLoadingSitemap = nil
                 }
             }
         }
