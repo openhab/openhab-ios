@@ -111,7 +111,7 @@ final class UserData: ObservableObject {
             .removeDuplicates()
             .sink { [weak self] newValue in
                 guard !newValue.isEmpty else { return }
-                Task {
+                Task { @MainActor in
                     self?.startPageHandling(sitemapName: newValue, force: true)
                 }
             }
@@ -121,9 +121,14 @@ final class UserData: ObservableObject {
         AppSettings.shared.$localConnectionConfig
             .combineLatest(AppSettings.shared.$remoteConnectionConfig)
             .dropFirst() // Skip initial values
+            .removeDuplicates { lhs, rhs in
+                // Only trigger if actual connection URLs changed
+                lhs.0?.url == rhs.0?.url && lhs.1?.url == rhs.1?.url
+            }
+            .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
             .sink { [weak self] _, _ in
                 Logger.userData.info("Connection config changed, updating network")
-                Task {
+                Task { @MainActor in
                     await self?.updateNetwork()
                 }
             }
@@ -136,7 +141,6 @@ final class UserData: ObservableObject {
 
     /// Observes network connection changes and updates state
     private func observeNetworkChanges() async {
-        Logger.userData.info("👀 Starting to observe network changes")
         let activeConnectionStream = await NetworkTracker.shared.activeConnectionStream()
         for await activeConnection in activeConnectionStream {
             guard let activeConnection else {
@@ -146,7 +150,6 @@ final class UserData: ObservableObject {
             Logger.userData.info("Active connection established: \(activeConnection.configuration.url)")
 
             if !AppSettings.shared.haveReceivedAppContext {
-                Logger.userData.info("📥 Requesting app context from iOS")
                 AppMessageService.singleton.requestApplicationContext()
                 errorDescription = NSLocalizedString("settings_not_received", comment: "")
                 showAlert = true
@@ -163,56 +166,50 @@ final class UserData: ObservableObject {
     }
 
     func updateNetwork() async {
-        Logger.userData.info("🔧 updateNetwork called")
         guard let connection1 = AppSettings.shared.localConnectionConfig,
               let connection2 = AppSettings.shared.remoteConnectionConfig else {
-            Logger.userData.info("❌ No connections defined")
+            Logger.userData.warning("No connections defined")
             return
         }
-        Logger.userData.info("🔌 Starting network tracking with local: \(connection1.url), remote: \(connection2.url)")
         await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
-        Logger.userData.info("✅ Network tracking started")
     }
 
     func startPageHandling(sitemapName: String, pageId: String = "", force: Bool = false) {
         // Handle concurrent loads based on force parameter
-        if currentlyLoadingSitemap == sitemapName, pageHandlingTask != nil, !(pageHandlingTask?.isCancelled ?? true) {
-            if force {
-                pageHandlingTask?.cancel()
+        if let task = pageHandlingTask, !task.isCancelled {
+            if currentlyLoadingSitemap == sitemapName {
+                if force {
+                    task.cancel()
+                } else {
+                    return
+                }
             } else {
-                return
+                task.cancel()
             }
-        } else if currentlyLoadingSitemap != sitemapName, pageHandlingTask != nil, !(pageHandlingTask?.isCancelled ?? true) {
-            // Switching to a different sitemap
-            pageHandlingTask?.cancel()
         }
         currentlyLoadingSitemap = sitemapName
 
         pageHandlingTask = Task {
             do {
                 isLoadingSitemap = true
-                Logger.userData.info("🔄 Loading sitemap: \(sitemapName)")
                 let activeNetworkConfig = await NetworkTracker.shared.activeConnection?.configuration
-                Logger.userData.info("🌐 Active connection: \(activeNetworkConfig?.url ?? "none")")
                 let service = try OpenAPIService(connectionConfiguration: activeNetworkConfig ?? ConnectionConfiguration.remoteDefault)
 
                 let initialPage = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
                 try Task.checkCancellation()
 
                 await MainActor.run {
-                    Logger.userData.info("✅ Loaded \(initialPage?.widgets.count ?? 0) widgets for sitemap: \(sitemapName)")
-                    self.openHABSitemapPage = initialPage
-                    // Set command handler BEFORE updating widgets to prevent race condition
-                    openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                    // Set command handler BEFORE assigning to @Published property to prevent race condition
+                    initialPage?.sendCommand = { [weak self] item, command in
                         Task { await self?.sendCommand(item, command: command) }
                     }
+                    self.openHABSitemapPage = initialPage
                     let newWidgets = initialPage?.widgets ?? []
                     self.widgets = newWidgets
                     if !newWidgets.isEmpty {
                         self.cachedWidgets = newWidgets
                     }
                     self.isLoadingSitemap = false
-                    Logger.userData.info("🎨 UI should now update with \(newWidgets.count) widgets")
                 }
 
                 // Long polling loop with backoff
@@ -225,11 +222,11 @@ final class UserData: ObservableObject {
                         try Task.checkCancellation()
 
                         await MainActor.run {
-                            self.openHABSitemapPage = page
-                            // Set command handler BEFORE updating widgets to prevent race condition
-                            openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                            // Set command handler BEFORE assigning to @Published property to prevent race condition
+                            page?.sendCommand = { [weak self] item, command in
                                 Task { await self?.sendCommand(item, command: command) }
                             }
+                            self.openHABSitemapPage = page
                             let newWidgets = page?.widgets ?? []
                             self.widgets = newWidgets
                             if !newWidgets.isEmpty {
@@ -283,7 +280,7 @@ final class UserData: ObservableObject {
         do {
             try await NetworkTracker.shared.send(to: item, command: command)
         } catch {
-            Logger.userData.info("Could not send command \(command) to \(item.name)")
+            Logger.userData.error("Failed to send command '\(command)' to '\(item.name)': \(error.localizedDescription)")
         }
     }
 
