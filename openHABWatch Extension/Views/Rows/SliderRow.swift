@@ -16,6 +16,7 @@ import SwiftUI
 struct SliderRow: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         let valueBinding = Binding<Double>(
@@ -39,17 +40,27 @@ struct SliderRow: View {
                     DetailTextLabelView(widget: widget)
                 }.padding(.top, 8)
 
-                Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
-                    .labelsHidden()
-                    .focusable(true)
-                    .digitalCrownRotation(
-                        valueBinding,
-                        from: widget.minValue,
-                        through: widget.maxValue,
-                        by: widget.step,
-                        sensitivity: .medium,
-                        isHapticFeedbackEnabled: true
-                    )
+                Group {
+                    if isFocused {
+                        Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
+                            .labelsHidden()
+                            .focusable(true)
+                            .focused($isFocused)
+                            .digitalCrownRotation(
+                                valueBinding,
+                                from: widget.minValue,
+                                through: widget.maxValue,
+                                by: widget.step,
+                                sensitivity: .medium,
+                                isHapticFeedbackEnabled: true
+                            )
+                    } else {
+                        Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
+                            .labelsHidden()
+                            .focusable(true)
+                            .focused($isFocused)
+                    }
+                }
             }
     }
 }
