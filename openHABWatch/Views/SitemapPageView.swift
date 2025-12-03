@@ -17,7 +17,6 @@ struct SitemapPageView: View {
     @ObservedObject var viewModel: UserData
     @EnvironmentObject var settings: AppSettings
     @State var title = "Sitemap"
-    @State private var scrollPosition: CGFloat = 0
 
     var body: some View {
         NavigationStack {
@@ -34,15 +33,6 @@ struct SitemapPageView: View {
                     ScrollView {
                         ForEach(viewModel.widgets) { widget in
                             rowWidget(widget: widget)
-                                .background(
-                                    GeometryReader { geo in
-                                        Color.clear
-                                            .preference(
-                                                key: ScrollOffsetPreferenceKey.self,
-                                                value: geo.frame(in: .named("scroll")).minY
-                                            )
-                                    }
-                                )
                         }
 
                         if viewModel.isLoadingSitemap {
@@ -58,11 +48,6 @@ struct SitemapPageView: View {
                             .padding(.horizontal)
                         }
                     }
-                    .coordinateSpace(name: "scroll")
-                    .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-                        scrollPosition = value
-                    }
-                    .sensoryFeedback(.selection, trigger: scrollPosition)
                     .navigationBarTitle(viewModel.openHABSitemapPage?.title ?? "Sitemap")
                 } else {
                     VStack {
@@ -139,13 +124,6 @@ struct SitemapPageView: View {
         default:
             GenericRow(widget: widget)
         }
-    }
-}
-
-struct ScrollOffsetPreferenceKey: PreferenceKey {
-    nonisolated(unsafe) static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
     }
 }
 
