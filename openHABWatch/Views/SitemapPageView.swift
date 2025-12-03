@@ -48,7 +48,6 @@ struct SitemapPageView: View {
                             .padding(.horizontal)
                         }
                     }
-                    .focusable(true)
                     .navigationBarTitle(viewModel.openHABSitemapPage?.title ?? "Sitemap")
                 } else {
                     VStack {
