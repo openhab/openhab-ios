@@ -65,21 +65,11 @@ struct SliderWithSwitchSupportRow: View {
                         }
                     }
                 }
-                .focusable(true)
                 .padding(.trailing)
                 .cornerRadius(5)
 
                 Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
                     .labelsHidden()
-                    .focusable(true)
-                    .digitalCrownRotation(
-                        valueBinding,
-                        from: widget.minValue,
-                        through: widget.maxValue,
-                        by: widget.step,
-                        sensitivity: .medium,
-                        isHapticFeedbackEnabled: true
-                    )
             }
     }
 }
