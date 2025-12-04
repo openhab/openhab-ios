@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.1.37, Build 94] - 2025-12-04Z
+
+- Fix for spontaneous sitemap switching (#1011)
+
 ## [Version 3.1.36, Build 93] - 2025-12-04Z
 
 - Watch connectivity (#1009)
