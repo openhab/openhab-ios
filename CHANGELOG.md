@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [Version 3.1.36, Build 93] - 2025-12-04Z
+
+- Watch connectivity (#1009)
+- Fix watch crown scrolling (#1010)
+- Bump actions/checkout from 5 to 6 (#1007)
+
 
 
 ## [Version 3.1.34, Build 91] - 2025-11-16Z
