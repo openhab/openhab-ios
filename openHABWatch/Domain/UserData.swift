@@ -111,6 +111,7 @@ final class UserData: ObservableObject {
         // when the app context is first received from the iOS app
         AppSettings.shared.$sitemapForWatch
             .removeDuplicates()
+            .debounce(for: .seconds(0.3), scheduler: RunLoop.main)
             .sink { [weak self] newValue in
                 guard !newValue.isEmpty else { return }
                 Task { @MainActor in

@@ -344,7 +344,13 @@ extension OpenHABSitemapViewController {
         }
 
         let pageTitle = currentPage?.title.components(separatedBy: "[")[0]
-        parent?.navigationItem.title = pageTitle?.isEmpty == false ? pageTitle : defaultSitemap.isEmpty ? "Sitemap" : defaultSitemap
+        if let pageTitle, !pageTitle.isEmpty {
+            parent?.navigationItem.title = pageTitle
+        } else if !defaultSitemap.isEmpty {
+            parent?.navigationItem.title = defaultSitemap
+        } else {
+            parent?.navigationItem.title = "Sitemap"
+        }
     }
 
     // Select sitemap

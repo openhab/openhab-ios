@@ -45,9 +45,8 @@ struct SegmentRow: View {
         HStack {
             HStack {
                 IconView(widget: widget, settings: settings)
-                TextLabelView(widget: widget)
+                TextLabelView(widget: widget, lineLimit: 1)
                 Spacer()
-                DetailTextLabelView(widget: widget)
             }
             NavigationLink(destination: LazyView(SegmentSelectionView(widget: widget))) {
                 HStack {
@@ -57,12 +56,17 @@ struct SegmentRow: View {
                     }) {
                         Text(widget.mappingsOrItemOptions[selectedIndex].label)
                             .foregroundColor(.secondary)
+                            .lineLimit(1)
                     }
                     Image(systemSymbol: .chevronRight)
                         .foregroundColor(.secondary)
                         .font(.caption)
                 }
+                .padding(.horizontal, 8)
+                .frame(height: 30)
+                .background(Capsule().fill(Color.gray.opacity(0.5)))
             }
+            .buttonStyle(.plain)
         }
     }
 }
