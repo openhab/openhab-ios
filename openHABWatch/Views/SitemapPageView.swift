@@ -17,6 +17,7 @@ struct SitemapPageView: View {
     @ObservedObject var viewModel: UserData
     @EnvironmentObject var settings: AppSettings
     @State var title = "Sitemap"
+    @State private var scrollPosition: String?
 
     var body: some View {
         NavigationStack {
@@ -31,24 +32,27 @@ struct SitemapPageView: View {
                     }
                 } else if !viewModel.widgets.isEmpty {
                     ScrollView {
-                        ForEach(viewModel.widgets) { widget in
-                            rowWidget(widget: widget)
-                        }
-
-                        if viewModel.isLoadingSitemap {
-                            HStack {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
-                                    .scaleEffect(0.7)
-                                Text("Updating...")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                Spacer()
+                        LazyVStack {
+                            ForEach(viewModel.widgets) { widget in
+                                rowWidget(widget: widget)
+                                    .id(widget.widgetId)
                             }
-                            .padding(.horizontal)
+
+                            if viewModel.isLoadingSitemap {
+                                HStack {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
+                                        .scaleEffect(0.7)
+                                    Text("Updating...")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                    Spacer()
+                                }
+                                .padding(.horizontal)
+                            }
                         }
                     }
-                    .focusable(true)
+                    .scrollPosition(id: $scrollPosition, anchor: .top)
                     .navigationBarTitle(viewModel.openHABSitemapPage?.title ?? "Sitemap")
                 } else {
                     VStack {
@@ -60,7 +64,6 @@ struct SitemapPageView: View {
                     }
                 }
             }
-            .animation(.easeInOut(duration: 0.2), value: viewModel.isLoadingSitemap)
             .alert(isPresented: $viewModel.showCertificateAlert) {
                 Alert(
                     title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),

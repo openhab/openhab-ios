@@ -342,9 +342,7 @@ extension OpenHABSitemapViewController {
         } else {
             isWaitingToReload = true
         }
-        // on initial load ??? refreshControl?.endRefreshing()
 
-        widgetTableView.reloadData()
         let pageTitle = currentPage?.title.components(separatedBy: "[")[0]
         parent?.navigationItem.title = pageTitle?.isEmpty == false ? pageTitle : defaultSitemap.isEmpty ? "Sitemap" : defaultSitemap
     }
@@ -390,7 +388,6 @@ extension OpenHABSitemapViewController {
                     showSideMenu()
                 default: break
                 }
-                widgetTableView.reloadData()
             } catch _ as OpenAPIServiceError {
                 Logger.sitemapViewController.debug("OpenAPIService Error on OpenHABSitemapViewController")
             } catch let error as OpenHABSitemapError {

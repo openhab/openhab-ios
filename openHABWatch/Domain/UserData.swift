@@ -29,11 +29,12 @@ final class UserData: ObservableObject {
 
     // Cache last successful widgets to prevent empty state during reconnections
     private var cachedWidgets: [OpenHABWidget] = []
+    private var currentlyLoadingSitemap: String?
 
     private var pageHandlingTask: Task<Void, Never>?
     @Published var isPolling = false
 
-    var openHABSitemapPage: OpenHABPage?
+    @Published var openHABSitemapPage: OpenHABPage?
     var currentClientDelegate: HTTPClientDelegate?
 
     private var cancellables = Set<AnyCancellable>()
@@ -105,11 +106,39 @@ final class UserData: ObservableObject {
             }
             .store(in: &cancellables)
 
+        // Observe sitemap changes - reload the sitemap when it changes
+        // Note: We don't use .dropFirst() here because we need to catch the initial value
+        // when the app context is first received from the iOS app
         AppSettings.shared.$sitemapForWatch
             .removeDuplicates()
             .sink { [weak self] newValue in
                 guard !newValue.isEmpty else { return }
-                self?.startPageHandling(sitemapName: newValue)
+                Task { @MainActor in
+                    guard let self else { return }
+
+                    // Check if we have an active connection before starting
+                    guard await NetworkTracker.shared.activeConnection != nil else { return }
+
+                    // Only force restart if the sitemap name actually changed
+                    let isDifferentSitemap = self.currentlyLoadingSitemap != newValue
+                    self.startPageHandling(sitemapName: newValue, force: isDifferentSitemap)
+                }
+            }
+            .store(in: &cancellables)
+
+        // Also observe connection config changes - update network when server changes
+        AppSettings.shared.$localConnectionConfig
+            .combineLatest(AppSettings.shared.$remoteConnectionConfig)
+            .dropFirst() // Skip initial values
+            .removeDuplicates { lhs, rhs in
+                // Only trigger if actual connection URLs changed
+                lhs.0?.url == rhs.0?.url && lhs.1?.url == rhs.1?.url
+            }
+            .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
+            .sink { [weak self] _, _ in
+                Task { @MainActor in
+                    await self?.updateNetwork()
+                }
             }
             .store(in: &cancellables)
 
@@ -122,9 +151,9 @@ final class UserData: ObservableObject {
     private func observeNetworkChanges() async {
         let activeConnectionStream = await NetworkTracker.shared.activeConnectionStream()
         for await activeConnection in activeConnectionStream {
-            guard let activeConnection else { continue }
-
-            Logger.userData.info("openHABTracked: \(activeConnection.configuration.url)")
+            guard let activeConnection else {
+                continue
+            }
 
             if !AppSettings.shared.haveReceivedAppContext {
                 AppMessageService.singleton.requestApplicationContext()
@@ -136,26 +165,47 @@ final class UserData: ObservableObject {
             AppSettings.shared.openHABRootUrl = activeConnection.configuration.url
             AppSettings.shared.openHABVersion = activeConnection.version
 
-            // TODO: Check whether there is need to setup requestModifier for Kingfisher
-
-            startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)
+            // If we have a sitemap but nothing is loading, start page handling
+            let sitemapName = AppSettings.shared.sitemapForWatch
+            if !sitemapName.isEmpty, currentlyLoadingSitemap == nil {
+                startPageHandling(sitemapName: sitemapName, force: false)
+            }
         }
     }
 
     func updateNetwork() async {
         guard let connection1 = AppSettings.shared.localConnectionConfig,
               let connection2 = AppSettings.shared.remoteConnectionConfig else {
-            Logger.userData.info("No connections defined")
+            Logger.userData.warning("No connections defined")
             return
         }
         await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
     }
 
-    func startPageHandling(sitemapName: String, pageId: String = "") {
-        // Don't clear widgets immediately when switching - use cached data during transition
-        pageHandlingTask?.cancel()
+    func startPageHandling(sitemapName: String, pageId: String = "", force: Bool = false) {
+        // Handle concurrent loads based on force parameter
+        if let task = pageHandlingTask, !task.isCancelled {
+            if currentlyLoadingSitemap == sitemapName {
+                if force {
+                    task.cancel()
+                } else {
+                    return
+                }
+            } else {
+                task.cancel()
+            }
+        }
+        currentlyLoadingSitemap = sitemapName
 
         pageHandlingTask = Task {
+            defer {
+                // Always clear task references when task completes (cancelled or error)
+                Task { @MainActor in
+                    self.pageHandlingTask = nil
+                    self.currentlyLoadingSitemap = nil
+                }
+            }
+
             do {
                 isLoadingSitemap = true
                 let activeNetworkConfig = await NetworkTracker.shared.activeConnection?.configuration
@@ -165,14 +215,16 @@ final class UserData: ObservableObject {
                 try Task.checkCancellation()
 
                 await MainActor.run {
+                    // Set command handler BEFORE assigning to @Published property to prevent race condition
+                    initialPage?.sendCommand = { [weak self] item, command in
+                        Task { await self?.sendCommand(item, command: command) }
+                    }
                     self.openHABSitemapPage = initialPage
-                    let newWidgets = initialPage?.widgets ?? []
+                    var newWidgets = [OpenHABWidget]()
+                    newWidgets.flatten(initialPage?.widgets ?? [])
                     self.widgets = newWidgets
                     if !newWidgets.isEmpty {
                         self.cachedWidgets = newWidgets
-                    }
-                    openHABSitemapPage?.sendCommand = { [weak self] item, command in
-                        Task { await self?.sendCommand(item, command: command) }
                     }
                     self.isLoadingSitemap = false
                 }
@@ -187,11 +239,13 @@ final class UserData: ObservableObject {
                         try Task.checkCancellation()
 
                         await MainActor.run {
-                            self.openHABSitemapPage = page
-                            openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                            // Set command handler BEFORE assigning to @Published property to prevent race condition
+                            page?.sendCommand = { [weak self] item, command in
                                 Task { await self?.sendCommand(item, command: command) }
                             }
-                            let newWidgets = page?.widgets ?? []
+                            self.openHABSitemapPage = page
+                            var newWidgets = [OpenHABWidget]()
+                            newWidgets.flatten(page?.widgets ?? [])
                             self.widgets = newWidgets
                             if !newWidgets.isEmpty {
                                 self.cachedWidgets = newWidgets
@@ -242,7 +296,7 @@ final class UserData: ObservableObject {
         do {
             try await NetworkTracker.shared.send(to: item, command: command)
         } catch {
-            Logger.userData.info("Could not send command \(command) to \(item.name)")
+            Logger.userData.error("Failed to send command '\(command)' to '\(item.name)': \(error.localizedDescription)")
         }
     }
 
