@@ -106,13 +106,22 @@ final class UserData: ObservableObject {
             .store(in: &cancellables)
 
         // Observe sitemap changes - reload the sitemap when it changes
+        // Note: We don't use .dropFirst() here because we need to catch the initial value
+        // when the app context is first received from the iOS app
         AppSettings.shared.$sitemapForWatch
-            .dropFirst()
             .removeDuplicates()
+            .debounce(for: .seconds(0.3), scheduler: RunLoop.main)
             .sink { [weak self] newValue in
                 guard !newValue.isEmpty else { return }
                 Task { @MainActor in
-                    self?.startPageHandling(sitemapName: newValue, force: true)
+                    guard let self else { return }
+
+                    // Check if we have an active connection before starting
+                    guard await NetworkTracker.shared.activeConnection != nil else { return }
+
+                    // Only force restart if the sitemap name actually changed
+                    let isDifferentSitemap = self.currentlyLoadingSitemap != newValue
+                    self.startPageHandling(sitemapName: newValue, force: isDifferentSitemap)
                 }
             }
             .store(in: &cancellables)
@@ -127,7 +136,6 @@ final class UserData: ObservableObject {
             }
             .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
             .sink { [weak self] _, _ in
-                Logger.userData.info("Connection config changed, updating network")
                 Task { @MainActor in
                     await self?.updateNetwork()
                 }
@@ -147,8 +155,6 @@ final class UserData: ObservableObject {
                 continue
             }
 
-            Logger.userData.info("Active connection established: \(activeConnection.configuration.url)")
-
             if !AppSettings.shared.haveReceivedAppContext {
                 AppMessageService.singleton.requestApplicationContext()
                 errorDescription = NSLocalizedString("settings_not_received", comment: "")
@@ -159,9 +165,11 @@ final class UserData: ObservableObject {
             AppSettings.shared.openHABRootUrl = activeConnection.configuration.url
             AppSettings.shared.openHABVersion = activeConnection.version
 
-            // TODO: Check whether there is need to setup requestModifier for Kingfisher
-
-            startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch, force: true)
+            // If we have a sitemap but nothing is loading, start page handling
+            let sitemapName = AppSettings.shared.sitemapForWatch
+            if !sitemapName.isEmpty, currentlyLoadingSitemap == nil {
+                startPageHandling(sitemapName: sitemapName, force: false)
+            }
         }
     }
 
@@ -212,7 +220,8 @@ final class UserData: ObservableObject {
                         Task { await self?.sendCommand(item, command: command) }
                     }
                     self.openHABSitemapPage = initialPage
-                    let newWidgets = initialPage?.widgets ?? []
+                    var newWidgets = [OpenHABWidget]()
+                    newWidgets.flatten(initialPage?.widgets ?? [])
                     self.widgets = newWidgets
                     if !newWidgets.isEmpty {
                         self.cachedWidgets = newWidgets
@@ -235,7 +244,8 @@ final class UserData: ObservableObject {
                                 Task { await self?.sendCommand(item, command: command) }
                             }
                             self.openHABSitemapPage = page
-                            let newWidgets = page?.widgets ?? []
+                            var newWidgets = [OpenHABWidget]()
+                            newWidgets.flatten(page?.widgets ?? [])
                             self.widgets = newWidgets
                             if !newWidgets.isEmpty {
                                 self.cachedWidgets = newWidgets
