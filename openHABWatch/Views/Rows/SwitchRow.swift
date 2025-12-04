@@ -39,7 +39,7 @@ struct SwitchRow: View {
             HStack {
                 IconView(widget: widget, settings: settings)
                 VStack {
-                    TextLabelView(widget: widget)
+                    TextLabelView(widget: widget, lineLimit: 1)
                     DetailTextLabelView(widget: widget)
                 }
             }
