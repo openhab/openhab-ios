@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.1.38, Build 95] - 2025-12-04Z
+
+- watchOS Scrolling behavior (#1012)
+
 ## [Version 3.1.37, Build 94] - 2025-12-04Z
 
 - Fix for spontaneous sitemap switching (#1011)
