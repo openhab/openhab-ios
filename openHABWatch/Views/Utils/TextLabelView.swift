@@ -14,11 +14,12 @@ import SwiftUI
 
 struct TextLabelView: View {
     @ObservedObject var widget: OpenHABWidget
+    var lineLimit = 2
 
     var body: some View {
         Text(widget.labelText ?? "")
             .font(.caption)
-            .lineLimit(2)
+            .lineLimit(lineLimit)
             .foregroundColor(!widget.labelcolor.isEmpty ? Color(fromString: widget.labelcolor) : .primary)
     }
 }

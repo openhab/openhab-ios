@@ -342,10 +342,15 @@ extension OpenHABSitemapViewController {
         } else {
             isWaitingToReload = true
         }
-        // on initial load ??? refreshControl?.endRefreshing()
 
-        widgetTableView.reloadData()
-        parent?.navigationItem.title = currentPage?.title.components(separatedBy: "[")[0]
+        let pageTitle = currentPage?.title.components(separatedBy: "[")[0]
+        if let pageTitle, !pageTitle.isEmpty {
+            parent?.navigationItem.title = pageTitle
+        } else if !defaultSitemap.isEmpty {
+            parent?.navigationItem.title = defaultSitemap
+        } else {
+            parent?.navigationItem.title = "Sitemap"
+        }
     }
 
     // Select sitemap
