@@ -425,8 +425,8 @@ public extension OpenHABWidget.CodingData {
 }
 
 //  Recursive parsing of nested widget structure
-extension [OpenHABWidget] {
-    public mutating func flatten(_ widgets: [Element]) {
+public extension [OpenHABWidget] {
+    mutating func flatten(_ widgets: [Element]) {
         for widget in widgets {
             append(widget)
             flatten(widget.widgets)
