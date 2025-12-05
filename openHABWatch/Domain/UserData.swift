@@ -106,11 +106,10 @@ final class UserData: ObservableObject {
             .store(in: &cancellables)
 
         // Observe sitemap changes - reload the sitemap when it changes
-        // Note: We don't use .dropFirst() here because we need to catch the initial value
-        // when the app context is first received from the iOS app
         AppSettings.shared.$sitemapForWatch
+            .dropFirst()
             .removeDuplicates()
-            .debounce(for: .seconds(0.3), scheduler: RunLoop.main)
+            .debounce(for: .seconds(2.0), scheduler: RunLoop.main)
             .sink { [weak self] newValue in
                 guard !newValue.isEmpty else { return }
                 Task { @MainActor in
@@ -223,8 +222,7 @@ final class UserData: ObservableObject {
                         Task { await self?.sendCommand(item, command: command) }
                     }
                     self.openHABSitemapPage = initialPage
-                    var newWidgets = [OpenHABWidget]()
-                    newWidgets.flatten(initialPage?.widgets ?? [])
+                    let newWidgets = initialPage?.widgets ?? []
                     self.widgets = newWidgets
                     if !newWidgets.isEmpty {
                         self.cachedWidgets = newWidgets
@@ -247,8 +245,7 @@ final class UserData: ObservableObject {
                                 Task { await self?.sendCommand(item, command: command) }
                             }
                             self.openHABSitemapPage = page
-                            var newWidgets = [OpenHABWidget]()
-                            newWidgets.flatten(page?.widgets ?? [])
+                            let newWidgets = page?.widgets ?? []
                             self.widgets = newWidgets
                             if !newWidgets.isEmpty {
                                 self.cachedWidgets = newWidgets
