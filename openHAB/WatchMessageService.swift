@@ -90,6 +90,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
         guard getCachedPreferences() != context else {
             // avoid updating unchanged preferences
+            Logger.preferences.debug("⏭️ Preferences unchanged, skipping sync")
             return
         }
 
@@ -97,7 +98,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
         do {
             try WCSession.default.updateApplicationContext(context)
-            Logger.preferences.debug("Successfully updated application context with WatchPreferences.")
+            Logger.preferences.info("📤 Synced WatchPreferences to watch - sitemapForWatch: \(prefs.sitemapForWatch)")
         } catch {
             Logger.preferences.error("Failed to encode or update watch context: \(error.localizedDescription)")
         }

@@ -106,20 +106,27 @@ final class UserData: ObservableObject {
             .store(in: &cancellables)
 
         // Observe sitemap changes - reload the sitemap when it changes
+        // Note: We don't use .dropFirst() here because we need to catch the initial value
+        // when the app context is first received from the iOS app on real devices
         AppSettings.shared.$sitemapForWatch
-            .dropFirst()
             .removeDuplicates()
-            .debounce(for: .seconds(2.0), scheduler: RunLoop.main)
+            .debounce(for: .seconds(0.3), scheduler: RunLoop.main)
             .sink { [weak self] newValue in
-                guard !newValue.isEmpty else { return }
+                guard !newValue.isEmpty else {
+                    Logger.userData.debug("Sitemap observer: empty sitemap, ignoring")
+                    return
+                }
+                Logger.userData.info("Sitemap observer fired: \(newValue)")
                 Task { @MainActor in
                     guard let self else { return }
 
-                    // Check if we have an active connection before starting
-                    guard await NetworkTracker.shared.activeConnection != nil else { return }
-
                     // Only force restart if the sitemap name actually changed
                     let isDifferentSitemap = self.currentlyLoadingSitemap != newValue
+                    Logger.userData.info("Sitemap change detected - current: \(self.currentlyLoadingSitemap ?? "nil"), new: \(newValue), force: \(isDifferentSitemap)")
+
+                    // Note: We don't check for active connection here because NetworkTracker
+                    // can report false negatives (especially during long-polling on real devices).
+                    // The observeNetworkChanges() function will handle retrying when network becomes available.
                     self.startPageHandling(sitemapName: newValue, force: isDifferentSitemap)
                 }
             }
@@ -154,6 +161,8 @@ final class UserData: ObservableObject {
                 continue
             }
 
+            Logger.userData.info("Network connection became available: \(activeConnection.configuration.url)")
+
             if !AppSettings.shared.haveReceivedAppContext {
                 AppMessageService.singleton.requestApplicationContext()
                 errorDescription = NSLocalizedString("settings_not_received", comment: "")
@@ -164,10 +173,24 @@ final class UserData: ObservableObject {
             AppSettings.shared.openHABRootUrl = activeConnection.configuration.url
             AppSettings.shared.openHABVersion = activeConnection.version
 
-            // If we have a sitemap but nothing is loading, start page handling
+            // Start page handling when network becomes available
             let sitemapName = AppSettings.shared.sitemapForWatch
-            if !sitemapName.isEmpty, currentlyLoadingSitemap == nil {
-                startPageHandling(sitemapName: sitemapName, force: false)
+            if !sitemapName.isEmpty {
+                // Check if there's already a running task
+                if let task = pageHandlingTask, !task.isCancelled {
+                    // Task is running, check if it's for the right sitemap
+                    if currentlyLoadingSitemap == sitemapName {
+                        Logger.userData.info("Page handling task already running for correct sitemap: \(sitemapName)")
+                    } else {
+                        // Running task is for different sitemap, force reload
+                        Logger.userData.info("Page handling task for wrong sitemap, forcing reload: \(sitemapName)")
+                        startPageHandling(sitemapName: sitemapName, force: true)
+                    }
+                } else {
+                    // No task running or task is cancelled - start a new one
+                    Logger.userData.info("Starting page handling for sitemap: \(sitemapName) after network became available")
+                    startPageHandling(sitemapName: sitemapName, force: false)
+                }
             }
         }
     }
@@ -182,15 +205,20 @@ final class UserData: ObservableObject {
     }
 
     func startPageHandling(sitemapName: String, pageId: String = "", force: Bool = false) {
+        Logger.userData.info("startPageHandling called - sitemap: \(sitemapName), pageId: \(pageId), force: \(force)")
+
         // Handle concurrent loads based on force parameter
         if let task = pageHandlingTask, !task.isCancelled {
             if currentlyLoadingSitemap == sitemapName {
                 if force {
+                    Logger.userData.info("Cancelling existing task for same sitemap (force=true)")
                     task.cancel()
                 } else {
+                    Logger.userData.info("Same sitemap already loading and force=false, skipping")
                     return
                 }
             } else {
+                Logger.userData.info("Cancelling existing task for different sitemap")
                 task.cancel()
             }
         }
@@ -202,16 +230,34 @@ final class UserData: ObservableObject {
                 // Only clear references if this task is still the current one
                 Task { @MainActor in
                     if self.currentlyLoadingSitemap == taskSitemapName {
+                        Logger.userData.debug("Clearing page handling task for: \(taskSitemapName)")
                         self.pageHandlingTask = nil
                         self.currentlyLoadingSitemap = nil
                     }
                 }
             }
 
+            // Get connection configuration - prefer active, fallback to stored local config
+            var connectionConfig = await NetworkTracker.shared.activeConnection?.configuration
+            if connectionConfig == nil {
+                // NetworkTracker can give false negatives on real devices, use stored config
+                connectionConfig = AppSettings.shared.localConnectionConfig ?? AppSettings.shared.remoteConnectionConfig
+                Logger.userData.warning("NetworkTracker has no active connection, using stored config: \(connectionConfig?.url ?? "none")")
+            }
+
+            guard let config = connectionConfig else {
+                Logger.userData.error("No connection configuration available, cannot load sitemap")
+                await MainActor.run {
+                    self.errorDescription = "No connection configuration available"
+                    self.showAlert = true
+                    self.isLoadingSitemap = false
+                }
+                return
+            }
+
             do {
                 isLoadingSitemap = true
-                let activeNetworkConfig = await NetworkTracker.shared.activeConnection?.configuration
-                let service = try OpenAPIService(connectionConfiguration: activeNetworkConfig ?? ConnectionConfiguration.remoteDefault)
+                let service = try OpenAPIService(connectionConfiguration: config)
 
                 let initialPage = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
                 try Task.checkCancellation()
@@ -267,14 +313,36 @@ final class UserData: ObservableObject {
                     }
                 }
             } catch {
+                // Check if this was a network error and we should try remote fallback
+                let shouldTryRemote = (error as? URLError)?.code == .cannotConnectToHost ||
+                                     (error as? URLError)?.code == .timedOut ||
+                                     (error as? URLError)?.code == .networkConnectionLost
+
                 await MainActor.run {
-                    Logger.userData.error("Page handling failed with error \(error.localizedDescription)")
+                    Logger.userData.error("Page handling failed for sitemap '\(taskSitemapName)': \(error.localizedDescription)")
+                    Logger.userData.error("Error type: \(String(describing: type(of: error)))")
+
+                    // If local connection failed and remote is available, try remote as fallback
+                    if shouldTryRemote,
+                       let remoteConfig = AppSettings.shared.remoteConnectionConfig,
+                       remoteConfig.url != connectionConfig?.url {
+                        Logger.userData.info("Local connection failed, retrying with remote: \(remoteConfig.url)")
+                        // Retry with remote connection
+                        Task {
+                            await MainActor.run {
+                                self.startPageHandling(sitemapName: taskSitemapName, force: true)
+                            }
+                        }
+                        return
+                    }
+
                     // Use cached widgets if available instead of clearing completely
                     if self.cachedWidgets.isEmpty {
+                        Logger.userData.warning("No cached widgets available, showing empty state")
                         self.widgets = []
                     } else {
                         self.widgets = self.cachedWidgets
-                        Logger.userData.info("Using cached widgets during connection failure")
+                        Logger.userData.info("Using \(self.cachedWidgets.count) cached widgets during connection failure")
                     }
                     self.errorDescription = error.localizedDescription
                     self.showAlert = true
