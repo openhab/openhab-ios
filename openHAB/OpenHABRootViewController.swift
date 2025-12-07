@@ -476,18 +476,24 @@ class OpenHABRootViewController: UIViewController {
         guard let action else { return }
 
         Logger.viewController.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
-        if let cloudUserId, let targetHome = Preferences.shared.storedHome(forCloudUserId: cloudUserId), Preferences.shared.currentHomePreferences.remoteConnectionConfig.cloudUserId != cloudUserId {
-            // if we need to switch homes, disconnnect the tracking first, and wait for the tracker to start again with the updated preferences
-            Task {
+
+        Task {
+            if let cloudUserId, let targetHome = Preferences.shared.storedHome(forCloudUserId: cloudUserId), Preferences.shared.currentHomePreferences.remoteConnectionConfig.cloudUserId != cloudUserId {
+                // if we need to switch homes, disconnnect the tracking first, and update preferences
                 await NetworkTracker.shared.stopTracking()
                 Logger.viewController.info("Switching to home \(targetHome.id)")
                 Preferences.shared.switchActiveHome(to: targetHome.id)
-                _ = await NetworkTracker.shared.waitForActiveConnection()
-                handleNotificationInternal(action)
             }
-            return
+            // if the app was woken from a fully stopped state, network tracking might not be active yet
+            await NetworkTracker.shared.startTracking(connectionConfigurations:
+                [
+                    Preferences.shared.currentHomePreferences.localConnectionConfig,
+                    Preferences.shared.currentHomePreferences.remoteConnectionConfig
+                ]
+            )
+            _ = await NetworkTracker.shared.waitForActiveConnection()
+            handleNotificationInternal(action)
         }
-        handleNotificationInternal(action)
     }
 
     private func handleNotificationInternal(_ action: String?) {
