@@ -141,6 +141,7 @@ struct SettingsView: View {
             homePreferences.realTimeSliders = settingsRealTimeSliders
             homePreferences.iconType = settingsIconType.rawValue
             homePreferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
+            homePreferences.defaultMainUIPath = settingsDefaultMainUIPath
             homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
             homePreferences.sitemapForWatch = settingsSitemapForWatch
             homePreferences.sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
