@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [Version 3.1.40, Build 97] - 2025-12-08Z
+
+- default path was missing in save routine of settings view (#1016)
+
+## [Version 3.1.39, Build 96] - 2025-12-08Z
+
+- process notification only after establishing network connection (#1015)
+
 ## [Version 3.1.38, Build 95] - 2025-12-04Z
 
 - watchOS Scrolling behavior (#1012)
