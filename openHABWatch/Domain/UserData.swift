@@ -237,27 +237,22 @@ final class UserData: ObservableObject {
                 }
             }
 
-            // Get connection configuration - prefer active, fallback to stored local config
-            var connectionConfig = await NetworkTracker.shared.activeConnection?.configuration
-            if connectionConfig == nil {
-                // NetworkTracker can give false negatives on real devices, use stored config
-                connectionConfig = AppSettings.shared.localConnectionConfig ?? AppSettings.shared.remoteConnectionConfig
-                Logger.userData.warning("NetworkTracker has no active connection, using stored config: \(connectionConfig?.url ?? "none")")
-            }
-
-            guard let config = connectionConfig else {
-                Logger.userData.error("No connection configuration available, cannot load sitemap")
-                await MainActor.run {
-                    self.errorDescription = "No connection configuration available"
-                    self.showAlert = true
-                    self.isLoadingSitemap = false
-                }
-                return
-            }
-
             do {
                 isLoadingSitemap = true
-                let service = try OpenAPIService(connectionConfiguration: config)
+
+                // Wait for NetworkTracker to establish a connection (no fallback hacks needed!)
+                guard let connectionInfo = await NetworkTracker.shared.waitForActiveConnection() else {
+                    Logger.userData.error("No active connection available after timeout")
+                    await MainActor.run {
+                        self.errorDescription = NSLocalizedString("settings_not_received", comment: "")
+                        self.showAlert = true
+                        self.isLoadingSitemap = false
+                    }
+                    return
+                }
+
+                Logger.userData.info("Using connection: \(connectionInfo.configuration.url)")
+                let service = try OpenAPIService(connectionConfiguration: connectionInfo.configuration)
 
                 let initialPage = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
                 try Task.checkCancellation()
@@ -313,28 +308,9 @@ final class UserData: ObservableObject {
                     }
                 }
             } catch {
-                // Check if this was a network error and we should try remote fallback
-                let shouldTryRemote = (error as? URLError)?.code == .cannotConnectToHost ||
-                                     (error as? URLError)?.code == .timedOut ||
-                                     (error as? URLError)?.code == .networkConnectionLost
-
                 await MainActor.run {
                     Logger.userData.error("Page handling failed for sitemap '\(taskSitemapName)': \(error.localizedDescription)")
                     Logger.userData.error("Error type: \(String(describing: type(of: error)))")
-
-                    // If local connection failed and remote is available, try remote as fallback
-                    if shouldTryRemote,
-                       let remoteConfig = AppSettings.shared.remoteConnectionConfig,
-                       remoteConfig.url != connectionConfig?.url {
-                        Logger.userData.info("Local connection failed, retrying with remote: \(remoteConfig.url)")
-                        // Retry with remote connection
-                        Task {
-                            await MainActor.run {
-                                self.startPageHandling(sitemapName: taskSitemapName, force: true)
-                            }
-                        }
-                        return
-                    }
 
                     // Use cached widgets if available instead of clearing completely
                     if self.cachedWidgets.isEmpty {
@@ -348,6 +324,7 @@ final class UserData: ObservableObject {
                     self.showAlert = true
                     self.isLoadingSitemap = false
                 }
+                // Note: NetworkTracker will automatically handle failover to remote if local fails
             }
         }
     }

@@ -457,7 +457,20 @@ public actor NetworkTracker {
             Logger.networkTracker.info("NetworkTracker: Networkmonitor status: Connected")
             await checkActiveConnection()
         } else {
-            Logger.networkTracker.info("NetworkTracker: Networkmonitor status: Disconnected, stopping connection attempts")
+            Logger.networkTracker.info("NetworkTracker: Networkmonitor status: Disconnected")
+
+            // Don't immediately clear active connection - path monitor can give false negatives
+            // especially on devices with VPNs. Test if the connection is actually dead first.
+            if let currentConnection = activeConnection {
+                Logger.networkTracker.info("NetworkTracker: Verifying if active connection is still working despite path monitor disconnect...")
+                let stillWorks = await testConnection(configuration: currentConnection.configuration)
+                if stillWorks != nil {
+                    Logger.networkTracker.info("NetworkTracker: Active connection still works, ignoring path monitor false negative")
+                    return
+                }
+                Logger.networkTracker.info("NetworkTracker: Active connection confirmed dead, clearing and stopping attempts")
+            }
+
             setActiveConnection(nil)
             // don´t retry until we have a network connection again
             retryTask?.cancel()
