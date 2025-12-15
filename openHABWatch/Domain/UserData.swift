@@ -252,7 +252,7 @@ final class UserData: ObservableObject {
                 }
 
                 Logger.userData.info("Using connection: \(connectionInfo.configuration.url)")
-                let service = try OpenAPIService(connectionConfiguration: connectionInfo.configuration)
+                let service = try OpenAPIService(connectionConfiguration: connectionInfo.configuration, serviceConfiguration: .longTerm)
 
                 let initialPage = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
                 try Task.checkCancellation()
@@ -264,7 +264,7 @@ final class UserData: ObservableObject {
                     }
                     self.openHABSitemapPage = initialPage
                     let newWidgets = initialPage?.widgets ?? []
-                    self.widgets = newWidgets
+                    self.updateWidgets(with: newWidgets)
                     if !newWidgets.isEmpty {
                         self.cachedWidgets = newWidgets
                     }
@@ -275,19 +275,28 @@ final class UserData: ObservableObject {
                 var backoffAttempt = 0
                 let maxBackoffDelay: UInt64 = 30_000_000_000 // 30 seconds
 
+                Logger.userData.info("Starting long polling loop for sitemap: \(taskSitemapName)")
                 while !Task.isCancelled {
                     do {
+                        Logger.userData.info("Long poll request starting for sitemap: \(taskSitemapName)")
+                        let startTime = Date()
+
                         let page = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: true)
+                        let elapsed = Date().timeIntervalSince(startTime)
                         try Task.checkCancellation()
 
+                        Logger.userData.info("Long poll response received for sitemap: \(taskSitemapName) after \(String(format: "%.1f", elapsed))s")
                         await MainActor.run {
                             // Set command handler BEFORE assigning to @Published property to prevent race condition
-                            page?.sendCommand = { [weak self] item, command in
-                                Task { await self?.sendCommand(item, command: command) }
+                            if let page {
+                                page.sendCommand = { [weak self] item, command in
+                                    Task { await self?.sendCommand(item, command: command) }
+                                }
                             }
                             self.openHABSitemapPage = page
                             let newWidgets = page?.widgets ?? []
-                            self.widgets = newWidgets
+                            Logger.userData.info("Updating widgets, received \(newWidgets.count) widgets")
+                            self.updateWidgets(with: newWidgets)
                             if !newWidgets.isEmpty {
                                 self.cachedWidgets = newWidgets
                             }
@@ -296,17 +305,21 @@ final class UserData: ObservableObject {
                         // Reset backoff after success
                         backoffAttempt = 0
 
+                    } catch is CancellationError {
+                        Logger.userData.info("Long polling cancelled for sitemap: \(taskSitemapName)")
+                        throw CancellationError()
                     } catch {
                         backoffAttempt += 1
                         let baseDelay = min(UInt64(pow(2.0, Double(backoffAttempt))) * 1_000_000_000, maxBackoffDelay)
                         let jitter = UInt64.random(in: 0 ..< (baseDelay / 2))
                         let totalDelay = baseDelay + jitter
 
-                        Logger.userData.warning("Polling failed: \(error.localizedDescription). Retrying in \(Double(totalDelay) / 1_000_000_000.0) seconds.")
+                        Logger.userData.warning("Polling failed: \(error.localizedDescription) (\(type(of: error))). Retrying in \(Double(totalDelay) / 1_000_000_000.0) seconds.")
 
                         try await Task.sleep(nanoseconds: totalDelay)
                     }
                 }
+                Logger.userData.info("Long polling loop exited for sitemap: \(taskSitemapName)")
             } catch {
                 await MainActor.run {
                     Logger.userData.error("Page handling failed for sitemap '\(taskSitemapName)': \(error.localizedDescription)")
@@ -350,5 +363,31 @@ final class UserData: ObservableObject {
 
         showAlert = false
         startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)
+    }
+
+    /// Updates existing widget instances instead of replacing them to preserve @ObservedObject references
+    private func updateWidgets(with newWidgets: [OpenHABWidget]) {
+        // Build a map of existing widgets by ID for quick lookup
+        var existingWidgetsMap = Dictionary(uniqueKeysWithValues: widgets.map { ($0.widgetId, $0) })
+        var updatedWidgets: [OpenHABWidget] = []
+
+        for newWidget in newWidgets {
+            if let existingWidget = existingWidgetsMap[newWidget.widgetId] {
+                // Update existing widget's properties to preserve the instance
+                existingWidget.label = newWidget.label
+                existingWidget.icon = newWidget.icon
+                existingWidget.state = newWidget.state
+                existingWidget.item = newWidget.item
+                existingWidget.stateEnumBinding = newWidget.stateEnumBinding
+                // Add other properties as needed
+                updatedWidgets.append(existingWidget)
+                existingWidgetsMap.removeValue(forKey: newWidget.widgetId)
+            } else {
+                // New widget, add it
+                updatedWidgets.append(newWidget)
+            }
+        }
+
+        widgets = updatedWidgets
     }
 }
