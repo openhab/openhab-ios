@@ -16,6 +16,7 @@ import UIKit
 
 public extension String {
     internal var doubleValue: Double {
+
         if let value = try? Double(self, format: .number.locale(Locale(identifier: "en_US_POSIX"))) {
             value
         } else {
@@ -24,6 +25,7 @@ public extension String {
     }
 
     internal var intValue: Int {
+
         if let value = try? Int(self, format: .number.locale(Locale(identifier: "en_US_POSIX"))) {
             value
         } else {
@@ -38,6 +40,7 @@ public extension String {
      */
     internal var numberValue: NSNumber? {
         let filtered = filter("01234567890E.+-".contains)
+
         if let value = Double(filtered) {
             return NSNumber(value: value)
         }

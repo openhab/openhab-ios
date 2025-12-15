@@ -43,7 +43,14 @@ class OpenHabService {
             DispatchQueue.main.async {
                 do {
                     let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+                    decoder.dateDecodingStrategy = .custom { decoder in
+                        let container = try decoder.singleValueContainer()
+                        let dateString = try container.decode(String.self)
+                        if let date = try? Date(dateString, strategy: Date.iso8601Full) {
+                            return date
+                        }
+                        throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date string \(dateString)")
+                    }
                     let codingData = try decoder.decode(OpenHABSitemap.CodingData.self, from: data)
                     if let sitemap = Sitemap(with: codingData) {
                         resultHandler(sitemap, "")
