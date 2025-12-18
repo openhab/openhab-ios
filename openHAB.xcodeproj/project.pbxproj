@@ -14,8 +14,6 @@
 		2F6412EE2CE494A80039FB28 /* DatePickerUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F6412ED2CE494A80039FB28 /* DatePickerUITableViewCell.swift */; };
 		2FBCF58C2DEB0B7700CD5D83 /* HomeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBCF58B2DEB0B7700CD5D83 /* HomeSelectionView.swift */; };
 		2FEFD8F62BE7C5BE00E387B9 /* TextInputUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FEFD8F52BE7C5BE00E387B9 /* TextInputUITableViewCell.swift */; };
-		2FF459362E230C6A00C0B640 /* OpenHABIntentHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF459352E230C6A00C0B640 /* OpenHABIntentHelper.swift */; };
-		4D6470DA2561F935007B03FC /* openHABIntents.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4D6470D32561F935007B03FC /* openHABIntents.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		652B81042E2193B500648510 /* ScreenSaverSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652B81032E2193B500648510 /* ScreenSaverSettingsView.swift */; };
 		652B81092E2193DA00648510 /* ScreenSaverManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652B81062E2193DA00648510 /* ScreenSaverManager.swift */; };
 		652B810A2E2193DA00648510 /* ScreenSaverConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652B81052E2193DA00648510 /* ScreenSaverConfiguration.swift */; };
@@ -38,14 +36,11 @@
 		934E592928F16EBA00162004 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 934E592828F16EBA00162004 /* DeviceKit */; };
 		935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B484525342B8E00E44CF0 /* URL+Static.swift */; };
 		93685A7A2ADE755C0077A9A6 /* openHABTests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 93685A792ADE755C0077A9A6 /* openHABTests.xctestplan */; };
-		937C8B0C2800A738009C055E /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
 		937E4471270B36D000A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4470270B36D000A98C26 /* OpenHABCore */; };
 		937E4473270B36DD00A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4472270B36DD00A98C26 /* OpenHABCore */; };
 		937E4485270B379900A98C26 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4484270B379900A98C26 /* DeviceKit */; };
 		937E448C270B37CA00A98C26 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 937E448B270B37CA00A98C26 /* Kingfisher */; };
 		937E448E270B37D200A98C26 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 937E448D270B37D200A98C26 /* DeviceKit */; };
-		937E44E2270B393C00A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E44E1270B393C00A98C26 /* OpenHABCore */; };
-		938620C0257E223C00A63200 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 938BF9C824EFCCC000E6B52F /* Localizable.strings */; };
 		938BF89624EFBC5400E6B52F /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938BF89524EFBC5400E6B52F /* LocalizationTests.swift */; };
 		938BF9C424EFCB9F00E6B52F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 938BF9C324EFCB9F00E6B52F /* Main.storyboard */; };
 		938BF9C624EFCC0700E6B52F /* UILabel+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */; };
@@ -55,14 +50,6 @@
 		938BF9D524EFD5B100E6B52F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 938BF9C824EFCCC000E6B52F /* Localizable.strings */; };
 		938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */; };
 		9397EDEC2587837000F266E1 /* openHABWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = DA0775152346705D0086C685 /* openHABWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		93AEE42427D9D76B008EB207 /* GetItemStateIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6471112561FDA7007B03FC /* GetItemStateIntentHandler.swift */; };
-		93AEE42527D9D76E008EB207 /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470D52561F935007B03FC /* IntentHandler.swift */; };
-		93AEE42627D9D785008EB207 /* SetSwitchStateIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */; };
-		93AEE42727D9D788008EB207 /* SetDimmerRollerValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D64724C256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift */; };
-		93AEE42827D9D78B008EB207 /* SetNumberValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D951256897490039DA6E /* SetNumberValueIntentHandler.swift */; };
-		93AEE42927D9D790008EB207 /* SetStringValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */; };
-		93AEE42A27D9D792008EB207 /* SetColorValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */; };
-		93AEE42B27D9D796008EB207 /* SetContactStateValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */; };
 		93F8063527AE6C620035A6B0 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8063427AE6C620035A6B0 /* FirebaseCrashlytics */; };
 		93F8064727AE7A050035A6B0 /* SwiftMessages in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8064627AE7A050035A6B0 /* SwiftMessages */; };
 		93F8064A27AE7A2E0035A6B0 /* FlexColorPicker in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8064927AE7A2E0035A6B0 /* FlexColorPicker */; };
@@ -123,7 +110,6 @@
 		DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* PreviewConstants.swift */; };
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
 		DA77E19B2D886D9B007CFF0F /* SingleConnectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA77E19A2D886D9B007CFF0F /* SingleConnectionSettingsView.swift */; };
-		DA7ACD5F2DC3DB130055CFC7 /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = DA7ACD5E2DC3DB130055CFC7 /* SFSafeSymbols */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */; };
 		DA7F002D2EB376CF00DE943A /* ServerCertificatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7F002C2EB376CF00DE943A /* ServerCertificatesView.swift */; };
 		DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */ = {isa = PBXBuildFile; fileRef = DA817E79234BF39B00C91824 /* CHANGELOG.md */; };
@@ -144,7 +130,6 @@
 		DAAAB2832EA3874500F1B05D /* SegmentSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAAB2822EA3874400F1B05D /* SegmentSelectionView.swift */; };
 		DAAC30872CBBF0420041927F /* SitemapPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0775262346705F0086C685 /* SitemapPageView.swift */; };
 		DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */; };
-		DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */; };
 		DAC131122DA32F5D00075AE2 /* Intents.intentdefinition in Resources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
 		DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */; };
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
@@ -196,13 +181,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		4D6470D82561F935007B03FC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = DFB2621F18830A3600D3244D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4D6470D22561F935007B03FC;
-			remoteInfo = openHABIntents;
-		};
 		657144532C1E438700C8A1F3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = DFB2621F18830A3600D3244D /* Project object */;
@@ -265,7 +243,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4D6470DA2561F935007B03FC /* openHABIntents.appex in Embed Foundation Extensions */,
 				657144552C1E438700C8A1F3 /* NotificationService.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
@@ -301,18 +278,6 @@
 		2F6412ED2CE494A80039FB28 /* DatePickerUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerUITableViewCell.swift; sourceTree = "<group>"; };
 		2FBCF58B2DEB0B7700CD5D83 /* HomeSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSelectionView.swift; sourceTree = "<group>"; };
 		2FEFD8F52BE7C5BE00E387B9 /* TextInputUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInputUITableViewCell.swift; sourceTree = "<group>"; };
-		2FF459352E230C6A00C0B640 /* OpenHABIntentHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABIntentHelper.swift; sourceTree = "<group>"; };
-		4D38D951256897490039DA6E /* SetNumberValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetNumberValueIntentHandler.swift; sourceTree = "<group>"; };
-		4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetStringValueIntentHandler.swift; sourceTree = "<group>"; };
-		4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetColorValueIntentHandler.swift; sourceTree = "<group>"; };
-		4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetContactStateValueIntentHandler.swift; sourceTree = "<group>"; };
-		4D6470D32561F935007B03FC /* openHABIntents.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = openHABIntents.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		4D6470D52561F935007B03FC /* IntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentHandler.swift; sourceTree = "<group>"; };
-		4D6470D72561F935007B03FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4D6471112561FDA7007B03FC /* GetItemStateIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetItemStateIntentHandler.swift; sourceTree = "<group>"; };
-		4D64720D256315D9007B03FC /* openHABIntents.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = openHABIntents.entitlements; sourceTree = "<group>"; };
-		4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandler.swift; sourceTree = "<group>"; };
-		4D64724C256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDimmerRollerValueIntentHandler.swift; sourceTree = "<group>"; };
 		652B81032E2193B500648510 /* ScreenSaverSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverSettingsView.swift; sourceTree = "<group>"; };
 		652B81052E2193DA00648510 /* ScreenSaverConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverConfiguration.swift; sourceTree = "<group>"; };
 		652B81062E2193DA00648510 /* ScreenSaverManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverManager.swift; sourceTree = "<group>"; };
@@ -475,7 +440,6 @@
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA599B72EAC0FE7003A8726 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		DAAAB2822EA3874400F1B05D /* SegmentSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentSelectionView.swift; sourceTree = "<group>"; };
-		DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandlerTests.swift; sourceTree = "<group>"; };
 		DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinnerViewController.swift; sourceTree = "<group>"; };
 		DAC6608B236F6F4200F4501E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesSwiftUIView.swift; sourceTree = "<group>"; };
@@ -555,15 +519,6 @@
 				937E448E270B37D200A98C26 /* DeviceKit in Frameworks */,
 				934E592928F16EBA00162004 /* DeviceKit in Frameworks */,
 				937E448C270B37CA00A98C26 /* Kingfisher in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		4D6470D02561F935007B03FC /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				DA7ACD5F2DC3DB130055CFC7 /* SFSafeSymbols in Frameworks */,
-				937E44E2270B393C00A98C26 /* OpenHABCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -654,24 +609,6 @@
 			name = External;
 			path = openHABWatch/External;
 			sourceTree = SOURCE_ROOT;
-		};
-		4D6470D42561F935007B03FC /* openHABIntents */ = {
-			isa = PBXGroup;
-			children = (
-				4D64720D256315D9007B03FC /* openHABIntents.entitlements */,
-				4D6470D52561F935007B03FC /* IntentHandler.swift */,
-				4D6470D72561F935007B03FC /* Info.plist */,
-				4D6471112561FDA7007B03FC /* GetItemStateIntentHandler.swift */,
-				4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */,
-				4D64724C256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift */,
-				4D38D951256897490039DA6E /* SetNumberValueIntentHandler.swift */,
-				4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */,
-				4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */,
-				4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */,
-				2FF459352E230C6A00C0B640 /* OpenHABIntentHelper.swift */,
-			);
-			path = openHABIntents;
-			sourceTree = "<group>";
 		};
 		652B81082E2193DA00648510 /* ScreenSaver */ = {
 			isa = PBXGroup;
@@ -887,14 +824,6 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		DAC1310F2DA3208E00075AE2 /* openHABIntentsTests */ = {
-			isa = PBXGroup;
-			children = (
-				DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */,
-			);
-			path = openHABIntentsTests;
-			sourceTree = "<group>";
-		};
 		DACE66522C63B2070069E514 /* openapitest */ = {
 			isa = PBXGroup;
 			children = (
@@ -1068,8 +997,6 @@
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
 				933D7F0522E7015000621A03 /* openHABUITests */,
 				DA0775162346705D0086C685 /* openHABWatch */,
-				4D6470D42561F935007B03FC /* openHABIntents */,
-				DAC1310F2DA3208E00075AE2 /* openHABIntentsTests */,
 				DAD0856F2AE4782D001D36BE /* openHABWatchSwiftUI Watch AppTests */,
 				DAD085792AE4782F001D36BE /* openHABWatchSwiftUI Watch AppUITests */,
 				6571444F2C1E438700C8A1F3 /* NotificationService */,
@@ -1089,7 +1016,6 @@
 				DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */,
 				933D7F0422E7015000621A03 /* openHABUITests.xctest */,
 				DA0775152346705D0086C685 /* openHABWatch.app */,
-				4D6470D32561F935007B03FC /* openHABIntents.appex */,
 				DAD0856C2AE4782B001D36BE /* openHABWatchSwiftUI Watch AppTests.xctest */,
 				DAD085762AE4782E001D36BE /* openHABWatchSwiftUI Watch AppUITests.xctest */,
 				6571444E2C1E438700C8A1F3 /* NotificationService.appex */,
@@ -1164,27 +1090,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4D6470D22561F935007B03FC /* openHABIntents */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 4D6470DB2561F935007B03FC /* Build configuration list for PBXNativeTarget "openHABIntents" */;
-			buildPhases = (
-				4D6470CF2561F935007B03FC /* Sources */,
-				4D6470D02561F935007B03FC /* Frameworks */,
-				4D6470D12561F935007B03FC /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = openHABIntents;
-			packageProductDependencies = (
-				937E44E1270B393C00A98C26 /* OpenHABCore */,
-				DA7ACD5E2DC3DB130055CFC7 /* SFSafeSymbols */,
-			);
-			productName = openHABIntents;
-			productReference = 4D6470D32561F935007B03FC /* openHABIntents.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 		6571444D2C1E438700C8A1F3 /* NotificationService */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 657144582C1E438700C8A1F3 /* Build configuration list for PBXNativeTarget "NotificationService" */;
@@ -1318,7 +1223,6 @@
 			);
 			dependencies = (
 				DA07753A2346705F0086C685 /* PBXTargetDependency */,
-				4D6470D92561F935007B03FC /* PBXTargetDependency */,
 				657144542C1E438700C8A1F3 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -1354,9 +1258,6 @@
 				LastUpgradeCheck = 2600;
 				ORGANIZATIONNAME = "openHAB e.V.";
 				TargetAttributes = {
-					4D6470D22561F935007B03FC = {
-						CreatedOnToolsVersion = 12.1;
-					};
 					6571444D2C1E438700C8A1F3 = {
 						CreatedOnToolsVersion = 15.4;
 					};
@@ -1438,7 +1339,6 @@
 				DA2DC22E21F2736C00830730 /* openHABTestsSwift */,
 				933D7F0322E7015000621A03 /* openHABUITests */,
 				DA0775142346705D0086C685 /* openHABWatch */,
-				4D6470D22561F935007B03FC /* openHABIntents */,
 				DAD0856B2AE4782A001D36BE /* openHABWatchSwiftUI Watch AppTests */,
 				DAD085752AE4782D001D36BE /* openHABWatchSwiftUI Watch AppUITests */,
 				6571444D2C1E438700C8A1F3 /* NotificationService */,
@@ -1447,14 +1347,6 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		4D6470D12561F935007B03FC /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				938620C0257E223C00A63200 /* Localizable.strings in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		6571444C2C1E438700C8A1F3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1553,23 +1445,6 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		4D6470CF2561F935007B03FC /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				937C8B0C2800A738009C055E /* Intents.intentdefinition in Sources */,
-				2FF459362E230C6A00C0B640 /* OpenHABIntentHelper.swift in Sources */,
-				93AEE42B27D9D796008EB207 /* SetContactStateValueIntentHandler.swift in Sources */,
-				93AEE42927D9D790008EB207 /* SetStringValueIntentHandler.swift in Sources */,
-				93AEE42527D9D76E008EB207 /* IntentHandler.swift in Sources */,
-				93AEE42727D9D788008EB207 /* SetDimmerRollerValueIntentHandler.swift in Sources */,
-				93AEE42A27D9D792008EB207 /* SetColorValueIntentHandler.swift in Sources */,
-				93AEE42427D9D76B008EB207 /* GetItemStateIntentHandler.swift in Sources */,
-				93AEE42627D9D785008EB207 /* SetSwitchStateIntentHandler.swift in Sources */,
-				93AEE42827D9D78B008EB207 /* SetNumberValueIntentHandler.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		6571444A2C1E438700C8A1F3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1698,7 +1573,6 @@
 				2F55E7BD2DEE44A800EC8350 /* ClientCertificatesView.swift in Sources */,
 				DA6B2EF72C8B92E800DF77CF /* SelectionView.swift in Sources */,
 				DA4800212D839D3A009CF127 /* AnimatedSecureTextField.swift in Sources */,
-				DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */,
 				DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */,
 				DA9F81872C85020F00B47B72 /* RTFTextView.swift in Sources */,
 				DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */,
@@ -1743,11 +1617,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		4D6470D92561F935007B03FC /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 4D6470D22561F935007B03FC /* openHABIntents */;
-			targetProxy = 4D6470D82561F935007B03FC /* PBXContainerItemProxy */;
-		};
 		657144542C1E438700C8A1F3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 6571444D2C1E438700C8A1F3 /* NotificationService */;
@@ -1833,77 +1702,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		4D6470DC2561F935007B03FC /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = openHABIntents/openHABIntents.entitlements;
-				CURRENT_PROJECT_VERSION = 97;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				INFOPLIST_FILE = openHABIntents/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 3.1.40;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		4D6470DD2561F935007B03FC /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = openHABIntents/openHABIntents.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 97;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				INFOPLIST_FILE = openHABIntents/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 3.1.40;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore org.openhab.app.openHABIntents";
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 		657144562C1E438700C8A1F3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2589,15 +2387,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4D6470DB2561F935007B03FC /* Build configuration list for PBXNativeTarget "openHABIntents" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				4D6470DC2561F935007B03FC /* Debug */,
-				4D6470DD2561F935007B03FC /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		657144582C1E438700C8A1F3 /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -2797,10 +2586,6 @@
 			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
 		};
-		937E44E1270B393C00A98C26 /* OpenHABCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = OpenHABCore;
-		};
 		93F8063427AE6C620035A6B0 /* FirebaseCrashlytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
@@ -2835,11 +2620,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DA2C4FD32B4F573300D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */;
 			productName = SDWebImageSVGCoder;
-		};
-		DA7ACD5E2DC3DB130055CFC7 /* SFSafeSymbols */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DA3B75AC2C59729200E219AB /* XCRemoteSwiftPackageReference "SFSafeSymbols" */;
-			productName = SFSafeSymbols;
 		};
 		DA9A7EFC2D668D5900824156 /* SFSafeSymbols */ = {
 			isa = XCSwiftPackageProductDependency;
