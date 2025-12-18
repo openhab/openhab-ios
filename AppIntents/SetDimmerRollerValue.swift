@@ -22,9 +22,9 @@ enum SetDimmerRollerValueError: Error, CustomLocalizedStringResourceConvertible 
     var localizedStringResource: LocalizedStringResource {
         switch self {
         case .invalidHomeIdentifier:
-            "Invalid home identifier"
+            "Invalid Home identifier"
         case .unknownHome:
-            "Unknown home"
+            "Unknown Home"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
         case let .invalidValue(value, itemName):
