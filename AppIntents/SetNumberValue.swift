@@ -47,13 +47,13 @@ struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
 
     // swiftlint:disable type_contents_order
     @Parameter(title: "Item", optionsProvider: StringOptionsProvider())
-    var item: String?
+    var item: String
 
     @Parameter(title: "Value")
-    var value: Double?
+    var value: Double
 
-    @Parameter(title: "home")
-    var home: Home?
+    @Parameter(title: "Home")
+    var home: Home
 
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$item) to \(\.$value)") {
@@ -66,25 +66,13 @@ struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
     static var predictionConfiguration: some IntentPredictionConfiguration {
         IntentPrediction(parameters: (\.$item, \.$value, \.$home)) { item, value, _ in
             DisplayRepresentation(
-                title: "Set \(item!) to \(value!)",
+                title: "Set \(item) to \(value)",
                 subtitle: ""
             )
         }
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let itemName = item, !itemName.isEmpty else {
-            throw $item.needsValueError()
-        }
-
-        guard let value else {
-            throw $value.needsValueError()
-        }
-
-        guard let home else {
-            throw $home.needsValueError()
-        }
-
         guard let homeId = UUID(uuidString: home.id) else {
             throw SetNumberValueError.invalidHomeIdentifier
         }
@@ -97,23 +85,23 @@ struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
             throw SetNumberValueError.unknownHome
         }
 
-        guard let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId),
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: item, home: homeId),
               !items.isEmpty else {
-            throw SetNumberValueError.itemNotFound(itemName)
+            throw SetNumberValueError.itemNotFound(item)
         }
 
-        let item = items[0]
+        let openHABItem = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: item, home: homeId, command: String(value))
+        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: String(value))
 
-        return .result(dialog: .responseSuccess(value: value, item: itemName))
+        return .result(dialog: .responseSuccess(value: value, item: item))
     }
 }
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 private extension IntentDialog {
     static var itemParameterConfiguration: Self {
-        "Dimmer/Roller Name"
+        "Number Item Name"
     }
 
     static var homeParameterConfiguration: Self {
@@ -125,7 +113,7 @@ private extension IntentDialog {
     }
 
     static func homeParameterDisambiguationIntro(count: Int, item: String) -> Self {
-        "There are \(count) configured homes with an item named '\(item)''."
+        "There are \(count) configured homes with an item named '\(item)'."
     }
 
     static func homeParameterConfirmation(home: Home) -> Self {

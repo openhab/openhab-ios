@@ -59,13 +59,13 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
 
     // swiftlint:disable type_contents_order
     @Parameter(title: "Item", optionsProvider: ItemOptionsProvider())
-    var item: String?
+    var item: String
 
     @Parameter(title: "State", optionsProvider: StateOptionsProvider())
-    var state: String?
+    var state: String
 
-    @Parameter(title: "home")
-    var home: Home?
+    @Parameter(title: "Home")
+    var home: Home
 
     static var parameterSummary: some ParameterSummary {
         Summary("Set the state of \(\.$item) to \(\.$state)") {
@@ -85,18 +85,6 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let itemName = item, !itemName.isEmpty else {
-            throw $item.needsValueError()
-        }
-
-        guard let state else {
-            throw $state.needsValueError()
-        }
-
-        guard let home else {
-            throw $home.needsValueError()
-        }
-
         guard let homeId = UUID(uuidString: home.id) else {
             throw SetContactStateValueError.invalidHomeIdentifier
         }
@@ -117,19 +105,19 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
         ]
 
         guard let realState = actionMap[state] else {
-            throw SetContactStateValueError.invalidState(state, itemName)
+            throw SetContactStateValueError.invalidState(state, item)
         }
 
-        guard let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId),
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: item, home: homeId),
               !items.isEmpty else {
-            throw SetContactStateValueError.itemNotFound(itemName)
+            throw SetContactStateValueError.itemNotFound(item)
         }
 
-        let item = items[0]
+        let openHABItem = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: item, home: homeId, command: realState)
+        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: realState)
 
-        return .result(dialog: .responseSuccess(item: itemName, state: state))
+        return .result(dialog: .responseSuccess(item: item, state: state))
     }
 }
 
@@ -152,7 +140,7 @@ private extension IntentDialog {
     }
 
     static func homeParameterDisambiguationIntro(count: Int, item: String) -> Self {
-        "There are \(count) configured homes with an item named '\(item)''."
+        "There are \(count) configured homes with an item named '\(item)'."
     }
 
     static func homeParameterConfirmation(home: Home) -> Self {

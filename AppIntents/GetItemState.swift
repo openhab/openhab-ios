@@ -46,10 +46,10 @@ struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent
 
     // swiftlint:disable type_contents_order
     @Parameter(title: "Item", optionsProvider: StringOptionsProvider())
-    var item: String?
+    var item: String
 
-    @Parameter(title: "home")
-    var home: Home?
+    @Parameter(title: "Home")
+    var home: Home
 
     static var parameterSummary: some ParameterSummary {
         Summary("Get \(\.$item) State") {
@@ -62,21 +62,13 @@ struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent
     static var predictionConfiguration: some IntentPredictionConfiguration {
         IntentPrediction(parameters: (\.$item, \.$home)) { item, _ in
             DisplayRepresentation(
-                title: "Get \(item!) State",
+                title: "Get \(item) State",
                 subtitle: ""
             )
         }
     }
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> {
-        guard let itemName = item, !itemName.isEmpty else {
-            throw $item.needsValueError()
-        }
-
-        guard let home else {
-            throw $home.needsValueError()
-        }
-
         guard let homeId = UUID(uuidString: home.id) else {
             throw GetItemStateError.invalidHomeIdentifier
         }
@@ -89,15 +81,15 @@ struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent
             throw GetItemStateError.unknownHome
         }
 
-        guard let item = await OpenHABItemCache.instance.getItemUncached(name: itemName, home: homeId) else {
-            throw GetItemStateError.itemNotFound(itemName)
+        guard let openHABItem = await OpenHABItemCache.instance.getItemUncached(name: item, home: homeId) else {
+            throw GetItemStateError.itemNotFound(item)
         }
 
-        let state = item.state ?? "Unknown state"
+        let state = openHABItem.state ?? "Unknown state"
 
         return .result(
             value: state,
-            dialog: .responseSuccess(item: itemName, state: state)
+            dialog: .responseSuccess(item: item, state: state)
         )
     }
 }

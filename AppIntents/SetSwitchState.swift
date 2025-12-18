@@ -59,13 +59,13 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
 
     // swiftlint:disable type_contents_order
     @Parameter(title: "Item", optionsProvider: ItemOptionsProvider())
-    var item: String?
+    var item: String
 
     @Parameter(title: "Action", optionsProvider: ActionOptionsProvider())
-    var action: String?
+    var action: String
 
-    @Parameter(title: "home")
-    var home: Home?
+    @Parameter(title: "Home")
+    var home: Home
 
     static var parameterSummary: some ParameterSummary {
         Summary("Send \(\.$action) to \(\.$item)") {
@@ -78,25 +78,13 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
     static var predictionConfiguration: some IntentPredictionConfiguration {
         IntentPrediction(parameters: (\.$item, \.$action, \.$home)) { item, action, _ in
             DisplayRepresentation(
-                title: "Send \(action!) to \(item!)",
+                title: "Send \(action) to \(item)",
                 subtitle: ""
             )
         }
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let itemName = item, !itemName.isEmpty else {
-            throw $item.needsValueError()
-        }
-
-        guard let action else {
-            throw $action.needsValueError()
-        }
-
-        guard let home else {
-            throw $home.needsValueError()
-        }
-
         guard let homeId = UUID(uuidString: home.id) else {
             throw SetSwitchStateError.invalidHomeIdentifier
         }
@@ -117,19 +105,19 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
         ]
 
         guard let command = actionMap[action] else {
-            throw SetSwitchStateError.invalidAction(action, itemName)
+            throw SetSwitchStateError.invalidAction(action, item)
         }
 
-        guard let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId),
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: item, home: homeId),
               !items.isEmpty else {
-            throw SetSwitchStateError.itemNotFound(itemName)
+            throw SetSwitchStateError.itemNotFound(item)
         }
 
-        let item = items[0]
+        let openHABItem = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: item, home: homeId, command: command)
+        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: command)
 
-        return .result(dialog: .responseSuccess(action: action, item: itemName))
+        return .result(dialog: .responseSuccess(action: action, item: item))
     }
 }
 
@@ -152,7 +140,7 @@ private extension IntentDialog {
     }
 
     static func homeParameterDisambiguationIntro(count: Int, item: String) -> Self {
-        "There are \(count) configured homes with an item named '\(item)''."
+        "There are \(count) configured homes with an item named '\(item)'."
     }
 
     static func homeParameterConfirmation(home: Home) -> Self {

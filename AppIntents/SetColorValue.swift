@@ -50,13 +50,13 @@ struct SetColorValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInten
 
     // swiftlint:disable type_contents_order
     @Parameter(title: "Item", optionsProvider: StringOptionsProvider())
-    var item: String?
+    var item: String
 
     @Parameter(title: "Value", default: "240,100,100")
-    var value: String?
+    var value: String
 
-    @Parameter(title: "home")
-    var home: Home?
+    @Parameter(title: "Home")
+    var home: Home
 
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$item) to \(\.$value) (HSB)") {
@@ -69,24 +69,14 @@ struct SetColorValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInten
     static var predictionConfiguration: some IntentPredictionConfiguration {
         IntentPrediction(parameters: (\.$item, \.$value, \.$home)) { item, value, _ in
             DisplayRepresentation(
-                title: "Set \(item!) to \(value!) (HSB)",
+                title: "Set \(item) to \(value) (HSB)",
                 subtitle: ""
             )
         }
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let itemName = item, !itemName.isEmpty else {
-            throw $item.needsValueError()
-        }
-
-        guard var value else {
-            throw $value.needsValueError()
-        }
-
-        guard let home else {
-            throw $home.needsValueError()
-        }
+        var colorValue = value
 
         guard let homeId = UUID(uuidString: home.id) else {
             throw SetColorValueError.invalidHomeIdentifier
@@ -100,33 +90,33 @@ struct SetColorValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInten
             throw SetColorValueError.unknownHome
         }
 
-        let hsb = value.split(separator: ",")
+        let hsb = colorValue.split(separator: ",")
         guard hsb.count == 3,
               let hue = Int(hsb[0]), (0 ... 360).contains(hue),
               let sat = Int(hsb[1]), (0 ... 100).contains(sat),
               let val = Int(hsb[2]), (0 ... 100).contains(val) else {
-            throw SetColorValueError.invalidValue(value, itemName)
+            throw SetColorValueError.invalidValue(colorValue, item)
         }
 
-        value = "\(hue),\(sat),\(val)"
+        colorValue = "\(hue),\(sat),\(val)"
 
-        guard let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId),
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: item, home: homeId),
               !items.isEmpty else {
-            throw SetColorValueError.itemNotFound(itemName)
+            throw SetColorValueError.itemNotFound(item)
         }
 
-        let item = items[0]
+        let openHABItem = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: item, home: homeId, command: value)
+        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: colorValue)
 
-        return .result(dialog: .responseSuccess(value: value, item: itemName))
+        return .result(dialog: .responseSuccess(value: colorValue, item: item))
     }
 }
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 private extension IntentDialog {
     static var itemParameterConfiguration: Self {
-        "Dimmer/Roller Name"
+        "Color Item Name"
     }
 
     static var homeParameterConfiguration: Self {
@@ -138,7 +128,7 @@ private extension IntentDialog {
     }
 
     static func homeParameterDisambiguationIntro(count: Int, item: String) -> Self {
-        "There are \(count) configured homes with an item named '\(item)''."
+        "There are \(count) configured homes with an item named '\(item)'."
     }
 
     static func homeParameterConfirmation(home: Home) -> Self {
