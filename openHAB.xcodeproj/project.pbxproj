@@ -95,6 +95,14 @@
 		DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */; };
 		DA32D1B42C8C98C40018D974 /* IconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32D1B32C8C98C40018D974 /* IconWithAction.swift */; };
 		DA3563D92E5096BE00BC0138 /* ScreenSaverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3563D82E5096BE00BC0138 /* ScreenSaverView.swift */; };
+		DA448E7F2EF435B400F0893C /* SetStringValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E7C2EF435B400F0893C /* SetStringValue.swift */; };
+		DA448E802EF435B400F0893C /* SetDimmerRollerValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E7A2EF435B400F0893C /* SetDimmerRollerValue.swift */; };
+		DA448E812EF435B400F0893C /* SetNumberValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E7B2EF435B400F0893C /* SetNumberValue.swift */; };
+		DA448E822EF435B400F0893C /* GetItemState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E762EF435B400F0893C /* GetItemState.swift */; };
+		DA448E832EF435B400F0893C /* SetContactStateValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E792EF435B400F0893C /* SetContactStateValue.swift */; };
+		DA448E842EF435B400F0893C /* SetColorValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E782EF435B400F0893C /* SetColorValue.swift */; };
+		DA448E852EF435B400F0893C /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E772EF435B400F0893C /* Home.swift */; };
+		DA448E862EF435B400F0893C /* SetSwitchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E7D2EF435B400F0893C /* SetSwitchState.swift */; };
 		DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800132D836892009CF127 /* ConnectionSettingsView.swift */; };
 		DA4800162D836EF0009CF127 /* MainUISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800152D836EF0009CF127 /* MainUISettingsView.swift */; };
 		DA4800182D837221009CF127 /* AboutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800172D837221009CF127 /* AboutSettingsView.swift */; };
@@ -423,6 +431,14 @@
 		DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewRow.swift; sourceTree = "<group>"; };
 		DA32D1B32C8C98C40018D974 /* IconWithAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconWithAction.swift; sourceTree = "<group>"; };
 		DA3563D82E5096BE00BC0138 /* ScreenSaverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverView.swift; sourceTree = "<group>"; };
+		DA448E762EF435B400F0893C /* GetItemState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetItemState.swift; sourceTree = "<group>"; };
+		DA448E772EF435B400F0893C /* Home.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Home.swift; sourceTree = "<group>"; };
+		DA448E782EF435B400F0893C /* SetColorValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetColorValue.swift; sourceTree = "<group>"; };
+		DA448E792EF435B400F0893C /* SetContactStateValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetContactStateValue.swift; sourceTree = "<group>"; };
+		DA448E7A2EF435B400F0893C /* SetDimmerRollerValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDimmerRollerValue.swift; sourceTree = "<group>"; };
+		DA448E7B2EF435B400F0893C /* SetNumberValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetNumberValue.swift; sourceTree = "<group>"; };
+		DA448E7C2EF435B400F0893C /* SetStringValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetStringValue.swift; sourceTree = "<group>"; };
+		DA448E7D2EF435B400F0893C /* SetSwitchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchState.swift; sourceTree = "<group>"; };
 		DA4800132D836892009CF127 /* ConnectionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionSettingsView.swift; sourceTree = "<group>"; };
 		DA4800152D836EF0009CF127 /* MainUISettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainUISettingsView.swift; sourceTree = "<group>"; };
 		DA4800172D837221009CF127 /* AboutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettingsView.swift; sourceTree = "<group>"; };
@@ -524,17 +540,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		DA2AEB752D92D32000897D80 /* Cells */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = Cells;
-			sourceTree = "<group>";
-		};
+		DA2AEB752D92D32000897D80 /* Cells */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Cells; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -834,6 +840,21 @@
 			path = openHABTestsSwift;
 			sourceTree = "<group>";
 		};
+		DA448E7E2EF435B400F0893C /* AppIntents */ = {
+			isa = PBXGroup;
+			children = (
+				DA448E762EF435B400F0893C /* GetItemState.swift */,
+				DA448E772EF435B400F0893C /* Home.swift */,
+				DA448E782EF435B400F0893C /* SetColorValue.swift */,
+				DA448E792EF435B400F0893C /* SetContactStateValue.swift */,
+				DA448E7A2EF435B400F0893C /* SetDimmerRollerValue.swift */,
+				DA448E7B2EF435B400F0893C /* SetNumberValue.swift */,
+				DA448E7C2EF435B400F0893C /* SetStringValue.swift */,
+				DA448E7D2EF435B400F0893C /* SetSwitchState.swift */,
+			);
+			path = AppIntents;
+			sourceTree = "<group>";
+		};
 		DA48001F2D837CD8009CF127 /* SettingsView */ = {
 			isa = PBXGroup;
 			children = (
@@ -1036,6 +1057,7 @@
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
+				DA448E7E2EF435B400F0893C /* AppIntents */,
 				6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */,
 				DA4D4DB4233F9ACB00B37E37 /* README.md */,
 				DA4D4E0E2340A00200B37E37 /* Changes.md */,
@@ -1651,6 +1673,14 @@
 				2FBCF58C2DEB0B7700CD5D83 /* HomeSelectionView.swift in Sources */,
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
+				DA448E7F2EF435B400F0893C /* SetStringValue.swift in Sources */,
+				DA448E802EF435B400F0893C /* SetDimmerRollerValue.swift in Sources */,
+				DA448E812EF435B400F0893C /* SetNumberValue.swift in Sources */,
+				DA448E822EF435B400F0893C /* GetItemState.swift in Sources */,
+				DA448E832EF435B400F0893C /* SetContactStateValue.swift in Sources */,
+				DA448E842EF435B400F0893C /* SetColorValue.swift in Sources */,
+				DA448E852EF435B400F0893C /* Home.swift in Sources */,
+				DA448E862EF435B400F0893C /* SetSwitchState.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
 				935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */,
 				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
