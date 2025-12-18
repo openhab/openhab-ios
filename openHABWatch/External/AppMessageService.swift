@@ -43,7 +43,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
             //                   if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
             //                       // do we need to do anything here?  We load from the shared keychain.
             //                   }
-            Logger.preferences.info("✅ Applied WatchPreferences - sitemapForWatch now: \(AppSettings.shared.sitemapForWatch)")
+            Logger.preferences.debug("✅ Applied WatchPreferences - sitemapForWatch now: \(AppSettings.shared.sitemapForWatch)")
         } catch {
             Logger.preferences.error("❌ Failed to decode WatchPreferences: \(error.localizedDescription)")
         }

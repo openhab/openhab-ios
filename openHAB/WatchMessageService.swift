@@ -98,7 +98,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
         do {
             try WCSession.default.updateApplicationContext(context)
-            Logger.preferences.info("📤 Synced WatchPreferences to watch - sitemapForWatch: \(prefs.sitemapForWatch)")
+            Logger.preferences.debug("📤 Synced WatchPreferences to watch - sitemapForWatch: \(prefs.sitemapForWatch)")
         } catch {
             Logger.preferences.error("Failed to encode or update watch context: \(error.localizedDescription)")
         }

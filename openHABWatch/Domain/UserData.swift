@@ -116,13 +116,13 @@ final class UserData: ObservableObject {
                     Logger.userData.debug("Sitemap observer: empty sitemap, ignoring")
                     return
                 }
-                Logger.userData.info("Sitemap observer fired: \(newValue)")
+                Logger.userData.debug("Sitemap observer fired: \(newValue)")
                 Task { @MainActor in
                     guard let self else { return }
 
                     // Only force restart if the sitemap name actually changed
                     let isDifferentSitemap = self.currentlyLoadingSitemap != newValue
-                    Logger.userData.info("Sitemap change detected - current: \(self.currentlyLoadingSitemap ?? "nil"), new: \(newValue), force: \(isDifferentSitemap)")
+                    Logger.userData.debug("Sitemap change detected - current: \(self.currentlyLoadingSitemap ?? "nil"), new: \(newValue), force: \(isDifferentSitemap)")
 
                     // Note: We don't check for active connection here because NetworkTracker
                     // can report false negatives (especially during long-polling on real devices).
@@ -161,7 +161,7 @@ final class UserData: ObservableObject {
                 continue
             }
 
-            Logger.userData.info("Network connection became available: \(activeConnection.configuration.url)")
+            Logger.userData.debug("Network connection became available: \(activeConnection.configuration.url)")
 
             if !AppSettings.shared.haveReceivedAppContext {
                 AppMessageService.singleton.requestApplicationContext()
@@ -180,15 +180,15 @@ final class UserData: ObservableObject {
                 if let task = pageHandlingTask, !task.isCancelled {
                     // Task is running, check if it's for the right sitemap
                     if currentlyLoadingSitemap == sitemapName {
-                        Logger.userData.info("Page handling task already running for correct sitemap: \(sitemapName)")
+                        Logger.userData.debug("Page handling task already running for correct sitemap: \(sitemapName)")
                     } else {
                         // Running task is for different sitemap, force reload
-                        Logger.userData.info("Page handling task for wrong sitemap, forcing reload: \(sitemapName)")
+                        Logger.userData.debug("Page handling task for wrong sitemap, forcing reload: \(sitemapName)")
                         startPageHandling(sitemapName: sitemapName, force: true)
                     }
                 } else {
                     // No task running or task is cancelled - start a new one
-                    Logger.userData.info("Starting page handling for sitemap: \(sitemapName) after network became available")
+                    Logger.userData.debug("Starting page handling for sitemap: \(sitemapName) after network became available")
                     startPageHandling(sitemapName: sitemapName, force: false)
                 }
             }
@@ -205,20 +205,20 @@ final class UserData: ObservableObject {
     }
 
     func startPageHandling(sitemapName: String, pageId: String = "", force: Bool = false) {
-        Logger.userData.info("startPageHandling called - sitemap: \(sitemapName), pageId: \(pageId), force: \(force)")
+        Logger.userData.debug("startPageHandling called - sitemap: \(sitemapName), pageId: \(pageId), force: \(force)")
 
         // Handle concurrent loads based on force parameter
         if let task = pageHandlingTask, !task.isCancelled {
             if currentlyLoadingSitemap == sitemapName {
                 if force {
-                    Logger.userData.info("Cancelling existing task for same sitemap (force=true)")
+                    Logger.userData.debug("Cancelling existing task for same sitemap (force=true)")
                     task.cancel()
                 } else {
-                    Logger.userData.info("Same sitemap already loading and force=false, skipping")
+                    Logger.userData.debug("Same sitemap already loading and force=false, skipping")
                     return
                 }
             } else {
-                Logger.userData.info("Cancelling existing task for different sitemap")
+                Logger.userData.debug("Cancelling existing task for different sitemap")
                 task.cancel()
             }
         }
@@ -251,7 +251,7 @@ final class UserData: ObservableObject {
                     return
                 }
 
-                Logger.userData.info("Using connection: \(connectionInfo.configuration.url)")
+                Logger.userData.debug("Using connection: \(connectionInfo.configuration.url)")
                 let service = try OpenAPIService(connectionConfiguration: connectionInfo.configuration, serviceConfiguration: .longTerm)
 
                 let initialPage = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
@@ -275,17 +275,12 @@ final class UserData: ObservableObject {
                 var backoffAttempt = 0
                 let maxBackoffDelay: UInt64 = 30_000_000_000 // 30 seconds
 
-                Logger.userData.info("Starting long polling loop for sitemap: \(taskSitemapName)")
+                Logger.userData.debug("Starting long polling loop for sitemap: \(taskSitemapName)")
                 while !Task.isCancelled {
                     do {
-                        Logger.userData.info("Long poll request starting for sitemap: \(taskSitemapName)")
-                        let startTime = Date()
-
                         let page = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: true)
-                        let elapsed = Date().timeIntervalSince(startTime)
                         try Task.checkCancellation()
 
-                        Logger.userData.info("Long poll response received for sitemap: \(taskSitemapName) after \(String(format: "%.1f", elapsed))s")
                         await MainActor.run {
                             // Set command handler BEFORE assigning to @Published property to prevent race condition
                             if let page {
@@ -295,7 +290,6 @@ final class UserData: ObservableObject {
                             }
                             self.openHABSitemapPage = page
                             let newWidgets = page?.widgets ?? []
-                            Logger.userData.info("Updating widgets, received \(newWidgets.count) widgets")
                             self.updateWidgets(with: newWidgets)
                             if !newWidgets.isEmpty {
                                 self.cachedWidgets = newWidgets
@@ -306,7 +300,7 @@ final class UserData: ObservableObject {
                         backoffAttempt = 0
 
                     } catch is CancellationError {
-                        Logger.userData.info("Long polling cancelled for sitemap: \(taskSitemapName)")
+                        Logger.userData.debug("Long polling cancelled for sitemap: \(taskSitemapName)")
                         throw CancellationError()
                     } catch {
                         backoffAttempt += 1
@@ -319,7 +313,6 @@ final class UserData: ObservableObject {
                         try await Task.sleep(nanoseconds: totalDelay)
                     }
                 }
-                Logger.userData.info("Long polling loop exited for sitemap: \(taskSitemapName)")
             } catch {
                 await MainActor.run {
                     Logger.userData.error("Page handling failed for sitemap '\(taskSitemapName)': \(error.localizedDescription)")
