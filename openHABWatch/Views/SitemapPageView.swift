@@ -32,7 +32,7 @@ struct SitemapPageView: View {
                     }
                 } else if !viewModel.widgets.isEmpty {
                     ScrollView {
-                        LazyVStack {
+                        VStack(spacing: 4) {
                             ForEach(viewModel.widgets) { widget in
                                 rowWidget(widget: widget)
                                     .id(widget.widgetId)
@@ -51,6 +51,7 @@ struct SitemapPageView: View {
                                 .padding(.horizontal)
                             }
                         }
+                        .padding(.vertical, 2)
                     }
                     .scrollPosition(id: $scrollPosition, anchor: .top)
                     .navigationBarTitle(viewModel.openHABSitemapPage?.title ?? "Sitemap")
