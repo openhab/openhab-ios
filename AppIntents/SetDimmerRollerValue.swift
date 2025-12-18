@@ -69,7 +69,7 @@ struct SetDimmerRollerValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
     static var predictionConfiguration: some IntentPredictionConfiguration {
         IntentPrediction(parameters: (\.$item, \.$value, \.$home)) { item, value, _ in
             DisplayRepresentation(
-                title: "Set \(item!) to \(value!)",
+                title: "Set \(item) to \(value)",
                 subtitle: ""
             )
         }

@@ -78,7 +78,7 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
     static var predictionConfiguration: some IntentPredictionConfiguration {
         IntentPrediction(parameters: (\.$item, \.$state, \.$home)) { item, state, _ in
             DisplayRepresentation(
-                title: "Set the state of \(item!) to \(state!)",
+                title: "Set the state of \(item) to \(state)",
                 subtitle: ""
             )
         }
