@@ -15,6 +15,7 @@ import SwiftUI
 
 struct SitemapPageView: View {
     @StateObject public var viewModel = SitemapPageViewModel()
+    @State private var idleTimerDisabled = false
 
     private var isLinkedPage: Bool {
         viewModel.isLinked
@@ -41,11 +42,27 @@ struct SitemapPageView: View {
         .listStyle(.inset)
         .navigationTitle(viewModel.pageTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $viewModel.searchText, prompt: "Search items")
+        .autocorrectionDisabled()
+        .textInputAutocapitalization(.never)
         .refreshable {
             await viewModel.reload()
         }
         .task {
             viewModel.startPageHandling()
+        }
+        .onAppear {
+            // Disable idle timer if configured in settings
+            if Preferences.shared.idleOff {
+                UIApplication.shared.isIdleTimerDisabled = true
+                idleTimerDisabled = true
+            }
+        }
+        .onDisappear {
+            // Re-enable idle timer when leaving the view
+            if idleTimerDisabled {
+                UIApplication.shared.isIdleTimerDisabled = false
+            }
         }
         .onChange(of: viewModel.networkTracker.activeConnection) { activeConnection in
             viewModel.handleActiveConnectionChange(activeConnection)

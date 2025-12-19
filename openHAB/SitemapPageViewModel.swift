@@ -37,7 +37,9 @@ class SitemapPageViewModel: ObservableObject {
     @Published var searchText = ""
     @Published var error: (any LocalizedError)?
     @Published var isLoading = false
+    @Published var isUpdating = false
     @Published var openHABRootUrl: String?
+    @Published var showSearchField = false
 
     @ObservedObject var networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
@@ -46,6 +48,8 @@ class SitemapPageViewModel: ObservableObject {
     private var defaultSitemap = ""
     @Published var pageId = ""
     private var isLinkedPage = false
+    private var pageNetworkStatus: NetworkStatus?
+    private var pageNetworkStatusAvailable = false
 
     var relevantWidgets: [OpenHABWidget] {
         var flattenedWidgets = [OpenHABWidget]()
@@ -59,7 +63,15 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     var pageTitle: String {
-        currentPage?.title ?? (defaultSitemap.isEmpty ? "Sitemap" : defaultSitemap)
+        // Strip bracket content from title (e.g., "Living Room[2]" becomes "Living Room")
+        let title = currentPage?.title.components(separatedBy: "[")[0] ?? ""
+        if !title.isEmpty {
+            return title
+        } else if !defaultSitemap.isEmpty {
+            return defaultSitemap
+        } else {
+            return "Sitemap"
+        }
     }
 
     var isLinked: Bool {
@@ -105,6 +117,7 @@ class SitemapPageViewModel: ObservableObject {
 
     func loadSettings() {
         defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
+        showSearchField = Preferences.shared.applicationPreferences.showSearchField
     }
 
     func startPageHandling() {
@@ -134,6 +147,7 @@ class SitemapPageViewModel: ObservableObject {
                 }
 
                 // 1. Initial page load (longPolling: false)
+                isLoading = true
                 let initialPage = try await openAPIService?.pollDataForPage(
                     sitemapname: defaultSitemap,
                     pageId: pageId,
@@ -145,14 +159,17 @@ class SitemapPageViewModel: ObservableObject {
                 if let page = initialPage {
                     updateUI(with: page)
                 }
+                isLoading = false
 
                 // 2. Start long polling loop
                 while !Task.isCancelled {
+                    isUpdating = true
                     let page = try await openAPIService?.pollDataForPage(
                         sitemapname: defaultSitemap,
                         pageId: pageId,
                         longPolling: true
                     )
+                    isUpdating = false
                     try Task.checkCancellation()
 
                     if let page {
@@ -162,10 +179,14 @@ class SitemapPageViewModel: ObservableObject {
 
             } catch is CancellationError {
                 logger.info("🔁 pageHandlingTask was cancelled")
+                isLoading = false
+                isUpdating = false
             } catch let error as DecodingError {
                 logger.error("Decoding error: \(error.localizedDescription)")
                 await MainActor.run {
                     self.error = SitemapPageError.serviceUnavailable
+                    self.isLoading = false
+                    self.isUpdating = false
                 }
             } catch let error as ClientError {
                 if let urlError = error.underlyingError as? URLError, urlError.code == .cancelled {
@@ -178,12 +199,18 @@ class SitemapPageViewModel: ObservableObject {
                         self.error = SitemapPageError.serviceUnavailable
                     }
                 }
+                isLoading = false
+                isUpdating = false
             } catch let openAPIError as OpenAPIServiceError {
                 logger.error("OpenAPIServiceError: \(openAPIError.localizedDescription)")
+                isLoading = false
+                isUpdating = false
             } catch {
                 logger.error("❌ Unhandled pageHandlingTask error: \(error.localizedDescription)")
                 await MainActor.run {
                     self.error = SitemapPageError.serviceUnavailable
+                    self.isLoading = false
+                    self.isUpdating = false
                 }
             }
         }
@@ -300,8 +327,35 @@ class SitemapPageViewModel: ObservableObject {
 
         logger.info("SitemapPageViewModel tracker URL \(activeConnection.configuration.url)")
 
+        // Check if network status changed
+        if pageNetworkStatusChanged() {
+            logger.info("Network status changed, restarting page handling")
+            pageHandlingTask?.cancel()
+        }
+
         Task {
             await handleActiveConnection(activeConnection)
+        }
+    }
+
+    @discardableResult
+    private func pageNetworkStatusChanged() -> Bool {
+        logger.info("SitemapPageViewModel pageNetworkStatusChange")
+
+        let currentStatus = MainActorNetworkTracker.shared.status
+
+        // First run
+        if !pageNetworkStatusAvailable {
+            pageNetworkStatus = currentStatus
+            pageNetworkStatusAvailable = true
+            return false
+        }
+
+        if pageNetworkStatus == currentStatus {
+            return false
+        } else {
+            pageNetworkStatus = currentStatus
+            return true
         }
     }
 
