@@ -59,48 +59,7 @@ final class UserData: ObservableObject {
 
         Logger.userData.info("Initializing UserData for linked page: '\(linkedPage.title)' with pageId: '\(extractedPageId)', link: '\(linkedPage.link)'")
 
-        // Set up notification observers (same as default init)
-        NotificationCenter.default.addObserver(
-            forName: .evaluateServerTrust,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self,
-                  let summary = notification.userInfo?["summary"] as? String,
-                  let domain = notification.userInfo?["domain"] as? String,
-                  let delegate = notification.object as? HTTPClientDelegate else { return }
-            DispatchQueue.main.async {
-                self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), summary, domain)
-                self.currentClientDelegate = delegate
-                self.showCertificateAlert = true
-            }
-        }
-
-        NotificationCenter.default.addObserver(
-            forName: .evaluateCertificateMismatch,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self,
-                  let summary = notification.userInfo?["summary"] as? String,
-                  let domain = notification.userInfo?["domain"] as? String,
-                  let delegate = notification.object as? HTTPClientDelegate else { return }
-            DispatchQueue.main.async {
-                self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), summary, domain)
-                self.currentClientDelegate = delegate
-                self.showCertificateAlert = true
-            }
-        }
-
-        NotificationCenter.default.addObserver(
-            forName: .acceptedServerCertificatesChanged,
-            object: nil,
-            queue: nil
-        ) { _ in
-            Task { @MainActor in
-                await NetworkTracker.shared.restartTracking()
-            }
-        }
+        setupNotificationObservers()
 
         // Start loading the linked page
         Task { @MainActor in
@@ -117,47 +76,7 @@ final class UserData: ObservableObject {
     }
 
     init() {
-        NotificationCenter.default.addObserver(
-            forName: .evaluateServerTrust,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self,
-                  let summary = notification.userInfo?["summary"] as? String,
-                  let domain = notification.userInfo?["domain"] as? String,
-                  let delegate = notification.object as? HTTPClientDelegate else { return }
-            DispatchQueue.main.async {
-                self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), summary, domain)
-                self.currentClientDelegate = delegate
-                self.showCertificateAlert = true
-            }
-        }
-
-        NotificationCenter.default.addObserver(
-            forName: .evaluateCertificateMismatch,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self,
-                  let summary = notification.userInfo?["summary"] as? String,
-                  let domain = notification.userInfo?["domain"] as? String,
-                  let delegate = notification.object as? HTTPClientDelegate else { return }
-            DispatchQueue.main.async {
-                self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), summary, domain)
-                self.currentClientDelegate = delegate
-                self.showCertificateAlert = true
-            }
-        }
-
-        NotificationCenter.default.addObserver(
-            forName: .acceptedServerCertificatesChanged,
-            object: nil,
-            queue: nil
-        ) { _ in
-            Task { @MainActor in
-                await NetworkTracker.shared.restartTracking()
-            }
-        }
+        setupNotificationObservers()
 
         AppSettings.shared.$haveReceivedAppContext
             .removeDuplicates()
@@ -207,6 +126,51 @@ final class UserData: ObservableObject {
 
         Task {
             await observeNetworkChanges()
+        }
+    }
+
+    /// Sets up notification observers for certificate validation and changes
+    private func setupNotificationObservers() {
+        NotificationCenter.default.addObserver(
+            forName: .evaluateServerTrust,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self,
+                  let summary = notification.userInfo?["summary"] as? String,
+                  let domain = notification.userInfo?["domain"] as? String,
+                  let delegate = notification.object as? HTTPClientDelegate else { return }
+            DispatchQueue.main.async {
+                self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), summary, domain)
+                self.currentClientDelegate = delegate
+                self.showCertificateAlert = true
+            }
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: .evaluateCertificateMismatch,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self,
+                  let summary = notification.userInfo?["summary"] as? String,
+                  let domain = notification.userInfo?["domain"] as? String,
+                  let delegate = notification.object as? HTTPClientDelegate else { return }
+            DispatchQueue.main.async {
+                self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), summary, domain)
+                self.currentClientDelegate = delegate
+                self.showCertificateAlert = true
+            }
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: .acceptedServerCertificatesChanged,
+            object: nil,
+            queue: nil
+        ) { _ in
+            Task { @MainActor in
+                await NetworkTracker.shared.restartTracking()
+            }
         }
     }
 

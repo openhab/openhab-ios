@@ -56,7 +56,7 @@ struct SitemapPageView: View {
                     ScrollView {
                         VStack(spacing: 4) {
                             ForEach(viewModel.widgets) { widget in
-                                WidgetRowView(widget: widget, viewModel: viewModel)
+                                WidgetRowView(widget: widget)
                                     .id(widget.widgetId)
                             }
 
@@ -110,7 +110,6 @@ struct SitemapPageView: View {
 /// A wrapper view that handles linkedPage navigation for widgets
 struct WidgetRowView: View {
     @ObservedObject var widget: OpenHABWidget
-    @ObservedObject var viewModel: UserData
     @EnvironmentObject var settings: AppSettings
 
     var body: some View {
