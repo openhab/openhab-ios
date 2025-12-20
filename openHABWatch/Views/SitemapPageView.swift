@@ -118,6 +118,7 @@ struct WidgetRowView: View {
             NavigationLink(value: linkedPage) {
                 rowWidget(widget: widget)
             }
+            .buttonStyle(.plain)
         } else {
             rowWidget(widget: widget)
         }
