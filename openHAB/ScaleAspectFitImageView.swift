@@ -13,28 +13,28 @@ import UIKit
 
 class ScaleAspectFitImageView: UIImageView {
     private var aspectRatioConstraint: NSLayoutConstraint?
-    override public var image: UIImage? {
+    override var image: UIImage? {
         didSet {
             updateAspectRatioConstraint()
         }
     }
 
-    public required init?(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setup()
     }
 
-    override public init(frame: CGRect) {
+    override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
     }
 
-    override public init(image: UIImage!) {
+    override init(image: UIImage!) {
         super.init(image: image)
         setup()
     }
 
-    override public init(image: UIImage!, highlightedImage: UIImage?) {
+    override init(image: UIImage!, highlightedImage: UIImage?) {
         super.init(image: image, highlightedImage: highlightedImage)
         setup()
     }

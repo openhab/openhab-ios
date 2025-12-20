@@ -75,9 +75,9 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     var mappings: [OpenHABWidgetMapping] = []
     var image: UIImage?
     var widgets: [ObservableOpenHABWidget] = []
-    public var visibility = true
-    public var switchSupport = false
-    public var forceAsItem: Bool?
+    var visibility = true
+    var switchSupport = false
+    var forceAsItem: Bool?
 
     @Published var stateEnumBinding: WidgetTypeEnum = .unassigned
 
@@ -88,7 +88,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     }
 
     // Text between square brackets
-    public var labelValue: String? {
+    var labelValue: String? {
         let pattern = /\[(.*?)\]/.dotMatchesNewlines()
         guard let firstMatch = label.firstMatch(of: pattern) else { return nil }
         return String(firstMatch.1)
@@ -108,19 +108,19 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         }
     }
 
-    public var stateValueAsBool: Bool? {
+    var stateValueAsBool: Bool? {
         item?.state?.parseAsBool()
     }
 
-    public var stateValueAsBrightness: Int? {
+    var stateValueAsBrightness: Int? {
         item?.state?.parseAsBrightness()
     }
 
-    public var stateValueAsUIColor: UIColor? {
+    var stateValueAsUIColor: UIColor? {
         item?.state?.parseAsUIColor()
     }
 
-    public var stateValueAsNumberState: NumberState? {
+    var stateValueAsNumberState: NumberState? {
         item?.state?.parseAsNumber(format: item?.stateDescription?.numberPattern)
     }
 
@@ -174,7 +174,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         }
     }
 
-    public func sendItemUpdate(state: NumberState?) {
+    func sendItemUpdate(state: NumberState?) {
         guard let item, let state else {
             os_log("ItemUpdate for Item or State = nil", log: .default, type: .info)
             return
@@ -264,7 +264,7 @@ extension ObservableOpenHABWidget {
 }
 
 extension ObservableOpenHABWidget {
-    public struct CodingData: Decodable {
+    struct CodingData: Decodable {
         let widgetId: String
         let label: String
         let type: String
