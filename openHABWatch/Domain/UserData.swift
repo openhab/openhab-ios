@@ -52,6 +52,70 @@ final class UserData: ObservableObject {
         }
     }
 
+    /// Initializes UserData for a linked page navigation
+    init(linkedPage: OpenHABPage) {
+        // Use the pageId directly from the linkedPage object
+        let extractedPageId = linkedPage.pageId
+
+        Logger.userData.info("Initializing UserData for linked page: '\(linkedPage.title)' with pageId: '\(extractedPageId)', link: '\(linkedPage.link)'")
+
+        // Set up notification observers (same as default init)
+        NotificationCenter.default.addObserver(
+            forName: .evaluateServerTrust,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self,
+                  let summary = notification.userInfo?["summary"] as? String,
+                  let domain = notification.userInfo?["domain"] as? String,
+                  let delegate = notification.object as? HTTPClientDelegate else { return }
+            DispatchQueue.main.async {
+                self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), summary, domain)
+                self.currentClientDelegate = delegate
+                self.showCertificateAlert = true
+            }
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: .evaluateCertificateMismatch,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self,
+                  let summary = notification.userInfo?["summary"] as? String,
+                  let domain = notification.userInfo?["domain"] as? String,
+                  let delegate = notification.object as? HTTPClientDelegate else { return }
+            DispatchQueue.main.async {
+                self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), summary, domain)
+                self.currentClientDelegate = delegate
+                self.showCertificateAlert = true
+            }
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: .acceptedServerCertificatesChanged,
+            object: nil,
+            queue: nil
+        ) { _ in
+            Task { @MainActor in
+                await NetworkTracker.shared.restartTracking()
+            }
+        }
+
+        // Start loading the linked page
+        Task { @MainActor in
+            let sitemapName = AppSettings.shared.sitemapForWatch
+            guard !sitemapName.isEmpty else {
+                Logger.userData.error("Cannot load linked page: no sitemap configured")
+                self.errorDescription = "No sitemap configured"
+                self.showAlert = true
+                return
+            }
+            Logger.userData.info("Starting page handling for sitemap: \(sitemapName), pageId: \(extractedPageId)")
+            self.startPageHandling(sitemapName: sitemapName, pageId: extractedPageId, force: true)
+        }
+    }
+
     init() {
         NotificationCenter.default.addObserver(
             forName: .evaluateServerTrust,

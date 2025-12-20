@@ -18,10 +18,32 @@ struct SitemapPageView: View {
     @EnvironmentObject var settings: AppSettings
     @State var title = "Sitemap"
     @State private var scrollPosition: String?
+    var isRoot: Bool = true
+
+    init(viewModel: UserData, isRoot: Bool = true) {
+        self.viewModel = viewModel
+        self.isRoot = isRoot
+    }
 
     var body: some View {
-        NavigationStack {
-            Group {
+        Group {
+            if isRoot {
+                NavigationStack {
+                    pageContent
+                        .navigationDestination(for: OpenHABPage.self) { linkedPage in
+                            SitemapPageView(viewModel: UserData(linkedPage: linkedPage), isRoot: false)
+                                .environmentObject(settings)
+                        }
+                }
+            } else {
+                pageContent
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var pageContent: some View {
+        Group {
                 if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {
                     VStack {
                         Spacer()
@@ -34,7 +56,7 @@ struct SitemapPageView: View {
                     ScrollView {
                         VStack(spacing: 4) {
                             ForEach(viewModel.widgets) { widget in
-                                rowWidget(widget: widget)
+                                WidgetRowView(widget: widget, viewModel: viewModel)
                                     .id(widget.widgetId)
                             }
 
@@ -84,7 +106,23 @@ struct SitemapPageView: View {
         }
     }
 
-    // https://www.swiftbysundell.com/tips/adding-swiftui-viewbuilder-to-functions/
+
+/// A wrapper view that handles linkedPage navigation for widgets
+struct WidgetRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    @ObservedObject var viewModel: UserData
+    @EnvironmentObject var settings: AppSettings
+
+    var body: some View {
+        if let linkedPage = widget.linkedPage {
+            NavigationLink(value: linkedPage) {
+                rowWidget(widget: widget)
+            }
+        } else {
+            rowWidget(widget: widget)
+        }
+    }
+
     @ViewBuilder func rowWidget(widget: OpenHABWidget) -> some View {
         switch widget.stateEnum {
         case .switcher:
