@@ -197,7 +197,7 @@ final class UserData: ObservableObject {
         currentlyLoadingSitemap = sitemapName
 
         pageHandlingTask = Task {
-            let taskSitemapName = sitemapName  // Capture the sitemap name for this specific task
+            let taskSitemapName = sitemapName // Capture the sitemap name for this specific task
             defer {
                 // Only clear references if this task is still the current one
                 Task { @MainActor in
