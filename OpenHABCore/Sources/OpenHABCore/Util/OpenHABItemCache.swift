@@ -179,3 +179,15 @@ public extension [OpenHABItem] {
         }
     }
 }
+
+public extension OpenHABItemCache {
+    func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, home: UUID) async -> [String] {
+        await reloadCacheIfNeeded(homes: [home])
+        return items[home]?.filter { (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name).map(\.name) ?? []
+    }
+
+    func getCachedItems(types: [OpenHABItem.ItemType]?, home: UUID) async -> [OpenHABItem] {
+        await reloadCacheIfNeeded(homes: [home])
+        return items[home]?.filter { (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name) ?? []
+    }
+}
