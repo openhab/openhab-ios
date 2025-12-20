@@ -113,7 +113,7 @@ private extension IntentDialog {
     }
 
     static func homeParameterDisambiguationIntro(count: Int, item: String) -> Self {
-        "There are \(count) configured homes with an item named '\(item)'’."
+        "There are \(count) configured homes with an item named '\(item)'."
     }
 
     static func homeParameterConfirmation(home: Home) -> Self {
