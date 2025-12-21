@@ -60,7 +60,7 @@ public extension Endpoint {
         components?.path = path
         components?.queryItems = queryItems
         let url = components?.url
-        Logger.endpoint.debug("URL: \(url?.absoluteString ?? "", privacy: .private)")
+//        Logger.endpoint.debug("URL: \(url?.absoluteString ?? "", privacy: .private)")
         return url
     }
 
