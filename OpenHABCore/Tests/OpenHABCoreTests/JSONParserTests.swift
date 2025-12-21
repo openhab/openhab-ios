@@ -91,6 +91,95 @@ final class JSONParserTests: XCTestCase {
         }
     }
 
+    func testJSONWidget2() {
+        let json = Data("""
+        {
+            "widgetId": "01",
+            "type": "Frame",
+            "label": "Eingang",
+            "icon": "frame",
+            "mappings": [],
+            "widgets": [
+            {
+            "widgetId": "0100",
+            "type": "Switch",
+            "label": "Licht Eingang",
+            "icon": "switch",
+            "mappings": [],
+            "item": {
+            "link": "https://192.168.2.63:8444/rest/items/lcnLightSwitch17_1",
+            "state": "ON",
+            "editable": false,
+            "type": "Switch",
+            "name": "lcnLightSwitch17_1",
+            "label": "Licht Eingang",
+            "tags": [
+            "Lighting"
+            ],
+            "groupNames": [
+            "G_PresenceSimulation",
+            "gLcn"
+            ]
+            },
+            "widgets": []
+            },
+            {
+            "widgetId": "0101",
+            "type": "Switch",
+            "label": "Licht Eingang aussen",
+            "icon": "switch",
+            "mappings": [],
+            "item": {
+            "link": "https://192.168.2.63:8444/rest/items/lcnLightSwitch17_2",
+            "state": "OFF",
+            "editable": false,
+            "type": "Switch",
+            "name": "lcnLightSwitch17_2",
+            "label": "Licht Eingang aussen",
+            "tags": [
+            "Lighting"
+            ],
+            "groupNames": [
+            "G_PresenceSimulation",
+            "gLcn"
+            ]
+            },
+            "widgets": []
+            }
+            ]
+            }
+        """.utf8)
+        do {
+            let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
+            XCTAssertEqual(codingData.widgetId, "01", "Widget properly parsed")
+            XCTAssert(codingData.mappings.isEmpty, "No mappings found")
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
+    func testJSONSitemapPage() {
+        do {
+            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: jsonSitemap)
+            XCTAssertEqual(codingData.leaf, false, "OpenHABSitemapPage properly parsed")
+            XCTAssertEqual(codingData.widgets?[0].widgetId, "00", "widget properly parsed")
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
+    func testJSONSitemapPage2() {
+        do {
+            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: jsonSitemap2)
+            XCTAssertEqual(codingData.leaf, false, "OpenHABSitemapPage properly parsed")
+            XCTAssertEqual(codingData.widgets?[0].widgetId, "00", "widget properly parsed")
+            XCTAssertEqual(codingData.widgets?[4].widgets[3].item?.stateDescription?.options?[0].label, "New moon", "State description properly parsed")
+
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
     func testWatchSitemap() {
         let json = Data("""
         {"name":"watch","label":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch","homepage":{"id":"watch","title":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch/watch","leaf":false,"timeout":false,"widgets":[{"widgetId":"00","type":"Frame","label":"Ground floor","icon":"frame","mappings":[],"widgets":[{"widgetId":"0000","type":"Switch","label":"Licht Oberlicht","icon":"switch","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch14_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch14_1","label":"Licht Oberlicht","tags":["Lighting"],"groupNames":["G_PresenceSimulation","gLcn"]},"widgets":[]},{"widgetId":"0001","type":"Switch","label":"Licht Keller WC Decke","icon":"colorpicker","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch6_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch6_1","label":"Licht Keller WC Decke","category":"colorpicker","tags":["Lighting"],"groupNames":["gKellerLicht","gLcn"]},"widgets":[]}]}]}}
@@ -102,6 +191,54 @@ final class JSONParserTests: XCTestCase {
             //        XCTAssert(.widgets[0].linkedPage?.pageId == "0000", "widget properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
+    func testParsingforRollerShutter() {
+        let jsonInputForGroup = """
+        {
+            "id": "watch",
+            "title": "Watch",
+            "link": "https://server/rest/sitemaps/watch/watch",
+            "leaf": true,
+            "timeout": false,
+            "widgets": [
+            {
+                "widgetId": "00",
+                "type": "Switch",
+                "label": "Rollladen Erdgeschoss",
+                "icon": "blinds",
+                "mappings": [],
+                "item": {
+                    "members": [],
+                    "groupType": "Rollershutter",
+                    "function": {
+                        "name": "EQUALITY"
+                    },
+                    "link": "https://server/rest/items/gRollladen_EG",
+                    "state": "UNDEF",
+                    "editable": false,
+                    "type": "Group",
+                    "name": "gRollladen_EG",
+                    "label": "Rollladen Erdgeschoss",
+                    "category": "blinds",
+                    "tags": [],
+                    "groupNames": []
+                },
+                "widgets": []
+            }
+            ]
+        }
+        """
+        let data = Data(jsonInputForGroup.utf8)
+        do {
+            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: data)
+            let widget = codingData.widgets?[0]
+            XCTAssert(widget?.item?.type == "Group" && widget?.item?.groupType == "Rollershutter", "")
+            XCTAssertEqual(codingData.widgets?[0].item?.groupType, "Rollershutter")
+            XCTAssertEqual(codingData.widgets?[0].item?.type, "Group")
+        } catch {
+            XCTFail("Failed parsing")
         }
     }
 
