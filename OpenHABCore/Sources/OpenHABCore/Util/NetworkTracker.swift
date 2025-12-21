@@ -453,12 +453,10 @@ public actor NetworkTracker {
             return
         }
 
-        if isConnected {
-            Logger.networkTracker.info("NetworkTracker: Networkmonitor status: Connected")
-            await checkActiveConnection()
-        } else {
-            Logger.networkTracker.info("NetworkTracker: Networkmonitor status: Disconnected, stopping connection attempts")
-            setActiveConnection(nil)
+        Logger.networkTracker.info("NetworkTracker: Networkmonitor status: \(isConnected ? "connected" : "disconnected")")
+        await checkActiveConnection()
+
+        if activeConnection == nil {
             // don´t retry until we have a network connection again
             retryTask?.cancel()
         }

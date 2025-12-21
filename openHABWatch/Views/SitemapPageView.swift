@@ -35,7 +35,6 @@ struct SitemapPageView: View {
                         VStack(spacing: 4) {
                             ForEach(viewModel.widgets) { widget in
                                 rowWidget(widget: widget)
-                                    .id(widget.widgetId)
                             }
 
                             if viewModel.isLoadingSitemap {

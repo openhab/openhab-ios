@@ -20,6 +20,11 @@ struct IconView: View {
     @ObservedObject var settings = AppSettings.shared
 
     var iconURL: URL? {
+        // Skip loading number icons as they don't exist/aren't useful
+        if widget.icon == "number" {
+            return nil
+        }
+
         var iconColor = widget.iconColor
         if iconColor.isEmpty {
             iconColor = "#FFFFFF"
