@@ -89,20 +89,27 @@ final class UserData: ObservableObject {
             .store(in: &cancellables)
 
         // Observe sitemap changes - reload the sitemap when it changes
+        // Note: We don't use .dropFirst() here because we need to catch the initial value
+        // when the app context is first received from the iOS app on real devices
         AppSettings.shared.$sitemapForWatch
-            .dropFirst()
             .removeDuplicates()
-            .debounce(for: .seconds(2.0), scheduler: RunLoop.main)
+            .debounce(for: .seconds(0.3), scheduler: RunLoop.main)
             .sink { [weak self] newValue in
-                guard !newValue.isEmpty else { return }
+                guard !newValue.isEmpty else {
+                    Logger.userData.debug("Sitemap observer: empty sitemap, ignoring")
+                    return
+                }
+                Logger.userData.debug("Sitemap observer fired: \(newValue)")
                 Task { @MainActor in
                     guard let self else { return }
 
-                    // Check if we have an active connection before starting
-                    guard await NetworkTracker.shared.activeConnection != nil else { return }
-
                     // Only force restart if the sitemap name actually changed
                     let isDifferentSitemap = self.currentlyLoadingSitemap != newValue
+                    Logger.userData.debug("Sitemap change detected - current: \(self.currentlyLoadingSitemap ?? "nil"), new: \(newValue), force: \(isDifferentSitemap)")
+
+                    // Note: We don't check for active connection here because NetworkTracker
+                    // can report false negatives (especially during long-polling on real devices).
+                    // The observeNetworkChanges() function will handle retrying when network becomes available.
                     self.startPageHandling(sitemapName: newValue, force: isDifferentSitemap)
                 }
             }
@@ -182,6 +189,8 @@ final class UserData: ObservableObject {
                 continue
             }
 
+            Logger.userData.debug("Network connection became available: \(activeConnection.configuration.url)")
+
             if !AppSettings.shared.haveReceivedAppContext {
                 AppMessageService.singleton.requestApplicationContext()
                 errorDescription = NSLocalizedString("settings_not_received", comment: "")
@@ -192,10 +201,24 @@ final class UserData: ObservableObject {
             AppSettings.shared.openHABRootUrl = activeConnection.configuration.url
             AppSettings.shared.openHABVersion = activeConnection.version
 
-            // If we have a sitemap but nothing is loading, start page handling
+            // Start page handling when network becomes available
             let sitemapName = AppSettings.shared.sitemapForWatch
-            if !sitemapName.isEmpty, currentlyLoadingSitemap == nil {
-                startPageHandling(sitemapName: sitemapName, force: false)
+            if !sitemapName.isEmpty {
+                // Check if there's already a running task
+                if let task = pageHandlingTask, !task.isCancelled {
+                    // Task is running, check if it's for the right sitemap
+                    if currentlyLoadingSitemap == sitemapName {
+                        Logger.userData.debug("Page handling task already running for correct sitemap: \(sitemapName)")
+                    } else {
+                        // Running task is for different sitemap, force reload
+                        Logger.userData.debug("Page handling task for wrong sitemap, forcing reload: \(sitemapName)")
+                        startPageHandling(sitemapName: sitemapName, force: true)
+                    }
+                } else {
+                    // No task running or task is cancelled - start a new one
+                    Logger.userData.debug("Starting page handling for sitemap: \(sitemapName) after network became available")
+                    startPageHandling(sitemapName: sitemapName, force: false)
+                }
             }
         }
     }
@@ -210,15 +233,20 @@ final class UserData: ObservableObject {
     }
 
     func startPageHandling(sitemapName: String, pageId: String = "", force: Bool = false) {
+        Logger.userData.debug("startPageHandling called - sitemap: \(sitemapName), pageId: \(pageId), force: \(force)")
+
         // Handle concurrent loads based on force parameter
         if let task = pageHandlingTask, !task.isCancelled {
             if currentlyLoadingSitemap == sitemapName {
                 if force {
+                    Logger.userData.debug("Cancelling existing task for same sitemap (force=true)")
                     task.cancel()
                 } else {
+                    Logger.userData.debug("Same sitemap already loading and force=false, skipping")
                     return
                 }
             } else {
+                Logger.userData.debug("Cancelling existing task for different sitemap")
                 task.cancel()
             }
         }
@@ -230,6 +258,7 @@ final class UserData: ObservableObject {
                 // Only clear references if this task is still the current one
                 Task { @MainActor in
                     if self.currentlyLoadingSitemap == taskSitemapName {
+                        Logger.userData.debug("Clearing page handling task for: \(taskSitemapName)")
                         self.pageHandlingTask = nil
                         self.currentlyLoadingSitemap = nil
                     }
@@ -238,8 +267,20 @@ final class UserData: ObservableObject {
 
             do {
                 isLoadingSitemap = true
-                let activeNetworkConfig = await NetworkTracker.shared.activeConnection?.configuration
-                let service = try OpenAPIService(connectionConfiguration: activeNetworkConfig ?? ConnectionConfiguration.remoteDefault)
+
+                // Wait for NetworkTracker to establish a connection (no fallback hacks needed!)
+                guard let connectionInfo = await NetworkTracker.shared.waitForActiveConnection() else {
+                    Logger.userData.error("No active connection available after timeout")
+                    await MainActor.run {
+                        self.errorDescription = NSLocalizedString("settings_not_received", comment: "")
+                        self.showAlert = true
+                        self.isLoadingSitemap = false
+                    }
+                    return
+                }
+
+                Logger.userData.debug("Using connection: \(connectionInfo.configuration.url)")
+                let service = try OpenAPIService(connectionConfiguration: connectionInfo.configuration, serviceConfiguration: .longTerm)
 
                 let initialPage = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
                 try Task.checkCancellation()
@@ -251,7 +292,7 @@ final class UserData: ObservableObject {
                     }
                     self.openHABSitemapPage = initialPage
                     let newWidgets = initialPage?.widgets ?? []
-                    self.widgets = newWidgets
+                    self.updateWidgets(with: newWidgets)
                     if !newWidgets.isEmpty {
                         self.cachedWidgets = newWidgets
                     }
@@ -262,6 +303,7 @@ final class UserData: ObservableObject {
                 var backoffAttempt = 0
                 let maxBackoffDelay: UInt64 = 30_000_000_000 // 30 seconds
 
+                Logger.userData.debug("Starting long polling loop for sitemap: \(taskSitemapName)")
                 while !Task.isCancelled {
                     do {
                         let page = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: true)
@@ -269,12 +311,14 @@ final class UserData: ObservableObject {
 
                         await MainActor.run {
                             // Set command handler BEFORE assigning to @Published property to prevent race condition
-                            page?.sendCommand = { [weak self] item, command in
-                                Task { await self?.sendCommand(item, command: command) }
+                            if let page {
+                                page.sendCommand = { [weak self] item, command in
+                                    Task { await self?.sendCommand(item, command: command) }
+                                }
                             }
                             self.openHABSitemapPage = page
                             let newWidgets = page?.widgets ?? []
-                            self.widgets = newWidgets
+                            self.updateWidgets(with: newWidgets)
                             if !newWidgets.isEmpty {
                                 self.cachedWidgets = newWidgets
                             }
@@ -283,31 +327,38 @@ final class UserData: ObservableObject {
                         // Reset backoff after success
                         backoffAttempt = 0
 
+                    } catch is CancellationError {
+                        Logger.userData.debug("Long polling cancelled for sitemap: \(taskSitemapName)")
+                        throw CancellationError()
                     } catch {
                         backoffAttempt += 1
                         let baseDelay = min(UInt64(pow(2.0, Double(backoffAttempt))) * 1_000_000_000, maxBackoffDelay)
                         let jitter = UInt64.random(in: 0 ..< (baseDelay / 2))
                         let totalDelay = baseDelay + jitter
 
-                        Logger.userData.warning("Polling failed: \(error.localizedDescription). Retrying in \(Double(totalDelay) / 1_000_000_000.0) seconds.")
+                        Logger.userData.warning("Polling failed: \(error.localizedDescription) (\(type(of: error))). Retrying in \(Double(totalDelay) / 1_000_000_000.0) seconds.")
 
                         try await Task.sleep(nanoseconds: totalDelay)
                     }
                 }
             } catch {
                 await MainActor.run {
-                    Logger.userData.error("Page handling failed with error \(error.localizedDescription)")
+                    Logger.userData.error("Page handling failed for sitemap '\(taskSitemapName)': \(error.localizedDescription)")
+                    Logger.userData.error("Error type: \(String(describing: type(of: error)))")
+
                     // Use cached widgets if available instead of clearing completely
                     if self.cachedWidgets.isEmpty {
+                        Logger.userData.warning("No cached widgets available, showing empty state")
                         self.widgets = []
                     } else {
                         self.widgets = self.cachedWidgets
-                        Logger.userData.info("Using cached widgets during connection failure")
+                        Logger.userData.info("Using \(self.cachedWidgets.count) cached widgets during connection failure")
                     }
                     self.errorDescription = error.localizedDescription
                     self.showAlert = true
                     self.isLoadingSitemap = false
                 }
+                // Note: NetworkTracker will automatically handle failover to remote if local fails
             }
         }
     }
@@ -333,5 +384,31 @@ final class UserData: ObservableObject {
 
         showAlert = false
         startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)
+    }
+
+    /// Updates existing widget instances instead of replacing them to preserve @ObservedObject references
+    private func updateWidgets(with newWidgets: [OpenHABWidget]) {
+        // Build a map of existing widgets by ID for quick lookup
+        var existingWidgetsMap = Dictionary(uniqueKeysWithValues: widgets.map { ($0.widgetId, $0) })
+        var updatedWidgets: [OpenHABWidget] = []
+
+        for newWidget in newWidgets {
+            if let existingWidget = existingWidgetsMap[newWidget.widgetId] {
+                // Update existing widget's properties to preserve the instance
+                existingWidget.label = newWidget.label
+                existingWidget.icon = newWidget.icon
+                existingWidget.state = newWidget.state
+                existingWidget.item = newWidget.item
+                existingWidget.stateEnumBinding = newWidget.stateEnumBinding
+                // Add other properties as needed
+                updatedWidgets.append(existingWidget)
+                existingWidgetsMap.removeValue(forKey: newWidget.widgetId)
+            } else {
+                // New widget, add it
+                updatedWidgets.append(newWidget)
+            }
+        }
+
+        widgets = updatedWidgets
     }
 }

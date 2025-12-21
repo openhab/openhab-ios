@@ -32,6 +32,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
         do {
             // Decode the connection payload
             let prefs = try JSONDecoder().decode(WatchPreferences.self, from: data)
+            Logger.preferences.info("📱 Received WatchPreferences - sitemapForWatch: \(prefs.sitemapForWatch), defaultSitemap: \(prefs.defaultSitemap)")
             AppSettings.shared.localConnectionConfig = prefs.localConnectionConfiguration ?? .localDefault
             AppSettings.shared.remoteConnectionConfig = prefs.remoteConnectionConfiguration ?? .remoteDefault
             AppSettings.shared.sitemapName = prefs.defaultSitemap
@@ -42,7 +43,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
             //                   if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
             //                       // do we need to do anything here?  We load from the shared keychain.
             //                   }
-            Logger.preferences.info("✅ Applied WatchPreferences")
+            Logger.preferences.debug("✅ Applied WatchPreferences - sitemapForWatch now: \(AppSettings.shared.sitemapForWatch)")
         } catch {
             Logger.preferences.error("❌ Failed to decode WatchPreferences: \(error.localizedDescription)")
         }
