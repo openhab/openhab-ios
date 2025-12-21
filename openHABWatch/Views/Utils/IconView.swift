@@ -46,9 +46,9 @@ struct IconView: View {
                 .onFailure { _ in
                     Logger.rowViews.debug("Failed to load image : \(iconURL.absoluteString)")
                 }
-                .onSuccess { _ in
-                    Logger.rowViews.debug("Successfully loaded image: \(iconURL.absoluteString)")
-                }
+//                .onSuccess { _ in
+//                    Logger.rowViews.debug("Successfully loaded image: \(iconURL.absoluteString)")
+//                }
                 .onFailureView {
                     Rectangle()
                         .foregroundStyle(.background)
