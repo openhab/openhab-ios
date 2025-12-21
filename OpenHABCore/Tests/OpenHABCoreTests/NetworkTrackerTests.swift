@@ -19,7 +19,7 @@ import XCTest
 
 final actor MockOpenAPIService: OpenAPIServiceProtocol {
     final class MockError: Error {
-        public var debugDescription: String {
+        var debugDescription: String {
             "MockConnectionFailure"
         }
     }

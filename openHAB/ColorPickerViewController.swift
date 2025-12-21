@@ -21,7 +21,7 @@ class ColorPickerViewController: DefaultColorPickerViewController {
     private var throttler: Throttler?
 
     /// Throttling interval
-    public var throttlingInterval: TimeInterval? = 0 {
+    var throttlingInterval: TimeInterval? = 0 {
         didSet {
             guard let interval = throttlingInterval else {
                 throttler = nil
@@ -48,7 +48,7 @@ class ColorPickerViewController: DefaultColorPickerViewController {
         if #available(iOS 13.0, *) {
             // if nothing is set DefaultColorPickerViewController will fall back to .white
             // if we set this manually DefaultColorPickerViewController will go with that
-            self.view.backgroundColor = .ohSystemBackground
+            view.backgroundColor = .ohSystemBackground
         } else {
             // do nothing - DefaultColorPickerViewController will handle this
         }
