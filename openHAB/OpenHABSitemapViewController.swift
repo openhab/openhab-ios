@@ -317,7 +317,7 @@ extension OpenHABSitemapViewController {
         relevantPage?.widgets[safe: indexPath.row]
     }
 
-    public func updateWidgetTableView() {
+    func updateWidgetTableView() {
         UIView.performWithoutAnimation {
             widgetTableView.beginUpdates()
             widgetTableView.endUpdates()
