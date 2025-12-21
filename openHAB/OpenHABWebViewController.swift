@@ -240,7 +240,7 @@ class OpenHABWebViewController: OpenHABViewController {
         "web"
     }
 
-    public func navigateCommand(_ command: String) {
+    func navigateCommand(_ command: String) {
         if acceptsCommands {
             navigateCommandInternal(command)
         } else {

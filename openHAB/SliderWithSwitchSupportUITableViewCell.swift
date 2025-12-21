@@ -55,7 +55,7 @@ class SliderWithSwitchSupportUITableViewCell: GenericUITableViewCell {
         sliderTouchUp(sender)
     }
 
-    override public func initialize() {
+    override func initialize() {
         selectionStyle = .none
         separatorInset = .zero
         if let widget {
