@@ -47,7 +47,7 @@ final class ScreenSaverManager: NSObject {
         resetIdleTimer()
     }
 
-    public func updateConfiguration(_ newConfiguration: ScreenSaverConfiguration) {
+    func updateConfiguration(_ newConfiguration: ScreenSaverConfiguration) {
         configuration = newConfiguration
         if overlayWindow != nil {
             dismissSaverIfNeeded()
