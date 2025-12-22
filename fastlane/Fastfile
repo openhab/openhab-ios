@@ -60,7 +60,7 @@ platform :ios do
         run_tests(
             workspace: 'openHAB.xcworkspace',
             scheme: 'openHABTestsSwift',
-            xcargs: '-skipPackagePluginValidation',
+            xcargs: '-skipPackagePluginValidation VERBOSE_TESTS=1',
             testplan: 'openHABTests',
             devices: ['iPhone 17 Pro (26.2)'],
             clean: true
