@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.1.42, Build 99] - 2025-12-24Z
+
+- Let the webview scroll its overflow under the status bar, similar to previous versions (#1031)
+
 ## [Version 3.1.41, Build 98] - 2025-12-21Z
 
 - Watch: Expand lists (#1025)
