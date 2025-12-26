@@ -23,6 +23,7 @@ import SwiftMessages
 import SwiftUI
 import UIKit
 
+
 class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDelegate {
     var pageUrl = ""
     private var iconType: IconType = .svg

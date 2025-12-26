@@ -724,6 +724,44 @@
 			path = openHABWatch/External;
 			sourceTree = SOURCE_ROOT;
 		};
+		2F7D1D572EFEBABA004A786D /* UIKit */ = {
+			isa = PBXGroup;
+			children = (
+				65C2EF482E244C8500A0C19F /* OpenHABNavigationController.swift */,
+				653B54C1285E714900298ECD /* OpenHABViewController.swift */,
+				DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */,
+				65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */,
+				DA95F3342E0F2C1600FE4474 /* OpenHABSitemapViewController.swift */,
+				DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */,
+				DA2AEB6F2D92CF3E00897D80 /* UITableViewCellExtension.swift */,
+			);
+			path = UIKit;
+			sourceTree = "<group>";
+		};
+		2F7D1D592EFEC12A004A786D /* RootView */ = {
+			isa = PBXGroup;
+			children = (
+				2F3136F82EF5655700708F89 /* OpenHABSwiftUIRootView.swift */,
+			);
+			path = RootView;
+			sourceTree = "<group>";
+		};
+		2F7D1D5A2EFEC137004A786D /* SitemapView */ = {
+			isa = PBXGroup;
+			children = (
+				DA9F81862C85020F00B47B72 /* RTFTextView.swift */,
+				DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */,
+				DAF5AA672E4F3A38004F18D7 /* EmbeddingRowView.swift */,
+				DAE280092E35F5590028EE24 /* IconURLView.swift */,
+				DA35E2CC2E1F96CA003987BB /* IconView.swift */,
+				DA35E2CA2E1F93AD003987BB /* ImageView.swift */,
+				DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */,
+				DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */,
+				DA64ACA92DBEAD9000294F60 /* SitemapNavigationView.swift */,
+			);
+			path = SitemapView;
+			sourceTree = "<group>";
+		};
 		4D6470D42561F935007B03FC /* openHABIntents */ = {
 			isa = PBXGroup;
 			children = (
@@ -915,13 +953,11 @@
 		DA35E2B12E1EEA58003987BB /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
-				DA35E2CA2E1F93AD003987BB /* ImageView.swift */,
-				DA35E2CC2E1F96CA003987BB /* IconView.swift */,
-				DAE280092E35F5590028EE24 /* IconURLView.swift */,
-				DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */,
-				DAF5AA672E4F3A38004F18D7 /* EmbeddingRowView.swift */,
-				DA64ACA92DBEAD9000294F60 /* SitemapNavigationView.swift */,
-				DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */,
+				2FBCF58B2DEB0B7700CD5D83 /* HomeSelectionView.swift */,
+				DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */,
+				DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */,
+				2F7D1D592EFEC12A004A786D /* RootView */,
+				2F7D1D5A2EFEC137004A786D /* SitemapView */,
 				DAC949FF2E21A473007E67B7 /* Rows */,
 			);
 			path = SwiftUI;
@@ -1077,7 +1113,8 @@
 		DF4B83FD18857FA100F34902 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				65C2EF482E244C8500A0C19F /* OpenHABNavigationController.swift */,
+				2F7D1D572EFEBABA004A786D /* UIKit */,
+				DA35E2B12E1EEA58003987BB /* SwiftUI */,
 				652B81082E2193DA00648510 /* ScreenSaver */,
 				DA2AEB752D92D32000897D80 /* Cells */,
 				DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */,
@@ -1085,18 +1122,9 @@
 				DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */,
 				DA94AF432EC8DE41003BB3C8 /* VideoStreamManager.swift */,
 				DA94AEB32EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift */,
-				65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */,
-				DA95F3342E0F2C1600FE4474 /* OpenHABSitemapViewController.swift */,
 				DA2AEB6D2D92BAD800897D80 /* PageLoader.swift */,
-				DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */,
-				DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */,
-				DA2AEB6F2D92CF3E00897D80 /* UITableViewCellExtension.swift */,
 				DA48001F2D837CD8009CF127 /* SettingsView */,
 				1224F78B228A89E300750965 /* Watch */,
-				2FBCF58B2DEB0B7700CD5D83 /* HomeSelectionView.swift */,
-				DA9F81862C85020F00B47B72 /* RTFTextView.swift */,
-				DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */,
-				DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */,
 				DF4B84101886DA9900F34902 /* Widgets */,
 				DFFD8FCE18EDBD30003B502A /* Util */,
 				DA35E2B12E1EEA58003987BB /* SwiftUI */,
