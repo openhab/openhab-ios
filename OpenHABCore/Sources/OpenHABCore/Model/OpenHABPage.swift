@@ -60,33 +60,6 @@ public extension OpenHABPage {
 }
 
 public extension OpenHABPage {
-    struct CodingData: Decodable {
-        private enum CodingKeys: String, CodingKey {
-            case pageId = "id"
-            case title
-            case link
-            case leaf
-            case widgets
-            case icon
-        }
-
-        let pageId: String?
-        let title: String?
-        let link: String?
-        let leaf: Bool?
-        let widgets: [OpenHABWidget.CodingData]?
-        let icon: String?
-    }
-}
-
-public extension OpenHABPage.CodingData {
-    var openHABSitemapPage: OpenHABPage {
-        let mappedWidgets = widgets?.map(\.openHABWidget) ?? []
-        return OpenHABPage(pageId: pageId.orEmpty, title: title.orEmpty, link: link.orEmpty, leaf: leaf ?? false, widgets: mappedWidgets, icon: icon.orEmpty)
-    }
-}
-
-public extension OpenHABPage {
     convenience init?(_ page: Components.Schemas.PageDTO?) {
         if let page {
             self.init(

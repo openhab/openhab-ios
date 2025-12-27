@@ -19,18 +19,6 @@ public struct OpenHABCommandDescription: Sendable {
     }
 }
 
-public extension OpenHABCommandDescription {
-    struct CodingData: Decodable {
-        let commandOptions: [OpenHABCommandOptions]?
-    }
-}
-
-extension OpenHABCommandDescription.CodingData {
-    var openHABCommandDescription: OpenHABCommandDescription {
-        OpenHABCommandDescription(commandOptions: commandOptions)
-    }
-}
-
 extension OpenHABCommandDescription {
     init?(_ commands: Components.Schemas.CommandDescription?) {
         if let commands {
