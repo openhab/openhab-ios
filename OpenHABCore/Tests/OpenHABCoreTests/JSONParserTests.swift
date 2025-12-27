@@ -14,7 +14,6 @@
 import os.signpost
 import XCTest
 
-// swiftlint:disable:next type_body_length
 final class JSONParserTests: XCTestCase {
     let decoder = JSONDecoder()
 
@@ -92,8 +91,6 @@ final class JSONParserTests: XCTestCase {
         }
     }
 
-    // swiftlint:disable line_length
-
     func testWatchSitemap() {
         let json = Data("""
         {"name":"watch","label":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch","homepage":{"id":"watch","title":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch/watch","leaf":false,"timeout":false,"widgets":[{"widgetId":"00","type":"Frame","label":"Ground floor","icon":"frame","mappings":[],"widgets":[{"widgetId":"0000","type":"Switch","label":"Licht Oberlicht","icon":"switch","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch14_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch14_1","label":"Licht Oberlicht","tags":["Lighting"],"groupNames":["G_PresenceSimulation","gLcn"]},"widgets":[]},{"widgetId":"0001","type":"Switch","label":"Licht Keller WC Decke","icon":"colorpicker","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch6_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch6_1","label":"Licht Keller WC Decke","category":"colorpicker","tags":["Lighting"],"groupNames":["gKellerLicht","gLcn"]},"widgets":[]}]}]}}
@@ -107,8 +104,6 @@ final class JSONParserTests: XCTestCase {
             XCTFail("Whoops, an error occured: \(error)")
         }
     }
-
-    // swiftlint:enable line_length
 
     func testJSONLargeSitemapParseSwift() throws {
         let jsonFile = "LargeSitemap"
