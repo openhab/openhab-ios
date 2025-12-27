@@ -197,9 +197,7 @@ public extension Endpoint {
             queryItems = [URLQueryItem(name: "height", value: "64")]
             if !iconColor.isEmpty {
                 let uiColor = UIColor(fromString: iconColor)
-                Logger.endpoint.info("\(uiColor.rgbaDescription)")
                 let colorString = uiColor.hexString
-                Logger.endpoint.debug("color : \(colorString ?? "No proper color")")
                 if let colorString {
                     queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
                 }

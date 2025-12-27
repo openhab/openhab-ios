@@ -73,7 +73,6 @@ struct IconView: View {
                 return widget.iconColor.isEmpty ? "black" : widget.iconColor
             }
         }
-        logger.debug("icon color: \(queriedIconColor)")
 
         return Endpoint.icon(
             rootUrl: activeConnection.configuration.url,
@@ -103,14 +102,12 @@ struct IconView: View {
                         logger.error("Failed URL: \(iconURL.absoluteString)")
                     }
                     .onSuccess { result in
-                        logger.debug("Loading of icon succeeded for widget \(widget.label)")
                         currentImage = result.image
                         if result.cacheType != .none {
                             let cacheKey = iconURL.absoluteString
                             Task {
                                 await IconCacheTracker.shared.addCacheKey(cacheKey)
                             }
-                            logger.debug("Icon loaded from cache: \(cacheKey)")
                         }
                     }
                     .placeholder { _ in
