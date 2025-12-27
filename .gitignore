@@ -24,3 +24,5 @@ vendor/
 
 OsLogRewriter/.build
 OsLogRewriter/.swiftpm
+
+.claude/

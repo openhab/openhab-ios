@@ -16,12 +16,17 @@ public enum OHInterfaceStyle: Int {
     case light, dark
 
     public static var current: OHInterfaceStyle {
-        #if os(iOS)
+        #if os(watchOS)
+        return .dark
+        #elseif os(iOS)
         if UITraitCollection.current.userInterfaceStyle == .dark {
             return .dark
+        } else {
+            return .light
         }
-        #endif
+        #else
         return .light
+        #endif
     }
 }
 
@@ -157,30 +162,43 @@ public extension UIColor {
 }
 
 public extension UIColor {
+    /// Initializes a UIColor from a string, supporting named colors and hex codes.
+    /// Falls back to gray if the input is invalid.
     convenience init(fromString string: String) {
-        let namedColors = [
-            "maroon": UIColor.ohMaroon,
-            "red": UIColor.ohRed,
-            "orange": UIColor.ohOrange,
-            "olive": UIColor.ohOlive,
-            "yellow": UIColor.ohYellow,
-            "purple": UIColor.ohPurple,
-            "fuchsia": UIColor.ohFuchsia,
-            "white": UIColor.ohWhite,
-            "lime": UIColor.ohLime,
-            "green": UIColor.ohGreen,
-            "navy": UIColor.ohNavy,
-            "blue": UIColor.ohBlue,
-            "teal": UIColor.ohTeal,
-            "aqua": UIColor.ohAqua,
-            "black": UIColor.ohBlack,
-            "silver": UIColor.ohSilver,
-            "gray": UIColor.ohGray,
-            "primary": UIColor.ohPrimary,
-            "secondary": UIColor.ohSecondary
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let namedColors: [String: UIColor] = [
+            "maroon": .ohMaroon,
+            "red": .ohRed,
+            "orange": .ohOrange,
+            "olive": .ohOlive,
+            "yellow": .ohYellow,
+            "purple": .ohPurple,
+            "fuchsia": .ohFuchsia,
+            "white": .ohWhite,
+            "lime": .ohLime,
+            "green": .ohGreen,
+            "navy": .ohNavy,
+            "blue": .ohBlue,
+            "teal": .ohTeal,
+            "aqua": .ohAqua,
+            "black": .ohBlack,
+            "silver": .ohSilver,
+            "gray": .ohGray,
+            "primary": .ohPrimary,
+            "secondary": .ohSecondary
         ]
-
-        self.init(cgColor: namedColors.first { $0.key == string.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }?.value.cgColor ?? UIColor(hex: string).cgColor)
+        if let color = namedColors[trimmed] {
+            self.init(cgColor: color.cgColor)
+            return
+        }
+        // Try hex
+        let hexColor = UIColor(hex: string)
+        // If hexColor is gray, input was invalid
+        if hexColor.toHex() == UIColor.gray.toHex() {
+            self.init(cgColor: UIColor.gray.cgColor)
+        } else {
+            self.init(cgColor: hexColor.cgColor)
+        }
     }
 
     convenience init(hex: String) {

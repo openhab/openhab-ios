@@ -11,12 +11,9 @@
 
 import Combine
 import OpenHABCore
-import os.log
 import SideMenu
 import SwiftMessages
 import UIKit
-
-private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABViewController")
 
 class OpenHABViewController: UIViewController {
     var trackerCancellables = Set<AnyCancellable>()
@@ -31,9 +28,16 @@ class OpenHABViewController: UIViewController {
         CertificateManagers.serverCertificateManager.delegate = self
     }
 
-    func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme) {
+    func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme,
+                          viewTapAction: (() -> Void)? = nil,
+                          buttonTitle: String = NSLocalizedString("dismiss", comment: ""),
+                          buttonAction: (() -> Void)? = nil) {
         var config = SwiftMessages.Config()
-        config.duration = .seconds(seconds: seconds)
+        if seconds >= 0 {
+            config.duration = .seconds(seconds: seconds)
+        } else {
+            config.duration = .forever
+        }
         config.presentationStyle = .bottom
         config.presentationContext = .view(view)
         SwiftMessages.hideAll()
@@ -42,8 +46,14 @@ class OpenHABViewController: UIViewController {
             // ... configure the view
             view.configureTheme(theme)
             view.configureContent(title: title, body: message)
-            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            view.button?.setTitle(buttonTitle, for: .normal)
+            view.buttonTapHandler = { _ in
+                SwiftMessages.hide()
+                buttonAction?()
+            }
+            view.tapHandler = { _ in
+                viewTapAction?()
+            }
             return view
         }
     }
@@ -66,7 +76,7 @@ class OpenHABViewController: UIViewController {
     @objc
     func didBecomeActive(_ notification: Notification?) {
         // re disable idle off timer
-        if Preferences.idleOff {
+        if Preferences.shared.idleOff {
             UIApplication.shared.isIdleTimerDisabled = true
         }
     }
@@ -130,7 +140,9 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
     @MainActor
     func acceptedServerCertificatesChanged() {
         // User's decision about trusting server certificates has changed.  Send updates to the paired watch.
-        WatchMessageService.singleton.syncPreferencesToWatch()
+        Task {
+            await WatchMessageService.singleton.syncPreferencesToWatch()
+        }
     }
 }
 

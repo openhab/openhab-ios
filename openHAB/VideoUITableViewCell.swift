@@ -19,8 +19,6 @@ enum VideoEncoding: String {
 }
 
 class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
-    private let logger = Logger(subsystem: "org.openhab", category: "VideoUITableViewCell")
-
     private var activityIndicator: UIActivityIndicatorView = if #available(iOS 13.0, *) {
         .init(style: .medium)
     } else {
@@ -40,18 +38,20 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private var mainImageView: UIImageView!
     private var playerObserver: NSKeyValueObservation?
     private var aspectRatioConstraint: NSLayoutConstraint?
-    private var activeTask: Task<Void, Never>?
-    private var session: URLSession!
-    // Add a stream token to identify the latest MJPEG stream task
-    private var currentStreamToken: UInt = 0
+    private var mjpegPlayer: SimpleMJPEGPlayer?
+    private var currentAspectRatio: CGFloat?
+    private var currentStreamUrl: URL?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
         activityIndicator.hidesWhenStopped = true
         playerView = PlayerView()
+        playerView.isHidden = true // Start hidden, will be shown when needed
         contentView.addSubview(playerView)
-        mainImageView = ScaleAspectFitImageView()
+        mainImageView = UIImageView()
+        mainImageView.contentMode = .scaleAspectFit
+        mainImageView.isHidden = true // Start hidden, will be shown when needed
         contentView.addSubview(mainImageView)
         contentView.addSubview(activityIndicator)
 
@@ -97,23 +97,116 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         if newSuperview == nil {
             stopPlayback()
+            // Release stream reference when cell is removed
+            if let currentStreamUrl {
+                VideoStreamManager.shared.releaseStream(for: currentStreamUrl)
+                self.currentStreamUrl = nil
+            }
+        }
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+
+        // Clean up any previous state
+        stopPlayback()
+        if let currentStreamUrl {
+            VideoStreamManager.shared.releaseStream(for: currentStreamUrl)
+            self.currentStreamUrl = nil
+        }
+        mjpegPlayer = nil
+        currentAspectRatio = nil
+
+        // Reset view states
+        mainImageView.image = nil
+        mainImageView.isHidden = true
+        playerView.isHidden = true
+        activityIndicator.stopAnimating()
+        activityIndicator.isHidden = true
+
+        // Remove aspect ratio constraint
+        if let aspectRatioConstraint {
+            aspectRatioConstraint.isActive = false
+            self.aspectRatioConstraint = nil
         }
     }
 
     override func displayWidget() {
-        url = URL(string: widget.url)
+        let newUrl = URL(string: widget.url)
 
-        // Set initial aspect ratio to prevent standard height display
-        // Use 16:9 as default, will be updated when actual video dimensions are available
-        if aspectRatioConstraint == nil {
-            updateAspectRatio(forView: widget.encoding.lowercased() == VideoEncoding.mjpeg.rawValue ? mainImageView : playerView, aspectRatio: 16.0 / 9.0)
+        // Handle MJPEG streams with VideoStreamManager
+        if widget.encoding.lowercased() == VideoEncoding.mjpeg.rawValue {
+            // Stop any HLS playback and hide player view
+            playerView?.playerLayer.player = nil
+            playerView.isHidden = true
+            mainImageView.isHidden = false
+
+            // Only process if URL has changed, similar to HLS handling
+            if currentStreamUrl?.absoluteString != newUrl?.absoluteString {
+                // Release previous stream if URL changed
+                if let currentStreamUrl {
+                    VideoStreamManager.shared.releaseStream(for: currentStreamUrl)
+                }
+
+                if let newUrl {
+                    currentStreamUrl = newUrl
+                    mjpegPlayer = VideoStreamManager.shared.getOrCreateStream(
+                        for: newUrl,
+                        imageView: mainImageView,
+                        onFirstFrame: { [weak self] aspectRatio in
+                            guard let self else { return }
+                            activityIndicator.isHidden = true
+                            if currentAspectRatio != aspectRatio {
+                                updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
+                                currentAspectRatio = aspectRatio
+                                didLoad?()
+                            }
+                        },
+                        onError: { [weak self] error in
+                            guard let self else { return }
+                            Logger.widgets.error("Failed to start MJPEG stream: \(error.localizedDescription)")
+                            activityIndicator.isHidden = true
+                            activityIndicator.stopAnimating()
+                        }
+                    )
+
+                    // Set initial aspect ratio for MJPEG
+                    updateAspectRatio(forView: mainImageView, aspectRatio: 16.0 / 9.0)
+
+                    // Start activity indicator
+                    bringSubviewToFront(activityIndicator)
+                    activityIndicator.isHidden = false
+                    activityIndicator.startAnimating()
+                    bringSubviewToFront(mainImageView)
+                } else {
+                    currentStreamUrl = nil
+                }
+            }
+        } else {
+            // Handle HLS and other video formats
+            // Clear any MJPEG stream and hide image view
+            if let currentStreamUrl {
+                VideoStreamManager.shared.releaseStream(for: currentStreamUrl)
+                self.currentStreamUrl = nil
+            }
+            mjpegPlayer = nil
+            mainImageView.image = nil
+            mainImageView.isHidden = true
+            playerView.isHidden = false
+
+            if url?.absoluteString != newUrl?.absoluteString {
+                url = newUrl
+            }
+            let targetView = playerView!
+            updateAspectRatio(forView: targetView, aspectRatio: 16.0 / 9.0)
         }
     }
 
     func play() {
         switch widget.encoding.lowercased() {
         case VideoEncoding.mjpeg.rawValue:
-            playMjpegStream()
+            // MJPEG streams are already managed by VideoStreamManager in displayWidget()
+            break
         default:
             playerView.player?.play()
         }
@@ -131,6 +224,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         }
 
         if widget.encoding.lowercased() != VideoEncoding.mjpeg.rawValue {
+            Logger.videoProcessing.info("Loading HLS video from: \(url.absoluteString)")
             bringSubviewToFront(playerView)
             let playerItem = AVPlayerItem(asset: AVAsset(url: url))
             playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] playerItem, _ in
@@ -138,12 +232,12 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
                 switch playerItem.status {
                 case .failed:
-                    logger.debug("Failed to load video with URL: \(url.absoluteString)")
+                    Logger.widgets.debug("Failed to load video with URL: \(url.absoluteString)")
                     Task { @MainActor in
                         self.url = nil
                     }
                 case .readyToPlay:
-                    logger.debug("Loaded video with URL: \(url.absoluteString)")
+                    Logger.widgets.debug("Loaded video with URL: \(url.absoluteString)")
                 default: return
                 }
                 Task { @MainActor in
@@ -159,133 +253,37 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         }
     }
 
-    private func playMjpegStream() {
-        guard let url else {
-            stopPlayback()
-            return
-        }
-
-        // Cancel any existing task before starting a new one
-        if let existingTask = activeTask {
-            existingTask.cancel()
-            activeTask = nil
-        }
-        // Increment the stream token for a new task
-        currentStreamToken += 1
-        let streamToken = currentStreamToken
-
-        bringSubviewToFront(mainImageView)
-
-        activeTask = Task { [weak self] in
-            guard let self else { return }
-            // Check if task was cancelled before starting work
-            guard !Task.isCancelled else {
-                logger.debug("MJPEG stream task was cancelled before starting")
-                return
-            }
-            do {
-                guard let config = MainActorNetworkTracker.shared.activeConnection?.configuration else {
-                    logger.warning("No openHAB configuration found.")
-                    throw HTTPClientError.noConfiguration
-                }
-                logger.debug("Starting MJPEG stream for URL: \(url.absoluteString)")
-                let client = HTTPClient(configuration: config)
-                let (byteStream, response) = try await client.processStream(url: url)
-                logger.debug("Successfully got MJPEG stream response: \(response)")
-                await handleMJPEGStream(byteStream, streamToken: streamToken)
-            } catch is CancellationError {
-                logger.debug("MJPEG stream was cancelled during setup")
-            } catch {
-                logger.error("Failed to start MJPEG stream: \(error.localizedDescription)")
-                await MainActor.run { [weak self] in
-                    guard let self, currentStreamToken == streamToken else { return }
-                    activityIndicator.isHidden = true
-                    activityIndicator.stopAnimating()
-                }
-            }
-        }
-    }
-
-    // Update handleMJPEGStream to take a streamToken and check it before UI updates
-    private func handleMJPEGStream(_ byteStream: URLSession.AsyncBytes, streamToken: UInt) async {
-        let streamImageInitialBytePattern = Data([255, 216])
-        var imageData = Data()
-        var isFirstFrame = true
-
-        logger.debug("Starting to process MJPEG byte stream")
-
-        do {
-            for try await byte in byteStream {
-                guard !Task.isCancelled else {
-                    logger.debug("MJPEG stream task was cancelled")
-                    return
-                }
-                // If a new stream has started, exit
-                if streamToken != currentStreamToken {
-                    logger.debug("MJPEG stream token mismatch, exiting stream handler")
-                    return
-                }
-                imageData.append(byte)
-
-                if imageData.count <= 50 {
-                    logger.debug("Received bytes (\(imageData.count)): \(imageData.prefix(50).map { String(format: "%02x", $0) }.joined(separator: " "))")
-                }
-
-                if imageData.starts(with: streamImageInitialBytePattern), let image = UIImage(data: imageData) {
-                    logger.debug("Successfully decoded MJPEG frame, size: \(image.size.width)x\(image.size.height)")
-
-                    await MainActor.run { [weak self] in
-                        guard let self, currentStreamToken == streamToken else { return }
-                        if isFirstFrame {
-                            let aspectRatio = image.size.width / image.size.height
-                            activityIndicator.isHidden = true
-                            updateAspectRatio(forView: mainImageView, aspectRatio: aspectRatio)
-                            isFirstFrame = false
-                            didLoad?()
-                        }
-                        mainImageView?.image = image
-                    }
-                    imageData = Data()
-                }
-            }
-        } catch is CancellationError {
-            logger.debug("MJPEG stream was cancelled")
-        } catch {
-            logger.error("Failed to process MJPEG stream: \(error.localizedDescription)")
-            await MainActor.run { [weak self] in
-                guard let self, currentStreamToken == streamToken else { return }
-                activityIndicator.isHidden = true
-                activityIndicator.stopAnimating()
-            }
-        }
-    }
-
     // Add or update the aspect ratio constraint for the given view
     private func updateAspectRatio(forView view: UIView, aspectRatio: CGFloat) {
         // Remove the old aspect ratio constraint if it exists
         if let oldConstraint = aspectRatioConstraint {
-            view.removeConstraint(oldConstraint)
+            oldConstraint.isActive = false
             aspectRatioConstraint = nil
         }
+
+        // Force layout to process constraint removal before adding new one
+        view.layoutIfNeeded()
+
         // Add a new aspect ratio constraint
         let constraint = view.widthAnchor.constraint(equalTo: view.heightAnchor, multiplier: aspectRatio)
-        constraint.priority = .required
+        constraint.priority = UILayoutPriority(rawValue: 998) // Lower than UIImageView's 999
         constraint.isActive = true
         aspectRatioConstraint = constraint
     }
 
     @objc
     private func stopPlayback(andResetUrl reset: Bool = true) {
-        // Increment the stream token to invalidate any running MJPEG stream tasks
-        currentStreamToken += 1
-        if reset {
-            url = nil
+        // For MJPEG streams, don't stop the shared stream - just clear our reference
+        if widget?.encoding.lowercased() == VideoEncoding.mjpeg.rawValue {
+            mjpegPlayer = nil
+        } else {
+            // For HLS and other formats, stop as usual
+            if reset {
+                url = nil
+            }
+            playerObserver = nil
+            playerView?.playerLayer.player = nil
         }
-        playerObserver = nil
-        playerView?.playerLayer.player = nil
-        // Cancel the active task if it is running
-        activeTask?.cancel()
-        activeTask = nil
-        mainImageView?.image = nil
+        currentAspectRatio = nil
     }
 }

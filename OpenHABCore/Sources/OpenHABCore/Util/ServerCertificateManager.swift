@@ -19,14 +19,15 @@ public protocol ServerCertificateManagerDelegate: AnyObject, Sendable {
     // certificate received from openHAB doesn't match our record, ask user for a decision
     func evaluateCertificateMismatch(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult
     // notify delegate that the certificagtes that a user is willing to trust has changed
-    func acceptedServerCertificatesChanged()
+    func acceptedServerCertificatesChanged() async
 }
 
 enum ServerCertificateManagerError: Error {
     case serverTrustEvaluationFailed
 }
 
-public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvaluating {
+@MainActor
+public final class ServerCertificateManager {
     // Handle the different responses of the user
     public enum EvaluateResult: Sendable {
         case undecided
@@ -38,77 +39,21 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
     public weak var delegate: (any ServerCertificateManagerDelegate)?
     // ignoreSSL is a synonym for allowInvalidCertificates, ignoreCertificates
     public var ignoreSSL = false
-    public var trustedCertificates: [String: Data] = [:]
-
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "ServerCertificateManager", category: "ServerCert")
 
     // Init a ServerCertificateManager and set ignore certificates setting
     public init(ignoreSSL: Bool = false) {
         self.ignoreSSL = ignoreSSL
-
-        logger.info("Initializing cert store")
-        loadTrustedCertificates()
-        if trustedCertificates.isEmpty {
-            logger.info("No cert store, creating")
-            trustedCertificates = [:]
-            //        [trustedCertificates setObject:@"Bulk" forKey:@"Bulk id to make it non-empty"];
-            saveTrustedCertificates()
-        } else {
-            logger.info("Loaded existing cert store")
-        }
+        Logger.serverCert.info("Initializing cert manager, delegating to CertificateStore")
     }
 
-    func getPersistensePath() -> URL {
-        #if os(watchOS)
-        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-        return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
-        #else
-        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app")!.appendingPathComponent("trustedCertificates")
-        #endif
-    }
-
-    public func saveTrustedCertificates() {
-        do {
-            let data = try PropertyListEncoder().encode(trustedCertificates)
-            try data.write(to: getPersistensePath())
-        } catch {
-            logger.info("Could not save trusted certificates")
-        }
-    }
-
-    func storeCertificateData(_ certificate: CFData?, forDomain domain: String) {
+    func storeCertificateData(_ certificate: CFData?, forDomain domain: String) async {
         let certificateData = certificate as Data?
-        trustedCertificates[domain] = certificateData
-        saveTrustedCertificates()
+        await CertificateManagers.certificateStore.storeCertificateData(certificateData, forDomain: domain)
     }
 
-    func certificateData(forDomain domain: String) -> CFData? {
-        guard let certificateData = trustedCertificates[domain] else { return nil }
+    func certificateData(forDomain domain: String) async -> CFData? {
+        guard let certificateData = await CertificateManagers.certificateStore.certificateData(forDomain: domain) else { return nil }
         return certificateData as CFData
-    }
-
-    func loadTrustedCertificates() {
-        var decodableTrustedCertificates: [String: Data] = [:]
-        do {
-            let rawdata = try Data(contentsOf: getPersistensePath())
-            let decoder = PropertyListDecoder()
-            decodableTrustedCertificates = try decoder.decode([String: Data].self, from: rawdata)
-            trustedCertificates = decodableTrustedCertificates
-        } catch {
-            // if Decodable fails, fall back to NSKeyedArchiver. Handling can be removed when customer base is migrated
-            do {
-                let rawdata = try Data(contentsOf: getPersistensePath())
-                if let unarchivedTrustedCertificates = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSDictionary.self, NSString.self, NSData.self], from: rawdata) as? [String: Data] {
-                    trustedCertificates = unarchivedTrustedCertificates
-                    saveTrustedCertificates() // Ensure that data is written in new format to take this path only once
-                } else {
-                    return
-                }
-            } catch {
-                logger.info("Could not load trusted unarchived certificates")
-            }
-            logger.info("Could not load trusted codable certificates")
-        }
     }
 
     func evaluateTrust(with challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
@@ -152,7 +97,7 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
 
         // If we have a certificate for this domain
         // Obtain certificate we have and compare it with the certificate presented by the server
-        let previousData = self.certificateData(forDomain: domain)
+        let previousData = await self.certificateData(forDomain: domain)
 
         if let previousData, CFEqual(previousData, certificateData) {
             // If certificate matched one in our store - permit this connection
@@ -163,7 +108,7 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
             throw ServerCertificateManagerError.serverTrustEvaluationFailed
         }
 
-        logger.info("Server trust not valid for \(domain), asking delegate...")
+        Logger.serverCert.info("Server trust not valid for \(domain), asking delegate...")
         let decision: EvaluateResult = if previousData != nil {
             // mismatch, we have a certificate for this domain in our memory of decisions, but the certificate we've got now
             // differs. We need to warn user about possible MiM attack and wait for users decision.
@@ -183,9 +128,9 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
         case .permitAlways:
             // User decided to accept invalid certificate and remember decision
             // Add certificate to storage
-            storeCertificateData(certificateData, forDomain: domain)
+            await storeCertificateData(certificateData, forDomain: domain)
             await delegate.acceptedServerCertificatesChanged()
-            logger.info("User chose to trust cert for \(domain) permanently")
+            Logger.serverCert.info("User chose to trust cert for \(domain) permanently")
             return
         @unknown default:
             throw ServerCertificateManagerError.serverTrustEvaluationFailed

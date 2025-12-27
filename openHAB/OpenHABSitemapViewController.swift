@@ -15,7 +15,6 @@ import Combine
 import Foundation
 import Kingfisher
 import OpenAPIRuntime
-import OpenAPIURLSession
 import OpenHABCore
 import os.log
 import SafariServices
@@ -34,6 +33,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     private var defaultSitemap = ""
     private var pageId = ""
     private var idleOff = false
+    private var showSearchField = false
     private var sitemaps: [OpenHABSitemap] = []
     private var currentPage: OpenHABPage?
     private var pageNetworkStatus: NetworkStatus?
@@ -48,8 +48,6 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     private var pageHandlingTask: Task<Void, Never>?
 
     private var pageLoader: PageLoader?
-
-    private let logger = Logger(subsystem: "org.openhab.app", category: "OpenHABSitemapViewController")
 
     var relevantPage: OpenHABPage? {
         if isFiltering {
@@ -78,7 +76,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        logger.info("OpenHABSitemapViewController viewDidLoad")
+        Logger.sitemapViewController.info("OpenHABSitemapViewController viewDidLoad")
 
         registerTableViewCells()
         configureTableView()
@@ -88,25 +86,32 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         refreshControl?.addTarget(self, action: #selector(handleRefresh(_:)), for: .valueChanged)
         widgetTableView.refreshControl = refreshControl
 
-        // Setup search controller
-        searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.autocapitalizationType = .none
-        searchController.searchBar.delegate = self
-        searchController.delegate = self
-        searchController.searchBar.placeholder = NSLocalizedString("search_items", comment: "")
-        definesPresentationContext = true
+        // Load showSearchField settings
+        showSearchField = Preferences.shared.applicationPreferences.showSearchField
 
-        // Assign to navigation item (must be in navigation stack)
-        navigationItem.searchController = searchController
-        navigationItem.hidesSearchBarWhenScrolling = false
+        if showSearchField {
+            // Setup search controller
+            searchController.searchResultsUpdater = self
+            searchController.obscuresBackgroundDuringPresentation = false
+            searchController.searchBar.autocapitalizationType = .none
+            searchController.searchBar.delegate = self
+            searchController.delegate = self
+            searchController.searchBar.placeholder = NSLocalizedString("search_items", comment: "")
+            definesPresentationContext = true
+
+            // Assign to navigation item (must be in navigation stack)
+            navigationItem.searchController = searchController
+            navigationItem.hidesSearchBarWhenScrolling = false
+        } else {
+            navigationItem.searchController = nil
+        }
 
         // Setup active connection
         guard let config = activeConnectionInfo?.configuration else { return }
         do {
             openAPIService = try OpenAPIService(connectionConfiguration: config)
         } catch {
-            logger.error("Failed to create OpenAPIService: \(error.localizedDescription)")
+            Logger.sitemapViewController.error("Failed to create OpenAPIService: \(error.localizedDescription)")
         }
 
         if let service = openAPIService {
@@ -119,17 +124,24 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     }
 
     override func viewDidAppear(_ animated: Bool) {
-        logger.info("OpenHABSitemapViewController viewDidAppear")
+        Logger.sitemapViewController.info("OpenHABSitemapViewController viewDidAppear")
         super.viewDidAppear(animated)
 
-        if parent?.navigationItem.searchController !== searchController {
-            parent?.navigationItem.searchController = searchController
-            parent?.navigationItem.hidesSearchBarWhenScrolling = true
+        // Load showSearchField settings
+        showSearchField = Preferences.shared.applicationPreferences.showSearchField
+
+        if showSearchField {
+            if parent?.navigationItem.searchController !== searchController {
+                parent?.navigationItem.searchController = searchController
+                parent?.navigationItem.hidesSearchBarWhenScrolling = true
+            }
+        } else {
+            parent?.navigationItem.searchController = nil
         }
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        logger.info("OpenHABSitemapViewController viewWillAppear")
+        Logger.sitemapViewController.info("OpenHABSitemapViewController viewWillAppear")
         super.viewWillAppear(animated)
 
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -150,26 +162,25 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
                 currentPage?.widgets = []
                 widgetTableView.reloadData()
             }
-            logger.info("OpenHABSitemapViewController pageUrl is empty, this is first launch")
+            Logger.sitemapViewController.info("OpenHABSitemapViewController pageUrl is empty, this is first launch")
         } else {
             if !pageNetworkStatusChanged() || !pageId.isEmpty {
                 // swiftformat:disable:next redundantSelf
-                logger.info("OpenHABSitemapViewController pageUrl \(self.pageUrl)")
+                Logger.sitemapViewController.info("OpenHABSitemapViewController pageUrl \(self.pageUrl)")
                 startPageHandling()
             } else {
-                logger.info("OpenHABSitemapViewController network status changed while it was not appearing")
+                Logger.sitemapViewController.info("OpenHABSitemapViewController network status changed while it was not appearing")
                 restart()
             }
         }
 
-        startTrackNetworkStatus()
         startWatchingActiveServer()
 
         ImageDownloader.default.authenticationChallengeResponder = self
     }
 
     override func viewWillDisappear(_ animated: Bool) {
-        logger.info("OpenHABSitemapViewController viewWillDisappear")
+        Logger.sitemapViewController.info("OpenHABSitemapViewController viewWillDisappear")
 
         trackerCancellables.removeAll()
         stopAllTasks()
@@ -197,19 +208,19 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     @objc
     override func didEnterBackground(_ notification: Notification?) {
         super.didEnterBackground(notification)
-        logger.info("OpenHABSitemapViewController didEnterBackground")
+        Logger.sitemapViewController.info("OpenHABSitemapViewController didEnterBackground")
     }
 
     @objc
     override func didBecomeActive(_ notification: Notification?) {
         super.didBecomeActive(notification)
-        logger.info("OpenHABSitemapViewController didBecomeActive")
+        Logger.sitemapViewController.info("OpenHABSitemapViewController didBecomeActive")
         if isViewLoaded, view.window != nil, !pageUrl.isEmpty {
             if !pageNetworkStatusChanged() {
-                logger.info("OpenHABSitemapViewController isViewLoaded, restarting network activity")
+                Logger.sitemapViewController.info("OpenHABSitemapViewController isViewLoaded, restarting network activity")
                 startPageHandling()
             } else {
-                logger.info("OpenHABSitemapViewController network status changed while it was inactive")
+                Logger.sitemapViewController.info("OpenHABSitemapViewController network status changed while it was inactive")
                 restart()
             }
         }
@@ -221,32 +232,12 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         widgetTableView.reloadData()
     }
 
-    private func startTrackNetworkStatus() {
-        let task = Task {
-            for await status in MainActorNetworkTracker.shared.$status.values {
-                logger.info("OpenHABViewController tracker status \(status.rawValue)")
-                await MainActor.run {
-                    switch status {
-                    case .connecting:
-                        self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                    case .notConnected:
-                        logger.info("Tracking error")
-//                        self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
-                    case .connected, .allConnected, .someConnected:
-                        self.hidePopupMessages()
-                    }
-                }
-            }
-        }
-        activeTasks.insert(task)
-    }
-
     func startWatchingActiveServer() {
         let task = Task {
             for await activeConnection in MainActorNetworkTracker.shared.$activeConnection.values {
                 if let activeConnection {
                     await MainActor.run {
-                        logger.info("OpenHABSitemapViewController tracker URL \(activeConnection.configuration.url)")
+                        Logger.sitemapViewController.info("OpenHABSitemapViewController tracker URL \(activeConnection.configuration.url)")
                         self.openHABRootUrl = activeConnection.configuration.url
                         self.activeConnectionInfo = activeConnection
                         self.selectSitemap()
@@ -268,8 +259,8 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     }
 
     override func reloadView() {
-        defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
-        logger.debug("Reload view")
+        defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
+        Logger.sitemapViewController.debug("Reload view")
         selectSitemap()
     }
 
@@ -314,7 +305,7 @@ extension OpenHABSitemapViewController {
 
     func restart() {
         if sitemapViewController == self {
-            logger.info("I am a rootViewController!")
+            Logger.sitemapViewController.info("I am a rootViewController!")
 
         } else {
             sitemapViewController?.pageUrl = ""
@@ -326,7 +317,7 @@ extension OpenHABSitemapViewController {
         relevantPage?.widgets[safe: indexPath.row]
     }
 
-    public func updateWidgetTableView() {
+    func updateWidgetTableView() {
         UIView.performWithoutAnimation {
             widgetTableView.beginUpdates()
             widgetTableView.endUpdates()
@@ -336,7 +327,7 @@ extension OpenHABSitemapViewController {
     func updateUI(with page: OpenHABPage) {
         currentPage = page
 
-        if isFiltering {
+        if showSearchField, isFiltering {
             filterContentForSearchText(searchController.searchBar.text)
         }
 
@@ -351,10 +342,15 @@ extension OpenHABSitemapViewController {
         } else {
             isWaitingToReload = true
         }
-        // on initial load ??? refreshControl?.endRefreshing()
 
-        widgetTableView.reloadData()
-        parent?.navigationItem.title = currentPage?.title.components(separatedBy: "[")[0]
+        let pageTitle = currentPage?.title.components(separatedBy: "[")[0]
+        if let pageTitle, !pageTitle.isEmpty {
+            parent?.navigationItem.title = pageTitle
+        } else if !defaultSitemap.isEmpty {
+            parent?.navigationItem.title = defaultSitemap
+        } else {
+            parent?.navigationItem.title = "Sitemap"
+        }
     }
 
     // Select sitemap
@@ -364,13 +360,13 @@ extension OpenHABSitemapViewController {
                 guard let activeConnection = MainActorNetworkTracker.shared.activeConnection else {
                     throw OpenHABSitemapError.noActiveConnection
                 }
-                logger.debug("Running selectSitemap for URL: \(activeConnection.configuration.url)")
+                Logger.sitemapViewController.debug("Running selectSitemap for URL: \(activeConnection.configuration.url)")
 
                 openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
                 sitemaps = try await openAPIService?.openHABSitemaps() ?? []
 
                 guard let openAPIService else {
-                    logger.error("Failed to load openAPIService")
+                    Logger.sitemapViewController.error("Failed to load openAPIService")
                     return
                 }
                 await pageLoader?.updateAPIService(newService: openAPIService)
@@ -400,9 +396,9 @@ extension OpenHABSitemapViewController {
                 }
                 widgetTableView.reloadData()
             } catch _ as OpenAPIServiceError {
-                logger.debug("OpenAPIService Error on OpenHABSitemapViewController")
+                Logger.sitemapViewController.debug("OpenAPIService Error on OpenHABSitemapViewController")
             } catch let error as OpenHABSitemapError {
-                logger.error("OpenHABSitemap Error: \(error.localizedDescription)")
+                Logger.sitemapViewController.error("OpenHABSitemap Error: \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     self.showPopupMessage(
                         seconds: 5,
@@ -412,7 +408,7 @@ extension OpenHABSitemapViewController {
                     )
                 }
             } catch {
-                logger.error("\(error.localizedDescription)")
+                Logger.sitemapViewController.error("\(error.localizedDescription)")
                 DispatchQueue.main.async {
                     if let urlError = error as? URLError, urlError.code == .clientCertificateRejected {
                         self.showPopupMessage(
@@ -437,14 +433,19 @@ extension OpenHABSitemapViewController {
     // This is mainly used for navigating to a specific sitemap and path from notifications
     func pushSitemap(name: String, path: String?) async {
         guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
-            logger.error("pushSitemap: No active connection available")
+            Logger.sitemapViewController.error("pushSitemap: No active connection available")
             return
         }
 
-        logger.info("pushSitemap: pushing page")
+        guard name != pageId || path != nil else {
+            Logger.sitemapViewController.info("pushSitemap: Already at the required sitemap")
+            return
+        }
+
+        Logger.sitemapViewController.info("pushSitemap: pushing page")
 
         guard let baseUrl = URL(string: activeConnection.configuration.url) else {
-            logger.error("pushSitemap: Invalid base URL")
+            Logger.sitemapViewController.error("pushSitemap: Invalid base URL")
             return
         }
 
@@ -457,10 +458,13 @@ extension OpenHABSitemapViewController {
         }
 
         guard let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController else {
-            logger.error("pushSitemap: Failed to instantiate OpenHABSitemapViewController")
+            Logger.sitemapViewController.error("pushSitemap: Failed to instantiate OpenHABSitemapViewController")
             return
         }
 
+        if let pageId = path {
+            newViewController.pageId = pageId
+        }
         newViewController.pageUrl = url.absoluteString
         newViewController.openHABRootUrl = activeConnection.configuration.url
         navigationController?.pushViewController(newViewController, animated: true)
@@ -470,11 +474,11 @@ extension OpenHABSitemapViewController {
         pageHandlingTask?.cancel()
 
         guard !pageUrl.isEmpty else {
-            logger.error("startPageHandling: Cannot run with empty pageUrl")
+            Logger.sitemapViewController.error("startPageHandling: Cannot run with empty pageUrl")
             return
         }
 
-        logger.info("🚀 Starting page load and long polling flow...")
+        Logger.sitemapViewController.info("🚀 Starting page load and long polling flow...")
 
         pageHandlingTask = Task {
             do {
@@ -521,26 +525,26 @@ extension OpenHABSitemapViewController {
                     }
                 }
             } catch is CancellationError {
-                logger.info("🔁 pageHandlingTask was cancelled")
+                Logger.sitemapViewController.info("🔁 pageHandlingTask was cancelled")
             } catch let error as DecodingError {
-                logger.error("DecodingError \(error.localizedDescription)")
+                Logger.sitemapViewController.error("DecodingError \(error.localizedDescription)")
             } catch let error as ClientError {
                 if let urlError = error.underlyingError as? URLError {
                     switch urlError.code {
                     case .cancelled:
-                        logger.info("Task was cancelled - URLError code: .cancelled")
+                        Logger.sitemapViewController.info("Task was cancelled - URLError code: .cancelled")
                     case .timedOut:
-                        logger.info("Task timed out - URLError code: .timedOut")
+                        Logger.sitemapViewController.info("Task timed out - URLError code: .timedOut")
                     default:
-                        logger.info("URLError: \(urlError.localizedDescription)")
+                        Logger.sitemapViewController.info("URLError: \(urlError.localizedDescription)")
                     }
                 } else {
-                    logger.error("\(error.localizedDescription)")
+                    Logger.sitemapViewController.error("\(error.localizedDescription)")
                 }
             } catch let openAPIError as OpenAPIServiceError {
-                logger.info("On pageHandling \(openAPIError)")
+                Logger.sitemapViewController.info("On pageHandling \(openAPIError)")
             } catch {
-                logger.error("❌ pageHandlingTask error: \(error.localizedDescription)")
+                Logger.sitemapViewController.error("❌ pageHandlingTask error: \(error.localizedDescription)")
                 await MainActor.run {
                     self.showPopupMessage(
                         seconds: 5,
@@ -555,9 +559,9 @@ extension OpenHABSitemapViewController {
 
     // load settings into local properties
     func loadSettings() {
-        defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
-        idleOff = Preferences.idleOff
-        iconType = IconType(rawValue: Preferences.currentHomePreferences.iconType) ?? .svg
+        defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
+        idleOff = Preferences.shared.idleOff
+        iconType = IconType(rawValue: Preferences.shared.currentHomePreferences.iconType) ?? .svg
         #if DEBUG
         // always use demo sitemap for UITest
         if ProcessInfo.processInfo.environment["UITest"] != nil {
@@ -577,7 +581,7 @@ extension OpenHABSitemapViewController {
 
     @discardableResult
     func pageNetworkStatusChanged() -> Bool {
-        logger.info("OpenHABSitemapViewController pageNetworkStatusChange")
+        Logger.sitemapViewController.info("OpenHABSitemapViewController pageNetworkStatusChange")
 
         guard !pageUrl.isEmpty else { return false }
 
@@ -625,7 +629,7 @@ extension OpenHABSitemapViewController {
 
 extension OpenHABSitemapViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        logger.info("Search updated: \(searchController.searchBar.text ?? "")")
+        Logger.sitemapViewController.info("Search updated: \(searchController.searchBar.text ?? "")")
         filterContentForSearchText(searchController.searchBar.text)
     }
 }
@@ -676,7 +680,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             if let height = widget?.height {
                 // calculate webview/mapview height and return it. Limited to UIScreen.main.bounds.height
                 let heightValue = height * 44
-                logger.info("Webview/Mapview height would be \(heightValue)")
+                Logger.sitemapViewController.info("Webview/Mapview height would be \(heightValue)")
                 return min(UIScreen.main.bounds.height, CGFloat(heightValue))
             } else {
                 // return default height for webview/mapview as 8 rows
@@ -702,7 +706,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
 
         var iconColor = widget.iconColor
         if iconColor.isEmpty, traitCollection.userInterfaceStyle == .dark {
-            iconColor = "white"
+            iconColor = "#FFFFFF"
         }
         // No icon will be displazed for cells that conform to NoIconDisplayableCell protocol
         if !(cell is any NoIconDisplayableCell) {
@@ -713,9 +717,10 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     icon: widget.icon,
                     state: widget.iconState(),
                     iconType: iconType,
-                    iconColor: iconColor
-                ).url {
-                    logger.info("URL: \(urlc.absoluteString, privacy: .private) , color: \(iconColor)")
+                    iconColor: iconColor,
+                    staticIcon: widget.staticIcon
+                )?.url {
+                    Logger.sitemapViewController.info("URL for icon: \(urlc.absoluteString, privacy: .public)")
                     cell.imageView?.kf.setImage(
                         with: KF.ImageResource(downloadURL: urlc), // , cacheKey: urlc.path + (urlc.query ?? "")),
                         placeholder: nil,
@@ -727,7 +732,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                                 cell.setNeedsLayout()
                             }
                         case let .failure(error):
-                            self.logger.error("Image loading failed for widget \(widget.label) : \(error.localizedDescription)")
+                            Logger.sitemapViewController.error("Image loading failed for widget \(widget.label, privacy: .public) : \(error.localizedDescription, privacy: .public)")
                         }
                     }
                 }
@@ -777,7 +782,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         guard let widget: OpenHABWidget = relevantWidget(indexPath: indexPath) else { return }
 
         if let linkedPage = widget.linkedPage {
-            logger.info("Selected linked page: \(linkedPage.link)")
+            Logger.sitemapViewController.info("Selected linked page: \(linkedPage.link)")
             stopAllTasks()
             let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
             newViewController.title = linkedPage.title.components(separatedBy: "[")[0]
@@ -787,7 +792,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             navigationController?.pushViewController(newViewController, animated: true)
         } else if widget.type == .selection {
             let selectionItemState = widget.item?.state
-            logger.info("Selected selection widget in status: \(selectionItemState ?? "unknown")")
+            Logger.sitemapViewController.info("Selected selection widget in status: \(selectionItemState ?? "unknown")")
             let hostingController = UIHostingController(
                 rootView: SelectionView(
                     labelText: widget.labelText,

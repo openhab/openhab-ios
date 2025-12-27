@@ -2,6 +2,129 @@
 
 ## [Unreleased]
 
+## [Version 3.1.42, Build 99] - 2025-12-24Z
+
+- Let the webview scroll its overflow under the status bar, similar to previous versions (#1031)
+
+## [Version 3.1.41, Build 98] - 2025-12-21Z
+
+- Watch: Expand lists (#1025)
+- Improve resilience on real watches (#1014)
+- Upgrade to latest version of swiftlint and swiftformat (#1026)
+- Bump aws-sdk-s3 from 1.194.0 to 1.208.0 (#1023)
+- Bump actions/cache from 4 to 5 (#1020)
+
+## [Version 3.1.40, Build 97] - 2025-12-08Z
+
+- default path was missing in save routine of settings view (#1016)
+
+## [Version 3.1.39, Build 96] - 2025-12-08Z
+
+- process notification only after establishing network connection (#1015)
+
+## [Version 3.1.38, Build 95] - 2025-12-04Z
+
+- watchOS Scrolling behavior (#1012)
+
+## [Version 3.1.37, Build 94] - 2025-12-04Z
+
+- Fix for spontaneous sitemap switching (#1011)
+
+## [Version 3.1.36, Build 93] - 2025-12-04Z
+
+- Watch connectivity (#1009)
+- Fix watch crown scrolling (#1010)
+- Bump actions/checkout from 5 to 6 (#1007)
+
+
+
+## [Version 3.1.34, Build 91] - 2025-11-16Z
+
+- Revert "committed version bump: 3.2.0 (90)"
+- committed version bump: 3.2.0 (90)
+- Make mjpeg handling work again (#1004)
+
+## [Version 3.1.33, Build 89] - 2025-11-06Z
+
+- Saving Preferences for Search (#1001)
+- Improve challenge handling - step 2 (#1000)
+
+## [Version 3.1.32, Build 88] - 2025-11-05Z
+
+- Challenge handling (#994)
+- Fixes regression where UI actions are not working (#998)
+
+## [Version 3.1.31, Build 87] - 2025-11-04Z
+
+- Suggestion to make Items Search Field optional in Settings (#995)
+- Upgrade to Kingfisher 8.6.1 for improvement on multiple requests on same URL (#996)
+
+
+
+## [Version 3.1.29, Build 85] - 2025-10-29Z
+
+- Use Logger also for RELEASE (#993)
+- Proposal - App Icon supporting Dark mode and iOS 26 Monochrome/Tinted modes (#989)
+- Clearer logging for debugging
+- Complete merge
+- Centralization for all static loggers (#992)
+
+## [Version 3.1.28, Build 84] - 2025-10-25Z
+
+- Handling of dark mode for external icons
+- Handling of authentication challenges (#988)
+- Address some warnings
+
+## [Version 3.1.27, Build 83] - 2025-10-21Z
+
+- Networktracker improvements (#981)
+- Bump crowdin/github-action from 2.11.0 to 2.12.0 (#986)
+
+## [Version 3.1.26, Build 82] - 2025-10-20Z
+
+- remove reported source of unexplicable crashes (#985)
+
+## [Version 3.1.25, Build 81] - 2025-10-19Z
+
+- Improve watch icons (#983)
+- improve notifications (#977)
+
+## [Version 3.1.24, Build 80] - 2025-10-12Z
+
+- Improve the handling for f7-icons on Apple Watch and implement static icon (#980)
+
+## [Version 3.1.23, Build 79] - 2025-10-10Z
+
+- Fixes a number of issues where background processing would crash (#976)
+
+## [Version 3.1.22, Build 78] - 2025-10-10Z
+
+- Improvement for icon rendering (#979)
+- Enable navigation until full webview load (#972)
+
+## [Version 3.1.21, Build 77] - 2025-10-02Z
+
+- don't run Swiftlint and swiftformat an github actions
+- Fix Fastfile for scheduled deploy to TestFligh.  When bump_type: '' hits the action, fastlane throws
+- Renaming AGENT.md to AGENTS.md to have it considered by GitHub Copilot as well
+- cachedWidgetId - Tracks which widget's content is currently cached (#974)
+- Speedup network tracker by early-exiting connection attempts (#967)
+
+## [Version 3.1.20, Build 73] - 2025-09-23Z
+
+- isolate ServerCertificateManager to main actor (#970)
+- Remove the deprecated use of WKProcessPool/processPool in OpenHABWebViewController (#965)
+- Bump rexml from 3.4.1 to 3.4.2 (#969)
+
+## [Version 3.1.19, Build 72] - 2025-09-22Z
+
+- Workaround for compiling in Archive/Release configuration (#968)
+- Migrate openHABCore to Swift 6 (#961)
+- Improve watch app (#962)
+- Prepare for Xcode 26 (#964)
+- Upgrade Xcode (#963)
+- Bump crowdin/github-action from 2.10.0 to 2.11.0 (#959)
+
 ## [Version 3.1.18, Build 71] - 2025-09-05Z
 
 - Fixes waiting for a connection when one already exists (#958)

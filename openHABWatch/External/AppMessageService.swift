@@ -19,21 +19,20 @@ import WatchKit
 class AppMessageService: NSObject, WCSessionDelegate {
     @MainActor static let singleton = AppMessageService()
 
-    private static let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "AppMessageService")
-
     private static let preferencesKey = "watchPreferences"
 
     @MainActor
     static func updateValuesFromApplicationContext(_ data: Data?) {
         guard let data else {
             let key = preferencesKey
-            logger.warning("⚠️ No \(key) data found in applicationContext.")
+            Logger.preferences.warning("⚠️ No \(key) data found in applicationContext.")
             return
         }
 
         do {
             // Decode the connection payload
             let prefs = try JSONDecoder().decode(WatchPreferences.self, from: data)
+            Logger.preferences.info("📱 Received WatchPreferences - sitemapForWatch: \(prefs.sitemapForWatch), defaultSitemap: \(prefs.defaultSitemap)")
             AppSettings.shared.localConnectionConfig = prefs.localConnectionConfiguration ?? .localDefault
             AppSettings.shared.remoteConnectionConfig = prefs.remoteConnectionConfiguration ?? .remoteDefault
             AppSettings.shared.sitemapName = prefs.defaultSitemap
@@ -44,9 +43,9 @@ class AppMessageService: NSObject, WCSessionDelegate {
             //                   if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
             //                       // do we need to do anything here?  We load from the shared keychain.
             //                   }
-            logger.info("✅ Applied WatchPreferences")
+            Logger.preferences.debug("✅ Applied WatchPreferences - sitemapForWatch now: \(AppSettings.shared.sitemapForWatch)")
         } catch {
-            logger.error("❌ Failed to decode WatchPreferences: \(error.localizedDescription)")
+            Logger.preferences.error("❌ Failed to decode WatchPreferences: \(error.localizedDescription)")
         }
     }
 
@@ -57,12 +56,12 @@ class AppMessageService: NSObject, WCSessionDelegate {
                 AppMessageService.updateValuesFromApplicationContext(data)
             }
         } errorHandler: { error in
-            AppMessageService.logger.error("Error sending message \(error.localizedDescription)")
+            Logger.preferences.error("Error sending message \(error.localizedDescription)")
         }
     }
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
-        AppMessageService.logger.info("activationDidCompleteWith activationState \(activationState.rawValue) error: \(String(describing: error))")
+        Logger.preferences.info("activationDidCompleteWith activationState \(activationState.rawValue) error: \(String(describing: error))")
         let data = session.receivedApplicationContext[AppMessageService.preferencesKey] as? Data
         DispatchQueue.main.async { () in
             AppMessageService.updateValuesFromApplicationContext(data)
@@ -71,7 +70,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     /** Called on the delegate of the receiver. Will be called on startup if an applicationContext is available. */
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        AppMessageService.logger.info("didReceiveApplicationContext \(applicationContext)")
+        Logger.preferences.info("didReceiveApplicationContext \(applicationContext)")
         let data = applicationContext[AppMessageService.preferencesKey] as? Data
         DispatchQueue.main.async { () in
             AppMessageService.updateValuesFromApplicationContext(data)
@@ -80,7 +79,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     /** Called on the delegate of the receiver. Will be called on startup if the user info finished transferring when the receiver was not running. */
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
-        AppMessageService.logger.info("didReceiveUserInfo \(userInfo)")
+        Logger.preferences.info("didReceiveUserInfo \(userInfo)")
         let data = userInfo[AppMessageService.preferencesKey] as? Data
         DispatchQueue.main.async { () in
             AppMessageService.updateValuesFromApplicationContext(data)
@@ -89,7 +88,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
-        AppMessageService.logger.info("didReceiveMessage some filtered messages: \(filteredMessages)")
+        Logger.preferences.info("didReceiveMessage some filtered messages: \(filteredMessages)")
         let data = message[AppMessageService.preferencesKey] as? Data
         DispatchQueue.main.async { () in
             AppMessageService.updateValuesFromApplicationContext(data)
@@ -98,7 +97,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Swift.Void) {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username", "defaultSitemap"].contains($0.key) }
-        AppMessageService.logger.info("didReceiveMessage some filtered messages: \(filteredMessages) with reply handler")
+        Logger.preferences.info("didReceiveMessage some filtered messages: \(filteredMessages) with reply handler")
         let data = message[AppMessageService.preferencesKey] as? Data
         DispatchQueue.main.async { () in
             AppMessageService.updateValuesFromApplicationContext(data)

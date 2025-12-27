@@ -49,8 +49,6 @@ public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible {
 }
 
 public struct Endpoint: Equatable {
-    static let logger = Logger(subsystem: "org.openhab.app", category: "EndPoint")
-
     let baseURL: String
     let path: String
     var queryItems: [URLQueryItem]
@@ -62,7 +60,7 @@ public extension Endpoint {
         components?.path = path
         components?.queryItems = queryItems
         let url = components?.url
-        Endpoint.logger.debug("URL: \(url?.absoluteString ?? "", privacy: .private)")
+//        Logger.endpoint.debug("URL: \(url?.absoluteString ?? "", privacy: .private)")
         return url
     }
 
@@ -135,9 +133,9 @@ public extension Endpoint {
     }
 
     // swiftlint:disable:next function_parameter_count
-    static func icon(rootUrl: String, version: Int, icon: String?, state: String?, iconType: IconType, iconColor: String, staticIcon: Bool? = nil) -> Endpoint {
+    static func icon(rootUrl: String, version: Int, icon: String?, state: String?, iconType: IconType, iconColor: String, staticIcon: Bool? = nil, widgetId: String? = nil) -> Endpoint? {
         guard let icon, !icon.isEmpty else {
-            return Endpoint(baseURL: "", path: "", queryItems: [])
+            return nil
         }
 
         guard version >= 2 else {
@@ -192,6 +190,9 @@ public extension Endpoint {
             if !iconColor.isEmpty, let colorString = UIColor(fromString: iconColor).toHex() {
                 queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
             }
+            if let widgetId {
+                queryItems.append(URLQueryItem(name: "widgetId", value: widgetId))
+            }
             return Endpoint(
                 baseURL: "https://api.iconify.design/",
                 path: "/\(set)/\(iconName).svg",
@@ -214,6 +215,10 @@ public extension Endpoint {
             URLQueryItem(name: "anyFormat", value: "true"),
             URLQueryItem(name: "iconset", value: set)
         ])
+
+        if let widgetId {
+            queryItems.append(URLQueryItem(name: "widgetId", value: widgetId))
+        }
 
         return Endpoint(
             baseURL: rootUrl,

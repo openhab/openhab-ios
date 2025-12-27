@@ -21,8 +21,6 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     @MainActor
     static let singleton = WatchMessageService()
 
-    private lazy var logger = Logger(subsystem: "org.openhab.app", category: "WatchMessageService")
-
     private var cachedWatchPreferences: [String: Data] = [:]
     private let lock = NSLock()
 
@@ -33,64 +31,76 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         guard message["request"] != nil else { return }
 
-        lock.lock()
-        let reply = cachedWatchPreferences
-        lock.unlock()
-
+        let reply = getCachedPreferences()
         replyHandler(reply) // ✅ Used synchronously — no concurrency violation
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        logger.info("Received message (no reply): \(message, privacy: .public)")
+        Logger.preferences.info("Received message (no reply): \(message, privacy: .public)")
     }
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
-        logger.info("WCSession activation completed. State: \(String(describing: activationState)), Error: \(String(describing: error))")
+        Logger.preferences.info("WCSession activation completed. State: \(String(describing: activationState)), Error: \(String(describing: error))")
     }
 
     func sessionDidBecomeInactive(_ session: WCSession) {
-        logger.info("WCSession became inactive.")
+        Logger.preferences.info("WCSession became inactive.")
     }
 
     func sessionDidDeactivate(_ session: WCSession) {
-        logger.info("WCSession deactivated.")
+        Logger.preferences.info("WCSession deactivated.")
+    }
+
+    // MARK: - Cache Management
+
+    private func getCachedPreferences() -> [String: Data] {
+        lock.lock()
+        defer { lock.unlock() }
+        return cachedWatchPreferences
+    }
+
+    private func updateCachedPreferences(_ context: [String: Data]) {
+        lock.lock()
+        defer { lock.unlock() }
+        cachedWatchPreferences = context
     }
 
     // MARK: - Sync Preferences
 
     @MainActor
-    public func subscribeToPreferences() {
-        preferencesSubscription = Preferences.$currentHomePreferences
+    func subscribeToPreferences() async {
+        preferencesSubscription = Preferences.shared.$currentHomePreferences
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { _ in } receiveValue: { homeSettings in
-                self.syncPreferencesToWatch(homeSettings)
+                Task { @MainActor in
+                    await self.syncPreferencesToWatch(homeSettings)
+                }
             }
     }
 
     @MainActor
-    public func syncPreferencesToWatch(_ homeSettings: HomePreferences = Preferences.currentHomePreferences) {
+    func syncPreferencesToWatch(_ homeSettings: HomePreferences? = nil) async {
         guard WCSession.default.activationState == .activated else {
-            logger.warning("WCSession not activated; skipping sync.")
+            Logger.preferences.warning("WCSession not activated; skipping sync.")
             return
         }
-
-        let prefs = WatchPreferences(fromPreferences: homeSettings)
+        let settings = homeSettings ?? Preferences.shared.currentHomePreferences
+        let prefs = WatchPreferences(fromPreferences: settings)
         let context = prefs.encodedWatchPreferences()
 
-        guard cachedWatchPreferences != context else {
-            // avoid update of update unchanged preferences
+        guard getCachedPreferences() != context else {
+            // avoid updating unchanged preferences
+            Logger.preferences.debug("⏭️ Preferences unchanged, skipping sync")
             return
         }
 
-        lock.lock()
-        cachedWatchPreferences = context
-        lock.unlock()
+        updateCachedPreferences(context)
 
         do {
             try WCSession.default.updateApplicationContext(context)
-            logger.debug("Successfully updated application context with WatchPreferences.")
+            Logger.preferences.debug("📤 Synced WatchPreferences to watch - sitemapForWatch: \(prefs.sitemapForWatch)")
         } catch {
-            logger.error("Failed to encode or update watch context: \(error.localizedDescription)")
+            Logger.preferences.error("Failed to encode or update watch context: \(error.localizedDescription)")
         }
     }
 }

@@ -14,8 +14,6 @@ import os.log
 import SwiftUI
 
 struct SliderRow: View {
-    let logger = Logger(subsystem: "org.openhab", category: "SliderRow")
-
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
     @State private var pendingValue: Double?
@@ -25,7 +23,7 @@ struct SliderRow: View {
                 pendingValue ?? widget.adjustedValue
             },
             set: { newValue in
-                logger.info("SliderRow new value = \(newValue)")
+                Logger.rowViews.info("SliderRow new value = \(newValue)")
                 pendingValue = newValue
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { // 500ms delay
                     if pendingValue == newValue { // Ensure no new updates came in
@@ -48,15 +46,6 @@ struct SliderRow: View {
 
             Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
                 .labelsHidden()
-                .focusable(true)
-                .digitalCrownRotation(
-                    valueBinding,
-                    from: widget.minValue,
-                    through: widget.maxValue,
-                    by: widget.step,
-                    sensitivity: .medium,
-                    isHapticFeedbackEnabled: true
-                )
         }
     }
 }

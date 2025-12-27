@@ -14,8 +14,6 @@ import os.log
 import UIKit
 
 class SliderUITableViewCell: GenericUITableViewCell {
-    let logger = Logger(subsystem: "org.openhab", category: "SliderUITableViewCell")
-
     private var step: Float = 1.0
 
     private var widgetValue: Double {
@@ -36,7 +34,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     // swiftlint:disable:next type_contents_order
-    override public func initialize() {
+    override func initialize() {
         selectionStyle = .none
         separatorInset = .zero
         if let widget {
@@ -106,7 +104,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     private func sliderDidChange(toValue value: Double) {
-        logger.info("Slider new value = \(value)")
+        Logger.widgets.info("Slider new value = \(value)")
         widget.sendCommand(value.valueText(step: Double(step)))
     }
 }

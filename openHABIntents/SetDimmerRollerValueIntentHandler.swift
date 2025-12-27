@@ -15,15 +15,13 @@ import OpenHABCore
 import os.log
 
 class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIntentHandling {
-    private let logger = Logger(subsystem: "org.openhab.app", category: "SetDimmerRollerValueIntent")
-
     func resolveHome(for intent: OpenHABSetDimmerRollerValueIntent) async -> OpenHABHomeResolutionResult {
-        logger.info("Resolving home for intent: \(intent)")
+        Logger.intentHandling.info("Resolving home for intent: \(intent)")
         return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent) async throws -> INObjectCollection<OpenHABHome> {
-        OpenHABIntentHelper.getHomeOptions()
+        await OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
@@ -39,7 +37,7 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
     }
 
     func handle(intent: OpenHABSetDimmerRollerValueIntent) async -> OpenHABSetDimmerRollerValueIntentResponse {
-        logger.info("SetDimmerRollerValueIntent for \(intent.item ?? "")")
+        Logger.intentHandling.info("SetDimmerRollerValueIntent for \(intent.item ?? "")")
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(
@@ -47,7 +45,7 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
             )
         }
 
-        guard let homeId = home.uuid, Preferences.storedHomes[homeId] != nil else {
+        guard let homeId = home.uuid, await Preferences.shared.storedHomes[homeId] != nil else {
             return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 

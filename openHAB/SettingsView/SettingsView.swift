@@ -18,6 +18,7 @@ struct SettingsView: View {
     @State var settingsDemomode = false
     @State var settingsIdleOff = true
     @State var settingsRealTimeSliders = true
+    @State var settingsShowSearchField = true
     @State var settingsSendCrashReports = false
     @State var settingsIconType: IconType = .svg
     @State var settingsSortSitemapsBy: SortSitemapsOrder = .label
@@ -33,8 +34,6 @@ struct SettingsView: View {
     @State var settingsSSECommandItem = ""
 
     @Environment(\.dismiss) private var dismiss
-
-    private let logger = Logger(subsystem: "org.openhab.app", category: "SettingsView")
 
     var body: some View {
         Form {
@@ -56,6 +55,7 @@ struct SettingsView: View {
 
             SitemapSettingsView(
                 settingsRealTimeSliders: $settingsRealTimeSliders,
+                settingsShowSearchField: $settingsShowSearchField,
                 settingsIconType: $settingsIconType,
                 settingsSortSitemapsBy: $settingsSortSitemapsBy,
                 settingsSitemapForWatch: $settingsSitemapForWatch,
@@ -105,41 +105,43 @@ struct SettingsView: View {
             }
 
             // Sort the sitemaps according to Settings selection.
-            switch SortSitemapsOrder(rawValue: Preferences.currentHomePreferences.sortSitemapsBy) ?? .label {
+            switch SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label {
             case .label: sitemaps.sort { $0.label < $1.label }
             case .name: sitemaps.sort { $0.name < $1.name }
             }
         } catch {
-            logger.error("\(error.localizedDescription)")
+            Logger.settingsView.error("\(error.localizedDescription)")
             sitemaps = []
         }
     }
 
     private func loadSettings() {
         #if !DEBUG
-        logger.debug("Loading Settings")
+        Logger.settingsView.debug("Loading Settings")
         #endif
-        settingsDemomode = Preferences.currentHomePreferences.demomode
-        settingsIdleOff = Preferences.idleOff
-        settingsRealTimeSliders = Preferences.currentHomePreferences.realTimeSliders
-        settingsSendCrashReports = Preferences.sendCrashReports
-        settingsIconType = IconType(rawValue: Preferences.currentHomePreferences.iconType) ?? .svg
-        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.currentHomePreferences.sortSitemapsBy) ?? .label
-        settingsDefaultMainUIPath = Preferences.currentHomePreferences.defaultMainUIPath
-        settingsAlwaysAllowWebRTC = Preferences.currentHomePreferences.alwaysAllowWebRTC
-        settingsSitemapForWatch = Preferences.currentHomePreferences.sitemapForWatch
-        settingsLocalConnectionConfiguration = Preferences.currentHomePreferences.localConnectionConfig
-        settingsRemoteConnectionConfiguration = Preferences.currentHomePreferences.remoteConnectionConfig
-        settingsHomeName = Preferences.currentHomePreferences.homeName
-        settingsSSECommandItem = Preferences.currentHomePreferences.sseCommandItem
+        settingsDemomode = Preferences.shared.currentHomePreferences.demomode
+        settingsIdleOff = Preferences.shared.idleOff
+        settingsRealTimeSliders = Preferences.shared.currentHomePreferences.realTimeSliders
+        settingsShowSearchField = Preferences.shared.applicationPreferences.showSearchField
+        settingsSendCrashReports = Preferences.shared.sendCrashReports
+        settingsIconType = IconType(rawValue: Preferences.shared.currentHomePreferences.iconType) ?? .svg
+        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label
+        settingsDefaultMainUIPath = Preferences.shared.currentHomePreferences.defaultMainUIPath
+        settingsAlwaysAllowWebRTC = Preferences.shared.currentHomePreferences.alwaysAllowWebRTC
+        settingsSitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
+        settingsLocalConnectionConfiguration = Preferences.shared.currentHomePreferences.localConnectionConfig
+        settingsRemoteConnectionConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
+        settingsHomeName = Preferences.shared.currentHomePreferences.homeName
+        settingsSSECommandItem = Preferences.shared.currentHomePreferences.sseCommandItem
     }
 
     func saveSettings() {
-        Preferences.modifyActiveHome { homePreferences in
+        Preferences.shared.modifyActiveHome { @MainActor homePreferences in
             homePreferences.demomode = settingsDemomode
             homePreferences.realTimeSliders = settingsRealTimeSliders
             homePreferences.iconType = settingsIconType.rawValue
             homePreferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
+            homePreferences.defaultMainUIPath = settingsDefaultMainUIPath
             homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
             homePreferences.sitemapForWatch = settingsSitemapForWatch
             homePreferences.sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
@@ -147,8 +149,12 @@ struct SettingsView: View {
             homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
             homePreferences.sseCommandItem = settingsSSECommandItem
         }
-        Preferences.idleOff = settingsIdleOff
-        Preferences.sendCrashReports = settingsSendCrashReports
+        Preferences.shared.idleOff = settingsIdleOff
+        Preferences.shared.sendCrashReports = settingsSendCrashReports
+
+        Preferences.shared.modifyApplicationPreferences { @MainActor applicationPreferences in
+            applicationPreferences.showSearchField = settingsShowSearchField
+        }
 
         // Apply global UI changes immediately (status bar visibility)
         UIApplication.shared.connectedScenes
@@ -173,6 +179,7 @@ extension UIApplication {
         @State var settingsDemomode = false
         @State var settingsIdleOff = true
         @State var settingsRealTimeSliders = true
+        @State var settingsShowSearchField = true
         @State var settingsSendCrashReports = false
         @State var settingsIconType: IconType = .svg
         @State var settingsSortSitemapsBy: SortSitemapsOrder = .label
@@ -212,6 +219,7 @@ extension UIApplication {
                     settingsDemomode: settingsDemomode,
                     settingsIdleOff: settingsIdleOff,
                     settingsRealTimeSliders: settingsRealTimeSliders,
+                    settingsShowSearchField: settingsShowSearchField,
                     settingsSendCrashReports: settingsSendCrashReports,
                     settingsIconType: settingsIconType,
                     settingsSortSitemapsBy: settingsSortSitemapsBy,

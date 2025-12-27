@@ -28,29 +28,31 @@ struct MainUISettingsView: View {
             }
 
             LabeledContent {
-                TextField(
-                    "/overview/",
-                    text: $settingsDefaultMainUIPath
-                )
-                .fixedSize()
-                Button {
-                    showUselastPathAlert = true
-                } label: {
-                    Image(systemSymbol: .plusCircle)
-                }
-                .confirmationDialog(
-                    "uselastpath_settings",
-                    isPresented: $showUselastPathAlert
-                ) {
-                    Button("Ok") {
-                        settingsDefaultMainUIPath = Preferences.currentWebViewPath
+                HStack {
+                    TextField(
+                        "/overview/",
+                        text: $settingsDefaultMainUIPath
+                    )
+                    .multilineTextAlignment(.trailing)
+                    Button {
+                        showUselastPathAlert = true
+                    } label: {
+                        Image(systemSymbol: .clear)
                     }
-                    Button(role: .cancel) {} label: {
-                        Text(LocalizedStringKey("cancel"))
+                    .confirmationDialog(
+                        "uselastpath_settings",
+                        isPresented: $showUselastPathAlert
+                    ) {
+                        Button("Ok") {
+                            settingsDefaultMainUIPath = Preferences.shared.currentWebViewPath
+                        }
+                        Button(role: .cancel) {} label: {
+                            Text(LocalizedStringKey("cancel"))
+                        }
+                        Button("cancel", role: .cancel) {}
+                    } message: {
+                        Text(LocalizedStringKey("uselastpath_settings"))
                     }
-                    Button("cancel", role: .cancel) {}
-                } message: {
-                    Text(LocalizedStringKey("uselastpath_settings"))
                 }
 
             } label: {

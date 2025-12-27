@@ -54,8 +54,8 @@ struct NotificationRow: View {
             iconColor: ""
         )
 
-        guard let url = endpoint.url, url.scheme != nil else {
-            Logger(subsystem: "org.openhab.app", category: "NotificationRow")
+        guard let url = endpoint?.url, url.scheme != nil else {
+            Logger.viewController
                 .warning("Invalid icon URL for icon: \(notification.icon ?? "nil", privacy: .public)")
             return nil
         }
@@ -117,8 +117,6 @@ struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: Observab
     @State var notifications: [OpenHABNotification] = []
     let loadNotifications: NotificationLoader
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "NotificationView")
-
     var body: some View {
         List(notifications, id: \.id) { notification in
             if let connection = networkTracker.activeConnection {
@@ -140,23 +138,21 @@ extension NotificationsView where Tracker == MainActorNetworkTracker {
         networkTracker = MainActorNetworkTracker.shared
         _notifications = State(initialValue: notifications)
         loadNotifications = {
-            let logger = Logger(subsystem: "org.openhab.app", category: "NotificationView")
-
             do {
-                guard let config = Preferences.getNotificationConnection() else {
-                    logger.warning("No openHAB configuration found.")
+                guard let config = Preferences.shared.getNotificationConnection() else {
+                    Logger.notificationService.warning("No openHAB configuration found.")
                     return []
                 }
 
                 guard let url = URL(string: config.url), url.scheme != nil else {
-                    logger.error("Invalid URL: \(config.url, privacy: .public)")
+                    Logger.notificationService.error("Invalid URL: \(config.url, privacy: .public)")
                     return []
                 }
 
-                let client = HTTPClient(configuration: config)
+                let client = HTTPClient(connectionConfiguration: config)
                 return try await client.notification(urlString: config.url)
             } catch {
-                logger.error("Failed to load notifications: \(error.localizedDescription, privacy: .public)")
+                Logger.notificationService.error("Failed to load notifications: \(error.localizedDescription, privacy: .public)")
                 return []
             }
         }

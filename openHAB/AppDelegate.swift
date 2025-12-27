@@ -26,8 +26,6 @@ import WatchConnectivity
 class AppDelegate: UIResponder, UIApplicationDelegate {
     static var appDelegate: AppDelegate!
 
-    private let logger = Logger(subsystem: "org.openhab", category: "AppDelegate")
-
     var window: UIWindow?
 
     private var crashlyticsSubscriber: AnyCancellable?
@@ -41,8 +39,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let watchMessageService = WatchMessageService.singleton
                 session.delegate = watchMessageService
                 session.activate()
-                logger.info("Paired watch \(session.isPaired), watch app installed \(session.isWatchAppInstalled)")
-                watchMessageService.subscribeToPreferences()
+                Logger.appDelegate.info("Paired watch \(session.isPaired), watch app installed \(session.isWatchAppInstalled)")
+                Task {
+                    await watchMessageService.subscribeToPreferences()
+                }
             }
         }
     }
@@ -53,28 +53,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        logger.info("didFinishLaunchingWithOptions started")
-
-        setupFirebase()
+        Logger.appDelegate.info("didFinishLaunchingWithOptions started")
 
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
         UserDefaults.standard.register(defaults: appDefaults)
 
         Preferences.migratePreferences()
 
+        setupFirebase()
+
         UNUserNotificationCenter.current().delegate = notificationDelegate
 
         registerForPushNotifications()
-        logger.info("uniq id: \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
-        logger.info("device name: \(UIDevice.current.name)")
+        Logger.appDelegate.info("uniq id: \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
+        Logger.appDelegate.info("device name: \(UIDevice.current.name)")
 
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.playback, mode: .default, options: [])
         } catch {
-            logger.info("Setting category to AVAudioSessionCategoryPlayback failed.")
+            Logger.appDelegate.info("Setting category to AVAudioSessionCategoryPlayback failed.")
         }
-        logger.info("didFinishLaunchingWithOptions ended")
+        Logger.appDelegate.info("didFinishLaunchingWithOptions ended")
 
         activateWatchConnectivity()
 
@@ -83,20 +83,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         /// load and start the screensaver
         if let keyWindow = UIApplication.shared.firstKeyWindow {
             var config = ScreenSaverConfiguration()
-            config.isEnabled = Preferences.screensaverEnabled
-            config.showsTime = Preferences.screensaverShowsTime
-            config.showsDate = Preferences.screensaverShowsDate
-            config.idleInterval = Preferences.screensaverIdleInterval
-            config.movementInterval = Preferences.screensaverMovementInterval
-            config.fontName = Preferences.screensaverFontName.isEmpty ? nil : Preferences.screensaverFontName
-            config.timeFontSizeRatio = CGFloat(Preferences.screensaverTimeFontRatio)
-            config.dateFontRelativeSize = CGFloat(Preferences.screensaverDateFontRatio)
-            config.enablesAutoDimming = Preferences.screensaverEnableDimming
-            config.dimLevel = CGFloat(Preferences.screensaverDimLevel)
-            config.wakeBrightnessLevel = CGFloat(Preferences.screensaverWakeBrightness)
-            config.showsSeconds = Preferences.screensaverShowsSeconds
-            config.uses24HourTime = Preferences.screensaverUse24Hour
-            config.restoresBrightness = Preferences.screensaverRestoreBrightness
+            config.isEnabled = Preferences.shared.screensaverEnabled
+            config.showsTime = Preferences.shared.screensaverShowsTime
+            config.showsDate = Preferences.shared.screensaverShowsDate
+            config.idleInterval = Preferences.shared.screensaverIdleInterval
+            config.movementInterval = Preferences.shared.screensaverMovementInterval
+            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
+            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
+            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
+            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
+            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
+            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
+            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
+            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
+            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
 
             ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
         }
@@ -108,16 +108,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func configureImageCoders() {
         let svgCoder = SDImageSVGCoder.shared
         SDImageCodersManager.shared.addCoder(svgCoder)
-        logger.info("SDImageSVGCoder registered")
+        Logger.appDelegate.info("SDImageSVGCoder registered")
     }
 
     private func setupFirebase() {
         // init Firebase crash reporting
         FirebaseApp.configure()
         FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
-        crashlyticsSubscriber = Preferences.$sendCrashReports.sink { [weak self] in
+        crashlyticsSubscriber = Preferences.shared.$sendCrashReports.sink {
             Crashlytics.crashlytics().setCrashlyticsCollectionEnabled($0)
-            self?.logger.debug("setCrashlyticsCollectionEnabled to \($0)")
+            Logger.appDelegate.debug("setCrashlyticsCollectionEnabled to \($0)")
         }
         Messaging.messaging().delegate = self
     }
@@ -126,7 +126,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if WCSession.isSupported() {
             session = WCSession.default
         } else {
-            logger.debug("WCSession is not supported - For instance on iPad")
+            Logger.appDelegate.debug("WCSession is not supported - For instance on iPad")
         }
     }
 
@@ -139,10 +139,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #endif
 
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-            self.logger.info("Permission granted: \(granted ? "YES" : "NO")")
+            Logger.appDelegate.info("Permission granted: \(granted ? "YES" : "NO")")
             guard granted else { return }
             UNUserNotificationCenter.current().getNotificationSettings { settings in
-                self.logger.info("Notification settings: \(settings)")
+                Logger.appDelegate.info("Notification settings: \(settings)")
 
                 guard settings.authorizationStatus == .authorized else { return }
                 Task { @MainActor in
@@ -155,13 +155,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
         // TODO: Pass this parameters to openHABViewController somehow to open specified sitemap/page and send specified command
         // Probably need to do this in a way compatible to Android app's URL
-        logger.info("Calling Application Bundle ID: \(options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String ?? "")")
-        logger.info("URL: \(url.absoluteString)")
-        logger.info("URL scheme: \(url.scheme ?? "")")
-        logger.info("URL query: \(url.query ?? "")")
+        Logger.appDelegate.info("Calling Application Bundle ID: \(options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String ?? "")")
+        Logger.appDelegate.info("URL: \(url.absoluteString)")
+        Logger.appDelegate.info("URL scheme: \(url.scheme ?? "")")
+        Logger.appDelegate.info("URL query: \(url.query ?? "")")
 
         if url.isFileURL {
-            logger.info("Loading Certificate")
+            Logger.appDelegate.info("Loading Certificate")
             let clientCertificateManager = CertificateManagers.clientCertificateManager
             Task { @MainActor in
                 await clientCertificateManager.startImportClientCertificate(url: url)
@@ -181,19 +181,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
-        logger.error("Failed to get token for notifications: \(error.localizedDescription)")
+        Logger.appDelegate.error("Failed to get token for notifications: \(error.localizedDescription)")
     }
 
     @MainActor
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) async -> UIBackgroundFetchResult {
-        logger.info("didReceiveRemoteNotification \(String(describing: userInfo), privacy: .public)")
+        Logger.appDelegate.info("didReceiveRemoteNotification \(String(describing: userInfo), privacy: .public)")
 
         guard let type = userInfo["type"] as? String, type == "hideNotification" else {
             return .noData
         }
 
         if let refid = userInfo["reference-id"] as? String {
-            logger.info("Removing notification with id \(refid, privacy: .public)")
+            Logger.appDelegate.info("Removing notification with id \(refid, privacy: .public)")
             UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [refid])
         }
 
@@ -207,7 +207,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }.value
 
             if !identifiers.isEmpty {
-                logger.info("Removing notifications with tag \(tag, privacy: .public), identifiers: \(String(describing: identifiers), privacy: .public)")
+                Logger.appDelegate.info("Removing notifications with tag \(tag, privacy: .public), identifiers: \(String(describing: identifiers), privacy: .public)")
                 UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: identifiers)
             }
         }
@@ -240,20 +240,20 @@ extension AppDelegate {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
         if let keyWindow = UIApplication.shared.firstKeyWindow {
             var config = ScreenSaverConfiguration()
-            config.isEnabled = Preferences.screensaverEnabled
-            config.showsTime = Preferences.screensaverShowsTime
-            config.showsDate = Preferences.screensaverShowsDate
-            config.idleInterval = Preferences.screensaverIdleInterval
-            config.movementInterval = Preferences.screensaverMovementInterval
-            config.fontName = Preferences.screensaverFontName.isEmpty ? nil : Preferences.screensaverFontName
-            config.timeFontSizeRatio = CGFloat(Preferences.screensaverTimeFontRatio)
-            config.dateFontRelativeSize = CGFloat(Preferences.screensaverDateFontRatio)
-            config.enablesAutoDimming = Preferences.screensaverEnableDimming
-            config.dimLevel = CGFloat(Preferences.screensaverDimLevel)
-            config.wakeBrightnessLevel = CGFloat(Preferences.screensaverWakeBrightness)
-            config.showsSeconds = Preferences.screensaverShowsSeconds
-            config.uses24HourTime = Preferences.screensaverUse24Hour
-            config.restoresBrightness = Preferences.screensaverRestoreBrightness
+            config.isEnabled = Preferences.shared.screensaverEnabled
+            config.showsTime = Preferences.shared.screensaverShowsTime
+            config.showsDate = Preferences.shared.screensaverShowsDate
+            config.idleInterval = Preferences.shared.screensaverIdleInterval
+            config.movementInterval = Preferences.shared.screensaverMovementInterval
+            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
+            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
+            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
+            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
+            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
+            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
+            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
+            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
+            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
 
             ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
         }
@@ -271,7 +271,7 @@ extension AppDelegate: MessagingDelegate {
             let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "UnknownDeviceID"
             let deviceName = UIDevice.current.name
 
-            logger.info("My FCM token is: \(safeToken, privacy: .private)")
+            Logger.appDelegate.info("My FCM token is: \(safeToken, privacy: .private)")
 
             let dataDict: [String: Any] = [
                 "deviceToken": safeToken,

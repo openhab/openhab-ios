@@ -60,8 +60,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         case text, number, date, time, datetime, unknown
     }
 
-    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABWidget")
-
     public var id = ""
 
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
@@ -198,7 +196,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
     public func sendItemUpdate(state: NumberState?) {
         guard let item, let state else {
-            logger.info("ItemUpdate for Item or State = nil")
+            Logger.restAPI.info("ItemUpdate for Item or State = nil")
             return
         }
         if item.isOfTypeOrGroupType(.numberWithDimension) {
@@ -216,11 +214,11 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
     public func sendCommand(_ command: String?) {
         guard let item else {
-            logger.info("Command for Item = nil")
+            Logger.restAPI.info("Command for Item = nil")
             return
         }
         guard let sendCommand else {
-            logger.info("sendCommand closure not set")
+            Logger.restAPI.info("sendCommand closure not set")
             return
         }
         sendCommand(item, command)
@@ -348,86 +346,8 @@ public extension OpenHABWidget {
     }
 }
 
-public extension OpenHABWidget {
-    struct CodingData: Decodable {
-        let widgetId: String
-        let label: String
-        let type: WidgetType
-        let icon: String
-        let url: String?
-        let period: String?
-        let minValue: Double?
-        let maxValue: Double?
-        let step: Double?
-        let refresh: Int?
-        let height: Double?
-        let isLeaf: Bool?
-        let iconcolor: String?
-        let labelcolor: String?
-        let valuecolor: String?
-        let service: String?
-        let state: String?
-        let text: String?
-        let legend: Bool?
-        let inputHint: InputHint?
-        let encoding: String?
-        let groupType: String?
-        let item: OpenHABItem.CodingData?
-        let linkedPage: OpenHABPage.CodingData?
-        let mappings: [OpenHABWidgetMapping]
-        let widgets: [OpenHABWidget.CodingData]
-        let visibility: Bool?
-        let switchSupport: Bool?
-        let forceAsItem: Bool?
-        let unit: String?
-        let pattern: String?
-        let staticIcon: Bool?
-        let labelSource: String?
-    }
-}
-
-public extension OpenHABWidget.CodingData {
-    var openHABWidget: OpenHABWidget {
-        let mappedWidgets = widgets.map(\.openHABWidget)
-        return OpenHABWidget(
-            widgetId: widgetId,
-            label: label,
-            icon: icon,
-            type: type,
-            url: url,
-            period: period,
-            minValue: minValue,
-            maxValue: maxValue,
-            step: step,
-            refresh: refresh,
-            height: height,
-            isLeaf: isLeaf,
-            iconColor: iconcolor,
-            labelColor: labelcolor,
-            valueColor: valuecolor,
-            service: service,
-            state: state,
-            text: text,
-            legend: legend,
-            inputHint: inputHint,
-            encoding: encoding,
-            item: item?.openHABItem,
-            linkedPage: linkedPage?.openHABSitemapPage,
-            mappings: mappings,
-            widgets: mappedWidgets,
-            visibility: visibility,
-            switchSupport: switchSupport,
-            forceAsItem: forceAsItem,
-            unit: unit,
-            pattern: pattern,
-            staticIcon: staticIcon,
-            labelSource: labelSource
-        )
-    }
-}
-
 //  Recursive parsing of nested widget structure
-extension [OpenHABWidget] {
+public extension [OpenHABWidget] {
     mutating func flatten(_ widgets: [Element]) {
         for widget in widgets {
             append(widget)

@@ -35,6 +35,9 @@ protocol OpenAPIServiceProtocol: AnyObject, Sendable {
     func sendItemCommand(itemname: String, command: String) async throws
     func updateItemState(itemname: String, with: String) async throws
     func getItems() async throws -> [OpenHABItem]
+    func getItems(
+        query: Operations.getItems.Input.Query
+    ) async throws -> [OpenHABItem]
     func getItemByName(id: String) async throws -> OpenHABItem?
     func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) async throws -> OpenHABPage?
     func runNow(ruleUID: String, payload: [String: any Sendable]) async throws
@@ -48,8 +51,6 @@ public actor OpenAPIService {
     private var url: URL?
     private var longPolling = false
     private var connectionConfiguration: ConnectionConfiguration
-
-    private let logger = Logger(subsystem: "org.openhab.app", category: "OpenAPIService")
 
     /// Creates a new client for OpenAPIService.
     public init(client: any APIProtocol) {
@@ -121,7 +122,7 @@ public extension OpenAPIService {
         // swiftformat:disable:next redundantSelf
         guard let url else { throw OpenAPIServiceError.noRootURL }
 
-        logger.log("Trying to getSitemaps for : \(url.debugDescription)")
+        Logger.openAPIService.log("Trying to getSitemaps for : \(url.debugDescription)")
         let response = try await client.getSitemaps(.init())
         switch response {
         case let .ok(okresponse):
@@ -188,29 +189,67 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
+    // Will need swift 6.0 SE-0421 and iOS 18 to return an opaque sequence without the type eraser AnyAsyncSequence<Element>
+//    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> some AsyncSequence<OpenHABSitemapWidgetEvent, any Error> {
+//
+//            let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
+//            let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: sitemap)
+//            let decodedSequence = try await client.getSitemapEvents_1(path: path, query: query)
+//                .ok.body.text_event_hyphen_stream
+//                .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
+//            return decodedSequence.compactMap { OpenHABSitemapWidgetEvent($0.data) }
+//        }
+    struct AnyAsyncSequence<Element>: AsyncSequence {
+        public struct Iterator: AsyncIteratorProtocol {
+            private var _next: () async throws -> Element?
+            init<S: AsyncSequence>(_ base: S) where S.Element == Element {
+                var it = base.makeAsyncIterator()
+                _next = { try await it.next() }
+            }
+
+            public mutating func next() async throws -> Element? { try await _next() }
+        }
+
+        public let _make: () -> Iterator
+        init<S: AsyncSequence>(_ base: S) where S.Element == Element {
+            _make = { Iterator(base) }
+        }
+
+        public func makeAsyncIterator() -> Iterator { _make() }
+    }
+
     // Returns subscription id or nil
     func openHABcreateSubscription() async throws -> String? {
-        logger.info("Creating subscription")
+        Logger.openAPIService.info("Creating subscription")
         let result = try await client.createSitemapEventSubscription()
         guard let urlString = try result.ok.body.json.context?.headers?.Location?.first else { return nil }
         return URL(string: urlString)?.lastPathComponent
     }
 
-    // Will need swift 6.0 SE-0421 to return an opaque sequence
-    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> AsyncCompactMapSequence<AsyncThrowingMapSequence<ServerSentEventsDeserializationSequence<ServerSentEventsLineDeserializationSequence<HTTPBody>>, ServerSentEventWithJSONData<Components.Schemas.SitemapWidgetEvent>>, OpenHABSitemapWidgetEvent> {
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String)
+        async throws -> AnyAsyncSequence<OpenHABSitemapWidgetEvent> {
         let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
         let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: sitemap)
-        let decodedSequence = try await client.getSitemapEvents_1(path: path, query: query)
+
+        let seq = try await client.getSitemapEvents_1(path: path, query: query)
             .ok.body.text_event_hyphen_stream
             .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
-        return decodedSequence.compactMap { OpenHABSitemapWidgetEvent($0.data) }
+            .compactMap { OpenHABSitemapWidgetEvent($0.data) }
+
+        return AnyAsyncSequence(seq)
     }
 
-    func openHABEvents(topics: String? = nil) async throws -> AsyncThrowingMapSequence<ServerSentEventsDeserializationSequence<ServerSentEventsLineDeserializationSequence<HTTPBody>>, ServerSentEventWithJSONData<OpenHABEvent>> {
-        let query: Operations.getEvents.Input.Query = topics == nil ? .init() : Operations.getEvents.Input.Query(topics: topics)
-        return try await client.getEvents(query: query)
+    func openHABEvents(topics: String? = nil)
+        async throws -> AnyAsyncSequence<OpenHABEvent> {
+        let query: Operations.getEvents.Input.Query =
+            (topics == nil) ? .init() : .init(topics: topics)
+
+        let seq = try await client.getEvents(query: query)
             .ok.body.text_event_hyphen_stream
             .asDecodedServerSentEventsWithJSONData(of: OpenHABEvent.self)
+            .compactMap(\.data)
+
+        return AnyAsyncSequence(seq)
     }
 }
 
@@ -241,7 +280,7 @@ public extension OpenAPIService {
     func pollDataForPage(sitemapname: String, pageId: String = "", longPolling: Bool) async throws -> OpenHABPage? {
         var headers = Operations.pollDataForPage.Input.Headers()
         if longPolling {
-            logger.info("Setting header X-Atmosphere-Transport to long-polling")
+            Logger.openAPIService.info("Setting header X-Atmosphere-Transport to long-polling")
             headers.X_hyphen_Atmosphere_hyphen_Transport = "long-polling"
         }
         let path = if pageId.isEmpty {
@@ -265,10 +304,16 @@ public extension OpenAPIService {
 
 // Array of items
 public extension OpenAPIService {
-    func getItems() async throws -> [OpenHABItem] {
-        try await client.getItems()
+    func getItems(
+        query: Operations.getItems.Input.Query
+    ) async throws -> [OpenHABItem] {
+        try await client.getItems(query: query)
             .ok.body.json
             .compactMap(OpenHABItem.init)
+    }
+
+    func getItems() async throws -> [OpenHABItem] {
+        try await getItems(query: .init())
     }
 }
 

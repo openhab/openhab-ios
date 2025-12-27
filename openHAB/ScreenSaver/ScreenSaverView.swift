@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Combine
+import OpenHABCore
 import os.log
 import SwiftUI
 
@@ -17,8 +18,6 @@ struct ScreenSaverView: View {
     // Constants for text dimension estimation
     private static let timeTextWidthMultiplier: CGFloat = 4.0
     private static let dateTextHeightMultiplier: CGFloat = 1.4
-
-    private let logger = Logger(subsystem: "org.openhab", category: "ScreenSaverView")
 
     let configuration: ScreenSaverConfiguration
 
@@ -131,7 +130,7 @@ struct ScreenSaverView: View {
             if isFontAvailable(fontName) {
                 return .custom(fontName, size: fontSize)
             } else {
-                logger.warning("Custom font '\(fontName)' not found. Falling back to system font.")
+                Logger.screenSaver.warning("Custom font '\(fontName)' not found. Falling back to system font.")
                 return .system(size: fontSize, weight: .thin)
             }
         } else {

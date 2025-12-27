@@ -15,15 +15,13 @@ import OpenHABCore
 import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
-    private let logger = Logger(subsystem: "org.openhab.app", category: "GetItemStateIntent")
-
     func resolveHome(for intent: OpenHABGetItemStateIntent) async -> OpenHABHomeResolutionResult {
-        logger.info("Resolving home for intent: \(intent)")
+        Logger.intentHandling.info("Resolving home for intent: \(intent)")
         return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABGetItemStateIntent) async throws -> INObjectCollection<OpenHABHome> {
-        OpenHABIntentHelper.getHomeOptions()
+        await OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
@@ -39,7 +37,7 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     }
 
     func handle(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
-        logger.info("GetItemStateIntent for \(intent.item ?? "")")
+        Logger.intentHandling.info("GetItemStateIntent for \(intent.item ?? "")")
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(
@@ -47,19 +45,19 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
             )
         }
 
-        guard let homeId = home.uuid, Preferences.storedHomes[homeId] != nil else {
+        guard let homeId = home.uuid, await Preferences.shared.storedHomes[homeId] != nil else {
             return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 
-        let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId)
+        let item = await OpenHABItemCache.instance.getItemUncached(name: itemName, home: homeId)
 
-        guard let items, items.count == 1 else {
+        guard let item else {
             return .failureInvalidItem(itemName)
         }
 
         return .success(
             item: itemName,
-            state: items[0].state ?? NSLocalizedString("unknownState", comment: "unknown item state")
+            state: item.state ?? NSLocalizedString("unknownState", comment: "unknown item state")
         )
     }
 }

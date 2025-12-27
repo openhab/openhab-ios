@@ -24,11 +24,11 @@ class ButtonTableRowController: NSObject {
         switchOpenHabItem(for: item, command: command)
     }
 
-    public func setInterfaceController(interfaceController: InterfaceController) {
+    func setInterfaceController(interfaceController: InterfaceController) {
         self.interfaceController = interfaceController
     }
 
-    public func setItem(item: Item) {
+    func setItem(item: Item) {
         self.item = item
         buttonSwitch.setTitle(item.label)
         buttonSwitch.setOn(item.state == "ON")

@@ -16,18 +16,22 @@ import SwiftUI
 
 struct SitemapSettingsView: View {
     @Binding var settingsRealTimeSliders: Bool
+    @Binding var settingsShowSearchField: Bool
     @Binding var settingsIconType: IconType
     @Binding var settingsSortSitemapsBy: SortSitemapsOrder
     @Binding var settingsSitemapForWatch: String
     @Binding var sitemaps: [OpenHABSitemap]
 
     @State private var showingCacheAlert = false
-    private let logger = Logger(subsystem: "org.openhab.app", category: "SitemapSettingsView")
 
     var body: some View {
         Section(header: Text(LocalizedStringKey("sitemap_settings"))) {
             Toggle(isOn: $settingsRealTimeSliders) {
                 Text("Real-time Sliders")
+            }
+
+            Toggle(isOn: $settingsShowSearchField) {
+                Text("Show Search Field")
             }
 
             Button {
@@ -72,7 +76,7 @@ struct SitemapSettingsView: View {
 
     func clearWebsiteCache() {
         #if !DEBUG
-        logger.debug("Clearing image cache")
+        Logger.settingsView.debug("Clearing image cache")
         #endif
         KingfisherManager.shared.cache.clearMemoryCache()
         KingfisherManager.shared.cache.clearDiskCache()
@@ -83,6 +87,7 @@ struct SitemapSettingsView: View {
 #Preview {
     struct PreviewWrapper: View {
         @State var realTimeSliders = true
+        @State var showSearchField = true
         @State var iconType: IconType = .svg
         @State var sortSitemapsBy: SortSitemapsOrder = .label
         @State var sitemapForWatch = "Home"
@@ -107,6 +112,7 @@ struct SitemapSettingsView: View {
                 Form {
                     SitemapSettingsView(
                         settingsRealTimeSliders: $realTimeSliders,
+                        settingsShowSearchField: $showSearchField,
                         settingsIconType: $iconType,
                         settingsSortSitemapsBy: $sortSitemapsBy,
                         settingsSitemapForWatch: $sitemapForWatch,

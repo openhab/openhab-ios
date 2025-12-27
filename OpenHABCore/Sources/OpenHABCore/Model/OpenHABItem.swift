@@ -31,8 +31,6 @@ public struct OpenHABItem: Sendable {
         case undetermined = "" // Relevant only for SitemapWidgetEvent
     }
 
-    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABItem")
-
     public var type: ItemType?
     public var groupType: ItemType?
     public var name = ""
@@ -97,7 +95,7 @@ public extension OpenHABItem {
                 let hue = CGFloat(state: values[0], divisor: 360)
                 let saturation = CGFloat(state: values[1], divisor: 100)
                 let brightness = CGFloat(state: values[2], divisor: 100)
-                logger.info("hue saturation brightness: \(hue) \(saturation) \(brightness)")
+                Logger.restAPI.info("hue saturation brightness: \(hue) \(saturation) \(brightness)")
                 return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
             } else {
                 return .black
@@ -123,30 +121,6 @@ public extension OpenHABItem {
             }
         }
         return nil
-    }
-}
-
-public extension OpenHABItem {
-    struct CodingData: Decodable {
-        let type: String?
-        let groupType: String?
-        let name: String
-        let link: String?
-        let state: String?
-        let label: String?
-        let stateDescription: OpenHABStateDescription.CodingData?
-        let commandDescription: OpenHABCommandDescription.CodingData?
-        let members: [OpenHABItem.CodingData]?
-        let category: String?
-        let options: [OpenHABOptions]?
-    }
-}
-
-public extension OpenHABItem.CodingData {
-    var openHABItem: OpenHABItem {
-        let mappedMembers = members?.map(\.openHABItem) ?? []
-        // swiftlint:disable:next line_length
-        return OpenHABItem(name: name, type: type ?? "", state: state, link: link ?? "", label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, commandDescription: commandDescription?.openHABCommandDescription, members: mappedMembers, category: category, options: options)
     }
 }
 

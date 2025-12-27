@@ -17,8 +17,6 @@ import SafariServices
 import SFSafeSymbols
 import SwiftUI
 
-private let logger = Logger(subsystem: "org.openhab.app", category: "DrawerView")
-
 enum DrawerViewError: Error, CustomDebugStringConvertible {
     case noRootURL
 
@@ -139,8 +137,8 @@ struct DrawerView: View {
     var systemSection: some View {
         Section(header: Text("System")) {
             systemMenuEntry(image: .gear, text: "settings", goTo: .settings)
-            if Preferences.getNotificationConnection() != nil,
-               !Preferences.currentHomePreferences.demomode {
+            if Preferences.shared.getNotificationConnection() != nil,
+               !Preferences.shared.currentHomePreferences.demomode {
                 systemMenuEntry(image: .bell, text: "notifications", goTo: .notifications)
             }
             systemMenuEntry(image: .house, text: "Manage Homes", goTo: .homeSelection)
@@ -151,8 +149,8 @@ struct DrawerView: View {
         VStack {
             List {
                 mainSection
-                tilesSection
                 sitemapsSection
+                tilesSection
                 systemSection
             }
             .listStyle(.inset)
@@ -165,7 +163,7 @@ struct DrawerView: View {
         .task {
             let activeConnection = networkTracker.activeConnection
             await updateSitemapsAndUITiles(activeConnection: activeConnection)
-            sitemapForWatch = Preferences.currentHomePreferences.sitemapForWatch
+            sitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
         }
         .onReceive(networkTracker.$activeConnection) { activeConnection in
             Task {
@@ -229,7 +227,7 @@ struct DrawerView: View {
     }
 
     func toggleWatchSitemap(_ sitemap: OpenHABSitemap) {
-        Preferences.modifyActiveHome { prefs in
+        Preferences.shared.modifyActiveHome { prefs in
             if sitemap.name == sitemapForWatch {
                 sitemapForWatch = nil
                 prefs.sitemapForWatch = ""
@@ -253,8 +251,8 @@ struct DrawerView: View {
                 if sitemaps.last?.name == "_default", sitemaps.count > 1 {
                     sitemaps = Array(sitemaps.dropLast())
                 }
-
-                switch SortSitemapsOrder(rawValue: Preferences.currentHomePreferences.sortSitemapsBy) ?? .label {
+                let sortSitemapsBy = Preferences.shared.currentHomePreferences.sortSitemapsBy
+                switch SortSitemapsOrder(rawValue: sortSitemapsBy) ?? .label {
                 case .label:
                     sitemaps.sort { $0.label < $1.label }
                 case .name:
@@ -262,20 +260,20 @@ struct DrawerView: View {
                 }
 
             } catch {
-                logger.error("Failed to fetch sitemaps: \(error.localizedDescription)")
+                Logger.drawerView.error("Failed to fetch sitemaps: \(error.localizedDescription)")
                 sitemaps = []
             }
 
             do {
                 uiTiles = try await openAPIService.getUITiles()
-                logger.info("Fetched UI tiles successfully")
+                Logger.drawerView.info("Fetched UI tiles successfully")
             } catch {
-                logger.error("Failed to fetch UI tiles: \(error.localizedDescription)")
+                Logger.drawerView.error("Failed to fetch UI tiles: \(error.localizedDescription)")
                 uiTiles = []
             }
 
         } catch {
-            logger.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
+            Logger.drawerView.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
             sitemaps = []
             uiTiles = []
         }

@@ -15,15 +15,13 @@ import os.log
 import UIKit
 
 class ColorPickerViewController: DefaultColorPickerViewController {
-    private let logger = Logger(subsystem: "org.openhab", category: "ColorPickerViewController")
-
     var widget: OpenHABWidget?
 
     /// Throttle engine
     private var throttler: Throttler?
 
     /// Throttling interval
-    public var throttlingInterval: TimeInterval? = 0 {
+    var throttlingInterval: TimeInterval? = 0 {
         didSet {
             guard let interval = throttlingInterval else {
                 throttler = nil
@@ -34,12 +32,12 @@ class ColorPickerViewController: DefaultColorPickerViewController {
     }
 
     required init?(coder: NSCoder) {
-        logger.info("ColorPickerViewController initWithCoder")
+        Logger.widgets.info("ColorPickerViewController initWithCoder")
         super.init(coder: coder)
     }
 
     override func viewDidLoad() {
-        logger.info("ColorPickerViewController viewDidLoad")
+        Logger.widgets.info("ColorPickerViewController viewDidLoad")
 
         if let color = widget?.item?.stateAsUIColor() {
             selectedColor = color
@@ -50,7 +48,7 @@ class ColorPickerViewController: DefaultColorPickerViewController {
         if #available(iOS 13.0, *) {
             // if nothing is set DefaultColorPickerViewController will fall back to .white
             // if we set this manually DefaultColorPickerViewController will go with that
-            self.view.backgroundColor = .ohSystemBackground
+            view.backgroundColor = .ohSystemBackground
         } else {
             // do nothing - DefaultColorPickerViewController will handle this
         }
@@ -68,7 +66,7 @@ class ColorPickerViewController: DefaultColorPickerViewController {
         saturation *= 100
         brightness *= 100
 
-        logger.info("Color changed to HSB(\(hue), \(saturation), \(brightness)).")
+        Logger.widgets.info("Color changed to HSB(\(hue), \(saturation), \(brightness)).")
 
         widget?.sendCommand("\(hue),\(saturation),\(brightness)")
     }

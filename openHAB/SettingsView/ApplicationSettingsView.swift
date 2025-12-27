@@ -18,7 +18,6 @@ struct ApplicationSettingsView: View {
     @Binding var settingsIdleOff: Bool
     @Binding var settingsSSECommandItem: String
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "ApplicationSettingsView")
     @State private var selectedItemName: String?
 
     var body: some View {
@@ -30,12 +29,16 @@ struct ApplicationSettingsView: View {
             }
 
             Toggle("Hide Status Bar", isOn: Binding(
-                get: { Preferences.hideStatusBar },
-                set: { Preferences.hideStatusBar = $0; UIApplication.shared.keyWindowActiveScene?.rootViewController?.setNeedsStatusBarAppearanceUpdate() }
+                get: { Preferences.shared.hideStatusBar },
+                set: { Preferences.shared.hideStatusBar = $0; UIApplication.shared.keyWindowActiveScene?.rootViewController?.setNeedsStatusBarAppearanceUpdate() }
             ))
 
             NavigationLink("Client Certificates") {
                 ClientCertificatesView()
+            }
+
+            NavigationLink("Accepted Server Certificates") {
+                ServerCertificatesView()
             }
 
             NavigationLink {

@@ -21,16 +21,14 @@ struct DebugSettingsView: View {
     @State private var hasBeenLoaded = false
     @State var showCrashReportingAlert = false
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "DebugSettingsView")
-
     var body: some View {
         Toggle("Crash Reporting", isOn: $settingsSendCrashReports)
-            .task {
-                settingsSendCrashReports = Preferences.sendCrashReports
+            .task { @MainActor in
+                updateSettingsSendCrashReports(Preferences.shared.sendCrashReports)
             }
             .onChange(of: settingsSendCrashReports) { newValue in
                 #if !DEBUG
-                logger.debug("Detected change on settingsSendCrashReports")
+                Logger.settingsView.debug("Detected change on settingsSendCrashReports")
                 #endif
                 if newValue, hasBeenLoaded {
                     showCrashReportingAlert = true
@@ -69,6 +67,10 @@ struct DebugSettingsView: View {
     func presentPrivacyPolicy() {
         let vc = SFSafariViewController(url: .privacyPolicy)
         UIApplication.shared.firstKeyWindow?.rootViewController?.present(vc, animated: true)
+    }
+
+    private func updateSettingsSendCrashReports(_ send: Bool) {
+        settingsSendCrashReports = send
     }
 }
 

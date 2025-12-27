@@ -14,8 +14,6 @@ import os.log
 import SwiftUI
 
 struct SwitchRow: View {
-    private let logger = Logger(subsystem: "org.openhab", category: "SwitchRow")
-
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
 
@@ -25,10 +23,10 @@ struct SwitchRow: View {
             get: { widget.stateEnumBinding.boolState },
             set: {
                 if $0 {
-                    logger.info("Switch to ON")
+                    Logger.rowViews.info("Switch to ON")
                     widget.sendCommand("ON")
                 } else {
-                    logger.info("Switch to OFF")
+                    Logger.rowViews.info("Switch to OFF")
                     widget.sendCommand("OFF")
                 }
                 widget.stateEnumBinding = .switcher($0)
@@ -41,12 +39,11 @@ struct SwitchRow: View {
             HStack {
                 IconView(widget: widget, settings: settings)
                 VStack {
-                    TextLabelView(widget: widget)
+                    TextLabelView(widget: widget, lineLimit: 1)
                     DetailTextLabelView(widget: widget)
                 }
             }
         }
-        .focusable(true)
         .padding(.trailing)
         .cornerRadius(5)
     }

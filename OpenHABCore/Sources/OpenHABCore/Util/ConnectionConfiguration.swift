@@ -87,3 +87,9 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
         }
     }
 }
+
+extension ConnectionConfiguration: CustomStringConvertible {
+    public var description: String {
+        "url: \(url), user: \(username)"
+    }
+}

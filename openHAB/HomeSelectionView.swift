@@ -19,8 +19,6 @@ import SwiftUI
 import WebKit
 
 struct HomeSelectionView: View {
-    private let logger = Logger(subsystem: "org.openhab", category: "HomeSelectionView")
-
     @State private var homes: [UUID] = []
 
     @State private var showingNewHomeAlert = false
@@ -39,7 +37,7 @@ struct HomeSelectionView: View {
 
     var body: some View {
         List(homes, id: \.self) { home in
-            let homeName = Preferences.storedHomes[home]?.homeName ?? ""
+            let homeName = Preferences.shared.storedHomes[home]?.homeName ?? ""
             HStack {
                 HStack {
                     if showEditOptions {
@@ -47,7 +45,7 @@ struct HomeSelectionView: View {
                             .foregroundStyle(.blue)
                     }
                     Text(homeName)
-                    if Preferences.currentHomePreferences.id == home, !showEditOptions {
+                    if Preferences.shared.currentHomePreferences.id == home, !showEditOptions {
                         Spacer()
                         Image(systemSymbol: .checkmark)
                             .foregroundColor(.blue)
@@ -69,7 +67,7 @@ struct HomeSelectionView: View {
                 if showEditOptions {
                     HStack {
                         Spacer()
-                        if Preferences.currentHomePreferences.id != home {
+                        if Preferences.shared.currentHomePreferences.id != home {
                             Button(action: {
                                 homeNameForAlert = homeName
                                 homeForAlert = home
@@ -176,20 +174,20 @@ struct HomeSelectionView: View {
     }
 
     private func select(home: UUID) {
-        Preferences.switchActiveHome(to: home)
+        Preferences.shared.switchActiveHome(to: home)
         dismiss()
     }
 
     private func loadHomesList() {
-        homes = Preferences.listStoredHomes()
+        homes = Preferences.shared.listStoredHomes()
     }
 
     private func delete(home toDelete: UUID?) {
         guard let toDelete else {
             return
         }
-        logger.info("delete home settings for \(toDelete.uuidString)")
-        Preferences.deleteStoredHome(toDelete)
+        Logger.selectionView.info("delete home settings for \(toDelete.uuidString)")
+        Preferences.shared.deleteStoredHome(toDelete)
         loadHomesList()
     }
 
@@ -198,12 +196,12 @@ struct HomeSelectionView: View {
             return
         }
         let newName = newHomeName
-        logger.info("rename home \(toRename.uuidString) to \(newName)")
-        Preferences.renameHome(toRename, newHomeName: newName)
+        Logger.selectionView.info("rename home \(toRename.uuidString) to \(newName)")
+        Preferences.shared.renameHome(toRename, newHomeName: newName)
     }
 
     private func addHome() {
-        Preferences.createAndLoadNewStoredSettings(homeName: newHomeName)
+        Preferences.shared.createAndLoadNewStoredSettings(homeName: newHomeName)
         loadHomesList()
     }
 }

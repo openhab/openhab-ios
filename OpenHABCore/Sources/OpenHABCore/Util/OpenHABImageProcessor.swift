@@ -19,9 +19,8 @@ public struct OpenHABImageProcessor: ImageProcessor {
     // `identifier` should be the same for processors with the same properties/functionality
     // It will be used when storing and retrieving the image to/from cache.
     public let identifier: String
-    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABImageProcessor")
+    let maxSize = CGSize(width: 64, height: 64)
 
-    /// - Parameter tint: The tint color used to tint the input image.
     public init() {
         identifier = "org.openhab.svgprocessor"
     }
@@ -40,11 +39,19 @@ public struct OpenHABImageProcessor: ImageProcessor {
     }
 
     /// Decode SVG on the main thread (UIGraphics-based), with sane defaults.
-    private func decodeSVGOnMain(_ data: Data) -> UIImage? {
+    private func decodeSVGOnMain(_ data: Data, targetSize: CGSize? = nil, preserveAspectRatio: Bool = true) -> UIImage? {
         mainSync {
-            SDImageSVGCoder.shared.decodedImage(
+            var options: [SDImageCoderOption: Any] = [:]
+
+            if let size = targetSize {
+                options[.decodeThumbnailPixelSize] = size
+                options[.decodePreserveAspectRatio] = preserveAspectRatio
+                Logger.openHABImageProcessor.debug("Setting targetSize to \(size)")
+            }
+
+            return SDImageSVGCoder.shared.decodedImage(
                 with: data,
-                options: nil
+                options: options.isEmpty ? nil : options
             )
         }
     }
@@ -59,18 +66,14 @@ public struct OpenHABImageProcessor: ImageProcessor {
     public func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         switch item {
         case let .image(image):
-            logger.info("already an image")
+            Logger.openHABImageProcessor.info("already an image")
             return image
         case let .data(data):
             guard !data.isEmpty else { return nil }
 
             if isSVG(data: data) {
-                if let image = decodeSVGOnMain(data) {
-                    let size = image.size
-                    if size.width > 1000 || size.height > 1000 {
-                        logger.warning("SVG decoded to very large bitmap: \(size.width, privacy: .public)x\(size.height, privacy: .public)")
-                        return warningSymbol()
-                    }
+                // Limit SVG decode size (to prevent memory issues
+                if let image = decodeSVGOnMain(data, targetSize: maxSize, preserveAspectRatio: true) {
                     return image
                 } else {
                     return warningSymbol()
@@ -87,5 +90,11 @@ public struct OpenHABImageProcessor: ImageProcessor {
             return start.contains("<svg") || start.hasPrefix("<?xml")
         }
         return false
+    }
+}
+
+extension CGSize: @retroactive CustomStringConvertible {
+    public var description: String {
+        "(\(width), \(height))"
     }
 }

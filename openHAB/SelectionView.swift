@@ -20,8 +20,6 @@ struct SelectionView: View {
     @State var selectionItemState: String? // To track the selected item state
     var onSelection: (Int) -> Void // Closure to handle selection
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "SelectionView")
-
     var body: some View {
         List(0 ..< mappings.count, id: \.self) { index in
             let mapping = mappings[index]
@@ -36,7 +34,7 @@ struct SelectionView: View {
             .contentShape(.interaction, Rectangle()) // Ensures entire row is tappable
             .onTapGesture {
                 selectionItemState = mappings[index].command
-                logger.info("Selected mapping \(index)")
+                Logger.selectionView.info("Selected mapping \(index)")
                 onSelection(index)
             }
             .accessibilityElement(children: .combine)
