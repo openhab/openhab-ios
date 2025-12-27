@@ -89,7 +89,7 @@ extension View {
     @ViewBuilder
     func sensoryHeavyFeedbackIfAvailable(trigger: Bool) -> some View {
         if #available(iOS 17.0, *) {
-            self.sensoryFeedback(.impact(weight: .heavy, intensity: 0.9), trigger: trigger)
+            sensoryFeedback(.impact(weight: .heavy, intensity: 0.9), trigger: trigger)
         } else {
             self
         }
@@ -98,7 +98,7 @@ extension View {
     @ViewBuilder
     func sensoryStopFeedbackIfAvailable(trigger: Bool) -> some View {
         if #available(iOS 17.0, *) {
-            self.sensoryFeedback(.impact(flexibility: .rigid), trigger: trigger)
+            sensoryFeedback(.impact(flexibility: .rigid), trigger: trigger)
         } else {
             self
         }

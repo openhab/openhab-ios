@@ -122,6 +122,7 @@ class SitemapPageViewModel: ObservableObject {
 
     func startPageHandling() {
         pageHandlingTask?.cancel()
+        error = nil // Clear any previous errors when starting a new page handling session
 
         logger.info("🚀 Starting page load and long polling flow...")
 
@@ -182,6 +183,13 @@ class SitemapPageViewModel: ObservableObject {
                 isLoading = false
                 isUpdating = false
             } catch let error as DecodingError {
+                // Don't set error if task was cancelled
+                guard !Task.isCancelled else {
+                    logger.info("Task cancelled, ignoring DecodingError")
+                    isLoading = false
+                    isUpdating = false
+                    return
+                }
                 logger.error("Decoding error: \(error.localizedDescription)")
                 await MainActor.run {
                     self.error = SitemapPageError.serviceUnavailable
@@ -194,6 +202,13 @@ class SitemapPageViewModel: ObservableObject {
                 } else if let urlError = error.underlyingError as? URLError, urlError.code == .timedOut {
                     logger.info("Task timed out (URLError: timedOut)")
                 } else {
+                    // Don't set error if task was cancelled
+                    guard !Task.isCancelled else {
+                        logger.info("Task cancelled, ignoring ClientError")
+                        isLoading = false
+                        isUpdating = false
+                        return
+                    }
                     logger.error("ClientError: \(error.localizedDescription)")
                     await MainActor.run {
                         self.error = SitemapPageError.serviceUnavailable
@@ -206,6 +221,13 @@ class SitemapPageViewModel: ObservableObject {
                 isLoading = false
                 isUpdating = false
             } catch {
+                // Don't set error if task was cancelled
+                guard !Task.isCancelled else {
+                    logger.info("Task cancelled, ignoring error")
+                    isLoading = false
+                    isUpdating = false
+                    return
+                }
                 logger.error("❌ Unhandled pageHandlingTask error: \(error.localizedDescription)")
                 await MainActor.run {
                     self.error = SitemapPageError.serviceUnavailable
@@ -270,6 +292,7 @@ class SitemapPageViewModel: ObservableObject {
     func pushSitemap(name: String, path: String?) async {
         defaultSitemap = name
         pageId = path ?? ""
+        error = nil // Clear any previous errors when switching sitemaps
         startPageHandling()
     }
 

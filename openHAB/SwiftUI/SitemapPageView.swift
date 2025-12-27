@@ -14,7 +14,7 @@ import OpenHABCore
 import SwiftUI
 
 struct SitemapPageView: View {
-    @StateObject public var viewModel = SitemapPageViewModel()
+    @StateObject var viewModel = SitemapPageViewModel()
     @State private var idleTimerDisabled = false
 
     private var isLinkedPage: Bool {
@@ -30,21 +30,14 @@ struct SitemapPageView: View {
                         .redacted(reason: .placeholder)
                         .disabled(true)
                 }
-                .environment(\.defaultMinListRowHeight, 30)
             } else {
                 List(viewModel.relevantWidgets) { widget in
                     EmbeddingRowView(widget: widget)
                 }
-                .environment(\.defaultMinListRowHeight, 30)
             }
         }
         .environmentObject(viewModel)
         .listStyle(.inset)
-        .navigationTitle(viewModel.pageTitle)
-        .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $viewModel.searchText, prompt: "Search items")
-        .autocorrectionDisabled()
-        .textInputAutocapitalization(.never)
         .refreshable {
             await viewModel.reload()
         }
@@ -67,7 +60,10 @@ struct SitemapPageView: View {
         .onChange(of: viewModel.networkTracker.activeConnection) { activeConnection in
             viewModel.handleActiveConnectionChange(activeConnection)
         }
-        .alert("Error", isPresented: .constant(viewModel.error != nil), actions: {
+        .alert("Error", isPresented: Binding(
+            get: { viewModel.error != nil },
+            set: { if !$0 { viewModel.error = nil } }
+        ), actions: {
             Button("OK", role: .cancel) {}
         }, message: {
             if let error = viewModel.error {
@@ -83,7 +79,7 @@ struct SitemapPageView: View {
 
 extension SitemapPageView {
     /// Creates placeholder widgets for skeleton loading state
-    public var placeholderWidgets: [OpenHABWidget] {
+    var placeholderWidgets: [OpenHABWidget] {
         [
             PreviewConstants.openHABSitemapPage!.widgets[3],
             PreviewConstants.openHABSitemapPage!.widgets[5],

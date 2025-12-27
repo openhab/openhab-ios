@@ -59,6 +59,12 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
         navigationController?.setNavigationBarHidden(true, animated: false)
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Ensure UIKit navigation bar stays hidden when transitioning from other views
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+
     func setRootViewController(_ rootViewController: OpenHABRootViewController) {
         self.rootViewController = rootViewController
         // Update the closure after initialization

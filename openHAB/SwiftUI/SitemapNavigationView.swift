@@ -15,7 +15,7 @@ import SFSafeSymbols
 import SwiftUI
 
 struct SitemapNavigationView: View {
-    @StateObject public var viewModel = SitemapPageViewModel()
+    @StateObject var viewModel = SitemapPageViewModel()
     let onShowSideMenu: () -> Void
 
     var body: some View {
@@ -24,6 +24,8 @@ struct SitemapNavigationView: View {
                 .navigationTitle(viewModel.pageTitle)
                 .navigationBarTitleDisplayMode(.inline)
                 .searchable(text: $viewModel.searchText, prompt: Text(NSLocalizedString("search_items", comment: "")))
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button {
