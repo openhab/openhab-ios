@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [Version 3.1.42, Build 99] - 2025-12-24Z
+
+- Let the webview scroll its overflow under the status bar, similar to previous versions (#1031)
+
+## [Version 3.1.41, Build 98] - 2025-12-21Z
+
+- Watch: Expand lists (#1025)
+- Improve resilience on real watches (#1014)
+- Upgrade to latest version of swiftlint and swiftformat (#1026)
+- Bump aws-sdk-s3 from 1.194.0 to 1.208.0 (#1023)
+- Bump actions/cache from 4 to 5 (#1020)
+
 ## [Version 3.1.40, Build 97] - 2025-12-08Z
 
 - default path was missing in save routine of settings view (#1016)
