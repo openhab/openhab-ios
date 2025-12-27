@@ -34,8 +34,8 @@ enum BonjourServiceType: String {
 // @available(watchOS, unavailable)
 @MainActor
 final class BonjourDiscoveryViewModel: ObservableObject {
-    @Published public var discoveredURLs: [String] = []
-    @Published public var isDiscovering = false
+    @Published var discoveredURLs: [String] = []
+    @Published var isDiscovering = false
 
     private var browsers: [BonjourServiceType: NWBrowser] = [:]
     private var timeoutTasks: [BonjourServiceType: Task<Void, Never>] = [:]
@@ -44,7 +44,7 @@ final class BonjourDiscoveryViewModel: ObservableObject {
     private let logger = Logger(subsystem: "org.openhab", category: "BonjourDiscovery")
     private let timeoutInterval: TimeInterval = 20
 
-    public init() {}
+    init() {}
 
     private func stopDiscovering() {
         isDiscovering = false
@@ -68,7 +68,7 @@ final class BonjourDiscoveryViewModel: ObservableObject {
 }
 
 extension BonjourDiscoveryViewModel {
-    public func discoverAll() {
+    func discoverAll() {
         discoverAllWithRetry(attempt: 1)
     }
 
