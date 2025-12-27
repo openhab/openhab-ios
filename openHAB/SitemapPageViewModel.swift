@@ -46,6 +46,7 @@ class SitemapPageViewModel: ObservableObject {
     private var activeConnectionInfo: ConnectionInfo?
     private var pageHandlingTask: Task<Void, Never>?
     private var defaultSitemap = ""
+    private var defaultSitemapLabel = ""
     @Published var pageId = ""
     private var isLinkedPage = false
     private var pageNetworkStatus: NetworkStatus?
@@ -67,6 +68,8 @@ class SitemapPageViewModel: ObservableObject {
         let title = currentPage?.title.components(separatedBy: "[")[0] ?? ""
         if !title.isEmpty {
             return title
+        } else if !defaultSitemapLabel.isEmpty {
+            return defaultSitemapLabel
         } else if !defaultSitemap.isEmpty {
             return defaultSitemap
         } else {
@@ -81,6 +84,13 @@ class SitemapPageViewModel: ObservableObject {
     init() {
         loadSettings()
         setupActiveConnectionObserver()
+
+        // Observe network connection changes directly
+        Task { @MainActor in
+            for await connection in networkTracker.$activeConnection.values {
+                handleActiveConnectionChange(connection)
+            }
+        }
     }
 
     init(pageUrl: String, title: String, pageId: String = "") {
@@ -134,17 +144,24 @@ class SitemapPageViewModel: ObservableObject {
 
             guard !defaultSitemap.isEmpty else {
                 logger.error("startPageHandling: Cannot run with empty sitemap after discovery")
+                isLoading = false
                 return
             }
             do {
                 guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
                     logger.error("Failed to establish connection within timeout")
+                    isLoading = false
                     return
                 }
                 let configuration = activeConnection.configuration
 
                 if openAPIService == nil {
                     openAPIService = try OpenAPIService(connectionConfiguration: configuration)
+                }
+
+                // Fetch sitemap label if we loaded from preferences (not from discovery)
+                if defaultSitemapLabel.isEmpty {
+                    await fetchSitemapLabel()
                 }
 
                 // 1. Initial page load (longPolling: false)
@@ -248,6 +265,10 @@ class SitemapPageViewModel: ObservableObject {
         do {
             isLoading = true
             try await setupConnection()
+            // Fetch sitemap label if we don't have it yet
+            if defaultSitemapLabel.isEmpty {
+                await fetchSitemapLabel()
+            }
             try await loadCurrentPage()
         } catch {
             self.error = error as? any LocalizedError
@@ -291,9 +312,34 @@ class SitemapPageViewModel: ObservableObject {
     @MainActor
     func pushSitemap(name: String, path: String?) async {
         defaultSitemap = name
+        defaultSitemapLabel = "" // Clear old label so it gets fetched for the new sitemap
         pageId = path ?? ""
         error = nil // Clear any previous errors when switching sitemaps
         startPageHandling()
+    }
+
+    private func fetchSitemapLabel() async {
+        guard let service = openAPIService else {
+            logger.error("OpenAPI service not available for fetching sitemap label")
+            return
+        }
+
+        do {
+            let sitemaps = try await service.openHABSitemaps()
+
+            // Find the sitemap matching our defaultSitemap name and get its label
+            if let sitemap = sitemaps.first(where: { $0.name == defaultSitemap }) {
+                defaultSitemapLabel = sitemap.label
+                // swiftformat:disable:next redundantSelf
+                logger.info("Found label '\(self.defaultSitemapLabel)' for sitemap '\(self.defaultSitemap)'")
+            } else {
+                // swiftformat:disable:next redundantSelf
+                logger.warning("Could not find sitemap '\(self.defaultSitemap)' in available sitemaps")
+            }
+        } catch {
+            logger.warning("Failed to fetch sitemap label: \(error)")
+            // Don't set error here as this is not critical - we can continue without the label
+        }
     }
 
     private func discoverAndSelectSitemap() async {
@@ -313,6 +359,7 @@ class SitemapPageViewModel: ObservableObject {
             case 1:
                 // Auto-select the only available sitemap
                 defaultSitemap = filteredSitemaps[0].name
+                defaultSitemapLabel = filteredSitemaps[0].label
                 // swiftformat:disable:next redundantSelf
                 logger.info("Auto-selected single sitemap: \(self.defaultSitemap)")
 
@@ -323,6 +370,7 @@ class SitemapPageViewModel: ObservableObject {
             case 2...:
                 // Multiple sitemaps available - select the first one
                 defaultSitemap = filteredSitemaps[0].name
+                defaultSitemapLabel = filteredSitemaps[0].label
                 // swiftformat:disable:next redundantSelf
                 logger.info("Auto-selected first sitemap from \(filteredSitemaps.count) available: \(self.defaultSitemap)")
 
@@ -354,6 +402,9 @@ class SitemapPageViewModel: ObservableObject {
         if pageNetworkStatusChanged() {
             logger.info("Network status changed, restarting page handling")
             pageHandlingTask?.cancel()
+            // Restart page handling to establish long-polling
+            startPageHandling()
+            return
         }
 
         Task {
