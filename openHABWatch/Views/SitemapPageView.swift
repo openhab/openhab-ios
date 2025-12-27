@@ -13,100 +13,6 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct SitemapPageView: View {
-    @ObservedObject var viewModel: UserData
-    @EnvironmentObject var settings: AppSettings
-    @State var title = "Sitemap"
-    @State private var scrollPosition: String?
-    var isRoot: Bool = true
-
-    init(viewModel: UserData, isRoot: Bool = true) {
-        self.viewModel = viewModel
-        self.isRoot = isRoot
-    }
-
-    var body: some View {
-        Group {
-            if isRoot {
-                NavigationStack {
-                    pageContent
-                        .navigationDestination(for: OpenHABPage.self) { linkedPage in
-                            SitemapPageView(viewModel: UserData(linkedPage: linkedPage), isRoot: false)
-                                .environmentObject(settings)
-                        }
-                }
-            } else {
-                pageContent
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var pageContent: some View {
-        Group {
-                if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {
-                    VStack {
-                        Spacer()
-                        ProgressView("Loading sitemap...")
-                            .progressViewStyle(CircularProgressViewStyle())
-                            .font(.footnote)
-                        Spacer()
-                    }
-                } else if !viewModel.widgets.isEmpty {
-                    ScrollView {
-                        VStack(spacing: 4) {
-                            ForEach(viewModel.widgets) { widget in
-                                WidgetRowView(widget: widget)
-                                    .id(widget.widgetId)
-                            }
-
-                            if viewModel.isLoadingSitemap {
-                                HStack {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
-                                        .scaleEffect(0.7)
-                                    Text("Updating...")
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                    Spacer()
-                                }
-                                .padding(.horizontal)
-                            }
-                        }
-                        .padding(.vertical, 2)
-                    }
-                    .scrollPosition(id: $scrollPosition, anchor: .top)
-                    .navigationBarTitle(viewModel.openHABSitemapPage?.title ?? "Sitemap")
-                } else {
-                    VStack {
-                        Spacer()
-                        Text("No widgets available.")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                    }
-                }
-            }
-            .alert(isPresented: $viewModel.showCertificateAlert) {
-                Alert(
-                    title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),
-                    message: Text(viewModel.certificateErrorDescription),
-                    primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
-                        if let delegate = viewModel.currentClientDelegate {
-                            delegate.completeEvaluation(.permitAlways)
-                        }
-                    },
-                    secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
-                        if let delegate = viewModel.currentClientDelegate {
-                            delegate.completeEvaluation(.deny)
-                        }
-                    }
-                )
-            }
-        }
-    }
-
-
 /// A wrapper view that handles linkedPage navigation for widgets
 struct WidgetRowView: View {
     @ObservedObject var widget: OpenHABWidget
@@ -167,6 +73,99 @@ struct WidgetRowView: View {
         default:
             GenericRow(widget: widget)
         }
+    }
+}
+
+struct SitemapPageView: View {
+    @ObservedObject var viewModel: UserData
+    @EnvironmentObject var settings: AppSettings
+    @State var title = "Sitemap"
+    @State private var scrollPosition: String?
+    var isRoot = true
+
+    var body: some View {
+        Group {
+            if isRoot {
+                NavigationStack {
+                    pageContent
+                        .navigationDestination(for: OpenHABPage.self) { linkedPage in
+                            SitemapPageView(viewModel: UserData(linkedPage: linkedPage), isRoot: false)
+                                .environmentObject(settings)
+                        }
+                }
+            } else {
+                pageContent
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var pageContent: some View {
+        Group {
+            if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {
+                VStack {
+                    Spacer()
+                    ProgressView("Loading sitemap...")
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .font(.footnote)
+                    Spacer()
+                }
+            } else if !viewModel.widgets.isEmpty {
+                ScrollView {
+                    VStack(spacing: 4) {
+                        ForEach(viewModel.widgets) { widget in
+                            WidgetRowView(widget: widget)
+                                .id(widget.widgetId)
+                        }
+
+                        if viewModel.isLoadingSitemap {
+                            HStack {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
+                                    .scaleEffect(0.7)
+                                Text("Updating...")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+                .scrollPosition(id: $scrollPosition, anchor: .top)
+                .navigationBarTitle(viewModel.openHABSitemapPage?.title ?? "Sitemap")
+            } else {
+                VStack {
+                    Spacer()
+                    Text("No widgets available.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+            }
+        }
+        .alert(isPresented: $viewModel.showCertificateAlert) {
+            Alert(
+                title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),
+                message: Text(viewModel.certificateErrorDescription),
+                primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
+                    if let delegate = viewModel.currentClientDelegate {
+                        delegate.completeEvaluation(.permitAlways)
+                    }
+                },
+                secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
+                    if let delegate = viewModel.currentClientDelegate {
+                        delegate.completeEvaluation(.deny)
+                    }
+                }
+            )
+        }
+    }
+
+    init(viewModel: UserData, isRoot: Bool = true) {
+        self.viewModel = viewModel
+        self.isRoot = isRoot
     }
 }
 

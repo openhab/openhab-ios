@@ -124,30 +124,6 @@ public extension OpenHABItem {
     }
 }
 
-public extension OpenHABItem {
-    struct CodingData: Decodable {
-        let type: String?
-        let groupType: String?
-        let name: String
-        let link: String?
-        let state: String?
-        let label: String?
-        let stateDescription: OpenHABStateDescription.CodingData?
-        let commandDescription: OpenHABCommandDescription.CodingData?
-        let members: [OpenHABItem.CodingData]?
-        let category: String?
-        let options: [OpenHABOptions]?
-    }
-}
-
-public extension OpenHABItem.CodingData {
-    var openHABItem: OpenHABItem {
-        let mappedMembers = members?.map(\.openHABItem) ?? []
-        // swiftlint:disable:next line_length
-        return OpenHABItem(name: name, type: type ?? "", state: state, link: link ?? "", label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, commandDescription: commandDescription?.openHABCommandDescription, members: mappedMembers, category: category, options: options)
-    }
-}
-
 extension OpenHABItem {
     init?(_ item: Components.Schemas.EnrichedItemDTO?) {
         // unitSymbol
