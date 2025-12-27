@@ -14,7 +14,6 @@
 import os.signpost
 import XCTest
 
-// swiftlint:disable:next type_body_length
 final class JSONParserTests: XCTestCase {
     let decoder = JSONDecoder()
 
@@ -54,38 +53,6 @@ final class JSONParserTests: XCTestCase {
         }
     }
 
-    func testJSONItem() {
-        let json = Data("""
-                {
-                    "link": "https://192.168.2.63:8444/rest/items/lcnLightSwitch5_1",
-                    "state": "OFF",
-                    "stateDescription": {
-                        "pattern": "Kellertest",
-                        "readOnly": false,
-                        "options": []
-                    },
-                    "editable": false,
-                    "type": "Switch",
-                    "name": "lcnLightSwitch5_1",
-                    "label": "Licht Treppe Keller-EG",
-                    "tags": [
-                    "Lighting"
-                    ],
-                    "groupNames": [
-                    "G_PresenceSimulation",
-                    "gLcn"
-                    ]
-                }
-        """.utf8)
-
-        do {
-            let codingData = try decoder.decode(OpenHABItem.CodingData.self, from: json)
-            XCTAssertEqual(codingData.type, "Switch", "Item properly parsed")
-        } catch {
-            XCTFail("Whoops, an error occured: \(error)")
-        }
-    }
-
     func testWidgetMapping() {
         let json = """
         [{"command": "0","label": "Overwrite"}, {"command": "1","label": "Calendar"}]
@@ -94,170 +61,6 @@ final class JSONParserTests: XCTestCase {
         do {
             let decoded = try decoder.decode([OpenHABWidgetMapping].self, from: data)
             XCTAssertEqual(decoded[0].label, "Overwrite", "WidgetMapping properly parsed")
-        } catch {
-            XCTFail("Whoops, an error occured: \(error)")
-        }
-    }
-
-    func testJSONWidget() {
-        let json = Data("""
-                {
-                "widgetId": "0000",
-                "type": "Switch",
-                "label": "Licht Treppe Keller-EG [Kellertest]",
-                "icon": "switch",
-                "mappings": [],
-                "item": {
-                    "link": "https://192.168.2.63:8444/rest/items/lcnLightSwitch5_1",
-                    "state": "OFF",
-                    "stateDescription": {
-                        "pattern": "Kellertest",
-                        "readOnly": false,
-                        "options": []
-                    },
-                    "editable": false,
-                    "type": "Switch",
-                    "name": "lcnLightSwitch5_1",
-                    "label": "Licht Treppe Keller-EG",
-                    "tags": [
-                        "Lighting"
-                    ],
-                    "groupNames": [
-                        "G_PresenceSimulation",
-                        "gLcn"
-                    ]
-                },
-                "widgets": []
-                }
-        """.utf8)
-
-        do {
-            let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
-            XCTAssertEqual(codingData.widgetId, "0000", "Widget properly parsed")
-            XCTAssertEqual(codingData.item?.stateDescription?.readOnly, false)
-        } catch {
-            XCTFail("Whoops, an error occured: \(error)")
-        }
-    }
-
-    func testLinkedPage() {
-        let json = """
-        {"id": "1302", "title": "EG Süd", "icon": "rollershutter", "link": "https://192.168.2.63:8444/rest/sitemaps/myHome/1302"}
-        """
-        let data = Data(json.utf8)
-        do {
-            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: data)
-            let decoded = codingData.openHABSitemapPage
-            XCTAssertEqual(decoded.pageId, "1302", "LinkedPage properly parsed")
-        } catch {
-            XCTFail("Whoops, an error occured: \(error)")
-        }
-    }
-
-    func testItem() {
-        let json = """
-        {"link": "https://192.168.2.63:8444/rest/items/lcnDFFOst", "state": "100.0", "editable": false, "type": "Rollershutter", "name": "lcnDFFOst", "label": "DFF Arbeitszimmer", "tags": [], "groupNames": [ "gDZ", "gDFF", "gLcn"]}
-        """
-        let data = Data(json.utf8)
-        do {
-            let decoded = try decoder.decode(OpenHABItem.CodingData.self, from: data)
-            XCTAssertEqual(decoded.name, "lcnDFFOst", "LinkedPage properly parsed")
-        } catch {
-            XCTFail("Whoops, an error occured: \(error)")
-        }
-    }
-
-    func testJSONLinkedPage() {
-        let json = Data("""
-                {   "id": "1304",
-            "title": "EG West",
-            "icon": "rollershutter",
-            "link": "https://192.168.2.63:8444/rest/sitemaps/myHome/1304",
-            "leaf": true,
-            "timeout": false,
-            "widgets": [
-            {
-            "widgetId": "130400",
-            "type": "Switch",
-            "label": "Jalousie WZ West links",
-            "icon": "rollershutter",
-            "mappings": [],
-            "item": {
-            "link": "https://192.168.2.63:8444/rest/items/lcnJalousieWZWestLinks",
-            "state": "0.0",
-            "editable": false,
-            "type": "Rollershutter",
-            "name": "lcnJalousieWZWestLinks",
-            "label": "Jalousie WZ West links",
-            "tags": [],
-            "groupNames": [
-            "gWZ",
-            "gEGJalousien",
-            "gHausJalousie",
-            "gJalousienWest",
-            "gEGJalousienWest",
-            "gLcn"
-            ]
-            },
-            "widgets": []
-            },
-            {
-            "widgetId": "130401",
-            "type": "Switch",
-            "label": "Jalousie WZ West Mitte",
-            "icon": "rollershutter",
-            "mappings": [],
-            "item": {
-            "link": "https://192.168.2.63:8444/rest/items/lcnJalousieWZWestMitte",
-            "state": "0.0",
-            "editable": false,
-            "type": "Rollershutter",
-            "name": "lcnJalousieWZWestMitte",
-            "label": "Jalousie WZ West Mitte",
-            "tags": [],
-            "groupNames": [
-            "gWZ",
-            "gEGJalousien",
-            "gHausJalousie",
-            "gJalousienWest",
-            "gEGJalousienWest",
-            "gLcn"
-            ]
-            },
-            "widgets": []
-            },
-            {
-            "widgetId": "130402",
-            "type": "Switch",
-            "label": "Jalousie WZ West rechts",
-            "icon": "rollershutter",
-            "mappings": [],
-            "item": {
-            "link": "https://192.168.2.63:8444/rest/items/lcnJalousieWZWestRechts",
-            "state": "0.0",
-            "editable": false,
-            "type": "Rollershutter",
-            "name": "lcnJalousieWZWestRechts",
-            "label": "Jalousie WZ West rechts",
-            "tags": [],
-            "groupNames": [
-            "gWZ",
-            "gEGJalousien",
-            "gHausJalousie",
-            "gJalousienWest",
-            "gEGJalousienWest",
-            "gLcn"
-            ]
-            },
-            "widgets": []
-            }
-            ]
-        }
-        """.utf8)
-        do {
-            let sitemapPageCodingData = try decoder.decode(OpenHABPage.CodingData.self, from: json)
-            let sitemapPage = sitemapPageCodingData.openHABSitemapPage
-            XCTAssertEqual(sitemapPage.pageId, "1304", "OpenHABLinkedPage properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -288,97 +91,6 @@ final class JSONParserTests: XCTestCase {
         }
     }
 
-    func testJSONWidget2() {
-        let json = Data("""
-        {
-            "widgetId": "01",
-            "type": "Frame",
-            "label": "Eingang",
-            "icon": "frame",
-            "mappings": [],
-            "widgets": [
-            {
-            "widgetId": "0100",
-            "type": "Switch",
-            "label": "Licht Eingang",
-            "icon": "switch",
-            "mappings": [],
-            "item": {
-            "link": "https://192.168.2.63:8444/rest/items/lcnLightSwitch17_1",
-            "state": "ON",
-            "editable": false,
-            "type": "Switch",
-            "name": "lcnLightSwitch17_1",
-            "label": "Licht Eingang",
-            "tags": [
-            "Lighting"
-            ],
-            "groupNames": [
-            "G_PresenceSimulation",
-            "gLcn"
-            ]
-            },
-            "widgets": []
-            },
-            {
-            "widgetId": "0101",
-            "type": "Switch",
-            "label": "Licht Eingang aussen",
-            "icon": "switch",
-            "mappings": [],
-            "item": {
-            "link": "https://192.168.2.63:8444/rest/items/lcnLightSwitch17_2",
-            "state": "OFF",
-            "editable": false,
-            "type": "Switch",
-            "name": "lcnLightSwitch17_2",
-            "label": "Licht Eingang aussen",
-            "tags": [
-            "Lighting"
-            ],
-            "groupNames": [
-            "G_PresenceSimulation",
-            "gLcn"
-            ]
-            },
-            "widgets": []
-            }
-            ]
-            }
-        """.utf8)
-        do {
-            let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
-            XCTAssertEqual(codingData.widgetId, "01", "Widget properly parsed")
-            XCTAssert(codingData.mappings.isEmpty, "No mappings found")
-        } catch {
-            XCTFail("Whoops, an error occured: \(error)")
-        }
-    }
-
-    func testJSONSitemapPage() {
-        do {
-            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: jsonSitemap)
-            XCTAssertEqual(codingData.leaf, false, "OpenHABSitemapPage properly parsed")
-            XCTAssertEqual(codingData.widgets?[0].widgetId, "00", "widget properly parsed")
-        } catch {
-            XCTFail("Whoops, an error occured: \(error)")
-        }
-    }
-
-    func testJSONSitemapPage2() {
-        do {
-            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: jsonSitemap2)
-            XCTAssertEqual(codingData.leaf, false, "OpenHABSitemapPage properly parsed")
-            XCTAssertEqual(codingData.widgets?[0].widgetId, "00", "widget properly parsed")
-            XCTAssertEqual(codingData.widgets?[4].widgets[3].item?.stateDescription?.options?[0].label, "New moon", "State description properly parsed")
-
-        } catch {
-            XCTFail("Whoops, an error occured: \(error)")
-        }
-    }
-
-    // swiftlint:disable line_length
-
     func testWatchSitemap() {
         let json = Data("""
         {"name":"watch","label":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch","homepage":{"id":"watch","title":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch/watch","leaf":false,"timeout":false,"widgets":[{"widgetId":"00","type":"Frame","label":"Ground floor","icon":"frame","mappings":[],"widgets":[{"widgetId":"0000","type":"Switch","label":"Licht Oberlicht","icon":"switch","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch14_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch14_1","label":"Licht Oberlicht","tags":["Lighting"],"groupNames":["G_PresenceSimulation","gLcn"]},"widgets":[]},{"widgetId":"0001","type":"Switch","label":"Licht Keller WC Decke","icon":"colorpicker","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch6_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch6_1","label":"Licht Keller WC Decke","category":"colorpicker","tags":["Lighting"],"groupNames":["gKellerLicht","gLcn"]},"widgets":[]}]}]}}
@@ -390,56 +102,6 @@ final class JSONParserTests: XCTestCase {
             //        XCTAssert(.widgets[0].linkedPage?.pageId == "0000", "widget properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
-        }
-    }
-
-    // swiftlint:enable line_length
-
-    func testParsingforRollerShutter() {
-        let jsonInputForGroup = """
-        {
-            "id": "watch",
-            "title": "Watch",
-            "link": "https://server/rest/sitemaps/watch/watch",
-            "leaf": true,
-            "timeout": false,
-            "widgets": [
-            {
-                "widgetId": "00",
-                "type": "Switch",
-                "label": "Rollladen Erdgeschoss",
-                "icon": "blinds",
-                "mappings": [],
-                "item": {
-                    "members": [],
-                    "groupType": "Rollershutter",
-                    "function": {
-                        "name": "EQUALITY"
-                    },
-                    "link": "https://server/rest/items/gRollladen_EG",
-                    "state": "UNDEF",
-                    "editable": false,
-                    "type": "Group",
-                    "name": "gRollladen_EG",
-                    "label": "Rollladen Erdgeschoss",
-                    "category": "blinds",
-                    "tags": [],
-                    "groupNames": []
-                },
-                "widgets": []
-            }
-            ]
-        }
-        """
-        let data = Data(jsonInputForGroup.utf8)
-        do {
-            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: data)
-            let widget = codingData.widgets?[0]
-            XCTAssert(widget?.item?.type == "Group" && widget?.item?.groupType == "Rollershutter", "")
-            XCTAssertEqual(codingData.widgets?[0].item?.groupType, "Rollershutter")
-            XCTAssertEqual(codingData.widgets?[0].item?.type, "Group")
-        } catch {
-            XCTFail("Failed parsing")
         }
     }
 
@@ -467,46 +129,6 @@ final class JSONParserTests: XCTestCase {
         XCTAssertEqual(widget2.widgets?[0].label, "Admin Items")
     }
 
-    func testItemWithDescription() {
-        let json = """
-        {
-        "widgetId": "0000",
-        "type": "Switch",
-        "label": "Licht Treppe Keller-EG [Kellertest]",
-        "icon": "switch",
-        "mappings": [],
-        "item": {"link":"http://eye:8080/rest/items/Master_Motion_Sensor",
-            "state":"OFF",
-        "stateDescription": {"readOnly":true,
-        "options":[{"value":"OFF","label":"OK"},{"value":"ON","label":"Alarm"}]},
-            "editable":false,
-            "type":"Switch",
-            "name":"Master_Motion_Sensor",
-            "label":"Master Movement",
-            "category":"motion",
-            "tags":[],
-            "groupNames":["gMotion","gMotion2","LightMotionSensors"]
-        },
-        "widgets": []
-        }
-        """
-        let data = Data(json.utf8)
-
-        do {
-            var widget: OpenHABWidget
-            widget = try {
-                let widgetCodingData = try decoder.decode(OpenHABWidget.CodingData.self, from: data)
-                return widgetCodingData.openHABWidget
-            }()
-
-            XCTAssertEqual(widget.mappingsOrItemOptions[0].command, "OFF", "Checking assignment of stateDescription")
-            XCTAssertEqual(widget.mappingIndex(byCommand: "ON"), 1, "Checking finding of command")
-
-        } catch {
-            XCTFail("Whoops, an error occured: \(error)")
-        }
-    }
-
     func testServerVersion() {
         let json = """
         {"version":"3", "links":[{"type":"uuid","url":"http://192.168.2.15:8081/rest/uuid"},
@@ -516,7 +138,6 @@ final class JSONParserTests: XCTestCase {
         """
         let data = Data(json.utf8)
         do {
-            // var widget: OpenHABServerLinks
             let properties = try decoder.decode(OpenHABServerProperties.self, from: data)
 
             XCTAssertEqual(properties.version, "3", "Checking version")

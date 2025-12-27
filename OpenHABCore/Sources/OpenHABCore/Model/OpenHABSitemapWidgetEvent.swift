@@ -46,7 +46,6 @@ public class OpenHABSitemapWidgetEvent {
 
     convenience init?(_ event: Components.Schemas.SitemapWidgetEvent?) {
         guard let event else { return nil }
-        // swiftlint:disable:next line_length
         self.init(sitemapName: event.sitemapName, pageId: event.pageId, widgetId: event.widgetId, label: event.label, labelSource: event.labelSource, icon: event.icon, reloadIcon: event.reloadIcon, labelcolor: event.labelcolor, valuecolor: event.valuecolor, iconcolor: event.iconcolor, visibility: event.visibility, state: event.state, enrichedItem: OpenHABItem(event.item), descriptionChanged: event.descriptionChanged)
     }
 }
@@ -54,53 +53,5 @@ public class OpenHABSitemapWidgetEvent {
 extension OpenHABSitemapWidgetEvent: CustomStringConvertible {
     public var description: String {
         "\(widgetId ?? "") \(label ?? "") \(enrichedItem?.state ?? "")"
-    }
-}
-
-public extension OpenHABSitemapWidgetEvent {
-    struct CodingData: Decodable, Hashable, Equatable {
-        var sitemapName: String?
-        var pageId: String?
-        var widgetId: String?
-        var label: String?
-        var labelSource: String?
-        var icon: String?
-        var reloadIcon: Bool?
-        var labelcolor: String?
-        var valuecolor: String?
-        var iconcolor: String?
-        var visibility: Bool?
-//        var state: String?
-        var item: OpenHABItem.CodingData?
-        var descriptionChanged: Bool?
-        var link: String?
-
-        public static func == (lhs: OpenHABSitemapWidgetEvent.CodingData, rhs: OpenHABSitemapWidgetEvent.CodingData) -> Bool {
-            lhs.widgetId == rhs.widgetId
-        }
-
-        public func hash(into hasher: inout Hasher) {
-            hasher.combine(widgetId)
-        }
-    }
-}
-
-extension OpenHABSitemapWidgetEvent.CodingData {
-    var openHABSitemapWidgetEvent: OpenHABSitemapWidgetEvent {
-        OpenHABSitemapWidgetEvent(
-            sitemapName: sitemapName,
-            pageId: pageId,
-            widgetId: widgetId,
-            label: label,
-            labelSource: labelSource,
-            icon: icon,
-            reloadIcon: reloadIcon,
-            labelcolor: labelcolor,
-            valuecolor: valuecolor,
-            iconcolor: iconcolor,
-            visibility: visibility,
-            enrichedItem: item?.openHABItem,
-            descriptionChanged: descriptionChanged
-        )
     }
 }

@@ -43,23 +43,6 @@ public struct OpenHABStateDescription: Sendable {
     }
 }
 
-public extension OpenHABStateDescription {
-    struct CodingData: Decodable {
-        let minimum: Double?
-        let maximum: Double?
-        let step: Double?
-        let readOnly: Bool?
-        let options: [OpenHABOptions]?
-        let pattern: String?
-    }
-}
-
-extension OpenHABStateDescription.CodingData {
-    var openHABStateDescription: OpenHABStateDescription {
-        OpenHABStateDescription(minimum: minimum, maximum: maximum, step: step, readOnly: readOnly, options: options, pattern: pattern)
-    }
-}
-
 extension OpenHABStateDescription {
     init?(_ state: Components.Schemas.StateDescription?) {
         if let state {
