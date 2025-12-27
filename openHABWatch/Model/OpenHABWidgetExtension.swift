@@ -18,15 +18,8 @@ import SwiftUI
 extension OpenHABWidget {
     @ViewBuilder @MainActor func makeView(settings: AppSettings) -> some View {
         if linkedPage != nil {
-            NavigationLink(destination:
-                LazyView(
-                    // TODO:
-                    EmptyView()
-                    // ContentView(viewModel: UserData(url: URL(string: pageUrl)), settings: settings, title: title)
-                )
-            ) {
-                Image(systemSymbol: .chevronRight)
-            }
+            Image(systemSymbol: .chevronRight)
+                .foregroundStyle(.secondary)
         } else {
             EmptyView()
         }

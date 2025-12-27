@@ -28,7 +28,9 @@ struct IconView: View {
     var iconURL: URL? {
         guard !widget.icon.isEmpty,
               let activeConnection = networkTracker.activeConnection,
-              !activeConnection.configuration.url.isEmpty else {
+              !activeConnection.configuration.url.isEmpty else { return nil }
+        // Skip loading number icons as they don't exist/aren't useful
+        if widget.icon == "number" {
             return nil
         }
 
@@ -53,9 +55,6 @@ struct IconView: View {
                 KFImage.url(iconURL)
                     .onFailure { _ in
                         Logger.rowViews.debug("Failed to load image : \(iconURL.absoluteString)")
-                    }
-                    .onSuccess { _ in
-                        Logger.rowViews.debug("Successfully loaded image: \(iconURL.absoluteString)")
                     }
                     .onFailureView {
                         Rectangle()
