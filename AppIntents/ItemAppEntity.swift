@@ -84,11 +84,11 @@ struct ItemAppEntity: AppEntity {
 }
 
 extension ItemIdentifier: EntityIdentifierConvertible {
-    public var entityIdentifierString: String {
+    var entityIdentifierString: String {
         "\(homeId.uuidString):\(itemName)"
     }
 
-    public static func entityIdentifier(for entityIdentifierString: String) -> ItemIdentifier? {
+    static func entityIdentifier(for entityIdentifierString: String) -> ItemIdentifier? {
         let components = entityIdentifierString.split(separator: ":", maxSplits: 1)
         guard components.count == 2,
               let homeId = UUID(uuidString: String(components[0])) else {
@@ -104,13 +104,12 @@ extension ItemAppEntity {
     var itemName: String { id.itemName }
 }
 
-
-//Usage Example in Your App Intents
-//                                                                                                                                                                         
-//struct ControlItemIntent: AppIntent {
+// Usage Example of App Intents
+//
+// struct ControlItemIntent: AppIntent {
 //    @Parameter(title: "Item")
 //    var item: ItemAppEntity
-//                                                                                                                                                                         
+//
 //    func perform() async throws -> some IntentResult {
 //        // Access components directly
 //        await OpenHABItemCache.instance.sendCommand(
@@ -120,4 +119,4 @@ extension ItemAppEntity {
 //        )
 //        return .result()
 //    }
-//}
+// }

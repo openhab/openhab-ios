@@ -44,68 +44,67 @@ struct SitemapPageView: View {
     @ViewBuilder
     private var pageContent: some View {
         Group {
-                if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {
-                    VStack {
-                        Spacer()
-                        ProgressView("Loading sitemap...")
-                            .progressViewStyle(CircularProgressViewStyle())
-                            .font(.footnote)
-                        Spacer()
-                    }
-                } else if !viewModel.widgets.isEmpty {
-                    ScrollView {
-                        VStack(spacing: 4) {
-                            ForEach(viewModel.widgets) { widget in
-                                WidgetRowView(widget: widget)
-                                    .id(widget.widgetId)
-                            }
-
-                            if viewModel.isLoadingSitemap {
-                                HStack {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
-                                        .scaleEffect(0.7)
-                                    Text("Updating...")
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                    Spacer()
-                                }
-                                .padding(.horizontal)
-                            }
+            if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {
+                VStack {
+                    Spacer()
+                    ProgressView("Loading sitemap...")
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .font(.footnote)
+                    Spacer()
+                }
+            } else if !viewModel.widgets.isEmpty {
+                ScrollView {
+                    VStack(spacing: 4) {
+                        ForEach(viewModel.widgets) { widget in
+                            WidgetRowView(widget: widget)
+                                .id(widget.widgetId)
                         }
-                        .padding(.vertical, 2)
+
+                        if viewModel.isLoadingSitemap {
+                            HStack {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
+                                    .scaleEffect(0.7)
+                                Text("Updating...")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                            }
+                            .padding(.horizontal)
+                        }
                     }
-                    .scrollPosition(id: $scrollPosition, anchor: .top)
-                    .navigationBarTitle(viewModel.openHABSitemapPage?.title ?? "Sitemap")
-                } else {
-                    VStack {
-                        Spacer()
-                        Text("No widgets available.")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                    }
+                    .padding(.vertical, 2)
+                }
+                .scrollPosition(id: $scrollPosition, anchor: .top)
+                .navigationBarTitle(viewModel.openHABSitemapPage?.title ?? "Sitemap")
+            } else {
+                VStack {
+                    Spacer()
+                    Text("No widgets available.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Spacer()
                 }
             }
-            .alert(isPresented: $viewModel.showCertificateAlert) {
-                Alert(
-                    title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),
-                    message: Text(viewModel.certificateErrorDescription),
-                    primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
-                        if let delegate = viewModel.currentClientDelegate {
-                            delegate.completeEvaluation(.permitAlways)
-                        }
-                    },
-                    secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
-                        if let delegate = viewModel.currentClientDelegate {
-                            delegate.completeEvaluation(.deny)
-                        }
+        }
+        .alert(isPresented: $viewModel.showCertificateAlert) {
+            Alert(
+                title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),
+                message: Text(viewModel.certificateErrorDescription),
+                primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
+                    if let delegate = viewModel.currentClientDelegate {
+                        delegate.completeEvaluation(.permitAlways)
                     }
-                )
-            }
+                },
+                secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
+                    if let delegate = viewModel.currentClientDelegate {
+                        delegate.completeEvaluation(.deny)
+                    }
+                }
+            )
         }
     }
-
+}
 
 /// A wrapper view that handles linkedPage navigation for widgets
 struct WidgetRowView: View {
