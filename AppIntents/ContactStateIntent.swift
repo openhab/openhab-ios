@@ -13,36 +13,36 @@ import AppIntents
 import Intents
 import OpenHABCore
 
-enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
-    case invalidAction(String, String)
+enum ContactStateError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
+    case invalidState(String, String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case let .invalidAction(action, itemName):
-            "Action invalid: \(action) for \(itemName)"
         case let .itemNotInHome(itemName, homeName):
             "Item '\(itemName)' is not in home '\(homeName)'"
+        case let .invalidState(state, itemName):
+            "State invalid: \(state) for \(itemName)"
         }
     }
 }
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-struct SwitchStateIntent: AppIntent {
-    struct ActionOptionsProvider: DynamicOptionsProvider {
+struct ContactStateIntent: AppIntent {
+    struct StateOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
-            ActionMapper.onOffToggleOptions
+            ActionMapper.onOffOptions
         }
     }
 
     static var parameterSummary: some ParameterSummary {
-        Summary("Send \(\.$action) to \(\.$itemEntity)") {
+        Summary("Set the state of \(\.$itemEntity) to \(\.$state)") {
             \.$home
         }
     }
 
-    static let title: LocalizedStringResource = "Set Switch State"
-    static let description = IntentDescription("Set the state of a switch on or off, or toggle its state")
+    static let title: LocalizedStringResource = "Set Contact State Value"
+    static let description = IntentDescription("Set the state of a contact open or closed")
 
     @Parameter(title: "Home")
     var home: Home
@@ -50,25 +50,25 @@ struct SwitchStateIntent: AppIntent {
     @Parameter(title: "Item", requestValueDialog: IntentDialog("Search for an item"))
     var itemEntity: ItemAppEntity
 
-    @Parameter(title: "Action", optionsProvider: ActionOptionsProvider())
-    var action: String
+    @Parameter(title: "State", optionsProvider: StateOptionsProvider())
+    var state: String
 
-    func perform() async throws -> some IntentResult {
+    func perform() async throws -> some IntentResult & ProvidesDialog {
         // Validate that the item belongs to the selected home
         guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw ControlItemError.itemNotInHome(itemEntity.label, home.displayString)
+            throw ContactStateError.itemNotInHome(itemEntity.label, home.displayString)
         }
 
-        guard let command = ActionMapper.command(from: action) else {
-            throw ControlItemError.invalidAction(action, itemEntity.label)
+        guard let realState = ActionMapper.command(from: state) else {
+            throw ContactStateError.invalidState(state, itemEntity.label)
         }
 
         await OpenHABItemCache.instance.sendCommand(
             to: itemEntity.item,
             home: itemEntity.homeId,
-            command: command
+            command: realState
         )
 
-        return .result()
+        return .result(dialog: "The state of \(itemEntity.label) was set to \(state)")
     }
 }

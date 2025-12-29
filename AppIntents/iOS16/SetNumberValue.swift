@@ -13,11 +13,10 @@ import AppIntents
 import Foundation
 import OpenHABCore
 
-enum SetContactStateValueError: Error, CustomLocalizedStringResourceConvertible {
+enum SetNumberValueError: Error, CustomLocalizedStringResourceConvertible {
     case invalidHomeIdentifier
     case unknownHome
     case itemNotFound(String)
-    case invalidState(String, String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -27,47 +26,37 @@ enum SetContactStateValueError: Error, CustomLocalizedStringResourceConvertible 
             "Unknown home"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
-        case let .invalidState(state, itemName):
-            "State invalid: \(state) for \(itemName)"
         }
     }
 }
 
-struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
-    struct ItemOptionsProvider: DynamicOptionsProvider {
+@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use NumberValueIntent for iOS 17+")
+struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
+    struct StringOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
-            let items = allItems.flatMap(\.value).filter { $0.type == .contact }
+            let items = allItems.flatMap(\.value).filter { $0.type == .number }
             return items.map(\.name)
         }
     }
 
-    struct StateOptionsProvider: DynamicOptionsProvider {
-        func results() async throws -> [String] {
-            [
-                NSLocalizedString("on", comment: "").capitalized,
-                NSLocalizedString("off", comment: "").capitalized
-            ]
-        }
-    }
+    static let intentClassName = "OpenHABSetNumberValueIntent"
 
-    static let intentClassName = "OpenHABSetContactStateValueIntent"
-
-    static let title: LocalizedStringResource = "Set Contact State Value"
-    static let description = IntentDescription("Set the state of a contact open or closed")
+    static let title: LocalizedStringResource = "Set Number Control Value"
+    static let description = IntentDescription("Set the decimal value of a number control item")
 
     // swiftlint:disable type_contents_order
-    @Parameter(title: "Item", optionsProvider: ItemOptionsProvider())
+    @Parameter(title: "Item", optionsProvider: StringOptionsProvider())
     var item: String
 
-    @Parameter(title: "State", optionsProvider: StateOptionsProvider())
-    var state: String
+    @Parameter(title: "Value")
+    var value: Double
 
     @Parameter(title: "Home")
     var home: Home
 
     static var parameterSummary: some ParameterSummary {
-        Summary("Set the state of \(\.$item) to \(\.$state)") {
+        Summary("Set \(\.$item) to \(\.$value)") {
             \.$home
         }
     }
@@ -75,9 +64,9 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
     // swiftlint:enable type_contents_order
 
     static var predictionConfiguration: some IntentPredictionConfiguration {
-        IntentPrediction(parameters: (\.$item, \.$state, \.$home)) { item, state, _ in
+        IntentPrediction(parameters: (\.$item, \.$value, \.$home)) { item, value, _ in
             DisplayRepresentation(
-                title: "Set the state of \(item) to \(state)",
+                title: "Set \(item) to \(value)",
                 subtitle: ""
             )
         }
@@ -85,7 +74,7 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         guard let homeId = UUID(uuidString: home.id) else {
-            throw SetContactStateValueError.invalidHomeIdentifier
+            throw SetNumberValueError.invalidHomeIdentifier
         }
 
         let homeExists = await MainActor.run {
@@ -93,40 +82,25 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
         }
 
         guard homeExists else {
-            throw SetContactStateValueError.unknownHome
-        }
-
-        let onLabel = NSLocalizedString("on", comment: "").capitalized
-        let offLabel = NSLocalizedString("off", comment: "").capitalized
-        let actionMap: [String: String] = [
-            onLabel: "ON",
-            offLabel: "OFF"
-        ]
-
-        guard let realState = actionMap[state] else {
-            throw SetContactStateValueError.invalidState(state, item)
+            throw SetNumberValueError.unknownHome
         }
 
         guard let items = await OpenHABItemCache.instance.getCachedItem(name: item, home: homeId),
               !items.isEmpty else {
-            throw SetContactStateValueError.itemNotFound(item)
+            throw SetNumberValueError.itemNotFound(item)
         }
 
         let openHABItem = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: realState)
+        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: String(value))
 
-        return .result(dialog: .responseSuccess(item: item, state: state))
+        return .result(dialog: .responseSuccess(value: value, item: item))
     }
 }
 
 private extension IntentDialog {
     static var itemParameterConfiguration: Self {
-        "Switch name"
-    }
-
-    static var stateParameterConfiguration: Self {
-        "Action"
+        "Number Item Name"
     }
 
     static var homeParameterConfiguration: Self {
@@ -145,15 +119,15 @@ private extension IntentDialog {
         "Just to confirm, you wanted '\(home)'?"
     }
 
-    static func responseSuccess(item: String, state: String) -> Self {
-        "The state of \(item) was set to \(state)"
+    static func responseSuccess(value: Double, item: String) -> Self {
+        "Sent the number \(value) to \(item)"
     }
 
     static func responseFailureInvalidItem(item: String) -> Self {
         "Sorry can't find \(item)"
     }
 
-    static func responseFailureInvalidAction(state: String, item: String) -> Self {
-        "State invalid: \(state) for \(item)"
+    static func responseFailureEmptyValue(item: String) -> Self {
+        "Invalid empty value for \(item)"
     }
 }

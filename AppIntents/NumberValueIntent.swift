@@ -13,14 +13,11 @@ import AppIntents
 import Intents
 import OpenHABCore
 
-enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
-    case invalidAction(String, String)
+enum NumberValueError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case let .invalidAction(action, itemName):
-            "Action invalid: \(action) for \(itemName)"
         case let .itemNotInHome(itemName, homeName):
             "Item '\(itemName)' is not in home '\(homeName)'"
         }
@@ -28,21 +25,15 @@ enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-struct SwitchStateIntent: AppIntent {
-    struct ActionOptionsProvider: DynamicOptionsProvider {
-        func results() async throws -> [String] {
-            ActionMapper.onOffToggleOptions
-        }
-    }
-
+struct NumberValueIntent: AppIntent {
     static var parameterSummary: some ParameterSummary {
-        Summary("Send \(\.$action) to \(\.$itemEntity)") {
+        Summary("Set \(\.$itemEntity) to \(\.$value)") {
             \.$home
         }
     }
 
-    static let title: LocalizedStringResource = "Set Switch State"
-    static let description = IntentDescription("Set the state of a switch on or off, or toggle its state")
+    static let title: LocalizedStringResource = "Set Number Control Value"
+    static let description = IntentDescription("Set the decimal value of a number control item")
 
     @Parameter(title: "Home")
     var home: Home
@@ -50,25 +41,21 @@ struct SwitchStateIntent: AppIntent {
     @Parameter(title: "Item", requestValueDialog: IntentDialog("Search for an item"))
     var itemEntity: ItemAppEntity
 
-    @Parameter(title: "Action", optionsProvider: ActionOptionsProvider())
-    var action: String
+    @Parameter(title: "Value")
+    var value: Double
 
-    func perform() async throws -> some IntentResult {
+    func perform() async throws -> some IntentResult & ProvidesDialog {
         // Validate that the item belongs to the selected home
         guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw ControlItemError.itemNotInHome(itemEntity.label, home.displayString)
-        }
-
-        guard let command = ActionMapper.command(from: action) else {
-            throw ControlItemError.invalidAction(action, itemEntity.label)
+            throw NumberValueError.itemNotInHome(itemEntity.label, home.displayString)
         }
 
         await OpenHABItemCache.instance.sendCommand(
             to: itemEntity.item,
             home: itemEntity.homeId,
-            command: command
+            command: String(value)
         )
 
-        return .result()
+        return .result(dialog: "Sent the number \(value) to \(itemEntity.label)")
     }
 }

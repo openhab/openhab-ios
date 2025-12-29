@@ -82,14 +82,7 @@
 		DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */; };
 		DA32D1B42C8C98C40018D974 /* IconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32D1B32C8C98C40018D974 /* IconWithAction.swift */; };
 		DA3563D92E5096BE00BC0138 /* ScreenSaverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3563D82E5096BE00BC0138 /* ScreenSaverView.swift */; };
-		DA448E7F2EF435B400F0893C /* SetStringValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E7C2EF435B400F0893C /* SetStringValue.swift */; };
-		DA448E802EF435B400F0893C /* SetDimmerRollerValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E7A2EF435B400F0893C /* SetDimmerRollerValue.swift */; };
-		DA448E812EF435B400F0893C /* SetNumberValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E7B2EF435B400F0893C /* SetNumberValue.swift */; };
-		DA448E822EF435B400F0893C /* GetItemState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E762EF435B400F0893C /* GetItemState.swift */; };
-		DA448E832EF435B400F0893C /* SetContactStateValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E792EF435B400F0893C /* SetContactStateValue.swift */; };
-		DA448E842EF435B400F0893C /* SetColorValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E782EF435B400F0893C /* SetColorValue.swift */; };
 		DA448E852EF435B400F0893C /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E772EF435B400F0893C /* Home.swift */; };
-		DA448E862EF435B400F0893C /* SetSwitchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E7D2EF435B400F0893C /* SetSwitchState.swift */; };
 		DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800132D836892009CF127 /* ConnectionSettingsView.swift */; };
 		DA4800162D836EF0009CF127 /* MainUISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800152D836EF0009CF127 /* MainUISettingsView.swift */; };
 		DA4800182D837221009CF127 /* AboutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800172D837221009CF127 /* AboutSettingsView.swift */; };
@@ -97,6 +90,12 @@
 		DA48001C2D837556009CF127 /* SitemapSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA48001B2D837556009CF127 /* SitemapSettingsView.swift */; };
 		DA48001E2D837905009CF127 /* ApplicationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA48001D2D837905009CF127 /* ApplicationSettingsView.swift */; };
 		DA4800212D839D3A009CF127 /* AnimatedSecureTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800202D839D39009CF127 /* AnimatedSecureTextField.swift */; };
+		DA4BF3522F0307A40082479C /* ItemStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3512F0307A40082479C /* ItemStateIntent.swift */; };
+		DA4BF3562F03095D0082479C /* ColorValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3542F03095D0082479C /* ColorValueIntent.swift */; };
+		DA4BF3572F03095D0082479C /* ContactStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3552F03095D0082479C /* ContactStateIntent.swift */; };
+		DA4BF3592F03098B0082479C /* DimmerRollerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3582F03098B0082479C /* DimmerRollerValueIntent.swift */; };
+		DA4BF35B2F0309A60082479C /* NumberValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35A2F0309A60082479C /* NumberValueIntent.swift */; };
+		DA4BF35D2F0309B10082479C /* StringValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35C2F0309B10082479C /* StringValueIntent.swift */; };
 		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
 		DA50C7BD2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */; };
 		DA50C7BF2B0A65300009F716 /* SliderWithSwitchSupportUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BE2B0A652F0009F716 /* SliderWithSwitchSupportUITableViewCell.swift */; };
@@ -140,7 +139,7 @@
 		DAD0857B2AE4782F001D36BE /* OpenHABWatchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857A2AE4782F001D36BE /* OpenHABWatchUITests.swift */; };
 		DAD0857D2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857C2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift */; };
 		DAD0858B2AE56F0E001D36BE /* OpenHABWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0855F2AE47824001D36BE /* OpenHABWatch.swift */; };
-		DAD5E85C2F02C272003215C0 /* ControlItemIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD5E85B2F02C272003215C0 /* ControlItemIntent.swift */; };
+		DAD5E85C2F02C272003215C0 /* SwitchStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD5E85B2F02C272003215C0 /* SwitchStateIntent.swift */; };
 		DAD5E85E2F02C3C6003215C0 /* ItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD5E85D2F02C3BC003215C0 /* ItemIdentifier.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
@@ -165,6 +164,7 @@
 		DAF4581E23DC60020018B495 /* ImageRawRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581D23DC60020018B495 /* ImageRawRow.swift */; };
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
 		DAF58C7B2EF6E99500483AFD /* ItemAppEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF58C7A2EF6E99500483AFD /* ItemAppEntity.swift */; };
+		DAFE45CA2F02FBF4001CA713 /* ActionMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFE45C92F02FBF4001CA713 /* ActionMapper.swift */; };
 		DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */; };
 		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */; };
 		DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */; };
@@ -399,14 +399,7 @@
 		DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewRow.swift; sourceTree = "<group>"; };
 		DA32D1B32C8C98C40018D974 /* IconWithAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconWithAction.swift; sourceTree = "<group>"; };
 		DA3563D82E5096BE00BC0138 /* ScreenSaverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverView.swift; sourceTree = "<group>"; };
-		DA448E762EF435B400F0893C /* GetItemState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetItemState.swift; sourceTree = "<group>"; };
 		DA448E772EF435B400F0893C /* Home.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Home.swift; sourceTree = "<group>"; };
-		DA448E782EF435B400F0893C /* SetColorValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetColorValue.swift; sourceTree = "<group>"; };
-		DA448E792EF435B400F0893C /* SetContactStateValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetContactStateValue.swift; sourceTree = "<group>"; };
-		DA448E7A2EF435B400F0893C /* SetDimmerRollerValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDimmerRollerValue.swift; sourceTree = "<group>"; };
-		DA448E7B2EF435B400F0893C /* SetNumberValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetNumberValue.swift; sourceTree = "<group>"; };
-		DA448E7C2EF435B400F0893C /* SetStringValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetStringValue.swift; sourceTree = "<group>"; };
-		DA448E7D2EF435B400F0893C /* SetSwitchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchState.swift; sourceTree = "<group>"; };
 		DA4800132D836892009CF127 /* ConnectionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionSettingsView.swift; sourceTree = "<group>"; };
 		DA4800152D836EF0009CF127 /* MainUISettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainUISettingsView.swift; sourceTree = "<group>"; };
 		DA4800172D837221009CF127 /* AboutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettingsView.swift; sourceTree = "<group>"; };
@@ -414,6 +407,12 @@
 		DA48001B2D837556009CF127 /* SitemapSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapSettingsView.swift; sourceTree = "<group>"; };
 		DA48001D2D837905009CF127 /* ApplicationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationSettingsView.swift; sourceTree = "<group>"; };
 		DA4800202D839D39009CF127 /* AnimatedSecureTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedSecureTextField.swift; sourceTree = "<group>"; };
+		DA4BF3512F0307A40082479C /* ItemStateIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemStateIntent.swift; sourceTree = "<group>"; };
+		DA4BF3542F03095D0082479C /* ColorValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorValueIntent.swift; sourceTree = "<group>"; };
+		DA4BF3552F03095D0082479C /* ContactStateIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactStateIntent.swift; sourceTree = "<group>"; };
+		DA4BF3582F03098B0082479C /* DimmerRollerValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DimmerRollerValueIntent.swift; sourceTree = "<group>"; };
+		DA4BF35A2F0309A60082479C /* NumberValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberValueIntent.swift; sourceTree = "<group>"; };
+		DA4BF35C2F0309B10082479C /* StringValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringValueIntent.swift; sourceTree = "<group>"; };
 		DA4D4DB4233F9ACB00B37E37 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderWithSwitchSupportRow.swift; sourceTree = "<group>"; };
@@ -462,7 +461,7 @@
 		DAD488B3287DDDFE00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = Resources/nb.lproj/Intents.strings; sourceTree = "<group>"; };
 		DAD488B4287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DAD488B5287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		DAD5E85B2F02C272003215C0 /* ControlItemIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlItemIntent.swift; sourceTree = "<group>"; };
+		DAD5E85B2F02C272003215C0 /* SwitchStateIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchStateIntent.swift; sourceTree = "<group>"; };
 		DAD5E85D2F02C3BC003215C0 /* ItemIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemIdentifier.swift; sourceTree = "<group>"; };
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
@@ -488,6 +487,7 @@
 		DAF58C7A2EF6E99500483AFD /* ItemAppEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemAppEntity.swift; sourceTree = "<group>"; };
 		DAF6F4112C67E83B0083883E /* openapiCorrected.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = openapiCorrected.json; sourceTree = "<group>"; };
 		DAFD2FE62E0D96700059A1EB /* OsLogRewriter */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = OsLogRewriter; sourceTree = "<group>"; };
+		DAFE45C92F02FBF4001CA713 /* ActionMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionMapper.swift; sourceTree = "<group>"; };
 		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectionUITableViewCell.swift; sourceTree = "<group>"; };
 		DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
 		DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameUITableViewCell.swift; sourceTree = "<group>"; };
@@ -511,6 +511,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DA2AEB752D92D32000897D80 /* Cells */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Cells; sourceTree = "<group>"; };
+		DA4BF3532F0307D30082479C /* iOS16 */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = iOS16; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -786,17 +787,18 @@
 		DA448E7E2EF435B400F0893C /* AppIntents */ = {
 			isa = PBXGroup;
 			children = (
+				DA4BF3532F0307D30082479C /* iOS16 */,
+				DAFE45C92F02FBF4001CA713 /* ActionMapper.swift */,
+				DA4BF3542F03095D0082479C /* ColorValueIntent.swift */,
+				DA4BF3552F03095D0082479C /* ContactStateIntent.swift */,
+				DA4BF3582F03098B0082479C /* DimmerRollerValueIntent.swift */,
+				DA4BF35A2F0309A60082479C /* NumberValueIntent.swift */,
 				DAD5E85D2F02C3BC003215C0 /* ItemIdentifier.swift */,
-				DAD5E85B2F02C272003215C0 /* ControlItemIntent.swift */,
-				DA448E762EF435B400F0893C /* GetItemState.swift */,
+				DA4BF35C2F0309B10082479C /* StringValueIntent.swift */,
+				DA4BF3512F0307A40082479C /* ItemStateIntent.swift */,
+				DAD5E85B2F02C272003215C0 /* SwitchStateIntent.swift */,
 				DAF58C7A2EF6E99500483AFD /* ItemAppEntity.swift */,
 				DA448E772EF435B400F0893C /* Home.swift */,
-				DA448E782EF435B400F0893C /* SetColorValue.swift */,
-				DA448E792EF435B400F0893C /* SetContactStateValue.swift */,
-				DA448E7A2EF435B400F0893C /* SetDimmerRollerValue.swift */,
-				DA448E7B2EF435B400F0893C /* SetNumberValue.swift */,
-				DA448E7C2EF435B400F0893C /* SetStringValue.swift */,
-				DA448E7D2EF435B400F0893C /* SetSwitchState.swift */,
 			);
 			path = AppIntents;
 			sourceTree = "<group>";
@@ -1557,24 +1559,19 @@
 				2FBCF58C2DEB0B7700CD5D83 /* HomeSelectionView.swift in Sources */,
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
-				DA448E7F2EF435B400F0893C /* SetStringValue.swift in Sources */,
-				DA448E802EF435B400F0893C /* SetDimmerRollerValue.swift in Sources */,
-				DA448E812EF435B400F0893C /* SetNumberValue.swift in Sources */,
 				DAF58C7B2EF6E99500483AFD /* ItemAppEntity.swift in Sources */,
-				DA448E822EF435B400F0893C /* GetItemState.swift in Sources */,
-				DA448E832EF435B400F0893C /* SetContactStateValue.swift in Sources */,
-				DA448E842EF435B400F0893C /* SetColorValue.swift in Sources */,
 				DA448E852EF435B400F0893C /* Home.swift in Sources */,
-				DA448E862EF435B400F0893C /* SetSwitchState.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
 				935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */,
 				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
 				DA77E19B2D886D9B007CFF0F /* SingleConnectionSettingsView.swift in Sources */,
 				DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */,
 				DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */,
-				DAD5E85C2F02C272003215C0 /* ControlItemIntent.swift in Sources */,
+				DAD5E85C2F02C272003215C0 /* SwitchStateIntent.swift in Sources */,
 				2F6412EE2CE494A80039FB28 /* DatePickerUITableViewCell.swift in Sources */,
+				DA4BF3522F0307A40082479C /* ItemStateIntent.swift in Sources */,
 				DA7F002D2EB376CF00DE943A /* ServerCertificatesView.swift in Sources */,
+				DAFE45CA2F02FBF4001CA713 /* ActionMapper.swift in Sources */,
 				DA95F3352E0F2C1600FE4474 /* OpenHABSitemapViewController.swift in Sources */,
 				DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */,
 				7BFFEA908B9E47FCB5C46E6E /* VideoStreamManager.swift in Sources */,
@@ -1603,20 +1600,25 @@
 				DA2AEBA02D92FB6500897D80 /* NoIconDisplayableCell.swift in Sources */,
 				DAD5E85E2F02C3C6003215C0 /* ItemIdentifier.swift in Sources */,
 				DA2AEB702D92CF3E00897D80 /* UITableViewCellExtension.swift in Sources */,
+				DA4BF3592F03098B0082479C /* DimmerRollerValueIntent.swift in Sources */,
 				DA4800162D836EF0009CF127 /* MainUISettingsView.swift in Sources */,
 				652B81042E2193B500648510 /* ScreenSaverSettingsView.swift in Sources */,
 				DA3563D92E5096BE00BC0138 /* ScreenSaverView.swift in Sources */,
 				DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */,
 				2F55E7BB2DEE447700EC8350 /* SettingsView.swift in Sources */,
 				DA4800182D837221009CF127 /* AboutSettingsView.swift in Sources */,
+				DA4BF3562F03095D0082479C /* ColorValueIntent.swift in Sources */,
+				DA4BF3572F03095D0082479C /* ContactStateIntent.swift in Sources */,
 				653B54C2285E714900298ECD /* OpenHABViewController.swift in Sources */,
 				DA7125372EC892BB0067D7B2 /* LoggerView.swift in Sources */,
 				65C2EF492E244C8500A0C19F /* OpenHABNavigationController.swift in Sources */,
 				DA2AEB6E2D92BAD800897D80 /* PageLoader.swift in Sources */,
+				DA4BF35D2F0309B10082479C /* StringValueIntent.swift in Sources */,
 				65F055442E3D4E41004E98FE /* ItemSelectionView.swift in Sources */,
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,
 				DAF0A28D2C56EF8900A14A6A /* SetpointCell.swift in Sources */,
 				DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */,
+				DA4BF35B2F0309A60082479C /* NumberValueIntent.swift in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,

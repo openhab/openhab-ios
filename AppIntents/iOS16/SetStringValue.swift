@@ -13,7 +13,7 @@ import AppIntents
 import Foundation
 import OpenHABCore
 
-enum GetItemStateError: Error, CustomLocalizedStringResourceConvertible {
+enum SetStringValueError: Error, CustomLocalizedStringResourceConvertible {
     case invalidHomeIdentifier
     case unknownHome
     case itemNotFound(String)
@@ -30,28 +30,33 @@ enum GetItemStateError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
+@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use StringValueIntent for iOS 17+")
+struct SetStringValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct StringOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
-            return allItems.flatMap { $0.value.map(\.name) }
+            let items = allItems.flatMap(\.value).filter { $0.type == .stringItem }
+            return items.map(\.name)
         }
     }
 
-    static let intentClassName = "OpenHABGetItemStateIntent"
+    static let intentClassName = "OpenHABSetStringValueIntent"
 
-    static let title: LocalizedStringResource = "Get Item State"
-    static let description = IntentDescription("Retrieve the current state of an item")
+    static let title: LocalizedStringResource = "Set String Control Value"
+    static let description = IntentDescription("Set the string of a string control item")
 
     // swiftlint:disable type_contents_order
     @Parameter(title: "Item", optionsProvider: StringOptionsProvider())
     var item: String
 
+    @Parameter(title: "Value")
+    var value: String
+
     @Parameter(title: "Home")
     var home: Home
 
     static var parameterSummary: some ParameterSummary {
-        Summary("Get \(\.$item) State") {
+        Summary("Set \(\.$item) to \(\.$value)") {
             \.$home
         }
     }
@@ -59,17 +64,17 @@ struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent
     // swiftlint:enable type_contents_order
 
     static var predictionConfiguration: some IntentPredictionConfiguration {
-        IntentPrediction(parameters: (\.$item, \.$home)) { item, _ in
+        IntentPrediction(parameters: (\.$item, \.$value, \.$home)) { item, value, _ in
             DisplayRepresentation(
-                title: "Get \(item) State",
+                title: "Set \(item) to \(value)",
                 subtitle: ""
             )
         }
     }
 
-    func perform() async throws -> some IntentResult & ReturnsValue<String> {
+    func perform() async throws -> some IntentResult & ProvidesDialog {
         guard let homeId = UUID(uuidString: home.id) else {
-            throw GetItemStateError.invalidHomeIdentifier
+            throw SetStringValueError.invalidHomeIdentifier
         }
 
         let homeExists = await MainActor.run {
@@ -77,33 +82,29 @@ struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent
         }
 
         guard homeExists else {
-            throw GetItemStateError.unknownHome
+            throw SetStringValueError.unknownHome
         }
 
-        guard let openHABItem = await OpenHABItemCache.instance.getItemUncached(name: item, home: homeId) else {
-            throw GetItemStateError.itemNotFound(item)
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: item, home: homeId),
+              !items.isEmpty else {
+            throw SetStringValueError.itemNotFound(item)
         }
 
-        let state = openHABItem.state ?? "Unknown state"
+        let openHABItem = items[0]
 
-        return .result(
-            value: state,
-            dialog: .responseSuccess(item: item, state: state)
-        )
+        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: value)
+
+        return .result(dialog: .responseSuccess(value: value, item: item))
     }
 }
 
 private extension IntentDialog {
     static var itemParameterConfiguration: Self {
-        "Item Name"
+        "String Item Name"
     }
 
     static var homeParameterConfiguration: Self {
         "Home name"
-    }
-
-    static var homeParameterPrompt: Self {
-        "blabla"
     }
 
     static var homeParameterDisambiguationSelection: Self {
@@ -115,14 +116,18 @@ private extension IntentDialog {
     }
 
     static func homeParameterConfirmation(home: Home) -> Self {
-        "Just to confirm, you wanted ‘\(home)’?"
+        "Just to confirm, you wanted '\(home)'?"
     }
 
-    static func responseSuccess(item: String, state: String) -> Self {
-        "The state of \(item) is \(state)"
+    static func responseSuccess(value: String, item: String) -> Self {
+        "Sent the string \(value) to \(item)"
     }
 
     static func responseFailureInvalidItem(item: String) -> Self {
         "Sorry can't find \(item)"
+    }
+
+    static func responseFailureEmptyValue(item: String) -> Self {
+        "Invalid empty value for \(item)"
     }
 }

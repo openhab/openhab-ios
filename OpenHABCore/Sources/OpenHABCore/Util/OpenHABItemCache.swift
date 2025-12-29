@@ -174,8 +174,9 @@ public extension [OpenHABItem] {
     func filtered(by searchTerm: String? = nil, for types: [OpenHABItem.ItemType]? = nil) -> [OpenHABItem] {
         // TODO: maybe allow home name for filtering and fuzzier search
         filter {
-            (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) &&
-                (types == nil || ($0.type != nil && types!.contains($0.type!)))
+            let matchesSearchTerm = searchTerm == nil || $0.name.contains(searchTerm.orEmpty)
+            let matchesType = types == nil || ($0.type.flatMap { types?.contains($0) } == true)
+            return matchesSearchTerm && matchesType
         }
     }
 }
@@ -183,12 +184,18 @@ public extension [OpenHABItem] {
 public extension OpenHABItemCache {
     func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, home: UUID) async -> [String] {
         await reloadCacheIfNeeded(homes: [home])
-        return items[home]?.filter { (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name).map(\.name) ?? []
+        return items[home]?.filter {
+            let matchesSearchTerm = searchTerm == nil || $0.name.contains(searchTerm.orEmpty)
+            let matchesType = types == nil || ($0.type.flatMap { types?.contains($0) } == true)
+            return matchesSearchTerm && matchesType
+        }
+        .sorted(by: \.name)
+        .map(\.name) ?? []
     }
 
     func getCachedItems(types: [OpenHABItem.ItemType]?, home: UUID) async -> [OpenHABItem] {
         await reloadCacheIfNeeded(homes: [home])
-        return items[home]?.filter { (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name) ?? []
+        return items[home]?.filter { types == nil || ($0.type.flatMap { types?.contains($0) } == true) }.sorted(by: \.name) ?? []
     }
 
     func searchItems(searchTerm: String, types: [OpenHABItem.ItemType]? = nil) async -> [UUID: [OpenHABItem]] {
@@ -199,7 +206,7 @@ public extension OpenHABItemCache {
             let filtered = homeItems.filter { item in
                 let matchesSearch = item.name.localizedCaseInsensitiveContains(searchTerm) ||
                     item.label.localizedCaseInsensitiveContains(searchTerm)
-                let matchesType = types == nil || (item.type != nil && types!.contains(item.type!))
+                let matchesType = types == nil || (item.type.flatMap { types?.contains($0) } == true)
                 return matchesSearch && matchesType
             }
             if !filtered.isEmpty {

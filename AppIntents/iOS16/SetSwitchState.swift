@@ -13,6 +13,7 @@ import AppIntents
 import Foundation
 import OpenHABCore
 
+@available(iOS, introduced: 16.0, obsoleted: 17.0)
 enum SetSwitchStateError: Error, CustomLocalizedStringResourceConvertible {
     case invalidHomeIdentifier
     case itemNotFound(String)
@@ -34,6 +35,7 @@ enum SetSwitchStateError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
+// @available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use SwitchStateIntent for iOS 17+")
 struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     // swiftlint:disable type_contents_order
 
@@ -57,10 +59,7 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
 
     struct ActionOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
-            [
-                String(localized: "on").capitalized,
-                String(localized: "off").capitalized
-            ]
+            ActionMapper.onOffOptions
         }
     }
 
@@ -89,14 +88,7 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
             throw SetSwitchStateError.invalidHomeIdentifier
         }
 
-        let onLabel = String(localized: "on").capitalized
-        let offLabel = String(localized: "off").capitalized
-        let actionMap: [String: String] = [
-            onLabel: "ON",
-            offLabel: "OFF"
-        ]
-
-        guard let command = actionMap[action] else {
+        guard let command = ActionMapper.command(from: action) else {
             throw SetSwitchStateError.invalidAction(action, item)
         }
         guard let items = await OpenHABItemCache.instance.getCachedItem(name: item, home: homeId),

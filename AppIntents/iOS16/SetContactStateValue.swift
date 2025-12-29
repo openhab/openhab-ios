@@ -13,10 +13,11 @@ import AppIntents
 import Foundation
 import OpenHABCore
 
-enum SetNumberValueError: Error, CustomLocalizedStringResourceConvertible {
+enum SetContactStateValueError: Error, CustomLocalizedStringResourceConvertible {
     case invalidHomeIdentifier
     case unknownHome
     case itemNotFound(String)
+    case invalidState(String, String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -26,36 +27,45 @@ enum SetNumberValueError: Error, CustomLocalizedStringResourceConvertible {
             "Unknown home"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
+        case let .invalidState(state, itemName):
+            "State invalid: \(state) for \(itemName)"
         }
     }
 }
 
-struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
-    struct StringOptionsProvider: DynamicOptionsProvider {
+@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use ContactStateIntent for iOS 17+")
+struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
+    struct ItemOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
-            let items = allItems.flatMap(\.value).filter { $0.type == .number }
+            let items = allItems.flatMap(\.value).filter { $0.type == .contact }
             return items.map(\.name)
         }
     }
 
-    static let intentClassName = "OpenHABSetNumberValueIntent"
+    struct StateOptionsProvider: DynamicOptionsProvider {
+        func results() async throws -> [String] {
+            ActionMapper.onOffOptions
+        }
+    }
 
-    static let title: LocalizedStringResource = "Set Number Control Value"
-    static let description = IntentDescription("Set the decimal value of a number control item")
+    static let intentClassName = "OpenHABSetContactStateValueIntent"
+
+    static let title: LocalizedStringResource = "Set Contact State Value"
+    static let description = IntentDescription("Set the state of a contact open or closed")
 
     // swiftlint:disable type_contents_order
-    @Parameter(title: "Item", optionsProvider: StringOptionsProvider())
+    @Parameter(title: "Item", optionsProvider: ItemOptionsProvider())
     var item: String
 
-    @Parameter(title: "Value")
-    var value: Double
+    @Parameter(title: "State", optionsProvider: StateOptionsProvider())
+    var state: String
 
     @Parameter(title: "Home")
     var home: Home
 
     static var parameterSummary: some ParameterSummary {
-        Summary("Set \(\.$item) to \(\.$value)") {
+        Summary("Set the state of \(\.$item) to \(\.$state)") {
             \.$home
         }
     }
@@ -63,9 +73,9 @@ struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
     // swiftlint:enable type_contents_order
 
     static var predictionConfiguration: some IntentPredictionConfiguration {
-        IntentPrediction(parameters: (\.$item, \.$value, \.$home)) { item, value, _ in
+        IntentPrediction(parameters: (\.$item, \.$state, \.$home)) { item, state, _ in
             DisplayRepresentation(
-                title: "Set \(item) to \(value)",
+                title: "Set the state of \(item) to \(state)",
                 subtitle: ""
             )
         }
@@ -73,7 +83,7 @@ struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         guard let homeId = UUID(uuidString: home.id) else {
-            throw SetNumberValueError.invalidHomeIdentifier
+            throw SetContactStateValueError.invalidHomeIdentifier
         }
 
         let homeExists = await MainActor.run {
@@ -81,25 +91,33 @@ struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
         }
 
         guard homeExists else {
-            throw SetNumberValueError.unknownHome
+            throw SetContactStateValueError.unknownHome
+        }
+
+        guard let realState = ActionMapper.command(from: state) else {
+            throw SetContactStateValueError.invalidState(state, item)
         }
 
         guard let items = await OpenHABItemCache.instance.getCachedItem(name: item, home: homeId),
               !items.isEmpty else {
-            throw SetNumberValueError.itemNotFound(item)
+            throw SetContactStateValueError.itemNotFound(item)
         }
 
         let openHABItem = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: String(value))
+        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: realState)
 
-        return .result(dialog: .responseSuccess(value: value, item: item))
+        return .result(dialog: .responseSuccess(item: item, state: state))
     }
 }
 
 private extension IntentDialog {
     static var itemParameterConfiguration: Self {
-        "Number Item Name"
+        "Switch name"
+    }
+
+    static var stateParameterConfiguration: Self {
+        "Action"
     }
 
     static var homeParameterConfiguration: Self {
@@ -118,15 +136,15 @@ private extension IntentDialog {
         "Just to confirm, you wanted '\(home)'?"
     }
 
-    static func responseSuccess(value: Double, item: String) -> Self {
-        "Sent the number \(value) to \(item)"
+    static func responseSuccess(item: String, state: String) -> Self {
+        "The state of \(item) was set to \(state)"
     }
 
     static func responseFailureInvalidItem(item: String) -> Self {
         "Sorry can't find \(item)"
     }
 
-    static func responseFailureEmptyValue(item: String) -> Self {
-        "Invalid empty value for \(item)"
+    static func responseFailureInvalidAction(state: String, item: String) -> Self {
+        "State invalid: \(state) for \(item)"
     }
 }

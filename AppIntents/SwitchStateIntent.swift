@@ -9,24 +9,40 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-struct ControlItemIntent: AppIntent {
-    struct ActionOptionsProvider: DynamicOptionsProvider {
-        func results() async throws -> [String] {
-            [
-                String(localized: "on").capitalized,
-                String(localized: "off").capitalized
-            ]
+import AppIntents
+import Intents
+import OpenHABCore
+
+enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
+    case invalidAction(String, String)
+    case itemNotInHome(String, String)
+
+    var localizedStringResource: LocalizedStringResource {
+        switch self {
+        case let .invalidAction(action, itemName):
+            "Action invalid: \(action) for \(itemName)"
+        case let .itemNotInHome(itemName, homeName):
+            "Item '\(itemName)' is not in home '\(homeName)'"
         }
     }
+}
 
-    static let title: LocalizedStringResource = "Control Item"
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+struct SwitchStateIntent: AppIntent {
+    struct ActionOptionsProvider: DynamicOptionsProvider {
+        func results() async throws -> [String] {
+            ActionMapper.onOffToggleOptions
+        }
+    }
 
     static var parameterSummary: some ParameterSummary {
         Summary("Send \(\.$action) to \(\.$itemEntity)") {
             \.$home
         }
     }
+
+    static let title: LocalizedStringResource = "Set Switch State"
+    static let description = IntentDescription("Set the state of a switch on or off, or toggle its state")
 
     @Parameter(title: "Home")
     var home: Home
@@ -43,14 +59,7 @@ struct ControlItemIntent: AppIntent {
             throw ControlItemError.itemNotInHome(itemEntity.label, home.displayString)
         }
 
-        let onLabel = String(localized: "on").capitalized
-        let offLabel = String(localized: "off").capitalized
-        let actionMap: [String: String] = [
-            onLabel: "ON",
-            offLabel: "OFF"
-        ]
-
-        guard let command = actionMap[action] else {
+        guard let command = ActionMapper.command(from: action) else {
             throw ControlItemError.invalidAction(action, itemEntity.label)
         }
 

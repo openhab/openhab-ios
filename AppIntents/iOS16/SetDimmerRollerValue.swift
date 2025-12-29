@@ -13,52 +13,53 @@ import AppIntents
 import Foundation
 import OpenHABCore
 
-enum SetColorValueError: Error, CustomLocalizedStringResourceConvertible {
+enum SetDimmerRollerValueError: Error, CustomLocalizedStringResourceConvertible {
     case invalidHomeIdentifier
     case unknownHome
     case itemNotFound(String)
-    case invalidValue(String, String)
+    case invalidValue(Int, String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
         case .invalidHomeIdentifier:
-            "Invalid home identifier"
+            "Invalid Home identifier"
         case .unknownHome:
-            "Unknown home"
+            "Unknown Home"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
         case let .invalidValue(value, itemName):
-            "Invalid value: \(value) for \(itemName) must be HSB (0-360,0-100,0-100)"
+            "Invalid value \(value) for \(itemName) (0-100)"
         }
     }
 }
 
-struct SetColorValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
+@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use DimmerRollerValueIntent for iOS 17+")
+struct SetDimmerRollerValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct StringOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
-            let items = allItems.flatMap(\.value).filter { $0.type == .color }
+            let items = allItems.flatMap(\.value).filter { $0.type == .dimmer || $0.type == .rollershutter }
             return items.map(\.name)
         }
     }
 
-    static let intentClassName = "OpenHABSetColorValueIntent"
+    static let intentClassName = "OpenHABSetDimmerRollerValueIntent"
 
-    static let title: LocalizedStringResource = "Set Color Control Value"
-    static let description = IntentDescription("Set the color of a color control item")
+    static let title: LocalizedStringResource = "Set Dimmer or Roller Shutter Value"
+    static let description = IntentDescription("Set the integer value of a dimmer or roller shutter")
 
     // swiftlint:disable type_contents_order
     @Parameter(title: "Item", optionsProvider: StringOptionsProvider())
     var item: String
 
-    @Parameter(title: "Value", default: "240,100,100")
-    var value: String
+    @Parameter(title: "Value")
+    var value: Int
 
     @Parameter(title: "Home")
     var home: Home
 
     static var parameterSummary: some ParameterSummary {
-        Summary("Set \(\.$item) to \(\.$value) (HSB)") {
+        Summary("Set \(\.$item) to \(\.$value)") {
             \.$home
         }
     }
@@ -68,17 +69,15 @@ struct SetColorValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInten
     static var predictionConfiguration: some IntentPredictionConfiguration {
         IntentPrediction(parameters: (\.$item, \.$value, \.$home)) { item, value, _ in
             DisplayRepresentation(
-                title: "Set \(item) to \(value) (HSB)",
+                title: "Set \(item) to \(value)",
                 subtitle: ""
             )
         }
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        var colorValue = value
-
         guard let homeId = UUID(uuidString: home.id) else {
-            throw SetColorValueError.invalidHomeIdentifier
+            throw SetDimmerRollerValueError.invalidHomeIdentifier
         }
 
         let homeExists = await MainActor.run {
@@ -86,35 +85,29 @@ struct SetColorValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInten
         }
 
         guard homeExists else {
-            throw SetColorValueError.unknownHome
+            throw SetDimmerRollerValueError.unknownHome
         }
 
-        let hsb = colorValue.split(separator: ",")
-        guard hsb.count == 3,
-              let hue = Int(hsb[0]), (0 ... 360).contains(hue),
-              let sat = Int(hsb[1]), (0 ... 100).contains(sat),
-              let val = Int(hsb[2]), (0 ... 100).contains(val) else {
-            throw SetColorValueError.invalidValue(colorValue, item)
+        guard (0 ... 100).contains(value) else {
+            throw SetDimmerRollerValueError.invalidValue(value, item)
         }
-
-        colorValue = "\(hue),\(sat),\(val)"
 
         guard let items = await OpenHABItemCache.instance.getCachedItem(name: item, home: homeId),
               !items.isEmpty else {
-            throw SetColorValueError.itemNotFound(item)
+            throw SetDimmerRollerValueError.itemNotFound(item)
         }
 
         let openHABItem = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: colorValue)
+        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: "\(value)")
 
-        return .result(dialog: .responseSuccess(value: colorValue, item: item))
+        return .result(dialog: .responseSuccess(value: value, item: item))
     }
 }
 
 private extension IntentDialog {
     static var itemParameterConfiguration: Self {
-        "Color Item Name"
+        "Dimmer/Roller Name"
     }
 
     static var homeParameterConfiguration: Self {
@@ -133,15 +126,19 @@ private extension IntentDialog {
         "Just to confirm, you wanted '\(home)'?"
     }
 
-    static func responseSuccess(value: String, item: String) -> Self {
-        "Sent the color value of \(value) to \(item)"
+    static func responseSuccess(value: Int, item: String) -> Self {
+        "Sent the value of \(value) to \(item)"
     }
 
     static func responseFailureInvalidItem(item: String) -> Self {
         "Sorry can't find \(item)"
     }
 
-    static func responseFailureInvalidValue(value: String, item: String) -> Self {
-        "Invalid value: \(value) for \(item) must be HSB (0-360,0-100,0-100)"
+    static func responseFailureEmptyValue(item: String) -> Self {
+        "Invalid empty value for \(item)"
+    }
+
+    static func responseFailureInvalidValue(value: Int, item: String) -> Self {
+        "Invalid value \(value) for \(item) (0-100)"
     }
 }

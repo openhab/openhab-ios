@@ -16,7 +16,7 @@ import OpenHABCore
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 struct ItemAppEntity: AppEntity, Identifiable {
     struct ItemAppEntityQuery: EntityStringQuery {
-        @IntentParameterDependency<ControlItemIntent>(\.$home)
+        @IntentParameterDependency<SwitchStateIntent>(\.$home)
         var intent
 
         func entities(for identifiers: [ItemAppEntity.ID]) async throws -> [ItemAppEntity] {
