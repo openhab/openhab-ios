@@ -14,11 +14,18 @@ import Foundation
 import OpenHABCore
 
 enum SetSwitchStateError: Error, CustomLocalizedStringResourceConvertible {
+    case invalidHomeIdentifier
+    case itemNotFound(String)
+
     case invalidAction(String, String)
     case itemNotInHome(String, String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
+        case .invalidHomeIdentifier:
+            "Invalid home identifier"
+        case let .itemNotFound(itemName):
+            "Item '\(itemName)' not found"
         case let .invalidAction(action, itemName):
             "Action invalid: \(action) for \(itemName)"
         case let .itemNotInHome(itemName, homeName):
@@ -28,6 +35,26 @@ enum SetSwitchStateError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
+    // swiftlint:disable type_contents_order
+
+    static let intentClassName = "OpenHABSetSwitchStateIntent"
+    static let title: LocalizedStringResource = "Set Switch State"
+    static let description = IntentDescription("Set the state of a switch on or off")
+
+    @Parameter(title: "Home")
+    var home: Home
+
+    struct ItemOptionsProvider: DynamicOptionsProvider {
+        func results() async throws -> [String] {
+            let allItems = await OpenHABItemCache.instance.getAllCachedItems()
+            let items = allItems.flatMap(\.value).filter { $0.type == .switchItem }
+            return items.map(\.name)
+        }
+    }
+
+    @Parameter(title: "Item", optionsProvider: ItemOptionsProvider())
+    var item: String
+
     struct ActionOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
             [
@@ -36,18 +63,6 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
             ]
         }
     }
-
-    static let intentClassName = "OpenHABSetSwitchStateIntent"
-
-    static let title: LocalizedStringResource = "Set Switch State"
-    static let description = IntentDescription("Set the state of a switch on or off")
-
-    // swiftlint:disable type_contents_order
-    @Parameter(title: "Home")
-    var home: Home
-
-    @Parameter(title: "Item")
-    var item: ItemAppEntity
 
     @Parameter(title: "Action", optionsProvider: ActionOptionsProvider())
     var action: String
@@ -61,18 +76,17 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
     // swiftlint:enable type_contents_order
 
     static var predictionConfiguration: some IntentPredictionConfiguration {
-        IntentPrediction(parameters: (\.$home, \.$item, \.$action)) { home, item, action in
+        IntentPrediction(parameters: (\.$item, \.$action, \.$home)) { item, action, _ in
             DisplayRepresentation(
-                title: "Send \(action) to \(item.label)",
-                subtitle: "in \(home.displayString)"
+                title: "Send \(action) to \(item)",
+                subtitle: ""
             )
         }
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        // Validate that the item belongs to the selected home
-        guard let homeId = UUID(uuidString: home.id), homeId == item.homeId else {
-            throw SetSwitchStateError.itemNotInHome(item.label, home.displayString)
+        guard let homeId = UUID(uuidString: home.id) else {
+            throw SetSwitchStateError.invalidHomeIdentifier
         }
 
         let onLabel = String(localized: "on").capitalized
@@ -83,12 +97,18 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
         ]
 
         guard let command = actionMap[action] else {
-            throw SetSwitchStateError.invalidAction(action, item.label)
+            throw SetSwitchStateError.invalidAction(action, item)
+        }
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: item, home: homeId),
+              !items.isEmpty else {
+            throw SetSwitchStateError.itemNotFound(item)
         }
 
-        await OpenHABItemCache.instance.sendCommand(to: item.item, home: item.homeId, command: command)
+        let openHABItem = items[0]
 
-        return .result(dialog: .responseSuccess(action: action, item: item.label))
+        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: command)
+
+        return .result(dialog: .responseSuccess(action: action, item: item))
     }
 }
 

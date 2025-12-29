@@ -13,14 +13,12 @@ import AppIntents
 import Intents
 import OpenHABCore
 
-struct ItemIdentifier: Hashable, Codable {
-    let homeId: UUID
-    let itemName: String
-}
-
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-struct ItemAppEntity: AppEntity, Hashable {
-    struct ItemAppEntityQuery: EntityQuery {
+struct ItemAppEntity: AppEntity, Identifiable {
+    struct ItemAppEntityQuery: EntityStringQuery {
+        @IntentParameterDependency<ControlItemIntent>(\.$home)
+        var intent
+
         func entities(for identifiers: [ItemAppEntity.ID]) async throws -> [ItemAppEntity] {
             var result: [ItemAppEntity] = []
 
@@ -46,6 +44,18 @@ struct ItemAppEntity: AppEntity, Hashable {
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
             var result: [ItemAppEntity] = []
 
+            // If the user selected a Home in the intent UI, scope results to that home.
+            if let selectedHome = intent?.home,
+               let selectedHomeId = UUID(uuidString: selectedHome.id) {
+                if let items = allItems[selectedHomeId] {
+                    let homeName = await getHomeName(for: selectedHomeId)
+                    let filteredItems = items.filter { $0.type == .switchItem }
+                    result.append(contentsOf: filteredItems.map { ItemAppEntity($0, homeId: selectedHomeId, homeName: homeName) })
+                }
+                return result
+            }
+
+            // Fallback (e.g. Siri request without an explicit Home selection): return items across all homes.
             for (homeId, items) in allItems {
                 let homeName = await getHomeName(for: homeId)
                 let filteredItems = items.filter { $0.type == .switchItem }
@@ -62,6 +72,17 @@ struct ItemAppEntity: AppEntity, Hashable {
             )
             var result: [ItemAppEntity] = []
 
+            // If the user selected a Home in the intent UI, scope results to that home.
+            if let selectedHome = intent?.home,
+               let selectedHomeId = UUID(uuidString: selectedHome.id) {
+                if let items = searchResults[selectedHomeId] {
+                    let homeName = await getHomeName(for: selectedHomeId)
+                    result.append(contentsOf: items.map { ItemAppEntity($0, homeId: selectedHomeId, homeName: homeName) })
+                }
+                return result
+            }
+
+            // Fallback (e.g. Siri request without an explicit Home selection): return matches across all homes.
             for (homeId, items) in searchResults {
                 let homeName = await getHomeName(for: homeId)
                 result.append(contentsOf: items.map { ItemAppEntity($0, homeId: homeId, homeName: homeName) })
@@ -104,30 +125,6 @@ struct ItemAppEntity: AppEntity, Hashable {
             homeName: homeName
         )
     }
-
-    // Hashable conformance - hash based on id only
-    static func == (lhs: ItemAppEntity, rhs: ItemAppEntity) -> Bool {
-        lhs.id == rhs.id
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-}
-
-extension ItemIdentifier: EntityIdentifierConvertible {
-    var entityIdentifierString: String {
-        "\(homeId.uuidString):\(itemName)"
-    }
-
-    static func entityIdentifier(for entityIdentifierString: String) -> ItemIdentifier? {
-        let components = entityIdentifierString.split(separator: ":", maxSplits: 1)
-        guard components.count == 2,
-              let homeId = UUID(uuidString: String(components[0])) else {
-            return nil
-        }
-        return ItemIdentifier(homeId: homeId, itemName: String(components[1]))
-    }
 }
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
@@ -141,73 +138,4 @@ extension ItemAppEntity {
     var type: OpenHABItem.ItemType? { item.type }
     var state: String? { item.state }
     var link: String { item.link }
-}
-
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-struct ControlItemIntent: AppIntent {
-    struct ActionOptionsProvider: DynamicOptionsProvider {
-        func results() async throws -> [String] {
-            [
-                String(localized: "on").capitalized,
-                String(localized: "off").capitalized
-            ]
-        }
-    }
-
-    static let title: LocalizedStringResource = "Control Item"
-
-    @Parameter(title: "Home")
-    var home: Home
-
-    @Parameter(title: "Item")
-    var itemEntity: ItemAppEntity
-
-    @Parameter(title: "Action", optionsProvider: ActionOptionsProvider())
-    var action: String
-
-    static var parameterSummary: some ParameterSummary {
-        Summary("Send \(\.$action) to \(\.$itemEntity)") {
-            \.$home
-        }
-    }
-
-    func perform() async throws -> some IntentResult {
-        // Validate that the item belongs to the selected home
-        guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw ControlItemError.itemNotInHome(itemEntity.label, home.displayString)
-        }
-
-        let onLabel = String(localized: "on").capitalized
-        let offLabel = String(localized: "off").capitalized
-        let actionMap: [String: String] = [
-            onLabel: "ON",
-            offLabel: "OFF"
-        ]
-
-        guard let command = actionMap[action] else {
-            throw ControlItemError.invalidAction(action, itemEntity.label)
-        }
-
-        await OpenHABItemCache.instance.sendCommand(
-            to: itemEntity.item,
-            home: itemEntity.homeId,
-            command: command
-        )
-
-        return .result()
-    }
-}
-
-enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
-    case invalidAction(String, String)
-    case itemNotInHome(String, String)
-
-    var localizedStringResource: LocalizedStringResource {
-        switch self {
-        case let .invalidAction(action, itemName):
-            "Action invalid: \(action) for \(itemName)"
-        case let .itemNotInHome(itemName, homeName):
-            "Item '\(itemName)' is not in home '\(homeName)'"
-        }
-    }
 }
