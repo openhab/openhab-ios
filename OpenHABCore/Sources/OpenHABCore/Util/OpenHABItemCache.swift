@@ -190,4 +190,23 @@ public extension OpenHABItemCache {
         await reloadCacheIfNeeded(homes: [home])
         return items[home]?.filter { (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name) ?? []
     }
+
+    func searchItems(searchTerm: String, types: [OpenHABItem.ItemType]? = nil) async -> [UUID: [OpenHABItem]] {
+        let allItems = await getAllCachedItems()
+        var result: [UUID: [OpenHABItem]] = [:]
+
+        for (homeId, homeItems) in allItems {
+            let filtered = homeItems.filter { item in
+                let matchesSearch = item.name.localizedCaseInsensitiveContains(searchTerm) ||
+                    item.label.localizedCaseInsensitiveContains(searchTerm)
+                let matchesType = types == nil || (item.type != nil && types!.contains(item.type!))
+                return matchesSearch && matchesType
+            }
+            if !filtered.isEmpty {
+                result[homeId] = filtered
+            }
+        }
+
+        return result
+    }
 }

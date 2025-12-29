@@ -13,7 +13,6 @@ import AppIntents
 import Foundation
 import OpenHABCore
 
-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 struct Home: AppEntity {
     struct HomeQuery: EntityQuery {
         @MainActor

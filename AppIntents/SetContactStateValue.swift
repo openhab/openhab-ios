@@ -33,7 +33,6 @@ enum SetContactStateValueError: Error, CustomLocalizedStringResourceConvertible 
     }
 }
 
-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct ItemOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
@@ -121,7 +120,6 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
     }
 }
 
-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 private extension IntentDialog {
     static var itemParameterConfiguration: Self {
         "Switch name"

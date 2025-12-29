@@ -19,7 +19,7 @@ struct ItemIdentifier: Hashable, Codable {
 }
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-struct ItemAppEntity: AppEntity {
+struct ItemAppEntity: AppEntity, Hashable {
     struct ItemAppEntityQuery: EntityQuery {
         func entities(for identifiers: [ItemAppEntity.ID]) async throws -> [ItemAppEntity] {
             var result: [ItemAppEntity] = []
@@ -29,11 +29,17 @@ struct ItemAppEntity: AppEntity {
                     name: identifier.itemName,
                     home: identifier.homeId
                 ), let item = items.first {
-                    result.append(ItemAppEntity(item, homeId: identifier.homeId))
+                    let homeName = await getHomeName(for: identifier.homeId)
+                    result.append(ItemAppEntity(item, homeId: identifier.homeId, homeName: homeName))
                 }
             }
 
             return result
+        }
+
+        @MainActor
+        private func getHomeName(for homeId: UUID) -> String? {
+            Preferences.shared.storedHomes[homeId]?.homeName
         }
 
         func suggestedEntities() async throws -> [ItemAppEntity] {
@@ -41,8 +47,24 @@ struct ItemAppEntity: AppEntity {
             var result: [ItemAppEntity] = []
 
             for (homeId, items) in allItems {
+                let homeName = await getHomeName(for: homeId)
                 let filteredItems = items.filter { $0.type == .switchItem }
-                result.append(contentsOf: filteredItems.map { ItemAppEntity($0, homeId: homeId) })
+                result.append(contentsOf: filteredItems.map { ItemAppEntity($0, homeId: homeId, homeName: homeName) })
+            }
+
+            return result
+        }
+
+        func entities(matching string: String) async throws -> [ItemAppEntity] {
+            let searchResults = await OpenHABItemCache.instance.searchItems(
+                searchTerm: string,
+                types: [.switchItem]
+            )
+            var result: [ItemAppEntity] = []
+
+            for (homeId, items) in searchResults {
+                let homeName = await getHomeName(for: homeId)
+                result.append(contentsOf: items.map { ItemAppEntity($0, homeId: homeId, homeName: homeName) })
             }
 
             return result
@@ -55,31 +77,41 @@ struct ItemAppEntity: AppEntity {
     static let defaultQuery = ItemAppEntityQuery()
 
     var id: ItemIdentifier
-    var label: String
-    var category: String
-    var link: String
-    var type: OpenHABItem.ItemType?
+    var item: OpenHABItem
+    var homeName: String?
 
     var displayRepresentation: DisplayRepresentation {
-        DisplayRepresentation(title: "\(label)", subtitle: "\(id.itemName)")
+        if let homeName {
+            DisplayRepresentation(
+                title: "\(label)",
+                subtitle: "\(item.name) • \(homeName)"
+            )
+        } else {
+            DisplayRepresentation(title: "\(label)", subtitle: "\(item.name)")
+        }
     }
 
-    init(id: ItemIdentifier, label: String, category: String, link: String, type: OpenHABItem.ItemType?) {
+    init(id: ItemIdentifier, item: OpenHABItem, homeName: String? = nil) {
         self.id = id
-        self.label = label
-        self.category = category
-        self.link = link
-        self.type = type
+        self.item = item
+        self.homeName = homeName
     }
 
-    init(_ openHABItem: OpenHABItem, homeId: UUID) {
+    init(_ openHABItem: OpenHABItem, homeId: UUID, homeName: String? = nil) {
         self.init(
             id: ItemIdentifier(homeId: homeId, itemName: openHABItem.name),
-            label: openHABItem.label,
-            category: openHABItem.category,
-            link: openHABItem.link,
-            type: openHABItem.type
+            item: openHABItem,
+            homeName: homeName
         )
+    }
+
+    // Hashable conformance - hash based on id only
+    static func == (lhs: ItemAppEntity, rhs: ItemAppEntity) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 
@@ -102,21 +134,80 @@ extension ItemIdentifier: EntityIdentifierConvertible {
 extension ItemAppEntity {
     var homeId: UUID { id.homeId }
     var itemName: String { id.itemName }
+
+    // Convenient access to common item properties
+    var label: String { item.label }
+    var category: String { item.category }
+    var type: OpenHABItem.ItemType? { item.type }
+    var state: String? { item.state }
+    var link: String { item.link }
 }
 
-// Usage Example of App Intents
-//
-// struct ControlItemIntent: AppIntent {
-//    @Parameter(title: "Item")
-//    var item: ItemAppEntity
-//
-//    func perform() async throws -> some IntentResult {
-//        // Access components directly
-//        await OpenHABItemCache.instance.sendCommand(
-//            to: /* OpenHABItem */,
-//            home: item.homeId,  // Clean access via computed property
-//            command: "ON"
-//        )
-//        return .result()
-//    }
-// }
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+struct ControlItemIntent: AppIntent {
+    struct ActionOptionsProvider: DynamicOptionsProvider {
+        func results() async throws -> [String] {
+            [
+                String(localized: "on").capitalized,
+                String(localized: "off").capitalized
+            ]
+        }
+    }
+
+    static let title: LocalizedStringResource = "Control Item"
+
+    @Parameter(title: "Home")
+    var home: Home
+
+    @Parameter(title: "Item")
+    var itemEntity: ItemAppEntity
+
+    @Parameter(title: "Action", optionsProvider: ActionOptionsProvider())
+    var action: String
+
+    static var parameterSummary: some ParameterSummary {
+        Summary("Send \(\.$action) to \(\.$itemEntity)") {
+            \.$home
+        }
+    }
+
+    func perform() async throws -> some IntentResult {
+        // Validate that the item belongs to the selected home
+        guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
+            throw ControlItemError.itemNotInHome(itemEntity.label, home.displayString)
+        }
+
+        let onLabel = String(localized: "on").capitalized
+        let offLabel = String(localized: "off").capitalized
+        let actionMap: [String: String] = [
+            onLabel: "ON",
+            offLabel: "OFF"
+        ]
+
+        guard let command = actionMap[action] else {
+            throw ControlItemError.invalidAction(action, itemEntity.label)
+        }
+
+        await OpenHABItemCache.instance.sendCommand(
+            to: itemEntity.item,
+            home: itemEntity.homeId,
+            command: command
+        )
+
+        return .result()
+    }
+}
+
+enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
+    case invalidAction(String, String)
+    case itemNotInHome(String, String)
+
+    var localizedStringResource: LocalizedStringResource {
+        switch self {
+        case let .invalidAction(action, itemName):
+            "Action invalid: \(action) for \(itemName)"
+        case let .itemNotInHome(itemName, homeName):
+            "Item '\(itemName)' is not in home '\(homeName)'"
+        }
+    }
+}

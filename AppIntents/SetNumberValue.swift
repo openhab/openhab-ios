@@ -30,7 +30,6 @@ enum SetNumberValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct StringOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
@@ -98,7 +97,6 @@ struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
     }
 }
 
-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 private extension IntentDialog {
     static var itemParameterConfiguration: Self {
         "Number Item Name"

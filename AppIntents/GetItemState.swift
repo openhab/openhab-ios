@@ -30,7 +30,6 @@ enum GetItemStateError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct StringOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
@@ -94,7 +93,6 @@ struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent
     }
 }
 
-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 private extension IntentDialog {
     static var itemParameterConfiguration: Self {
         "Item Name"
