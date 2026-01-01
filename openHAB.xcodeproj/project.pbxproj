@@ -141,7 +141,7 @@
 		DAD0857B2AE4782F001D36BE /* OpenHABWatchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857A2AE4782F001D36BE /* OpenHABWatchUITests.swift */; };
 		DAD0857D2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857C2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift */; };
 		DAD0858B2AE56F0E001D36BE /* OpenHABWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0855F2AE47824001D36BE /* OpenHABWatch.swift */; };
-		DAD5E85C2F02C272003215C0 /* SwitchStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD5E85B2F02C272003215C0 /* SwitchStateIntent.swift */; };
+		DAD5E85C2F02C272003215C0 /* SwitchItemIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD5E85B2F02C272003215C0 /* SwitchItemIntent.swift */; };
 		DAD5E85E2F02C3C6003215C0 /* ItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD5E85D2F02C3BC003215C0 /* ItemIdentifier.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
@@ -165,7 +165,7 @@
 		DAF4581823DC4A050018B495 /* ImageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581723DC4A050018B495 /* ImageRow.swift */; };
 		DAF4581E23DC60020018B495 /* ImageRawRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581D23DC60020018B495 /* ImageRawRow.swift */; };
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
-		DAF58C7B2EF6E99500483AFD /* ItemAppEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF58C7A2EF6E99500483AFD /* ItemAppEntity.swift */; };
+		DAF58C7B2EF6E99500483AFD /* SwitchItemEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF58C7A2EF6E99500483AFD /* SwitchItemEntity.swift */; };
 		DAFE45CA2F02FBF4001CA713 /* ActionMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFE45C92F02FBF4001CA713 /* ActionMapper.swift */; };
 		DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */; };
 		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */; };
@@ -465,7 +465,7 @@
 		DAD488B3287DDDFE00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = Resources/nb.lproj/Intents.strings; sourceTree = "<group>"; };
 		DAD488B4287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DAD488B5287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		DAD5E85B2F02C272003215C0 /* SwitchStateIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchStateIntent.swift; sourceTree = "<group>"; };
+		DAD5E85B2F02C272003215C0 /* SwitchItemIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchItemIntent.swift; sourceTree = "<group>"; };
 		DAD5E85D2F02C3BC003215C0 /* ItemIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemIdentifier.swift; sourceTree = "<group>"; };
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
@@ -488,7 +488,7 @@
 		DAF4581723DC4A050018B495 /* ImageRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRow.swift; sourceTree = "<group>"; };
 		DAF4581D23DC60020018B495 /* ImageRawRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRawRow.swift; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
-		DAF58C7A2EF6E99500483AFD /* ItemAppEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemAppEntity.swift; sourceTree = "<group>"; };
+		DAF58C7A2EF6E99500483AFD /* SwitchItemEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchItemEntity.swift; sourceTree = "<group>"; };
 		DAF6F4112C67E83B0083883E /* openapiCorrected.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = openapiCorrected.json; sourceTree = "<group>"; };
 		DAFD2FE62E0D96700059A1EB /* OsLogRewriter */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = OsLogRewriter; sourceTree = "<group>"; };
 		DAFE45C92F02FBF4001CA713 /* ActionMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionMapper.swift; sourceTree = "<group>"; };
@@ -796,7 +796,7 @@
 				DAFE45C92F02FBF4001CA713 /* ActionMapper.swift */,
 				DAD5E85D2F02C3BC003215C0 /* ItemIdentifier.swift */,
 				DA4BF4042F06F5CA0082479C /* ContactState.swift */,
-				DAF58C7A2EF6E99500483AFD /* ItemAppEntity.swift */,
+				DAF58C7A2EF6E99500483AFD /* SwitchItemEntity.swift */,
 				DA4BF4022F06F5950082479C /* SwitchAction.swift */,
 				DA448E772EF435B400F0893C /* Home.swift */,
 			);
@@ -830,7 +830,7 @@
 				DA4BF3552F03095D0082479C /* ContactStateIntent.swift */,
 				DA4BF3582F03098B0082479C /* DimmerRollerValueIntent.swift */,
 				DA4BF3512F0307A40082479C /* ItemStateIntent.swift */,
-				DAD5E85B2F02C272003215C0 /* SwitchStateIntent.swift */,
+				DAD5E85B2F02C272003215C0 /* SwitchItemIntent.swift */,
 				DA4BF35C2F0309B10082479C /* StringValueIntent.swift */,
 				DA4BF35A2F0309A60082479C /* NumberValueIntent.swift */,
 			);
@@ -1573,7 +1573,7 @@
 				2FBCF58C2DEB0B7700CD5D83 /* HomeSelectionView.swift in Sources */,
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
-				DAF58C7B2EF6E99500483AFD /* ItemAppEntity.swift in Sources */,
+				DAF58C7B2EF6E99500483AFD /* SwitchItemEntity.swift in Sources */,
 				DA448E852EF435B400F0893C /* Home.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
 				935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */,
@@ -1581,7 +1581,7 @@
 				DA77E19B2D886D9B007CFF0F /* SingleConnectionSettingsView.swift in Sources */,
 				DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */,
 				DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */,
-				DAD5E85C2F02C272003215C0 /* SwitchStateIntent.swift in Sources */,
+				DAD5E85C2F02C272003215C0 /* SwitchItemIntent.swift in Sources */,
 				2F6412EE2CE494A80039FB28 /* DatePickerUITableViewCell.swift in Sources */,
 				DA4BF3522F0307A40082479C /* ItemStateIntent.swift in Sources */,
 				DA7F002D2EB376CF00DE943A /* ServerCertificatesView.swift in Sources */,
