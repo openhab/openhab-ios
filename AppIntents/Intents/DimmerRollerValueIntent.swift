@@ -15,6 +15,7 @@ import OpenHABCore
 enum DimmerRollerValueError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
     case invalidValue(Int, String)
+    case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -22,6 +23,8 @@ enum DimmerRollerValueError: Error, CustomLocalizedStringResourceConvertible {
             "Item '\(itemName)' is not in home '\(homeName)'"
         case let .invalidValue(value, itemName):
             "Invalid value \(value) for \(itemName) (0-100)"
+        case let .commandFailed(message):
+            "Command failed: \(message)"
         }
     }
 }
@@ -60,11 +63,15 @@ struct DimmerRollerValueIntent: AppIntent {
             throw DimmerRollerValueError.invalidValue(value, itemEntity.label)
         }
 
-        await OpenHABItemCache.instance.sendCommand(
-            to: itemEntity.item,
-            home: itemEntity.homeId,
-            command: "\(value)"
-        )
+        do {
+            try await OpenHABItemCache.instance.sendCommand(
+                to: itemEntity.item,
+                home: itemEntity.homeId,
+                command: "\(value)"
+            )
+        } catch {
+            throw DimmerRollerValueError.commandFailed(error.localizedDescription)
+        }
 
         return .result(dialog: "Sent the value of \(value) to \(itemEntity.label)")
     }

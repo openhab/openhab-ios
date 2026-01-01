@@ -18,6 +18,7 @@ enum SetColorValueError: Error, CustomLocalizedStringResourceConvertible {
     case unknownHome
     case itemNotFound(String)
     case invalidValue(String, String)
+    case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -29,6 +30,8 @@ enum SetColorValueError: Error, CustomLocalizedStringResourceConvertible {
             "Item '\(itemName)' not found"
         case let .invalidValue(value, itemName):
             "Invalid value: \(value) for \(itemName) must be HSB (0-360,0-100,0-100)"
+        case let .commandFailed(message):
+            "Command failed: \(message)"
         }
     }
 }
@@ -107,7 +110,11 @@ struct SetColorValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInten
 
         let openHABItem = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: colorValue)
+        do {
+            try await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: colorValue)
+        } catch {
+            throw SetColorValueError.commandFailed(error.localizedDescription)
+        }
 
         return .result(dialog: .responseSuccess(value: colorValue, item: item))
     }

@@ -15,6 +15,7 @@ import OpenHABCore
 enum ColorValueError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
     case invalidValue(String, String)
+    case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -22,6 +23,8 @@ enum ColorValueError: Error, CustomLocalizedStringResourceConvertible {
             "Item '\(itemName)' is not in home '\(homeName)'"
         case let .invalidValue(value, itemName):
             "Invalid value: \(value) for \(itemName) must be HSB (0-360,0-100,0-100)"
+        case let .commandFailed(message):
+            "Command failed: \(message)"
         }
     }
 }
@@ -67,11 +70,15 @@ struct ColorValueIntent: AppIntent {
 
         colorValue = "\(hue),\(sat),\(val)"
 
-        await OpenHABItemCache.instance.sendCommand(
-            to: itemEntity.item,
-            home: itemEntity.homeId,
-            command: colorValue
-        )
+        do {
+            try await OpenHABItemCache.instance.sendCommand(
+                to: itemEntity.item,
+                home: itemEntity.homeId,
+                command: colorValue
+            )
+        } catch {
+            throw ColorValueError.commandFailed(error.localizedDescription)
+        }
 
         return .result(dialog: "Sent the color value of \(colorValue) to \(itemEntity.label)")
     }

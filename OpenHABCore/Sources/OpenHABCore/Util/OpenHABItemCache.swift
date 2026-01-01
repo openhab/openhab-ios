@@ -13,6 +13,23 @@ import Combine
 import Foundation
 import os.log
 
+public enum OpenHABItemCacheError: Error, LocalizedError {
+    case homeNotReachable(UUID)
+    case commandFailed(any Error)
+    case stateFailed(any Error)
+
+    public var errorDescription: String? {
+        switch self {
+        case let .homeNotReachable(homeId):
+            "Home \(homeId) is not reachable"
+        case let .commandFailed(error):
+            "Could not send command: \(error.localizedDescription)"
+        case let .stateFailed(error):
+            "Could not send state: \(error.localizedDescription)"
+        }
+    }
+}
+
 public actor OpenHABItemCache {
     public static let instance = OpenHABItemCache()
 
@@ -49,29 +66,31 @@ public actor OpenHABItemCache {
         return try? await networkTracker.getItemByName(id: name)
     }
 
-    public func sendCommand(to item: OpenHABItem, home: UUID, command: String) async {
+    public func sendCommand(to item: OpenHABItem, home: UUID, command: String) async throws {
         guard let networkTracker = await assureNetworkTracker(homeId: home) else {
             Logger.itemCache.error("Home \(home) not reachable")
-            return
+            throw OpenHABItemCacheError.homeNotReachable(home)
         }
 
         do {
             try await networkTracker.send(to: item, command: command)
         } catch {
             Logger.itemCache.info("Could not send command: \(error.localizedDescription)")
+            throw OpenHABItemCacheError.commandFailed(error)
         }
     }
 
-    public func sendState(_ item: OpenHABItem, home: UUID, state: String) async {
+    public func sendState(_ item: OpenHABItem, home: UUID, state: String) async throws {
         guard let networkTracker = await assureNetworkTracker(homeId: home) else {
             Logger.itemCache.error("Home \(home) not reachable")
-            return
+            throw OpenHABItemCacheError.homeNotReachable(home)
         }
 
         do {
             try await networkTracker.updateState(item: item, state: state)
         } catch {
             Logger.itemCache.info("Could not send state: \(error.localizedDescription)")
+            throw OpenHABItemCacheError.stateFailed(error)
         }
     }
 

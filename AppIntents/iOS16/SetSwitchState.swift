@@ -17,9 +17,9 @@ import OpenHABCore
 enum SetSwitchStateError: Error, CustomLocalizedStringResourceConvertible {
     case invalidHomeIdentifier
     case itemNotFound(String)
-
     case invalidAction(String, String)
     case itemNotInHome(String, String)
+    case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -31,6 +31,8 @@ enum SetSwitchStateError: Error, CustomLocalizedStringResourceConvertible {
             "Action invalid: \(action) for \(itemName)"
         case let .itemNotInHome(itemName, homeName):
             "Item '\(itemName)' is not in home '\(homeName)'"
+        case let .commandFailed(message):
+            "Command failed: \(message)"
         }
     }
 }
@@ -98,7 +100,11 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
 
         let openHABItem = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: command)
+        do {
+            try await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: command)
+        } catch {
+            throw SetSwitchStateError.commandFailed(error.localizedDescription)
+        }
 
         return .result(dialog: .responseSuccess(action: action, item: item))
     }

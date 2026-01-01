@@ -14,11 +14,14 @@ import OpenHABCore
 
 enum ContactStateError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
+    case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
         case let .itemNotInHome(itemName, homeName):
             "Item '\(itemName)' is not in home '\(homeName)'"
+        case let .commandFailed(message):
+            "Command failed: \(message)"
         }
     }
 }
@@ -54,11 +57,15 @@ struct ContactStateIntent: AppIntent {
             throw ContactStateError.itemNotInHome(itemEntity.label, home.displayString)
         }
 
-        await OpenHABItemCache.instance.sendCommand(
-            to: itemEntity.item,
-            home: itemEntity.homeId,
-            command: state.rawValue
-        )
+        do {
+            try await OpenHABItemCache.instance.sendCommand(
+                to: itemEntity.item,
+                home: itemEntity.homeId,
+                command: state.rawValue
+            )
+        } catch {
+            throw ContactStateError.commandFailed(error.localizedDescription)
+        }
 
         return .result(dialog: "The state of \(itemEntity.label) was set to \(state.rawValue)")
     }

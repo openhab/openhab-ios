@@ -18,6 +18,7 @@ enum SetDimmerRollerValueError: Error, CustomLocalizedStringResourceConvertible 
     case unknownHome
     case itemNotFound(String)
     case invalidValue(Int, String)
+    case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -29,6 +30,8 @@ enum SetDimmerRollerValueError: Error, CustomLocalizedStringResourceConvertible 
             "Item '\(itemName)' not found"
         case let .invalidValue(value, itemName):
             "Invalid value \(value) for \(itemName) (0-100)"
+        case let .commandFailed(message):
+            "Command failed: \(message)"
         }
     }
 }
@@ -99,7 +102,11 @@ struct SetDimmerRollerValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
 
         let openHABItem = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: "\(value)")
+        do {
+            try await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: "\(value)")
+        } catch {
+            throw SetDimmerRollerValueError.commandFailed(error.localizedDescription)
+        }
 
         return .result(dialog: .responseSuccess(value: value, item: item))
     }

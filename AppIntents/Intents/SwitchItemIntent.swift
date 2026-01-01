@@ -14,11 +14,14 @@ import OpenHABCore
 
 enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
+    case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
         case let .itemNotInHome(itemName, homeName):
             "Item '\(itemName)' is not in home '\(homeName)'"
+        case let .commandFailed(message):
+            "Command failed: \(message)"
         }
     }
 }
@@ -54,11 +57,15 @@ struct SwitchItemIntent: AppIntent {
             throw ControlItemError.itemNotInHome(itemEntity.label, home.displayString)
         }
 
-        await OpenHABItemCache.instance.sendCommand(
-            to: itemEntity.item,
-            home: itemEntity.homeId,
-            command: action.rawValue
-        )
+        do {
+            try await OpenHABItemCache.instance.sendCommand(
+                to: itemEntity.item,
+                home: itemEntity.homeId,
+                command: action.rawValue
+            )
+        } catch {
+            throw ControlItemError.commandFailed(error.localizedDescription)
+        }
 
         return .result()
     }

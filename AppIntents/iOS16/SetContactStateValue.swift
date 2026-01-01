@@ -18,6 +18,7 @@ enum SetContactStateValueError: Error, CustomLocalizedStringResourceConvertible 
     case unknownHome
     case itemNotFound(String)
     case invalidState(String, String)
+    case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -29,6 +30,8 @@ enum SetContactStateValueError: Error, CustomLocalizedStringResourceConvertible 
             "Item '\(itemName)' not found"
         case let .invalidState(state, itemName):
             "State invalid: \(state) for \(itemName)"
+        case let .commandFailed(message):
+            "Command failed: \(message)"
         }
     }
 }
@@ -105,7 +108,11 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
 
         let openHABItem = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: realState)
+        do {
+            try await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: realState)
+        } catch {
+            throw SetContactStateValueError.commandFailed(error.localizedDescription)
+        }
 
         return .result(dialog: .responseSuccess(item: item, state: state))
     }

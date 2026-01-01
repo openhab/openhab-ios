@@ -17,6 +17,7 @@ enum SetStringValueError: Error, CustomLocalizedStringResourceConvertible {
     case invalidHomeIdentifier
     case unknownHome
     case itemNotFound(String)
+    case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
@@ -26,6 +27,8 @@ enum SetStringValueError: Error, CustomLocalizedStringResourceConvertible {
             "Unknown home"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
+        case let .commandFailed(message):
+            "Command failed: \(message)"
         }
     }
 }
@@ -92,7 +95,11 @@ struct SetStringValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
 
         let openHABItem = items[0]
 
-        await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: value)
+        do {
+            try await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: value)
+        } catch {
+            throw SetStringValueError.commandFailed(error.localizedDescription)
+        }
 
         return .result(dialog: .responseSuccess(value: value, item: item))
     }

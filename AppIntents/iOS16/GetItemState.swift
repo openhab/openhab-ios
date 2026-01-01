@@ -95,35 +95,7 @@ struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent
 }
 
 private extension IntentDialog {
-    static var itemParameterConfiguration: Self {
-        "Item Name"
-    }
-
-    static var homeParameterConfiguration: Self {
-        "Home name"
-    }
-
-    static var homeParameterPrompt: Self {
-        "blabla"
-    }
-
-    static var homeParameterDisambiguationSelection: Self {
-        "For which home do you want to get the value?"
-    }
-
-    static func homeParameterDisambiguationIntro(count: Int, item: String) -> Self {
-        "There are \(count) configured homes with an item named '\(item)'."
-    }
-
-    static func homeParameterConfirmation(home: Home) -> Self {
-        "Just to confirm, you wanted ‘\(home)’?"
-    }
-
     static func responseSuccess(item: String, state: String) -> Self {
         "The state of \(item) is \(state)"
-    }
-
-    static func responseFailureInvalidItem(item: String) -> Self {
-        "Sorry can't find \(item)"
     }
 }
