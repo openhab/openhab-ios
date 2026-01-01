@@ -29,6 +29,7 @@ enum ContactStateError: Error, CustomLocalizedStringResourceConvertible {
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 struct ContactStateIntent: AppIntent {
+    static var allowedItemTypes: [OpenHABItem.ItemType] { [.contact] }
     struct StateOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
             ActionMapper.onOffOptions
@@ -47,8 +48,11 @@ struct ContactStateIntent: AppIntent {
     @Parameter(title: "Home")
     var home: Home
 
-    @Parameter(title: "Item", requestValueDialog: IntentDialog("Search for an item"))
-    var itemEntity: ItemAppEntity
+    @Parameter(
+        title: "Item",
+        requestValueDialog: IntentDialog("Search for an item")
+    )
+    var itemEntity: ContactItemEntity
 
     @Parameter(title: "State", optionsProvider: StateOptionsProvider())
     var state: String

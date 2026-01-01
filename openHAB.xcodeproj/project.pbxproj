@@ -787,16 +787,10 @@
 		DA448E7E2EF435B400F0893C /* AppIntents */ = {
 			isa = PBXGroup;
 			children = (
+				DA4BF3652F0419F30082479C /* Intents */,
 				DA4BF3532F0307D30082479C /* iOS16 */,
 				DAFE45C92F02FBF4001CA713 /* ActionMapper.swift */,
-				DA4BF3542F03095D0082479C /* ColorValueIntent.swift */,
-				DA4BF3552F03095D0082479C /* ContactStateIntent.swift */,
-				DA4BF3582F03098B0082479C /* DimmerRollerValueIntent.swift */,
-				DA4BF35A2F0309A60082479C /* NumberValueIntent.swift */,
 				DAD5E85D2F02C3BC003215C0 /* ItemIdentifier.swift */,
-				DA4BF35C2F0309B10082479C /* StringValueIntent.swift */,
-				DA4BF3512F0307A40082479C /* ItemStateIntent.swift */,
-				DAD5E85B2F02C272003215C0 /* SwitchStateIntent.swift */,
 				DAF58C7A2EF6E99500483AFD /* ItemAppEntity.swift */,
 				DA448E772EF435B400F0893C /* Home.swift */,
 			);
@@ -821,6 +815,20 @@
 				2F55E7BA2DEE447700EC8350 /* SettingsView.swift */,
 			);
 			path = SettingsView;
+			sourceTree = "<group>";
+		};
+		DA4BF3652F0419F30082479C /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				DA4BF3542F03095D0082479C /* ColorValueIntent.swift */,
+				DA4BF3552F03095D0082479C /* ContactStateIntent.swift */,
+				DA4BF3582F03098B0082479C /* DimmerRollerValueIntent.swift */,
+				DA4BF3512F0307A40082479C /* ItemStateIntent.swift */,
+				DAD5E85B2F02C272003215C0 /* SwitchStateIntent.swift */,
+				DA4BF35C2F0309B10082479C /* StringValueIntent.swift */,
+				DA4BF35A2F0309A60082479C /* NumberValueIntent.swift */,
+			);
+			path = Intents;
 			sourceTree = "<group>";
 		};
 		DA658720236F841F007E2E7F /* Views */ = {

@@ -29,6 +29,7 @@ enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 struct SwitchStateIntent: AppIntent {
+    static var allowedItemTypes: [OpenHABItem.ItemType] { [.switchItem] }
     struct ActionOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
             ActionMapper.onOffToggleOptions
@@ -47,8 +48,11 @@ struct SwitchStateIntent: AppIntent {
     @Parameter(title: "Home")
     var home: Home
 
-    @Parameter(title: "Item", requestValueDialog: IntentDialog("Search for an item"))
-    var itemEntity: ItemAppEntity
+    @Parameter(
+        title: "Item",
+        requestValueDialog: IntentDialog("Search for an item")
+    )
+    var itemEntity: SwitchItemEntity
 
     @Parameter(title: "Action", optionsProvider: ActionOptionsProvider())
     var action: String

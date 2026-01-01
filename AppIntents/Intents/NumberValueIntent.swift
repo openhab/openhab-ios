@@ -26,6 +26,7 @@ enum NumberValueError: Error, CustomLocalizedStringResourceConvertible {
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 struct NumberValueIntent: AppIntent {
+    static var allowedItemTypes: [OpenHABItem.ItemType] { [.number, .numberWithDimension] }
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$value)") {
             \.$home
@@ -38,8 +39,11 @@ struct NumberValueIntent: AppIntent {
     @Parameter(title: "Home")
     var home: Home
 
-    @Parameter(title: "Item", requestValueDialog: IntentDialog("Search for an item"))
-    var itemEntity: ItemAppEntity
+    @Parameter(
+        title: "Item",
+        requestValueDialog: IntentDialog("Search for an item")
+    )
+    var itemEntity: NumberItemEntity
 
     @Parameter(title: "Value")
     var value: Double
