@@ -96,6 +96,8 @@
 		DA4BF3592F03098B0082479C /* DimmerRollerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3582F03098B0082479C /* DimmerRollerValueIntent.swift */; };
 		DA4BF35B2F0309A60082479C /* NumberValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35A2F0309A60082479C /* NumberValueIntent.swift */; };
 		DA4BF35D2F0309B10082479C /* StringValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35C2F0309B10082479C /* StringValueIntent.swift */; };
+		DA4BF4032F06F5950082479C /* SwitchAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4022F06F5950082479C /* SwitchAction.swift */; };
+		DA4BF4052F06F5CA0082479C /* ContactState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4042F06F5CA0082479C /* ContactState.swift */; };
 		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
 		DA50C7BD2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */; };
 		DA50C7BF2B0A65300009F716 /* SliderWithSwitchSupportUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BE2B0A652F0009F716 /* SliderWithSwitchSupportUITableViewCell.swift */; };
@@ -413,6 +415,8 @@
 		DA4BF3582F03098B0082479C /* DimmerRollerValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DimmerRollerValueIntent.swift; sourceTree = "<group>"; };
 		DA4BF35A2F0309A60082479C /* NumberValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberValueIntent.swift; sourceTree = "<group>"; };
 		DA4BF35C2F0309B10082479C /* StringValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringValueIntent.swift; sourceTree = "<group>"; };
+		DA4BF4022F06F5950082479C /* SwitchAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchAction.swift; sourceTree = "<group>"; };
+		DA4BF4042F06F5CA0082479C /* ContactState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactState.swift; sourceTree = "<group>"; };
 		DA4D4DB4233F9ACB00B37E37 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderWithSwitchSupportRow.swift; sourceTree = "<group>"; };
@@ -791,7 +795,9 @@
 				DA4BF3532F0307D30082479C /* iOS16 */,
 				DAFE45C92F02FBF4001CA713 /* ActionMapper.swift */,
 				DAD5E85D2F02C3BC003215C0 /* ItemIdentifier.swift */,
+				DA4BF4042F06F5CA0082479C /* ContactState.swift */,
 				DAF58C7A2EF6E99500483AFD /* ItemAppEntity.swift */,
+				DA4BF4022F06F5950082479C /* SwitchAction.swift */,
 				DA448E772EF435B400F0893C /* Home.swift */,
 			);
 			path = AppIntents;
@@ -1606,6 +1612,7 @@
 				2FEFD8F62BE7C5BE00E387B9 /* TextInputUITableViewCell.swift in Sources */,
 				938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */,
 				DA2AEBA02D92FB6500897D80 /* NoIconDisplayableCell.swift in Sources */,
+				DA4BF4052F06F5CA0082479C /* ContactState.swift in Sources */,
 				DAD5E85E2F02C3C6003215C0 /* ItemIdentifier.swift in Sources */,
 				DA2AEB702D92CF3E00897D80 /* UITableViewCellExtension.swift in Sources */,
 				DA4BF3592F03098B0082479C /* DimmerRollerValueIntent.swift in Sources */,
@@ -1629,6 +1636,7 @@
 				DA4BF35B2F0309A60082479C /* NumberValueIntent.swift in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
+				DA4BF4032F06F5950082479C /* SwitchAction.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
 				DA48001C2D837556009CF127 /* SitemapSettingsView.swift in Sources */,
@@ -1724,77 +1732,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		4D6470DC2561F935007B03FC /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = openHABIntents/openHABIntents.entitlements;
-				CURRENT_PROJECT_VERSION = 100;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				INFOPLIST_FILE = openHABIntents/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 3.1.43;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		4D6470DD2561F935007B03FC /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = openHABIntents/openHABIntents.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 100;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				INFOPLIST_FILE = openHABIntents/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 3.1.43;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore org.openhab.app.openHABIntents";
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 		657144562C1E438700C8A1F3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {

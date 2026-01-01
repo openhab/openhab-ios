@@ -15,14 +15,11 @@ import OpenHABCore
 
 enum ContactStateError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
-    case invalidState(String, String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
         case let .itemNotInHome(itemName, homeName):
             "Item '\(itemName)' is not in home '\(homeName)'"
-        case let .invalidState(state, itemName):
-            "State invalid: \(state) for \(itemName)"
         }
     }
 }
@@ -30,11 +27,6 @@ enum ContactStateError: Error, CustomLocalizedStringResourceConvertible {
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 struct ContactStateIntent: AppIntent {
     static var allowedItemTypes: [OpenHABItem.ItemType] { [.contact] }
-    struct StateOptionsProvider: DynamicOptionsProvider {
-        func results() async throws -> [String] {
-            ActionMapper.onOffOptions
-        }
-    }
 
     static var parameterSummary: some ParameterSummary {
         Summary("Set the state of \(\.$itemEntity) to \(\.$state)") {
@@ -54,8 +46,8 @@ struct ContactStateIntent: AppIntent {
     )
     var itemEntity: ContactItemEntity
 
-    @Parameter(title: "State", optionsProvider: StateOptionsProvider())
-    var state: String
+    @Parameter(title: "State")
+    var state: ContactState
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         // Validate that the item belongs to the selected home
@@ -63,16 +55,12 @@ struct ContactStateIntent: AppIntent {
             throw ContactStateError.itemNotInHome(itemEntity.label, home.displayString)
         }
 
-        guard let realState = ActionMapper.command(from: state) else {
-            throw ContactStateError.invalidState(state, itemEntity.label)
-        }
-
         await OpenHABItemCache.instance.sendCommand(
             to: itemEntity.item,
             home: itemEntity.homeId,
-            command: realState
+            command: state.rawValue
         )
 
-        return .result(dialog: "The state of \(itemEntity.label) was set to \(state)")
+        return .result(dialog: "The state of \(itemEntity.label) was set to \(state.rawValue)")
     }
 }

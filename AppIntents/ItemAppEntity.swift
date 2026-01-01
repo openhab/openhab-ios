@@ -147,34 +147,6 @@ extension ItemEntityQuery {
     }
 }
 
-// MARK: - SwitchItemEntity
-
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-struct SwitchItemEntity: ItemEntity {
-    struct SwitchItemQuery: ItemEntityQuery {
-        typealias EntityType = SwitchItemEntity
-
-        @IntentParameterDependency<SwitchStateIntent>(\.$home)
-        var intent
-
-        var allowedTypes: [OpenHABItem.ItemType] = [.switchItem]
-        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
-    }
-
-    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Switch Item")
-    static let defaultQuery = SwitchItemQuery()
-
-    var id: ItemIdentifier
-    var item: OpenHABItem
-    var homeName: String?
-
-    init(id: ItemIdentifier, item: OpenHABItem, homeName: String? = nil) {
-        self.id = id
-        self.item = item
-        self.homeName = homeName
-    }
-}
-
 // MARK: - DimmerItemEntity
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
@@ -191,6 +163,34 @@ struct DimmerItemEntity: ItemEntity {
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Dimmer/Roller Item")
     static let defaultQuery = DimmerItemQuery()
+
+    var id: ItemIdentifier
+    var item: OpenHABItem
+    var homeName: String?
+
+    init(id: ItemIdentifier, item: OpenHABItem, homeName: String? = nil) {
+        self.id = id
+        self.item = item
+        self.homeName = homeName
+    }
+}
+
+// MARK: - SwitchItemEntity
+
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+struct SwitchItemEntity: ItemEntity {
+    struct SwitchItemQuery: ItemEntityQuery {
+        typealias EntityType = SwitchItemEntity
+
+        @IntentParameterDependency<SwitchItemIntent>(\.$home)
+        var intent
+
+        var allowedTypes: [OpenHABItem.ItemType] = [.switchItem]
+        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+    }
+
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Switch Item")
+    static let defaultQuery = SwitchItemQuery()
 
     var id: ItemIdentifier
     var item: OpenHABItem

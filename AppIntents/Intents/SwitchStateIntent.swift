@@ -14,13 +14,10 @@ import Intents
 import OpenHABCore
 
 enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
-    case invalidAction(String, String)
     case itemNotInHome(String, String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case let .invalidAction(action, itemName):
-            "Action invalid: \(action) for \(itemName)"
         case let .itemNotInHome(itemName, homeName):
             "Item '\(itemName)' is not in home '\(homeName)'"
         }
@@ -28,13 +25,8 @@ enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-struct SwitchStateIntent: AppIntent {
+struct SwitchItemIntent: AppIntent {
     static var allowedItemTypes: [OpenHABItem.ItemType] { [.switchItem] }
-    struct ActionOptionsProvider: DynamicOptionsProvider {
-        func results() async throws -> [String] {
-            ActionMapper.onOffToggleOptions
-        }
-    }
 
     static var parameterSummary: some ParameterSummary {
         Summary("Send \(\.$action) to \(\.$itemEntity)") {
@@ -54,8 +46,8 @@ struct SwitchStateIntent: AppIntent {
     )
     var itemEntity: SwitchItemEntity
 
-    @Parameter(title: "Action", optionsProvider: ActionOptionsProvider())
-    var action: String
+    @Parameter(title: "Action")
+    var action: SwitchAction
 
     func perform() async throws -> some IntentResult {
         // Validate that the item belongs to the selected home
@@ -63,14 +55,10 @@ struct SwitchStateIntent: AppIntent {
             throw ControlItemError.itemNotInHome(itemEntity.label, home.displayString)
         }
 
-        guard let command = ActionMapper.command(from: action) else {
-            throw ControlItemError.invalidAction(action, itemEntity.label)
-        }
-
         await OpenHABItemCache.instance.sendCommand(
             to: itemEntity.item,
             home: itemEntity.homeId,
-            command: command
+            command: action.rawValue
         )
 
         return .result()
