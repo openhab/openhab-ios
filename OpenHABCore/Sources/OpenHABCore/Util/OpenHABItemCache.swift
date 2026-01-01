@@ -189,12 +189,21 @@ public actor OpenHABItemCache {
     }
 }
 
+public extension OpenHABItem {
+    /// Checks if the item matches the specified types filter
+    /// - Parameter types: Optional array of item types to match. If nil, all items match.
+    /// - Returns: True if the item matches the filter, false otherwise
+    func matches(types: [OpenHABItem.ItemType]?) -> Bool {
+        types == nil || (type.flatMap { types?.contains($0) } == true)
+    }
+}
+
 public extension [OpenHABItem] {
     func filtered(by searchTerm: String? = nil, for types: [OpenHABItem.ItemType]? = nil) -> [OpenHABItem] {
         // TODO: maybe allow home name for filtering and fuzzier search
         filter {
             let matchesSearchTerm = searchTerm == nil || $0.name.contains(searchTerm.orEmpty)
-            let matchesType = types == nil || ($0.type.flatMap { types?.contains($0) } == true)
+            let matchesType = $0.matches(types: types)
             return matchesSearchTerm && matchesType
         }
     }
@@ -203,18 +212,17 @@ public extension [OpenHABItem] {
 public extension OpenHABItemCache {
     func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, home: UUID) async -> [String] {
         await reloadCacheIfNeeded(homes: [home])
-        return items[home]?.filter {
-            let matchesSearchTerm = searchTerm == nil || $0.name.contains(searchTerm.orEmpty)
-            let matchesType = types == nil || ($0.type.flatMap { types?.contains($0) } == true)
-            return matchesSearchTerm && matchesType
-        }
-        .sorted(by: \.name)
-        .map(\.name) ?? []
+        return items[home]?
+            .filtered(by: searchTerm, for: types)
+            .sorted(by: \.name)
+            .map(\.name) ?? []
     }
 
     func getCachedItems(types: [OpenHABItem.ItemType]?, home: UUID) async -> [OpenHABItem] {
         await reloadCacheIfNeeded(homes: [home])
-        return items[home]?.filter { types == nil || ($0.type.flatMap { types?.contains($0) } == true) }.sorted(by: \.name) ?? []
+        return items[home]?
+            .filtered(for: types)
+            .sorted(by: \.name) ?? []
     }
 
     func searchItems(searchTerm: String, types: [OpenHABItem.ItemType]? = nil) async -> [UUID: [OpenHABItem]] {
@@ -225,7 +233,7 @@ public extension OpenHABItemCache {
             let filtered = homeItems.filter { item in
                 let matchesSearch = item.name.localizedCaseInsensitiveContains(searchTerm) ||
                     item.label.localizedCaseInsensitiveContains(searchTerm)
-                let matchesType = types == nil || (item.type.flatMap { types?.contains($0) } == true)
+                let matchesType = item.matches(types: types)
                 return matchesSearch && matchesType
             }
             if !filtered.isEmpty {
