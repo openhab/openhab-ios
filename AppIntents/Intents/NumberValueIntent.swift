@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AppIntents
-import Intents
 import OpenHABCore
 
 enum NumberValueError: Error, CustomLocalizedStringResourceConvertible {
