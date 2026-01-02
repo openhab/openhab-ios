@@ -30,7 +30,7 @@ enum GetItemStateError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use ItemStateIntent for iOS 17+")
+@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use GetItemStateIntent for iOS 17+")
 struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct StringOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {

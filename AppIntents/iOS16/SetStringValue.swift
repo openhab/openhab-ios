@@ -33,7 +33,7 @@ enum SetStringValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use StringValueIntent for iOS 17+")
+@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use SetStringValueIntent for iOS 17+")
 struct SetStringValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct StringOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {

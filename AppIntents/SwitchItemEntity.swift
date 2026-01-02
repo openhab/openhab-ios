@@ -19,7 +19,7 @@ struct DimmerItemEntity: ItemEntity {
     struct DimmerItemQuery: ItemEntityQuery {
         typealias EntityType = DimmerItemEntity
 
-        @IntentParameterDependency<DimmerRollerValueIntent>(\.$home)
+        @IntentParameterDependency<SetDimmerRollerValueIntent>(\.$home)
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.dimmer, .rollershutter]
@@ -47,7 +47,7 @@ struct ColorItemEntity: ItemEntity {
     struct ColorItemQuery: ItemEntityQuery {
         typealias EntityType = ColorItemEntity
 
-        @IntentParameterDependency<ColorValueIntent>(\.$home)
+        @IntentParameterDependency<SetColorValueIntent>(\.$home)
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.color]
@@ -75,7 +75,7 @@ struct NumberItemEntity: ItemEntity {
     struct NumberItemQuery: ItemEntityQuery {
         typealias EntityType = NumberItemEntity
 
-        @IntentParameterDependency<NumberValueIntent>(\.$home)
+        @IntentParameterDependency<SetNumberValueIntent>(\.$home)
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.number, .numberWithDimension]
@@ -103,7 +103,7 @@ struct StringItemEntity: ItemEntity {
     struct StringItemQuery: ItemEntityQuery {
         typealias EntityType = StringItemEntity
 
-        @IntentParameterDependency<StringValueIntent>(\.$home)
+        @IntentParameterDependency<SetStringValueIntent>(\.$home)
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.stringItem]
@@ -159,7 +159,7 @@ struct GenericItemEntity: ItemEntity {
     struct GenericItemQuery: ItemEntityQuery {
         typealias EntityType = GenericItemEntity
 
-        @IntentParameterDependency<ItemStateIntent>(\.$home)
+        @IntentParameterDependency<GetItemStateIntent>(\.$home)
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [] // Empty means all types
@@ -187,7 +187,7 @@ struct SwitchItemEntity: ItemEntity {
     struct SwitchItemQuery: ItemEntityQuery {
         typealias EntityType = SwitchItemEntity
 
-        @IntentParameterDependency<SwitchItemIntent>(\.$home)
+        @IntentParameterDependency<SetSwitchItemIntent>(\.$home)
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.switchItem]

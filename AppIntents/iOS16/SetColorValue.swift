@@ -36,7 +36,7 @@ enum SetColorValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use ColorValueIntent for iOS 17+")
+@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use SetColorValueIntent for iOS 17+")
 struct SetColorValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct StringOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {

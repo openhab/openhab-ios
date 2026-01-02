@@ -12,7 +12,7 @@
 import AppIntents
 import OpenHABCore
 
-enum StringValueError: Error, CustomLocalizedStringResourceConvertible {
+enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
     case commandFailed(String)
 
@@ -27,16 +27,17 @@ enum StringValueError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-struct StringValueIntent: AppIntent {
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.stringItem] }
+struct SetSwitchItemIntent: AppIntent {
+    static var allowedItemTypes: [OpenHABItem.ItemType] { [.switchItem] }
+
     static var parameterSummary: some ParameterSummary {
-        Summary("Set \(\.$itemEntity) to \(\.$value)") {
+        Summary("Send \(\.$action) to \(\.$itemEntity)") {
             \.$home
         }
     }
 
-    static let title: LocalizedStringResource = "Set String Control Value"
-    static let description = IntentDescription("Set the string of a string control item")
+    static let title: LocalizedStringResource = "Set Switch State"
+    static let description = IntentDescription("Set the state of a switch on or off, or toggle its state")
 
     @Parameter(title: "Home")
     var home: Home
@@ -45,27 +46,27 @@ struct StringValueIntent: AppIntent {
         title: "Item",
         requestValueDialog: IntentDialog("Search for an item")
     )
-    var itemEntity: StringItemEntity
+    var itemEntity: SwitchItemEntity
 
-    @Parameter(title: "Value")
-    var value: String
+    @Parameter(title: "Action")
+    var action: SwitchAction
 
-    func perform() async throws -> some IntentResult & ProvidesDialog {
+    func perform() async throws -> some IntentResult {
         // Validate that the item belongs to the selected home
         guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw StringValueError.itemNotInHome(itemEntity.label, home.displayString)
+            throw ControlItemError.itemNotInHome(itemEntity.label, home.displayString)
         }
 
         do {
             try await OpenHABItemCache.instance.sendCommand(
                 to: itemEntity.item,
                 home: itemEntity.homeId,
-                command: value
+                command: action.rawValue
             )
         } catch {
-            throw StringValueError.commandFailed(error.localizedDescription)
+            throw ControlItemError.commandFailed(error.localizedDescription)
         }
 
-        return .result(dialog: "Sent the string \(value) to \(itemEntity.label)")
+        return .result()
     }
 }

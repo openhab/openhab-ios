@@ -12,32 +12,27 @@
 import AppIntents
 import OpenHABCore
 
-enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
+enum ItemStateError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
-    case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
         case let .itemNotInHome(itemName, homeName):
             "Item '\(itemName)' is not in home '\(homeName)'"
-        case let .commandFailed(message):
-            "Command failed: \(message)"
         }
     }
 }
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-struct SwitchItemIntent: AppIntent {
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.switchItem] }
-
+struct GetItemStateIntent: AppIntent {
     static var parameterSummary: some ParameterSummary {
-        Summary("Send \(\.$action) to \(\.$itemEntity)") {
+        Summary("Get \(\.$itemEntity) State") {
             \.$home
         }
     }
 
-    static let title: LocalizedStringResource = "Set Switch State"
-    static let description = IntentDescription("Set the state of a switch on or off, or toggle its state")
+    static let title: LocalizedStringResource = "Get Item State"
+    static let description = IntentDescription("Retrieve the current state of an item")
 
     @Parameter(title: "Home")
     var home: Home
@@ -46,27 +41,19 @@ struct SwitchItemIntent: AppIntent {
         title: "Item",
         requestValueDialog: IntentDialog("Search for an item")
     )
-    var itemEntity: SwitchItemEntity
+    var itemEntity: GenericItemEntity
 
-    @Parameter(title: "Action")
-    var action: SwitchAction
-
-    func perform() async throws -> some IntentResult {
+    func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
         // Validate that the item belongs to the selected home
         guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw ControlItemError.itemNotInHome(itemEntity.label, home.displayString)
+            throw ItemStateError.itemNotInHome(itemEntity.label, home.displayString)
         }
 
-        do {
-            try await OpenHABItemCache.instance.sendCommand(
-                to: itemEntity.item,
-                home: itemEntity.homeId,
-                command: action.rawValue
-            )
-        } catch {
-            throw ControlItemError.commandFailed(error.localizedDescription)
-        }
+        let state = itemEntity.item.state ?? "Unknown state"
 
-        return .result()
+        return .result(
+            value: state,
+            dialog: "The state of \(itemEntity.label) is \(state)"
+        )
     }
 }

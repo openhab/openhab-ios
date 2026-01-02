@@ -12,14 +12,17 @@
 import AppIntents
 import OpenHABCore
 
-enum NumberValueError: Error, CustomLocalizedStringResourceConvertible {
+enum DimmerRollerValueError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
+    case invalidValue(Int, String)
     case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
         case let .itemNotInHome(itemName, homeName):
             "Item '\(itemName)' is not in home '\(homeName)'"
+        case let .invalidValue(value, itemName):
+            "Invalid value \(value) for \(itemName) (0-100)"
         case let .commandFailed(message):
             "Command failed: \(message)"
         }
@@ -27,16 +30,16 @@ enum NumberValueError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-struct NumberValueIntent: AppIntent {
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.number, .numberWithDimension] }
+struct SetDimmerRollerValueIntent: AppIntent {
+    static var allowedItemTypes: [OpenHABItem.ItemType] { [.dimmer, .rollershutter] }
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$value)") {
             \.$home
         }
     }
 
-    static let title: LocalizedStringResource = "Set Number Control Value"
-    static let description = IntentDescription("Set the decimal value of a number control item")
+    static let title: LocalizedStringResource = "Set Dimmer or Roller Shutter Value"
+    static let description = IntentDescription("Set the integer value of a dimmer or roller shutter")
 
     @Parameter(title: "Home")
     var home: Home
@@ -45,27 +48,31 @@ struct NumberValueIntent: AppIntent {
         title: "Item",
         requestValueDialog: IntentDialog("Search for an item")
     )
-    var itemEntity: NumberItemEntity
+    var itemEntity: DimmerItemEntity
 
     @Parameter(title: "Value")
-    var value: Double
+    var value: Int
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         // Validate that the item belongs to the selected home
         guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw NumberValueError.itemNotInHome(itemEntity.label, home.displayString)
+            throw DimmerRollerValueError.itemNotInHome(itemEntity.label, home.displayString)
+        }
+
+        guard (0 ... 100).contains(value) else {
+            throw DimmerRollerValueError.invalidValue(value, itemEntity.label)
         }
 
         do {
             try await OpenHABItemCache.instance.sendCommand(
                 to: itemEntity.item,
                 home: itemEntity.homeId,
-                command: String(value)
+                command: "\(value)"
             )
         } catch {
-            throw NumberValueError.commandFailed(error.localizedDescription)
+            throw DimmerRollerValueError.commandFailed(error.localizedDescription)
         }
 
-        return .result(dialog: "Sent the number \(value) to \(itemEntity.label)")
+        return .result(dialog: "Sent the value of \(value) to \(itemEntity.label)")
     }
 }

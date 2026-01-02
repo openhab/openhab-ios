@@ -12,17 +12,14 @@
 import AppIntents
 import OpenHABCore
 
-enum ColorValueError: Error, CustomLocalizedStringResourceConvertible {
+enum NumberValueError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
-    case invalidValue(String, String)
     case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
         case let .itemNotInHome(itemName, homeName):
             "Item '\(itemName)' is not in home '\(homeName)'"
-        case let .invalidValue(value, itemName):
-            "Invalid value: \(value) for \(itemName) must be HSB (0-360,0-100,0-100)"
         case let .commandFailed(message):
             "Command failed: \(message)"
         }
@@ -30,16 +27,16 @@ enum ColorValueError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-struct ColorValueIntent: AppIntent {
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.color] }
+struct SetNumberValueIntent: AppIntent {
+    static var allowedItemTypes: [OpenHABItem.ItemType] { [.number, .numberWithDimension] }
     static var parameterSummary: some ParameterSummary {
-        Summary("Set \(\.$itemEntity) to \(\.$value) (HSB)") {
+        Summary("Set \(\.$itemEntity) to \(\.$value)") {
             \.$home
         }
     }
 
-    static let title: LocalizedStringResource = "Set Color Control Value"
-    static let description = IntentDescription("Set the color of a color control item")
+    static let title: LocalizedStringResource = "Set Number Control Value"
+    static let description = IntentDescription("Set the decimal value of a number control item")
 
     @Parameter(title: "Home")
     var home: Home
@@ -48,38 +45,27 @@ struct ColorValueIntent: AppIntent {
         title: "Item",
         requestValueDialog: IntentDialog("Search for an item")
     )
-    var itemEntity: ColorItemEntity
+    var itemEntity: NumberItemEntity
 
-    @Parameter(title: "Value", default: "240,100,100")
-    var value: String
+    @Parameter(title: "Value")
+    var value: Double
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         // Validate that the item belongs to the selected home
         guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw ColorValueError.itemNotInHome(itemEntity.label, home.displayString)
+            throw NumberValueError.itemNotInHome(itemEntity.label, home.displayString)
         }
-
-        var colorValue = value
-        let hsb = colorValue.split(separator: ",")
-        guard hsb.count == 3,
-              let hue = Int(hsb[0]), (0 ... 360).contains(hue),
-              let sat = Int(hsb[1]), (0 ... 100).contains(sat),
-              let val = Int(hsb[2]), (0 ... 100).contains(val) else {
-            throw ColorValueError.invalidValue(colorValue, itemEntity.label)
-        }
-
-        colorValue = "\(hue),\(sat),\(val)"
 
         do {
             try await OpenHABItemCache.instance.sendCommand(
                 to: itemEntity.item,
                 home: itemEntity.homeId,
-                command: colorValue
+                command: String(value)
             )
         } catch {
-            throw ColorValueError.commandFailed(error.localizedDescription)
+            throw NumberValueError.commandFailed(error.localizedDescription)
         }
 
-        return .result(dialog: "Sent the color value of \(colorValue) to \(itemEntity.label)")
+        return .result(dialog: "Sent the number \(value) to \(itemEntity.label)")
     }
 }
