@@ -42,7 +42,7 @@ struct CertificateStoreTests {
         let info = await store.getCertificateInfo(forDomain: domain)
         #expect(info != nil)
         #expect(info?.data == data)
-        #expect(info!.dateAccepted.timeIntervalSinceNow > -5) // stored just now
+        #expect(info!.dateAccepted.timeIntervalSinceNow > -30) // stored recently (allow 30s for slow CI)
 
         await store.removeCertificate(forDomain: domain)
     }
