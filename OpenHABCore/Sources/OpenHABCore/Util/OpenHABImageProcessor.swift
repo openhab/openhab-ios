@@ -20,9 +20,15 @@ public struct OpenHABImageProcessor: ImageProcessor {
     // It will be used when storing and retrieving the image to/from cache.
     public let identifier: String
     let maxSize = CGSize(width: 64, height: 64)
+    let iconColor: String?
 
-    public init() {
-        identifier = "org.openhab.svgprocessor"
+    public init(iconColor: String? = nil) {
+        self.iconColor = iconColor
+        if let color = iconColor, !color.isEmpty {
+            identifier = "org.openhab.svgprocessor.\(color)"
+        } else {
+            identifier = "org.openhab.svgprocessor"
+        }
     }
 
     /// Execute `body` on the main thread synchronously, but avoid deadlock when already on main.
@@ -36,6 +42,55 @@ public struct OpenHABImageProcessor: ImageProcessor {
                 body()
             }
         }
+    }
+
+    /// Apply color preprocessing to SVG data
+    private func preprocessSVG(_ data: Data) -> Data {
+        guard let iconColor, !iconColor.isEmpty,
+              let svgString = String(data: data, encoding: .utf8) else {
+            return data
+        }
+
+        // Convert iconColor to hex format
+        let uiColor = UIColor(fromString: iconColor)
+        guard let hexColor = uiColor.toHex() else {
+            return data
+        }
+
+        let colorString = "#\(hexColor)"
+        Logger.openHABImageProcessor.debug("Preprocessing SVG with color: \(colorString)")
+
+        // Preprocess SVG to apply color
+        var processedSVG = svgString
+
+        // Add a style to the SVG root to set fill color using modern Swift regex
+        do {
+            let svgTagRegex = /<svg[^>]*>/
+            if let match = processedSVG.firstMatch(of: svgTagRegex) {
+                let svgTag = String(processedSVG[match.range])
+
+                // Check if the svg tag already has a style attribute
+                if svgTag.contains("style=") {
+                    // Append to existing style
+                    let modifiedTag = svgTag.replacingOccurrences(
+                        of: "style=\"",
+                        with: "style=\"fill:\(colorString);",
+                        options: .literal
+                    )
+                    processedSVG.replaceSubrange(match.range, with: modifiedTag)
+                } else {
+                    // Add new style attribute before the closing >
+                    let modifiedTag = svgTag.replacingOccurrences(
+                        of: ">",
+                        with: " style=\"fill:\(colorString);\">",
+                        options: .backwards
+                    )
+                    processedSVG.replaceSubrange(match.range, with: modifiedTag)
+                }
+            }
+        }
+
+        return processedSVG.data(using: .utf8) ?? data
     }
 
     /// Decode SVG on the main thread (UIGraphics-based), with sane defaults.
@@ -72,8 +127,11 @@ public struct OpenHABImageProcessor: ImageProcessor {
             guard !data.isEmpty else { return nil }
 
             if isSVG(data: data) {
+                // Apply color preprocessing to SVG if iconColor is specified
+                let processedData = preprocessSVG(data)
+
                 // Limit SVG decode size (to prevent memory issues
-                if let image = decodeSVGOnMain(data, targetSize: maxSize, preserveAspectRatio: true) {
+                if let image = decodeSVGOnMain(processedData, targetSize: maxSize, preserveAspectRatio: true) {
                     return image
                 } else {
                     return warningSymbol()

@@ -721,10 +721,12 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     staticIcon: widget.staticIcon
                 )?.url {
                     Logger.sitemapViewController.info("URL for icon: \(urlc.absoluteString, privacy: .public)")
+                    // Only apply color preprocessing for non-iconify icons
+                    let processorIconColor = urlc.host == "api.iconify.design" ? nil : iconColor
                     cell.imageView?.kf.setImage(
                         with: KF.ImageResource(downloadURL: urlc), // , cacheKey: urlc.path + (urlc.query ?? "")),
                         placeholder: nil,
-                        options: [.processor(OpenHABImageProcessor())]
+                        options: [.processor(OpenHABImageProcessor(iconColor: processorIconColor))]
                     ) { result in
                         switch result {
                         case .success:
