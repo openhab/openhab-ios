@@ -73,7 +73,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
 
                 // Check if the svg tag already has a style attribute
                 if svgTag.contains("style=") {
-                    // Append to existing style
+                    // Prepend to existing style
                     let modifiedTag = svgTag.replacingOccurrences(
                         of: "style=\"",
                         with: "style=\"color:\(colorString);fill:\(colorString);",
@@ -84,7 +84,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
                     // Add new style attribute before the closing >
                     let modifiedTag = svgTag.replacingOccurrences(
                         of: ">",
-                        with: " style=\"color:\(colorString);fill:\(colorString);\">",
+                        with: " style=\"color:\(colorString);fill:\(colorString)\">",
                         options: .backwards
                     )
                     processedSVG.replaceSubrange(match.range, with: modifiedTag)
