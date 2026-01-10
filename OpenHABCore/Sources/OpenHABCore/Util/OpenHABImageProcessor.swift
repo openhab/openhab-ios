@@ -45,7 +45,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
     }
 
     /// Apply color preprocessing to SVG data
-    private func preprocessSVG(_ data: Data) -> Data {
+    func preprocessSVG(_ data: Data) -> Data {
         guard let iconColor, !iconColor.isEmpty,
               let svgString = String(data: data, encoding: .utf8) else {
             return data
