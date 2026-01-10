@@ -63,7 +63,9 @@ public struct OpenHABImageProcessor: ImageProcessor {
         // Preprocess SVG to apply color
         var processedSVG = svgString
 
-        // Add a style to the SVG root to set fill color using modern Swift regex
+        // Add a style to the SVG root to set color using modern Swift regex
+        // Setting 'color' makes it available to 'currentColor' references
+        // Setting 'fill' applies to elements without explicit fill attributes
         do {
             let svgTagRegex = /<svg[^>]*>/
             if let match = processedSVG.firstMatch(of: svgTagRegex) {
@@ -74,7 +76,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
                     // Append to existing style
                     let modifiedTag = svgTag.replacingOccurrences(
                         of: "style=\"",
-                        with: "style=\"fill:\(colorString);",
+                        with: "style=\"color:\(colorString);fill:\(colorString);",
                         options: .literal
                     )
                     processedSVG.replaceSubrange(match.range, with: modifiedTag)
@@ -82,7 +84,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
                     // Add new style attribute before the closing >
                     let modifiedTag = svgTag.replacingOccurrences(
                         of: ">",
-                        with: " style=\"fill:\(colorString);\">",
+                        with: " style=\"color:\(colorString);fill:\(colorString);\">",
                         options: .backwards
                     )
                     processedSVG.replaceSubrange(match.range, with: modifiedTag)

@@ -28,10 +28,13 @@ struct OpenHABImageProcessorTests {
         let processedData = processor.preprocessSVG(svgData)
         let processedString = String(data: processedData, encoding: .utf8)!
 
-        // Verify that style attribute was added with fill color
-        #expect(processedString.contains("style=\"fill:#"))
+        // Verify that style attribute was added with both color and fill
+        // 'color' is needed for currentColor references, 'fill' for elements without explicit fill
+        #expect(processedString.contains("style=\"color:#"))
+        #expect(processedString.contains("fill:#"))
         #expect(processedString.contains("<svg"))
         #expect(processedString.contains("</svg>"))
+        #expect(processedString.contains("fill=\"currentColor\""), "Original currentColor attribute should be preserved")
     }
 
     @Test func preprocessSVG_withoutIconColor() async throws {
@@ -75,8 +78,9 @@ struct OpenHABImageProcessorTests {
         let processedData = processor.preprocessSVG(svgData)
         let processedString = String(data: processedData, encoding: .utf8)!
 
-        // Verify that fill color was prepended to existing style
-        #expect(processedString.contains("style=\"fill:#"))
+        // Verify that color and fill were prepended to existing style
+        #expect(processedString.contains("style=\"color:#"))
+        #expect(processedString.contains("fill:#"))
         #expect(processedString.contains("stroke:black;"))
     }
 
@@ -92,7 +96,8 @@ struct OpenHABImageProcessorTests {
         let processedString = String(data: processedData, encoding: .utf8)!
 
         // Verify that style attribute was added
-        #expect(processedString.contains("style=\"fill:#"))
+        #expect(processedString.contains("style=\"color:#"))
+        #expect(processedString.contains("fill:#"))
     }
 
     @Test func preprocessSVG_withRGBColor() async throws {
@@ -107,7 +112,8 @@ struct OpenHABImageProcessorTests {
         let processedString = String(data: processedData, encoding: .utf8)!
 
         // Verify that style attribute was added
-        #expect(processedString.contains("style=\"fill:#"))
+        #expect(processedString.contains("style=\"color:#"))
+        #expect(processedString.contains("fill:#"))
     }
 
     @Test func preprocessSVG_preservesOtherAttributes() async throws {
@@ -127,7 +133,8 @@ struct OpenHABImageProcessorTests {
         #expect(processedString.contains("viewBox=\"0 0 16 16\""))
         #expect(processedString.contains("class=\"icon\""))
         #expect(processedString.contains("data-test=\"value\""))
-        #expect(processedString.contains("style=\"fill:#"))
+        #expect(processedString.contains("style=\"color:#"))
+        #expect(processedString.contains("fill:#"))
     }
 
     @Test func preprocessSVG_withInvalidData() async throws {
@@ -158,6 +165,23 @@ struct OpenHABImageProcessorTests {
         let processedString = String(data: processedData, encoding: .utf8)!
 
         // Verify that style attribute was added
-        #expect(processedString.contains("style=\"fill:#"))
+        #expect(processedString.contains("style=\"color:#"))
+        #expect(processedString.contains("fill:#"))
+    }
+
+    @Test func preprocessSVG_verifyColorValue() async throws {
+        // Verify that the exact hex color value is correctly inserted
+        let svgString = """
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><circle cx="16" cy="16" r="15" fill="currentColor"/></svg>
+        """
+        let svgData = svgString.data(using: .utf8)!
+
+        let processor = OpenHABImageProcessor(iconColor: "red")
+        let processedData = processor.preprocessSVG(svgData)
+        let processedString = String(data: processedData, encoding: .utf8)!
+
+        // Red should convert to #FF0000
+        #expect(processedString.contains("color:#FF0000"))
+        #expect(processedString.contains("fill:#FF0000"))
     }
 }
