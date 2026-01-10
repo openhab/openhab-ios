@@ -138,7 +138,7 @@ struct OpenHABImageProcessorTests {
     }
 
     @Test func preprocessSVG_withInvalidData() async throws {
-        let invalidData = "Not an SVG".data(using: .utf8)!
+        let invalidData = Data("Not an SVG".utf8)
 
         // Process with color
         let processor = OpenHABImageProcessor(iconColor: "red")
