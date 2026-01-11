@@ -19,16 +19,17 @@ struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = AppSettings.shared
 
+    var iconColor: String {
+        let logicColor = !(widget.iconColor.isEmpty) ? UIColor(fromString: widget.iconColor) : .ohBlack
+        return logicColor.semanticColorToHex() ?? "#FFFFFF"
+    }
+
     var iconURL: URL? {
         // Skip loading number icons as they don't exist/aren't useful
         if widget.icon == "number" {
             return nil
         }
 
-        var iconColor = widget.iconColor
-        if iconColor.isEmpty {
-            iconColor = "#FFFFFF"
-        }
         return Endpoint.icon(
             rootUrl: settings.openHABRootUrl,
             version: settings.openHABVersion,
@@ -43,14 +44,11 @@ struct IconView: View {
     var body: some View {
         if let iconURL {
             // Only apply color preprocessing for non-iconify icons
-            let processorIconColor = iconURL.host == "api.iconify.design" ? nil : widget.iconColor.isEmpty ? nil : widget.iconColor
+            let processorIconColor = iconURL.host == "api.iconify.design" ? nil : iconColor
             KFImage.url(iconURL)
                 .onFailure { _ in
                     Logger.rowViews.debug("Failed to load image : \(iconURL.absoluteString)")
                 }
-//                .onSuccess { _ in
-//                    Logger.rowViews.debug("Successfully loaded image: \(iconURL.absoluteString)")
-//                }
                 .onFailureView {
                     Rectangle()
                         .foregroundStyle(.background)
