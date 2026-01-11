@@ -250,4 +250,26 @@ public extension UIColor {
             return String(format: "%02lX%02lX%02lX", lroundf(red * 255), lroundf(green * 255), lroundf(blue * 255))
         }
     }
+
+    func semanticColorToHex() -> String? {
+        // First try the standard toHex() method
+        if let hex = toHex() {
+            return "#\(hex)"
+        }
+
+        // Handle grayscale colors (like .black and .white) by converting to RGB color space
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+
+        if getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+            let r = Int(round(red * 255))
+            let g = Int(round(green * 255))
+            let b = Int(round(blue * 255))
+            return String(format: "#%02X%02X%02X", r, g, b)
+        }
+
+        return nil
+    }
 }

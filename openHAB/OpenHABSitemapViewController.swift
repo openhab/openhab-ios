@@ -704,10 +704,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         let cell = provider.dequeue(from: tableView, at: indexPath)
         provider.configure(cell: cell, for: widget, controller: self)
 
-        var iconColor = widget.iconColor
-        if iconColor.isEmpty, traitCollection.userInterfaceStyle == .dark {
-            iconColor = "#FFFFFF"
-        }
+        let logicColor = !(widget.iconColor.isEmpty) ? UIColor(fromString: widget.iconColor) : .ohBlack
+        let iconColor = logicColor.semanticColorToHex() ?? "#000000"
         // No icon will be displazed for cells that conform to NoIconDisplayableCell protocol
         if !(cell is any NoIconDisplayableCell) {
             if !widget.icon.isEmpty {
