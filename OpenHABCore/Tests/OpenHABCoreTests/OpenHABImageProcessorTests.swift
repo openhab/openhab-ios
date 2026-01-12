@@ -67,21 +67,6 @@ struct OpenHABImageProcessorTests {
         #expect(processedString == svgString)
     }
 
-//    @Test func preprocessSVG_withEmptyIconColor2() async throws {
-//        let svgString = """
-//        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect x="0" y="0" width="64" height="64" fill="black"/></svg>
-//        """
-//        let svgData = Data(svgString.utf8)
-//
-//        // Process with empty icon color
-//        let processor = OpenHABImageProcessor(iconColor: "red")
-//        let processedData = processor.preprocessSVG(svgData)
-//        let processedString = String(bytes: processedData, encoding: .utf8)!
-//
-//        // Verify that SVG is unchanged
-//        #expect(processedString == svgString)
-//    }
-
     @Test func preprocessSVG_withExistingStyleAttribute() async throws {
         let svgString = """
         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" style="stroke:black;"><circle cx="32" cy="32" r="30"/></svg>
@@ -97,6 +82,59 @@ struct OpenHABImageProcessorTests {
         #expect(processedString.contains("style=\"color:#"))
         #expect(processedString.contains("fill:#"))
         #expect(processedString.contains("stroke:black;"))
+    }
+
+    @Test func preprocessSVG_withSingleQuotedStyleAttribute() async throws {
+        let svgString = """
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" style='stroke:black;'><circle cx="32" cy="32" r="30"/></svg>
+        """
+        let svgData = Data(svgString.utf8)
+
+        // Process with green color
+        let processor = OpenHABImageProcessor(iconColor: "green")
+        let processedData = processor.preprocessSVG(svgData)
+        let processedString = String(bytes: processedData, encoding: .utf8)!
+
+        // Verify that color and fill were prepended to existing style with single quotes preserved
+        #expect(processedString.contains("style='color:#"))
+        #expect(processedString.contains("fill:#"))
+        #expect(processedString.contains("stroke:black;"))
+        #expect(processedString.contains("#008000")) // Green hex color
+    }
+
+    @Test func preprocessSVG_withStyleAttributeAndWhitespace() async throws {
+        let svgString = """
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" style = "opacity:0.8;"><rect x="0" y="0" width="64" height="64"/></svg>
+        """
+        let svgData = Data(svgString.utf8)
+
+        // Process with orange color
+        let processor = OpenHABImageProcessor(iconColor: "orange")
+        let processedData = processor.preprocessSVG(svgData)
+        let processedString = String(bytes: processedData, encoding: .utf8)!
+
+        // Verify that style with whitespace is handled correctly
+        #expect(processedString.contains("color:#"))
+        #expect(processedString.contains("fill:#"))
+        #expect(processedString.contains("opacity:0.8;"))
+    }
+
+    @Test func preprocessSVG_withSingleQuotedStyleAndWhitespace() async throws {
+        let svgString = """
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style  =  'margin:10px;'><path d="M0 0h32v32H0z"/></svg>
+        """
+        let svgData = Data(svgString.utf8)
+
+        // Process with purple color
+        let processor = OpenHABImageProcessor(iconColor: "purple")
+        let processedData = processor.preprocessSVG(svgData)
+        let processedString = String(bytes: processedData, encoding: .utf8)!
+
+        // Verify that single-quoted style with whitespace is handled correctly
+        #expect(processedString.contains("color:#"))
+        #expect(processedString.contains("fill:#"))
+        #expect(processedString.contains("margin:10px;"))
+        #expect(processedString.contains("style") && processedString.contains("'"))
     }
 
     @Test func preprocessSVG_withHexColor() async throws {
@@ -198,5 +236,81 @@ struct OpenHABImageProcessorTests {
         // Red should convert to #FF0000
         #expect(processedString.contains("color:#FF0000"))
         #expect(processedString.contains("fill:#FF0000"))
+    }
+
+    // MARK: - Cache Identifier Normalization Tests
+
+    @Test func cacheIdentifier_normalizesNamedColors() async throws {
+        // Verify that named colors are normalized to hex for consistent cache identifiers
+        let processor1 = OpenHABImageProcessor(iconColor: "red")
+        let processor2 = OpenHABImageProcessor(iconColor: "#FF0000")
+        let processor3 = OpenHABImageProcessor(iconColor: "#ff0000")
+        let processor4 = OpenHABImageProcessor(iconColor: "FF0000")
+
+        // All variations of red should produce the same cache identifier
+        #expect(processor1.identifier == processor2.identifier)
+        #expect(processor2.identifier == processor3.identifier)
+        #expect(processor3.identifier == processor4.identifier)
+        #expect(processor1.identifier == "org.openhab.svgprocessor.FF0000")
+    }
+
+    @Test func cacheIdentifier_handlesDifferentColors() async throws {
+        // Verify that different colors produce different cache identifiers
+        let redProcessor = OpenHABImageProcessor(iconColor: "red")
+        let blueProcessor = OpenHABImageProcessor(iconColor: "blue")
+        let greenProcessor = OpenHABImageProcessor(iconColor: "green")
+
+        #expect(redProcessor.identifier != blueProcessor.identifier)
+        #expect(blueProcessor.identifier != greenProcessor.identifier)
+        #expect(redProcessor.identifier != greenProcessor.identifier)
+    }
+
+    @Test func cacheIdentifier_withoutColor() async throws {
+        // Verify that processors without color have the default identifier
+        let processor1 = OpenHABImageProcessor()
+        let processor2 = OpenHABImageProcessor(iconColor: nil)
+        let processor3 = OpenHABImageProcessor(iconColor: "")
+
+        #expect(processor1.identifier == "org.openhab.svgprocessor")
+        #expect(processor2.identifier == "org.openhab.svgprocessor")
+        #expect(processor3.identifier == "org.openhab.svgprocessor")
+    }
+
+    @Test func cacheIdentifier_normalizesOpenHABColors() async throws {
+        // Verify that openHAB semantic colors are normalized
+        let processor1 = OpenHABImageProcessor(iconColor: "maroon")
+        let processor2 = OpenHABImageProcessor(iconColor: "#800000")
+
+        #expect(processor1.identifier == processor2.identifier)
+        #expect(processor1.identifier == "org.openhab.svgprocessor.800000")
+    }
+
+    @Test func cacheIdentifier_handlesWhitespace() async throws {
+        // Verify that whitespace is handled correctly
+        let processor1 = OpenHABImageProcessor(iconColor: "  red  ")
+        let processor2 = OpenHABImageProcessor(iconColor: "red")
+        let processor3 = OpenHABImageProcessor(iconColor: "  #FF0000  ")
+
+        #expect(processor1.identifier == processor2.identifier)
+        #expect(processor2.identifier == processor3.identifier)
+    }
+
+    @Test func cacheIdentifier_handlesCaseSensitivity() async throws {
+        // Verify that color strings are case-insensitive
+        let processor1 = OpenHABImageProcessor(iconColor: "RED")
+        let processor2 = OpenHABImageProcessor(iconColor: "Red")
+        let processor3 = OpenHABImageProcessor(iconColor: "red")
+
+        #expect(processor1.identifier == processor2.identifier)
+        #expect(processor2.identifier == processor3.identifier)
+    }
+
+    @Test func cacheIdentifier_fallbackForInvalidColors() async throws {
+        // Verify that invalid colors fall back to normalized string
+        let processor = OpenHABImageProcessor(iconColor: "xyz")
+
+        // Invalid colors should still produce a consistent identifier
+        // (falls back to trimmed, lowercased string)
+        #expect(processor.identifier.contains("xyz"))
     }
 }
