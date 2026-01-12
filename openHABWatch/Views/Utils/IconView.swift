@@ -54,11 +54,12 @@ struct IconView: View {
                         .foregroundStyle(.background)
                 }
                 .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor))
+                .cacheOriginalImage(false)
                 .loadTransition(.opacity, animation: .easeInOut(duration: 0.25))
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 20, height: 20)
-                .id(iconURL.absoluteString)
+                .id("\(iconURL.absoluteString)-\(widget.item?.state ?? "")-\(widget.iconColor)")
         } else {
             Rectangle()
                 .foregroundStyle(.background)
