@@ -801,6 +801,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 ) { selectedMappingIndex in
                     let selectedMapping: OpenHABWidgetMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
                     self.sendCommand(widget.item, commandToSend: selectedMapping.command)
+                } onDismiss: { [weak self] in
+                    self?.navigationController?.popViewController(animated: true)
                 }
             )
             hostingController.title = widget.labelText
