@@ -46,10 +46,12 @@ extension UITableViewCell {
         var request = URLRequest(url: url)
         request.timeoutInterval = 10
 
+        // Only apply color preprocessing for non-iconify icons
+        let processorIconColor = url.host == "api.iconify.design" ? nil : iconColor
         imageView.kf.setImage(
             with: KF.ImageResource(downloadURL: url, cacheKey: url.path + (url.query ?? "")),
             placeholder: nil,
-            options: [.processor(OpenHABImageProcessor())]
+            options: [.processor(OpenHABImageProcessor(iconColor: processorIconColor))]
         ) { result in
             switch result {
             case .success:
