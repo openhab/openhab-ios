@@ -75,7 +75,17 @@ public struct OpenHABImageProcessor: ImageProcessor {
             // Normalize the color to hex format for consistent cache identifiers.
             // This ensures that equivalent colors (e.g., "red", "#FF0000", "#ff0000")
             // share the same cache entry rather than creating separate cached images.
-            let normalizedColor = UIColor(fromString: color).semanticColorToHex() ?? color.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let trimmedLowercased = color.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            var normalizedColor = UIColor(fromString: color).semanticColorToHex() ?? trimmedLowercased
+            // Strip the leading '#' from the normalized color for the cache identifier
+            if normalizedColor.hasPrefix("#") {
+                normalizedColor = String(normalizedColor.dropFirst())
+            }
+            // If the color was invalid and converted to gray, use the original string instead
+            // Gray is 808080, but only fallback if the input wasn't actually meant to be gray
+            if normalizedColor.uppercased() == "808080", trimmedLowercased != "gray", !trimmedLowercased.contains("808080") {
+                normalizedColor = trimmedLowercased
+            }
             identifier = "org.openhab.svgprocessor.\(normalizedColor)"
         } else {
             identifier = "org.openhab.svgprocessor"
