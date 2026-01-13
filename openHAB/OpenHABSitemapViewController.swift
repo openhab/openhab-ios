@@ -49,6 +49,9 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
 
     private var pageLoader: PageLoader?
 
+    // Store scroll position for restoration after selection
+    private var savedScrollPosition: CGPoint?
+
     var relevantPage: OpenHABPage? {
         if isFiltering {
             filteredPage
@@ -126,6 +129,13 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     override func viewDidAppear(_ animated: Bool) {
         Logger.sitemapViewController.info("OpenHABSitemapViewController viewDidAppear")
         super.viewDidAppear(animated)
+
+        // Restore scroll position if returning from a pushed view
+        // Defer to next run loop to ensure table view is fully laid out
+        if let savedPosition = savedScrollPosition {
+            widgetTableView.setContentOffset(savedPosition, animated: false)
+            savedScrollPosition = nil
+        }
 
         // Load showSearchField settings
         showSearchField = Preferences.shared.applicationPreferences.showSearchField
@@ -793,6 +803,10 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         } else if widget.type == .selection {
             let selectionItemState = widget.item?.state
             Logger.sitemapViewController.info("Selected selection widget in status: \(selectionItemState ?? "unknown")")
+
+            // Save current scroll position before navigating
+            savedScrollPosition = widgetTableView.contentOffset
+
             let hostingController = UIHostingController(
                 rootView: SelectionView(
                     labelText: widget.labelText,
