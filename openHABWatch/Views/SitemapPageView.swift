@@ -13,6 +13,23 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
+/// Wrapper view that owns UserData with @StateObject for stable nested pages
+struct NestedSitemapPageView: View {
+    let linkedPage: OpenHABPage
+    @StateObject private var viewModel: UserData
+    @EnvironmentObject var settings: AppSettings
+
+    init(linkedPage: OpenHABPage) {
+        self.linkedPage = linkedPage
+        self._viewModel = StateObject(wrappedValue: UserData(linkedPage: linkedPage))
+    }
+
+    var body: some View {
+        SitemapPageView(viewModel: viewModel, isRoot: false)
+            .environmentObject(settings)
+    }
+}
+
 /// A wrapper view that handles linkedPage navigation for widgets
 struct WidgetRowView: View {
     @ObservedObject var widget: OpenHABWidget
@@ -80,7 +97,6 @@ struct SitemapPageView: View {
     @ObservedObject var viewModel: UserData
     @EnvironmentObject var settings: AppSettings
     @State var title = "Sitemap"
-    @State private var scrollPosition: String?
     var isRoot = true
 
     var body: some View {
@@ -89,8 +105,7 @@ struct SitemapPageView: View {
                 NavigationStack {
                     pageContent
                         .navigationDestination(for: OpenHABPage.self) { linkedPage in
-                            SitemapPageView(viewModel: UserData(linkedPage: linkedPage), isRoot: false)
-                                .environmentObject(settings)
+                            NestedSitemapPageView(linkedPage: linkedPage)
                         }
                 }
             } else {
@@ -112,7 +127,7 @@ struct SitemapPageView: View {
                 }
             } else if !viewModel.widgets.isEmpty {
                 ScrollView {
-                    VStack(spacing: 4) {
+                    LazyVStack(spacing: 4) {
                         ForEach(viewModel.widgets) { widget in
                             WidgetRowView(widget: widget)
                                 .id(widget.widgetId)
@@ -133,7 +148,6 @@ struct SitemapPageView: View {
                     }
                     .padding(.vertical, 2)
                 }
-                .scrollPosition(id: $scrollPosition, anchor: .top)
                 .navigationBarTitle(viewModel.openHABSitemapPage?.title ?? "Sitemap")
             } else {
                 VStack {

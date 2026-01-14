@@ -389,12 +389,18 @@ final class UserData: ObservableObject {
     /// Updates existing widget instances instead of replacing them to preserve @ObservedObject references
     private func updateWidgets(with newWidgets: [OpenHABWidget]) {
         // Build a map of existing widgets by ID for quick lookup
-        var existingWidgetsMap = Dictionary(uniqueKeysWithValues: widgets.map { ($0.widgetId, $0) })
-        var updatedWidgets: [OpenHABWidget] = []
+        let existingWidgetsMap = Dictionary(uniqueKeysWithValues: widgets.map { ($0.widgetId, $0) })
 
-        for newWidget in newWidgets {
-            if let existingWidget = existingWidgetsMap[newWidget.widgetId] {
-                // Update existing widget's properties to preserve the instance
+        // Check if structure changed (widgets added/removed/reordered)
+        let currentIds = widgets.map(\.widgetId)
+        let newIds = newWidgets.map(\.widgetId)
+
+        if currentIds == newIds {
+            // Structure unchanged - only update properties in-place
+            // This prevents @Published from firing and maintains scroll position
+            for (index, newWidget) in newWidgets.enumerated() where index < widgets.count {
+                let existingWidget = widgets[index]
+                // Update properties only
                 existingWidget.label = newWidget.label
                 existingWidget.icon = newWidget.icon
                 existingWidget.state = newWidget.state
@@ -403,15 +409,30 @@ final class UserData: ObservableObject {
                 existingWidget.iconColor = newWidget.iconColor
                 existingWidget.labelcolor = newWidget.labelcolor
                 existingWidget.valuecolor = newWidget.valuecolor
-                // Add other properties as needed
-                updatedWidgets.append(existingWidget)
-                existingWidgetsMap.removeValue(forKey: newWidget.widgetId)
-            } else {
-                // New widget, add it
-                updatedWidgets.append(newWidget)
             }
-        }
+        } else {
+            // Structure changed - need to rebuild array
+            var updatedWidgets: [OpenHABWidget] = []
 
-        widgets = updatedWidgets
+            for newWidget in newWidgets {
+                if let existingWidget = existingWidgetsMap[newWidget.widgetId] {
+                    // Update existing widget's properties
+                    existingWidget.label = newWidget.label
+                    existingWidget.icon = newWidget.icon
+                    existingWidget.state = newWidget.state
+                    existingWidget.item = newWidget.item
+                    existingWidget.stateEnumBinding = newWidget.stateEnumBinding
+                    existingWidget.iconColor = newWidget.iconColor
+                    existingWidget.labelcolor = newWidget.labelcolor
+                    existingWidget.valuecolor = newWidget.valuecolor
+                    updatedWidgets.append(existingWidget)
+                } else {
+                    // New widget, add it
+                    updatedWidgets.append(newWidget)
+                }
+            }
+
+            widgets = updatedWidgets
+        }
     }
 }
