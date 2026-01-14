@@ -64,6 +64,13 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
 
     // MARK: - Private instance methods
 
+    /// Reloads the table view data while preserving the current scroll position
+    private func reloadTableViewPreservingScrollPosition() {
+        let currentScrollPosition = widgetTableView.contentOffset
+        widgetTableView.reloadData()
+        widgetTableView.setContentOffset(currentScrollPosition, animated: false)
+    }
+
     var searchBarIsEmpty: Bool {
         // Returns true if the text is empty or nil
         searchController.searchBar.text?.isEmpty ?? true
@@ -239,7 +246,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
 
-        widgetTableView.reloadData()
+        reloadTableViewPreservingScrollPosition()
     }
 
     func startWatchingActiveServer() {
@@ -287,7 +294,7 @@ extension OpenHABSitemapViewController: GenericUITableViewCellTouchEventDelegate
     func touchUp() {
         isUserInteracting = false
         if isWaitingToReload {
-            widgetTableView.reloadData()
+            reloadTableViewPreservingScrollPosition()
             refreshControl?.endRefreshing()
         }
         isWaitingToReload = false
@@ -309,7 +316,7 @@ extension OpenHABSitemapViewController {
     @objc
     func handleRefresh(_ refreshControl: UIRefreshControl?) {
         startPageHandling()
-        widgetTableView.reloadData()
+        reloadTableViewPreservingScrollPosition()
         widgetTableView.layoutIfNeeded()
     }
 
@@ -347,7 +354,7 @@ extension OpenHABSitemapViewController {
 
         // isUserInteracting fixes https://github.com/openhab/openhab-ios/issues/646 where reloading while the user is interacting can have unintended consequences
         if !isUserInteracting {
-            widgetTableView.reloadData()
+            reloadTableViewPreservingScrollPosition()
             refreshControl?.endRefreshing()
         } else {
             isWaitingToReload = true
@@ -621,7 +628,7 @@ extension OpenHABSitemapViewController {
         filteredPage?.sendCommand = { [weak self] item, command in
             self?.sendCommand(item, commandToSend: command)
         }
-        widgetTableView.reloadData()
+        reloadTableViewPreservingScrollPosition()
     }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
