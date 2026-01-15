@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [Version 3.1.44, Build 101] - 2026-01-15Z
+
+- Implement SVG color preprocessing for non-iconify icons in OpenHABImageProcessor (#1036)
+- Add PR review instructions
+- Update to 2026 Copyright message (#1035)
+
 ## [Version 3.1.43, Build 100] - 2026-01-01Z
 
 - Clean up obsolete code after migration to openapi-generator (#1032)
