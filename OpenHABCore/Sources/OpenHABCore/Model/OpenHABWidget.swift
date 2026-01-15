@@ -103,9 +103,9 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var refresh = 0
     public var height: Double?
     public var isLeaf = false
-    public var iconColor = ""
-    public var labelcolor = ""
-    public var valuecolor = ""
+    @Published public var iconColor = ""
+    @Published public var labelcolor = ""
+    @Published public var valuecolor = ""
     public var service = ""
     @Published public var state = ""
     public var text = ""

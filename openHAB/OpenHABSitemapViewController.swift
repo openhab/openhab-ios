@@ -708,10 +708,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         let cell = provider.dequeue(from: tableView, at: indexPath)
         provider.configure(cell: cell, for: widget, controller: self)
 
-        var iconColor = widget.iconColor
-        if iconColor.isEmpty, traitCollection.userInterfaceStyle == .dark {
-            iconColor = "#FFFFFF"
-        }
+        let logicColor = !(widget.iconColor.isEmpty) ? UIColor(fromString: widget.iconColor) : .ohBlack
+        let iconColor = logicColor.semanticColorToHex() ?? "#000000"
         // No icon will be displazed for cells that conform to NoIconDisplayableCell protocol
         if !(cell is any NoIconDisplayableCell) {
             if !widget.icon.isEmpty {
@@ -725,10 +723,12 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     staticIcon: widget.staticIcon
                 )?.url {
                     Logger.sitemapViewController.info("URL for icon: \(urlc.absoluteString, privacy: .public)")
+                    // Only apply color preprocessing for non-iconify icons
+                    let processorIconColor = urlc.host == "api.iconify.design" ? nil : iconColor
                     cell.imageView?.kf.setImage(
                         with: KF.ImageResource(downloadURL: urlc), // , cacheKey: urlc.path + (urlc.query ?? "")),
                         placeholder: nil,
-                        options: [.processor(OpenHABImageProcessor())]
+                        options: [.processor(OpenHABImageProcessor(iconColor: processorIconColor))]
                     ) { result in
                         switch result {
                         case .success:

@@ -44,7 +44,9 @@ final class UserData: ObservableObject {
         do {
             let sitemapPage = try data.decoded(as: Components.Schemas.PageDTO.self)
             openHABSitemapPage = OpenHABPage(sitemapPage)
-            widgets = openHABSitemapPage?.widgets ?? []
+            var flattenedWidgets = [OpenHABWidget]()
+            flattenedWidgets.flatten(openHABSitemapPage?.widgets ?? [])
+            widgets = flattenedWidgets
             openHABSitemapPage?.sendCommand = { [weak self] item, command in
                 Task { await self?.sendCommand(item, command: command) }
             }
@@ -292,7 +294,8 @@ final class UserData: ObservableObject {
                         Task { await self?.sendCommand(item, command: command) }
                     }
                     self.openHABSitemapPage = initialPage
-                    let newWidgets = initialPage?.widgets ?? []
+                    var newWidgets = [OpenHABWidget]()
+                    newWidgets.flatten(initialPage?.widgets ?? [])
                     self.updateWidgets(with: newWidgets)
                     if !newWidgets.isEmpty {
                         self.cachedWidgets = newWidgets
@@ -318,7 +321,8 @@ final class UserData: ObservableObject {
                                 }
                             }
                             self.openHABSitemapPage = page
-                            let newWidgets = page?.widgets ?? []
+                            var newWidgets = [OpenHABWidget]()
+                            newWidgets.flatten(page?.widgets ?? [])
                             self.updateWidgets(with: newWidgets)
                             if !newWidgets.isEmpty {
                                 self.cachedWidgets = newWidgets
@@ -401,6 +405,9 @@ final class UserData: ObservableObject {
                 existingWidget.state = newWidget.state
                 existingWidget.item = newWidget.item
                 existingWidget.stateEnumBinding = newWidget.stateEnumBinding
+                existingWidget.iconColor = newWidget.iconColor
+                existingWidget.labelcolor = newWidget.labelcolor
+                existingWidget.valuecolor = newWidget.valuecolor
                 // Add other properties as needed
                 updatedWidgets.append(existingWidget)
                 existingWidgetsMap.removeValue(forKey: newWidget.widgetId)
