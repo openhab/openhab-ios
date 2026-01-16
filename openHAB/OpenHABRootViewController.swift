@@ -125,7 +125,7 @@ class OpenHABRootViewController: UIViewController {
         Task {
             await ItemEventStream.startMonitoringNetwork()
         }
-        print("Starting SSE")
+        Logger.viewController.debug("Starting SSE")
         streamTask = Task { [weak self] in
             guard let self else { return }
             for await msg in await ItemEventStream.shared.stream() {
@@ -137,18 +137,18 @@ class OpenHABRootViewController: UIViewController {
     private func handleSSEMessage(_ msg: StreamOutput<StateStreamMessage>) {
         switch msg {
         case .connected:
-            print("SSE Connected")
+            Logger.viewController.debug("SSE Connected")
         case let .disconnected(err):
-            print("SSE Disconnected:", err ?? "nil")
+            Logger.viewController.debug("SSE Disconnected: \(err?.localizedDescription ?? "nil")")
         case let .event(sm):
             switch sm {
             case let .state(item, state):
-                print("SSE Item \(item): \(state)")
+                Logger.viewController.debug("SSE Item \(item): \(state)")
                 handleNotificationInternal(state)
             case let .ready(uuid, _):
-                print("SSE Session UUID:", uuid)
+                Logger.viewController.debug("SSE Session UUID: \(uuid)")
             case let .unknown(raw):
-                print("SSE Unknown:", raw)
+                Logger.viewController.debug("SSE Unknown: \(raw)")
             default:
                 break
             }
@@ -358,11 +358,11 @@ class OpenHABRootViewController: UIViewController {
         switch mode {
         case .webview:
             // Handle webview navigation or state update
-            print("Dismissed to WebView")
+            Logger.viewController.debug("Dismissed to WebView")
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true)
             switchView(target: .webview)
         case .settings:
-            print("Dismissed to Settings")
+            Logger.viewController.debug("Dismissed to Settings")
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
                 self.modalDismissed(to: .settings)
             }
@@ -383,7 +383,7 @@ class OpenHABRootViewController: UIViewController {
                 self.modalDismissed(to: .tile(urlString))
             }
         case .homeSelection:
-            print("Dismissed to Home Selection")
+            Logger.viewController.debug("Dismissed to Home Selection")
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
                 self.modalDismissed(to: .homeSelection)
             }
@@ -674,10 +674,10 @@ class OpenHABRootViewController: UIViewController {
 
             let utterance = AVSpeechUtterance(string: arg1)
             if cmdParts.count > 3 {
-                print("Filtering voice \(cmdParts[2]) \(cmdParts[3])")
+                Logger.viewController.debug("Filtering voice \(cmdParts[2]) \(cmdParts[3])")
                 let voice = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.lowercased() == cmdParts[2].lowercased() && normalizeVoiceName(from: $0.name) == normalizeVoiceName(from: String(cmdParts[3])) }
                 if !voice.isEmpty {
-                    print("setting custom voice \(voice[0].name)")
+                    Logger.viewController.debug("Setting custom voice \(voice[0].name)")
                     utterance.voice = voice[0]
                 }
             } else if cmdParts.count > 2 {

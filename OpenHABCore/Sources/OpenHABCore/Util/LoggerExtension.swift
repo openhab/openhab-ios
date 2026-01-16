@@ -80,6 +80,12 @@ public extension Logger {
 
     static let widgets = Logger(subsystem: subsystem, category: "Widgets")
 
+    static let rtfTextView = Logger(subsystem: subsystem, category: "RTFTextView")
+
+    static let watchService = Logger(subsystem: subsystem, category: "WatchService")
+
+    static let watchInterface = Logger(subsystem: subsystem, category: "WatchInterface")
+
     #if DEBUG
     private static let testSubsystem = subsystem + "." + "test"
 
