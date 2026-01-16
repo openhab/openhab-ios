@@ -17,6 +17,7 @@ import SwiftUI
 struct SwitchRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
+    @State private var localIsOn: Bool?
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSwitchView")
 
@@ -30,7 +31,7 @@ struct SwitchRowView: View {
     }
 
     private var isOn: Bool {
-        effectiveState.parseAsBool()
+        localIsOn ?? effectiveState.parseAsBool()
     }
 
     var body: some View {
@@ -54,6 +55,7 @@ struct SwitchRowView: View {
             Toggle("", isOn: Binding(
                 get: { isOn },
                 set: { newValue in
+                    localIsOn = newValue
                     let newState = newValue ? "ON" : "OFF"
                     if newValue {
                         logger.info("\("Switch to ON")")
@@ -67,6 +69,10 @@ struct SwitchRowView: View {
             .disabled(widget.readOnly ?? false)
         }
         .contentShape(Rectangle())
+        .onChange(of: effectiveState) { _ in
+            // Sync local state when server state changes
+            localIsOn = nil
+        }
     }
 }
 

@@ -47,7 +47,8 @@ struct EmbeddingRowView: View {
                 RowViewFactory.view(for: widget)
             }
         }
-        .padding(.vertical, -8)
+        .contentShape(Rectangle())
+        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
         .alert("Input", isPresented: $showInputAlert) {
             if let widget = selectedWidget {
                 TextField("Enter value", text: $inputText)

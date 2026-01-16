@@ -441,15 +441,15 @@ class SitemapPageViewModel: ObservableObject {
         do {
             // Setup the OpenAPI service based on the new connection
             openAPIService = try OpenAPIService(connectionConfiguration: connection.configuration)
-            // Reload the sitemap data
-            await selectSitemap()
+            // Start page handling which includes initial load and long polling
+            startPageHandling()
         } catch {
             self.error = error as? any LocalizedError
         }
     }
 
     func selectSitemap() async {
-        await reload()
+        startPageHandling()
     }
 
     // MARK: - Command Sending
