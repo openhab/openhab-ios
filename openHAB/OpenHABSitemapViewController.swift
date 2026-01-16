@@ -163,6 +163,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
                 widgetTableView.reloadData()
             }
             Logger.sitemapViewController.info("OpenHABSitemapViewController pageUrl is empty, this is first launch")
+            startWatchingActiveServer()
         } else {
             // Skip restarting if polling task is still active (e.g., returning from SelectionView)
             if let task = pageHandlingTask, !task.isCancelled {
@@ -171,13 +172,12 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
                 // swiftformat:disable:next redundantSelf
                 Logger.sitemapViewController.info("OpenHABSitemapViewController pageUrl \(self.pageUrl)")
                 startPageHandling()
+                startWatchingActiveServer()
             } else {
                 Logger.sitemapViewController.info("OpenHABSitemapViewController network status changed while it was not appearing")
                 restart()
             }
         }
-
-        startWatchingActiveServer()
 
         ImageDownloader.default.authenticationChallengeResponder = self
     }
@@ -186,6 +186,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         Logger.sitemapViewController.info("OpenHABSitemapViewController viewWillDisappear")
 
         trackerCancellables.removeAll()
+        // Keep polling alive when pushing to SelectionView to preserve scroll position
         if !isNavigatingToSelection {
             stopAllTasks()
         }
