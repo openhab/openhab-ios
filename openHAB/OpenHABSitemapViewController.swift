@@ -43,7 +43,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     private let searchController = UISearchController(searchResultsController: nil)
     private var isUserInteracting = false
     private var isWaitingToReload = false
-    // Properties in your view controller:
+    private var isNavigatingToSelection = false
 
     private var pageHandlingTask: Task<Void, Never>?
 
@@ -164,7 +164,10 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
             }
             Logger.sitemapViewController.info("OpenHABSitemapViewController pageUrl is empty, this is first launch")
         } else {
-            if !pageNetworkStatusChanged() || !pageId.isEmpty {
+            // Skip restarting if polling task is still active (e.g., returning from SelectionView)
+            if let task = pageHandlingTask, !task.isCancelled {
+                Logger.sitemapViewController.info("OpenHABSitemapViewController polling still active, skipping restart")
+            } else if !pageNetworkStatusChanged() || !pageId.isEmpty {
                 // swiftformat:disable:next redundantSelf
                 Logger.sitemapViewController.info("OpenHABSitemapViewController pageUrl \(self.pageUrl)")
                 startPageHandling()
@@ -183,7 +186,10 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         Logger.sitemapViewController.info("OpenHABSitemapViewController viewWillDisappear")
 
         trackerCancellables.removeAll()
-        stopAllTasks()
+        if !isNavigatingToSelection {
+            stopAllTasks()
+        }
+        isNavigatingToSelection = false
 
         super.viewWillDisappear(animated)
 
@@ -806,6 +812,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 }
             )
             hostingController.title = widget.labelText
+            isNavigatingToSelection = true
             navigationController?.pushViewController(hostingController, animated: true)
         } else if widget.type == .input {
             let hint = widget.inputHint
