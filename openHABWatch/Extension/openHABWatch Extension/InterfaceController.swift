@@ -10,6 +10,8 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import OpenHABCore
+import os.log
 import WatchKit
 
 class InterfaceController: WKInterfaceController {
@@ -59,7 +61,7 @@ class InterfaceController: WKInterfaceController {
     func displayAlert(message: String) {
         DispatchQueue.main.async {
             let okAction = WKAlertAction(title: "Ok", style: .default) {
-                print("ok action")
+                Logger.watchInterface.debug("OK action pressed")
             }
             self.presentAlert(withTitle: "Fehler", message: message, preferredStyle: .actionSheet, actions: [okAction])
         }

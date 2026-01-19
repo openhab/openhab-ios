@@ -25,11 +25,11 @@ struct SegmentRow: View {
                 return value
             },
             set: { newValue in
-                print("Picker new value = \(newValue)")
+                Logger.rowViews.debug("Picker new value = \(newValue)")
                 widget.stateEnumBinding = .segmented(newValue)
                 if let selectedCommand = widget.mappingsOrItemOptions[safe: newValue]?.command {
                     pendingValue = selectedCommand
-                    print("Selected command: \(selectedCommand)")
+                    Logger.rowViews.debug("Selected command: \(selectedCommand)")
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { // 500ms delay
                         if pendingValue == selectedCommand { // Ensure no new updates came in
                             widget.sendCommand(selectedCommand)

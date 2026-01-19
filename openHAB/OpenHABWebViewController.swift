@@ -346,7 +346,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         Logger.viewController.info("WKScriptMessage \(message.name)")
         if message.name == "pathChanged", let newPath = message.body as? String {
-            print("path changed to: \(newPath)")
+            Logger.viewController.debug("Path changed to: \(newPath)")
             Task { @MainActor in
                 Preferences.shared.currentWebViewPath = newPath
             }
