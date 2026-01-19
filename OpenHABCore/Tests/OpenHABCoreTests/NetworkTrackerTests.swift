@@ -155,10 +155,11 @@ final class NetworkTrackerTests: XCTestCase {
             failureTracker: ConnectionFailureTracker()
         )
 
-        // Subscribe directly to NetworkTracker's statusStream to avoid race conditions
-        // with MainActorNetworkTracker's async Task initialization
+        // Get the status stream first to ensure subscription is established before tracking starts
+        let statusStream = await networkTracker.statusStream()
+
         let statusTask = Task {
-            for await status in await networkTracker.statusStream() {
+            for await status in statusStream {
                 Logger.testNetworkTracker
                     .info("NetworkTrackerTests: Network status became \(status == .connected ? "connected" : (status == .connecting ? "connecting" : (status == .started ? "started" : "stopped")))")
                 if status == .connected {
