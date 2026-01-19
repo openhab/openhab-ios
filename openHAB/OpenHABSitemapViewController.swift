@@ -44,6 +44,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     private var isUserInteracting = false
     private var isWaitingToReload = false
     private var isNavigatingToSelection = false
+    private var isNavigatingToLinkedPage = false
 
     private var pageHandlingTask: Task<Void, Never>?
 
@@ -186,11 +187,12 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         Logger.sitemapViewController.info("OpenHABSitemapViewController viewWillDisappear")
 
         trackerCancellables.removeAll()
-        // Keep polling alive when pushing to SelectionView to preserve scroll position
-        if !isNavigatingToSelection {
+        // Keep polling alive when pushing to SelectionView or LinkedPage to preserve scroll position
+        if !isNavigatingToSelection, !isNavigatingToLinkedPage {
             stopAllTasks()
         }
         isNavigatingToSelection = false
+        isNavigatingToLinkedPage = false
 
         super.viewWillDisappear(animated)
 
@@ -790,12 +792,12 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
 
         if let linkedPage = widget.linkedPage {
             Logger.sitemapViewController.info("Selected linked page: \(linkedPage.link)")
-            stopAllTasks()
             let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
             newViewController.title = linkedPage.title.components(separatedBy: "[")[0]
             newViewController.pageId = linkedPage.pageId
             newViewController.pageUrl = linkedPage.link
             newViewController.openHABRootUrl = openHABRootUrl
+            isNavigatingToLinkedPage = true
             navigationController?.pushViewController(newViewController, animated: true)
         } else if widget.type == .selection {
             let selectionItemState = widget.item?.state
