@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [Version 3.1.45, Build 102] - 2026-01-19Z
+
+- Fix for race condition in NetworkTrackerTests (#1044)
+- Fix/1038 auto back from selection view (#1041)
+- Replaced print statements with Logger calls
+
 ## [Version 3.1.44, Build 101] - 2026-01-15Z
 
 - Implement SVG color preprocessing for non-iconify icons in OpenHABImageProcessor (#1036)
