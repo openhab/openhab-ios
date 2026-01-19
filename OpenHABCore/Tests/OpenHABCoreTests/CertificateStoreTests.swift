@@ -14,7 +14,7 @@ import Foundation
 import os.log
 import Testing
 
-@Suite("CertificateStore Tests")
+@Suite("CertificateStore Tests", .serialized)
 struct CertificateStoreTests {
     // Helper to load the bundled test certificate data
     func loadTestCertificateData() throws -> Data {
