@@ -43,7 +43,8 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     private let searchController = UISearchController(searchResultsController: nil)
     private var isUserInteracting = false
     private var isWaitingToReload = false
-    // Properties in your view controller:
+    private var isNavigatingToSelection = false
+    private var isNavigatingToLinkedPage = false
 
     private var pageHandlingTask: Task<Void, Never>?
 
@@ -163,18 +164,21 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
                 widgetTableView.reloadData()
             }
             Logger.sitemapViewController.info("OpenHABSitemapViewController pageUrl is empty, this is first launch")
+            startWatchingActiveServer()
         } else {
-            if !pageNetworkStatusChanged() || !pageId.isEmpty {
+            // Skip restarting if polling task is still active (e.g., returning from SelectionView)
+            if let task = pageHandlingTask, !task.isCancelled {
+                Logger.sitemapViewController.info("OpenHABSitemapViewController polling still active, skipping restart")
+            } else if !pageNetworkStatusChanged() || !pageId.isEmpty {
                 // swiftformat:disable:next redundantSelf
                 Logger.sitemapViewController.info("OpenHABSitemapViewController pageUrl \(self.pageUrl)")
                 startPageHandling()
+                startWatchingActiveServer()
             } else {
                 Logger.sitemapViewController.info("OpenHABSitemapViewController network status changed while it was not appearing")
                 restart()
             }
         }
-
-        startWatchingActiveServer()
 
         ImageDownloader.default.authenticationChallengeResponder = self
     }
@@ -183,7 +187,12 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         Logger.sitemapViewController.info("OpenHABSitemapViewController viewWillDisappear")
 
         trackerCancellables.removeAll()
-        stopAllTasks()
+        // Keep polling alive when pushing to SelectionView or LinkedPage to preserve scroll position
+        if !isNavigatingToSelection, !isNavigatingToLinkedPage {
+            stopAllTasks()
+        }
+        isNavigatingToSelection = false
+        isNavigatingToLinkedPage = false
 
         super.viewWillDisappear(animated)
 
@@ -783,12 +792,12 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
 
         if let linkedPage = widget.linkedPage {
             Logger.sitemapViewController.info("Selected linked page: \(linkedPage.link)")
-            stopAllTasks()
             let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
             newViewController.title = linkedPage.title.components(separatedBy: "[")[0]
             newViewController.pageId = linkedPage.pageId
             newViewController.pageUrl = linkedPage.link
             newViewController.openHABRootUrl = openHABRootUrl
+            isNavigatingToLinkedPage = true
             navigationController?.pushViewController(newViewController, animated: true)
         } else if widget.type == .selection {
             let selectionItemState = widget.item?.state
@@ -801,9 +810,12 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 ) { selectedMappingIndex in
                     let selectedMapping: OpenHABWidgetMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
                     self.sendCommand(widget.item, commandToSend: selectedMapping.command)
+                } onDismiss: { [weak self] in
+                    self?.navigationController?.popViewController(animated: true)
                 }
             )
             hostingController.title = widget.labelText
+            isNavigatingToSelection = true
             navigationController?.pushViewController(hostingController, animated: true)
         } else if widget.type == .input {
             let hint = widget.inputHint

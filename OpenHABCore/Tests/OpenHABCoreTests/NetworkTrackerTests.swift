@@ -155,19 +155,18 @@ final class NetworkTrackerTests: XCTestCase {
             failureTracker: ConnectionFailureTracker()
         )
 
-        let tracker = MainActorNetworkTracker(tracker: networkTracker)
-
-        var cancellables = Set<AnyCancellable>()
-
-        tracker.$status
-            .sink { status in
+        // Subscribe directly to NetworkTracker's statusStream to avoid race conditions
+        // with MainActorNetworkTracker's async Task initialization
+        let statusTask = Task {
+            for await status in await networkTracker.statusStream() {
                 Logger.testNetworkTracker
                     .info("NetworkTrackerTests: Network status became \(status == .connected ? "connected" : (status == .connecting ? "connecting" : (status == .started ? "started" : "stopped")))")
                 if status == .connected {
                     expectation.fulfill()
+                    break
                 }
             }
-            .store(in: &cancellables)
+        }
 
         // Start tracking with your mock config
         await networkTracker.startTracking(connectionConfigurations: [config])
@@ -176,6 +175,7 @@ final class NetworkTrackerTests: XCTestCase {
         mockMonitor.simulateConnection(isConnected: true)
 
         await fulfillment(of: [expectation], timeout: 2.0)
+        statusTask.cancel()
     }
 
 //    @MainActor
