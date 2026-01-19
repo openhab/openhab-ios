@@ -59,7 +59,7 @@ extension UITableViewCell {
                     imageView.setNeedsLayout()
                 }
             case let .failure(error):
-                print("Image loading failed for widget \(widget.label): \(error.localizedDescription)")
+                Logger.widgets.error("Image loading failed for widget \(widget.label): \(error.localizedDescription)")
             }
         }
     }

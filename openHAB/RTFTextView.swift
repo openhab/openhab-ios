@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import OpenHABCore
+import os.log
 import SwiftUI
 import UIKit
 
@@ -37,10 +38,10 @@ struct RTFTextView: UIViewRepresentable {
                 uiView.backgroundColor = .ohSystemBackground
                 uiView.textColor = .ohLabel
             } catch {
-                print("Failed to load RTF file: \(error.localizedDescription)")
+                Logger.rtfTextView.error("Failed to load RTF file: \(error.localizedDescription)")
             }
         } else {
-            print("RTF file not found")
+            Logger.rtfTextView.warning("RTF file not found")
         }
     }
 }
