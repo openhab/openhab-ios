@@ -135,7 +135,8 @@ final class MockPathMonitor: NWPathMonitoring {
 @MainActor
 final class NetworkTrackerTests: XCTestCase {
     func testTrackerSetsConnectedStatusOnNetworkUp() async {
-        let expectation = XCTestExpectation(description: "Status becomes .connected")
+        let streamIterating = XCTestExpectation(description: "Stream iteration started")
+        let connectedExpectation = XCTestExpectation(description: "Status becomes .connected")
         let config = ConnectionConfiguration(
             url: "http://mock",
             username: "",
@@ -155,19 +156,27 @@ final class NetworkTrackerTests: XCTestCase {
             failureTracker: ConnectionFailureTracker()
         )
 
-        // Get the status stream first to ensure subscription is established before tracking starts
+        // Create stream first to ensure Combine sink is attached before tracking starts
         let statusStream = await networkTracker.statusStream()
 
         let statusTask = Task {
+            var receivedFirstValue = false
             for await status in statusStream {
+                if !receivedFirstValue {
+                    receivedFirstValue = true
+                    streamIterating.fulfill()
+                }
                 Logger.testNetworkTracker
                     .info("NetworkTrackerTests: Network status became \(status == .connected ? "connected" : (status == .connecting ? "connecting" : (status == .started ? "started" : "stopped")))")
                 if status == .connected {
-                    expectation.fulfill()
+                    connectedExpectation.fulfill()
                     break
                 }
             }
         }
+
+        // Wait for the stream to actually start iterating before triggering any state changes
+        await fulfillment(of: [streamIterating], timeout: 1.0)
 
         // Start tracking with your mock config
         await networkTracker.startTracking(connectionConfigurations: [config])
@@ -175,7 +184,7 @@ final class NetworkTrackerTests: XCTestCase {
         // Simulate the network becoming available
         mockMonitor.simulateConnection(isConnected: true)
 
-        await fulfillment(of: [expectation], timeout: 2.0)
+        await fulfillment(of: [connectedExpectation], timeout: 2.0)
         statusTask.cancel()
     }
 
