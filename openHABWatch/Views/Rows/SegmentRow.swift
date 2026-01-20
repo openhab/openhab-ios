@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2025 Contributors to the openHAB project
+// Copyright (c) 2010-2026 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -25,11 +25,11 @@ struct SegmentRow: View {
                 return value
             },
             set: { newValue in
-                print("Picker new value = \(newValue)")
+                Logger.rowViews.debug("Picker new value = \(newValue)")
                 widget.stateEnumBinding = .segmented(newValue)
                 if let selectedCommand = widget.mappingsOrItemOptions[safe: newValue]?.command {
                     pendingValue = selectedCommand
-                    print("Selected command: \(selectedCommand)")
+                    Logger.rowViews.debug("Selected command: \(selectedCommand)")
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { // 500ms delay
                         if pendingValue == selectedCommand { // Ensure no new updates came in
                             widget.sendCommand(selectedCommand)

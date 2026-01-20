@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2025 Contributors to the openHAB project
+// Copyright (c) 2010-2026 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -19,16 +19,17 @@ struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = AppSettings.shared
 
+    var iconColor: String {
+        let logicColor = !(widget.iconColor.isEmpty) ? UIColor(fromString: widget.iconColor) : .ohBlack
+        return logicColor.semanticColorToHex() ?? "#FFFFFF"
+    }
+
     var iconURL: URL? {
         // Skip loading number icons as they don't exist/aren't useful
         if widget.icon == "number" {
             return nil
         }
 
-        var iconColor = widget.iconColor
-        if iconColor.isEmpty {
-            iconColor = "#FFFFFF"
-        }
         return Endpoint.icon(
             rootUrl: settings.openHABRootUrl,
             version: settings.openHABVersion,
@@ -42,23 +43,23 @@ struct IconView: View {
 
     var body: some View {
         if let iconURL {
+            // Only apply color preprocessing for non-iconify icons
+            let processorIconColor = iconURL.host == "api.iconify.design" ? nil : iconColor
             KFImage.url(iconURL)
                 .onFailure { _ in
                     Logger.rowViews.debug("Failed to load image : \(iconURL.absoluteString)")
                 }
-//                .onSuccess { _ in
-//                    Logger.rowViews.debug("Successfully loaded image: \(iconURL.absoluteString)")
-//                }
                 .onFailureView {
                     Rectangle()
                         .foregroundStyle(.background)
                 }
-                .setProcessor(OpenHABImageProcessor())
+                .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor))
+                .cacheOriginalImage(false)
                 .loadTransition(.opacity, animation: .easeInOut(duration: 0.25))
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 20, height: 20)
-                .id(iconURL.absoluteString)
+                .id("\(iconURL.absoluteString)-\(widget.item?.state ?? "")-\(widget.iconColor)")
         } else {
             Rectangle()
                 .foregroundStyle(.background)
@@ -78,7 +79,7 @@ struct IconView: View {
 
     let endpoint = Endpoint.icon(rootUrl: localTestingURL, version: 4, icon: "switch", state: "2", iconType: .png, iconColor: "blue")
     KFImage(endpoint?.url)
-        .setProcessor(OpenHABImageProcessor())
+        .setProcessor(OpenHABImageProcessor(iconColor: endpoint?.url?.host == "api.iconify.design" ? nil : "blue"))
         .resizable()
         .frame(width: 20, height: 20)
 
@@ -91,7 +92,7 @@ struct IconView: View {
 
     let endpoint2 = Endpoint.icon(rootUrl: localTestingURL, version: 3, icon: "f7:alarm", state: "", iconType: .svg, iconColor: "yellow")
     KFImage(endpoint2?.url)
-        .setProcessor(OpenHABImageProcessor())
+        .setProcessor(OpenHABImageProcessor(iconColor: endpoint2?.url?.host == "api.iconify.design" ? nil : "yellow"))
         .resizable()
         .frame(width: 20, height: 20)
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2025 Contributors to the openHAB project
+// Copyright (c) 2010-2026 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -162,8 +162,23 @@ public extension UIColor {
 }
 
 public extension UIColor {
-    /// Initializes a UIColor from a string, supporting named colors and hex codes.
-    /// Falls back to gray if the input is invalid.
+    /// Initializes a UIColor from a string, supporting both named colors and hexadecimal color codes.
+    ///
+    /// This convenience initializer attempts to parse the input string as either a named color
+    /// or a hexadecimal color code. The string is trimmed of whitespace and converted to lowercase
+    /// before matching against the known color names.
+    ///
+    /// - Parameter string: A color string in one of the supported formats:
+    ///   - **Named colors**: Standard color names like `"red"`, `"blue"`, `"green"`, `"white"`, `"black"`
+    ///   - **openHAB colors**: Special colors like `"primary"`, `"secondary"`, `"maroon"`, `"olive"`, etc.
+    ///   - **Hex codes**: Hexadecimal values like `"#FF0000"`, `"00FF00"`, or `"0000ff"`
+    ///
+    ///   The parsing is case-insensitive and whitespace-tolerant. If the string doesn't match
+    ///   a known color name and cannot be parsed as a valid hex code, the initializer falls back
+    ///   to gray.
+    ///
+    /// - Note: This initializer is designed to handle color strings from openHAB server responses,
+    ///   which may use either named colors or hex codes.
     convenience init(fromString string: String) {
         let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let namedColors: [String: UIColor] = [
@@ -201,6 +216,22 @@ public extension UIColor {
         }
     }
 
+    /// Initializes a UIColor from a hexadecimal color string.
+    ///
+    /// This convenience initializer parses a hex string (with or without a leading `#`)
+    /// and creates a UIColor with full opacity (alpha = 1.0).
+    ///
+    /// - Parameter hex: A hexadecimal color string. Accepts formats like:
+    ///   - `"FF0000"` (red)
+    ///   - `"#00FF00"` (green)
+    ///   - `"0000ff"` (blue, case-insensitive)
+    ///
+    ///   The string must contain at least 6 characters (representing RGB values).
+    ///   Whitespace is trimmed automatically. If the string is too short or invalid,
+    ///   the initializer falls back to gray.
+    ///
+    /// - Note: This initializer does not support alpha channel in the hex string.
+    ///   All colors are created with full opacity (alpha = 1.0).
     convenience init(hex: String) {
         guard hex.count >= 6 else {
             self.init(cgColor: UIColor.gray.cgColor)
@@ -230,6 +261,24 @@ public extension UIColor {
 
     // MARK: - From UIColor to String
 
+    /// Converts this color to a hexadecimal string representation without a leading `#`.
+    ///
+    /// This method extracts the RGB (and optionally alpha) components from the color's
+    /// CGColor and formats them as an uppercase hexadecimal string. The method may fail
+    /// for colors that don't have sufficient RGB component information (e.g., certain
+    /// semantic or grayscale colors in non-RGB color spaces).
+    ///
+    /// - Parameter alpha: If `true`, includes the alpha channel in the output, producing
+    ///   an 8-character hex string (RRGGBBAA). If `false` (default), produces a 6-character
+    ///   hex string (RRGGBB) representing only the RGB components.
+    ///
+    /// - Returns: A hexadecimal string (e.g., `"FF0000"` for red, or `"FF0000FF"` with alpha),
+    ///   or `nil` if the color cannot be represented with RGB components (fewer than 3 components
+    ///   in the CGColor).
+    ///
+    /// - Note: The returned hex string does NOT include a leading `#`. Use ``semanticColorToHex()``
+    ///   if you need a hex string with the `#` prefix, or if you need to handle semantic/grayscale
+    ///   colors that may not work with this method.
     func toHex(alpha: Bool = false) -> String? {
         guard let components = cgColor.components, components.count >= 3 else {
             return nil
@@ -249,5 +298,36 @@ public extension UIColor {
         } else {
             return String(format: "%02lX%02lX%02lX", lroundf(red * 255), lroundf(green * 255), lroundf(blue * 255))
         }
+    }
+
+    /// Converts this color, including semantic and grayscale colors, to a hex string with a leading `#`.
+    ///
+    /// This method first delegates to ``toHex(alpha:)``. If that conversion succeeds, the resulting
+    /// hex string is prefixed with `#` and returned. If ``toHex(alpha:)`` cannot produce a value
+    /// (for example, for certain semantic or grayscale colors), this method attempts to extract
+    /// the RGB components via ``getRed(_:green:blue:alpha:)`` and formats them as `#RRGGBB`.
+    ///
+    /// - Returns: A hex string (e.g. `#FFFFFF`) if the color can be represented in the RGB color
+    ///   space, or `nil` if the conversion is not possible.
+    func semanticColorToHex() -> String? {
+        // First try the standard toHex() method
+        if let hex = toHex() {
+            return "#\(hex)"
+        }
+
+        // Handle grayscale colors (like .black and .white) by converting to RGB color space
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+
+        if getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+            let r = Int(round(red * 255))
+            let g = Int(round(green * 255))
+            let b = Int(round(blue * 255))
+            return String(format: "#%02X%02X%02X", r, g, b)
+        }
+
+        return nil
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2025 Contributors to the openHAB project
+// Copyright (c) 2010-2026 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -400,6 +400,9 @@ final class UserData: ObservableObject {
                 existingWidget.state = newWidget.state
                 existingWidget.item = newWidget.item
                 existingWidget.stateEnumBinding = newWidget.stateEnumBinding
+                existingWidget.iconColor = newWidget.iconColor
+                existingWidget.labelcolor = newWidget.labelcolor
+                existingWidget.valuecolor = newWidget.valuecolor
                 // Add other properties as needed
                 updatedWidgets.append(existingWidget)
                 existingWidgetsMap.removeValue(forKey: newWidget.widgetId)

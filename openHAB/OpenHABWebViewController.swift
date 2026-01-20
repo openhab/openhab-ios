@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2025 Contributors to the openHAB project
+// Copyright (c) 2010-2026 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -346,7 +346,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         Logger.viewController.info("WKScriptMessage \(message.name)")
         if message.name == "pathChanged", let newPath = message.body as? String {
-            print("path changed to: \(newPath)")
+            Logger.viewController.debug("Path changed to: \(newPath)")
             Task { @MainActor in
                 Preferences.shared.currentWebViewPath = newPath
             }

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2025 Contributors to the openHAB project
+// Copyright (c) 2010-2026 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import OpenHABCore
+import os.log
 import SwiftUI
 import UIKit
 
@@ -37,10 +38,10 @@ struct RTFTextView: UIViewRepresentable {
                 uiView.backgroundColor = .ohSystemBackground
                 uiView.textColor = .ohLabel
             } catch {
-                print("Failed to load RTF file: \(error.localizedDescription)")
+                Logger.rtfTextView.error("Failed to load RTF file: \(error.localizedDescription)")
             }
         } else {
-            print("RTF file not found")
+            Logger.rtfTextView.warning("RTF file not found")
         }
     }
 }

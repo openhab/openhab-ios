@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2025 Contributors to the openHAB project
+// Copyright (c) 2010-2026 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -19,6 +19,7 @@ struct SelectionView: View {
     var mappings: [OpenHABWidgetMapping] // List of mappings (instead of AnyHashable, we use a concrete type)
     @State var selectionItemState: String? // To track the selected item state
     var onSelection: (Int) -> Void // Closure to handle selection
+    var onDismiss: (() -> Void)? // Closure to handle dismissal after selection
 
     var body: some View {
         List(0 ..< mappings.count, id: \.self) { index in
@@ -36,6 +37,7 @@ struct SelectionView: View {
                 selectionItemState = mappings[index].command
                 Logger.selectionView.info("Selected mapping \(index)")
                 onSelection(index)
+                onDismiss?()
             }
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isButton)
@@ -54,5 +56,7 @@ struct SelectionView: View {
         selectionItemState: "command2"
     ) { selectedMappingIndex in
         print("Selected mapping at index \(selectedMappingIndex)")
+    } onDismiss: {
+        print("Dismissing selection view")
     }
 }

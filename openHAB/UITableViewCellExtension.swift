@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2025 Contributors to the openHAB project
+// Copyright (c) 2010-2026 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -46,10 +46,12 @@ extension UITableViewCell {
         var request = URLRequest(url: url)
         request.timeoutInterval = 10
 
+        // Only apply color preprocessing for non-iconify icons
+        let processorIconColor = url.host == "api.iconify.design" ? nil : iconColor
         imageView.kf.setImage(
             with: KF.ImageResource(downloadURL: url, cacheKey: url.path + (url.query ?? "")),
             placeholder: nil,
-            options: [.processor(OpenHABImageProcessor())]
+            options: [.processor(OpenHABImageProcessor(iconColor: processorIconColor))]
         ) { result in
             switch result {
             case .success:
@@ -57,7 +59,7 @@ extension UITableViewCell {
                     imageView.setNeedsLayout()
                 }
             case let .failure(error):
-                print("Image loading failed for widget \(widget.label): \(error.localizedDescription)")
+                Logger.widgets.error("Image loading failed for widget \(widget.label): \(error.localizedDescription)")
             }
         }
     }

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2025 Contributors to the openHAB project
+// Copyright (c) 2010-2026 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -10,6 +10,8 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import OpenHABCore
+import os.log
 import WatchKit
 
 class ButtonTableRowController: NSObject {
@@ -57,7 +59,7 @@ class ButtonTableRowController: NSObject {
             }
 
             let responseString = String(data: data, encoding: .utf8)
-            print("responseString = \(String(describing: responseString))")
+            Logger.watchService.debug("responseString = \(String(describing: responseString))")
         }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2025 Contributors to the openHAB project
+// Copyright (c) 2010-2026 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -14,7 +14,7 @@ import Foundation
 import os.log
 import Testing
 
-@Suite("CertificateStore Tests")
+@Suite("CertificateStore Tests", .serialized)
 struct CertificateStoreTests {
     // Helper to load the bundled test certificate data
     func loadTestCertificateData() throws -> Data {

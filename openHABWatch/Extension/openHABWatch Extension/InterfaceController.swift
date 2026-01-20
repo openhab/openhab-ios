@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2025 Contributors to the openHAB project
+// Copyright (c) 2010-2026 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -10,6 +10,8 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import OpenHABCore
+import os.log
 import WatchKit
 
 class InterfaceController: WKInterfaceController {
@@ -59,7 +61,7 @@ class InterfaceController: WKInterfaceController {
     func displayAlert(message: String) {
         DispatchQueue.main.async {
             let okAction = WKAlertAction(title: "Ok", style: .default) {
-                print("ok action")
+                Logger.watchInterface.debug("OK action pressed")
             }
             self.presentAlert(withTitle: "Fehler", message: message, preferredStyle: .actionSheet, actions: [okAction])
         }

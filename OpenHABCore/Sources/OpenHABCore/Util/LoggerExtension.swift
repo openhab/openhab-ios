@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2025 Contributors to the openHAB project
+// Copyright (c) 2010-2026 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -79,6 +79,12 @@ public extension Logger {
     static let viewController = Logger(subsystem: subsystem, category: "viewController")
 
     static let widgets = Logger(subsystem: subsystem, category: "Widgets")
+
+    static let rtfTextView = Logger(subsystem: subsystem, category: "RTFTextView")
+
+    static let watchService = Logger(subsystem: subsystem, category: "WatchService")
+
+    static let watchInterface = Logger(subsystem: subsystem, category: "WatchInterface")
 
     #if DEBUG
     private static let testSubsystem = subsystem + "." + "test"
