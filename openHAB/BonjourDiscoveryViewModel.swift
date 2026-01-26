@@ -25,10 +25,10 @@ enum BonjourServiceType: String, CaseIterable {
     }
 }
 
-// MARK: - NetServiceBrowser-based Discovery (like flametouch)
+// MARK: - NetServiceBrowser-based Discovery
 
 /// Handles Bonjour service discovery using NetServiceBrowser on a dedicated background thread
-/// (like flametouch - NetServiceBrowser needs its own RunLoop and address resolution can block)
+/// - NetServiceBrowser needs its own RunLoop and address resolution can block)
 /// Thread-safety: All mutable state is accessed on the dedicated background thread via the RunLoop.
 private final class ServiceBrowserDelegate: NSObject, NetServiceBrowserDelegate, NetServiceDelegate, @unchecked Sendable {
     // Track additional addresses discovered via DNS lookup (since we can't modify NetService.addresses)
@@ -57,10 +57,11 @@ private final class ServiceBrowserDelegate: NSObject, NetServiceBrowserDelegate,
 
     private var additionalAddresses: [ServiceAddressKey: [String]] = [:]
 
-    // Dedicated thread with RunLoop for NetServiceBrowser (like flametouch)
+    // Dedicated thread with RunLoop for NetServiceBrowser
     private var thread: Thread?
     private var runLoop: RunLoop?
-    private var isRunning = false
+    // Thread-safe flag to control the run loop (accessed from multiple threads)
+    private let isRunning = OSAllocatedUnfairLock(initialState: false)
 
     init(onUpdate: @escaping @Sendable ([DiscoveredServer]) -> Void) {
         self.onUpdate = onUpdate
@@ -69,9 +70,9 @@ private final class ServiceBrowserDelegate: NSObject, NetServiceBrowserDelegate,
 
     func start() {
         logger.info("🔍 Starting NetServiceBrowser discovery on background thread")
-        isRunning = true
+        isRunning.withLock { $0 = true }
 
-        // Create dedicated thread with RunLoop (like flametouch)
+        // Create dedicated thread with RunLoop
         // Start browsers directly in the thread entry point to avoid priority inversion
         thread = Thread { [weak self] in
             guard let self else { return }
@@ -92,7 +93,7 @@ private final class ServiceBrowserDelegate: NSObject, NetServiceBrowserDelegate,
             logger.debug("🔄 RunLoop started on background thread")
 
             // Run the loop
-            while isRunning, let runLoop {
+            while isRunning.withLock({ $0 }), let runLoop {
                 let didProcess = runLoop.run(mode: .default, before: Date(timeIntervalSinceNow: 0.1))
                 if !didProcess {
                     Thread.sleep(forTimeInterval: 0.01)
@@ -108,7 +109,7 @@ private final class ServiceBrowserDelegate: NSObject, NetServiceBrowserDelegate,
         logger.debug("🛑 Stopping discovery")
 
         // Signal the run loop to stop
-        isRunning = false
+        isRunning.withLock { $0 = false }
 
         // Stop browsers and services on the background thread
         if let runLoop {
@@ -252,7 +253,7 @@ private final class ServiceBrowserDelegate: NSObject, NetServiceBrowserDelegate,
                     if !address.hasPrefix("fe80:"),
                        !address.hasPrefix("127."),
                        address != "::1",
-                       !address.hasPrefix("fc00:"),
+                       !address.hasPrefix("fc"),
                        !address.hasPrefix("fd") {
                         logger.info("  ↳ DNS resolved: \(address, privacy: .public)")
 
@@ -384,7 +385,7 @@ private final class ServiceBrowserDelegate: NSObject, NetServiceBrowserDelegate,
         if address.hasPrefix("fe80:") ||
             address.hasPrefix("127.") ||
             address == "::1" ||
-            address.hasPrefix("fc00:") ||
+            address.hasPrefix("fc") ||
             address.hasPrefix("fd") {
             return nil
         }

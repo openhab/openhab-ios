@@ -34,29 +34,41 @@ struct BonjourDiscoverySheet: View {
                 }
 
                 Section {
-                    ForEach(
-                        discovery.discoveredURLs
-                            .sorted {
-                                if $0.hasPrefix("https") == $1.hasPrefix("https") {
-                                    $0 < $1
-                                } else {
-                                    $0.hasPrefix("https")
-                                }
-                            },
-                        id: \.self
-                    ) { url in
-                        Button(action: {
-                            connectionConfig.url = url
-                            isPresented = false
-                        }, label: {
+                    if discovery.discoveredURLs.isEmpty {
+                        if !discovery.isDiscovering {
                             HStack {
-                                Text(url)
                                 Spacer()
-                                if connectionConfig.url == url {
-                                    Image(systemSymbol: .checkmark)
-                                }
+                                Text("No servers found")
+                                    .foregroundColor(.secondary)
+                                    .padding(.vertical, 8)
+                                Spacer()
                             }
-                        })
+                        }
+                    } else {
+                        ForEach(
+                            discovery.discoveredURLs
+                                .sorted {
+                                    if $0.hasPrefix("https") == $1.hasPrefix("https") {
+                                        $0 < $1
+                                    } else {
+                                        $0.hasPrefix("https")
+                                    }
+                                },
+                            id: \.self
+                        ) { url in
+                            Button(action: {
+                                connectionConfig.url = url
+                                isPresented = false
+                            }, label: {
+                                HStack {
+                                    Text(url)
+                                    Spacer()
+                                    if connectionConfig.url == url {
+                                        Image(systemSymbol: .checkmark)
+                                    }
+                                }
+                            })
+                        }
                     }
                 }
             }
