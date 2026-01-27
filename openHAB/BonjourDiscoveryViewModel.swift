@@ -25,7 +25,7 @@ final class BonjourDiscoveryViewModel: ObservableObject {
     private let logger = Logger(subsystem: "org.openhab", category: "BonjourDiscovery")
 
     /// Number of discovery cycles (more cycles help find multi-homed servers)
-    var discoveryCycles: Int = 2
+    var discoveryCycles = 2
 
     /// Duration of each discovery cycle in seconds
     var cycleDuration: TimeInterval = 5
@@ -45,12 +45,12 @@ final class BonjourDiscoveryViewModel: ObservableObject {
             cycles: cycles,
             cycleDuration: duration,
             onUpdate: { [weak self] servers in
-                MainActor.assumeIsolated {
+                Task { @MainActor in
                     self?.handleDiscoveredServers(servers)
                 }
             },
             onComplete: { [weak self] in
-                MainActor.assumeIsolated {
+                Task { @MainActor in
                     self?.completeDiscovery()
                 }
             }

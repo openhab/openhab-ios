@@ -40,6 +40,35 @@ public struct DiscoveredServer: Hashable, Sendable {
     }
 }
 
+// MARK: - Address Utilities
+
+enum BonjourAddressUtils {
+    /// Determines if an address should be filtered out (link-local, loopback, unique local)
+    static func shouldFilterAddress(_ address: String) -> Bool {
+        address.hasPrefix("fe80:") ||
+            address.hasPrefix("127.") ||
+            address == "::1" ||
+            address.hasPrefix("fc") ||
+            address.hasPrefix("fd")
+    }
+
+    /// Strips zone ID suffix from IPv6 addresses (e.g., "fe80::1%en0" -> "fe80::1")
+    static func stripZoneID(from address: String) -> String {
+        if let percentIndex = address.firstIndex(of: "%") {
+            return String(address[..<percentIndex])
+        }
+        return address
+    }
+
+    /// Formats an IPv6 address with brackets for URL usage
+    static func formatForURL(_ address: String) -> String {
+        if address.contains(":"), !address.hasPrefix("[") {
+            return "[\(address)]"
+        }
+        return address
+    }
+}
+
 // MARK: - Bonjour Service
 
 #if !os(watchOS)
@@ -93,7 +122,7 @@ public final class BonjourService: NSObject, NetServiceBrowserDelegate, NetServi
     public func start(cycles: Int = 1,
                       cycleDuration: TimeInterval = 10,
                       onUpdate: @escaping ([DiscoveredServer]) -> Void,
-                      onComplete: (() -> Void)? = nil) {
+                      onComplete: (@Sendable () -> Void)? = nil) {
         self.onUpdate = onUpdate
 
         logger.info("Starting Bonjour discovery (cycles: \(cycles), duration: \(cycleDuration)s)")
@@ -155,6 +184,9 @@ public final class BonjourService: NSObject, NetServiceBrowserDelegate, NetServi
             }
             CFRunLoopWakeUp(runLoop.getCFRunLoop())
         }
+
+        // Clear callback to avoid retaining captured objects after stop
+        onUpdate = nil
     }
 
     /// Get all currently discovered servers (cross-combined addresses × endpoints).
@@ -221,11 +253,7 @@ public final class BonjourService: NSObject, NetServiceBrowserDelegate, NetServi
             // Addresses from DNS lookups
             if let dnsAddresses = additionalAddresses[addressKey] {
                 for address in dnsAddresses {
-                    var formattedAddress = address
-                    if address.contains(":"), !address.hasPrefix("[") {
-                        formattedAddress = "[\(address)]"
-                    }
-                    cycleAddresses.insert(formattedAddress)
+                    cycleAddresses.insert(BonjourAddressUtils.formatForURL(address))
                 }
             }
         }
@@ -242,7 +270,7 @@ public final class BonjourService: NSObject, NetServiceBrowserDelegate, NetServi
 
         // Notify on main thread
         if let onUpdate {
-            DispatchQueue.main.sync {
+            DispatchQueue.main.async {
                 onUpdate(servers)
             }
         }
@@ -252,7 +280,7 @@ public final class BonjourService: NSObject, NetServiceBrowserDelegate, NetServi
         let servers = getDiscoveredServers()
 
         if let onUpdate {
-            DispatchQueue.main.sync {
+            DispatchQueue.main.async {
                 onUpdate(servers)
             }
         }
@@ -351,17 +379,10 @@ public final class BonjourService: NSObject, NetServiceBrowserDelegate, NetServi
                 let addrLen = socklen_t(info.pointee.ai_addrlen)
 
                 if getnameinfo(sockaddr, addrLen, &hostBuffer, socklen_t(hostBuffer.count), nil, 0, NI_NUMERICHOST) == 0 {
-                    var address = stringFromCCharArray(hostBuffer)
+                    let rawAddress = stringFromCCharArray(hostBuffer)
+                    let address = BonjourAddressUtils.stripZoneID(from: rawAddress)
 
-                    if let percentIndex = address.firstIndex(of: "%") {
-                        address = String(address[..<percentIndex])
-                    }
-
-                    if !address.hasPrefix("fe80:"),
-                       !address.hasPrefix("127."),
-                       address != "::1",
-                       !address.hasPrefix("fc"),
-                       !address.hasPrefix("fd") {
+                    if !BonjourAddressUtils.shouldFilterAddress(address) {
                         logger.debug("  DNS resolved: \(address, privacy: .public)")
 
                         let key = ServiceAddressKey(name: service.name, type: service.type)
@@ -398,26 +419,16 @@ public final class BonjourService: NSObject, NetServiceBrowserDelegate, NetServi
 
         guard result == 0 else { return nil }
 
-        var address = stringFromCCharArray(hostname)
-
-        if let percentIndex = address.firstIndex(of: "%") {
-            address = String(address[..<percentIndex])
-        }
+        let rawAddress = stringFromCCharArray(hostname)
+        let address = BonjourAddressUtils.stripZoneID(from: rawAddress)
 
         // Filter unwanted addresses
-        if address.hasPrefix("fe80:") ||
-            address.hasPrefix("127.") ||
-            address == "::1" ||
-            address.hasPrefix("fc") ||
-            address.hasPrefix("fd") {
+        if BonjourAddressUtils.shouldFilterAddress(address) {
             return nil
         }
 
         // Format IPv6 with brackets
-        if address.contains(":"), !address.hasPrefix("[") {
-            return "[\(address)]"
-        }
-        return address
+        return BonjourAddressUtils.formatForURL(address)
     }
 
     private func stringFromCCharArray(_ chars: [CChar]) -> String {
@@ -427,4 +438,16 @@ public final class BonjourService: NSObject, NetServiceBrowserDelegate, NetServi
         }
     }
 }
+
+// MARK: - Test Helpers
+
+#if DEBUG
+extension BonjourService {
+    /// Injects test state for unit testing cross-combination logic
+    func injectTestState(addresses: Set<String>, schemePorts: [(scheme: String, port: Int)]) {
+        allDiscoveredAddresses = addresses
+        allDiscoveredSchemePorts = Set(schemePorts.map { SchemePort(scheme: $0.scheme, port: $0.port) })
+    }
+}
+#endif
 #endif
