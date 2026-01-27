@@ -41,6 +41,7 @@ excluded:
   - ../openHABWatch/Intents/Generated
   - ../OsLogRewriter/.build
   - ../build
+  - ../BonjourDiscoveryTool
 
 nesting:
     type_level: 2
