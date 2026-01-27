@@ -9,9 +9,10 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Foundation
 @testable import openHAB
 import OpenHABCore
-import XCTest
+import Testing
 
 // MARK: - Mock Bonjour Service
 
@@ -59,91 +60,102 @@ final class MockBonjourService: BonjourServiceProtocol, @unchecked Sendable {
 
 // MARK: - BonjourDiscoveryViewModel Tests
 
+@Suite("BonjourDiscoveryViewModel")
 @MainActor
-final class BonjourDiscoveryViewModelTests: XCTestCase {
-    var mockService: MockBonjourService!
-    var viewModel: BonjourDiscoveryViewModel!
-
-    override func setUp() async throws {
-        try await super.setUp()
-        mockService = MockBonjourService()
-        let service = mockService!
-        viewModel = BonjourDiscoveryViewModel { service }
-    }
-
-    override func tearDown() async throws {
-        viewModel = nil
-        mockService = nil
-        try await super.tearDown()
-    }
-
+struct BonjourDiscoveryViewModelTests {
     // MARK: - Initial State Tests
 
-    func testInitialState() {
-        XCTAssertEqual(viewModel.discoveredURLs, [])
-        XCTAssertFalse(viewModel.isDiscovering)
-        XCTAssertEqual(viewModel.discoveryCycles, 2)
-        XCTAssertEqual(viewModel.cycleDuration, 5)
+    @Test
+    func initialState() {
+        let viewModel = BonjourDiscoveryViewModel { MockBonjourService() }
+
+        #expect(viewModel.discoveredURLs == [])
+        #expect(viewModel.isDiscovering == false)
+        #expect(viewModel.discoveryCycles == 2)
+        #expect(viewModel.cycleDuration == 5)
     }
 
     // MARK: - Discovery Lifecycle Tests
 
-    func testDiscoverAllSetsIsDiscoveringToTrue() {
+    @Test
+    func discoverAllSetsIsDiscoveringToTrue() {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+
         viewModel.discoverAll()
 
-        XCTAssertTrue(viewModel.isDiscovering)
+        #expect(viewModel.isDiscovering == true)
     }
 
-    func testDiscoverAllClearsExistingURLs() {
-        // Pre-populate with URLs
+    @Test
+    func discoverAllClearsExistingURLs() {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
         viewModel.discoveredURLs = ["http://old.server:8080"]
 
         viewModel.discoverAll()
 
-        XCTAssertEqual(viewModel.discoveredURLs, [])
+        #expect(viewModel.discoveredURLs == [])
     }
 
-    func testDiscoverAllStartsService() {
+    @Test
+    func discoverAllStartsService() {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+
         viewModel.discoverAll()
 
-        XCTAssertTrue(mockService.startCalled)
+        #expect(mockService.startCalled == true)
     }
 
-    func testDiscoverAllPassesConfigurationToService() {
+    @Test
+    func discoverAllPassesConfigurationToService() {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
         viewModel.discoveryCycles = 3
         viewModel.cycleDuration = 10
 
         viewModel.discoverAll()
 
-        XCTAssertEqual(mockService.startCycles, 3)
-        XCTAssertEqual(mockService.startCycleDuration, 10)
+        #expect(mockService.startCycles == 3)
+        #expect(mockService.startCycleDuration == 10)
     }
 
-    func testCompletionSetsIsDiscoveringToFalse() async throws {
+    @Test
+    func completionSetsIsDiscoveringToFalse() async throws {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+
         viewModel.discoverAll()
-        XCTAssertTrue(viewModel.isDiscovering)
-
-        mockService.simulateCompletion()
-
-        // Wait for async Task to complete
-        try await Task.sleep(nanoseconds: 100_000_000) // 0.1s
-
-        XCTAssertFalse(viewModel.isDiscovering)
-    }
-
-    func testCompletionStopsService() async throws {
-        viewModel.discoverAll()
+        #expect(viewModel.isDiscovering == true)
 
         mockService.simulateCompletion()
 
         try await Task.sleep(nanoseconds: 100_000_000)
 
-        XCTAssertTrue(mockService.stopCalled)
+        #expect(viewModel.isDiscovering == false)
+    }
+
+    @Test
+    func completionStopsService() async throws {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+
+        viewModel.discoverAll()
+        mockService.simulateCompletion()
+
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        #expect(mockService.stopCalled == true)
     }
 
     // MARK: - Server Discovery Tests
 
-    func testDiscoveredServersAreAddedToURLs() async throws {
+    @Test
+    func discoveredServersAreAddedToURLs() async throws {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+
         viewModel.discoverAll()
 
         let servers = [
@@ -154,81 +166,100 @@ final class BonjourDiscoveryViewModelTests: XCTestCase {
 
         try await Task.sleep(nanoseconds: 100_000_000)
 
-        XCTAssertEqual(viewModel.discoveredURLs.count, 2)
-        XCTAssertTrue(viewModel.discoveredURLs.contains("http://192.168.1.1:8080"))
-        XCTAssertTrue(viewModel.discoveredURLs.contains("https://192.168.1.1:8443"))
+        #expect(viewModel.discoveredURLs.count == 2)
+        #expect(viewModel.discoveredURLs.contains("http://192.168.1.1:8080"))
+        #expect(viewModel.discoveredURLs.contains("https://192.168.1.1:8443"))
     }
 
     // MARK: - URL Deduplication Tests
 
-    func testDuplicateURLsAreNotAdded() async throws {
+    @Test
+    func duplicateURLsAreNotAdded() async throws {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+
         viewModel.discoverAll()
 
         let servers = [
             DiscoveredServer(scheme: "http", address: "192.168.1.1", port: 8080)
         ]
 
-        // Simulate discovery twice with the same server
         mockService.simulateDiscovery(servers: servers)
         try await Task.sleep(nanoseconds: 50_000_000)
 
         mockService.simulateDiscovery(servers: servers)
         try await Task.sleep(nanoseconds: 50_000_000)
 
-        XCTAssertEqual(viewModel.discoveredURLs.count, 1)
+        #expect(viewModel.discoveredURLs.count == 1)
     }
 
-    func testMultipleUpdatesAccumulateUniqueURLs() async throws {
+    @Test
+    func multipleUpdatesAccumulateUniqueURLs() async throws {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+
         viewModel.discoverAll()
 
-        // First update
         mockService.simulateDiscovery(servers: [
             DiscoveredServer(scheme: "http", address: "192.168.1.1", port: 8080)
         ])
         try await Task.sleep(nanoseconds: 50_000_000)
 
-        // Second update with new server
         mockService.simulateDiscovery(servers: [
             DiscoveredServer(scheme: "http", address: "192.168.1.1", port: 8080),
             DiscoveredServer(scheme: "http", address: "192.168.1.2", port: 8080)
         ])
         try await Task.sleep(nanoseconds: 50_000_000)
 
-        XCTAssertEqual(viewModel.discoveredURLs.count, 2)
-        XCTAssertTrue(viewModel.discoveredURLs.contains("http://192.168.1.1:8080"))
-        XCTAssertTrue(viewModel.discoveredURLs.contains("http://192.168.1.2:8080"))
+        #expect(viewModel.discoveredURLs.count == 2)
+        #expect(viewModel.discoveredURLs.contains("http://192.168.1.1:8080"))
+        #expect(viewModel.discoveredURLs.contains("http://192.168.1.2:8080"))
     }
 
     // MARK: - Reset Tests
 
-    func testResetDiscoveredUrlsClearsURLs() {
+    @Test
+    func resetDiscoveredUrlsClearsURLs() {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
         viewModel.discoveredURLs = ["http://test:8080"]
 
         viewModel.resetDiscoveredUrls()
 
-        XCTAssertEqual(viewModel.discoveredURLs, [])
+        #expect(viewModel.discoveredURLs == [])
     }
 
-    func testResetDiscoveredUrlsSetsIsDiscoveringToFalse() {
+    @Test
+    func resetDiscoveredUrlsSetsIsDiscoveringToFalse() {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+
         viewModel.discoverAll()
-        XCTAssertTrue(viewModel.isDiscovering)
+        #expect(viewModel.isDiscovering == true)
 
         viewModel.resetDiscoveredUrls()
 
-        XCTAssertFalse(viewModel.isDiscovering)
+        #expect(viewModel.isDiscovering == false)
     }
 
-    func testResetDiscoveredUrlsStopsService() {
-        viewModel.discoverAll()
+    @Test
+    func resetDiscoveredUrlsStopsService() {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
 
+        viewModel.discoverAll()
         viewModel.resetDiscoveredUrls()
 
-        XCTAssertTrue(mockService.stopCalled)
+        #expect(mockService.stopCalled == true)
     }
 
     // MARK: - State Management Tests
 
-    func testStartingNewDiscoveryWhileDiscoveringResetsState() async throws {
+    @Test
+    func startingNewDiscoveryWhileDiscoveringResetsState() async throws {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+
         viewModel.discoverAll()
 
         mockService.simulateDiscovery(servers: [
@@ -236,18 +267,21 @@ final class BonjourDiscoveryViewModelTests: XCTestCase {
         ])
         try await Task.sleep(nanoseconds: 50_000_000)
 
-        XCTAssertEqual(viewModel.discoveredURLs.count, 1)
+        #expect(viewModel.discoveredURLs.count == 1)
 
-        // Start new discovery
         viewModel.discoverAll()
 
-        XCTAssertEqual(viewModel.discoveredURLs, [])
-        XCTAssertTrue(viewModel.isDiscovering)
+        #expect(viewModel.discoveredURLs == [])
+        #expect(viewModel.isDiscovering == true)
     }
 
     // MARK: - URL Ordering Tests
 
-    func testURLsAreAddedInDiscoveryOrder() async throws {
+    @Test
+    func urlsAreAddedInDiscoveryOrder() async throws {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+
         viewModel.discoverAll()
 
         mockService.simulateDiscovery(servers: [
@@ -257,15 +291,18 @@ final class BonjourDiscoveryViewModelTests: XCTestCase {
         ])
         try await Task.sleep(nanoseconds: 50_000_000)
 
-        // URLs should be in the order they were discovered
-        XCTAssertEqual(viewModel.discoveredURLs[0], "http://192.168.1.3:8080")
-        XCTAssertEqual(viewModel.discoveredURLs[1], "http://192.168.1.1:8080")
-        XCTAssertEqual(viewModel.discoveredURLs[2], "http://192.168.1.2:8080")
+        #expect(viewModel.discoveredURLs[0] == "http://192.168.1.3:8080")
+        #expect(viewModel.discoveredURLs[1] == "http://192.168.1.1:8080")
+        #expect(viewModel.discoveredURLs[2] == "http://192.168.1.2:8080")
     }
 
     // MARK: - IPv6 Tests
 
-    func testIPv6AddressesAreHandledCorrectly() async throws {
+    @Test
+    func ipv6AddressesAreHandledCorrectly() async throws {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+
         viewModel.discoverAll()
 
         mockService.simulateDiscovery(servers: [
@@ -273,6 +310,6 @@ final class BonjourDiscoveryViewModelTests: XCTestCase {
         ])
         try await Task.sleep(nanoseconds: 50_000_000)
 
-        XCTAssertTrue(viewModel.discoveredURLs.contains("http://[2001:db8::1]:8080"))
+        #expect(viewModel.discoveredURLs.contains("http://[2001:db8::1]:8080"))
     }
 }

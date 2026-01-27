@@ -26,7 +26,7 @@ struct BonjourDiscoverySheet: View {
                     Section {
                         HStack {
                             Spacer()
-                            ProgressView("Discovering openHAB servers…")
+                            ProgressView("discovering_servers")
                                 .padding(.vertical, 8)
                             Spacer()
                         }
@@ -38,7 +38,7 @@ struct BonjourDiscoverySheet: View {
                         if !discovery.isDiscovering {
                             HStack {
                                 Spacer()
-                                Text("No servers found")
+                                Text("no_servers_found")
                                     .foregroundColor(.secondary)
                                     .padding(.vertical, 8)
                                 Spacer()
@@ -70,13 +70,17 @@ struct BonjourDiscoverySheet: View {
                             })
                         }
                     }
+                } footer: {
+                    if !discovery.isDiscovering {
+                        Text("bonjour_discovery_disclaimer")
+                    }
                 }
             }
             .listStyle(.insetGrouped)
-            .navigationTitle("Discovered Servers")
+            .navigationTitle("discovered_servers")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button("cancel") {
                         isPresented = false
                     }
                 }
@@ -85,6 +89,9 @@ struct BonjourDiscoverySheet: View {
         .task {
             discovery.resetDiscoveredUrls()
             discovery.discoverAll()
+        }
+        .onDisappear {
+            discovery.resetDiscoveredUrls()
         }
     }
 }
