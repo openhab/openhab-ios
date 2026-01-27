@@ -29,6 +29,10 @@
 "connecting_discovered" = "Connessione all'URL trovato";
 "running_demo_mode" = "Esecuzione in modalità demo. Controlla le impostazioni per disabilitare la modalità demo.";
 "discovering_oh" = "Cercando openHAB";
+"discovering_servers" = "Discovering openHAB servers…";
+"discovered_servers" = "Discovered Servers";
+"no_servers_found" = "No servers found";
+"bonjour_discovery_disclaimer" = "Bonjour discovery may not find all servers. Additional servers may be available on your network.";
 "settings_not_received" = "Impostazioni non ancora ricevute dal telefono.";
 "retry" = "Riprova";
 "warning" = "Attenzione";

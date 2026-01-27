@@ -33,12 +33,16 @@ struct SpinningSymbol: View {
 
 struct SingleConnectionSettingsView: View {
     var headerText: String
+    var isLocalConnection = false
+
     @Binding var connectionConfig: ConnectionConfiguration
     var showNotificationToggle: Bool
 
     @State private var isTestingConnection = false
     @State private var connectionTestMessage: String?
     @State private var connectionTestSuccess: Bool?
+
+    @State private var isPresentingDiscoverySheet = false
 
     var body: some View {
         Section(header: Text(headerText)) {
@@ -55,6 +59,16 @@ struct SingleConnectionSettingsView: View {
                 } label: {
                     HStack {
                         Text("URL")
+                        if isLocalConnection {
+                            Button(action: {
+                                isPresentingDiscoverySheet = true
+                            }, label: {
+                                Image(systemSymbol: .bonjour)
+                                    .font(.callout) // Smaller than default .body
+                                    .imageScale(.small)
+                            })
+                            .buttonStyle(BorderlessButtonStyle())
+                        }
                         if isTestingConnection {
                             SpinningSymbol()
                                 .scaleEffect(0.8)
@@ -75,6 +89,9 @@ struct SingleConnectionSettingsView: View {
                     if connectionConfig.url.isEmpty {
                         Text("Enter URL of remote server")
                     }
+                }
+                .sheet(isPresented: $isPresentingDiscoverySheet) {
+                    BonjourDiscoverySheet(isPresented: $isPresentingDiscoverySheet, connectionConfig: $connectionConfig)
                 }
 
                 if let message = connectionTestMessage, let success = connectionTestSuccess {
