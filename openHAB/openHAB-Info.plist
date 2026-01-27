@@ -69,6 +69,7 @@
 	<array>
 		<string>_http._tcp</string>
 		<string>_openhab-server-ssl._tcp</string>
+		<string>_openhab-server._tcp</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>openHAB needs access to your camera.</string>
