@@ -12,38 +12,6 @@
 @testable import OpenHABCore
 import Testing
 
-// MARK: - BonjourServiceType Tests
-
-@Suite("BonjourServiceType")
-struct BonjourServiceTypeTests {
-    @Test
-    func httpsTypeReturnsHttpsScheme() {
-        #expect(BonjourServiceType.https.scheme == "https")
-    }
-
-    @Test
-    func httpTypeReturnsHttpScheme() {
-        #expect(BonjourServiceType.http.scheme == "http")
-    }
-
-    @Test
-    func httpsTypeHasCorrectRawValue() {
-        #expect(BonjourServiceType.https.rawValue == "_openhab-server-ssl._tcp.")
-    }
-
-    @Test
-    func httpTypeHasCorrectRawValue() {
-        #expect(BonjourServiceType.http.rawValue == "_openhab-server._tcp.")
-    }
-
-    @Test
-    func allCasesContainsBothTypes() {
-        #expect(BonjourServiceType.allCases.count == 2)
-        #expect(BonjourServiceType.allCases.contains(.http))
-        #expect(BonjourServiceType.allCases.contains(.https))
-    }
-}
-
 // MARK: - DiscoveredServer Tests
 
 @Suite("DiscoveredServer")
@@ -75,7 +43,7 @@ struct DiscoveredServerTests {
         #expect(server1 == server2)
         #expect(server1 != server3)
 
-        var set: Set<DiscoveredServer> = [server1, server2, server3]
+        let set: Set<DiscoveredServer> = [server1, server2, server3]
         #expect(set.count == 2)
     }
 
@@ -321,3 +289,35 @@ struct GetDiscoveredServersTests {
     }
 }
 #endif
+
+// MARK: - BonjourServiceType Tests
+
+@Suite("BonjourServiceType")
+struct BonjourServiceTypeTests {
+    @Test
+    func httpsTypeReturnsHttpsScheme() {
+        #expect(BonjourServiceType.https.scheme == "https")
+    }
+
+    @Test
+    func httpTypeReturnsHttpScheme() {
+        #expect(BonjourServiceType.http.scheme == "http")
+    }
+
+    @Test
+    func httpsTypeHasCorrectRawValue() {
+        #expect(BonjourServiceType.https.rawValue == "_openhab-server-ssl._tcp.")
+    }
+
+    @Test
+    func httpTypeHasCorrectRawValue() {
+        #expect(BonjourServiceType.http.rawValue == "_openhab-server._tcp.")
+    }
+
+    @Test
+    func allCasesContainsBothTypes() {
+        #expect(BonjourServiceType.allCases.count == 2)
+        #expect(BonjourServiceType.allCases.contains(.http))
+        #expect(BonjourServiceType.allCases.contains(.https))
+    }
+}

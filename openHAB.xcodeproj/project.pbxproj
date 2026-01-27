@@ -122,6 +122,8 @@
 		DA94AEB42EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA94AEB32EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift */; };
 		DA95F3332E0F2B1700FE4474 /* OpenHABRootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */; };
 		DA95F3352E0F2C1600FE4474 /* OpenHABSitemapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA95F3342E0F2C1600FE4474 /* OpenHABSitemapViewController.swift */; };
+		DA96415A2F292EE200CEC181 /* BonjourDiscoveryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9641592F292EE200CEC181 /* BonjourDiscoveryViewModelTests.swift */; };
+		DA96415C2F292F0600CEC181 /* OpenHABEndPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA96415B2F292F0600CEC181 /* OpenHABEndPoint.swift */; };
 		DA9721C324E29A8F0092CCFD /* UserDefaultsBacked.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9721C224E29A8F0092CCFD /* UserDefaultsBacked.swift */; };
 		DA9A7EFD2D668D5900824156 /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = DA9A7EFC2D668D5900824156 /* SFSafeSymbols */; };
 		DA9A7EFF2D66915900824156 /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = DA9A7EFE2D66915900824156 /* SFSafeSymbols */; };
@@ -454,6 +456,8 @@
 		DA94AF432EC8DE41003BB3C8 /* VideoStreamManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoStreamManager.swift; sourceTree = "<group>"; };
 		DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABRootViewController.swift; sourceTree = "<group>"; };
 		DA95F3342E0F2C1600FE4474 /* OpenHABSitemapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSitemapViewController.swift; sourceTree = "<group>"; };
+		DA9641592F292EE200CEC181 /* BonjourDiscoveryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoveryViewModelTests.swift; sourceTree = "<group>"; };
+		DA96415B2F292F0600CEC181 /* OpenHABEndPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABEndPoint.swift; sourceTree = "<group>"; };
 		DA9721C224E29A8F0092CCFD /* UserDefaultsBacked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsBacked.swift; sourceTree = "<group>"; };
 		DA9F81862C85020F00B47B72 /* RTFTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTFTextView.swift; sourceTree = "<group>"; };
 		DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
@@ -820,10 +824,12 @@
 				DAF231D327BB6F5C00AB916C /* Ressources */,
 				DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */,
 				938BF89524EFBC5400E6B52F /* LocalizationTests.swift */,
+				DA9641592F292EE200CEC181 /* BonjourDiscoveryViewModelTests.swift */,
 				DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */,
 				DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */,
 				DAF231D127BB6EEA00AB916C /* OpenHABSVGTests.swift */,
 				DA2DC23321F2736C00830730 /* Info.plist */,
+				DA96415B2F292F0600CEC181 /* OpenHABEndPoint.swift */,
 			);
 			path = openHABTestsSwift;
 			sourceTree = "<group>";
@@ -1611,6 +1617,8 @@
 			files = (
 				DAF231D227BB6EEA00AB916C /* OpenHABSVGTests.swift in Sources */,
 				DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */,
+				DA96415C2F292F0600CEC181 /* OpenHABEndPoint.swift in Sources */,
+				DA96415A2F292EE200CEC181 /* BonjourDiscoveryViewModelTests.swift in Sources */,
 				DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */,
 				938BF89624EFBC5400E6B52F /* LocalizationTests.swift in Sources */,
 			);

@@ -69,13 +69,25 @@ enum BonjourAddressUtils {
     }
 }
 
-// MARK: - Bonjour Service
+// MARK: - Bonjour Service Protocol
 
 #if !os(watchOS)
+/// Protocol for Bonjour discovery services, enabling dependency injection and testing.
+public protocol BonjourServiceProtocol: AnyObject, Sendable {
+    func start(cycles: Int,
+               cycleDuration: TimeInterval,
+               onUpdate: @escaping ([DiscoveredServer]) -> Void,
+               onComplete: (@Sendable () -> Void)?)
+    func stop()
+    func getDiscoveredServers() -> [DiscoveredServer]
+}
+
+// MARK: - Bonjour Service
+
 /// A reusable Bonjour discovery service that finds openHAB servers on the local network.
 /// Thread-safe and works on both iOS and macOS.
 /// Note: Not available on watchOS (NetServiceBrowser is unavailable).
-public final class BonjourService: NSObject, NetServiceBrowserDelegate, NetServiceDelegate, @unchecked Sendable {
+public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceBrowserDelegate, NetServiceDelegate, @unchecked Sendable {
     // MARK: - Types
 
     private struct SchemePort: Hashable {
