@@ -22,14 +22,14 @@ final class MockBonjourService: BonjourServiceProtocol, @unchecked Sendable {
     var startCycles: Int?
     var startCycleDuration: TimeInterval?
 
-    private var onUpdateCallback: (([DiscoveredServer]) -> Void)?
-    private var onCompleteCallback: (() -> Void)?
+    private var onUpdateCallback: (@Sendable ([DiscoveredServer]) -> Void)?
+    private var onCompleteCallback: (@Sendable () -> Void)?
 
     private var injectedServers: [DiscoveredServer] = []
 
     func start(cycles: Int,
                cycleDuration: TimeInterval,
-               onUpdate: @escaping ([DiscoveredServer]) -> Void,
+               onUpdate: @escaping @Sendable ([DiscoveredServer]) -> Void,
                onComplete: (@Sendable () -> Void)?) {
         startCalled = true
         startCycles = cycles
