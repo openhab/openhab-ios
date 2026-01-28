@@ -70,7 +70,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .navigationBarBackButtonHidden(true)
-        .navigationBarTitle("\(settingsHomeName) Settings")
+        .navigationTitle("\(settingsHomeName) Settings")
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button("Save") {
@@ -214,7 +214,7 @@ extension UIApplication {
         )
 
         var body: some View {
-            NavigationView {
+            NavigationStack {
                 SettingsView(
                     settingsDemomode: settingsDemomode,
                     settingsIdleOff: settingsIdleOff,

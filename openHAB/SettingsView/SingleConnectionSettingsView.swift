@@ -228,7 +228,7 @@ struct SingleConnectionSettingsView: View {
         )
 
         var body: some View {
-            NavigationView {
+            NavigationStack {
                 Form {
                     SingleConnectionSettingsView(headerText: "Connection Settings for local server", connectionConfig: $connectionConfig, showNotificationToggle: false)
                 }

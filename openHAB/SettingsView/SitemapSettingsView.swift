@@ -108,7 +108,7 @@ struct SitemapSettingsView: View {
             )
         ]
         var body: some View {
-            NavigationView {
+            NavigationStack {
                 Form {
                     SitemapSettingsView(
                         settingsRealTimeSliders: $realTimeSliders,
