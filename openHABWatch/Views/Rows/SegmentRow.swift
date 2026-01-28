@@ -30,7 +30,8 @@ struct SegmentRow: View {
                 if let selectedCommand = widget.mappingsOrItemOptions[safe: newValue]?.command {
                     pendingValue = selectedCommand
                     Logger.rowViews.debug("Selected command: \(selectedCommand)")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { // 500ms delay
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(500))
                         if pendingValue == selectedCommand { // Ensure no new updates came in
                             widget.sendCommand(selectedCommand)
                             pendingValue = nil
