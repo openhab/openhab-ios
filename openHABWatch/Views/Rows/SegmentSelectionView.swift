@@ -64,7 +64,8 @@ struct SegmentSelectionView: View {
         widget.stateEnumBinding = .segmented(index)
         if let selectedCommand = widget.mappingsOrItemOptions[safe: index]?.command {
             pendingValue = selectedCommand
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { // 300ms delay
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(300))
                 if pendingValue == selectedCommand {
                     widget.sendCommand(selectedCommand)
                     pendingValue = nil

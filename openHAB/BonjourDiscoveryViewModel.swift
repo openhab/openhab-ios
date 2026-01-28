@@ -21,8 +21,8 @@ final class BonjourDiscoveryViewModel: ObservableObject {
     @Published var discoveredURLs: [String] = []
     @Published var isDiscovering = false
 
-    private var bonjourService: BonjourServiceProtocol?
-    private let serviceFactory: @Sendable () -> BonjourServiceProtocol
+    private var bonjourService: (any BonjourServiceProtocol)?
+    private let serviceFactory: @Sendable () -> any BonjourServiceProtocol
     private let logger = Logger(subsystem: "org.openhab", category: "BonjourDiscovery")
 
     /// Number of discovery cycles (more cycles help find multi-homed servers)
@@ -31,7 +31,7 @@ final class BonjourDiscoveryViewModel: ObservableObject {
     /// Duration of each discovery cycle in seconds
     var cycleDuration: TimeInterval = 5
 
-    init(serviceFactory: @escaping @Sendable () -> BonjourServiceProtocol = { BonjourService() }) {
+    init(serviceFactory: @escaping @Sendable () -> any BonjourServiceProtocol = { BonjourService() }) {
         self.serviceFactory = serviceFactory
     }
 
@@ -47,12 +47,12 @@ final class BonjourDiscoveryViewModel: ObservableObject {
         bonjourService?.start(
             cycles: cycles,
             cycleDuration: duration,
-            onUpdate: { [weak self] servers in
+            onUpdate: { @Sendable [weak self] servers in
                 Task { @MainActor in
                     self?.handleDiscoveredServers(servers)
                 }
             },
-            onComplete: { [weak self] in
+            onComplete: { @Sendable [weak self] in
                 Task { @MainActor in
                     self?.completeDiscovery()
                 }

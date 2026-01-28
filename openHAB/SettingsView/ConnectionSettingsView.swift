@@ -53,7 +53,7 @@ struct ConnectionSettingsView: View {
         )
 
         var body: some View {
-            NavigationView {
+            NavigationStack {
                 Form {
                     ConnectionSettingsView(
                         settingsDemomode: $demoMode,

@@ -26,7 +26,8 @@ struct SliderWithSwitchSupportRow: View {
             set: { newValue in
                 Logger.rowViews.info("SliderWithSwitchSupportRow new value = \(newValue)")
                 pendingValue = newValue
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { // 500ms delay
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(500))
                     if pendingValue == newValue { // Ensure no new updates came in
                         widget.sendCommand(newValue.valueText(step: widget.step))
                         pendingValue = nil
