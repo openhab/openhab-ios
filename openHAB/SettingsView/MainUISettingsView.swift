@@ -83,7 +83,7 @@ struct MainUISettingsView: View {
         @State var showUselastPathAlert = false
 
         var body: some View {
-            NavigationView {
+            NavigationStack {
                 Form {
                     MainUISettingsView(
                         settingsAlwaysAllowWebRTC: $alwaysAllowWebRTC,

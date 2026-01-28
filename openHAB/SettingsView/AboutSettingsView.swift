@@ -46,7 +46,7 @@ struct AboutSettingsView: View {
 }
 
 #Preview {
-    NavigationView {
+    NavigationStack {
         Form {
             AboutSettingsView()
         }
