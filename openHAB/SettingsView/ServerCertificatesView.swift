@@ -109,7 +109,7 @@ struct ServerCertificatesView: View {
 }
 
 #Preview {
-    NavigationView {
+    NavigationStack {
         ServerCertificatesView()
     }
 }
