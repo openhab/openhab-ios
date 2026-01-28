@@ -5,7 +5,7 @@ on:
  
 jobs:
   set_github_release:
-    runs-on: macos-13
+    runs-on: macos-26
     steps:
       - name: checkout
         uses: actions/checkout@v6
