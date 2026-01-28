@@ -45,7 +45,7 @@ struct SitemapSettingsView: View {
             } label: {
                 NavigationLink("Check & Clear Image Cache", destination: EmptyView())
             }
-            .foregroundColor(Color(uiColor: .label))
+            .foregroundStyle(Color(uiColor: .label))
             .alert(
                 "Image Cache",
                 isPresented: $showingCacheAlert,
@@ -88,7 +88,7 @@ struct SitemapSettingsView: View {
 
             Picker("Sitemap For Apple Watch", selection: $settingsSitemapForWatch) {
                 if sitemaps.isEmpty {
-                    Text("No sitemaps available").tag("").foregroundColor(.secondary)
+                    Text("No sitemaps available").tag("").foregroundStyle(.secondary)
                 } else {
                     ForEach(sitemaps, id: \.name) { sitemap in
                         Text(sitemap.label).tag(sitemap.name)

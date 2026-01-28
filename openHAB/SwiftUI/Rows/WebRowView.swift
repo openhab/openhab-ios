@@ -21,17 +21,17 @@ struct WidgetWebViewContainer: View {
         VStack(alignment: .leading, spacing: 8) {
             if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
             WebRowView(widget: widget)
                 .frame(height: widget.preferredRowHeight)
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 8))
 
             if let labelValue = widget.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
     }

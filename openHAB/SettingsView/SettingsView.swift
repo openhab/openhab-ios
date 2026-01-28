@@ -15,23 +15,23 @@ import os
 import SwiftUI
 
 struct SettingsView: View {
-    @State var settingsDemomode = false
-    @State var settingsIdleOff = true
-    @State var settingsRealTimeSliders = true
-    @State var settingsShowSearchField = true
-    @State var settingsSendCrashReports = false
-    @State var settingsIconType: IconType = .svg
-    @State var settingsSortSitemapsBy: SortSitemapsOrder = .label
-    @State var settingsDefaultMainUIPath = ""
-    @State var settingsAlwaysAllowWebRTC = true
-    @State var settingsSitemapForWatch = ""
+    @State private var settingsDemomode = false
+    @State private var settingsIdleOff = true
+    @State private var settingsRealTimeSliders = true
+    @State private var settingsShowSearchField = true
+    @State private var settingsSendCrashReports = false
+    @State private var settingsIconType: IconType = .svg
+    @State private var settingsSortSitemapsBy: SortSitemapsOrder = .label
+    @State private var settingsDefaultMainUIPath = ""
+    @State private var settingsAlwaysAllowWebRTC = true
+    @State private var settingsSitemapForWatch = ""
 
-    @State var sitemaps: [OpenHABSitemap] = []
-    @State var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
-    @State var settingsRemoteConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
-    @State var settingsHomeName = ""
-    @State var viewAppearedOnce = false
-    @State var settingsSSECommandItem = ""
+    @State private var sitemaps: [OpenHABSitemap] = []
+    @State private var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
+    @State private var settingsRemoteConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
+    @State private var settingsHomeName = ""
+    @State private var viewAppearedOnce = false
+    @State private var settingsSSECommandItem = ""
 
     @Environment(\.dismiss) private var dismiss
 
@@ -175,69 +175,7 @@ extension UIApplication {
 }
 
 #Preview {
-    struct PreviewWrapper: View {
-        @State var settingsDemomode = false
-        @State var settingsIdleOff = true
-        @State var settingsRealTimeSliders = true
-        @State var settingsShowSearchField = true
-        @State var settingsSendCrashReports = false
-        @State var settingsIconType: IconType = .svg
-        @State var settingsSortSitemapsBy: SortSitemapsOrder = .label
-        @State var settingsDefaultMainUIPath = "/overview/"
-        @State var settingsAlwaysAllowWebRTC = true
-        @State var settingsSitemapForWatch = "home"
-        @State var sitemaps: [OpenHABSitemap] = [
-            OpenHABSitemap(
-                name: "home",
-                icon: "",
-                label: "Home",
-                link: "http://192.168.1.100/rest/sitemaps/home",
-                page: nil
-            ),
-            OpenHABSitemap(
-                name: "office",
-                icon: "",
-                label: "Office",
-                link: "http://192.168.1.100/rest/sitemaps/office",
-                page: nil
-            )
-        ]
-        @State var localConnectionConfiguration = ConnectionConfiguration(
-            url: "http://192.168.2.1",
-            username: "user",
-            password: "password123"
-        )
-        @State var remoteConnectionConfiguration = ConnectionConfiguration(
-            url: "http://192.168.2.1",
-            username: "user",
-            password: "password123"
-        )
-
-        var body: some View {
-            NavigationStack {
-                SettingsView(
-                    settingsDemomode: settingsDemomode,
-                    settingsIdleOff: settingsIdleOff,
-                    settingsRealTimeSliders: settingsRealTimeSliders,
-                    settingsShowSearchField: settingsShowSearchField,
-                    settingsSendCrashReports: settingsSendCrashReports,
-                    settingsIconType: settingsIconType,
-                    settingsSortSitemapsBy: settingsSortSitemapsBy,
-                    settingsDefaultMainUIPath: settingsDefaultMainUIPath,
-                    settingsAlwaysAllowWebRTC: settingsAlwaysAllowWebRTC,
-                    settingsSitemapForWatch: settingsSitemapForWatch,
-                    sitemaps: sitemaps,
-                    settingsLocalConnectionConfiguration: localConnectionConfiguration,
-                    settingsRemoteConnectionConfiguration: remoteConnectionConfiguration
-                )
-            }
-            .onAppear {
-                // Mock behavior of updateSitemaps
-                if settingsSitemapForWatch.isEmpty, let first = sitemaps.first {
-                    settingsSitemapForWatch = first.name
-                }
-            }
-        }
+    NavigationStack {
+        SettingsView()
     }
-    return PreviewWrapper()
 }

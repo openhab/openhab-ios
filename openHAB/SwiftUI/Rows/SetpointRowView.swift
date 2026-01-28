@@ -47,7 +47,7 @@ struct SetpointRowView: View {
 
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
             Spacer()
@@ -59,7 +59,7 @@ struct SetpointRowView: View {
                 } label: {
                     Image(systemSymbol: .chevronDown)
                         .font(.body)
-                        .foregroundColor(currentValue <= widget.minValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
+                        .foregroundStyle(currentValue <= widget.minValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
                 .disabled(currentValue <= widget.minValue)
@@ -68,7 +68,7 @@ struct SetpointRowView: View {
 
                 Text(formattedValue)
                     .font(.body.monospacedDigit())
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
 
                 Button {
                     triggerFeedback.toggle()
@@ -76,7 +76,7 @@ struct SetpointRowView: View {
                 } label: {
                     Image(systemSymbol: .chevronUp)
                         .font(.body)
-                        .foregroundColor(currentValue >= widget.maxValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
+                        .foregroundStyle(currentValue >= widget.maxValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
                 .disabled(currentValue >= widget.maxValue)

@@ -48,7 +48,7 @@ struct HomeSelectionView: View {
                     if Preferences.shared.currentHomePreferences.id == home, !showEditOptions {
                         Spacer()
                         Image(systemSymbol: .checkmark)
-                            .foregroundColor(.blue)
+                            .foregroundStyle(.blue)
                     } else if !showEditOptions {
                         Spacer() // make more of the cell clickable
                     }

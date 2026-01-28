@@ -31,7 +31,7 @@ struct ColorPickerRowView: View {
 
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
             Spacer()
@@ -44,7 +44,7 @@ struct ColorPickerRowView: View {
                         lastSendTime = now
                         sendColorCommand(newColor)
                     }
-                    // ColorPicker does not provide an .onEnded like Slider as it doesn’t expose the drag lifecycle.
+                    // ColorPicker does not provide an .onEnded like Slider as it doesn't expose the drag lifecycle.
                     // It only emits onChange when the color value changes.
                     // Therefore, we debounce final send after 0.3s of no changes
                     debounceTask?.cancel()
@@ -58,7 +58,7 @@ struct ColorPickerRowView: View {
             if let labelValue = widget.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
         .onAppear {

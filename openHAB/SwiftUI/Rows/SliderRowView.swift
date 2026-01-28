@@ -19,7 +19,6 @@ struct SliderRowView: View {
     @State private var isDragging = false
 
     @State private var updateTask: Task<Void, Never>?
-    @State private var lastSentTime = Date.distantPast
     private let throttleInterval: TimeInterval = 0.9 // in seconds
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
@@ -41,7 +40,7 @@ struct SliderRowView: View {
 
                 if let labelText = widget.labelText, !labelText.isEmpty {
                     Text(labelText)
-                        .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                        .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                 }
 
                 Spacer()
@@ -49,7 +48,7 @@ struct SliderRowView: View {
                 if let value = widget.labelValue {
                     Text(value)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
             .contentShape(Rectangle()) // 🔍 Make row but not slider tappable
@@ -68,6 +67,7 @@ struct SliderRowView: View {
                             let now = Date()
                             if now.timeIntervalSince(lastSendTime) > 0.2 {
                                 sendSliderUpdate(newValue)
+                                lastSendTime = now
                             }
                         }
                     }
@@ -113,7 +113,7 @@ struct SliderRowView: View {
             guard !Task.isCancelled else { return }
             await MainActor.run {
                 sendSliderUpdate(sliderValue)
-                lastSentTime = Date()
+                lastSendTime = Date()
             }
         }
     }

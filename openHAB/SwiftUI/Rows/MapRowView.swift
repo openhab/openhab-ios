@@ -31,14 +31,14 @@ struct MapRowViewLegacy: View {
         VStack(alignment: .leading, spacing: 8) {
             if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
             Map(coordinateRegion: .constant(region), annotationItems: CLLocationCoordinate2DIsValid(widget.coordinate) ? [widget.coordinate] : []) { location in
                 MapMarker(coordinate: location, tint: .red)
             }
             .frame(height: widget.preferredRowHeight)
-            .cornerRadius(8)
+            .clipShape(.rect(cornerRadius: 8))
         }
     }
 }

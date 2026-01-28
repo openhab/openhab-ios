@@ -21,7 +21,7 @@ struct FrameRowView: View {
         HStack {
             Text(widget.labelText?.uppercased() ?? "")
                 .font(.callout)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .lineLimit(1)
             Spacer()
         }

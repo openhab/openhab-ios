@@ -67,7 +67,7 @@ struct MainUISettingsView: View {
             } label: {
                 NavigationLink("Clear Web Cache", destination: EmptyView())
             }
-            .foregroundColor(Color(uiColor: .label))
+            .foregroundStyle(Color(uiColor: .label))
             .alert("cache_cleared", isPresented: $showingCacheAlert) {
                 Button("OK", role: .cancel) {}
             }

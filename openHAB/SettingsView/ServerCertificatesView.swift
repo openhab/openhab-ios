@@ -77,7 +77,7 @@ struct ServerCertificatesView: View {
         List {
             if viewModel.certificates.isEmpty {
                 Text("No accepted server certificates")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             } else {
                 ForEach(viewModel.certificates, id: \.domain) { certificate in
                     VStack(alignment: .leading, spacing: 4) {
@@ -86,11 +86,11 @@ struct ServerCertificatesView: View {
                         if let summary = certificate.summary {
                             Text(summary)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                         Text("Added: \(certificate.dateAdded, formatter: viewModel.dateFormatter)")
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 2)
                 }

@@ -42,14 +42,14 @@ struct ScreenSaverView: View {
                             Text(dateString(for: context.date))
                                 .font(dateFont(for: geometry.size))
                                 .monospacedDigit()
-                                .foregroundColor(.white.opacity(0.85 * alphaFactor))
+                                .foregroundStyle(.white.opacity(0.85 * alphaFactor))
                         }
 
                         if configuration.showsTime {
                             Text(timeString(for: context.date))
                                 .font(timeFont(for: geometry.size))
                                 .monospacedDigit()
-                                .foregroundColor(.white.opacity(alphaFactor))
+                                .foregroundStyle(.white.opacity(alphaFactor))
                         }
                     }
                     .opacity(fadeOpacity)

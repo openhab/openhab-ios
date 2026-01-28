@@ -40,7 +40,7 @@ struct VideoRowView: View {
         VStack(alignment: .leading, spacing: 8) {
             if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
             if let videoURL {
@@ -52,20 +52,20 @@ struct VideoRowView: View {
                                 .resizable()
                                 .aspectRatio(aspectRatio, contentMode: .fit)
                                 .frame(height: 200)
-                                .cornerRadius(8)
+                                .clipShape(.rect(cornerRadius: 8))
                         } else {
                             Rectangle()
                                 .fill(Color.gray.opacity(0.3))
                                 .frame(height: 200)
                                 .aspectRatio(aspectRatio, contentMode: .fit)
-                                .cornerRadius(8)
+                                .clipShape(.rect(cornerRadius: 8))
                         }
                     } else {
                         // HLS/other video formats using VideoPlayer
                         VideoPlayer(player: player)
                             .frame(height: 200)
                             .aspectRatio(aspectRatio, contentMode: .fit)
-                            .cornerRadius(8)
+                            .clipShape(.rect(cornerRadius: 8))
                     }
 
                     if isLoading {
@@ -93,15 +93,15 @@ struct VideoRowView: View {
                     .frame(height: 200)
                     .overlay(
                         Text("No Video URL")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     )
-                    .cornerRadius(8)
+                    .clipShape(.rect(cornerRadius: 8))
             }
 
             if let labelValue = widget.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
     }

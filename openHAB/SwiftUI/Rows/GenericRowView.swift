@@ -26,7 +26,7 @@ struct GenericRowView: View {
             Spacer()
             if let value = widget.labelValue {
                 Text(value)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
         }
     }

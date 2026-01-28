@@ -29,7 +29,7 @@ struct SelectionView: View {
                 Spacer()
                 if selectionItemState == mapping.command {
                     Image(systemSymbol: .checkmark)
-                        .foregroundColor(.blue)
+                        .foregroundStyle(.blue)
                 }
             }
             .contentShape(.interaction, Rectangle()) // Ensures entire row is tappable

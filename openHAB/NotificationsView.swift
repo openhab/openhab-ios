@@ -29,14 +29,14 @@ struct NotificationRow: View {
                 }
                 .resizable()
                 .frame(width: 40, height: 40)
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 8))
             VStack(alignment: .leading) {
                 Text(notification.message ?? "")
                     .font(.body)
                 if let timeStamp = notification.created {
                     Text(dateString(from: timeStamp))
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
             }
         }

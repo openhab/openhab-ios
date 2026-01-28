@@ -24,14 +24,14 @@ struct TextRowView: View {
                 .frame(width: 24, height: 24)
 
             Text(widget.labelText ?? "")
-                .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
 
             Spacer()
 
             if let value = widget.labelValue {
                 Text(value)
                     .font(.body)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
         .contextMenu {

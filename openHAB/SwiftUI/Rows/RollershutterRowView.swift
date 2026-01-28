@@ -39,7 +39,7 @@ struct RollershutterRowView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     if let labelText = widget.labelText, !labelText.isEmpty {
                         Text(labelText)
-                            .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                            .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     }
                 }
 
@@ -52,7 +52,7 @@ struct RollershutterRowView: View {
                 } label: {
                     Image(systemSymbol: .chevronUp)
                         .font(.title2)
-                        .foregroundColor(Color(UIColor.systemBlue))
+                        .foregroundStyle(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerUpFeedback)
@@ -64,7 +64,7 @@ struct RollershutterRowView: View {
                 } label: {
                     Image(systemSymbol: .stop)
                         .font(.title2)
-                        .foregroundColor(Color(UIColor.systemBlue))
+                        .foregroundStyle(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerStopFeedback)
@@ -76,7 +76,7 @@ struct RollershutterRowView: View {
                 } label: {
                     Image(systemSymbol: .chevronDown)
                         .font(.title2)
-                        .foregroundColor(Color(UIColor.systemBlue))
+                        .foregroundStyle(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerDownFeedback)

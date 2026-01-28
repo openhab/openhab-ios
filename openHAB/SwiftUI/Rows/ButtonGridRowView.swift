@@ -40,7 +40,7 @@ struct ButtonGridButton: View {
                 } else {
                     Text(widget.label)
                         .font(.caption)
-                        .foregroundColor(.primary)
+                        .foregroundStyle(.primary)
                         .lineLimit(1)
                         .truncationMode(.tail)
                 }
@@ -136,7 +136,7 @@ struct ButtonGridRowView: View {
 
                     if let labelText = widget.labelText, !labelText.isEmpty {
                         Text(labelText)
-                            .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                            .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     }
 
                     Spacer()

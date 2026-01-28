@@ -36,7 +36,7 @@ struct ImageRowView: View {
         VStack(alignment: .leading, spacing: 8) {
             if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
             switch widget.generateImageResult(rootUrl: viewModel.openHABRootUrl ?? "") {
             case let .embedded(data: data):
@@ -45,7 +45,7 @@ struct ImageRowView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: 300)
-                    .cornerRadius(8)
+                    .clipShape(.rect(cornerRadius: 8))
             case let .link(url):
                 KFImage(url)
                     .resizable()
@@ -55,22 +55,22 @@ struct ImageRowView: View {
                     .id(shouldCache ? url?.absoluteString : "\(url?.absoluteString ?? "")-\(forceRefreshKey)")
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: 300)
-                    .cornerRadius(8)
+                    .clipShape(.rect(cornerRadius: 8))
             case .empty:
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(height: 200)
                     .overlay(
                         Text("No Image URL")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     )
-                    .cornerRadius(8)
+                    .clipShape(.rect(cornerRadius: 8))
             }
 
             if let labelValue = widget.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
         .onAppear {

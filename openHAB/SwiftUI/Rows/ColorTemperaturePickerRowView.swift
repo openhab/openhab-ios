@@ -37,7 +37,7 @@ struct CustomSliderView: View {
 
                 Circle()
                     .frame(width: 20, height: 20)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .shadow(radius: 1)
                     .overlay(Circle().stroke(Color.gray.opacity(0.6), lineWidth: 1))
                     .position(x: xPos, y: height / 2)
@@ -88,7 +88,7 @@ struct ColorTemperaturePickerRowView: View {
                 HStack {
                     if let labelText = widget.labelText, !labelText.isEmpty {
                         Text(labelText)
-                            .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                            .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     }
 
                     Spacer()
@@ -97,16 +97,16 @@ struct ColorTemperaturePickerRowView: View {
                     HStack {
                         Text("\(Int(selectedTemperature))K")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
 
                         Text(" - ")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
 
                         // Temperature description
                         Text(temperatureDescription)
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                 }
 
@@ -114,7 +114,7 @@ struct ColorTemperaturePickerRowView: View {
                 HStack {
                     // Warm indicator
                     Image(systemSymbol: .sunMinFill)
-                        .foregroundColor(.orange)
+                        .foregroundStyle(.orange)
                         .font(.caption)
 
                     // Slider with custom gradient track
@@ -127,7 +127,7 @@ struct ColorTemperaturePickerRowView: View {
                             endPoint: .trailing
                         )
                         .frame(height: 10)
-                        .cornerRadius(3)
+                        .clipShape(.rect(cornerRadius: 3))
 
                         // Actual slider
                         CustomSliderView(
@@ -143,7 +143,7 @@ struct ColorTemperaturePickerRowView: View {
 
                     // Cool indicator
                     Image(systemSymbol: .snowflake)
-                        .foregroundColor(.blue)
+                        .foregroundStyle(.blue)
                         .font(.caption)
                 }
             }

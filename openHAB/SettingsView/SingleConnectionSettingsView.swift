@@ -81,7 +81,7 @@ struct SingleConnectionSettingsView: View {
                                 Image(systemSymbol: .wifiCircle)
                             }
                             .buttonStyle(.plain)
-                            .foregroundColor(.accentColor)
+                            .foregroundStyle(Color.accentColor)
                             .disabled(connectionConfig.url.isEmpty)
                             .help("Test Connection")
                         }
@@ -97,9 +97,9 @@ struct SingleConnectionSettingsView: View {
                 if let message = connectionTestMessage, let success = connectionTestSuccess {
                     HStack(spacing: 4) {
                         Image(systemSymbol: success ? .checkmarkCircle : .xmarkOctagon)
-                            .foregroundColor(success ? .green : .red)
+                            .foregroundStyle(success ? .green : .red)
                         Text(message)
-                            .foregroundColor(success ? .green : .red)
+                            .foregroundStyle(success ? .green : .red)
                             .font(.caption2)
                     }
                     .transition(.opacity)
