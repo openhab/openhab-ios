@@ -42,7 +42,7 @@ public struct DiscoveredServer: Hashable, Sendable {
 
 // MARK: - Address Utilities
 
-enum BonjourAddressUtils {
+enum BonjourAddressUtils: Sendable {
     /// Determines if an address should be filtered out (link-local, loopback, unique local)
     static func shouldFilterAddress(_ address: String) -> Bool {
         address.hasPrefix("fe80:") ||
@@ -76,7 +76,7 @@ enum BonjourAddressUtils {
 public protocol BonjourServiceProtocol: AnyObject, Sendable {
     func start(cycles: Int,
                cycleDuration: TimeInterval,
-               onUpdate: @escaping ([DiscoveredServer]) -> Void,
+               onUpdate: @escaping @Sendable ([DiscoveredServer]) -> Void,
                onComplete: (@Sendable () -> Void)?)
     func stop()
     func getDiscoveredServers() -> [DiscoveredServer]
@@ -87,37 +87,54 @@ public protocol BonjourServiceProtocol: AnyObject, Sendable {
 /// A reusable Bonjour discovery service that finds openHAB servers on the local network.
 /// Thread-safe and works on both iOS and macOS.
 /// Note: Not available on watchOS (NetServiceBrowser is unavailable).
-public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceBrowserDelegate, NetServiceDelegate, @unchecked Sendable {
+///
+/// ## Thread Safety
+///
+/// This class uses a dedicated thread with its own RunLoop for NetService operations
+/// (required by the NetService API). All mutable state is protected by an unfair lock
+/// to ensure thread-safe access from:
+/// - The main thread (via `start()`, `stop()`, `getDiscoveredServers()`)
+/// - The discovery thread (via delegate callbacks)
+///
+/// The class is marked `Sendable` and all cross-thread state access goes through
+/// `state.withLockUnchecked { ... }`.
+public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceBrowserDelegate, NetServiceDelegate, Sendable {
     // MARK: - Types
 
-    private struct SchemePort: Hashable {
+    private struct SchemePort: Hashable, Sendable {
         let scheme: String
         let port: Int
     }
 
-    private struct ServiceAddressKey: Hashable {
+    private struct ServiceAddressKey: Hashable, Sendable {
         let name: String
         let type: String
+    }
+
+    /// Container for all mutable state.
+    ///
+    /// Safety invariant: This struct is marked `@unchecked Sendable` because:
+    /// 1. It contains non-Sendable Foundation types (NetServiceBrowser, NetService, Thread, RunLoop)
+    /// 2. Thread-safety is guaranteed by the enclosing `OSAllocatedUnfairLock`
+    /// 3. All access to State properties goes through `state.withLockUnchecked { ... }`
+    private struct State: @unchecked Sendable {
+        var browsers: [BonjourServiceType: NetServiceBrowser] = [:]
+        var discoveredServices: [NetService] = []
+        var additionalAddresses: [ServiceAddressKey: [String]] = [:]
+        var allDiscoveredAddresses: Set<String> = []
+        var allDiscoveredSchemePorts: Set<SchemePort> = []
+        var thread: Thread?
+        var runLoop: RunLoop?
+        var isRunning = false
+        var onUpdate: (@Sendable ([DiscoveredServer]) -> Void)?
     }
 
     // MARK: - Properties
 
     private let logger = Logger(subsystem: "org.openhab", category: "BonjourService")
-    private var browsers: [BonjourServiceType: NetServiceBrowser] = [:]
-    private var discoveredServices: [NetService] = []
-    private var additionalAddresses: [ServiceAddressKey: [String]] = [:]
 
-    // Accumulated results across cycles
-    private var allDiscoveredAddresses: Set<String> = []
-    private var allDiscoveredSchemePorts: Set<SchemePort> = []
-
-    // Threading
-    private var thread: Thread?
-    private var runLoop: RunLoop?
-    private let isRunning = OSAllocatedUnfairLock(initialState: false)
-
-    // Callback
-    private var onUpdate: (([DiscoveredServer]) -> Void)?
+    /// All mutable state is protected by this lock for thread-safe access.
+    private let state = OSAllocatedUnfairLock(initialState: State())
 
     // MARK: - Public API
 
@@ -133,43 +150,44 @@ public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceB
     ///   - onComplete: Called when all cycles are finished
     public func start(cycles: Int = 1,
                       cycleDuration: TimeInterval = 10,
-                      onUpdate: @escaping ([DiscoveredServer]) -> Void,
+                      onUpdate: @escaping @Sendable ([DiscoveredServer]) -> Void,
                       onComplete: (@Sendable () -> Void)? = nil) {
-        self.onUpdate = onUpdate
+        state.withLockUnchecked { state in
+            state.onUpdate = onUpdate
+            state.allDiscoveredAddresses.removeAll()
+            state.allDiscoveredSchemePorts.removeAll()
+            state.isRunning = true
+        }
 
         logger.info("Starting Bonjour discovery (cycles: \(cycles), duration: \(cycleDuration)s)")
 
-        // Reset accumulated results
-        allDiscoveredAddresses.removeAll()
-        allDiscoveredSchemePorts.removeAll()
-
-        isRunning.withLock { $0 = true }
-
-        thread = Thread { [weak self] in
+        let newThread = Thread { [weak self] in
             guard let self else { return }
-            runLoop = RunLoop.current
+
+            let currentRunLoop = RunLoop.current
+            state.withLockUnchecked { $0.runLoop = currentRunLoop }
 
             // Add dummy source to keep runloop alive
-            runLoop?.add(NSMachPort(), forMode: .default)
+            currentRunLoop.add(NSMachPort(), forMode: .default)
 
             for cycle in 1 ... cycles {
-                guard isRunning.withLock({ $0 }) else { break }
+                guard state.withLockUnchecked({ $0.isRunning }) else { break }
 
                 logger.debug("Starting cycle \(cycle)/\(cycles)")
                 startBrowsers()
 
                 // Run for the cycle duration
                 let endTime = Date(timeIntervalSinceNow: cycleDuration)
-                while isRunning.withLock({ $0 }), Date() < endTime {
-                    runLoop?.run(mode: .default, before: Date(timeIntervalSinceNow: 0.1))
+                while state.withLockUnchecked({ $0.isRunning }), Date() < endTime {
+                    currentRunLoop.run(mode: .default, before: Date(timeIntervalSinceNow: 0.1))
                 }
 
                 stopBrowsers()
-                let addrCount = allDiscoveredAddresses.count
+                let addrCount = state.withLockUnchecked { $0.allDiscoveredAddresses.count }
                 logger.debug("Cycle \(cycle) complete. Addresses: \(addrCount)")
             }
 
-            let finalCount = allDiscoveredAddresses.count
+            let finalCount = state.withLockUnchecked { $0.allDiscoveredAddresses.count }
             logger.info("Discovery complete. Found \(finalCount) address(es)")
 
             // Final broadcast with all accumulated results
@@ -179,62 +197,84 @@ public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceB
                 onComplete?()
             }
         }
-        thread?.name = "BonjourDiscovery"
-        thread?.start()
+        newThread.name = "BonjourDiscovery"
+        state.withLockUnchecked { $0.thread = newThread }
+        newThread.start()
     }
 
     /// Stop discovery immediately.
     public func stop() {
         logger.debug("Stopping discovery")
-        isRunning.withLock { $0 = false }
 
-        if let runLoop {
-            CFRunLoopPerformBlock(runLoop.getCFRunLoop(), CFRunLoopMode.defaultMode.rawValue) { [weak self] in
-                self?.stopBrowsers()
-                self?.discoveredServices.removeAll()
-                self?.additionalAddresses.removeAll()
-            }
-            CFRunLoopWakeUp(runLoop.getCFRunLoop())
+        let currentRunLoop = state.withLockUnchecked { state -> RunLoop? in
+            state.isRunning = false
+            state.onUpdate = nil
+            return state.runLoop
         }
 
-        // Clear callback to avoid retaining captured objects after stop
-        onUpdate = nil
+        if let currentRunLoop {
+            CFRunLoopPerformBlock(currentRunLoop.getCFRunLoop(), CFRunLoopMode.defaultMode.rawValue) { [weak self] in
+                self?.stopBrowsers()
+                self?.state.withLockUnchecked { state in
+                    state.discoveredServices.removeAll()
+                    state.additionalAddresses.removeAll()
+                }
+            }
+            CFRunLoopWakeUp(currentRunLoop.getCFRunLoop())
+        }
     }
 
     /// Get all currently discovered servers (cross-combined addresses × endpoints).
     public func getDiscoveredServers() -> [DiscoveredServer] {
-        var servers: [DiscoveredServer] = []
-        for address in allDiscoveredAddresses.sorted() {
-            for sp in allDiscoveredSchemePorts.sorted(by: { $0.scheme < $1.scheme || ($0.scheme == $1.scheme && $0.port < $1.port) }) {
-                servers.append(DiscoveredServer(scheme: sp.scheme, address: address, port: sp.port))
+        state.withLockUnchecked { state in
+            var servers: [DiscoveredServer] = []
+            let sortedAddresses = state.allDiscoveredAddresses.sorted()
+            let sortedSchemePorts = state.allDiscoveredSchemePorts.sorted { lhs, rhs in
+                if lhs.scheme != rhs.scheme {
+                    return lhs.scheme < rhs.scheme
+                }
+                return lhs.port < rhs.port
             }
+            for address in sortedAddresses {
+                for sp in sortedSchemePorts {
+                    servers.append(DiscoveredServer(scheme: sp.scheme, address: address, port: sp.port))
+                }
+            }
+            return servers
         }
-        return servers
     }
 
     // MARK: - Private Methods
 
     private func startBrowsers() {
         // Clear per-cycle state but keep accumulated addresses
-        discoveredServices.removeAll()
-        additionalAddresses.removeAll()
+        state.withLockUnchecked { state in
+            state.discoveredServices.removeAll()
+            state.additionalAddresses.removeAll()
+        }
 
         for serviceType in BonjourServiceType.allCases {
             let browser = NetServiceBrowser()
             browser.delegate = self
-            browsers[serviceType] = browser
+            state.withLockUnchecked { $0.browsers[serviceType] = browser }
             browser.searchForServices(ofType: serviceType.rawValue, inDomain: "local.")
             logger.debug("Searching for \(serviceType.rawValue, privacy: .public)")
         }
     }
 
     private func stopBrowsers() {
-        for browser in browsers.values {
+        let (browsers, services) = state.withLockUnchecked { state -> ([NetServiceBrowser], [NetService]) in
+            let browsers = Array(state.browsers.values)
+            let services = state.discoveredServices
+            state.browsers.removeAll()
+            return (browsers, services)
+        }
+
+        for browser in browsers {
             browser.stop()
         }
-        browsers.removeAll()
 
-        for service in discoveredServices {
+        for service in services {
             service.stop()
         }
     }
@@ -244,7 +284,11 @@ public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceB
         var cycleAddresses: Set<String> = []
         var cycleSchemePorts: Set<SchemePort> = []
 
-        for service in discoveredServices {
+        let (services, additionalAddrs) = state.withLockUnchecked { state in
+            (state.discoveredServices, state.additionalAddresses)
+        }
+
+        for service in services {
             let scheme = schemeForServiceType(service.type)
             let port = service.port
             let addressKey = ServiceAddressKey(name: service.name, type: service.type)
@@ -263,27 +307,30 @@ public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceB
             }
 
             // Addresses from DNS lookups
-            if let dnsAddresses = additionalAddresses[addressKey] {
+            if let dnsAddresses = additionalAddrs[addressKey] {
                 for address in dnsAddresses {
                     cycleAddresses.insert(BonjourAddressUtils.formatForURL(address))
                 }
             }
         }
 
-        // Accumulate across cycles
-        allDiscoveredAddresses.formUnion(cycleAddresses)
-        allDiscoveredSchemePorts.formUnion(cycleSchemePorts)
+        // Accumulate across cycles and get callback
+        let onUpdateCallback = state.withLockUnchecked { state -> (@Sendable ([DiscoveredServer]) -> Void)? in
+            state.allDiscoveredAddresses.formUnion(cycleAddresses)
+            state.allDiscoveredSchemePorts.formUnion(cycleSchemePorts)
+            return state.onUpdate
+        }
 
         // Build cross-combined servers
         let servers = getDiscoveredServers()
 
-        let addressCount = allDiscoveredAddresses.count
+        let addressCount = state.withLockUnchecked { $0.allDiscoveredAddresses.count }
         logger.info("Broadcasting \(servers.count) server(s) from \(addressCount) address(es)")
 
         // Notify on main thread
-        if let onUpdate {
+        if let onUpdateCallback {
             DispatchQueue.main.async {
-                onUpdate(servers)
+                onUpdateCallback(servers)
             }
         }
     }
@@ -291,9 +338,10 @@ public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceB
     private func broadcastAll() {
         let servers = getDiscoveredServers()
 
-        if let onUpdate {
+        let onUpdateCallback = state.withLockUnchecked { $0.onUpdate }
+        if let onUpdateCallback {
             DispatchQueue.main.async {
-                onUpdate(servers)
+                onUpdateCallback(servers)
             }
         }
     }
@@ -307,11 +355,15 @@ public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceB
     public func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
         logger.info("Found service: \(service.name, privacy: .public) type: \(service.type, privacy: .public)")
 
-        if discoveredServices.contains(where: { $0 === service }) {
+        let alreadyExists = state.withLockUnchecked { state in
+            state.discoveredServices.contains(where: { $0 === service })
+        }
+
+        if alreadyExists {
             return
         }
 
-        discoveredServices.append(service)
+        state.withLockUnchecked { $0.discoveredServices.append(service) }
         service.delegate = self
         service.startMonitoring()
         service.resolve(withTimeout: 10)
@@ -319,7 +371,9 @@ public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceB
 
     public func netServiceBrowser(_ browser: NetServiceBrowser, didRemove service: NetService, moreComing: Bool) {
         logger.debug("Service removed: \(service.name, privacy: .public)")
-        discoveredServices.removeAll { $0.name == service.name && $0.type == service.type }
+        state.withLockUnchecked { state in
+            state.discoveredServices.removeAll { $0.name == service.name && $0.type == service.type }
+        }
     }
 
     public func netServiceBrowser(_ browser: NetServiceBrowser, didNotSearch errorDict: [String: NSNumber]) {
@@ -384,6 +438,8 @@ public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceB
 
         defer { freeaddrinfo(result) }
 
+        let key = ServiceAddressKey(name: service.name, type: service.type)
+
         var current = result
         while let info = current {
             if let sockaddr = info.pointee.ai_addr {
@@ -397,12 +453,13 @@ public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceB
                     if !BonjourAddressUtils.shouldFilterAddress(address) {
                         logger.debug("  DNS resolved: \(address, privacy: .public)")
 
-                        let key = ServiceAddressKey(name: service.name, type: service.type)
-                        if additionalAddresses[key] == nil {
-                            additionalAddresses[key] = []
-                        }
-                        if !additionalAddresses[key]!.contains(address) {
-                            additionalAddresses[key]!.append(address)
+                        state.withLockUnchecked { state in
+                            if state.additionalAddresses[key] == nil {
+                                state.additionalAddresses[key] = []
+                            }
+                            if !state.additionalAddresses[key]!.contains(address) {
+                                state.additionalAddresses[key]!.append(address)
+                            }
                         }
                     }
                 }
@@ -457,8 +514,10 @@ public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceB
 extension BonjourService {
     /// Injects test state for unit testing cross-combination logic
     func injectTestState(addresses: Set<String>, schemePorts: [(scheme: String, port: Int)]) {
-        allDiscoveredAddresses = addresses
-        allDiscoveredSchemePorts = Set(schemePorts.map { SchemePort(scheme: $0.scheme, port: $0.port) })
+        state.withLockUnchecked { state in
+            state.allDiscoveredAddresses = addresses
+            state.allDiscoveredSchemePorts = Set(schemePorts.map { SchemePort(scheme: $0.scheme, port: $0.port) })
+        }
     }
 }
 #endif
