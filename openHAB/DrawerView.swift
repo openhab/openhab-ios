@@ -146,33 +146,37 @@ struct DrawerView: View {
     }
 
     private func menuEntry(image: Image, text: Text, goTo target: TargetController) -> some View {
-        HStack {
-            image
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: iconWidth, height: iconWidth)
-            text
-        }
-        .onTapGesture {
+        Button {
             dismiss()
             onDismiss(target)
+        } label: {
+            HStack {
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: iconWidth, height: iconWidth)
+                text
+            }
         }
+        .buttonStyle(.plain)
     }
 
     private func menuEntry(image: some View,
                            goTo target: TargetController,
                            @ViewBuilder label: () -> some View) -> some View {
-        HStack {
-            image
-                .aspectRatio(contentMode: .fit)
-                .frame(width: iconWidth, height: iconWidth)
-            label()
-        }
-        .contentShape(Rectangle()) // entire row tappable
-        .onTapGesture {
+        Button {
             dismiss()
             onDismiss(target)
+        } label: {
+            HStack {
+                image
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: iconWidth, height: iconWidth)
+                label()
+            }
+            .contentShape(Rectangle()) // entire row tappable
         }
+        .buttonStyle(.plain)
     }
 
     func systemMenuEntry(image: SFSymbol, text: String, goTo target: TargetController) -> some View {

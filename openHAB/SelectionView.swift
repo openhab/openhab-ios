@@ -24,23 +24,23 @@ struct SelectionView: View {
     var body: some View {
         List(0 ..< mappings.count, id: \.self) { index in
             let mapping = mappings[index]
-            HStack {
-                Text(mapping.label)
-                Spacer()
-                if selectionItemState == mapping.command {
-                    Image(systemSymbol: .checkmark)
-                        .foregroundStyle(.blue)
-                }
-            }
-            .contentShape(.interaction, Rectangle()) // Ensures entire row is tappable
-            .onTapGesture {
+            Button {
                 selectionItemState = mappings[index].command
                 Logger.selectionView.info("Selected mapping \(index)")
                 onSelection(index)
                 onDismiss?()
+            } label: {
+                HStack {
+                    Text(mapping.label)
+                    Spacer()
+                    if selectionItemState == mapping.command {
+                        Image(systemSymbol: .checkmark)
+                            .foregroundStyle(.blue)
+                    }
+                }
+                .contentShape(Rectangle())
             }
-            .accessibilityElement(children: .combine)
-            .accessibilityAddTraits(.isButton)
+            .buttonStyle(.plain)
         }
         .navigationTitle(labelText ?? "Select Mapping") // Navigation title
     }
