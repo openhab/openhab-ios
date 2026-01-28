@@ -47,12 +47,12 @@ final class BonjourDiscoveryViewModel: ObservableObject {
         bonjourService?.start(
             cycles: cycles,
             cycleDuration: duration,
-            onUpdate: { [weak self] servers in
+            onUpdate: { @Sendable [weak self] servers in
                 Task { @MainActor in
                     self?.handleDiscoveredServers(servers)
                 }
             },
-            onComplete: { [weak self] in
+            onComplete: { @Sendable [weak self] in
                 Task { @MainActor in
                     self?.completeDiscovery()
                 }
