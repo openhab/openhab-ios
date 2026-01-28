@@ -208,7 +208,7 @@ extension UIApplication {
 }
 
 #Preview {
-    NavigationView {
+    NavigationStack {
         ScreenSaverSettingsView()
     }
 }
