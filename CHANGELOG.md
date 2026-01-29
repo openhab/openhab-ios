@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [Version 3.1.46, Build 103] - 2026-01-29Z
+
+- Fix for #987 (#1052)
+- Evaluation of PR #1052 for issue #987 (Watch icons with SSL) (#1057)
+- Fix flaky CertificateStoreTests and NetworkTrackerTests (#1056)
+- Improve Swift Concurrency safety and modernize async patterns (#1054)
+- Upgrade to MacOS 26 for GitHub CI (#1055)
+- Migrate from NavigationView to NavigationStack (#1053)
+- Bonjour discovery of servers (#911)
+- Bump crowdin/github-action from 2.13.0 to 2.14.0 (#1051)
+- Third attempt (#1050)
+-  Move await networkTracker.statusStream() outside of the Task so the stream subscription is established before calling startTracking. (#1048)
+- Fix for failed tests in CertificateStoreTests. (#1047)
+- Fix for nested subviews (#1046)
+- Update fastlane to 2.231 (#1045)
+
 ## [Version 3.1.45, Build 102] - 2026-01-19Z
 
 - Fix for race condition in NetworkTrackerTests (#1044)
