@@ -43,7 +43,13 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
 
     switch challenge.protectionSpace.authenticationMethod {
     case NSURLAuthenticationMethodServerTrust:
-        // TODO:
+        // Check if the active connection has ignoreSSL enabled
+        if let activeConnection = await NetworkTracker.shared.activeConnection,
+           activeConnection.configuration.ignoreSSL,
+           let serverTrust = challenge.protectionSpace.serverTrust {
+            Logger.sessionChallenge.info("Ignoring SSL certificate validation (ignoreSSL enabled)")
+            return (.useCredential, URLCredential(trust: serverTrust))
+        }
         return await CertificateManagers.serverCertificateManager.evaluateTrust(with: challenge)
     case NSURLAuthenticationMethodClientCertificate:
         return CertificateManagers.clientCertificateManager.evaluateTrust(with: challenge)
