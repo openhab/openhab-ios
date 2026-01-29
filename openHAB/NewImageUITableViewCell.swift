@@ -112,6 +112,14 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         activeTask?.cancel()
         activeTask = nil
 
+        // Invalidate timer to prevent refreshes for wrong widget
+        refreshTimer?.invalidate()
+        refreshTimer = nil
+        currentRefreshInterval = 0
+
+        // Clear displayed widget ID to ensure clean state
+        displayedWidgetId = nil
+
         // Reset chart style
         chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
     }
@@ -158,10 +166,12 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         switch widgetPayload {
         case let .embedded(image):
             if let image {
-
-                Self.sharedImageCache.setObject(image, forKey: widgetId as NSString)
-                mainImageView.image = image
-                didLoad?()
+                // Only update cache and UI if still displaying the same widget
+                if displayedWidgetId == widgetId {
+                    Self.sharedImageCache.setObject(image, forKey: widgetId as NSString)
+                    mainImageView.image = image
+                    didLoad?()
+                }
             }
         case let .link(url):
             guard let url else { return }
@@ -205,10 +215,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                 let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, timeout: 10.0, type: .data, cacheingPolicy: !shouldCache ? .reloadIgnoringCacheData : .useProtocolCachePolicy)
                 await MainActor.run {
                     guard let image = UIImage(data: data) else { return }
-
-                    // Store in shared cache
-                    Self.sharedImageCache.setObject(image, forKey: widgetId as NSString)
-                    // Only update UI if this cell is still displaying the same widget
+                    // Only store in cache and update UI if this cell is still displaying the same widget
                     if self.displayedWidgetId == widgetId {
                         Self.sharedImageCache.setObject(image, forKey: widgetId as NSString)
                         self.mainImageView?.image = image
