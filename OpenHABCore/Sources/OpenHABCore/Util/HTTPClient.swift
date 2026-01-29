@@ -68,11 +68,11 @@ public actor CertificateStore {
     public static let shared = CertificateStore()
 
     private var trustedCertificates: [String: CertificateEntry] = [:]
+    private let persistencePath: URL?
 
+    /// Creates a CertificateStore with the default persistence path (app group or documents directory)
     public init() {
-        Logger.httpClient.info("Initializing cert store")
-
-        // Inline the path calculation to avoid nonisolated issues
+        // Calculate the default persistence path
         let path: URL
         #if os(watchOS)
         let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
@@ -88,33 +88,67 @@ public actor CertificateStore {
         }
         #endif
 
-        // Load certificates directly in init
+        persistencePath = path
+        let (certificates, needsMigration) = Self.loadCertificates(from: path)
+        trustedCertificates = certificates
+
+        // If migration occurred, persist the new format
+        if needsMigration {
+            Task {
+                await self.saveTrustedCertificates()
+                Logger.httpClient.info("Migration completed, saved in new format")
+            }
+        }
+    }
+
+    /// Creates a CertificateStore for testing with an optional custom persistence path.
+    /// Pass `nil` for in-memory only operation (no file I/O).
+    public init(persistencePath: URL?) {
+        self.persistencePath = persistencePath
+        if let path = persistencePath {
+            let (certificates, needsMigration) = Self.loadCertificates(from: path)
+            trustedCertificates = certificates
+
+            // If migration occurred, persist the new format
+            if needsMigration {
+                Task {
+                    await self.saveTrustedCertificates()
+                    Logger.httpClient.info("Migration completed, saved in new format")
+                }
+            }
+        } else {
+            trustedCertificates = [:]
+        }
+    }
+
+    /// Loads certificates from a given path (static to be called from init)
+    /// Returns a tuple of (certificates, needsMigration) where needsMigration indicates if the data was in an old format
+    private static func loadCertificates(from path: URL) -> (certificates: [String: CertificateEntry], needsMigration: Bool) {
+        Logger.httpClient.info("Initializing cert store")
         Logger.httpClient.debug("Attempting to load certificates from \(path)")
+
         do {
             let rawdata = try Data(contentsOf: path)
             let decoder = PropertyListDecoder()
 
             // Try to load new format first
             do {
-                trustedCertificates = try decoder.decode([String: CertificateEntry].self, from: rawdata)
-                let certCount = trustedCertificates.count
+                let certificates = try decoder.decode([String: CertificateEntry].self, from: rawdata)
+                let certCount = certificates.count
                 Logger.httpClient.info("Loaded existing cert store (new format) with \(certCount) certificates")
+                return (certificates, false)
             } catch {
-                // Fall back to old format and migrate
+                // Fall back to old format
                 let oldFormat = try decoder.decode([String: Data].self, from: rawdata)
                 Logger.httpClient.info("Migrating cert store from old format with \(oldFormat.count) certificates")
 
                 // Convert old format to new format with current date
                 let migrationDate = Date()
+                var certificates: [String: CertificateEntry] = [:]
                 for (domain, data) in oldFormat {
-                    trustedCertificates[domain] = CertificateEntry(data: data, dateAccepted: migrationDate)
+                    certificates[domain] = CertificateEntry(data: data, dateAccepted: migrationDate)
                 }
-
-                // Schedule save for after init completes
-                Task {
-                    await self.saveTrustedCertificates()
-                    Logger.httpClient.info("Migration completed, will save in new format")
-                }
+                return (certificates, true)
             }
         } catch {
             // if Decodable fails, fall back to NSKeyedArchiver for very old format
@@ -125,45 +159,28 @@ public actor CertificateStore {
 
                     // Convert old format to new format with current date
                     let migrationDate = Date()
+                    var certificates: [String: CertificateEntry] = [:]
                     for (domain, data) in unarchivedTrustedCertificates {
-                        trustedCertificates[domain] = CertificateEntry(data: data, dateAccepted: migrationDate)
+                        certificates[domain] = CertificateEntry(data: data, dateAccepted: migrationDate)
                     }
-
-                    // Schedule save for after init completes
-                    Task {
-                        await self.saveTrustedCertificates()
-                        Logger.httpClient.info("Migration from NSKeyedArchiver completed")
-                    }
-                } else {
-                    trustedCertificates = [:]
+                    return (certificates, true)
                 }
             } catch {
-                trustedCertificates = [:]
+                // File doesn't exist or can't be read
             }
             Logger.httpClient.info("No cert store, creating")
+            return ([:], false)
         }
-    }
-
-    private func getPersistencePath() -> URL {
-        #if os(watchOS)
-        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-        return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
-        #else
-        // Try app group container first, fall back to documents directory for testing
-        if let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app") {
-            return appGroupURL.appendingPathComponent("trustedCertificates")
-        } else {
-            // Fallback for test environment where app group may not be available
-            let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-            return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
-        }
-        #endif
     }
 
     private func saveTrustedCertificates() async {
+        guard let path = persistencePath else {
+            // In-memory mode, no persistence
+            return
+        }
+
         do {
             let data = try PropertyListEncoder().encode(trustedCertificates)
-            let path = getPersistencePath()
 
             // Ensure parent directory exists
             let parentDir = path.deletingLastPathComponent()
