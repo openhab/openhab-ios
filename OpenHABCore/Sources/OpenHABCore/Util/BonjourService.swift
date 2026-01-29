@@ -356,7 +356,7 @@ public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceB
         logger.info("Found service: \(service.name, privacy: .public) type: \(service.type, privacy: .public)")
 
         let alreadyExists = state.withLockUnchecked { state in
-            state.discoveredServices.contains(where: { $0 === service })
+            state.discoveredServices.contains { $0 === service }
         }
 
         if alreadyExists {
