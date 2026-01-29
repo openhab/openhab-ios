@@ -9,25 +9,93 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Kingfisher
 import OpenHABCore
 import os.log
 import SwiftUI
 
-struct ImageRow: View {
-    @State var url: URL?
-    @EnvironmentObject var settings: AppSettings
+// Timer manager that persists across view updates
+private class ImageRefreshTimer: ObservableObject {
+    @Published var refreshCount = 0
+    private var timer: AnyCancellable?
+    private var currentInterval = 0
+    private var isActive = false
+
+    func configure(interval: Int) {
+        // Only restart timer if interval changed or timer is not active
+        guard interval != currentInterval || !isActive else { return }
+        currentInterval = interval
+        isActive = false
+
+        timer?.cancel()
+        timer = nil
+
+        guard interval > 0 else { return }
+
+        let intervalSeconds = max(0.1, Double(interval) / 1000.0)
+        Logger.widgets.info("Starting image refresh timer with interval \(intervalSeconds) seconds")
+
+        isActive = true
+        timer = Timer.publish(every: intervalSeconds, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                Logger.widgets.info("Image refresh timer fired")
+                self?.refreshCount += 1
+            }
+    }
+
+    func stop() {
+        timer?.cancel()
+        timer = nil
+        isActive = false
+    }
+
+    deinit {
+        timer?.cancel()
+    }
+}
+
+struct ImageRow: View, Equatable {
+    let url: URL?
+    let refresh: Int // Refresh interval in milliseconds, 0 means no refresh
+
+    @StateObject private var refreshTimer = ImageRefreshTimer()
+
+    // For refreshing images, append a query parameter to bust the cache
+    private var displayUrl: URL? {
+        guard let url else { return nil }
+        guard refresh > 0 else { return url }
+
+        // Always add _r parameter when refresh is enabled to prevent stale cache
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        var queryItems = components?.queryItems ?? []
+        queryItems.append(URLQueryItem(name: "_r", value: "\(refreshTimer.refreshCount)"))
+        components?.queryItems = queryItems
+        return components?.url ?? url
+    }
 
     var body: some View {
-        KFImage(url)
-            .placeholder {
-                ProgressView()
-                    .frame(width: 20, height: 20)
-            }
-            .fade(duration: 0.25)
+        KFImage.url(displayUrl)
+            .cacheMemoryOnly(refresh > 0)
+            .loadDiskFileSynchronously()
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .id(url?.absoluteString ?? "")
+            .onAppear {
+                refreshTimer.configure(interval: refresh)
+            }
+            .onDisappear {
+                refreshTimer.stop()
+            }
+    }
+
+    init(url: URL?, refresh: Int = 0) {
+        self.url = url
+        self.refresh = refresh
+    }
+
+    static func == (lhs: ImageRow, rhs: ImageRow) -> Bool {
+        lhs.url == rhs.url && lhs.refresh == rhs.refresh
     }
 }
 
@@ -40,6 +108,5 @@ struct ImageRow: View {
         iconType: .svg,
         iconColor: ""
     )?.url
-    ImageRow(url: iconUrl)
-        .environmentObject(AppSettings())
+    ImageRow(url: iconUrl, refresh: 0)
 }
