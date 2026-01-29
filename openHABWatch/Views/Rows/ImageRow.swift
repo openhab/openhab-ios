@@ -20,11 +20,13 @@ private class ImageRefreshTimer: ObservableObject {
     @Published var refreshCount = 0
     private var timer: AnyCancellable?
     private var currentInterval = 0
+    private var isActive = false
 
     func configure(interval: Int) {
-        // Only restart timer if interval changed
-        guard interval != currentInterval else { return }
+        // Only restart timer if interval changed or timer is not active
+        guard interval != currentInterval || !isActive else { return }
         currentInterval = interval
+        isActive = false
 
         timer?.cancel()
         timer = nil
@@ -34,12 +36,19 @@ private class ImageRefreshTimer: ObservableObject {
         let intervalSeconds = max(0.1, Double(interval) / 1000.0)
         Logger.widgets.info("Starting image refresh timer with interval \(intervalSeconds) seconds")
 
+        isActive = true
         timer = Timer.publish(every: intervalSeconds, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 Logger.widgets.info("Image refresh timer fired")
                 self?.refreshCount += 1
             }
+    }
+
+    func stop() {
+        timer?.cancel()
+        timer = nil
+        isActive = false
     }
 
     deinit {
@@ -56,8 +65,9 @@ struct ImageRow: View, Equatable {
     // For refreshing images, append a query parameter to bust the cache
     private var displayUrl: URL? {
         guard let url else { return nil }
-        guard refresh > 0, refreshTimer.refreshCount > 0 else { return url }
+        guard refresh > 0 else { return url }
 
+        // Always add _r parameter when refresh is enabled to prevent stale cache
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         var queryItems = components?.queryItems ?? []
         queryItems.append(URLQueryItem(name: "_r", value: "\(refreshTimer.refreshCount)"))
@@ -74,6 +84,9 @@ struct ImageRow: View, Equatable {
             .onAppear {
                 refreshTimer.configure(interval: refresh)
             }
+            .onDisappear {
+                refreshTimer.stop()
+            }
     }
 
     init(url: URL?, refresh: Int = 0) {
@@ -81,7 +94,7 @@ struct ImageRow: View, Equatable {
         self.refresh = refresh
     }
 
-    nonisolated static func == (lhs: ImageRow, rhs: ImageRow) -> Bool {
+    static func == (lhs: ImageRow, rhs: ImageRow) -> Bool {
         lhs.url == rhs.url && lhs.refresh == rhs.refresh
     }
 }

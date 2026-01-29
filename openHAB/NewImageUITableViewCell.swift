@@ -22,7 +22,8 @@ enum ImageType {
 
 class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     // Shared image cache across all cells - keyed by widget ID
-    private static var sharedImageCache: [String: UIImage] = [:]
+    // Using NSCache for thread-safety and automatic memory management
+    private static let sharedImageCache = NSCache<NSString, UIImage>()
 
     private var mainImageView: ScaleAspectFitImageView!
     private var refreshTimer: Timer?
@@ -106,9 +107,10 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     override func prepareForReuse() {
         super.prepareForReuse()
 
-        // NOTE: We intentionally do NOT cancel activeTask, clear cache, or reset timer here.
-        // This prevents flickering when the same widget is redisplayed after a long-poll update.
-        // These are handled in displayWidget() if the widget actually changes.
+        // Cancel any active image loading task to prevent race conditions where a task
+        // started for a previous widget updates the shared cache or UI for a newly assigned widget
+        activeTask?.cancel()
+        activeTask = nil
 
         // Reset chart style
         chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
@@ -116,16 +118,15 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
     override func displayWidget() {
         let widgetId = widget?.id ?? ""
+        // Set displayedWidgetId before cache check to ensure consistency
         displayedWidgetId = widgetId
 
         // Check shared cache for this widget's image
-        if let cachedImage = Self.sharedImageCache[widgetId] {
+        if let cachedImage = Self.sharedImageCache.object(forKey: widgetId as NSString) {
             // Found in shared cache - use it immediately without reloading
             mainImageView?.image = cachedImage
         } else {
             // Not in cache - need to load
-            activeTask?.cancel()
-            activeTask = nil
             mainImageView?.image = nil
             loadImage()
         }
@@ -156,9 +157,11 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         let widgetId = widget?.id ?? ""
         switch widgetPayload {
         case let .embedded(image):
-            Self.sharedImageCache[widgetId] = image
-            mainImageView.image = image
-            didLoad?()
+            if let image {
+                Self.sharedImageCache.setObject(image, forKey: widgetId as NSString)
+                mainImageView.image = image
+                didLoad?()
+            }
         case let .link(url):
             guard let url else { return }
             loadRemoteImage(withURL: url)
@@ -202,7 +205,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                 await MainActor.run {
                     guard let image = UIImage(data: data) else { return }
                     // Store in shared cache
-                    Self.sharedImageCache[widgetId] = image
+                    Self.sharedImageCache.setObject(image, forKey: widgetId as NSString)
                     // Only update UI if this cell is still displaying the same widget
                     if self.displayedWidgetId == widgetId {
                         self.mainImageView?.image = image
@@ -235,7 +238,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 extension NewImageUITableViewCell: GenericCellCacheProtocol {
     /// Clears the entire shared image cache (call when sitemap changes, etc.)
     static func clearSharedCache() {
-        sharedImageCache.removeAll()
+        sharedImageCache.removeAllObjects()
     }
 
     func invalidateCache() {
@@ -244,7 +247,7 @@ extension NewImageUITableViewCell: GenericCellCacheProtocol {
         currentRefreshInterval = 0
         // Clear this widget from shared cache
         if let widgetId = displayedWidgetId {
-            Self.sharedImageCache.removeValue(forKey: widgetId)
+            Self.sharedImageCache.removeObject(forKey: widgetId as NSString)
         }
         displayedWidgetId = nil
     }
