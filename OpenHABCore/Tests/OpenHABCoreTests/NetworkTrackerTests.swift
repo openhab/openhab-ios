@@ -97,6 +97,9 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
 
 actor PathMonitor {
     var handler: ((Bool) -> Void)?
+    private var monitoringStarted = false
+    private var waitingContinuations: [CheckedContinuation<Void, Never>] = []
+
     func connectionUpdates() -> AsyncStream<Bool> {
         AsyncStream { continuation in
             handler = { connectionStatus in
@@ -105,15 +108,36 @@ actor PathMonitor {
         }
     }
 
+    func signalMonitoringStarted() {
+        monitoringStarted = true
+        // Resume all waiting continuations
+        for continuation in waitingContinuations {
+            continuation.resume()
+        }
+        waitingContinuations.removeAll()
+    }
+
+    func waitForMonitoringStarted() async {
+        if monitoringStarted {
+            return
+        }
+        await withCheckedContinuation { continuation in
+            waitingContinuations.append(continuation)
+        }
+    }
+
     func changeState(_ state: Bool) {
         handler?(state)
     }
 }
 
-final class MockPathMonitor: NWPathMonitoring {
+final class MockPathMonitor: NWPathMonitoring, @unchecked Sendable {
     private let monitor: PathMonitor = .init()
 
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
+        // Signal that monitoring has started before entering the loop
+        await monitor.signalMonitoringStarted()
+
         for await connected in await monitor.connectionUpdates() {
             await handler(connected)
         }
@@ -123,12 +147,14 @@ final class MockPathMonitor: NWPathMonitoring {
         // no-op
     }
 
+    /// Waits until startMonitoring has been called
+    func waitForMonitoringToStart() async {
+        await monitor.waitForMonitoringStarted()
+    }
+
     /// Call this in your tests to simulate a connection status change
-    func simulateConnection(isConnected: Bool) {
-        let monitor = monitor
-        Task.detached {
-            await monitor.changeState(isConnected)
-        }
+    func simulateConnection(isConnected: Bool) async {
+        await monitor.changeState(isConnected)
     }
 }
 
@@ -178,11 +204,19 @@ final class NetworkTrackerTests: XCTestCase {
         // Wait for the stream to actually start iterating before triggering any state changes
         await fulfillment(of: [streamIterating], timeout: 1.0)
 
+        // Start a task to wait for monitoring to begin
+        let monitoringTask = Task {
+            await mockMonitor.waitForMonitoringToStart()
+        }
+
         // Start tracking with your mock config
         await networkTracker.startTracking(connectionConfigurations: [config])
 
+        // Wait for path monitor's startMonitoring to be called before simulating connection
+        await monitoringTask.value
+
         // Simulate the network becoming available
-        mockMonitor.simulateConnection(isConnected: true)
+        await mockMonitor.simulateConnection(isConnected: true)
 
         await fulfillment(of: [connectedExpectation], timeout: 2.0)
         statusTask.cancel()

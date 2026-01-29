@@ -20,7 +20,7 @@ struct BonjourDiscoverySheet: View {
     @StateObject private var discovery = BonjourDiscoveryViewModel()
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 if discovery.isDiscovering {
                     Section {
@@ -107,7 +107,7 @@ struct BonjourDiscoverySheet: View {
         )
 
         var body: some View {
-            NavigationView {
+            NavigationStack {
                 Form {
                     BonjourDiscoverySheet(isPresented: $isPresented, connectionConfig: $connectionConfig)
                 }
