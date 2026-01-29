@@ -18,19 +18,28 @@ import Testing
 struct CertificateStoreTests {
     // Helper to load the bundled test certificate data
     func loadTestCertificateData() throws -> Data {
-        let certURL = Bundle.module.url(forResource: "test-cert", withExtension: "cer")!
+        guard let certURL = Bundle.module.url(forResource: "test-cert", withExtension: "cer") else {
+            throw CertificateStoreTestError.resourceNotFound("test-cert.cer")
+        }
         return try Data(contentsOf: certURL)
     }
 
-    // Helper to create a fresh store (actor) instance
-    func makeStore() -> CertificateStore {
-        CertificateStore.shared
+    // Helper to create a fresh in-memory store for isolated testing
+    func makeInMemoryStore() -> CertificateStore {
+        CertificateStore(persistencePath: nil)
     }
 
-    @Test("Store and retrieve certificate")
+    // Helper to create a unique temporary path for persistence tests
+    func makeTempPersistencePath() -> URL {
+        let tempDir = FileManager.default.temporaryDirectory
+        let uniqueID = UUID().uuidString
+        return tempDir.appendingPathComponent("CertificateStoreTests-\(uniqueID)")
+    }
+
+    @Test("Store and retrieve certificate", .timeLimit(.minutes(1)))
     func storeAndRetrieve() async throws {
         let domain = "store-retrieve-test.openhab.org"
-        let store = makeStore()
+        let store = makeInMemoryStore()
 
         let data = try loadTestCertificateData()
         await store.storeCertificateData(data, forDomain: domain)
@@ -42,15 +51,13 @@ struct CertificateStoreTests {
         let info = await store.getCertificateInfo(forDomain: domain)
         #expect(info != nil)
         #expect(info?.data == data)
-        #expect(info!.dateAccepted.timeIntervalSinceNow > -30) // stored recently (allow 30s for slow CI)
-
-        await store.removeCertificate(forDomain: domain)
+        #expect(info!.dateAccepted.timeIntervalSinceNow > -5) // stored just now
     }
 
-    @Test("Overwrite existing certificate updates data and date")
+    @Test("Overwrite existing certificate updates data and date", .timeLimit(.minutes(1)))
     func overwriteUpdates() async throws {
         let domain = "overwrite-test.openhab.org"
-        let store = makeStore()
+        let store = makeInMemoryStore()
 
         let first = Data([0x01, 0x02, 0x03])
         await store.storeCertificateData(first, forDomain: domain)
@@ -66,14 +73,12 @@ struct CertificateStoreTests {
         #expect(info != nil)
         #expect(info!.data == second)
         #expect(info!.dateAccepted >= firstDate)
-
-        await store.removeCertificate(forDomain: domain)
     }
 
-    @Test("Remove certificate clears entry")
+    @Test("Remove certificate clears entry", .timeLimit(.minutes(1)))
     func removeClears() async throws {
         let domain = "remove-test.openhab.org"
-        let store = makeStore()
+        let store = makeInMemoryStore()
 
         let data = Data([0xAA, 0xBB])
         await store.storeCertificateData(data, forDomain: domain)
@@ -86,10 +91,10 @@ struct CertificateStoreTests {
         #expect(info == nil)
     }
 
-    @Test("Store nil removes certificate")
+    @Test("Store nil removes certificate", .timeLimit(.minutes(1)))
     func storeNilRemoves() async throws {
         let domain = "nil-remove-test.openhab.org"
-        let store = makeStore()
+        let store = makeInMemoryStore()
 
         let data = Data([0xDE, 0xAD, 0xBE, 0xEF])
         await store.storeCertificateData(data, forDomain: domain)
@@ -97,15 +102,13 @@ struct CertificateStoreTests {
 
         await store.storeCertificateData(nil, forDomain: domain)
         #expect(await store.certificateData(forDomain: domain) == nil)
-
-        await store.removeCertificate(forDomain: domain)
     }
 
-    @Test("Get all certificates returns expected entries")
+    @Test("Get all certificates returns expected entries", .timeLimit(.minutes(1)))
     func getAllCertificates() async throws {
         let domainA = "list-a-test.openhab.org"
         let domainB = "list-b-test.openhab.org"
-        let store = makeStore()
+        let store = makeInMemoryStore()
 
         let dataA = Data([0x01])
         let dataB = Data([0x02])
@@ -117,29 +120,37 @@ struct CertificateStoreTests {
         #expect(all[domainB]?.data == dataB)
         #expect(all.keys.contains(domainA))
         #expect(all.keys.contains(domainB))
-
-        await store.removeCertificate(forDomain: domainA)
-        await store.removeCertificate(forDomain: domainB)
     }
 
-    @Test("Persistence across instances")
+    @Test("Persistence across instances", .timeLimit(.minutes(1)))
     func persistenceAcrossInstances() async throws {
         let domain = "persistence-test.openhab.org"
-        var store: CertificateStore? = makeStore()
+        let tempPath = makeTempPersistencePath()
 
-        Logger.defaultLoggingMiddleware.log("Running persistenceAcrossInstances")
-        let data = Data([0xFE, 0xED, 0xFA, 0xCE])
-        await store!.storeCertificateData(data, forDomain: domain)
+        // Clean up any existing file
+        try? FileManager.default.removeItem(at: tempPath)
 
-        // Ensure the store is completely finished with file operations
-        // by setting it to nil and waiting a moment
-        store = nil
+        do {
+            // Create first store instance with temp path
+            let store1 = CertificateStore(persistencePath: tempPath)
 
-        // Create a new instance which should load from disk
-        store = makeStore()
-        let fetched = await store!.certificateData(forDomain: domain)
-        #expect(fetched == data, "Certificate data should persist across instances")
+            Logger.defaultLoggingMiddleware.log("Running persistenceAcrossInstances")
+            let data = Data([0xFE, 0xED, 0xFA, 0xCE])
+            await store1.storeCertificateData(data, forDomain: domain)
 
-        await store?.removeCertificate(forDomain: domain)
+            // Create a new instance which should load from disk
+            let store2 = CertificateStore(persistencePath: tempPath)
+            let fetched = await store2.certificateData(forDomain: domain)
+            #expect(fetched == data, "Certificate data should persist across instances")
+        }
+
+        // Clean up temp file
+        try? FileManager.default.removeItem(at: tempPath)
     }
+}
+
+// MARK: - Test Errors
+
+enum CertificateStoreTestError: Error {
+    case resourceNotFound(String)
 }
