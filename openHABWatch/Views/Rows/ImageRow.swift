@@ -94,7 +94,7 @@ struct ImageRow: View, Equatable {
         self.refresh = refresh
     }
 
-    static func == (lhs: ImageRow, rhs: ImageRow) -> Bool {
+    nonisolated static func == (lhs: ImageRow, rhs: ImageRow) -> Bool {
         lhs.url == rhs.url && lhs.refresh == rhs.refresh
     }
 }
