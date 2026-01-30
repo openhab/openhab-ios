@@ -134,9 +134,9 @@ struct VideoRowView: View {
         mjpegPlayer = VideoStreamManager.shared.getOrCreateStream(
             for: url,
             imageView: imageView,
-            onFirstFrame: { [aspectRatio = aspectRatio] newAspectRatio in
+            onFirstFrame: { newAspectRatio in
                 Task { @MainActor in
-                    self.aspectRatio = newAspectRatio
+                    aspectRatio = newAspectRatio
                     isLoading = false
                 }
             },

@@ -162,6 +162,8 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
             if currentPage != nil {
                 currentPage?.widgets = []
                 widgetTableView.reloadData()
+                // Clear shared image cache when sitemap changes
+                NewImageUITableViewCell.clearSharedCache()
             }
             Logger.sitemapViewController.info("OpenHABSitemapViewController pageUrl is empty, this is first launch")
             startWatchingActiveServer()

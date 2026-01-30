@@ -52,7 +52,7 @@ struct WidgetRowView: View {
             if widget.item != nil {
                 ImageRawRow(widget: widget)
             } else {
-                ImageRow(url: URL(string: widget.url))
+                EquatableView(content: ImageRow(url: URL(string: widget.url), refresh: widget.refresh))
             }
         case .chart:
             let url = Endpoint.chart(
@@ -65,7 +65,7 @@ struct WidgetRowView: View {
                 theme: .dark,
                 forceAsItem: widget.forceAsItem
             ).url
-            ImageRow(url: url)
+            EquatableView(content: ImageRow(url: url, refresh: widget.refresh))
         case .mapview:
             MapViewRow(widget: widget)
         case .colorpicker:
