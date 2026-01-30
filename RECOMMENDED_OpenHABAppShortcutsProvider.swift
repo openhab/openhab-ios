@@ -14,10 +14,20 @@ import AppIntents
 /// App Shortcuts Provider for openHAB app
 ///
 /// This provider registers app shortcuts with iOS, enabling:
-/// - Siri phrase suggestions (e.g., "Set switch Kitchen Light from openHAB")
+/// - Siri phrase suggestions (e.g., "Toggle Kitchen Light in openHAB")
 /// - Shortcuts in Spotlight search
 /// - Add to Home Screen functionality
 /// - Siri Suggestions on lock screen and search
+///
+/// ## Design Note
+/// Due to iOS AppShortcuts limitation of one parameter per phrase,
+/// shortcuts are designed for specific, common actions:
+/// - Toggle switch items (most common switch operation)
+/// - Get item state (universal query)
+/// - Open/Close roller shutters (specific directional commands)
+///
+/// The action is embedded in the phrase itself since we can only
+/// pass the item name as a parameter.
 ///
 /// ## Note
 /// This file was present in PR #742 but was missing from PR #1028.
@@ -36,92 +46,60 @@ import AppIntents
 struct OpenHABAppShortcutsProvider: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         [
-            // MARK: - Switch Control
+            // MARK: - Switch Control - Toggle Action
+            // Note: Since AppShortcuts only allow one parameter per phrase,
+            // the action (toggle) is embedded in the phrase itself
             
             AppShortcut(
                 intent: SetSwitchItemIntent(),
                 phrases: [
-                    "Set switch \(\.$itemEntity) in \(.applicationName)",
-                    "Toggle \(\.$itemEntity) in \(.applicationName)"
+                    "Toggle \(\.$itemEntity) in \(.applicationName)",
+                    "Toggle switch \(\.$itemEntity) in \(.applicationName)"
                 ],
-                shortTitle: "Set Switch",
+                shortTitle: "Toggle Switch",
                 systemImageName: "light.beacon.max"
             ),
             
-            // MARK: - Dimmer & Roller Shutter Control
-            
-            AppShortcut(
-                intent: SetDimmerRollerValueIntent(),
-                phrases: [
-                    "Set \(\.$itemEntity) in \(.applicationName)",
-                    "Adjust \(\.$itemEntity) in \(.applicationName)",
-                    "Dim \(\.$itemEntity) in \(.applicationName)"
-                ],
-                shortTitle: "Set Dimmer",
-                systemImageName: "slider.horizontal.3"
-            ),
-            
-            // MARK: - Color Control
-            
-            AppShortcut(
-                intent: SetColorValueIntent(),
-                phrases: [
-                    "Set color of \(\.$itemEntity) in \(.applicationName)",
-                    "Change color of \(\.$itemEntity) in \(.applicationName)",
-                    "Set \(\.$itemEntity) color in \(.applicationName)"
-                ],
-                shortTitle: "Set Color",
-                systemImageName: "paintpalette"
-            ),
-            
             // MARK: - Get Item State
+            // Query the current state of any item
             
             AppShortcut(
                 intent: GetItemStateIntent(),
                 phrases: [
-                    "Get \(\.$itemEntity) state from \(.applicationName)",
+                    "Get \(\.$itemEntity) in \(.applicationName)",
                     "Check \(\.$itemEntity) in \(.applicationName)",
-                    "What is \(\.$itemEntity) in \(.applicationName)",
-                    "Show \(\.$itemEntity) status in \(.applicationName)"
+                    "What is \(\.$itemEntity) in \(.applicationName)"
                 ],
-                shortTitle: "Get State",
+                shortTitle: "Get Item State",
                 systemImageName: "info.circle"
             ),
             
-            // MARK: - Number Value Control
+            // MARK: - Roller Shutter Control - UP Command
+            // Separate shortcut for raising/opening roller shutters
             
             AppShortcut(
-                intent: SetNumberValueIntent(),
+                intent: SetDimmerRollerValueIntent(),
                 phrases: [
-                    "Set \(\.$itemEntity) in \(.applicationName)",
-                    "Change \(\.$itemEntity) in \(.applicationName)"
+                    "Open \(\.$itemEntity) in \(.applicationName)",
+                    "Raise \(\.$itemEntity) in \(.applicationName)",
+                    "Roll up \(\.$itemEntity) in \(.applicationName)"
                 ],
-                shortTitle: "Set Number",
-                systemImageName: "number"
+                shortTitle: "Open Shutter",
+                systemImageName: "arrow.up.square"
             ),
             
-            // MARK: - String Value Control
+            // MARK: - Roller Shutter Control - DOWN Command
+            // Separate shortcut for lowering/closing roller shutters
             
             AppShortcut(
-                intent: SetStringValueIntent(),
+                intent: SetDimmerRollerValueIntent(),
                 phrases: [
-                    "Set \(\.$itemEntity) in \(.applicationName)",
-                    "Update \(\.$itemEntity) in \(.applicationName)"
+                    "Close \(\.$itemEntity) in \(.applicationName)",
+                    "Lower \(\.$itemEntity) in \(.applicationName)",
+                    "Roll down \(\.$itemEntity) in \(.applicationName)"
                 ],
-                shortTitle: "Set Text",
-                systemImageName: "text.quote"
-            ),
-            
-            // MARK: - Contact State Control
-            
-            AppShortcut(
-                intent: ContactStateIntent(),
-                phrases: [
-                    "Set \(\.$itemEntity) in \(.applicationName)",
-                    "Update contact \(\.$itemEntity) in \(.applicationName)"
-                ],
-                shortTitle: "Set Contact",
-                systemImageName: "sensor"
+                shortTitle: "Close Shutter",
+                systemImageName: "arrow.down.square"
             )
         ]
     }
