@@ -41,8 +41,7 @@ struct OpenHABAppShortcutsProvider: AppShortcutsProvider {
             AppShortcut(
                 intent: SetSwitchItemIntent(),
                 phrases: [
-                    "Set \(.applicationName)",
-                    "Set switch \(\.$itemEntity) from \(.applicationName)",
+                    "Set switch \(\.$itemEntity) in \(.applicationName)",
                     "Toggle \(\.$itemEntity) in \(.applicationName)"
                 ],
                 shortTitle: "Set Switch",
