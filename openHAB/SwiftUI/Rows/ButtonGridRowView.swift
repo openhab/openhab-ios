@@ -137,6 +137,7 @@ struct ButtonGridRowView: View {
                     if let labelText = widget.labelText, !labelText.isEmpty {
                         Text(labelText)
                             .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                            .lineLimit(1)
                     }
 
                     Spacer()

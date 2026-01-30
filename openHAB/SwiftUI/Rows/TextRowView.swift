@@ -25,6 +25,7 @@ struct TextRowView: View {
 
             Text(widget.labelText ?? "")
                 .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                .lineLimit(1)
 
             Spacer()
 
@@ -32,6 +33,7 @@ struct TextRowView: View {
                 Text(value)
                     .font(.body)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .lineLimit(1)
             }
         }
         .contextMenu {

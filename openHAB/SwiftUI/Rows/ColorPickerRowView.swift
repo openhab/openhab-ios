@@ -32,6 +32,7 @@ struct ColorPickerRowView: View {
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .lineLimit(1)
             }
 
             Spacer()
@@ -59,6 +60,7 @@ struct ColorPickerRowView: View {
                 Text(labelValue)
                     .font(.caption)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .lineLimit(1)
             }
         }
         .onAppear {

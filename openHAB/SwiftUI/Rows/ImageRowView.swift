@@ -37,6 +37,7 @@ struct ImageRowView: View {
             if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .lineLimit(1)
             }
             switch widget.generateImageResult(rootUrl: viewModel.openHABRootUrl ?? "") {
             case let .embedded(data: data):
@@ -71,6 +72,7 @@ struct ImageRowView: View {
                 Text(labelValue)
                     .font(.caption)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .lineLimit(1)
             }
         }
         .onAppear {

@@ -42,6 +42,7 @@ struct SwitchRowView: View {
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .lineLimit(1)
             }
 
             Spacer()
@@ -50,6 +51,7 @@ struct SwitchRowView: View {
                 Text(labelValue)
                     .font(.caption)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .lineLimit(1)
             }
 
             Toggle("", isOn: Binding(
