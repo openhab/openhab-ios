@@ -27,10 +27,6 @@ struct SegmentedRowView: View {
     @State private var selectedIndex: Int?
     @State private var pressedIndex: Int?
 
-    private var isMomentary: Bool {
-        mappings.count == 1 || widget.item?.state == "NULL"
-    }
-
     var body: some View {
         HStack {
             IconView(widget: widget)
@@ -53,49 +49,44 @@ struct SegmentedRowView: View {
                 if widget.hasPressReleaseMappings {
                     // Press-release buttons for mappings with releaseCommand
                     pressReleaseButtons
-                } else if isMomentary {
-                    HStack {
-                        ForEach(mappings.indices, id: \.self) { index in
-                            Button {
-                                viewModel.sendCommand(widget.item, commandToSend: mappings[index].command)
-                            } label: {
-                                Text(mappings[index].label)
-                                    .padding(.horizontal, 6)
-                            }
-                            .buttonStyle(.bordered)
-                        }
-                    }
                 } else {
-                    HStack {
-                        Picker("", selection: Binding<Int>(
-                            get: { selectedIndex ?? -1 },
-                            set: { newIndex in
-                                selectedIndex = newIndex
-                                if let mapping = mappings[safe: newIndex] {
-                                    viewModel.sendCommand(widget.item, commandToSend: mapping.command)
-                                }
-                            }
-                        )) {
-                            ForEach(mappings.indices, id: \.self) { index in
-                                Text(mappings[index].label).tag(index)
-                            }
-                        }
-                        .padding(.bottom, -8)
-                        .padding(.top, -8)
-                        .pickerStyle(.segmented)
-                        .controlSize(.small)
-                    }
+                    // Button-based segmented control that allows repeated clicks on same segment
+                    // This matches Android app and BasicUI behavior (issue #530)
+                    segmentedButtons
                 }
             }
         }
         .onAppear {
-            if !isMomentary {
-                selectedIndex = widget.mapCommandtoIndex(with: widget.item?.state)
-            }
+            selectedIndex = widget.mapCommandtoIndex(with: widget.item?.state)
         }
         .onChange(of: widget.item?.state) { newState in
             selectedIndex = widget.mapCommandtoIndex(with: newState)
         }
+    }
+
+    /// Button-based segmented control that always responds to taps, even on selected segment
+    @ViewBuilder
+    private var segmentedButtons: some View {
+        HStack(spacing: 0) {
+            ForEach(0 ..< mappings.count, id: \.self) { index in
+                segmentButton(at: index)
+
+                // Add divider between segments
+                if index < mappings.count - 1 {
+                    Divider()
+                        .frame(height: 20)
+                }
+            }
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 7)
+                .fill(Color(uiColor: .systemGray6))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 7)
+                .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
+        )
+        .fixedSize(horizontal: true, vertical: true)
     }
 
     @ViewBuilder
@@ -106,6 +97,29 @@ struct SegmentedRowView: View {
                 pressReleaseButton(for: mapping, at: index)
             }
         }
+    }
+
+    // MARK: - Helper Methods
+
+    @ViewBuilder
+    private func segmentButton(at index: Int) -> some View {
+        let isSelected = selectedIndex == index
+        let mapping = mappings[index]
+
+        Button {
+            logger.info("Segment tapped: \(index), command: \(mapping.command)")
+            selectedIndex = index
+            viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+        } label: {
+            Text(mapping.label)
+                .font(.subheadline)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity)
+                .background(isSelected ? Color.accentColor.opacity(0.2) : Color.clear)
+                .foregroundStyle(isSelected ? Color.accentColor : .primary)
+        }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder
