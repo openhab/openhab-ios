@@ -21,14 +21,18 @@ enum ImageType {
 }
 
 class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
-    var didLoad: (() -> Void)?
+    // Shared image cache across all cells - keyed by widget ID
+    // Using NSCache for thread-safety and automatic memory management
+    private static let sharedImageCache = NSCache<NSString, UIImage>()
 
     private var mainImageView: ScaleAspectFitImageView!
     private var refreshTimer: Timer?
+    private var currentRefreshInterval: TimeInterval = 0
     private var chartStyle: ChartStyle = .light
     private var activeTask: Task<Void, Never>?
-    private var cachedImage: UIImage?
-    private var cachedWidgetId: String?
+    private var displayedWidgetId: String? // Track which widget this cell is currently displaying
+
+    var didLoad: (() -> Void)?
 
     var openHABRootUrl: String?
 
@@ -103,45 +107,51 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     override func prepareForReuse() {
         super.prepareForReuse()
 
-        // Cancel any active image loading task
+        // Cancel any active image loading task to prevent race conditions where a task
+        // started for a previous widget updates the shared cache or UI for a newly assigned widget
         activeTask?.cancel()
         activeTask = nil
 
-        // Invalidate and clear timer
+        // Invalidate timer to prevent refreshes for wrong widget
         refreshTimer?.invalidate()
         refreshTimer = nil
+        currentRefreshInterval = 0
 
-        // Clear cached image and widget ID to prevent showing wrong content in reused cells
-        cachedImage = nil
-        cachedWidgetId = nil
-        mainImageView?.image = nil
+        // Clear displayed widget ID to ensure clean state
+        displayedWidgetId = nil
 
         // Reset chart style
         chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
     }
 
     override func displayWidget() {
-        // Check if we can reuse the cached image for the same widget
-        let currentWidgetId = widget?.id
-        let canReuseCache = cachedImage != nil && cachedWidgetId == currentWidgetId
+        let widgetId = widget?.id ?? ""
+        // Set displayedWidgetId before cache check to ensure consistency
+        displayedWidgetId = widgetId
 
-        if canReuseCache {
-            mainImageView.image = cachedImage
+        // Check shared cache for this widget's image
+        if let cachedImage = Self.sharedImageCache.object(forKey: widgetId as NSString) {
+            // Found in shared cache - use it immediately without reloading
+            mainImageView?.image = cachedImage
         } else {
-            // Different widget, clear cache and load new image
-            cachedImage = nil
-            cachedWidgetId = currentWidgetId
+            // Not in cache - need to load
+            mainImageView?.image = nil
             loadImage()
         }
-        // If widget have a refresh rate configured, i.e. different from zero, schedule an image update timer
-        if widget.refresh != 0 {
+
+        // Handle refresh timer - only update if the interval has changed
+        let newRefreshInterval = widget.refresh != 0 ? TimeInterval(Double(widget.refresh) / 1000) : 0
+
+        if newRefreshInterval != currentRefreshInterval {
+            // Refresh interval changed, update the timer
             refreshTimer?.invalidate()
             refreshTimer = nil
-            let refreshInterval = TimeInterval(Double(widget.refresh) / 1000)
-            if refreshInterval > 0.09 {
-                Logger.widgets.info("Scheduling image refresh every \(refreshInterval) seconds")
+            currentRefreshInterval = newRefreshInterval
+
+            if newRefreshInterval > 0.09 {
+                Logger.widgets.info("Scheduling image refresh every \(newRefreshInterval) seconds")
                 refreshTimer = Timer.scheduledTimer(
-                    timeInterval: refreshInterval,
+                    timeInterval: newRefreshInterval,
                     target: self,
                     selector: #selector(NewImageUITableViewCell.refreshImage(_:)),
                     userInfo: nil,
@@ -152,12 +162,17 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     }
 
     func loadImage() {
+        let widgetId = widget?.id ?? ""
         switch widgetPayload {
         case let .embedded(image):
-            cachedImage = image
-            cachedWidgetId = widget?.id
-            mainImageView.image = image
-            didLoad?()
+            if let image {
+                // Only update cache and UI if still displaying the same widget
+                if displayedWidgetId == widgetId {
+                    Self.sharedImageCache.setObject(image, forKey: widgetId as NSString)
+                    mainImageView.image = image
+                    didLoad?()
+                }
+            }
         case let .link(url):
             guard let url else { return }
             loadRemoteImage(withURL: url)
@@ -182,6 +197,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     }
 
     private func loadRemoteImage(withURL url: URL) {
+        let widgetId = widget?.id ?? ""
         Logger.widgets.debug("Image URL: \(url.absoluteString)")
 
         if activeTask != nil {
@@ -198,10 +214,13 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                 let client = HTTPClient(connectionConfiguration: config)
                 let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, timeout: 10.0, type: .data, cacheingPolicy: !shouldCache ? .reloadIgnoringCacheData : .useProtocolCachePolicy)
                 await MainActor.run {
-                    self.cachedImage = UIImage(data: data)
-                    self.cachedWidgetId = self.widget?.id
-                    self.mainImageView?.image = self.cachedImage
-                    self.didLoad?()
+                    guard let image = UIImage(data: data) else { return }
+                    // Only store in cache and update UI if this cell is still displaying the same widget
+                    if self.displayedWidgetId == widgetId {
+                        Self.sharedImageCache.setObject(image, forKey: widgetId as NSString)
+                        self.mainImageView?.image = image
+                        self.didLoad?()
+                    }
                 }
             } catch {
                 Logger.widgets.info("Downloading image failed: \(error.localizedDescription)")
@@ -227,9 +246,19 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 }
 
 extension NewImageUITableViewCell: GenericCellCacheProtocol {
+    /// Clears the entire shared image cache (call when sitemap changes, etc.)
+    static func clearSharedCache() {
+        sharedImageCache.removeAllObjects()
+    }
+
     func invalidateCache() {
         refreshTimer?.invalidate()
-        cachedImage = nil
-        cachedWidgetId = nil
+        refreshTimer = nil
+        currentRefreshInterval = 0
+        // Clear this widget from shared cache
+        if let widgetId = displayedWidgetId {
+            Self.sharedImageCache.removeObject(forKey: widgetId as NSString)
+        }
+        displayedWidgetId = nil
     }
 }
