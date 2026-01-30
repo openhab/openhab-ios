@@ -56,11 +56,11 @@ struct SegmentRow: View {
                         return value == index
                     }) {
                         Text(widget.mappingsOrItemOptions[selectedIndex].label)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
                     Image(systemSymbol: .chevronRight)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .font(.caption)
                 }
                 .padding(.horizontal, 8)

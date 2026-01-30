@@ -20,7 +20,7 @@ struct DetailTextLabelView: View {
             Text(label)
                 .font(.footnote)
                 .lineLimit(1)
-                .foregroundColor(!widget.valuecolor.isEmpty ? Color(widget.valuecolor) : .secondary)
+                .foregroundStyle(!widget.valuecolor.isEmpty ? Color(widget.valuecolor) : .secondary)
         }
     }
 }

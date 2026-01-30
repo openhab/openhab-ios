@@ -41,7 +41,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published var openHABRootUrl: String?
     @Published var showSearchField = false
 
-    @ObservedObject var networkTracker = MainActorNetworkTracker.shared
+    let networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
     private var activeConnectionInfo: ConnectionInfo?
     private var pageHandlingTask: Task<Void, Never>?
@@ -208,11 +208,9 @@ class SitemapPageViewModel: ObservableObject {
                     return
                 }
                 logger.error("Decoding error: \(error.localizedDescription)")
-                await MainActor.run {
-                    self.error = SitemapPageError.serviceUnavailable
-                    self.isLoading = false
-                    self.isUpdating = false
-                }
+                self.error = SitemapPageError.serviceUnavailable
+                isLoading = false
+                isUpdating = false
             } catch let error as ClientError {
                 if let urlError = error.underlyingError as? URLError, urlError.code == .cancelled {
                     logger.info("Task cancelled (URLError: cancelled)")
@@ -227,9 +225,7 @@ class SitemapPageViewModel: ObservableObject {
                         return
                     }
                     logger.error("ClientError: \(error.localizedDescription)")
-                    await MainActor.run {
-                        self.error = SitemapPageError.serviceUnavailable
-                    }
+                    self.error = SitemapPageError.serviceUnavailable
                 }
                 isLoading = false
                 isUpdating = false
@@ -246,11 +242,9 @@ class SitemapPageViewModel: ObservableObject {
                     return
                 }
                 logger.error("❌ Unhandled pageHandlingTask error: \(error.localizedDescription)")
-                await MainActor.run {
-                    self.error = SitemapPageError.serviceUnavailable
-                    self.isLoading = false
-                    self.isUpdating = false
-                }
+                self.error = SitemapPageError.serviceUnavailable
+                isLoading = false
+                isUpdating = false
             }
         }
     }

@@ -82,14 +82,15 @@ struct SitemapPageView: View {
 extension SitemapPageView {
     /// Creates placeholder widgets for skeleton loading state
     var placeholderWidgets: [OpenHABWidget] {
-        [
-            PreviewConstants.openHABSitemapPage!.widgets[3],
-            PreviewConstants.openHABSitemapPage!.widgets[5],
-            PreviewConstants.openHABSitemapPage!.widgets[2],
-            PreviewConstants.openHABSitemapPage!.widgets[6],
-            PreviewConstants.openHABSitemapPage!.widgets[17],
-            PreviewConstants.openHABSitemapPage!.widgets[4]
-        ]
+        guard let page = PreviewConstants.openHABSitemapPage else { return [] }
+        return [
+            page.widgets[safe: 3],
+            page.widgets[safe: 5],
+            page.widgets[safe: 2],
+            page.widgets[safe: 6],
+            page.widgets[safe: 17],
+            page.widgets[safe: 4]
+        ].compactMap(\.self)
     }
 }
 

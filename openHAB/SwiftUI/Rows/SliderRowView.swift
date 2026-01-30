@@ -34,29 +34,30 @@ struct SliderRowView: View {
 
     var body: some View {
         HStack {
-            HStack {
-                IconView(widget: widget)
-                    .frame(width: 24, height: 24)
+            Button {
+                viewModel.sendCommand(widget.item, commandToSend: sliderValue <= widget.minValue ? "ON" : "OFF")
+            } label: {
+                HStack {
+                    IconView(widget: widget)
+                        .frame(width: 24, height: 24)
 
-                if let labelText = widget.labelText, !labelText.isEmpty {
-                    Text(labelText)
-                        .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    if let labelText = widget.labelText, !labelText.isEmpty {
+                        Text(labelText)
+                            .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    }
+
+                    Spacer()
+
+                    if let value = widget.labelValue {
+                        Text(value)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
-
-                Spacer()
-
-                if let value = widget.labelValue {
-                    Text(value)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                .contentShape(Rectangle())
             }
-            .contentShape(Rectangle()) // 🔍 Make row but not slider tappable
-            .onTapGesture {
-                if widget.switchSupport, !(widget.readOnly ?? false) {
-                    viewModel.sendCommand(widget.item, commandToSend: sliderValue <= widget.minValue ? "ON" : "OFF")
-                }
-            }
+            .buttonStyle(.plain)
+            .disabled(!widget.switchSupport || (widget.readOnly ?? false))
 
             Slider(
                 value: Binding(

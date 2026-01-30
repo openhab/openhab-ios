@@ -78,12 +78,12 @@ struct SegmentSelectionView: View {
     private func optionLabel(for mapping: OpenHABWidgetMapping, at index: Int, isPressed: Bool) -> some View {
         HStack {
             Text(mapping.label)
-                .foregroundColor(.primary)
+                .foregroundStyle(.primary)
                 .multilineTextAlignment(.leading)
             Spacer()
             if isSelected(index: index), !widget.hasPressReleaseMappings {
                 Image(systemSymbol: .checkmark)
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(Color.accentColor)
                     .font(.caption.weight(.bold))
             }
         }
