@@ -45,8 +45,10 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
             widgetSegmentControl.insertSegment(withTitle: mapping.label, at: index, animated: false)
         }
 
-        widgetSegmentControl.isMomentary = widget.mappingsOrItemOptions.count == 1 || widget.item?.state == "NULL"
-        widgetSegmentControl.selectedSegmentIndex = widgetSegmentControl.isMomentary ? -1 : Int(widget.mappingIndex(byCommand: widget.item?.state) ?? -1)
+        // Always set to momentary to allow repeated clicks on the same segment
+        // This matches the behavior of the Android app and BasicUI
+        widgetSegmentControl.isMomentary = true
+        widgetSegmentControl.selectedSegmentIndex = -1
         widgetSegmentControl.addTarget(self, action: #selector(SegmentedUITableViewCell.pickOne(_:)), for: .valueChanged)
     }
 
