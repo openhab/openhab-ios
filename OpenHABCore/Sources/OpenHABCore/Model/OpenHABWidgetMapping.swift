@@ -19,12 +19,19 @@ public struct OpenHABWidgetMapping: Decodable, Sendable {
     public var icon: String?
     public var releaseCommand: String?
 
+    /// Returns true if this mapping has press-and-release behavior
+    public var hasPressReleaseBehavior: Bool {
+        guard let releaseCommand else { return false }
+        return !releaseCommand.isEmpty
+    }
+
     public init(command: String?, label: String?, row: Int? = nil, column: Int? = nil, icon: String? = nil, releaseCommand: String? = nil) {
         self.command = command.orEmpty
         self.label = label.orEmpty
         self.row = row
         self.column = column
         self.icon = icon
+        self.releaseCommand = releaseCommand
     }
 }
 

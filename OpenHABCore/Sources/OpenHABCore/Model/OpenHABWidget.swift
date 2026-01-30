@@ -164,6 +164,11 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         }
     }
 
+    /// Returns true if any mapping has press-and-release behavior
+    public var hasPressReleaseMappings: Bool {
+        mappingsOrItemOptions.contains { $0.hasPressReleaseBehavior }
+    }
+
     public var stateValueAsBool: Bool? {
         item?.state?.parseAsBool()
     }

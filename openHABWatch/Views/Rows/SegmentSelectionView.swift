@@ -17,42 +17,95 @@ struct SegmentSelectionView: View {
     @ObservedObject var widget: OpenHABWidget
     @Environment(\.dismiss) private var dismiss
     @State private var pendingValue: String?
+    @State private var pressedIndex: Int?
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
                 ForEach(0 ..< widget.mappingsOrItemOptions.count, id: \.self) { index in
-                    Button {
-                        selectOption(at: index)
-                    } label: {
-                        HStack {
-                            Text(widget.mappingsOrItemOptions[index].label)
-                                .foregroundColor(.primary)
-                                .multilineTextAlignment(.leading)
-                            Spacer()
-                            if isSelected(index: index) {
-                                Image(systemSymbol: .checkmark)
-                                    .foregroundColor(.accentColor)
-                                    .font(.caption.weight(.bold))
-                            }
-                        }
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(isSelected(index: index) ? Color.accentColor.opacity(0.2) : Color.clear)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
-                        )
+                    let mapping = widget.mappingsOrItemOptions[index]
+
+                    if widget.hasPressReleaseMappings {
+                        // Press-release button for mappings with releaseCommand
+                        pressReleaseButton(for: mapping, at: index)
+                    } else {
+                        // Standard button for regular mappings
+                        standardButton(for: mapping, at: index)
                     }
-                    .buttonStyle(PlainButtonStyle())
                 }
             }
             .padding()
         }
         .navigationTitle("Select Option")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    private func standardButton(for mapping: OpenHABWidgetMapping, at index: Int) -> some View {
+        Button {
+            selectOption(at: index)
+        } label: {
+            optionLabel(for: mapping, at: index, isPressed: false)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    @ViewBuilder
+    private func pressReleaseButton(for mapping: OpenHABWidgetMapping, at index: Int) -> some View {
+        optionLabel(for: mapping, at: index, isPressed: pressedIndex == index)
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if pressedIndex != index {
+                            pressedIndex = index
+                            // Send command on press
+                            Logger.rowViews.info("Sending press command: \(mapping.command)")
+                            widget.sendCommand(mapping.command)
+                        }
+                    }
+                    .onEnded { _ in
+                        pressedIndex = nil
+                        // Send release command on release
+                        if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
+                            Logger.rowViews.info("Sending release command: \(releaseCommand)")
+                            widget.sendCommand(releaseCommand)
+                        }
+                    }
+            )
+    }
+
+    @ViewBuilder
+    private func optionLabel(for mapping: OpenHABWidgetMapping, at index: Int, isPressed: Bool) -> some View {
+        HStack {
+            Text(mapping.label)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.leading)
+            Spacer()
+            if isSelected(index: index), !widget.hasPressReleaseMappings {
+                Image(systemSymbol: .checkmark)
+                    .foregroundColor(.accentColor)
+                    .font(.caption.weight(.bold))
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(backgroundColor(for: index, isPressed: isPressed))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+        )
+    }
+
+    private func backgroundColor(for index: Int, isPressed: Bool) -> Color {
+        if isPressed {
+            Color.accentColor.opacity(0.4)
+        } else if isSelected(index: index) {
+            Color.accentColor.opacity(0.2)
+        } else {
+            Color.clear
+        }
     }
 
     private func isSelected(index: Int) -> Bool {

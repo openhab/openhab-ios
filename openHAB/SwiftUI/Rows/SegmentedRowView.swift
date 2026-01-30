@@ -25,6 +25,7 @@ struct SegmentedRowView: View {
     }
 
     @State private var selectedIndex: Int?
+    @State private var pressedIndex: Int?
 
     private var isMomentary: Bool {
         mappings.count == 1 || widget.item?.state == "NULL"
@@ -49,7 +50,10 @@ struct SegmentedRowView: View {
             }
 
             if !mappings.isEmpty {
-                if isMomentary {
+                if widget.hasPressReleaseMappings {
+                    // Press-release buttons for mappings with releaseCommand
+                    pressReleaseButtons
+                } else if isMomentary {
                     HStack {
                         ForEach(mappings.indices, id: \.self) { index in
                             Button {
@@ -92,6 +96,47 @@ struct SegmentedRowView: View {
         .onChange(of: widget.item?.state) { newState in
             selectedIndex = widget.mapCommandtoIndex(with: newState)
         }
+    }
+
+    @ViewBuilder
+    private var pressReleaseButtons: some View {
+        HStack {
+            ForEach(mappings.indices, id: \.self) { index in
+                let mapping = mappings[index]
+                pressReleaseButton(for: mapping, at: index)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func pressReleaseButton(for mapping: OpenHABWidgetMapping, at index: Int) -> some View {
+        Text(mapping.label)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(pressedIndex == index ? Color.accentColor.opacity(0.3) : Color(uiColor: .systemGray5))
+            )
+            .foregroundStyle(pressedIndex == index ? Color.accentColor : .primary)
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if pressedIndex != index {
+                            pressedIndex = index
+                            // Send command on press
+                            logger.info("Sending press command: \(mapping.command)")
+                            viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+                        }
+                    }
+                    .onEnded { _ in
+                        pressedIndex = nil
+                        // Send release command on release
+                        if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
+                            logger.info("Sending release command: \(releaseCommand)")
+                            viewModel.sendCommand(widget.item, commandToSend: releaseCommand)
+                        }
+                    }
+            )
     }
 }
 
