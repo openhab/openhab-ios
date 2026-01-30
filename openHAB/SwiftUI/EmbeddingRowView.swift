@@ -86,15 +86,24 @@ struct EmbeddingRowView: View {
         }
         .sheet(isPresented: $showSelectionSheet) {
             if let widget = selectedWidget {
-                SelectionView(
-                    labelText: widget.labelText,
-                    mappings: widget.mappingsOrItemOptions,
-                    selectionItemState: widget.item?.state,
-                    valuecolor: widget.valuecolor
-                ) { selectedMappingIndex in
-                    let selectedMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
-                    viewModel.sendCommand(widget.item, commandToSend: selectedMapping.command)
-                    showSelectionSheet = false
+                NavigationStack {
+                    SelectionView(
+                        labelText: widget.labelText,
+                        mappings: widget.mappingsOrItemOptions,
+                        selectionItemState: widget.item?.state,
+                        valuecolor: widget.valuecolor
+                    ) { selectedMappingIndex in
+                        let selectedMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
+                        viewModel.sendCommand(widget.item, commandToSend: selectedMapping.command)
+                        showSelectionSheet = false
+                    }
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") {
+                                showSelectionSheet = false
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -62,6 +62,8 @@ struct SitemapPageView: View {
         .onChange(of: viewModel.networkTracker.activeConnection) { activeConnection in
             viewModel.handleActiveConnectionChange(activeConnection)
         }
+        .navigationTitle(viewModel.pageTitle)
+        .navigationBarTitleDisplayMode(.large)
         .alert("Error", isPresented: Binding(
             get: { viewModel.error != nil },
             set: { if !$0 { viewModel.error = nil } }
