@@ -86,7 +86,7 @@ struct SegmentedRowView: View {
             RoundedRectangle(cornerRadius: 7)
                 .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
         )
-        .fixedSize(horizontal: true, vertical: true)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     @ViewBuilder
@@ -113,9 +113,11 @@ struct SegmentedRowView: View {
         } label: {
             Text(mapping.label)
                 .font(.subheadline)
+                .lineLimit(1)
+                .truncationMode(.tail)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 6)
-                .frame(maxWidth: .infinity)
+                .frame(minWidth: 40, maxWidth: 120)
                 .background(isSelected ? Color.accentColor.opacity(0.2) : Color.clear)
                 .foregroundStyle(isSelected ? Color.accentColor : .primary)
         }

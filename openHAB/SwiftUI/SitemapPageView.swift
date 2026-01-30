@@ -39,7 +39,7 @@ struct SitemapPageView: View {
         .environmentObject(viewModel)
         .listStyle(.plain)
         .listRowSpacing(0)
-        .environment(\.defaultMinListRowHeight, 44)
+        .environment(\.defaultMinListRowHeight, 32)
         .refreshable {
             await viewModel.reload()
         }

@@ -133,11 +133,11 @@ struct IconView: View {
 // MARK: - Convenience Extensions
 
 extension IconView {
-    /// Creates a widget icon view with standard size
+    /// Creates a widget icon view with standard size (32x32, matching UIKit cells)
     init(widget: OpenHABWidget) {
         self.init(
             widget: widget,
-            size: CGSize(width: 24, height: 24)
+            size: CGSize(width: 32, height: 32)
         )
     }
 }

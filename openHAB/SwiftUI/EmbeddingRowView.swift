@@ -21,15 +21,24 @@ struct EmbeddingRowView: View {
     @State private var inputText = ""
 
     /// Insets for different widget types - Frame headers are more compact
-    private var frameInsets: EdgeInsets {
+    private var rowInsets: EdgeInsets {
         if widget.type == .frame {
-            // Empty frame labels should be minimal, matching UIKit's 0pt height
+            // Frame headers: ~35pt total in UIKit
             let hasLabel = !(widget.label.isEmpty)
             return hasLabel
-                ? EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16)
+                ? EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)
                 : EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
         }
-        return EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+        // Regular rows: use smaller vertical padding to match UIKit density
+        return EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16)
+    }
+
+    /// Background color matching UIKit: Frame rows use systemGroupedBackground, others use secondarySystemGroupedBackground
+    private var rowBackground: Color {
+        if widget.type == .frame {
+            return Color(UIColor.ohSystemGroupedBackground)
+        }
+        return Color(UIColor.ohSecondarySystemGroupedBackground)
     }
 
     var body: some View {
@@ -60,7 +69,8 @@ struct EmbeddingRowView: View {
             }
         }
         .contentShape(Rectangle())
-        .listRowInsets(frameInsets)
+        .listRowInsets(rowInsets)
+        .listRowBackground(rowBackground)
         .alert("Input", isPresented: $showInputAlert) {
             if let widget = selectedWidget {
                 TextField("Enter value", text: $inputText)

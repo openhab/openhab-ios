@@ -25,7 +25,6 @@ struct FrameRowView: View {
                 .lineLimit(1)
             Spacer()
         }
-        .listRowBackground(Color(UIColor.systemGroupedBackground))
     }
 }
 
