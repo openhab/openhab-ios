@@ -43,8 +43,7 @@ struct OpenHABAppShortcutsProvider: AppShortcutsProvider {
                 phrases: [
                     "Set \(.applicationName)",
                     "Set switch \(\.$itemEntity) from \(.applicationName)",
-                    "Toggle \(\.$itemEntity) in \(.applicationName)",
-                    "\(\.$action) \(\.$itemEntity) in \(.applicationName)"
+                    "Toggle \(\.$itemEntity) in \(.applicationName)"
                 ],
                 shortTitle: "Set Switch",
                 systemImageName: "light.beacon.max"
@@ -55,9 +54,9 @@ struct OpenHABAppShortcutsProvider: AppShortcutsProvider {
             AppShortcut(
                 intent: SetDimmerRollerValueIntent(),
                 phrases: [
-                    "Set \(\.$itemEntity) to \(\.$value) in \(.applicationName)",
-                    "Adjust \(\.$itemEntity) to \(\.$value) in \(.applicationName)",
-                    "Dim \(\.$itemEntity) to \(\.$value) in \(.applicationName)"
+                    "Set \(\.$itemEntity) in \(.applicationName)",
+                    "Adjust \(\.$itemEntity) in \(.applicationName)",
+                    "Dim \(\.$itemEntity) in \(.applicationName)"
                 ],
                 shortTitle: "Set Dimmer",
                 systemImageName: "slider.horizontal.3"
@@ -95,8 +94,8 @@ struct OpenHABAppShortcutsProvider: AppShortcutsProvider {
             AppShortcut(
                 intent: SetNumberValueIntent(),
                 phrases: [
-                    "Set \(\.$itemEntity) to \(\.$value) in \(.applicationName)",
-                    "Change \(\.$itemEntity) to \(\.$value) in \(.applicationName)"
+                    "Set \(\.$itemEntity) in \(.applicationName)",
+                    "Change \(\.$itemEntity) in \(.applicationName)"
                 ],
                 shortTitle: "Set Number",
                 systemImageName: "number"
@@ -107,8 +106,8 @@ struct OpenHABAppShortcutsProvider: AppShortcutsProvider {
             AppShortcut(
                 intent: SetStringValueIntent(),
                 phrases: [
-                    "Set \(\.$itemEntity) to \(\.$value) in \(.applicationName)",
-                    "Update \(\.$itemEntity) to \(\.$value) in \(.applicationName)"
+                    "Set \(\.$itemEntity) in \(.applicationName)",
+                    "Update \(\.$itemEntity) in \(.applicationName)"
                 ],
                 shortTitle: "Set Text",
                 systemImageName: "text.quote"
@@ -119,7 +118,7 @@ struct OpenHABAppShortcutsProvider: AppShortcutsProvider {
             AppShortcut(
                 intent: ContactStateIntent(),
                 phrases: [
-                    "Set \(\.$itemEntity) to \(\.$state) in \(.applicationName)",
+                    "Set \(\.$itemEntity) in \(.applicationName)",
                     "Update contact \(\.$itemEntity) in \(.applicationName)"
                 ],
                 shortTitle: "Set Contact",
