@@ -53,6 +53,12 @@ struct IconView: View {
 
     @State private var currentImage: UIImage?
 
+    /// Icon color converted to hex, using ohBlack as default (adapts to light/dark mode)
+    private var iconColorHex: String {
+        let logicColor = !widget.iconColor.isEmpty ? UIColor(fromString: widget.iconColor) : .ohBlack
+        return logicColor.semanticColorToHex() ?? "#000000"
+    }
+
     private var iconURL: URL? {
         guard !widget.icon.isEmpty else { return nil }
 
@@ -63,24 +69,13 @@ struct IconView: View {
             return nil
         }
 
-        var queriedIconColor: String {
-            switch colorScheme {
-            case .light:
-                return widget.iconColor.isEmpty ? "black" : widget.iconColor
-            case .dark:
-                return widget.iconColor.isEmpty ? "white" : widget.iconColor
-            @unknown default:
-                return widget.iconColor.isEmpty ? "black" : widget.iconColor
-            }
-        }
-
         return Endpoint.icon(
             rootUrl: activeConnection.configuration.url,
             version: activeConnection.version,
             icon: widget.icon,
             state: widget.iconState(),
             iconType: iconType,
-            iconColor: queriedIconColor,
+            iconColor: iconColorHex,
             staticIcon: widget.staticIcon
         )?.url
     }
@@ -117,7 +112,7 @@ struct IconView: View {
                     .cancelOnDisappear(true)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id(viewModel.pageId + widget.id)
+                    .id("\(viewModel.pageId)-\(widget.id)-\(colorScheme)")
             }
         }
     }
@@ -126,7 +121,7 @@ struct IconView: View {
     private func processorIconColor(for url: URL) -> String? {
         // Don't apply color preprocessing for iconify icons
         guard url.host != "api.iconify.design" else { return nil }
-        return widget.iconColor.isEmpty ? nil : widget.iconColor
+        return iconColorHex
     }
 }
 

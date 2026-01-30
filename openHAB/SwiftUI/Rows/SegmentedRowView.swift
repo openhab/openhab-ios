@@ -31,24 +31,30 @@ struct SegmentedRowView: View {
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
-                .padding(.top, 4) // Align with text
 
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .layoutPriority(1) // Truncates second
             }
-            Spacer()
+
+            Spacer(minLength: 4)
 
             if let detailTextLabel = widget.labelValue, !detailTextLabel.isEmpty {
                 Text(detailTextLabel)
                     .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
                     .lineLimit(1)
+                    .truncationMode(.tail)
+                    .layoutPriority(0) // Truncates first
             }
 
             if !mappings.isEmpty {
                 if widget.hasPressReleaseMappings {
                     // Press-release buttons for mappings with releaseCommand
                     pressReleaseButtons
+                        .fixedSize(horizontal: true, vertical: false)
                 } else {
                     // Button-based segmented control that allows repeated clicks on same segment
                     // This matches Android app and BasicUI behavior (issue #530)
@@ -112,11 +118,11 @@ struct SegmentedRowView: View {
             viewModel.sendCommand(widget.item, commandToSend: mapping.command)
         } label: {
             Text(mapping.label)
-                .font(.subheadline)
+                .font(.footnote)
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .padding(.horizontal, 8)
-                .padding(.vertical, 6)
+                .padding(.vertical, 5)
                 .frame(minWidth: 40, maxWidth: 120)
                 .background(isSelected ? Color.accentColor.opacity(0.2) : Color.clear)
                 .foregroundStyle(isSelected ? Color.accentColor : .primary)
