@@ -119,7 +119,7 @@ struct OpenHABAppShortcutsProvider: AppShortcutsProvider {
             AppShortcut(
                 intent: ContactStateIntent(),
                 phrases: [
-                    "Set \(\.$itemEntity) to \(\.$value) in \(.applicationName)",
+                    "Set \(\.$itemEntity) to \(\.$state) in \(.applicationName)",
                     "Update contact \(\.$itemEntity) in \(.applicationName)"
                 ],
                 shortTitle: "Set Contact",
