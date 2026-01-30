@@ -34,7 +34,7 @@ struct SegmentedRowView: View {
     var body: some View {
         HStack {
             IconView(widget: widget)
-                .frame(width: 24, height: 24)
+                .frame(width: 32, height: 32)
                 .padding(.top, 4) // Align with text
 
             if let labelText = widget.labelText, !labelText.isEmpty {

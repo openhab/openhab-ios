@@ -82,7 +82,7 @@ struct ColorTemperaturePickerRowView: View {
     var body: some View {
         HStack(alignment: .top) {
             IconView(widget: widget)
-                .frame(width: 24, height: 24)
+                .frame(width: 32, height: 32)
 
             VStack(spacing: 8) {
                 HStack {

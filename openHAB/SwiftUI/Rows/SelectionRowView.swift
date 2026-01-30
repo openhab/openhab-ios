@@ -11,26 +11,29 @@
 
 import CommonUI
 import OpenHABCore
-import os.log
+import SFSafeSymbols
 import SwiftUI
 
 struct SelectionRowView: View {
     @ObservedObject var widget: OpenHABWidget
-    @State private var selectedIndex = 0
-    @ScaledMetric(relativeTo: .body) private var pickerHeight: CGFloat = 24
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    private let logger = Logger(subsystem: "org.openhab", category: "WidgetSelectionView")
 
     private var mappings: [OpenHABWidgetMapping] {
         widget.mappingsOrItemOptions
     }
 
+    /// Returns the label of the currently selected mapping, or the widget's labelValue as fallback
+    private var selectedValueText: String? {
+        if let state = widget.item?.state,
+           let selectedMapping = mappings.first(where: { $0.command == state }) {
+            return selectedMapping.label
+        }
+        return widget.labelValue
+    }
+
     var body: some View {
         HStack {
             IconView(widget: widget)
-                .frame(width: 24, height: 24)
-                .padding(.top, 4) // Align with text
+                .frame(width: 32, height: 32)
 
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
@@ -39,30 +42,15 @@ struct SelectionRowView: View {
 
             Spacer()
 
-            if !mappings.isEmpty {
-                Picker("", selection: $selectedIndex) {
-                    ForEach(mappings.indices, id: \.self) { index in
-                        Text(mappings[index].label)
-                            .tag(index)
-                    }
-                }
-                .pickerStyle(.menu)
-                .padding(.bottom, -4)
-                .frame(height: pickerHeight) // 👈 Restrict height of the Picker
-                .onChange(of: selectedIndex) { newIndex in
-                    guard let mapping = mappings[safe: newIndex] else { return }
-                    logger.info("Selection changed to: \(mapping.label)")
-                    viewModel.sendCommand(widget.item, commandToSend: mapping.command)
-                }
-                .disabled(widget.readOnly ?? false)
+            if let valueText = selectedValueText, !valueText.isEmpty {
+                Text(valueText)
+                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
-        }
-        .onAppear {
-            selectedIndex = widget.mapCommandtoIndex(with: widget.item?.state)
-        }
-        .onChange(of: widget.item?.state ?? "") { newState in
-            guard !newState.isEmpty else { return }
-            selectedIndex = widget.mapCommandtoIndex(with: newState)
+
+            // Show disclosure indicator to indicate tappable selection
+            Image(systemSymbol: .chevronUpChevronDown)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 }

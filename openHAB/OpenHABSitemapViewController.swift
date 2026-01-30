@@ -812,7 +812,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 rootView: SelectionView(
                     labelText: widget.labelText,
                     mappings: widget.mappingsOrItemOptions,
-                    selectionItemState: selectionItemState
+                    selectionItemState: selectionItemState,
+                    valuecolor: widget.valuecolor
                 ) { selectedMappingIndex in
                     let selectedMapping: OpenHABWidgetMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
                     self.sendCommand(widget.item, commandToSend: selectedMapping.command)

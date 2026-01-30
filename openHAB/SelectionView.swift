@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import os.log
 import SFSafeSymbols
@@ -18,6 +19,7 @@ struct SelectionView: View {
     let labelText: String?
     var mappings: [OpenHABWidgetMapping] // List of mappings (instead of AnyHashable, we use a concrete type)
     @State var selectionItemState: String? // To track the selected item state
+    var valuecolor = "" // Color for the selected value indicator
     var onSelection: (Int) -> Void // Closure to handle selection
     var onDismiss: (() -> Void)? // Closure to handle dismissal after selection
 
@@ -35,7 +37,7 @@ struct SelectionView: View {
                     Spacer()
                     if selectionItemState == mapping.command {
                         Image(systemSymbol: .checkmark)
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(valuecolor.isEmpty ? .blue : Color(fromString: valuecolor))
                     }
                 }
                 .contentShape(Rectangle())
@@ -46,7 +48,7 @@ struct SelectionView: View {
     }
 }
 
-#Preview {
+#Preview("Default") {
     SelectionView(
         labelText: "Test Label",
         mappings: [
@@ -54,6 +56,22 @@ struct SelectionView: View {
             OpenHABWidgetMapping(command: "command2", label: "Option 2")
         ],
         selectionItemState: "command2"
+    ) { selectedMappingIndex in
+        print("Selected mapping at index \(selectedMappingIndex)")
+    } onDismiss: {
+        print("Dismissing selection view")
+    }
+}
+
+#Preview("With Valuecolor") {
+    SelectionView(
+        labelText: "Test Label",
+        mappings: [
+            OpenHABWidgetMapping(command: "ON", label: "On"),
+            OpenHABWidgetMapping(command: "OFF", label: "Off")
+        ],
+        selectionItemState: "OFF",
+        valuecolor: "red"
     ) { selectedMappingIndex in
         print("Selected mapping at index \(selectedMappingIndex)")
     } onDismiss: {

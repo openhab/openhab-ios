@@ -37,7 +37,7 @@ struct DatePickerInputRowView: View {
     var body: some View {
         HStack {
             IconView(widget: widget)
-                .frame(width: 24, height: 24)
+                .frame(width: 32, height: 32)
 
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)

@@ -20,13 +20,16 @@ struct GenericRowView: View {
     var body: some View {
         HStack {
             IconView(widget: widget)
-                .frame(width: 24, height: 24)
+                .frame(width: 32, height: 32)
 
             Text(widget.labelText ?? "")
+                .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+
             Spacer()
+
             if let value = widget.labelValue {
                 Text(value)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
     }

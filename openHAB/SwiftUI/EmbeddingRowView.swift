@@ -20,6 +20,18 @@ struct EmbeddingRowView: View {
     @State private var showInputAlert = false
     @State private var inputText = ""
 
+    /// Insets for different widget types - Frame headers are more compact
+    private var frameInsets: EdgeInsets {
+        if widget.type == .frame {
+            // Empty frame labels should be minimal, matching UIKit's 0pt height
+            let hasLabel = !(widget.label.isEmpty)
+            return hasLabel
+                ? EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16)
+                : EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
+        }
+        return EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+    }
+
     var body: some View {
         Group {
             if let linkedPage = widget.linkedPage {
@@ -48,7 +60,7 @@ struct EmbeddingRowView: View {
             }
         }
         .contentShape(Rectangle())
-        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+        .listRowInsets(frameInsets)
         .alert("Input", isPresented: $showInputAlert) {
             if let widget = selectedWidget {
                 TextField("Enter value", text: $inputText)
@@ -67,7 +79,8 @@ struct EmbeddingRowView: View {
                 SelectionView(
                     labelText: widget.labelText,
                     mappings: widget.mappingsOrItemOptions,
-                    selectionItemState: widget.item?.state
+                    selectionItemState: widget.item?.state,
+                    valuecolor: widget.valuecolor
                 ) { selectedMappingIndex in
                     let selectedMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
                     viewModel.sendCommand(widget.item, commandToSend: selectedMapping.command)
