@@ -96,7 +96,7 @@ struct IconView: View {
                 KFImage(iconURL)
                     .retry(maxCount: 3, interval: .seconds(5))
                     .resizable()
-                    .setProcessor(OpenHABImageProcessor())
+                    .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
                     .onFailure { error in
                         logger.error("Icon loading failed for widget \(widget.label): \(error.localizedDescription)")
                         logger.error("Failed URL: \(iconURL.absoluteString)")
@@ -120,6 +120,13 @@ struct IconView: View {
                     .id(viewModel.pageId + widget.id)
             }
         }
+    }
+
+    /// Returns the icon color for SVG preprocessing, or nil for iconify icons (they handle their own colors)
+    private func processorIconColor(for url: URL) -> String? {
+        // Don't apply color preprocessing for iconify icons
+        guard url.host != "api.iconify.design" else { return nil }
+        return widget.iconColor.isEmpty ? nil : widget.iconColor
     }
 }
 
