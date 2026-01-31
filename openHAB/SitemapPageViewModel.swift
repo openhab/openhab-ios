@@ -98,6 +98,9 @@ class SitemapPageViewModel: ObservableObject {
         setupActiveConnectionObserver()
         isLinkedPage = true
 
+        // Set openHABRootUrl from current active connection for charts/images
+        openHABRootUrl = networkTracker.activeConnection?.configuration.url
+
         // Extract pageId from URL if not provided
         if pageId.isEmpty {
             if let urlComponents = URLComponents(string: pageUrl),

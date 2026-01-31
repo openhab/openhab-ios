@@ -56,8 +56,7 @@ struct SegmentedRowView: View {
                     pressReleaseButtons
                         .fixedSize(horizontal: true, vertical: false)
                 } else {
-                    // Button-based segmented control that allows repeated clicks on same segment
-                    // This matches Android app and BasicUI behavior (issue #530)
+                    // Button-based segmented control with animated selection indicator
                     segmentedButtons
                 }
             }
@@ -70,23 +69,30 @@ struct SegmentedRowView: View {
         }
     }
 
-    /// Button-based segmented control that always responds to taps, even on selected segment
+    /// Button-based segmented control with animated selection indicator
     @ViewBuilder
     private var segmentedButtons: some View {
         HStack(spacing: 0) {
             ForEach(0 ..< mappings.count, id: \.self) { index in
                 segmentButton(at: index)
-
-                // Add divider between segments
-                if index < mappings.count - 1 {
-                    Divider()
-                        .frame(height: 20)
-                }
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: 7)
-                .fill(Color(uiColor: .systemGray6))
+            GeometryReader { geometry in
+                // Layer 1: Dark gray background
+                RoundedRectangle(cornerRadius: 7)
+                    .fill(Color(uiColor: .systemGray5))
+
+                // Layer 2: Selection indicator (lighter, more visible)
+                if let selectedIndex, !mappings.isEmpty {
+                    let segmentWidth = geometry.size.width / CGFloat(mappings.count)
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(uiColor: .systemGray3))
+                        .frame(width: segmentWidth - 4, height: geometry.size.height - 4)
+                        .offset(x: CGFloat(selectedIndex) * segmentWidth + 2, y: 2)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: selectedIndex)
+                }
+            }
         )
         .overlay(
             RoundedRectangle(cornerRadius: 7)
@@ -109,12 +115,13 @@ struct SegmentedRowView: View {
 
     @ViewBuilder
     private func segmentButton(at index: Int) -> some View {
-        let isSelected = selectedIndex == index
         let mapping = mappings[index]
 
         Button {
             logger.info("Segment tapped: \(index), command: \(mapping.command)")
-            selectedIndex = index
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                selectedIndex = index
+            }
             viewModel.sendCommand(widget.item, commandToSend: mapping.command)
         } label: {
             Text(mapping.label)
@@ -124,8 +131,7 @@ struct SegmentedRowView: View {
                 .padding(.horizontal, 8)
                 .padding(.vertical, 5)
                 .frame(minWidth: 40, maxWidth: 120)
-                .background(isSelected ? Color.accentColor.opacity(0.2) : Color.clear)
-                .foregroundStyle(isSelected ? Color.accentColor : .primary)
+                .foregroundStyle(.primary)
         }
         .buttonStyle(.plain)
     }
@@ -137,9 +143,9 @@ struct SegmentedRowView: View {
             .padding(.vertical, 6)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(pressedIndex == index ? Color.accentColor.opacity(0.3) : Color(uiColor: .systemGray5))
+                    .fill(pressedIndex == index ? Color(uiColor: .systemGray3) : Color(uiColor: .systemGray5))
             )
-            .foregroundStyle(pressedIndex == index ? Color.accentColor : .primary)
+            .foregroundStyle(.primary)
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in

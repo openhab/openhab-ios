@@ -68,7 +68,8 @@ struct ImageRowView: View {
                     .clipShape(.rect(cornerRadius: 8))
             }
 
-            if let labelValue = widget.labelValue, !labelValue.isEmpty {
+            // Only show labelValue for image widgets, not charts
+            if widget.type == .image, let labelValue = widget.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .font(.caption)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
