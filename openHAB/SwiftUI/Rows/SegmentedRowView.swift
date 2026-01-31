@@ -188,9 +188,19 @@ private extension SegmentedRowView {
         widget.mappings = mappings
         
         if let detailLabel {
-            let item = OpenHABItem()
-            item.state = selectedState ?? mappings.first?.command ?? ""
-            item.label = detailLabel
+            let item = OpenHABItem(
+                name: "",
+                type: "String",
+                state: selectedState ?? mappings.first?.command ?? "",
+                link: "",
+                label: detailLabel,
+                groupType: nil,
+                stateDescription: nil,
+                commandDescription: nil,
+                members: [],
+                category: nil,
+                options: nil
+            )
             widget.item = item
         }
         
