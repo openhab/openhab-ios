@@ -18,6 +18,7 @@ import SwiftUI
 struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = AppSettings.shared
+    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
 
     var iconColor: String {
         let logicColor = !(widget.iconColor.isEmpty) ? UIColor(fromString: widget.iconColor) : .ohBlack
@@ -25,14 +26,17 @@ struct IconView: View {
     }
 
     var iconURL: URL? {
+        guard !widget.icon.isEmpty,
+              let activeConnection = networkTracker.activeConnection,
+              !activeConnection.configuration.url.isEmpty else { return nil }
         // Skip loading number icons as they don't exist/aren't useful
         if widget.icon == "number" {
             return nil
         }
 
         return Endpoint.icon(
-            rootUrl: settings.openHABRootUrl,
-            version: settings.openHABVersion,
+            rootUrl: activeConnection.configuration.url,
+            version: activeConnection.version,
             icon: widget.icon,
             state: widget.iconState(),
             iconType: settings.iconType,
@@ -42,28 +46,39 @@ struct IconView: View {
     }
 
     var body: some View {
-        if let iconURL {
-            // Only apply color preprocessing for non-iconify icons
-            let processorIconColor = iconURL.host == "api.iconify.design" ? nil : iconColor
-            KFImage.url(iconURL)
-                .onFailure { _ in
-                    Logger.rowViews.debug("Failed to load image : \(iconURL.absoluteString)")
-                }
-                .onFailureView {
-                    Rectangle()
-                        .foregroundStyle(.background)
-                }
-                .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor))
-                .cacheOriginalImage(false)
-                .loadTransition(.opacity, animation: .easeInOut(duration: 0.25))
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 20, height: 20)
-                .id("\(iconURL.absoluteString)-\(widget.item?.state ?? "")-\(widget.iconColor)")
-        } else {
-            Rectangle()
-                .foregroundStyle(.background)
-                .frame(width: 20, height: 20)
+        Group {
+            if let iconURL {
+                // Only apply color preprocessing for non-iconify icons
+                let processorIconColor = iconURL.host == "api.iconify.design" ? nil : iconColor
+                KFImage.url(iconURL)
+                    .onFailure { _ in
+                        Logger.rowViews.debug("Failed to load image : \(iconURL.absoluteString)")
+                    }
+                    .onFailureView {
+                        Rectangle()
+                            .foregroundStyle(.background)
+                    }
+                    .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor))
+                    .cacheOriginalImage(false)
+                    .loadTransition(.opacity, animation: .easeInOut(duration: 0.25))
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 20, height: 20)
+                    .id("\(iconURL.absoluteString)-\(widget.item?.state ?? "")-\(widget.iconColor)")
+            } else {
+                Rectangle()
+                    .foregroundStyle(.background)
+                    .frame(width: 20, height: 20)
+            }
+        }
+        .onChange(of: widget.icon) {
+            // Icon changed, no action needed as KFImage handles updates
+        }
+        .onChange(of: widget.iconState()) {
+            // Icon state changed, no action needed as KFImage handles updates
+        }
+        .onChange(of: networkTracker.activeConnection) {
+            // Connection changed, no action needed as KFImage handles updates
         }
     }
 }

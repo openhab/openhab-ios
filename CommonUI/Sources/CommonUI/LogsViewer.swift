@@ -15,7 +15,7 @@ import SwiftUI
 
 // Thanks to https://useyourloaf.com/blog/fetching-oslog-messages-in-swift/
 
-struct LogsViewer: View {
+public struct LogsViewer: View {
     private static let template = NSPredicate(format:
         "(subsystem BEGINSWITH $PREFIX)")
 
@@ -25,7 +25,7 @@ struct LogsViewer: View {
         .system(size: 10)
         .monospaced()
 
-    var body: some View {
+    public var body: some View {
         ScrollView {
             Text(text)
                 .font(myFont)
@@ -35,6 +35,8 @@ struct LogsViewer: View {
             text = await fetchLogs()
         }
     }
+
+    public init() {}
 
     private func fetchLogs() async -> String {
         let calendar = Calendar.current

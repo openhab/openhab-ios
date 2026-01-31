@@ -10,5 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 // No icon will be displazed for cells that conform to NoIconDisplayableCell protocol
+import OpenHABCore
+import SwiftUI
 
 protocol NoIconDisplayableCell {}

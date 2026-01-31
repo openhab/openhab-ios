@@ -114,7 +114,7 @@ struct ColorSelection: View {
         // Add the gestures and visuals to the handle
         return Circle()
             .overlay(thumb.isDragging ? Circle().stroke(Color.white, lineWidth: 2) : nil)
-            .foregroundColor(.white)
+            .foregroundStyle(.white)
             .frame(width: 25, height: 25, alignment: .center)
             .position(limitCircle(CGPoint(x: xpos, y: ypos), geometry.size, thumb.translation))
             .animation(.interactiveSpring(), value: thumb.isDragging)

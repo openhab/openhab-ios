@@ -14,12 +14,6 @@ import OpenHABCore
 import os.log
 import UIKit
 
-enum ImageType {
-    case link(url: URL?)
-    case embedded(image: UIImage?)
-    case empty
-}
-
 class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     // Shared image cache across all cells - keyed by widget ID
     // Using NSCache for thread-safety and automatic memory management

@@ -9,15 +9,17 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import OpenHABCore
-import SwiftUI
+import Foundation
+import UIKit
 
-extension Color {
-    init(fromString string: String) {
-        self.init(UIColor(fromString: string))
-    }
+public enum ImagePayload {
+    case link(url: URL?)
+    case embedded(data: Data)
+    case empty
+}
 
-    init(hex: String) {
-        self.init(UIColor(hex: hex))
-    }
+public enum ImageType {
+    case link(url: URL?)
+    case embedded(image: UIImage?)
+    case empty
 }

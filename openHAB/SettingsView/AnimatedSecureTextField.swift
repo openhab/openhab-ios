@@ -22,7 +22,7 @@ struct AnimatedSecureTextField: View {
                 isSecure = !isSecure
             } label: {
                 Image(systemSymbol: isSecure ? .eyeSlash : .eyeFill)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
             }
             Spacer()
             HStack {

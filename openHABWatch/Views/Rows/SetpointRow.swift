@@ -17,6 +17,7 @@ import SwiftUI
 struct SetpointRow: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    private let setpointService = SetPointService()
 
     private var isIntStep: Bool {
         widget.step.truncatingRemainder(dividingBy: 1) == 0
@@ -58,27 +59,35 @@ struct SetpointRow: View {
         }
     }
 
-    private func handleUpDown(down: Bool) {
+    private func handleUpDown(isDecreasing: Bool) {
         var numberState = widget.stateValueAsNumberState
-        let stateValue = numberState?.value ?? widget.minValue
-        let newValue: Double = switch down {
-        case true:
-            stateValue - widget.step
-        case false:
-            stateValue + widget.step
+        let currentValue = numberState?.value ?? widget.minValue
+
+        let limitedNewValue = setpointService.calculateNewValue(
+            currentValue: currentValue,
+            step: widget.step,
+            minValue: widget.minValue,
+            maxValue: widget.maxValue,
+            isDecreasing: isDecreasing
+        )
+
+        guard limitedNewValue != currentValue else {
+            // nothing to update, skip sending value
+            return
         }
-        if newValue >= widget.minValue, newValue <= widget.maxValue {
-            numberState?.value = newValue
-            widget.sendItemUpdate(state: numberState)
-        }
+
+        numberState = numberState ?? NumberState(value: limitedNewValue)
+        numberState?.value = limitedNewValue
+
+        widget.sendItemUpdate(state: numberState)
     }
 
     func decreaseValue() {
-        handleUpDown(down: true)
+        handleUpDown(isDecreasing: true)
     }
 
     func increaseValue() {
-        handleUpDown(down: false)
+        handleUpDown(isDecreasing: false)
     }
 }
 

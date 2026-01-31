@@ -35,7 +35,7 @@ enum WidgetCellFactory {
                 SliderProvider()
             }
         case .input:
-            if [.date, .time, .datetime].contains(widget.inputHint) {
+            if [.date, .time, .dateTime].contains(widget.inputHint) {
                 DatePickerInputProvider()
             } else {
                 TextInputProvider()
@@ -48,7 +48,7 @@ enum WidgetCellFactory {
         case .video: VideoCellProvider()
         case .webview: WebViewCellProvider()
         case .mapview: MapViewCellProvider()
-        case .group, .text, .defaultWidget, .unknown:
+        case .group, .text, .defaultWidget, .colortemperaturepicker, .buttongrid, .button, .unknown:
             GenericCellProvider()
         }
     }

@@ -1,0 +1,225 @@
+// Copyright (c) 2010-2026 Contributors to the openHAB project
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information.
+//
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
+//
+// SPDX-License-Identifier: EPL-2.0
+
+import AVKit
+import CommonUI
+import OpenHABCore
+import SwiftUI
+import UIKit
+
+struct VideoRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    @State private var player: AVPlayer?
+    @State private var mjpegPlayer: SimpleMJPEGPlayer?
+    @State private var mjpegImage: UIImage?
+    @State private var aspectRatio: CGFloat = 16.0 / 9.0
+    @State private var isLoading = false
+    @State private var currentStreamUrl: URL?
+    @State private var imageObservationTimer: Timer?
+    @State private var playerObserver: NSKeyValueObservation?
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    private var videoURL: URL? {
+        guard !widget.url.isEmpty else { return nil }
+        return URL(string: widget.url)
+    }
+
+    private var isMJPEG: Bool {
+        widget.encoding.lowercased() == VideoEncoding.mjpeg.rawValue
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+                Text(labelText)
+                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .lineLimit(1)
+            }
+
+            if let videoURL {
+                ZStack {
+                    if isMJPEG {
+                        // MJPEG display using UIImageView
+                        if let mjpegImage {
+                            Image(uiImage: mjpegImage)
+                                .resizable()
+                                .aspectRatio(aspectRatio, contentMode: .fit)
+                                .frame(height: 200)
+                                .clipShape(.rect(cornerRadius: 8))
+                        } else {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(height: 200)
+                                .aspectRatio(aspectRatio, contentMode: .fit)
+                                .clipShape(.rect(cornerRadius: 8))
+                        }
+                    } else {
+                        // HLS/other video formats using VideoPlayer
+                        VideoPlayer(player: player)
+                            .frame(height: 200)
+                            .aspectRatio(aspectRatio, contentMode: .fit)
+                            .clipShape(.rect(cornerRadius: 8))
+                    }
+
+                    if isLoading {
+                        ProgressView()
+                            .scaleEffect(1.2)
+                            .progressViewStyle(CircularProgressViewStyle())
+                    }
+                }
+                .onAppear {
+                    setupVideo(url: videoURL)
+                }
+                .onDisappear {
+                    cleanup()
+                }
+                .onChange(of: widget.url) { newValue in
+                    if !newValue.isEmpty, let newURL = URL(string: newValue) {
+                        setupVideo(url: newURL)
+                    } else {
+                        cleanup()
+                    }
+                }
+            } else {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(height: 200)
+                    .overlay(
+                        Text("No Video URL")
+                            .foregroundStyle(.secondary)
+                    )
+                    .clipShape(.rect(cornerRadius: 8))
+            }
+
+            if let labelValue = widget.labelValue, !labelValue.isEmpty {
+                Text(labelValue)
+                    .font(.caption)
+                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    @MainActor
+    private func setupVideo(url: URL) {
+        // Avoid redundant setup if URL hasn't changed
+        if currentStreamUrl?.absoluteString == url.absoluteString {
+            return
+        }
+
+        // Clean up previous setup
+        cleanup()
+        currentStreamUrl = url
+        isLoading = true
+
+        if isMJPEG {
+            setupMJPEG(url: url)
+        } else {
+            setupHLS(url: url)
+        }
+    }
+
+    @MainActor
+    private func setupMJPEG(url: URL) {
+        // Create a dummy UIImageView for the SimpleMJPEGPlayer
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+
+        mjpegPlayer = VideoStreamManager.shared.getOrCreateStream(
+            for: url,
+            imageView: imageView,
+            onFirstFrame: { newAspectRatio in
+                Task { @MainActor in
+                    aspectRatio = newAspectRatio
+                    isLoading = false
+                }
+            },
+            onError: { error in
+                Task { @MainActor in
+                    print("MJPEG stream error: \(error.localizedDescription)")
+                    isLoading = false
+                }
+            }
+        )
+
+        // Observe image changes on the UIImageView
+        startImageObservation(imageView: imageView)
+    }
+
+    @MainActor
+    private func startImageObservation(imageView: UIImageView) {
+        imageObservationTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { _ in
+            DispatchQueue.main.async {
+                if mjpegPlayer == nil {
+                    imageObservationTimer?.invalidate()
+                    imageObservationTimer = nil
+                    return
+                }
+
+                if let image = imageView.image {
+                    mjpegImage = image
+                    if isLoading {
+                        isLoading = false
+                    }
+                }
+            }
+        }
+    }
+
+    private func setupHLS(url: URL) {
+        let playerItem = AVPlayerItem(url: url)
+        player = AVPlayer(playerItem: playerItem)
+
+        // Observe player readiness
+        playerObserver = playerItem.observe(\.status, options: [.new, .old]) { item, _ in
+            Task { @MainActor in
+                switch item.status {
+                case .readyToPlay:
+                    isLoading = false
+                    if item.presentationSize != .zero {
+                        let newAspectRatio = item.presentationSize.width / item.presentationSize.height
+                        aspectRatio = newAspectRatio
+                    }
+                    // Auto-play when ready
+                    player?.play()
+                case .failed:
+                    isLoading = false
+                    print("HLS player failed: \(item.error?.localizedDescription ?? "Unknown error")")
+                default:
+                    break
+                }
+            }
+        }
+    }
+
+    private func cleanup() {
+        // Clean up timer
+        imageObservationTimer?.invalidate()
+        imageObservationTimer = nil
+
+        // Clean up HLS observer
+        playerObserver = nil
+
+        // Release MJPEG stream
+        if let currentStreamUrl, isMJPEG {
+            VideoStreamManager.shared.releaseStream(for: currentStreamUrl)
+        }
+
+        // Clean up HLS player
+        player?.pause()
+        player = nil
+
+        mjpegPlayer = nil
+        mjpegImage = nil
+        currentStreamUrl = nil
+        isLoading = false
+    }
+}

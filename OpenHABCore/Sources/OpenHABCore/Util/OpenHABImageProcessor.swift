@@ -14,6 +14,9 @@ import Kingfisher
 import os.log
 import SDWebImageSVGCoder
 import SFSafeSymbols
+#if canImport(AppKit)
+import WebKit
+#endif
 
 /// An image processor for openHAB icons and images with SVG color preprocessing support.
 ///
@@ -224,6 +227,12 @@ public struct OpenHABImageProcessor: ImageProcessor {
             guard !data.isEmpty else { return nil }
 
             if isSVG(data: data) {
+                #if os(macOS)
+                if let image = renderSVGWithWebKit(data) {
+                    return image
+                }
+                #endif
+
                 // Apply color preprocessing to SVG if iconColor is specified
                 let processedData = preprocessSVG(data)
 
@@ -238,6 +247,26 @@ public struct OpenHABImageProcessor: ImageProcessor {
             }
         }
     }
+
+    #if os(macOS)
+    private func renderSVGWithWebKit(_ data: Data) -> NSImage? {
+        guard let svgString = String(data: data, encoding: .utf8) else { return nil }
+        let webView = WKWebView(frame: CGRect(origin: .zero, size: CGSize(width: 256, height: 256)))
+        webView.loadHTMLString("<html><body style='margin:0'>\(svgString)</body></html>", baseURL: nil)
+
+        let config = WKSnapshotConfiguration()
+        config.rect = CGRect(origin: .zero, size: webView.bounds.size)
+
+        var snapshotImage: NSImage?
+        let sema = DispatchSemaphore(value: 0)
+        webView.takeSnapshot(with: config) { image, _ in
+            snapshotImage = image
+            sema.signal()
+        }
+        _ = sema.wait(timeout: .now() + 2)
+        return snapshotImage
+    }
+    #endif
 
     private func isSVG(data: Data?) -> Bool {
         guard let data else { return false }

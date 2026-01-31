@@ -13,6 +13,7 @@ import AVFoundation
 import Combine
 import FirebaseCrashlytics
 import Foundation
+import Kingfisher
 import OpenHABCore
 import os.log
 import SafariServices
@@ -36,9 +37,76 @@ protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
 
+class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, OpenHABViewable {
+    private let viewModel: SitemapPageViewModel
+
+    private weak var rootViewController: OpenHABRootViewController?
+
+    init() {
+        let viewModel = SitemapPageViewModel()
+        self.viewModel = viewModel
+        super.init(rootView: SitemapNavigationView(viewModel: viewModel) {})
+    }
+
+    @available(*, unavailable)
+    @objc dynamic required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Hide UIKit navigation bar since SwiftUI now handles navigation
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Ensure UIKit navigation bar stays hidden when transitioning from other views
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+
+    func setRootViewController(_ rootViewController: OpenHABRootViewController) {
+        self.rootViewController = rootViewController
+        // Update the closure after initialization
+        rootView = SitemapNavigationView(viewModel: viewModel) { [weak self] in
+            self?.rootViewController?.showSideMenu()
+        }
+    }
+
+    func getSitemapTitle() -> String {
+        viewModel.pageTitle
+    }
+
+    func viewName() -> String { "sitemap" }
+
+    nonisolated func reloadView() {
+        Task { @MainActor in
+            await viewModel.reload()
+        }
+    }
+
+    func pushSitemap(name: String, path: String?) async {
+        // Implement pushing logic into SitemapPageViewModel
+        await viewModel.pushSitemap(name: name, path: path)
+    }
+
+    // swiftlint:disable:next  function_parameter_count
+    func showPopupMessage(seconds: Double,
+                          title: String,
+                          message: String,
+                          theme: Theme,
+                          viewTapAction: (() -> Void)?,
+                          buttonTitle: String,
+                          buttonAction: (() -> Void)?) {}
+
+    func hidePopupMessages() {}
+}
+
+// MARK: - Search Controller Delegates
+
 // swiftlint:disable type_body_length
 class OpenHABRootViewController: UIViewController {
-    var currentView: OpenHABViewController!
+    var currentView: (any UIViewController & OpenHABViewable)!
     var isDemoMode = false
     var cancellables = Set<AnyCancellable>()
     private var streamTask: Task<Void, Never>?
@@ -53,10 +121,10 @@ class OpenHABRootViewController: UIViewController {
         return viewController
     }()
 
-    private lazy var sitemapViewController: OpenHABSitemapViewController = {
-        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
-        var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABPageViewController") as! OpenHABSitemapViewController
-        return viewController
+    lazy var sitemapViewController: any (UIViewController & OpenHABViewable) = {
+        let controller = HostingSitemapViewController()
+        controller.setRootViewController(self)
+        return controller
     }()
 
     private var activeConnection: ConnectionInfo?
@@ -113,12 +181,13 @@ class OpenHABRootViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         Logger.viewController.info("OpenHABRootController viewWillAppear")
         super.viewWillAppear(animated)
-        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationController?.navigationBar.prefersLargeTitles = false
         // if we have turned demo mode off/on, reset view
         if isDemoMode != Preferences.shared.currentHomePreferences.demomode {
             switchToSavedView()
             isDemoMode = Preferences.shared.currentHomePreferences.demomode
         }
+        ImageDownloader.default.authenticationChallengeResponder = self
     }
 
     private func startSSEListening() {
@@ -166,19 +235,41 @@ class OpenHABRootViewController: UIViewController {
                 let retryButtonTitle: String = NSLocalizedString("retry", comment: "retry connection")
                 switch status {
                 case .started:
-                    currentView.showPopupMessage(seconds: -1, title: NSLocalizedString("no_connection_will_reconnect", comment: ""), message: "", theme: .warning, buttonTitle: retryButtonTitle) {
+                    currentView.showPopupMessage(
+                        seconds: -1,
+                        title: NSLocalizedString("no_connection_will_reconnect", comment: ""),
+                        message: "",
+                        theme: .warning,
+                        viewTapAction: nil,
+                        buttonTitle: retryButtonTitle
+                    ) {
                         Task {
                             await NetworkTracker.shared.restartTracking()
                         }
                     }
                 case .connecting:
-                    currentView.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                    currentView.showPopupMessage(
+                        seconds: 60,
+                        title: NSLocalizedString("connecting", comment: ""),
+                        message: "",
+                        theme: .info,
+                        viewTapAction: nil,
+                        buttonTitle: "",
+                        buttonAction: nil
+                    )
                 case .connected:
                     currentView.hidePopupMessages()
                 case .stopped:
                     let error: String = NSLocalizedString("error", comment: "")
                     let no_network: String = NSLocalizedString("network_not_available", comment: "")
-                    currentView.showPopupMessage(seconds: -1, title: error, message: no_network, theme: .error, buttonTitle: retryButtonTitle) {
+                    currentView.showPopupMessage(
+                        seconds: -1,
+                        title: error,
+                        message: no_network,
+                        theme: .error,
+                        viewTapAction: nil,
+                        buttonTitle: retryButtonTitle
+                    ) {
                         Task {
                             await NetworkTracker.shared.restartTracking()
                         }
@@ -541,7 +632,7 @@ class OpenHABRootViewController: UIViewController {
                 let defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
                 guard let urlComponents = URLComponents(string: path) else {
                     Logger.viewController.warning("No parameters for specifying sitemap or widget to navigate to")
-                    if currentView != sitemapViewController {
+                    if currentView !== sitemapViewController {
                         switchView(target: .sitemap(defaultSitemap))
                     }
                     return
@@ -549,12 +640,12 @@ class OpenHABRootViewController: UIViewController {
                 let queryItems = urlComponents.queryItems
                 let sitemap = queryItems?.first { $0.name == "sitemap" }?.value
                 let widgetId = queryItems?.first { $0.name == "w" }?.value
-                if currentView != sitemapViewController {
+                if currentView !== sitemapViewController {
                     switchView(target: .sitemap(sitemap ?? defaultSitemap))
                 }
                 if let sitemap {
                     Task { @MainActor in
-                        await sitemapViewController.pushSitemap(name: sitemap, path: widgetId)
+                        await (sitemapViewController as? HostingSitemapViewController)?.pushSitemap(name: sitemap, path: widgetId)
                     }
                 }
             } else {
@@ -770,7 +861,7 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func switchView(target: TargetController) {
-        let targetView: OpenHABViewController
+        let targetView: any (UIViewController & OpenHABViewable)
 
         switch target {
         case let .sitemap(sitemap):
@@ -784,7 +875,7 @@ class OpenHABRootViewController: UIViewController {
             return
         }
 
-        if currentView != targetView {
+        if currentView !== targetView {
             if let currentView {
                 removeView(viewController: currentView)
             }
@@ -892,11 +983,12 @@ extension OpenHABRootViewController: ModalHandler {
     nonisolated func modalDismissed(to: TargetController) {
         Task { @MainActor in
             switch to {
-            case .sitemap:
+            case let .sitemap(sitemapName):
                 switchView(target: to)
+                await (sitemapViewController as? HostingSitemapViewController)?.pushSitemap(name: sitemapName, path: nil)
             case .settings:
-                let hostingController = UIHostingController(rootView: SettingsView())
-                navigationController?.pushViewController(hostingController, animated: true)
+                let hostingController = UIHostingController(rootView: NavigationView { SettingsView() })
+                present(hostingController, animated: true)
             case .notifications:
                 let hostingController = UIHostingController(rootView: NotificationsView())
                 navigationController?.pushViewController(hostingController, animated: true)
@@ -911,5 +1003,20 @@ extension OpenHABRootViewController: ModalHandler {
                 navigationController?.pushViewController(hostingController, animated: true)
             }
         }
+    }
+}
+
+// MARK: Kingfisher authentication with URLCredential
+
+extension OpenHABRootViewController: AuthenticationChallengeResponsible {
+    func downloader(_ downloader: ImageDownloader,
+                    didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        await onReceiveSessionChallenge(with: challenge)
+    }
+
+    func downloader(_ downloader: ImageDownloader,
+                    task: URLSessionTask,
+                    didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        await onReceiveSessionTaskChallenge(with: challenge)
     }
 }

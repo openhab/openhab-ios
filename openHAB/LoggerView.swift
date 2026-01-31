@@ -32,14 +32,14 @@ struct LoggerView: View {
                     .padding()
             } else if logs.isEmpty {
                 Text("No logs found")
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .padding()
             } else {
                 List(logs, id: \.id) { log in
                     VStack(alignment: .leading, spacing: 1) {
                         Text(formattedDate(log.timestamp))
                             .font(.caption.monospacedDigit())
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
 
                         Text(log.message)
                             .font(.body)

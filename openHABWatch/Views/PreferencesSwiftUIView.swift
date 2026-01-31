@@ -39,7 +39,7 @@ struct CompactLabeledContentStyle: LabeledContentStyle {
             Spacer()
             configuration.content
                 .font(.footnote)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
 //        .padding(.vertical, 4) // Reduces vertical space
     }

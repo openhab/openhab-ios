@@ -12,6 +12,10 @@
 import Foundation
 
 public extension Double {
+    var asColorTemperatureInKelvin: Double {
+        self < 1000 ? 1_000_000 / self : self
+    }
+
     func valueText(step: Double) -> String {
         let digits = max(-Decimal(step).exponent, 0)
         let numberFormatter = NumberFormatter()

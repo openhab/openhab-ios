@@ -405,7 +405,6 @@ extension OpenHABSitemapViewController {
                     showSideMenu()
                 default: break
                 }
-                widgetTableView.reloadData()
             } catch _ as OpenAPIServiceError {
                 Logger.sitemapViewController.debug("OpenAPIService Error on OpenHABSitemapViewController")
             } catch let error as OpenHABSitemapError {
@@ -619,10 +618,14 @@ extension OpenHABSitemapViewController {
         filteredPage = currentPage?.filter {
             $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
         }
+
         filteredPage?.sendCommand = { [weak self] item, command in
             self?.sendCommand(item, commandToSend: command)
         }
-        widgetTableView.reloadData()
+
+        UIView.performWithoutAnimation {
+            widgetTableView.reloadData()
+        }
     }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
@@ -649,6 +652,7 @@ extension OpenHABSitemapViewController: UISearchResultsUpdating {
 
 extension OpenHABSitemapViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        filterContentForSearchText(searchBar.text)
         searchBar.resignFirstResponder()
     }
 }
@@ -808,7 +812,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 rootView: SelectionView(
                     labelText: widget.labelText,
                     mappings: widget.mappingsOrItemOptions,
-                    selectionItemState: selectionItemState
+                    selectionItemState: selectionItemState,
+                    valuecolor: widget.valuecolor
                 ) { selectedMappingIndex in
                     let selectedMapping: OpenHABWidgetMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
                     self.sendCommand(widget.item, commandToSend: selectedMapping.command)
@@ -825,7 +830,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             let textFieldAdder: ((UITextField) -> Void)?
 
             switch hint {
-            case .date, .time, .datetime:
+            case .date, .time, .dateTime:
                 // value setting is handeled by the cell itself
                 textExtractor = nil
                 textFieldAdder = nil

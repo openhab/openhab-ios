@@ -15,7 +15,22 @@ import SideMenu
 import SwiftMessages
 import UIKit
 
-class OpenHABViewController: UIViewController {
+@MainActor
+protocol OpenHABViewable: AnyObject {
+    func reloadView()
+    func viewName() -> String
+    // swiftlint:disable:next  function_parameter_count
+    func showPopupMessage(seconds: Double,
+                          title: String,
+                          message: String,
+                          theme: Theme,
+                          viewTapAction: (() -> Void)?,
+                          buttonTitle: String,
+                          buttonAction: (() -> Void)?)
+    func hidePopupMessages()
+}
+
+class OpenHABViewController: UIViewController, OpenHABViewable {
     var trackerCancellables = Set<AnyCancellable>()
 
     var activeTasks = Set<Task<Void, Never>>()
@@ -28,7 +43,10 @@ class OpenHABViewController: UIViewController {
         CertificateManagers.serverCertificateManager.delegate = self
     }
 
-    func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme,
+    func showPopupMessage(seconds: Double,
+                          title: String,
+                          message: String,
+                          theme: Theme,
                           viewTapAction: (() -> Void)? = nil,
                           buttonTitle: String = NSLocalizedString("dismiss", comment: ""),
                           buttonAction: (() -> Void)? = nil) {

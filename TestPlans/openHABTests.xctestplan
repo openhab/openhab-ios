@@ -18,17 +18,24 @@
     {
       "parallelizable" : true,
       "target" : {
+        "containerPath" : "container:OpenHABCore",
+        "identifier" : "OpenHABCoreTests",
+        "name" : "OpenHABCoreTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
         "containerPath" : "container:openHAB.xcodeproj",
         "identifier" : "DA2DC22E21F2736C00830730",
         "name" : "openHABTestsSwift"
       }
     },
     {
-      "parallelizable" : true,
       "target" : {
-        "containerPath" : "container:OpenHABCore",
-        "identifier" : "OpenHABCoreTests",
-        "name" : "OpenHABCoreTests"
+        "containerPath" : "container:CommonUI",
+        "identifier" : "CommonUITests",
+        "name" : "CommonUITests"
       }
     }
   ],
