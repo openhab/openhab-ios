@@ -109,7 +109,10 @@ struct SliderRowView: View {
     }
 
     private func loadCurrentValue() {
-        sliderValue = widget.stateValueAsNumberState?.value ?? widget.minValue
+        // Avoid snapping to minValue while state is still loading.
+        if let value = widget.stateValueAsNumberState?.value {
+            sliderValue = value
+        }
     }
 
     private func sendSliderUpdate(_ newValue: Double) {
