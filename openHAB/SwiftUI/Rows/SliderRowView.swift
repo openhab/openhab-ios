@@ -34,32 +34,17 @@ struct SliderRowView: View {
 
     var body: some View {
         HStack {
-            Button {
-                viewModel.sendCommand(widget.item, commandToSend: sliderValue <= widget.minValue ? "ON" : "OFF")
-            } label: {
-                HStack {
-                    IconView(widget: widget)
-                        .frame(width: 32, height: 32)
-
-                    if let labelText = widget.labelText, !labelText.isEmpty {
-                        Text(labelText)
-                            .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                            .lineLimit(1)
-                    }
-
-                    Spacer()
-
-                    if let value = widget.labelValue {
-                        Text(value)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
+            if widget.switchSupport {
+                Button {
+                    viewModel.sendCommand(widget.item, commandToSend: sliderValue <= widget.minValue ? "ON" : "OFF")
+                } label: {
+                    labelContent
                 }
-                .contentShape(Rectangle())
+                .buttonStyle(.plain)
+                .disabled(widget.readOnly ?? false)
+            } else {
+                labelContent
             }
-            .buttonStyle(.plain)
-            .disabled(!widget.switchSupport || (widget.readOnly ?? false))
 
             Slider(
                 value: Binding(
@@ -95,6 +80,32 @@ struct SliderRowView: View {
         .onDisappear {
             updateTask?.cancel()
         }
+    }
+
+    @ViewBuilder
+    private var labelContent: some View {
+        HStack {
+            IconView(widget: widget)
+                .frame(width: 32, height: 32)
+
+            if let labelText = widget.labelText, !labelText.isEmpty {
+                Text(labelText)
+                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+
+            Spacer()
+            
+            if let detailTextLabel = widget.labelValue, !detailTextLabel.isEmpty {
+                Text(detailTextLabel)
+                    .font(.callout)
+                    .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
+                    .lineLimit(1)
+            }
+
+        }
+        .contentShape(Rectangle())
     }
 
     private func loadCurrentValue() {
