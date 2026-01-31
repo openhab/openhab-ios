@@ -21,8 +21,6 @@ struct CustomSliderView: View {
     let step: Double
     let onEditingChanged: () -> Void
 
-    @GestureState private var dragOffset: CGSize = .zero
-
     @State private var lastSendTime: Date = .distantPast
 
     var body: some View {

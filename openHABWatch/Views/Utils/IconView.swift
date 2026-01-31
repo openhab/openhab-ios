@@ -20,11 +20,6 @@ struct IconView: View {
     @ObservedObject var settings = AppSettings.shared
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
 
-    @State private var imageLoadingFailed = false
-    @State private var retryCount = 0
-    private let maxRetries = 3
-    private let retryDelay: TimeInterval = 1.0
-
     var iconColor: String {
         let logicColor = !(widget.iconColor.isEmpty) ? UIColor(fromString: widget.iconColor) : .ohBlack
         return logicColor.semanticColorToHex() ?? "#FFFFFF"
@@ -77,33 +72,14 @@ struct IconView: View {
             }
         }
         .onChange(of: widget.icon) {
-            resetLoadingState()
+            // Icon changed, no action needed as KFImage handles updates
         }
         .onChange(of: widget.iconState()) {
-            resetLoadingState()
+            // Icon state changed, no action needed as KFImage handles updates
         }
         .onChange(of: networkTracker.activeConnection) {
-            resetLoadingState()
+            // Connection changed, no action needed as KFImage handles updates
         }
-    }
-
-    private func handleLoadingFailure() {
-        if retryCount < maxRetries {
-            retryCount += 1
-            Logger.rowViews.info("Retrying icon load for widget \(widget.label), attempt \(retryCount)/\(maxRetries)")
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay * Double(retryCount)) {
-                imageLoadingFailed = false
-            }
-        } else {
-            Logger.rowViews.warning("Max retries reached for widget \(widget.label), giving up")
-            imageLoadingFailed = true
-        }
-    }
-
-    private func resetLoadingState() {
-        imageLoadingFailed = false
-        retryCount = 0
     }
 }
 
