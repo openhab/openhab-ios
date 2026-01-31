@@ -87,7 +87,7 @@ struct SegmentedRowView: View {
                 if let selectedIndex, !mappings.isEmpty {
                     let segmentWidth = geometry.size.width / CGFloat(mappings.count)
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(Color(uiColor: .systemGray3))
+                        .fill(Color(uiColor: .white))
                         .frame(width: segmentWidth - 4, height: geometry.size.height - 4)
                         .offset(x: CGFloat(selectedIndex) * segmentWidth + 2, y: 2)
                         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: selectedIndex)
@@ -126,6 +126,7 @@ struct SegmentedRowView: View {
         } label: {
             Text(mapping.label)
                 .font(.footnote)
+                .bold()
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .padding(.horizontal, 8)
