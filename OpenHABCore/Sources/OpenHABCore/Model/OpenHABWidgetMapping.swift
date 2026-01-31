@@ -14,15 +14,17 @@ import Foundation
 public struct OpenHABWidgetMapping: Decodable, Sendable {
     public var command = ""
     public var label = ""
+    public var releaseCommand: String?
 
-    public init(command: String?, label: String?) {
+    public init(command: String?, label: String?, releaseCommand: String? = nil) {
         self.command = command.orEmpty
         self.label = label.orEmpty
+        self.releaseCommand = releaseCommand
     }
 }
 
 extension OpenHABWidgetMapping {
     init(_ mapping: Components.Schemas.MappingDTO) {
-        self.init(command: mapping.command, label: mapping.label)
+        self.init(command: mapping.command, label: mapping.label, releaseCommand: mapping.releaseCommand)
     }
 }

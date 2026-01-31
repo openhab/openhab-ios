@@ -126,6 +126,10 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         }
     }
 
+    public var hasPressReleaseMappings: Bool {
+        mappingsOrItemOptions.contains { $0.releaseCommand != nil && !$0.releaseCommand!.isEmpty }
+    }
+
     public var stateValueAsBool: Bool? {
         item?.state?.parseAsBool()
     }

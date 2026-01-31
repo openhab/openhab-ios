@@ -172,6 +172,228 @@ struct SegmentedRowView: View {
     }
 }
 
+// MARK: - Preview Helpers
+
+private extension SegmentedRowView {
+    static func createPreviewWidget(
+        label: String,
+        detailLabel: String? = nil,
+        mappings: [OpenHABWidgetMapping],
+        selectedState: String? = nil
+    ) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = UUID().uuidString
+        widget.label = label
+        widget.type = .switchWidget
+        widget.mappings = mappings
+        
+        if let detailLabel {
+            let item = OpenHABItem()
+            item.state = selectedState ?? mappings.first?.command ?? ""
+            item.label = detailLabel
+            widget.item = item
+        }
+        
+        return widget
+    }
+}
+
+// MARK: - Previews
+
+#Preview("Short Labels") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Light Switch",
+        detailLabel: "Status",
+        mappings: [
+            OpenHABWidgetMapping(command: "ON", label: "ON"),
+            OpenHABWidgetMapping(command: "OFF", label: "OFF")
+        ],
+        selectedState: "ON"
+    )
+    
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Long Labels") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Temperature Control Mode",
+        detailLabel: "Current Mode",
+        mappings: [
+            OpenHABWidgetMapping(command: "manual", label: "Manual Override"),
+            OpenHABWidgetMapping(command: "calendar", label: "Calendar Based"),
+            OpenHABWidgetMapping(command: "automatic", label: "Fully Automatic")
+        ],
+        selectedState: "automatic"
+    )
+    
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Multiple Segments (4)") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Fan Speed",
+        detailLabel: "Level 3",
+        mappings: [
+            OpenHABWidgetMapping(command: "0", label: "Off"),
+            OpenHABWidgetMapping(command: "1", label: "Low"),
+            OpenHABWidgetMapping(command: "2", label: "Med"),
+            OpenHABWidgetMapping(command: "3", label: "High")
+        ],
+        selectedState: "3"
+    )
+    
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Narrow Labels (2 segments)") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Door Lock",
+        mappings: [
+            OpenHABWidgetMapping(command: "lock", label: "🔒"),
+            OpenHABWidgetMapping(command: "unlock", label: "🔓")
+        ],
+        selectedState: "lock"
+    )
+    
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Press-Release Buttons") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Blinds Control",
+        detailLabel: "Position",
+        mappings: [
+            OpenHABWidgetMapping(command: "UP", label: "Up", releaseCommand: "STOP"),
+            OpenHABWidgetMapping(command: "DOWN", label: "Down", releaseCommand: "STOP")
+        ]
+    )
+    
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Text("Press and hold buttons to move blinds")
+            .font(.caption)
+            .foregroundColor(.secondary)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Press-Release (Multiple)") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Garage Door",
+        mappings: [
+            OpenHABWidgetMapping(command: "OPEN", label: "Open", releaseCommand: "STOP"),
+            OpenHABWidgetMapping(command: "CLOSE", label: "Close", releaseCommand: "STOP"),
+            OpenHABWidgetMapping(command: "PARTIAL", label: "Partial", releaseCommand: "STOP")
+        ]
+    )
+    
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Text("Hold to perform action, release to stop")
+            .font(.caption)
+            .foregroundColor(.secondary)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Truncation Test") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Very Long Label That Should Truncate Nicely",
+        detailLabel: "Also A Very Long Detail Text Here",
+        mappings: [
+            OpenHABWidgetMapping(command: "option1", label: "First"),
+            OpenHABWidgetMapping(command: "option2", label: "Second")
+        ],
+        selectedState: "option1"
+    )
+    
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Text("Tests label truncation behavior")
+            .font(.caption)
+            .foregroundColor(.secondary)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("All Scenarios") {
+    ScrollView {
+        VStack(spacing: 16) {
+            // Short labels
+            SegmentedRowView(widget: SegmentedRowView.createPreviewWidget(
+                label: "Light",
+                mappings: [
+                    OpenHABWidgetMapping(command: "ON", label: "ON"),
+                    OpenHABWidgetMapping(command: "OFF", label: "OFF")
+                ],
+                selectedState: "ON"
+            ))
+            
+            Divider()
+            
+            // Long labels
+            SegmentedRowView(widget: SegmentedRowView.createPreviewWidget(
+                label: "Climate Mode",
+                detailLabel: "Auto",
+                mappings: [
+                    OpenHABWidgetMapping(command: "m", label: "Manual"),
+                    OpenHABWidgetMapping(command: "a", label: "Automatic"),
+                    OpenHABWidgetMapping(command: "s", label: "Schedule")
+                ],
+                selectedState: "a"
+            ))
+            
+            Divider()
+            
+            // Press-release
+            SegmentedRowView(widget: SegmentedRowView.createPreviewWidget(
+                label: "Shutter",
+                mappings: [
+                    OpenHABWidgetMapping(command: "UP", label: "↑", releaseCommand: "STOP"),
+                    OpenHABWidgetMapping(command: "DOWN", label: "↓", releaseCommand: "STOP")
+                ]
+            ))
+            
+            Divider()
+            
+            // Multiple segments
+            SegmentedRowView(widget: SegmentedRowView.createPreviewWidget(
+                label: "Speed",
+                mappings: [
+                    OpenHABWidgetMapping(command: "0", label: "Off"),
+                    OpenHABWidgetMapping(command: "1", label: "Low"),
+                    OpenHABWidgetMapping(command: "2", label: "Mid"),
+                    OpenHABWidgetMapping(command: "3", label: "High")
+                ],
+                selectedState: "2"
+            ))
+            
+            Spacer()
+        }
+        .padding()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[4]
     VStack {
