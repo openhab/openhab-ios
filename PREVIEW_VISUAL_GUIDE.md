@@ -236,3 +236,122 @@ Each preview is fully self-contained and will render without requiring:
 - Real device
 
 This makes them perfect for quick UI verification during development.
+
+---
+
+### 10. Preview: "Button Types Comparison" (NEW)
+
+**Purpose:** Clearly demonstrates the difference between regular segmented controls and press-release buttons
+
+**Visual Layout:**
+```
+╔═══════════════════════════════════════════════════════════╗
+║     Segmented Control vs Press-Release Buttons           ║
+╠═══════════════════════════════════════════════════════════╣
+║                                                           ║
+║  Regular Segmented Control                               ║
+║  Tap to select, animated indicator shows selection       ║
+║  ┌───────────────────────────────────────────────┐       ║
+║  │ [🔲] Light Mode  Auto  [Manual|Auto|Schedule] │       ║
+║  │                             ^^^^               │       ║
+║  └───────────────────────────────────────────────┘       ║
+║                                                           ║
+║  ─────────────────────────────────────────────────       ║
+║                                                           ║
+║  Press-Release Buttons                                   ║
+║  Hold to activate, release to stop                       ║
+║  ┌───────────────────────────────────────────────┐       ║
+║  │ [🔲] Blinds  Control  [↑][↓]                  │       ║
+║  │                       ^^^  ^^^                 │       ║
+║  └───────────────────────────────────────────────┘       ║
+║                                                           ║
+║  Key Differences                                         ║
+║  ┌───────────────────────────────────────────────┐       ║
+║  │ 👆 Segmented Control                          │       ║
+║  │ • Single tap to select                        │       ║
+║  │ • Animated selection indicator                │       ║
+║  │ • Stays selected until changed                │       ║
+║  │ • No releaseCommand                           │       ║
+║  │                                                │       ║
+║  │ ☝️ Press-Release Buttons                      │       ║
+║  │ • Hold down to activate                       │       ║
+║  │ • Independent rounded buttons                 │       ║
+║  │ • Sends command on press                      │       ║
+║  │ • Sends releaseCommand on release             │       ║
+║  └───────────────────────────────────────────────┘       ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+```
+
+**Key Features:**
+- Side-by-side comparison of both button types
+- Real working examples of each type
+- Clear visual distinction between the two
+- Detailed explanation of differences
+- Demonstrates that press-release buttons ARE implemented
+- Shows exactly when each type is used:
+  - Regular: When mappings have NO releaseCommand
+  - Press-Release: When mappings HAVE releaseCommand
+
+**Use Case:**
+Perfect for understanding the architecture and seeing how the `hasPressReleaseMappings` logic determines which button type to render.
+
+---
+
+## Summary of Press-Release Button Previews
+
+We now have **4 previews** that demonstrate press-release button functionality:
+
+| Preview | Line | Press-Release | Description |
+|---------|------|---------------|-------------|
+| "Press-Release Buttons" | 287 | ✅ Yes (2 buttons) | Blinds Up/Down control |
+| "Press-Release (Multiple)" | 307 | ✅ Yes (3 buttons) | Garage door control |
+| "All Scenarios" | 348 | ✅ Yes (included) | Shutter Up/Down in ScrollView |
+| "Button Types Comparison" | 407 | ✅ Yes (with regular) | Side-by-side comparison |
+
+### Detection Logic
+
+All press-release previews work because:
+
+1. Mappings are created with `releaseCommand`:
+   ```swift
+   OpenHABWidgetMapping(command: "UP", label: "↑", releaseCommand: "STOP")
+   ```
+
+2. Widget's `hasPressReleaseMappings` checks:
+   ```swift
+   mappingsOrItemOptions.contains { $0.releaseCommand != nil && !$0.releaseCommand!.isEmpty }
+   ```
+
+3. View renders appropriate component:
+   ```swift
+   if widget.hasPressReleaseMappings {
+       pressReleaseButtons  // Renders press-release style
+   } else {
+       segmentedButtons     // Renders segmented control style
+   }
+   ```
+
+### Visual Differences
+
+**Regular Segmented Control:**
+- Single rounded rectangle background
+- Animated selection indicator (lighter rectangle)
+- Segments divided by spacing, appearing connected
+- Tap to select, stays selected
+
+**Press-Release Buttons:**
+- Independent rounded rectangles for each button
+- No selection indicator (stateless)
+- Clear spacing between buttons
+- Hold to activate, release to stop
+
+---
+
+## Updated Preview Count
+
+Total Previews: **10**
+- Regular Segmented Controls: 6
+- Press-Release Buttons: 4 (including comparison)
+
+All press-release previews are fully functional and correctly trigger the press-release button rendering path.
