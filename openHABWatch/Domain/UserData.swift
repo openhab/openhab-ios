@@ -44,9 +44,7 @@ final class UserData: ObservableObject {
         do {
             let sitemapPage = try data.decoded(as: Components.Schemas.PageDTO.self)
             openHABSitemapPage = OpenHABPage(sitemapPage)
-            var flattenedWidgets = [OpenHABWidget]()
-            flattenedWidgets.flatten(openHABSitemapPage?.widgets ?? [])
-            widgets = flattenedWidgets
+            widgets = openHABSitemapPage?.widgets ?? []
             openHABSitemapPage?.sendCommand = { [weak self] item, command in
                 Task { await self?.sendCommand(item, command: command) }
             }
@@ -294,8 +292,7 @@ final class UserData: ObservableObject {
                         Task { await self?.sendCommand(item, command: command) }
                     }
                     self.openHABSitemapPage = initialPage
-                    var newWidgets = [OpenHABWidget]()
-                    newWidgets.flatten(initialPage?.widgets ?? [])
+                    let newWidgets = initialPage?.widgets ?? []
                     self.updateWidgets(with: newWidgets)
                     if !newWidgets.isEmpty {
                         self.cachedWidgets = newWidgets
@@ -321,8 +318,7 @@ final class UserData: ObservableObject {
                                 }
                             }
                             self.openHABSitemapPage = page
-                            var newWidgets = [OpenHABWidget]()
-                            newWidgets.flatten(page?.widgets ?? [])
+                            let newWidgets = page?.widgets ?? []
                             self.updateWidgets(with: newWidgets)
                             if !newWidgets.isEmpty {
                                 self.cachedWidgets = newWidgets
