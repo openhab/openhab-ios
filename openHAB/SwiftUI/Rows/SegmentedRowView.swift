@@ -17,6 +17,7 @@ import SwiftUI
 struct SegmentedRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
+    @Environment(\.colorScheme) var colorScheme
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSegmentedView")
 
@@ -28,7 +29,7 @@ struct SegmentedRowView: View {
     @State private var pressedIndex: Int?
 
     var body: some View {
-        HStack {
+        HStack(spacing: 0) {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
 
@@ -40,7 +41,7 @@ struct SegmentedRowView: View {
                     .layoutPriority(1) // Truncates second
             }
 
-            Spacer(minLength: 4)
+            Spacer(minLength: 8)
 
             if let detailTextLabel = widget.labelValue, !detailTextLabel.isEmpty {
                 Text(detailTextLabel)
@@ -54,10 +55,13 @@ struct SegmentedRowView: View {
                 if widget.hasPressReleaseMappings {
                     // Press-release buttons for mappings with releaseCommand
                     pressReleaseButtons
+                        .padding(.leading, 8)
                         .fixedSize(horizontal: true, vertical: false)
                 } else {
                     // Button-based segmented control with animated selection indicator
                     segmentedButtons
+                        .padding(.leading, 8)
+                        .frame(minWidth: 75)
                 }
             }
         }
@@ -81,13 +85,20 @@ struct SegmentedRowView: View {
             GeometryReader { geometry in
                 // Layer 1: Dark gray background
                 RoundedRectangle(cornerRadius: 7)
-                    .fill(Color(uiColor: .systemGray5))
-
+                    .fill(
+                        colorScheme == .dark
+                            ? Color(uiColor: .tertiarySystemBackground)
+                            : Color(uiColor: .secondarySystemBackground)
+                    )
                 // Layer 2: Selection indicator (lighter, more visible)
                 if let selectedIndex, !mappings.isEmpty {
                     let segmentWidth = geometry.size.width / CGFloat(mappings.count)
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(Color(uiColor: .white))
+                        .fill(
+                            colorScheme == .dark
+                                ? Color(uiColor: .systemGray2)
+                                : Color(uiColor: .systemBackground)
+                        )
                         .frame(width: segmentWidth - 4, height: geometry.size.height - 4)
                         .offset(x: CGFloat(selectedIndex) * segmentWidth + 2, y: 2)
                         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: selectedIndex)
@@ -131,7 +142,7 @@ struct SegmentedRowView: View {
                 .truncationMode(.tail)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 5)
-                .frame(minWidth: 40, maxWidth: 120)
+                .frame(minWidth: 30, maxWidth: 120)
                 .foregroundStyle(.primary)
         }
         .buttonStyle(.plain)
@@ -167,6 +178,236 @@ struct SegmentedRowView: View {
                     }
             )
     }
+}
+
+// MARK: - Preview Helpers
+
+private extension SegmentedRowView {
+    static func createPreviewWidget(label: String,
+                                    detailLabel: String? = nil,
+                                    mappings: [OpenHABWidgetMapping],
+                                    selectedState: String? = nil) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = UUID().uuidString
+        widget.label = label
+        widget.type = .switchWidget
+        widget.mappings = mappings
+
+        if let detailLabel {
+            let item = OpenHABItem(
+                name: "",
+                type: "String",
+                state: selectedState ?? mappings.first?.command ?? "",
+                link: "",
+                label: detailLabel,
+                groupType: nil,
+                stateDescription: nil,
+                commandDescription: nil,
+                members: [],
+                category: nil,
+                options: nil
+            )
+            widget.item = item
+        }
+
+        return widget
+    }
+}
+
+// MARK: - Previews
+
+#Preview("Short Labels") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Light Switch",
+        detailLabel: "Status",
+        mappings: [
+            OpenHABWidgetMapping(command: "ON", label: "ON"),
+            OpenHABWidgetMapping(command: "OFF", label: "OFF")
+        ],
+        selectedState: "ON"
+    )
+
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Long Labels") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Temperature Control Mode",
+        detailLabel: "Current Mode",
+        mappings: [
+            OpenHABWidgetMapping(command: "manual", label: "Manual Override"),
+            OpenHABWidgetMapping(command: "calendar", label: "Calendar Based"),
+            OpenHABWidgetMapping(command: "automatic", label: "Fully Automatic")
+        ],
+        selectedState: "automatic"
+    )
+
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Multiple Segments (4)") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Fan Speed",
+        detailLabel: "Level 3",
+        mappings: [
+            OpenHABWidgetMapping(command: "0", label: "Off"),
+            OpenHABWidgetMapping(command: "1", label: "Low"),
+            OpenHABWidgetMapping(command: "2", label: "Med"),
+            OpenHABWidgetMapping(command: "3", label: "High")
+        ],
+        selectedState: "3"
+    )
+
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Narrow Labels (2 segments)") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Door Lock",
+        mappings: [
+            OpenHABWidgetMapping(command: "lock", label: "🔒"),
+            OpenHABWidgetMapping(command: "unlock", label: "🔓")
+        ],
+        selectedState: "lock"
+    )
+
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Press-Release Buttons") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Blinds Control",
+        detailLabel: "Position",
+        mappings: [
+            OpenHABWidgetMapping(command: "UP", label: "Up", releaseCommand: "STOP"),
+            OpenHABWidgetMapping(command: "DOWN", label: "Down", releaseCommand: "STOP")
+        ]
+    )
+
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Text("Press and hold buttons to move blinds")
+            .font(.caption)
+            .foregroundColor(.secondary)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Press-Release (Multiple)") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Garage Door",
+        mappings: [
+            OpenHABWidgetMapping(command: "OPEN", label: "Open", releaseCommand: "STOP"),
+            OpenHABWidgetMapping(command: "CLOSE", label: "Close", releaseCommand: "STOP"),
+            OpenHABWidgetMapping(command: "PARTIAL", label: "Partial", releaseCommand: "STOP")
+        ]
+    )
+
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Text("Hold to perform action, release to stop")
+            .font(.caption)
+            .foregroundColor(.secondary)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Truncation Test") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Very Long Label That Should Truncate Nicely",
+        detailLabel: "Also A Very Long Detail Text Here",
+        mappings: [
+            OpenHABWidgetMapping(command: "option1", label: "First"),
+            OpenHABWidgetMapping(command: "option2", label: "Second")
+        ],
+        selectedState: "option1"
+    )
+
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Text("Tests label truncation behavior")
+            .font(.caption)
+            .foregroundColor(.secondary)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("All Scenarios") {
+    ScrollView {
+        VStack(spacing: 16) {
+            // Short labels
+            SegmentedRowView(widget: SegmentedRowView.createPreviewWidget(
+                label: "Light",
+                mappings: [
+                    OpenHABWidgetMapping(command: "ON", label: "ON"),
+                    OpenHABWidgetMapping(command: "OFF", label: "OFF")
+                ],
+                selectedState: "ON"
+            ))
+
+            Divider()
+
+            // Long labels
+            SegmentedRowView(widget: SegmentedRowView.createPreviewWidget(
+                label: "Climate Mode",
+                detailLabel: "Auto",
+                mappings: [
+                    OpenHABWidgetMapping(command: "m", label: "Manual"),
+                    OpenHABWidgetMapping(command: "a", label: "Automatic"),
+                    OpenHABWidgetMapping(command: "s", label: "Schedule")
+                ],
+                selectedState: "a"
+            ))
+
+            Divider()
+
+            // Press-release
+            SegmentedRowView(widget: SegmentedRowView.createPreviewWidget(
+                label: "Shutter",
+                mappings: [
+                    OpenHABWidgetMapping(command: "UP", label: "↑", releaseCommand: "STOP"),
+                    OpenHABWidgetMapping(command: "DOWN", label: "↓", releaseCommand: "STOP")
+                ]
+            ))
+
+            Divider()
+
+            // Multiple segments
+            SegmentedRowView(widget: SegmentedRowView.createPreviewWidget(
+                label: "Speed",
+                mappings: [
+                    OpenHABWidgetMapping(command: "0", label: "Off"),
+                    OpenHABWidgetMapping(command: "1", label: "Low"),
+                    OpenHABWidgetMapping(command: "2", label: "Mid"),
+                    OpenHABWidgetMapping(command: "3", label: "High")
+                ],
+                selectedState: "2"
+            ))
+
+            Spacer()
+        }
+        .padding()
+    }
+    .environmentObject(SitemapPageViewModel())
 }
 
 #Preview {
