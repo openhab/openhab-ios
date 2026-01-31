@@ -404,6 +404,105 @@ private extension SegmentedRowView {
     .environmentObject(SitemapPageViewModel())
 }
 
+#Preview("Button Types Comparison") {
+    ScrollView {
+        VStack(spacing: 24) {
+            // Header
+            Text("Segmented Control vs Press-Release Buttons")
+                .font(.headline)
+                .padding(.top)
+            
+            // Regular Segmented Control
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Regular Segmented Control")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Text("Tap to select, animated indicator shows selection")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                SegmentedRowView(widget: SegmentedRowView.createPreviewWidget(
+                    label: "Light Mode",
+                    detailLabel: "Auto",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "manual", label: "Manual"),
+                        OpenHABWidgetMapping(command: "auto", label: "Auto"),
+                        OpenHABWidgetMapping(command: "schedule", label: "Schedule")
+                    ],
+                    selectedState: "auto"
+                ))
+            }
+            .padding()
+            .background(Color(uiColor: .systemBackground))
+            .cornerRadius(12)
+            
+            Divider()
+            
+            // Press-Release Buttons
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Press-Release Buttons")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Text("Hold to activate, release to stop")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                SegmentedRowView(widget: SegmentedRowView.createPreviewWidget(
+                    label: "Blinds",
+                    detailLabel: "Control",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "UP", label: "↑", releaseCommand: "STOP"),
+                        OpenHABWidgetMapping(command: "DOWN", label: "↓", releaseCommand: "STOP")
+                    ]
+                ))
+            }
+            .padding()
+            .background(Color(uiColor: .systemBackground))
+            .cornerRadius(12)
+            
+            // Key Differences
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Key Differences")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                
+                HStack(alignment: .top, spacing: 12) {
+                    Image(systemName: "hand.tap")
+                        .foregroundColor(.blue)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Segmented Control")
+                            .fontWeight(.medium)
+                        Text("• Single tap to select\n• Animated selection indicator\n• Stays selected until changed\n• No releaseCommand")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Divider()
+                
+                HStack(alignment: .top, spacing: 12) {
+                    Image(systemName: "hand.point.up.left")
+                        .foregroundColor(.orange)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Press-Release Buttons")
+                            .fontWeight(.medium)
+                        Text("• Hold down to activate\n• Independent rounded buttons\n• Sends command on press\n• Sends releaseCommand on release")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding()
+            .background(Color(uiColor: .secondarySystemBackground))
+            .cornerRadius(12)
+            
+            Spacer()
+        }
+        .padding()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[4]
     VStack {
