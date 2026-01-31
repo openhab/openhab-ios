@@ -47,8 +47,7 @@ struct SegmentedRowView: View {
                     .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
                     .lineLimit(1)
                     .truncationMode(.tail)
-                    .layoutPriority(0) // Truncates first
-                    .fixedSize(horizontal: false, vertical: true)
+                    .layoutPriority(0) // Lower priority: truncates first when space is constrained
             }
 
             if !mappings.isEmpty {
