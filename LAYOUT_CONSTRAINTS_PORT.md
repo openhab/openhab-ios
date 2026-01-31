@@ -33,7 +33,7 @@ From `openHAB/Main.storyboard`:
 |---------|-----------------|--------|
 | HStack | `spacing: 0` | Explicit control of spacing |
 | TextLabel spacing | `Spacer(minLength: 8)` | Replaces ≥8pt constraint |
-| DetailLabel | `.fixedSize(horizontal: false, vertical: true)` + `.layoutPriority(0)` | Prevents unwanted compression |
+| DetailLabel | `.layoutPriority(0)` | Lower priority for truncation |
 | SegmentedControl spacing | `.padding(.leading, 8)` | 8pt from DetailLabel |
 | SegmentedControl min width | `.frame(minWidth: 75)` | ≥75pt constraint |
 | Trailing padding | `.padding(.trailing, 20)` on HStack | 20pt from superview edge |
@@ -60,11 +60,11 @@ HStack(spacing: 0) {
 ```
 
 ### 2. DetailLabel Compression Resistance
-**Added:**
+**Using layoutPriority:**
 ```swift
-.fixedSize(horizontal: false, vertical: true)
+.layoutPriority(0) // Lower priority: truncates first when space is constrained
 ```
-This prevents the DetailLabel from being compressed unnecessarily, matching the storyboard's `horizontalCompressionResistancePriority="751"`.
+This ensures the DetailLabel truncates before the TextLabel when space is limited, matching the storyboard's relative priority behavior. Combined with `.lineLimit(1)` and `.truncationMode(.tail)`, this achieves the same effect as the storyboard's `horizontalCompressionResistancePriority="751"`.
 
 ### 3. Segmented Control Constraints
 **Added:**
