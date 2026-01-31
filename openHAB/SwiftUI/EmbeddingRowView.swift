@@ -15,9 +15,8 @@ import SwiftUI
 struct EmbeddingRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
-    @State private var selectedWidget: OpenHABWidget?
-    @State private var showSelectionSheet = false
     @State private var showInputAlert = false
+    @State private var inputWidget: OpenHABWidget?
     @State private var inputText = ""
 
     /// Insets for different widget types - Frame headers are more compact
@@ -48,17 +47,9 @@ struct EmbeddingRowView: View {
                     RowViewFactory.view(for: widget)
                 }
                 .buttonStyle(.plain)
-            } else if widget.type == .selection {
-                Button {
-                    selectedWidget = widget
-                    showSelectionSheet = true
-                } label: {
-                    RowViewFactory.view(for: widget)
-                }
-                .buttonStyle(.plain)
             } else if widget.type == .input {
                 Button {
-                    selectedWidget = widget
+                    inputWidget = widget
                     showInputAlert = true
                 } label: {
                     RowViewFactory.view(for: widget)
@@ -72,7 +63,7 @@ struct EmbeddingRowView: View {
         .listRowInsets(rowInsets)
         .listRowBackground(rowBackground)
         .alert("Input", isPresented: $showInputAlert) {
-            if let widget = selectedWidget {
+            if let widget = inputWidget {
                 TextField("Enter value", text: $inputText)
                 Button("Cancel", role: .cancel) {}
                 Button("OK") {
@@ -80,29 +71,6 @@ struct EmbeddingRowView: View {
                     showInputAlert = false
                     if let item = widget.item {
                         viewModel.sendCommand(item, commandToSend: inputText)
-                    }
-                }
-            }
-        }
-        .sheet(isPresented: $showSelectionSheet) {
-            if let widget = selectedWidget {
-                NavigationStack {
-                    SelectionView(
-                        labelText: widget.labelText,
-                        mappings: widget.mappingsOrItemOptions,
-                        selectionItemState: widget.item?.state,
-                        valuecolor: widget.valuecolor
-                    ) { selectedMappingIndex in
-                        let selectedMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
-                        viewModel.sendCommand(widget.item, commandToSend: selectedMapping.command)
-                        showSelectionSheet = false
-                    }
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Cancel") {
-                                showSelectionSheet = false
-                            }
-                        }
                     }
                 }
             }
