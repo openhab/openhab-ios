@@ -20,6 +20,7 @@ private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "org.open
 enum SitemapPageError: LocalizedError {
     case noActiveConnection
     case serviceUnavailable
+    case pageNotFound
 
     var errorDescription: String? {
         switch self {
@@ -27,6 +28,8 @@ enum SitemapPageError: LocalizedError {
             "No active connection available."
         case .serviceUnavailable:
             "Service unavailable."
+        case .pageNotFound:
+            "Page not found."
         }
     }
 }
@@ -291,7 +294,11 @@ class SitemapPageViewModel: ObservableObject {
             longPolling: false
         )
 
-        injectSendCommand(for: page!.widgets)
+        guard let page else {
+            throw SitemapPageError.pageNotFound
+        }
+        
+        injectSendCommand(for: page.widgets)
         currentPage = page
     }
 

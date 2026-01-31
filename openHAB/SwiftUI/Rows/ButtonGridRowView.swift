@@ -174,6 +174,10 @@ struct ButtonGridRowView: View {
     }
 }
 
+/// A SwiftUI View extension to handle press and release gesture events.
+/// Used specifically for button grid buttons that need to send commands on press and release
+/// (supporting the releaseCommand feature from openHAB).
+/// This extension is scoped to ButtonGridRowView usage for now.
 extension View {
     func onPressGesture(onPress: @escaping () -> Void,
                         onRelease: @escaping () -> Void) -> some View {
@@ -202,7 +206,7 @@ extension OpenHABWidgetMapping {
         widget.visibility = true
         widget.row = row
         widget.column = column
-        widget.releaseCommand = ""
+        widget.releaseCommand = releaseCommand ?? ""
         widget.stateless = true
         widget.icon = icon ?? ""
         return widget

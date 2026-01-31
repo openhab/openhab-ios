@@ -21,8 +21,6 @@ struct CustomSliderView: View {
     let step: Double
     let onEditingChanged: () -> Void
 
-    @GestureState private var dragOffset: CGSize = .zero
-
     @State private var lastSendTime: Date = .distantPast
 
     var body: some View {
@@ -44,7 +42,7 @@ struct CustomSliderView: View {
                     .gesture(
                         DragGesture()
                             .onChanged { gesture in
-                                let location = gesture.location.x.clamped(to: 0 ... width)
+                                let location = max(0, min(width, gesture.location.x))
                                 let raw = Double(location / width) * (range.upperBound - range.lowerBound) + range.lowerBound
                                 let stepped = (raw / step).rounded() * step
                                 value = stepped.clamped(to: range)

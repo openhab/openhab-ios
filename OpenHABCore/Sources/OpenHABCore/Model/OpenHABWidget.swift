@@ -443,16 +443,12 @@ public extension OpenHABWidget {
         self.staticIcon = staticIcon ?? false
         self.labelSource = labelSource
         stateEnumBinding = stateEnum
-        self.labelSource = labelSource
         self.releaseOnly = releaseOnly
         self.row = row
         self.column = column
         self.releaseCommand = releaseCommand
         self.command = command
         self.stateless = stateless
-        self.staticIcon = staticIcon
-        self.unit = unit
-        self.pattern = pattern
         self.yAxisDecimalPattern = yAxisDecimalPattern
     }
 

@@ -43,11 +43,15 @@ actor IconCacheTracker {
 struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    @ObservedObject private var settings = AppSettings.shared
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     let size: CGSize
-    let iconType: IconType = .svg
+    
+    private var iconType: IconType {
+        settings.iconType
+    }
 
     private let logger = Logger(subsystem: "org.openhab", category: "IconView")
 
@@ -157,4 +161,5 @@ extension IconView {
     widget.icon = "switch"
     widget.label = "Test Switch"
     return IconView(widget: widget)
+        .environmentObject(SitemapPageViewModel())
 }
