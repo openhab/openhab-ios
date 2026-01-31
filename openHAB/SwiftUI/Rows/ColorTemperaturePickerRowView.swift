@@ -42,7 +42,7 @@ struct CustomSliderView: View {
                     .gesture(
                         DragGesture()
                             .onChanged { gesture in
-                                let location = max(0, min(width, gesture.location.x))
+                                let location = gesture.location.x.clamped(to: 0 ... width)
                                 let raw = Double(location / width) * (range.upperBound - range.lowerBound) + range.lowerBound
                                 let stepped = (raw / step).rounded() * step
                                 value = stepped.clamped(to: range)
