@@ -57,6 +57,10 @@ struct SegmentedRowView: View {
                     pressReleaseButtons
                         .padding(.leading, 8)
                         .fixedSize(horizontal: true, vertical: false)
+                } else if mappings.count == 1 {
+                    singleMappingButton
+                        .padding(.leading, 8)
+                        .fixedSize(horizontal: true, vertical: false)
                 } else {
                     // Button-based segmented control with animated selection indicator
                     segmentedButtons
@@ -120,6 +124,39 @@ struct SegmentedRowView: View {
                 pressReleaseButton(for: mapping, at: index)
             }
         }
+    }
+
+    @ViewBuilder
+    private var singleMappingButton: some View {
+        let mapping = mappings[0]
+        let isSelected = selectedIndex == 0
+
+        Button {
+            logger.info("Segment tapped: 0, command: \(mapping.command)")
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                selectedIndex = 0
+            }
+            viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+        } label: {
+            Text(mapping.label)
+                .font(.footnote)
+                .bold()
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 5)
+                .frame(minWidth: 30, maxWidth: 120)
+                .foregroundStyle(.primary)
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 7)
+                .fill(Color(uiColor: isSelected ? .systemGray3 : .systemGray5))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 7)
+                .stroke(Color.secondary.opacity(isSelected ? 0.5 : 0.35), lineWidth: 0.75)
+        )
+        .buttonStyle(.plain)
     }
 
     // MARK: - Helper Methods
@@ -281,6 +318,23 @@ private extension SegmentedRowView {
             OpenHABWidgetMapping(command: "unlock", label: "🔓")
         ],
         selectedState: "lock"
+    )
+
+    VStack(spacing: 20) {
+        SegmentedRowView(widget: widget)
+        Spacer()
+    }
+    .environmentObject(SitemapPageViewModel())
+}
+
+#Preview("Single Segment") {
+    let widget = SegmentedRowView.createPreviewWidget(
+        label: "Scene",
+        detailLabel: "Active",
+        mappings: [
+            OpenHABWidgetMapping(command: "PLAY", label: "Run")
+        ],
+        selectedState: "PLAY"
     )
 
     VStack(spacing: 20) {
