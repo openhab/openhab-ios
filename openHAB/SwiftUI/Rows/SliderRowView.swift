@@ -96,14 +96,13 @@ struct SliderRowView: View {
             }
 
             Spacer()
-            
+
             if let detailTextLabel = widget.labelValue, !detailTextLabel.isEmpty {
                 Text(detailTextLabel)
                     .font(.callout)
                     .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
                     .lineLimit(1)
             }
-
         }
         .contentShape(Rectangle())
     }

@@ -18,6 +18,7 @@ import SwiftUI
 struct ImageRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
+    @Environment(\.colorScheme) var colorScheme
     @State private var refreshTimer: Timer?
     @State private var forceRefreshKey = UUID()
 
@@ -32,6 +33,10 @@ struct ImageRowView: View {
         widget.refresh == 0
     }
 
+    private var chartStyle: ChartStyle {
+        colorScheme == .light ? .light : .dark
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
@@ -39,7 +44,7 @@ struct ImageRowView: View {
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)
             }
-            switch widget.generateImageResult(rootUrl: viewModel.openHABRootUrl ?? "") {
+            switch widget.generateImageResult(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
             case let .embedded(data: data):
                 let provider = RawImageDataProvider(data: data, cacheKey: shouldCache ? widget.widgetId : "\(widget.widgetId)-\(forceRefreshKey)")
                 KFImage(source: .provider(provider))
