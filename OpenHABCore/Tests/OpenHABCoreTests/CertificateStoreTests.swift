@@ -14,6 +14,12 @@ import Foundation
 import os.log
 import Testing
 
+// MARK: - Test Errors
+
+enum CertificateStoreTestError: Error {
+    case resourceNotFound(String)
+}
+
 @Suite("CertificateStore Tests", .serialized)
 struct CertificateStoreTests {
     // Helper to load the bundled test certificate data
@@ -147,10 +153,4 @@ struct CertificateStoreTests {
         // Clean up temp file
         try? FileManager.default.removeItem(at: tempPath)
     }
-}
-
-// MARK: - Test Errors
-
-enum CertificateStoreTestError: Error {
-    case resourceNotFound(String)
 }
