@@ -31,10 +31,10 @@ public class OpenHABPage: NSObject, @unchecked Sendable {
         var flattened = [OpenHABWidget]()
         flattened.flatten(widgets)
         self.widgets = flattened
-        
+
         decorateWithSendCommand(self.widgets)
     }
-    
+
     private func decorateWithSendCommand(_ widgets: [OpenHABWidget]) {
         for widget in widgets {
             widget.sendCommand = { [weak self] item, command in
