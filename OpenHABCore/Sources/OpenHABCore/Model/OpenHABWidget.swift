@@ -314,8 +314,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
     public func generateImageResult(rootUrl: String,
                                     chartStyle: ChartStyle = .light) -> ImagePayload {
-        print("widget yAxisDecimalPattern: \(yAxisDecimalPattern ?? "")")
-
         switch type {
         case .chart:
             guard let url = Endpoint.chart(

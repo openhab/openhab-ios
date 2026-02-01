@@ -12,6 +12,7 @@
 import AVKit
 import CommonUI
 import OpenHABCore
+import os.log
 import SwiftUI
 import UIKit
 
@@ -26,6 +27,8 @@ struct VideoRowView: View {
     @State private var imageObservationTimer: Timer?
     @State private var playerObserver: NSKeyValueObservation?
     @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    private let logger = Logger(subsystem: "org.openhab", category: "VideoRowView")
 
     private var videoURL: URL? {
         guard !widget.url.isEmpty else { return nil }
@@ -144,7 +147,7 @@ struct VideoRowView: View {
             },
             onError: { error in
                 Task { @MainActor in
-                    print("MJPEG stream error: \(error.localizedDescription)")
+                    logger.debug("MJPEG stream error: \(error.localizedDescription)")
                     isLoading = false
                 }
             }
@@ -192,7 +195,7 @@ struct VideoRowView: View {
                     player?.play()
                 case .failed:
                     isLoading = false
-                    print("HLS player failed: \(item.error?.localizedDescription ?? "Unknown error")")
+                    logger.debug("HLS player failed: \(item.error?.localizedDescription ?? "Unknown error")")
                 default:
                     break
                 }

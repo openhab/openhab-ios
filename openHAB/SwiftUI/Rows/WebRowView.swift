@@ -11,6 +11,7 @@
 
 import CommonUI
 import OpenHABCore
+import os.log
 import SwiftUI
 import WebKit
 
@@ -41,8 +42,10 @@ struct WidgetWebViewContainer: View {
 
 struct WebRowView: UIViewRepresentable {
     class Coordinator: NSObject, WKNavigationDelegate {
+        private let logger = Logger(subsystem: "org.openhab", category: "WebRowViewCoordinator")
+
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
-            print("WebView failed to load: \(error.localizedDescription)")
+            logger.debug("WebView failed to load: \(error.localizedDescription)")
         }
     }
 

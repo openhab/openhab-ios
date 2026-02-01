@@ -48,6 +48,8 @@ struct SegmentedRowView: View {
                     .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
                     .lineLimit(1)
                     .truncationMode(.tail)
+//                    .minimumScaleFactor(0.25)     // shrinks text instead of vanishing
+//                    .allowsTightening(true)
                     .layoutPriority(0) // Truncates first
             }
 
@@ -57,6 +59,7 @@ struct SegmentedRowView: View {
                     pressReleaseButtons
                         .padding(.leading, 8)
                         .fixedSize(horizontal: true, vertical: false)
+                        .layoutPriority(1)
                 } else if mappings.count == 1 {
                     singleMappingButton
                         .padding(.leading, 8)
@@ -66,6 +69,8 @@ struct SegmentedRowView: View {
                     segmentedButtons
                         .padding(.leading, 8)
                         .frame(minWidth: 75)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .layoutPriority(1)
                 }
             }
         }
@@ -150,11 +155,11 @@ struct SegmentedRowView: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 7)
-                .fill(Color(uiColor: isSelected ? .systemGray3 : .systemGray5))
+                .fill(Color(uiColor: isSelected ? .systemBackground : .secondarySystemBackground))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 7)
-                .stroke(Color.secondary.opacity(isSelected ? 0.5 : 0.35), lineWidth: 0.75)
+                .stroke(Color(uiColor: .separator).opacity(0.6), lineWidth: 0.75)
         )
         .buttonStyle(.plain)
     }
@@ -226,7 +231,11 @@ private extension SegmentedRowView {
                                     selectedState: String? = nil) -> OpenHABWidget {
         let widget = OpenHABWidget()
         widget.widgetId = UUID().uuidString
-        widget.label = label
+        if let detailLabel, !detailLabel.isEmpty {
+            widget.label = "\(label) [\(detailLabel)]"
+        } else {
+            widget.label = label
+        }
         widget.type = .switchWidget
         widget.mappings = mappings
 
