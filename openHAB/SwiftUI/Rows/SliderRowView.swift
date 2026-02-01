@@ -48,7 +48,9 @@ struct SliderRowView: View {
 
             Slider(
                 value: Binding(
-                    get: { sliderValue },
+                    get: {
+                        isDragging ? sliderValue : (widget.stateValueAsNumberState?.value ?? widget.minValue)
+                    },
                     set: { newValue in
                         sliderValue = newValue
                         if widget.shouldUseSliderUpdatesDuringMove() {
@@ -63,6 +65,9 @@ struct SliderRowView: View {
                 in: sliderRange
             ) { editing in
                 isDragging = editing
+                if editing {
+                    sliderValue = widget.stateValueAsNumberState?.value ?? widget.minValue
+                }
                 if !editing, !widget.shouldUseSliderUpdatesDuringMove() {
                     sendSliderUpdate(sliderValue)
                 }

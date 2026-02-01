@@ -35,9 +35,9 @@ struct WidgetRowView: View {
             SwitchRow(widget: widget)
         case .slider:
             if widget.switchSupport {
-                SliderRow(widget: widget)
-            } else {
                 SliderWithSwitchSupportRow(widget: widget)
+            } else {
+                SliderRow(widget: widget)
             }
         case .segmented:
             SegmentRow(widget: widget)
