@@ -53,12 +53,9 @@ class SitemapPageViewModel: ObservableObject {
     private var pageNetworkStatusAvailable = false
 
     var relevantWidgets: [OpenHABWidget] {
-        var flattenedWidgets = [OpenHABWidget]()
-        flattenedWidgets.flatten(currentPage?.widgets ?? [])
-
-        guard !searchText.isEmpty else { return flattenedWidgets }
-
-        return flattenedWidgets.filter {
+        let widgets = currentPage?.widgets ?? []
+        guard !searchText.isEmpty else { return widgets }
+        return widgets.filter {
             $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
         }
     }
