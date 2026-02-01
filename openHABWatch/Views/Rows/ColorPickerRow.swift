@@ -36,10 +36,16 @@ struct ColorPickerRow: View {
 
                     Spacer()
 
-                    NavigationLink(destination: ColorSelection()) {
+                    NavigationLink(destination: ColorSelection(widget: widget)) {
                         Circle()
-                            .fill(Color(uiColor!))
+                            .fill(uiColor.map { Color($0) } ?? Color.gray.opacity(0.4))
                             .frame(width: 35, height: 35)
+                            .overlay {
+                                if uiColor == nil {
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.4), lineWidth: 1)
+                                }
+                            }
                     }
 
                     Spacer()
