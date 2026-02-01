@@ -35,48 +35,61 @@ struct SelectionRowView: View {
     }
 
     var body: some View {
-        Menu {
-            ForEach(mappings.indices, id: \.self) { index in
-                let mapping = mappings[index]
-                let isSelected = widget.item?.state == mapping.command
-                Button {
-                    logger.info("Selection changed to: \(mapping.label)")
-                    viewModel.sendCommand(widget.item, commandToSend: mapping.command)
-                } label: {
-                    if isSelected {
-                        Label(mapping.label, systemSymbol: .checkmark)
-                    } else {
-                        Text(mapping.label)
+        ZStack {
+            rowContent
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .animation(nil, value: widget.item?.state)
+
+            Menu {
+                ForEach(mappings.indices, id: \.self) { index in
+                    let mapping = mappings[index]
+                    let isSelected = widget.item?.state == mapping.command
+                    Button {
+                        logger.info("Selection changed to: \(mapping.label)")
+                        viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+                    } label: {
+                        if isSelected {
+                            Label(mapping.label, systemSymbol: .checkmark)
+                        } else {
+                            Text(mapping.label)
+                        }
                     }
                 }
+            } label: {
+                Color.clear
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(Rectangle())
             }
-        } label: {
-            HStack {
-                IconView(widget: widget)
-                    .frame(width: 32, height: 32)
-
-                if let labelText = widget.labelText, !labelText.isEmpty {
-                    Text(labelText)
-                        .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                        .lineLimit(1)
-                }
-
-                Spacer()
-
-                if let valueText = selectedValueText, !valueText.isEmpty {
-                    Text(valueText)
-                        .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
-                        .lineLimit(1)
-                }
-
-                // Show disclosure indicator to indicate tappable selection
-                Image(systemSymbol: .chevronUpChevronDown)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .disabled(widget.readOnly ?? false)
         }
-        .buttonStyle(.plain)
-        .disabled(widget.readOnly ?? false)
+    }
+
+    @ViewBuilder
+    private var rowContent: some View {
+        HStack {
+            IconView(widget: widget)
+                .frame(width: 32, height: 32)
+
+            if let labelText = widget.labelText, !labelText.isEmpty {
+                Text(labelText)
+                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            if let valueText = selectedValueText, !valueText.isEmpty {
+                Text(valueText)
+                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .lineLimit(1)
+            }
+
+            // Show disclosure indicator to indicate tappable selection
+            Image(systemSymbol: .chevronUpChevronDown)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .contentShape(Rectangle())
     }
 }
