@@ -48,8 +48,6 @@ struct SegmentedRowView: View {
                     .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
                     .lineLimit(1)
                     .truncationMode(.tail)
-//                    .minimumScaleFactor(0.25)     // shrinks text instead of vanishing
-//                    .allowsTightening(true)
                     .layoutPriority(0) // Truncates first
             }
 
@@ -59,7 +57,6 @@ struct SegmentedRowView: View {
                     pressReleaseButtons
                         .padding(.leading, 8)
                         .fixedSize(horizontal: true, vertical: false)
-                        .layoutPriority(1)
                 } else if mappings.count == 1 {
                     singleMappingButton
                         .padding(.leading, 8)
@@ -69,9 +66,8 @@ struct SegmentedRowView: View {
                     segmentedButtons
                         .padding(.leading, 8)
                         .frame(minWidth: 75)
-                        .fixedSize(horizontal: true, vertical: false)
                         .layoutPriority(1)
-                }
+                 }
             }
         }
         .onAppear {
