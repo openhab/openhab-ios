@@ -397,6 +397,7 @@ final class UserData: ObservableObject {
             if let existingWidget = existingWidgetsMap[newWidget.widgetId] {
                 // Update existing widget's properties to preserve the instance
                 existingWidget.label = newWidget.label
+                existingWidget.type = newWidget.type
                 existingWidget.icon = newWidget.icon
                 existingWidget.state = newWidget.state
                 existingWidget.item = newWidget.item
@@ -404,6 +405,15 @@ final class UserData: ObservableObject {
                 existingWidget.iconColor = newWidget.iconColor
                 existingWidget.labelcolor = newWidget.labelcolor
                 existingWidget.valuecolor = newWidget.valuecolor
+                existingWidget.url = newWidget.url
+                existingWidget.period = newWidget.period
+                existingWidget.service = newWidget.service
+                existingWidget.legend = newWidget.legend
+                existingWidget.refresh = newWidget.refresh
+                existingWidget.height = newWidget.height
+                existingWidget.forceAsItem = newWidget.forceAsItem
+                existingWidget.mappings = newWidget.mappings
+                existingWidget.widgets = newWidget.widgets
                 // Add other properties as needed
                 updatedWidgets.append(existingWidget)
                 existingWidgetsMap.removeValue(forKey: newWidget.widgetId)
