@@ -54,14 +54,6 @@ public struct Endpoint: Equatable {
     var queryItems: [URLQueryItem]
 }
 
-extension UIColor {
-    var rgbaDescription: String {
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        getRed(&r, green: &g, blue: &b, alpha: &a)
-        return String(format: "r: %.2f, g: %.2f, b: %.2f, a: %.2f", r, g, b, a)
-    }
-}
-
 public extension Endpoint {
     var url: URL? {
         var components = URLComponents(string: baseURL)
