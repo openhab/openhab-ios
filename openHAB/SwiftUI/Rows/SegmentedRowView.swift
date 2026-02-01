@@ -38,6 +38,7 @@ struct SegmentedRowView: View {
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)
                     .truncationMode(.tail)
+                    .padding(.leading, 8)
                     .layoutPriority(1) // Truncates second
             }
 
@@ -67,7 +68,7 @@ struct SegmentedRowView: View {
                         .padding(.leading, 8)
                         .frame(minWidth: 75)
                         .layoutPriority(1)
-                 }
+                }
             }
         }
         .onAppear {
