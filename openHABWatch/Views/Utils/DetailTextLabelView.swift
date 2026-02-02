@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import SwiftUI
 
@@ -20,7 +21,7 @@ struct DetailTextLabelView: View {
             Text(label)
                 .font(.footnote)
                 .lineLimit(1)
-                .foregroundStyle(!widget.valuecolor.isEmpty ? Color(widget.valuecolor) : .secondary)
+                .foregroundStyle(!widget.valuecolor.isEmpty ? Color(fromString: widget.valuecolor) : .secondary)
         }
     }
 }
