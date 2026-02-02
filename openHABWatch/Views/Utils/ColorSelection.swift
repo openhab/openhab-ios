@@ -61,7 +61,7 @@ struct ColorSelection: View {
     @State private var dragStart: CGPoint?
     @State private var lastSendTime: Date = .distantPast
 
-    private let handleRadius: Double = 12.5
+    private let handleRadius = 12.5
 
     var body: some View {
         // Use a clockwise spectrum to match the handle's hue direction.

@@ -39,17 +39,16 @@ struct SegmentedRowView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .padding(.leading, 8)
-                    .layoutPriority(1) // Truncates second
+                    .layoutPriority(1)
             }
 
-            Spacer(minLength: 8)
-
             if let detailTextLabel = widget.labelValue, !detailTextLabel.isEmpty {
+                Spacer(minLength: 8)
                 Text(detailTextLabel)
                     .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
                     .lineLimit(1)
                     .truncationMode(.tail)
-                    .layoutPriority(0) // Truncates first
+                    .layoutPriority(1)
             }
 
             if !mappings.isEmpty {
