@@ -11,6 +11,7 @@
 
 import CommonUI
 import OpenHABCore
+import SFSafeSymbols
 import SwiftUI
 
 struct TextRow: View {
@@ -23,6 +24,11 @@ struct TextRow: View {
             TextLabelView(widget: widget)
             Spacer()
             DetailTextLabelView(widget: widget)
+            if widget.linkedPage != nil {
+                Image(systemSymbol: .chevronRight)
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
+            }
         }
     }
 }

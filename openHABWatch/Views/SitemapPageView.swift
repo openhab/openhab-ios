@@ -77,7 +77,9 @@ struct WidgetRowView: View {
             MapViewRow(widget: widget)
         case .colorpicker:
             ColorPickerRow(widget: widget)
-        case .selection, .video, .webview, .input, .colortemperaturepicker, .buttongrid:
+        case .selection:
+            SelectionRow(widget: widget)
+        case .video, .webview, .input, .colortemperaturepicker, .buttongrid:
             // Not yet implemented for watchOS
             GenericRow(widget: widget)
         case .group, .defaultWidget, .button, .unknown:

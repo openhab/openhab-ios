@@ -191,6 +191,7 @@
 		DAF4578723D798A50018B495 /* TextLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578623D798A50018B495 /* TextLabelView.swift */; };
 		DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */; };
 		DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */; };
+		C4377202F7D642B5A8349008 /* SelectionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86D8BF295C448039B2B85EB /* SelectionRow.swift */; };
 		DAF457A223DB6C640018B495 /* RollershutterRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF457A123DB6C640018B495 /* RollershutterRow.swift */; };
 		DAF457A623DB9CE00018B495 /* SetpointRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF457A523DB9CE00018B495 /* SetpointRow.swift */; };
 		DAF457A923DBA4990018B495 /* FrameRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF457A823DBA4990018B495 /* FrameRow.swift */; };
@@ -550,6 +551,7 @@
 		DAF4578623D798A50018B495 /* TextLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLabelView.swift; sourceTree = "<group>"; };
 		DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailTextLabelView.swift; sourceTree = "<group>"; };
 		DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentRow.swift; sourceTree = "<group>"; };
+		D86D8BF295C448039B2B85EB /* SelectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionRow.swift; sourceTree = "<group>"; };
 		DAF457A123DB6C640018B495 /* RollershutterRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollershutterRow.swift; sourceTree = "<group>"; };
 		DAF457A523DB9CE00018B495 /* SetpointRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetpointRow.swift; sourceTree = "<group>"; };
 		DAF457A823DBA4990018B495 /* FrameRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameRow.swift; sourceTree = "<group>"; };
@@ -1031,6 +1033,7 @@
 				DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */,
 				DAF457A123DB6C640018B495 /* RollershutterRow.swift */,
 				DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */,
+				D86D8BF295C448039B2B85EB /* SelectionRow.swift */,
 				DA2741012EA62FA3002FE576 /* SegmentSelectionView.swift */,
 				DAF457A523DB9CE00018B495 /* SetpointRow.swift */,
 				DAF457A823DBA4990018B495 /* FrameRow.swift */,
@@ -1691,6 +1694,7 @@
 				DAF4581623DC48400018B495 /* GenericRow.swift in Sources */,
 				10472F7AF99C4940A6144817 /* TextRow.swift in Sources */,
 				DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */,
+				C4377202F7D642B5A8349008 /* SelectionRow.swift in Sources */,
 				DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */,
 				DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */,
 				DA0776F0234788010086C685 /* UserData.swift in Sources */,
