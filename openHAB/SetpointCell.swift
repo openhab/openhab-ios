@@ -69,7 +69,8 @@ class SetpointCell: GenericUITableViewCell {
         if numberState != nil {
             numberState?.value = limitedNewValue
         } else {
-            numberState = NumberState(value: limitedNewValue)
+            // Use widget's unit as fallback when creating NumberState
+            numberState = NumberState(value: limitedNewValue, unit: widget.unit)
         }
 
         widget.sendItemUpdate(state: numberState)

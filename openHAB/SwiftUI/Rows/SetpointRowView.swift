@@ -112,10 +112,11 @@ struct SetpointRowView: View {
             return
         }
 
-        numberState = numberState ?? NumberState(value: limitedNewValue)
+        // Use widget's unit as fallback when creating NumberState
+        numberState = numberState ?? NumberState(value: limitedNewValue, unit: widget.unit)
         numberState?.value = limitedNewValue
 
-        logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(limitedNewValue)")
+        logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState?.description ?? String(limitedNewValue))")
         viewModel.sendToUpdate(item: widget.item, state: numberState)
     }
 }

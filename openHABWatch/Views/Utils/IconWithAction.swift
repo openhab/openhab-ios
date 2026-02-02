@@ -16,13 +16,13 @@ struct IconWithAction: View {
     var systemSymbol: SFSymbol
     var action: () -> Void
     var body: some View {
-        Image(systemSymbol: systemSymbol)
-            .font(.system(size: 25))
-            .colorMultiply(.blue)
-            .saturation(0.8)
-            .onTapGesture {
-                action()
-            }
+        Button(action: action) {
+            Image(systemSymbol: systemSymbol)
+                .font(.system(size: 25))
+                .colorMultiply(.blue)
+                .saturation(0.8)
+        }
+        .buttonStyle(.plain)
     }
 }
 

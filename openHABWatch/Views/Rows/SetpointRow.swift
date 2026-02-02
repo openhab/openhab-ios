@@ -18,6 +18,7 @@ struct SetpointRow: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
     private let setpointService = SetPointService()
+    private let logger = Logger(subsystem: "org.openhab.watch", category: "SetpointRow")
 
     private var isIntStep: Bool {
         widget.step.truncatingRemainder(dividingBy: 1) == 0
@@ -25,6 +26,10 @@ struct SetpointRow: View {
 
     private var stateFormat: String {
         isIntStep ? "%ld" : "%.01f"
+    }
+
+    private var currentValue: Double {
+        widget.stateValueAsNumberState?.value ?? widget.minValue
     }
 
     var body: some View {
@@ -37,10 +42,13 @@ struct SetpointRow: View {
             HStack {
                 Spacer()
 
-                IconWithAction(
-                    systemSymbol: .chevronDownCircleFill,
-                    action: decreaseValue
-                )
+                Button(action: decreaseValue) {
+                    Image(systemSymbol: .chevronDownCircleFill)
+                        .font(.system(size: 25))
+                        .foregroundStyle(currentValue <= widget.minValue ? Color.gray : Color.blue)
+                }
+                .buttonStyle(.plain)
+                .disabled(currentValue <= widget.minValue)
 
                 Spacer()
 
@@ -49,10 +57,13 @@ struct SetpointRow: View {
 
                 Spacer()
 
-                IconWithAction(
-                    systemSymbol: .chevronUpCircleFill,
-                    action: increaseValue
-                )
+                Button(action: increaseValue) {
+                    Image(systemSymbol: .chevronUpCircleFill)
+                        .font(.system(size: 25))
+                        .foregroundStyle(currentValue >= widget.maxValue ? Color.gray : Color.blue)
+                }
+                .buttonStyle(.plain)
+                .disabled(currentValue >= widget.maxValue)
 
                 Spacer()
             }
@@ -76,9 +87,11 @@ struct SetpointRow: View {
             return
         }
 
-        numberState = numberState ?? NumberState(value: limitedNewValue)
+        // Use widget's unit as fallback when creating NumberState
+        numberState = numberState ?? NumberState(value: limitedNewValue, unit: widget.unit)
         numberState?.value = limitedNewValue
 
+        logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState?.description ?? String(limitedNewValue))")
         widget.sendItemUpdate(state: numberState)
     }
 
