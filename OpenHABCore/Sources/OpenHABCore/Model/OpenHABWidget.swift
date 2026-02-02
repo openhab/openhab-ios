@@ -14,28 +14,6 @@ import Foundation
 @_exported import MapKit
 import os.log
 
-public enum WidgetTypeEnum {
-    case switcher(Bool)
-    case slider //
-    case segmented(Int)
-    case unassigned
-    case rollershutter
-    case frame
-    case setpoint
-    case selection
-    case colorpicker
-    case chart
-    case image
-    case video
-    case webview
-    case mapview
-
-    public var boolState: Bool {
-        guard case let .switcher(value) = self else { return false }
-        return value
-    }
-}
-
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
     public enum WidgetType: String, Decodable {
         case chart = "Chart"
@@ -135,8 +113,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
     public var yAxisDecimalPattern: String?
 
-    @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
-
     // Text prior to "["
     public var labelText: String? {
         let array = label.components(separatedBy: "[")
@@ -194,46 +170,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
             adj(item.stateAsDouble())
         } else {
             minValue
-        }
-    }
-
-    public var stateEnum: WidgetTypeEnum {
-        switch type {
-        case .frame:
-            .frame
-        case .switchWidget:
-            // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
-            if !mappings.isEmpty {
-                .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
-            } else if item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                .switcher(item?.state == "ON" ? true : false)
-            } else if item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                .rollershutter
-            } else if !mappingsOrItemOptions.isEmpty {
-                .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
-            } else {
-                .switcher(item?.state == "ON" ? true : false)
-            }
-        case .setpoint:
-            .setpoint
-        case .slider:
-            .slider
-        case .selection:
-            .selection
-        case .colorpicker:
-            .colorpicker
-        case .chart:
-            .chart
-        case .image:
-            .image
-        case .video:
-            .video
-        case .webview:
-            .webview
-        case .mapview:
-            .mapview
-        default:
-            .unassigned
         }
     }
 
@@ -439,8 +375,6 @@ public extension OpenHABWidget {
         self.unit = unit ?? ""
         self.pattern = pattern ?? ""
         self.staticIcon = staticIcon ?? false
-        self.labelSource = labelSource
-        stateEnumBinding = stateEnum
         self.labelSource = labelSource
         self.releaseOnly = releaseOnly
         self.row = row

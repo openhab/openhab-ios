@@ -401,7 +401,6 @@ final class UserData: ObservableObject {
                 existingWidget.icon = newWidget.icon
                 existingWidget.state = newWidget.state
                 existingWidget.item = newWidget.item
-                existingWidget.stateEnumBinding = newWidget.stateEnumBinding
                 existingWidget.iconColor = newWidget.iconColor
                 existingWidget.labelcolor = newWidget.labelcolor
                 existingWidget.valuecolor = newWidget.valuecolor

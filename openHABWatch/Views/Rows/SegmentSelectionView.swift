@@ -15,9 +15,14 @@ import SwiftUI
 
 struct SegmentSelectionView: View {
     @ObservedObject var widget: OpenHABWidget
+    @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
     @State private var pendingValue: String?
     @State private var pressedIndex: Int?
+
+    private var currentIndex: Int {
+        selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) } ?? 0
+    }
 
     var body: some View {
         ScrollView {
@@ -109,12 +114,11 @@ struct SegmentSelectionView: View {
     }
 
     private func isSelected(index: Int) -> Bool {
-        guard case let .segmented(value) = widget.stateEnumBinding else { return false }
-        return value == index
+        currentIndex == index
     }
 
     private func selectOption(at index: Int) {
-        widget.stateEnumBinding = .segmented(index)
+        selectedIndex = index
         if let selectedCommand = widget.mappingsOrItemOptions[safe: index]?.command {
             pendingValue = selectedCommand
             Task { @MainActor in
@@ -130,9 +134,10 @@ struct SegmentSelectionView: View {
 }
 
 #Preview {
+    @Previewable @State var selectedIndex: Int? = 0
     let widget = UserData(preview: true).widgets[4]
     return NavigationStack {
-        SegmentSelectionView(widget: widget)
+        SegmentSelectionView(widget: widget, selectedIndex: $selectedIndex)
     }
     .environmentObject(AppSettings())
 }

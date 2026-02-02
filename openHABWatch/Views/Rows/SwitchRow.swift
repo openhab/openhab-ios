@@ -17,26 +17,34 @@ import SwiftUI
 struct SwitchRow: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    @State private var localIsOn: Bool?
 
-    // https://stackoverflow.com/questions/59395501/do-something-when-toggle-state-changes
-    var stateBinding: Binding<Bool> {
-        .init(
-            get: { widget.stateEnumBinding.boolState },
-            set: {
-                if $0 {
+    private var effectiveState: String {
+        var state = widget.state
+        if state.isEmpty {
+            state = widget.item?.state ?? ""
+        }
+        return state
+    }
+
+    private var isOn: Bool {
+        localIsOn ?? effectiveState.parseAsBool()
+    }
+
+    var body: some View {
+        Toggle(isOn: Binding(
+            get: { isOn },
+            set: { newValue in
+                localIsOn = newValue
+                if newValue {
                     Logger.rowViews.info("Switch to ON")
                     widget.sendCommand("ON")
                 } else {
                     Logger.rowViews.info("Switch to OFF")
                     widget.sendCommand("OFF")
                 }
-                widget.stateEnumBinding = .switcher($0)
             }
-        )
-    }
-
-    var body: some View {
-        Toggle(isOn: stateBinding) {
+        )) {
             HStack {
                 IconView(widget: widget, settings: settings)
                 VStack {
@@ -47,6 +55,9 @@ struct SwitchRow: View {
         }
         .padding(.trailing)
         .cornerRadius(5)
+        .onChange(of: effectiveState) { _ in
+            localIsOn = nil
+        }
     }
 }
 

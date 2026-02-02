@@ -16,30 +16,10 @@ import SwiftUI
 struct SegmentRow: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
-    @State private var pendingValue: String?
+    @State private var selectedIndex: Int?
 
-    var valueBinding: Binding<Int> {
-        .init(
-            get: {
-                guard case let .segmented(value) = widget.stateEnumBinding else { return 0 }
-                return value
-            },
-            set: { newValue in
-                Logger.rowViews.debug("Picker new value = \(newValue)")
-                widget.stateEnumBinding = .segmented(newValue)
-                if let selectedCommand = widget.mappingsOrItemOptions[safe: newValue]?.command {
-                    pendingValue = selectedCommand
-                    Logger.rowViews.debug("Selected command: \(selectedCommand)")
-                    Task { @MainActor in
-                        try? await Task.sleep(for: .milliseconds(500))
-                        if pendingValue == selectedCommand { // Ensure no new updates came in
-                            widget.sendCommand(selectedCommand)
-                            pendingValue = nil
-                        }
-                    }
-                }
-            }
-        )
+    private var currentIndex: Int {
+        selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) } ?? 0
     }
 
     var body: some View {
@@ -49,13 +29,10 @@ struct SegmentRow: View {
                 TextLabelView(widget: widget, lineLimit: 1)
                 Spacer()
             }
-            NavigationLink(destination: LazyView(SegmentSelectionView(widget: widget))) {
+            NavigationLink(destination: LazyView(SegmentSelectionView(widget: widget, selectedIndex: $selectedIndex))) {
                 HStack {
-                    if let selectedIndex = widget.mappingsOrItemOptions.indices.first(where: { index in
-                        guard case let .segmented(value) = widget.stateEnumBinding else { return false }
-                        return value == index
-                    }) {
-                        Text(widget.mappingsOrItemOptions[selectedIndex].label)
+                    if currentIndex >= 0, currentIndex < widget.mappingsOrItemOptions.count {
+                        Text(widget.mappingsOrItemOptions[currentIndex].label)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
@@ -68,6 +45,12 @@ struct SegmentRow: View {
                 .background(Capsule().fill(Color.gray.opacity(0.5)))
             }
             .buttonStyle(.plain)
+        }
+        .onAppear {
+            selectedIndex = widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
+        }
+        .onChange(of: widget.item?.state) { newState in
+            selectedIndex = widget.mappingIndex(byCommand: newState).map { Int($0) }
         }
     }
 }

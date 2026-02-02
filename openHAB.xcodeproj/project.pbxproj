@@ -195,6 +195,7 @@
 		DAF457A623DB9CE00018B495 /* SetpointRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF457A523DB9CE00018B495 /* SetpointRow.swift */; };
 		DAF457A923DBA4990018B495 /* FrameRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF457A823DBA4990018B495 /* FrameRow.swift */; };
 		DAF4581623DC48400018B495 /* GenericRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581523DC483F0018B495 /* GenericRow.swift */; };
+		10472F7AF99C4940A6144817 /* TextRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399449C421544C61AD83450C /* TextRow.swift */; };
 		DAF4581823DC4A050018B495 /* ImageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581723DC4A050018B495 /* ImageRow.swift */; };
 		DAF4581E23DC60020018B495 /* ImageRawRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581D23DC60020018B495 /* ImageRawRow.swift */; };
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
@@ -553,6 +554,7 @@
 		DAF457A523DB9CE00018B495 /* SetpointRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetpointRow.swift; sourceTree = "<group>"; };
 		DAF457A823DBA4990018B495 /* FrameRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameRow.swift; sourceTree = "<group>"; };
 		DAF4581523DC483F0018B495 /* GenericRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericRow.swift; sourceTree = "<group>"; };
+		399449C421544C61AD83450C /* TextRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRow.swift; sourceTree = "<group>"; };
 		DAF4581723DC4A050018B495 /* ImageRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRow.swift; sourceTree = "<group>"; };
 		DAF4581D23DC60020018B495 /* ImageRawRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRawRow.swift; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
@@ -1033,6 +1035,7 @@
 				DAF457A523DB9CE00018B495 /* SetpointRow.swift */,
 				DAF457A823DBA4990018B495 /* FrameRow.swift */,
 				DAF4581523DC483F0018B495 /* GenericRow.swift */,
+				399449C421544C61AD83450C /* TextRow.swift */,
 				DAF4581723DC4A050018B495 /* ImageRow.swift */,
 				DAF4581D23DC60020018B495 /* ImageRawRow.swift */,
 				DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */,
@@ -1686,6 +1689,7 @@
 				DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */,
 				DA07752B2346705F0086C685 /* OpenHABWatchAppDelegate.swift in Sources */,
 				DAF4581623DC48400018B495 /* GenericRow.swift in Sources */,
+				10472F7AF99C4940A6144817 /* TextRow.swift in Sources */,
 				DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */,
 				DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */,
 				DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */,

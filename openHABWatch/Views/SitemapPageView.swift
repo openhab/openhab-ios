@@ -30,25 +30,32 @@ struct WidgetRowView: View {
     }
 
     @ViewBuilder func rowWidget(widget: OpenHABWidget) -> some View {
-        switch widget.stateEnum {
-        case .switcher:
-            SwitchRow(widget: widget)
+        switch widget.type {
+        case .switchWidget:
+            if !widget.mappings.isEmpty {
+                SegmentRow(widget: widget)
+            } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
+                SwitchRow(widget: widget)
+            } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
+                RollershutterRow(widget: widget)
+            } else if !widget.mappingsOrItemOptions.isEmpty {
+                SegmentRow(widget: widget)
+            } else {
+                SwitchRow(widget: widget)
+            }
         case .slider:
             if widget.switchSupport {
                 SliderWithSwitchSupportRow(widget: widget)
             } else {
                 SliderRow(widget: widget)
             }
-        case .segmented:
-            SegmentRow(widget: widget)
-        case .rollershutter:
-            RollershutterRow(widget: widget)
         case .setpoint:
             SetpointRow(widget: widget)
         case .frame:
             FrameRow(widget: widget)
+        case .text:
+            TextRow(widget: widget)
         case .image:
-            // Encoded image
             if widget.item != nil {
                 ImageRawRow(widget: widget)
             } else {
@@ -70,7 +77,10 @@ struct WidgetRowView: View {
             MapViewRow(widget: widget)
         case .colorpicker:
             ColorPickerRow(widget: widget)
-        default:
+        case .selection, .video, .webview, .input, .colortemperaturepicker, .buttongrid:
+            // Not yet implemented for watchOS
+            GenericRow(widget: widget)
+        case .group, .defaultWidget, .button, .unknown:
             GenericRow(widget: widget)
         }
     }
