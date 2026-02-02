@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import os.log
 import SwiftUI
@@ -26,7 +27,7 @@ struct SegmentRow: View {
         HStack {
             HStack {
                 IconView(widget: widget, settings: settings)
-                TextLabelView(widget: widget, lineLimit: 1)
+                TextLabelView(widget: widget, font: .caption)
                 Spacer()
             }
             NavigationLink(destination: LazyView(SegmentSelectionView(widget: widget, selectedIndex: $selectedIndex))) {
@@ -49,8 +50,8 @@ struct SegmentRow: View {
         .onAppear {
             selectedIndex = widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
         }
-        .onChange(of: widget.item?.state) { newState in
-            selectedIndex = widget.mappingIndex(byCommand: newState).map { Int($0) }
+        .onChange(of: widget.item?.state, initial: false) { oldValue, newValue in
+            selectedIndex = widget.mappingIndex(byCommand: newValue).map { Int($0) }
         }
     }
 }
@@ -63,3 +64,4 @@ struct SegmentRow: View {
     }
     .environmentObject(AppSettings())
 }
+

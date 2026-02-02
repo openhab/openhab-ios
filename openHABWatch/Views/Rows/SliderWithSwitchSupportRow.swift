@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import os.log
 import SwiftUI
@@ -61,7 +62,7 @@ struct SliderWithSwitchSupportRow: View {
                     HStack {
                         IconView(widget: widget, settings: settings)
                         VStack {
-                            TextLabelView(widget: widget)
+                            TextLabelView(widget: widget, font: .caption, lineLimit: 2)
                             DetailTextLabelView(widget: widget)
                         }
                     }

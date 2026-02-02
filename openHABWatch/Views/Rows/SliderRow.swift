@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import os.log
 import SwiftUI
@@ -40,7 +41,7 @@ struct SliderRow: View {
         VStack(spacing: 3) {
             HStack {
                 IconView(widget: widget, settings: settings)
-                TextLabelView(widget: widget)
+                TextLabelView(widget: widget, font: .caption, lineLimit: 2)
                 Spacer()
                 DetailTextLabelView(widget: widget)
             }.padding(.top, 8)

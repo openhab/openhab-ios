@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import os.log
 import SFSafeSymbols
@@ -24,7 +25,7 @@ struct ColorPickerRow: View {
             VStack(spacing: 0) {
                 HStack {
                     IconView(widget: widget, settings: settings)
-                    TextLabelView(widget: widget)
+                    TextLabelView(widget: widget, font: .caption, lineLimit: 2)
                     Spacer()
                 }
                 HStack {

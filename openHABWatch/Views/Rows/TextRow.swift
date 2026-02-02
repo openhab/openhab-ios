@@ -21,7 +21,7 @@ struct TextRow: View {
     var body: some View {
         HStack {
             IconView(widget: widget, settings: settings)
-            TextLabelView(widget: widget)
+            TextLabelView(widget: widget, font: .caption, lineLimit: 2)
             Spacer()
             DetailTextLabelView(widget: widget)
             if widget.linkedPage != nil {

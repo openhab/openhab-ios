@@ -9,23 +9,24 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import CommonUI
 import OpenHABCore
 import SwiftUI
 
-struct TextLabelView: View {
+public struct TextLabelView: View {
     @ObservedObject var widget: OpenHABWidget
-    var lineLimit = 2
-
-    var body: some View {
+    var font: Font?
+    var lineLimit: Int
+    
+    public var body: some View {
         Text(widget.labelText ?? "")
-            .font(.caption)
+            .font(font)
             .lineLimit(lineLimit)
             .foregroundStyle(!widget.labelcolor.isEmpty ? Color(fromString: widget.labelcolor) : .primary)
     }
-}
 
-#Preview {
-    let widget = UserData(preview: true).widgets[2]
-    TextLabelView(widget: widget)
+    public init(widget: OpenHABWidget, font: Font? = nil, lineLimit: Int = 1) {
+        self.widget = widget
+        self.font = font
+        self.lineLimit = lineLimit
+    }
 }

@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
@@ -21,7 +22,7 @@ struct RollershutterRow: View {
         VStack(spacing: -5) {
             HStack {
                 IconView(widget: widget, settings: settings)
-                TextLabelView(widget: widget)
+                TextLabelView(widget: widget, font: .caption, lineLimit: 2)
                 Spacer()
             }
             HStack {

@@ -9,61 +9,11 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import os.log
 import SFSafeSymbols
 import SwiftUI
-
-struct SelectionRow: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: AppSettings
-    @State private var selectedIndex: Int?
-
-    private var mappings: [OpenHABWidgetMapping] {
-        widget.mappingsOrItemOptions
-    }
-
-    private var currentIndex: Int? {
-        selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
-    }
-
-    /// Returns the label of the currently selected mapping
-    private var selectedValueText: String? {
-        if let index = currentIndex, index >= 0, index < mappings.count {
-            return mappings[index].label
-        }
-        return widget.labelValue
-    }
-
-    var body: some View {
-        HStack {
-            HStack {
-                IconView(widget: widget, settings: settings)
-                TextLabelView(widget: widget, lineLimit: 1)
-                Spacer()
-            }
-            NavigationLink(destination: LazyView(SelectionListView(widget: widget, selectedIndex: $selectedIndex))) {
-                HStack(spacing: 4) {
-                    if let valueText = selectedValueText {
-                        Text(valueText)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-                    Image(systemSymbol: .chevronUpChevronDown)
-                        .foregroundStyle(.secondary)
-                        .font(.caption2)
-                }
-            }
-            .buttonStyle(.plain)
-        }
-        .onAppear {
-            selectedIndex = widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
-        }
-        .onChange(of: widget.item?.state) { newState in
-            selectedIndex = widget.mappingIndex(byCommand: newState).map { Int($0) }
-        }
-    }
-}
 
 /// Selection list view for picking from available options
 struct SelectionListView: View {
@@ -123,6 +73,57 @@ struct SelectionListView: View {
             Logger.rowViews.info("Selection changed to: \(selectedCommand)")
             widget.sendCommand(selectedCommand)
             dismiss()
+        }
+    }
+}
+
+struct SelectionRow: View {
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var settings: AppSettings
+    @State private var selectedIndex: Int?
+
+    private var mappings: [OpenHABWidgetMapping] {
+        widget.mappingsOrItemOptions
+    }
+
+    private var currentIndex: Int? {
+        selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
+    }
+
+    /// Returns the label of the currently selected mapping
+    private var selectedValueText: String? {
+        if let index = currentIndex, index >= 0, index < mappings.count {
+            return mappings[index].label
+        }
+        return widget.labelValue
+    }
+
+    var body: some View {
+        HStack {
+            HStack {
+                IconView(widget: widget, settings: settings)
+                TextLabelView(widget: widget, font: .caption)
+                Spacer()
+            }
+            NavigationLink(destination: LazyView(SelectionListView(widget: widget, selectedIndex: $selectedIndex))) {
+                HStack(spacing: 4) {
+                    if let valueText = selectedValueText {
+                        Text(valueText)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                    Image(systemSymbol: .chevronUpChevronDown)
+                        .foregroundStyle(.secondary)
+                        .font(.caption2)
+                }
+            }
+            .buttonStyle(.plain)
+        }
+        .onAppear {
+            selectedIndex = widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
+        }
+        .onChange(of: widget.item?.state) { _, newState in
+            selectedIndex = widget.mappingIndex(byCommand: newState).map { Int($0) }
         }
     }
 }

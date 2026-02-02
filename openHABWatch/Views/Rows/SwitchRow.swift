@@ -48,14 +48,14 @@ struct SwitchRow: View {
             HStack {
                 IconView(widget: widget, settings: settings)
                 VStack {
-                    TextLabelView(widget: widget, lineLimit: 1)
+                    TextLabelView(widget: widget, font: .caption)
                     DetailTextLabelView(widget: widget)
                 }
             }
         }
         .padding(.trailing)
         .cornerRadius(5)
-        .onChange(of: effectiveState) { _ in
+        .onChange(of: effectiveState) {
             localIsOn = nil
         }
     }
