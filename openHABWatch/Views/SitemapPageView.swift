@@ -44,11 +44,7 @@ struct WidgetRowView: View {
                 SwitchRow(widget: widget)
             }
         case .slider:
-            if widget.switchSupport {
-                SliderWithSwitchSupportRow(widget: widget)
-            } else {
-                SliderRow(widget: widget)
-            }
+            SliderRow(widget: widget)
         case .setpoint:
             SetpointRow(widget: widget)
         case .frame:

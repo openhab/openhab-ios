@@ -19,6 +19,8 @@ struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = AppSettings.shared
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    /// Optional SF Symbol to show as fallback when network icon is unavailable (useful for previews)
+    var fallbackSymbol: SFSymbol?
 
     @State private var imageLoadingFailed = false
     @State private var retryCount = 0
@@ -70,6 +72,12 @@ struct IconView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 20, height: 20)
                     .id("\(iconURL.absoluteString)-\(widget.item?.state ?? "")-\(widget.iconColor)")
+            } else if let fallbackSymbol {
+                Image(systemSymbol: fallbackSymbol)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 15, height: 15)
+                    .foregroundStyle(.primary)
             } else {
                 Rectangle()
                     .foregroundStyle(.background)
