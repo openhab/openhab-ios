@@ -16,7 +16,7 @@ public struct TextLabelView: View {
     @ObservedObject var widget: OpenHABWidget
     var font: Font?
     var lineLimit: Int
-    
+
     public var body: some View {
         Text(widget.labelText ?? "")
             .font(font)

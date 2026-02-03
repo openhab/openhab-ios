@@ -50,7 +50,7 @@ struct SegmentRow: View {
         .onAppear {
             selectedIndex = widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
         }
-        .onChange(of: widget.item?.state, initial: false) { oldValue, newValue in
+        .onChange(of: widget.item?.state, initial: false) { _, newValue in
             selectedIndex = widget.mappingIndex(byCommand: newValue).map { Int($0) }
         }
     }
@@ -64,4 +64,3 @@ struct SegmentRow: View {
     }
     .environmentObject(AppSettings())
 }
-
