@@ -13,6 +13,7 @@ import Combine
 import Kingfisher
 import OpenHABCore
 import os.log
+import SFSafeSymbols
 import SwiftUI
 
 /// Thread-safe actor for tracking cached icon keys
@@ -48,6 +49,8 @@ struct IconView: View {
 
     let size: CGSize
     let iconType: IconType = .svg
+    /// Optional SF Symbol to show as fallback when network icon is unavailable (useful for previews)
+    let fallbackSymbol: SFSymbol?
 
     private let logger = Logger(subsystem: "org.openhab", category: "IconView")
 
@@ -82,10 +85,18 @@ struct IconView: View {
 
     var body: some View {
         ZStack {
-            // No icon or failed to load - show empty space
-            Rectangle()
-                .fill(Color.clear)
-                .frame(width: size.width, height: size.height)
+            // No icon URL - show fallback symbol if available
+            if let fallbackSymbol {
+                Image(systemSymbol: fallbackSymbol)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: size.width * 0.75, height: size.height * 0.75)
+                    .foregroundStyle(.primary)
+            } else {
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(width: size.width, height: size.height)
+            }
 
             if let iconURL {
                 KFImage(iconURL)
@@ -129,10 +140,11 @@ struct IconView: View {
 
 extension IconView {
     /// Creates a widget icon view with standard size (32x32, matching UIKit cells)
-    init(widget: OpenHABWidget) {
+    init(widget: OpenHABWidget, fallbackSymbol: SFSymbol? = nil) {
         self.init(
             widget: widget,
-            size: CGSize(width: 32, height: 32)
+            size: CGSize(width: 32, height: 32),
+            fallbackSymbol: fallbackSymbol
         )
     }
 }
@@ -156,5 +168,6 @@ extension IconView {
     let widget = OpenHABWidget()
     widget.icon = "switch"
     widget.label = "Test Switch"
-    return IconView(widget: widget)
+    return IconView(widget: widget, fallbackSymbol: .switch2)
+        .environmentObject(SitemapPageViewModel())
 }
