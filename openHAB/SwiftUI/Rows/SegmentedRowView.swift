@@ -286,7 +286,7 @@ private extension SegmentedRowView {
         SegmentedRowView(
             widget: SegmentedRowView.createPreviewWidget(
                 label: "Light Switch",
-                detailLabel: "ON",
+                detailLabel: "1",
                 mappings: [
                     OpenHABWidgetMapping(command: "ON", label: "ON"),
                     OpenHABWidgetMapping(command: "OFF", label: "OFF")
@@ -321,7 +321,7 @@ private extension SegmentedRowView {
         SegmentedRowView(
             widget: SegmentedRowView.createPreviewWidget(
                 label: "Temperature Control",
-                detailLabel: "Automatic",
+                detailLabel: "3",
                 mappings: [
                     OpenHABWidgetMapping(command: "manual", label: "Manual"),
                     OpenHABWidgetMapping(command: "calendar", label: "Calendar"),
@@ -339,7 +339,7 @@ private extension SegmentedRowView {
         SegmentedRowView(
             widget: SegmentedRowView.createPreviewWidget(
                 label: "Fan Speed",
-                detailLabel: "High",
+                detailLabel: "4",
                 mappings: [
                     OpenHABWidgetMapping(command: "0", label: "Off"),
                     OpenHABWidgetMapping(command: "1", label: "Low"),
@@ -374,7 +374,7 @@ private extension SegmentedRowView {
         SegmentedRowView(
             widget: SegmentedRowView.createPreviewWidget(
                 label: "Light",
-                detailLabel: "ON",
+                detailLabel: "1",
                 mappings: [
                     OpenHABWidgetMapping(command: "ON", label: "ON"),
                     OpenHABWidgetMapping(command: "OFF", label: "OFF")
@@ -386,7 +386,7 @@ private extension SegmentedRowView {
         SegmentedRowView(
             widget: SegmentedRowView.createPreviewWidget(
                 label: "Climate Mode",
-                detailLabel: "Auto",
+                detailLabel: "2",
                 mappings: [
                     OpenHABWidgetMapping(command: "m", label: "Manual"),
                     OpenHABWidgetMapping(command: "a", label: "Auto"),
@@ -399,7 +399,7 @@ private extension SegmentedRowView {
         SegmentedRowView(
             widget: SegmentedRowView.createPreviewWidget(
                 label: "Fan Speed",
-                detailLabel: "Medium",
+                detailLabel: "2",
                 mappings: [
                     OpenHABWidgetMapping(command: "0", label: "Off"),
                     OpenHABWidgetMapping(command: "1", label: "Low"),

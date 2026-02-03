@@ -13,6 +13,7 @@ import Foundation
 import OpenHABCore
 import os.log
 
+#if DEBUG
 // swiftlint:disable type_body_length
 public enum PreviewConstants {
     public static let logger = Logger(subsystem: "org.openhab", category: "PreviewConstants")
@@ -579,3 +580,4 @@ public enum PreviewConstants {
 }
 
 // swiftlint:enable type_body_length
+#endif
