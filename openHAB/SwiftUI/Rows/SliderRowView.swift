@@ -14,6 +14,7 @@ import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
 
+// swiftlint:disable:next file_types_order
 struct SliderRowView: View {
     @ObservedObject var widget: OpenHABWidget
     var fallbackSymbol: SFSymbol?
@@ -22,10 +23,19 @@ struct SliderRowView: View {
 
     /// Pending value while user is dragging; nil when not actively changing
     @State private var pendingValue: Double?
+    @State private var isEditing = false
     @State private var lastSendTime: Date = .distantPast
 
     private var sliderRange: ClosedRange<Double> {
         widget.minValue ... widget.maxValue
+    }
+
+    private var currentValue: Double {
+        pendingValue ?? widget.adjustedValue
+    }
+
+    private var currentValueText: String {
+        currentValue.valueText(step: widget.step)
     }
 
     private var valueBinding: Binding<Double> {
@@ -33,21 +43,13 @@ struct SliderRowView: View {
             get: { pendingValue ?? widget.adjustedValue },
             set: { newValue in
                 pendingValue = newValue
+
+                // Send updates during drag if enabled (throttled)
                 if widget.shouldUseSliderUpdatesDuringMove() {
                     let now = Date()
                     if now.timeIntervalSince(lastSendTime) > 0.2 {
                         sendSliderUpdate(newValue)
                         lastSendTime = now
-                    }
-                }
-                // Debounce: clear pending value after delay if no new updates
-                Task { @MainActor in
-                    try? await Task.sleep(for: .milliseconds(500))
-                    if pendingValue == newValue {
-                        if !widget.shouldUseSliderUpdatesDuringMove() {
-                            sendSliderUpdate(newValue)
-                        }
-                        pendingValue = nil
                     }
                 }
             }
@@ -58,7 +60,7 @@ struct SliderRowView: View {
         HStack {
             if widget.switchSupport {
                 Button {
-                    viewModel.sendCommand(widget.item, commandToSend: (pendingValue ?? widget.adjustedValue) <= widget.minValue ? "ON" : "OFF")
+                    viewModel.sendCommand(widget.item, commandToSend: currentValue <= widget.minValue ? "ON" : "OFF")
                 } label: {
                     labelContent
                 }
@@ -68,8 +70,34 @@ struct SliderRowView: View {
                 labelContent
             }
 
-            Slider(value: valueBinding, in: sliderRange)
-                .disabled(widget.readOnly ?? false)
+            Slider(value: valueBinding, in: sliderRange) { editing in
+                isEditing = editing
+                if !editing {
+                    // User released slider - send final value for release-only mode
+                    if !widget.shouldUseSliderUpdatesDuringMove(), let value = pendingValue {
+                        sendSliderUpdate(value)
+                    }
+                    // Keep pendingValue set until server responds to avoid visual jump
+                    // Fallback: clear after delay if server doesn't respond
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(2000))
+                        if !isEditing, pendingValue != nil {
+                            pendingValue = nil
+                        }
+                    }
+                }
+            }
+            .disabled(widget.readOnly ?? false)
+        }
+        .onChange(of: widget.adjustedValue) { _ in
+            // Clear pending value when server responds (and user is not editing)
+            if !isEditing {
+                pendingValue = nil
+            }
+        }
+        .onAppear {
+            pendingValue = nil
+            isEditing = false
         }
     }
 
@@ -88,12 +116,11 @@ struct SliderRowView: View {
 
             Spacer()
 
-            if let detailTextLabel = widget.labelValue, !detailTextLabel.isEmpty {
-                Text(detailTextLabel)
-                    .font(.callout)
-                    .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
-                    .lineLimit(1)
-            }
+            // Show current slider value (pendingValue while dragging, otherwise widget value)
+            Text(pendingValue != nil ? currentValueText : (widget.labelValue ?? currentValueText))
+                .font(.callout)
+                .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
+                .lineLimit(1)
         }
         .contentShape(Rectangle())
     }

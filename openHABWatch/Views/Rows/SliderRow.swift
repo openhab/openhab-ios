@@ -20,6 +20,15 @@ struct SliderRow: View {
     @EnvironmentObject var settings: AppSettings
     var fallbackSymbol: SFSymbol?
     @State private var pendingValue: Double?
+
+    private var currentValue: Double {
+        pendingValue ?? widget.adjustedValue
+    }
+
+    private var currentValueText: String {
+        currentValue.valueText(step: widget.step)
+    }
+
     var valueBinding: Binding<Double> {
         .init(
             get: {
@@ -64,7 +73,13 @@ struct SliderRow: View {
                         IconView(widget: widget, settings: settings, fallbackSymbol: fallbackSymbol)
                         VStack(alignment: .leading) {
                             TextLabelView(widget: widget, font: .caption, lineLimit: 2)
-                            DetailTextLabelView(widget: widget)
+                            if pendingValue != nil {
+                                Text(currentValueText)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                DetailTextLabelView(widget: widget)
+                            }
                         }
                     }
                 }
@@ -75,7 +90,13 @@ struct SliderRow: View {
                     IconView(widget: widget, settings: settings, fallbackSymbol: fallbackSymbol)
                     TextLabelView(widget: widget, font: .caption, lineLimit: 2)
                     Spacer()
-                    DetailTextLabelView(widget: widget)
+                    if pendingValue != nil {
+                        Text(currentValueText)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        DetailTextLabelView(widget: widget)
+                    }
                 }.padding(.top, 8)
             }
 
