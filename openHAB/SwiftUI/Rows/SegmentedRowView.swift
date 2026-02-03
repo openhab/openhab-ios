@@ -47,8 +47,9 @@ struct SegmentedRowView: View {
                     .layoutPriority(1)
             }
 
+            Spacer(minLength: 8)
+
             if let detailTextLabel = widget.labelValue, !detailTextLabel.isEmpty {
-                Spacer(minLength: 8)
                 Text(detailTextLabel)
                     .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
                     .lineLimit(1)
@@ -60,16 +61,13 @@ struct SegmentedRowView: View {
                 if widget.hasPressReleaseMappings {
                     // Press-release buttons for mappings with releaseCommand
                     pressReleaseButtons
-                        .padding(.leading, 8)
                         .fixedSize(horizontal: true, vertical: false)
                 } else if mappings.count == 1 {
                     singleMappingButton
-                        .padding(.leading, 8)
                         .fixedSize(horizontal: true, vertical: false)
                 } else {
                     // Button-based segmented control with animated selection indicator
                     segmentedButtons
-                        .padding(.leading, 8)
                         .frame(minWidth: 75)
                         .layoutPriority(1)
                 }
@@ -124,12 +122,24 @@ struct SegmentedRowView: View {
 
     @ViewBuilder
     private var pressReleaseButtons: some View {
-        HStack {
+        HStack(spacing: 2) {
             ForEach(mappings.indices, id: \.self) { index in
-                let mapping = mappings[index]
-                pressReleaseButton(for: mapping, at: index)
+                pressReleaseButton(for: mappings[index], at: index)
             }
         }
+        .padding(2)
+        .background(
+            RoundedRectangle(cornerRadius: 7)
+                .fill(
+                    colorScheme == .dark
+                        ? Color(uiColor: .tertiarySystemBackground)
+                        : Color(uiColor: .secondarySystemBackground)
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 7)
+                .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
+        )
     }
 
     @ViewBuilder
@@ -193,14 +203,25 @@ struct SegmentedRowView: View {
 
     @ViewBuilder
     private func pressReleaseButton(for mapping: OpenHABWidgetMapping, at index: Int) -> some View {
+        let isPressed = pressedIndex == index
         Text(mapping.label)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(pressedIndex == index ? Color(uiColor: .systemGray3) : Color(uiColor: .systemGray5))
-            )
+            .font(.footnote)
+            .bold()
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .frame(minWidth: 50)
             .foregroundStyle(.primary)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(
+                        isPressed
+                            ? (colorScheme == .dark ? Color(uiColor: .systemGray2) : Color(uiColor: .systemBackground))
+                            : Color.clear
+                    )
+            )
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
@@ -353,18 +374,18 @@ private extension SegmentedRowView {
     }
 }
 
-#Preview("Single Mapping") {
+#Preview("PressRelease") {
     PreviewList {
         SegmentedRowView(
             widget: SegmentedRowView.createPreviewWidget(
-                label: "Scene",
-                detailLabel: "Movie Night",
+                label: "All Shutters",
+                detailLabel: "NA",
                 mappings: [
-                    OpenHABWidgetMapping(command: "PLAY", label: "Run")
+                    OpenHABWidgetMapping(command: "DOWN", label: "DOWN", releaseCommand: "OFF")
                 ],
-                selectedState: "PLAY"
+                selectedState: "DOWN"
             ),
-            fallbackSymbol: .theatermasksFill
+            fallbackSymbol: .romanShadeClosed
         )
     }
 }
