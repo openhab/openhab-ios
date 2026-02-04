@@ -13,346 +13,82 @@
 import os.log
 import UIKit
 
+@MainActor
 private let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
 
+@MainActor
 @propertyWrapper
-private struct Preference<T: Sendable> {
-    private let keyPath: WritableKeyPath<PreferencesStore, T>
+public struct UserDefault<T: Sendable> {
+    private let key: String
+    private let defaultValue: T
+    private let isHomeProperty: Bool
     private let subject: CurrentValueSubject<T, Never>
 
-    var wrappedValue: T {
+    public var wrappedValue: T {
         get {
-            PreferencesStoreAccess.shared.value(for: keyPath)
+            PreferencesAccess.getPreference(key: key, defaultValue: defaultValue, encoder: { $0 }, decoder: { $0 as? T })
         }
         set {
-            PreferencesStoreAccess.shared.setValue(newValue, for: keyPath)
-            subject.send(newValue)
+            PreferencesAccess.preferenceChanged(newValue: newValue, key: key, isHomeProperty: isHomeProperty, subject: subject) { $0 }
         }
     }
 
-    var projectedValue: AnyPublisher<T, Never> {
+    public var projectedValue: AnyPublisher<T, Never> {
         subject.eraseToAnyPublisher()
     }
 
-    init(_ keyPath: WritableKeyPath<PreferencesStore, T>) {
-        self.keyPath = keyPath
-        let currentValue = PreferencesStoreAccess.shared.value(for: keyPath)
+    public init(_ key: String, defaultValue: T, isHomeProperty: Bool = false) {
+        self.key = key
+        self.defaultValue = defaultValue
+        self.isHomeProperty = isHomeProperty
+        let currentValue = PreferencesAccess.getPreference(key: key, defaultValue: defaultValue, encoder: { $0 }, decoder: { $0 as? T })
         subject = CurrentValueSubject<T, Never>(currentValue)
     }
 }
 
-private struct PreferencesStore: Codable, Sendable, Equatable {
-    static let currentVersion = 1
+@MainActor
+@propertyWrapper
+public struct UserDefaultObject<T: Codable & Sendable> {
+    private let key: String
+    private let defaultValue: T
+    private let isHomeProperty: Bool
+    private let subject: CurrentValueSubject<T, Never>
 
-    var version: Int
-    var currentHomePreferences: HomePreferences
-    var storedHomes: [UUID: HomePreferences]
-    var activeHomeId: UUID
-    var applicationPreferences: ApplicationPreferences
-    var sendCrashReports: Bool
-    var idleOff: Bool
-    var screensaverEnabled: Bool
-    var screensaverShowsTime: Bool
-    var screensaverShowsDate: Bool
-    var screensaverIdleInterval: Double
-    var screensaverMovementInterval: Double
-    var screensaverFontName: String
-    var screensaverTimeFontRatio: Double
-    var screensaverDateFontRatio: Double
-    var screensaverEnableDimming: Bool
-    var screensaverDimLevel: Double
-    var screensaverShowsSeconds: Bool
-    var screensaverUse24Hour: Bool
-    var screensaverFadeDuration: Double
-    var screensaverRestoreBrightness: Bool
-    var screensaverWakeBrightness: Double
-    var hideStatusBar: Bool
-    var currentWebViewPath: String
-
-    private enum CodingKeys: String, CodingKey {
-        case version
-        case currentHomePreferences
-        case storedHomes
-        case activeHomeId
-        case applicationPreferences
-        case sendCrashReports
-        case idleOff
-        case screensaverEnabled
-        case screensaverShowsTime
-        case screensaverShowsDate
-        case screensaverIdleInterval
-        case screensaverMovementInterval
-        case screensaverFontName
-        case screensaverTimeFontRatio
-        case screensaverDateFontRatio
-        case screensaverEnableDimming
-        case screensaverDimLevel
-        case screensaverShowsSeconds
-        case screensaverUse24Hour
-        case screensaverFadeDuration
-        case screensaverRestoreBrightness
-        case screensaverWakeBrightness
-        case hideStatusBar
-        case currentWebViewPath
+    private let objectDecoder: (Any) -> (T?) = {
+        guard let data = $0 as? Data else {
+            return nil
+        }
+        return try? JSONDecoder().decode(T.self, from: data)
     }
 
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let defaults = PreferencesStore.defaultStore()
-        version = try container.decodeIfPresent(Int.self, forKey: .version) ?? defaults.version
-        currentHomePreferences = try container.decodeIfPresent(HomePreferences.self, forKey: .currentHomePreferences) ?? defaults.currentHomePreferences
-        storedHomes = try container.decodeIfPresent([UUID: HomePreferences].self, forKey: .storedHomes) ?? defaults.storedHomes
-        activeHomeId = try container.decodeIfPresent(UUID.self, forKey: .activeHomeId) ?? defaults.activeHomeId
-        applicationPreferences = try container.decodeIfPresent(ApplicationPreferences.self, forKey: .applicationPreferences) ?? defaults.applicationPreferences
-        sendCrashReports = try container.decodeIfPresent(Bool.self, forKey: .sendCrashReports) ?? defaults.sendCrashReports
-        idleOff = try container.decodeIfPresent(Bool.self, forKey: .idleOff) ?? defaults.idleOff
-        screensaverEnabled = try container.decodeIfPresent(Bool.self, forKey: .screensaverEnabled) ?? defaults.screensaverEnabled
-        screensaverShowsTime = try container.decodeIfPresent(Bool.self, forKey: .screensaverShowsTime) ?? defaults.screensaverShowsTime
-        screensaverShowsDate = try container.decodeIfPresent(Bool.self, forKey: .screensaverShowsDate) ?? defaults.screensaverShowsDate
-        screensaverIdleInterval = try container.decodeIfPresent(Double.self, forKey: .screensaverIdleInterval) ?? defaults.screensaverIdleInterval
-        screensaverMovementInterval = try container.decodeIfPresent(Double.self, forKey: .screensaverMovementInterval) ?? defaults.screensaverMovementInterval
-        screensaverFontName = try container.decodeIfPresent(String.self, forKey: .screensaverFontName) ?? defaults.screensaverFontName
-        screensaverTimeFontRatio = try container.decodeIfPresent(Double.self, forKey: .screensaverTimeFontRatio) ?? defaults.screensaverTimeFontRatio
-        screensaverDateFontRatio = try container.decodeIfPresent(Double.self, forKey: .screensaverDateFontRatio) ?? defaults.screensaverDateFontRatio
-        screensaverEnableDimming = try container.decodeIfPresent(Bool.self, forKey: .screensaverEnableDimming) ?? defaults.screensaverEnableDimming
-        screensaverDimLevel = try container.decodeIfPresent(Double.self, forKey: .screensaverDimLevel) ?? defaults.screensaverDimLevel
-        screensaverShowsSeconds = try container.decodeIfPresent(Bool.self, forKey: .screensaverShowsSeconds) ?? defaults.screensaverShowsSeconds
-        screensaverUse24Hour = try container.decodeIfPresent(Bool.self, forKey: .screensaverUse24Hour) ?? defaults.screensaverUse24Hour
-        screensaverFadeDuration = try container.decodeIfPresent(Double.self, forKey: .screensaverFadeDuration) ?? defaults.screensaverFadeDuration
-        screensaverRestoreBrightness = try container.decodeIfPresent(Bool.self, forKey: .screensaverRestoreBrightness) ?? defaults.screensaverRestoreBrightness
-        screensaverWakeBrightness = try container.decodeIfPresent(Double.self, forKey: .screensaverWakeBrightness) ?? defaults.screensaverWakeBrightness
-        hideStatusBar = try container.decodeIfPresent(Bool.self, forKey: .hideStatusBar) ?? defaults.hideStatusBar
-        currentWebViewPath = try container.decodeIfPresent(String.self, forKey: .currentWebViewPath) ?? defaults.currentWebViewPath
+    private let objectEncoder: (T) -> (any Sendable)? = { try? JSONEncoder().encode($0) }
+
+    public var wrappedValue: T {
+        get {
+            PreferencesAccess.getPreference(key: key, defaultValue: defaultValue, encoder: objectEncoder, decoder: objectDecoder)
+        }
+        set {
+            PreferencesAccess.preferenceChanged(newValue: newValue, key: key, isHomeProperty: isHomeProperty, subject: subject, converter: objectEncoder)
+        }
     }
 
-    static func defaultStore() -> PreferencesStore {
-        let homeId = UUID()
-        let home = HomePreferences(id: homeId)
-        return PreferencesStore(
-            version: currentVersion,
-            currentHomePreferences: home,
-            storedHomes: [homeId: home],
-            activeHomeId: homeId,
-            applicationPreferences: ApplicationPreferences(),
-            sendCrashReports: false,
-            idleOff: false,
-            screensaverEnabled: false,
-            screensaverShowsTime: true,
-            screensaverShowsDate: true,
-            screensaverIdleInterval: 120.0,
-            screensaverMovementInterval: 8.0,
-            screensaverFontName: "",
-            screensaverTimeFontRatio: 0.2,
-            screensaverDateFontRatio: 0.4,
-            screensaverEnableDimming: true,
-            screensaverDimLevel: 0.3,
-            screensaverShowsSeconds: false,
-            screensaverUse24Hour: false,
-            screensaverFadeDuration: 2.0,
-            screensaverRestoreBrightness: true,
-            screensaverWakeBrightness: 1.0,
-            hideStatusBar: false,
-            currentWebViewPath: ""
-        )
+    public var projectedValue: AnyPublisher<T, Never> {
+        subject.eraseToAnyPublisher()
+    }
+
+    init(_ key: String, defaultValue: T, isHomeProperty: Bool = false) {
+        self.key = key
+        self.defaultValue = defaultValue
+        self.isHomeProperty = isHomeProperty
+
+        // Combine publication
+        let currentValue = PreferencesAccess.getPreference(key: key, defaultValue: defaultValue, encoder: objectEncoder, decoder: objectDecoder)
+        subject = CurrentValueSubject(currentValue)
     }
 }
 
-private final class PreferencesStoreAccess {
-    static let shared = PreferencesStoreAccess()
-    private static let storeKey = "preferencesStore"
-    private var store: PreferencesStore
-
-    private init() {
-        store = Self.loadStore()
-    }
-
-    func value<T>(for keyPath: KeyPath<PreferencesStore, T>) -> T {
-        store[keyPath: keyPath]
-    }
-
-    func setValue<T>(_ value: T, for keyPath: WritableKeyPath<PreferencesStore, T>) {
-        store[keyPath: keyPath] = value
-        persistStore()
-    }
-
-    static func migrateIfNeeded() {
-        _ = PreferencesStoreAccess.shared
-    }
-
-    private static func loadStore() -> PreferencesStore {
-        if let data = sharedDefaults.data(forKey: storeKey) {
-            let decoder = JSONDecoder()
-            if let decoded = try? decoder.decode(PreferencesStore.self, from: data) {
-                if decoded.version == PreferencesStore.currentVersion {
-                    return decoded
-                }
-                return migrateStore(decoded)
-            } else {
-                Logger.preferences.error("Preferences JSON failed to decode, falling back to legacy preferences.")
-            }
-        }
-
-        let legacyStore = LegacyPreferencesMapper.loadStore()
-        persistStore(legacyStore)
-        return legacyStore
-    }
-
-    private static func migrateStore(_ store: PreferencesStore) -> PreferencesStore {
-        var migrated = store
-        migrated.version = PreferencesStore.currentVersion
-        persistStore(migrated)
-        return migrated
-    }
-
-    private func persistStore() {
-        Self.persistStore(store)
-    }
-
-    private static func persistStore(_ store: PreferencesStore) {
-        let encoder = JSONEncoder()
-        guard let data = try? encoder.encode(store) else {
-            Logger.preferences.error("Failed to encode preferences JSON.")
-            return
-        }
-        sharedDefaults.set(data, forKey: storeKey)
-    }
-
-    #if DEBUG
-    func reloadFromDefaultsForTesting() {
-        store = Self.loadStore()
-    }
-    #endif
-}
-
-private enum LegacyPreferencesMapper {
-    static func loadStore() -> PreferencesStore {
-        let decoder = JSONDecoder()
-        var store = PreferencesStore.defaultStore()
-
-        if let data = sharedDefaults.data(forKey: "currentHomePreferences"),
-           let decoded = try? decoder.decode(HomePreferences.self, from: data) {
-            store.currentHomePreferences = decoded
-        }
-
-        if let data = sharedDefaults.data(forKey: "storedHomes"),
-           let decoded = try? decoder.decode([UUID: HomePreferences].self, from: data) {
-            store.storedHomes = decoded
-        }
-
-        if let data = sharedDefaults.data(forKey: "activeHomeId"),
-           let decoded = try? decoder.decode(UUID.self, from: data) {
-            store.activeHomeId = decoded
-        }
-
-        if let data = sharedDefaults.data(forKey: "applicationPreferences"),
-           let decoded = try? decoder.decode(ApplicationPreferences.self, from: data) {
-            store.applicationPreferences = decoded
-        }
-
-        store.sendCrashReports = sharedDefaults.object(forKey: "sendCrashReports") as? Bool ?? store.sendCrashReports
-        store.idleOff = sharedDefaults.object(forKey: "idleOff") as? Bool ?? store.idleOff
-        store.screensaverEnabled = sharedDefaults.object(forKey: "screensaverEnabled") as? Bool ?? store.screensaverEnabled
-        store.screensaverShowsTime = sharedDefaults.object(forKey: "screensaverShowsTime") as? Bool ?? store.screensaverShowsTime
-        store.screensaverShowsDate = sharedDefaults.object(forKey: "screensaverShowsDate") as? Bool ?? store.screensaverShowsDate
-        store.screensaverIdleInterval = sharedDefaults.object(forKey: "screensaverIdleInterval") as? Double ?? store.screensaverIdleInterval
-        store.screensaverMovementInterval = sharedDefaults.object(forKey: "screensaverMovementInterval") as? Double ?? store.screensaverMovementInterval
-        store.screensaverFontName = sharedDefaults.string(forKey: "screensaverFontName") ?? store.screensaverFontName
-        store.screensaverTimeFontRatio = sharedDefaults.object(forKey: "screensaverTimeFontRatio") as? Double ?? store.screensaverTimeFontRatio
-        store.screensaverDateFontRatio = sharedDefaults.object(forKey: "screensaverDateFontRatio") as? Double ?? store.screensaverDateFontRatio
-        store.screensaverEnableDimming = sharedDefaults.object(forKey: "screensaverEnableDimming") as? Bool ?? store.screensaverEnableDimming
-        store.screensaverDimLevel = sharedDefaults.object(forKey: "screensaverDimLevel") as? Double ?? store.screensaverDimLevel
-        store.screensaverShowsSeconds = sharedDefaults.object(forKey: "screensaverShowsSeconds") as? Bool ?? store.screensaverShowsSeconds
-        store.screensaverUse24Hour = sharedDefaults.object(forKey: "screensaverUse24Hour") as? Bool ?? store.screensaverUse24Hour
-        store.screensaverFadeDuration = sharedDefaults.object(forKey: "screensaverFadeDuration") as? Double ?? store.screensaverFadeDuration
-        store.screensaverRestoreBrightness = sharedDefaults.object(forKey: "screensaverRestoreBrightness") as? Bool ?? store.screensaverRestoreBrightness
-        store.screensaverWakeBrightness = sharedDefaults.object(forKey: "screensaverWakeBrightness") as? Double ?? store.screensaverWakeBrightness
-        store.hideStatusBar = sharedDefaults.object(forKey: "hideStatusBar") as? Bool ?? store.hideStatusBar
-        store.currentWebViewPath = sharedDefaults.string(forKey: "currentWebViewPath") ?? store.currentWebViewPath
-
-        let didMigrateToSharedDefaults = sharedDefaults.bool(forKey: "didMigrateToSharedDefaults")
-        let didMigrateToMultipleHomes = sharedDefaults.bool(forKey: "didMigrateToMultipleHomes")
-
-        if !didMigrateToSharedDefaults {
-            applyStandardDefaultsMigration(to: &store)
-            sharedDefaults.set(true, forKey: "didMigrateToSharedDefaults")
-            sharedDefaults.set(true, forKey: "didMigrateToMultipleHomes")
-        }
-
-        if !didMigrateToMultipleHomes {
-            applyMultipleHomesMigration(to: &store)
-            sharedDefaults.set(true, forKey: "didMigrateToMultipleHomes")
-        }
-
-        if store.storedHomes.isEmpty {
-            store.storedHomes[store.currentHomePreferences.id] = store.currentHomePreferences
-        }
-
-        if store.storedHomes[store.activeHomeId] == nil {
-            store.storedHomes[store.activeHomeId] = store.currentHomePreferences
-        }
-
-        if let storedHome = store.storedHomes[store.activeHomeId] {
-            store.currentHomePreferences = storedHome
-        }
-
-        return store
-    }
-
-    private static func applyStandardDefaultsMigration(to store: inout PreferencesStore) {
-        let standardDefaults = UserDefaults.standard
-        store.currentHomePreferences.localConnectionConfig.url = standardDefaults.string(forKey: "localUrl") ?? store.currentHomePreferences.localConnectionConfig.url
-        store.currentHomePreferences.localConnectionConfig.alwaysSendBasicAuth = standardDefaults.object(forKey: "alwaysSendCreds") as? Bool ?? store.currentHomePreferences.localConnectionConfig.alwaysSendBasicAuth
-        store.currentHomePreferences.localConnectionConfig.ignoreSSL = standardDefaults.object(forKey: "ignoreSSL") as? Bool ?? store.currentHomePreferences.localConnectionConfig.ignoreSSL
-        store.currentHomePreferences.remoteConnectionConfig.url = standardDefaults.string(forKey: "remoteUrl") ?? store.currentHomePreferences.remoteConnectionConfig.url
-        store.currentHomePreferences.remoteConnectionConfig.username = standardDefaults.string(forKey: "username") ?? store.currentHomePreferences.remoteConnectionConfig.username
-        store.currentHomePreferences.remoteConnectionConfig.password = standardDefaults.string(forKey: "password") ?? store.currentHomePreferences.remoteConnectionConfig.password
-        store.currentHomePreferences.remoteConnectionConfig.alwaysSendBasicAuth = standardDefaults.object(forKey: "alwaysSendCreds") as? Bool ?? store.currentHomePreferences.remoteConnectionConfig.alwaysSendBasicAuth
-        store.currentHomePreferences.remoteConnectionConfig.ignoreSSL = standardDefaults.object(forKey: "ignoreSSL") as? Bool ?? store.currentHomePreferences.remoteConnectionConfig.ignoreSSL
-        store.currentHomePreferences.demomode = standardDefaults.object(forKey: "demomode") as? Bool ?? store.currentHomePreferences.demomode
-        store.currentHomePreferences.realTimeSliders = standardDefaults.object(forKey: "realTimeSliders") as? Bool ?? store.currentHomePreferences.realTimeSliders
-        store.currentHomePreferences.iconType = standardDefaults.object(forKey: "iconType") as? Int ?? store.currentHomePreferences.iconType
-        store.currentHomePreferences.defaultSitemap = standardDefaults.string(forKey: "defaultSitemap") ?? store.currentHomePreferences.defaultSitemap
-
-        store.idleOff = standardDefaults.object(forKey: "idleOff") as? Bool ?? store.idleOff
-        store.sendCrashReports = standardDefaults.object(forKey: "sendCrashReports") as? Bool ?? store.sendCrashReports
-    }
-
-    private static func applyMultipleHomesMigration(to store: inout PreferencesStore) {
-        let oldLocalUrl = sharedDefaults.string(forKey: "localUrl")
-        let oldRemoteUrl = sharedDefaults.string(forKey: "remoteUrl")
-        let oldUsername = sharedDefaults.string(forKey: "username")
-        let oldPassword = sharedDefaults.string(forKey: "password")
-        let oldAlwaysSendCreds = sharedDefaults.object(forKey: "alwaysSendCreds") as? Bool
-        let oldIgnoreSSL = sharedDefaults.object(forKey: "ignoreSSL") as? Bool
-
-        var newLocalConfiguration = store.currentHomePreferences.localConnectionConfig
-        newLocalConfiguration.url = oldLocalUrl ?? newLocalConfiguration.url
-        newLocalConfiguration.alwaysSendBasicAuth = oldAlwaysSendCreds ?? newLocalConfiguration.alwaysSendBasicAuth
-        newLocalConfiguration.ignoreSSL = oldIgnoreSSL ?? newLocalConfiguration.ignoreSSL
-
-        var newRemoteConfiguration = store.currentHomePreferences.remoteConnectionConfig
-        newRemoteConfiguration.url = oldRemoteUrl ?? newRemoteConfiguration.url
-        newRemoteConfiguration.username = oldUsername ?? newRemoteConfiguration.username
-        newRemoteConfiguration.password = oldPassword ?? newRemoteConfiguration.password
-        newRemoteConfiguration.alwaysSendBasicAuth = oldAlwaysSendCreds ?? newRemoteConfiguration.alwaysSendBasicAuth
-        newRemoteConfiguration.ignoreSSL = oldIgnoreSSL ?? newRemoteConfiguration.ignoreSSL
-
-        store.currentHomePreferences.defaultView = sharedDefaults.string(forKey: "defaultView") ?? store.currentHomePreferences.defaultView
-        store.currentHomePreferences.demomode = sharedDefaults.object(forKey: "demomode") as? Bool ?? store.currentHomePreferences.demomode
-        store.currentHomePreferences.realTimeSliders = sharedDefaults.object(forKey: "realTimeSliders") as? Bool ?? store.currentHomePreferences.realTimeSliders
-        store.currentHomePreferences.iconType = sharedDefaults.object(forKey: "iconType") as? Int ?? store.currentHomePreferences.iconType
-        store.currentHomePreferences.defaultSitemap = sharedDefaults.string(forKey: "defaultSitemap") ?? store.currentHomePreferences.defaultSitemap
-        store.currentHomePreferences.sortSitemapsBy = sharedDefaults.object(forKey: "sortSitemapsBy") as? Int ?? store.currentHomePreferences.sortSitemapsBy
-        store.currentHomePreferences.defaultMainUIPath = sharedDefaults.string(forKey: "defaultMainUIPath") ?? store.currentHomePreferences.defaultMainUIPath
-        store.currentHomePreferences.alwaysAllowWebRTC = sharedDefaults.object(forKey: "alwaysAllowWebRTC") as? Bool ?? store.currentHomePreferences.alwaysAllowWebRTC
-        store.currentHomePreferences.sitemapForWatch = sharedDefaults.string(forKey: "sitemapForWatch") ?? store.currentHomePreferences.sitemapForWatch
-        store.currentHomePreferences.localConnectionConfig = newLocalConfiguration
-        store.currentHomePreferences.remoteConnectionConfig = newRemoteConfiguration
-        store.currentHomePreferences.sitemapForWatchLabel = sharedDefaults.string(forKey: "sitemapForWatchLabel") ?? store.currentHomePreferences.sitemapForWatchLabel
-    }
-}
-
-public struct HomePreferences: Codable, Equatable, Sendable {
+@MainActor
+public struct HomePreferences: Codable, Equatable {
     public let id: UUID
     public var defaultView = "web"
     public var demomode = true
@@ -374,90 +110,148 @@ public struct HomePreferences: Codable, Equatable, Sendable {
     }
 }
 
-public struct ApplicationPreferences: Codable, Equatable, Sendable {
+@MainActor
+public struct ApplicationPreferences: Codable, Equatable {
     public var showSearchField = true
 }
 
-// MARK: Preferences stored in JSON with versioning
+// MARK: Retrieving preference from user defaults, reacting to preference change
 
-@MainActor
+// MARK: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+// MARK: !!
+
+// MARK: When making changes to Preferences, always consider a migration for existing users. Otherwise, they risk to loose their existing preferences.
+
+// MARK: !!
+
+// MARK: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+private enum PreferencesAccess {
+    @MainActor fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
+        let preferenceValue = sharedDefaults.object(forKey: key)
+        if let preferenceConverted = decoder(preferenceValue) {
+            return preferenceConverted
+        } else {
+            if let preferenceValue {
+                Logger.preferences.error("Preference value \(key) was \(String(describing: preferenceValue)) but did not conform to \(T.self). Replace with default value.")
+            } else {
+                Logger.preferences.info("Preference value \(key) was set for the first time. Using default value.")
+            }
+            let fallback = defaultValue
+            sharedDefaults.set(encoder(fallback), forKey: key)
+            return fallback
+        }
+    }
+
+    @MainActor fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
+        guard let sanitized = sanitize(newValue) else {
+            Logger.preferences.debug("Preference \(key) new value \(String(describing: newValue), privacy: .private) could not be sanitized, will be ignored")
+            return
+        }
+        let convertedValue = converter(sanitized)
+        guard convertedValue != nil else {
+            Logger.preferences.debug("Preference \(key) conversion of new value \(String(describing: sanitized), privacy: .private) failed, do not store.")
+            return
+        }
+        Logger.preferences.debug("Preference \(key) will be changed to value \(String(describing: newValue), privacy: .private)")
+        sharedDefaults.set(convertedValue, forKey: key)
+
+        subject.send(sanitized)
+    }
+}
+
 public actor Preferences {
     public static let shared = Preferences()
 
+    private static let defaultHomeId = UUID()
+
     /// the currently applied settings set from storedHomes
-    @Preference(\.currentHomePreferences)
+    @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: defaultHomeId))
     public private(set) var currentHomePreferences: HomePreferences
 
-    @Preference(\.sendCrashReports)
+    @UserDefault("sendCrashReports", defaultValue: false)
     public var sendCrashReports: Bool
 
-    @Preference(\.idleOff)
+    @UserDefault("idleOff", defaultValue: false)
     public var idleOff: Bool
 
-    @Preference(\.applicationPreferences)
+    @UserDefaultObject(
+        "applicationPreferences",
+        defaultValue:
+        ApplicationPreferences()
+    )
     public private(set) var applicationPreferences: ApplicationPreferences
 
-    @Preference(\.screensaverEnabled)
+    @UserDefault("screensaverEnabled", defaultValue: false)
     public var screensaverEnabled: Bool
 
-    @Preference(\.screensaverShowsTime)
+    @UserDefault("screensaverShowsTime", defaultValue: true)
     public var screensaverShowsTime: Bool
 
-    @Preference(\.screensaverShowsDate)
+    @UserDefault("screensaverShowsDate", defaultValue: true)
     public var screensaverShowsDate: Bool
 
-    @Preference(\.screensaverIdleInterval)
+    @UserDefault("screensaverIdleInterval", defaultValue: 120.0)
     public var screensaverIdleInterval: Double
 
-    @Preference(\.screensaverMovementInterval)
+    @UserDefault("screensaverMovementInterval", defaultValue: 8.0)
     public var screensaverMovementInterval: Double
 
-    @Preference(\.screensaverFontName)
+    @UserDefault("screensaverFontName", defaultValue: "")
     public var screensaverFontName: String
 
-    @Preference(\.screensaverTimeFontRatio)
+    @UserDefault("screensaverTimeFontRatio", defaultValue: 0.2)
     public var screensaverTimeFontRatio: Double
 
-    @Preference(\.screensaverDateFontRatio)
+    @UserDefault("screensaverDateFontRatio", defaultValue: 0.4)
     public var screensaverDateFontRatio: Double
 
-    @Preference(\.screensaverEnableDimming)
+    @UserDefault("screensaverEnableDimming", defaultValue: true)
     public var screensaverEnableDimming: Bool
 
-    @Preference(\.screensaverDimLevel)
+    @UserDefault("screensaverDimLevel", defaultValue: 0.3)
     public var screensaverDimLevel: Double
 
-    @Preference(\.screensaverShowsSeconds)
+    @UserDefault("screensaverShowsSeconds", defaultValue: false)
     public var screensaverShowsSeconds: Bool
 
-    @Preference(\.screensaverUse24Hour)
+    @UserDefault("screensaverUse24Hour", defaultValue: false)
     public var screensaverUse24Hour: Bool
 
-    @Preference(\.screensaverFadeDuration)
+    @UserDefault("screensaverFadeDuration", defaultValue: 2.0)
     public var screensaverFadeDuration: Double
 
-    @Preference(\.screensaverRestoreBrightness)
+    @UserDefault("screensaverRestoreBrightness", defaultValue: true)
     public var screensaverRestoreBrightness: Bool
 
-    @Preference(\.screensaverWakeBrightness)
+    @UserDefault("screensaverWakeBrightness", defaultValue: 1.0)
     public var screensaverWakeBrightness: Double
 
-    @Preference(\.hideStatusBar)
+    @UserDefault("hideStatusBar", defaultValue: false)
     public var hideStatusBar: Bool
 
-    @Preference(\.currentWebViewPath)
+    @UserDefault("currentWebViewPath", defaultValue: "")
     public var currentWebViewPath: String
 
     /// settings for different homes
-    @Preference(\.storedHomes)
+    @UserDefaultObject("storedHomes", defaultValue: [:])
     public private(set) var storedHomes: [UUID: HomePreferences]
 
     /// the currently applied settings set from storedHomes
-    @Preference(\.activeHomeId)
+    @UserDefaultObject("activeHomeId", defaultValue: defaultHomeId)
     private var activeHomeId: UUID
 
+    @UserDefault("didMigrateToSharedDefaults", defaultValue: false)
+    private var didMigrateToSharedDefaults: Bool
+
+    @UserDefault("didMigrateToMultipleHomes", defaultValue: false)
+    private var didMigrateToMultipleHomes: Bool
+
+    @MainActor
     private var internalPreferenceChangeOngoing = false
 
+    @MainActor
     private func internalPreferenceChange(_ change: () -> Void) {
         internalPreferenceChangeOngoing = true
         change()
@@ -467,6 +261,7 @@ public actor Preferences {
 
 // MARK: Multiple homes
 
+@MainActor
 public extension Preferences {
     func listStoredHomes() -> [UUID] {
         let preferenceIds = storedHomes
@@ -554,20 +349,21 @@ public extension Preferences {
         Logger.preferences.debug("Stored preferences for current home \(homeId.uuidString)")
     }
 
-    func modifyActiveHome(modificationFunction: (inout HomePreferences) -> Void) {
+    func modifyActiveHome(modificationFunction: @MainActor (inout HomePreferences) -> Void) {
         var homePreferences = currentHomePreferences
         modificationFunction(&homePreferences)
         currentHomePreferences = homePreferences
         storeActiveHome()
     }
 
-    func modifyApplicationPreferences(modificationFunction: (inout ApplicationPreferences) -> Void) {
+    func modifyApplicationPreferences(modificationFunction: @MainActor (inout ApplicationPreferences) -> Void) {
         var applicationPreferences = applicationPreferences
         modificationFunction(&applicationPreferences)
         self.applicationPreferences = applicationPreferences
     }
 }
 
+@MainActor
 public extension Preferences {
     func firstStoredHome(where predicate: (HomePreferences) -> Bool) -> (id: UUID, record: HomePreferences)? {
         for (uuid, record) in storedHomes {
@@ -586,24 +382,88 @@ public extension Preferences {
 
 // MARK: Migration
 
+@MainActor
 public extension Preferences {
     static func migratePreferences() {
-        PreferencesStoreAccess.migrateIfNeeded()
         Preferences.shared.initializeStoredHomes()
+        migrateToSharedDefaultsIfRequired()
+        migrateToMultipleHomesIfRequired()
     }
-}
 
-#if DEBUG
-public extension Preferences {
-    static func reloadForTesting() {
-        PreferencesStoreAccess.shared.reloadFromDefaultsForTesting()
-        Preferences.shared.initializeStoredHomes()
+    private static func migrateToSharedDefaultsIfRequired() {
+        guard !Preferences.shared.didMigrateToSharedDefaults else { return }
+
+        Preferences.shared.modifyActiveHome { currentHomePreferences in
+            currentHomePreferences.localConnectionConfig.url = UserDefaults.standard.string(forKey: "localUrl") ?? currentHomePreferences.localConnectionConfig.url
+            currentHomePreferences.localConnectionConfig.alwaysSendBasicAuth = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? currentHomePreferences.localConnectionConfig.alwaysSendBasicAuth
+            currentHomePreferences.localConnectionConfig.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? currentHomePreferences.localConnectionConfig.ignoreSSL
+            currentHomePreferences.remoteConnectionConfig.url = UserDefaults.standard.string(forKey: "remoteUrl") ?? currentHomePreferences.remoteConnectionConfig.url
+            currentHomePreferences.remoteConnectionConfig.username = UserDefaults.standard.string(forKey: "username") ?? currentHomePreferences.remoteConnectionConfig.username
+            currentHomePreferences.remoteConnectionConfig.password = UserDefaults.standard.string(forKey: "password") ?? currentHomePreferences.remoteConnectionConfig.password
+            currentHomePreferences.remoteConnectionConfig.alwaysSendBasicAuth = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? currentHomePreferences.remoteConnectionConfig.alwaysSendBasicAuth
+            currentHomePreferences.remoteConnectionConfig.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? currentHomePreferences.remoteConnectionConfig.ignoreSSL
+            currentHomePreferences.demomode = UserDefaults.standard.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
+            currentHomePreferences.realTimeSliders = UserDefaults.standard.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
+            currentHomePreferences.iconType = UserDefaults.standard.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
+            currentHomePreferences.defaultSitemap = UserDefaults.standard.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
+        }
+
+        Preferences.shared.idleOff = UserDefaults.standard.object(forKey: "idleOff") as? Bool ?? Preferences.shared.idleOff
+        Preferences.shared.sendCrashReports = UserDefaults.standard.object(forKey: "sendCrashReports") as? Bool ?? Preferences.shared.sendCrashReports
+
+        Preferences.shared.didMigrateToSharedDefaults = true
+        // this was done implicitly
+        Preferences.shared.didMigrateToMultipleHomes = true
+    }
+
+    private static func migrateToMultipleHomesIfRequired() {
+        guard !Preferences.shared.didMigrateToMultipleHomes else { return }
+
+        migrateToSharedDefaultsIfRequired()
+
+        let oldLocalUrl = sharedDefaults.string(forKey: "localUrl")
+        let oldRemoteUrl = sharedDefaults.string(forKey: "remoteUrl")
+        let oldUsername = sharedDefaults.string(forKey: "username")
+        let oldPassword = sharedDefaults.string(forKey: "password")
+        let oldAlwaysSendCreds = sharedDefaults.object(forKey: "alwaysSendCreds") as? Bool
+        let oldIgnoreSSL = sharedDefaults.object(forKey: "ignoreSSL") as? Bool
+
+        // Create new configuration
+        var newLocalConfiguration = Preferences.shared.currentHomePreferences.localConnectionConfig
+        newLocalConfiguration.url = oldLocalUrl ?? newLocalConfiguration.url
+        newLocalConfiguration.alwaysSendBasicAuth = oldAlwaysSendCreds ?? newLocalConfiguration.alwaysSendBasicAuth
+        newLocalConfiguration.ignoreSSL = oldIgnoreSSL ?? newLocalConfiguration.ignoreSSL
+
+        var newRemoteConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
+        newRemoteConfiguration.url = oldRemoteUrl ?? newRemoteConfiguration.url
+        newRemoteConfiguration.username = oldUsername ?? newRemoteConfiguration.username
+        newRemoteConfiguration.password = oldPassword ?? newRemoteConfiguration.password
+        newRemoteConfiguration.alwaysSendBasicAuth = oldAlwaysSendCreds ?? newRemoteConfiguration.alwaysSendBasicAuth
+        newRemoteConfiguration.ignoreSSL = oldIgnoreSSL ?? newRemoteConfiguration.ignoreSSL
+
+        // Save to Preferences
+        Preferences.shared.modifyActiveHome { currentHomePreferences in
+            currentHomePreferences.defaultView = sharedDefaults.string(forKey: "defaultView") ?? currentHomePreferences.defaultView
+            currentHomePreferences.demomode = sharedDefaults.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
+            currentHomePreferences.realTimeSliders = sharedDefaults.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
+            currentHomePreferences.iconType = sharedDefaults.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
+            currentHomePreferences.defaultSitemap = sharedDefaults.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
+            currentHomePreferences.sortSitemapsBy = sharedDefaults.object(forKey: "sortSitemapsBy") as? Int ?? currentHomePreferences.sortSitemapsBy
+            currentHomePreferences.defaultMainUIPath = sharedDefaults.string(forKey: "defaultMainUIPath") ?? currentHomePreferences.defaultMainUIPath
+            currentHomePreferences.alwaysAllowWebRTC = sharedDefaults.object(forKey: "alwaysAllowWebRTC") as? Bool ?? currentHomePreferences.alwaysAllowWebRTC
+            currentHomePreferences.sitemapForWatch = sharedDefaults.string(forKey: "sitemapForWatch") ?? currentHomePreferences.sitemapForWatch
+            currentHomePreferences.localConnectionConfig = newLocalConfiguration
+            currentHomePreferences.remoteConnectionConfig = newRemoteConfiguration
+            currentHomePreferences.sitemapForWatchLabel = sharedDefaults.string(forKey: "sitemapForWatchLabel") ?? currentHomePreferences.sitemapForWatchLabel
+        }
+
+        Preferences.shared.didMigrateToMultipleHomes = true
     }
 }
-#endif
 
 // MARK: All connections
 
+@MainActor
 public extension Preferences {
     func getNotificationConnection() -> ConnectionConfiguration? {
         getNotificationConnection(of: [Preferences.shared.currentHomePreferences.remoteConnectionConfig])
