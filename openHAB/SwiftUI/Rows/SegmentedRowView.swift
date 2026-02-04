@@ -58,27 +58,22 @@ struct SegmentedRowView: View {
 
             if !mappings.isEmpty {
                 if widget.hasPressReleaseMappings {
-                    if !(widget.labelValue?.isEmpty == false) {
-                        Spacer(minLength: 8)
-                    }
                     // Press-release buttons for mappings with releaseCommand
                     pressReleaseButtons
-                        .frame(minWidth: 80)
-                        .padding(.leading, 8)
                         .fixedSize(horizontal: true, vertical: false)
+                        .padding(.leading, 8)
                 } else if mappings.count == 1 {
+                    singleMappingButton
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.leading, 8)
+                } else {
                     if !(widget.labelValue?.isEmpty == false) {
                         Spacer(minLength: 8)
                     }
-                    singleMappingButton
-                        .frame(minWidth: 80)
-                        .padding(.leading, 8)
-                        .fixedSize(horizontal: true, vertical: false)
-                } else {
                     // Button-based segmented control with animated selection indicator
                     segmentedButtons
-                        .padding(.leading, 8)
                         .frame(minWidth: 75)
+                        .padding(.leading, 8)
                         .layoutPriority(1)
                 }
             }
