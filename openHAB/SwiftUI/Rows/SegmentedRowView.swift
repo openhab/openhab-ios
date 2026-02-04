@@ -130,24 +130,11 @@ struct SegmentedRowView: View {
 
     @ViewBuilder
     private var pressReleaseButtons: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 4) {
             ForEach(mappings.indices, id: \.self) { index in
                 pressReleaseButton(for: mappings[index], at: index)
             }
         }
-        .padding(2)
-        .background(
-            RoundedRectangle(cornerRadius: 7)
-                .fill(
-                    colorScheme == .dark
-                        ? Color(uiColor: .tertiarySystemBackground)
-                        : Color(uiColor: .secondarySystemBackground)
-                )
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 7)
-                .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
-        )
     }
 
     @State private var singleButtonPressed = false
@@ -162,7 +149,7 @@ struct SegmentedRowView: View {
             .lineLimit(1)
             .truncationMode(.tail)
             .padding(.horizontal, 8)
-            .padding(.vertical, 3)
+            .padding(.vertical, 5)
             .frame(minWidth: 50)
             .foregroundStyle(.primary)
             .background(
@@ -187,7 +174,6 @@ struct SegmentedRowView: View {
                         viewModel.sendCommand(widget.item, commandToSend: mapping.command)
                     }
             )
-            .padding(2)
             .background(
                 RoundedRectangle(cornerRadius: 7)
                     .fill(
@@ -236,16 +222,20 @@ struct SegmentedRowView: View {
             .lineLimit(1)
             .truncationMode(.tail)
             .padding(.horizontal, 8)
-            .padding(.vertical, 3)
+            .padding(.vertical, 5)
             .frame(minWidth: 50)
             .foregroundStyle(.primary)
             .background(
-                RoundedRectangle(cornerRadius: 6)
+                RoundedRectangle(cornerRadius: 7)
                     .fill(
                         isPressed
                             ? (colorScheme == .dark ? Color(uiColor: .systemGray2) : Color(uiColor: .systemBackground))
-                            : Color.clear
+                            : (colorScheme == .dark ? Color(uiColor: .tertiarySystemBackground) : Color(uiColor: .secondarySystemBackground))
                     )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 7)
+                    .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
             )
             .contentShape(Rectangle())
             .gesture(
@@ -490,7 +480,9 @@ private extension SegmentedRowView {
                 label: "All Shutters",
                 detailLabel: "NA",
                 mappings: [
-                    OpenHABWidgetMapping(command: "DOWN", label: "DOWN", releaseCommand: "OFF")
+                    OpenHABWidgetMapping(command: "DOWN", label: "DOWN", releaseCommand: "OFF"),
+                    OpenHABWidgetMapping(command: "UP", label: " UP ", releaseCommand: "UP"),
+
                 ],
                 selectedState: "DOWN"
             ),
