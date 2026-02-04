@@ -131,7 +131,7 @@ struct SegmentedRowView: View {
 
     @ViewBuilder
     private var pressReleaseButtons: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 8) {
             ForEach(mappings.indices, id: \.self) { index in
                 pressReleaseButton(for: mappings[index], at: index)
             }
