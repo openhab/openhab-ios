@@ -59,20 +59,20 @@ struct SegmentedRowView: View {
             if !mappings.isEmpty {
                 if widget.hasPressReleaseMappings {
                     // Press-release buttons for mappings with releaseCommand
-                    if widget.labelValue.isNilOrEmpty {
+                    if !(widget.labelValue?.isEmpty == false) {
                         Spacer(minLength: 8)
                     }
                     pressReleaseButtons
                         .fixedSize(horizontal: true, vertical: false)
                         .padding(.leading, 8)
                 } else if mappings.count == 1 {
-                    singleMappingButton
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        .padding(.leading, 8)
-                } else {
-                    if widget.labelValue.isNilOrEmpty {
+                    if !(widget.labelValue?.isEmpty == false) {
                         Spacer(minLength: 8)
                     }
+                    singleMappingButton
+                        .fixedSize(horizontal: true, vertical: false)
+                        .padding(.leading, 8)
+                } else {
                     // Button-based segmented control with animated selection indicator
                     segmentedButtons
                         .frame(minWidth: 75)
@@ -481,13 +481,27 @@ private extension SegmentedRowView {
                 detailLabel: "NA",
                 mappings: [
                     OpenHABWidgetMapping(command: "DOWN", label: "DOWN", releaseCommand: "OFF"),
-                    OpenHABWidgetMapping(command: "UP", label: " UP ", releaseCommand: "UP"),
+                    OpenHABWidgetMapping(command: "UP", label: " UP ", releaseCommand: "OFF")
 
                 ],
                 selectedState: "DOWN"
             ),
             fallbackSymbol: .romanShadeClosed
         )
+
+        SegmentedRowView(
+            widget: SegmentedRowView.createPreviewWidget(
+                label: "Office Shutter",
+                detailLabel: "NA",
+                mappings: [
+                    OpenHABWidgetMapping(command: "DOWN", label: "DOWN", releaseCommand: "OFF"),
+                    OpenHABWidgetMapping(command: "UP", label: "UP", releaseCommand: "OFF")
+                ],
+                selectedState: "DOWN"
+            ),
+            fallbackSymbol: .romanShadeClosed
+        )
+
         SegmentedRowView(
             widget: SegmentedRowView.createPreviewWidget(
                 label: "Scene",
