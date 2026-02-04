@@ -47,9 +47,8 @@ struct SegmentedRowView: View {
                     .layoutPriority(1)
             }
 
-            Spacer(minLength: 8)
-
             if let detailTextLabel = widget.labelValue, !detailTextLabel.isEmpty {
+                Spacer(minLength: 8)
                 Text(detailTextLabel)
                     .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
                     .lineLimit(1)
@@ -59,15 +58,26 @@ struct SegmentedRowView: View {
 
             if !mappings.isEmpty {
                 if widget.hasPressReleaseMappings {
+                    if !(widget.labelValue?.isEmpty == false) {
+                        Spacer(minLength: 8)
+                    }
                     // Press-release buttons for mappings with releaseCommand
                     pressReleaseButtons
+                        .frame(minWidth: 80)
+                        .padding(.leading, 8)
                         .fixedSize(horizontal: true, vertical: false)
                 } else if mappings.count == 1 {
+                    if !(widget.labelValue?.isEmpty == false) {
+                        Spacer(minLength: 8)
+                    }
                     singleMappingButton
+                        .frame(minWidth: 80)
+                        .padding(.leading, 8)
                         .fixedSize(horizontal: true, vertical: false)
                 } else {
                     // Button-based segmented control with animated selection indicator
                     segmentedButtons
+                        .padding(.leading, 8)
                         .frame(minWidth: 75)
                         .layoutPriority(1)
                 }
@@ -142,37 +152,56 @@ struct SegmentedRowView: View {
         )
     }
 
+    @State private var singleButtonPressed = false
+
     @ViewBuilder
     private var singleMappingButton: some View {
         let mapping = mappings[0]
-        let isSelected = selectedIndex == 0
 
-        Button {
-            logger.info("Segment tapped: 0, command: \(mapping.command)")
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                selectedIndex = 0
-            }
-            viewModel.sendCommand(widget.item, commandToSend: mapping.command)
-        } label: {
-            Text(mapping.label)
-                .font(.footnote)
-                .bold()
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 5)
-                .frame(minWidth: 30, maxWidth: 120)
-                .foregroundStyle(.primary)
-        }
-        .background(
-            RoundedRectangle(cornerRadius: 7)
-                .fill(Color(uiColor: isSelected ? .systemBackground : .secondarySystemBackground))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 7)
-                .stroke(Color(uiColor: .separator).opacity(0.6), lineWidth: 0.75)
-        )
-        .buttonStyle(.plain)
+        Text(mapping.label)
+            .font(.footnote)
+            .bold()
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .frame(minWidth: 50)
+            .foregroundStyle(.primary)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(
+                        singleButtonPressed
+                            ? (colorScheme == .dark ? Color(uiColor: .systemGray2) : Color(uiColor: .systemBackground))
+                            : Color.clear
+                    )
+            )
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !singleButtonPressed {
+                            singleButtonPressed = true
+                        }
+                    }
+                    .onEnded { _ in
+                        singleButtonPressed = false
+                        logger.info("Segment tapped: 0, command: \(mapping.command)")
+                        viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+                    }
+            )
+            .padding(2)
+            .background(
+                RoundedRectangle(cornerRadius: 7)
+                    .fill(
+                        colorScheme == .dark
+                            ? Color(uiColor: .tertiarySystemBackground)
+                            : Color(uiColor: .secondarySystemBackground)
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 7)
+                    .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
+            )
     }
 
     // MARK: - Helper Methods
@@ -193,7 +222,6 @@ struct SegmentedRowView: View {
                 .bold()
                 .lineLimit(1)
                 .truncationMode(.tail)
-                .padding(.horizontal, 8)
                 .padding(.vertical, 5)
                 .frame(minWidth: 30, maxWidth: 120)
                 .foregroundStyle(.primary)
@@ -210,7 +238,7 @@ struct SegmentedRowView: View {
             .lineLimit(1)
             .truncationMode(.tail)
             .padding(.horizontal, 8)
-            .padding(.vertical, 5)
+            .padding(.vertical, 3)
             .frame(minWidth: 50)
             .foregroundStyle(.primary)
             .background(
@@ -390,6 +418,21 @@ private extension SegmentedRowView {
     }
 }
 
+#Preview("Single Mapping") {
+    PreviewList {
+        SegmentedRowView(
+            widget: SegmentedRowView.createPreviewWidget(
+                label: "Scene",
+                mappings: [
+                    OpenHABWidgetMapping(command: "RUN", label: "Run")
+                ],
+                selectedState: "RUN"
+            ),
+            fallbackSymbol: .theatermasksFill
+        )
+    }
+}
+
 #Preview("All Scenarios") {
     PreviewList {
         SegmentedRowView(
@@ -433,11 +476,35 @@ private extension SegmentedRowView {
         )
         SegmentedRowView(
             widget: SegmentedRowView.createPreviewWidget(
+                label: "Charts Period",
+                mappings: [
+                    OpenHABWidgetMapping(command: "D", label: "Day"),
+                    OpenHABWidgetMapping(command: "W", label: "Week"),
+                    OpenHABWidgetMapping(command: "M", label: "M"),
+                    OpenHABWidgetMapping(command: "4h", label: "4h")
+                ],
+                selectedState: "D"
+            ),
+            fallbackSymbol: .chartBarFill
+        )
+        SegmentedRowView(
+            widget: SegmentedRowView.createPreviewWidget(
+                label: "All Shutters",
+                detailLabel: "NA",
+                mappings: [
+                    OpenHABWidgetMapping(command: "DOWN", label: "DOWN", releaseCommand: "OFF")
+                ],
+                selectedState: "DOWN"
+            ),
+            fallbackSymbol: .romanShadeClosed
+        )
+        SegmentedRowView(
+            widget: SegmentedRowView.createPreviewWidget(
                 label: "Scene",
                 mappings: [
-                    OpenHABWidgetMapping(command: "RUN", label: "Run")
+                    OpenHABWidgetMapping(command: "RUN", label: "DOWN")
                 ],
-                selectedState: "RUN"
+                selectedState: "DOWN"
             ),
             fallbackSymbol: .theatermasksFill
         )
