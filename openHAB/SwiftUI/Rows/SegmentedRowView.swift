@@ -65,8 +65,9 @@ struct SegmentedRowView: View {
                     pressReleaseButtons
                         .fixedSize(horizontal: true, vertical: false)
                         .padding(.leading, 8)
-                } else if mappings.count == 1 {
-                    if !(widget.labelValue?.isEmpty == false) {
+                    
+                }  else if mappings.count == 1 {
+                    if widget.labelValue.isNilOrEmpty {
                         Spacer(minLength: 8)
                     }
                     singleMappingButton
