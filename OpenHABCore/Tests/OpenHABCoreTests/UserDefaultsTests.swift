@@ -27,6 +27,8 @@ final class UserDefaultsTests: XCTestCase {
             fatalError()
         }
         data.removePersistentDomain(forName: defaultsName)
+        data.removePersistentDomain(forName: "group.org.openhab.app")
+        Preferences.reloadForTesting()
 
         let random: String = UUID().uuidString
 
@@ -65,6 +67,63 @@ final class UserDefaultsTests: XCTestCase {
         XCTAssertEqual(Preferences.shared.currentHomePreferences.iconType, home.iconType)
         XCTAssertEqual(Preferences.shared.currentHomePreferences.defaultSitemap, home.defaultSitemap)
         XCTAssertEqual(Preferences.shared.currentHomePreferences.sitemapForWatch, home.sitemapForWatch)
-        XCTAssertEqual(home, try? JSONDecoder().decode(HomePreferences.self, from: data.data(forKey: "currentHomePreferences")!))
+
+        let storeData = try XCTUnwrap(data.data(forKey: "preferencesStore"))
+        let storeObject = try XCTUnwrap(JSONSerialization.jsonObject(with: storeData) as? [String: Any])
+        XCTAssertEqual(storeObject["version"] as? Int, 1)
+        XCTAssertNotNil(storeObject["currentHomePreferences"])
+    }
+
+    func testPreferencesStoreForwardCompatibility() throws {
+        let data = UserDefaults(suiteName: "group.org.openhab.app")!
+        data.removePersistentDomain(forName: "group.org.openhab.app")
+
+        Preferences.reloadForTesting()
+        let home = Preferences.shared.currentHomePreferences
+        let homeId = home.id
+        let homeData = try JSONEncoder().encode(home)
+        let homeObject = try XCTUnwrap(JSONSerialization.jsonObject(with: homeData) as? [String: Any])
+
+        let appPrefs = ApplicationPreferences()
+        let appPrefsData = try JSONEncoder().encode(appPrefs)
+        let appPrefsObject = try XCTUnwrap(JSONSerialization.jsonObject(with: appPrefsData) as? [String: Any])
+
+        let storedHomesObject: [String: Any] = [homeId.uuidString: homeObject]
+
+        var legacyStore: [String: Any] = [
+            "version": 1,
+            "currentHomePreferences": homeObject,
+            "storedHomes": storedHomesObject,
+            "activeHomeId": homeId.uuidString,
+            "applicationPreferences": appPrefsObject,
+            "sendCrashReports": true,
+            "idleOff": true,
+            "screensaverEnabled": false,
+            "screensaverShowsTime": true,
+            "screensaverShowsDate": true,
+            "screensaverIdleInterval": 120.0,
+            "screensaverMovementInterval": 8.0,
+            "screensaverFontName": "",
+            "screensaverTimeFontRatio": 0.2,
+            "screensaverDateFontRatio": 0.4,
+            "screensaverEnableDimming": true,
+            "screensaverDimLevel": 0.3,
+            "screensaverShowsSeconds": false,
+            "screensaverUse24Hour": false,
+            "screensaverFadeDuration": 2.0,
+            "screensaverRestoreBrightness": true,
+            "screensaverWakeBrightness": 1.0,
+            "hideStatusBar": false
+        ]
+
+        // Deliberately omit currentWebViewPath to simulate older payloads
+        let legacyData = try JSONSerialization.data(withJSONObject: legacyStore)
+        data.set(legacyData, forKey: "preferencesStore")
+
+        Preferences.reloadForTesting()
+
+        XCTAssertTrue(Preferences.shared.sendCrashReports)
+        XCTAssertTrue(Preferences.shared.idleOff)
+        XCTAssertEqual(Preferences.shared.currentWebViewPath, "")
     }
 }
