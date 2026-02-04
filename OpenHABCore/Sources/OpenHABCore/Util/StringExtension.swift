@@ -186,7 +186,7 @@ public extension String? {
     }
 
     var isNilOrEmpty: Bool {
-        self?.isEmpty ?? true
+        self == nil || self == ""
     }
 }
 
