@@ -184,6 +184,10 @@ public extension String? {
             ""
         }
     }
+
+    var isNilOrEmpty: Bool {
+        self?.isEmpty ?? true
+    }
 }
 
 public extension String {
