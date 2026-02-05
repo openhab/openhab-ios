@@ -115,6 +115,15 @@ public actor OpenAPIService {
 //        config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
         return config
     }
+
+    private func commandSource() -> String? {
+        let base = "org.openhab.ios"
+        let actor = connectionConfiguration.username.trimmingCharacters(in: .whitespacesAndNewlines)
+        if actor.isEmpty {
+            return base
+        }
+        return "\(base)$\(actor)"
+    }
 }
 
 public extension OpenAPIService {
@@ -336,14 +345,16 @@ public extension OpenAPIService {
     func updateItemState(itemname: String, with state: String) async throws {
         let path = Operations.updateItemState.Input.Path(itemname: itemname)
         let body = Operations.updateItemState.Input.Body.plainText(.init(state))
-        let response = try await client.updateItemState(path: path, body: body)
+        let query = Operations.updateItemState.Input.Query(source: commandSource())
+        let response = try await client.updateItemState(path: path, query: query, body: body)
         _ = try response.accepted
     }
 
     func sendItemCommand(itemname: String, command: String) async throws {
         let path = Operations.sendItemCommand.Input.Path(itemname: itemname)
         let body = Operations.sendItemCommand.Input.Body.plainText(.init(command))
-        let response = try await client.sendItemCommand(path: path, body: body)
+        let query = Operations.sendItemCommand.Input.Query(source: commandSource())
+        let response = try await client.sendItemCommand(path: path, query: query, body: body)
         _ = try response.ok
     }
 }
