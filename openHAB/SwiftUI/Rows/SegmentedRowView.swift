@@ -65,8 +65,8 @@ struct SegmentedRowView: View {
                     pressReleaseButtons
                         .fixedSize(horizontal: true, vertical: false)
                         .padding(.leading, 8)
-                    
-                }  else if mappings.count == 1 {
+
+                } else if mappings.count == 1 {
                     if widget.labelValue.isNilOrEmpty {
                         Spacer(minLength: 8)
                     }
@@ -140,9 +140,16 @@ struct SegmentedRowView: View {
 
     @State private var singleButtonPressed = false
 
+    /// Whether the single mapping button is selected (item state matches the mapping command)
+    private var isSingleMappingSelected: Bool {
+        guard let state = widget.item?.state else { return false }
+        return state == mappings[0].command
+    }
+
     @ViewBuilder
     private var singleMappingButton: some View {
         let mapping = mappings[0]
+        let isSelected = isSingleMappingSelected
 
         Text(mapping.label)
             .font(.footnote)
@@ -156,7 +163,7 @@ struct SegmentedRowView: View {
             .background(
                 RoundedRectangle(cornerRadius: 6)
                     .fill(
-                        singleButtonPressed
+                        singleButtonPressed || isSelected
                             ? (colorScheme == .dark ? Color(uiColor: .systemGray2) : Color(uiColor: .systemBackground))
                             : Color.clear
                     )
