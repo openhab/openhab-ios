@@ -70,11 +70,11 @@ struct SliderRowView: View {
                 labelContent
             }
 
-            Slider(value: valueBinding, in: sliderRange) { editing in
+            Slider(value: valueBinding, in: sliderRange, step: widget.step) { editing in
                 isEditing = editing
                 if !editing {
-                    // User released slider - send final value for release-only mode
-                    if !widget.shouldUseSliderUpdatesDuringMove(), let value = pendingValue {
+                    // Always send the final value on release
+                    if let value = pendingValue {
                         sendSliderUpdate(value)
                     }
                     // Keep pendingValue set until server responds to avoid visual jump
@@ -90,8 +90,9 @@ struct SliderRowView: View {
             .disabled(widget.readOnly ?? false)
         }
         .onChange(of: widget.adjustedValue) { _ in
-            // Clear pending value when server responds (and user is not editing)
-            if !isEditing {
+            // Clear pending value only when server confirms our value (not intermediate responses)
+            if !isEditing, let pending = pendingValue,
+               abs(widget.adjustedValue - pending) < max(widget.step * 0.5, 0.01) {
                 pendingValue = nil
             }
         }
