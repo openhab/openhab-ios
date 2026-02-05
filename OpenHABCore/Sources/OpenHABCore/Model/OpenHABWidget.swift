@@ -420,6 +420,46 @@ public extension OpenHABWidget {
     }
 }
 
+public extension OpenHABWidget {
+    /// Recursively finds a widget by its ID in this widget's subtree.
+    func findWidget(byId id: String) -> OpenHABWidget? {
+        if widgetId == id {
+            return self
+        }
+        for widget in widgets {
+            if let found = widget.findWidget(byId: id) {
+                return found
+            }
+        }
+        return nil
+    }
+
+    @discardableResult
+    func apply(event: OpenHABSitemapWidgetEvent) -> Bool {
+        guard let eventWidgetId = event.widgetId else { return false }
+
+        if widgetId == eventWidgetId {
+            if let label = event.label { self.label = label }
+            if let icon = event.icon { self.icon = icon }
+            if let labelcolor = event.labelcolor { self.labelcolor = labelcolor }
+            if let valuecolor = event.valuecolor { self.valuecolor = valuecolor }
+            if let iconcolor = event.iconcolor { iconColor = iconcolor }
+            if let visibility = event.visibility { self.visibility = visibility }
+            if let state = event.state { self.state = state }
+            if let item = event.enrichedItem { self.item = item }
+            if let labelSource = event.labelSource {
+                self.labelSource = OpenHABWidget.LabelSource(rawValue: labelSource) ?? .unknown
+            }
+            return true
+        }
+
+        for widget in widgets where widget.apply(event: event) {
+            return true
+        }
+        return false
+    }
+}
+
 extension OpenHABWidget {
     convenience init(_ widget: Components.Schemas.WidgetDTO) {
         self.init(

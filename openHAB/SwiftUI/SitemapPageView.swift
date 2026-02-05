@@ -25,10 +25,21 @@ struct SitemapPageView: View {
         Group {
             if viewModel.isLoading, viewModel.relevantWidgets.isEmpty {
                 // Show skeleton/placeholder rows while loading
-                List(placeholderWidgets, id: \.id) { widget in
-                    RowViewFactory.view(for: widget)
-                        .redacted(reason: .placeholder)
-                        .disabled(true)
+                List {
+                    // Redacted large title header
+                    if viewModel.pageTitle.isEmpty {
+                        Text("Placeholder Title")
+                            .font(.largeTitle.bold())
+                            .redacted(reason: .placeholder)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                    }
+                    ForEach(placeholderWidgets, id: \.id) { widget in
+                        EmbeddingRowView(widget: widget)
+                            .redacted(reason: .placeholder)
+                            .disabled(true)
+                    }
                 }
             } else {
                 List(viewModel.relevantWidgets) { widget in

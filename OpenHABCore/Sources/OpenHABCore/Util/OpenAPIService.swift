@@ -199,7 +199,13 @@ public extension OpenAPIService {
 //                .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
 //            return decodedSequence.compactMap { OpenHABSitemapWidgetEvent($0.data) }
 //        }
-    struct AnyAsyncSequence<Element>: AsyncSequence {
+    /// Type-erased async sequence wrapper.
+    ///
+    /// This type is marked `@unchecked Sendable` when `Element: Sendable` because:
+    /// - The wrapped iterator closure captures a mutable iterator, which isn't inherently Sendable
+    /// - However, the iterator is only accessed sequentially via `next()` calls
+    /// - The element type constraint ensures values crossing actor boundaries are safe
+    struct AnyAsyncSequence<Element: Sendable>: AsyncSequence {
         public struct Iterator: AsyncIteratorProtocol {
             private var _next: () async throws -> Element?
             init<S: AsyncSequence>(_ base: S) where S.Element == Element {
@@ -221,20 +227,50 @@ public extension OpenAPIService {
     // Returns subscription id or nil
     func openHABcreateSubscription() async throws -> String? {
         Logger.openAPIService.info("Creating subscription")
-        let result = try await client.createSitemapEventSubscription()
-        guard let urlString = try result.ok.body.json.context?.headers?.Location?.first else { return nil }
-        return URL(string: urlString)?.lastPathComponent
+        guard let acceptValue = OpenAPIRuntime.AcceptHeaderContentType<Operations.createSitemapEventSubscription.AcceptableContentType>(rawValue: "application/json") else {
+            return nil
+        }
+        let accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.createSitemapEventSubscription.AcceptableContentType>] = [
+            acceptValue
+        ]
+        let headers = Operations.createSitemapEventSubscription.Input.Headers(accept: accept)
+        let result = try await client.createSitemapEventSubscription(.init(headers: headers))
+        switch result {
+        case let .ok(ok):
+            guard let urlString = try ok.body.json.context?.headers?.Location?.first else { return nil }
+            Logger.openAPIService.info("Sitemap SSE subscription Location (JSON): \(urlString, privacy: .public)")
+            return URL(string: urlString)?.lastPathComponent
+        case .created:
+            // Some servers return 201 without a body; caller should treat nil as unsupported.
+            Logger.openAPIService.warning("Sitemap SSE subscription returned 201 Created without body")
+            return nil
+        default:
+            Logger.openAPIService.warning("Sitemap SSE subscription returned unexpected response")
+            return nil
+        }
     }
 
-    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String)
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String, pageId: String)
         async throws -> AnyAsyncSequence<OpenHABSitemapWidgetEvent> {
         let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
-        let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: sitemap)
+        let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: pageId)
 
         let seq = try await client.getSitemapEvents_1(path: path, query: query)
             .ok.body.text_event_hyphen_stream
             .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
             .compactMap { OpenHABSitemapWidgetEvent($0.data) }
+
+        return AnyAsyncSequence(seq)
+    }
+
+    func openHABSitemapWidgetEventsRaw(subscriptionid: String, sitemap: String, pageId: String)
+        async throws -> AnyAsyncSequence<ServerSentEvent> {
+        let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
+        let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: pageId)
+
+        let seq = try await client.getSitemapEvents_1(path: path, query: query)
+            .ok.body.text_event_hyphen_stream
+            .asDecodedServerSentEvents()
 
         return AnyAsyncSequence(seq)
     }
@@ -349,3 +385,5 @@ public extension OpenAPIService {
 }
 
 extension OpenAPIService: OpenAPIServiceProtocol {}
+
+extension OpenAPIService.AnyAsyncSequence: @unchecked Sendable {}

@@ -66,6 +66,26 @@ public extension OpenHABPage {
 }
 
 public extension OpenHABPage {
+    /// Recursively finds a widget by its ID in the page's widget tree.
+    func findWidget(byId id: String) -> OpenHABWidget? {
+        for widget in widgets {
+            if let found = widget.findWidget(byId: id) {
+                return found
+            }
+        }
+        return nil
+    }
+
+    @discardableResult
+    func apply(event: OpenHABSitemapWidgetEvent) -> Bool {
+        for widget in widgets where widget.apply(event: event) {
+            return true
+        }
+        return false
+    }
+}
+
+public extension OpenHABPage {
     convenience init?(_ page: Components.Schemas.PageDTO?) {
         if let page {
             self.init(

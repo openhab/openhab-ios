@@ -44,11 +44,16 @@ class SitemapPageViewModel: ObservableObject {
     let networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
     private var activeConnectionInfo: ConnectionInfo?
+    private var serverProperties: OpenHABServerProperties?
     private var pageHandlingTask: Task<Void, Never>?
+    private var sseStreamTask: Task<Void, Never>?
+    private var sseConnected = false
+    private var ssePreferred = true
     private var defaultSitemap = ""
     private var defaultSitemapLabel = ""
     @Published var pageId = ""
     private var isLinkedPage = false
+    private var initialTitle = ""
     private var pageNetworkStatus: NetworkStatus?
     private var pageNetworkStatusAvailable = false
 
@@ -65,12 +70,13 @@ class SitemapPageViewModel: ObservableObject {
         let title = currentPage?.title.components(separatedBy: "[")[0] ?? ""
         if !title.isEmpty {
             return title
+        } else if !initialTitle.isEmpty {
+            return initialTitle
         } else if !defaultSitemapLabel.isEmpty {
             return defaultSitemapLabel
-        } else if !defaultSitemap.isEmpty {
-            return defaultSitemap
         } else {
-            return "Sitemap"
+            // Return empty - SitemapPageView shows redacted placeholder title when loading
+            return ""
         }
     }
 
@@ -94,6 +100,7 @@ class SitemapPageViewModel: ObservableObject {
         loadSettings()
         setupActiveConnectionObserver()
         isLinkedPage = true
+        initialTitle = title
 
         // Set openHABRootUrl from current active connection for charts/images
         openHABRootUrl = networkTracker.activeConnection?.configuration.url
@@ -132,9 +139,13 @@ class SitemapPageViewModel: ObservableObject {
 
     func startPageHandling() {
         pageHandlingTask?.cancel()
+        sseStreamTask?.cancel()
         error = nil // Clear any previous errors when starting a new page handling session
+        isLoading = true // Show redacted view immediately
 
         logger.info("🚀 Starting page load and long polling flow...")
+        // swiftformat:disable:next redundantSelf
+        logger.info("Sitemap target defaultSitemap=\(self.defaultSitemap) pageId=\(self.pageId)")
 
         pageHandlingTask = Task {
             // If no default sitemap is set, try to discover and auto-select one
@@ -158,6 +169,10 @@ class SitemapPageViewModel: ObservableObject {
                 if openAPIService == nil {
                     openAPIService = try OpenAPIService(connectionConfiguration: configuration)
                 }
+                if serverProperties == nil {
+                    serverProperties = try? await openAPIService?.getRoot()
+                }
+                logger.info("Server properties: version=\(self.serverProperties?.version ?? "nil") sse=\(self.serverProperties?.hasSseSupport() == true)")
 
                 // Fetch sitemap label if we loaded from preferences (not from discovery)
                 if defaultSitemapLabel.isEmpty {
@@ -165,10 +180,9 @@ class SitemapPageViewModel: ObservableObject {
                 }
 
                 // 1. Initial page load (longPolling: false)
-                isLoading = true
                 let initialPage = try await openAPIService?.pollDataForPage(
                     sitemapname: defaultSitemap,
-                    pageId: pageId,
+                    pageId: effectivePageId(),
                     longPolling: false
                 )
 
@@ -179,21 +193,15 @@ class SitemapPageViewModel: ObservableObject {
                 }
                 isLoading = false
 
-                // 2. Start long polling loop
-                while !Task.isCancelled {
-                    isUpdating = true
-                    let page = try await openAPIService?.pollDataForPage(
-                        sitemapname: defaultSitemap,
-                        pageId: pageId,
-                        longPolling: true
-                    )
-                    isUpdating = false
-                    try Task.checkCancellation()
-
-                    if let page {
-                        updateUI(with: page)
-                    }
+                if shouldUseSSE() {
+                    logger.info("Using SSE for sitemap updates")
+                    await startSSE(sitemap: defaultSitemap, pageId: effectivePageId())
+                    return
                 }
+                logger.info("Using long polling fallback for sitemap updates")
+
+                // 2. Start long polling loop (fallback)
+                await startLongPollingLoop()
 
             } catch is CancellationError {
                 logger.info("🔁 pageHandlingTask was cancelled")
@@ -277,6 +285,9 @@ class SitemapPageViewModel: ObservableObject {
 
         activeConnectionInfo = activeConnection
         openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
+        if serverProperties == nil {
+            serverProperties = try? await openAPIService?.getRoot()
+        }
     }
 
     private func loadCurrentPage() async throws {
@@ -284,7 +295,7 @@ class SitemapPageViewModel: ObservableObject {
 
         let page = try await service.pollDataForPage(
             sitemapname: defaultSitemap,
-            pageId: pageId,
+            pageId: effectivePageId(),
             longPolling: false
         )
 
@@ -431,10 +442,12 @@ class SitemapPageViewModel: ObservableObject {
         // Save the active connection information
         activeConnectionInfo = connection
         openHABRootUrl = connection.configuration.url
+        ssePreferred = true
 
         do {
             // Setup the OpenAPI service based on the new connection
             openAPIService = try OpenAPIService(connectionConfiguration: connection.configuration)
+            serverProperties = try? await openAPIService?.getRoot()
             // Start page handling which includes initial load and long polling
             startPageHandling()
         } catch {
@@ -481,6 +494,171 @@ class SitemapPageViewModel: ObservableObject {
 
     deinit {
         pageHandlingTask?.cancel()
+        sseStreamTask?.cancel()
+    }
+}
+
+private extension SitemapPageViewModel {
+    func effectivePageId() -> String {
+        pageId.isEmpty ? defaultSitemap : pageId
+    }
+
+    func shouldUseSSE() -> Bool {
+        guard ssePreferred else { return false }
+        if let serverProperties {
+            return serverProperties.hasSseSupport()
+        }
+        if let version = activeConnectionInfo?.version {
+            return version >= 3
+        }
+        return false
+    }
+
+    func startSSE(sitemap: String, pageId: String) async {
+        sseConnected = false
+        sseStreamTask?.cancel()
+
+        logger.info("Starting sitemap SSE for \(sitemap)/\(pageId)")
+        SitemapEventStream.startMonitoringNetwork()
+        await SitemapEventStream.shared.setTarget(sitemap: sitemap, pageId: pageId)
+
+        sseStreamTask = Task { [weak self] in
+            guard let self else { return }
+            for await msg in await SitemapEventStream.shared.stream() {
+                await MainActor.run { [weak self] in
+                    guard let self else { return }
+                    switch msg {
+                    case .connected:
+                        logger.info("Sitemap SSE connected")
+                        sseConnected = true
+                    case let .disconnected(error):
+                        logger.warning("Sitemap SSE disconnected: \(error?.localizedDescription ?? "nil")")
+                        isUpdating = false
+                        if let error = error as? SitemapSseError, error == .unsupported {
+                            ssePreferred = false
+                            startLongPollingFallback(error)
+                        } else if !sseConnected {
+                            ssePreferred = false
+                            startLongPollingFallback(error)
+                        }
+                    case let .event(message):
+                        handleSseMessage(message)
+                    }
+                }
+            }
+        }
+    }
+
+    func startLongPollingFallback(_ error: (any Error)?) {
+        sseStreamTask?.cancel()
+        sseStreamTask = nil
+        Task {
+            await SitemapEventStream.shared.stop()
+        }
+        pageHandlingTask?.cancel()
+        pageHandlingTask = Task {
+            if let error {
+                logger.warning("SSE unavailable (\(error.localizedDescription)), falling back to long polling")
+            } else {
+                logger.warning("SSE unavailable, falling back to long polling")
+            }
+            await startLongPollingLoop()
+        }
+    }
+
+    func startLongPollingLoop() async {
+        while !Task.isCancelled {
+            do {
+                isUpdating = true
+                let page = try await openAPIService?.pollDataForPage(
+                    sitemapname: defaultSitemap,
+                    pageId: effectivePageId(),
+                    longPolling: true
+                )
+                isUpdating = false
+                try Task.checkCancellation()
+
+                if let page {
+                    updateUI(with: page)
+                }
+            } catch is CancellationError {
+                return
+            } catch let error as DecodingError {
+                logger.error("Decoding error: \(error.localizedDescription)")
+                self.error = SitemapPageError.serviceUnavailable
+                isUpdating = false
+                return
+            } catch let error as ClientError {
+                if let urlError = error.underlyingError as? URLError, urlError.code == .cancelled {
+                    logger.info("Task cancelled (URLError: cancelled)")
+                } else if let urlError = error.underlyingError as? URLError, urlError.code == .timedOut {
+                    logger.info("Task timed out (URLError: timedOut)")
+                } else {
+                    logger.error("ClientError: \(error.localizedDescription)")
+                    self.error = SitemapPageError.serviceUnavailable
+                }
+                isUpdating = false
+                return
+            } catch let openAPIError as OpenAPIServiceError {
+                logger.error("OpenAPIServiceError: \(openAPIError.localizedDescription)")
+                isUpdating = false
+                return
+            } catch {
+                logger.error("❌ Unhandled polling error: \(error.localizedDescription)")
+                self.error = SitemapPageError.serviceUnavailable
+                isUpdating = false
+                return
+            }
+        }
+    }
+}
+
+private extension SitemapPageViewModel {
+    func handleSseMessage(_ message: SitemapEventMessage) {
+        switch message {
+        case .alive:
+            return
+        case let .sitemapChanged(sitemap, pageId):
+            logger.info("SSE sitemap changed \(sitemap.orEmpty)/\(pageId.orEmpty) – reloading")
+            Task {
+                await SitemapEventStream.shared.stop()
+            }
+            startPageHandling()
+        case let .widget(event):
+            logger.debug("SSE widget event \(event.widgetId.orEmpty) label=\(event.label.orEmpty) visibility=\(String(describing: event.visibility))")
+            guard let currentPage else { return }
+            guard let widgetId = event.widgetId else { return }
+
+            // Handle page title update
+            if widgetId == effectivePageId(), let label = event.label {
+                objectWillChange.send()
+                currentPage.title = label
+                return
+            }
+
+            // On servers that don't support invisible widgets, visibility changes require a full reload
+            let supportsInvisible = serverProperties?.hasInvisibleWidgetSupport() ?? false
+            if let eventVisibility = event.visibility,
+               !supportsInvisible,
+               let widget = currentPage.findWidget(byId: widgetId),
+               eventVisibility != widget.visibility {
+                logger.info("SSE visibility change on unsupported server – reloading")
+                startPageHandling()
+                return
+            }
+
+            // Apply the event to the widget tree
+            if currentPage.apply(event: event) {
+                objectWillChange.send()
+                logger.debug("SSE applied widget update for \(widgetId)")
+                isUpdating = false
+            } else {
+                logger.info("SSE widget not found – reloading")
+                startPageHandling()
+            }
+        case let .unknown(raw):
+            logger.debug("SSE unknown event: \(raw)")
+        }
     }
 }
 
