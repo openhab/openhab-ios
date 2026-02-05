@@ -172,13 +172,7 @@ struct SegmentedRowView: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
-                        if !singleButtonPressed {
-                            singleButtonPressed = true
-                        }
-                    }
-                    .onEnded { _ in
-                        singleButtonPressed = false
-                        logger.info("Segment tapped: 0, command: \(mapping.command)")
+                        logger.info("Segment mapping tapped:, command: \(mapping.command)")
                         viewModel.sendCommand(widget.item, commandToSend: mapping.command)
                     }
             )
