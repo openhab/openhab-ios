@@ -27,15 +27,21 @@ public class OpenHABPage: NSObject, @unchecked Sendable {
         self.title = title
         self.link = link
         self.leaf = leaf
-        var tempWidgets = [OpenHABWidget]()
-        tempWidgets.flatten(widgets)
-        self.widgets = tempWidgets
-        for widget in self.widgets {
+        self.icon = icon
+        var flattened = [OpenHABWidget]()
+        flattened.flatten(widgets)
+        self.widgets = flattened
+
+        decorateWithSendCommand(self.widgets)
+    }
+
+    private func decorateWithSendCommand(_ widgets: [OpenHABWidget]) {
+        for widget in widgets {
             widget.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
             }
+            decorateWithSendCommand(widget.widgets)
         }
-        self.icon = icon
     }
 
     private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {

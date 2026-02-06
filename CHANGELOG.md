@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.1.47, Build 104] - 2026-02-01Z
+
+- Replaced per-cell cache with a static shared cache keyed by widget ID. (#1042)
+
 ## [Version 3.1.46, Build 103] - 2026-01-29Z
 
 - Fix for #987 (#1052)
