@@ -77,7 +77,7 @@ extension ItemEntityQuery {
     func entities(matching string: String) async throws -> [EntityType] {
         let searchResults = await OpenHABItemCache.instance.searchItems(
             searchTerm: string,
-            types: allowedTypes
+            types: allowedTypes.isEmpty ? nil : allowedTypes
         )
         var result: [EntityType] = []
 
