@@ -120,6 +120,7 @@ public actor OpenAPIService {
         let base = "org.openhab.ios"
         guard let deviceId else { return base }
         let trimmed = deviceId.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Actor must not include the delegation separator per openHAB source spec.
         if trimmed.isEmpty || trimmed.contains("=>") {
             return base
         }
