@@ -14,7 +14,6 @@ import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
 
-// swiftlint:disable:next file_types_order
 struct SliderRowView: View {
     @ObservedObject var widget: OpenHABWidget
     var fallbackSymbol: SFSymbol?

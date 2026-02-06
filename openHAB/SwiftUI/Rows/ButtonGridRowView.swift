@@ -110,6 +110,28 @@ struct ButtonGridButton: View {
     }
 }
 
+private struct PressGestureModifier: ViewModifier {
+    let onPress: () -> Void
+    let onRelease: () -> Void
+    @State private var pressed = false
+
+    func body(content: Content) -> some View {
+        content.gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    if !pressed {
+                        pressed = true
+                        onPress()
+                    }
+                }
+                .onEnded { _ in
+                    pressed = false
+                    onRelease()
+                }
+        )
+    }
+}
+
 struct ButtonGridRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
@@ -186,35 +208,6 @@ struct ButtonGridRowView: View {
     }
 }
 
-extension View {
-    func onPressGesture(onPress: @escaping () -> Void,
-                        onRelease: @escaping () -> Void) -> some View {
-        modifier(PressGestureModifier(onPress: onPress, onRelease: onRelease))
-    }
-}
-
-private struct PressGestureModifier: ViewModifier {
-    let onPress: () -> Void
-    let onRelease: () -> Void
-    @State private var pressed = false
-
-    func body(content: Content) -> some View {
-        content.gesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    if !pressed {
-                        pressed = true
-                        onPress()
-                    }
-                }
-                .onEnded { _ in
-                    pressed = false
-                    onRelease()
-                }
-        )
-    }
-}
-
 // Extension to convert OpenHABWidgetMapping to OpenHABWidget
 extension OpenHABWidgetMapping {
     func toWidget(widgetId: String, item: OpenHABItem?) -> OpenHABWidget {
@@ -232,6 +225,13 @@ extension OpenHABWidgetMapping {
         widget.stateless = true
         widget.icon = icon ?? ""
         return widget
+    }
+}
+
+extension View {
+    func onPressGesture(onPress: @escaping () -> Void,
+                        onRelease: @escaping () -> Void) -> some View {
+        modifier(PressGestureModifier(onPress: onPress, onRelease: onRelease))
     }
 }
 
