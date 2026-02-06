@@ -32,8 +32,8 @@ public enum OpenAPIServiceConfiguration {
 protocol OpenAPIServiceProtocol: AnyObject, Sendable {
     func getRootVersion() async throws -> Int
     @discardableResult func getRoot() async throws -> OpenHABServerProperties
-    func sendItemCommand(itemname: String, command: String) async throws
-    func updateItemState(itemname: String, with: String) async throws
+    func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) async throws
+    func updateItemState(itemname: String, with: String, sourcePrefix: String?, deviceId: String?) async throws
     func getItems() async throws -> [OpenHABItem]
     func getItems(
         query: Operations.getItems.Input.Query
@@ -116,13 +116,21 @@ public actor OpenAPIService {
         return config
     }
 
-    private func commandSource() -> String? {
+    private func sourceComponent(deviceId: String?) -> String? {
         let base = "org.openhab.ios"
-        let actor = connectionConfiguration.username.trimmingCharacters(in: .whitespacesAndNewlines)
-        if actor.isEmpty {
+        guard let deviceId else { return base }
+        let trimmed = deviceId.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty || trimmed.contains("=>") {
             return base
         }
-        return "\(base)$\(actor)"
+        return "\(base)$\(trimmed)"
+    }
+
+    private func buildSource(sourcePrefix: String?, deviceId: String?) -> String? {
+        let base = sourceComponent(deviceId: deviceId)
+        guard let sourcePrefix, !sourcePrefix.isEmpty else { return base }
+        guard let base else { return sourcePrefix }
+        return "\(sourcePrefix)=>\(base)"
     }
 }
 
@@ -342,18 +350,18 @@ public extension OpenAPIService {
 // MARK: State changes and commands
 
 public extension OpenAPIService {
-    func updateItemState(itemname: String, with state: String) async throws {
+    func updateItemState(itemname: String, with state: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
         let path = Operations.updateItemState.Input.Path(itemname: itemname)
         let body = Operations.updateItemState.Input.Body.plainText(.init(state))
-        let query = Operations.updateItemState.Input.Query(source: commandSource())
+        let query = Operations.updateItemState.Input.Query(source: buildSource(sourcePrefix: sourcePrefix, deviceId: deviceId))
         let response = try await client.updateItemState(path: path, query: query, body: body)
         _ = try response.accepted
     }
 
-    func sendItemCommand(itemname: String, command: String) async throws {
+    func sendItemCommand(itemname: String, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
         let path = Operations.sendItemCommand.Input.Path(itemname: itemname)
         let body = Operations.sendItemCommand.Input.Body.plainText(.init(command))
-        let query = Operations.sendItemCommand.Input.Query(source: commandSource())
+        let query = Operations.sendItemCommand.Input.Query(source: buildSource(sourcePrefix: sourcePrefix, deviceId: deviceId))
         let response = try await client.sendItemCommand(path: path, query: query, body: body)
         _ = try response.ok
     }

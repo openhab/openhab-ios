@@ -503,11 +503,11 @@ public extension NetworkTracker {
     }
 
     func send(to item: String, command: String) async throws {
-        try await service().sendItemCommand(itemname: item, command: command)
+        try await service().sendItemCommand(itemname: item, command: command, sourcePrefix: nil, deviceId: nil)
     }
 
     func updateState(item: OpenHABItem, state: String) async throws {
-        try await service().updateItemState(itemname: item.name, with: state)
+        try await service().updateItemState(itemname: item.name, with: state, sourcePrefix: nil, deviceId: nil)
     }
 
     func getStaticItems() async throws -> [OpenHABItem] {
