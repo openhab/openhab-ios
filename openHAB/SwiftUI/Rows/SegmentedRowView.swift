@@ -32,6 +32,7 @@ struct SegmentedRowView: View {
 
     @State private var selectedIndex: Int?
     @State private var pressedIndex: Int?
+    @State private var singlePressed: Bool = false
 
     var body: some View {
         HStack(spacing: 0) {
@@ -138,8 +139,6 @@ struct SegmentedRowView: View {
         }
     }
 
-    @State private var singleButtonPressed = false
-
     /// Whether the single mapping button is selected (item state matches the mapping command)
     private var isSingleMappingSelected: Bool {
         guard let state = widget.item?.state else { return false }
@@ -163,7 +162,7 @@ struct SegmentedRowView: View {
             .background(
                 RoundedRectangle(cornerRadius: 6)
                     .fill(
-                        singleButtonPressed || isSelected
+                        (singlePressed || isSelected)
                             ? (colorScheme == .dark ? Color(uiColor: .systemGray2) : Color(uiColor: .systemBackground))
                             : Color.clear
                     )
@@ -172,8 +171,14 @@ struct SegmentedRowView: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
-                        logger.info("Segment mapping tapped:, command: \(mapping.command)")
-                        viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+                        if singlePressed == false {
+                            singlePressed = true
+                            logger.info("Segment mapping pressed, command: \(mapping.command)")
+                            viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+                        }
+                    }
+                    .onEnded { _ in
+                        singlePressed = false
                     }
             )
             .background(
@@ -188,6 +193,8 @@ struct SegmentedRowView: View {
                 RoundedRectangle(cornerRadius: 7)
                     .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
             )
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+            .animation(.easeInOut(duration: 0.1), value: singlePressed)
     }
 
     // MARK: - Helper Methods
