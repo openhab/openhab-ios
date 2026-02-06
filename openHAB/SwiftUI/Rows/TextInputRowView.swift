@@ -35,16 +35,14 @@ struct TextInputRowView: View {
 
             Spacer()
 
-            if let labelValue = widget.labelValue, !labelValue.isEmpty {
-                TextField("Enter text", text: $inputText)
-                    .multilineTextAlignment(widget.inputHint == .number ? .trailing : .leading)
-                    .textFieldStyle(.roundedBorder)
-                    .focused($isTextFieldFocused)
-                    .onSubmit {
-                        sendTextCommand()
-                    }
-                    .disabled(widget.readOnly ?? false)
-            }
+            TextField("Enter text", text: $inputText)
+                .multilineTextAlignment(widget.inputHint == .number ? .trailing : .leading)
+                .textFieldStyle(.roundedBorder)
+                .focused($isTextFieldFocused)
+                .onSubmit {
+                    sendTextCommand()
+                }
+                .disabled(widget.readOnly ?? false)
         }
         .onAppear {
             inputText = widget.item?.state ?? ""

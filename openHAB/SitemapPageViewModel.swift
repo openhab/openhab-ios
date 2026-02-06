@@ -83,18 +83,12 @@ class SitemapPageViewModel: ObservableObject {
 
     init() {
         loadSettings()
-
-        // Observe network connection changes directly
-        Task { @MainActor in
-            for await connection in networkTracker.$activeConnection.values {
-                handleActiveConnectionChange(connection)
-            }
-        }
     }
 
     init(pageUrl: String, title: String, pageId: String = "") {
         loadSettings()
         isLinkedPage = true
+        defaultSitemapLabel = title
 
         // Set openHABRootUrl from current active connection for charts/images
         openHABRootUrl = networkTracker.activeConnection?.configuration.url

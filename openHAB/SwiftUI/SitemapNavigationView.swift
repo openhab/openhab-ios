@@ -20,22 +20,33 @@ struct SitemapNavigationView: View {
 
     var body: some View {
         NavigationStack {
-            SitemapPageView(viewModel: viewModel)
-                .navigationTitle(viewModel.pageTitle)
-                .navigationBarTitleDisplayMode(.inline)
+            sitemapContent
+        }
+    }
+
+    @ViewBuilder
+    private var sitemapContent: some View {
+        let page = SitemapPageView(viewModel: viewModel)
+            .navigationTitle(viewModel.pageTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        onShowSideMenu()
+                    } label: {
+                        Image(systemSymbol: .line3Horizontal)
+                            .font(.title)
+                    }
+                }
+            }
+
+        if viewModel.showSearchField {
+            page
                 .searchable(text: $viewModel.searchText, prompt: Text(NSLocalizedString("search_items", comment: "")))
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button {
-                            onShowSideMenu()
-                        } label: {
-                            Image(systemSymbol: .line3Horizontal)
-                                .font(.title)
-                        }
-                    }
-                }
+        } else {
+            page
         }
     }
 
