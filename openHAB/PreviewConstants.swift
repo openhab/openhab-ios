@@ -12,7 +12,6 @@
 import Foundation
 import OpenHABCore
 import os.log
-import SwiftUI
 
 // swiftlint:disable type_body_length
 enum PreviewConstants {
@@ -580,19 +579,3 @@ enum PreviewConstants {
 }
 
 // swiftlint:enable type_body_length
-
-/// Wrapper for consistent preview list styling matching SitemapPageView
-struct PreviewList<Content: View>: View {
-    @ViewBuilder let content: () -> Content
-
-    var body: some View {
-        List {
-            content()
-                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-        }
-        .listStyle(.plain)
-        .listRowSpacing(0)
-        .environment(\.defaultMinListRowHeight, 32)
-        .environmentObject(SitemapPageViewModel())
-    }
-}

@@ -32,7 +32,7 @@ struct SegmentedRowView: View {
 
     @State private var selectedIndex: Int?
     @State private var pressedIndex: Int?
-    @State private var singlePressed: Bool = false
+    @State private var singlePressed = false
 
     var body: some View {
         HStack(spacing: 0) {
@@ -272,6 +272,22 @@ struct SegmentedRowView: View {
 // MARK: - Preview Helpers
 
 #if DEBUG
+/// Wrapper for consistent preview list styling matching SitemapPageView
+struct PreviewList<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        List {
+            content()
+                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+        }
+        .listStyle(.plain)
+        .listRowSpacing(0)
+        .environment(\.defaultMinListRowHeight, 32)
+        .environmentObject(SitemapPageViewModel())
+    }
+}
+
 private extension SegmentedRowView {
     static func createPreviewWidget(label: String,
                                     detailLabel: String? = nil,
