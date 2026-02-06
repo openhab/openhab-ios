@@ -67,6 +67,7 @@ public actor EventStream<Event: Sendable> {
     private var currentConfig: ConnectionConfiguration?
     private var sessionUUID: String?
     private var service: OpenAPIService?
+    private var lastEventTime = Date.now
 
     public func stream() -> AsyncStream<StreamOutput<Event>> {
         AsyncStream { continuation in
@@ -139,8 +140,19 @@ public actor EventStream<Event: Sendable> {
                 let eventStream = try response.ok.body.text_event_hyphen_stream.asDecodedServerSentEvents()
                 self.service = service
                 broadcast(.connected)
+                lastEventTime = .now
+
+                let watchdog = Task {
+                    while !Task.isCancelled {
+                        try? await Task.sleep(for: .seconds(10))
+                        guard !Task.isCancelled else { return }
+                        await self.checkAliveWatchdog()
+                    }
+                }
+                defer { watchdog.cancel() }
 
                 for try await sse in eventStream {
+                    lastEventTime = .now
                     for rawMessage in parse(sse) {
                         if let message = rawMessage as? Event {
                             broadcast(.event(message))
@@ -160,6 +172,24 @@ public actor EventStream<Event: Sendable> {
                 backoff = min(backoff * 2, maxBackoff)
             }
         }
+    }
+
+    /// Restarts the SSE connection if no events have been received for 30 seconds.
+    /// The server sends ALIVE events every ~10 seconds, so 30 seconds without any
+    /// event indicates a silently dead connection (e.g. after a server restart).
+    private func checkAliveWatchdog() {
+        guard Date.now.timeIntervalSince(lastEventTime) > 30 else { return }
+        Logger.restAPI.warning("Item SSE watchdog: no events for 30s, reconnecting")
+        restartListening()
+    }
+
+    private func restartListening() {
+        guard let cfg = currentConfig else {
+            broadcast(.disconnected(nil))
+            return
+        }
+        listenTask?.cancel()
+        listenTask = Task { await listen(using: cfg) }
     }
 
     private func broadcast(_ msg: StreamOutput<Event>) {

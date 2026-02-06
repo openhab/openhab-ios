@@ -37,6 +37,7 @@ public actor SitemapEventStream {
     private var currentTarget: Target?
     private var isMonitoringNetwork = false
     private var isStopped = false
+    private var lastEventTime = Date.now
 
     public func stream() -> AsyncStream<StreamOutput<SitemapEventMessage>> {
         AsyncStream { continuation in
@@ -128,8 +129,19 @@ public actor SitemapEventStream {
 
                 broadcast(.connected)
                 backoff = 1 // Reset backoff on successful connection
+                lastEventTime = .now
+
+                let watchdog = Task {
+                    while !Task.isCancelled {
+                        try? await Task.sleep(for: .seconds(10))
+                        guard !Task.isCancelled else { return }
+                        await self.checkAliveWatchdog()
+                    }
+                }
+                defer { watchdog.cancel() }
 
                 for try await sse in eventStream {
+                    lastEventTime = .now
                     if let message = parse(sse) {
                         broadcast(.event(message))
                     }
@@ -146,6 +158,15 @@ public actor SitemapEventStream {
                 backoff = min(backoff * 2, maxBackoff)
             }
         }
+    }
+
+    /// Restarts the SSE connection if no events have been received for 30 seconds.
+    /// The server sends ALIVE events every ~10 seconds, so 30 seconds without any
+    /// event indicates a silently dead connection (e.g. after a server restart).
+    private func checkAliveWatchdog() {
+        guard Date.now.timeIntervalSince(lastEventTime) > 30 else { return }
+        Logger.restAPI.warning("Sitemap SSE watchdog: no events for 30s, reconnecting")
+        restartListeningIfPossible()
     }
 
     private func broadcast(_ msg: StreamOutput<SitemapEventMessage>) {
