@@ -137,21 +137,6 @@ struct SliderRowView: View {
 // MARK: - Preview Helpers
 
 #if DEBUG
-private struct PreviewList<Content: View>: View {
-    @ViewBuilder let content: () -> Content
-
-    var body: some View {
-        List {
-            content()
-                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-        }
-        .listStyle(.plain)
-        .listRowSpacing(0)
-        .environment(\.defaultMinListRowHeight, 32)
-        .environmentObject(SitemapPageViewModel())
-    }
-}
-
 private extension SliderRowView {
     static func createPreviewWidget(label: String,
                                     value: Double? = nil,

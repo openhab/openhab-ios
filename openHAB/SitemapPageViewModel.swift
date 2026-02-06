@@ -20,6 +20,7 @@ private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "org.open
 enum SitemapPageError: LocalizedError {
     case noActiveConnection
     case serviceUnavailable
+    case noData
 
     var errorDescription: String? {
         switch self {
@@ -27,6 +28,8 @@ enum SitemapPageError: LocalizedError {
             "No active connection available."
         case .serviceUnavailable:
             "Service unavailable."
+        case .noData:
+            "No page data received."
         }
     }
 }
@@ -282,13 +285,15 @@ class SitemapPageViewModel: ObservableObject {
     private func loadCurrentPage() async throws {
         guard let service = openAPIService else { throw SitemapPageError.serviceUnavailable }
 
-        let page = try await service.pollDataForPage(
+        guard let page = try await service.pollDataForPage(
             sitemapname: defaultSitemap,
             pageId: pageId,
             longPolling: false
-        )
+        ) else {
+            throw SitemapPageError.noData
+        }
 
-        injectSendCommand(for: page!.widgets)
+        injectSendCommand(for: page.widgets)
         currentPage = page
     }
 

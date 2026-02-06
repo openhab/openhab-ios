@@ -28,10 +28,21 @@ struct ButtonGridButton: View {
         return widget.item?.state == widget.command
     }
 
+    private var hasPressRelease: Bool {
+        if let releaseCommand = widget.releaseCommand, !releaseCommand.isEmpty {
+            return true
+        }
+        return false
+    }
+
     var body: some View {
         Button {
-            triggerFeedback.toggle()
-            handleButtonPress()
+            // Only handle tap for non-press-release buttons;
+            // press-release buttons are handled entirely by the gesture
+            if !hasPressRelease {
+                triggerFeedback.toggle()
+                handleButtonPress()
+            }
         } label: {
             HStack {
                 if !widget.icon.isEmpty {
@@ -71,7 +82,6 @@ struct ButtonGridButton: View {
     }
 
     private func handleButtonPress() {
-        // Send command on tap for mappings
         if let command = widget.command, !command.isEmpty {
             logger.info("Sending command: \(command)")
             viewModel.sendCommand(widget.item, commandToSend: widget.command)
@@ -79,18 +89,20 @@ struct ButtonGridButton: View {
     }
 
     private func handleTouchDown() {
+        guard !isPressed else { return }
         isPressed = true
-        // For buttons with releaseCommand, send command on press
-        if let releaseCommand = widget.releaseCommand, !releaseCommand.isEmpty,
-           let command = widget.command {
+        // For press-release buttons, send command on press
+        if hasPressRelease, let command = widget.command {
+            triggerFeedback.toggle()
             logger.info("Sending press command: \(command)")
             widget.sendCommand(command)
         }
     }
 
     private func handleTouchUp() {
+        guard isPressed else { return }
         isPressed = false
-        // For buttons with releaseCommand, send release command on release
+        // For press-release buttons, send release command on release
         if let releaseCommand = widget.releaseCommand, !releaseCommand.isEmpty {
             logger.info("Sending release command: \(releaseCommand)")
             widget.sendCommand(releaseCommand)
@@ -177,12 +189,26 @@ struct ButtonGridRowView: View {
 extension View {
     func onPressGesture(onPress: @escaping () -> Void,
                         onRelease: @escaping () -> Void) -> some View {
-        gesture(
+        modifier(PressGestureModifier(onPress: onPress, onRelease: onRelease))
+    }
+}
+
+private struct PressGestureModifier: ViewModifier {
+    let onPress: () -> Void
+    let onRelease: () -> Void
+    @State private var pressed = false
+
+    func body(content: Content) -> some View {
+        content.gesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
-                    onPress()
+                    if !pressed {
+                        pressed = true
+                        onPress()
+                    }
                 }
                 .onEnded { _ in
+                    pressed = false
                     onRelease()
                 }
         )

@@ -372,9 +372,9 @@ public extension OpenHABWidget {
         self.switchSupport = switchSupport ?? false
 
         self.forceAsItem = forceAsItem
-        self.unit = unit ?? ""
-        self.pattern = pattern ?? ""
-        self.staticIcon = staticIcon ?? false
+        self.unit = unit
+        self.pattern = pattern
+        self.staticIcon = staticIcon
         self.labelSource = labelSource
         self.releaseOnly = releaseOnly
         self.row = row
@@ -382,9 +382,6 @@ public extension OpenHABWidget {
         self.releaseCommand = releaseCommand
         self.command = command
         self.stateless = stateless
-        self.staticIcon = staticIcon
-        self.unit = unit
-        self.pattern = pattern
         self.yAxisDecimalPattern = yAxisDecimalPattern
     }
 
