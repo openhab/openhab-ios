@@ -83,7 +83,6 @@ class SitemapPageViewModel: ObservableObject {
 
     init() {
         loadSettings()
-        setupActiveConnectionObserver()
 
         // Observe network connection changes directly
         Task { @MainActor in
@@ -95,7 +94,6 @@ class SitemapPageViewModel: ObservableObject {
 
     init(pageUrl: String, title: String, pageId: String = "") {
         loadSettings()
-        setupActiveConnectionObserver()
         isLinkedPage = true
 
         // Set openHABRootUrl from current active connection for charts/images
@@ -385,11 +383,6 @@ class SitemapPageViewModel: ObservableObject {
             logger.error("Failed to discover sitemaps: \(error)")
             self.error = error as? any LocalizedError ?? SitemapPageError.serviceUnavailable
         }
-    }
-
-    private func setupActiveConnectionObserver() {
-        // The @ObservedObject will automatically trigger view updates
-        // We'll handle the connection changes in the view's onChange modifier
     }
 
     func handleActiveConnectionChange(_ activeConnection: ConnectionInfo?) {
