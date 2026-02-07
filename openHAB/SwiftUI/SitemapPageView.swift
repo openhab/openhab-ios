@@ -55,11 +55,7 @@ struct SitemapPageView: View {
             await viewModel.reload()
         }
         .task {
-            // Linked pages start loading when the view appears (after navigation).
-            // The root page is handled by the for-await connection observer in init().
-            if viewModel.isLinked {
-                viewModel.startPageHandling()
-            }
+            viewModel.startPageHandling()
         }
         .onAppear {
             // Disable idle timer if configured in settings

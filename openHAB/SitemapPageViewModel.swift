@@ -83,9 +83,10 @@ class SitemapPageViewModel: ObservableObject {
 
     init() {
         loadSettings()
+        // Observe connection changes (skip initial value) — initial load is triggered by .task in the view
         connectionObserverTask = Task { @MainActor [weak self] in
             guard let self else { return }
-            for await connection in networkTracker.$activeConnection.values {
+            for await connection in networkTracker.$activeConnection.values.dropFirst() {
                 handleActiveConnectionChange(connection)
             }
         }
@@ -109,14 +110,6 @@ class SitemapPageViewModel: ObservableObject {
             }
         } else {
             self.pageId = pageId
-        }
-
-        // Only observe connection changes (skip initial value) — initial load is triggered by .task in the view
-        connectionObserverTask = Task { @MainActor [weak self] in
-            guard let self else { return }
-            for await connection in networkTracker.$activeConnection.values.dropFirst() {
-                handleActiveConnectionChange(connection)
-            }
         }
     }
 
@@ -164,6 +157,7 @@ class SitemapPageViewModel: ObservableObject {
                     return
                 }
                 let configuration = activeConnection.configuration
+                openHABRootUrl = configuration.url
 
                 if openAPIService == nil {
                     openAPIService = try OpenAPIService(connectionConfiguration: configuration)
@@ -404,6 +398,12 @@ class SitemapPageViewModel: ObservableObject {
             pageHandlingTask?.cancel()
             // Restart page handling to establish long-polling
             startPageHandling()
+            return
+        }
+
+        // Skip if already connected to this URL — avoids restarting long-polling
+        // when the NetworkTracker re-evaluates to the same connection
+        guard openHABRootUrl != activeConnection.configuration.url else {
             return
         }
 
