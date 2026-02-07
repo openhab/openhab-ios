@@ -39,7 +39,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published var currentPage: OpenHABPage?
     @Published var searchText = ""
     @Published var error: (any LocalizedError)?
-    @Published var isLoading = false
+    @Published var isLoading = true
     @Published var isUpdating = false
     @Published var openHABRootUrl: String?
     @Published var showSearchField = false
