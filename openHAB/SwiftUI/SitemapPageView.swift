@@ -55,7 +55,11 @@ struct SitemapPageView: View {
             await viewModel.reload()
         }
         .task {
-            viewModel.startPageHandling()
+            // Linked pages start loading when the view appears (after navigation).
+            // The root page is handled by the for-await connection observer in init().
+            if viewModel.isLinked {
+                viewModel.startPageHandling()
+            }
         }
         .onAppear {
             // Disable idle timer if configured in settings
@@ -69,9 +73,6 @@ struct SitemapPageView: View {
             if idleTimerDisabled {
                 UIApplication.shared.isIdleTimerDisabled = false
             }
-        }
-        .onChange(of: viewModel.networkTracker.activeConnection) { activeConnection in
-            viewModel.handleActiveConnectionChange(activeConnection)
         }
         .navigationTitle(viewModel.pageTitle)
         .navigationBarTitleDisplayMode(.large)

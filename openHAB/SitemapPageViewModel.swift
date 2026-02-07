@@ -48,6 +48,7 @@ class SitemapPageViewModel: ObservableObject {
     private var openAPIService: OpenAPIService?
     private var activeConnectionInfo: ConnectionInfo?
     private var pageHandlingTask: Task<Void, Never>?
+    private var connectionObserverTask: Task<Void, Never>?
     private var defaultSitemap = ""
     private var defaultSitemapLabel = ""
     @Published var pageId = ""
@@ -70,10 +71,9 @@ class SitemapPageViewModel: ObservableObject {
             return title
         } else if !defaultSitemapLabel.isEmpty {
             return defaultSitemapLabel
-        } else if !defaultSitemap.isEmpty {
-            return defaultSitemap
         } else {
-            return "Sitemap"
+            // Return empty — SitemapPageView shows a redacted placeholder title when loading
+            return ""
         }
     }
 
@@ -83,6 +83,12 @@ class SitemapPageViewModel: ObservableObject {
 
     init() {
         loadSettings()
+        connectionObserverTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            for await connection in networkTracker.$activeConnection.values {
+                handleActiveConnectionChange(connection)
+            }
+        }
     }
 
     init(pageUrl: String, title: String, pageId: String = "") {
@@ -103,6 +109,14 @@ class SitemapPageViewModel: ObservableObject {
             }
         } else {
             self.pageId = pageId
+        }
+
+        // Only observe connection changes (skip initial value) — initial load is triggered by .task in the view
+        connectionObserverTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            for await connection in networkTracker.$activeConnection.values.dropFirst() {
+                handleActiveConnectionChange(connection)
+            }
         }
     }
 
@@ -128,6 +142,7 @@ class SitemapPageViewModel: ObservableObject {
     func startPageHandling() {
         pageHandlingTask?.cancel()
         error = nil // Clear any previous errors when starting a new page handling session
+        isLoading = true // Show redacted view immediately
 
         logger.info("🚀 Starting page load and long polling flow...")
 
@@ -160,7 +175,6 @@ class SitemapPageViewModel: ObservableObject {
                 }
 
                 // 1. Initial page load (longPolling: false)
-                isLoading = true
                 let initialPage = try await openAPIService?.pollDataForPage(
                     sitemapname: defaultSitemap,
                     pageId: pageId,
@@ -472,6 +486,7 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     deinit {
+        connectionObserverTask?.cancel()
         pageHandlingTask?.cancel()
     }
 }
