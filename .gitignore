@@ -16,6 +16,7 @@ openHAB.ipa
 # spm
 build/
 BuildTools/.build
+CommonUI/.build
 OpenHABCore/Package.resolved
 
 swift-openapi-generator/
