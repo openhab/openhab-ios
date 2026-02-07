@@ -26,16 +26,7 @@ struct SitemapPageView: View {
             if viewModel.isLoading, viewModel.relevantWidgets.isEmpty {
                 // Show skeleton/placeholder rows while loading
                 List {
-                    // Redacted large title header
-                    if viewModel.pageTitle.isEmpty {
-                        Text("Placeholder Title")
-                            .font(.largeTitle.bold())
-                            .redacted(reason: .placeholder)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
-                    }
-                    ForEach(placeholderWidgets, id: \.id) { widget in
+                    ForEach(Self.placeholderWidgets, id: \.id) { widget in
                         EmbeddingRowView(widget: widget)
                             .redacted(reason: .placeholder)
                             .disabled(true)
@@ -90,25 +81,28 @@ struct SitemapPageView: View {
 }
 
 extension SitemapPageView {
-    /// Creates placeholder widgets for skeleton loading state
-    var placeholderWidgets: [OpenHABWidget] {
-        guard let page = PreviewConstants.openHABSitemapPage else { return [] }
-        return [
-            page.widgets[safe: 3],
-            page.widgets[safe: 5],
-            page.widgets[safe: 2],
-            page.widgets[safe: 6],
-            page.widgets[safe: 17],
-            page.widgets[safe: 4]
-        ].compactMap(\.self)
+    /// Lightweight placeholder widgets for skeleton loading state — no dependency on PreviewConstants
+    static let placeholderWidgets: [OpenHABWidget] = (0 ..< 6).map { i in
+        OpenHABWidget(
+            widgetId: "placeholder_\(i)",
+            label: "Placeholder [100]",
+            icon: "none",
+            type: .text,
+            url: nil, period: nil, minValue: nil, maxValue: nil, step: nil,
+            refresh: nil, height: nil, isLeaf: nil, iconColor: nil,
+            labelColor: nil, valueColor: nil, service: nil, state: nil,
+            text: nil, legend: nil, inputHint: nil, encoding: nil,
+            item: nil, linkedPage: nil, mappings: [], widgets: [],
+            visibility: true, switchSupport: nil, forceAsItem: nil,
+            labelSource: .unknown, releaseOnly: nil
+        )
     }
 }
 
 #Preview {
     let previewViewModel = SitemapPageViewModel(
-        pageUrl: PreviewConstants.openHABSitemapPage?.link ?? "",
-        title: PreviewConstants.openHABSitemapPage?.title ?? "Preview Page",
-        widgets: SitemapPageView(viewModel: SitemapPageViewModel()).placeholderWidgets
+        title: "Preview Page",
+        widgets: SitemapPageView.placeholderWidgets
     )
     SitemapPageView(viewModel: previewViewModel)
 }
