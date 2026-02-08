@@ -19,6 +19,7 @@ struct SegmentRow: View {
     @EnvironmentObject var settings: AppSettings
     @State private var selectedIndex: Int?
     @State private var pressedIndex: Int?
+    @State private var singlePressed = false
 
     private var currentIndex: Int {
         selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) } ?? 0
@@ -69,25 +70,30 @@ struct SegmentRow: View {
                 let mapping = widget.mappingsOrItemOptions[index]
                 inlineButton(label: mapping.label, isPressed: pressedIndex == index)
                     .overlay {
-                        Color.clear
-                            .contentShape(Rectangle())
-                            .gesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onChanged { _ in
-                                        if pressedIndex != index {
-                                            pressedIndex = index
-                                            Logger.rowViews.info("Sending press command: \(mapping.command)")
-                                            widget.sendCommand(mapping.command)
+                        GeometryReader { geometry in
+                            Color.clear
+                                .contentShape(Rectangle())
+                                .gesture(
+                                    DragGesture(minimumDistance: 0)
+                                        .onChanged { value in
+                                            let bounds = CGRect(origin: .zero, size: geometry.size)
+                                            guard bounds.contains(value.startLocation) else { return }
+                                            if pressedIndex != index {
+                                                pressedIndex = index
+                                                Logger.rowViews.info("Sending press command: \(mapping.command)")
+                                                widget.sendCommand(mapping.command)
+                                            }
                                         }
-                                    }
-                                    .onEnded { _ in
-                                        pressedIndex = nil
-                                        if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
-                                            Logger.rowViews.info("Sending release command: \(releaseCommand)")
-                                            widget.sendCommand(releaseCommand)
+                                        .onEnded { _ in
+                                            guard pressedIndex == index else { return }
+                                            pressedIndex = nil
+                                            if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
+                                                Logger.rowViews.info("Sending release command: \(releaseCommand)")
+                                                widget.sendCommand(releaseCommand)
+                                            }
                                         }
-                                    }
-                            )
+                                )
+                        }
                     }
             }
         }
@@ -117,14 +123,27 @@ struct SegmentRow: View {
 
     @ViewBuilder
     private func singleButton(for mapping: OpenHABWidgetMapping) -> some View {
-        inlineButton(label: mapping.label, isPressed: false)
+        inlineButton(label: mapping.label, isPressed: singlePressed)
             .overlay {
-                Color.clear
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        Logger.rowViews.info("Sending command: \(mapping.command)")
-                        widget.sendCommand(mapping.command)
-                    }
+                GeometryReader { geometry in
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    let bounds = CGRect(origin: .zero, size: geometry.size)
+                                    guard bounds.contains(value.startLocation) else { return }
+                                    if !singlePressed {
+                                        singlePressed = true
+                                        Logger.rowViews.info("Sending command: \(mapping.command)")
+                                        widget.sendCommand(mapping.command)
+                                    }
+                                }
+                                .onEnded { _ in
+                                    singlePressed = false
+                                }
+                        )
+                }
             }
     }
 
