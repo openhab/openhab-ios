@@ -126,20 +126,19 @@ struct SegmentRow: View {
         inlineButton(label: mapping.label, isPressed: singlePressed)
             .overlay {
                 GeometryReader { geometry in
+                    let bounds = CGRect(origin: .zero, size: geometry.size)
                     Color.clear
                         .contentShape(Rectangle())
                         .gesture(
                             DragGesture(minimumDistance: 0)
                                 .onChanged { value in
-                                    let bounds = CGRect(origin: .zero, size: geometry.size)
-                                    guard bounds.contains(value.startLocation) else { return }
-                                    if !singlePressed {
-                                        singlePressed = true
+                                    singlePressed = bounds.contains(value.location)
+                                }
+                                .onEnded { value in
+                                    if singlePressed, bounds.contains(value.location) {
                                         Logger.rowViews.info("Sending command: \(mapping.command)")
                                         widget.sendCommand(mapping.command)
                                     }
-                                }
-                                .onEnded { _ in
                                     singlePressed = false
                                 }
                         )
