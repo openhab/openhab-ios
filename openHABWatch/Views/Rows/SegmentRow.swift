@@ -17,21 +17,31 @@ import SwiftUI
 struct SegmentRow: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
-    @State private var selectedIndex: Int?
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
+    @StateObject private var viewModel: WidgetRowViewModel
 
-    private var currentIndex: Int {
-        selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) } ?? 0
+    private var currentIndex: Int? {
+        viewModel.selectedIndex
     }
 
     var body: some View {
-        if widget.hasPressReleaseMappings {
-            pressReleaseContent
-        } else if widget.mappingsOrItemOptions.count == 1 {
-            singleMappingContent
-        } else {
-            multiSegmentContent
+        Group {
+            if viewModel.hasPressReleaseMappings {
+                pressReleaseContent
+            } else if viewModel.mappings.count == 1 {
+                singleMappingContent
+            } else {
+                multiSegmentContent
+            }
+        }
+        .onAppear {
+            viewModel.update(from: widget)
+        }
+        .onReceive(widget.objectWillChange) { _ in
+            DispatchQueue.main.async {
+                viewModel.update(from: widget)
+            }
         }
     }
 
@@ -39,7 +49,7 @@ struct SegmentRow: View {
 
     @ViewBuilder
     private var pressReleaseContent: some View {
-        if widget.mappingsOrItemOptions.count <= 2 {
+        if viewModel.mappings.count <= 2 {
             HStack {
                 IconView(widget: widget, settings: settings)
                 TextLabelView(widget: widget, font: .caption)
@@ -61,8 +71,8 @@ struct SegmentRow: View {
     @ViewBuilder
     private var pressReleaseButtons: some View {
         HStack(spacing: 8) {
-            ForEach(widget.mappingsOrItemOptions.indices, id: \.self) { index in
-                let mapping = widget.mappingsOrItemOptions[index]
+            ForEach(viewModel.mappings.indices, id: \.self) { index in
+                let mapping = viewModel.mappings[index]
                 inlineButton(label: mapping.label, isPressed: pressedIndex == index)
                     .overlay {
                         GeometryReader { geometry in
@@ -94,11 +104,58 @@ struct SegmentRow: View {
         }
     }
 
+    // MARK: - Shared Components
+
+    @ViewBuilder
+    private var iconTitleRow: some View {
+        HStack {
+            IconView(widget: widget, settings: settings)
+            TextLabelView(widget: widget, font: .caption)
+            Spacer()
+        }
+    }
+
+    private var selectedIndexBinding: Binding<Int?> {
+        Binding(
+            get: { viewModel.selectedIndex },
+            set: { viewModel.selectedIndex = $0 }
+        )
+    }
+
+    // MARK: - Multi-Segment (existing NavigationLink)
+
+    @ViewBuilder
+    private var multiSegmentContent: some View {
+        HStack {
+            HStack {
+                IconView(widget: widget, settings: settings)
+                TextLabelView(widget: widget, font: .caption)
+                Spacer()
+            }
+            NavigationLink(destination: LazyView(SegmentSelectionView(widget: widget, selectedIndex: selectedIndexBinding))) {
+                HStack {
+                    if let currentIndex, currentIndex >= 0, currentIndex < viewModel.mappings.count {
+                        Text(viewModel.mappings[currentIndex].label)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                    Image(systemSymbol: .chevronRight)
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+                .padding(.horizontal, 8)
+                .frame(height: 30)
+                .background(Capsule().fill(Color.gray.opacity(0.5)))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     // MARK: - Single Mapping
 
     @ViewBuilder
     private var singleMappingContent: some View {
-        let mapping = widget.mappingsOrItemOptions[0]
+        let mapping = viewModel.mappings[0]
         HStack {
             IconView(widget: widget, settings: settings)
             TextLabelView(widget: widget, font: .caption)
@@ -107,6 +164,13 @@ struct SegmentRow: View {
                 .layoutPriority(1)
         }
     }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        _viewModel = StateObject(wrappedValue: WidgetRowViewModel(widget: widget))
+    }
+
+    // MARK: - Single Mapping
 
     @ViewBuilder
     private func singleButton(for mapping: OpenHABWidgetMapping) -> some View {
@@ -133,51 +197,7 @@ struct SegmentRow: View {
             }
     }
 
-    // MARK: - Multi-Segment (existing NavigationLink)
-
-    @ViewBuilder
-    private var multiSegmentContent: some View {
-        HStack {
-            HStack {
-                IconView(widget: widget, settings: settings)
-                TextLabelView(widget: widget, font: .caption)
-                Spacer()
-            }
-            NavigationLink(destination: LazyView(SegmentSelectionView(widget: widget, selectedIndex: $selectedIndex))) {
-                HStack {
-                    if currentIndex >= 0, currentIndex < widget.mappingsOrItemOptions.count {
-                        Text(widget.mappingsOrItemOptions[currentIndex].label)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-                    Image(systemSymbol: .chevronRight)
-                        .foregroundStyle(.secondary)
-                        .font(.caption)
-                }
-                .padding(.horizontal, 8)
-                .frame(height: 30)
-                .background(Capsule().fill(Color.gray.opacity(0.5)))
-            }
-            .buttonStyle(.plain)
-        }
-        .onAppear {
-            selectedIndex = widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
-        }
-        .onChange(of: widget.item?.state, initial: false) { _, newValue in
-            selectedIndex = widget.mappingIndex(byCommand: newValue).map { Int($0) }
-        }
-    }
-
     // MARK: - Shared Components
-
-    @ViewBuilder
-    private var iconTitleRow: some View {
-        HStack {
-            IconView(widget: widget, settings: settings)
-            TextLabelView(widget: widget, font: .caption)
-            Spacer()
-        }
-    }
 
     @ViewBuilder
     private func inlineButton(label: String, isPressed: Bool) -> some View {
