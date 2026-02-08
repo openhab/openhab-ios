@@ -25,13 +25,6 @@ struct SegmentRow: View {
         selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) } ?? 0
     }
 
-    private var hasLabel: Bool {
-        if let labelText = widget.labelText, !labelText.isEmpty {
-            return true
-        }
-        return false
-    }
-
     var body: some View {
         if widget.hasPressReleaseMappings {
             pressReleaseContent
@@ -46,19 +39,21 @@ struct SegmentRow: View {
 
     @ViewBuilder
     private var pressReleaseContent: some View {
-        if hasLabel {
+        if widget.mappingsOrItemOptions.count <= 2 {
+            HStack {
+                IconView(widget: widget, settings: settings)
+                TextLabelView(widget: widget, font: .caption)
+                Spacer()
+                pressReleaseButtons
+                    .layoutPriority(1)
+            }
+        } else {
             VStack(alignment: .leading, spacing: 4) {
                 iconTitleRow
                 HStack {
                     Spacer()
                     pressReleaseButtons
                 }
-            }
-        } else {
-            HStack {
-                IconView(widget: widget, settings: settings)
-                Spacer()
-                pressReleaseButtons
             }
         }
     }
@@ -104,20 +99,12 @@ struct SegmentRow: View {
     @ViewBuilder
     private var singleMappingContent: some View {
         let mapping = widget.mappingsOrItemOptions[0]
-        if hasLabel {
-            VStack(alignment: .leading, spacing: 4) {
-                iconTitleRow
-                HStack {
-                    Spacer()
-                    singleButton(for: mapping)
-                }
-            }
-        } else {
-            HStack {
-                IconView(widget: widget, settings: settings)
-                Spacer()
-                singleButton(for: mapping)
-            }
+        HStack {
+            IconView(widget: widget, settings: settings)
+            TextLabelView(widget: widget, font: .caption)
+            Spacer()
+            singleButton(for: mapping)
+                .layoutPriority(1)
         }
     }
 
