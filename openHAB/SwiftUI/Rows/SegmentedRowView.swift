@@ -103,11 +103,7 @@ struct SegmentedRowView: View {
             GeometryReader { geometry in
                 // Layer 1: Dark gray background
                 RoundedRectangle(cornerRadius: 7)
-                    .fill(
-                        colorScheme == .dark
-                            ? Color(uiColor: .tertiarySystemBackground)
-                            : Color(uiColor: .secondarySystemBackground)
-                    )
+                    .fill(Color(uiColor: colorScheme == .dark ? .systemGray4 : .systemGray5))
                 // Layer 2: Selection indicator (lighter, more visible)
                 if let selectedIndex, !mappings.isEmpty {
                     let segmentWidth = geometry.size.width / CGFloat(mappings.count)
@@ -183,11 +179,7 @@ struct SegmentedRowView: View {
             )
             .background(
                 RoundedRectangle(cornerRadius: 7)
-                    .fill(
-                        colorScheme == .dark
-                            ? Color(uiColor: .tertiarySystemBackground)
-                            : Color(uiColor: .secondarySystemBackground)
-                    )
+                    .fill(Color(uiColor: colorScheme == .dark ? .systemGray4 : .systemGray5))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 7)
@@ -238,8 +230,8 @@ struct SegmentedRowView: View {
                 RoundedRectangle(cornerRadius: 7)
                     .fill(
                         isPressed
-                            ? (colorScheme == .dark ? Color(uiColor: .systemGray2) : Color(uiColor: .systemBackground))
-                            : (colorScheme == .dark ? Color(uiColor: .tertiarySystemBackground) : Color(uiColor: .secondarySystemBackground))
+                            ? Color(uiColor: colorScheme == .dark ? .systemGray2 : .systemBackground)
+                            : Color(uiColor: colorScheme == .dark ? .systemGray4 : .systemGray5)
                     )
             )
             .overlay(
