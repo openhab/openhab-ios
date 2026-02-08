@@ -180,6 +180,7 @@ struct SegmentRow: View {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.gray.opacity(isPressed ? 0.6 : 0.3))
             )
+            .contentShape(RoundedRectangle(cornerRadius: 8))
     }
 }
 
