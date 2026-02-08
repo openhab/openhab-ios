@@ -389,13 +389,16 @@ final class UserData: ObservableObject {
 
     /// Updates existing widget instances instead of replacing them to preserve @ObservedObject references
     private func updateWidgets(with newWidgets: [OpenHABWidget]) {
-        // Build a map of existing widgets by ID for quick lookup
-        var existingWidgetsMap = Dictionary(uniqueKeysWithValues: widgets.map { ($0.widgetId, $0) })
-        var updatedWidgets: [OpenHABWidget] = []
+        let existingWidgetsMap = Dictionary(uniqueKeysWithValues: widgets.map { ($0.widgetId, $0) })
+
+        // Check if the widget list structure changed (count, order, or IDs)
+        let structureChanged = widgets.count != newWidgets.count
+            || !zip(widgets, newWidgets).allSatisfy({ $0.widgetId == $1.widgetId })
 
         for newWidget in newWidgets {
             if let existingWidget = existingWidgetsMap[newWidget.widgetId] {
-                // Update existing widget's properties to preserve the instance
+                // Update existing widget's properties in place — this triggers
+                // per-row re-renders via @ObservedObject without rebuilding the list
                 existingWidget.label = newWidget.label
                 existingWidget.type = newWidget.type
                 existingWidget.icon = newWidget.icon
@@ -413,15 +416,18 @@ final class UserData: ObservableObject {
                 existingWidget.forceAsItem = newWidget.forceAsItem
                 existingWidget.mappings = newWidget.mappings
                 existingWidget.widgets = newWidget.widgets
-                // Add other properties as needed
-                updatedWidgets.append(existingWidget)
-                existingWidgetsMap.removeValue(forKey: newWidget.widgetId)
-            } else {
-                // New widget, add it
-                updatedWidgets.append(newWidget)
             }
         }
 
-        widgets = updatedWidgets
+        // Only reassign the @Published array when the list structure actually
+        // changed (widgets added, removed, or reordered). This avoids a full
+        // ScrollView rebuild that resets the scroll position.
+        if structureChanged {
+            var updatedWidgets: [OpenHABWidget] = []
+            for newWidget in newWidgets {
+                updatedWidgets.append(existingWidgetsMap[newWidget.widgetId] ?? newWidget)
+            }
+            widgets = updatedWidgets
+        }
     }
 }
