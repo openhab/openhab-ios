@@ -393,7 +393,7 @@ final class UserData: ObservableObject {
 
         // Check if the widget list structure changed (count, order, or IDs)
         let structureChanged = widgets.count != newWidgets.count
-            || !zip(widgets, newWidgets).allSatisfy({ $0.widgetId == $1.widgetId })
+            || !zip(widgets, newWidgets).allSatisfy { $0.widgetId == $1.widgetId }
 
         for newWidget in newWidgets {
             if let existingWidget = existingWidgetsMap[newWidget.widgetId] {
