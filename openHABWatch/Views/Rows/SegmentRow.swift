@@ -68,23 +68,27 @@ struct SegmentRow: View {
             ForEach(widget.mappingsOrItemOptions.indices, id: \.self) { index in
                 let mapping = widget.mappingsOrItemOptions[index]
                 inlineButton(label: mapping.label, isPressed: pressedIndex == index)
-                    .gesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { _ in
-                                if pressedIndex != index {
-                                    pressedIndex = index
-                                    Logger.rowViews.info("Sending press command: \(mapping.command)")
-                                    widget.sendCommand(mapping.command)
-                                }
-                            }
-                            .onEnded { _ in
-                                pressedIndex = nil
-                                if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
-                                    Logger.rowViews.info("Sending release command: \(releaseCommand)")
-                                    widget.sendCommand(releaseCommand)
-                                }
-                            }
-                    )
+                    .overlay {
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .gesture(
+                                DragGesture(minimumDistance: 0)
+                                    .onChanged { _ in
+                                        if pressedIndex != index {
+                                            pressedIndex = index
+                                            Logger.rowViews.info("Sending press command: \(mapping.command)")
+                                            widget.sendCommand(mapping.command)
+                                        }
+                                    }
+                                    .onEnded { _ in
+                                        pressedIndex = nil
+                                        if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
+                                            Logger.rowViews.info("Sending release command: \(releaseCommand)")
+                                            widget.sendCommand(releaseCommand)
+                                        }
+                                    }
+                            )
+                    }
             }
         }
     }
@@ -99,28 +103,29 @@ struct SegmentRow: View {
                 iconTitleRow
                 HStack {
                     Spacer()
-                    Button {
-                        Logger.rowViews.info("Sending command: \(mapping.command)")
-                        widget.sendCommand(mapping.command)
-                    } label: {
-                        inlineButton(label: mapping.label, isPressed: false)
-                    }
-                    .buttonStyle(.plain)
+                    singleButton(for: mapping)
                 }
             }
         } else {
             HStack {
                 IconView(widget: widget, settings: settings)
                 Spacer()
-                Button {
-                    Logger.rowViews.info("Sending command: \(mapping.command)")
-                    widget.sendCommand(mapping.command)
-                } label: {
-                    inlineButton(label: mapping.label, isPressed: false)
-                }
-                .buttonStyle(.plain)
+                singleButton(for: mapping)
             }
         }
+    }
+
+    @ViewBuilder
+    private func singleButton(for mapping: OpenHABWidgetMapping) -> some View {
+        inlineButton(label: mapping.label, isPressed: false)
+            .overlay {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        Logger.rowViews.info("Sending command: \(mapping.command)")
+                        widget.sendCommand(mapping.command)
+                    }
+            }
     }
 
     // MARK: - Multi-Segment (existing NavigationLink)
