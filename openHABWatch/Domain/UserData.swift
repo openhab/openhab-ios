@@ -416,6 +416,7 @@ final class UserData: ObservableObject {
                 existingWidget.forceAsItem = newWidget.forceAsItem
                 existingWidget.mappings = newWidget.mappings
                 existingWidget.widgets = newWidget.widgets
+                existingWidget.sendCommand = newWidget.sendCommand
             }
         }
 
