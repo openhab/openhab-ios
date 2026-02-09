@@ -43,7 +43,7 @@ enum NotificationServiceError: Error {
 }
 
 actor NotificationServiceHandler {
-    static let networkTimeout: TimeInterval = 5
+    static let networkTimeout: TimeInterval = 30 // we have up to about this time in background notifications
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
     var cancellables = Set<AnyCancellable>()
@@ -292,6 +292,9 @@ actor NotificationServiceHandler {
         }
 
         await tracker.startTracking(connectionConfigurations: connections)
+        // Wait for the initial connection attempt to complete before returning
+        // This prevents the notification service from racing the connection testing
+        _ = await tracker.waitForActiveConnection()
         networkTracker = tracker
         return tracker
     }
