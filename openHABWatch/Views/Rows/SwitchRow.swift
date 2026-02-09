@@ -18,17 +18,10 @@ struct SwitchRow: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
     @State private var localIsOn: Bool?
-
-    private var effectiveState: String {
-        var state = widget.state
-        if state.isEmpty {
-            state = widget.item?.state ?? ""
-        }
-        return state
-    }
+    @State private var viewModel: WidgetRowViewModel
 
     private var isOn: Bool {
-        localIsOn ?? effectiveState.parseAsBool()
+        localIsOn ?? viewModel.isOn
     }
 
     var body: some View {
@@ -55,9 +48,20 @@ struct SwitchRow: View {
         }
         .padding(.trailing)
         .cornerRadius(5)
-        .onChange(of: effectiveState) {
+        .onAppear {
+            viewModel.update(from: widget)
+        }
+        .onChange(of: widget.item?.state, initial: false) { _, _ in
+            viewModel.update(from: widget)
+        }
+        .onChange(of: viewModel.effectiveState) {
             localIsOn = nil
         }
+    }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 

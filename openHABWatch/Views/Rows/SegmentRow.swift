@@ -149,7 +149,7 @@ struct SegmentRow: View {
         }
     }
 
-    // MARK: - Single Mapping
+    // MARK: - Single Mapping var
 
     @ViewBuilder
     private var singleMappingContent: some View {
@@ -168,7 +168,7 @@ struct SegmentRow: View {
         _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 
-    // MARK: - Single Mapping
+    // MARK: - Single Mapping func
 
     @ViewBuilder
     private func singleButton(for mapping: OpenHABWidgetMapping) -> some View {

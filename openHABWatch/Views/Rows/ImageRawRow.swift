@@ -16,17 +16,29 @@ import SwiftUI
 struct ImageRawRow: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    @State private var viewModel: WidgetRowViewModel
 
     var body: some View {
-        if let data = widget.item?.state?.components(separatedBy: ",")[safe: 1],
-           let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters),
-           let image = UIImage(data: decodedData) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFit()
-        } else {
-            EmptyView()
+        Group {
+            if let data = viewModel.effectiveState.components(separatedBy: ",")[safe: 1],
+               let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters),
+               let image = UIImage(data: decodedData) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+            }
         }
+        .onAppear {
+            viewModel.update(from: widget)
+        }
+        .onChange(of: widget.item?.state, initial: false) { _, _ in
+            viewModel.update(from: widget)
+        }
+    }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 

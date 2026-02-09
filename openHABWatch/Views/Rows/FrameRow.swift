@@ -15,14 +15,26 @@ import SwiftUI
 struct FrameRow: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    @State private var viewModel: WidgetRowViewModel
 
     var body: some View {
         HStack {
-            Text(widget.labelText?.uppercased() ?? "")
+            Text(viewModel.labelText.uppercased())
                 .font(.callout)
                 .lineLimit(1)
             Spacer()
         }
+        .onAppear {
+            viewModel.update(from: widget)
+        }
+        .onChange(of: widget.item?.state, initial: false) { _, _ in
+            viewModel.update(from: widget)
+        }
+    }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 

@@ -18,8 +18,9 @@ import SwiftUI
 struct ColorPickerRow: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = AppSettings.shared
+    @State private var viewModel: WidgetRowViewModel
     var body: some View {
-        let uiColor = widget.item?.stateAsUIColor()
+        let uiColor = viewModel.colorState
 
         return
             VStack(spacing: 0) {
@@ -59,6 +60,12 @@ struct ColorPickerRow: View {
                     Spacer()
                 }
             }
+            .onAppear {
+                viewModel.update(from: widget)
+            }
+            .onChange(of: widget.item?.state, initial: false) { _, _ in
+                viewModel.update(from: widget)
+            }
     }
 
     func upButtonPressed() {
@@ -69,6 +76,11 @@ struct ColorPickerRow: View {
     func downButtonPressed() {
         Logger.rowViews.info("OFF button pressed")
         widget.sendCommand("OFF")
+    }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 

@@ -17,6 +17,7 @@ import SwiftUI
 struct GenericRow: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = AppSettings.shared
+    @State private var viewModel: WidgetRowViewModel
 
     var body: some View {
         HStack {
@@ -26,6 +27,18 @@ struct GenericRow: View {
             DetailTextLabelView(widget: widget)
             widget.makeView(settings: settings)
         }
+        .accessibilityLabel(viewModel.labelText)
+        .onAppear {
+            viewModel.update(from: widget)
+        }
+        .onChange(of: widget.item?.state, initial: false) { _, _ in
+            viewModel.update(from: widget)
+        }
+    }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 

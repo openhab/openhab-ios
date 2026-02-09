@@ -20,13 +20,14 @@ struct SelectionListView: View {
     @ObservedObject var widget: OpenHABWidget
     @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
+    @State private var viewModel: WidgetRowViewModel
 
     private var mappings: [OpenHABWidgetMapping] {
-        widget.mappingsOrItemOptions
+        viewModel.mappings
     }
 
     private var currentIndex: Int? {
-        selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
+        viewModel.selectedIndex
     }
 
     var body: some View {
@@ -65,37 +66,53 @@ struct SelectionListView: View {
         }
         .navigationTitle(widget.labelText ?? "Select")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.update(from: widget)
+            selectedIndex = viewModel.selectedIndex
+        }
+        .onChange(of: widget.item?.state, initial: false) { _, _ in
+            viewModel.update(from: widget)
+            selectedIndex = viewModel.selectedIndex
+        }
     }
 
     private func selectOption(at index: Int) {
-        selectedIndex = index
+        viewModel.selectedIndex = index
+        selectedIndex = viewModel.selectedIndex
         if let selectedCommand = mappings[safe: index]?.command {
             Logger.rowViews.info("Selection changed to: \(selectedCommand)")
             widget.sendCommand(selectedCommand)
             dismiss()
         }
     }
+
+    init(widget: OpenHABWidget, selectedIndex: Binding<Int?>) {
+        self.widget = widget
+        _selectedIndex = selectedIndex
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+    }
 }
 
 struct SelectionRow: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
-    @State private var selectedIndex: Int?
-
-    private var mappings: [OpenHABWidgetMapping] {
-        widget.mappingsOrItemOptions
-    }
-
-    private var currentIndex: Int? {
-        selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
-    }
+    @State private var viewModel: WidgetRowViewModel
 
     /// Returns the label of the currently selected mapping
     private var selectedValueText: String? {
-        if let index = currentIndex, index >= 0, index < mappings.count {
-            return mappings[index].label
+        if let index = viewModel.selectedIndex,
+           index >= 0,
+           index < viewModel.mappings.count {
+            return viewModel.mappings[index].label
         }
-        return widget.labelValue
+        return viewModel.labelValue
+    }
+
+    private var selectedIndexBinding: Binding<Int?> {
+        Binding(
+            get: { viewModel.selectedIndex },
+            set: { viewModel.selectedIndex = $0 }
+        )
     }
 
     var body: some View {
@@ -105,7 +122,7 @@ struct SelectionRow: View {
                 TextLabelView(widget: widget, font: .caption)
                 Spacer()
             }
-            NavigationLink(destination: LazyView(SelectionListView(widget: widget, selectedIndex: $selectedIndex))) {
+            NavigationLink(destination: LazyView(SelectionListView(widget: widget, selectedIndex: selectedIndexBinding))) {
                 HStack(spacing: 4) {
                     if let valueText = selectedValueText {
                         Text(valueText)
@@ -120,11 +137,16 @@ struct SelectionRow: View {
             .buttonStyle(.plain)
         }
         .onAppear {
-            selectedIndex = widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
+            viewModel.update(from: widget)
         }
-        .onChange(of: widget.item?.state) { _, newState in
-            selectedIndex = widget.mappingIndex(byCommand: newState).map { Int($0) }
+        .onChange(of: widget.item?.state, initial: false) { _, _ in
+            viewModel.update(from: widget)
         }
+    }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 

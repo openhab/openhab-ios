@@ -12,6 +12,7 @@
 import Foundation
 import Observation
 import OpenHABCore
+import UIKit
 
 @MainActor
 @Observable
@@ -20,7 +21,18 @@ final class WidgetRowViewModel {
     var selectedIndex: Int?
     var hasPressReleaseMappings = false
     var labelText = ""
+    var labelValue: String?
     var selectedLabel: String?
+    var effectiveState = ""
+    var isOn = false
+    var adjustedValue: Double = 0.0
+    var minValue: Double = 0.0
+    var maxValue: Double = 100.0
+    var step: Double = 1.0
+    var switchSupport = false
+    var hasLinkedPage = false
+    var numberState: NumberState?
+    var colorState: UIColor?
 
     init(widget: OpenHABWidget) {
         update(from: widget)
@@ -31,11 +43,26 @@ final class WidgetRowViewModel {
         mappings = newMappings
         hasPressReleaseMappings = widget.hasPressReleaseMappings
         labelText = widget.labelText ?? widget.label
+        labelValue = widget.labelValue
         selectedIndex = widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
         if let index = selectedIndex, index >= 0, index < newMappings.count {
             selectedLabel = newMappings[index].label
         } else {
             selectedLabel = nil
         }
+        if widget.state.isEmpty {
+            effectiveState = widget.item?.state ?? ""
+        } else {
+            effectiveState = widget.state
+        }
+        isOn = effectiveState.parseAsBool()
+        adjustedValue = widget.adjustedValue
+        minValue = widget.minValue
+        maxValue = widget.maxValue
+        step = widget.step
+        switchSupport = widget.switchSupport
+        hasLinkedPage = widget.linkedPage != nil
+        numberState = widget.stateValueAsNumberState
+        colorState = widget.item?.stateAsUIColor()
     }
 }

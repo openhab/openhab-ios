@@ -17,6 +17,7 @@ import SwiftUI
 struct TextRow: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    @State private var viewModel: WidgetRowViewModel
 
     var body: some View {
         HStack {
@@ -24,12 +25,23 @@ struct TextRow: View {
             TextLabelView(widget: widget, font: .caption, lineLimit: 2)
             Spacer()
             DetailTextLabelView(widget: widget)
-            if widget.linkedPage != nil {
+            if viewModel.hasLinkedPage {
                 Image(systemSymbol: .chevronRight)
                     .foregroundStyle(.secondary)
                     .font(.caption)
             }
         }
+        .onAppear {
+            viewModel.update(from: widget)
+        }
+        .onChange(of: widget.item?.state, initial: false) { _, _ in
+            viewModel.update(from: widget)
+        }
+    }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 

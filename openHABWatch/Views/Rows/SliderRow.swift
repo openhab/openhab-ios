@@ -20,19 +20,20 @@ struct SliderRow: View {
     @EnvironmentObject var settings: AppSettings
     var fallbackSymbol: SFSymbol?
     @State private var pendingValue: Double?
+    @State private var viewModel: WidgetRowViewModel
 
     private var currentValue: Double {
-        pendingValue ?? widget.adjustedValue
+        pendingValue ?? viewModel.adjustedValue
     }
 
     private var currentValueText: String {
-        currentValue.valueText(step: widget.step)
+        currentValue.valueText(step: viewModel.step)
     }
 
     var valueBinding: Binding<Double> {
         .init(
             get: {
-                pendingValue ?? widget.adjustedValue
+                pendingValue ?? viewModel.adjustedValue
             },
             set: { newValue in
                 Logger.rowViews.info("SliderRow new value = \(newValue)")
@@ -40,7 +41,7 @@ struct SliderRow: View {
                 Task { @MainActor in
                     try? await Task.sleep(for: .milliseconds(500))
                     if pendingValue == newValue { // Ensure no new updates came in
-                        widget.sendCommand(newValue.valueText(step: widget.step))
+                        widget.sendCommand(newValue.valueText(step: viewModel.step))
                         pendingValue = nil
                     }
                 }
@@ -51,15 +52,15 @@ struct SliderRow: View {
     private var stateBinding: Binding<Bool> {
         Binding<Bool>(
             get: {
-                widget.adjustedValue > widget.minValue
+                viewModel.adjustedValue > viewModel.minValue
             },
             set: { newValue in
                 if newValue {
                     Logger.rowViews.info("SliderRow switch to ON")
-                    widget.sendCommand(widget.maxValue.valueText(step: widget.step))
+                    widget.sendCommand(viewModel.maxValue.valueText(step: viewModel.step))
                 } else {
                     Logger.rowViews.info("SliderRow switch to OFF")
-                    widget.sendCommand(widget.minValue.valueText(step: widget.step))
+                    widget.sendCommand(viewModel.minValue.valueText(step: viewModel.step))
                 }
             }
         )
@@ -67,7 +68,7 @@ struct SliderRow: View {
 
     var body: some View {
         VStack(spacing: 3) {
-            if widget.switchSupport {
+            if viewModel.switchSupport {
                 Toggle(isOn: stateBinding) {
                     HStack {
                         IconView(widget: widget, settings: settings, fallbackSymbol: fallbackSymbol)
@@ -100,9 +101,21 @@ struct SliderRow: View {
                 }.padding(.top, 8)
             }
 
-            Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
+            Slider(value: valueBinding, in: viewModel.minValue ... viewModel.maxValue, step: viewModel.step)
                 .labelsHidden()
         }
+        .onAppear {
+            viewModel.update(from: widget)
+        }
+        .onChange(of: widget.item?.state, initial: false) { _, _ in
+            viewModel.update(from: widget)
+        }
+    }
+
+    init(widget: OpenHABWidget, fallbackSymbol: SFSymbol? = nil) {
+        self.widget = widget
+        self.fallbackSymbol = fallbackSymbol
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 

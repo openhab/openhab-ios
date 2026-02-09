@@ -19,18 +19,19 @@ struct SegmentSelectionView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var pendingValue: String?
     @State private var pressedIndex: Int?
+    @State private var viewModel: WidgetRowViewModel
 
-    private var currentIndex: Int {
-        selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) } ?? 0
+    private var currentIndex: Int? {
+        viewModel.selectedIndex
     }
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
-                ForEach(0 ..< widget.mappingsOrItemOptions.count, id: \.self) { index in
-                    let mapping = widget.mappingsOrItemOptions[index]
+                ForEach(0 ..< viewModel.mappings.count, id: \.self) { index in
+                    let mapping = viewModel.mappings[index]
 
-                    if widget.hasPressReleaseMappings {
+                    if viewModel.hasPressReleaseMappings {
                         // Press-release button for mappings with releaseCommand
                         pressReleaseButton(for: mapping, at: index)
                     } else {
@@ -43,6 +44,14 @@ struct SegmentSelectionView: View {
         }
         .navigationTitle("Select Option")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.update(from: widget)
+            selectedIndex = viewModel.selectedIndex
+        }
+        .onChange(of: widget.item?.state, initial: false) { _, _ in
+            viewModel.update(from: widget)
+            selectedIndex = viewModel.selectedIndex
+        }
     }
 
     @ViewBuilder
@@ -86,7 +95,7 @@ struct SegmentSelectionView: View {
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.leading)
             Spacer()
-            if isSelected(index: index), !widget.hasPressReleaseMappings {
+            if isSelected(index: index), !viewModel.hasPressReleaseMappings {
                 Image(systemSymbol: .checkmark)
                     .foregroundStyle(Color.accentColor)
                     .font(.caption.weight(.bold))
@@ -118,8 +127,9 @@ struct SegmentSelectionView: View {
     }
 
     private func selectOption(at index: Int) {
-        selectedIndex = index
-        if let selectedCommand = widget.mappingsOrItemOptions[safe: index]?.command {
+        viewModel.selectedIndex = index
+        selectedIndex = viewModel.selectedIndex
+        if let selectedCommand = viewModel.mappings[safe: index]?.command {
             pendingValue = selectedCommand
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(300))
@@ -130,6 +140,12 @@ struct SegmentSelectionView: View {
                 }
             }
         }
+    }
+
+    init(widget: OpenHABWidget, selectedIndex: Binding<Int?>) {
+        self.widget = widget
+        _selectedIndex = selectedIndex
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 

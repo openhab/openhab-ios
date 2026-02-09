@@ -20,17 +20,10 @@ struct SetpointRow: View {
     @EnvironmentObject var settings: AppSettings
     private let setpointService = SetPointService()
     private let logger = Logger(subsystem: "org.openhab.watch", category: "SetpointRow")
-
-    private var isIntStep: Bool {
-        widget.step.truncatingRemainder(dividingBy: 1) == 0
-    }
-
-    private var stateFormat: String {
-        isIntStep ? "%ld" : "%.01f"
-    }
+    @State private var viewModel: WidgetRowViewModel
 
     private var currentValue: Double {
-        widget.stateValueAsNumberState?.value ?? widget.minValue
+        viewModel.numberState?.value ?? viewModel.minValue
     }
 
     var body: some View {
@@ -46,10 +39,10 @@ struct SetpointRow: View {
                 Button(action: decreaseValue) {
                     Image(systemSymbol: .chevronDownCircleFill)
                         .font(.system(size: 25))
-                        .foregroundStyle(currentValue <= widget.minValue ? Color.gray : Color.blue)
+                        .foregroundStyle(currentValue <= viewModel.minValue ? Color.gray : Color.blue)
                 }
                 .buttonStyle(.plain)
-                .disabled(currentValue <= widget.minValue)
+                .disabled(currentValue <= viewModel.minValue)
 
                 Spacer()
 
@@ -61,25 +54,31 @@ struct SetpointRow: View {
                 Button(action: increaseValue) {
                     Image(systemSymbol: .chevronUpCircleFill)
                         .font(.system(size: 25))
-                        .foregroundStyle(currentValue >= widget.maxValue ? Color.gray : Color.blue)
+                        .foregroundStyle(currentValue >= viewModel.maxValue ? Color.gray : Color.blue)
                 }
                 .buttonStyle(.plain)
-                .disabled(currentValue >= widget.maxValue)
+                .disabled(currentValue >= viewModel.maxValue)
 
                 Spacer()
             }
         }
+        .onAppear {
+            viewModel.update(from: widget)
+        }
+        .onChange(of: widget.item?.state, initial: false) { _, _ in
+            viewModel.update(from: widget)
+        }
     }
 
     private func handleUpDown(isDecreasing: Bool) {
-        var numberState = widget.stateValueAsNumberState
-        let currentValue = numberState?.value ?? widget.minValue
+        var numberState = viewModel.numberState
+        let currentValue = numberState?.value ?? viewModel.minValue
 
         let limitedNewValue = setpointService.calculateNewValue(
             currentValue: currentValue,
-            step: widget.step,
-            minValue: widget.minValue,
-            maxValue: widget.maxValue,
+            step: viewModel.step,
+            minValue: viewModel.minValue,
+            maxValue: viewModel.maxValue,
             isDecreasing: isDecreasing
         )
 
@@ -88,8 +87,7 @@ struct SetpointRow: View {
             return
         }
 
-        // Use widget's unit as fallback when creating NumberState
-        numberState = numberState ?? NumberState(value: limitedNewValue, unit: widget.unit)
+        numberState = numberState ?? NumberState(value: limitedNewValue)
         numberState?.value = limitedNewValue
 
         logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState?.description ?? String(limitedNewValue))")
@@ -102,6 +100,11 @@ struct SetpointRow: View {
 
     func increaseValue() {
         handleUpDown(isDecreasing: false)
+    }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 
