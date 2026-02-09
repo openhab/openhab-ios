@@ -19,7 +19,7 @@ struct SegmentRow: View {
     @EnvironmentObject var settings: AppSettings
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
-    @StateObject private var viewModel: WidgetRowViewModel
+    @State private var viewModel: WidgetRowViewModel
 
     private var currentIndex: Int? {
         viewModel.selectedIndex
@@ -38,10 +38,8 @@ struct SegmentRow: View {
         .onAppear {
             viewModel.update(from: widget)
         }
-        .onReceive(widget.objectWillChange) { _ in
-            DispatchQueue.main.async {
-                viewModel.update(from: widget)
-            }
+        .onChange(of: widget.item?.state, initial: false) { _, _ in
+            viewModel.update(from: widget)
         }
     }
 
@@ -167,7 +165,7 @@ struct SegmentRow: View {
 
     init(widget: OpenHABWidget) {
         self.widget = widget
-        _viewModel = StateObject(wrappedValue: WidgetRowViewModel(widget: widget))
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 
     // MARK: - Single Mapping
