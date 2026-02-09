@@ -21,65 +21,11 @@ struct WidgetRowView: View {
     var body: some View {
         if let linkedPage = widget.linkedPage {
             NavigationLink(value: linkedPage) {
-                rowWidget(widget: widget)
+                WidgetRowFactory.make(widget: widget, settings: settings)
             }
             .buttonStyle(.plain)
         } else {
-            rowWidget(widget: widget)
-        }
-    }
-
-    @ViewBuilder func rowWidget(widget: OpenHABWidget) -> some View {
-        switch widget.type {
-        case .switchWidget:
-            if !widget.mappings.isEmpty {
-                SegmentRow(widget: widget)
-            } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                SwitchRow(widget: widget)
-            } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                RollershutterRow(widget: widget)
-            } else if !widget.mappingsOrItemOptions.isEmpty {
-                SegmentRow(widget: widget)
-            } else {
-                SwitchRow(widget: widget)
-            }
-        case .slider:
-            SliderRow(widget: widget)
-        case .setpoint:
-            SetpointRow(widget: widget)
-        case .frame:
-            FrameRow(widget: widget)
-        case .text:
-            TextRow(widget: widget)
-        case .image:
-            if widget.item != nil {
-                ImageRawRow(widget: widget)
-            } else {
-                EquatableView(content: ImageRow(url: URL(string: widget.url), refresh: widget.refresh))
-            }
-        case .chart:
-            let url = Endpoint.chart(
-                rootUrl: settings.openHABRootUrl,
-                period: widget.period,
-                type: widget.item?.type ?? .none,
-                service: widget.service,
-                name: widget.item?.name,
-                legend: widget.legend,
-                theme: .dark,
-                forceAsItem: widget.forceAsItem
-            ).url
-            EquatableView(content: ImageRow(url: url, refresh: widget.refresh))
-        case .mapview:
-            MapViewRow(widget: widget)
-        case .colorpicker:
-            ColorPickerRow(widget: widget)
-        case .selection:
-            SelectionRow(widget: widget)
-        case .video, .webview, .input, .colortemperaturepicker, .buttongrid:
-            // Not yet implemented for watchOS
-            GenericRow(widget: widget)
-        case .group, .defaultWidget, .button, .unknown:
-            GenericRow(widget: widget)
+            WidgetRowFactory.make(widget: widget, settings: settings)
         }
     }
 }

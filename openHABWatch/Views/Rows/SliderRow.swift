@@ -119,57 +119,11 @@ struct SliderRow: View {
     }
 }
 
-// MARK: - Preview Helpers
-
-#if DEBUG
-private extension SliderRow {
-    static func createPreviewWidget(label: String,
-                                    value: Double? = nil,
-                                    minValue: Double = 0.0,
-                                    maxValue: Double = 100.0,
-                                    step: Double = 1.0,
-                                    icon: String = "slider",
-                                    switchSupport: Bool = false) -> OpenHABWidget {
-        let widget = OpenHABWidget()
-        widget.widgetId = UUID().uuidString
-        widget.type = .slider
-        widget.icon = icon
-        widget.minValue = minValue
-        widget.maxValue = maxValue
-        widget.step = step
-        widget.switchSupport = switchSupport
-
-        if let value {
-            widget.label = "\(label) [\(Int(value))]"
-        } else {
-            widget.label = label
-        }
-
-        let item = OpenHABItem(
-            name: "Preview_\(label.replacingOccurrences(of: " ", with: "_"))",
-            type: "Dimmer",
-            state: value.map { String($0) } ?? "NULL",
-            link: "",
-            label: label,
-            groupType: nil,
-            stateDescription: nil,
-            commandDescription: nil,
-            members: [],
-            category: nil,
-            options: nil
-        )
-        widget.item = item
-
-        return widget
-    }
-}
-#endif
-
 // MARK: - Previews
 
 #Preview("Default Range") {
     SliderRow(
-        widget: SliderRow.createPreviewWidget(
+        widget: PreviewWidgetFactory.slider(
             label: "Brightness",
             value: 75
         ),
@@ -180,7 +134,7 @@ private extension SliderRow {
 
 #Preview("Custom Range (minValue)") {
     SliderRow(
-        widget: SliderRow.createPreviewWidget(
+        widget: PreviewWidgetFactory.slider(
             label: "Temperature",
             value: 16,
             minValue: 16,
@@ -194,7 +148,7 @@ private extension SliderRow {
 
 #Preview("With Switch Support") {
     SliderRow(
-        widget: SliderRow.createPreviewWidget(
+        widget: PreviewWidgetFactory.slider(
             label: "Dimmer",
             value: 50,
             switchSupport: true
@@ -207,14 +161,14 @@ private extension SliderRow {
 #Preview("All Scenarios") {
     List {
         SliderRow(
-            widget: SliderRow.createPreviewWidget(
+            widget: PreviewWidgetFactory.slider(
                 label: "Brightness",
                 value: 75
             ),
             fallbackSymbol: .sliderHorizontal3
         )
         SliderRow(
-            widget: SliderRow.createPreviewWidget(
+            widget: PreviewWidgetFactory.slider(
                 label: "Temperature",
                 value: 21,
                 minValue: 16,
@@ -224,7 +178,7 @@ private extension SliderRow {
             fallbackSymbol: .thermometerMedium
         )
         SliderRow(
-            widget: SliderRow.createPreviewWidget(
+            widget: PreviewWidgetFactory.slider(
                 label: "Dimmer",
                 value: 50,
                 switchSupport: true

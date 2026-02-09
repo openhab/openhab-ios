@@ -85,7 +85,11 @@ struct ColorPickerRow: View {
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[10]
+    let widget = PreviewWidgetFactory.colorpicker(
+        label: "Color",
+        state: "120,100,100",
+        icon: "colorwheel"
+    )
     ColorPickerRow(widget: widget)
         .environmentObject(AppSettings())
 }

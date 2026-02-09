@@ -66,13 +66,13 @@ struct SwitchRow: View {
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[2]
+    let widget = PreviewWidgetFactory.switchWidget(label: "Outdoor Light", state: "ON")
     SwitchRow(widget: widget)
         .environmentObject(AppSettings())
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[2]
+    let widget = PreviewWidgetFactory.switchWidget(label: "Outdoor Light", state: "OFF")
     let mockSettings = {
         let obj = AppSettings()
         obj.openHABRootUrl = PreviewConstants.remoteURLString

@@ -109,7 +109,14 @@ struct SetpointRow: View {
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[3]
+    let widget = PreviewWidgetFactory.setpoint(
+        label: "Temperature",
+        value: 21,
+        minValue: 16,
+        maxValue: 28,
+        step: 0.5,
+        unit: "°C"
+    )
     SetpointRow(widget: widget)
         .environmentObject(AppSettings())
 }

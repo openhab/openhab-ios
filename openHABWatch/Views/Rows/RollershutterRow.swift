@@ -60,7 +60,7 @@ struct RollershutterRow: View {
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[5]
+    let widget = PreviewWidgetFactory.rollershutter(label: "Blinds", state: "STOP")
     RollershutterRow(widget: widget)
         .environmentObject(AppSettings())
 }

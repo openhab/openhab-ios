@@ -43,7 +43,7 @@ struct GenericRow: View {
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[6]
+    let widget = PreviewWidgetFactory.generic(label: "Unsupported Widget", valueText: "N/A")
     GenericRow(widget: widget)
         .environmentObject(AppSettings())
 }

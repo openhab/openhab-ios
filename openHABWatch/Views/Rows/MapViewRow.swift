@@ -40,7 +40,7 @@ struct MapViewRow: View {
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[9]
+    let widget = PreviewWidgetFactory.mapview(label: "Location", state: "51.5074,0.1278")
     MapViewRow(widget: widget)
         .environmentObject(AppSettings())
 }

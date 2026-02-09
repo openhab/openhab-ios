@@ -46,7 +46,7 @@ struct TextRow: View {
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[3]
+    let widget = PreviewWidgetFactory.text(label: "Energy Usage", valueText: "450 W")
     TextRow(widget: widget)
         .environmentObject(AppSettings())
 }

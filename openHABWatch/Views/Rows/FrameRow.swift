@@ -39,7 +39,7 @@ struct FrameRow: View {
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[6]
+    let widget = PreviewWidgetFactory.frame(label: "Environment")
     FrameRow(widget: widget)
         .environmentObject(AppSettings())
 }

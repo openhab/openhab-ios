@@ -151,7 +151,16 @@ struct SegmentSelectionView: View {
 
 #Preview {
     @Previewable @State var selectedIndex: Int? = 0
-    let widget = UserData(preview: true).widgets[4]
+    let widget = PreviewWidgetFactory.segmented(
+        label: "Climate Mode",
+        mappings: [
+            OpenHABWidgetMapping(command: "manual", label: "Manual"),
+            OpenHABWidgetMapping(command: "auto", label: "Auto"),
+            OpenHABWidgetMapping(command: "schedule", label: "Schedule")
+        ],
+        selectedState: "auto",
+        icon: "temperature"
+    )
     return NavigationStack {
         SegmentSelectionView(widget: widget, selectedIndex: $selectedIndex)
     }

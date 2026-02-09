@@ -151,14 +151,22 @@ struct SelectionRow: View {
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[4]
+    let widget = PreviewWidgetFactory.selection(
+        label: "Mode",
+        options: [("auto", "Auto"), ("manual", "Manual"), ("away", "Away")],
+        selectedIndex: 1
+    )
     SelectionRow(widget: widget)
         .environmentObject(AppSettings())
 }
 
 #Preview("Selection List") {
     @Previewable @State var selectedIndex: Int? = 0
-    let widget = UserData(preview: true).widgets[4]
+    let widget = PreviewWidgetFactory.selection(
+        label: "Mode",
+        options: [("auto", "Auto"), ("manual", "Manual"), ("away", "Away")],
+        selectedIndex: 0
+    )
     NavigationStack {
         SelectionListView(widget: widget, selectedIndex: $selectedIndex)
     }
