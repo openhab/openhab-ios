@@ -19,8 +19,10 @@ struct DetailTextLabelView: View {
     var body: some View {
         if let label = widget.labelValue {
             Text(label)
-                .font(.footnote)
-                .lineLimit(1)
+                .font(WatchTypography.detailFont)
+                .lineLimit(WatchTypography.detailLineLimit)
+                .minimumScaleFactor(WatchTypography.detailMinScale)
+                .truncationMode(.tail)
                 .foregroundStyle(!widget.valuecolor.isEmpty ? Color(fromString: widget.valuecolor) : .secondary)
         }
     }

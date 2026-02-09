@@ -42,6 +42,10 @@ struct SelectionListView: View {
                             Text(mapping.label)
                                 .foregroundStyle(.primary)
                                 .multilineTextAlignment(.leading)
+                                .font(WatchTypography.labelFont)
+                                .lineLimit(WatchTypography.labelLineLimit)
+                                .minimumScaleFactor(WatchTypography.labelMinScale)
+                                .truncationMode(.tail)
                             Spacer()
                             if currentIndex == index {
                                 Image(systemSymbol: .checkmark)
@@ -119,7 +123,7 @@ struct SelectionRow: View {
         HStack {
             HStack {
                 IconView(widget: widget, settings: settings)
-                TextLabelView(widget: widget, font: .caption)
+                WatchLabelText(widget: widget)
                 Spacer()
             }
             NavigationLink(destination: LazyView(SelectionListView(widget: widget, selectedIndex: selectedIndexBinding))) {
@@ -127,7 +131,10 @@ struct SelectionRow: View {
                     if let valueText = selectedValueText {
                         Text(valueText)
                             .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                            .font(WatchTypography.secondaryFont)
+                            .lineLimit(WatchTypography.secondaryLineLimit)
+                            .minimumScaleFactor(WatchTypography.secondaryMinScale)
+                            .truncationMode(.tail)
                     }
                     Image(systemSymbol: .chevronUpChevronDown)
                         .foregroundStyle(.secondary)

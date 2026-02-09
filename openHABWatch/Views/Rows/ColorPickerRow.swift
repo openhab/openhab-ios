@@ -26,7 +26,7 @@ struct ColorPickerRow: View {
             VStack(spacing: 0) {
                 HStack {
                     IconView(widget: widget, settings: settings)
-                    TextLabelView(widget: widget, font: .caption, lineLimit: 2)
+                    WatchLabelText(widget: widget)
                     Spacer()
                 }
                 HStack {

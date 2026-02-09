@@ -50,7 +50,7 @@ struct SegmentRow: View {
         if viewModel.mappings.count <= 2 {
             HStack {
                 IconView(widget: widget, settings: settings)
-                TextLabelView(widget: widget, font: .caption)
+                WatchLabelText(widget: widget)
                 Spacer()
                 pressReleaseButtons
                     .layoutPriority(1)
@@ -108,7 +108,7 @@ struct SegmentRow: View {
     private var iconTitleRow: some View {
         HStack {
             IconView(widget: widget, settings: settings)
-            TextLabelView(widget: widget, font: .caption)
+            WatchLabelText(widget: widget)
             Spacer()
         }
     }
@@ -127,7 +127,7 @@ struct SegmentRow: View {
         HStack {
             HStack {
                 IconView(widget: widget, settings: settings)
-                TextLabelView(widget: widget, font: .caption)
+                WatchLabelText(widget: widget)
                 Spacer()
             }
             NavigationLink(destination: LazyView(SegmentSelectionView(widget: widget, selectedIndex: selectedIndexBinding))) {
@@ -135,7 +135,10 @@ struct SegmentRow: View {
                     if let currentIndex, currentIndex >= 0, currentIndex < viewModel.mappings.count {
                         Text(viewModel.mappings[currentIndex].label)
                             .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                            .font(WatchTypography.secondaryFont)
+                            .lineLimit(WatchTypography.secondaryLineLimit)
+                            .minimumScaleFactor(WatchTypography.secondaryMinScale)
+                            .truncationMode(.tail)
                     }
                     Image(systemSymbol: .chevronRight)
                         .foregroundStyle(.secondary)
@@ -156,7 +159,7 @@ struct SegmentRow: View {
         let mapping = viewModel.mappings[0]
         HStack {
             IconView(widget: widget, settings: settings)
-            TextLabelView(widget: widget, font: .caption)
+            WatchLabelText(widget: widget)
             Spacer()
             singleButton(for: mapping)
                 .layoutPriority(1)
@@ -200,8 +203,10 @@ struct SegmentRow: View {
     @ViewBuilder
     private func inlineButton(label: String, isPressed: Bool) -> some View {
         Text(label)
-            .font(.caption)
-            .lineLimit(1)
+            .font(WatchTypography.controlFont)
+            .lineLimit(WatchTypography.controlLineLimit)
+            .minimumScaleFactor(WatchTypography.controlMinScale)
+            .truncationMode(.tail)
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
             .background(

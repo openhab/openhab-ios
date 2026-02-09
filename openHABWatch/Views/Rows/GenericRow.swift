@@ -22,7 +22,7 @@ struct GenericRow: View {
     var body: some View {
         HStack {
             IconView(widget: widget, settings: settings)
-            TextLabelView(widget: widget, font: .caption, lineLimit: 2)
+            WatchLabelText(widget: widget)
             Spacer()
             DetailTextLabelView(widget: widget)
             widget.makeView(settings: settings)

@@ -94,6 +94,10 @@ struct SegmentSelectionView: View {
             Text(mapping.label)
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.leading)
+                .font(WatchTypography.labelFont)
+                .lineLimit(WatchTypography.labelLineLimit)
+                .minimumScaleFactor(WatchTypography.labelMinScale)
+                .truncationMode(.tail)
             Spacer()
             if isSelected(index: index), !viewModel.hasPressReleaseMappings {
                 Image(systemSymbol: .checkmark)

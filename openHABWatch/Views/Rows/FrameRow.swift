@@ -20,8 +20,10 @@ struct FrameRow: View {
     var body: some View {
         HStack {
             Text(viewModel.labelText.uppercased())
-                .font(.callout)
-                .lineLimit(1)
+                .font(WatchTypography.sectionFont)
+                .lineLimit(WatchTypography.sectionLineLimit)
+                .minimumScaleFactor(WatchTypography.sectionMinScale)
+                .truncationMode(.tail)
             Spacer()
         }
         .onAppear {

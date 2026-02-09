@@ -73,10 +73,13 @@ struct SliderRow: View {
                     HStack {
                         IconView(widget: widget, settings: settings, fallbackSymbol: fallbackSymbol)
                         VStack(alignment: .leading) {
-                            TextLabelView(widget: widget, font: .caption, lineLimit: 2)
+                            WatchLabelText(widget: widget)
                             if pendingValue != nil {
                                 Text(currentValueText)
-                                    .font(.caption2)
+                                    .font(WatchTypography.secondaryFont)
+                                    .lineLimit(WatchTypography.secondaryLineLimit)
+                                    .minimumScaleFactor(WatchTypography.secondaryMinScale)
+                                    .truncationMode(.tail)
                                     .foregroundStyle(.secondary)
                             } else {
                                 DetailTextLabelView(widget: widget)
@@ -89,11 +92,14 @@ struct SliderRow: View {
             } else {
                 HStack {
                     IconView(widget: widget, settings: settings, fallbackSymbol: fallbackSymbol)
-                    TextLabelView(widget: widget, font: .caption, lineLimit: 2)
+                    WatchLabelText(widget: widget)
                     Spacer()
                     if pendingValue != nil {
                         Text(currentValueText)
-                            .font(.caption2)
+                            .font(WatchTypography.secondaryFont)
+                            .lineLimit(WatchTypography.secondaryLineLimit)
+                            .minimumScaleFactor(WatchTypography.secondaryMinScale)
+                            .truncationMode(.tail)
                             .foregroundStyle(.secondary)
                     } else {
                         DetailTextLabelView(widget: widget)

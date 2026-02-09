@@ -41,7 +41,7 @@ struct SwitchRow: View {
             HStack {
                 IconView(widget: widget, settings: settings)
                 VStack {
-                    TextLabelView(widget: widget, font: .caption)
+                    WatchLabelText(widget: widget)
                     DetailTextLabelView(widget: widget)
                 }
             }
