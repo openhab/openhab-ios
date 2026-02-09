@@ -22,10 +22,17 @@ public enum ETagCheckResult: Sendable {
 /// Service for checking if remote content has changed using HTTP ETags
 public actor ETagChecker {
     private let httpClient: HTTPClient
-    private let cache = ETagCache.shared
+    private let cache: ETagCache
 
     public init(httpClient: HTTPClient) {
         self.httpClient = httpClient
+        cache = ETagCache.shared
+    }
+
+    // Internal initializer for testing - allows cache injection
+    init(httpClient: HTTPClient, cache: ETagCache) {
+        self.httpClient = httpClient
+        self.cache = cache
     }
 
     /// Checks if content at the given URL has changed since last check

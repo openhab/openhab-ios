@@ -22,7 +22,7 @@ public actor ETagCache {
     public init() {
         // Calculate the default persistence path
         let path: URL
-        // Maybe this could be used for the watch? We will keep it compatable just in case.
+        // Maybe this could be used for the watch? We will keep it compatible just in case.
         #if os(watchOS)
         let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
         path = URL(fileURLWithPath: documentsDirectory).appendingPathComponent("etagCache")

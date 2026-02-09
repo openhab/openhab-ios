@@ -106,6 +106,7 @@ struct DrawerView: View {
                     if currentViewState.isWebViewActive {
                         Spacer()
                         Image(systemSymbol: .arrowClockwise)
+                            .accessibilityHidden(true)
                     }
                 }
             }
