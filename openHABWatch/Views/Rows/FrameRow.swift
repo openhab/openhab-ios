@@ -40,6 +40,7 @@ struct FrameRow: View {
 
 #Preview {
     let widget = PreviewWidgetFactory.frame(label: "Environment")
-    FrameRow(widget: widget)
-        .environmentObject(AppSettings())
+    PreviewNavigationContainer {
+        FrameRow(widget: widget)
+    }
 }

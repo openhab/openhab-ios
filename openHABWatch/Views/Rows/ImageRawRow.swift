@@ -45,6 +45,7 @@ struct ImageRawRow: View {
 #Preview {
     let base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
     let widget = PreviewWidgetFactory.imageRaw(label: "Camera", base64: base64)
-    ImageRawRow(widget: widget)
-        .environmentObject(AppSettings())
+    PreviewNavigationContainer {
+        ImageRawRow(widget: widget)
+    }
 }

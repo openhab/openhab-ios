@@ -122,44 +122,7 @@ struct SliderRow: View {
 // MARK: - Previews
 
 #Preview("Default Range") {
-    SliderRow(
-        widget: PreviewWidgetFactory.slider(
-            label: "Brightness",
-            value: 75
-        ),
-        fallbackSymbol: .sliderHorizontal3
-    )
-    .environmentObject(AppSettings())
-}
-
-#Preview("Custom Range (minValue)") {
-    SliderRow(
-        widget: PreviewWidgetFactory.slider(
-            label: "Temperature",
-            value: 16,
-            minValue: 16,
-            maxValue: 28,
-            step: 0.5
-        ),
-        fallbackSymbol: .thermometerMedium
-    )
-    .environmentObject(AppSettings())
-}
-
-#Preview("With Switch Support") {
-    SliderRow(
-        widget: PreviewWidgetFactory.slider(
-            label: "Dimmer",
-            value: 50,
-            switchSupport: true
-        ),
-        fallbackSymbol: .lightbulbFill
-    )
-    .environmentObject(AppSettings())
-}
-
-#Preview("All Scenarios") {
-    List {
+    PreviewNavigationContainer {
         SliderRow(
             widget: PreviewWidgetFactory.slider(
                 label: "Brightness",
@@ -167,16 +130,26 @@ struct SliderRow: View {
             ),
             fallbackSymbol: .sliderHorizontal3
         )
+    }
+}
+
+#Preview("Custom Range (minValue)") {
+    PreviewNavigationContainer {
         SliderRow(
             widget: PreviewWidgetFactory.slider(
                 label: "Temperature",
-                value: 21,
+                value: 16,
                 minValue: 16,
                 maxValue: 28,
                 step: 0.5
             ),
             fallbackSymbol: .thermometerMedium
         )
+    }
+}
+
+#Preview("With Switch Support") {
+    PreviewNavigationContainer {
         SliderRow(
             widget: PreviewWidgetFactory.slider(
                 label: "Dimmer",
@@ -186,13 +159,45 @@ struct SliderRow: View {
             fallbackSymbol: .lightbulbFill
         )
     }
-    .environmentObject(AppSettings())
+}
+
+#Preview("All Scenarios") {
+    PreviewNavigationContainer {
+        List {
+            SliderRow(
+                widget: PreviewWidgetFactory.slider(
+                    label: "Brightness",
+                    value: 75
+                ),
+                fallbackSymbol: .sliderHorizontal3
+            )
+            SliderRow(
+                widget: PreviewWidgetFactory.slider(
+                    label: "Temperature",
+                    value: 21,
+                    minValue: 16,
+                    maxValue: 28,
+                    step: 0.5
+                ),
+                fallbackSymbol: .thermometerMedium
+            )
+            SliderRow(
+                widget: PreviewWidgetFactory.slider(
+                    label: "Dimmer",
+                    value: 50,
+                    switchSupport: true
+                ),
+                fallbackSymbol: .lightbulbFill
+            )
+        }
+    }
 }
 
 #Preview("From UserData") {
-    SliderRow(
-        widget: UserData(preview: true).widgets[3],
-        fallbackSymbol: .sliderHorizontal3
-    )
-    .environmentObject(AppSettings())
+    PreviewNavigationContainer {
+        SliderRow(
+            widget: UserData(preview: true).widgets[3],
+            fallbackSymbol: .sliderHorizontal3
+        )
+    }
 }

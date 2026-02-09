@@ -213,164 +213,170 @@ struct SegmentRow: View {
 }
 
 #Preview("Short Labels") {
-    VStack(spacing: 8) {
-        SegmentRow(
-            widget: PreviewWidgetFactory.segmented(
-                label: "Light Switch",
-                mappings: [
-                    OpenHABWidgetMapping(command: "ON", label: "ON"),
-                    OpenHABWidgetMapping(command: "OFF", label: "OFF")
-                ],
-                selectedState: "ON",
-                icon: "switch"
+    PreviewNavigationContainer {
+        VStack(spacing: 8) {
+            SegmentRow(
+                widget: PreviewWidgetFactory.segmented(
+                    label: "Light Switch",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "ON", label: "ON"),
+                        OpenHABWidgetMapping(command: "OFF", label: "OFF")
+                    ],
+                    selectedState: "ON",
+                    icon: "switch"
+                )
             )
-        )
+        }
     }
-    .environmentObject(AppSettings())
 }
 
 #Preview("Long Labels") {
-    VStack(spacing: 8) {
-        SegmentRow(
-            widget: PreviewWidgetFactory.segmented(
-                label: "Temperature Control",
-                mappings: [
-                    OpenHABWidgetMapping(command: "manual", label: "Manual"),
-                    OpenHABWidgetMapping(command: "calendar", label: "Calendar"),
-                    OpenHABWidgetMapping(command: "automatic", label: "Automatic")
-                ],
-                selectedState: "automatic",
-                icon: "temperature"
+    PreviewNavigationContainer {
+        VStack(spacing: 8) {
+            SegmentRow(
+                widget: PreviewWidgetFactory.segmented(
+                    label: "Temperature Control",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "manual", label: "Manual"),
+                        OpenHABWidgetMapping(command: "calendar", label: "Calendar"),
+                        OpenHABWidgetMapping(command: "automatic", label: "Automatic")
+                    ],
+                    selectedState: "automatic",
+                    icon: "temperature"
+                )
             )
-        )
+        }
     }
-    .environmentObject(AppSettings())
 }
 
 #Preview("Multiple Segments (4)") {
-    VStack(spacing: 8) {
-        SegmentRow(
-            widget: PreviewWidgetFactory.segmented(
-                label: "Fan Speed",
-                mappings: [
-                    OpenHABWidgetMapping(command: "0", label: "Off"),
-                    OpenHABWidgetMapping(command: "1", label: "Low"),
-                    OpenHABWidgetMapping(command: "2", label: "Med"),
-                    OpenHABWidgetMapping(command: "3", label: "High")
-                ],
-                selectedState: "3",
-                icon: "fan"
+    PreviewNavigationContainer {
+        VStack(spacing: 8) {
+            SegmentRow(
+                widget: PreviewWidgetFactory.segmented(
+                    label: "Fan Speed",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "0", label: "Off"),
+                        OpenHABWidgetMapping(command: "1", label: "Low"),
+                        OpenHABWidgetMapping(command: "2", label: "Med"),
+                        OpenHABWidgetMapping(command: "3", label: "High")
+                    ],
+                    selectedState: "3",
+                    icon: "fan"
+                )
             )
-        )
+        }
     }
-    .environmentObject(AppSettings())
 }
 
 #Preview("PressRelease") {
-    VStack(spacing: 8) {
-        SegmentRow(
-            widget: PreviewWidgetFactory.segmented(
-                label: "All Shutters",
-                mappings: [
-                    OpenHABWidgetMapping(command: "DOWN", label: "DOWN", releaseCommand: "OFF"),
-                    OpenHABWidgetMapping(command: "UP", label: "UP", releaseCommand: "OFF")
-                ],
-                selectedState: "DOWN",
-                icon: "rollershutter"
+    PreviewNavigationContainer {
+        VStack(spacing: 8) {
+            SegmentRow(
+                widget: PreviewWidgetFactory.segmented(
+                    label: "All Shutters",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "DOWN", label: "DOWN", releaseCommand: "OFF"),
+                        OpenHABWidgetMapping(command: "UP", label: "UP", releaseCommand: "OFF")
+                    ],
+                    selectedState: "DOWN",
+                    icon: "rollershutter"
+                )
             )
-        )
+        }
     }
-    .environmentObject(AppSettings())
 }
 
 #Preview("Single Mapping") {
-    VStack(spacing: 8) {
-        SegmentRow(
-            widget: PreviewWidgetFactory.segmented(
-                label: "Scene",
-                mappings: [
-                    OpenHABWidgetMapping(command: "RUN", label: "Run")
-                ],
-                selectedState: "RUN",
-                icon: "scene"
+    PreviewNavigationContainer {
+        VStack(spacing: 8) {
+            SegmentRow(
+                widget: PreviewWidgetFactory.segmented(
+                    label: "Scene",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "RUN", label: "Run")
+                    ],
+                    selectedState: "RUN",
+                    icon: "scene"
+                )
             )
-        )
+        }
     }
-    .environmentObject(AppSettings())
 }
 
 #Preview("All Scenarios") {
-    VStack(spacing: 8) {
-        SegmentRow(
-            widget: PreviewWidgetFactory.segmented(
-                label: "Light",
-                mappings: [
-                    OpenHABWidgetMapping(command: "ON", label: "ON"),
-                    OpenHABWidgetMapping(command: "OFF", label: "OFF")
-                ],
-                selectedState: "ON",
-                icon: "light"
+    PreviewNavigationContainer {
+        VStack(spacing: 8) {
+            SegmentRow(
+                widget: PreviewWidgetFactory.segmented(
+                    label: "Light",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "ON", label: "ON"),
+                        OpenHABWidgetMapping(command: "OFF", label: "OFF")
+                    ],
+                    selectedState: "ON",
+                    icon: "light"
+                )
             )
-        )
-        SegmentRow(
-            widget: PreviewWidgetFactory.segmented(
-                label: "Climate Mode",
-                mappings: [
-                    OpenHABWidgetMapping(command: "m", label: "Manual"),
-                    OpenHABWidgetMapping(command: "a", label: "Auto"),
-                    OpenHABWidgetMapping(command: "s", label: "Schedule")
-                ],
-                selectedState: "a",
-                icon: "temperature"
+            SegmentRow(
+                widget: PreviewWidgetFactory.segmented(
+                    label: "Climate Mode",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "m", label: "Manual"),
+                        OpenHABWidgetMapping(command: "a", label: "Auto"),
+                        OpenHABWidgetMapping(command: "s", label: "Schedule")
+                    ],
+                    selectedState: "a",
+                    icon: "temperature"
+                )
             )
-        )
-        SegmentRow(
-            widget: PreviewWidgetFactory.segmented(
-                label: "Fan Speed",
-                mappings: [
-                    OpenHABWidgetMapping(command: "0", label: "Off"),
-                    OpenHABWidgetMapping(command: "1", label: "Low"),
-                    OpenHABWidgetMapping(command: "2", label: "Med"),
-                    OpenHABWidgetMapping(command: "3", label: "High")
-                ],
-                selectedState: "2",
-                icon: "fan"
+            SegmentRow(
+                widget: PreviewWidgetFactory.segmented(
+                    label: "Fan Speed",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "0", label: "Off"),
+                        OpenHABWidgetMapping(command: "1", label: "Low"),
+                        OpenHABWidgetMapping(command: "2", label: "Med"),
+                        OpenHABWidgetMapping(command: "3", label: "High")
+                    ],
+                    selectedState: "2",
+                    icon: "fan"
+                )
             )
-        )
-        SegmentRow(
-            widget: PreviewWidgetFactory.segmented(
-                label: "Charts Period",
-                mappings: [
-                    OpenHABWidgetMapping(command: "D", label: "Day"),
-                    OpenHABWidgetMapping(command: "W", label: "Week"),
-                    OpenHABWidgetMapping(command: "M", label: "M"),
-                    OpenHABWidgetMapping(command: "4h", label: "4h")
-                ],
-                selectedState: "D",
-                icon: "chart"
+            SegmentRow(
+                widget: PreviewWidgetFactory.segmented(
+                    label: "Charts Period",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "D", label: "Day"),
+                        OpenHABWidgetMapping(command: "W", label: "Week"),
+                        OpenHABWidgetMapping(command: "M", label: "M"),
+                        OpenHABWidgetMapping(command: "4h", label: "4h")
+                    ],
+                    selectedState: "D",
+                    icon: "chart"
+                )
             )
-        )
-        SegmentRow(
-            widget: PreviewWidgetFactory.segmented(
-                label: "All Shutters",
-                mappings: [
-                    OpenHABWidgetMapping(command: "DOWN", label: "DOWN", releaseCommand: "OFF"),
-                    OpenHABWidgetMapping(command: "UP", label: "UP", releaseCommand: "OFF")
-                ],
-                selectedState: "DOWN",
-                icon: "rollershutter"
+            SegmentRow(
+                widget: PreviewWidgetFactory.segmented(
+                    label: "All Shutters",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "DOWN", label: "DOWN", releaseCommand: "OFF"),
+                        OpenHABWidgetMapping(command: "UP", label: "UP", releaseCommand: "OFF")
+                    ],
+                    selectedState: "DOWN",
+                    icon: "rollershutter"
+                )
             )
-        )
-        SegmentRow(
-            widget: PreviewWidgetFactory.segmented(
-                label: "Scene",
-                mappings: [
-                    OpenHABWidgetMapping(command: "RUN", label: "RUN")
-                ],
-                selectedState: "RUN",
-                icon: "scene"
+            SegmentRow(
+                widget: PreviewWidgetFactory.segmented(
+                    label: "Scene",
+                    mappings: [
+                        OpenHABWidgetMapping(command: "RUN", label: "RUN")
+                    ],
+                    selectedState: "RUN",
+                    icon: "scene"
+                )
             )
-        )
+        }
     }
-    .environmentObject(AppSettings())
 }

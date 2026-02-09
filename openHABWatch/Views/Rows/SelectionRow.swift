@@ -156,8 +156,9 @@ struct SelectionRow: View {
         options: [("auto", "Auto"), ("manual", "Manual"), ("away", "Away")],
         selectedIndex: 1
     )
-    SelectionRow(widget: widget)
-        .environmentObject(AppSettings())
+    PreviewNavigationContainer {
+        SelectionRow(widget: widget)
+    }
 }
 
 #Preview("Selection List") {
@@ -167,8 +168,7 @@ struct SelectionRow: View {
         options: [("auto", "Auto"), ("manual", "Manual"), ("away", "Away")],
         selectedIndex: 0
     )
-    NavigationStack {
+    PreviewNavigationContainer {
         SelectionListView(widget: widget, selectedIndex: $selectedIndex)
     }
-    .environmentObject(AppSettings())
 }

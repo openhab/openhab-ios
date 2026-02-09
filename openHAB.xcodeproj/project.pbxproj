@@ -141,6 +141,7 @@
 		DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */ = {isa = PBXBuildFile; fileRef = DA88F8C522EC377100B408E5 /* ReleaseNotes.md */; };
 		DA8B14B62F3A0DFF007753FD /* WidgetRowFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8B14B52F3A0DFF007753FD /* WidgetRowFactory.swift */; };
 		DA8B14B82F3A120E007753FD /* PreviewWidgetFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8B14B72F3A11F0007753FD /* PreviewWidgetFactory.swift */; };
+		DA8B14BA2F3A373A007753FD /* PreviewNavigationContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8B14B92F3A373A007753FD /* PreviewNavigationContainer.swift */; };
 		DA94AEB42EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA94AEB32EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift */; };
 		DA95F3332E0F2B1700FE4474 /* OpenHABRootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */; };
 		DA95F3352E0F2C1600FE4474 /* OpenHABSitemapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA95F3342E0F2C1600FE4474 /* OpenHABSitemapViewController.swift */; };
@@ -499,6 +500,7 @@
 		DA88F8C522EC377100B408E5 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = ReleaseNotes.md; sourceTree = "<group>"; };
 		DA8B14B52F3A0DFF007753FD /* WidgetRowFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetRowFactory.swift; sourceTree = "<group>"; };
 		DA8B14B72F3A11F0007753FD /* PreviewWidgetFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewWidgetFactory.swift; sourceTree = "<group>"; };
+		DA8B14B92F3A373A007753FD /* PreviewNavigationContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewNavigationContainer.swift; sourceTree = "<group>"; };
 		DA94AEB32EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleMJPEGPlayer.swift; sourceTree = "<group>"; };
 		DA94AF432EC8DE41003BB3C8 /* VideoStreamManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoStreamManager.swift; sourceTree = "<group>"; };
 		DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABRootViewController.swift; sourceTree = "<group>"; };
@@ -1006,6 +1008,7 @@
 			isa = PBXGroup;
 			children = (
 				DAD085662AE4782A001D36BE /* Preview Assets.xcassets */,
+				DA8B14B92F3A373A007753FD /* PreviewNavigationContainer.swift */,
 				DA8B14B72F3A11F0007753FD /* PreviewWidgetFactory.swift */,
 			);
 			path = "Preview Content";
@@ -1710,6 +1713,7 @@
 				DA07752F2346705F0086C685 /* NotificationView.swift in Sources */,
 				DA0775312346705F0086C685 /* ComplicationController.swift in Sources */,
 				DAF457A223DB6C640018B495 /* RollershutterRow.swift in Sources */,
+				DA8B14BA2F3A373A007753FD /* PreviewNavigationContainer.swift in Sources */,
 				DAF457A923DBA4990018B495 /* FrameRow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

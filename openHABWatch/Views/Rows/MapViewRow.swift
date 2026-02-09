@@ -41,6 +41,7 @@ struct MapViewRow: View {
 
 #Preview {
     let widget = PreviewWidgetFactory.mapview(label: "Location", state: "51.5074,0.1278")
-    MapViewRow(widget: widget)
-        .environmentObject(AppSettings())
+    PreviewNavigationContainer {
+        MapViewRow(widget: widget)
+    }
 }

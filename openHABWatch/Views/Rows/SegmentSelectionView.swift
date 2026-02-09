@@ -161,8 +161,7 @@ struct SegmentSelectionView: View {
         selectedState: "auto",
         icon: "temperature"
     )
-    return NavigationStack {
+    return PreviewNavigationContainer {
         SegmentSelectionView(widget: widget, selectedIndex: $selectedIndex)
     }
-    .environmentObject(AppSettings())
 }

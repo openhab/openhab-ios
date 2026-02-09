@@ -90,6 +90,7 @@ struct ColorPickerRow: View {
         state: "120,100,100",
         icon: "colorwheel"
     )
-    ColorPickerRow(widget: widget)
-        .environmentObject(AppSettings())
+    PreviewNavigationContainer {
+        ColorPickerRow(widget: widget)
+    }
 }

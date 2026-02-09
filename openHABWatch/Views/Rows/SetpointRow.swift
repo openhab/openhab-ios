@@ -117,6 +117,7 @@ struct SetpointRow: View {
         step: 0.5,
         unit: "°C"
     )
-    SetpointRow(widget: widget)
-        .environmentObject(AppSettings())
+    PreviewNavigationContainer {
+        SetpointRow(widget: widget)
+    }
 }

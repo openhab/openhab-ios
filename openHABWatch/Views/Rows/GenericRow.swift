@@ -44,6 +44,7 @@ struct GenericRow: View {
 
 #Preview {
     let widget = PreviewWidgetFactory.generic(label: "Unsupported Widget", valueText: "N/A")
-    GenericRow(widget: widget)
-        .environmentObject(AppSettings())
+    PreviewNavigationContainer {
+        GenericRow(widget: widget)
+    }
 }
