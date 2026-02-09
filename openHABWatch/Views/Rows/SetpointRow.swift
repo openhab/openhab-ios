@@ -21,6 +21,7 @@ struct SetpointRow: View {
     private let setpointService = SetPointService()
     private let logger = Logger(subsystem: "org.openhab.watch", category: "SetpointRow")
     @State private var viewModel: WidgetRowViewModel
+    @State private var commandSender = WidgetCommandSender()
 
     private var currentValue: Double {
         viewModel.numberState?.value ?? viewModel.minValue
@@ -91,7 +92,7 @@ struct SetpointRow: View {
         numberState?.value = limitedNewValue
 
         logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState?.description ?? String(limitedNewValue))")
-        widget.sendItemUpdate(state: numberState)
+        commandSender.sendItemUpdate(numberState, for: widget)
     }
 
     func decreaseValue() {

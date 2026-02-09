@@ -11,7 +11,6 @@
 
 import CommonUI
 import OpenHABCore
-import os.log
 import SwiftUI
 
 struct SegmentRow: View {
@@ -20,6 +19,7 @@ struct SegmentRow: View {
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
     @State private var viewModel: WidgetRowViewModel
+    @State private var commandSender = WidgetCommandSender()
 
     private var currentIndex: Int? {
         viewModel.selectedIndex
@@ -83,17 +83,13 @@ struct SegmentRow: View {
                                             guard bounds.contains(value.startLocation) else { return }
                                             if pressedIndex != index {
                                                 pressedIndex = index
-                                                Logger.rowViews.info("Sending press command: \(mapping.command)")
-                                                widget.sendCommand(mapping.command)
+                                                commandSender.sendPress(mapping.command, for: widget)
                                             }
                                         }
                                         .onEnded { _ in
                                             guard pressedIndex == index else { return }
                                             pressedIndex = nil
-                                            if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
-                                                Logger.rowViews.info("Sending release command: \(releaseCommand)")
-                                                widget.sendCommand(releaseCommand)
-                                            }
+                                            commandSender.sendRelease(mapping.releaseCommand, for: widget)
                                         }
                                 )
                         }
@@ -188,8 +184,7 @@ struct SegmentRow: View {
                                 }
                                 .onEnded { value in
                                     if singlePressed, bounds.contains(value.location) {
-                                        Logger.rowViews.info("Sending command: \(mapping.command)")
-                                        widget.sendCommand(mapping.command)
+                                        commandSender.send(mapping.command, for: widget, policy: .immediate)
                                     }
                                     singlePressed = false
                                 }

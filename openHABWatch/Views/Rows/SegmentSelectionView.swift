@@ -10,16 +10,15 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import OpenHABCore
-import os.log
 import SwiftUI
 
 struct SegmentSelectionView: View {
     @ObservedObject var widget: OpenHABWidget
     @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
-    @State private var pendingValue: String?
     @State private var pressedIndex: Int?
     @State private var viewModel: WidgetRowViewModel
+    @State private var commandSender = WidgetCommandSender()
 
     private var currentIndex: Int? {
         viewModel.selectedIndex
@@ -72,18 +71,12 @@ struct SegmentSelectionView: View {
                     .onChanged { _ in
                         if pressedIndex != index {
                             pressedIndex = index
-                            // Send command on press
-                            Logger.rowViews.info("Sending press command: \(mapping.command)")
-                            widget.sendCommand(mapping.command)
+                            commandSender.sendPress(mapping.command, for: widget)
                         }
                     }
                     .onEnded { _ in
                         pressedIndex = nil
-                        // Send release command on release
-                        if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
-                            Logger.rowViews.info("Sending release command: \(releaseCommand)")
-                            widget.sendCommand(releaseCommand)
-                        }
+                        commandSender.sendRelease(mapping.releaseCommand, for: widget)
                     }
             )
     }
@@ -134,15 +127,13 @@ struct SegmentSelectionView: View {
         viewModel.selectedIndex = index
         selectedIndex = viewModel.selectedIndex
         if let selectedCommand = viewModel.mappings[safe: index]?.command {
-            pendingValue = selectedCommand
-            Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(300))
-                if pendingValue == selectedCommand {
-                    widget.sendCommand(selectedCommand)
-                    pendingValue = nil
-                    dismiss()
-                }
-            }
+            commandSender.send(
+                selectedCommand,
+                for: widget,
+                policy: WidgetCommandDefaults.segmentedSelection,
+                key: "segment-selection"
+            )
+            dismiss()
         }
     }
 

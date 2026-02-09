@@ -11,7 +11,6 @@
 
 import CommonUI
 import OpenHABCore
-import os.log
 import SFSafeSymbols
 import SwiftUI
 
@@ -19,6 +18,7 @@ struct ColorPickerRow: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = AppSettings.shared
     @State private var viewModel: WidgetRowViewModel
+    @State private var commandSender = WidgetCommandSender()
     var body: some View {
         let uiColor = viewModel.colorState
 
@@ -69,13 +69,11 @@ struct ColorPickerRow: View {
     }
 
     func upButtonPressed() {
-        Logger.rowViews.info("ON button pressed")
-        widget.sendCommand("ON")
+        commandSender.send("ON", for: widget, policy: .immediate)
     }
 
     func downButtonPressed() {
-        Logger.rowViews.info("OFF button pressed")
-        widget.sendCommand("OFF")
+        commandSender.send("OFF", for: widget, policy: .immediate)
     }
 
     init(widget: OpenHABWidget) {

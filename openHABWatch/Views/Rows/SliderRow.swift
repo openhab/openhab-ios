@@ -21,6 +21,7 @@ struct SliderRow: View {
     var fallbackSymbol: SFSymbol?
     @State private var pendingValue: Double?
     @State private var viewModel: WidgetRowViewModel
+    @State private var commandSender = WidgetCommandSender()
 
     private var currentValue: Double {
         pendingValue ?? viewModel.adjustedValue
@@ -38,13 +39,12 @@ struct SliderRow: View {
             set: { newValue in
                 Logger.rowViews.info("SliderRow new value = \(newValue)")
                 pendingValue = newValue
-                Task { @MainActor in
-                    try? await Task.sleep(for: .milliseconds(500))
-                    if pendingValue == newValue { // Ensure no new updates came in
-                        widget.sendCommand(newValue.valueText(step: viewModel.step))
-                        pendingValue = nil
-                    }
-                }
+                commandSender.send(
+                    newValue.valueText(step: viewModel.step),
+                    for: widget,
+                    policy: WidgetCommandDefaults.slider,
+                    key: "slider-value"
+                )
             }
         )
     }
@@ -56,11 +56,19 @@ struct SliderRow: View {
             },
             set: { newValue in
                 if newValue {
-                    Logger.rowViews.info("SliderRow switch to ON")
-                    widget.sendCommand(viewModel.maxValue.valueText(step: viewModel.step))
+                    commandSender.send(
+                        viewModel.maxValue.valueText(step: viewModel.step),
+                        for: widget,
+                        policy: .immediate,
+                        key: "slider-toggle"
+                    )
                 } else {
-                    Logger.rowViews.info("SliderRow switch to OFF")
-                    widget.sendCommand(viewModel.minValue.valueText(step: viewModel.step))
+                    commandSender.send(
+                        viewModel.minValue.valueText(step: viewModel.step),
+                        for: widget,
+                        policy: .immediate,
+                        key: "slider-toggle"
+                    )
                 }
             }
         )
@@ -115,6 +123,7 @@ struct SliderRow: View {
         }
         .onChange(of: widget.item?.state, initial: false) { _, _ in
             viewModel.update(from: widget)
+            pendingValue = nil
         }
     }
 

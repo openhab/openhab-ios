@@ -18,6 +18,7 @@ struct RollershutterRow: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
     @State private var viewModel: WidgetRowViewModel
+    @State private var commandSender = WidgetCommandSender()
 
     var body: some View {
         VStack(spacing: -5) {
@@ -29,16 +30,16 @@ struct RollershutterRow: View {
             HStack {
                 Spacer()
                 IconWithAction(systemSymbol: .chevronUpCircleFill) {
-                    widget.sendCommand("UP")
+                    commandSender.send("UP", for: widget, policy: .immediate)
                 }
                 Spacer()
                 IconWithAction(systemSymbol: .square) {
-                    widget.sendCommand("STOP")
+                    commandSender.send("STOP", for: widget, policy: .immediate)
                 }
                 Spacer()
 
                 IconWithAction(systemSymbol: .chevronDownCircleFill) {
-                    widget.sendCommand("DOWN")
+                    commandSender.send("DOWN", for: widget, policy: .immediate)
                 }
                 Spacer()
             }

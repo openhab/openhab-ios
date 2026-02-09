@@ -11,7 +11,6 @@
 
 import CommonUI
 import OpenHABCore
-import os.log
 import SFSafeSymbols
 import SwiftUI
 
@@ -21,6 +20,7 @@ struct SelectionListView: View {
     @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel: WidgetRowViewModel
+    @State private var commandSender = WidgetCommandSender()
 
     private var mappings: [OpenHABWidgetMapping] {
         viewModel.mappings
@@ -84,8 +84,12 @@ struct SelectionListView: View {
         viewModel.selectedIndex = index
         selectedIndex = viewModel.selectedIndex
         if let selectedCommand = mappings[safe: index]?.command {
-            Logger.rowViews.info("Selection changed to: \(selectedCommand)")
-            widget.sendCommand(selectedCommand)
+            commandSender.send(
+                selectedCommand,
+                for: widget,
+                policy: WidgetCommandDefaults.immediate,
+                key: "selection-list"
+            )
             dismiss()
         }
     }

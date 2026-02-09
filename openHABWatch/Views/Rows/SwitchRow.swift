@@ -11,7 +11,6 @@
 
 import CommonUI
 import OpenHABCore
-import os.log
 import SwiftUI
 
 struct SwitchRow: View {
@@ -19,6 +18,7 @@ struct SwitchRow: View {
     @EnvironmentObject var settings: AppSettings
     @State private var localIsOn: Bool?
     @State private var viewModel: WidgetRowViewModel
+    @State private var commandSender = WidgetCommandSender()
 
     private var isOn: Bool {
         localIsOn ?? viewModel.isOn
@@ -30,11 +30,9 @@ struct SwitchRow: View {
             set: { newValue in
                 localIsOn = newValue
                 if newValue {
-                    Logger.rowViews.info("Switch to ON")
-                    widget.sendCommand("ON")
+                    commandSender.send("ON", for: widget, policy: .immediate)
                 } else {
-                    Logger.rowViews.info("Switch to OFF")
-                    widget.sendCommand("OFF")
+                    commandSender.send("OFF", for: widget, policy: .immediate)
                 }
             }
         )) {
