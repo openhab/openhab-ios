@@ -17,6 +17,10 @@ import SafariServices
 import SFSafeSymbols
 import SwiftUI
 
+class CurrentViewState: ObservableObject {
+    @Published var isWebViewActive = false
+}
+
 enum DrawerViewError: Error, CustomDebugStringConvertible {
     case noRootURL
 
@@ -85,6 +89,7 @@ struct DrawerView: View {
     @State private var connectedUrl = "Not connected" // Default label text
 
     @EnvironmentObject private var networkTracker: MainActorNetworkTracker
+    @EnvironmentObject private var currentViewState: CurrentViewState
 
     var onDismiss: (TargetController) -> Void
     @Environment(\.dismiss) private var dismiss
@@ -96,7 +101,13 @@ struct DrawerView: View {
     var mainSection: some View {
         Section(header: Text("Main")) {
             menuEntry(image: Image("openHABIcon").resizable(), goTo: .webview) {
-                Text("Home").accessibilityIdentifier("Home")
+                HStack {
+                    Text("Home").accessibilityIdentifier("Home")
+                    if currentViewState.isWebViewActive {
+                        Spacer()
+                        Image(systemSymbol: .arrowClockwise)
+                    }
+                }
             }
         }
     }
@@ -280,8 +291,20 @@ struct DrawerView: View {
     }
 }
 
-#Preview {
+#Preview("WebView Active") {
     let networkTracker = MainActorNetworkTracker.shared
-    DrawerView { _ in }
+    let currentViewState = CurrentViewState()
+    currentViewState.isWebViewActive = true
+    return DrawerView { _ in }
         .environmentObject(networkTracker)
+        .environmentObject(currentViewState)
+}
+
+#Preview("WebView Inactive") {
+    let networkTracker = MainActorNetworkTracker.shared
+    let currentViewState = CurrentViewState()
+    currentViewState.isWebViewActive = false
+    return DrawerView { _ in }
+        .environmentObject(networkTracker)
+        .environmentObject(currentViewState)
 }
