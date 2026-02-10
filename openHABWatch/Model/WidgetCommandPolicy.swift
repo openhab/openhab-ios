@@ -14,12 +14,15 @@ import OpenHABCore
 
 enum WidgetCommandDefaults {
     static let slider: WidgetCommandPolicy = .debounce(.milliseconds(500))
+    static let colorPicker: WidgetCommandPolicy = .debounce(.milliseconds(200))
     static let immediate: WidgetCommandPolicy = .immediate
 
     static func policy(for widget: OpenHABWidget) -> WidgetCommandPolicy {
         switch widget.type {
         case .slider:
             slider
+        case .colorpicker:
+            colorPicker
         default:
             immediate
         }
