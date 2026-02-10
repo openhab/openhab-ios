@@ -30,6 +30,9 @@ class OpenHABWebViewController: OpenHABViewController {
     private var views: [UUID: WKWebView] = [:]
     // TODO: remove myOhViews when we drop iOS 16 support
     private var myOhViews: [UUID: WKWebView] = [:]
+    private var etagChecker: ETagChecker?
+    private var etagCheckerConfigURL: String? // Track which config the checker was created for
+    private var lastLoadedURL: String? // Track the last successfully loaded URL from didFinish
 
     private var js = """
     (function() {
@@ -108,6 +111,15 @@ class OpenHABWebViewController: OpenHABViewController {
                 }
             }
             .store(in: &trackerCancellables)
+
+        // Listen for app becoming active to check for content updates
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+
         startTracker()
     }
 
@@ -118,12 +130,20 @@ class OpenHABWebViewController: OpenHABViewController {
         navigationController?.setNavigationBarHidden(false, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = true
         trackerCancellables.removeAll()
+
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
     }
 
     func startTracker() {
         if currentTarget.isEmpty {
             showActivityIndicator(show: true)
         }
+    }
+
+    @objc private func applicationDidBecomeActive() {
+        // When app returns from background, check if content has changed
+        Logger.viewController.info("App became active, checking for content updates")
+        loadWebView(force: false)
     }
 
     @MainActor
@@ -134,16 +154,44 @@ class OpenHABWebViewController: OpenHABViewController {
         let authStr = "\(activeConfig.username):\(activeConfig.password)"
         let newTarget = "\(activeConfig.url):\(authStr)"
 
-        if !force, currentTarget == newTarget {
-            showActivityIndicator(show: false)
+        // If force reload, skip ETag check and always reload
+        if force {
+            Task {
+                await performLoadWebView(newTarget: newTarget, path: path, force: true)
+            }
             return
         }
+
+        // Check ETag before loading (even if target hasn't changed - content might have updated)
+        Task {
+            await loadWebViewWithETagCheck(newTarget: newTarget, path: path)
+        }
+    }
+
+    @MainActor
+    private func performLoadWebView(newTarget: String, path: String?, force: Bool) async {
+        guard let activeConfig else { return }
         currentTarget = newTarget
         let url = URL(string: activeConfig.url)
 
         if let modifiedUrl = modifyUrl(orig: url, path: path) {
             acceptsCommands = false
-            let request = URLRequest(url: modifiedUrl)
+            var request = URLRequest(url: modifiedUrl)
+
+            // When force reloading, bypass ALL caches (both URLRequest and WKWebView)
+            if force {
+                // Clear WKWebView's internal cache
+                let dataStore = webView.configuration.websiteDataStore
+                let websiteDataTypes: Set<String> = [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache]
+                let date = Date(timeIntervalSince1970: 0)
+
+                Logger.viewController.info("Force reload: clearing WKWebView cache")
+                await dataStore.removeData(ofTypes: websiteDataTypes, modifiedSince: date)
+
+                // Set aggressive cache policy for URLRequest
+                request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+            }
+
             // TODO: remove this check once iOS 16 is dropped
             let isMyOh = url?.host?.contains("myopenhab.org") ?? false
             // create new (or resuse existing)
@@ -162,6 +210,91 @@ class OpenHABWebViewController: OpenHABViewController {
             Logger.viewController.info("Loading URL: \(modifiedUrl)")
             webView.load(request)
         }
+    }
+
+    @MainActor
+    private func loadWebViewWithETagCheck(newTarget: String, path: String?) async {
+        guard let activeConfig,
+              let url = URL(string: activeConfig.url),
+              let fullURL = modifyUrl(orig: url, path: path) else {
+            Logger.viewController.info("ETag check skipped: invalid configuration")
+            await performLoadWebView(newTarget: newTarget, path: path, force: false)
+            return
+        }
+
+        // Create checker if needed (lazy initialization) or if config changed
+        let configKey = "\(activeConfig.url):\(activeConfig.username)"
+        if etagChecker == nil || etagCheckerConfigURL != configKey {
+            let httpClient = HTTPClient(baseURL: nil, connectionConfiguration: activeConfig)
+            etagChecker = ETagChecker(httpClient: httpClient)
+            etagCheckerConfigURL = configKey
+            Logger.viewController.debug("Created new ETagChecker for config: \(configKey)")
+        }
+
+        guard let checker = etagChecker else {
+            await performLoadWebView(newTarget: newTarget, path: path, force: false)
+            return
+        }
+
+        // Check if content changed
+        let result = await checker.checkIfChanged(url: fullURL)
+
+        switch result {
+        case .unchanged:
+            // When ETag is unchanged, the base resource (HTML/JS) hasn't changed
+            // Compare base URLs (origin) only, since paths are handled by client-side routing
+            let normalizedTarget = normalizeURLForComparison(fullURL.absoluteString, includeBasePath: false)
+            let normalizedLoaded = normalizeURLForComparison(lastLoadedURL, includeBasePath: false)
+
+            Logger.viewController.debug("ETag unchanged - comparing base URLs: loaded=\(normalizedLoaded ?? "nil") vs target=\(normalizedTarget ?? "nil")")
+
+            if let normalizedTarget, let normalizedLoaded, normalizedLoaded == normalizedTarget {
+                Logger.viewController.info("ETag unchanged and same base URL, skipping load")
+                currentTarget = newTarget
+                showActivityIndicator(show: false)
+                // Don't load - same server, same content version, already displayed
+            } else {
+                Logger.viewController.info("ETag unchanged but different base URL, loading \(fullURL.absoluteString)")
+                await performLoadWebView(newTarget: newTarget, path: path, force: false)
+            }
+
+        case .changed:
+            Logger.viewController.info("ETag changed, loading \(fullURL.absoluteString)")
+            await performLoadWebView(newTarget: newTarget, path: path, force: false)
+
+        case let .failed(error):
+            Logger.viewController.info("ETag check failed: \(error.localizedDescription), loading anyway")
+            await performLoadWebView(newTarget: newTarget, path: path, force: false)
+        }
+    }
+
+    /// Normalizes URLs for comparison
+    /// - Parameters:
+    ///   - urlString: The URL string to normalize
+    ///   - includeBasePath: If true, includes the path component; if false, returns only the base URL (origin)
+    /// - Returns: Normalized URL string
+    private func normalizeURLForComparison(_ urlString: String?, includeBasePath: Bool = false) -> String? {
+        guard let urlString, let url = URL(string: urlString) else { return nil }
+
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+
+        // Always remove fragment (everything after #)
+        components?.fragment = nil
+
+        // For base URL comparison (when includeBasePath == false), remove the path entirely
+        if !includeBasePath {
+            components?.path = ""
+            components?.query = nil
+        }
+
+        guard var normalized = components?.url?.absoluteString else { return nil }
+
+        // Remove trailing slash for consistent comparison
+        if normalized.hasSuffix("/") {
+            normalized = String(normalized.dropLast())
+        }
+
+        return normalized
     }
 
     func modifyUrl(orig: URL?, path: String? = nil) -> URL? {
@@ -425,6 +558,9 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         Logger.viewController.info("didFinish - webView.url: \(String(describing: webView.url?.description))")
+
+        // Track the successfully loaded URL for ETag comparison
+        lastLoadedURL = webView.url?.absoluteString
 
         setHideNavigationBar(shouldHide: true)
         showActivityIndicator(show: false)
