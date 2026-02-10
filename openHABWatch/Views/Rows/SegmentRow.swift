@@ -128,9 +128,7 @@ struct SegmentRow: View {
             }
             NavigationLink(destination: LazyView(SegmentSelectionView(
                 widget: widget,
-                mappings: viewModel.mappings,
-                title: viewModel.labelText,
-                hasPressReleaseMappings: viewModel.hasPressReleaseMappings,
+                stateToken: widget.item?.state ?? widget.state,
                 selectedIndex: selectedIndexBinding
             ))) {
                 HStack {

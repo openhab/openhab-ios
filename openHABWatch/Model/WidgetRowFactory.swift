@@ -21,35 +21,18 @@ enum WidgetRowFactory {
             if !widget.mappings.isEmpty {
                 SegmentRow(widget: widget)
             } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                SwitchRow(widget: widget, effectiveState: widget.state.isEmpty ? (widget.item?.state ?? "") : widget.state)
+                SwitchRow(widget: widget, stateToken: widget.state.isEmpty ? (widget.item?.state ?? "") : widget.state)
             } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
                 RollershutterRow(widget: widget)
             } else if !widget.mappingsOrItemOptions.isEmpty {
                 SegmentRow(widget: widget)
             } else {
-                SwitchRow(widget: widget, effectiveState: widget.state.isEmpty ? (widget.item?.state ?? "") : widget.state)
+                SwitchRow(widget: widget, stateToken: widget.state.isEmpty ? (widget.item?.state ?? "") : widget.state)
             }
         case .slider:
-            SliderRow(
-                widget: widget,
-                adjustedValue: widget.adjustedValue,
-                minValue: widget.minValue,
-                maxValue: widget.maxValue,
-                step: widget.step,
-                switchSupport: widget.switchSupport
-            )
+            SliderRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
         case .setpoint:
-            SetpointRow(
-                widget: widget,
-                title: widget.labelText ?? widget.label,
-                minValue: widget.minValue,
-                maxValue: widget.maxValue,
-                step: widget.step,
-                stateValue: widget.stateValueAsNumberState?.value,
-                labelValue: widget.labelValue,
-                unit: widget.unit,
-                stateToken: widget.item?.state ?? widget.state
-            )
+            SetpointRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
         case .frame:
             FrameRow(title: widget.labelText ?? "")
         case .text:

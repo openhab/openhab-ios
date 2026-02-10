@@ -17,34 +17,31 @@ import SwiftUI
 
 struct SliderRow: View {
     let widget: OpenHABWidget
-    let adjustedValue: Double
-    let minValue: Double
-    let maxValue: Double
-    let step: Double
-    let switchSupport: Bool
+    let stateToken: String
     @EnvironmentObject var settings: AppSettings
     var fallbackSymbol: SFSymbol?
     @State private var pendingValue: Double?
+    @State private var viewModel: WidgetRowViewModel
     @State private var commandSender = WidgetCommandSender()
 
     private var currentValue: Double {
-        pendingValue ?? adjustedValue
+        pendingValue ?? viewModel.adjustedValue
     }
 
     private var currentValueText: String {
-        currentValue.valueText(step: step)
+        currentValue.valueText(step: viewModel.step)
     }
 
     var valueBinding: Binding<Double> {
         .init(
             get: {
-                pendingValue ?? adjustedValue
+                pendingValue ?? viewModel.adjustedValue
             },
             set: { newValue in
                 Logger.rowViews.info("SliderRow new value = \(newValue)")
                 pendingValue = newValue
                 commandSender.send(
-                    newValue.valueText(step: step),
+                    newValue.valueText(step: viewModel.step),
                     for: widget,
                     policy: WidgetCommandDefaults.slider,
                     key: "slider-value"
@@ -56,19 +53,19 @@ struct SliderRow: View {
     private var stateBinding: Binding<Bool> {
         Binding<Bool>(
             get: {
-                adjustedValue > minValue
+                viewModel.adjustedValue > viewModel.minValue
             },
             set: { newValue in
                 if newValue {
                     commandSender.send(
-                        maxValue.valueText(step: step),
+                        viewModel.maxValue.valueText(step: viewModel.step),
                         for: widget,
                         policy: .immediate,
                         key: "slider-toggle"
                     )
                 } else {
                     commandSender.send(
-                        minValue.valueText(step: step),
+                        viewModel.minValue.valueText(step: viewModel.step),
                         for: widget,
                         policy: .immediate,
                         key: "slider-toggle"
@@ -80,7 +77,7 @@ struct SliderRow: View {
 
     var body: some View {
         VStack(spacing: 3) {
-            if switchSupport {
+            if viewModel.switchSupport {
                 Toggle(isOn: stateBinding) {
                     HStack {
                         WatchIconView(model: widget.iconRenderModel(fallbackSymbol: fallbackSymbol), settings: settings)
@@ -119,28 +116,20 @@ struct SliderRow: View {
                 }.padding(.top, 8)
             }
 
-            Slider(value: valueBinding, in: minValue ... maxValue, step: step)
+            Slider(value: valueBinding, in: viewModel.minValue ... viewModel.maxValue, step: viewModel.step)
                 .labelsHidden()
         }
-        .onChange(of: adjustedValue, initial: false) { _, _ in
+        .onChange(of: stateToken, initial: false) { _, _ in
+            viewModel.update(from: widget)
             pendingValue = nil
         }
     }
 
-    init(widget: OpenHABWidget,
-         adjustedValue: Double,
-         minValue: Double,
-         maxValue: Double,
-         step: Double,
-         switchSupport: Bool,
-         fallbackSymbol: SFSymbol? = nil) {
+    init(widget: OpenHABWidget, stateToken: String, fallbackSymbol: SFSymbol? = nil) {
         self.widget = widget
-        self.adjustedValue = adjustedValue
-        self.minValue = minValue
-        self.maxValue = maxValue
-        self.step = step
-        self.switchSupport = switchSupport
+        self.stateToken = stateToken
         self.fallbackSymbol = fallbackSymbol
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 
@@ -153,11 +142,7 @@ struct SliderRow: View {
                 label: "Brightness",
                 value: 75
             ),
-            adjustedValue: 75,
-            minValue: 0,
-            maxValue: 100,
-            step: 1,
-            switchSupport: false,
+            stateToken: "75",
             fallbackSymbol: .sliderHorizontal3
         )
     }
@@ -173,11 +158,7 @@ struct SliderRow: View {
                 maxValue: 28,
                 step: 0.5
             ),
-            adjustedValue: 16,
-            minValue: 16,
-            maxValue: 28,
-            step: 0.5,
-            switchSupport: false,
+            stateToken: "16",
             fallbackSymbol: .thermometerMedium
         )
     }
@@ -191,11 +172,7 @@ struct SliderRow: View {
                 value: 50,
                 switchSupport: true
             ),
-            adjustedValue: 50,
-            minValue: 0,
-            maxValue: 100,
-            step: 1,
-            switchSupport: true,
+            stateToken: "50",
             fallbackSymbol: .lightbulbFill
         )
     }
@@ -209,11 +186,7 @@ struct SliderRow: View {
                     label: "Brightness",
                     value: 75
                 ),
-                adjustedValue: 75,
-                minValue: 0,
-                maxValue: 100,
-                step: 1,
-                switchSupport: false,
+                stateToken: "75",
                 fallbackSymbol: .sliderHorizontal3
             )
             SliderRow(
@@ -224,11 +197,7 @@ struct SliderRow: View {
                     maxValue: 28,
                     step: 0.5
                 ),
-                adjustedValue: 21,
-                minValue: 16,
-                maxValue: 28,
-                step: 0.5,
-                switchSupport: false,
+                stateToken: "21",
                 fallbackSymbol: .thermometerMedium
             )
             SliderRow(
@@ -237,11 +206,7 @@ struct SliderRow: View {
                     value: 50,
                     switchSupport: true
                 ),
-                adjustedValue: 50,
-                minValue: 0,
-                maxValue: 100,
-                step: 1,
-                switchSupport: true,
+                stateToken: "50",
                 fallbackSymbol: .lightbulbFill
             )
         }
@@ -252,11 +217,7 @@ struct SliderRow: View {
     PreviewNavigationContainer {
         SliderRow(
             widget: UserData(preview: true).widgets[3],
-            adjustedValue: 0,
-            minValue: 0,
-            maxValue: 100,
-            step: 1,
-            switchSupport: false,
+            stateToken: "0",
             fallbackSymbol: .sliderHorizontal3
         )
     }

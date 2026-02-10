@@ -16,12 +16,12 @@ import SwiftUI
 struct SwitchRow: View {
     let widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
-    let effectiveState: String
+    let stateToken: String
     @State private var localIsOn: Bool?
     @State private var commandSender = WidgetCommandSender()
 
     private var isOn: Bool {
-        localIsOn ?? effectiveState.parseAsBool()
+        localIsOn ?? stateToken.parseAsBool()
     }
 
     var body: some View {
@@ -46,7 +46,7 @@ struct SwitchRow: View {
         }
         .padding(.trailing)
         .cornerRadius(5)
-        .onChange(of: effectiveState) {
+        .onChange(of: stateToken) {
             localIsOn = nil
         }
     }
@@ -55,7 +55,7 @@ struct SwitchRow: View {
 #Preview {
     let widget = PreviewWidgetFactory.switchWidget(label: "Outdoor Light", state: "ON")
     PreviewNavigationContainer {
-        SwitchRow(widget: widget, effectiveState: widget.item?.state ?? "OFF")
+        SwitchRow(widget: widget, stateToken: widget.item?.state ?? "OFF")
     }
 }
 
@@ -67,7 +67,7 @@ struct SwitchRow: View {
         return obj
     }()
     NavigationStack {
-        SwitchRow(widget: widget, effectiveState: widget.item?.state ?? "OFF")
+        SwitchRow(widget: widget, stateToken: widget.item?.state ?? "OFF")
     }
     .environmentObject(mockSettings)
 }
