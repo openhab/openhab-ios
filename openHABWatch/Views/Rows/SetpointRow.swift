@@ -30,7 +30,7 @@ struct SetpointRow: View {
     var body: some View {
         VStack(spacing: 5) {
             HStack {
-                IconView(widget: widget, settings: settings)
+                WatchIconView(model: widget.iconRenderModel(), settings: settings)
                 WatchLabelText(widget: widget)
                 Spacer()
             }
@@ -71,6 +71,11 @@ struct SetpointRow: View {
         }
     }
 
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+    }
+
     private func handleUpDown(isDecreasing: Bool) {
         var numberState = viewModel.numberState
         let currentValue = numberState?.value ?? viewModel.minValue
@@ -101,11 +106,6 @@ struct SetpointRow: View {
 
     func increaseValue() {
         handleUpDown(isDecreasing: false)
-    }
-
-    init(widget: OpenHABWidget) {
-        self.widget = widget
-        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 

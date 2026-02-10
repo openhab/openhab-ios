@@ -80,6 +80,12 @@ struct SelectionListView: View {
         }
     }
 
+    init(widget: OpenHABWidget, selectedIndex: Binding<Int?>) {
+        self.widget = widget
+        _selectedIndex = selectedIndex
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+    }
+
     private func selectOption(at index: Int) {
         viewModel.selectedIndex = index
         selectedIndex = viewModel.selectedIndex
@@ -92,12 +98,6 @@ struct SelectionListView: View {
             )
             dismiss()
         }
-    }
-
-    init(widget: OpenHABWidget, selectedIndex: Binding<Int?>) {
-        self.widget = widget
-        _selectedIndex = selectedIndex
-        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 
@@ -126,7 +126,7 @@ struct SelectionRow: View {
     var body: some View {
         HStack {
             HStack {
-                IconView(widget: widget, settings: settings)
+                WatchIconView(model: widget.iconRenderModel(), settings: settings)
                 WatchLabelText(widget: widget)
                 Spacer()
             }

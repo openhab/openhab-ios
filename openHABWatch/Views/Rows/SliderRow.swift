@@ -79,7 +79,7 @@ struct SliderRow: View {
             if viewModel.switchSupport {
                 Toggle(isOn: stateBinding) {
                     HStack {
-                        IconView(widget: widget, settings: settings, fallbackSymbol: fallbackSymbol)
+                        WatchIconView(model: widget.iconRenderModel(fallbackSymbol: fallbackSymbol), settings: settings)
                         VStack(alignment: .leading) {
                             WatchLabelText(widget: widget)
                             if pendingValue != nil {
@@ -99,7 +99,7 @@ struct SliderRow: View {
                 .cornerRadius(5)
             } else {
                 HStack {
-                    IconView(widget: widget, settings: settings, fallbackSymbol: fallbackSymbol)
+                    WatchIconView(model: widget.iconRenderModel(fallbackSymbol: fallbackSymbol), settings: settings)
                     WatchLabelText(widget: widget)
                     Spacer()
                     if pendingValue != nil {

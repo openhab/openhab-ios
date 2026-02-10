@@ -15,40 +15,37 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
-struct IconView: View {
-    @ObservedObject var widget: OpenHABWidget
+struct IconRenderModel: Equatable {
+    var icon: String
+    var iconState: String?
+    var iconColorHex: String
+    var staticIcon: Bool?
+    var stateToken: String
+    var fallbackSymbol: SFSymbol?
+}
+
+struct WatchIconView: View {
+    let model: IconRenderModel
     @ObservedObject var settings = AppSettings.shared
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
-    /// Optional SF Symbol to show as fallback when network icon is unavailable (useful for previews)
-    var fallbackSymbol: SFSymbol?
-
-    @State private var imageLoadingFailed = false
-    @State private var retryCount = 0
-    private let maxRetries = 3
-    private let retryDelay: TimeInterval = 1.0
-
-    var iconColor: String {
-        let logicColor = !(widget.iconColor.isEmpty) ? UIColor(fromString: widget.iconColor) : .ohBlack
-        return logicColor.semanticColorToHex() ?? "#FFFFFF"
-    }
 
     var iconURL: URL? {
-        guard !widget.icon.isEmpty,
+        guard !model.icon.isEmpty,
               let activeConnection = networkTracker.activeConnection,
               !activeConnection.configuration.url.isEmpty else { return nil }
         // Skip loading number icons as they don't exist/aren't useful
-        if widget.icon == "number" {
+        if model.icon == "number" {
             return nil
         }
 
         return Endpoint.icon(
             rootUrl: activeConnection.configuration.url,
             version: activeConnection.version,
-            icon: widget.icon,
-            state: widget.iconState(),
+            icon: model.icon,
+            state: model.iconState,
             iconType: settings.iconType,
-            iconColor: iconColor,
-            staticIcon: widget.staticIcon
+            iconColor: model.iconColorHex,
+            staticIcon: model.staticIcon
         )?.url
     }
 
@@ -56,7 +53,7 @@ struct IconView: View {
         Group {
             if let iconURL {
                 // Only apply color preprocessing for non-iconify icons
-                let processorIconColor = iconURL.host == "api.iconify.design" ? nil : iconColor
+                let processorIconColor = iconURL.host == "api.iconify.design" ? nil : model.iconColorHex
                 KFImage.url(iconURL)
                     .onFailure { _ in
                         Logger.rowViews.debug("Failed to load image : \(iconURL.absoluteString)")
@@ -71,8 +68,8 @@ struct IconView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 20, height: 20)
-                    .id("\(iconURL.absoluteString)-\(widget.item?.state ?? "")-\(widget.iconColor)")
-            } else if let fallbackSymbol {
+                    .id("\(iconURL.absoluteString)-\(model.stateToken)-\(model.iconColorHex)")
+            } else if let fallbackSymbol = model.fallbackSymbol {
                 Image(systemSymbol: fallbackSymbol)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -84,34 +81,6 @@ struct IconView: View {
                     .frame(width: 20, height: 20)
             }
         }
-        .onChange(of: widget.icon) {
-            resetLoadingState()
-        }
-        .onChange(of: widget.iconState()) {
-            resetLoadingState()
-        }
-        .onChange(of: networkTracker.activeConnection) {
-            resetLoadingState()
-        }
-    }
-
-    private func handleLoadingFailure() {
-        if retryCount < maxRetries {
-            retryCount += 1
-            Logger.rowViews.info("Retrying icon load for widget \(widget.label), attempt \(retryCount)/\(maxRetries)")
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay * Double(retryCount)) {
-                imageLoadingFailed = false
-            }
-        } else {
-            Logger.rowViews.warning("Max retries reached for widget \(widget.label), giving up")
-            imageLoadingFailed = true
-        }
-    }
-
-    private func resetLoadingState() {
-        imageLoadingFailed = false
-        retryCount = 0
     }
 }
 
@@ -132,8 +101,8 @@ struct IconView: View {
 
     let settings = AppSettings(debug: true, openHABRootUrl: localTestingURL)
     let widget = UserData(preview: true).widgets[4]
-    IconView(
-        widget: widget,
+    WatchIconView(
+        model: widget.iconRenderModel(),
         settings: settings
     )
 
@@ -144,8 +113,8 @@ struct IconView: View {
         .frame(width: 20, height: 20)
 
     let widget2 = UserData(preview: true).widgets[11]
-    IconView(
-        widget: widget2,
+    WatchIconView(
+        model: widget2.iconRenderModel(),
         settings: settings
     )
 }

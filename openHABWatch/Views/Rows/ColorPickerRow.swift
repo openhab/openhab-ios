@@ -25,7 +25,7 @@ struct ColorPickerRow: View {
         return
             VStack(spacing: 0) {
                 HStack {
-                    IconView(widget: widget, settings: settings)
+                    WatchIconView(model: widget.iconRenderModel(), settings: settings)
                     WatchLabelText(widget: widget)
                     Spacer()
                 }
@@ -68,17 +68,17 @@ struct ColorPickerRow: View {
             }
     }
 
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+    }
+
     func upButtonPressed() {
         commandSender.send("ON", for: widget, policy: .immediate)
     }
 
     func downButtonPressed() {
         commandSender.send("OFF", for: widget, policy: .immediate)
-    }
-
-    init(widget: OpenHABWidget) {
-        self.widget = widget
-        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 

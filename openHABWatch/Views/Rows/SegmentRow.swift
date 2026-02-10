@@ -49,7 +49,7 @@ struct SegmentRow: View {
     private var pressReleaseContent: some View {
         if viewModel.mappings.count <= 2 {
             HStack {
-                IconView(widget: widget, settings: settings)
+                WatchIconView(model: widget.iconRenderModel(), settings: settings)
                 WatchLabelText(widget: widget)
                 Spacer()
                 pressReleaseButtons
@@ -103,7 +103,7 @@ struct SegmentRow: View {
     @ViewBuilder
     private var iconTitleRow: some View {
         HStack {
-            IconView(widget: widget, settings: settings)
+            WatchIconView(model: widget.iconRenderModel(), settings: settings)
             WatchLabelText(widget: widget)
             Spacer()
         }
@@ -122,7 +122,7 @@ struct SegmentRow: View {
     private var multiSegmentContent: some View {
         HStack {
             HStack {
-                IconView(widget: widget, settings: settings)
+                WatchIconView(model: widget.iconRenderModel(), settings: settings)
                 WatchLabelText(widget: widget)
                 Spacer()
             }
@@ -154,7 +154,7 @@ struct SegmentRow: View {
     private var singleMappingContent: some View {
         let mapping = viewModel.mappings[0]
         HStack {
-            IconView(widget: widget, settings: settings)
+            WatchIconView(model: widget.iconRenderModel(), settings: settings)
             WatchLabelText(widget: widget)
             Spacer()
             singleButton(for: mapping)

@@ -53,6 +53,12 @@ struct SegmentSelectionView: View {
         }
     }
 
+    init(widget: OpenHABWidget, selectedIndex: Binding<Int?>) {
+        self.widget = widget
+        _selectedIndex = selectedIndex
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+    }
+
     @ViewBuilder
     private func standardButton(for mapping: OpenHABWidgetMapping, at index: Int) -> some View {
         Button {
@@ -135,12 +141,6 @@ struct SegmentSelectionView: View {
             )
             dismiss()
         }
-    }
-
-    init(widget: OpenHABWidget, selectedIndex: Binding<Int?>) {
-        self.widget = widget
-        _selectedIndex = selectedIndex
-        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 

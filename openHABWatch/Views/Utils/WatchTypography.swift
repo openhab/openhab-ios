@@ -13,6 +13,20 @@ import CommonUI
 import OpenHABCore
 import SwiftUI
 
+struct WatchLabelText: View {
+    @ObservedObject var widget: OpenHABWidget
+
+    var body: some View {
+        TextLabelView(widget: widget, font: WatchTypography.labelFont, lineLimit: WatchTypography.labelLineLimit)
+            .minimumScaleFactor(WatchTypography.labelMinScale)
+            .truncationMode(.tail)
+    }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+    }
+}
+
 enum WatchTypography {
     static let labelFont: Font = .caption
     static let labelLineLimit = 2
@@ -35,18 +49,4 @@ enum WatchTypography {
     static let secondaryMinScale: CGFloat = 0.8
 
     static let emphasisFont: Font = .headline
-}
-
-struct WatchLabelText: View {
-    @ObservedObject var widget: OpenHABWidget
-
-    var body: some View {
-        TextLabelView(widget: widget, font: WatchTypography.labelFont, lineLimit: WatchTypography.labelLineLimit)
-            .minimumScaleFactor(WatchTypography.labelMinScale)
-            .truncationMode(.tail)
-    }
-
-    init(widget: OpenHABWidget) {
-        self.widget = widget
-    }
 }

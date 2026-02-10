@@ -14,8 +14,23 @@ import OpenHABCore
 import os.log
 import SFSafeSymbols
 import SwiftUI
+import UIKit
 
 extension OpenHABWidget {
+    @MainActor
+    func iconRenderModel(fallbackSymbol: SFSymbol? = nil) -> IconRenderModel {
+        let logicColor = !iconColor.isEmpty ? UIColor(fromString: iconColor) : .ohBlack
+        let encodedIconColor = logicColor.semanticColorToHex() ?? "#FFFFFF"
+        return IconRenderModel(
+            icon: icon,
+            iconState: iconState(),
+            iconColorHex: encodedIconColor,
+            staticIcon: staticIcon,
+            stateToken: item?.state ?? state,
+            fallbackSymbol: fallbackSymbol
+        )
+    }
+
     @ViewBuilder @MainActor func makeView(settings: AppSettings) -> some View {
         if linkedPage != nil {
             Image(systemSymbol: .chevronRight)

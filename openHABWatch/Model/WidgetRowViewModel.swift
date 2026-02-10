@@ -25,10 +25,10 @@ final class WidgetRowViewModel {
     var selectedLabel: String?
     var effectiveState = ""
     var isOn = false
-    var adjustedValue: Double = 0.0
-    var minValue: Double = 0.0
-    var maxValue: Double = 100.0
-    var step: Double = 1.0
+    var adjustedValue = 0.0
+    var minValue = 0.0
+    var maxValue = 100.0
+    var step = 1.0
     var switchSupport = false
     var hasLinkedPage = false
     var numberState: NumberState?

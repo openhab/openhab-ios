@@ -16,15 +16,15 @@ struct PreviewNavigationContainer<Content: View>: View {
     @State private var settings = AppSettings()
     private let content: Content
 
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-
     var body: some View {
         NavigationStack {
             content
         }
         .environmentObject(settings)
+    }
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
     }
 }
 #endif

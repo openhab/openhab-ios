@@ -19,7 +19,7 @@ struct GenericRow: View {
 
     var body: some View {
         HStack {
-            IconView(widget: widget, settings: settings)
+            WatchIconView(model: widget.iconRenderModel(), settings: settings)
             WatchLabelText(widget: widget)
             Spacer()
             DetailTextLabelView(widget: widget)

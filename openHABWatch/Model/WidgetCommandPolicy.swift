@@ -12,11 +12,6 @@
 import Foundation
 import OpenHABCore
 
-enum WidgetCommandPolicy: Sendable {
-    case immediate
-    case debounce(Duration)
-}
-
 enum WidgetCommandDefaults {
     static let slider: WidgetCommandPolicy = .debounce(.milliseconds(500))
     static let immediate: WidgetCommandPolicy = .immediate
@@ -29,4 +24,9 @@ enum WidgetCommandDefaults {
             immediate
         }
     }
+}
+
+enum WidgetCommandPolicy: Sendable {
+    case immediate
+    case debounce(Duration)
 }

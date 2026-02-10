@@ -105,8 +105,8 @@ enum PreviewWidgetFactory {
     }
 
     static func rollershutter(label: String,
-                               state: String = "STOP",
-                               icon: String = "rollershutter") -> OpenHABWidget {
+                              state: String = "STOP",
+                              icon: String = "rollershutter") -> OpenHABWidget {
         makeWidget(
             type: .switchWidget,
             label: label,
@@ -193,6 +193,7 @@ enum PreviewWidgetFactory {
         )
     }
 
+    // swiftlint:disable:next function_parameter_count
     private static func makeWidget(type: OpenHABWidget.WidgetType,
                                    label: String,
                                    valueText: String?,
