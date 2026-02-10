@@ -11,8 +11,35 @@
 
 import Foundation
 import OpenHABCore
-import Testing
 @testable import openHABWatch
+import Testing
+
+private final class CommandRecorder {
+    var commands: [String] = []
+}
+
+private func makeWidget(widgetId: String, recorder: CommandRecorder) -> OpenHABWidget {
+    let item = OpenHABItem(
+        name: "TestItem",
+        type: "Switch",
+        state: "OFF",
+        link: "",
+        label: nil,
+        groupType: nil,
+        stateDescription: nil,
+        commandDescription: nil,
+        members: [],
+        category: nil,
+        options: nil
+    )
+    let widget = OpenHABWidget(icon: "switch")
+    widget.widgetId = widgetId
+    widget.item = item
+    widget.sendCommand = { _, command in
+        recorder.commands.append(command ?? "")
+    }
+    return widget
+}
 
 struct WidgetCommandSenderTests {
     @Test("Immediate policy sends command once")
@@ -81,31 +108,4 @@ struct WidgetCommandSenderTests {
         #expect(recorder.commands.count == 1)
         #expect(recorder.commands.first?.contains("21") == true)
     }
-}
-
-private final class CommandRecorder {
-    var commands: [String] = []
-}
-
-private func makeWidget(widgetId: String, recorder: CommandRecorder) -> OpenHABWidget {
-    let item = OpenHABItem(
-        name: "TestItem",
-        type: "Switch",
-        state: "OFF",
-        link: "",
-        label: nil,
-        groupType: nil,
-        stateDescription: nil,
-        commandDescription: nil,
-        members: [],
-        category: nil,
-        options: nil
-    )
-    let widget = OpenHABWidget(icon: "switch")
-    widget.widgetId = widgetId
-    widget.item = item
-    widget.sendCommand = { _, command in
-        recorder.commands.append(command ?? "")
-    }
-    return widget
 }
