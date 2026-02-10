@@ -16,6 +16,11 @@ import os.log
 final class WidgetCommandSender {
     private var pendingTasks: [String: Task<Void, Never>] = [:]
 
+    deinit {
+        pendingTasks.values.forEach { $0.cancel() }
+        pendingTasks.removeAll()
+    }
+
     @MainActor
     func send(_ command: String?, for widget: OpenHABWidget, policy: WidgetCommandPolicy, key: String? = nil) {
         guard let command, !command.isEmpty else { return }

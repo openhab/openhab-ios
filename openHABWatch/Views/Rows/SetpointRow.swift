@@ -88,7 +88,7 @@ struct SetpointRow: View {
             return
         }
 
-        numberState = numberState ?? NumberState(value: limitedNewValue)
+        numberState = numberState ?? NumberState(value: limitedNewValue, unit: widget.unit)
         numberState?.value = limitedNewValue
 
         logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState?.description ?? String(limitedNewValue))")

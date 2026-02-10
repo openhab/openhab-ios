@@ -130,7 +130,7 @@ struct SegmentSelectionView: View {
             commandSender.send(
                 selectedCommand,
                 for: widget,
-                policy: WidgetCommandDefaults.segmentedSelection,
+                policy: WidgetCommandDefaults.immediate,
                 key: "segment-selection"
             )
             dismiss()

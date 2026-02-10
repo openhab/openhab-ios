@@ -19,7 +19,6 @@ enum WidgetCommandPolicy: Sendable {
 
 enum WidgetCommandDefaults {
     static let slider: WidgetCommandPolicy = .debounce(.milliseconds(500))
-    static let segmentedSelection: WidgetCommandPolicy = .debounce(.milliseconds(300))
     static let immediate: WidgetCommandPolicy = .immediate
 
     static func policy(for widget: OpenHABWidget) -> WidgetCommandPolicy {
