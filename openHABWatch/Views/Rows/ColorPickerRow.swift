@@ -33,6 +33,7 @@ struct ColorPickerRow: View {
                     Spacer()
                     IconWithAction(
                         systemSymbol: .chevronDownCircleFill,
+                        accessibilityLabel: "Decrease brightness",
                         action: downButtonPressed
                     )
 
@@ -49,12 +50,14 @@ struct ColorPickerRow: View {
                                 }
                             }
                     }
+                    .accessibilityLabel("Select color")
 
                     Spacer()
 
                     IconWithAction(
                         systemSymbol:
                         .chevronUpCircleFill,
+                        accessibilityLabel: "Increase brightness",
                         action: upButtonPressed
                     )
                     Spacer()

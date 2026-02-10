@@ -17,10 +17,7 @@ struct FrameRow: View {
     var body: some View {
         HStack {
             Text(title.uppercased())
-                .font(WatchTypography.sectionFont)
-                .lineLimit(WatchTypography.sectionLineLimit)
-                .minimumScaleFactor(WatchTypography.sectionMinScale)
-                .truncationMode(.tail)
+                .watchTextStyle(.section)
             Spacer()
         }
     }

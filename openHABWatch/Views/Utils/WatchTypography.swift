@@ -16,10 +16,73 @@ struct WatchLabelText: View {
 
     var body: some View {
         Text(text)
-            .font(WatchTypography.labelFont)
-            .lineLimit(WatchTypography.labelLineLimit)
-            .minimumScaleFactor(WatchTypography.labelMinScale)
-            .truncationMode(.tail)
+            .watchTextStyle(.label)
+    }
+}
+
+enum WatchTextStyle {
+    case label
+    case detail
+    case section
+    case control
+    case secondary
+    case emphasis
+}
+
+private struct WatchTextModifier: ViewModifier {
+    let style: WatchTextStyle
+
+    func body(content: Content) -> some View {
+        switch style {
+        case .label:
+            content
+                .font(WatchTypography.labelFont)
+                .lineLimit(WatchTypography.labelLineLimit)
+                .minimumScaleFactor(WatchTypography.labelMinScale)
+                .truncationMode(.tail)
+                .multilineTextAlignment(.leading)
+        case .detail:
+            content
+                .font(WatchTypography.detailFont)
+                .lineLimit(WatchTypography.detailLineLimit)
+                .minimumScaleFactor(WatchTypography.detailMinScale)
+                .truncationMode(.tail)
+                .multilineTextAlignment(.leading)
+        case .section:
+            content
+                .font(WatchTypography.sectionFont)
+                .lineLimit(WatchTypography.sectionLineLimit)
+                .minimumScaleFactor(WatchTypography.sectionMinScale)
+                .truncationMode(.tail)
+                .multilineTextAlignment(.leading)
+        case .control:
+            content
+                .font(WatchTypography.controlFont)
+                .lineLimit(WatchTypography.controlLineLimit)
+                .minimumScaleFactor(WatchTypography.controlMinScale)
+                .truncationMode(.tail)
+                .multilineTextAlignment(.leading)
+        case .secondary:
+            content
+                .font(WatchTypography.secondaryFont)
+                .lineLimit(WatchTypography.secondaryLineLimit)
+                .minimumScaleFactor(WatchTypography.secondaryMinScale)
+                .truncationMode(.tail)
+                .multilineTextAlignment(.leading)
+        case .emphasis:
+            content
+                .font(WatchTypography.emphasisFont)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .truncationMode(.tail)
+                .multilineTextAlignment(.leading)
+        }
+    }
+}
+
+extension View {
+    func watchTextStyle(_ style: WatchTextStyle) -> some View {
+        modifier(WatchTextModifier(style: style))
     }
 }
 

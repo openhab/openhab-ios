@@ -90,11 +90,7 @@ struct SegmentSelectionView: View {
         HStack {
             Text(mapping.label)
                 .foregroundStyle(.primary)
-                .multilineTextAlignment(.leading)
-                .font(WatchTypography.labelFont)
-                .lineLimit(WatchTypography.labelLineLimit)
-                .minimumScaleFactor(WatchTypography.labelMinScale)
-                .truncationMode(.tail)
+                .watchTextStyle(.label)
             Spacer()
             if isSelected(index: index), !viewModel.hasPressReleaseMappings {
                 Image(systemSymbol: .checkmark)
@@ -111,6 +107,8 @@ struct SegmentSelectionView: View {
             RoundedRectangle(cornerRadius: 8)
                 .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
         )
+        .accessibilityLabel(mapping.label)
+        .accessibilityAddTraits(.isButton)
     }
 
     private func backgroundColor(for index: Int, isPressed: Bool) -> Color {

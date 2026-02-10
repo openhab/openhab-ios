@@ -42,10 +42,7 @@ struct SetpointRow: View {
             HStack {
                 WatchIconView(model: widget.iconRenderModel(), settings: settings)
                 Text(viewModel.labelText)
-                    .font(WatchTypography.labelFont)
-                    .lineLimit(WatchTypography.labelLineLimit)
-                    .minimumScaleFactor(WatchTypography.labelMinScale)
-                    .truncationMode(.tail)
+                    .watchTextStyle(.label)
                 Spacer()
             }
             HStack {
@@ -58,11 +55,15 @@ struct SetpointRow: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(currentValue <= viewModel.minValue)
+                .accessibilityLabel("Decrease \(viewModel.labelText)")
+                .accessibilityHint("Lowers by \(viewModel.step.valueText(step: viewModel.step))")
 
                 Spacer()
 
                 Text(localValue == nil ? (viewModel.labelValue ?? valueText) : valueText)
-                    .font(WatchTypography.emphasisFont)
+                    .watchTextStyle(.emphasis)
+                    .accessibilityLabel("\(viewModel.labelText) value")
+                    .accessibilityValue(localValue == nil ? (viewModel.labelValue ?? valueText) : valueText)
 
                 Spacer()
 
@@ -73,6 +74,8 @@ struct SetpointRow: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(currentValue >= viewModel.maxValue)
+                .accessibilityLabel("Increase \(viewModel.labelText)")
+                .accessibilityHint("Raises by \(viewModel.step.valueText(step: viewModel.step))")
 
                 Spacer()
             }

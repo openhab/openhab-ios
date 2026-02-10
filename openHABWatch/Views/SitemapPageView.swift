@@ -78,7 +78,7 @@ struct SitemapPageView: View {
                                     .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
                                     .scaleEffect(0.7)
                                 Text("Updating...")
-                                    .font(.caption2)
+                                    .watchTextStyle(.secondary)
                                     .foregroundStyle(.secondary)
                                 Spacer()
                             }
@@ -93,7 +93,7 @@ struct SitemapPageView: View {
                 VStack {
                     Spacer()
                     Text("No widgets available.")
-                        .font(.footnote)
+                        .watchTextStyle(.detail)
                         .foregroundStyle(.secondary)
                     Spacer()
                 }

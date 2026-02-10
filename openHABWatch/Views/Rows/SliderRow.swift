@@ -85,10 +85,7 @@ struct SliderRow: View {
                             WatchLabelText(text: viewModel.labelText)
                             if pendingValue != nil {
                                 Text(currentValueText)
-                                    .font(WatchTypography.secondaryFont)
-                                    .lineLimit(WatchTypography.secondaryLineLimit)
-                                    .minimumScaleFactor(WatchTypography.secondaryMinScale)
-                                    .truncationMode(.tail)
+                                    .watchTextStyle(.secondary)
                                     .foregroundStyle(.secondary)
                             } else {
                                 DetailTextLabelView(text: viewModel.labelValue, valueColor: widget.valuecolor)
@@ -105,10 +102,7 @@ struct SliderRow: View {
                     Spacer()
                     if pendingValue != nil {
                         Text(currentValueText)
-                            .font(WatchTypography.secondaryFont)
-                            .lineLimit(WatchTypography.secondaryLineLimit)
-                            .minimumScaleFactor(WatchTypography.secondaryMinScale)
-                            .truncationMode(.tail)
+                            .watchTextStyle(.secondary)
                             .foregroundStyle(.secondary)
                     } else {
                         DetailTextLabelView(text: viewModel.labelValue, valueColor: widget.valuecolor)
@@ -118,7 +112,10 @@ struct SliderRow: View {
 
             Slider(value: valueBinding, in: viewModel.minValue ... viewModel.maxValue, step: viewModel.step)
                 .labelsHidden()
+                .accessibilityLabel(viewModel.labelText)
+                .accessibilityValue(currentValueText)
         }
+        .accessibilityElement(children: .contain)
         .onChange(of: stateToken, initial: false) { _, _ in
             viewModel.update(from: widget)
             pendingValue = nil

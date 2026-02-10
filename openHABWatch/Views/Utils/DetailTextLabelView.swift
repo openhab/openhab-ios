@@ -19,10 +19,7 @@ struct DetailTextLabelView: View {
     var body: some View {
         if let text {
             Text(text)
-                .font(WatchTypography.detailFont)
-                .lineLimit(WatchTypography.detailLineLimit)
-                .minimumScaleFactor(WatchTypography.detailMinScale)
-                .truncationMode(.tail)
+                .watchTextStyle(.detail)
                 .foregroundStyle(!valueColor.isEmpty ? Color(fromString: valueColor) : .secondary)
         }
     }

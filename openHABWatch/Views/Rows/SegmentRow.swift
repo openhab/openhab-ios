@@ -135,10 +135,7 @@ struct SegmentRow: View {
                     if let currentIndex, currentIndex >= 0, currentIndex < viewModel.mappings.count {
                         Text(viewModel.mappings[currentIndex].label)
                             .foregroundStyle(.secondary)
-                            .font(WatchTypography.secondaryFont)
-                            .lineLimit(WatchTypography.secondaryLineLimit)
-                            .minimumScaleFactor(WatchTypography.secondaryMinScale)
-                            .truncationMode(.tail)
+                            .watchTextStyle(.secondary)
                     }
                     Image(systemSymbol: .chevronRight)
                         .foregroundStyle(.secondary)
@@ -202,10 +199,7 @@ struct SegmentRow: View {
     @ViewBuilder
     private func inlineButton(label: String, isPressed: Bool) -> some View {
         Text(label)
-            .font(WatchTypography.controlFont)
-            .lineLimit(WatchTypography.controlLineLimit)
-            .minimumScaleFactor(WatchTypography.controlMinScale)
-            .truncationMode(.tail)
+            .watchTextStyle(.control)
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
             .background(
@@ -213,6 +207,8 @@ struct SegmentRow: View {
                     .fill(Color.gray.opacity(isPressed ? 0.6 : 0.3))
             )
             .contentShape(RoundedRectangle(cornerRadius: 8))
+            .accessibilityLabel(label)
+            .accessibilityAddTraits(.isButton)
     }
 }
 

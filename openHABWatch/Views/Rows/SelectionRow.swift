@@ -34,11 +34,7 @@ struct SelectionListView: View {
                         HStack {
                             Text(mapping.label)
                                 .foregroundStyle(.primary)
-                                .multilineTextAlignment(.leading)
-                                .font(WatchTypography.labelFont)
-                                .lineLimit(WatchTypography.labelLineLimit)
-                                .minimumScaleFactor(WatchTypography.labelMinScale)
-                                .truncationMode(.tail)
+                                .watchTextStyle(.label)
                             Spacer()
                             if selectedIndex == index {
                                 Image(systemSymbol: .checkmark)
@@ -122,10 +118,7 @@ struct SelectionRow: View {
                     if let valueText = selectedValueText {
                         Text(valueText)
                             .foregroundStyle(.secondary)
-                            .font(WatchTypography.secondaryFont)
-                            .lineLimit(WatchTypography.secondaryLineLimit)
-                            .minimumScaleFactor(WatchTypography.secondaryMinScale)
-                            .truncationMode(.tail)
+                            .watchTextStyle(.secondary)
                     }
                     Image(systemSymbol: .chevronUpChevronDown)
                         .foregroundStyle(.secondary)
