@@ -109,7 +109,7 @@ struct SelectionRow: View {
         HStack {
             HStack {
                 WatchIconView(model: widget.iconRenderModel(), settings: settings)
-                WatchLabelText(widget: widget)
+                WatchLabelText(text: title)
                 Spacer()
             }
             NavigationLink(destination: LazyView(SelectionListView(

@@ -9,21 +9,17 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import CommonUI
-import OpenHABCore
 import SwiftUI
 
 struct WatchLabelText: View {
-    @ObservedObject var widget: OpenHABWidget
+    let text: String
 
     var body: some View {
-        TextLabelView(widget: widget, font: WatchTypography.labelFont, lineLimit: WatchTypography.labelLineLimit)
+        Text(text)
+            .font(WatchTypography.labelFont)
+            .lineLimit(WatchTypography.labelLineLimit)
             .minimumScaleFactor(WatchTypography.labelMinScale)
             .truncationMode(.tail)
-    }
-
-    init(widget: OpenHABWidget) {
-        self.widget = widget
     }
 }
 

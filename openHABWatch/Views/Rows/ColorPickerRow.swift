@@ -26,7 +26,7 @@ struct ColorPickerRow: View {
             VStack(spacing: 0) {
                 HStack {
                     WatchIconView(model: widget.iconRenderModel(), settings: settings)
-                    WatchLabelText(widget: widget)
+                    WatchLabelText(text: viewModel.labelText)
                     Spacer()
                 }
                 HStack {

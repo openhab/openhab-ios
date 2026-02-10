@@ -20,9 +20,9 @@ struct GenericRow: View {
     var body: some View {
         HStack {
             WatchIconView(model: widget.iconRenderModel(), settings: settings)
-            WatchLabelText(widget: widget)
+            WatchLabelText(text: widget.labelText ?? widget.label)
             Spacer()
-            DetailTextLabelView(widget: widget)
+            DetailTextLabelView(text: widget.labelValue, valueColor: widget.valuecolor)
             widget.makeView(settings: settings)
         }
         .accessibilityLabel(widget.labelText ?? "")

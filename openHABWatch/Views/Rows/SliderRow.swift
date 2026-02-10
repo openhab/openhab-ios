@@ -82,7 +82,7 @@ struct SliderRow: View {
                     HStack {
                         WatchIconView(model: widget.iconRenderModel(fallbackSymbol: fallbackSymbol), settings: settings)
                         VStack(alignment: .leading) {
-                            WatchLabelText(widget: widget)
+                            WatchLabelText(text: viewModel.labelText)
                             if pendingValue != nil {
                                 Text(currentValueText)
                                     .font(WatchTypography.secondaryFont)
@@ -91,7 +91,7 @@ struct SliderRow: View {
                                     .truncationMode(.tail)
                                     .foregroundStyle(.secondary)
                             } else {
-                                DetailTextLabelView(widget: widget)
+                                DetailTextLabelView(text: viewModel.labelValue, valueColor: widget.valuecolor)
                             }
                         }
                     }
@@ -101,7 +101,7 @@ struct SliderRow: View {
             } else {
                 HStack {
                     WatchIconView(model: widget.iconRenderModel(fallbackSymbol: fallbackSymbol), settings: settings)
-                    WatchLabelText(widget: widget)
+                    WatchLabelText(text: viewModel.labelText)
                     Spacer()
                     if pendingValue != nil {
                         Text(currentValueText)
@@ -111,7 +111,7 @@ struct SliderRow: View {
                             .truncationMode(.tail)
                             .foregroundStyle(.secondary)
                     } else {
-                        DetailTextLabelView(widget: widget)
+                        DetailTextLabelView(text: viewModel.labelValue, valueColor: widget.valuecolor)
                     }
                 }.padding(.top, 8)
             }
