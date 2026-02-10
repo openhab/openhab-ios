@@ -311,13 +311,16 @@ final class UserData: ObservableObject {
                         try Task.checkCancellation()
 
                         await MainActor.run {
-                            // Set command handler BEFORE assigning to @Published property to prevent race condition
                             if let page {
                                 page.sendCommand = { [weak self] item, command in
                                     Task { await self?.sendCommand(item, command: command) }
                                 }
                             }
-                            self.openHABSitemapPage = page
+                            // Only update page object when title changes to avoid
+                            // firing objectWillChange and resetting scroll position
+                            if self.openHABSitemapPage?.title != page?.title {
+                                self.openHABSitemapPage = page
+                            }
                             let newWidgets = page?.widgets ?? []
                             self.updateWidgets(with: newWidgets)
                             if !newWidgets.isEmpty {
@@ -416,6 +419,8 @@ final class UserData: ObservableObject {
                 existingWidget.forceAsItem = newWidget.forceAsItem
                 existingWidget.mappings = newWidget.mappings
                 existingWidget.widgets = newWidget.widgets
+                existingWidget.linkedPage = newWidget.linkedPage
+                existingWidget.visibility = newWidget.visibility
                 existingWidget.sendCommand = newWidget.sendCommand
             }
         }

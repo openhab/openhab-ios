@@ -56,6 +56,9 @@ class SitemapPageViewModel: ObservableObject {
     private var pageNetworkStatus: NetworkStatus?
     private var pageNetworkStatusAvailable = false
 
+    /// Cache of current widget objects by widgetId for in-place updates
+    private var currentWidgetMap: [String: OpenHABWidget] = [:]
+
     var relevantWidgets: [OpenHABWidget] {
         let widgets = currentPage?.widgets ?? []
         guard !searchText.isEmpty else { return widgets }
@@ -184,13 +187,11 @@ class SitemapPageViewModel: ObservableObject {
 
                 // 2. Start long polling loop
                 while !Task.isCancelled {
-                    isUpdating = true
                     let page = try await openAPIService?.pollDataForPage(
                         sitemapname: defaultSitemap,
                         pageId: pageId,
                         longPolling: true
                     )
-                    isUpdating = false
                     try Task.checkCancellation()
 
                     if let page {
@@ -254,8 +255,49 @@ class SitemapPageViewModel: ObservableObject {
 
     @MainActor
     private func updateUI(with page: OpenHABPage) {
-        injectSendCommand(for: page.widgets)
-        currentPage = page
+        let newWidgets = page.widgets
+
+        // Check if list structure changed (count, order, or IDs)
+        let currentWidgets = currentPage?.widgets ?? []
+        let structureChanged = currentWidgets.count != newWidgets.count
+            || !zip(currentWidgets, newWidgets).allSatisfy { $0.widgetId == $1.widgetId }
+
+        // Update existing widget properties in-place to preserve @ObservedObject
+        // references and avoid image/chart flickering from body re-evaluation
+        for newWidget in newWidgets {
+            if let existing = currentWidgetMap[newWidget.widgetId] {
+                existing.label = newWidget.label
+                existing.icon = newWidget.icon
+                existing.state = newWidget.state
+                existing.item = newWidget.item
+                existing.iconColor = newWidget.iconColor
+                existing.labelcolor = newWidget.labelcolor
+                existing.valuecolor = newWidget.valuecolor
+                existing.url = newWidget.url
+                existing.period = newWidget.period
+                existing.service = newWidget.service
+                existing.legend = newWidget.legend
+                existing.refresh = newWidget.refresh
+                existing.height = newWidget.height
+                existing.forceAsItem = newWidget.forceAsItem
+                existing.mappings = newWidget.mappings
+                existing.widgets = newWidget.widgets
+                existing.linkedPage = newWidget.linkedPage
+                existing.visibility = newWidget.visibility
+                existing.staticIcon = newWidget.staticIcon
+            }
+        }
+
+        // Only replace currentPage when structure or title changed
+        if structureChanged || currentPage?.title != page.title || currentPage == nil {
+            injectSendCommand(for: page.widgets)
+            currentPage = page
+            // Rebuild the widget map
+            currentWidgetMap = Dictionary(uniqueKeysWithValues: page.widgets.map { ($0.widgetId, $0) })
+        } else {
+            // Inject sendCommand into existing widgets without replacing the page
+            injectSendCommand(for: currentPage?.widgets ?? [])
+        }
     }
 
     func reload() async {
