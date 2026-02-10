@@ -15,9 +15,9 @@ import SFSafeSymbols
 import SwiftUI
 
 struct TextRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
-    @State private var viewModel: WidgetRowViewModel
+    let hasLinkedPage: Bool
 
     var body: some View {
         HStack {
@@ -25,29 +25,18 @@ struct TextRow: View {
             WatchLabelText(widget: widget)
             Spacer()
             DetailTextLabelView(widget: widget)
-            if viewModel.hasLinkedPage {
+            if hasLinkedPage {
                 Image(systemSymbol: .chevronRight)
                     .foregroundStyle(.secondary)
                     .font(.caption)
             }
         }
-        .onAppear {
-            viewModel.update(from: widget)
-        }
-        .onChange(of: widget.item?.state, initial: false) { _, _ in
-            viewModel.update(from: widget)
-        }
-    }
-
-    init(widget: OpenHABWidget) {
-        self.widget = widget
-        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 
 #Preview {
     let widget = PreviewWidgetFactory.text(label: "Energy Usage", valueText: "450 W")
     PreviewNavigationContainer {
-        TextRow(widget: widget)
+        TextRow(widget: widget, hasLinkedPage: false)
     }
 }

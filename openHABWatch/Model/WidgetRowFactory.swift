@@ -34,9 +34,9 @@ enum WidgetRowFactory {
         case .setpoint:
             SetpointRow(widget: widget)
         case .frame:
-            FrameRow(widget: widget)
+            FrameRow(title: widget.labelText ?? "")
         case .text:
-            TextRow(widget: widget)
+            TextRow(widget: widget, hasLinkedPage: widget.linkedPage != nil)
         case .image:
             if widget.item != nil {
                 ImageRawRow(widget: widget)

@@ -9,40 +9,26 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import OpenHABCore
 import SwiftUI
 
 struct FrameRow: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: AppSettings
-    @State private var viewModel: WidgetRowViewModel
+    let title: String
 
     var body: some View {
         HStack {
-            Text(viewModel.labelText.uppercased())
+            Text(title.uppercased())
                 .font(WatchTypography.sectionFont)
                 .lineLimit(WatchTypography.sectionLineLimit)
                 .minimumScaleFactor(WatchTypography.sectionMinScale)
                 .truncationMode(.tail)
             Spacer()
         }
-        .onAppear {
-            viewModel.update(from: widget)
-        }
-        .onChange(of: widget.item?.state, initial: false) { _, _ in
-            viewModel.update(from: widget)
-        }
-    }
-
-    init(widget: OpenHABWidget) {
-        self.widget = widget
-        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 
 #Preview {
     let widget = PreviewWidgetFactory.frame(label: "Environment")
     PreviewNavigationContainer {
-        FrameRow(widget: widget)
+        FrameRow(title: widget.labelText ?? "")
     }
 }

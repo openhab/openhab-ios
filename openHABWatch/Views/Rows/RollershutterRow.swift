@@ -15,9 +15,8 @@ import SFSafeSymbols
 import SwiftUI
 
 struct RollershutterRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
-    @State private var viewModel: WidgetRowViewModel
     @State private var commandSender = WidgetCommandSender()
 
     var body: some View {
@@ -45,18 +44,7 @@ struct RollershutterRow: View {
             }
             .frame(height: 50)
         }
-        .accessibilityLabel(viewModel.labelText)
-        .onAppear {
-            viewModel.update(from: widget)
-        }
-        .onChange(of: widget.item?.state, initial: false) { _, _ in
-            viewModel.update(from: widget)
-        }
-    }
-
-    init(widget: OpenHABWidget) {
-        self.widget = widget
-        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+        .accessibilityLabel(widget.labelText ?? "")
     }
 }
 
