@@ -14,7 +14,8 @@ import OpenHABCore
 import SwiftUI
 
 struct SegmentRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
+    let stateToken: String
     @EnvironmentObject var settings: AppSettings
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
@@ -35,10 +36,7 @@ struct SegmentRow: View {
                 multiSegmentContent
             }
         }
-        .onAppear {
-            viewModel.update(from: widget)
-        }
-        .onChange(of: widget.item?.state, initial: false) { _, _ in
+        .onChange(of: stateToken, initial: false) { _, _ in
             viewModel.update(from: widget)
         }
     }
@@ -128,7 +126,7 @@ struct SegmentRow: View {
             }
             NavigationLink(destination: LazyView(SegmentSelectionView(
                 widget: widget,
-                stateToken: widget.item?.state ?? widget.state,
+                stateToken: stateToken,
                 selectedIndex: selectedIndexBinding
             ))) {
                 HStack {
@@ -165,6 +163,13 @@ struct SegmentRow: View {
 
     init(widget: OpenHABWidget) {
         self.widget = widget
+        stateToken = widget.item?.state ?? widget.state
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+    }
+
+    init(widget: OpenHABWidget, stateToken: String) {
+        self.widget = widget
+        self.stateToken = stateToken
         _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 

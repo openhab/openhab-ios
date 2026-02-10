@@ -15,8 +15,9 @@ import SFSafeSymbols
 import SwiftUI
 
 struct ColorPickerRow: View {
-    @ObservedObject var widget: OpenHABWidget
-    @ObservedObject var settings = AppSettings.shared
+    let widget: OpenHABWidget
+    let stateToken: String
+    @EnvironmentObject var settings: AppSettings
     @State private var viewModel: WidgetRowViewModel
     @State private var commandSender = WidgetCommandSender()
     var body: some View {
@@ -63,16 +64,20 @@ struct ColorPickerRow: View {
                     Spacer()
                 }
             }
-            .onAppear {
-                viewModel.update(from: widget)
-            }
-            .onChange(of: widget.item?.state, initial: false) { _, _ in
+            .onChange(of: stateToken, initial: false) { _, _ in
                 viewModel.update(from: widget)
             }
     }
 
     init(widget: OpenHABWidget) {
         self.widget = widget
+        stateToken = widget.item?.state ?? widget.state
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+    }
+
+    init(widget: OpenHABWidget, stateToken: String) {
+        self.widget = widget
+        self.stateToken = stateToken
         _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 
@@ -92,6 +97,6 @@ struct ColorPickerRow: View {
         icon: "colorwheel"
     )
     PreviewNavigationContainer {
-        ColorPickerRow(widget: widget)
+        ColorPickerRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
     }
 }

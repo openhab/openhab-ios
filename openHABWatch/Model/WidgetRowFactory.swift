@@ -19,13 +19,13 @@ enum WidgetRowFactory {
         switch widget.type {
         case .switchWidget:
             if !widget.mappings.isEmpty {
-                SegmentRow(widget: widget)
+                SegmentRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
             } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
                 SwitchRow(widget: widget, stateToken: widget.state.isEmpty ? (widget.item?.state ?? "") : widget.state)
             } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
                 RollershutterRow(widget: widget)
             } else if !widget.mappingsOrItemOptions.isEmpty {
-                SegmentRow(widget: widget)
+                SegmentRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
             } else {
                 SwitchRow(widget: widget, stateToken: widget.state.isEmpty ? (widget.item?.state ?? "") : widget.state)
             }
@@ -58,7 +58,7 @@ enum WidgetRowFactory {
         case .mapview:
             MapViewRow(widget: widget)
         case .colorpicker:
-            ColorPickerRow(widget: widget)
+            ColorPickerRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
         case .selection:
             SelectionRow(
                 widget: widget,
