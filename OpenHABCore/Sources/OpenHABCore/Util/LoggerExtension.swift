@@ -30,6 +30,10 @@ public extension Logger {
 
     static let endpoint = Logger(subsystem: subsystem, category: "EndPoint")
 
+    static let etagCache = Logger(subsystem: subsystem, category: "ETagCache")
+
+    static let etagChecker = Logger(subsystem: subsystem, category: "ETagChecker")
+
     static let httpClient = Logger(subsystem: subsystem, category: "HTTPClient")
 
     static let httpClientDelegate = Logger(subsystem: subsystem, category: "HTTPClientDelegate")

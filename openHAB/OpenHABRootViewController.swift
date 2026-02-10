@@ -41,6 +41,7 @@ class OpenHABRootViewController: UIViewController {
     var currentView: OpenHABViewController!
     var isDemoMode = false
     var cancellables = Set<AnyCancellable>()
+    private let currentViewState = CurrentViewState()
     private var streamTask: Task<Void, Never>?
 
     private var apsRegistrationData: [AnyHashable: Any]?
@@ -315,6 +316,7 @@ class OpenHABRootViewController: UIViewController {
             self.handleDismiss(mode: mode)
         }
         .environmentObject(networkTracker)
+        .environmentObject(currentViewState)
         let hostingController = UIHostingController(rootView: drawerView)
         let menu = SideMenuNavigationController(rootViewController: hostingController)
 
@@ -790,6 +792,9 @@ class OpenHABRootViewController: UIViewController {
             }
             addView(viewController: targetView)
             currentView = targetView
+
+            // Update webview active state
+            currentViewState.isWebViewActive = (targetView == webViewController)
 
             // Don't save our view in demo mode
             if !Preferences.shared.currentHomePreferences.demomode {
