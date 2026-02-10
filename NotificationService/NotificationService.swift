@@ -43,7 +43,7 @@ enum NotificationServiceError: Error {
 }
 
 actor NotificationServiceHandler {
-    static let networkTimeout: TimeInterval = 5
+    static let networkTimeout: TimeInterval = 20 // don't go too long or we risk being terminated by the system
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
     var cancellables = Set<AnyCancellable>()
@@ -107,16 +107,20 @@ actor NotificationServiceHandler {
 
         // check if there is an attachment to put on the notification
         // this should be last as we need to wait for media
-        // TODO: we should support relative paths and try the user's openHAB (local,remote) for content
         if let attachmentURLString = userInfo["media-attachment-url"] as? String {
-            // HERE we switch to async usage
             Task {
                 do {
+                    guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else {
+                        Logger.notificationService.error("No active connection available")
+                        throw NotificationServiceError.noActiveConnection
+                    }
+
                     let unNotificationAttachment = if attachmentURLString.starts(with: "item:") {
                         try await downloadAndAttachItemImage(itemURI: attachmentURLString)
                     } else {
-                        try await downloadAndAttachMedia(url: attachmentURLString)
+                        try await downloadAndAttachMedia(url: attachmentURLString, config: activeConfig)
                     }
+
                     if let unNotificationAttachment {
                         bestAttemptContent.attachments = [unNotificationAttachment]
                     } else {
@@ -127,7 +131,6 @@ actor NotificationServiceHandler {
                 }
                 contentHandler(bestAttemptContent)
             }
-
         } else {
             contentHandler(bestAttemptContent)
         }
@@ -163,47 +166,28 @@ actor NotificationServiceHandler {
         return nil
     }
 
-    private func downloadForAttachment(attachmentURLString: String) -> (URL?, String?) {
-        var returnValues: (URL?, String?)
-        Task {
-            do {
-                returnValues = if attachmentURLString.starts(with: "item:") {
-                    try await downloadItemImage(itemURI: attachmentURLString)
-                } else {
-                    try await downloadMedia(url: attachmentURLString)
-                }
-
-            } catch {
-                Logger.notificationService.error("Error fetching data: \(error.localizedDescription)")
-            }
-        }
-        return returnValues
-    }
-
-    private func downloadAndAttachMedia(url: String) async throws -> UNNotificationAttachment? {
-        let (localURL, mimeType) = try await downloadMedia(url: url)
+    private func downloadAndAttachMedia(url: String, config: ConnectionConfiguration) async throws -> UNNotificationAttachment? {
+        let (localURL, mimeType) = try await downloadMedia(url: url, config: config)
         guard let localURL else { return nil }
         return await attachFile(localURL: localURL, mimeType: mimeType)
     }
 
-    private func downloadMedia(url: String) async throws -> (URL?, String?) {
-        guard let fullURL = await resolveFullURL(from: url) else { return (nil, nil) }
-
-        guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return (nil, nil) }
-
-        let client = HTTPClient(connectionConfiguration: activeConfig)
-
+    private func downloadMedia(url: String, config: ConnectionConfiguration) async throws -> (URL?, String?) {
+        // Resolve URL using the provided config
+        guard let fullURL = resolveFullURL(from: url, baseURL: config.url) else {
+            return (nil, nil)
+        }
+        let client = HTTPClient(connectionConfiguration: config)
         let (localURL, urlResponse) = try await client.downloadFile(url: fullURL)
         return (localURL, urlResponse.mimeType)
     }
 
-    // 🔹 Extracted helper function to determine full URL
-    private func resolveFullURL(from url: String) async -> URL? {
+    // Helper function to determine full URL
+    private func resolveFullURL(from url: String, baseURL: String) -> URL? {
         if url.starts(with: "/") {
-            guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return nil }
-            return URL(string: activeConfig.url)?.appendingPathComponent(url)
+            URL(string: baseURL)?.appendingPathComponent(url)
         } else {
-            return URL(string: url)
+            URL(string: url)
         }
     }
 

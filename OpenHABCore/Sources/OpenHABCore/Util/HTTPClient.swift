@@ -355,6 +355,7 @@ public final class HTTPClient: NSObject, Sendable {
                              headers: [String: String]? = nil,
                              timeout: TimeInterval = 60.0,
                              body: String? = nil,
+                             method: String = "GET",
                              type: SessionType,
                              cacheingPolicy: URLRequest.CachePolicy = .useProtocolCachePolicy) async throws -> (T, URLResponse) {
         guard var url = baseURL ?? self.baseURL else {
@@ -367,7 +368,7 @@ public final class HTTPClient: NSObject, Sendable {
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = "GET"
+        request.httpMethod = method
         request.timeoutInterval = timeout
 
         if let headers {
