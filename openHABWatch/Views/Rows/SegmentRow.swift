@@ -385,3 +385,24 @@ struct SegmentRow: View {
         }
     }
 }
+
+#Preview("Interactive State Token") {
+    let widget = PreviewWidgetFactory.segmented(
+        label: "Climate Mode",
+        mappings: [
+            OpenHABWidgetMapping(command: "manual", label: "Manual"),
+            OpenHABWidgetMapping(command: "auto", label: "Auto"),
+            OpenHABWidgetMapping(command: "schedule", label: "Schedule")
+        ],
+        selectedState: "auto",
+        icon: "temperature"
+    )
+    PreviewNavigationContainer {
+        InteractiveStateTokenPreview(
+            widget: widget,
+            states: ["manual", "auto", "schedule"]
+        ) { targetWidget, stateToken in
+            SegmentRow(widget: targetWidget, stateToken: stateToken)
+        }
+    }
+}

@@ -100,3 +100,19 @@ struct ColorPickerRow: View {
         ColorPickerRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
     }
 }
+
+#Preview("Interactive State Token") {
+    let widget = PreviewWidgetFactory.colorpicker(
+        label: "Color",
+        state: "120,100,100",
+        icon: "colorwheel"
+    )
+    PreviewNavigationContainer {
+        InteractiveStateTokenPreview(
+            widget: widget,
+            states: ["0,100,100", "120,100,100", "240,100,100", "NULL"]
+        ) { targetWidget, stateToken in
+            ColorPickerRow(widget: targetWidget, stateToken: stateToken)
+        }
+    }
+}

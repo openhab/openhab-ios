@@ -80,12 +80,6 @@ private struct WatchTextModifier: ViewModifier {
     }
 }
 
-extension View {
-    func watchTextStyle(_ style: WatchTextStyle) -> some View {
-        modifier(WatchTextModifier(style: style))
-    }
-}
-
 enum WatchTypography {
     static let labelFont: Font = .caption
     static let labelLineLimit = 2
@@ -108,4 +102,10 @@ enum WatchTypography {
     static let secondaryMinScale: CGFloat = 0.8
 
     static let emphasisFont: Font = .headline
+}
+
+extension View {
+    func watchTextStyle(_ style: WatchTextStyle) -> some View {
+        modifier(WatchTextModifier(style: style))
+    }
 }
