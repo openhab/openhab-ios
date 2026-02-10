@@ -16,6 +16,7 @@ import SwiftUI
 
 struct ButtonGridButton: View {
     @ObservedObject var widget: OpenHABWidget
+    let parentItem: OpenHABItem?
 
     @State private var isPressed = false
     @EnvironmentObject var viewModel: SitemapPageViewModel
@@ -84,7 +85,7 @@ struct ButtonGridButton: View {
     private func handleButtonPress() {
         if let command = widget.command, !command.isEmpty {
             logger.info("Sending command: \(command)")
-            viewModel.sendCommand(widget.item, commandToSend: widget.command)
+            sendCommand(command)
         }
     }
 
@@ -95,7 +96,7 @@ struct ButtonGridButton: View {
         if hasPressRelease, let command = widget.command {
             triggerFeedback.toggle()
             logger.info("Sending press command: \(command)")
-            widget.sendCommand(command)
+            sendCommand(command)
         }
     }
 
@@ -105,8 +106,17 @@ struct ButtonGridButton: View {
         // For press-release buttons, send release command on release
         if let releaseCommand = widget.releaseCommand, !releaseCommand.isEmpty {
             logger.info("Sending release command: \(releaseCommand)")
-            widget.sendCommand(releaseCommand)
+            sendCommand(releaseCommand)
         }
+    }
+
+    private func sendCommand(_ command: String) {
+        // Most button grid commands target the parent widget item.
+        if let commandItem = widget.item ?? parentItem {
+            viewModel.sendCommand(commandItem, commandToSend: command)
+            return
+        }
+        widget.sendCommand(command)
     }
 }
 
@@ -185,7 +195,7 @@ struct ButtonGridRowView: View {
 
                             if let button,
                                button.visibility {
-                                ButtonGridButton(widget: button)
+                                ButtonGridButton(widget: button, parentItem: widget.item)
                                     .id(viewModel.pageId + button.widgetId)
                             } else {
                                 // Empty cell to maintain grid structure
@@ -221,7 +231,7 @@ extension OpenHABWidgetMapping {
         widget.visibility = true
         widget.row = row
         widget.column = column
-        widget.releaseCommand = ""
+        widget.releaseCommand = releaseCommand
         widget.stateless = true
         widget.icon = icon ?? ""
         return widget
