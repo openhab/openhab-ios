@@ -16,19 +16,12 @@ import SwiftUI
 
 /// Selection list view for picking from available options
 struct SelectionListView: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
+    let mappings: [OpenHABWidgetMapping]
+    let title: String
     @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
-    @State private var viewModel: WidgetRowViewModel
     @State private var commandSender = WidgetCommandSender()
-
-    private var mappings: [OpenHABWidgetMapping] {
-        viewModel.mappings
-    }
-
-    private var currentIndex: Int? {
-        viewModel.selectedIndex
-    }
 
     var body: some View {
         ScrollView {
@@ -47,7 +40,7 @@ struct SelectionListView: View {
                                 .minimumScaleFactor(WatchTypography.labelMinScale)
                                 .truncationMode(.tail)
                             Spacer()
-                            if currentIndex == index {
+                            if selectedIndex == index {
                                 Image(systemSymbol: .checkmark)
                                     .foregroundStyle(Color.accentColor)
                                     .font(.caption.weight(.bold))
@@ -56,7 +49,7 @@ struct SelectionListView: View {
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(currentIndex == index ? Color.accentColor.opacity(0.2) : Color.clear)
+                                .fill(selectedIndex == index ? Color.accentColor.opacity(0.2) : Color.clear)
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
@@ -68,32 +61,17 @@ struct SelectionListView: View {
             }
             .padding()
         }
-        .navigationTitle(widget.labelText ?? "Select")
+        .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            viewModel.update(from: widget)
-            selectedIndex = viewModel.selectedIndex
-        }
-        .onChange(of: widget.item?.state, initial: false) { _, _ in
-            viewModel.update(from: widget)
-            selectedIndex = viewModel.selectedIndex
-        }
-    }
-
-    init(widget: OpenHABWidget, selectedIndex: Binding<Int?>) {
-        self.widget = widget
-        _selectedIndex = selectedIndex
-        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 
     private func selectOption(at index: Int) {
-        viewModel.selectedIndex = index
-        selectedIndex = viewModel.selectedIndex
+        selectedIndex = index
         if let selectedCommand = mappings[safe: index]?.command {
             commandSender.send(
                 selectedCommand,
                 for: widget,
-                policy: WidgetCommandDefaults.immediate,
+                policy: .immediate,
                 key: "selection-list"
             )
             dismiss()
@@ -102,24 +80,28 @@ struct SelectionListView: View {
 }
 
 struct SelectionRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
+    let mappings: [OpenHABWidgetMapping]
+    let title: String
+    let initialSelectedIndex: Int?
+    let labelValue: String?
     @EnvironmentObject var settings: AppSettings
-    @State private var viewModel: WidgetRowViewModel
+    @State private var selectedIndex: Int?
 
     /// Returns the label of the currently selected mapping
     private var selectedValueText: String? {
-        if let index = viewModel.selectedIndex,
+        if let index = selectedIndex,
            index >= 0,
-           index < viewModel.mappings.count {
-            return viewModel.mappings[index].label
+           index < mappings.count {
+            return mappings[index].label
         }
-        return viewModel.labelValue
+        return labelValue
     }
 
     private var selectedIndexBinding: Binding<Int?> {
         Binding(
-            get: { viewModel.selectedIndex },
-            set: { viewModel.selectedIndex = $0 }
+            get: { selectedIndex },
+            set: { selectedIndex = $0 }
         )
     }
 
@@ -130,7 +112,12 @@ struct SelectionRow: View {
                 WatchLabelText(widget: widget)
                 Spacer()
             }
-            NavigationLink(destination: LazyView(SelectionListView(widget: widget, selectedIndex: selectedIndexBinding))) {
+            NavigationLink(destination: LazyView(SelectionListView(
+                widget: widget,
+                mappings: mappings,
+                title: title,
+                selectedIndex: selectedIndexBinding
+            ))) {
                 HStack(spacing: 4) {
                     if let valueText = selectedValueText {
                         Text(valueText)
@@ -148,16 +135,11 @@ struct SelectionRow: View {
             .buttonStyle(.plain)
         }
         .onAppear {
-            viewModel.update(from: widget)
+            selectedIndex = initialSelectedIndex
         }
-        .onChange(of: widget.item?.state, initial: false) { _, _ in
-            viewModel.update(from: widget)
+        .onChange(of: initialSelectedIndex) { _, newValue in
+            selectedIndex = newValue
         }
-    }
-
-    init(widget: OpenHABWidget) {
-        self.widget = widget
-        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 
@@ -168,7 +150,13 @@ struct SelectionRow: View {
         selectedIndex: 1
     )
     PreviewNavigationContainer {
-        SelectionRow(widget: widget)
+        SelectionRow(
+            widget: widget,
+            mappings: widget.mappingsOrItemOptions,
+            title: widget.labelText ?? "Select",
+            initialSelectedIndex: widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) },
+            labelValue: widget.labelValue
+        )
     }
 }
 
@@ -180,6 +168,11 @@ struct SelectionRow: View {
         selectedIndex: 0
     )
     PreviewNavigationContainer {
-        SelectionListView(widget: widget, selectedIndex: $selectedIndex)
+        SelectionListView(
+            widget: widget,
+            mappings: widget.mappingsOrItemOptions,
+            title: widget.labelText ?? "Select",
+            selectedIndex: $selectedIndex
+        )
     }
 }

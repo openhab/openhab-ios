@@ -14,14 +14,14 @@ import OpenHABCore
 import SwiftUI
 
 struct SwitchRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    let effectiveState: String
     @State private var localIsOn: Bool?
-    @State private var viewModel: WidgetRowViewModel
     @State private var commandSender = WidgetCommandSender()
 
     private var isOn: Bool {
-        localIsOn ?? viewModel.isOn
+        localIsOn ?? effectiveState.parseAsBool()
     }
 
     var body: some View {
@@ -46,27 +46,16 @@ struct SwitchRow: View {
         }
         .padding(.trailing)
         .cornerRadius(5)
-        .onAppear {
-            viewModel.update(from: widget)
-        }
-        .onChange(of: widget.item?.state, initial: false) { _, _ in
-            viewModel.update(from: widget)
-        }
-        .onChange(of: viewModel.effectiveState) {
+        .onChange(of: effectiveState) {
             localIsOn = nil
         }
-    }
-
-    init(widget: OpenHABWidget) {
-        self.widget = widget
-        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 
 #Preview {
     let widget = PreviewWidgetFactory.switchWidget(label: "Outdoor Light", state: "ON")
     PreviewNavigationContainer {
-        SwitchRow(widget: widget)
+        SwitchRow(widget: widget, effectiveState: widget.item?.state ?? "OFF")
     }
 }
 
@@ -78,7 +67,7 @@ struct SwitchRow: View {
         return obj
     }()
     NavigationStack {
-        SwitchRow(widget: widget)
+        SwitchRow(widget: widget, effectiveState: widget.item?.state ?? "OFF")
     }
     .environmentObject(mockSettings)
 }

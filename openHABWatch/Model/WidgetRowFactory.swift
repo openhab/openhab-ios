@@ -21,13 +21,13 @@ enum WidgetRowFactory {
             if !widget.mappings.isEmpty {
                 SegmentRow(widget: widget)
             } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                SwitchRow(widget: widget)
+                SwitchRow(widget: widget, effectiveState: widget.state.isEmpty ? (widget.item?.state ?? "") : widget.state)
             } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
                 RollershutterRow(widget: widget)
             } else if !widget.mappingsOrItemOptions.isEmpty {
                 SegmentRow(widget: widget)
             } else {
-                SwitchRow(widget: widget)
+                SwitchRow(widget: widget, effectiveState: widget.state.isEmpty ? (widget.item?.state ?? "") : widget.state)
             }
         case .slider:
             SliderRow(widget: widget)
@@ -60,7 +60,13 @@ enum WidgetRowFactory {
         case .colorpicker:
             ColorPickerRow(widget: widget)
         case .selection:
-            SelectionRow(widget: widget)
+            SelectionRow(
+                widget: widget,
+                mappings: widget.mappingsOrItemOptions,
+                title: widget.labelText ?? "Select",
+                initialSelectedIndex: widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) },
+                labelValue: widget.labelValue
+            )
         case .video, .webview, .input, .colortemperaturepicker, .buttongrid:
             // Not yet implemented for watchOS
             GenericRow(widget: widget)
