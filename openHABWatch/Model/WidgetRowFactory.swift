@@ -30,9 +30,26 @@ enum WidgetRowFactory {
                 SwitchRow(widget: widget, effectiveState: widget.state.isEmpty ? (widget.item?.state ?? "") : widget.state)
             }
         case .slider:
-            SliderRow(widget: widget)
+            SliderRow(
+                widget: widget,
+                adjustedValue: widget.adjustedValue,
+                minValue: widget.minValue,
+                maxValue: widget.maxValue,
+                step: widget.step,
+                switchSupport: widget.switchSupport
+            )
         case .setpoint:
-            SetpointRow(widget: widget)
+            SetpointRow(
+                widget: widget,
+                title: widget.labelText ?? widget.label,
+                minValue: widget.minValue,
+                maxValue: widget.maxValue,
+                step: widget.step,
+                stateValue: widget.stateValueAsNumberState?.value,
+                labelValue: widget.labelValue,
+                unit: widget.unit,
+                stateToken: widget.item?.state ?? widget.state
+            )
         case .frame:
             FrameRow(title: widget.labelText ?? "")
         case .text:

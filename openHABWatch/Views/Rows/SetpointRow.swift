@@ -16,22 +16,42 @@ import SFSafeSymbols
 import SwiftUI
 
 struct SetpointRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
+    let title: String
+    let minValue: Double
+    let maxValue: Double
+    let step: Double
+    let stateValue: Double?
+    let labelValue: String?
+    let unit: String?
+    let stateToken: String
     @EnvironmentObject var settings: AppSettings
     private let setpointService = SetPointService()
     private let logger = Logger(subsystem: "org.openhab.watch", category: "SetpointRow")
-    @State private var viewModel: WidgetRowViewModel
+    @State private var localValue: Double?
     @State private var commandSender = WidgetCommandSender()
 
     private var currentValue: Double {
-        viewModel.numberState?.value ?? viewModel.minValue
+        localValue ?? stateValue ?? minValue
+    }
+
+    private var valueText: String {
+        let value = currentValue.valueText(step: step)
+        if let unit, !unit.isEmpty {
+            return "\(value) \(unit)"
+        }
+        return value
     }
 
     var body: some View {
         VStack(spacing: 5) {
             HStack {
                 WatchIconView(model: widget.iconRenderModel(), settings: settings)
-                WatchLabelText(widget: widget)
+                Text(title)
+                    .font(WatchTypography.labelFont)
+                    .lineLimit(WatchTypography.labelLineLimit)
+                    .minimumScaleFactor(WatchTypography.labelMinScale)
+                    .truncationMode(.tail)
                 Spacer()
             }
             HStack {
@@ -40,14 +60,14 @@ struct SetpointRow: View {
                 Button(action: decreaseValue) {
                     Image(systemSymbol: .chevronDownCircleFill)
                         .font(.system(size: 25))
-                        .foregroundStyle(currentValue <= viewModel.minValue ? Color.gray : Color.blue)
+                        .foregroundStyle(currentValue <= minValue ? Color.gray : Color.blue)
                 }
                 .buttonStyle(.plain)
-                .disabled(currentValue <= viewModel.minValue)
+                .disabled(currentValue <= minValue)
 
                 Spacer()
 
-                DetailTextLabelView(widget: widget)
+                Text(localValue == nil ? (labelValue ?? valueText) : valueText)
                     .font(WatchTypography.emphasisFont)
 
                 Spacer()
@@ -55,36 +75,45 @@ struct SetpointRow: View {
                 Button(action: increaseValue) {
                     Image(systemSymbol: .chevronUpCircleFill)
                         .font(.system(size: 25))
-                        .foregroundStyle(currentValue >= viewModel.maxValue ? Color.gray : Color.blue)
+                        .foregroundStyle(currentValue >= maxValue ? Color.gray : Color.blue)
                 }
                 .buttonStyle(.plain)
-                .disabled(currentValue >= viewModel.maxValue)
+                .disabled(currentValue >= maxValue)
 
                 Spacer()
             }
         }
-        .onAppear {
-            viewModel.update(from: widget)
-        }
-        .onChange(of: widget.item?.state, initial: false) { _, _ in
-            viewModel.update(from: widget)
+        .onChange(of: stateToken, initial: false) { _, _ in
+            localValue = nil
         }
     }
 
-    init(widget: OpenHABWidget) {
+    init(widget: OpenHABWidget,
+         title: String,
+         minValue: Double,
+         maxValue: Double,
+         step: Double,
+         stateValue: Double?,
+         labelValue: String?,
+         unit: String?,
+         stateToken: String) {
         self.widget = widget
-        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+        self.title = title
+        self.minValue = minValue
+        self.maxValue = maxValue
+        self.step = step
+        self.stateValue = stateValue
+        self.labelValue = labelValue
+        self.unit = unit
+        self.stateToken = stateToken
     }
 
     private func handleUpDown(isDecreasing: Bool) {
-        var numberState = viewModel.numberState
-        let currentValue = numberState?.value ?? viewModel.minValue
-
         let limitedNewValue = setpointService.calculateNewValue(
             currentValue: currentValue,
-            step: viewModel.step,
-            minValue: viewModel.minValue,
-            maxValue: viewModel.maxValue,
+            step: step,
+            minValue: minValue,
+            maxValue: maxValue,
             isDecreasing: isDecreasing
         )
 
@@ -93,10 +122,10 @@ struct SetpointRow: View {
             return
         }
 
-        numberState = numberState ?? NumberState(value: limitedNewValue, unit: widget.unit)
-        numberState?.value = limitedNewValue
+        localValue = limitedNewValue
+        let numberState = NumberState(value: limitedNewValue, unit: unit)
 
-        logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState?.description ?? String(limitedNewValue))")
+        logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState.description)")
         commandSender.sendItemUpdate(numberState, for: widget)
     }
 
@@ -119,6 +148,16 @@ struct SetpointRow: View {
         unit: "°C"
     )
     PreviewNavigationContainer {
-        SetpointRow(widget: widget)
+        SetpointRow(
+            widget: widget,
+            title: widget.labelText ?? widget.label,
+            minValue: widget.minValue,
+            maxValue: widget.maxValue,
+            step: widget.step,
+            stateValue: widget.stateValueAsNumberState?.value,
+            labelValue: widget.labelValue,
+            unit: widget.unit,
+            stateToken: widget.item?.state ?? widget.state
+        )
     }
 }

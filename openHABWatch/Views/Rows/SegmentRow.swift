@@ -126,7 +126,13 @@ struct SegmentRow: View {
                 WatchLabelText(widget: widget)
                 Spacer()
             }
-            NavigationLink(destination: LazyView(SegmentSelectionView(widget: widget, selectedIndex: selectedIndexBinding))) {
+            NavigationLink(destination: LazyView(SegmentSelectionView(
+                widget: widget,
+                mappings: viewModel.mappings,
+                title: viewModel.labelText,
+                hasPressReleaseMappings: viewModel.hasPressReleaseMappings,
+                selectedIndex: selectedIndexBinding
+            ))) {
                 HStack {
                     if let currentIndex, currentIndex >= 0, currentIndex < viewModel.mappings.count {
                         Text(viewModel.mappings[currentIndex].label)

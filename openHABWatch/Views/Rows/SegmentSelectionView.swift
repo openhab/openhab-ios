@@ -13,24 +13,22 @@ import OpenHABCore
 import SwiftUI
 
 struct SegmentSelectionView: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
+    let mappings: [OpenHABWidgetMapping]
+    let title: String
+    let hasPressReleaseMappings: Bool
     @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
     @State private var pressedIndex: Int?
-    @State private var viewModel: WidgetRowViewModel
     @State private var commandSender = WidgetCommandSender()
-
-    private var currentIndex: Int? {
-        viewModel.selectedIndex
-    }
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
-                ForEach(0 ..< viewModel.mappings.count, id: \.self) { index in
-                    let mapping = viewModel.mappings[index]
+                ForEach(0 ..< mappings.count, id: \.self) { index in
+                    let mapping = mappings[index]
 
-                    if viewModel.hasPressReleaseMappings {
+                    if hasPressReleaseMappings {
                         // Press-release button for mappings with releaseCommand
                         pressReleaseButton(for: mapping, at: index)
                     } else {
@@ -41,22 +39,20 @@ struct SegmentSelectionView: View {
             }
             .padding()
         }
-        .navigationTitle("Select Option")
+        .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            viewModel.update(from: widget)
-            selectedIndex = viewModel.selectedIndex
-        }
-        .onChange(of: widget.item?.state, initial: false) { _, _ in
-            viewModel.update(from: widget)
-            selectedIndex = viewModel.selectedIndex
-        }
     }
 
-    init(widget: OpenHABWidget, selectedIndex: Binding<Int?>) {
+    init(widget: OpenHABWidget,
+         mappings: [OpenHABWidgetMapping],
+         title: String,
+         hasPressReleaseMappings: Bool,
+         selectedIndex: Binding<Int?>) {
         self.widget = widget
+        self.mappings = mappings
+        self.title = title
+        self.hasPressReleaseMappings = hasPressReleaseMappings
         _selectedIndex = selectedIndex
-        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 
     @ViewBuilder
@@ -98,7 +94,7 @@ struct SegmentSelectionView: View {
                 .minimumScaleFactor(WatchTypography.labelMinScale)
                 .truncationMode(.tail)
             Spacer()
-            if isSelected(index: index), !viewModel.hasPressReleaseMappings {
+            if isSelected(index: index), !hasPressReleaseMappings {
                 Image(systemSymbol: .checkmark)
                     .foregroundStyle(Color.accentColor)
                     .font(.caption.weight(.bold))
@@ -126,13 +122,12 @@ struct SegmentSelectionView: View {
     }
 
     private func isSelected(index: Int) -> Bool {
-        currentIndex == index
+        selectedIndex == index
     }
 
     private func selectOption(at index: Int) {
-        viewModel.selectedIndex = index
-        selectedIndex = viewModel.selectedIndex
-        if let selectedCommand = viewModel.mappings[safe: index]?.command {
+        selectedIndex = index
+        if let selectedCommand = mappings[safe: index]?.command {
             commandSender.send(
                 selectedCommand,
                 for: widget,
@@ -157,6 +152,12 @@ struct SegmentSelectionView: View {
         icon: "temperature"
     )
     return PreviewNavigationContainer {
-        SegmentSelectionView(widget: widget, selectedIndex: $selectedIndex)
+        SegmentSelectionView(
+            widget: widget,
+            mappings: widget.mappingsOrItemOptions,
+            title: "Select Option",
+            hasPressReleaseMappings: widget.hasPressReleaseMappings,
+            selectedIndex: $selectedIndex
+        )
     }
 }
