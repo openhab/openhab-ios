@@ -42,7 +42,7 @@ extension AuthorisationMiddleware: ClientMiddleware {
                           next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)) async throws -> (HTTPResponse, HTTPBody?) {
         // Use a mutable copy of request
         var newRequest = request
-        if configuration.supportsNotifications || alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
+        if configuration.isCloudConnection || alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
             newRequest.headerFields[.authorization] = basicAuthHeader(username: username, password: password)
         }
         let (response, body) = try await next(newRequest, body, baseURL)

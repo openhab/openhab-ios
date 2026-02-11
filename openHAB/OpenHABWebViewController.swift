@@ -194,7 +194,7 @@ class OpenHABWebViewController: OpenHABViewController {
             }
 
             // TODO: remove this check once iOS 16 is dropped
-            let isCloudConnection = activeConfig.supportsNotifications
+            let isCloudConnection = activeConfig.isCloudConnection
             // create new (or resuse existing)
             let newWebview = webView(for: Preferences.shared.currentHomePreferences.id, isCloudConnection: isCloudConnection)
             if newWebview != webView {

@@ -383,7 +383,7 @@ public actor NetworkTracker {
     }
 
     private func fetchProxyURL(for config: ConnectionConfiguration) async -> URL? {
-        guard config.supportsNotifications,
+        guard config.isCloudConnection,
               let baseURL = URL(string: config.url) else { return nil }
         let proxyEndpoint = baseURL.appendingPathComponent("api/v1/proxyurl")
         var request = URLRequest(url: proxyEndpoint)

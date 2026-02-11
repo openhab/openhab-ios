@@ -409,7 +409,7 @@ public final class HTTPClient: NSObject, Sendable {
         let password = connectionConfiguration.password
         let alwaysSendBasicAuth = connectionConfiguration.alwaysSendBasicAuth
 
-        if connectionConfiguration.supportsNotifications || alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
+        if connectionConfiguration.isCloudConnection || alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
             request.setValue(basicAuthHeader(username: username, password: password), forHTTPHeaderField: "Authorization")
         }
 
