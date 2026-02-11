@@ -96,6 +96,10 @@
 		DA4BF35B2F0309A60082479C /* SetNumberValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35A2F0309A60082479C /* SetNumberValueIntent.swift */; };
 		DA4BF35D2F0309B10082479C /* SetStringValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35C2F0309B10082479C /* SetStringValueIntent.swift */; };
 		DA4BF4032F06F5950082479C /* SwitchAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4022F06F5950082479C /* SwitchAction.swift */; };
+		DA4BF4072F0800010082479C /* PlayerAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4062F0800010082479C /* PlayerAction.swift */; };
+		DA4BF4092F0800020082479C /* SetPlayerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4082F0800020082479C /* SetPlayerValueIntent.swift */; };
+		DA4BF40B2F0800030082479C /* SetDateTimeValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF40A2F0800030082479C /* SetDateTimeValueIntent.swift */; };
+		DA4BF40D2F0800040082479C /* SetLocationValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF40C2F0800040082479C /* SetLocationValueIntent.swift */; };
 		DA4BF4052F06F5CA0082479C /* ContactState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4042F06F5CA0082479C /* ContactState.swift */; };
 		DA4BF4342F0705580082479C /* ItemEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4332F0705580082479C /* ItemEntity.swift */; };
 		DA4BF4362F07056F0082479C /* ItemEntityQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4352F07056F0082479C /* ItemEntityQuery.swift */; };
@@ -136,7 +140,6 @@
 		DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */; };
 		DABED17B2E451694000B92EF /* BonjourDiscoverySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */; };
 		DABED17D2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */; };
-		DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */; };
 		DAC131122DA32F5D00075AE2 /* Intents.intentdefinition in Resources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
 		DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */; };
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
@@ -422,6 +425,10 @@
 		DA4BF35A2F0309A60082479C /* SetNumberValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetNumberValueIntent.swift; sourceTree = "<group>"; };
 		DA4BF35C2F0309B10082479C /* SetStringValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetStringValueIntent.swift; sourceTree = "<group>"; };
 		DA4BF4022F06F5950082479C /* SwitchAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchAction.swift; sourceTree = "<group>"; };
+		DA4BF4062F0800010082479C /* PlayerAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAction.swift; sourceTree = "<group>"; };
+		DA4BF4082F0800020082479C /* SetPlayerValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetPlayerValueIntent.swift; sourceTree = "<group>"; };
+		DA4BF40A2F0800030082479C /* SetDateTimeValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDateTimeValueIntent.swift; sourceTree = "<group>"; };
+		DA4BF40C2F0800040082479C /* SetLocationValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetLocationValueIntent.swift; sourceTree = "<group>"; };
 		DA4BF4042F06F5CA0082479C /* ContactState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactState.swift; sourceTree = "<group>"; };
 		DA4BF4332F0705580082479C /* ItemEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemEntity.swift; sourceTree = "<group>"; };
 		DA4BF4352F07056F0082479C /* ItemEntityQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemEntityQuery.swift; sourceTree = "<group>"; };
@@ -458,7 +465,6 @@
 		DAAAB2822EA3874400F1B05D /* SegmentSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentSelectionView.swift; sourceTree = "<group>"; };
 		DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoverySheet.swift; sourceTree = "<group>"; };
 		DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoveryViewModel.swift; sourceTree = "<group>"; };
-		DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandlerTests.swift; sourceTree = "<group>"; };
 		DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinnerViewController.swift; sourceTree = "<group>"; };
 		DAC6608B236F6F4200F4501E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesSwiftUIView.swift; sourceTree = "<group>"; };
@@ -538,8 +544,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DA2AEB752D92D32000897D80 /* Cells */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Cells; sourceTree = "<group>"; };
 		DA4BF3532F0307D30082479C /* iOS16 */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (DA4BF4322F0705070082479C /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = iOS16; sourceTree = "<group>"; };
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		DA2AEB752D92D32000897D80 /* Cells */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Cells; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -825,6 +829,7 @@
 				DA4BF4352F07056F0082479C /* ItemEntityQuery.swift */,
 				DA4BF4332F0705580082479C /* ItemEntity.swift */,
 				DA4BF4022F06F5950082479C /* SwitchAction.swift */,
+				DA4BF4062F0800010082479C /* PlayerAction.swift */,
 				DA448E772EF435B400F0893C /* Home.swift */,
 			);
 			path = AppIntents;
@@ -861,6 +866,9 @@
 				DAD5E85B2F02C272003215C0 /* SetSwitchItemIntent.swift */,
 				DA4BF35C2F0309B10082479C /* SetStringValueIntent.swift */,
 				DA4BF35A2F0309A60082479C /* SetNumberValueIntent.swift */,
+				DA4BF4082F0800020082479C /* SetPlayerValueIntent.swift */,
+				DA4BF40A2F0800030082479C /* SetDateTimeValueIntent.swift */,
+				DA4BF40C2F0800040082479C /* SetLocationValueIntent.swift */,
 			);
 			path = Intents;
 			sourceTree = "<group>";
@@ -1671,6 +1679,10 @@
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
 				DA4BF4032F06F5950082479C /* SwitchAction.swift in Sources */,
+				DA4BF4072F0800010082479C /* PlayerAction.swift in Sources */,
+				DA4BF4092F0800020082479C /* SetPlayerValueIntent.swift in Sources */,
+				DA4BF40B2F0800030082479C /* SetDateTimeValueIntent.swift in Sources */,
+				DA4BF40D2F0800040082479C /* SetLocationValueIntent.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
 				DA48001C2D837556009CF127 /* SitemapSettingsView.swift in Sources */,
@@ -1766,77 +1778,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		4D6470DC2561F935007B03FC /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = openHABIntents/openHABIntents.entitlements;
-				CURRENT_PROJECT_VERSION = 104;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				INFOPLIST_FILE = openHABIntents/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 3.1.47;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		4D6470DD2561F935007B03FC /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = openHABIntents/openHABIntents.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 104;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				INFOPLIST_FILE = openHABIntents/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 3.1.47;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore org.openhab.app.openHABIntents";
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 		657144562C1E438700C8A1F3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {

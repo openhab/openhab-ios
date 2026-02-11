@@ -180,6 +180,90 @@ struct GenericItemEntity: ItemEntity {
     }
 }
 
+// MARK: - PlayerItemEntity
+
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+struct PlayerItemEntity: ItemEntity {
+    struct PlayerItemQuery: ItemEntityQuery {
+        typealias EntityType = PlayerItemEntity
+
+        @IntentParameterDependency<SetPlayerValueIntent>(\.$home)
+        var intent
+
+        var allowedTypes: [OpenHABItem.ItemType] = [.player]
+        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+    }
+
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Player Item")
+    static let defaultQuery = PlayerItemQuery()
+
+    var id: ItemIdentifier
+    var item: OpenHABItem
+    var homeName: String?
+
+    init(id: ItemIdentifier, item: OpenHABItem, homeName: String? = nil) {
+        self.id = id
+        self.item = item
+        self.homeName = homeName
+    }
+}
+
+// MARK: - DateTimeItemEntity
+
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+struct DateTimeItemEntity: ItemEntity {
+    struct DateTimeItemQuery: ItemEntityQuery {
+        typealias EntityType = DateTimeItemEntity
+
+        @IntentParameterDependency<SetDateTimeValueIntent>(\.$home)
+        var intent
+
+        var allowedTypes: [OpenHABItem.ItemType] = [.dateTime]
+        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+    }
+
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "DateTime Item")
+    static let defaultQuery = DateTimeItemQuery()
+
+    var id: ItemIdentifier
+    var item: OpenHABItem
+    var homeName: String?
+
+    init(id: ItemIdentifier, item: OpenHABItem, homeName: String? = nil) {
+        self.id = id
+        self.item = item
+        self.homeName = homeName
+    }
+}
+
+// MARK: - LocationItemEntity
+
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+struct LocationItemEntity: ItemEntity {
+    struct LocationItemQuery: ItemEntityQuery {
+        typealias EntityType = LocationItemEntity
+
+        @IntentParameterDependency<SetLocationValueIntent>(\.$home)
+        var intent
+
+        var allowedTypes: [OpenHABItem.ItemType] = [.location]
+        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+    }
+
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Location Item")
+    static let defaultQuery = LocationItemQuery()
+
+    var id: ItemIdentifier
+    var item: OpenHABItem
+    var homeName: String?
+
+    init(id: ItemIdentifier, item: OpenHABItem, homeName: String? = nil) {
+        self.id = id
+        self.item = item
+        self.homeName = homeName
+    }
+}
+
 // MARK: - SwitchItemEntity
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
