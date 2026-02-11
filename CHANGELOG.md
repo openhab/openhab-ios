@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [Version 3.1.48, Build 105] - 2026-02-11Z
+
+- Fixes notification image downloading (#1067)
+- Webview caching enhancements (#1066)
+- Aligning .swiftlint.yml
+- Cleaning up
+- Remove dead code
+- Backport from openapigen-swiftui to develop to narrow gap further
+
 ## [Version 3.1.47, Build 104] - 2026-02-01Z
 
 - Replaced per-cell cache with a static shared cache keyed by widget ID. (#1042)
