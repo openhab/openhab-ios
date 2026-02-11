@@ -238,6 +238,9 @@ extension OpenHABWidgetMapping {
     }
 }
 
+/// A SwiftUI View extension to handle press and release gesture events.
+/// Used specifically for button grid buttons that need to send commands on press and release
+/// (supporting the releaseCommand feature from openHAB).
 extension View {
     func onPressGesture(onPress: @escaping () -> Void,
                         onRelease: @escaping () -> Void) -> some View {
