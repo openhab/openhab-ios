@@ -28,11 +28,13 @@ public enum NetworkStatus: String, Sendable {
 public struct ConnectionInfo: Equatable, Sendable {
     public let configuration: ConnectionConfiguration
     public let version: Int
+    public let proxyURL: URL?
 
     // Explicit public memberwise initializer
-    public init(configuration: ConnectionConfiguration, version: Int) {
+    public init(configuration: ConnectionConfiguration, version: Int, proxyURL: URL? = nil) {
         self.configuration = configuration
         self.version = version
+        self.proxyURL = proxyURL
     }
 }
 
@@ -380,6 +382,28 @@ public actor NetworkTracker {
         }
     }
 
+    private func fetchProxyURL(for config: ConnectionConfiguration) async -> URL? {
+        guard config.supportsNotifications,
+              let baseURL = URL(string: config.url) else { return nil }
+        let proxyEndpoint = baseURL.appendingPathComponent("api/v1/proxyurl")
+        var request = URLRequest(url: proxyEndpoint)
+        request.timeoutInterval = 5
+        if !config.username.isEmpty, !config.password.isEmpty {
+            request.setValue(
+                basicAuthHeader(username: config.username, password: config.password),
+                forHTTPHeaderField: "Authorization"
+            )
+        }
+        do {
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let json = try JSONDecoder().decode([String: String].self, from: data)
+            if let urlString = json["url"] { return URL(string: urlString) }
+        } catch {
+            Logger.networkTracker.info("NetworkTracker: Failed to fetch proxyURL: \(error.localizedDescription)")
+        }
+        return nil
+    }
+
     /// tests connectivity for a given connection, but at most until timeout
     private func testConnection(configuration: ConnectionConfiguration) async -> ConnectionInfo? {
         guard URL(string: configuration.url) != nil else { return nil }
@@ -396,7 +420,8 @@ public actor NetworkTracker {
             Logger.networkTracker.info("NetworkTracker: testConnection for url: \(configuration.url) user: \(configuration.username, privacy: .private)")
             let connection = try await connectionPool.getOrCreateService(for: configuration)
             let version = try await connection.getRootVersion()
-            let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
+            let proxyURL = await fetchProxyURL(for: configuration)
+            let connectionInfo = ConnectionInfo(configuration: configuration, version: version, proxyURL: proxyURL)
 
             await failureTracker.reset(configuration) // Reset on success
             Logger.networkTracker.info("NetworkTracker: testConnection successful for \(configuration.url)")

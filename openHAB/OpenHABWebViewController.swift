@@ -21,7 +21,8 @@ import WebKit
 class OpenHABWebViewController: OpenHABViewController {
     private var currentTarget = ""
     private var openHABTrackedRootUrl = ""
-    private var activeConfig: ConnectionConfiguration?
+    private var activeConnectionInfo: ConnectionInfo?
+    private var activeConfig: ConnectionConfiguration? { activeConnectionInfo?.configuration }
     private var hideNavigationBar = false
     private var activityIndicator: UIActivityIndicatorView!
     private var sseTimer: Timer?
@@ -106,7 +107,7 @@ class OpenHABWebViewController: OpenHABViewController {
                     let activeConfiguration = activeConnection.configuration
                     Logger.viewController.info("OpenHABWebViewController openHAB URL = \(activeConfiguration.url)")
                     self.openHABTrackedRootUrl = activeConfiguration.url
-                    self.activeConfig = activeConfiguration
+                    self.activeConnectionInfo = activeConnection
                     self.loadWebView(force: false)
                 }
             }
@@ -193,9 +194,9 @@ class OpenHABWebViewController: OpenHABViewController {
             }
 
             // TODO: remove this check once iOS 16 is dropped
-            let isMyOh = url?.host?.contains("myopenhab.org") ?? false
+            let isCloudConnection = activeConfig.supportsNotifications
             // create new (or resuse existing)
-            let newWebview = webView(for: Preferences.shared.currentHomePreferences.id, isMyopenhab: isMyOh)
+            let newWebview = webView(for: Preferences.shared.currentHomePreferences.id, isCloudConnection: isCloudConnection)
             if newWebview != webView {
                 // Detach old instance
                 webView.stopLoading()
@@ -300,8 +301,9 @@ class OpenHABWebViewController: OpenHABViewController {
     func modifyUrl(orig: URL?, path: String? = nil) -> URL? {
         // better way to clone/copy ?
         guard let urlString = orig?.absoluteString, var url = URL(string: urlString) else { return orig }
-        if url.host == "myopenhab.org" {
-            url = URL(string: "https://home.myopenhab.org") ?? url
+        // Use cloud proxy URL if available (resolved from /api/v1/proxyurl)
+        if let proxyURL = activeConnectionInfo?.proxyURL {
+            url = proxyURL
         }
         if let path {
             url = appendPathToURL(baseURL: url, path: path) ?? url
@@ -400,11 +402,11 @@ class OpenHABWebViewController: OpenHABViewController {
         }
     }
 
-    func webView(for id: UUID, isMyopenhab: Bool) -> WKWebView {
+    func webView(for id: UUID, isCloudConnection: Bool) -> WKWebView {
         // TODO: remove all iOS < 17 code when we drop iOS 16 support
         if #unavailable(iOS 17) {
-            if isMyopenhab, let myExsiting = myOhViews[id] {
-                Logger.viewController.info("Reusing myopenhab webview for id:\(id.uuidString)")
+            if isCloudConnection, let myExsiting = myOhViews[id] {
+                Logger.viewController.info("Reusing cloud webview for id:\(id.uuidString)")
                 return myExsiting
             }
         }
@@ -423,8 +425,8 @@ class OpenHABWebViewController: OpenHABViewController {
         // iOS 17 allows Sandboxed profiles, which is fantastic, iOS 16 does not and agressively caches everything
         if #available(iOS 17, *) {
             config.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
-        } else if isMyopenhab {
-            // for myopenhab, create a instance that does not persist or share states (private)
+        } else if isCloudConnection {
+            // for cloud connections, create an instance that does not persist or share states (private)
             config.websiteDataStore = .nonPersistent()
         }
 
@@ -449,7 +451,7 @@ class OpenHABWebViewController: OpenHABViewController {
         webview.scrollView.scrollIndicatorInsets = .zero
 
         if #unavailable(iOS 17) {
-            if isMyopenhab {
+            if isCloudConnection {
                 myOhViews[id] = webview
                 return webview
             }
