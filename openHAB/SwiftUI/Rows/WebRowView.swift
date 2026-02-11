@@ -47,6 +47,11 @@ struct WebRowView: UIViewRepresentable {
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
             logger.debug("WebView failed to load: \(error.localizedDescription)")
         }
+
+        func webView(_ webView: WKWebView,
+                     respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+            await onReceiveSessionChallenge(with: challenge)
+        }
     }
 
     @ObservedObject var widget: OpenHABWidget
