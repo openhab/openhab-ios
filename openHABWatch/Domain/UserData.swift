@@ -15,6 +15,7 @@ import Foundation
 import OpenHABCore
 import os.log
 import SwiftUI
+import WatchKit
 
 @MainActor
 final class UserData: ObservableObject {
@@ -376,11 +377,21 @@ final class UserData: ObservableObject {
 
     func sendCommand(_ item: OpenHABItem?, command: String?) async {
         guard let item, let command else { return }
+        let sourcePrefix = sitemapSourcePrefix()
+        let deviceId = WKInterfaceDevice.current().identifierForVendor?.uuidString
         do {
-            try await NetworkTracker.shared.send(to: item, command: command)
+            try await NetworkTracker.shared.send(to: item, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
         } catch {
             Logger.userData.error("Failed to send command '\(command)' to '\(item.name)': \(error.localizedDescription)")
         }
+    }
+
+    private func sitemapSourcePrefix() -> String? {
+        let sitemapName = currentlyLoadingSitemap ?? ""
+        guard !sitemapName.isEmpty else { return nil }
+        let pageId = openHABSitemapPage?.pageId ?? ""
+        let suffix = pageId.isEmpty ? "" : ":\(pageId)"
+        return "org.openhab.ui.basic$\(sitemapName)\(suffix)"
     }
 
     func refreshUrl() async {

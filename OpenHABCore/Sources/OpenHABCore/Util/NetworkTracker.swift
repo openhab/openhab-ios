@@ -523,16 +523,16 @@ public extension NetworkTracker {
         return service
     }
 
-    func send(to item: OpenHABItem, command: String) async throws {
-        try await send(to: item.name, command: command)
+    func send(to item: OpenHABItem, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
+        try await send(to: item.name, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
     }
 
-    func send(to item: String, command: String) async throws {
-        try await service().sendItemCommand(itemname: item, command: command, sourcePrefix: nil, deviceId: nil)
+    func send(to item: String, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
+        try await service().sendItemCommand(itemname: item, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
     }
 
-    func updateState(item: OpenHABItem, state: String) async throws {
-        try await service().updateItemState(itemname: item.name, with: state, sourcePrefix: nil, deviceId: nil)
+    func updateState(item: OpenHABItem, state: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
+        try await service().updateItemState(itemname: item.name, with: state, sourcePrefix: sourcePrefix, deviceId: deviceId)
     }
 
     func getStaticItems() async throws -> [OpenHABItem] {

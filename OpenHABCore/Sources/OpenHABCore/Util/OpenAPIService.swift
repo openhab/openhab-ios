@@ -117,7 +117,11 @@ public actor OpenAPIService {
     }
 
     private func sourceComponent(deviceId: String?) -> String? {
+        #if os(watchOS)
+        let base = "org.openhab.watchos"
+        #else
         let base = "org.openhab.ios"
+        #endif
         guard let deviceId else { return base }
         let trimmed = deviceId.trimmingCharacters(in: .whitespacesAndNewlines)
         // Actor must not include the delegation separator per openHAB source spec.

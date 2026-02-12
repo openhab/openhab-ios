@@ -678,10 +678,11 @@ class OpenHABRootViewController: UIViewController {
 
         let itemName = String(components[0])
         let itemCommand = String(components[1])
+        let deviceId = UIDevice.current.identifierForVendor?.uuidString
         Task {
             do {
                 Logger.viewController.info("Sending command")
-                try await NetworkTracker.shared.send(to: itemName, command: itemCommand)
+                try await NetworkTracker.shared.send(to: itemName, command: itemCommand, deviceId: deviceId)
             } catch NetworkTrackerError.noActiveConnection {
                 displayErrorNotification("Could not find server")
             } catch {
