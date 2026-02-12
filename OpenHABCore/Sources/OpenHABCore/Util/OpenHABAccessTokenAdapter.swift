@@ -21,7 +21,7 @@ public final class OpenHABAccessTokenAdapter {
 
     public func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
         guard let connectionConfiguration else { return urlRequest }
-        guard connectionConfiguration.alwaysSendBasicAuth || urlRequest.url?.host?.hasSuffix("myopenhab.org") == true else {
+        guard connectionConfiguration.alwaysSendBasicAuth || connectionConfiguration.isCloudConnection else {
             // The user did not choose for the credentials to be sent with every request.
             return urlRequest
         }
