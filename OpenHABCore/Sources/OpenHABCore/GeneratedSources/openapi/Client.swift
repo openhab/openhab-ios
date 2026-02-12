@@ -1440,6 +1440,18 @@ public struct Client: APIProtocol {
                     method: .post
                 )
                 suppressMutabilityWarning(&request)
+                try converter.setHeaderFieldAsURI(
+                    in: &request.headerFields,
+                    name: "X-OpenHAB-Source",
+                    value: input.headers.X_hyphen_OpenHAB_hyphen_Source
+                )
+                try converter.setQueryItemAsURI(
+                    in: &request,
+                    style: .form,
+                    explode: true,
+                    name: "source",
+                    value: input.query.source
+                )
                 let body: OpenAPIRuntime.HTTPBody?
                 switch input.body {
                 case let .plainText(value):
@@ -1447,6 +1459,12 @@ public struct Client: APIProtocol {
                         value,
                         headerFields: &request.headerFields,
                         contentType: "text/plain"
+                    )
+                case let .json(value):
+                    body = try converter.setRequiredRequestBodyAsJSON(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "application/json; charset=utf-8"
                     )
                 }
                 return (request, body)
@@ -1861,6 +1879,18 @@ public struct Client: APIProtocol {
                     in: &request.headerFields,
                     name: "Accept-Language",
                     value: input.headers.Accept_hyphen_Language
+                )
+                try converter.setHeaderFieldAsURI(
+                    in: &request.headerFields,
+                    name: "X-OpenHAB-Source",
+                    value: input.headers.X_hyphen_OpenHAB_hyphen_Source
+                )
+                try converter.setQueryItemAsURI(
+                    in: &request,
+                    style: .form,
+                    explode: true,
+                    name: "source",
+                    value: input.query.source
                 )
                 let body: OpenAPIRuntime.HTTPBody?
                 switch input.body {

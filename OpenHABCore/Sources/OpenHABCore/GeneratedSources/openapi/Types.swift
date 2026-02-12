@@ -558,10 +558,14 @@ extension APIProtocol {
     /// - Remark: Generated from `#/paths//items/{itemname}/post(sendItemCommand)`.
     public func sendItemCommand(
         path: Operations.sendItemCommand.Input.Path,
+        query: Operations.sendItemCommand.Input.Query = .init(),
+        headers: Operations.sendItemCommand.Input.Headers = .init(),
         body: Operations.sendItemCommand.Input.Body
     ) async throws -> Operations.sendItemCommand.Output {
         try await sendItemCommand(Operations.sendItemCommand.Input(
             path: path,
+            query: query,
+            headers: headers,
             body: body
         ))
     }
@@ -632,11 +636,13 @@ extension APIProtocol {
     /// - Remark: Generated from `#/paths//items/{itemname}/state/put(updateItemState)`.
     public func updateItemState(
         path: Operations.updateItemState.Input.Path,
+        query: Operations.updateItemState.Input.Query = .init(),
         headers: Operations.updateItemState.Input.Headers = .init(),
         body: Operations.updateItemState.Input.Body
     ) async throws -> Operations.updateItemState.Output {
         try await updateItemState(Operations.updateItemState.Input(
             path: path,
+            query: query,
             headers: headers,
             body: body
         ))
@@ -7964,22 +7970,60 @@ public enum Operations {
                 }
             }
             public var path: Operations.sendItemCommand.Input.Path
+            /// - Remark: Generated from `#/paths/items/{itemname}/POST/query`.
+            public struct Query: Sendable, Hashable {
+                /// the source of the command
+                ///
+                /// - Remark: Generated from `#/paths/items/{itemname}/POST/query/source`.
+                public var source: Swift.String?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - source: the source of the command
+                public init(source: Swift.String? = nil) {
+                    self.source = source
+                }
+            }
+            public var query: Operations.sendItemCommand.Input.Query
+            /// - Remark: Generated from `#/paths/items/{itemname}/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// the source of the command; takes priority over the query parameter or JSON body if multiple are set
+                ///
+                /// - Remark: Generated from `#/paths/items/{itemname}/POST/header/X-OpenHAB-Source`.
+                public var X_hyphen_OpenHAB_hyphen_Source: Swift.String?
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - X_hyphen_OpenHAB_hyphen_Source: the source of the command; takes priority over the query parameter or JSON body if multiple are set
+                public init(X_hyphen_OpenHAB_hyphen_Source: Swift.String? = nil) {
+                    self.X_hyphen_OpenHAB_hyphen_Source = X_hyphen_OpenHAB_hyphen_Source
+                }
+            }
+            public var headers: Operations.sendItemCommand.Input.Headers
             /// - Remark: Generated from `#/paths/items/{itemname}/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/{itemname}/POST/requestBody/content/text\/plain`.
                 case plainText(OpenAPIRuntime.HTTPBody)
+                /// - Remark: Generated from `#/paths/items/{itemname}/POST/requestBody/content/application\/json`.
+                case json(Swift.String)
             }
             public var body: Operations.sendItemCommand.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
+            ///   - query:
+            ///   - headers:
             ///   - body:
             public init(
                 path: Operations.sendItemCommand.Input.Path,
+                query: Operations.sendItemCommand.Input.Query = .init(),
+                headers: Operations.sendItemCommand.Input.Headers = .init(),
                 body: Operations.sendItemCommand.Input.Body
             ) {
                 self.path = path
+                self.query = query
+                self.headers = headers
                 self.body = body
             }
         }
@@ -9009,18 +9053,42 @@ public enum Operations {
                 }
             }
             public var path: Operations.updateItemState.Input.Path
+            /// - Remark: Generated from `#/paths/items/{itemname}/state/PUT/query`.
+            public struct Query: Sendable, Hashable {
+                /// the source of the event
+                ///
+                /// - Remark: Generated from `#/paths/items/{itemname}/state/PUT/query/source`.
+                public var source: Swift.String?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - source: the source of the event
+                public init(source: Swift.String? = nil) {
+                    self.source = source
+                }
+            }
+            public var query: Operations.updateItemState.Input.Query
             /// - Remark: Generated from `#/paths/items/{itemname}/state/PUT/header`.
             public struct Headers: Sendable, Hashable {
                 /// language
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/state/PUT/header/Accept-Language`.
                 public var Accept_hyphen_Language: Swift.String?
+                /// the source of the event; takes priority over the query parameter or JSON body if multiple are set
+                ///
+                /// - Remark: Generated from `#/paths/items/{itemname}/state/PUT/header/X-OpenHAB-Source`.
+                public var X_hyphen_OpenHAB_hyphen_Source: Swift.String?
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - Accept_hyphen_Language: language
-                public init(Accept_hyphen_Language: Swift.String? = nil) {
+                ///   - X_hyphen_OpenHAB_hyphen_Source: the source of the event; takes priority over the query parameter or JSON body if multiple are set
+                public init(
+                    Accept_hyphen_Language: Swift.String? = nil,
+                    X_hyphen_OpenHAB_hyphen_Source: Swift.String? = nil
+                ) {
                     self.Accept_hyphen_Language = Accept_hyphen_Language
+                    self.X_hyphen_OpenHAB_hyphen_Source = X_hyphen_OpenHAB_hyphen_Source
                 }
             }
             public var headers: Operations.updateItemState.Input.Headers
@@ -9034,14 +9102,17 @@ public enum Operations {
             ///
             /// - Parameters:
             ///   - path:
+            ///   - query:
             ///   - headers:
             ///   - body:
             public init(
                 path: Operations.updateItemState.Input.Path,
+                query: Operations.updateItemState.Input.Query = .init(),
                 headers: Operations.updateItemState.Input.Headers = .init(),
                 body: Operations.updateItemState.Input.Body
             ) {
                 self.path = path
+                self.query = query
                 self.headers = headers
                 self.body = body
             }

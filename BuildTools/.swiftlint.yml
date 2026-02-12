@@ -42,6 +42,7 @@ excluded:
   - ../OsLogRewriter/.build
   - ../build
   - ../BonjourDiscoveryTool
+  - ../CommonUI/.build
 
 nesting:
     type_level: 2
