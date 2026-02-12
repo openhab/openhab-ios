@@ -2963,6 +2963,14 @@
         "operationId": "sendItemCommand",
         "parameters": [
           {
+            "name": "X-OpenHAB-Source",
+            "in": "header",
+            "description": "the source of the command; takes priority over the query parameter or JSON body if multiple are set",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "itemname",
             "in": "path",
             "description": "item name",
@@ -2971,14 +2979,32 @@
               "pattern": "[a-zA-Z_0-9]+",
               "type": "string"
             }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "description": "the source of the command",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
-          "description": "valid item command (e.g. ON, OFF, UP, DOWN, REFRESH)",
+          "description": "Valid item command (e.g., ON, OFF) either as plain text or JSON",
           "content": {
             "text/plain": {
               "schema": {
-                "type": "string"
+                "type": "string",
+                "example": "ON"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "example": {
+                  "value": "ON",
+                  "source": "org.openhab.ios"
+                }
               }
             }
           },
@@ -3210,12 +3236,28 @@
             }
           },
           {
+            "name": "X-OpenHAB-Source",
+            "in": "header",
+            "description": "the source of the event; takes priority over the query parameter or JSON body if multiple are set",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "itemname",
             "in": "path",
             "description": "item name",
             "required": true,
             "schema": {
               "pattern": "[a-zA-Z_0-9]+",
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "description": "the source of the event",
+            "schema": {
               "type": "string"
             }
           }

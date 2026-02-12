@@ -36,13 +36,13 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
         self.mockServerProperties = mockServerProperties
     }
 
-    func sendItemCommand(itemname: String, command: String) async throws {
+    func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) async throws {
         if shouldFail {
             throw networkTrackerError
         }
     }
 
-    func updateItemState(itemname: String, with: String) async throws {
+    func updateItemState(itemname: String, with: String, sourcePrefix: String?, deviceId: String?) async throws {
         if shouldFail {
             throw networkTrackerError
         }

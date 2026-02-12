@@ -635,7 +635,22 @@ extension OpenHABSitemapViewController {
     }
 
     func sendCommand(itemname: String, command: String) {
-        Task { try await openAPIService?.sendItemCommand(itemname: itemname, command: command) }
+        let sourcePrefix = sitemapSourcePrefix()
+        let deviceId = UIDevice.current.identifierForVendor?.uuidString
+        Task {
+            try await openAPIService?.sendItemCommand(
+                itemname: itemname,
+                command: command,
+                sourcePrefix: sourcePrefix,
+                deviceId: deviceId
+            )
+        }
+    }
+
+    private func sitemapSourcePrefix() -> String? {
+        guard !defaultSitemap.isEmpty else { return nil }
+        let suffix = pageId.isEmpty ? "" : ":\(pageId)"
+        return "org.openhab.ui.basic$\(defaultSitemap)\(suffix)"
     }
 }
 
