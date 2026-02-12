@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [Version 3.1.49, Build 106] - 2026-02-12Z
+
+- Provide source for commands sent (#1064)
+- Bump faraday from 1.10.4 to 1.10.5 (#1069)
+- Support private openHAB Cloud instances via proxy URL discovery (#1068)
+
 ## [Version 3.1.48, Build 105] - 2026-02-11Z
 
 - Fixes notification image downloading (#1067)
