@@ -24,7 +24,9 @@ public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChall
         let networkTracker = NetworkTracker.shared
         let activeConnection = await networkTracker.activeConnection
         guard let configuration = activeConnection?.configuration else { return (.cancelAuthenticationChallenge, credential) }
-        if challenge.protectionSpace.host == URL(string: configuration.url)?.host || challenge.protectionSpace.host == "home.myopenhab.org" {
+        let proxyHost = activeConnection?.proxyURL?.host
+        if challenge.protectionSpace.host == URL(string: configuration.url)?.host
+            || challenge.protectionSpace.host == proxyHost {
             credential = URLCredential(user: configuration.username, password: configuration.password, persistence: .forSession)
             disposition = .useCredential
             Logger.sessionChallenge.info(".useCredential")
@@ -65,78 +67,5 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
             // }
         }
         return (disposition, nil)
-    }
-}
-
-final class SessionChallengeHandler {
-    private let username: String
-    private let password: String
-    private let localUrl: URL?
-    private let remoteUrl: URL?
-
-    private let clientCertEvaluator: ((URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?))?
-    private let serverTrustEvaluator: ((URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?))?
-
-    init(username: String,
-         password: String,
-         localUrl: URL?,
-         remoteUrl: URL?,
-         serverTrustEvaluator: ((URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?))? = nil,
-         clientCertEvaluator: ((URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?))? = nil) {
-        self.username = username
-        self.password = password
-        self.localUrl = localUrl
-        self.remoteUrl = remoteUrl
-        self.serverTrustEvaluator = serverTrustEvaluator
-        self.clientCertEvaluator = clientCertEvaluator
-    }
-
-    func handleSessionTaskChallenge(_ challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        Logger.sessionChallengeHandler.debug("SessionTaskChallenge host: \(challenge.protectionSpace.host, privacy: .public)")
-
-        if challenge.previousFailureCount > 0 {
-            return (.cancelAuthenticationChallenge, nil)
-        }
-
-        let authMethod = challenge.protectionSpace.authenticationMethod
-        if authMethod == NSURLAuthenticationMethodHTTPBasic || authMethod == NSURLAuthenticationMethodDefault {
-            if isTrustedHost(challenge.protectionSpace.host) {
-                let credential = URLCredential(user: username, password: password, persistence: .forSession)
-                Logger.sessionChallengeHandler.debug("Using HTTP BasicAuth for host: \(challenge.protectionSpace.host, privacy: .public)")
-                return (.useCredential, credential)
-            }
-        }
-
-        return (.performDefaultHandling, nil)
-    }
-
-    func handleSessionChallenge(_ challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        Logger.sessionChallengeHandler.debug("SessionChallenge host: \(challenge.protectionSpace.host, privacy: .public)")
-
-        if challenge.previousFailureCount > 0 {
-            return (.cancelAuthenticationChallenge, nil)
-        }
-
-        switch challenge.protectionSpace.authenticationMethod {
-        case NSURLAuthenticationMethodServerTrust:
-            if let serverTrustEvaluator {
-                return serverTrustEvaluator(challenge)
-            }
-        case NSURLAuthenticationMethodClientCertificate:
-            if let clientCertEvaluator {
-                return clientCertEvaluator(challenge)
-            }
-        default:
-            // Try using stored credential if available
-            if let credential = URLCredentialStorage.shared.defaultCredential(for: challenge.protectionSpace) {
-                return (.useCredential, credential)
-            }
-        }
-
-        return (.performDefaultHandling, nil)
-    }
-
-    private func isTrustedHost(_ host: String) -> Bool {
-        host == localUrl?.host || host == remoteUrl?.host || host == "home.myopenhab.org"
     }
 }
