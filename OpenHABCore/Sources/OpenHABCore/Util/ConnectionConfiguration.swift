@@ -88,6 +88,12 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
     }
 }
 
+public extension ConnectionConfiguration {
+    /// Whether this connection is to an openHAB Cloud instance.
+    /// Currently determined by the "openHAB Cloud Service" user preference (`supportsNotifications`).
+    var isCloudConnection: Bool { supportsNotifications }
+}
+
 extension ConnectionConfiguration: CustomStringConvertible {
     public var description: String {
         "url: \(url), user: \(username)"
