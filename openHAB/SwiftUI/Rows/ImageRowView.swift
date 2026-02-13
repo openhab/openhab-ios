@@ -23,6 +23,7 @@ struct ImageRowView: View {
     @State private var forceRefreshKey = UUID()
 
     private let logger = Logger(subsystem: "org.openhab", category: "ImageRowView")
+    private var displayState: WidgetDisplayState { widget.displayState }
 
     private var imageURL: URL? {
         guard !widget.url.isEmpty else { return nil }
@@ -39,7 +40,8 @@ struct ImageRowView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+            if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+                let labelText = displayState.labelText
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)
@@ -74,7 +76,7 @@ struct ImageRowView: View {
             }
 
             // Only show labelValue for image widgets, not charts
-            if widget.type == .image, let labelValue = widget.labelValue, !labelValue.isEmpty {
+            if widget.type == .image, let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .font(.caption)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))

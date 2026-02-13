@@ -23,15 +23,19 @@ struct SetpointRowView: View {
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSetpointView")
     private let setpointService = SetPointService()
 
+    private var displayState: WidgetDisplayState {
+        widget.displayState
+    }
+
     private var currentValue: Double {
-        widget.stateValueAsNumberState?.value ?? widget.minValue
+        widget.stateValueAsNumberState?.value ?? displayState.minValue
     }
 
     private var formattedValue: String {
-        if let labelValue = widget.labelValue, !labelValue.isEmpty {
+        if let labelValue = displayState.labelValue, !labelValue.isEmpty {
             return labelValue
         } else {
-            let step = widget.step
+            let step = displayState.step
             if step.truncatingRemainder(dividingBy: 1) == 0 {
                 return String(format: "%.0f", currentValue)
             } else {
@@ -45,7 +49,8 @@ struct SetpointRowView: View {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
 
-            if let labelText = widget.labelText, !labelText.isEmpty {
+            if !displayState.labelText.isEmpty {
+                let labelText = displayState.labelText
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)
@@ -60,10 +65,10 @@ struct SetpointRowView: View {
                 } label: {
                     Image(systemSymbol: .chevronDown)
                         .font(.body)
-                        .foregroundStyle(currentValue <= widget.minValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
+                        .foregroundStyle(currentValue <= displayState.minValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
-                .disabled(currentValue <= widget.minValue)
+                .disabled(currentValue <= displayState.minValue)
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
                 .disabled(widget.readOnly ?? false)
 
@@ -77,10 +82,10 @@ struct SetpointRowView: View {
                 } label: {
                     Image(systemSymbol: .chevronUp)
                         .font(.body)
-                        .foregroundStyle(currentValue >= widget.maxValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
+                        .foregroundStyle(currentValue >= displayState.maxValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
-                .disabled(currentValue >= widget.maxValue)
+                .disabled(currentValue >= displayState.maxValue)
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
                 .disabled(widget.readOnly ?? false)
             }
@@ -97,13 +102,13 @@ struct SetpointRowView: View {
 
     private func handleUpDown(isDecreasing: Bool) {
         var numberState = widget.stateValueAsNumberState
-        let currentValue = numberState?.value ?? widget.minValue
+        let currentValue = numberState?.value ?? displayState.minValue
 
         let limitedNewValue = setpointService.calculateNewValue(
             currentValue: currentValue,
-            step: widget.step,
-            minValue: widget.minValue,
-            maxValue: widget.maxValue,
+            step: displayState.step,
+            minValue: displayState.minValue,
+            maxValue: displayState.maxValue,
             isDecreasing: isDecreasing
         )
 

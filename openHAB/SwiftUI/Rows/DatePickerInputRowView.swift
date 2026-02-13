@@ -20,6 +20,7 @@ struct DatePickerInputRowView: View {
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetDatePickerInputView")
+    private var displayState: WidgetDisplayState { widget.displayState }
 
     private var datePickerComponents: DatePickerComponents {
         switch widget.inputHint {
@@ -39,7 +40,8 @@ struct DatePickerInputRowView: View {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
 
-            if let labelText = widget.labelText, !labelText.isEmpty {
+            if !displayState.labelText.isEmpty {
+                let labelText = displayState.labelText
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)
@@ -59,7 +61,8 @@ struct DatePickerInputRowView: View {
             .disabled(widget.readOnly ?? false)
         }
         .onAppear {
-            if let state = widget.item?.state, !state.isEmpty {
+            let state = displayState.effectiveState
+            if !state.isEmpty {
                 selectedDate = parseDate(from: state) ?? Date()
             }
         }

@@ -39,29 +39,21 @@ final class WidgetRowViewModel {
     }
 
     func update(from widget: OpenHABWidget) {
-        let newMappings = widget.mappingsOrItemOptions
-        mappings = newMappings
-        hasPressReleaseMappings = widget.hasPressReleaseMappings
-        labelText = widget.labelText ?? widget.label
-        labelValue = widget.labelValue
-        selectedIndex = widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
-        if let index = selectedIndex, index >= 0, index < newMappings.count {
-            selectedLabel = newMappings[index].label
-        } else {
-            selectedLabel = nil
-        }
-        if widget.state.isEmpty {
-            effectiveState = widget.item?.state ?? ""
-        } else {
-            effectiveState = widget.state
-        }
-        isOn = effectiveState.parseAsBool()
-        adjustedValue = widget.adjustedValue
-        minValue = widget.minValue
-        maxValue = widget.maxValue
-        step = widget.step
-        switchSupport = widget.switchSupport
-        hasLinkedPage = widget.linkedPage != nil
+        let displayState = widget.displayState
+        mappings = displayState.mappings
+        hasPressReleaseMappings = displayState.hasPressReleaseMappings
+        labelText = displayState.labelText
+        labelValue = displayState.labelValue
+        selectedIndex = displayState.selectedIndex
+        selectedLabel = displayState.selectedLabel
+        effectiveState = displayState.effectiveState
+        isOn = displayState.isOn
+        adjustedValue = displayState.adjustedValue
+        minValue = displayState.minValue
+        maxValue = displayState.maxValue
+        step = displayState.step
+        switchSupport = displayState.switchSupport
+        hasLinkedPage = displayState.hasLinkedPage
         numberState = widget.stateValueAsNumberState
         colorState = widget.item?.stateAsUIColor()
     }

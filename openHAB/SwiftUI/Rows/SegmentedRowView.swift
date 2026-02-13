@@ -30,6 +30,10 @@ struct SegmentedRowView: View {
         widget.mappingsOrItemOptions
     }
 
+    private var displayState: WidgetDisplayState {
+        widget.displayState
+    }
+
     @State private var selectedIndex: Int?
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
@@ -39,7 +43,8 @@ struct SegmentedRowView: View {
             IconView(widget: widget, fallbackSymbol: fallbackSymbol)
                 .frame(width: 32, height: 32)
 
-            if let labelText = widget.labelText, !labelText.isEmpty {
+            if !displayState.labelText.isEmpty {
+                let labelText = displayState.labelText
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)
@@ -48,7 +53,7 @@ struct SegmentedRowView: View {
                     .layoutPriority(1)
             }
 
-            if let detailTextLabel = widget.labelValue, !detailTextLabel.isEmpty {
+            if let detailTextLabel = displayState.labelValue, !detailTextLabel.isEmpty {
                 Spacer(minLength: 8)
                 Text(detailTextLabel)
                     .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
@@ -60,7 +65,7 @@ struct SegmentedRowView: View {
             if !mappings.isEmpty {
                 if widget.hasPressReleaseMappings {
                     // Press-release buttons for mappings with releaseCommand
-                    if !(widget.labelValue?.isEmpty == false) {
+                    if !(displayState.labelValue?.isEmpty == false) {
                         Spacer(minLength: 8)
                     }
                     pressReleaseButtons
@@ -68,7 +73,7 @@ struct SegmentedRowView: View {
                         .padding(.leading, 8)
 
                 } else if mappings.count == 1 {
-                    if widget.labelValue.isNilOrEmpty {
+                    if displayState.labelValue.isNilOrEmpty {
                         Spacer(minLength: 8)
                     }
                     singleMappingButton
@@ -84,9 +89,9 @@ struct SegmentedRowView: View {
             }
         }
         .onAppear {
-            selectedIndex = widget.mapCommandtoIndex(with: widget.item?.state)
+            selectedIndex = widget.mapCommandtoIndex(with: displayState.effectiveState)
         }
-        .onChange(of: widget.item?.state) { newState in
+        .onChange(of: displayState.effectiveState) { newState in
             selectedIndex = widget.mapCommandtoIndex(with: newState)
         }
     }
@@ -137,8 +142,7 @@ struct SegmentedRowView: View {
 
     /// Whether the single mapping button is selected (item state matches the mapping command)
     private var isSingleMappingSelected: Bool {
-        guard let state = widget.item?.state else { return false }
-        return state == mappings[0].command
+        displayState.effectiveState == mappings[0].command
     }
 
     @ViewBuilder

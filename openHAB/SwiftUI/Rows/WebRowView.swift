@@ -17,10 +17,12 @@ import WebKit
 
 struct WidgetWebViewContainer: View {
     @ObservedObject var widget: OpenHABWidget
+    private var displayState: WidgetDisplayState { widget.displayState }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+            if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+                let labelText = displayState.labelText
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)
@@ -30,7 +32,7 @@ struct WidgetWebViewContainer: View {
                 .frame(height: widget.preferredRowHeight)
                 .clipShape(.rect(cornerRadius: 8))
 
-            if let labelValue = widget.labelValue, !labelValue.isEmpty {
+            if let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .font(.caption)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))

@@ -21,17 +21,12 @@ struct SwitchRowView: View {
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSwitchView")
 
-    private var effectiveState: String {
-        var state = widget.state
-        // If state is nil or empty using the item state (OH 1.x compatibility)
-        if state.isEmpty {
-            state = widget.item?.state ?? ""
-        }
-        return state
+    private var displayState: WidgetDisplayState {
+        widget.displayState
     }
 
     private var isOn: Bool {
-        localIsOn ?? effectiveState.parseAsBool()
+        localIsOn ?? displayState.isOn
     }
 
     var body: some View {
@@ -39,7 +34,8 @@ struct SwitchRowView: View {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
 
-            if let labelText = widget.labelText, !labelText.isEmpty {
+            if !displayState.labelText.isEmpty {
+                let labelText = displayState.labelText
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)
@@ -47,7 +43,7 @@ struct SwitchRowView: View {
 
             Spacer()
 
-            if let labelValue = widget.labelValue, !labelValue.isEmpty {
+            if let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .font(.caption)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
@@ -71,7 +67,7 @@ struct SwitchRowView: View {
             .disabled(widget.readOnly ?? false)
         }
         .contentShape(Rectangle())
-        .onChange(of: effectiveState) { _ in
+        .onChange(of: displayState.effectiveState) { _ in
             // Sync local state when server state changes
             localIsOn = nil
         }

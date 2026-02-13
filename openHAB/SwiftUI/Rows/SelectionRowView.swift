@@ -25,25 +25,25 @@ struct SelectionRowView: View {
         widget.mappingsOrItemOptions
     }
 
+    private var displayState: WidgetDisplayState {
+        widget.displayState
+    }
+
     /// Returns the label of the currently selected mapping, or the widget's labelValue as fallback
     private var selectedValueText: String? {
-        if let state = widget.item?.state,
-           let selectedMapping = mappings.first(where: { $0.command == state }) {
-            return selectedMapping.label
-        }
-        return widget.labelValue
+        displayState.selectedLabel ?? displayState.labelValue
     }
 
     var body: some View {
         ZStack {
             rowContent
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .animation(nil, value: widget.item?.state)
+                .animation(nil, value: displayState.effectiveState)
 
             Menu {
                 ForEach(mappings.indices, id: \.self) { index in
                     let mapping = mappings[index]
-                    let isSelected = widget.item?.state == mapping.command
+                    let isSelected = displayState.effectiveState == mapping.command
                     Button {
                         logger.info("Selection changed to: \(mapping.label)")
                         viewModel.sendCommand(mapping.command, for: widget)
@@ -71,7 +71,8 @@ struct SelectionRowView: View {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
 
-            if let labelText = widget.labelText, !labelText.isEmpty {
+            if !displayState.labelText.isEmpty {
+                let labelText = displayState.labelText
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)

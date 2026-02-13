@@ -21,13 +21,15 @@ struct TextInputRowView: View {
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")
+    private var displayState: WidgetDisplayState { widget.displayState }
 
     var body: some View {
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
 
-            if let labelText = widget.labelText, !labelText.isEmpty {
+            if !displayState.labelText.isEmpty {
+                let labelText = displayState.labelText
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)
@@ -45,11 +47,11 @@ struct TextInputRowView: View {
                 .disabled(widget.readOnly ?? false)
         }
         .onAppear {
-            inputText = widget.item?.state ?? ""
+            inputText = displayState.effectiveState
         }
-        .onChange(of: widget.item?.state) { newState in
+        .onChange(of: displayState.effectiveState) { newState in
             if !isTextFieldFocused {
-                inputText = newState ?? ""
+                inputText = newState
             }
         }
     }

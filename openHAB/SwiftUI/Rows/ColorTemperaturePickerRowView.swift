@@ -71,14 +71,15 @@ struct ColorTemperaturePickerRowView: View {
     }
 
     private let logger = Logger(subsystem: "org.openhab", category: "ColorTemperaturePickerRowView")
+    private var displayState: WidgetDisplayState { widget.displayState }
 
     // Use widget's min/max values, similar to Android implementation
     private var minTemperature: Double {
-        max(widget.minValue, 1000)
+        max(displayState.minValue, 1000)
     }
 
     private var maxTemperature: Double {
-        min(widget.maxValue, 10000)
+        min(displayState.maxValue, 10000)
     }
 
     var body: some View {
@@ -88,7 +89,8 @@ struct ColorTemperaturePickerRowView: View {
 
             VStack(spacing: 8) {
                 HStack {
-                    if let labelText = widget.labelText, !labelText.isEmpty {
+                    if !displayState.labelText.isEmpty {
+                        let labelText = displayState.labelText
                         Text(labelText)
                             .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                             .lineLimit(1)
@@ -152,9 +154,9 @@ struct ColorTemperaturePickerRowView: View {
             }
         }
         .onAppear {
-            selectedTemperature = loadCurrentTemperature(state: widget.item?.state) ?? 2700
+            selectedTemperature = loadCurrentTemperature(state: displayState.effectiveState) ?? 2700
         }
-        .onChange(of: widget.item?.state ?? "") { newState in
+        .onChange(of: displayState.effectiveState) { newState in
             selectedTemperature = loadCurrentTemperature(state: newState) ?? 2700
         }
         .onDisappear {

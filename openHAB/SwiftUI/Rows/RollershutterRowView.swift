@@ -29,6 +29,7 @@ struct RollershutterRowView: View {
     @State private var triggerDownFeedback = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetRollershutterView")
+    private var displayState: WidgetDisplayState { widget.displayState }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -37,7 +38,8 @@ struct RollershutterRowView: View {
                     .frame(width: 32, height: 32)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    if let labelText = widget.labelText, !labelText.isEmpty {
+                    if !displayState.labelText.isEmpty {
+                        let labelText = displayState.labelText
                         Text(labelText)
                             .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                             .lineLimit(1)

@@ -16,10 +16,11 @@ import SwiftUI
 struct FrameRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
+    private var displayState: WidgetDisplayState { widget.displayState }
 
     var body: some View {
         HStack {
-            Text(widget.labelText?.uppercased() ?? "")
+            Text(displayState.labelText.uppercased())
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)

@@ -24,13 +24,15 @@ struct ColorPickerRowView: View {
     }
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetColorPickerView")
+    private var displayState: WidgetDisplayState { widget.displayState }
 
     var body: some View {
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
 
-            if let labelText = widget.labelText, !labelText.isEmpty {
+            if !displayState.labelText.isEmpty {
+                let labelText = displayState.labelText
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)
@@ -45,7 +47,7 @@ struct ColorPickerRowView: View {
                 }
                 .disabled(widget.readOnly ?? false)
 
-            if let labelValue = widget.labelValue, !labelValue.isEmpty {
+            if let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .font(.caption)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
@@ -53,11 +55,12 @@ struct ColorPickerRowView: View {
             }
         }
         .onAppear {
-            if let state = widget.item?.state, !state.isEmpty {
+            let state = displayState.effectiveState
+            if !state.isEmpty {
                 selectedColor = parseColor(from: state) ?? .white
             }
         }
-        .onChange(of: widget.item?.state ?? "") { newState in
+        .onChange(of: displayState.effectiveState) { newState in
             guard !newState.isEmpty else { return }
             selectedColor = parseColor(from: newState) ?? .white
         }

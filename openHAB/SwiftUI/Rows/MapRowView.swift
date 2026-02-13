@@ -17,6 +17,7 @@ import SwiftUI
 
 struct MapRowViewLegacy: View {
     @ObservedObject var widget: OpenHABWidget
+    private var displayState: WidgetDisplayState { widget.displayState }
 
     private var region: MKCoordinateRegion {
         let coordinate = CLLocationCoordinate2DIsValid(widget.coordinate) ? widget.coordinate : CLLocationCoordinate2D(latitude: 0, longitude: 0)
@@ -29,7 +30,8 @@ struct MapRowViewLegacy: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+            if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+                let labelText = displayState.labelText
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)

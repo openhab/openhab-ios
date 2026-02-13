@@ -17,19 +17,20 @@ import SwiftUI
 struct TextRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
+    private var displayState: WidgetDisplayState { widget.displayState }
 
     var body: some View {
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
 
-            Text(widget.labelText ?? "")
+            Text(displayState.labelText)
                 .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                 .lineLimit(1)
 
             Spacer()
 
-            if let value = widget.labelValue {
+            if let value = displayState.labelValue {
                 Text(value)
                     .font(.body)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
@@ -37,7 +38,7 @@ struct TextRowView: View {
             }
         }
         .contextMenu {
-            if let text = widget.labelValue ?? widget.labelText, !text.isEmpty {
+            if let text = displayState.labelValue ?? (displayState.labelText.isEmpty ? nil : displayState.labelText), !text.isEmpty {
                 Button {
                     UIPasteboard.general.string = text
                 } label: {

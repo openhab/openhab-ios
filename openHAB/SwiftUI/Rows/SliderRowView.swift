@@ -28,12 +28,16 @@ struct SliderRowView: View {
         "slider-\(widget.widgetId)"
     }
 
+    private var displayState: WidgetDisplayState {
+        widget.displayState
+    }
+
     private var sliderRange: ClosedRange<Double> {
-        widget.minValue ... widget.maxValue
+        displayState.minValue ... displayState.maxValue
     }
 
     private var currentValue: Double {
-        pendingValue ?? widget.adjustedValue
+        pendingValue ?? displayState.adjustedValue
     }
 
     private var currentValueText: String {
@@ -42,7 +46,7 @@ struct SliderRowView: View {
 
     private var valueBinding: Binding<Double> {
         Binding(
-            get: { pendingValue ?? widget.adjustedValue },
+            get: { pendingValue ?? displayState.adjustedValue },
             set: { newValue in
                 pendingValue = newValue
 
@@ -62,7 +66,7 @@ struct SliderRowView: View {
         HStack {
             if widget.switchSupport {
                 Button {
-                    viewModel.sendCommand(currentValue <= widget.minValue ? "ON" : "OFF", for: widget)
+                    viewModel.sendCommand(currentValue <= displayState.minValue ? "ON" : "OFF", for: widget)
                 } label: {
                     labelContent
                 }
@@ -96,10 +100,10 @@ struct SliderRowView: View {
             }
             .disabled(widget.readOnly ?? false)
         }
-        .onChange(of: widget.adjustedValue) { _ in
+        .onChange(of: displayState.adjustedValue) { _ in
             // Clear pending value only when server confirms our value (not intermediate responses)
             if !isEditing, let pending = pendingValue,
-               abs(widget.adjustedValue - pending) < max(widget.step * 0.5, 0.01) {
+               abs(displayState.adjustedValue - pending) < max(widget.step * 0.5, 0.01) {
                 pendingValue = nil
             }
         }
@@ -115,7 +119,8 @@ struct SliderRowView: View {
             IconView(widget: widget, fallbackSymbol: fallbackSymbol)
                 .frame(width: 32, height: 32)
 
-            if let labelText = widget.labelText, !labelText.isEmpty {
+            if !displayState.labelText.isEmpty {
+                let labelText = displayState.labelText
                 Text(labelText)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     .lineLimit(1)
@@ -125,7 +130,7 @@ struct SliderRowView: View {
             Spacer()
 
             // Show current slider value (pendingValue while dragging, otherwise widget value)
-            Text(pendingValue != nil ? currentValueText : (widget.labelValue ?? currentValueText))
+            Text(pendingValue != nil ? currentValueText : (displayState.labelValue ?? currentValueText))
                 .font(.callout)
                 .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
                 .lineLimit(1)

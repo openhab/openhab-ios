@@ -23,10 +23,11 @@ struct ButtonGridButton: View {
     @State private var triggerFeedback = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "ButtonGridButton")
+    private var displayState: WidgetDisplayState { widget.displayState }
 
     private var isChecked: Bool {
         if let stateless = widget.stateless, stateless { return false }
-        return widget.item?.state == widget.command
+        return displayState.effectiveState == widget.command
     }
 
     private var hasPressRelease: Bool {
@@ -149,6 +150,7 @@ struct ButtonGridRowView: View {
 
     // Maximum number of columns based on screen width
     private let maxColumns = 12
+    private var displayState: WidgetDisplayState { widget.displayState }
 
     private var buttons: [OpenHABWidget] {
         let childButtons = widget.widgets // .filter(\.visibility)
@@ -177,7 +179,8 @@ struct ButtonGridRowView: View {
                     IconView(widget: widget)
                         .frame(width: 32, height: 32)
 
-                    if let labelText = widget.labelText, !labelText.isEmpty {
+                    if !displayState.labelText.isEmpty {
+                        let labelText = displayState.labelText
                         Text(labelText)
                             .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                             .lineLimit(1)
