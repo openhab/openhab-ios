@@ -23,7 +23,10 @@ struct SliderRowView: View {
     /// Pending value while user is dragging; nil when not actively changing
     @State private var pendingValue: Double?
     @State private var isEditing = false
-    @State private var lastSendTime: Date = .distantPast
+
+    private var sliderCommandKey: String {
+        "slider-\(widget.widgetId)"
+    }
 
     private var sliderRange: ClosedRange<Double> {
         widget.minValue ... widget.maxValue
@@ -45,11 +48,11 @@ struct SliderRowView: View {
 
                 // Send updates during drag if enabled (throttled)
                 if widget.shouldUseSliderUpdatesDuringMove() {
-                    let now = Date()
-                    if now.timeIntervalSince(lastSendTime) > 0.2 {
-                        sendSliderUpdate(newValue)
-                        lastSendTime = now
-                    }
+                    sendSliderUpdate(
+                        newValue,
+                        policy: WidgetCommandDefaults.slider,
+                        key: sliderCommandKey
+                    )
                 }
             }
         )
@@ -59,7 +62,7 @@ struct SliderRowView: View {
         HStack {
             if widget.switchSupport {
                 Button {
-                    viewModel.sendCommand(widget.item, commandToSend: currentValue <= widget.minValue ? "ON" : "OFF")
+                    viewModel.sendCommand(currentValue <= widget.minValue ? "ON" : "OFF", for: widget)
                 } label: {
                     labelContent
                 }
@@ -74,7 +77,12 @@ struct SliderRowView: View {
                 if !editing {
                     // Always send the final value on release
                     if let value = pendingValue {
-                        sendSliderUpdate(value)
+                        if let item = widget.item {
+                            viewModel.cancelPendingCommand(for: item, key: sliderCommandKey)
+                        } else {
+                            viewModel.cancelPendingCommand(for: widget, key: sliderCommandKey)
+                        }
+                        sendSliderUpdate(value, policy: .immediate, key: sliderCommandKey)
                     }
                     // Keep pendingValue set until server responds to avoid visual jump
                     // Fallback: clear after delay if server doesn't respond
@@ -125,11 +133,13 @@ struct SliderRowView: View {
         .contentShape(Rectangle())
     }
 
-    private func sendSliderUpdate(_ newValue: Double) {
+    private func sendSliderUpdate(_ newValue: Double,
+                                  policy: WidgetCommandPolicy,
+                                  key: String?) {
         var numberState = widget.stateValueAsNumberState
         numberState = numberState ?? NumberState(value: newValue)
         numberState?.value = newValue
-        viewModel.sendToUpdate(item: widget.item, state: numberState)
+        viewModel.sendToUpdate(item: widget.item, state: numberState, policy: policy, key: key)
     }
 }
 

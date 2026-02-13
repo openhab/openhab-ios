@@ -22,7 +22,7 @@ struct SliderRow: View {
     var fallbackSymbol: SFSymbol?
     @State private var pendingValue: Double?
     @State private var viewModel: WidgetRowViewModel
-    @State private var commandSender = WidgetCommandSender()
+    @State private var commandSender = WidgetCommandDispatcher()
 
     private var currentValue: Double {
         pendingValue ?? viewModel.adjustedValue

@@ -49,7 +49,7 @@ struct RollershutterRowView: View {
                 Button {
                     triggerUpFeedback.toggle()
                     logger.info("\("up button pressed")")
-                    viewModel.sendCommand(widget.item, commandToSend: RollerShutterCommand.up.rawValue)
+                    viewModel.sendCommand(RollerShutterCommand.up.rawValue, for: widget)
                 } label: {
                     Image(systemSymbol: .chevronUp)
                         .font(.title2)
@@ -61,7 +61,7 @@ struct RollershutterRowView: View {
                 Button {
                     triggerStopFeedback.toggle()
                     logger.info("\("stop button pressed")")
-                    viewModel.sendCommand(widget.item, commandToSend: RollerShutterCommand.stop.rawValue)
+                    viewModel.sendCommand(RollerShutterCommand.stop.rawValue, for: widget)
                 } label: {
                     Image(systemSymbol: .stop)
                         .font(.title2)
@@ -73,7 +73,7 @@ struct RollershutterRowView: View {
                 Button {
                     triggerDownFeedback.toggle()
                     logger.info("\("down button pressed")")
-                    viewModel.sendCommand(widget.item, commandToSend: RollerShutterCommand.down.rawValue)
+                    viewModel.sendCommand(RollerShutterCommand.down.rawValue, for: widget)
                 } label: {
                     Image(systemSymbol: .chevronDown)
                         .font(.title2)

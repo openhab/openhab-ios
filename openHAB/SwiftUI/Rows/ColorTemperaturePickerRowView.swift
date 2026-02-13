@@ -66,6 +66,10 @@ struct ColorTemperaturePickerRowView: View {
     @State private var selectedTemperature: Double = 2700 // Default warm white
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
+    private var colorTemperatureCommandKey: String {
+        "color-temperature-\(widget.widgetId)"
+    }
+
     private let logger = Logger(subsystem: "org.openhab", category: "ColorTemperaturePickerRowView")
 
     // Use widget's min/max values, similar to Android implementation
@@ -153,6 +157,13 @@ struct ColorTemperaturePickerRowView: View {
         .onChange(of: widget.item?.state ?? "") { newState in
             selectedTemperature = loadCurrentTemperature(state: newState) ?? 2700
         }
+        .onDisappear {
+            if let item = widget.item {
+                viewModel.cancelPendingCommand(for: item, key: colorTemperatureCommandKey)
+            } else {
+                viewModel.cancelPendingCommand(for: widget, key: colorTemperatureCommandKey)
+            }
+        }
     }
 
     private var temperatureDescription: String {
@@ -186,7 +197,12 @@ struct ColorTemperaturePickerRowView: View {
         let command = "\(Int(selectedTemperature))"
 
         logger.info("Sending color temperature command: \(command)K")
-        viewModel.sendCommand(widget.item, commandToSend: command)
+        viewModel.sendCommand(
+            command,
+            for: widget,
+            policy: WidgetCommandDefaults.slider,
+            key: colorTemperatureCommandKey
+        )
     }
 }
 

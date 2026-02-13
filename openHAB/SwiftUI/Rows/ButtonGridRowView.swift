@@ -111,12 +111,11 @@ struct ButtonGridButton: View {
     }
 
     private func sendCommand(_ command: String) {
-        // Most button grid commands target the parent widget item.
-        if let commandItem = widget.item ?? parentItem {
-            viewModel.sendCommand(commandItem, commandToSend: command)
-            return
-        }
-        widget.sendCommand(command)
+        viewModel.sendCommand(
+            command,
+            for: widget,
+            fallbackItem: parentItem
+        )
     }
 }
 

@@ -19,7 +19,7 @@ struct ColorPickerRow: View {
     let stateToken: String
     @EnvironmentObject var settings: AppSettings
     @State private var viewModel: WidgetRowViewModel
-    @State private var commandSender = WidgetCommandSender()
+    @State private var commandSender = WidgetCommandDispatcher()
     var body: some View {
         let uiColor = viewModel.colorState
 

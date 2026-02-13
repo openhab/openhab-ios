@@ -56,7 +56,7 @@ struct TextInputRowView: View {
 
     private func sendTextCommand() {
         logger.info("Sending text command: \(inputText)")
-        viewModel.sendCommand(widget.item, commandToSend: inputText)
+        viewModel.sendCommand(inputText, for: widget)
         isTextFieldFocused = false
     }
 }

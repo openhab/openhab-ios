@@ -59,7 +59,7 @@ struct ColorSelection: View {
     @State private var xpos: Double = 100
     @State private var ypos: Double = 100
     @State private var dragStart: CGPoint?
-    @State private var commandSender = WidgetCommandSender()
+    @State private var commandSender = WidgetCommandDispatcher()
 
     private let handleRadius = 12.5
 

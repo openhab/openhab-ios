@@ -23,7 +23,7 @@ struct SetpointRow: View {
     private let logger = Logger(subsystem: "org.openhab.watch", category: "SetpointRow")
     @State private var viewModel: WidgetRowViewModel
     @State private var localValue: Double?
-    @State private var commandSender = WidgetCommandSender()
+    @State private var commandSender = WidgetCommandDispatcher()
 
     private var currentValue: Double {
         localValue ?? viewModel.numberState?.value ?? viewModel.minValue

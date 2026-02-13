@@ -19,7 +19,7 @@ struct SegmentSelectionView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var pressedIndex: Int?
     @State private var viewModel: WidgetRowViewModel
-    @State private var commandSender = WidgetCommandSender()
+    @State private var commandSender = WidgetCommandDispatcher()
 
     var body: some View {
         ScrollView {

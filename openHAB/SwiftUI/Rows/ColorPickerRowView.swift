@@ -19,8 +19,9 @@ struct ColorPickerRowView: View {
     @State private var selectedColor: Color = .white
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
-    @State private var lastSendTime: Date = .distantPast
-    @State private var debounceTask: Task<Void, Never>?
+    private var colorCommandKey: String {
+        "color-\(widget.widgetId)"
+    }
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetColorPickerView")
 
@@ -40,19 +41,7 @@ struct ColorPickerRowView: View {
             ColorPicker("Color", selection: $selectedColor, supportsOpacity: false)
                 .labelsHidden()
                 .onChange(of: selectedColor) { newColor in
-                    let now = Date()
-                    if now.timeIntervalSince(lastSendTime) > 0.2 {
-                        lastSendTime = now
-                        sendColorCommand(newColor)
-                    }
-                    // ColorPicker does not provide an .onEnded like Slider as it doesn't expose the drag lifecycle.
-                    // It only emits onChange when the color value changes.
-                    // Therefore, we debounce final send after 0.3s of no changes
-                    debounceTask?.cancel()
-                    debounceTask = Task {
-                        try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
-                        sendColorCommand(newColor)
-                    }
+                    sendColorCommand(newColor)
                 }
                 .disabled(widget.readOnly ?? false)
 
@@ -72,6 +61,13 @@ struct ColorPickerRowView: View {
             guard !newState.isEmpty else { return }
             selectedColor = parseColor(from: newState) ?? .white
         }
+        .onDisappear {
+            if let item = widget.item {
+                viewModel.cancelPendingCommand(for: item, key: colorCommandKey)
+            } else {
+                viewModel.cancelPendingCommand(for: widget, key: colorCommandKey)
+            }
+        }
     }
 
     private func sendColorCommand(_ color: Color) {
@@ -89,7 +85,12 @@ struct ColorPickerRowView: View {
 
         let command = "\(hueValue),\(saturationValue),\(brightnessValue)"
         logger.info("Sending color command: \(command)")
-        viewModel.sendCommand(widget.item, commandToSend: command)
+        viewModel.sendCommand(
+            command,
+            for: widget,
+            policy: WidgetCommandDefaults.colorPicker,
+            key: colorCommandKey
+        )
     }
 
     private func parseColor(from state: String) -> Color? {

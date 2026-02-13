@@ -81,7 +81,7 @@ struct DatePickerInputRowView: View {
 
         let command = formatter.string(from: date)
         logger.info("Sending date command: \(command)")
-        viewModel.sendCommand(widget.item, commandToSend: command)
+        viewModel.sendCommand(command, for: widget)
     }
 
     private func parseDate(from state: String) -> Date? {

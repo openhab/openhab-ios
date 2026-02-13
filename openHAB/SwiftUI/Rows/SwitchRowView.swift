@@ -64,7 +64,7 @@ struct SwitchRowView: View {
                     } else {
                         logger.info("\("Switch to OFF")")
                     }
-                    viewModel.sendCommand(widget.item, commandToSend: newState)
+                    viewModel.sendCommand(newState, for: widget)
                 }
             ))
             .labelsHidden()

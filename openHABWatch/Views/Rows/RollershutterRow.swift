@@ -17,7 +17,7 @@ import SwiftUI
 struct RollershutterRow: View {
     let widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
-    @State private var commandSender = WidgetCommandSender()
+    @State private var commandSender = WidgetCommandDispatcher()
 
     var body: some View {
         VStack(spacing: -5) {

@@ -170,7 +170,7 @@ struct SegmentedRowView: View {
                         if singlePressed == false {
                             singlePressed = true
                             logger.info("Segment mapping pressed, command: \(mapping.command)")
-                            viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+                            viewModel.sendCommand(mapping.command, for: widget)
                         }
                     }
                     .onEnded { _ in
@@ -200,7 +200,7 @@ struct SegmentedRowView: View {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 selectedIndex = index
             }
-            viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+            viewModel.sendCommand(mapping.command, for: widget)
         } label: {
             Text(mapping.label)
                 .font(.footnote)
@@ -246,7 +246,7 @@ struct SegmentedRowView: View {
                             pressedIndex = index
                             // Send command on press
                             logger.info("Sending press command: \(mapping.command)")
-                            viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+                            viewModel.sendCommand(mapping.command, for: widget)
                         }
                     }
                     .onEnded { _ in
@@ -254,7 +254,7 @@ struct SegmentedRowView: View {
                         // Send release command on release
                         if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
                             logger.info("Sending release command: \(releaseCommand)")
-                            viewModel.sendCommand(widget.item, commandToSend: releaseCommand)
+                            viewModel.sendCommand(releaseCommand, for: widget)
                         }
                     }
             )

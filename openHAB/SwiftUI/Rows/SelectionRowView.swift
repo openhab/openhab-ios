@@ -46,7 +46,7 @@ struct SelectionRowView: View {
                     let isSelected = widget.item?.state == mapping.command
                     Button {
                         logger.info("Selection changed to: \(mapping.label)")
-                        viewModel.sendCommand(widget.item, commandToSend: mapping.command)
+                        viewModel.sendCommand(mapping.command, for: widget)
                     } label: {
                         if isSelected {
                             Label(mapping.label, systemSymbol: .checkmark)

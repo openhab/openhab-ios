@@ -20,7 +20,7 @@ struct SegmentRow: View {
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
     @State private var viewModel: WidgetRowViewModel
-    @State private var commandSender = WidgetCommandSender()
+    @State private var commandSender = WidgetCommandDispatcher()
 
     private var currentIndex: Int? {
         viewModel.selectedIndex

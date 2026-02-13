@@ -49,6 +49,7 @@ class SitemapPageViewModel: ObservableObject {
     private var activeConnectionInfo: ConnectionInfo?
     private var pageHandlingTask: Task<Void, Never>?
     private var connectionObserverTask: Task<Void, Never>?
+    private let commandDispatcher = WidgetCommandDispatcher()
     private var defaultSitemap = ""
     private var defaultSitemapLabel = ""
     @Published var pageId = ""
@@ -496,9 +497,31 @@ class SitemapPageViewModel: ObservableObject {
 
     // MARK: - Command Sending
 
+    func sendCommand(_ command: String?,
+                     for widget: OpenHABWidget,
+                     policy: WidgetCommandPolicy = .immediate,
+                     key: String? = nil,
+                     fallbackItem: OpenHABItem? = nil) {
+        commandDispatcher.send(
+            command,
+            for: widget,
+            policy: policy,
+            key: key,
+            fallbackItem: fallbackItem
+        )
+    }
+
+    func cancelPendingCommand(for widget: OpenHABWidget, key: String? = nil) {
+        commandDispatcher.cancelPending(for: widget, key: key)
+    }
+
+    func cancelPendingCommand(for item: OpenHABItem, key: String? = nil) {
+        commandDispatcher.cancelPending(for: item, key: key)
+    }
+
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
-        if let item, let command {
-            sendCommand(itemname: item.name, command: command)
+        commandDispatcher.send(command, for: item, policy: .immediate) { [weak self] itemname, command in
+            self?.sendCommand(itemname: itemname, command: command)
         }
     }
 
@@ -513,17 +536,23 @@ class SitemapPageViewModel: ObservableObject {
         }
     }
 
-    func sendToUpdate(item: OpenHABItem?, state: NumberState?) {
+    func sendToUpdate(item: OpenHABItem?,
+                      state: NumberState?,
+                      policy: WidgetCommandPolicy = .immediate,
+                      key: String? = nil) {
         guard let item, let state else {
             logger.info("ItemUpdate for Item or State = nil")
             return
         }
-        if item.isOfTypeOrGroupType(.numberWithDimension) {
+        let command: String = if item.isOfTypeOrGroupType(.numberWithDimension) {
             // For number items, include unit (if present) in command
-            sendCommand(item, commandToSend: state.toString(locale: Locale(identifier: "US")))
+            state.toString(locale: Locale(identifier: "US"))
         } else {
             // For all other items, send the plain value
-            sendCommand(item, commandToSend: state.stringValue)
+            state.stringValue
+        }
+        commandDispatcher.send(command, for: item, policy: policy, key: key) { [weak self] itemname, command in
+            self?.sendCommand(itemname: itemname, command: command)
         }
     }
 

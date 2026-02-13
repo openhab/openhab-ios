@@ -18,7 +18,7 @@ struct SwitchRow: View {
     @EnvironmentObject var settings: AppSettings
     let stateToken: String
     @State private var localIsOn: Bool?
-    @State private var commandSender = WidgetCommandSender()
+    @State private var commandSender = WidgetCommandDispatcher()
 
     private var isOn: Bool {
         localIsOn ?? stateToken.parseAsBool()

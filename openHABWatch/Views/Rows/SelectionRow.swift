@@ -21,7 +21,7 @@ struct SelectionListView: View {
     let title: String
     @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
-    @State private var commandSender = WidgetCommandSender()
+    @State private var commandSender = WidgetCommandDispatcher()
 
     var body: some View {
         ScrollView {

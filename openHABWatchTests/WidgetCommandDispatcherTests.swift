@@ -41,13 +41,13 @@ private func makeWidget(widgetId: String, recorder: CommandRecorder) -> OpenHABW
     return widget
 }
 
-struct WidgetCommandSenderTests {
+struct WidgetCommandDispatcherTests {
     @Test("Immediate policy sends command once")
     @MainActor
     func immediatePolicySendsOnce() async {
         let recorder = CommandRecorder()
         let widget = makeWidget(widgetId: "immediate", recorder: recorder)
-        let sender = WidgetCommandSender()
+        let sender = WidgetCommandDispatcher()
 
         sender.send("ON", for: widget, policy: .immediate)
 
@@ -59,7 +59,7 @@ struct WidgetCommandSenderTests {
     func debounceKeepsFinalCommand() async throws {
         let recorder = CommandRecorder()
         let widget = makeWidget(widgetId: "debounce", recorder: recorder)
-        let sender = WidgetCommandSender()
+        let sender = WidgetCommandDispatcher()
 
         sender.send("ON", for: widget, policy: .debounce(.milliseconds(80)))
         sender.send("OFF", for: widget, policy: .debounce(.milliseconds(80)))
@@ -73,7 +73,7 @@ struct WidgetCommandSenderTests {
     func cancelPendingPreventsDispatch() async throws {
         let recorder = CommandRecorder()
         let widget = makeWidget(widgetId: "cancel", recorder: recorder)
-        let sender = WidgetCommandSender()
+        let sender = WidgetCommandDispatcher()
 
         sender.send("ON", for: widget, policy: .debounce(.milliseconds(120)))
         sender.cancelPending(for: widget)
@@ -87,7 +87,7 @@ struct WidgetCommandSenderTests {
     func pressReleaseDispatchesInOrder() async {
         let recorder = CommandRecorder()
         let widget = makeWidget(widgetId: "press-release", recorder: recorder)
-        let sender = WidgetCommandSender()
+        let sender = WidgetCommandDispatcher()
 
         sender.sendPress("UP", for: widget)
         sender.sendRelease("STOP", for: widget)
@@ -100,7 +100,7 @@ struct WidgetCommandSenderTests {
     func itemUpdateDispatchesAndSkipsNil() async {
         let recorder = CommandRecorder()
         let widget = makeWidget(widgetId: "item-update", recorder: recorder)
-        let sender = WidgetCommandSender()
+        let sender = WidgetCommandDispatcher()
 
         sender.sendItemUpdate(NumberState(value: 21), for: widget)
         sender.sendItemUpdate(nil, for: widget)

@@ -10,14 +10,13 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-import OpenHABCore
 
-enum WidgetCommandDefaults {
-    static let slider: WidgetCommandPolicy = .debounce(.milliseconds(500))
-    static let colorPicker: WidgetCommandPolicy = .debounce(.milliseconds(200))
-    static let immediate: WidgetCommandPolicy = .immediate
+public enum WidgetCommandDefaults {
+    public static let slider: WidgetCommandPolicy = .debounce(.milliseconds(500))
+    public static let colorPicker: WidgetCommandPolicy = .debounce(.milliseconds(200))
+    public static let immediate: WidgetCommandPolicy = .immediate
 
-    static func policy(for widget: OpenHABWidget) -> WidgetCommandPolicy {
+    public static func policy(for widget: OpenHABWidget) -> WidgetCommandPolicy {
         switch widget.type {
         case .slider:
             slider
@@ -29,7 +28,7 @@ enum WidgetCommandDefaults {
     }
 }
 
-enum WidgetCommandPolicy: Sendable {
+public enum WidgetCommandPolicy: Sendable {
     case immediate
     case debounce(Duration)
 }
