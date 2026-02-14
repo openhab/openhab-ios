@@ -95,18 +95,9 @@ public actor OpenAPIService {
     }
 
     private static func getServerURL(for url: URL) -> URL {
-        if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
-           let host = urlComponents.host,
-           host.contains("myopenhab.org"),
-           host != "home.myopenhab.org" {
-//            URL(string: "https://home.myopenhab.org")!
-            var newComponents = urlComponents
-            newComponents.host = "home.myopenhab.org"
-//            newComponents.scheme = "https"
-            return newComponents.url!
-        } else {
-            return url
-        }
+        // Respect the configured connection URL. Forcing cloud hosts can fail
+        // DNS resolution on some networks/simulators and breaks sitemap loading.
+        url
     }
 
     private func prepareURLSessionConfiguration(longPolling: Bool) -> URLSessionConfiguration {

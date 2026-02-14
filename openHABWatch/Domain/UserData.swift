@@ -15,7 +15,6 @@ import Foundation
 import OpenHABCore
 import os.log
 import SwiftUI
-import WatchKit
 
 @MainActor
 final class UserData: ObservableObject {
@@ -46,9 +45,7 @@ final class UserData: ObservableObject {
             let sitemapPage = try data.decoded(as: Components.Schemas.PageDTO.self)
             openHABSitemapPage = OpenHABPage(sitemapPage)
             widgets = openHABSitemapPage?.widgets ?? []
-            openHABSitemapPage?.sendCommand = { [weak self] item, command in
-                Task { await self?.sendCommand(item, command: command) }
-            }
+            decorateWidgetsWithSendCommand(widgets)
         } catch {
             Logger.userData.error("Should not throw \(error.localizedDescription)")
         }
@@ -226,12 +223,16 @@ final class UserData: ObservableObject {
     }
 
     func updateNetwork() async {
-        guard let connection1 = AppSettings.shared.localConnectionConfig,
-              let connection2 = AppSettings.shared.remoteConnectionConfig else {
+        let connections = [
+            AppSettings.shared.localConnectionConfig,
+            AppSettings.shared.remoteConnectionConfig
+        ].compactMap(\.self)
+
+        guard !connections.isEmpty else {
             Logger.userData.warning("No connections defined")
             return
         }
-        await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
+        await NetworkTracker.shared.startTracking(connectionConfigurations: connections)
     }
 
     func startPageHandling(sitemapName: String, pageId: String = "", force: Bool = false) {
@@ -270,8 +271,22 @@ final class UserData: ObservableObject {
             do {
                 isLoadingSitemap = true
 
-                // Wait for NetworkTracker to establish a connection (no fallback hacks needed!)
-                guard let connectionInfo = await NetworkTracker.shared.waitForActiveConnection() else {
+                // Always ensure tracking is running before waiting.
+                // startTracking is idempotent for unchanged active configurations.
+                await self.updateNetwork()
+
+                var connectionInfo = await NetworkTracker.shared.activeConnection
+                if connectionInfo == nil {
+                    connectionInfo = await NetworkTracker.shared.waitForActiveConnection()
+                }
+
+                if connectionInfo == nil {
+                    Logger.userData.warning("No active connection on first attempt, restarting network tracking once")
+                    await self.updateNetwork()
+                    connectionInfo = await NetworkTracker.shared.waitForActiveConnection()
+                }
+
+                guard let connectionInfo else {
                     Logger.userData.error("No active connection available after timeout")
                     await MainActor.run {
                         self.errorDescription = NSLocalizedString("settings_not_received", comment: "")
@@ -288,10 +303,6 @@ final class UserData: ObservableObject {
                 try Task.checkCancellation()
 
                 await MainActor.run {
-                    // Set command handler BEFORE assigning to @Published property to prevent race condition
-                    initialPage?.sendCommand = { [weak self] item, command in
-                        Task { await self?.sendCommand(item, command: command) }
-                    }
                     self.openHABSitemapPage = initialPage
                     let newWidgets = initialPage?.widgets ?? []
                     self.updateWidgets(with: newWidgets)
@@ -312,11 +323,6 @@ final class UserData: ObservableObject {
                         try Task.checkCancellation()
 
                         await MainActor.run {
-                            if let page {
-                                page.sendCommand = { [weak self] item, command in
-                                    Task { await self?.sendCommand(item, command: command) }
-                                }
-                            }
                             // Only update page object when title changes to avoid
                             // firing objectWillChange and resetting scroll position
                             if self.openHABSitemapPage?.title != page?.title {
@@ -377,21 +383,13 @@ final class UserData: ObservableObject {
 
     func sendCommand(_ item: OpenHABItem?, command: String?) async {
         guard let item, let command else { return }
-        let sourcePrefix = sitemapSourcePrefix()
-        let deviceId = WKInterfaceDevice.current().identifierForVendor?.uuidString
         do {
-            try await NetworkTracker.shared.send(to: item, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
+            // Watch commands currently rely on server defaults for `source`.
+            // Explicit source formatting can be rejected by some deployments.
+            try await NetworkTracker.shared.send(to: item, command: command)
         } catch {
             Logger.userData.error("Failed to send command '\(command)' to '\(item.name)': \(error.localizedDescription)")
         }
-    }
-
-    private func sitemapSourcePrefix() -> String? {
-        let sitemapName = currentlyLoadingSitemap ?? ""
-        guard !sitemapName.isEmpty else { return nil }
-        let pageId = openHABSitemapPage?.pageId ?? ""
-        let suffix = pageId.isEmpty ? "" : ":\(pageId)"
-        return "org.openhab.ui.basic$\(sitemapName)\(suffix)"
     }
 
     func refreshUrl() async {
@@ -432,19 +430,35 @@ final class UserData: ObservableObject {
                 existingWidget.widgets = newWidget.widgets
                 existingWidget.linkedPage = newWidget.linkedPage
                 existingWidget.visibility = newWidget.visibility
-                existingWidget.sendCommand = newWidget.sendCommand
             }
         }
+
+        // Wire sendCommand closures directly to UserData rather than copying
+        // from the page's decorated widgets. The page object is a local variable
+        // that gets deallocated after each poll cycle (when the title doesn't
+        // change), which kills the [weak page] closures set by
+        // decorateWithSendCommand. By capturing [weak self] (UserData) instead,
+        // the closures remain alive for the lifetime of the view hierarchy.
+        let allWidgets = structureChanged
+            ? newWidgets.map { existingWidgetsMap[$0.widgetId] ?? $0 }
+            : widgets
+        decorateWidgetsWithSendCommand(allWidgets)
 
         // Only reassign the @Published array when the list structure actually
         // changed (widgets added, removed, or reordered). This avoids a full
         // ScrollView rebuild that resets the scroll position.
         if structureChanged {
-            var updatedWidgets: [OpenHABWidget] = []
-            for newWidget in newWidgets {
-                updatedWidgets.append(existingWidgetsMap[newWidget.widgetId] ?? newWidget)
+            widgets = allWidgets
+        }
+    }
+
+    /// Sets sendCommand closures on widgets that go directly to UserData,
+    /// bypassing the OpenHABPage closure chain and its weak-reference lifetime issues.
+    private func decorateWidgetsWithSendCommand(_ widgets: [OpenHABWidget]) {
+        for widget in widgets {
+            widget.sendCommand = { [weak self] item, command in
+                Task { await self?.sendCommand(item, command: command) }
             }
-            widgets = updatedWidgets
         }
     }
 }

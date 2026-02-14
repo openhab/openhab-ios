@@ -16,25 +16,21 @@ enum WidgetRowFactory {
     @MainActor
     @ViewBuilder
     static func make(widget: OpenHABWidget, settings: AppSettings) -> some View {
-        switch widget.type {
-        case .switchWidget:
-            if !widget.mappings.isEmpty {
-                SegmentRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
-            } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                SwitchRow(widget: widget, stateToken: widget.state.isEmpty ? (widget.item?.state ?? "") : widget.state)
-            } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                RollershutterRow(widget: widget)
-            } else if !widget.mappingsOrItemOptions.isEmpty {
-                SegmentRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
-            } else {
-                SwitchRow(widget: widget, stateToken: widget.state.isEmpty ? (widget.item?.state ?? "") : widget.state)
-            }
+        let stateToken = widget.displayState.effectiveState
+
+        switch widget.renderingKind {
+        case .segmentedSwitch:
+            SegmentRow(widget: widget, stateToken: stateToken)
+        case .toggleSwitch:
+            SwitchRow(widget: widget, stateToken: stateToken)
+        case .rollershutterSwitch:
+            RollershutterRow(widget: widget)
         case .slider:
-            SliderRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
+            SliderRow(widget: widget, stateToken: stateToken)
         case .setpoint:
-            SetpointRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
+            SetpointRow(widget: widget, stateToken: stateToken)
         case .frame:
-            FrameRow(title: widget.labelText ?? "")
+            FrameRow(title: widget.displayState.labelText)
         case .text:
             TextRow(widget: widget, hasLinkedPage: widget.linkedPage != nil)
         case .image:
@@ -57,20 +53,20 @@ enum WidgetRowFactory {
             EquatableView(content: ImageRow(url: url, refresh: widget.refresh))
         case .mapview:
             MapViewRow(widget: widget)
-        case .colorpicker:
-            ColorPickerRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
+        case .colorPicker:
+            ColorPickerRow(widget: widget, stateToken: stateToken)
         case .selection:
             SelectionRow(
                 widget: widget,
-                mappings: widget.mappingsOrItemOptions,
-                title: widget.labelText ?? "Select",
-                initialSelectedIndex: widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) },
-                labelValue: widget.labelValue
+                mappings: widget.displayState.mappings,
+                title: widget.displayState.labelText.isEmpty ? "Select" : widget.displayState.labelText,
+                initialSelectedIndex: widget.displayState.selectedIndex,
+                labelValue: widget.displayState.labelValue
             )
-        case .video, .webview, .input, .colortemperaturepicker, .buttongrid:
+        case .video, .webview, .dateInput, .textInput, .colorTemperaturePicker, .buttonGrid:
             // Not yet implemented for watchOS
             GenericRow(widget: widget)
-        case .group, .defaultWidget, .button, .unknown:
+        case .generic:
             GenericRow(widget: widget)
         }
     }

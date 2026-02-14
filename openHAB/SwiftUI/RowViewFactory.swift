@@ -15,27 +15,19 @@ import SwiftUI
 enum RowViewFactory {
     @MainActor @ViewBuilder
     static func view(for widget: OpenHABWidget) -> some View {
-        switch widget.type {
-        case .switchWidget:
-            if !widget.mappings.isEmpty {
-                SegmentedRowView(widget: widget)
-            } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                SwitchRowView(widget: widget)
-            } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                RollershutterRowView(widget: widget)
-            } else if !widget.mappingsOrItemOptions.isEmpty {
-                SegmentedRowView(widget: widget)
-            } else {
-                SwitchRowView(widget: widget)
-            }
+        switch widget.renderingKind {
+        case .segmentedSwitch:
+            SegmentedRowView(widget: widget)
+        case .toggleSwitch:
+            SwitchRowView(widget: widget)
+        case .rollershutterSwitch:
+            RollershutterRowView(widget: widget)
         case .slider: // SliderRowView also handles switchSupport
             SliderRowView(widget: widget)
-        case .input:
-            if [.date, .time, .dateTime].contains(widget.inputHint) {
-                DatePickerInputRowView(widget: widget)
-            } else {
-                TextInputRowView(widget: widget)
-            }
+        case .dateInput:
+            DatePickerInputRowView(widget: widget)
+        case .textInput:
+            TextInputRowView(widget: widget)
         case .text:
             TextRowView(widget: widget)
         case .frame:
@@ -44,7 +36,7 @@ enum RowViewFactory {
             SetpointRowView(widget: widget)
         case .selection:
             SelectionRowView(widget: widget)
-        case .colorpicker:
+        case .colorPicker:
             ColorPickerRowView(widget: widget)
         case .image, .chart:
             ImageRowView(widget: widget)
@@ -54,11 +46,11 @@ enum RowViewFactory {
             WidgetWebViewContainer(widget: widget)
         case .mapview:
             MapRowView(widget: widget)
-        case .colortemperaturepicker:
+        case .colorTemperaturePicker:
             ColorTemperaturePickerRowView(widget: widget)
-        case .buttongrid:
+        case .buttonGrid:
             ButtonGridRowView(widget: widget)
-        case .group, .defaultWidget, .button, .unknown:
+        case .generic:
             GenericRowView(widget: widget)
         }
     }
