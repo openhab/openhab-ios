@@ -29,6 +29,7 @@ import SwiftUI
         var remoteConnectionConfig: ConnectionConfiguration
         var homeName: String
         var sseCommandItem: String
+        var tabConfiguration: [TabEntry]
     }
 
 struct SettingsView: View {
@@ -49,6 +50,7 @@ struct SettingsView: View {
     @State private var settingsHomeName = ""
     @State private var viewAppearedOnce = false
     @State private var settingsSSECommandItem = ""
+    @State private var settingsTabConfiguration: [TabEntry] = TabEntry.defaultConfiguration
 
     @State private var initialSnapshot: SettingsSnapshot?
     @State private var isDirty = false
@@ -70,7 +72,8 @@ struct SettingsView: View {
             localConnectionConfig: settingsLocalConnectionConfiguration,
             remoteConnectionConfig: settingsRemoteConnectionConfiguration,
             homeName: settingsHomeName,
-            sseCommandItem: settingsSSECommandItem
+            sseCommandItem: settingsSSECommandItem,
+            tabConfiguration: settingsTabConfiguration
         )
     }
 
@@ -86,6 +89,8 @@ struct SettingsView: View {
                 settingsIdleOff: $settingsIdleOff,
                 settingsSSECommandItem: $settingsSSECommandItem
             )
+
+            TabCustomizationSection(tabConfiguration: $settingsTabConfiguration)
 
             MainUISettingsView(
                 settingsAlwaysAllowWebRTC: $settingsAlwaysAllowWebRTC,
@@ -140,7 +145,9 @@ struct SettingsView: View {
             }
         }
         .onChange(of: currentSnapshot) { _, newSnapshot in
-            isDirty = newSnapshot != initialSnapshot
+            withAnimation {
+                isDirty = newSnapshot != initialSnapshot
+            }
         }
     }
 
@@ -160,6 +167,7 @@ struct SettingsView: View {
         settingsRemoteConnectionConfiguration = snapshot.remoteConnectionConfig
         settingsHomeName = snapshot.homeName
         settingsSSECommandItem = snapshot.sseCommandItem
+        settingsTabConfiguration = snapshot.tabConfiguration
     }
 
     private func updateSitemaps(activeConfiguration: ConnectionConfiguration) async {
@@ -200,6 +208,7 @@ struct SettingsView: View {
         settingsRemoteConnectionConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
         settingsHomeName = Preferences.shared.currentHomePreferences.homeName
         settingsSSECommandItem = Preferences.shared.currentHomePreferences.sseCommandItem
+        settingsTabConfiguration = Preferences.shared.applicationPreferences.tabConfiguration
     }
 
     func saveSettings() {
@@ -221,6 +230,7 @@ struct SettingsView: View {
 
         Preferences.shared.modifyApplicationPreferences { @MainActor applicationPreferences in
             applicationPreferences.showSearchField = settingsShowSearchField
+            applicationPreferences.tabConfiguration = settingsTabConfiguration
         }
 
         // Apply global UI changes immediately (status bar visibility)

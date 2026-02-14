@@ -15,7 +15,16 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
+struct SitemapNavigationCommand: Equatable {
+    let name: String
+    let widgetId: String?
+    let id = UUID()
+}
+
 struct SitemapsTab: View {
+    var resetTrigger: Int = 0
+    @Binding var navigationCommand: SitemapNavigationCommand?
+
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var selectedSitemap: String?
     @State private var sitemapForWatch: String?
@@ -28,7 +37,7 @@ struct SitemapsTab: View {
     var body: some View {
         NavigationStack {
             Group {
-                if let selectedSitemap {
+                if selectedSitemap != nil {
                     SitemapNavigationContent(viewModel: viewModel)
                 } else {
                     sitemapList
@@ -60,6 +69,22 @@ struct SitemapsTab: View {
             Task {
                 await fetchSitemaps(activeConnection: activeConnection)
             }
+        }
+        .onChange(of: resetTrigger) { _, _ in
+            withAnimation {
+                selectedSitemap = nil
+            }
+        }
+        .onChange(of: navigationCommand) { _, command in
+            guard let command else { return }
+            selectedSitemap = command.name
+            Preferences.shared.modifyActiveHome { preferences in
+                preferences.defaultSitemap = command.name
+            }
+            Task {
+                await viewModel.pushSitemap(name: command.name, path: command.widgetId)
+            }
+            navigationCommand = nil
         }
     }
 
@@ -93,20 +118,6 @@ struct SitemapsTab: View {
         }
         Task {
             await viewModel.pushSitemap(name: name, path: nil)
-        }
-    }
-
-    func resetToRoot() {
-        selectedSitemap = nil
-    }
-
-    func navigateToSitemap(name: String, widgetId: String?) {
-        selectedSitemap = name
-        Preferences.shared.modifyActiveHome { preferences in
-            preferences.defaultSitemap = name
-        }
-        Task {
-            await viewModel.pushSitemap(name: name, path: widgetId)
         }
     }
 

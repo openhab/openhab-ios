@@ -37,8 +37,10 @@ struct ConnectionView: View {
 }
 
 struct SystemTab: View {
+    var resetTrigger: Int = 0
+
     @State private var showNotifications = false
-    @State var path = NavigationPath()
+    @State private var path = NavigationPath()
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -90,10 +92,9 @@ struct SystemTab: View {
         .onReceive(Preferences.shared.$currentHomePreferences) { _ in
             updateNotificationVisibility()
         }
-    }
-
-    func resetToRoot() {
-        path = NavigationPath()
+        .onChange(of: resetTrigger) { _, _ in
+            path = NavigationPath()
+        }
     }
 
     private func updateNotificationVisibility() {

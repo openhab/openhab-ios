@@ -21,6 +21,24 @@ enum AppTab: String, CaseIterable, Hashable {
     case sitemaps
     case tiles
     case system
+
+    var title: String {
+        switch self {
+        case .main: "Home"
+        case .sitemaps: "Sitemaps"
+        case .tiles: "Tiles"
+        case .system: "System"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .main: "house"
+        case .sitemaps: "map"
+        case .tiles: "square.grid.2x2"
+        case .system: "gear"
+        }
+    }
 }
 
 struct OpenHABTabRootView: View {
@@ -29,10 +47,12 @@ struct OpenHABTabRootView: View {
 
     @State private var selectedTab: AppTab
     @State private var isDemoMode: Bool
-    @State private var sitemapsTab = SitemapsTab()
-    @State private var tilesTab = TilesTab()
-    @State private var systemTab = SystemTab()
-    @State private var tabCustomization = TabViewCustomization()
+    @State private var enabledTabs: [AppTab]
+
+    @State private var sitemapsResetTrigger = 0
+    @State private var tilesResetTrigger = 0
+    @State private var systemResetTrigger = 0
+    @State private var sitemapNavigationCommand: SitemapNavigationCommand?
 
     private let webViewController = OpenHABWebViewController()
 
@@ -52,6 +72,7 @@ struct OpenHABTabRootView: View {
         let saved = Preferences.shared.currentHomePreferences.lastSelectedTab
         _selectedTab = State(initialValue: AppTab(rawValue: saved) ?? .main)
         _isDemoMode = State(initialValue: Preferences.shared.currentHomePreferences.demomode)
+        _enabledTabs = State(initialValue: Self.computeEnabledTabs())
 
         #if DEBUG
         if ProcessInfo.processInfo.environment["UITest"] != nil {
@@ -62,34 +83,41 @@ struct OpenHABTabRootView: View {
         #endif
     }
 
+    private static func computeEnabledTabs() -> [AppTab] {
+        let config = Preferences.shared.applicationPreferences.tabConfiguration
+        let tabs = config.compactMap { entry -> AppTab? in
+            guard entry.enabled || entry.id == AppTab.system.rawValue else { return nil }
+            return AppTab(rawValue: entry.id)
+        }
+        // Ensure system tab is always present
+        if !tabs.contains(.system) {
+            return tabs + [.system]
+        }
+        return tabs
+    }
+
     var body: some View {
         TabView(selection: tabSelectionBinding) {
-            Tab("Home", systemImage: "house", value: AppTab.main) {
-                MainWebTab(webViewController: webViewController)
-                    .ignoresSafeArea()
+            ForEach(enabledTabs, id: \.self) { tab in
+                Tab(tab.title, systemImage: tab.systemImage, value: tab) {
+                    AnyView(tabContentView(for: tab))
+                }
             }
-            .customizationID("home")
-
-            Tab("Sitemaps", systemImage: "map", value: AppTab.sitemaps) {
-                sitemapsTab
-            }
-            .customizationID("sitemaps")
-
-            Tab("Tiles", systemImage: "square.grid.2x2", value: AppTab.tiles) {
-                tilesTab
-            }
-            .customizationID("tiles")
-
-            Tab("System", systemImage: "gear", value: AppTab.system) {
-                systemTab
-            }
-            .customizationID("system")
         }
-        .tabViewCustomization($tabCustomization)
         .environmentObject(networkTracker)
         .onChange(of: selectedTab) { oldTab, newTab in
             Preferences.shared.modifyActiveHome { prefs in
                 prefs.lastSelectedTab = newTab.rawValue
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
+            let newTabs = Self.computeEnabledTabs()
+            if enabledTabs != newTabs {
+                enabledTabs = newTabs
+                // If current tab was disabled, switch to first available
+                if !enabledTabs.contains(selectedTab) {
+                    selectedTab = enabledTabs.first ?? .system
+                }
             }
         }
         .onAppear {
@@ -97,7 +125,7 @@ struct OpenHABTabRootView: View {
             // Switch to sitemaps in demo mode
             if Preferences.shared.currentHomePreferences.demomode {
                 selectedTab = .sitemaps
-                sitemapsTab.navigateToSitemap(name: "demo", widgetId: nil)
+                sitemapNavigationCommand = SitemapNavigationCommand(name: "demo", widgetId: nil)
             }
         }
         .onReceive(appServices.$navigationCommand) { command in
@@ -149,16 +177,31 @@ struct OpenHABTabRootView: View {
         }
     }
 
+    @ViewBuilder
+    private func tabContentView(for tab: AppTab) -> some View {
+        switch tab {
+        case .main:
+            MainWebTab(webViewController: webViewController)
+                .ignoresSafeArea()
+        case .sitemaps:
+            SitemapsTab(resetTrigger: sitemapsResetTrigger, navigationCommand: $sitemapNavigationCommand)
+        case .tiles:
+            TilesTab(resetTrigger: tilesResetTrigger)
+        case .system:
+            SystemTab(resetTrigger: systemResetTrigger)
+        }
+    }
+
     private func resetTab(_ tab: AppTab) {
         switch tab {
         case .main:
             webViewController.loadWebView(force: true)
         case .sitemaps:
-            sitemapsTab.resetToRoot()
+            sitemapsResetTrigger += 1
         case .tiles:
-            tilesTab.resetToRoot()
+            tilesResetTrigger += 1
         case .system:
-            systemTab.resetToRoot()
+            systemResetTrigger += 1
         }
     }
 
@@ -175,7 +218,7 @@ struct OpenHABTabRootView: View {
             }
         case let .switchToSitemap(name, widgetId):
             selectedTab = .sitemaps
-            sitemapsTab.navigateToSitemap(name: name, widgetId: widgetId)
+            sitemapNavigationCommand = SitemapNavigationCommand(name: name, widgetId: widgetId)
         }
     }
 }

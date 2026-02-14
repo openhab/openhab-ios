@@ -111,9 +111,40 @@ public struct HomePreferences: Codable, Equatable {
     }
 }
 
+public struct TabEntry: Codable, Equatable, Hashable, Sendable {
+    public var id: String
+    public var enabled: Bool
+
+    public init(id: String, enabled: Bool) {
+        self.id = id
+        self.enabled = enabled
+    }
+
+    public static let defaultConfiguration: [TabEntry] = [
+        TabEntry(id: "main", enabled: true),
+        TabEntry(id: "sitemaps", enabled: true),
+        TabEntry(id: "tiles", enabled: true),
+        TabEntry(id: "system", enabled: true)
+    ]
+}
+
 @MainActor
 public struct ApplicationPreferences: Codable, Equatable {
     public var showSearchField = true
+    public var tabConfiguration: [TabEntry] = TabEntry.defaultConfiguration
+
+    enum CodingKeys: String, CodingKey {
+        case showSearchField
+        case tabConfiguration
+    }
+
+    public init() {}
+
+    public nonisolated init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        showSearchField = try container.decodeIfPresent(Bool.self, forKey: .showSearchField) ?? true
+        tabConfiguration = try container.decodeIfPresent([TabEntry].self, forKey: .tabConfiguration) ?? TabEntry.defaultConfiguration
+    }
 }
 
 // MARK: Retrieving preference from user defaults, reacting to preference change

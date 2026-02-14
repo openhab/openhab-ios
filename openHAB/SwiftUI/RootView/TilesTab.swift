@@ -13,17 +13,20 @@ import OpenHABCore
 import os.log
 import SFSafeSymbols
 import SwiftUI
+@preconcurrency import WebKit
 
 struct TilesTab: View {
+    var resetTrigger: Int = 0
+
     @State private var uiTiles: [OpenHABUiTile] = []
-    @State private var selectedTileURL: IdentifiableURL?
+    @State private var path = NavigationPath()
 
     @EnvironmentObject private var networkTracker: MainActorNetworkTracker
 
     @ScaledMetric private var iconWidth = 24.0
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 ForEach(uiTiles, id: \.url) { tile in
                     Button {
@@ -41,6 +44,11 @@ struct TilesTab: View {
             }
             .navigationTitle("Tiles")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(for: URL.self) { url in
+                TileWebView(url: url)
+                    .ignoresSafeArea(edges: .bottom)
+                    .navigationBarTitleDisplayMode(.inline)
+            }
         }
         .task {
             await fetchTiles(activeConnection: networkTracker.activeConnection)
@@ -50,13 +58,9 @@ struct TilesTab: View {
                 await fetchTiles(activeConnection: activeConnection)
             }
         }
-        .sheet(item: $selectedTileURL) { item in
-            SafariView(url: item.url)
+        .onChange(of: resetTrigger) { _, _ in
+            path = NavigationPath()
         }
-    }
-
-    func resetToRoot() {
-        selectedTileURL = nil
     }
 
     private func openTile(_ tile: OpenHABUiTile) {
@@ -75,7 +79,7 @@ struct TilesTab: View {
         }
 
         if let url {
-            selectedTileURL = IdentifiableURL(url: url)
+            path.append(url)
         }
     }
 
@@ -92,7 +96,14 @@ struct TilesTab: View {
     }
 }
 
-private struct IdentifiableURL: Identifiable {
-    let id = UUID()
+private struct TileWebView: UIViewRepresentable {
     let url: URL
+
+    func makeUIView(context: Context) -> WKWebView {
+        let webView = WKWebView()
+        webView.load(URLRequest(url: url))
+        return webView
+    }
+
+    func updateUIView(_ webView: WKWebView, context: Context) {}
 }
