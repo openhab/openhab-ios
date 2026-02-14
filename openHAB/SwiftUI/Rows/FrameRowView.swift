@@ -21,9 +21,8 @@ struct FrameRowView: View {
         let displayState = widget.displayState
         HStack {
             Text(displayState.labelText.uppercased())
-                .font(.callout)
+                .ohTextToken(.section)
                 .foregroundStyle(.secondary)
-                .lineLimit(1)
             Spacer()
         }
     }

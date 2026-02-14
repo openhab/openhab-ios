@@ -41,8 +41,8 @@ struct RollershutterRowView: View {
                     if !displayState.labelText.isEmpty {
                         let labelText = displayState.labelText
                         Text(labelText)
+                            .ohTextToken(.rowLabel)
                             .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                            .lineLimit(1)
                     }
                 }
 

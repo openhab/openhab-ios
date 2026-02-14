@@ -91,18 +91,16 @@ struct SliderRowView: View {
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
                 Text(labelText)
+                    .ohTextToken(.rowLabel)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
             }
 
             Spacer()
 
             // Show current slider value (pendingValue while dragging, otherwise widget value)
             Text(pendingValue != nil ? currentValueText : (displayState.labelValue ?? currentValueText))
-                .font(.callout)
+                .ohTextToken(.rowValueCallout)
                 .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
-                .lineLimit(1)
         }
         .contentShape(Rectangle())
     }
@@ -111,7 +109,11 @@ struct SliderRowView: View {
                                   policy: WidgetCommandPolicy,
                                   key: String?) {
         var numberState = widget.stateValueAsNumberState
-        numberState = numberState ?? NumberState(value: newValue)
+        numberState = numberState ?? NumberState(
+            value: newValue,
+            unit: widget.unit,
+            format: widget.item?.stateDescription?.numberPattern
+        )
         numberState?.value = newValue
         viewModel.sendToUpdate(item: widget.item, state: numberState, policy: policy, key: key)
     }
@@ -126,6 +128,16 @@ struct SliderRowView: View {
 
     private func currentValueText(displayState: WidgetDisplayState) -> String {
         let currentValue = currentValue(displayState: displayState)
+        if let numberPattern = widget.item?.stateDescription?.numberPattern, !numberPattern.isEmpty {
+            let formatted = NumberState(
+                value: currentValue,
+                unit: widget.unit,
+                format: numberPattern
+            ).toString(locale: Locale.current)
+            if !formatted.isEmpty {
+                return formatted
+            }
+        }
         return currentValue.valueText(step: widget.step)
     }
 

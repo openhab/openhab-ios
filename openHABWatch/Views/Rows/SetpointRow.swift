@@ -30,11 +30,10 @@ struct SetpointRow: View {
     }
 
     private var valueText: String {
-        let value = currentValue.valueText(step: viewModel.step)
-        if let unit = widget.unit, !unit.isEmpty {
-            return "\(value) \(unit)"
-        }
-        return value
+        formattedValue(
+            for: currentValue,
+            locale: Locale.current
+        )
     }
 
     var body: some View {
@@ -107,7 +106,11 @@ struct SetpointRow: View {
         }
 
         localValue = limitedNewValue
-        let numberState = NumberState(value: limitedNewValue, unit: widget.unit)
+        let numberState = NumberState(
+            value: limitedNewValue,
+            unit: widget.unit,
+            format: widget.item?.stateDescription?.numberPattern
+        )
 
         logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState.description)")
         commandSender.sendItemUpdate(numberState, for: widget)
@@ -119,6 +122,22 @@ struct SetpointRow: View {
 
     func increaseValue() {
         handleUpDown(isDecreasing: false)
+    }
+
+    private func formattedValue(for value: Double, locale: Locale) -> String {
+        if let numberPattern = widget.item?.stateDescription?.numberPattern,
+           !numberPattern.isEmpty {
+            return NumberState(
+                value: value,
+                unit: widget.unit,
+                format: numberPattern
+            ).toString(locale: locale)
+        }
+        let fallback = value.valueText(step: viewModel.step)
+        if let unit = widget.unit, !unit.isEmpty {
+            return "\(fallback) \(unit)"
+        }
+        return fallback
     }
 }
 

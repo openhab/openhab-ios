@@ -25,16 +25,15 @@ struct TextRowView: View {
                 .frame(width: 32, height: 32)
 
             Text(displayState.labelText)
+                .ohTextToken(.rowLabel)
                 .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                .lineLimit(1)
 
             Spacer()
 
             if let value = displayState.labelValue {
                 Text(value)
-                    .font(.body)
+                    .ohTextToken(.rowValue)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
-                    .lineLimit(1)
             }
         }
         .contextMenu {

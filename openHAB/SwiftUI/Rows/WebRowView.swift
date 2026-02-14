@@ -24,8 +24,8 @@ struct WidgetWebViewContainer: View {
             if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 let labelText = displayState.labelText
                 Text(labelText)
+                    .ohTextToken(.rowLabel)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                    .lineLimit(1)
             }
 
             WebRowView(widget: widget)
@@ -34,9 +34,8 @@ struct WidgetWebViewContainer: View {
 
             if let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
-                    .font(.caption)
+                    .ohTextToken(.rowValueCompact)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
-                    .lineLimit(1)
             }
         }
     }

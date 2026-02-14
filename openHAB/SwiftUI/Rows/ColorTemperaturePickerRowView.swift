@@ -92,8 +92,8 @@ struct ColorTemperaturePickerRowView: View {
                     if !displayState.labelText.isEmpty {
                         let labelText = displayState.labelText
                         Text(labelText)
+                            .ohTextToken(.rowLabel)
                             .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                            .lineLimit(1)
                     }
 
                     Spacer()
@@ -101,16 +101,16 @@ struct ColorTemperaturePickerRowView: View {
                     // Temperature value display
                     HStack {
                         Text("\(Int(selectedTemperature))K")
-                            .font(.caption)
+                            .ohTextToken(.rowValueCompact)
                             .foregroundStyle(.secondary)
 
                         Text(" - ")
-                            .font(.caption)
+                            .ohTextToken(.rowValueCompact)
                             .foregroundStyle(.secondary)
 
                         // Temperature description
                         Text(temperatureDescription)
-                            .font(.caption2)
+                            .ohTextToken(.secondary)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -120,7 +120,7 @@ struct ColorTemperaturePickerRowView: View {
                     // Warm indicator
                     Image(systemSymbol: .sunMinFill)
                         .foregroundStyle(.orange)
-                        .font(.caption)
+                        .ohTextToken(.secondary)
 
                     // Slider with custom gradient track
                     ZStack(alignment: .leading) {
@@ -149,7 +149,7 @@ struct ColorTemperaturePickerRowView: View {
                     // Cool indicator
                     Image(systemSymbol: .snowflake)
                         .foregroundStyle(.blue)
-                        .font(.caption)
+                        .ohTextToken(.secondary)
                 }
             }
         }

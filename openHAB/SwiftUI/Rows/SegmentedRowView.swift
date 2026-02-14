@@ -40,9 +40,8 @@ struct SegmentedRowView: View {
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
                 Text(labelText)
+                    .ohTextToken(.rowLabel)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
                     .padding(.leading, 8)
                     .layoutPriority(1)
             }
@@ -50,9 +49,8 @@ struct SegmentedRowView: View {
             if let detailTextLabel = displayState.labelValue, !detailTextLabel.isEmpty {
                 Spacer(minLength: 8)
                 Text(detailTextLabel)
+                    .ohTextToken(.rowValue)
                     .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
                     .layoutPriority(1)
             }
 
@@ -146,10 +144,8 @@ struct SegmentedRowView: View {
         let isSelected = isSingleMappingSelected(displayState: displayState, mappings: mappings)
 
         Text(mapping.label)
-            .font(.footnote)
+            .ohTextToken(.control)
             .bold()
-            .lineLimit(1)
-            .truncationMode(.tail)
             .padding(.horizontal, 8)
             .padding(.vertical, 5)
             .frame(minWidth: 50)
@@ -206,10 +202,8 @@ struct SegmentedRowView: View {
             viewModel.sendCommand(mapping.command, for: widget)
         } label: {
             Text(mapping.label)
-                .font(.footnote)
+                .ohTextToken(.control)
                 .bold()
-                .lineLimit(1)
-                .truncationMode(.tail)
                 .padding(.vertical, 5)
                 .frame(minWidth: 30, maxWidth: 120)
                 .foregroundStyle(.primary)
@@ -221,10 +215,8 @@ struct SegmentedRowView: View {
     private func pressReleaseButton(for mapping: OpenHABWidgetMapping, at index: Int) -> some View {
         let isPressed = pressedIndex == index
         Text(mapping.label)
-            .font(.footnote)
+            .ohTextToken(.control)
             .bold()
-            .lineLimit(1)
-            .truncationMode(.tail)
             .padding(.horizontal, 8)
             .padding(.vertical, 5)
             .frame(minWidth: 50)

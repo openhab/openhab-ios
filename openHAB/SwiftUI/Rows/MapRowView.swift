@@ -33,8 +33,8 @@ struct MapRowViewLegacy: View {
             if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 let labelText = displayState.labelText
                 Text(labelText)
+                    .ohTextToken(.rowLabel)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                    .lineLimit(1)
             }
 
             Map(coordinateRegion: .constant(region), annotationItems: CLLocationCoordinate2DIsValid(widget.coordinate) ? [widget.coordinate] : []) { location in

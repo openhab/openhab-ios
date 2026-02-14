@@ -43,8 +43,8 @@ struct ImageRowView: View {
             if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 let labelText = displayState.labelText
                 Text(labelText)
+                    .ohTextToken(.rowLabel)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                    .lineLimit(1)
             }
             switch widget.generateImageResult(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
             case let .embedded(data: data):
@@ -78,9 +78,8 @@ struct ImageRowView: View {
             // Only show labelValue for image widgets, not charts
             if widget.type == .image, let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
-                    .font(.caption)
+                    .ohTextToken(.rowValueCompact)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
-                    .lineLimit(1)
             }
         }
         .onAppear {

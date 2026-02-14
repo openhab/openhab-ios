@@ -47,10 +47,8 @@ struct ButtonGridButton: View {
                         .frame(width: 16, height: 16)
                 } else {
                     Text(widget.label)
-                        .font(.caption)
+                        .ohTextToken(.rowValueCompact)
                         .foregroundStyle(.primary)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -182,8 +180,8 @@ struct ButtonGridRowView: View {
                     if !displayState.labelText.isEmpty {
                         let labelText = displayState.labelText
                         Text(labelText)
+                            .ohTextToken(.rowLabel)
                             .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                            .lineLimit(1)
                     }
 
                     Spacer()

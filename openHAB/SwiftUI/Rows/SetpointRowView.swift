@@ -33,8 +33,8 @@ struct SetpointRowView: View {
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
                 Text(labelText)
+                    .ohTextToken(.rowLabel)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                    .lineLimit(1)
             }
 
             Spacer()
@@ -54,7 +54,8 @@ struct SetpointRowView: View {
                 .disabled(widget.readOnly ?? false)
 
                 Text(formattedValue(displayState: displayState))
-                    .font(.body.monospacedDigit())
+                    .ohTextToken(.rowValue)
+                    .monospacedDigit()
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
 
                 Button {
@@ -99,7 +100,11 @@ struct SetpointRowView: View {
         }
 
         // Use widget's unit as fallback when creating NumberState
-        numberState = numberState ?? NumberState(value: limitedNewValue, unit: widget.unit)
+        numberState = numberState ?? NumberState(
+            value: limitedNewValue,
+            unit: widget.unit,
+            format: widget.item?.stateDescription?.numberPattern
+        )
         numberState?.value = limitedNewValue
 
         logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState?.description ?? String(limitedNewValue))")
@@ -111,6 +116,9 @@ struct SetpointRowView: View {
     }
 
     private func formattedValue(displayState: WidgetDisplayState) -> String {
+        if let numberState = widget.stateValueAsNumberState {
+            return numberState.toString(locale: Locale.current)
+        }
         let text = currentValue(displayState: displayState).valueText(step: displayState.step)
         if let unit = widget.unit, !unit.isEmpty {
             return "\(text) \(unit)"

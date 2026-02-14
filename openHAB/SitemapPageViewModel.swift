@@ -53,6 +53,7 @@ class SitemapPageViewModel: ObservableObject {
     private let commandDispatcher = WidgetCommandDispatcher()
     private var defaultSitemap = ""
     private var defaultSitemapLabel = ""
+    private var fallbackTitle = ""
     @Published var pageId = ""
     private var isLinkedPage = false
     private var pageNetworkStatus: NetworkStatus?
@@ -71,9 +72,11 @@ class SitemapPageViewModel: ObservableObject {
 
     var pageTitle: String {
         // Strip bracket content from title (e.g., "Living Room[2]" becomes "Living Room")
-        let title = currentPage?.title.components(separatedBy: "[")[0] ?? ""
+        let title = currentPage?.title.components(separatedBy: "[")[0].trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !title.isEmpty {
             return title
+        } else if !fallbackTitle.isEmpty {
+            return fallbackTitle
         } else if !defaultSitemapLabel.isEmpty {
             return defaultSitemapLabel
         } else {
@@ -100,6 +103,7 @@ class SitemapPageViewModel: ObservableObject {
     init(pageUrl: String, title: String, pageId: String = "") {
         loadSettings()
         isLinkedPage = true
+        fallbackTitle = title
         defaultSitemapLabel = title
 
         // Set openHABRootUrl from current active connection for charts/images
@@ -121,6 +125,7 @@ class SitemapPageViewModel: ObservableObject {
     /// Initializes the view model with a fixed set of widgets, without loading or polling
     init(pageUrl: String = "", title: String = "Preview Page", pageId: String = "", widgets: [OpenHABWidget]) {
         isLinkedPage = !pageUrl.isEmpty
+        fallbackTitle = title
         self.pageId = pageId
         currentPage = OpenHABPage(
             pageId: pageId.isEmpty ? UUID().uuidString : pageId,
@@ -527,14 +532,13 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     func sendCommand(itemname: String, command: String) {
-        let sourcePrefix = sitemapSourcePrefix()
         let deviceId = UIDevice.current.identifierForVendor?.uuidString
         Task {
             do {
                 try await openAPIService?.sendItemCommand(
                     itemname: itemname,
                     command: command,
-                    sourcePrefix: sourcePrefix,
+                    sourcePrefix: nil,
                     deviceId: deviceId
                 )
                 logger.info("Successfully sent command \(command) to \(itemname)")
@@ -542,12 +546,6 @@ class SitemapPageViewModel: ObservableObject {
                 logger.info("Failed to send command\(command) to \(itemname): \(error.localizedDescription)")
             }
         }
-    }
-
-    private func sitemapSourcePrefix() -> String? {
-        guard !defaultSitemap.isEmpty else { return nil }
-        let suffix = pageId.isEmpty ? "" : ":\(pageId)"
-        return "org.openhab.ui.basic$\(defaultSitemap)\(suffix)"
     }
 
     func sendToUpdate(item: OpenHABItem?,

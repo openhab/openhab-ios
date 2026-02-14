@@ -15,18 +15,24 @@ import SwiftUI
 public struct TextLabelView: View {
     @ObservedObject var widget: OpenHABWidget
     var font: Font?
+    var token: OHTextToken
     var lineLimit: Int
 
     public var body: some View {
         Text(widget.labelText ?? "")
+            .ohTextToken(token)
             .font(font)
             .lineLimit(lineLimit)
             .foregroundStyle(!widget.labelcolor.isEmpty ? Color(fromString: widget.labelcolor) : .primary)
     }
 
-    public init(widget: OpenHABWidget, font: Font? = nil, lineLimit: Int = 1) {
+    public init(widget: OpenHABWidget,
+                font: Font? = nil,
+                token: OHTextToken = .rowLabel,
+                lineLimit: Int = 1) {
         self.widget = widget
         self.font = font
+        self.token = token
         self.lineLimit = lineLimit
     }
 }

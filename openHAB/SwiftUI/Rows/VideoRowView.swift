@@ -45,8 +45,8 @@ struct VideoRowView: View {
             if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 let labelText = displayState.labelText
                 Text(labelText)
+                    .ohTextToken(.rowLabel)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                    .lineLimit(1)
             }
 
             if let videoURL {
@@ -57,11 +57,13 @@ struct VideoRowView: View {
                             Image(uiImage: mjpegImage)
                                 .resizable()
                                 .aspectRatio(aspectRatio, contentMode: .fit)
+                                .frame(maxWidth: .infinity)
                                 .frame(height: 200)
                                 .clipShape(.rect(cornerRadius: 8))
                         } else {
                             Rectangle()
                                 .fill(Color.gray.opacity(0.3))
+                                .frame(maxWidth: .infinity)
                                 .frame(height: 200)
                                 .aspectRatio(aspectRatio, contentMode: .fit)
                                 .clipShape(.rect(cornerRadius: 8))
@@ -69,6 +71,7 @@ struct VideoRowView: View {
                     } else {
                         // HLS/other video formats using VideoPlayer
                         VideoPlayer(player: player)
+                            .frame(maxWidth: .infinity)
                             .frame(height: 200)
                             .aspectRatio(aspectRatio, contentMode: .fit)
                             .clipShape(.rect(cornerRadius: 8))
@@ -80,6 +83,7 @@ struct VideoRowView: View {
                             .progressViewStyle(CircularProgressViewStyle())
                     }
                 }
+                .frame(maxWidth: .infinity)
                 .onAppear {
                     setupVideo(url: videoURL)
                 }
@@ -96,6 +100,7 @@ struct VideoRowView: View {
             } else {
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
+                    .frame(maxWidth: .infinity)
                     .frame(height: 200)
                     .overlay(
                         Text("No Video URL")
@@ -106,9 +111,8 @@ struct VideoRowView: View {
 
             if let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
-                    .font(.caption)
+                    .ohTextToken(.rowValueCompact)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
-                    .lineLimit(1)
             }
         }
     }

@@ -66,21 +66,21 @@ struct SelectionRowView: View {
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
                 Text(labelText)
+                    .ohTextToken(.rowLabel)
                     .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                    .lineLimit(1)
             }
 
             Spacer()
 
             if let valueText = selectedValueText(displayState: displayState), !valueText.isEmpty {
                 Text(valueText)
+                    .ohTextToken(.rowValue)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
-                    .lineLimit(1)
             }
 
             // Show disclosure indicator to indicate tappable selection
             Image(systemSymbol: .chevronUpChevronDown)
-                .font(.caption)
+                .ohTextToken(.secondary)
                 .foregroundStyle(.secondary)
         }
         .contentShape(Rectangle())

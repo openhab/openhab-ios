@@ -29,7 +29,7 @@ struct SliderRow: View {
     }
 
     private var currentValueText: String {
-        currentValue.valueText(step: viewModel.step)
+        formattedValue(for: currentValue, locale: Locale.current)
     }
 
     var valueBinding: Binding<Double> {
@@ -41,7 +41,7 @@ struct SliderRow: View {
                 Logger.rowViews.info("SliderRow new value = \(newValue)")
                 pendingValue = newValue
                 commandSender.send(
-                    newValue.valueText(step: viewModel.step),
+                    formattedValue(for: newValue, locale: Locale(identifier: "US")),
                     for: widget,
                     policy: WidgetCommandDefaults.slider,
                     key: "slider-value"
@@ -58,14 +58,14 @@ struct SliderRow: View {
             set: { newValue in
                 if newValue {
                     commandSender.send(
-                        viewModel.maxValue.valueText(step: viewModel.step),
+                        formattedValue(for: viewModel.maxValue, locale: Locale(identifier: "US")),
                         for: widget,
                         policy: .immediate,
                         key: "slider-toggle"
                     )
                 } else {
                     commandSender.send(
-                        viewModel.minValue.valueText(step: viewModel.step),
+                        formattedValue(for: viewModel.minValue, locale: Locale(identifier: "US")),
                         for: widget,
                         policy: .immediate,
                         key: "slider-toggle"
@@ -127,6 +127,18 @@ struct SliderRow: View {
         self.stateToken = stateToken
         self.fallbackSymbol = fallbackSymbol
         _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+    }
+
+    private func formattedValue(for value: Double, locale: Locale) -> String {
+        if let numberPattern = widget.item?.stateDescription?.numberPattern,
+           !numberPattern.isEmpty {
+            return NumberState(
+                value: value,
+                unit: widget.unit,
+                format: numberPattern
+            ).toString(locale: locale)
+        }
+        return value.valueText(step: viewModel.step)
     }
 }
 
