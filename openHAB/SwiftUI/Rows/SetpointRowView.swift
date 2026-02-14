@@ -23,18 +23,6 @@ struct SetpointRowView: View {
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSetpointView")
     private let setpointService = SetPointService()
 
-    private func currentValue(displayState: WidgetDisplayState) -> Double {
-        widget.stateValueAsNumberState?.value ?? displayState.minValue
-    }
-
-    private func formattedValue(displayState: WidgetDisplayState) -> String {
-        let text = currentValue(displayState: displayState).valueText(step: displayState.step)
-        if let unit = widget.unit, !unit.isEmpty {
-            return "\(text) \(unit)"
-        }
-        return text
-    }
-
     var body: some View {
         let displayState = widget.displayState
         let currentValue = currentValue(displayState: displayState)
@@ -116,6 +104,18 @@ struct SetpointRowView: View {
 
         logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState?.description ?? String(limitedNewValue))")
         viewModel.sendToUpdate(item: widget.item, state: numberState, policy: .immediate)
+    }
+
+    private func currentValue(displayState: WidgetDisplayState) -> Double {
+        widget.stateValueAsNumberState?.value ?? displayState.minValue
+    }
+
+    private func formattedValue(displayState: WidgetDisplayState) -> String {
+        let text = currentValue(displayState: displayState).valueText(step: displayState.step)
+        if let unit = widget.unit, !unit.isEmpty {
+            return "\(text) \(unit)"
+        }
+        return text
     }
 }
 

@@ -25,11 +25,6 @@ struct SelectionRowView: View {
         widget.mappingsOrItemOptions
     }
 
-    /// Returns the label of the currently selected mapping, or the widget's labelValue as fallback.
-    private func selectedValueText(displayState: WidgetDisplayState) -> String? {
-        displayState.selectedLabel ?? displayState.labelValue
-    }
-
     var body: some View {
         let displayState = widget.displayState
         ZStack {
@@ -89,5 +84,10 @@ struct SelectionRowView: View {
                 .foregroundStyle(.secondary)
         }
         .contentShape(Rectangle())
+    }
+
+    /// Returns the label of the currently selected mapping, or the widget's labelValue as fallback.
+    private func selectedValueText(displayState: WidgetDisplayState) -> String? {
+        displayState.selectedLabel ?? displayState.labelValue
     }
 }

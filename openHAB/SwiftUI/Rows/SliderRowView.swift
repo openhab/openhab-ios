@@ -28,37 +28,6 @@ struct SliderRowView: View {
         "slider-\(widget.widgetId)"
     }
 
-    private func sliderRange(displayState: WidgetDisplayState) -> ClosedRange<Double> {
-        displayState.minValue ... displayState.maxValue
-    }
-
-    private func currentValue(displayState: WidgetDisplayState) -> Double {
-        pendingValue ?? displayState.adjustedValue
-    }
-
-    private func currentValueText(displayState: WidgetDisplayState) -> String {
-        let currentValue = currentValue(displayState: displayState)
-        return currentValue.valueText(step: widget.step)
-    }
-
-    private func valueBinding(displayState: WidgetDisplayState) -> Binding<Double> {
-        Binding(
-            get: { pendingValue ?? displayState.adjustedValue },
-            set: { newValue in
-                pendingValue = newValue
-
-                // Send updates during drag if enabled (throttled)
-                if widget.shouldUseSliderUpdatesDuringMove() {
-                    sendSliderUpdate(
-                        newValue,
-                        policy: WidgetCommandDefaults.slider,
-                        key: sliderCommandKey
-                    )
-                }
-            }
-        )
-    }
-
     var body: some View {
         let displayState = widget.displayState
         let currentValue = currentValue(displayState: displayState)
@@ -145,6 +114,37 @@ struct SliderRowView: View {
         numberState = numberState ?? NumberState(value: newValue)
         numberState?.value = newValue
         viewModel.sendToUpdate(item: widget.item, state: numberState, policy: policy, key: key)
+    }
+
+    private func sliderRange(displayState: WidgetDisplayState) -> ClosedRange<Double> {
+        displayState.minValue ... displayState.maxValue
+    }
+
+    private func currentValue(displayState: WidgetDisplayState) -> Double {
+        pendingValue ?? displayState.adjustedValue
+    }
+
+    private func currentValueText(displayState: WidgetDisplayState) -> String {
+        let currentValue = currentValue(displayState: displayState)
+        return currentValue.valueText(step: widget.step)
+    }
+
+    private func valueBinding(displayState: WidgetDisplayState) -> Binding<Double> {
+        Binding(
+            get: { pendingValue ?? displayState.adjustedValue },
+            set: { newValue in
+                pendingValue = newValue
+
+                // Send updates during drag if enabled (throttled)
+                if widget.shouldUseSliderUpdatesDuringMove() {
+                    sendSliderUpdate(
+                        newValue,
+                        policy: WidgetCommandDefaults.slider,
+                        key: sliderCommandKey
+                    )
+                }
+            }
+        )
     }
 }
 

@@ -24,11 +24,6 @@ struct ButtonGridButton: View {
 
     private let logger = Logger(subsystem: "org.openhab", category: "ButtonGridButton")
 
-    private func isChecked(displayState: WidgetDisplayState) -> Bool {
-        if let stateless = widget.stateless, stateless { return false }
-        return displayState.effectiveState == widget.command
-    }
-
     private var hasPressRelease: Bool {
         if let releaseCommand = widget.releaseCommand, !releaseCommand.isEmpty {
             return true
@@ -117,6 +112,11 @@ struct ButtonGridButton: View {
             for: widget,
             fallbackItem: parentItem
         )
+    }
+
+    private func isChecked(displayState: WidgetDisplayState) -> Bool {
+        if let stateless = widget.stateless, stateless { return false }
+        return displayState.effectiveState == widget.command
     }
 }
 

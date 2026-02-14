@@ -21,10 +21,6 @@ struct SwitchRowView: View {
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSwitchView")
 
-    private func isOn(displayState: WidgetDisplayState) -> Bool {
-        localIsOn ?? displayState.isOn
-    }
-
     var body: some View {
         let displayState = widget.displayState
         HStack {
@@ -68,6 +64,10 @@ struct SwitchRowView: View {
             // Sync local state when server state changes
             localIsOn = nil
         }
+    }
+
+    private func isOn(displayState: WidgetDisplayState) -> Bool {
+        localIsOn ?? displayState.isOn
     }
 }
 

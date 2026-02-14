@@ -15,141 +15,17 @@ import UIKit
 
 struct ScreenSaverSettingsView: View {
     @State private var config = ScreenSaverConfiguration()
+    private let fontOptions: [String] = ["", "Arial", "Helvetica Neue", "Courier New", "Menlo", "Avenir Next"]
 
     var body: some View {
         Form {
-            Section {
-                Toggle("Enable Screen Saver", isOn: Binding(
-                    get: { config.isEnabled },
-                    set: { config.isEnabled = $0 }
-                ))
-            }
-
-            Section("Appearance") {
-                Toggle("Show Time", isOn: Binding(
-                    get: { config.showsTime },
-                    set: { newVal in config.showsTime = newVal }
-                ))
-
-                Toggle("Show Date", isOn: Binding(
-                    get: { config.showsDate },
-                    set: { newVal in config.showsDate = newVal }
-                ))
-
-                Toggle("Show Seconds", isOn: Binding(
-                    get: { config.showsSeconds },
-                    set: { config.showsSeconds = $0 }
-                ))
-
-                Toggle("24-Hour Clock", isOn: Binding(
-                    get: { config.uses24HourTime },
-                    set: { config.uses24HourTime = $0 }
-                ))
-
-                let fontOptions: [String] = ["", "Arial", "Helvetica Neue", "Courier New", "Menlo", "Avenir Next"]
-                Picker("Font", selection: Binding(
-                    get: { config.fontName ?? "" },
-                    set: { config.fontName = $0.isEmpty ? nil : $0 }
-                )) {
-                    ForEach(fontOptions, id: \.self) { name in
-                        Text(name.isEmpty ? "Default" : name).tag(name)
-                    }
-                }
-            }
-            .disabled(!config.isEnabled)
-
-            Section("Timing") {
-                Stepper(value: Binding(
-                    get: { Int(config.idleInterval) },
-                    set: { config.idleInterval = TimeInterval($0) }
-                ), in: 5 ... 600, step: 5) {
-                    Text("Idle Interval: \(Int(config.idleInterval)) s")
-                }
-
-                Stepper(value: Binding(
-                    get: { Int(config.movementInterval) },
-                    set: { config.movementInterval = TimeInterval($0) }
-                ), in: 2 ... 60, step: 1) {
-                    Text("Movement Interval: \(Int(config.movementInterval)) s")
-                }
-            }
-            .disabled(!config.isEnabled)
-
-            Section("Font Size") {
-                VStack(alignment: .leading) {
-                    Text("Clock Size: \(Int(config.timeFontSizeRatio * 100)) %")
-                        .font(.caption)
-                    Slider(value: Binding(
-                        get: { Double(config.timeFontSizeRatio) },
-                        set: { config.timeFontSizeRatio = CGFloat($0) }
-                    ), in: 0.05 ... 0.4, step: 0.01)
-                }
-
-                VStack(alignment: .leading) {
-                    Text("Date relative: \(Int(config.dateFontRelativeSize * 100)) %")
-                        .font(.caption)
-                    Slider(value: Binding(
-                        get: { Double(config.dateFontRelativeSize) },
-                        set: { config.dateFontRelativeSize = CGFloat($0) }
-                    ), in: 0.1 ... 1.0, step: 0.05)
-                }
-            }
-            .disabled(!config.isEnabled)
-
-            Section("Animation") {
-                VStack(alignment: .leading) {
-                    Text("Fade Duration: \(String(format: "%.1f", config.fadeDuration)) s")
-                        .font(.caption)
-                    Slider(value: Binding(
-                        get: { config.fadeDuration },
-                        set: { config.fadeDuration = $0 }
-                    ), in: 0.1 ... 3.0, step: 0.1)
-                }
-            }
-            .disabled(!config.isEnabled)
-
-            Section("Brightness") {
-                Toggle("Enable Dimming", isOn: Binding(
-                    get: { config.enablesAutoDimming },
-                    set: { config.enablesAutoDimming = $0 }
-                ))
-
-                VStack(alignment: .leading) {
-                    Text("Dim Level: \(Int(config.dimLevel * 100)) %")
-                        .font(.caption)
-                    Slider(value: Binding(
-                        get: { Double(config.dimLevel * 100) },
-                        set: { config.dimLevel = CGFloat($0) / 100 }
-                    ), in: 0 ... 100, step: 1)
-                }
-                .disabled(!config.enablesAutoDimming)
-
-                Toggle("Restore Previous Brightness on Wake", isOn: Binding(
-                    get: { config.restoresBrightness },
-                    set: { config.restoresBrightness = $0 }
-                )).disabled(!config.enablesAutoDimming)
-
-                VStack(alignment: .leading) {
-                    Text("Restore Brightness: \(Int(config.wakeBrightnessLevel * 100)) %")
-                        .font(.caption)
-                    Slider(value: Binding(
-                        get: { Double(config.wakeBrightnessLevel * 100) },
-                        set: { config.wakeBrightnessLevel = CGFloat($0) / 100 }
-                    ), in: 0 ... 100, step: 1)
-                }
-                .disabled(!config.enablesAutoDimming || config.restoresBrightness)
-            }
-            .disabled(!config.isEnabled)
-
-            Section {
-                Button("Test Screen Saver") {
-                    if let keyWindow = UIApplication.shared.keyWindowActiveScene {
-                        // Ensure the manager knows about the current key window in case monitoring was not started yet.
-                        ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
-                    }
-                    ScreenSaverManager.shared.presentSaver(configuration: config)
-                }
-            }
+            enableSection
+            appearanceSection
+            timingSection
+            fontSection
+            animationSection
+            brightnessSection
+            testSection
         }
         .navigationTitle("Screen Saver")
         .onDisappear {
@@ -189,6 +65,159 @@ struct ScreenSaverSettingsView: View {
             config.fadeDuration = Preferences.shared.screensaverFadeDuration
             config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
             changeConfig(config)
+        }
+    }
+
+    private var fontBinding: Binding<String> {
+        Binding(
+            get: { config.fontName ?? "" },
+            set: { config.fontName = $0.isEmpty ? nil : $0 }
+        )
+    }
+
+    private var idleIntervalBinding: Binding<Int> {
+        Binding(
+            get: { Int(config.idleInterval) },
+            set: { config.idleInterval = TimeInterval($0) }
+        )
+    }
+
+    private var movementIntervalBinding: Binding<Int> {
+        Binding(
+            get: { Int(config.movementInterval) },
+            set: { config.movementInterval = TimeInterval($0) }
+        )
+    }
+
+    private var timeFontSizeBinding: Binding<Double> {
+        Binding(
+            get: { Double(config.timeFontSizeRatio) },
+            set: { config.timeFontSizeRatio = CGFloat($0) }
+        )
+    }
+
+    private var dateFontSizeBinding: Binding<Double> {
+        Binding(
+            get: { Double(config.dateFontRelativeSize) },
+            set: { config.dateFontRelativeSize = CGFloat($0) }
+        )
+    }
+
+    private var dimLevelBinding: Binding<Double> {
+        Binding(
+            get: { Double(config.dimLevel * 100) },
+            set: { config.dimLevel = CGFloat($0) / 100 }
+        )
+    }
+
+    private var wakeBrightnessBinding: Binding<Double> {
+        Binding(
+            get: { Double(config.wakeBrightnessLevel * 100) },
+            set: { config.wakeBrightnessLevel = CGFloat($0) / 100 }
+        )
+    }
+
+    @ViewBuilder
+    private var enableSection: some View {
+        Section {
+            Toggle("Enable Screen Saver", isOn: $config.isEnabled)
+        }
+    }
+
+    @ViewBuilder
+    private var appearanceSection: some View {
+        Section("Appearance") {
+            Toggle("Show Time", isOn: $config.showsTime)
+            Toggle("Show Date", isOn: $config.showsDate)
+            Toggle("Show Seconds", isOn: $config.showsSeconds)
+            Toggle("24-Hour Clock", isOn: $config.uses24HourTime)
+            Picker("Font", selection: fontBinding) {
+                ForEach(fontOptions, id: \.self) { name in
+                    Text(name.isEmpty ? "Default" : name).tag(name)
+                }
+            }
+        }
+        .disabled(!config.isEnabled)
+    }
+
+    @ViewBuilder
+    private var timingSection: some View {
+        Section("Timing") {
+            Stepper(value: idleIntervalBinding, in: 5 ... 600, step: 5) {
+                Text("Idle Interval: \(Int(config.idleInterval)) s")
+            }
+
+            Stepper(value: movementIntervalBinding, in: 2 ... 60, step: 1) {
+                Text("Movement Interval: \(Int(config.movementInterval)) s")
+            }
+        }
+        .disabled(!config.isEnabled)
+    }
+
+    @ViewBuilder
+    private var fontSection: some View {
+        Section("Font Size") {
+            VStack(alignment: .leading) {
+                Text("Clock Size: \(Int(config.timeFontSizeRatio * 100)) %")
+                    .font(.caption)
+                Slider(value: timeFontSizeBinding, in: 0.05 ... 0.4, step: 0.01)
+            }
+
+            VStack(alignment: .leading) {
+                Text("Date relative: \(Int(config.dateFontRelativeSize * 100)) %")
+                    .font(.caption)
+                Slider(value: dateFontSizeBinding, in: 0.1 ... 1.0, step: 0.05)
+            }
+        }
+        .disabled(!config.isEnabled)
+    }
+
+    @ViewBuilder
+    private var animationSection: some View {
+        Section("Animation") {
+            VStack(alignment: .leading) {
+                Text("Fade Duration: \(String(format: "%.1f", config.fadeDuration)) s")
+                    .font(.caption)
+                Slider(value: $config.fadeDuration, in: 0.1 ... 3.0, step: 0.1)
+            }
+        }
+        .disabled(!config.isEnabled)
+    }
+
+    @ViewBuilder
+    private var brightnessSection: some View {
+        Section("Brightness") {
+            Toggle("Enable Dimming", isOn: $config.enablesAutoDimming)
+
+            VStack(alignment: .leading) {
+                Text("Dim Level: \(Int(config.dimLevel * 100)) %")
+                    .font(.caption)
+                Slider(value: dimLevelBinding, in: 0 ... 100, step: 1)
+            }
+            .disabled(!config.enablesAutoDimming)
+
+            Toggle("Restore Previous Brightness on Wake", isOn: $config.restoresBrightness)
+                .disabled(!config.enablesAutoDimming)
+
+            VStack(alignment: .leading) {
+                Text("Restore Brightness: \(Int(config.wakeBrightnessLevel * 100)) %")
+                    .font(.caption)
+                Slider(value: wakeBrightnessBinding, in: 0 ... 100, step: 1)
+            }
+            .disabled(!config.enablesAutoDimming || config.restoresBrightness)
+        }
+        .disabled(!config.isEnabled)
+    }
+
+    @ViewBuilder
+    private var testSection: some View {
+        Section {
+            Button("Test Screen Saver") {
+                if let keyWindow = UIApplication.shared.keyWindowActiveScene {
+                    ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
+                }
+                ScreenSaverManager.shared.presentSaver(configuration: config)
+            }
         }
     }
 
