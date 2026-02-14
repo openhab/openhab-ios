@@ -28,10 +28,12 @@ struct SitemapNavigationView: View {
     private var sitemapContent: some View {
         let page = SitemapPageView(viewModel: viewModel)
             .navigationTitle(viewModel.pageTitle)
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    commandLifecycleIndicator
+                if !isCommandLifecycleIdle {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        commandLifecycleIndicator
+                    }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -71,6 +73,13 @@ struct SitemapNavigationView: View {
             .font(.caption)
             .accessibilityLabel("Command failures: \(count)")
         }
+    }
+
+    private var isCommandLifecycleIdle: Bool {
+        if case .idle = viewModel.commandLifecycleSummary {
+            return true
+        }
+        return false
     }
 
     init(viewModel: SitemapPageViewModel, onShowSideMenu: @escaping () -> Void) {
