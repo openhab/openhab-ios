@@ -84,7 +84,7 @@ struct OpenHABTabRootView: View {
     }
 
     private static func computeEnabledTabs() -> [AppTab] {
-        let config = Preferences.shared.applicationPreferences.tabConfiguration
+        let config = Preferences.shared.currentHomePreferences.tabConfiguration ?? TabEntry.defaultConfiguration
         let tabs = config.compactMap { entry -> AppTab? in
             guard entry.enabled || entry.id == AppTab.system.rawValue else { return nil }
             return AppTab(rawValue: entry.id)

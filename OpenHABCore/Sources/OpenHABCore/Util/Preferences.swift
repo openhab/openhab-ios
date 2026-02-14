@@ -105,6 +105,7 @@ public struct HomePreferences: Codable, Equatable {
     public var homeName = "Home"
     public var sseCommandItem = ""
     public var lastSelectedTab = "main"
+    public var tabConfiguration: [TabEntry]?
 
     fileprivate init(id: UUID) {
         self.id = id
@@ -131,20 +132,6 @@ public struct TabEntry: Codable, Equatable, Hashable, Sendable {
 @MainActor
 public struct ApplicationPreferences: Codable, Equatable {
     public var showSearchField = true
-    public var tabConfiguration: [TabEntry] = TabEntry.defaultConfiguration
-
-    enum CodingKeys: String, CodingKey {
-        case showSearchField
-        case tabConfiguration
-    }
-
-    public init() {}
-
-    public nonisolated init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        showSearchField = try container.decodeIfPresent(Bool.self, forKey: .showSearchField) ?? true
-        tabConfiguration = try container.decodeIfPresent([TabEntry].self, forKey: .tabConfiguration) ?? TabEntry.defaultConfiguration
-    }
 }
 
 // MARK: Retrieving preference from user defaults, reacting to preference change

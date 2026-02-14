@@ -35,6 +35,7 @@ struct TabCustomizationSection: View {
                 tabConfiguration.move(fromOffsets: source, toOffset: destination)
             }
         }
+        .environment(\.editMode, .constant(.active))
     }
 
     private func displayName(for id: String) -> String {

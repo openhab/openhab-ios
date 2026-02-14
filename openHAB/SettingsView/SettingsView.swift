@@ -208,7 +208,7 @@ struct SettingsView: View {
         settingsRemoteConnectionConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
         settingsHomeName = Preferences.shared.currentHomePreferences.homeName
         settingsSSECommandItem = Preferences.shared.currentHomePreferences.sseCommandItem
-        settingsTabConfiguration = Preferences.shared.applicationPreferences.tabConfiguration
+        settingsTabConfiguration = Preferences.shared.currentHomePreferences.tabConfiguration ?? TabEntry.defaultConfiguration
     }
 
     func saveSettings() {
@@ -224,13 +224,13 @@ struct SettingsView: View {
             homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration
             homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
             homePreferences.sseCommandItem = settingsSSECommandItem
+            homePreferences.tabConfiguration = settingsTabConfiguration
         }
         Preferences.shared.idleOff = settingsIdleOff
         Preferences.shared.sendCrashReports = settingsSendCrashReports
 
         Preferences.shared.modifyApplicationPreferences { @MainActor applicationPreferences in
             applicationPreferences.showSearchField = settingsShowSearchField
-            applicationPreferences.tabConfiguration = settingsTabConfiguration
         }
 
         // Apply global UI changes immediately (status bar visibility)
