@@ -56,6 +56,7 @@ struct SitemapPageView: View {
             }
         }
         .onDisappear {
+            viewModel.stopPageHandling()
             // Re-enable idle timer when leaving the view
             if idleTimerDisabled {
                 UIApplication.shared.isIdleTimerDisabled = false

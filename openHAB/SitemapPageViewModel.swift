@@ -92,10 +92,12 @@ class SitemapPageViewModel: ObservableObject {
     init() {
         loadSettings()
         // Observe connection changes (skip initial value) — initial load is triggered by .task in the view
-        connectionObserverTask = Task { @MainActor [weak self] in
-            guard let self else { return }
-            for await connection in networkTracker.$activeConnection.values.dropFirst() {
-                handleActiveConnectionChange(connection)
+        connectionObserverTask = Task { [weak self] in
+            guard let tracker = self?.networkTracker else { return }
+            for await connection in tracker.$activeConnection.values.dropFirst() {
+                await MainActor.run { [weak self] in
+                    self?.handleActiveConnectionChange(connection)
+                }
             }
         }
     }
@@ -142,6 +144,11 @@ class SitemapPageViewModel: ObservableObject {
         showSearchField = Preferences.shared.applicationPreferences.showSearchField
     }
 
+    func stopPageHandling() {
+        pageHandlingTask?.cancel()
+        pageHandlingTask = nil
+    }
+
     func startPageHandling() {
         pageHandlingTask?.cancel()
         error = nil // Clear any previous errors when starting a new page handling session
@@ -166,6 +173,7 @@ class SitemapPageViewModel: ObservableObject {
                     isLoading = false
                     return
                 }
+                activeConnectionInfo = activeConnection
                 let configuration = activeConnection.configuration
                 openHABRootUrl = configuration.url
 
@@ -483,15 +491,24 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     private func handleActiveConnection(_ connection: ConnectionInfo) async {
+        let previousURL = activeConnectionInfo?.configuration.url
+        let newURL = connection.configuration.url
+        let connectionDidChange = previousURL != newURL
+
         // Save the active connection information
         activeConnectionInfo = connection
-        openHABRootUrl = connection.configuration.url
+        openHABRootUrl = newURL
 
         do {
             // Setup the OpenAPI service based on the new connection
             openAPIService = try OpenAPIService(connectionConfiguration: connection.configuration)
-            // Start page handling which includes initial load and long polling
-            startPageHandling()
+            // Restart when connection changed, or when polling is currently inactive.
+            let shouldRestart = connectionDidChange
+                || pageHandlingTask == nil
+                || pageHandlingTask?.isCancelled == true
+            if shouldRestart {
+                startPageHandling()
+            }
         } catch {
             self.error = error as? any LocalizedError
         }
