@@ -110,7 +110,7 @@ struct OpenHABTabRootView: View {
                 prefs.lastSelectedTab = newTab.rawValue
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
+        .onReceive(Preferences.shared.$currentHomePreferences) { _ in
             let newTabs = Self.computeEnabledTabs()
             if enabledTabs != newTabs {
                 enabledTabs = newTabs

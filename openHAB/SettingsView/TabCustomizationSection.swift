@@ -19,6 +19,9 @@ struct TabCustomizationSection: View {
         Section(header: Text("Tabs")) {
             ForEach(Array(tabConfiguration.enumerated()), id: \.element.id) { index, entry in
                 HStack {
+                    Image(systemName: "line.3.horizontal")
+                        .foregroundStyle(.secondary)
+                        .font(.callout)
                     Image(systemName: systemImage(for: entry.id))
                         .frame(width: 24)
                         .foregroundStyle(entry.enabled || entry.id == "system" ? .primary : .secondary)
