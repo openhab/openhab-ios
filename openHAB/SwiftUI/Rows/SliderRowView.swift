@@ -38,7 +38,7 @@ struct SliderRowView: View {
 
     private func currentValueText(displayState: WidgetDisplayState) -> String {
         let currentValue = currentValue(displayState: displayState)
-        currentValue.valueText(step: widget.step)
+        return currentValue.valueText(step: widget.step)
     }
 
     private func valueBinding(displayState: WidgetDisplayState) -> Binding<Double> {
