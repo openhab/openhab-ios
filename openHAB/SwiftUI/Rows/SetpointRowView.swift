@@ -32,16 +32,11 @@ struct SetpointRowView: View {
     }
 
     private var formattedValue: String {
-        if let labelValue = displayState.labelValue, !labelValue.isEmpty {
-            return labelValue
-        } else {
-            let step = displayState.step
-            if step.truncatingRemainder(dividingBy: 1) == 0 {
-                return String(format: "%.0f", currentValue)
-            } else {
-                return String(format: "%.1f", currentValue)
-            }
+        let text = currentValue.valueText(step: displayState.step)
+        if let unit = widget.unit, !unit.isEmpty {
+            return "\(text) \(unit)"
         }
+        return text
     }
 
     var body: some View {

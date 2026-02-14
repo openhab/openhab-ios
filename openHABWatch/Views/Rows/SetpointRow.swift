@@ -60,10 +60,10 @@ struct SetpointRow: View {
 
                 Spacer()
 
-                Text(localValue == nil ? (viewModel.labelValue ?? valueText) : valueText)
+                Text(valueText)
                     .watchTextStyle(.emphasis)
                     .accessibilityLabel("\(viewModel.labelText) value")
-                    .accessibilityValue(localValue == nil ? (viewModel.labelValue ?? valueText) : valueText)
+                    .accessibilityValue(valueText)
 
                 Spacer()
 
