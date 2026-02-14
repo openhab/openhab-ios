@@ -19,6 +19,41 @@ struct ScreenSaverView: View {
     private static let timeTextWidthMultiplier: CGFloat = 4.0
     private static let dateTextHeightMultiplier: CGFloat = 1.4
 
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }()
+
+    private static let time24Formatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.dateFormat = "H:mm"
+        return formatter
+    }()
+
+    private static let time24SecondsFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.dateFormat = "H:mm:ss"
+        return formatter
+    }()
+
+    private static let time12Formatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.dateFormat = "h:mm a"
+        return formatter
+    }()
+
+    private static let time12SecondsFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.dateFormat = "h:mm:ss a"
+        return formatter
+    }()
+
     let configuration: ScreenSaverConfiguration
 
     @State private var currentPosition: CGPoint = .zero
@@ -26,6 +61,7 @@ struct ScreenSaverView: View {
     @State private var fadeOpacity = 1.0
     @State private var movementTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     @State private var isTimerActive = false
+    @State private var animationTask: Task<Void, Never>?
 
     var body: some View {
         GeometryReader { geometry in
@@ -61,23 +97,18 @@ struct ScreenSaverView: View {
 
                 let half = max(configuration.fadeDuration / 2.0, 0.01)
 
-                Task {
-                    // Fade out on the main actor
-                    await MainActor.run {
-                        withAnimation(.easeInOut(duration: half)) {
-                            fadeOpacity = 0.0
-                        }
+                animationTask?.cancel()
+                animationTask = Task {
+                    withAnimation(.easeInOut(duration: half)) {
+                        fadeOpacity = 0.0
                     }
 
-                    // Wait for half the duration before moving
                     try? await Task.sleep(nanoseconds: UInt64(half * 1_000_000_000))
+                    guard !Task.isCancelled else { return }
 
-                    // Move and fade back in on the main actor
-                    await MainActor.run {
-                        currentPosition = calculateRandomPosition(for: screenSize)
-                        withAnimation(.easeInOut(duration: half)) {
-                            fadeOpacity = 1.0
-                        }
+                    currentPosition = calculateRandomPosition(for: screenSize)
+                    withAnimation(.easeInOut(duration: half)) {
+                        fadeOpacity = 1.0
                     }
                 }
             }
@@ -105,21 +136,16 @@ struct ScreenSaverView: View {
     // MARK: - Private Methods
 
     private func timeString(for date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        if configuration.showsSeconds {
-            formatter.dateFormat = configuration.uses24HourTime ? "H:mm:ss" : "h:mm:ss a"
+        let formatter: DateFormatter = if configuration.showsSeconds {
+            configuration.uses24HourTime ? Self.time24SecondsFormatter : Self.time12SecondsFormatter
         } else {
-            formatter.dateFormat = configuration.uses24HourTime ? "H:mm" : "h:mm a"
+            configuration.uses24HourTime ? Self.time24Formatter : Self.time12Formatter
         }
         return formatter.string(from: date)
     }
 
     private func dateString(for date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: date)
+        Self.dateFormatter.string(from: date)
     }
 
     private func timeFont(for size: CGSize) -> Font {
@@ -158,6 +184,9 @@ struct ScreenSaverView: View {
 
     private func stopMovementTimer() {
         isTimerActive = false
+        animationTask?.cancel()
+        animationTask = nil
+        movementTimer.upstream.connect().cancel()
     }
 
     private func calculateRandomPosition(for size: CGSize) -> CGPoint {
