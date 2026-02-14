@@ -23,16 +23,12 @@ struct SetpointRowView: View {
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSetpointView")
     private let setpointService = SetPointService()
 
-    private var displayState: WidgetDisplayState {
-        widget.displayState
-    }
-
-    private var currentValue: Double {
+    private func currentValue(displayState: WidgetDisplayState) -> Double {
         widget.stateValueAsNumberState?.value ?? displayState.minValue
     }
 
-    private var formattedValue: String {
-        let text = currentValue.valueText(step: displayState.step)
+    private func formattedValue(displayState: WidgetDisplayState) -> String {
+        let text = currentValue(displayState: displayState).valueText(step: displayState.step)
         if let unit = widget.unit, !unit.isEmpty {
             return "\(text) \(unit)"
         }
@@ -40,6 +36,8 @@ struct SetpointRowView: View {
     }
 
     var body: some View {
+        let displayState = widget.displayState
+        let currentValue = currentValue(displayState: displayState)
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
@@ -56,7 +54,7 @@ struct SetpointRowView: View {
             HStack(spacing: 12) {
                 Button {
                     triggerFeedback.toggle()
-                    decreaseValue()
+                    decreaseValue(displayState: displayState)
                 } label: {
                     Image(systemSymbol: .chevronDown)
                         .font(.body)
@@ -67,13 +65,13 @@ struct SetpointRowView: View {
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
                 .disabled(widget.readOnly ?? false)
 
-                Text(formattedValue)
+                Text(formattedValue(displayState: displayState))
                     .font(.body.monospacedDigit())
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
 
                 Button {
                     triggerFeedback.toggle()
-                    increaseValue()
+                    increaseValue(displayState: displayState)
                 } label: {
                     Image(systemSymbol: .chevronUp)
                         .font(.body)
@@ -87,15 +85,15 @@ struct SetpointRowView: View {
         }
     }
 
-    private func decreaseValue() {
-        handleUpDown(isDecreasing: true)
+    private func decreaseValue(displayState: WidgetDisplayState) {
+        handleUpDown(isDecreasing: true, displayState: displayState)
     }
 
-    private func increaseValue() {
-        handleUpDown(isDecreasing: false)
+    private func increaseValue(displayState: WidgetDisplayState) {
+        handleUpDown(isDecreasing: false, displayState: displayState)
     }
 
-    private func handleUpDown(isDecreasing: Bool) {
+    private func handleUpDown(isDecreasing: Bool, displayState: WidgetDisplayState) {
         var numberState = widget.stateValueAsNumberState
         let currentValue = numberState?.value ?? displayState.minValue
 

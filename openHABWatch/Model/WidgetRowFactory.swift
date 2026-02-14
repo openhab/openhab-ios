@@ -16,7 +16,8 @@ enum WidgetRowFactory {
     @MainActor
     @ViewBuilder
     static func make(widget: OpenHABWidget, settings: AppSettings) -> some View {
-        let stateToken = widget.displayState.effectiveState
+        let displayState = widget.displayState
+        let stateToken = displayState.effectiveState
 
         switch widget.renderingKind {
         case .segmentedSwitch:
@@ -30,7 +31,7 @@ enum WidgetRowFactory {
         case .setpoint:
             SetpointRow(widget: widget, stateToken: stateToken)
         case .frame:
-            FrameRow(title: widget.displayState.labelText)
+            FrameRow(title: displayState.labelText)
         case .text:
             TextRow(widget: widget, hasLinkedPage: widget.linkedPage != nil)
         case .image:
@@ -58,10 +59,10 @@ enum WidgetRowFactory {
         case .selection:
             SelectionRow(
                 widget: widget,
-                mappings: widget.displayState.mappings,
-                title: widget.displayState.labelText.isEmpty ? "Select" : widget.displayState.labelText,
-                initialSelectedIndex: widget.displayState.selectedIndex,
-                labelValue: widget.displayState.labelValue
+                mappings: displayState.mappings,
+                title: displayState.labelText.isEmpty ? "Select" : displayState.labelText,
+                initialSelectedIndex: displayState.selectedIndex,
+                labelValue: displayState.labelValue
             )
         case .video, .webview, .dateInput, .textInput, .colorTemperaturePicker, .buttonGrid:
             // Not yet implemented for watchOS

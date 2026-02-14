@@ -29,9 +29,9 @@ struct RollershutterRowView: View {
     @State private var triggerDownFeedback = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetRollershutterView")
-    private var displayState: WidgetDisplayState { widget.displayState }
 
     var body: some View {
+        let displayState = widget.displayState
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 IconView(widget: widget)

@@ -21,15 +21,12 @@ struct SwitchRowView: View {
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSwitchView")
 
-    private var displayState: WidgetDisplayState {
-        widget.displayState
-    }
-
-    private var isOn: Bool {
+    private func isOn(displayState: WidgetDisplayState) -> Bool {
         localIsOn ?? displayState.isOn
     }
 
     var body: some View {
+        let displayState = widget.displayState
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
@@ -51,7 +48,7 @@ struct SwitchRowView: View {
             }
 
             Toggle("", isOn: Binding(
-                get: { isOn },
+                get: { isOn(displayState: displayState) },
                 set: { newValue in
                     localIsOn = newValue
                     let newState = newValue ? "ON" : "OFF"

@@ -71,18 +71,18 @@ struct ColorTemperaturePickerRowView: View {
     }
 
     private let logger = Logger(subsystem: "org.openhab", category: "ColorTemperaturePickerRowView")
-    private var displayState: WidgetDisplayState { widget.displayState }
 
     // Use widget's min/max values, similar to Android implementation
     private var minTemperature: Double {
-        max(displayState.minValue, 1000)
+        max(widget.minValue, 1000)
     }
 
     private var maxTemperature: Double {
-        min(displayState.maxValue, 10000)
+        min(widget.maxValue, 10000)
     }
 
     var body: some View {
+        let displayState = widget.displayState
         HStack(alignment: .top) {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)

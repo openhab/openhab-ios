@@ -28,23 +28,20 @@ struct SliderRowView: View {
         "slider-\(widget.widgetId)"
     }
 
-    private var displayState: WidgetDisplayState {
-        widget.displayState
-    }
-
-    private var sliderRange: ClosedRange<Double> {
+    private func sliderRange(displayState: WidgetDisplayState) -> ClosedRange<Double> {
         displayState.minValue ... displayState.maxValue
     }
 
-    private var currentValue: Double {
+    private func currentValue(displayState: WidgetDisplayState) -> Double {
         pendingValue ?? displayState.adjustedValue
     }
 
-    private var currentValueText: String {
+    private func currentValueText(displayState: WidgetDisplayState) -> String {
+        let currentValue = currentValue(displayState: displayState)
         currentValue.valueText(step: widget.step)
     }
 
-    private var valueBinding: Binding<Double> {
+    private func valueBinding(displayState: WidgetDisplayState) -> Binding<Double> {
         Binding(
             get: { pendingValue ?? displayState.adjustedValue },
             set: { newValue in
@@ -63,20 +60,22 @@ struct SliderRowView: View {
     }
 
     var body: some View {
+        let displayState = widget.displayState
+        let currentValue = currentValue(displayState: displayState)
         HStack {
             if widget.switchSupport {
                 Button {
                     viewModel.sendCommand(currentValue <= displayState.minValue ? "ON" : "OFF", for: widget)
                 } label: {
-                    labelContent
+                    labelContent(displayState: displayState)
                 }
                 .buttonStyle(.plain)
                 .disabled(widget.readOnly ?? false)
             } else {
-                labelContent
+                labelContent(displayState: displayState)
             }
 
-            Slider(value: valueBinding, in: sliderRange, step: widget.step) { editing in
+            Slider(value: valueBinding(displayState: displayState), in: sliderRange(displayState: displayState), step: widget.step) { editing in
                 isEditing = editing
                 if !editing {
                     // Always send the final value on release
@@ -114,7 +113,8 @@ struct SliderRowView: View {
     }
 
     @ViewBuilder
-    private var labelContent: some View {
+    private func labelContent(displayState: WidgetDisplayState) -> some View {
+        let currentValueText = currentValueText(displayState: displayState)
         HStack {
             IconView(widget: widget, fallbackSymbol: fallbackSymbol)
                 .frame(width: 32, height: 32)

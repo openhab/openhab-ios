@@ -17,6 +17,7 @@ import SwiftUI
 struct ColorPickerRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var selectedColor: Color = .white
+    @State private var lastImmediateSendAt: Date = .distantPast
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private var colorCommandKey: String {
@@ -24,9 +25,9 @@ struct ColorPickerRowView: View {
     }
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetColorPickerView")
-    private var displayState: WidgetDisplayState { widget.displayState }
 
     var body: some View {
+        let displayState = widget.displayState
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
@@ -88,6 +89,19 @@ struct ColorPickerRowView: View {
 
         let command = "\(hueValue),\(saturationValue),\(brightnessValue)"
         logger.info("Sending color command: \(command)")
+
+        // Keep real-time feedback while dragging: throttle immediate sends.
+        let now = Date()
+        if now.timeIntervalSince(lastImmediateSendAt) >= 0.2 {
+            lastImmediateSendAt = now
+            viewModel.sendCommand(
+                command,
+                for: widget,
+                policy: .immediate
+            )
+        }
+
+        // Also debounce to ensure the final value is sent after interaction settles.
         viewModel.sendCommand(
             command,
             for: widget,

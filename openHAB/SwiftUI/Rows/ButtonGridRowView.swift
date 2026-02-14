@@ -23,9 +23,8 @@ struct ButtonGridButton: View {
     @State private var triggerFeedback = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "ButtonGridButton")
-    private var displayState: WidgetDisplayState { widget.displayState }
 
-    private var isChecked: Bool {
+    private func isChecked(displayState: WidgetDisplayState) -> Bool {
         if let stateless = widget.stateless, stateless { return false }
         return displayState.effectiveState == widget.command
     }
@@ -38,6 +37,7 @@ struct ButtonGridButton: View {
     }
 
     var body: some View {
+        let displayState = widget.displayState
         Button {
             // Only handle tap for non-press-release buttons;
             // press-release buttons are handled entirely by the gesture
@@ -62,11 +62,11 @@ struct ButtonGridButton: View {
             .frame(height: 44)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(isChecked ? Color.accentColor : Color.secondary.opacity(0.1))
+                    .fill(isChecked(displayState: displayState) ? Color.accentColor : Color.secondary.opacity(0.1))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(isChecked ? Color.accentColor : Color.secondary.opacity(0.3), lineWidth: 1)
+                    .stroke(isChecked(displayState: displayState) ? Color.accentColor : Color.secondary.opacity(0.3), lineWidth: 1)
             )
             .scaleEffect(isPressed ? 0.95 : 1.0)
         }
@@ -150,7 +150,6 @@ struct ButtonGridRowView: View {
 
     // Maximum number of columns based on screen width
     private let maxColumns = 12
-    private var displayState: WidgetDisplayState { widget.displayState }
 
     private var buttons: [OpenHABWidget] {
         let childButtons = widget.widgets // .filter(\.visibility)
@@ -173,6 +172,7 @@ struct ButtonGridRowView: View {
     }
 
     var body: some View {
+        let displayState = widget.displayState
         VStack(alignment: .leading, spacing: 8) {
             if showLabelAndIcon {
                 HStack {

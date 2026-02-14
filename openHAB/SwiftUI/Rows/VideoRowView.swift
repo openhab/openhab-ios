@@ -29,7 +29,6 @@ struct VideoRowView: View {
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "VideoRowView")
-    private var displayState: WidgetDisplayState { widget.displayState }
 
     private var videoURL: URL? {
         guard !widget.url.isEmpty else { return nil }
@@ -41,6 +40,7 @@ struct VideoRowView: View {
     }
 
     var body: some View {
+        let displayState = widget.displayState
         VStack(alignment: .leading, spacing: 8) {
             if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 let labelText = displayState.labelText

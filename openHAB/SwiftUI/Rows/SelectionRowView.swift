@@ -25,18 +25,15 @@ struct SelectionRowView: View {
         widget.mappingsOrItemOptions
     }
 
-    private var displayState: WidgetDisplayState {
-        widget.displayState
-    }
-
-    /// Returns the label of the currently selected mapping, or the widget's labelValue as fallback
-    private var selectedValueText: String? {
+    /// Returns the label of the currently selected mapping, or the widget's labelValue as fallback.
+    private func selectedValueText(displayState: WidgetDisplayState) -> String? {
         displayState.selectedLabel ?? displayState.labelValue
     }
 
     var body: some View {
+        let displayState = widget.displayState
         ZStack {
-            rowContent
+            rowContent(displayState: displayState)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .animation(nil, value: displayState.effectiveState)
 
@@ -66,7 +63,7 @@ struct SelectionRowView: View {
     }
 
     @ViewBuilder
-    private var rowContent: some View {
+    private func rowContent(displayState: WidgetDisplayState) -> some View {
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
@@ -80,7 +77,7 @@ struct SelectionRowView: View {
 
             Spacer()
 
-            if let valueText = selectedValueText, !valueText.isEmpty {
+            if let valueText = selectedValueText(displayState: displayState), !valueText.isEmpty {
                 Text(valueText)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
                     .lineLimit(1)

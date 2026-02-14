@@ -20,7 +20,6 @@ struct DatePickerInputRowView: View {
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetDatePickerInputView")
-    private var displayState: WidgetDisplayState { widget.displayState }
 
     private var datePickerComponents: DatePickerComponents {
         switch widget.inputHint {
@@ -36,6 +35,7 @@ struct DatePickerInputRowView: View {
     }
 
     var body: some View {
+        let displayState = widget.displayState
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)

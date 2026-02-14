@@ -14,6 +14,7 @@ import OpenAPIRuntime
 import OpenHABCore
 import os.log
 import SwiftUI
+import UIKit
 
 private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "org.openhab.app", category: "SitemapPageViewModel")
 
@@ -526,14 +527,27 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     func sendCommand(itemname: String, command: String) {
+        let sourcePrefix = sitemapSourcePrefix()
+        let deviceId = UIDevice.current.identifierForVendor?.uuidString
         Task {
             do {
-                try await openAPIService?.sendItemCommand(itemname: itemname, command: command)
+                try await openAPIService?.sendItemCommand(
+                    itemname: itemname,
+                    command: command,
+                    sourcePrefix: sourcePrefix,
+                    deviceId: deviceId
+                )
                 logger.info("Successfully sent command \(command) to \(itemname)")
             } catch {
                 logger.info("Failed to send command\(command) to \(itemname): \(error.localizedDescription)")
             }
         }
+    }
+
+    private func sitemapSourcePrefix() -> String? {
+        guard !defaultSitemap.isEmpty else { return nil }
+        let suffix = pageId.isEmpty ? "" : ":\(pageId)"
+        return "org.openhab.ui.basic$\(defaultSitemap)\(suffix)"
     }
 
     func sendToUpdate(item: OpenHABItem?,

@@ -16,9 +16,9 @@ import SwiftUI
 struct GenericRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
-    private var displayState: WidgetDisplayState { widget.displayState }
 
     var body: some View {
+        let displayState = widget.displayState
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)

@@ -26,19 +26,13 @@ struct SegmentedRowView: View {
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSegmentedView")
 
-    private var mappings: [OpenHABWidgetMapping] {
-        widget.mappingsOrItemOptions
-    }
-
-    private var displayState: WidgetDisplayState {
-        widget.displayState
-    }
-
     @State private var selectedIndex: Int?
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
 
     var body: some View {
+        let displayState = widget.displayState
+        let mappings = displayState.mappings
         HStack(spacing: 0) {
             IconView(widget: widget, fallbackSymbol: fallbackSymbol)
                 .frame(width: 32, height: 32)
@@ -63,12 +57,12 @@ struct SegmentedRowView: View {
             }
 
             if !mappings.isEmpty {
-                if widget.hasPressReleaseMappings {
+                if displayState.hasPressReleaseMappings {
                     // Press-release buttons for mappings with releaseCommand
                     if !(displayState.labelValue?.isEmpty == false) {
                         Spacer(minLength: 8)
                     }
-                    pressReleaseButtons
+                    pressReleaseButtons(mappings: mappings)
                         .fixedSize(horizontal: true, vertical: false)
                         .padding(.leading, 8)
 
@@ -76,12 +70,12 @@ struct SegmentedRowView: View {
                     if displayState.labelValue.isNilOrEmpty {
                         Spacer(minLength: 8)
                     }
-                    singleMappingButton
+                    singleMappingButton(displayState: displayState, mappings: mappings)
                         .fixedSize(horizontal: true, vertical: false)
                         .padding(.leading, 8)
                 } else {
                     // Button-based segmented control with animated selection indicator
-                    segmentedButtons
+                    segmentedButtons(mappings: mappings)
                         .frame(minWidth: 75)
                         .padding(.leading, 8)
                         .layoutPriority(1)
@@ -89,19 +83,19 @@ struct SegmentedRowView: View {
             }
         }
         .onAppear {
-            selectedIndex = widget.mapCommandtoIndex(with: displayState.effectiveState)
+            selectedIndex = selectedIndex(for: displayState.effectiveState, mappings: mappings)
         }
         .onChange(of: displayState.effectiveState) { newState in
-            selectedIndex = widget.mapCommandtoIndex(with: newState)
+            selectedIndex = selectedIndex(for: newState, mappings: mappings)
         }
     }
 
     /// Button-based segmented control with animated selection indicator
     @ViewBuilder
-    private var segmentedButtons: some View {
+    private func segmentedButtons(mappings: [OpenHABWidgetMapping]) -> some View {
         HStack(spacing: 0) {
             ForEach(0 ..< mappings.count, id: \.self) { index in
-                segmentButton(at: index)
+                segmentButton(at: index, mappings: mappings)
             }
         }
         .background(
@@ -132,7 +126,7 @@ struct SegmentedRowView: View {
     }
 
     @ViewBuilder
-    private var pressReleaseButtons: some View {
+    private func pressReleaseButtons(mappings: [OpenHABWidgetMapping]) -> some View {
         HStack(spacing: 8) {
             ForEach(mappings.indices, id: \.self) { index in
                 pressReleaseButton(for: mappings[index], at: index)
@@ -141,14 +135,15 @@ struct SegmentedRowView: View {
     }
 
     /// Whether the single mapping button is selected (item state matches the mapping command)
-    private var isSingleMappingSelected: Bool {
-        displayState.effectiveState == mappings[0].command
+    private func isSingleMappingSelected(displayState: WidgetDisplayState, mappings: [OpenHABWidgetMapping]) -> Bool {
+        guard let mapping = mappings.first else { return false }
+        return displayState.effectiveState == mapping.command
     }
 
     @ViewBuilder
-    private var singleMappingButton: some View {
+    private func singleMappingButton(displayState: WidgetDisplayState, mappings: [OpenHABWidgetMapping]) -> some View {
         let mapping = mappings[0]
-        let isSelected = isSingleMappingSelected
+        let isSelected = isSingleMappingSelected(displayState: displayState, mappings: mappings)
 
         Text(mapping.label)
             .font(.footnote)
@@ -195,8 +190,12 @@ struct SegmentedRowView: View {
 
     // MARK: - Helper Methods
 
+    private func selectedIndex(for state: String, mappings: [OpenHABWidgetMapping]) -> Int? {
+        mappings.firstIndex { $0.command == state }
+    }
+
     @ViewBuilder
-    private func segmentButton(at index: Int) -> some View {
+    private func segmentButton(at index: Int, mappings: [OpenHABWidgetMapping]) -> some View {
         let mapping = mappings[index]
 
         Button {

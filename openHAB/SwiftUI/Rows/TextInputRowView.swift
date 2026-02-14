@@ -21,9 +21,9 @@ struct TextInputRowView: View {
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")
-    private var displayState: WidgetDisplayState { widget.displayState }
 
     var body: some View {
+        let displayState = widget.displayState
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)

@@ -16,9 +16,9 @@ import SwiftUI
 struct FrameRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
-    private var displayState: WidgetDisplayState { widget.displayState }
 
     var body: some View {
+        let displayState = widget.displayState
         HStack {
             Text(displayState.labelText.uppercased())
                 .font(.callout)

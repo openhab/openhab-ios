@@ -11,6 +11,7 @@
 
 import Foundation
 
+@MainActor
 public final class WidgetCommandDispatcher {
     private var pendingTasks: [String: Task<Void, Never>] = [:]
 

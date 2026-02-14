@@ -17,9 +17,9 @@ import WebKit
 
 struct WidgetWebViewContainer: View {
     @ObservedObject var widget: OpenHABWidget
-    private var displayState: WidgetDisplayState { widget.displayState }
 
     var body: some View {
+        let displayState = widget.displayState
         VStack(alignment: .leading, spacing: 8) {
             if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 let labelText = displayState.labelText
