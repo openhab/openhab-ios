@@ -55,6 +55,10 @@ struct TilesTab: View {
         }
     }
 
+    func resetToRoot() {
+        selectedTileURL = nil
+    }
+
     private func openTile(_ tile: OpenHABUiTile) {
         let urlString = tile.url
         guard !urlString.isEmpty else { return }

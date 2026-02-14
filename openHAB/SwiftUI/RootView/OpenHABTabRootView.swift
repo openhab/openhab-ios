@@ -30,8 +30,23 @@ struct OpenHABTabRootView: View {
     @State private var selectedTab: AppTab
     @State private var isDemoMode: Bool
     @State private var sitemapsTab = SitemapsTab()
+    @State private var tilesTab = TilesTab()
+    @State private var systemTab = SystemTab()
+    @State private var tabCustomization = TabViewCustomization()
 
     private let webViewController = OpenHABWebViewController()
+
+    private var tabSelectionBinding: Binding<AppTab> {
+        Binding(
+            get: { selectedTab },
+            set: { newTab in
+                if newTab == selectedTab {
+                    resetTab(newTab)
+                }
+                selectedTab = newTab
+            }
+        )
+    }
 
     init() {
         let saved = Preferences.shared.currentHomePreferences.lastSelectedTab
@@ -48,24 +63,29 @@ struct OpenHABTabRootView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: tabSelectionBinding) {
             Tab("Home", systemImage: "house", value: AppTab.main) {
                 MainWebTab(webViewController: webViewController)
                     .ignoresSafeArea()
             }
+            .customizationID("home")
 
             Tab("Sitemaps", systemImage: "map", value: AppTab.sitemaps) {
                 sitemapsTab
             }
+            .customizationID("sitemaps")
 
             Tab("Tiles", systemImage: "square.grid.2x2", value: AppTab.tiles) {
-                TilesTab()
+                tilesTab
             }
+            .customizationID("tiles")
 
             Tab("System", systemImage: "gear", value: AppTab.system) {
-                SystemTab()
+                systemTab
             }
+            .customizationID("system")
         }
+        .tabViewCustomization($tabCustomization)
         .environmentObject(networkTracker)
         .onChange(of: selectedTab) { oldTab, newTab in
             Preferences.shared.modifyActiveHome { prefs in
@@ -126,6 +146,19 @@ struct OpenHABTabRootView: View {
             }
         } message: {
             Text(NSLocalizedString("crash_reporting_info", comment: ""))
+        }
+    }
+
+    private func resetTab(_ tab: AppTab) {
+        switch tab {
+        case .main:
+            webViewController.loadWebView(force: true)
+        case .sitemaps:
+            sitemapsTab.resetToRoot()
+        case .tiles:
+            tilesTab.resetToRoot()
+        case .system:
+            systemTab.resetToRoot()
         }
     }
 

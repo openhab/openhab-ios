@@ -96,6 +96,10 @@ struct SitemapsTab: View {
         }
     }
 
+    func resetToRoot() {
+        selectedSitemap = nil
+    }
+
     func navigateToSitemap(name: String, widgetId: String?) {
         selectedSitemap = name
         Preferences.shared.modifyActiveHome { preferences in

@@ -14,6 +14,23 @@ import OpenHABCore
 import os
 import SwiftUI
 
+    private struct SettingsSnapshot: Equatable {
+        var demomode: Bool
+        var idleOff: Bool
+        var realTimeSliders: Bool
+        var showSearchField: Bool
+        var sendCrashReports: Bool
+        var iconType: IconType
+        var sortSitemapsBy: SortSitemapsOrder
+        var defaultMainUIPath: String
+        var alwaysAllowWebRTC: Bool
+        var sitemapForWatch: String
+        var localConnectionConfig: ConnectionConfiguration
+        var remoteConnectionConfig: ConnectionConfiguration
+        var homeName: String
+        var sseCommandItem: String
+    }
+
 struct SettingsView: View {
     @State private var settingsDemomode = false
     @State private var settingsIdleOff = true
@@ -33,7 +50,29 @@ struct SettingsView: View {
     @State private var viewAppearedOnce = false
     @State private var settingsSSECommandItem = ""
 
+    @State private var initialSnapshot: SettingsSnapshot?
+    @State private var isDirty = false
+
     @Environment(\.dismiss) private var dismiss
+
+    private var currentSnapshot: SettingsSnapshot {
+        SettingsSnapshot(
+            demomode: settingsDemomode,
+            idleOff: settingsIdleOff,
+            realTimeSliders: settingsRealTimeSliders,
+            showSearchField: settingsShowSearchField,
+            sendCrashReports: settingsSendCrashReports,
+            iconType: settingsIconType,
+            sortSitemapsBy: settingsSortSitemapsBy,
+            defaultMainUIPath: settingsDefaultMainUIPath,
+            alwaysAllowWebRTC: settingsAlwaysAllowWebRTC,
+            sitemapForWatch: settingsSitemapForWatch,
+            localConnectionConfig: settingsLocalConnectionConfiguration,
+            remoteConnectionConfig: settingsRemoteConnectionConfiguration,
+            homeName: settingsHomeName,
+            sseCommandItem: settingsSSECommandItem
+        )
+    }
 
     var body: some View {
         Form {
@@ -69,19 +108,25 @@ struct SettingsView: View {
             AboutSettingsView()
         }
         .formStyle(.grouped)
-        .navigationBarBackButtonHidden(true)
+        .navigationBarBackButtonHidden(isDirty)
         .navigationTitle("\(settingsHomeName) Settings")
         .toolbar {
-            ToolbarItemGroup(placement: .primaryAction) {
-                Button("Save") {
-                    saveSettings()
-                    NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
-                    dismiss()
+            if isDirty {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        saveSettings()
+                        NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+                        dismiss()
+                    } label: {
+                        Image(systemName: "checkmark")
+                    }
                 }
-            }
-            ToolbarItemGroup(placement: .cancellationAction) {
-                Button("Cancel") {
-                    dismiss()
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        restoreFromSnapshot()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
                 }
             }
         }
@@ -89,10 +134,32 @@ struct SettingsView: View {
             if !viewAppearedOnce {
                 viewAppearedOnce = true
                 loadSettings()
+                initialSnapshot = currentSnapshot
                 let activeConfiguration = settingsLocalConnectionConfiguration
                 await updateSitemaps(activeConfiguration: activeConfiguration)
             }
         }
+        .onChange(of: currentSnapshot) { _, newSnapshot in
+            isDirty = newSnapshot != initialSnapshot
+        }
+    }
+
+    private func restoreFromSnapshot() {
+        guard let snapshot = initialSnapshot else { return }
+        settingsDemomode = snapshot.demomode
+        settingsIdleOff = snapshot.idleOff
+        settingsRealTimeSliders = snapshot.realTimeSliders
+        settingsShowSearchField = snapshot.showSearchField
+        settingsSendCrashReports = snapshot.sendCrashReports
+        settingsIconType = snapshot.iconType
+        settingsSortSitemapsBy = snapshot.sortSitemapsBy
+        settingsDefaultMainUIPath = snapshot.defaultMainUIPath
+        settingsAlwaysAllowWebRTC = snapshot.alwaysAllowWebRTC
+        settingsSitemapForWatch = snapshot.sitemapForWatch
+        settingsLocalConnectionConfiguration = snapshot.localConnectionConfig
+        settingsRemoteConnectionConfiguration = snapshot.remoteConnectionConfig
+        settingsHomeName = snapshot.homeName
+        settingsSSECommandItem = snapshot.sseCommandItem
     }
 
     private func updateSitemaps(activeConfiguration: ConnectionConfiguration) async {

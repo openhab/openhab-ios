@@ -37,8 +37,11 @@ struct ConnectionView: View {
 }
 
 struct SystemTab: View {
+    @State private var showNotifications = false
+    @State var path = NavigationPath()
+
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 Section {
                     NavigationLink {
@@ -51,8 +54,7 @@ struct SystemTab: View {
                         }
                     }
 
-                    if Preferences.shared.getNotificationConnection() != nil,
-                       !Preferences.shared.currentHomePreferences.demomode {
+                    if showNotifications {
                         NavigationLink {
                             NotificationsView()
                         } label: {
@@ -82,5 +84,20 @@ struct SystemTab: View {
                     .padding(.bottom, 8)
             }
         }
+        .task {
+            updateNotificationVisibility()
+        }
+        .onReceive(Preferences.shared.$currentHomePreferences) { _ in
+            updateNotificationVisibility()
+        }
+    }
+
+    func resetToRoot() {
+        path = NavigationPath()
+    }
+
+    private func updateNotificationVisibility() {
+        showNotifications = Preferences.shared.getNotificationConnection() != nil
+            && !Preferences.shared.currentHomePreferences.demomode
     }
 }
