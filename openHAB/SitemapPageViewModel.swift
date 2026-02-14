@@ -58,6 +58,8 @@ class SitemapPageViewModel: ObservableObject {
     private var isLinkedPage = false
     private var pageNetworkStatus: NetworkStatus?
     private var pageNetworkStatusAvailable = false
+    private var activePageHandlingKey: String?
+    private var activePageHandlingID: UUID?
 
     /// Cache of current widget objects by widgetId for in-place updates
     private var currentWidgetMap: [String: OpenHABWidget] = [:]
@@ -147,16 +149,38 @@ class SitemapPageViewModel: ObservableObject {
     func stopPageHandling() {
         pageHandlingTask?.cancel()
         pageHandlingTask = nil
+        activePageHandlingKey = nil
+        activePageHandlingID = nil
     }
 
-    func startPageHandling() {
+    func startPageHandling(forceRestart: Bool = false, reason: String = "manual") {
+        let requestedKey = "\(defaultSitemap)|\(pageId)"
+        if !forceRestart,
+           let activeTask = pageHandlingTask,
+           !activeTask.isCancelled,
+           activePageHandlingKey == requestedKey {
+            logger.info("Skipping duplicate page handling start for \(requestedKey, privacy: .public), reason: \(reason, privacy: .public)")
+            return
+        }
+
         pageHandlingTask?.cancel()
         error = nil // Clear any previous errors when starting a new page handling session
         isLoading = true // Show redacted view immediately
 
-        logger.info("🚀 Starting page load and long polling flow...")
+        let runID = UUID()
+        activePageHandlingID = runID
+        activePageHandlingKey = requestedKey
+
+        logger.info("🚀 Starting page load and long polling flow (reason: \(reason, privacy: .public), run: \(runID.uuidString, privacy: .public), key: \(requestedKey, privacy: .public))")
 
         pageHandlingTask = Task {
+            defer {
+                if activePageHandlingID == runID {
+                    pageHandlingTask = nil
+                    activePageHandlingID = nil
+                }
+            }
+
             // If no default sitemap is set, try to discover and auto-select one
             if defaultSitemap.isEmpty {
                 await discoverAndSelectSitemap()
@@ -194,6 +218,10 @@ class SitemapPageViewModel: ObservableObject {
                 )
 
                 try Task.checkCancellation()
+                guard activePageHandlingID == runID else {
+                    logger.info("Ignoring stale initial page result for run \(runID.uuidString, privacy: .public)")
+                    return
+                }
 
                 if let page = initialPage {
                     updateUI(with: page)
@@ -208,6 +236,10 @@ class SitemapPageViewModel: ObservableObject {
                         longPolling: true
                     )
                     try Task.checkCancellation()
+                    guard activePageHandlingID == runID else {
+                        logger.info("Ignoring stale long-poll result for run \(runID.uuidString, privacy: .public)")
+                        return
+                    }
 
                     if let page {
                         updateUI(with: page)
@@ -265,6 +297,7 @@ class SitemapPageViewModel: ObservableObject {
                 isLoading = false
                 isUpdating = false
             }
+
         }
     }
 
@@ -371,7 +404,7 @@ class SitemapPageViewModel: ObservableObject {
         defaultSitemapLabel = "" // Clear old label so it gets fetched for the new sitemap
         pageId = path ?? ""
         error = nil // Clear any previous errors when switching sitemaps
-        startPageHandling()
+        startPageHandling(forceRestart: true, reason: "push-sitemap")
     }
 
     private func fetchSitemapLabel() async {
@@ -449,18 +482,12 @@ class SitemapPageViewModel: ObservableObject {
 
         logger.info("SitemapPageViewModel tracker URL \(activeConnection.configuration.url)")
 
-        // Check if network status changed
-        if pageNetworkStatusChanged() {
-            logger.info("Network status changed, restarting page handling")
-            pageHandlingTask?.cancel()
-            // Restart page handling to establish long-polling
-            startPageHandling()
-            return
-        }
-
         // Skip if already connected to this URL — avoids restarting long-polling
         // when the NetworkTracker re-evaluates to the same connection
-        guard openHABRootUrl != activeConnection.configuration.url else {
+        let connectionDidChange = openHABRootUrl != activeConnection.configuration.url
+        let hasRunningPageTask = pageHandlingTask != nil && pageHandlingTask?.isCancelled == false
+        let networkStatusDidChange = pageNetworkStatusChanged()
+        guard connectionDidChange || (networkStatusDidChange && !hasRunningPageTask) else {
             return
         }
 
@@ -507,7 +534,7 @@ class SitemapPageViewModel: ObservableObject {
                 || pageHandlingTask == nil
                 || pageHandlingTask?.isCancelled == true
             if shouldRestart {
-                startPageHandling()
+                startPageHandling(forceRestart: true, reason: connectionDidChange ? "connection-changed" : "connection-recovered")
             }
         } catch {
             self.error = error as? any LocalizedError
@@ -515,7 +542,7 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     func selectSitemap() async {
-        startPageHandling()
+        startPageHandling(forceRestart: true, reason: "select-sitemap")
     }
 
     // MARK: - Command Sending
