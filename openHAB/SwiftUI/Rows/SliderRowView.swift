@@ -54,7 +54,12 @@ struct SliderRowView: View {
                         } else {
                             viewModel.cancelPendingCommand(for: widget, key: sliderCommandKey)
                         }
-                        sendSliderUpdate(value, policy: .immediate, key: sliderCommandKey)
+                        sendSliderUpdate(
+                            value,
+                            policy: .finalOnly,
+                            phase: .release,
+                            key: sliderCommandKey
+                        )
                     }
                     // Keep pendingValue set until server responds to avoid visual jump
                     // Fallback: clear after delay if server doesn't respond
@@ -107,6 +112,7 @@ struct SliderRowView: View {
 
     private func sendSliderUpdate(_ newValue: Double,
                                   policy: WidgetCommandPolicy,
+                                  phase: WidgetCommandPhase = .change,
                                   key: String?) {
         var numberState = widget.stateValueAsNumberState
         numberState = numberState ?? NumberState(
@@ -115,7 +121,7 @@ struct SliderRowView: View {
             format: widget.item?.stateDescription?.numberPattern
         )
         numberState?.value = newValue
-        viewModel.sendToUpdate(item: widget.item, state: numberState, policy: policy, key: key)
+        viewModel.sendToUpdate(item: widget.item, state: numberState, policy: policy, phase: phase, key: key)
     }
 
     private func sliderRange(displayState: WidgetDisplayState) -> ClosedRange<Double> {

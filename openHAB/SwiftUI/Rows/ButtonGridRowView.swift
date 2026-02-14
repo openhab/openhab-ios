@@ -90,7 +90,7 @@ struct ButtonGridButton: View {
         if hasPressRelease, let command = widget.command {
             triggerFeedback.toggle()
             logger.info("Sending press command: \(command)")
-            sendCommand(command)
+            sendCommand(command, policy: .pressRelease, phase: .press)
         }
     }
 
@@ -100,14 +100,18 @@ struct ButtonGridButton: View {
         // For press-release buttons, send release command on release
         if let releaseCommand = widget.releaseCommand, !releaseCommand.isEmpty {
             logger.info("Sending release command: \(releaseCommand)")
-            sendCommand(releaseCommand)
+            sendCommand(releaseCommand, policy: .pressRelease, phase: .release)
         }
     }
 
-    private func sendCommand(_ command: String) {
+    private func sendCommand(_ command: String,
+                             policy: WidgetCommandPolicy = .immediate,
+                             phase: WidgetCommandPhase = .change) {
         viewModel.sendCommand(
             command,
             for: widget,
+            policy: policy,
+            phase: phase,
             fallbackItem: parentItem
         )
     }

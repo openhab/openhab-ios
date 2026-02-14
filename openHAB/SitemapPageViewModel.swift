@@ -35,6 +35,12 @@ enum SitemapPageError: LocalizedError {
     }
 }
 
+enum CommandLifecycleSummary: Equatable {
+    case idle
+    case sending(count: Int)
+    case failed(count: Int)
+}
+
 @MainActor
 class SitemapPageViewModel: ObservableObject {
     @Published var currentPage: OpenHABPage?
@@ -44,6 +50,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published var isUpdating = false
     @Published var openHABRootUrl: String?
     @Published var showSearchField = false
+    @Published private(set) var commandStates: [String: WidgetCommandLifecycleState] = [:]
 
     let networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
@@ -60,6 +67,8 @@ class SitemapPageViewModel: ObservableObject {
     private var pageNetworkStatusAvailable = false
     private var activePageHandlingKey: String?
     private var activePageHandlingID: UUID?
+    private var commandStateResetTasks: [String: Task<Void, Never>] = [:]
+    private var commandStateVersions: [String: Int] = [:]
 
     /// Cache of current widget objects by widgetId for in-place updates
     private var currentWidgetMap: [String: OpenHABWidget] = [:]
@@ -89,6 +98,27 @@ class SitemapPageViewModel: ObservableObject {
 
     var isLinked: Bool {
         isLinkedPage
+    }
+
+    var commandLifecycleSummary: CommandLifecycleSummary {
+        let failedCount = commandStates.values.reduce(into: 0) { result, state in
+            if case .failed = state {
+                result += 1
+            }
+        }
+        if failedCount > 0 {
+            return .failed(count: failedCount)
+        }
+
+        let sendingCount = commandStates.values.reduce(into: 0) { result, state in
+            if case .sending = state {
+                result += 1
+            }
+        }
+        if sendingCount > 0 {
+            return .sending(count: sendingCount)
+        }
+        return .idle
     }
 
     init() {
@@ -141,6 +171,16 @@ class SitemapPageViewModel: ObservableObject {
         )
     }
 
+    deinit {
+        connectionObserverTask?.cancel()
+        pageHandlingTask?.cancel()
+        commandStateResetTasks.values.forEach { $0.cancel() }
+        commandStateResetTasks.removeAll()
+    }
+}
+
+@MainActor
+extension SitemapPageViewModel {
     func loadSettings() {
         defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
         showSearchField = Preferences.shared.applicationPreferences.showSearchField
@@ -181,123 +221,88 @@ class SitemapPageViewModel: ObservableObject {
                 }
             }
 
-            // If no default sitemap is set, try to discover and auto-select one
-            if defaultSitemap.isEmpty {
-                await discoverAndSelectSitemap()
-            }
-
-            guard !defaultSitemap.isEmpty else {
-                logger.error("startPageHandling: Cannot run with empty sitemap after discovery")
-                isLoading = false
-                return
-            }
             do {
-                guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
-                    logger.error("Failed to establish connection within timeout")
-                    isLoading = false
-                    return
-                }
-                activeConnectionInfo = activeConnection
-                let configuration = activeConnection.configuration
-                openHABRootUrl = configuration.url
+                guard await ensureSitemapAvailableForHandling() else { return }
+                guard let activeConnection = await waitForConnectionForHandling() else { return }
 
-                if openAPIService == nil {
-                    openAPIService = try OpenAPIService(connectionConfiguration: configuration)
-                }
+                try setupServiceIfNeeded(activeConnection: activeConnection)
 
-                // Fetch sitemap label if we loaded from preferences (not from discovery)
                 if defaultSitemapLabel.isEmpty {
                     await fetchSitemapLabel()
                 }
 
-                // 1. Initial page load (longPolling: false)
-                let initialPage = try await openAPIService?.pollDataForPage(
-                    sitemapname: defaultSitemap,
-                    pageId: pageId,
-                    longPolling: false
-                )
-
-                try Task.checkCancellation()
-                guard activePageHandlingID == runID else {
-                    logger.info("Ignoring stale initial page result for run \(runID.uuidString, privacy: .public)")
-                    return
-                }
-
-                if let page = initialPage {
-                    updateUI(with: page)
-                }
+                try await loadInitialPageForHandling(runID: runID)
                 isLoading = false
-
-                // 2. Start long polling loop
-                while !Task.isCancelled {
-                    let page = try await openAPIService?.pollDataForPage(
-                        sitemapname: defaultSitemap,
-                        pageId: pageId,
-                        longPolling: true
-                    )
-                    try Task.checkCancellation()
-                    guard activePageHandlingID == runID else {
-                        logger.info("Ignoring stale long-poll result for run \(runID.uuidString, privacy: .public)")
-                        return
-                    }
-
-                    if let page {
-                        updateUI(with: page)
-                    }
-                }
-
-            } catch is CancellationError {
-                logger.info("🔁 pageHandlingTask was cancelled")
-                isLoading = false
-                isUpdating = false
-            } catch let error as DecodingError {
-                // Don't set error if task was cancelled
-                guard !Task.isCancelled else {
-                    logger.info("Task cancelled, ignoring DecodingError")
-                    isLoading = false
-                    isUpdating = false
-                    return
-                }
-                logger.error("Decoding error: \(error.localizedDescription)")
-                self.error = SitemapPageError.serviceUnavailable
-                isLoading = false
-                isUpdating = false
-            } catch let error as ClientError {
-                if let urlError = error.underlyingError as? URLError, urlError.code == .cancelled {
-                    logger.info("Task cancelled (URLError: cancelled)")
-                } else if let urlError = error.underlyingError as? URLError, urlError.code == .timedOut {
-                    logger.info("Task timed out (URLError: timedOut)")
-                } else {
-                    // Don't set error if task was cancelled
-                    guard !Task.isCancelled else {
-                        logger.info("Task cancelled, ignoring ClientError")
-                        isLoading = false
-                        isUpdating = false
-                        return
-                    }
-                    logger.error("ClientError: \(error.localizedDescription)")
-                    self.error = SitemapPageError.serviceUnavailable
-                }
-                isLoading = false
-                isUpdating = false
-            } catch let openAPIError as OpenAPIServiceError {
-                logger.error("OpenAPIServiceError: \(openAPIError.localizedDescription)")
-                isLoading = false
-                isUpdating = false
+                try await runLongPollingLoop(runID: runID)
             } catch {
-                // Don't set error if task was cancelled
-                guard !Task.isCancelled else {
-                    logger.info("Task cancelled, ignoring error")
-                    isLoading = false
-                    isUpdating = false
-                    return
-                }
-                logger.error("❌ Unhandled pageHandlingTask error: \(error.localizedDescription)")
-                self.error = SitemapPageError.serviceUnavailable
-                isLoading = false
-                isUpdating = false
+                handlePageHandlingError(error)
+            }
+        }
+    }
+
+    private func ensureSitemapAvailableForHandling() async -> Bool {
+        if defaultSitemap.isEmpty {
+            await discoverAndSelectSitemap()
+        }
+        guard !defaultSitemap.isEmpty else {
+            logger.error("startPageHandling: Cannot run with empty sitemap after discovery")
+            isLoading = false
+            return false
+        }
+        return true
+    }
+
+    private func waitForConnectionForHandling() async -> ConnectionInfo? {
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
+            logger.error("Failed to establish connection within timeout")
+            isLoading = false
+            return nil
+        }
+        activeConnectionInfo = activeConnection
+        openHABRootUrl = activeConnection.configuration.url
+        return activeConnection
+    }
+
+    private func setupServiceIfNeeded(activeConnection: ConnectionInfo) throws {
+        if openAPIService == nil {
+            openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
+        }
+    }
+
+    private func loadInitialPageForHandling(runID: UUID) async throws {
+        let initialPage = try await openAPIService?.pollDataForPage(
+            sitemapname: defaultSitemap,
+            pageId: pageId,
+            longPolling: false
+        )
+
+        try Task.checkCancellation()
+        guard activePageHandlingID == runID else {
+            logger.info("Ignoring stale initial page result for run \(runID.uuidString, privacy: .public)")
+            return
+        }
+
+        if let page = initialPage {
+            updateUI(with: page)
+        }
+    }
+
+    private func runLongPollingLoop(runID: UUID) async throws {
+        while !Task.isCancelled {
+            let page = try await openAPIService?.pollDataForPage(
+                sitemapname: defaultSitemap,
+                pageId: pageId,
+                longPolling: true
+            )
+            try Task.checkCancellation()
+            guard activePageHandlingID == runID else {
+                logger.info("Ignoring stale long-poll result for run \(runID.uuidString, privacy: .public)")
+                return
             }
 
+            if let page {
+                updateUI(with: page)
+            }
         }
     }
 
@@ -550,12 +555,14 @@ class SitemapPageViewModel: ObservableObject {
     func sendCommand(_ command: String?,
                      for widget: OpenHABWidget,
                      policy: WidgetCommandPolicy = .immediate,
+                     phase: WidgetCommandPhase = .change,
                      key: String? = nil,
                      fallbackItem: OpenHABItem? = nil) {
         commandDispatcher.send(
             command,
             for: widget,
             policy: policy,
+            phase: phase,
             key: key,
             fallbackItem: fallbackItem
         )
@@ -570,14 +577,17 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
-        commandDispatcher.send(command, for: item, policy: .immediate) { [weak self] itemname, command in
+        commandDispatcher.send(command, for: item, policy: .immediate, phase: .change) { [weak self] itemname, command in
             self?.sendCommand(itemname: itemname, command: command)
         }
     }
 
     func sendCommand(itemname: String, command: String) {
+        let version = nextCommandVersion(for: itemname)
+        setCommandState(.sending, for: itemname)
         let deviceId = UIDevice.current.identifierForVendor?.uuidString
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
             do {
                 try await openAPIService?.sendItemCommand(
                     itemname: itemname,
@@ -586,8 +596,10 @@ class SitemapPageViewModel: ObservableObject {
                     deviceId: deviceId
                 )
                 logger.info("Successfully sent command \(command) to \(itemname)")
+                handleCommandSuccess(for: itemname, version: version)
             } catch {
                 logger.info("Failed to send command\(command) to \(itemname): \(error.localizedDescription)")
+                handleCommandFailure(for: itemname, version: version, errorDescription: error.localizedDescription)
             }
         }
     }
@@ -595,6 +607,7 @@ class SitemapPageViewModel: ObservableObject {
     func sendToUpdate(item: OpenHABItem?,
                       state: NumberState?,
                       policy: WidgetCommandPolicy = .immediate,
+                      phase: WidgetCommandPhase = .change,
                       key: String? = nil) {
         guard let item, let state else {
             logger.info("ItemUpdate for Item or State = nil")
@@ -607,14 +620,111 @@ class SitemapPageViewModel: ObservableObject {
             // For all other items, send the plain value
             state.stringValue
         }
-        commandDispatcher.send(command, for: item, policy: policy, key: key) { [weak self] itemname, command in
+        commandDispatcher.send(command, for: item, policy: policy, phase: phase, key: key) { [weak self] itemname, command in
             self?.sendCommand(itemname: itemname, command: command)
         }
     }
+}
 
-    deinit {
-        connectionObserverTask?.cancel()
-        pageHandlingTask?.cancel()
+@MainActor
+private extension SitemapPageViewModel {
+    func handlePageHandlingError(_ error: any Error) {
+        if error is CancellationError {
+            logger.info("🔁 pageHandlingTask was cancelled")
+            isLoading = false
+            isUpdating = false
+            return
+        }
+
+        if let decodingError = error as? DecodingError {
+            guard !Task.isCancelled else {
+                logger.info("Task cancelled, ignoring DecodingError")
+                isLoading = false
+                isUpdating = false
+                return
+            }
+            logger.error("Decoding error: \(decodingError.localizedDescription)")
+            self.error = SitemapPageError.serviceUnavailable
+            isLoading = false
+            isUpdating = false
+            return
+        }
+
+        if let clientError = error as? ClientError {
+            if let urlError = clientError.underlyingError as? URLError, urlError.code == .cancelled {
+                logger.info("Task cancelled (URLError: cancelled)")
+            } else if let urlError = clientError.underlyingError as? URLError, urlError.code == .timedOut {
+                logger.info("Task timed out (URLError: timedOut)")
+            } else {
+                guard !Task.isCancelled else {
+                    logger.info("Task cancelled, ignoring ClientError")
+                    isLoading = false
+                    isUpdating = false
+                    return
+                }
+                logger.error("ClientError: \(clientError.localizedDescription)")
+                self.error = SitemapPageError.serviceUnavailable
+            }
+            isLoading = false
+            isUpdating = false
+            return
+        }
+
+        if let openAPIError = error as? OpenAPIServiceError {
+            logger.error("OpenAPIServiceError: \(openAPIError.localizedDescription)")
+            isLoading = false
+            isUpdating = false
+            return
+        }
+
+        guard !Task.isCancelled else {
+            logger.info("Task cancelled, ignoring error")
+            isLoading = false
+            isUpdating = false
+            return
+        }
+        logger.error("❌ Unhandled pageHandlingTask error: \(error.localizedDescription)")
+        self.error = SitemapPageError.serviceUnavailable
+        isLoading = false
+        isUpdating = false
+    }
+
+    func nextCommandVersion(for itemname: String) -> Int {
+        let newVersion = (commandStateVersions[itemname] ?? 0) + 1
+        commandStateVersions[itemname] = newVersion
+        return newVersion
+    }
+
+    func setCommandState(_ state: WidgetCommandLifecycleState, for itemname: String) {
+        commandStateResetTasks[itemname]?.cancel()
+        commandStateResetTasks[itemname] = nil
+
+        switch state {
+        case .idle:
+            commandStates.removeValue(forKey: itemname)
+        case .sending, .failed:
+            commandStates[itemname] = state
+        }
+    }
+
+    func handleCommandSuccess(for itemname: String, version: Int) {
+        guard commandStateVersions[itemname] == version else { return }
+        scheduleCommandStateReset(for: itemname, version: version, after: .milliseconds(450))
+    }
+
+    func handleCommandFailure(for itemname: String, version: Int, errorDescription: String) {
+        guard commandStateVersions[itemname] == version else { return }
+        setCommandState(.failed(message: errorDescription), for: itemname)
+    }
+
+    func scheduleCommandStateReset(for itemname: String, version: Int, after delay: Duration) {
+        commandStateResetTasks[itemname]?.cancel()
+        commandStateResetTasks[itemname] = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: delay)
+            guard let self else { return }
+            guard commandStateVersions[itemname] == version else { return }
+            setCommandState(.idle, for: itemname)
+        }
     }
 }
 

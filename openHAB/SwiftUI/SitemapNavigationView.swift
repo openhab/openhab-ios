@@ -31,6 +31,9 @@ struct SitemapNavigationView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
+                    commandLifecycleIndicator
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         onShowSideMenu()
                     } label: {
@@ -47,6 +50,26 @@ struct SitemapNavigationView: View {
                 .textInputAutocapitalization(.never)
         } else {
             page
+        }
+    }
+
+    @ViewBuilder
+    private var commandLifecycleIndicator: some View {
+        switch viewModel.commandLifecycleSummary {
+        case .idle:
+            EmptyView()
+        case .sending:
+            ProgressView()
+                .controlSize(.small)
+                .accessibilityLabel("Sending command")
+        case let .failed(count):
+            HStack(spacing: 4) {
+                Image(systemSymbol: .exclamationmarkTriangleFill)
+                Text("\(count)")
+            }
+            .foregroundStyle(.red)
+            .font(.caption)
+            .accessibilityLabel("Command failures: \(count)")
         }
     }
 

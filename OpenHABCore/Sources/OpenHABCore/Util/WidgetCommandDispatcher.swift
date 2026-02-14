@@ -21,6 +21,7 @@ public final class WidgetCommandDispatcher {
     public func send(_ command: String?,
                      for widget: OpenHABWidget,
                      policy: WidgetCommandPolicy,
+                     phase: WidgetCommandPhase = .change,
                      key: String? = nil,
                      fallbackItem: OpenHABItem? = nil) {
         guard let command, !command.isEmpty else { return }
@@ -29,6 +30,10 @@ public final class WidgetCommandDispatcher {
         case .immediate:
             dispatch(command: command, for: widget, fallbackItem: fallbackItem)
         case let .debounce(duration):
+            guard phase != .release else {
+                dispatch(command: command, for: widget, fallbackItem: fallbackItem)
+                return
+            }
             sendDebounced(
                 command,
                 for: widget,
@@ -36,6 +41,12 @@ public final class WidgetCommandDispatcher {
                 key: key,
                 fallbackItem: fallbackItem
             )
+        case .finalOnly:
+            guard phase == .release else { return }
+            dispatch(command: command, for: widget, fallbackItem: fallbackItem)
+        case .pressRelease:
+            guard phase == .press || phase == .release else { return }
+            dispatch(command: command, for: widget, fallbackItem: fallbackItem)
         }
     }
 
@@ -43,6 +54,7 @@ public final class WidgetCommandDispatcher {
     public func send(_ command: String?,
                      for item: OpenHABItem?,
                      policy: WidgetCommandPolicy,
+                     phase: WidgetCommandPhase = .change,
                      key: String? = nil,
                      execute: @escaping @MainActor (_ itemname: String, _ command: String) -> Void) {
         guard let command, !command.isEmpty, let item else { return }
@@ -51,6 +63,10 @@ public final class WidgetCommandDispatcher {
         case .immediate:
             execute(item.name, command)
         case let .debounce(duration):
+            guard phase != .release else {
+                execute(item.name, command)
+                return
+            }
             sendDebounced(
                 command,
                 for: item,
@@ -58,6 +74,12 @@ public final class WidgetCommandDispatcher {
                 key: key,
                 execute: execute
             )
+        case .finalOnly:
+            guard phase == .release else { return }
+            execute(item.name, command)
+        case .pressRelease:
+            guard phase == .press || phase == .release else { return }
+            execute(item.name, command)
         }
     }
 

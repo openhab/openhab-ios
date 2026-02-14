@@ -241,7 +241,12 @@ struct SegmentedRowView: View {
                             pressedIndex = index
                             // Send command on press
                             logger.info("Sending press command: \(mapping.command)")
-                            viewModel.sendCommand(mapping.command, for: widget)
+                            viewModel.sendCommand(
+                                mapping.command,
+                                for: widget,
+                                policy: .pressRelease,
+                                phase: .press
+                            )
                         }
                     }
                     .onEnded { _ in
@@ -249,7 +254,12 @@ struct SegmentedRowView: View {
                         // Send release command on release
                         if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
                             logger.info("Sending release command: \(releaseCommand)")
-                            viewModel.sendCommand(releaseCommand, for: widget)
+                            viewModel.sendCommand(
+                                releaseCommand,
+                                for: widget,
+                                policy: .pressRelease,
+                                phase: .release
+                            )
                         }
                     }
             )
