@@ -104,6 +104,7 @@ public struct HomePreferences: Codable, Equatable {
     public var sitemapForWatchLabel = "watch"
     public var homeName = "Home"
     public var sseCommandItem = ""
+    public var lastSelectedTab = "main"
 
     fileprivate init(id: UUID) {
         self.id = id

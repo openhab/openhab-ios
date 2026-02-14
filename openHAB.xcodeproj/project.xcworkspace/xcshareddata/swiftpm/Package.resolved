@@ -1,5 +1,5 @@
 {
-  "originHash" : "510fece68ecb3b20f88be6a202204737d9bb1b0c487b784869bdd79b26798df4",
+  "originHash" : "8569e30a45db15e05c7c1667e727a277e8587c9ef61be4f1f5677da0a5122781",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -200,6 +200,15 @@
       }
     },
     {
+      "identity" : "swift-timeout",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swhitty/swift-timeout.git",
+      "state" : {
+        "revision" : "4efb73b593d5553b90766d531db701ecf2306237",
+        "version" : "0.4.1"
+      }
+    },
+    {
       "identity" : "swiftformatplugin",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftFormatPlugin",
@@ -224,6 +233,15 @@
       "state" : {
         "revision" : "c0ff6c65bfc00e6a707957cb7069988c5cde2a30",
         "version" : "10.0.2"
+      }
+    },
+    {
+      "identity" : "webui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/cybozu/WebUI.git",
+      "state" : {
+        "revision" : "d1408d9ad8056f4619b71f06a0b0ba1ff553f3a3",
+        "version" : "4.2.1"
       }
     }
   ],

@@ -35,12 +35,12 @@ class OpenHABUITests: XCTestCase {
         let app = XCUIApplication()
         app.activate()
 
-        let hamburgerButton = app.navigationBars.buttons["HamburgerButton"]
-        hamburgerButton.tap()
-        sleep(3)
+        // Navigate using tab bar instead of hamburger menu
+        let tabBar = app.tabBars
 
         if runWebViewAndSitemap {
-            app.staticTexts["Home"].tap()
+            // Home tab (WebView / MainUI)
+            tabBar.buttons["Home"].tap()
             sleep(10)
             snapshot("0_MainUI")
 
@@ -77,9 +77,10 @@ class OpenHABUITests: XCTestCase {
             webViewsQuery.links.allElementsBoundByIndex[1].tap()
             sleep(2)
 
-            app.webViews.staticTexts["square_arrow_right"].tap()
+            // Switch to Sitemaps tab
+            tabBar.buttons["Sitemaps"].tap()
+            sleep(3)
 
-            app.staticTexts["Main Menu"].tap()
             app.cells.containing(.staticText, identifier: "Widget Overview").firstMatch.tap()
             sleep(10)
             snapshot("4_MainSitemap")
@@ -90,10 +91,11 @@ class OpenHABUITests: XCTestCase {
 
             app.navigationBars.buttons.element(boundBy: 0).tap()
             sleep(2)
-
-            hamburgerButton.tap()
-            sleep(3)
         }
+
+        // Switch to System tab for settings
+        tabBar.buttons["System"].tap()
+        sleep(2)
         app.staticTexts["settings"].tap()
         sleep(2)
         snapshot("7_Settings_Demo")

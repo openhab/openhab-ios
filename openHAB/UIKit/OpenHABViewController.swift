@@ -11,7 +11,6 @@
 
 import Combine
 import OpenHABCore
-import SideMenu
 import SwiftMessages
 import UIKit
 
@@ -80,12 +79,6 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
         SwiftMessages.hideAll()
     }
 
-    func showSideMenu() {
-        if let rc = parent as? OpenHABRootViewController {
-            rc.showSideMenu()
-        }
-    }
-
     @objc
     func didEnterBackground(_ notification: Notification?) {
         UIApplication.shared.isIdleTimerDisabled = false
@@ -98,6 +91,9 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
             UIApplication.shared.isIdleTimerDisabled = true
         }
     }
+
+    // No-op: side menu replaced by tab bar
+    func showSideMenu() {}
 
     // To be overridden by sub classes
 

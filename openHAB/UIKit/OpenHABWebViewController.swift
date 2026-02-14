@@ -13,7 +13,6 @@ import Combine
 import OpenHABCore
 import os.log
 import SafariServices
-import SideMenu
 import SwiftMessages
 import UIKit
 import WebKit
@@ -490,7 +489,8 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
             Logger.viewController.info("WKScriptMessage \(callbackName)")
             switch callbackName {
             case "exitToApp":
-                showSideMenu()
+                // Tab bar is always visible, no side menu to show
+                break
             case "goFullscreen":
                 // check to make sure we are actually the top view before hiding the nav button
                 if isViewLoaded, view.window != nil {

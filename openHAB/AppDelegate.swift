@@ -18,6 +18,7 @@ import OpenHABCore
 import os.log
 import SDWebImageSVGCoder
 import SwiftMessages
+import SwiftUI
 import UIKit
 @preconcurrency import UserNotifications
 import WatchConnectivity
@@ -62,6 +63,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Preferences.migratePreferences()
 
         UNUserNotificationCenter.current().delegate = notificationDelegate
+
+        // Replace storyboard root with SwiftUI TabView
+        let rootView = OpenHABTabRootView()
+        let hostingController = UIHostingController(rootView: rootView)
+        window = UIWindow(frame: UIScreen.main.bounds)
+        window?.rootViewController = hostingController
+        window?.makeKeyAndVisible()
 
         Logger.appDelegate.info("didFinishLaunchingWithOptions ended")
 

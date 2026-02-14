@@ -18,7 +18,6 @@ struct SitemapNavigationView: View {
     @StateObject var viewModel = SitemapPageViewModel()
     @State private var isSearchPresented = false
     @FocusState private var isLegacySearchFocused: Bool
-    let onShowSideMenu: () -> Void
 
     var body: some View {
         NavigationStack {
@@ -55,14 +54,6 @@ struct SitemapNavigationView: View {
                             }
                             .accessibilityLabel("Search")
                         }
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        onShowSideMenu()
-                    } label: {
-                        Image(systemSymbol: .line3Horizontal)
-                            .font(.title)
                     }
                 }
             }
@@ -163,14 +154,12 @@ struct SitemapNavigationView: View {
         return false
     }
 
-    init(viewModel: SitemapPageViewModel, onShowSideMenu: @escaping () -> Void) {
+    init(viewModel: SitemapPageViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
-        self.onShowSideMenu = onShowSideMenu
     }
 
-    init(onShowSideMenu: @escaping () -> Void = {}) {
+    init() {
         _viewModel = StateObject(wrappedValue: SitemapPageViewModel())
-        self.onShowSideMenu = onShowSideMenu
     }
 }
 
@@ -179,7 +168,5 @@ struct SitemapNavigationView: View {
         pageUrl: PreviewConstants.openHABSitemapPage?.link ?? "",
         title: PreviewConstants.openHABSitemapPage?.title ?? "Preview Page"
     )
-    SitemapNavigationView(viewModel: previewViewModel) {
-        print("Show side menu tapped")
-    }
+    SitemapNavigationView(viewModel: previewViewModel)
 }

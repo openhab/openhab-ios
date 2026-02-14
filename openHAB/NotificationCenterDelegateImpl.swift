@@ -138,16 +138,19 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         SwiftMessages.hideAll()
     }
 
-    // ✅ Ensure this runs on the MainActor
     @MainActor
     func notifyNotificationListeners(action: String?, cloudUserId: String? = nil) {
         // Wake up screen saver immediately on incoming notification interaction
         NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
 
-        if let navigationController = AppDelegate.appDelegate.window?.rootViewController as? UINavigationController,
-           let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
-            rootViewController.handleNotification(action: action, cloudUserId: cloudUserId)
-        }
+        var userInfo: [String: Any] = [:]
+        if let action { userInfo["action"] = action }
+        if let cloudUserId { userInfo["cloudUserId"] = cloudUserId }
+        NotificationCenter.default.post(
+            name: .openHABHandleNotificationAction,
+            object: nil,
+            userInfo: userInfo
+        )
     }
 }
 
