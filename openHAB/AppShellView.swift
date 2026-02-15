@@ -61,8 +61,36 @@ private struct RightEdgeSwipeModifier: ViewModifier {
     }
 }
 
+private struct LeftEdgeSwipeModifier: ViewModifier {
+    let onSwipe: () -> Void
+    @State private var dragStartedNearEdge = false
+
+    func body(content: Content) -> some View {
+        content.overlay(alignment: .leading) {
+            Color.clear
+                .frame(width: 24)
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture(minimumDistance: 20)
+                        .onChanged { _ in
+                            if !dragStartedNearEdge {
+                                dragStartedNearEdge = true
+                            }
+                        }
+                        .onEnded { value in
+                            if dragStartedNearEdge, value.translation.width > 60 {
+                                onSwipe()
+                            }
+                            dragStartedNearEdge = false
+                        }
+                )
+        }
+    }
+}
+
 struct AppShellView: View {
     @StateObject private var coordinator = AppShellCoordinator.shared
+    @StateObject private var currentViewState = CurrentViewState.shared
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
@@ -73,6 +101,10 @@ struct AppShellView: View {
             } detail: {
                 OpenHABRootContainerView()
                     .ignoresSafeArea()
+                    .toolbar(currentViewState.isWebViewActive ? .hidden : .visible, for: .navigationBar)
+                    .onLeftEdgeSwipe {
+                        coordinator.requestMenu()
+                    }
             }
             .navigationSplitViewStyle(.prominentDetail)
         } else {
@@ -109,5 +141,9 @@ struct AppShellView: View {
 extension View {
     func onRightEdgeSwipe(perform action: @escaping () -> Void) -> some View {
         modifier(RightEdgeSwipeModifier(onSwipe: action))
+    }
+
+    func onLeftEdgeSwipe(perform action: @escaping () -> Void) -> some View {
+        modifier(LeftEdgeSwipeModifier(onSwipe: action))
     }
 }

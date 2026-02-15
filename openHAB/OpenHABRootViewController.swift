@@ -834,24 +834,34 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func applyNavigationChrome(isWebViewActive: Bool) {
+        resetNavigationTitles()
         let isRegularWidth = traitCollection.horizontalSizeClass == .regular
         if isWebViewActive, !isRegularWidth {
-            navigationController?.setNavigationBarHidden(false, animated: false)
-            navigationController?.navigationBar.prefersLargeTitles = false
             navigationItem.title = "Main View"
+            webViewController.navigationItem.title = "Main View"
+            navigationController?.navigationBar.prefersLargeTitles = false
             navigationItem.searchController = nil
             navigationItem.hidesSearchBarWhenScrolling = true
             navigationItem.rightBarButtonItems = nil
             navigationItem.setRightBarButton(nil, animated: false)
+            navigationController?.setNavigationBarHidden(false, animated: false)
         } else {
             // Sitemap is SwiftUI-driven and renders its own toolbar/menu/search.
             // Hide UIKit navigation chrome to avoid duplicate title/buttons.
             navigationItem.title = nil
+            webViewController.navigationItem.title = nil
+            (sitemapViewController as UIViewController).navigationItem.title = nil
             navigationItem.searchController = nil
             navigationItem.rightBarButtonItems = nil
             navigationItem.setRightBarButton(nil, animated: false)
             navigationController?.setNavigationBarHidden(true, animated: false)
         }
+    }
+
+    private func resetNavigationTitles() {
+        navigationItem.title = nil
+        webViewController.navigationItem.title = nil
+        (sitemapViewController as UIViewController).navigationItem.title = nil
     }
 
     private func updateCurrentViewState(isWebViewActive: Bool) {
