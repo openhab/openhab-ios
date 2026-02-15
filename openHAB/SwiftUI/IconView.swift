@@ -152,9 +152,9 @@ extension IconView {
 // MARK: - Widget Type Extensions
 
 extension IconView {
-    /// Determines if a widget type should show an icon (equivalent to NoIconDisplayableCell protocol)
+    /// Determines if a widget type should show an icon
     static func shouldShowIcon(for widget: OpenHABWidget) -> Bool {
-        // These widget types should not show icons (equivalent to NoIconDisplayableCell)
+        // These widget types should not show icons
         switch widget.type {
         case .frame, .image, .chart, .video, .webview:
             false

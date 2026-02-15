@@ -812,7 +812,7 @@ class OpenHABRootViewController: UIViewController {
 
             // Update webview active state and apply app-level navigation chrome.
             let isWebViewActive = (targetView as UIViewController) === webViewController
-            currentViewState.isWebViewActive = isWebViewActive
+            updateCurrentViewState(isWebViewActive: isWebViewActive)
             applyNavigationChrome(isWebViewActive: isWebViewActive)
 
             // Don't save our view in demo mode
@@ -825,7 +825,7 @@ class OpenHABRootViewController: UIViewController {
             // if we hit the menu item again while on the view, trigger a reload
             currentView.reloadView()
             let isWebViewActive = (targetView as UIViewController) === webViewController
-            currentViewState.isWebViewActive = isWebViewActive
+            updateCurrentViewState(isWebViewActive: isWebViewActive)
             applyNavigationChrome(isWebViewActive: isWebViewActive)
         }
 
@@ -851,6 +851,18 @@ class OpenHABRootViewController: UIViewController {
             navigationItem.rightBarButtonItems = nil
             navigationItem.setRightBarButton(nil, animated: false)
             navigationController?.setNavigationBarHidden(true, animated: false)
+        }
+    }
+
+    private func updateCurrentViewState(isWebViewActive: Bool) {
+        guard currentViewState.isWebViewActive != isWebViewActive else { return }
+
+        // Publishing on the next run loop avoids mutating ObservableObject state
+        // while SwiftUI is rendering.
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            guard currentViewState.isWebViewActive != isWebViewActive else { return }
+            currentViewState.isWebViewActive = isWebViewActive
         }
     }
 
