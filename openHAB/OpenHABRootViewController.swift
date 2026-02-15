@@ -834,7 +834,8 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func applyNavigationChrome(isWebViewActive: Bool) {
-        if isWebViewActive {
+        let isRegularWidth = traitCollection.horizontalSizeClass == .regular
+        if isWebViewActive, !isRegularWidth {
             navigationController?.setNavigationBarHidden(false, animated: false)
             navigationController?.navigationBar.prefersLargeTitles = false
             navigationItem.title = "Main View"

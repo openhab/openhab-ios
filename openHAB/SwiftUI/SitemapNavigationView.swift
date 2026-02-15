@@ -18,6 +18,7 @@ struct SitemapNavigationView: View {
     @StateObject var viewModel = SitemapPageViewModel()
     @State private var isSearchPresented = false
     @FocusState private var isLegacySearchFocused: Bool
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let onShowMenu: () -> Void
 
     var body: some View {
@@ -57,12 +58,14 @@ struct SitemapNavigationView: View {
                         }
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        onShowMenu()
-                    } label: {
-                        Image(systemSymbol: .line3Horizontal)
-                            .font(.title)
+                if horizontalSizeClass == .compact {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            onShowMenu()
+                        } label: {
+                            Image(systemSymbol: .line3Horizontal)
+                                .font(.title)
+                        }
                     }
                 }
             }
