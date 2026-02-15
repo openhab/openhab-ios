@@ -18,7 +18,7 @@ final class AppShellCoordinator: ObservableObject {
     static let shared = AppShellCoordinator()
 
     @Published var isCompactMenuPresented = false
-    @Published var splitViewVisibility: NavigationSplitViewVisibility = .all
+    @Published var splitViewVisibility: NavigationSplitViewVisibility = .detailOnly
 
     weak var rootViewController: OpenHABRootViewController?
 
@@ -31,7 +31,7 @@ final class AppShellCoordinator: ObservableObject {
 
     func requestMenu() {
         if UIDevice.current.userInterfaceIdiom == .pad {
-            splitViewVisibility = .all
+            splitViewVisibility = splitViewVisibility == .detailOnly ? .all : .detailOnly
         } else {
             isCompactMenuPresented = true
         }

@@ -30,7 +30,7 @@ struct SitemapNavigationView: View {
     private var sitemapContent: some View {
         let page = SitemapPageView(viewModel: viewModel)
             .navigationTitle(viewModel.pageTitle)
-            .navigationBarTitleDisplayMode(.automatic)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if !isCommandLifecycleIdle {
                     ToolbarItem(placement: .navigationBarLeading) {

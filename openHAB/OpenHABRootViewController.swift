@@ -171,8 +171,8 @@ class OpenHABRootViewController: UIViewController {
         #endif
         // save this so we know if its changed later
         isDemoMode = Preferences.shared.currentHomePreferences.demomode
-        switchToSavedView()
         setupTracker()
+        switchToSavedView()
         startSSEListening()
     }
 

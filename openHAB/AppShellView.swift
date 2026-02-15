@@ -11,7 +11,6 @@
 
 import OpenHABCore
 import SwiftUI
-import UIKit
 
 struct OpenHABRootContainerView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> OpenHABNavigationController {
@@ -35,6 +34,33 @@ final class AppShellHostingController: UIHostingController<AppShellView> {
     override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation { .fade }
 }
 
+private struct RightEdgeSwipeModifier: ViewModifier {
+    let onSwipe: () -> Void
+    @State private var dragStartedNearEdge = false
+
+    func body(content: Content) -> some View {
+        content.overlay(alignment: .trailing) {
+            Color.clear
+                .frame(width: 24)
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture(minimumDistance: 20)
+                        .onChanged { _ in
+                            if !dragStartedNearEdge {
+                                dragStartedNearEdge = true
+                            }
+                        }
+                        .onEnded { value in
+                            if dragStartedNearEdge, value.translation.width < -60 {
+                                onSwipe()
+                            }
+                            dragStartedNearEdge = false
+                        }
+                )
+        }
+    }
+}
+
 struct AppShellView: View {
     @StateObject private var coordinator = AppShellCoordinator.shared
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -48,10 +74,13 @@ struct AppShellView: View {
                 OpenHABRootContainerView()
                     .ignoresSafeArea()
             }
-            .navigationSplitViewStyle(.balanced)
+            .navigationSplitViewStyle(.prominentDetail)
         } else {
             OpenHABRootContainerView()
                 .ignoresSafeArea()
+                .onRightEdgeSwipe {
+                    coordinator.requestMenu()
+                }
                 .sheet(isPresented: $coordinator.isCompactMenuPresented) {
                     NavigationStack {
                         sidebar
@@ -74,5 +103,11 @@ struct AppShellView: View {
         }
         .environmentObject(MainActorNetworkTracker.shared)
         .environmentObject(CurrentViewState.shared)
+    }
+}
+
+extension View {
+    func onRightEdgeSwipe(perform action: @escaping () -> Void) -> some View {
+        modifier(RightEdgeSwipeModifier(onSwipe: action))
     }
 }
