@@ -38,7 +38,7 @@ struct SitemapNavigationView: View {
                         commandLifecycleIndicator
                     }
                 }
-                if viewModel.showSearchField {
+                if viewModel.showSearchField, horizontalSizeClass == .compact {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         if #available(iOS 17.0, *) {
                             Button {
