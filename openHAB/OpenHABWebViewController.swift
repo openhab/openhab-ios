@@ -126,7 +126,8 @@ class OpenHABWebViewController: OpenHABViewController {
         super.viewWillDisappear(animated)
         // Show the navigation bar on other view controllers
         // do not change the "navigationBarHidden" flag to restore on reappearing
-        navigationController?.setNavigationBarHidden(false, animated: animated)
+        let forceHidden = traitCollection.horizontalSizeClass == .regular
+        navigationController?.setNavigationBarHidden(forceHidden, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = true
         trackerCancellables.removeAll()
 
@@ -344,7 +345,10 @@ class OpenHABWebViewController: OpenHABViewController {
     func setHideNavigationBar(shouldHide: Bool, animated: Bool = true) {
         Logger.viewController.debug("Hide navigation bar: \(shouldHide)")
         hideNavigationBar = shouldHide
-        navigationController?.setNavigationBarHidden(hideNavigationBar, animated: animated)
+        // On iPad the NavigationSplitView provides its own chrome;
+        // always keep the UIKit nav bar hidden to avoid pushing content down.
+        let forceHidden = traitCollection.horizontalSizeClass == .regular
+        navigationController?.setNavigationBarHidden(forceHidden || hideNavigationBar, animated: animated)
     }
 
     func clearExistingPage() {
