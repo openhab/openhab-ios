@@ -11,7 +11,6 @@
 
 import Combine
 import OpenHABCore
-import SideMenu
 import SwiftMessages
 import UIKit
 
@@ -80,9 +79,9 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
         SwiftMessages.hideAll()
     }
 
-    func showSideMenu() {
+    func showMenu() {
         if let rc = parent as? OpenHABRootViewController {
-            rc.showSideMenu()
+            rc.showMenu()
         }
     }
 

@@ -13,7 +13,6 @@ import Combine
 import OpenHABCore
 import os.log
 import SafariServices
-import SideMenu
 import SwiftMessages
 import UIKit
 import WebKit
@@ -99,7 +98,6 @@ class OpenHABWebViewController: OpenHABViewController {
         super.viewWillAppear(animated)
         setHideNavigationBar(shouldHide: hideNavigationBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
-        parent?.navigationItem.title = "Main View"
         MainActorNetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
             .sink { activeConnection in
@@ -490,7 +488,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
             Logger.viewController.info("WKScriptMessage \(callbackName)")
             switch callbackName {
             case "exitToApp":
-                showSideMenu()
+                showMenu()
             case "goFullscreen":
                 // check to make sure we are actually the top view before hiding the nav button
                 if isViewLoaded, view.window != nil {

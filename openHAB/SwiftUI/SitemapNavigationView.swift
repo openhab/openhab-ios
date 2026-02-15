@@ -18,7 +18,7 @@ struct SitemapNavigationView: View {
     @StateObject var viewModel = SitemapPageViewModel()
     @State private var isSearchPresented = false
     @FocusState private var isLegacySearchFocused: Bool
-    let onShowSideMenu: () -> Void
+    let onShowMenu: () -> Void
 
     var body: some View {
         NavigationStack {
@@ -59,7 +59,7 @@ struct SitemapNavigationView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        onShowSideMenu()
+                        onShowMenu()
                     } label: {
                         Image(systemSymbol: .line3Horizontal)
                             .font(.title)
@@ -163,14 +163,14 @@ struct SitemapNavigationView: View {
         return false
     }
 
-    init(viewModel: SitemapPageViewModel, onShowSideMenu: @escaping () -> Void) {
+    init(viewModel: SitemapPageViewModel, onShowMenu: @escaping () -> Void) {
         _viewModel = StateObject(wrappedValue: viewModel)
-        self.onShowSideMenu = onShowSideMenu
+        self.onShowMenu = onShowMenu
     }
 
-    init(onShowSideMenu: @escaping () -> Void = {}) {
+    init(onShowMenu: @escaping () -> Void = {}) {
         _viewModel = StateObject(wrappedValue: SitemapPageViewModel())
-        self.onShowSideMenu = onShowSideMenu
+        self.onShowMenu = onShowMenu
     }
 }
 

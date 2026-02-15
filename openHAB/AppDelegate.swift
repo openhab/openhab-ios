@@ -61,6 +61,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Preferences.migratePreferences()
 
+        let appShellView = AppShellView()
+        let hostingController = AppShellHostingController(rootView: appShellView)
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = hostingController
+        window.makeKeyAndVisible()
+        self.window = window
+
         UNUserNotificationCenter.current().delegate = notificationDelegate
 
         Logger.appDelegate.info("didFinishLaunchingWithOptions ended")

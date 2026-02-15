@@ -17,7 +17,10 @@ import SafariServices
 import SFSafeSymbols
 import SwiftUI
 
-class CurrentViewState: ObservableObject {
+@MainActor
+final class CurrentViewState: ObservableObject {
+    static let shared = CurrentViewState()
+
     @Published var isWebViewActive = false
 }
 
@@ -65,7 +68,6 @@ struct DrawerView: View {
     @EnvironmentObject private var currentViewState: CurrentViewState
 
     var onDismiss: (TargetController) -> Void
-    @Environment(\.dismiss) private var dismiss
 
     @ScaledMetric var iconWidth = 20.0
 
@@ -132,13 +134,7 @@ struct DrawerView: View {
 
     var body: some View {
         VStack {
-            List {
-                mainSection
-                sitemapsSection
-                tilesSection
-                systemSection
-            }
-            .listStyle(.inset)
+            menuList
 
             Spacer()
             ConnectionView()
@@ -157,19 +153,47 @@ struct DrawerView: View {
         }
     }
 
+    @ViewBuilder
+    private var menuList: some View {
+        if #available(iOS 17.0, *) {
+            List {
+                mainSection
+                sitemapsSection
+                tilesSection
+                systemSection
+            }
+            .listStyle(.inset)
+            .environment(\.defaultMinListRowHeight, 38)
+            .environment(\.defaultMinListHeaderHeight, 20)
+            .listSectionSpacing(.compact)
+        } else {
+            List {
+                mainSection
+                sitemapsSection
+                tilesSection
+                systemSection
+            }
+            .listStyle(.inset)
+            .environment(\.defaultMinListRowHeight, 38)
+            .environment(\.defaultMinListHeaderHeight, 20)
+        }
+    }
+
     private func menuEntry(image: Image, text: Text, goTo target: TargetController) -> some View {
         Button {
-            dismiss()
             onDismiss(target)
         } label: {
-            HStack {
+            HStack(spacing: 8) {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: iconWidth, height: iconWidth)
                 text
             }
+            .padding(.vertical, 2)
+            .padding(.horizontal, 2)
         }
+        .listRowInsets(EdgeInsets(top: 2, leading: 12, bottom: 2, trailing: 12))
         .buttonStyle(.plain)
     }
 
@@ -177,17 +201,19 @@ struct DrawerView: View {
                            goTo target: TargetController,
                            @ViewBuilder label: () -> some View) -> some View {
         Button {
-            dismiss()
             onDismiss(target)
         } label: {
-            HStack {
+            HStack(spacing: 8) {
                 image
                     .aspectRatio(contentMode: .fit)
                     .frame(width: iconWidth, height: iconWidth)
                 label()
             }
+            .padding(.vertical, 2)
+            .padding(.horizontal, 2)
             .contentShape(Rectangle()) // entire row tappable
         }
+        .listRowInsets(EdgeInsets(top: 2, leading: 12, bottom: 2, trailing: 12))
         .buttonStyle(.plain)
     }
 

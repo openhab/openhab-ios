@@ -392,17 +392,17 @@ extension OpenHABSitemapViewController {
                             pageUrl = sitemapToOpen.homepageLink
                             startPageHandling()
                         } else {
-                            showSideMenu()
+                            showMenu()
                         }
                     } else {
-                        showSideMenu()
+                        showMenu()
                     }
                 case 1:
                     pageUrl = sitemaps[0].homepageLink
                     startPageHandling()
                 case ...0:
                     showPopupMessage(seconds: 5, title: NSLocalizedString("warning", comment: ""), message: NSLocalizedString("empty_sitemap", comment: ""), theme: .warning)
-                    showSideMenu()
+                    showMenu()
                 default: break
                 }
             } catch _ as OpenAPIServiceError {

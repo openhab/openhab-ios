@@ -18,7 +18,6 @@ import OpenHABCore
 import os.log
 import SafariServices
 import SFSafeSymbols
-import SideMenu
 import SwiftMessages
 import SwiftUI
 import UIKit
@@ -69,7 +68,7 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
         self.rootViewController = rootViewController
         // Update the closure after initialization
         rootView = SitemapNavigationView(viewModel: viewModel) { [weak self] in
-            self?.rootViewController?.showSideMenu()
+            self?.rootViewController?.showMenu()
         }
     }
 
@@ -109,8 +108,9 @@ class OpenHABRootViewController: UIViewController {
     var currentView: (any UIViewController & OpenHABViewable)!
     var isDemoMode = false
     var cancellables = Set<AnyCancellable>()
-    private let currentViewState = CurrentViewState()
+    private let currentViewState = CurrentViewState.shared
     private var streamTask: Task<Void, Never>?
+    var onMenuRequested: (() -> Void)?
 
     private var apsRegistrationData: [AnyHashable: Any]?
 
@@ -134,7 +134,6 @@ class OpenHABRootViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         Logger.viewController.info("OpenHABRootViewController viewDidLoad")
-        setupSideMenu()
         addConnectionStatusIndication()
 
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABRootViewController.handleApsRegistration(_:)), name: NSNotification.Name("apsRegistered"), object: nil)
@@ -169,8 +168,6 @@ class OpenHABRootViewController: UIViewController {
                 homePreferences.demomode = true
             }
         }
-        // setup accessibilityIdentifiers for UITest
-        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
         #endif
         // save this so we know if its changed later
         isDemoMode = Preferences.shared.currentHomePreferences.demomode
@@ -380,45 +377,6 @@ class OpenHABRootViewController: UIViewController {
             .store(in: &cancellables)
     }
 
-    private func setupSideMenu() {
-        let hamburgerButtonItem: UIBarButtonItem
-        let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
-        let buttonImage = UIImage(systemSymbol: .line3Horizontal, withConfiguration: imageConfig)
-        let button = UIButton(type: .custom)
-        button.setImage(buttonImage, for: .normal)
-        button.addTarget(self, action: #selector(OpenHABRootViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
-        hamburgerButtonItem = UIBarButtonItem(customView: button)
-        hamburgerButtonItem.customView?.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
-
-        // Define the menus
-
-        let presentationStyle: SideMenuPresentationStyle = .viewSlideOutMenuIn
-        presentationStyle.presentingEndAlpha = 1
-        presentationStyle.onTopShadowOpacity = 0.5
-        var settings = SideMenuSettings()
-        settings.presentationStyle = presentationStyle
-        settings.statusBarEndAlpha = 0
-
-        SideMenuManager.default.rightMenuNavigationController?.settings = settings
-
-        let networkTracker = MainActorNetworkTracker.shared
-        let drawerView = DrawerView { mode in
-            self.handleDismiss(mode: mode)
-        }
-        .environmentObject(networkTracker)
-        .environmentObject(currentViewState)
-        let hostingController = UIHostingController(rootView: drawerView)
-        let menu = SideMenuNavigationController(rootViewController: hostingController)
-
-        SideMenuManager.default.rightMenuNavigationController = menu
-
-        // Enable gestures. The left and/or right menus must be set up above for these to work.
-        // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
-        SideMenuManager.default.addPanGestureToPresent(toView: navigationController!.navigationBar)
-        SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: navigationController!.view, forMenu: .right)
-    }
-
     private func openTileURL(_ urlString: String) {
         // Use SFSafariViewController in SwiftUI with UIViewControllerRepresentable
         // Dependent on $OPENHAB_CONF/services/runtime.cfg
@@ -447,45 +405,26 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    private func handleDismiss(mode: TargetController) {
+    func navigateFromMenu(to mode: TargetController) {
         switch mode {
         case .webview:
-            // Handle webview navigation or state update
             Logger.viewController.debug("Dismissed to WebView")
-            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true)
             switchView(target: .webview)
         case .settings:
             Logger.viewController.debug("Dismissed to Settings")
-            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
-                self.modalDismissed(to: .settings)
-            }
+            modalDismissed(to: .settings)
         case let .sitemap(sitemap):
-            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
-                self.modalDismissed(to: .sitemap(sitemap))
-            }
+            modalDismissed(to: .sitemap(sitemap))
         case .notifications:
-            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
-                self.modalDismissed(to: .notifications)
-            }
+            modalDismissed(to: .notifications)
         case let .browser(urlString):
-            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
-                self.modalDismissed(to: .browser(urlString))
-            }
+            modalDismissed(to: .browser(urlString))
         case let .tile(urlString):
-            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
-                self.modalDismissed(to: .tile(urlString))
-            }
+            modalDismissed(to: .tile(urlString))
         case .homeSelection:
             Logger.viewController.debug("Dismissed to Home Selection")
-            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
-                self.modalDismissed(to: .homeSelection)
-            }
+            modalDismissed(to: .homeSelection)
         }
-    }
-
-    @objc
-    func rightDrawerButtonPress(_ sender: Any?) {
-        showSideMenu()
     }
 
     @objc
@@ -819,34 +758,13 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    func showSideMenu() {
-        Logger.viewController.info("OpenHABRootViewController showSideMenu")
-        if let menu = SideMenuManager.default.rightMenuNavigationController {
-            // don't try and push an already visible menu less you crash the app
-            dismiss(animated: false) {
-                var topMostViewController: UIViewController? =
-                    UIApplication.shared.connectedScenes.flatMap { ($0 as? UIWindowScene)?.windows ?? [] }.last { $0.isKeyWindow }?.rootViewController
-
-                while let presentedViewController = topMostViewController?.presentedViewController {
-                    topMostViewController = presentedViewController
-                }
-
-                guard let presenter = topMostViewController else {
-                    // swiftformat:disable:next redundantSelf
-                    Logger.viewController.error("No valid view controller found to present side menu")
-                    return
-                }
-
-                // Avoid trying to present the menu on itself
-                if presenter == menu {
-                    // swiftformat:disable:next redundantSelf
-                    Logger.viewController.error("Cannot present side menu on itself")
-                    return
-                }
-
-                presenter.present(menu, animated: true)
-            }
+    func showMenu() {
+        Logger.viewController.info("OpenHABRootViewController showMenu")
+        if let onMenuRequested {
+            onMenuRequested()
+            return
         }
+        Logger.viewController.error("Missing app shell callback for showMenu")
     }
 
     private func addView(viewController: UIViewController) {
@@ -879,14 +797,23 @@ class OpenHABRootViewController: UIViewController {
         }
 
         if currentView !== targetView {
+            let previousViewController: UIViewController? = currentView
+            previousViewController?.beginAppearanceTransition(false, animated: false)
+            (targetView as UIViewController).beginAppearanceTransition(true, animated: false)
+
             if let currentView {
                 removeView(viewController: currentView)
             }
             addView(viewController: targetView)
             currentView = targetView
 
-            // Update webview active state
-            currentViewState.isWebViewActive = (targetView == webViewController)
+            previousViewController?.endAppearanceTransition()
+            (targetView as UIViewController).endAppearanceTransition()
+
+            // Update webview active state and apply app-level navigation chrome.
+            let isWebViewActive = (targetView as UIViewController) === webViewController
+            currentViewState.isWebViewActive = isWebViewActive
+            applyNavigationChrome(isWebViewActive: isWebViewActive)
 
             // Don't save our view in demo mode
             if !Preferences.shared.currentHomePreferences.demomode {
@@ -897,10 +824,33 @@ class OpenHABRootViewController: UIViewController {
         } else {
             // if we hit the menu item again while on the view, trigger a reload
             currentView.reloadView()
+            let isWebViewActive = (targetView as UIViewController) === webViewController
+            currentViewState.isWebViewActive = isWebViewActive
+            applyNavigationChrome(isWebViewActive: isWebViewActive)
         }
 
         // Make sure we reset any views that may be pushed
         navigationController?.popToRootViewController(animated: true)
+    }
+
+    private func applyNavigationChrome(isWebViewActive: Bool) {
+        if isWebViewActive {
+            navigationController?.setNavigationBarHidden(false, animated: false)
+            navigationController?.navigationBar.prefersLargeTitles = false
+            navigationItem.title = "Main View"
+            navigationItem.searchController = nil
+            navigationItem.hidesSearchBarWhenScrolling = true
+            navigationItem.rightBarButtonItems = nil
+            navigationItem.setRightBarButton(nil, animated: false)
+        } else {
+            // Sitemap is SwiftUI-driven and renders its own toolbar/menu/search.
+            // Hide UIKit navigation chrome to avoid duplicate title/buttons.
+            navigationItem.title = nil
+            navigationItem.searchController = nil
+            navigationItem.rightBarButtonItems = nil
+            navigationItem.setRightBarButton(nil, animated: false)
+            navigationController?.setNavigationBarHidden(true, animated: false)
+        }
     }
 
     private func switchToSavedView() {
@@ -974,14 +924,6 @@ class OpenHABRootViewController: UIViewController {
 }
 
 // swiftlint:enable type_body_length
-
-// MARK: - UISideMenuNavigationControllerDelegate
-
-extension OpenHABRootViewController: SideMenuNavigationControllerDelegate {
-    nonisolated func sideMenuWillAppear(menu: SideMenuNavigationController, animated: Bool) {
-        Logger.viewController.info("OpenHABRootViewController sideMenuWillAppear")
-    }
-}
 
 // MARK: - ModalHandler
 
