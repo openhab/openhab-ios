@@ -16,6 +16,8 @@ import SwiftUI
 
 struct SitemapNavigationView: View {
     @StateObject var viewModel = SitemapPageViewModel()
+    @State private var isSearchPresented = false
+    @FocusState private var isLegacySearchFocused: Bool
     let onShowSideMenu: () -> Void
 
     var body: some View {
@@ -35,6 +37,26 @@ struct SitemapNavigationView: View {
                         commandLifecycleIndicator
                     }
                 }
+                if viewModel.showSearchField {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        if #available(iOS 17.0, *) {
+                            Button {
+                                isSearchPresented = true
+                            } label: {
+                                Image(systemSymbol: .magnifyingglass)
+                            }
+                            .accessibilityLabel("Search")
+                        } else {
+                            Button {
+                                isSearchPresented = true
+                                isLegacySearchFocused = true
+                            } label: {
+                                Image(systemSymbol: .magnifyingglass)
+                            }
+                            .accessibilityLabel("Search")
+                        }
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         onShowSideMenu()
@@ -46,13 +68,72 @@ struct SitemapNavigationView: View {
             }
 
         if viewModel.showSearchField {
-            page
-                .searchable(text: $viewModel.searchText, prompt: Text(NSLocalizedString("search_items", comment: "")))
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
+            if #available(iOS 17.0, *) {
+                if isSearchPresented {
+                    page
+                        .searchable(
+                            text: $viewModel.searchText,
+                            isPresented: $isSearchPresented,
+                            placement: .navigationBarDrawer(displayMode: .always),
+                            prompt: Text(NSLocalizedString("search_items", comment: ""))
+                        )
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                } else {
+                    page
+                }
+            } else {
+                page
+                    .safeAreaInset(edge: .bottom) {
+                        if isSearchPresented {
+                            legacySearchBar
+                        }
+                    }
+            }
         } else {
             page
         }
+    }
+
+    private var legacySearchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemSymbol: .magnifyingglass)
+                .foregroundStyle(.secondary)
+                .font(.footnote)
+
+            TextField(NSLocalizedString("search_items", comment: ""), text: $viewModel.searchText)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .focused($isLegacySearchFocused)
+                .font(.footnote)
+
+            if !viewModel.searchText.isEmpty {
+                Button {
+                    viewModel.searchText = ""
+                } label: {
+                    Image(systemSymbol: .xmarkCircleFill)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+
+            Button {
+                isSearchPresented = false
+                isLegacySearchFocused = false
+            } label: {
+                Image(systemSymbol: .xmark)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            Color(.secondarySystemBackground).opacity(0.6),
+            in: RoundedRectangle(cornerRadius: 10)
+        )
+        .padding(.horizontal, 12)
+        .padding(.bottom, 6)
     }
 
     @ViewBuilder
