@@ -174,7 +174,7 @@ class OpenHABWebViewController: OpenHABViewController {
         currentTarget = newTarget
         let url = URL(string: activeConfig.url)
 
-        if let modifiedUrl = modifyUrl(orig: url, path: path) {
+        if let modifiedUrl = await modifyUrl(orig: url, path: path) {
             acceptsCommands = false
             var request = URLRequest(url: modifiedUrl)
 
@@ -216,7 +216,7 @@ class OpenHABWebViewController: OpenHABViewController {
     private func loadWebViewWithETagCheck(newTarget: String, path: String?) async {
         guard let activeConfig,
               let url = URL(string: activeConfig.url),
-              let fullURL = modifyUrl(orig: url, path: path) else {
+              let fullURL = await modifyUrl(orig: url, path: path) else {
             Logger.viewController.info("ETag check skipped: invalid configuration")
             await performLoadWebView(newTarget: newTarget, path: path, force: false)
             return
@@ -297,7 +297,7 @@ class OpenHABWebViewController: OpenHABViewController {
         return normalized
     }
 
-    func modifyUrl(orig: URL?, path: String? = nil) -> URL? {
+    func modifyUrl(orig: URL?, path: String? = nil) async -> URL? {
         // better way to clone/copy ?
         guard let urlString = orig?.absoluteString, var url = URL(string: urlString) else { return orig }
         // Use cloud proxy URL if available (resolved from /api/v1/proxyurl)
@@ -306,8 +306,8 @@ class OpenHABWebViewController: OpenHABViewController {
         }
         if let path {
             url = appendPathToURL(baseURL: url, path: path) ?? url
-        } else if !Preferences.shared.currentHomePreferences.defaultMainUIPath.isEmpty {
-            url = appendPathToURL(baseURL: url, path: Preferences.shared.currentHomePreferences.defaultMainUIPath) ?? url
+        } else if await !Preferences.shared.currentHomePreferences.defaultMainUIPath.isEmpty {
+            url = appendPathToURL(baseURL: url, path: await Preferences.shared.currentHomePreferences.defaultMainUIPath) ?? url
         }
         return url
     }
@@ -585,7 +585,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         Logger.viewController.info("Challenge.protectionSpace.authenticationMethod: \(String(describing: challenge.protectionSpace.authenticationMethod))")
 
-        if let url = modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
+        if let url = await modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
                 guard let serverTrust = challenge.protectionSpace.serverTrust else {
                     return (.performDefaultHandling, nil)

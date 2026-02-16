@@ -26,9 +26,14 @@ struct SitemapsTab: View {
     @Binding var navigationCommand: SitemapNavigationCommand?
 
     @State private var sitemaps: [OpenHABSitemap] = []
-    @State private var selectedSitemap: String?
+    @State private var selectedSitemap: SelectedSitemapIdentifier?
     @State private var sitemapForWatch: String?
     @StateObject private var viewModel = SitemapPageViewModel()
+    
+    private struct SelectedSitemapIdentifier: Identifiable, Hashable {
+        let id = UUID()
+        let name: String
+    }
 
     @EnvironmentObject private var networkTracker: MainActorNetworkTracker
 
@@ -36,34 +41,20 @@ struct SitemapsTab: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if selectedSitemap != nil {
-                    SitemapNavigationContent(viewModel: viewModel)
-                } else {
-                    sitemapList
+            sitemapList
+                .navigationTitle("Sitemaps")
+                .navigationBarTitleDisplayMode(.inline)
+                .navigationDestination(item: $selectedSitemap) { sitemapName in
+                    SitemapNavigationView(viewModel: viewModel)
                 }
-            }
-            .navigationTitle(selectedSitemap != nil ? viewModel.pageTitle : "Sitemaps")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                if selectedSitemap != nil {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button {
-                            self.selectedSitemap = nil
-                        } label: {
-                            HStack(spacing: 4) {
-                                Image(systemSymbol: .chevronBackward)
-                                Text("Sitemaps")
-                            }
-                        }
-                    }
-                }
-            }
         }
         .task {
             sitemapForWatch = await Preferences.shared.currentHomePreferences.sitemapForWatch
             await fetchSitemaps(activeConnection: networkTracker.activeConnection)
-            autoSelectSitemap()
+            let defaultSitemap = await Preferences.shared.currentHomePreferences.defaultSitemap
+            if !defaultSitemap.isEmpty, sitemaps.contains(where: { $0.name == defaultSitemap }) {
+                selectSitemap(defaultSitemap)
+            }
         }
         .onReceive(networkTracker.$activeConnection) { activeConnection in
             Task {
@@ -71,17 +62,15 @@ struct SitemapsTab: View {
             }
         }
         .onChange(of: resetTrigger) { _, _ in
-            withAnimation {
-                selectedSitemap = nil
-            }
+            selectedSitemap = nil
         }
         .onChange(of: navigationCommand) { _, command in
             guard let command else { return }
-            selectedSitemap = command.name
-            Preferences.shared.modifyActiveHome { preferences in
-                preferences.defaultSitemap = command.name
-            }
+            selectedSitemap = SelectedSitemapIdentifier(name: command.name)
             Task {
+                await Preferences.shared.modifyActiveHome { preferences in
+                    preferences.defaultSitemap = command.name
+                }
                 await viewModel.pushSitemap(name: command.name, path: command.widgetId)
             }
             navigationCommand = nil
@@ -112,19 +101,12 @@ struct SitemapsTab: View {
     }
 
     private func selectSitemap(_ name: String) {
-        selectedSitemap = name
-        Preferences.shared.modifyActiveHome { preferences in
-            preferences.defaultSitemap = name
-        }
+        selectedSitemap = SelectedSitemapIdentifier(name: name)
         Task {
+            await Preferences.shared.modifyActiveHome { preferences in
+                preferences.defaultSitemap = name
+            }
             await viewModel.pushSitemap(name: name, path: nil)
-        }
-    }
-
-    private func autoSelectSitemap() {
-        let defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
-        if !defaultSitemap.isEmpty, sitemaps.contains(where: { $0.name == defaultSitemap }) {
-            selectSitemap(defaultSitemap)
         }
     }
 
@@ -168,33 +150,22 @@ struct SitemapsTab: View {
     }
 
     private func toggleWatchSitemap(_ sitemap: OpenHABSitemap) {
-        Preferences.shared.modifyActiveHome { prefs in
-            if sitemap.name == sitemapForWatch {
-                sitemapForWatch = nil
-                prefs.sitemapForWatch = ""
-                prefs.sitemapForWatchLabel = ""
-            } else {
-                sitemapForWatch = sitemap.name
-                prefs.sitemapForWatch = sitemap.name
-                prefs.sitemapForWatchLabel = sitemap.label
+        let sitemapForWatchName, sitemapForWatchLabel: String
+        if sitemap.name == sitemapForWatch {
+            sitemapForWatch = nil
+            sitemapForWatchName = ""
+            sitemapForWatchLabel = ""
+        } else {
+            sitemapForWatch = sitemap.name
+            sitemapForWatchName = sitemap.name
+            sitemapForWatchLabel = sitemap.label
+        }
+        Task {
+            await Preferences.shared.modifyActiveHome { prefs in
+                prefs.sitemapForWatch = sitemapForWatchName
+                prefs.sitemapForWatchLabel = sitemapForWatchLabel
             }
         }
     }
 }
 
-/// Inner content view that wraps SitemapPageView without its own NavigationStack
-private struct SitemapNavigationContent: View {
-    @ObservedObject var viewModel: SitemapPageViewModel
-
-    var body: some View {
-        let page = SitemapPageView(viewModel: viewModel)
-        if viewModel.showSearchField {
-            page
-                .searchable(text: $viewModel.searchText, prompt: Text(NSLocalizedString("search_items", comment: "")))
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-        } else {
-            page
-        }
-    }
-}

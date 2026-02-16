@@ -103,10 +103,14 @@ struct OpenHABTabRootView: View {
                 }
             }
         }
+        .tabViewStyle(.sidebarAdaptable)
+        .tabBarMinimizeBehavior(.onScrollDown)
         .environmentObject(networkTracker)
         .onChange(of: selectedTab) { oldTab, newTab in
-            Preferences.shared.modifyActiveHome { prefs in
-                prefs.lastSelectedTab = newTab.rawValue
+            Task {
+                await Preferences.shared.modifyActiveHome { prefs in
+                    prefs.lastSelectedTab = newTab.rawValue
+                }
             }
         }
         .onReceive(Preferences.shared.$currentHomePreferences) { _ in

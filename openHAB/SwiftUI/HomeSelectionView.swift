@@ -132,7 +132,7 @@ struct HomeSelectionView: View {
                 .tint(.blue)
             }
         }
-        .onAppear(perform: loadHomesList)
+        .task(loadHomesList)
         .navigationBarTitle("Manage Homes")
         .toolbar {
             if showEditOptions {
@@ -174,21 +174,25 @@ struct HomeSelectionView: View {
     }
 
     private func select(home: UUID) {
-        Preferences.shared.switchActiveHome(to: home)
-        dismiss()
+        Task {
+            await Preferences.shared.switchActiveHome(to: home)
+            dismiss()
+        }
     }
 
-    private func loadHomesList() {
-        homes = Preferences.shared.listStoredHomes()
+    private func loadHomesList() async {
+        await homes = Preferences.shared.listStoredHomes()
     }
 
     private func delete(home toDelete: UUID?) {
         guard let toDelete else {
             return
         }
-        Logger.selectionView.info("delete home settings for \(toDelete.uuidString)")
-        Preferences.shared.deleteStoredHome(toDelete)
-        loadHomesList()
+        Task {
+            Logger.selectionView.info("delete home settings for \(toDelete.uuidString)")
+            await Preferences.shared.deleteStoredHome(toDelete)
+            await loadHomesList()
+        }
     }
 
     private func rename(home toRename: UUID?) {
@@ -197,12 +201,16 @@ struct HomeSelectionView: View {
         }
         let newName = newHomeName
         Logger.selectionView.info("rename home \(toRename.uuidString) to \(newName)")
-        Preferences.shared.renameHome(toRename, newHomeName: newName)
+        Task {
+            await Preferences.shared.renameHome(toRename, newHomeName: newName)
+        }
     }
 
     private func addHome() {
-        Preferences.shared.createAndLoadNewStoredSettings(homeName: newHomeName)
-        loadHomesList()
+        Task {
+            await Preferences.shared.createAndLoadNewStoredSettings(homeName: newHomeName)
+            await loadHomesList()
+        }
     }
 }
 

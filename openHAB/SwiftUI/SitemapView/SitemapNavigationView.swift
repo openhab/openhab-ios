@@ -20,16 +20,14 @@ struct SitemapNavigationView: View {
     @FocusState private var isLegacySearchFocused: Bool
 
     var body: some View {
-        NavigationStack {
-            sitemapContent
-        }
+        sitemapContent
     }
 
     @ViewBuilder
     private var sitemapContent: some View {
         let page = SitemapPageView(viewModel: viewModel)
             .navigationTitle(viewModel.pageTitle)
-            .navigationBarTitleDisplayMode(.automatic)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if !isCommandLifecycleIdle {
                     ToolbarItem(placement: .navigationBarLeading) {
@@ -38,14 +36,14 @@ struct SitemapNavigationView: View {
                 }
                 if viewModel.showSearchField {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        if #available(iOS 17.0, *) {
+                        //if #available(iOS 17.0, *) {
                             Button {
                                 isSearchPresented = true
                             } label: {
                                 Image(systemSymbol: .magnifyingglass)
                             }
                             .accessibilityLabel("Search")
-                        } else {
+                        /*} else {
                             Button {
                                 isSearchPresented = true
                                 isLegacySearchFocused = true
@@ -53,7 +51,7 @@ struct SitemapNavigationView: View {
                                 Image(systemSymbol: .magnifyingglass)
                             }
                             .accessibilityLabel("Search")
-                        }
+                        }*/
                     }
                 }
             }
