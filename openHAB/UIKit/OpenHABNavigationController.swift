@@ -25,11 +25,12 @@ import UIKit
 
 /// This is a wrapper around UINavigationController that allows the status bar to be hidden or shown.
 /// It is used to control the status bar for the entire app and is loaded from the Main storyboard entry point.
+@MainActor
 class OpenHABNavigationController: UINavigationController {
     override var childForStatusBarHidden: UIViewController? { nil }
 
     override var prefersStatusBarHidden: Bool {
-        Preferences.shared.hideStatusBar
+        PreferencesObserver.shared.applicationPreferences.hideStatusBar
     }
 
     override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation { .fade }

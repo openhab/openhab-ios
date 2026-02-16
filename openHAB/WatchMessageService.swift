@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
+import AsyncAlgorithms
 import Foundation
 import OpenHABCore
 import os.log
@@ -24,7 +24,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     private var cachedWatchPreferences: [String: Data] = [:]
     private let lock = NSLock()
 
-    private var preferencesSubscription: AnyCancellable?
+    private var preferencesTask: Task<Void, Never>?
 
     // This method gets called when the watch requests the data
     // ⚠️ This is called off the main thread. Do NOT touch @MainActor stuff.
@@ -68,14 +68,29 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     // MARK: - Sync Preferences
 
     @MainActor
-    func subscribeToPreferences() async {
-        preferencesSubscription = Preferences.shared.$currentHomePreferences
-            .debounce(for: .seconds(1), scheduler: RunLoop.main)
-            .sink { _ in } receiveValue: { homeSettings in
-                Task { @MainActor in
-                    await self.syncPreferencesToWatch(homeSettings)
-                }
+    func subscribeToPreferences() {
+        // Cancel any existing subscription
+        preferencesTask?.cancel()
+        
+        preferencesTask = Task { @MainActor in
+            // Get the AsyncChannel for currentHomePreferences from the actor
+            let preferencesChannel = await Preferences.shared.currentHomePreferencesChannel
+            
+            // Sync initial value immediately
+            let initialValue = await Preferences.shared.currentHomePreferences
+            await syncPreferencesToWatch(initialValue)
+            
+            // Listen for changes from the AsyncChannel with debouncing
+            for await homeSettings in preferencesChannel.debounce(for: .seconds(1)) {
+                await syncPreferencesToWatch(homeSettings)
             }
+        }
+    }
+    
+    @MainActor
+    func stopSubscription() {
+        preferencesTask?.cancel()
+        preferencesTask = nil
     }
 
     @MainActor
@@ -84,7 +99,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
             Logger.preferences.warning("WCSession not activated; skipping sync.")
             return
         }
-        let settings = homeSettings ?? Preferences.shared.currentHomePreferences
+        let settings = if let homeSettings { homeSettings } else { await Preferences.shared.currentHomePreferences }
         let prefs = WatchPreferences(fromPreferences: settings)
         let context = prefs.encodedWatchPreferences()
 

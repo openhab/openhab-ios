@@ -20,20 +20,14 @@ final class RealPathMonitor: NWPathMonitoring, Sendable {
     init() {
         monitor = NWPathMonitor()
     }
-
+    
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
-        if #available(iOS 17, watchOS 10, *) {
-            for await path in monitor {
-                Logger.nwPathMonitoring.debug("Path monitor update: \(path.debugDescription)")
-                await handler(path.status == .satisfied || path.status == .requiresConnection)
-            }
-        } else {
-            for await path in monitor.paths() {
-                await handler(path.status == .satisfied || path.status == .requiresConnection)
-            }
+        for await path in monitor {
+            Logger.nwPathMonitoring.debug("Path monitor update: \(path.debugDescription)")
+            await handler(path.status == .satisfied || path.status == .requiresConnection)
         }
     }
-
+    
     func cancel() {
         monitor.cancel()
     }

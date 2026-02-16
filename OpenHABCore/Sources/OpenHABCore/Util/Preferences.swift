@@ -9,32 +9,36 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-@preconcurrency import Combine
+import AsyncAlgorithms
 import os.log
-import UIKit
+import SwiftUI
 
-@MainActor
-private let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
+// Thread-safe access to UserDefaults - still needs main actor due to UserDefaults not being Sendable
+private nonisolated(unsafe) let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
 
-@MainActor
 @propertyWrapper
 public struct UserDefault<T: Sendable> {
     private let key: String
     private let defaultValue: T
     private let isHomeProperty: Bool
     private let subject: CurrentValueSubject<T, Never>
+    private let channel: AsyncChannel<T>
 
     public var wrappedValue: T {
         get {
             PreferencesAccess.getPreference(key: key, defaultValue: defaultValue, encoder: { $0 }, decoder: { $0 as? T })
         }
         set {
-            PreferencesAccess.preferenceChanged(newValue: newValue, key: key, isHomeProperty: isHomeProperty, subject: subject) { $0 }
+            PreferencesAccess.preferenceChanged(newValue: newValue, key: key, isHomeProperty: isHomeProperty, subject: subject, channel: channel) { $0 }
         }
     }
 
     public var projectedValue: AnyPublisher<T, Never> {
         subject.eraseToAnyPublisher()
+    }
+    
+    public var asyncValues: AsyncChannel<T> {
+        channel
     }
 
     public init(_ key: String, defaultValue: T, isHomeProperty: Bool = false) {
@@ -43,16 +47,17 @@ public struct UserDefault<T: Sendable> {
         self.isHomeProperty = isHomeProperty
         let currentValue = PreferencesAccess.getPreference(key: key, defaultValue: defaultValue, encoder: { $0 }, decoder: { $0 as? T })
         subject = CurrentValueSubject<T, Never>(currentValue)
+        channel = AsyncChannel<T>()
     }
 }
 
-@MainActor
 @propertyWrapper
 public struct UserDefaultObject<T: Codable & Sendable> {
     private let key: String
     private let defaultValue: T
     private let isHomeProperty: Bool
     private let subject: CurrentValueSubject<T, Never>
+    private let channel: AsyncChannel<T>
 
     private let objectDecoder: (Any) -> (T?) = {
         guard let data = $0 as? Data else {
@@ -68,12 +73,16 @@ public struct UserDefaultObject<T: Codable & Sendable> {
             PreferencesAccess.getPreference(key: key, defaultValue: defaultValue, encoder: objectEncoder, decoder: objectDecoder)
         }
         set {
-            PreferencesAccess.preferenceChanged(newValue: newValue, key: key, isHomeProperty: isHomeProperty, subject: subject, converter: objectEncoder)
+            PreferencesAccess.preferenceChanged(newValue: newValue, key: key, isHomeProperty: isHomeProperty, subject: subject, channel: channel, converter: objectEncoder)
         }
     }
 
     public var projectedValue: AnyPublisher<T, Never> {
         subject.eraseToAnyPublisher()
+    }
+    
+    public var asyncValues: AsyncChannel<T> {
+        channel
     }
 
     init(_ key: String, defaultValue: T, isHomeProperty: Bool = false) {
@@ -84,11 +93,11 @@ public struct UserDefaultObject<T: Codable & Sendable> {
         // Combine publication
         let currentValue = PreferencesAccess.getPreference(key: key, defaultValue: defaultValue, encoder: objectEncoder, decoder: objectDecoder)
         subject = CurrentValueSubject(currentValue)
+        channel = AsyncChannel<T>()
     }
 }
 
-@MainActor
-public struct HomePreferences: Codable, Equatable {
+public struct HomePreferences: Codable, Equatable, Sendable {
     public let id: UUID
     public var defaultView = "web"
     public var demomode = true
@@ -105,7 +114,7 @@ public struct HomePreferences: Codable, Equatable {
     public var homeName = "Home"
     public var sseCommandItem = ""
     public var lastSelectedTab = "main"
-    public var tabConfiguration: [TabEntry]?
+    public var tabConfiguration = TabEntry.defaultConfiguration
 
     fileprivate init(id: UUID) {
         self.id = id
@@ -129,9 +138,29 @@ public struct TabEntry: Codable, Equatable, Hashable, Sendable {
     ]
 }
 
-@MainActor
-public struct ApplicationPreferences: Codable, Equatable {
+public struct ApplicationPreferences: Codable, Equatable, Sendable {
     public var showSearchField = true
+    public var sendCrashReports = false
+    public var idleOff = false
+    public var hideStatusBar = false
+}
+
+public struct ScreenSaverPreferences: Codable, Equatable, Sendable {
+    public var isEnabled = false
+    public var showsTime = true
+    public var showsDate = true
+    public var idleInterval = 120.0
+    public var movementInterval = 8.0
+    public var fontName = ""
+    public var timeFontRatio = 0.2
+    public var dateFontRatio = 0.4
+    public var enableDimming = true
+    public var dimLevel = 0.3
+    public var showsSeconds = false
+    public var use24Hour = false
+    public var fadeDuration = 2.0
+    public var restoreBrightness = true
+    public var wakeBrightness = 1.0
 }
 
 // MARK: Retrieving preference from user defaults, reacting to preference change
@@ -147,7 +176,7 @@ public struct ApplicationPreferences: Codable, Equatable {
 // MARK: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 private enum PreferencesAccess {
-    @MainActor fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
+    fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
         let preferenceValue = sharedDefaults.object(forKey: key)
         if let preferenceConverted = decoder(preferenceValue) {
             return preferenceConverted
@@ -163,7 +192,7 @@ private enum PreferencesAccess {
         }
     }
 
-    @MainActor fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
+    fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, channel: AsyncChannel<T>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
         guard let sanitized = sanitize(newValue) else {
             Logger.preferences.debug("Preference \(key) new value \(String(describing: newValue), privacy: .private) could not be sanitized, will be ignored")
             return
@@ -177,6 +206,11 @@ private enum PreferencesAccess {
         sharedDefaults.set(convertedValue, forKey: key)
 
         subject.send(sanitized)
+        
+        // Send to AsyncChannel
+        Task {
+            await channel.send(sanitized)
+        }
     }
 }
 
@@ -189,12 +223,6 @@ public actor Preferences {
     @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: defaultHomeId))
     public private(set) var currentHomePreferences: HomePreferences
 
-    @UserDefault("sendCrashReports", defaultValue: false)
-    public var sendCrashReports: Bool
-
-    @UserDefault("idleOff", defaultValue: false)
-    public var idleOff: Bool
-
     @UserDefaultObject(
         "applicationPreferences",
         defaultValue:
@@ -202,53 +230,12 @@ public actor Preferences {
     )
     public private(set) var applicationPreferences: ApplicationPreferences
 
-    @UserDefault("screensaverEnabled", defaultValue: false)
-    public var screensaverEnabled: Bool
-
-    @UserDefault("screensaverShowsTime", defaultValue: true)
-    public var screensaverShowsTime: Bool
-
-    @UserDefault("screensaverShowsDate", defaultValue: true)
-    public var screensaverShowsDate: Bool
-
-    @UserDefault("screensaverIdleInterval", defaultValue: 120.0)
-    public var screensaverIdleInterval: Double
-
-    @UserDefault("screensaverMovementInterval", defaultValue: 8.0)
-    public var screensaverMovementInterval: Double
-
-    @UserDefault("screensaverFontName", defaultValue: "")
-    public var screensaverFontName: String
-
-    @UserDefault("screensaverTimeFontRatio", defaultValue: 0.2)
-    public var screensaverTimeFontRatio: Double
-
-    @UserDefault("screensaverDateFontRatio", defaultValue: 0.4)
-    public var screensaverDateFontRatio: Double
-
-    @UserDefault("screensaverEnableDimming", defaultValue: true)
-    public var screensaverEnableDimming: Bool
-
-    @UserDefault("screensaverDimLevel", defaultValue: 0.3)
-    public var screensaverDimLevel: Double
-
-    @UserDefault("screensaverShowsSeconds", defaultValue: false)
-    public var screensaverShowsSeconds: Bool
-
-    @UserDefault("screensaverUse24Hour", defaultValue: false)
-    public var screensaverUse24Hour: Bool
-
-    @UserDefault("screensaverFadeDuration", defaultValue: 2.0)
-    public var screensaverFadeDuration: Double
-
-    @UserDefault("screensaverRestoreBrightness", defaultValue: true)
-    public var screensaverRestoreBrightness: Bool
-
-    @UserDefault("screensaverWakeBrightness", defaultValue: 1.0)
-    public var screensaverWakeBrightness: Double
-
-    @UserDefault("hideStatusBar", defaultValue: false)
-    public var hideStatusBar: Bool
+    @UserDefaultObject(
+        "screensaverPreferences",
+        defaultValue:
+        ScreenSaverPreferences()
+    )
+    public private(set) var screensaverPreferences: ScreenSaverPreferences
 
     @UserDefault("currentWebViewPath", defaultValue: "")
     public var currentWebViewPath: String
@@ -267,20 +254,62 @@ public actor Preferences {
     @UserDefault("didMigrateToMultipleHomes", defaultValue: false)
     private var didMigrateToMultipleHomes: Bool
 
-    @MainActor
+    @UserDefault("didMigrateScreenSaverPreferences", defaultValue: false)
+    private var didMigrateScreenSaverPreferences: Bool
+
+    @UserDefault("didMigrateApplicationPreferences", defaultValue: false)
+    private var didMigrateApplicationPreferences: Bool
+
     private var internalPreferenceChangeOngoing = false
 
-    @MainActor
     private func internalPreferenceChange(_ change: () -> Void) {
         internalPreferenceChangeOngoing = true
         change()
         internalPreferenceChangeOngoing = false
     }
+    
+    // MARK: - AsyncChannel Access
+    
+    /// Access the AsyncChannel for currentHomePreferences
+    public var currentHomePreferencesChannel: AsyncChannel<HomePreferences> {
+        _currentHomePreferences.asyncValues
+    }
+    
+    /// Access the AsyncChannel for applicationPreferences
+    public var applicationPreferencesChannel: AsyncChannel<ApplicationPreferences> {
+        _applicationPreferences.asyncValues
+    }
+    
+    /// Access the AsyncChannel for screensaverPreferences
+    public var screensaverPreferencesChannel: AsyncChannel<ScreenSaverPreferences> {
+        _screensaverPreferences.asyncValues
+    }
+    
+    /// Access the AsyncChannel for storedHomes
+    public var storedHomesChannel: AsyncChannel<[UUID: HomePreferences]> {
+        _storedHomes.asyncValues
+    }
+    
+    // Setter methods for actor-isolated properties (used in migration)
+    func setDidMigrateToSharedDefaults(_ value: Bool) {
+        didMigrateToSharedDefaults = value
+    }
+    
+    func setDidMigrateToMultipleHomes(_ value: Bool) {
+        didMigrateToMultipleHomes = value
+    }
+    
+    func setDidMigrateScreenSaverPreferences(_ value: Bool) {
+        didMigrateScreenSaverPreferences = value
+    }
+    
+    func setDidMigrateApplicationPreferences(_ value: Bool) {
+        didMigrateApplicationPreferences = value
+    }
 }
 
 // MARK: Multiple homes
 
-@MainActor
 public extension Preferences {
     func listStoredHomes() -> [UUID] {
         let preferenceIds = storedHomes
@@ -362,27 +391,36 @@ public extension Preferences {
 
     private func storeActiveHome() {
         var all = storedHomes
-        let homeId = Preferences.shared.activeHomeId
-        all[homeId] = Preferences.shared.currentHomePreferences
+        let homeId = activeHomeId
+        all[homeId] = currentHomePreferences
         storedHomes = all
         Logger.preferences.debug("Stored preferences for current home \(homeId.uuidString)")
     }
 
-    func modifyActiveHome(modificationFunction: @MainActor (inout HomePreferences) -> Void) {
+    func modifyActiveHome(modificationFunction: @Sendable (inout HomePreferences) -> Void) {
         var homePreferences = currentHomePreferences
         modificationFunction(&homePreferences)
         currentHomePreferences = homePreferences
         storeActiveHome()
     }
 
-    func modifyApplicationPreferences(modificationFunction: @MainActor (inout ApplicationPreferences) -> Void) {
+    func modifyApplicationPreferences(modificationFunction: @Sendable (inout ApplicationPreferences) -> Void) {
         var applicationPreferences = applicationPreferences
         modificationFunction(&applicationPreferences)
         self.applicationPreferences = applicationPreferences
     }
+
+    func modifyScreenSaverPreferences(modificationFunction: @Sendable (inout ScreenSaverPreferences) -> Void) {
+        var screensaverPreferences = screensaverPreferences
+        modificationFunction(&screensaverPreferences)
+        self.screensaverPreferences = screensaverPreferences
+    }
+
+    func setCurrentWebViewPath(_ path: String) {
+        currentWebViewPath = path
+    }
 }
 
-@MainActor
 public extension Preferences {
     func firstStoredHome(where predicate: (HomePreferences) -> Bool) -> (id: UUID, record: HomePreferences)? {
         for (uuid, record) in storedHomes {
@@ -401,18 +439,19 @@ public extension Preferences {
 
 // MARK: Migration
 
-@MainActor
 public extension Preferences {
-    static func migratePreferences() {
-        Preferences.shared.initializeStoredHomes()
-        migrateToSharedDefaultsIfRequired()
-        migrateToMultipleHomesIfRequired()
+    static func migratePreferences() async {
+        await Preferences.shared.initializeStoredHomes()
+        await migrateToSharedDefaultsIfRequired()
+        await migrateToMultipleHomesIfRequired()
+        await migrateApplicationPreferencesIfRequired()
+        await migrateScreenSaverPreferencesIfRequired()
     }
 
-    private static func migrateToSharedDefaultsIfRequired() {
-        guard !Preferences.shared.didMigrateToSharedDefaults else { return }
+    private static func migrateToSharedDefaultsIfRequired() async {
+        guard await !Preferences.shared.didMigrateToSharedDefaults else { return }
 
-        Preferences.shared.modifyActiveHome { currentHomePreferences in
+        await Preferences.shared.modifyActiveHome { currentHomePreferences in
             currentHomePreferences.localConnectionConfig.url = UserDefaults.standard.string(forKey: "localUrl") ?? currentHomePreferences.localConnectionConfig.url
             currentHomePreferences.localConnectionConfig.alwaysSendBasicAuth = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? currentHomePreferences.localConnectionConfig.alwaysSendBasicAuth
             currentHomePreferences.localConnectionConfig.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? currentHomePreferences.localConnectionConfig.ignoreSSL
@@ -427,18 +466,15 @@ public extension Preferences {
             currentHomePreferences.defaultSitemap = UserDefaults.standard.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
         }
 
-        Preferences.shared.idleOff = UserDefaults.standard.object(forKey: "idleOff") as? Bool ?? Preferences.shared.idleOff
-        Preferences.shared.sendCrashReports = UserDefaults.standard.object(forKey: "sendCrashReports") as? Bool ?? Preferences.shared.sendCrashReports
-
-        Preferences.shared.didMigrateToSharedDefaults = true
+        await Preferences.shared.setDidMigrateToSharedDefaults(true)
         // this was done implicitly
-        Preferences.shared.didMigrateToMultipleHomes = true
+        await Preferences.shared.setDidMigrateToMultipleHomes(true)
     }
 
-    private static func migrateToMultipleHomesIfRequired() {
-        guard !Preferences.shared.didMigrateToMultipleHomes else { return }
+    private static func migrateToMultipleHomesIfRequired() async {
+        guard await !Preferences.shared.didMigrateToMultipleHomes else { return }
 
-        migrateToSharedDefaultsIfRequired()
+        await migrateToSharedDefaultsIfRequired()
 
         let oldLocalUrl = sharedDefaults.string(forKey: "localUrl")
         let oldRemoteUrl = sharedDefaults.string(forKey: "remoteUrl")
@@ -447,21 +483,21 @@ public extension Preferences {
         let oldAlwaysSendCreds = sharedDefaults.object(forKey: "alwaysSendCreds") as? Bool
         let oldIgnoreSSL = sharedDefaults.object(forKey: "ignoreSSL") as? Bool
 
-        // Create new configuration
-        var newLocalConfiguration = Preferences.shared.currentHomePreferences.localConnectionConfig
-        newLocalConfiguration.url = oldLocalUrl ?? newLocalConfiguration.url
-        newLocalConfiguration.alwaysSendBasicAuth = oldAlwaysSendCreds ?? newLocalConfiguration.alwaysSendBasicAuth
-        newLocalConfiguration.ignoreSSL = oldIgnoreSSL ?? newLocalConfiguration.ignoreSSL
-
-        var newRemoteConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
-        newRemoteConfiguration.url = oldRemoteUrl ?? newRemoteConfiguration.url
-        newRemoteConfiguration.username = oldUsername ?? newRemoteConfiguration.username
-        newRemoteConfiguration.password = oldPassword ?? newRemoteConfiguration.password
-        newRemoteConfiguration.alwaysSendBasicAuth = oldAlwaysSendCreds ?? newRemoteConfiguration.alwaysSendBasicAuth
-        newRemoteConfiguration.ignoreSSL = oldIgnoreSSL ?? newRemoteConfiguration.ignoreSSL
-
         // Save to Preferences
-        Preferences.shared.modifyActiveHome { currentHomePreferences in
+        await Preferences.shared.modifyActiveHome { currentHomePreferences in
+            // Create new configuration inside the closure to avoid capture issues
+            var newLocalConfiguration = currentHomePreferences.localConnectionConfig
+            newLocalConfiguration.url = oldLocalUrl ?? newLocalConfiguration.url
+            newLocalConfiguration.alwaysSendBasicAuth = oldAlwaysSendCreds ?? newLocalConfiguration.alwaysSendBasicAuth
+            newLocalConfiguration.ignoreSSL = oldIgnoreSSL ?? newLocalConfiguration.ignoreSSL
+
+            var newRemoteConfiguration = currentHomePreferences.remoteConnectionConfig
+            newRemoteConfiguration.url = oldRemoteUrl ?? newRemoteConfiguration.url
+            newRemoteConfiguration.username = oldUsername ?? newRemoteConfiguration.username
+            newRemoteConfiguration.password = oldPassword ?? newRemoteConfiguration.password
+            newRemoteConfiguration.alwaysSendBasicAuth = oldAlwaysSendCreds ?? newRemoteConfiguration.alwaysSendBasicAuth
+            newRemoteConfiguration.ignoreSSL = oldIgnoreSSL ?? newRemoteConfiguration.ignoreSSL
+
             currentHomePreferences.defaultView = sharedDefaults.string(forKey: "defaultView") ?? currentHomePreferences.defaultView
             currentHomePreferences.demomode = sharedDefaults.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
             currentHomePreferences.realTimeSliders = sharedDefaults.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
@@ -476,16 +512,105 @@ public extension Preferences {
             currentHomePreferences.sitemapForWatchLabel = sharedDefaults.string(forKey: "sitemapForWatchLabel") ?? currentHomePreferences.sitemapForWatchLabel
         }
 
-        Preferences.shared.didMigrateToMultipleHomes = true
+        await Preferences.shared.setDidMigrateToMultipleHomes(true)
+    }
+
+    private static func migrateApplicationPreferencesIfRequired() async {
+        guard await !Preferences.shared.didMigrateApplicationPreferences else { return }
+
+        // Check if old preferences exist in UserDefaults
+        let oldSendCrashReports = sharedDefaults.object(forKey: "sendCrashReports") as? Bool
+        let oldIdleOff = sharedDefaults.object(forKey: "idleOff") as? Bool
+        let oldHideStatusBar = sharedDefaults.object(forKey: "hideStatusBar") as? Bool
+
+        // Only migrate if at least one old preference exists
+        if oldSendCrashReports != nil || oldIdleOff != nil || oldHideStatusBar != nil {
+            await Preferences.shared.modifyApplicationPreferences { prefs in
+                if let oldSendCrashReports { prefs.sendCrashReports = oldSendCrashReports }
+                if let oldIdleOff { prefs.idleOff = oldIdleOff }
+                if let oldHideStatusBar { prefs.hideStatusBar = oldHideStatusBar }
+            }
+
+            Logger.preferences.info("Migrated application preferences from individual keys to ApplicationPreferences struct")
+
+            // Clean up old keys
+            sharedDefaults.removeObject(forKey: "sendCrashReports")
+            sharedDefaults.removeObject(forKey: "idleOff")
+            sharedDefaults.removeObject(forKey: "hideStatusBar")
+        }
+
+        await Preferences.shared.setDidMigrateApplicationPreferences(true)
+    }
+
+    private static func migrateScreenSaverPreferencesIfRequired() async {
+        guard await !Preferences.shared.didMigrateScreenSaverPreferences else { return }
+
+        // Check if old preferences exist in UserDefaults
+        let oldEnabled = sharedDefaults.object(forKey: "screensaverEnabled") as? Bool
+        let oldShowsTime = sharedDefaults.object(forKey: "screensaverShowsTime") as? Bool
+        let oldShowsDate = sharedDefaults.object(forKey: "screensaverShowsDate") as? Bool
+        let oldIdleInterval = sharedDefaults.object(forKey: "screensaverIdleInterval") as? Double
+        let oldMovementInterval = sharedDefaults.object(forKey: "screensaverMovementInterval") as? Double
+        let oldFontName = sharedDefaults.string(forKey: "screensaverFontName")
+        let oldTimeFontRatio = sharedDefaults.object(forKey: "screensaverTimeFontRatio") as? Double
+        let oldDateFontRatio = sharedDefaults.object(forKey: "screensaverDateFontRatio") as? Double
+        let oldEnableDimming = sharedDefaults.object(forKey: "screensaverEnableDimming") as? Bool
+        let oldDimLevel = sharedDefaults.object(forKey: "screensaverDimLevel") as? Double
+        let oldShowsSeconds = sharedDefaults.object(forKey: "screensaverShowsSeconds") as? Bool
+        let oldUse24Hour = sharedDefaults.object(forKey: "screensaverUse24Hour") as? Bool
+        let oldFadeDuration = sharedDefaults.object(forKey: "screensaverFadeDuration") as? Double
+        let oldRestoreBrightness = sharedDefaults.object(forKey: "screensaverRestoreBrightness") as? Bool
+        let oldWakeBrightness = sharedDefaults.object(forKey: "screensaverWakeBrightness") as? Double
+
+        // Only migrate if at least one old preference exists
+        if oldEnabled != nil || oldShowsTime != nil || oldIdleInterval != nil {
+            await Preferences.shared.modifyScreenSaverPreferences { prefs in
+                if let oldEnabled { prefs.isEnabled = oldEnabled }
+                if let oldShowsTime { prefs.showsTime = oldShowsTime }
+                if let oldShowsDate { prefs.showsDate = oldShowsDate }
+                if let oldIdleInterval { prefs.idleInterval = oldIdleInterval }
+                if let oldMovementInterval { prefs.movementInterval = oldMovementInterval }
+                if let oldFontName { prefs.fontName = oldFontName }
+                if let oldTimeFontRatio { prefs.timeFontRatio = oldTimeFontRatio }
+                if let oldDateFontRatio { prefs.dateFontRatio = oldDateFontRatio }
+                if let oldEnableDimming { prefs.enableDimming = oldEnableDimming }
+                if let oldDimLevel { prefs.dimLevel = oldDimLevel }
+                if let oldShowsSeconds { prefs.showsSeconds = oldShowsSeconds }
+                if let oldUse24Hour { prefs.use24Hour = oldUse24Hour }
+                if let oldFadeDuration { prefs.fadeDuration = oldFadeDuration }
+                if let oldRestoreBrightness { prefs.restoreBrightness = oldRestoreBrightness }
+                if let oldWakeBrightness { prefs.wakeBrightness = oldWakeBrightness }
+            }
+
+            Logger.preferences.info("Migrated screen saver preferences from individual keys to ScreenSaverPreferences struct")
+
+            // Clean up old keys (optional, but keeps UserDefaults tidy)
+            sharedDefaults.removeObject(forKey: "screensaverEnabled")
+            sharedDefaults.removeObject(forKey: "screensaverShowsTime")
+            sharedDefaults.removeObject(forKey: "screensaverShowsDate")
+            sharedDefaults.removeObject(forKey: "screensaverIdleInterval")
+            sharedDefaults.removeObject(forKey: "screensaverMovementInterval")
+            sharedDefaults.removeObject(forKey: "screensaverFontName")
+            sharedDefaults.removeObject(forKey: "screensaverTimeFontRatio")
+            sharedDefaults.removeObject(forKey: "screensaverDateFontRatio")
+            sharedDefaults.removeObject(forKey: "screensaverEnableDimming")
+            sharedDefaults.removeObject(forKey: "screensaverDimLevel")
+            sharedDefaults.removeObject(forKey: "screensaverShowsSeconds")
+            sharedDefaults.removeObject(forKey: "screensaverUse24Hour")
+            sharedDefaults.removeObject(forKey: "screensaverFadeDuration")
+            sharedDefaults.removeObject(forKey: "screensaverRestoreBrightness")
+            sharedDefaults.removeObject(forKey: "screensaverWakeBrightness")
+        }
+
+        await Preferences.shared.setDidMigrateScreenSaverPreferences(true)
     }
 }
 
 // MARK: All connections
 
-@MainActor
 public extension Preferences {
     func getNotificationConnection() -> ConnectionConfiguration? {
-        getNotificationConnection(of: [Preferences.shared.currentHomePreferences.remoteConnectionConfig])
+        getNotificationConnection(of: [currentHomePreferences.remoteConnectionConfig])
     }
 
     func getNotificationConnection(of homeConfig: HomePreferences) -> ConnectionConfiguration? {
@@ -525,3 +650,79 @@ public extension ConnectionConfiguration {
         priority: 1
     )
 }
+
+// MARK: - SwiftUI Observable Wrapper
+
+/// A @MainActor observable wrapper for Preferences that can be used in SwiftUI views
+@MainActor
+@Observable
+public final class PreferencesObserver {
+    public static let shared = PreferencesObserver()
+
+    public private(set) var currentHomePreferences: HomePreferences
+    public private(set) var applicationPreferences: ApplicationPreferences
+    public private(set) var screensaverPreferences: ScreenSaverPreferences
+
+    private var currentHomeTask: Task<Void, Never>?
+    private var applicationTask: Task<Void, Never>?
+    private var screensaverTask: Task<Void, Never>?
+
+    private init() {
+        // Initialize with default values - will be updated immediately by channels
+        self.currentHomePreferences = HomePreferences(id: UUID())
+        self.applicationPreferences = ApplicationPreferences()
+        self.screensaverPreferences = ScreenSaverPreferences()
+
+        // Bootstrap initial values and start listeners
+        Task { [weak self] in
+            guard let self else { return }
+            // Fetch initial values from the actor
+            let initialHome = await Preferences.shared.currentHomePreferences
+            let initialApp = await Preferences.shared.applicationPreferences
+            let initialScreen = await Preferences.shared.screensaverPreferences
+
+            // Apply initial values on the main actor
+            self.currentHomePreferences = initialHome
+            self.applicationPreferences = initialApp
+            self.screensaverPreferences = initialScreen
+
+            // Start listening to async channels
+            self.currentHomeTask = Task { [weak self] in
+                guard let self else { return }
+                let channel = await Preferences.shared.currentHomePreferencesChannel
+                for await value in channel {
+                    await MainActor.run { self.currentHomePreferences = value }
+                }
+            }
+
+            self.applicationTask = Task { [weak self] in
+                guard let self else { return }
+                let channel = await Preferences.shared.applicationPreferencesChannel
+                for await value in channel {
+                    await MainActor.run { self.applicationPreferences = value }
+                }
+            }
+
+            self.screensaverTask = Task { [weak self] in
+                guard let self else { return }
+                let channel = await Preferences.shared.screensaverPreferencesChannel
+                for await value in channel {
+                    await MainActor.run { self.screensaverPreferences = value }
+                }
+            }
+        }
+    }
+
+    @MainActor
+    deinit {
+        currentHomeTask?.cancel()
+        applicationTask?.cancel()
+        screensaverTask?.cancel()
+    }
+
+    /// Get notification connection for current home
+    public func getNotificationConnection() async -> ConnectionConfiguration? {
+        await Preferences.shared.getNotificationConnection()
+    }
+}
+

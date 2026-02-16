@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AVFoundation
-import Combine
 import Firebase
 import FirebaseMessaging
 import Kingfisher
@@ -22,6 +21,7 @@ import SwiftUI
 import UIKit
 @preconcurrency import UserNotifications
 import WatchConnectivity
+import AsyncAlgorithms
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -29,7 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    private var crashlyticsSubscriber: AnyCancellable?
+    private var crashlyticsTask: Task<Void, Never>?
 
     private let notificationDelegate = NotificationCenterDelegateImpl()
 
@@ -53,28 +53,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         AppDelegate.appDelegate = self
     }
 
+    deinit {
+        crashlyticsTask?.cancel()
+    }
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logger.appDelegate.info("didFinishLaunchingWithOptions started")
 
         // Only essential setup here - defer everything else to show UI faster
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
         UserDefaults.standard.register(defaults: appDefaults)
-
-        Preferences.migratePreferences()
-
-        UNUserNotificationCenter.current().delegate = notificationDelegate
-
-        // Replace storyboard root with SwiftUI TabView
-        let rootView = OpenHABTabRootView()
-        let hostingController = UIHostingController(rootView: rootView)
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window?.rootViewController = hostingController
-        window?.makeKeyAndVisible()
-
-        Logger.appDelegate.info("didFinishLaunchingWithOptions ended")
-
-        // Defer non-essential initialization to after first frame renders
+        
         Task { @MainActor in
+            await Preferences.migratePreferences()
+            
+            UNUserNotificationCenter.current().delegate = notificationDelegate
+            
+            // Replace storyboard root with SwiftUI TabView
+            let rootView = OpenHABTabRootView()
+            let hostingController = UIHostingController(rootView: rootView)
+            window = UIWindow(frame: UIScreen.main.bounds)
+            window?.rootViewController = hostingController
+            window?.makeKeyAndVisible()
+            
+            Logger.appDelegate.info("didFinishLaunchingWithOptions ended")
+            
+            // Defer non-essential initialization to after first frame renders
             // Small delay to ensure UI has appeared
             try? await Task.sleep(for: .milliseconds(100))
             performDeferredSetup()
@@ -104,24 +108,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         configureImageCoders()
 
         /// load and start the screensaver
-        if let keyWindow = UIApplication.shared.firstKeyWindow {
-            var config = ScreenSaverConfiguration()
-            config.isEnabled = Preferences.shared.screensaverEnabled
-            config.showsTime = Preferences.shared.screensaverShowsTime
-            config.showsDate = Preferences.shared.screensaverShowsDate
-            config.idleInterval = Preferences.shared.screensaverIdleInterval
-            config.movementInterval = Preferences.shared.screensaverMovementInterval
-            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
-            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
-            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
-            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
-            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
-            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
-            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
-            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
-            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
+        Task { @MainActor in
+            if let keyWindow = UIApplication.shared.firstKeyWindow {
+                let prefs = await Preferences.shared.screensaverPreferences
+                var config = ScreenSaverConfiguration()
+                config.isEnabled = prefs.isEnabled
+                config.showsTime = prefs.showsTime
+                config.showsDate = prefs.showsDate
+                config.idleInterval = prefs.idleInterval
+                config.movementInterval = prefs.movementInterval
+                config.fontName = prefs.fontName.isEmpty ? nil : prefs.fontName
+                config.timeFontSizeRatio = CGFloat(prefs.timeFontRatio)
+                config.dateFontRelativeSize = CGFloat(prefs.dateFontRatio)
+                config.enablesAutoDimming = prefs.enableDimming
+                config.dimLevel = CGFloat(prefs.dimLevel)
+                config.wakeBrightnessLevel = CGFloat(prefs.wakeBrightness)
+                config.showsSeconds = prefs.showsSeconds
+                config.uses24HourTime = prefs.use24Hour
+                config.restoresBrightness = prefs.restoreBrightness
 
-            ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
+                ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
+            }
         }
     }
 
@@ -136,10 +143,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // init Firebase crash reporting
         FirebaseApp.configure()
         FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
-        crashlyticsSubscriber = Preferences.shared.$sendCrashReports.sink {
-            Crashlytics.crashlytics().setCrashlyticsCollectionEnabled($0)
-            Logger.appDelegate.debug("setCrashlyticsCollectionEnabled to \($0)")
+        
+        // Use AsyncAlgorithms to observe application preferences changes
+        crashlyticsTask = Task {
+            let channel = await Preferences.shared.applicationPreferencesChannel
+            for await applicationProperties in channel {
+                let sendCrashReports = applicationProperties.sendCrashReports
+                Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(sendCrashReports)
+                Logger.appDelegate.debug("setCrashlyticsCollectionEnabled to \(sendCrashReports)")
+            }
         }
+        
         Messaging.messaging().delegate = self
     }
 
@@ -259,24 +273,27 @@ extension AppDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        if let keyWindow = UIApplication.shared.firstKeyWindow {
-            var config = ScreenSaverConfiguration()
-            config.isEnabled = Preferences.shared.screensaverEnabled
-            config.showsTime = Preferences.shared.screensaverShowsTime
-            config.showsDate = Preferences.shared.screensaverShowsDate
-            config.idleInterval = Preferences.shared.screensaverIdleInterval
-            config.movementInterval = Preferences.shared.screensaverMovementInterval
-            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
-            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
-            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
-            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
-            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
-            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
-            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
-            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
-            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
+        Task { @MainActor in
+            if let keyWindow = UIApplication.shared.firstKeyWindow {
+                let prefs = await Preferences.shared.screensaverPreferences
+                var config = ScreenSaverConfiguration()
+                config.isEnabled = prefs.isEnabled
+                config.showsTime = prefs.showsTime
+                config.showsDate = prefs.showsDate
+                config.idleInterval = prefs.idleInterval
+                config.movementInterval = prefs.movementInterval
+                config.fontName = prefs.fontName.isEmpty ? nil : prefs.fontName
+                config.timeFontSizeRatio = CGFloat(prefs.timeFontRatio)
+                config.dateFontRelativeSize = CGFloat(prefs.dateFontRatio)
+                config.enablesAutoDimming = prefs.enableDimming
+                config.dimLevel = CGFloat(prefs.dimLevel)
+                config.wakeBrightnessLevel = CGFloat(prefs.wakeBrightness)
+                config.showsSeconds = prefs.showsSeconds
+                config.uses24HourTime = prefs.use24Hour
+                config.restoresBrightness = prefs.restoreBrightness
 
-            ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
+                ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
+            }
         }
     }
 

@@ -182,8 +182,10 @@ class SitemapPageViewModel: ObservableObject {
 @MainActor
 extension SitemapPageViewModel {
     func loadSettings() {
-        defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
-        showSearchField = Preferences.shared.applicationPreferences.showSearchField
+        Task {
+            defaultSitemap = await Preferences.shared.currentHomePreferences.defaultSitemap
+            showSearchField = await Preferences.shared.applicationPreferences.showSearchField
+        }
     }
 
     func stopPageHandling() {
@@ -449,27 +451,29 @@ extension SitemapPageViewModel {
             // Filter out _default sitemap if there are multiple sitemaps available
             let filteredSitemaps = sitemaps.count > 1 ? sitemaps.filter { $0.name != "_default" } : sitemaps
 
+            let defaultSitemap = defaultSitemap
+
             switch filteredSitemaps.count {
             case 1:
                 // Auto-select the only available sitemap
-                defaultSitemap = filteredSitemaps[0].name
+                self.defaultSitemap = filteredSitemaps[0].name
                 defaultSitemapLabel = filteredSitemaps[0].label
                 // swiftformat:disable:next redundantSelf
                 logger.info("Auto-selected single sitemap: \(self.defaultSitemap)")
 
                 // Save as default for future launches
-                Preferences.shared.modifyActiveHome { homePreferences in
+                await Preferences.shared.modifyActiveHome { homePreferences in
                     homePreferences.defaultSitemap = defaultSitemap
                 }
             case 2...:
                 // Multiple sitemaps available - select the first one
-                defaultSitemap = filteredSitemaps[0].name
+                self.defaultSitemap = filteredSitemaps[0].name
                 defaultSitemapLabel = filteredSitemaps[0].label
                 // swiftformat:disable:next redundantSelf
                 logger.info("Auto-selected first sitemap from \(filteredSitemaps.count) available: \(self.defaultSitemap)")
 
                 // Save as default for future launches
-                Preferences.shared.modifyActiveHome { homePreferences in
+                await Preferences.shared.modifyActiveHome { homePreferences in
                     homePreferences.defaultSitemap = defaultSitemap
                 }
             default:

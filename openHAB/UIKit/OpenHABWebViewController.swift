@@ -195,7 +195,7 @@ class OpenHABWebViewController: OpenHABViewController {
             // TODO: remove this check once iOS 16 is dropped
             let isCloudConnection = activeConfig.isCloudConnection
             // create new (or resuse existing)
-            let newWebview = webView(for: Preferences.shared.currentHomePreferences.id, isCloudConnection: isCloudConnection)
+            let newWebview = await webView(for: Preferences.shared.currentHomePreferences.id, isCloudConnection: isCloudConnection)
             if newWebview != webView {
                 // Detach old instance
                 webView.stopLoading()
@@ -481,8 +481,8 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
         Logger.viewController.info("WKScriptMessage \(message.name)")
         if message.name == "pathChanged", let newPath = message.body as? String {
             Logger.viewController.debug("Path changed to: \(newPath)")
-            Task { @MainActor in
-                Preferences.shared.currentWebViewPath = newPath
+            Task {
+                await Preferences.shared.setCurrentWebViewPath(newPath)
             }
         }
         if message.name == "mainUi", let callbackName = message.body as? String {
@@ -574,8 +574,9 @@ extension OpenHABWebViewController: WKNavigationDelegate {
             if let path = url?.path {
                 let string = openHABTrackedRootUrl
                 Logger.viewController.info("navigation change base: \(string) path: \(path)")
-                Task { @MainActor in
-                    Preferences.shared.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
+                Task {
+                    let normalizedPath = path.hasSuffix("/") ? path : path + "/"
+                    await Preferences.shared.setCurrentWebViewPath(normalizedPath)
                 }
             }
         }
@@ -634,6 +635,6 @@ extension OpenHABWebViewController: WKUIDelegate {
                  decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
                  initiatedBy frame: WKFrameInfo,
                  type: WKMediaCaptureType) async -> WKPermissionDecision {
-        Preferences.shared.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
+        await Preferences.shared.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
     }
 }

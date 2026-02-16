@@ -29,41 +29,47 @@ struct ScreenSaverSettingsView: View {
         }
         .navigationTitle("Screen Saver")
         .onDisappear {
-            ScreenSaverManager.shared.updateConfiguration(config)
-            // Persist to Preferences
-            Preferences.shared.screensaverEnabled = config.isEnabled
-            Preferences.shared.screensaverShowsTime = config.showsTime
-            Preferences.shared.screensaverShowsDate = config.showsDate
-            Preferences.shared.screensaverIdleInterval = config.idleInterval
-            Preferences.shared.screensaverMovementInterval = config.movementInterval
-            Preferences.shared.screensaverFontName = config.fontName ?? ""
-            Preferences.shared.screensaverTimeFontRatio = Double(config.timeFontSizeRatio)
-            Preferences.shared.screensaverDateFontRatio = Double(config.dateFontRelativeSize)
-            Preferences.shared.screensaverEnableDimming = config.enablesAutoDimming
-            Preferences.shared.screensaverDimLevel = Double(config.dimLevel)
-            Preferences.shared.screensaverWakeBrightness = Double(config.wakeBrightnessLevel)
-            Preferences.shared.screensaverShowsSeconds = config.showsSeconds
-            Preferences.shared.screensaverUse24Hour = config.uses24HourTime
-            Preferences.shared.screensaverFadeDuration = config.fadeDuration
-            Preferences.shared.screensaverRestoreBrightness = config.restoresBrightness
+            let config = config //copy to make isolated var sendable
+            Task { @MainActor in
+                ScreenSaverManager.shared.updateConfiguration(config)
+                // Persist to Preferences
+                await Preferences.shared.modifyScreenSaverPreferences { prefs in
+                    prefs.isEnabled = config.isEnabled
+                    prefs.showsTime = config.showsTime
+                    prefs.showsDate = config.showsDate
+                    prefs.idleInterval = config.idleInterval
+                    prefs.movementInterval = config.movementInterval
+                    prefs.fontName = config.fontName ?? ""
+                    prefs.timeFontRatio = Double(config.timeFontSizeRatio)
+                    prefs.dateFontRatio = Double(config.dateFontRelativeSize)
+                    prefs.enableDimming = config.enablesAutoDimming
+                    prefs.dimLevel = Double(config.dimLevel)
+                    prefs.wakeBrightness = Double(config.wakeBrightnessLevel)
+                    prefs.showsSeconds = config.showsSeconds
+                    prefs.use24Hour = config.uses24HourTime
+                    prefs.fadeDuration = config.fadeDuration
+                    prefs.restoreBrightness = config.restoresBrightness
+                }
+            }
         }
         .task { @MainActor in
+            let prefs = await Preferences.shared.screensaverPreferences
             var config = ScreenSaverConfiguration()
-            config.isEnabled = Preferences.shared.screensaverEnabled
-            config.showsTime = Preferences.shared.screensaverShowsTime
-            config.showsDate = Preferences.shared.screensaverShowsDate
-            config.idleInterval = Preferences.shared.screensaverIdleInterval
-            config.movementInterval = Preferences.shared.screensaverMovementInterval
-            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
-            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
-            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
-            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
-            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
-            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
-            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
-            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
-            config.fadeDuration = Preferences.shared.screensaverFadeDuration
-            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
+            config.isEnabled = prefs.isEnabled
+            config.showsTime = prefs.showsTime
+            config.showsDate = prefs.showsDate
+            config.idleInterval = prefs.idleInterval
+            config.movementInterval = prefs.movementInterval
+            config.fontName = prefs.fontName.isEmpty ? nil : prefs.fontName
+            config.timeFontSizeRatio = CGFloat(prefs.timeFontRatio)
+            config.dateFontRelativeSize = CGFloat(prefs.dateFontRatio)
+            config.enablesAutoDimming = prefs.enableDimming
+            config.dimLevel = CGFloat(prefs.dimLevel)
+            config.wakeBrightnessLevel = CGFloat(prefs.wakeBrightness)
+            config.showsSeconds = prefs.showsSeconds
+            config.uses24HourTime = prefs.use24Hour
+            config.fadeDuration = prefs.fadeDuration
+            config.restoresBrightness = prefs.restoreBrightness
             changeConfig(config)
         }
     }

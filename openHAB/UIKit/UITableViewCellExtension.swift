@@ -9,6 +9,11 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+// DEPRECATED: This file is part of the legacy UIKit OpenHABSitemapViewController
+// implementation that has been replaced by SwiftUI views (SitemapNavigationView, SitemapPageView).
+// This entire file can be safely deleted.
+// See DELETION_CHECKLIST.md for complete list of files to remove.
+
 import Foundation
 import Kingfisher
 import OpenHABCore

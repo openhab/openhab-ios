@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import AsyncAlgorithms
 import AVFoundation
 import Combine
 import FirebaseCrashlytics
@@ -117,8 +118,6 @@ class AppServicesViewModel: ObservableObject {
     // MARK: - Network Tracker
 
     private func setupTracker() {
-        let serverInfo = Preferences.shared.$currentHomePreferences
-
         NotificationCenter.default.addObserver(
             forName: .evaluateServerTrust,
             object: nil,
@@ -170,33 +169,64 @@ class AppServicesViewModel: ObservableObject {
             }
         }
 
-        serverInfo.debounce(for: .milliseconds(500), scheduler: RunLoop.main)
-            .sink { homeSettings in
+        // Subscribe to home preferences changes using AsyncChannel
+        let trackerTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            
+            // Get the AsyncChannel for currentHomePreferences from the actor
+            let preferencesChannel = await Preferences.shared.currentHomePreferencesChannel
+            
+            // Process initial value
+            let initialSettings = await Preferences.shared.currentHomePreferences
+            let localConnectionConfig = initialSettings.localConnectionConfig
+            let remoteConnectionConfig = initialSettings.remoteConnectionConfig
+            let demomode = initialSettings.demomode
+            let sseCommandItem = initialSettings.sseCommandItem
+            
+            if demomode {
+                await NetworkTracker.shared.startTracking(connectionConfigurations: [
+                    ConnectionConfiguration(
+                        url: "https://demo.openhab.org",
+                        username: "",
+                        password: "",
+                        priority: 0
+                    )
+                ])
+            } else {
+                await NetworkTracker.shared.startTracking(connectionConfigurations: [
+                    localConnectionConfig,
+                    remoteConnectionConfig
+                ])
+                await ItemEventStream.trackItems(sseCommandItem.isEmpty ? [] : [sseCommandItem])
+            }
+            
+            // Listen for changes with debouncing
+            for await homeSettings in preferencesChannel.debounce(for: .milliseconds(500)) {
                 let localConnectionConfig = homeSettings.localConnectionConfig
                 let remoteConnectionConfig = homeSettings.remoteConnectionConfig
                 let demomode = homeSettings.demomode
                 let sseCommandItem = homeSettings.sseCommandItem
-
-                Task {
-                    if demomode {
-                        await NetworkTracker.shared.startTracking(connectionConfigurations: [
-                            ConnectionConfiguration(
-                                url: "https://demo.openhab.org",
-                                username: "",
-                                password: "",
-                                priority: 0
-                            )
-                        ])
-                    } else {
-                        await NetworkTracker.shared.startTracking(connectionConfigurations: [
-                            localConnectionConfig,
-                            remoteConnectionConfig
-                        ])
-                        await ItemEventStream.trackItems(sseCommandItem.isEmpty ? [] : [sseCommandItem])
-                    }
+                
+                if demomode {
+                    await NetworkTracker.shared.startTracking(connectionConfigurations: [
+                        ConnectionConfiguration(
+                            url: "https://demo.openhab.org",
+                            username: "",
+                            password: "",
+                            priority: 0
+                        )
+                    ])
+                } else {
+                    await NetworkTracker.shared.startTracking(connectionConfigurations: [
+                        localConnectionConfig,
+                        remoteConnectionConfig
+                    ])
+                    await ItemEventStream.trackItems(sseCommandItem.isEmpty ? [] : [sseCommandItem])
                 }
             }
-            .store(in: &cancellables)
+        }
+        
+        cancellables.insert(AnyCancellable { trackerTask.cancel() })
 
         MainActorNetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
@@ -224,14 +254,20 @@ class AppServicesViewModel: ObservableObject {
     // MARK: - Crash Report
 
     private func setupCrashReportCheck() {
-        if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !Preferences.shared.sendCrashReports {
-            crashReportAlert = true
+        Task {
+            if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !(await Preferences.shared.applicationPreferences.sendCrashReports) {
+                crashReportAlert = true
+            }
         }
     }
 
     func enableCrashReporting() {
-        Preferences.shared.sendCrashReports = true
-        Crashlytics.crashlytics().sendUnsentReports()
+        Task {
+            await Preferences.shared.modifyApplicationPreferences(modificationFunction: { applicationPreferences in
+                applicationPreferences.sendCrashReports = true
+            })
+            Crashlytics.crashlytics().sendUnsentReports()
+        }
     }
 
     func deleteCrashReports() {
@@ -254,37 +290,65 @@ class AppServicesViewModel: ObservableObject {
             let connection: ConnectionConfiguration
         }
 
-        let storedOpenHabConnections = Preferences.shared.$storedHomes
-            .debounce(for: .seconds(1), scheduler: RunLoop.main)
-            .map { updatedPreferences in
-                Set<UuidWithConnection>(updatedPreferences.compactMap { storedWithUuid in
-                    let (uuid, homeConfig) = storedWithUuid
-                    guard let connection = Preferences.shared.getNotificationConnection(of: homeConfig) else { return nil }
-                    return UuidWithConnection(uuid: uuid, connection: connection)
-                })
+        // Cancel any existing subscription task
+        let subscriptionTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            
+            // Get the AsyncChannel for storedHomes from the actor
+            let storedHomesChannel = await Preferences.shared.storedHomesChannel
+            
+            var previousConnections = Set<UuidWithConnection>()
+            
+            // Process initial value
+            let initialHomes = await Preferences.shared.storedHomes
+            var initialConnections = Set<UuidWithConnection>()
+            for (uuid, homeConfig) in initialHomes {
+                if let connection = await Preferences.shared.getNotificationConnection(of: homeConfig) {
+                    initialConnections.insert(UuidWithConnection(uuid: uuid, connection: connection))
+                }
             }
-
-        let connectionsWithPreviousValues = storedOpenHabConnections
-            .scan((previous: Set<UuidWithConnection>(), current: Set<UuidWithConnection>())) { previous, current in
-                (previous: previous.current, current: current)
+            
+            // Register initial homes
+            for newHome in initialConnections {
+                Logger.viewController.info("openhabConnectionSubscription uuid \(newHome.uuid) registering for push notifications (initial)")
+                self.registerHome(uuid: newHome.uuid, connection: newHome.connection)
             }
-
-        let differences = connectionsWithPreviousValues.map { (previous, current) in
-            (newValues: current.subtracting(previous), deletedValues: previous.subtracting(current))
+            previousConnections = initialConnections
+            
+            // Listen for changes with debouncing
+            for await updatedHomes in storedHomesChannel.debounce(for: .seconds(1)) {
+                Logger.viewController.info("openhabConnectionSubscription updated")
+                
+                // Map to connections using manual iteration for async calls
+                var currentConnections = Set<UuidWithConnection>()
+                for (uuid, homeConfig) in updatedHomes {
+                    if let connection = await Preferences.shared.getNotificationConnection(of: homeConfig) {
+                        currentConnections.insert(UuidWithConnection(uuid: uuid, connection: connection))
+                    }
+                }
+                
+                // Calculate differences
+                let newValues = currentConnections.subtracting(previousConnections)
+                let deletedValues = previousConnections.subtracting(currentConnections)
+                
+                // Register new homes
+                for newHome in newValues {
+                    Logger.viewController.info("openhabConnectionSubscription uuid \(newHome.uuid) registering for push notifications")
+                    self.registerHome(uuid: newHome.uuid, connection: newHome.connection)
+                }
+                
+                // Log deleted homes (deregistration not implemented)
+                for deletedHome in deletedValues {
+                    Logger.viewController.warning("APNS Deregistration is missing (wanted to deregister \(deletedHome.connection.url))")
+                }
+                
+                previousConnections = currentConnections
+            }
         }
-
-        let openhabConnectionSubscription = differences.sink { [weak self] diff in
-            Logger.viewController.info("openhabConnectionSubscription updated")
-            for newHome in diff.newValues {
-                Logger.viewController.info("openhabConnectionSubscription uuid \(newHome.uuid) registering for push notifications ")
-                self?.registerHome(uuid: newHome.uuid, connection: newHome.connection)
-            }
-            for deletedHome in diff.deletedValues {
-                Logger.viewController.warning("APNS Deregistration is missing (wanted to deregister \(deletedHome.connection.url))")
-            }
-        }
-
-        cancellables.insert(openhabConnectionSubscription)
+        
+        // Store the task in cancellables for proper cleanup
+        // We can wrap it in an AnyCancellable for compatibility
+        cancellables.insert(AnyCancellable { subscriptionTask.cancel() })
     }
 
     private func registerHome(uuid: UUID, connection: ConnectionConfiguration) {
@@ -303,7 +367,7 @@ class AppServicesViewModel: ObservableObject {
             do {
                 let client = HTTPClient(connectionConfiguration: config)
                 if let cloudUserId = try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) {
-                    Preferences.shared.setCloudUserId(cloudUserId, for: uuid)
+                    await Preferences.shared.setCloudUserId(cloudUserId, for: uuid)
                     Logger.viewController.info("my.openHAB registration succeeded with cloudUserId \(cloudUserId)")
                 }
                 Logger.viewController.info("my.openHAB registration succeeded without cloudUserId")
@@ -335,15 +399,19 @@ class AppServicesViewModel: ObservableObject {
         Logger.viewController.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
 
         Task {
-            if let cloudUserId, let targetHome = Preferences.shared.storedHome(forCloudUserId: cloudUserId), Preferences.shared.currentHomePreferences.remoteConnectionConfig.cloudUserId != cloudUserId {
+            if let cloudUserId, 
+               let targetHome = await Preferences.shared.storedHome(forCloudUserId: cloudUserId),
+               await Preferences.shared.currentHomePreferences.remoteConnectionConfig.cloudUserId != cloudUserId {
                 await NetworkTracker.shared.stopTracking()
                 Logger.viewController.info("Switching to home \(targetHome.id)")
-                Preferences.shared.switchActiveHome(to: targetHome.id)
+                await Preferences.shared.switchActiveHome(to: targetHome.id)
             }
+            
+            let currentPreferences = await Preferences.shared.currentHomePreferences
             await NetworkTracker.shared.startTracking(connectionConfigurations:
                 [
-                    Preferences.shared.currentHomePreferences.localConnectionConfig,
-                    Preferences.shared.currentHomePreferences.remoteConnectionConfig
+                    currentPreferences.localConnectionConfig,
+                    currentPreferences.remoteConnectionConfig
                 ]
             )
             _ = await NetworkTracker.shared.waitForActiveConnection()
@@ -384,16 +452,18 @@ class AppServicesViewModel: ObservableObject {
             Logger.viewController.info("navigateCommandAction path: \(path)")
             if path.starts(with: "/basicui/app?") {
                 Logger.viewController.info("Navigating to sitemap target")
-                let defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
-                guard let urlComponents = URLComponents(string: path) else {
-                    Logger.viewController.warning("No parameters for specifying sitemap or widget to navigate to")
-                    navigationCommand = .switchToSitemap(name: defaultSitemap, widgetId: nil)
-                    return
+                Task { @MainActor in
+                    let defaultSitemap = await Preferences.shared.currentHomePreferences.defaultSitemap
+                    guard let urlComponents = URLComponents(string: path) else {
+                        Logger.viewController.warning("No parameters for specifying sitemap or widget to navigate to")
+                        navigationCommand = .switchToSitemap(name: defaultSitemap, widgetId: nil)
+                        return
+                    }
+                    let queryItems = urlComponents.queryItems
+                    let sitemap = queryItems?.first { $0.name == "sitemap" }?.value
+                    let widgetId = queryItems?.first { $0.name == "w" }?.value
+                    navigationCommand = .switchToSitemap(name: sitemap ?? defaultSitemap, widgetId: widgetId)
                 }
-                let queryItems = urlComponents.queryItems
-                let sitemap = queryItems?.first { $0.name == "sitemap" }?.value
-                let widgetId = queryItems?.first { $0.name == "w" }?.value
-                navigationCommand = .switchToSitemap(name: sitemap ?? defaultSitemap, widgetId: widgetId)
             } else {
                 Logger.viewController.info("Navigating to webview target")
                 if path.starts(with: "/") {

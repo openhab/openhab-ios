@@ -61,7 +61,7 @@ struct SitemapsTab: View {
             }
         }
         .task {
-            sitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
+            sitemapForWatch = await Preferences.shared.currentHomePreferences.sitemapForWatch
             await fetchSitemaps(activeConnection: networkTracker.activeConnection)
             autoSelectSitemap()
         }
@@ -136,7 +136,7 @@ struct SitemapsTab: View {
             if fetched.last?.name == "_default", fetched.count > 1 {
                 fetched = Array(fetched.dropLast())
             }
-            let sortSitemapsBy = Preferences.shared.currentHomePreferences.sortSitemapsBy
+            let sortSitemapsBy = await Preferences.shared.currentHomePreferences.sortSitemapsBy
             switch SortSitemapsOrder(rawValue: sortSitemapsBy) ?? .label {
             case .label:
                 fetched.sort { $0.label < $1.label }

@@ -1,11 +1,11 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "OpenHABCore",
-    platforms: [.iOS(.v16), .watchOS(.v10), .macOS(.v14)],
+    platforms: [.iOS("26.0"), .watchOS("26.0"), .macOS("26.0")],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -21,7 +21,8 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-http-types.git", from: "1.5.1"),
         .package(url: "https://github.com/SDWebImage/SDWebImageSVGCoder.git", from: "1.4.0"),
         .package(url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git", from: "7.0.0"),
-        .package(url: "https://github.com/swhitty/swift-timeout.git", from: "0.4.0")
+        .package(url: "https://github.com/swhitty/swift-timeout.git", from: "0.4.0"),
+        .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.0.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -35,7 +36,8 @@ let package = Package(
                 .product(name: "HTTPTypes", package: "swift-http-types"),
                 .product(name: "SDWebImageSVGCoder", package: "SDWebImageSVGCoder"),
                 .product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
-                .product(name: "Timeout", package: "swift-timeout")
+                .product(name: "Timeout", package: "swift-timeout"),
+                .product(name: "AsyncAlgorithms", package: "swift-async-algorithms")
             ],
             swiftSettings: [
                 .enableUpcomingFeature("ExistentialAny"),

@@ -17,6 +17,7 @@ import SwiftUI
     private struct SettingsSnapshot: Equatable {
         var demomode: Bool
         var idleOff: Bool
+        var hideStatusBar: Bool
         var realTimeSliders: Bool
         var showSearchField: Bool
         var sendCrashReports: Bool
@@ -35,6 +36,7 @@ import SwiftUI
 struct SettingsView: View {
     @State private var settingsDemomode = false
     @State private var settingsIdleOff = true
+    @State private var settingsHideStatusBar = false
     @State private var settingsRealTimeSliders = true
     @State private var settingsShowSearchField = true
     @State private var settingsSendCrashReports = false
@@ -61,6 +63,7 @@ struct SettingsView: View {
         SettingsSnapshot(
             demomode: settingsDemomode,
             idleOff: settingsIdleOff,
+            hideStatusBar: settingsHideStatusBar,
             realTimeSliders: settingsRealTimeSliders,
             showSearchField: settingsShowSearchField,
             sendCrashReports: settingsSendCrashReports,
@@ -87,6 +90,7 @@ struct SettingsView: View {
 
             ApplicationSettingsView(
                 settingsIdleOff: $settingsIdleOff,
+                settingsHideStatusBar: $settingsHideStatusBar,
                 settingsSSECommandItem: $settingsSSECommandItem
             )
 
@@ -120,7 +124,6 @@ struct SettingsView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         saveSettings()
-                        NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
@@ -138,7 +141,7 @@ struct SettingsView: View {
         .task {
             if !viewAppearedOnce {
                 viewAppearedOnce = true
-                loadSettings()
+                await loadSettings()
                 initialSnapshot = currentSnapshot
                 let activeConfiguration = settingsLocalConnectionConfiguration
                 await updateSitemaps(activeConfiguration: activeConfiguration)
@@ -155,6 +158,7 @@ struct SettingsView: View {
         guard let snapshot = initialSnapshot else { return }
         settingsDemomode = snapshot.demomode
         settingsIdleOff = snapshot.idleOff
+        settingsHideStatusBar = snapshot.hideStatusBar
         settingsRealTimeSliders = snapshot.realTimeSliders
         settingsShowSearchField = snapshot.showSearchField
         settingsSendCrashReports = snapshot.sendCrashReports
@@ -180,7 +184,7 @@ struct SettingsView: View {
             }
 
             // Sort the sitemaps according to Settings selection.
-            switch SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label {
+            switch await SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label {
             case .label: sitemaps.sort { $0.label < $1.label }
             case .name: sitemaps.sort { $0.name < $1.name }
             }
@@ -190,55 +194,79 @@ struct SettingsView: View {
         }
     }
 
-    private func loadSettings() {
+    private func loadSettings() async {
         #if !DEBUG
         Logger.settingsView.debug("Loading Settings")
         #endif
-        settingsDemomode = Preferences.shared.currentHomePreferences.demomode
-        settingsIdleOff = Preferences.shared.idleOff
-        settingsRealTimeSliders = Preferences.shared.currentHomePreferences.realTimeSliders
-        settingsShowSearchField = Preferences.shared.applicationPreferences.showSearchField
-        settingsSendCrashReports = Preferences.shared.sendCrashReports
-        settingsIconType = IconType(rawValue: Preferences.shared.currentHomePreferences.iconType) ?? .svg
-        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label
-        settingsDefaultMainUIPath = Preferences.shared.currentHomePreferences.defaultMainUIPath
-        settingsAlwaysAllowWebRTC = Preferences.shared.currentHomePreferences.alwaysAllowWebRTC
-        settingsSitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
-        settingsLocalConnectionConfiguration = Preferences.shared.currentHomePreferences.localConnectionConfig
-        settingsRemoteConnectionConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
-        settingsHomeName = Preferences.shared.currentHomePreferences.homeName
-        settingsSSECommandItem = Preferences.shared.currentHomePreferences.sseCommandItem
-        settingsTabConfiguration = Preferences.shared.currentHomePreferences.tabConfiguration ?? TabEntry.defaultConfiguration
+        let appPrefs = await Preferences.shared.applicationPreferences
+        settingsDemomode = await Preferences.shared.currentHomePreferences.demomode
+        settingsIdleOff = appPrefs.idleOff
+        settingsHideStatusBar = appPrefs.hideStatusBar
+        settingsRealTimeSliders = await Preferences.shared.currentHomePreferences.realTimeSliders
+        settingsShowSearchField = appPrefs.showSearchField
+        settingsSendCrashReports = appPrefs.sendCrashReports
+        settingsIconType = IconType(rawValue: await Preferences.shared.currentHomePreferences.iconType) ?? .svg
+        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: await Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label
+        settingsDefaultMainUIPath = await Preferences.shared.currentHomePreferences.defaultMainUIPath
+        settingsAlwaysAllowWebRTC = await Preferences.shared.currentHomePreferences.alwaysAllowWebRTC
+        settingsSitemapForWatch = await Preferences.shared.currentHomePreferences.sitemapForWatch
+        settingsLocalConnectionConfiguration = await Preferences.shared.currentHomePreferences.localConnectionConfig
+        settingsRemoteConnectionConfiguration = await Preferences.shared.currentHomePreferences.remoteConnectionConfig
+        settingsHomeName = await Preferences.shared.currentHomePreferences.homeName
+        settingsSSECommandItem = await Preferences.shared.currentHomePreferences.sseCommandItem
+        settingsTabConfiguration = await Preferences.shared.currentHomePreferences.tabConfiguration
     }
 
     func saveSettings() {
-        Preferences.shared.modifyActiveHome { @MainActor homePreferences in
-            homePreferences.demomode = settingsDemomode
-            homePreferences.realTimeSliders = settingsRealTimeSliders
-            homePreferences.iconType = settingsIconType.rawValue
-            homePreferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
-            homePreferences.defaultMainUIPath = settingsDefaultMainUIPath
-            homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
-            homePreferences.sitemapForWatch = settingsSitemapForWatch
-            homePreferences.sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
-            homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration
-            homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
-            homePreferences.sseCommandItem = settingsSSECommandItem
-            homePreferences.tabConfiguration = settingsTabConfiguration
+        let settingsDemomode = settingsDemomode
+        let settingsRealTimeSliders = settingsRealTimeSliders
+        let settingsIconType = settingsIconType.rawValue
+        let settingsSortSitemapsBy = settingsSortSitemapsBy.rawValue
+        let settingsDefaultMainUIPath = settingsDefaultMainUIPath
+        let settingsAlwaysAllowWebRTC = settingsAlwaysAllowWebRTC
+        let settingsSitemapForWatch = settingsSitemapForWatch
+        let sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
+        let settingsLocalConnectionConfiguration = settingsLocalConnectionConfiguration
+        let settingsRemoteConnectionConfiguration = settingsRemoteConnectionConfiguration
+        let settingsSSECommandItem = settingsSSECommandItem
+        let settingsTabConfiguration = settingsTabConfiguration
+        let settingsIdleOff = settingsIdleOff
+        let settingsHideStatusBar = settingsHideStatusBar
+        let settingsSendCrashReports = settingsSendCrashReports
+        let settingsShowSearchField = settingsShowSearchField
+        
+        Task { @MainActor in
+            await Preferences.shared.modifyActiveHome { homePreferences in
+                homePreferences.demomode = settingsDemomode
+                homePreferences.realTimeSliders = settingsRealTimeSliders
+                homePreferences.iconType = settingsIconType
+                homePreferences.sortSitemapsBy = settingsSortSitemapsBy
+                homePreferences.defaultMainUIPath = settingsDefaultMainUIPath
+                homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
+                homePreferences.sitemapForWatch = settingsSitemapForWatch
+                homePreferences.sitemapForWatchLabel = sitemapForWatchLabel
+                homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration
+                homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
+                homePreferences.sseCommandItem = settingsSSECommandItem
+                homePreferences.tabConfiguration = settingsTabConfiguration
+            }
+            
+            await Preferences.shared.modifyApplicationPreferences { applicationPreferences in
+                applicationPreferences.idleOff = settingsIdleOff
+                applicationPreferences.hideStatusBar = settingsHideStatusBar
+                applicationPreferences.sendCrashReports = settingsSendCrashReports
+                applicationPreferences.showSearchField = settingsShowSearchField
+            }
+            
+            // Apply global UI changes immediately (status bar visibility)
+            UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap(\.windows)
+                .first?.rootViewController?
+                .setNeedsStatusBarAppearanceUpdate()
+            
+            NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
         }
-        Preferences.shared.idleOff = settingsIdleOff
-        Preferences.shared.sendCrashReports = settingsSendCrashReports
-
-        Preferences.shared.modifyApplicationPreferences { @MainActor applicationPreferences in
-            applicationPreferences.showSearchField = settingsShowSearchField
-        }
-
-        // Apply global UI changes immediately (status bar visibility)
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap(\.windows)
-            .first?.rootViewController?
-            .setNeedsStatusBarAppearanceUpdate()
     }
 }
 

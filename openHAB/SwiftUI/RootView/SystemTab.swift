@@ -41,6 +41,7 @@ struct SystemTab: View {
 
     @State private var showNotifications = false
     @State private var path = NavigationPath()
+    @State private var preferencesObserver = PreferencesObserver.shared
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -87,18 +88,21 @@ struct SystemTab: View {
             }
         }
         .task {
-            updateNotificationVisibility()
+            await updateNotificationVisibility()
         }
-        .onReceive(Preferences.shared.$currentHomePreferences) { _ in
-            updateNotificationVisibility()
+        .onChange(of: preferencesObserver.currentHomePreferences) { _, _ in
+            Task {
+                await updateNotificationVisibility()
+            }
         }
         .onChange(of: resetTrigger) { _, _ in
             path = NavigationPath()
         }
     }
 
-    private func updateNotificationVisibility() {
-        showNotifications = Preferences.shared.getNotificationConnection() != nil
-            && !Preferences.shared.currentHomePreferences.demomode
+    private func updateNotificationVisibility() async {
+        let notificationConnection = await preferencesObserver.getNotificationConnection()
+        showNotifications = notificationConnection != nil
+            && !preferencesObserver.currentHomePreferences.demomode
     }
 }

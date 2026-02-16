@@ -49,10 +49,12 @@ struct SitemapPageView: View {
             viewModel.startPageHandling()
         }
         .onAppear {
-            // Disable idle timer if configured in settings
-            if Preferences.shared.idleOff {
-                UIApplication.shared.isIdleTimerDisabled = true
-                idleTimerDisabled = true
+            Task {
+                // Disable idle timer if configured in settings
+                if await Preferences.shared.applicationPreferences.idleOff {
+                    UIApplication.shared.isIdleTimerDisabled = true
+                    idleTimerDisabled = true
+                }
             }
         }
         .onDisappear {

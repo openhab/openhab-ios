@@ -72,7 +72,7 @@ struct OpenHABTabRootView: View {
         let saved = Preferences.shared.currentHomePreferences.lastSelectedTab
         _selectedTab = State(initialValue: AppTab(rawValue: saved) ?? .main)
         _isDemoMode = State(initialValue: Preferences.shared.currentHomePreferences.demomode)
-        _enabledTabs = State(initialValue: Self.computeEnabledTabs())
+        _enabledTabs = State(initialValue: Self.computeEnabledTabs(config: Preferences.shared.currentHomePreferences.tabConfiguration))
 
         #if DEBUG
         if ProcessInfo.processInfo.environment["UITest"] != nil {
@@ -83,8 +83,7 @@ struct OpenHABTabRootView: View {
         #endif
     }
 
-    private static func computeEnabledTabs() -> [AppTab] {
-        let config = Preferences.shared.currentHomePreferences.tabConfiguration ?? TabEntry.defaultConfiguration
+    private static func computeEnabledTabs(config: [TabEntry]) -> [AppTab] {
         let tabs = config.compactMap { entry -> AppTab? in
             guard entry.enabled || entry.id == AppTab.system.rawValue else { return nil }
             return AppTab(rawValue: entry.id)
@@ -111,12 +110,14 @@ struct OpenHABTabRootView: View {
             }
         }
         .onReceive(Preferences.shared.$currentHomePreferences) { _ in
-            let newTabs = Self.computeEnabledTabs()
-            if enabledTabs != newTabs {
-                enabledTabs = newTabs
-                // If current tab was disabled, switch to first available
-                if !enabledTabs.contains(selectedTab) {
-                    selectedTab = enabledTabs.first ?? .system
+            Task {
+                let newTabs = Self.computeEnabledTabs(config: await Preferences.shared.currentHomePreferences.tabConfiguration)
+                if enabledTabs != newTabs {
+                    enabledTabs = newTabs
+                    // If current tab was disabled, switch to first available
+                    if !enabledTabs.contains(selectedTab) {
+                        selectedTab = enabledTabs.first ?? .system
+                    }
                 }
             }
         }

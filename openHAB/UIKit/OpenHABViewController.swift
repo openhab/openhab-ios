@@ -86,9 +86,11 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
 
     @objc
     func didBecomeActive(_ notification: Notification?) {
-        // re disable idle off timer
-        if Preferences.shared.idleOff {
-            UIApplication.shared.isIdleTimerDisabled = true
+        Task {
+            // re disable idle off timer
+            if await Preferences.shared.applicationPreferences.idleOff {
+                UIApplication.shared.isIdleTimerDisabled = true
+            }
         }
     }
 

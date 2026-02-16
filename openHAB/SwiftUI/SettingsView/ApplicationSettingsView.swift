@@ -16,6 +16,7 @@ import UIKit
 
 struct ApplicationSettingsView: View {
     @Binding var settingsIdleOff: Bool
+    @Binding var settingsHideStatusBar: Bool
     @Binding var settingsSSECommandItem: String
 
     @State private var selectedItemName: String?
@@ -28,10 +29,10 @@ struct ApplicationSettingsView: View {
                 ScreenSaverSettingsView()
             }
 
-            Toggle("Hide Status Bar", isOn: Binding(
-                get: { Preferences.shared.hideStatusBar },
-                set: { Preferences.shared.hideStatusBar = $0; UIApplication.shared.keyWindowActiveScene?.rootViewController?.setNeedsStatusBarAppearanceUpdate() }
-            ))
+            Toggle("Hide Status Bar", isOn: $settingsHideStatusBar)
+                .onChange(of: settingsHideStatusBar) { _ in
+                    UIApplication.shared.keyWindowActiveScene?.rootViewController?.setNeedsStatusBarAppearanceUpdate()
+                }
 
             NavigationLink("Client Certificates") {
                 ClientCertificatesView()
@@ -67,11 +68,13 @@ struct ApplicationSettingsView: View {
 #Preview {
     struct PreviewWrapper: View {
         @State private var idleOff = false
+        @State private var hideStatusBar = false
         @State private var sseCommandItem = ""
         var body: some View {
             Form {
                 ApplicationSettingsView(
                     settingsIdleOff: $idleOff,
+                    settingsHideStatusBar: $hideStatusBar,
                     settingsSSECommandItem: $sseCommandItem
                 )
             }
