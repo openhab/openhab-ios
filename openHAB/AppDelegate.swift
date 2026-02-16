@@ -23,12 +23,7 @@ import UIKit
 import WatchConnectivity
 import AsyncAlgorithms
 
-@main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    static var appDelegate: AppDelegate!
-
-    var window: UIWindow?
-
     private var crashlyticsTask: Task<Void, Never>?
 
     private let notificationDelegate = NotificationCenterDelegateImpl()
@@ -48,11 +43,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
-    override init() {
-        super.init()
-        AppDelegate.appDelegate = self
-    }
-
     deinit {
         crashlyticsTask?.cancel()
     }
@@ -60,36 +50,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logger.appDelegate.info("didFinishLaunchingWithOptions started")
 
-        // Only essential setup here - defer everything else to show UI faster
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
         UserDefaults.standard.register(defaults: appDefaults)
-        
-        Task { @MainActor in
-            await Preferences.migratePreferences()
-            
-            UNUserNotificationCenter.current().delegate = notificationDelegate
-            
-            // Replace storyboard root with SwiftUI TabView
-            let rootView = OpenHABTabRootView()
-            let hostingController = UIHostingController(rootView: rootView)
-            window = UIWindow(frame: UIScreen.main.bounds)
-            window?.rootViewController = hostingController
-            window?.makeKeyAndVisible()
-            
-            Logger.appDelegate.info("didFinishLaunchingWithOptions ended")
-            
-            // Defer non-essential initialization to after first frame renders
-            // Small delay to ensure UI has appeared
-            try? await Task.sleep(for: .milliseconds(100))
-            performDeferredSetup()
-        }
 
+        UNUserNotificationCenter.current().delegate = notificationDelegate
+
+        Logger.appDelegate.info("didFinishLaunchingWithOptions ended")
         return true
     }
 
     /// Setup that can be deferred until after the UI appears
     @MainActor
-    private func performDeferredSetup() {
+    func performDeferredSetup() {
         setupFirebase()
 
         registerForPushNotifications()
@@ -107,7 +79,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         configureImageCoders()
 
-        /// load and start the screensaver
+        startScreenSaverMonitoring()
+    }
+
+    @MainActor
+    func startScreenSaverMonitoring() {
         Task { @MainActor in
             if let keyWindow = UIApplication.shared.firstKeyWindow {
                 let prefs = await Preferences.shared.screensaverPreferences
@@ -255,52 +231,6 @@ extension Notification.Name {
     static let openHABDidReceiveNotification = Notification.Name("openHABDidReceiveNotification")
 }
 
-extension AppDelegate {
-    func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
-        NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
-    }
-
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-    }
-
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-    }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        Task { @MainActor in
-            if let keyWindow = UIApplication.shared.firstKeyWindow {
-                let prefs = await Preferences.shared.screensaverPreferences
-                var config = ScreenSaverConfiguration()
-                config.isEnabled = prefs.isEnabled
-                config.showsTime = prefs.showsTime
-                config.showsDate = prefs.showsDate
-                config.idleInterval = prefs.idleInterval
-                config.movementInterval = prefs.movementInterval
-                config.fontName = prefs.fontName.isEmpty ? nil : prefs.fontName
-                config.timeFontSizeRatio = CGFloat(prefs.timeFontRatio)
-                config.dateFontRelativeSize = CGFloat(prefs.dateFontRatio)
-                config.enablesAutoDimming = prefs.enableDimming
-                config.dimLevel = CGFloat(prefs.dimLevel)
-                config.wakeBrightnessLevel = CGFloat(prefs.wakeBrightness)
-                config.showsSeconds = prefs.showsSeconds
-                config.uses24HourTime = prefs.use24Hour
-                config.restoresBrightness = prefs.restoreBrightness
-
-                ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
-            }
-        }
-    }
-
-    func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-    }
-}
 
 extension AppDelegate: MessagingDelegate {
     nonisolated func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {

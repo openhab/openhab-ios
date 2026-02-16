@@ -148,6 +148,7 @@ struct SettingsView: View {
             }
         }
         .onChange(of: currentSnapshot) { _, newSnapshot in
+            guard let initialSnapshot else { return }
             withAnimation {
                 isDirty = newSnapshot != initialSnapshot
             }

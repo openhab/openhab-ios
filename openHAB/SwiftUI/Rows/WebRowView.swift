@@ -41,42 +41,32 @@ struct WidgetWebViewContainer: View {
     }
 }
 
-struct WebRowView: UIViewRepresentable {
-    class Coordinator: NSObject, WKNavigationDelegate {
-        private let logger = Logger(subsystem: "org.openhab", category: "WebRowViewCoordinator")
-
-        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
-            logger.debug("WebView failed to load: \(error.localizedDescription)")
-        }
-
-        func webView(_ webView: WKWebView,
-                     respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-            await onReceiveSessionChallenge(with: challenge)
-        }
-    }
-
+struct WebRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
-
+    @State private var page = WebPage()
+    
     private var webURL: URL? {
         guard !widget.url.isEmpty else { return nil }
         return URL(string: widget.url)
     }
 
-    func makeUIView(context: Context) -> WKWebView {
-        let webView = WKWebView()
-        webView.navigationDelegate = context.coordinator
-        return webView
-    }
-
-    func updateUIView(_ webView: WKWebView, context: Context) {
-        if let webURL {
-            let request = URLRequest(url: webURL)
-            webView.load(request)
-        }
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
+    var body: some View {
+        WebView(page)
+            .webViewBackForwardNavigationGestures(.disabled)
+            .webViewMagnificationGestures(.enabled)
+            .webViewTextSelection(.enabled)
+            .onAppear {
+                if let webURL {
+                    let request = URLRequest(url: webURL)
+                    let _ = page.load(request)
+                }
+            }
+            .onChange(of: widget.url) { _, newURL in
+                if let url = URL(string: newURL) {
+                    let request = URLRequest(url: url)
+                    let _ = page.load(request)
+                }
+            }
     }
 }

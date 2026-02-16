@@ -9,13 +9,18 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import OpenHABCore
 import SwiftUI
 
-struct MainWebTab: View {
-    let viewModel: OpenHABWebViewModel
-    
+/// Lightweight splash screen shown while preferences migration runs,
+/// matching the launch screen appearance.
+struct SplashView: View {
     var body: some View {
-        OpenHABWebView(viewModel: viewModel)
+        Image("launchImage")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.white)
+            .ignoresSafeArea()
     }
 }

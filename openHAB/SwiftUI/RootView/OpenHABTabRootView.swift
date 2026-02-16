@@ -54,7 +54,7 @@ struct OpenHABTabRootView: View {
     @State private var systemResetTrigger = 0
     @State private var sitemapNavigationCommand: SitemapNavigationCommand?
 
-    private let webViewController = OpenHABWebViewController()
+    private let webViewModel = OpenHABWebViewModel()
 
     private var tabSelectionBinding: Binding<AppTab> {
         Binding(
@@ -180,14 +180,16 @@ struct OpenHABTabRootView: View {
         } message: {
             Text(NSLocalizedString("crash_reporting_info", comment: ""))
         }
+        .certificateManagementAlerts()  // Handles certificates
+        .idleTimerManagement()          // Manages idle timer
+        .statusBar(hidden: Preferences.shared.applicationPreferences.hideStatusBar)  // Replace navigation controller
     }
 
     @ViewBuilder
     private func tabContentView(for tab: AppTab) -> some View {
         switch tab {
         case .main:
-            MainWebTab(webViewController: webViewController)
-                .ignoresSafeArea()
+            MainWebTab(viewModel: webViewModel)
         case .sitemaps:
             SitemapsTab(resetTrigger: sitemapsResetTrigger, navigationCommand: $sitemapNavigationCommand)
         case .tiles:
@@ -200,7 +202,9 @@ struct OpenHABTabRootView: View {
     private func resetTab(_ tab: AppTab) {
         switch tab {
         case .main:
-            webViewController.loadWebView(force: true)
+            Task {
+                await webViewModel.loadWebView(force: true)
+            }
         case .sitemaps:
             sitemapsResetTrigger += 1
         case .tiles:
@@ -215,10 +219,12 @@ struct OpenHABTabRootView: View {
         case let .switchToWebView(path):
             selectedTab = .main
             if let path {
-                if path.starts(with: "/") {
-                    webViewController.loadWebView(force: true, path: path)
-                } else {
-                    webViewController.navigateCommand(path)
+                Task {
+                    if path.starts(with: "/") {
+                        await webViewModel.loadWebView(force: true, path: path)
+                    } else {
+                        webViewModel.navigateCommand(path)
+                    }
                 }
             }
         case let .switchToSitemap(name, widgetId):
