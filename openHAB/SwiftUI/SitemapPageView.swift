@@ -26,14 +26,14 @@ struct SitemapPageView: View {
             if viewModel.isLoading, viewModel.relevantWidgets.isEmpty {
                 // Show skeleton/placeholder rows while loading
                 List {
-                    ForEach(Self.placeholderWidgets, id: \.id) { widget in
+                    ForEach(Self.placeholderWidgets, id: \.self) { widget in
                         EmbeddingRowView(widget: widget)
                             .redacted(reason: .placeholder)
                             .disabled(true)
                     }
                 }
             } else {
-                List(viewModel.relevantWidgets) { widget in
+                List(viewModel.relevantWidgets, id: \.self) { widget in
                     EmbeddingRowView(widget: widget)
                 }
             }

@@ -20,8 +20,8 @@ struct SliderRowView: View {
 
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
-    /// Pending value while user is dragging; nil when not actively changing
-    @State private var pendingValue: Double?
+    /// Local slider thumb value. Synced from server state when not editing.
+    @State private var sliderValue: Double = 0
     @State private var isEditing = false
 
     private var sliderCommandKey: String {
@@ -30,11 +30,11 @@ struct SliderRowView: View {
 
     var body: some View {
         let displayState = widget.displayState
-        let currentValue = currentValue(displayState: displayState)
+        let displayedSliderValue = isEditing ? sliderValue : serverSliderValue(displayState: displayState)
         HStack {
             if widget.switchSupport {
                 Button {
-                    viewModel.sendCommand(currentValue <= displayState.minValue ? "ON" : "OFF", for: widget)
+                    viewModel.sendCommand(displayedSliderValue <= displayState.minValue ? "ON" : "OFF", for: widget)
                 } label: {
                     labelContent(displayState: displayState)
                 }
@@ -44,44 +44,27 @@ struct SliderRowView: View {
                 labelContent(displayState: displayState)
             }
 
-            Slider(value: valueBinding(displayState: displayState), in: sliderRange(displayState: displayState), step: widget.step) { editing in
+            Slider(value: sliderBinding(displayState: displayState), in: sliderRange(displayState: displayState), step: widget.step) { editing in
                 isEditing = editing
                 if !editing {
                     // Always send the final value on release
-                    if let value = pendingValue {
-                        if let item = widget.item {
-                            viewModel.cancelPendingCommand(for: item, key: sliderCommandKey)
-                        } else {
-                            viewModel.cancelPendingCommand(for: widget, key: sliderCommandKey)
-                        }
-                        sendSliderUpdate(
-                            value,
-                            policy: .finalOnly,
-                            phase: .release,
-                            key: sliderCommandKey
-                        )
+                    if let item = widget.item {
+                        viewModel.cancelPendingCommand(for: item, key: sliderCommandKey)
+                    } else {
+                        viewModel.cancelPendingCommand(for: widget, key: sliderCommandKey)
                     }
-                    // Keep pendingValue set until server responds to avoid visual jump
-                    // Fallback: clear after delay if server doesn't respond
-                    Task { @MainActor in
-                        try? await Task.sleep(for: .milliseconds(2000))
-                        if !isEditing, pendingValue != nil {
-                            pendingValue = nil
-                        }
-                    }
+                    sendSliderUpdate(
+                        sliderValue,
+                        policy: .finalOnly,
+                        phase: .release,
+                        key: sliderCommandKey
+                    )
                 }
             }
             .disabled(widget.readOnly ?? false)
         }
-        .onChange(of: displayState.adjustedValue) { _ in
-            // Clear pending value only when server confirms our value (not intermediate responses)
-            if !isEditing, let pending = pendingValue,
-               abs(displayState.adjustedValue - pending) < max(widget.step * 0.5, 0.01) {
-                pendingValue = nil
-            }
-        }
         .onAppear {
-            pendingValue = nil
+            sliderValue = serverSliderValue(displayState: displayState)
             isEditing = false
         }
     }
@@ -102,8 +85,8 @@ struct SliderRowView: View {
 
             Spacer()
 
-            // Show current slider value (pendingValue while dragging, otherwise widget value)
-            Text(pendingValue != nil ? currentValueText : (displayState.labelValue ?? currentValueText))
+            // Show local value while dragging, otherwise use the server label value.
+            Text(isEditing ? currentValueText : (displayState.labelValue ?? currentValueText))
                 .ohTextToken(.rowValueCallout)
                 .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
         }
@@ -128,33 +111,14 @@ struct SliderRowView: View {
         displayState.minValue ... displayState.maxValue
     }
 
-    private func currentValue(displayState: WidgetDisplayState) -> Double {
-        pendingValue ?? displayState.adjustedValue
-    }
-
-    private func currentValueText(displayState: WidgetDisplayState) -> String {
-        let currentValue = currentValue(displayState: displayState)
-        if let numberPattern = widget.item?.stateDescription?.numberPattern, !numberPattern.isEmpty {
-            let formatted = NumberState(
-                value: currentValue,
-                unit: widget.unit,
-                format: numberPattern
-            ).toString(locale: Locale.current)
-            if !formatted.isEmpty {
-                return formatted
-            }
-        }
-        return currentValue.valueText(step: widget.step)
-    }
-
-    private func valueBinding(displayState: WidgetDisplayState) -> Binding<Double> {
+    private func sliderBinding(displayState: WidgetDisplayState) -> Binding<Double> {
         Binding(
-            get: { pendingValue ?? displayState.adjustedValue },
+            get: { isEditing ? sliderValue : serverSliderValue(displayState: displayState) },
             set: { newValue in
-                pendingValue = newValue
+                sliderValue = newValue
 
                 // Send updates during drag if enabled (throttled)
-                if widget.shouldUseSliderUpdatesDuringMove() {
+                if isEditing, widget.shouldUseSliderUpdatesDuringMove() {
                     sendSliderUpdate(
                         newValue,
                         policy: WidgetCommandDefaults.slider,
@@ -163,6 +127,51 @@ struct SliderRowView: View {
                 }
             }
         )
+    }
+
+    private func serverSliderValue(displayState: WidgetDisplayState) -> Double {
+        let numberPattern = widget.item?.stateDescription?.numberPattern
+
+        if let labelValue = displayState.labelValue, !labelValue.isEmpty {
+            return adjustedToStep(labelValue.parseAsNumber(format: numberPattern).value, displayState: displayState)
+        }
+
+        let effectiveState = displayState.effectiveState
+        if !effectiveState.isEmpty,
+           effectiveState != "NULL",
+           effectiveState != "UNDEF",
+           effectiveState.caseInsensitiveCompare("undefined") != .orderedSame {
+            return adjustedToStep(effectiveState.parseAsNumber(format: numberPattern).value, displayState: displayState)
+        }
+
+        return displayState.adjustedValue
+    }
+
+    private func adjustedToStep(_ raw: Double, displayState: WidgetDisplayState) -> Double {
+        let range = displayState.minValue ... displayState.maxValue
+        let clamped = raw.clamped(to: range)
+
+        guard displayState.step > 0 else {
+            return clamped
+        }
+
+        var adjusted = floor((clamped - displayState.minValue) / displayState.step) * displayState.step
+        adjusted += displayState.minValue
+        return adjusted.clamped(to: range)
+    }
+
+    private func currentValueText(displayState: WidgetDisplayState) -> String {
+        if let numberPattern = widget.item?.stateDescription?.numberPattern, !numberPattern.isEmpty {
+            let formatted = NumberState(
+                value: sliderValue,
+                unit: widget.unit,
+                format: numberPattern
+            ).toString(locale: Locale.current)
+            if !formatted.isEmpty {
+                return formatted
+            }
+        }
+        return sliderValue.valueText(step: widget.step)
     }
 }
 

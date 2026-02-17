@@ -70,9 +70,6 @@ class SitemapPageViewModel: ObservableObject {
     private var commandStateResetTasks: [String: Task<Void, Never>] = [:]
     private var commandStateVersions: [String: Int] = [:]
 
-    /// Cache of current widget objects by widgetId for in-place updates
-    private var currentWidgetMap: [String: OpenHABWidget] = [:]
-
     var relevantWidgets: [OpenHABWidget] {
         let widgets = currentPage?.widgets ?? []
         guard !searchText.isEmpty else { return widgets }
@@ -314,42 +311,17 @@ extension SitemapPageViewModel {
         let currentWidgets = currentPage?.widgets ?? []
         let structureChanged = currentWidgets.count != newWidgets.count
             || !zip(currentWidgets, newWidgets).allSatisfy { $0.widgetId == $1.widgetId }
-
-        // Update existing widget properties in-place to preserve @ObservedObject
-        // references and avoid image/chart flickering from body re-evaluation
-        for newWidget in newWidgets {
-            if let existing = currentWidgetMap[newWidget.widgetId] {
-                existing.label = newWidget.label
-                existing.icon = newWidget.icon
-                existing.state = newWidget.state
-                existing.item = newWidget.item
-                existing.iconColor = newWidget.iconColor
-                existing.labelcolor = newWidget.labelcolor
-                existing.valuecolor = newWidget.valuecolor
-                existing.url = newWidget.url
-                existing.period = newWidget.period
-                existing.service = newWidget.service
-                existing.legend = newWidget.legend
-                existing.refresh = newWidget.refresh
-                existing.height = newWidget.height
-                existing.forceAsItem = newWidget.forceAsItem
-                existing.mappings = newWidget.mappings
-                existing.widgets = newWidget.widgets
-                existing.linkedPage = newWidget.linkedPage
-                existing.visibility = newWidget.visibility
-                existing.staticIcon = newWidget.staticIcon
-            }
-        }
+        let reconciledWidgets = reconcileWidgets(newWidgets, with: currentWidgets)
 
         // Only replace currentPage when structure or title changed
         if structureChanged || currentPage?.title != page.title || currentPage == nil {
-            injectSendCommand(for: page.widgets)
+            page.widgets = reconciledWidgets
+            injectSendCommand(for: reconciledWidgets)
             currentPage = page
-            // Rebuild the widget map
-            currentWidgetMap = Dictionary(uniqueKeysWithValues: page.widgets.map { ($0.widgetId, $0) })
         } else {
+            currentPage?.widgets = reconciledWidgets
             // Inject sendCommand into existing widgets without replacing the page
-            injectSendCommand(for: currentPage?.widgets ?? [])
+            injectSendCommand(for: reconciledWidgets)
         }
     }
 
@@ -390,6 +362,51 @@ extension SitemapPageViewModel {
 
         injectSendCommand(for: page.widgets)
         currentPage = page
+    }
+
+    private func reconcileWidgets(_ newWidgets: [OpenHABWidget], with currentWidgets: [OpenHABWidget]) -> [OpenHABWidget] {
+        var buckets: [String: [OpenHABWidget]] = [:]
+        for widget in currentWidgets {
+            buckets[widget.widgetId, default: []].append(widget)
+        }
+
+        var reconciled: [OpenHABWidget] = []
+        reconciled.reserveCapacity(newWidgets.count)
+
+        for newWidget in newWidgets {
+            if var candidates = buckets[newWidget.widgetId], !candidates.isEmpty {
+                let existing = candidates.removeFirst()
+                buckets[newWidget.widgetId] = candidates
+                copyWidgetProperties(from: newWidget, to: existing)
+                reconciled.append(existing)
+            } else {
+                reconciled.append(newWidget)
+            }
+        }
+
+        return reconciled
+    }
+
+    private func copyWidgetProperties(from source: OpenHABWidget, to target: OpenHABWidget) {
+        target.label = source.label
+        target.icon = source.icon
+        target.state = source.state
+        target.item = source.item
+        target.iconColor = source.iconColor
+        target.labelcolor = source.labelcolor
+        target.valuecolor = source.valuecolor
+        target.url = source.url
+        target.period = source.period
+        target.service = source.service
+        target.legend = source.legend
+        target.refresh = source.refresh
+        target.height = source.height
+        target.forceAsItem = source.forceAsItem
+        target.mappings = source.mappings
+        target.widgets = source.widgets
+        target.linkedPage = source.linkedPage
+        target.visibility = source.visibility
+        target.staticIcon = source.staticIcon
     }
 
     private func injectSendCommand(for widgets: [OpenHABWidget]) {
