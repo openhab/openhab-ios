@@ -16,6 +16,11 @@ import os.log
 import SwiftUI
 import UIKit
 
+private enum VideoEncoding: String {
+    case hls
+    case mjpeg
+}
+
 struct VideoRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var player: AVPlayer?
