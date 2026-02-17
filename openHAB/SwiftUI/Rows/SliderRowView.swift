@@ -14,6 +14,81 @@ import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
 
+private struct SliderRowState {
+    let widgetId: String
+    let displayState: WidgetDisplayState
+    let numberPattern: String?
+    let unit: String?
+    let readOnly: Bool
+    let switchSupport: Bool
+    let step: Double
+    let labelColor: String
+    let valueColor: String
+    let shouldSendUpdatesDuringMove: Bool
+    let serverValue: Double
+
+    var sliderCommandKey: String {
+        "slider-\(widgetId)"
+    }
+
+    var sliderRange: ClosedRange<Double> {
+        displayState.minValue ... displayState.maxValue
+    }
+
+    static func from(widget: OpenHABWidget) -> SliderRowState {
+        let displayState = widget.displayState
+        let numberPattern = widget.item?.stateDescription?.numberPattern
+        // For item-backed sliders, adjustedValue is the most stable source of truth for position.
+        // It is derived from the item state and avoids stale text/state snapshots.
+        let serverValue = if widget.item != nil {
+            displayState.adjustedValue
+        } else {
+            parseServerValue(displayState: displayState, numberPattern: numberPattern)
+        }
+
+        return SliderRowState(
+            widgetId: widget.widgetId,
+            displayState: displayState,
+            numberPattern: numberPattern,
+            unit: widget.unit,
+            readOnly: widget.readOnly ?? false,
+            switchSupport: widget.switchSupport,
+            step: widget.step,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            shouldSendUpdatesDuringMove: widget.shouldUseSliderUpdatesDuringMove(),
+            serverValue: adjustedToStep(serverValue, displayState: displayState)
+        )
+    }
+
+    private static func parseServerValue(displayState: WidgetDisplayState, numberPattern: String?) -> Double {
+        let effectiveState = displayState.effectiveState
+        if !effectiveState.isEmpty,
+           effectiveState != "NULL",
+           effectiveState != "UNDEF",
+           effectiveState.caseInsensitiveCompare("undefined") != .orderedSame {
+            return effectiveState.parseAsNumber(format: numberPattern).value
+        }
+
+        // Fallback for widgets whose item state is not directly usable but label value is present.
+        if let labelValue = displayState.labelValue, !labelValue.isEmpty {
+            return labelValue.parseAsNumber(format: numberPattern).value
+        }
+
+        return displayState.adjustedValue
+    }
+
+    private static func adjustedToStep(_ raw: Double, displayState: WidgetDisplayState) -> Double {
+        let range = displayState.minValue ... displayState.maxValue
+        let clamped = raw.clamped(to: range)
+        guard displayState.step > 0 else { return clamped }
+
+        var adjusted = floor((clamped - displayState.minValue) / displayState.step) * displayState.step
+        adjusted += displayState.minValue
+        return adjusted.clamped(to: range)
+    }
+}
+
 struct SliderRowView: View {
     @ObservedObject var widget: OpenHABWidget
     var fallbackSymbol: SFSymbol?
@@ -24,71 +99,72 @@ struct SliderRowView: View {
     @State private var sliderValue: Double = 0
     @State private var isEditing = false
 
-    private var sliderCommandKey: String {
-        "slider-\(widget.widgetId)"
-    }
-
     var body: some View {
-        let displayState = widget.displayState
-        let displayedSliderValue = isEditing ? sliderValue : serverSliderValue(displayState: displayState)
+        let state = SliderRowState.from(widget: widget)
+        let displayedSliderValue = isEditing ? sliderValue : state.serverValue
         HStack {
-            if widget.switchSupport {
+            if state.switchSupport {
                 Button {
-                    viewModel.sendCommand(displayedSliderValue <= displayState.minValue ? "ON" : "OFF", for: widget)
+                    viewModel.sendCommand(displayedSliderValue <= state.displayState.minValue ? "ON" : "OFF", for: widget)
                 } label: {
-                    labelContent(displayState: displayState)
+                    labelContent(state: state)
                 }
                 .buttonStyle(.plain)
-                .disabled(widget.readOnly ?? false)
+                .disabled(state.readOnly)
             } else {
-                labelContent(displayState: displayState)
+                labelContent(state: state)
             }
 
-            Slider(value: sliderBinding(displayState: displayState), in: sliderRange(displayState: displayState), step: widget.step) { editing in
+            Slider(value: sliderBinding(state: state), in: state.sliderRange, step: state.step) { editing in
                 isEditing = editing
                 if !editing {
                     // Always send the final value on release
                     if let item = widget.item {
-                        viewModel.cancelPendingCommand(for: item, key: sliderCommandKey)
+                        viewModel.cancelPendingCommand(for: item, key: state.sliderCommandKey)
                     } else {
-                        viewModel.cancelPendingCommand(for: widget, key: sliderCommandKey)
+                        viewModel.cancelPendingCommand(for: widget, key: state.sliderCommandKey)
                     }
                     sendSliderUpdate(
                         sliderValue,
                         policy: .finalOnly,
                         phase: .release,
-                        key: sliderCommandKey
+                        key: state.sliderCommandKey
                     )
                 }
             }
-            .disabled(widget.readOnly ?? false)
+            .disabled(state.readOnly)
         }
         .onAppear {
-            sliderValue = serverSliderValue(displayState: displayState)
+            sliderValue = state.serverValue
             isEditing = false
+        }
+        .onChange(of: state.serverValue) { newServerValue in
+            if !isEditing {
+                sliderValue = newServerValue
+            }
         }
     }
 
     @ViewBuilder
-    private func labelContent(displayState: WidgetDisplayState) -> some View {
-        let currentValueText = currentValueText(displayState: displayState)
+    private func labelContent(state: SliderRowState) -> some View {
+        let currentValueText = currentValueText(state: state)
         HStack {
             IconView(widget: widget, fallbackSymbol: fallbackSymbol)
                 .frame(width: 32, height: 32)
 
-            if !displayState.labelText.isEmpty {
-                let labelText = displayState.labelText
+            if !state.displayState.labelText.isEmpty {
+                let labelText = state.displayState.labelText
                 Text(labelText)
                     .ohTextToken(.rowLabel)
-                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(state.labelColor.isEmpty ? .primary : Color(fromString: state.labelColor))
             }
 
             Spacer()
 
             // Show local value while dragging, otherwise use the server label value.
-            Text(isEditing ? currentValueText : (displayState.labelValue ?? currentValueText))
+            Text(isEditing ? currentValueText : (state.displayState.labelValue ?? currentValueText))
                 .ohTextToken(.rowValueCallout)
-                .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
+                .foregroundStyle(state.valueColor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: state.valueColor))
         }
         .contentShape(Rectangle())
     }
@@ -107,71 +183,36 @@ struct SliderRowView: View {
         viewModel.sendToUpdate(item: widget.item, state: numberState, policy: policy, phase: phase, key: key)
     }
 
-    private func sliderRange(displayState: WidgetDisplayState) -> ClosedRange<Double> {
-        displayState.minValue ... displayState.maxValue
-    }
-
-    private func sliderBinding(displayState: WidgetDisplayState) -> Binding<Double> {
+    private func sliderBinding(state: SliderRowState) -> Binding<Double> {
         Binding(
-            get: { isEditing ? sliderValue : serverSliderValue(displayState: displayState) },
+            get: { isEditing ? sliderValue : state.serverValue },
             set: { newValue in
                 sliderValue = newValue
 
                 // Send updates during drag if enabled (throttled)
-                if isEditing, widget.shouldUseSliderUpdatesDuringMove() {
+                if isEditing, state.shouldSendUpdatesDuringMove {
                     sendSliderUpdate(
                         newValue,
                         policy: WidgetCommandDefaults.slider,
-                        key: sliderCommandKey
+                        key: state.sliderCommandKey
                     )
                 }
             }
         )
     }
 
-    private func serverSliderValue(displayState: WidgetDisplayState) -> Double {
-        let numberPattern = widget.item?.stateDescription?.numberPattern
-
-        if let labelValue = displayState.labelValue, !labelValue.isEmpty {
-            return adjustedToStep(labelValue.parseAsNumber(format: numberPattern).value, displayState: displayState)
-        }
-
-        let effectiveState = displayState.effectiveState
-        if !effectiveState.isEmpty,
-           effectiveState != "NULL",
-           effectiveState != "UNDEF",
-           effectiveState.caseInsensitiveCompare("undefined") != .orderedSame {
-            return adjustedToStep(effectiveState.parseAsNumber(format: numberPattern).value, displayState: displayState)
-        }
-
-        return displayState.adjustedValue
-    }
-
-    private func adjustedToStep(_ raw: Double, displayState: WidgetDisplayState) -> Double {
-        let range = displayState.minValue ... displayState.maxValue
-        let clamped = raw.clamped(to: range)
-
-        guard displayState.step > 0 else {
-            return clamped
-        }
-
-        var adjusted = floor((clamped - displayState.minValue) / displayState.step) * displayState.step
-        adjusted += displayState.minValue
-        return adjusted.clamped(to: range)
-    }
-
-    private func currentValueText(displayState: WidgetDisplayState) -> String {
-        if let numberPattern = widget.item?.stateDescription?.numberPattern, !numberPattern.isEmpty {
+    private func currentValueText(state: SliderRowState) -> String {
+        if let numberPattern = state.numberPattern, !numberPattern.isEmpty {
             let formatted = NumberState(
                 value: sliderValue,
-                unit: widget.unit,
+                unit: state.unit,
                 format: numberPattern
             ).toString(locale: Locale.current)
             if !formatted.isEmpty {
                 return formatted
             }
         }
-        return sliderValue.valueText(step: widget.step)
+        return sliderValue.valueText(step: state.step)
     }
 }
 
