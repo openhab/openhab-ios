@@ -138,10 +138,21 @@ struct SliderRowView: View {
             sliderValue = state.serverValue
             isEditing = false
         }
+        .onChange(of: state.widgetId) { _ in
+            // Defensive reset if SwiftUI reuses view-local @State across identity changes.
+            sliderValue = state.serverValue
+            isEditing = false
+        }
         .onChange(of: state.serverValue) { newServerValue in
-            if !isEditing {
-                sliderValue = newServerValue
+            // Always absorb server state updates.
+            // If a row stayed in editing=true due to an interrupted gesture, force it back to server truth.
+            if isEditing {
+                let threshold = max(state.step, 0.001)
+                if abs(newServerValue - sliderValue) > threshold {
+                    isEditing = false
+                }
             }
+            sliderValue = newServerValue
         }
     }
 
