@@ -37,7 +37,11 @@ private struct SliderRowState {
 
     static func from(widget: OpenHABWidget) -> SliderRowState {
         let displayState = widget.displayState
-        let numberPattern = widget.item?.stateDescription?.numberPattern
+        let numberPattern = if let pattern = widget.pattern, !pattern.isEmpty {
+            pattern
+        } else {
+            widget.item?.stateDescription?.numberPattern
+        }
         // For item-backed sliders, adjustedValue is the most stable source of truth for position.
         // It is derived from the item state and avoids stale text/state snapshots.
         let serverValue = if widget.item != nil {
@@ -175,6 +179,7 @@ struct SliderRowView: View {
             // Show local value while dragging, otherwise use the server label value.
             Text(isEditing ? currentValueText : (state.displayState.labelValue ?? currentValueText))
                 .ohTextToken(.rowValueCallout)
+                .monospacedDigit()
                 .foregroundStyle(state.valueColor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: state.valueColor))
         }
         .contentShape(Rectangle())
@@ -188,7 +193,7 @@ struct SliderRowView: View {
         numberState = numberState ?? NumberState(
             value: newValue,
             unit: widget.unit,
-            format: widget.item?.stateDescription?.numberPattern
+            format: widget.pattern ?? widget.item?.stateDescription?.numberPattern
         )
         numberState?.value = newValue
         viewModel.sendToUpdate(item: widget.item, state: numberState, policy: policy, phase: phase, key: key)
