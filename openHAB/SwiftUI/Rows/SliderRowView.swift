@@ -278,37 +278,15 @@ private extension SliderRowView {
                                     step: Double = 1.0,
                                     icon: String = "slider",
                                     switchSupport: Bool = false) -> OpenHABWidget {
-        let widget = OpenHABWidget()
-        widget.widgetId = UUID().uuidString
-        widget.type = .slider
-        widget.icon = icon
-        widget.minValue = minValue
-        widget.maxValue = maxValue
-        widget.step = step
-        widget.switchSupport = switchSupport
-
-        if let value {
-            widget.label = "\(label) [\(Int(value))]"
-        } else {
-            widget.label = label
-        }
-
-        let item = OpenHABItem(
-            name: "Preview_\(label.replacingOccurrences(of: " ", with: "_"))",
-            type: "Dimmer",
-            state: value.map { String($0) } ?? "NULL",
-            link: "",
+        PreviewWidgetFactory.slider(
             label: label,
-            groupType: nil,
-            stateDescription: nil,
-            commandDescription: nil,
-            members: [],
-            category: nil,
-            options: nil
+            value: value,
+            minValue: minValue,
+            maxValue: maxValue,
+            step: step,
+            icon: icon,
+            switchSupport: switchSupport
         )
-        widget.item = item
-
-        return widget
     }
 }
 #endif

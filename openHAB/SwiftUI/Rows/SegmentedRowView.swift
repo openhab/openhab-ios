@@ -377,33 +377,13 @@ private extension SegmentedRowView {
                                     icon: String = "switch",
                                     mappings: [OpenHABWidgetMapping],
                                     selectedState: String? = nil) -> OpenHABWidget {
-        let widget = OpenHABWidget()
-        widget.widgetId = UUID().uuidString
-        if let detailLabel, !detailLabel.isEmpty {
-            widget.label = "\(label) [\(detailLabel)]"
-        } else {
-            widget.label = label
-        }
-        widget.type = .switchWidget
-        widget.icon = icon
-        widget.mappings = mappings
-
-        let item = OpenHABItem(
-            name: "Preview_\(label.replacingOccurrences(of: " ", with: "_"))",
-            type: "String",
-            state: selectedState ?? mappings.first?.command ?? "",
-            link: "",
-            label: detailLabel ?? label,
-            groupType: nil,
-            stateDescription: nil,
-            commandDescription: nil,
-            members: [],
-            category: nil,
-            options: nil
+        PreviewWidgetFactory.segmented(
+            label: label,
+            mappings: mappings,
+            selectedState: selectedState,
+            icon: icon,
+            valueText: detailLabel
         )
-        widget.item = item
-
-        return widget
     }
 }
 #endif
