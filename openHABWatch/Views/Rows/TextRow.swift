@@ -28,7 +28,7 @@ struct TextRow: View {
             if hasLinkedPage {
                 Image(systemSymbol: .chevronRight)
                     .foregroundStyle(.secondary)
-                    .font(.caption)
+                    .watchTextStyle(.control)
             }
         }
     }

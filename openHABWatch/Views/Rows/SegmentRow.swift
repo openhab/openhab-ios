@@ -137,7 +137,7 @@ struct SegmentRow: View {
                     }
                     Image(systemSymbol: .chevronRight)
                         .foregroundStyle(.secondary)
-                        .font(.caption)
+                        .watchTextStyle(.control)
                 }
                 .padding(.horizontal, 8)
                 .frame(height: 30)

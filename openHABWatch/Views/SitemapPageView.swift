@@ -61,7 +61,7 @@ struct SitemapPageView: View {
                     Spacer()
                     ProgressView("Loading sitemap...")
                         .progressViewStyle(CircularProgressViewStyle())
-                        .font(.footnote)
+                        .watchTextStyle(.detail)
                     Spacer()
                 }
             } else if !viewModel.widgets.isEmpty {

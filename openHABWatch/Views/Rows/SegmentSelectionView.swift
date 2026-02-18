@@ -95,7 +95,7 @@ struct SegmentSelectionView: View {
             if isSelected(index: index), !viewModel.hasPressReleaseMappings {
                 Image(systemSymbol: .checkmark)
                     .foregroundStyle(Color.accentColor)
-                    .font(.caption.weight(.bold))
+                    .watchTextStyle(.control)
             }
         }
         .padding()

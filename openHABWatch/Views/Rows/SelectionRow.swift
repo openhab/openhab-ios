@@ -39,7 +39,7 @@ struct SelectionListView: View {
                             if selectedIndex == index {
                                 Image(systemSymbol: .checkmark)
                                     .foregroundStyle(Color.accentColor)
-                                    .font(.caption.weight(.bold))
+                                    .watchTextStyle(.control)
                             }
                         }
                         .padding()
@@ -122,7 +122,7 @@ struct SelectionRow: View {
                     }
                     Image(systemSymbol: .chevronUpChevronDown)
                         .foregroundStyle(.secondary)
-                        .font(.caption2)
+                        .watchTextStyle(.secondary)
                 }
             }
             .buttonStyle(.plain)
