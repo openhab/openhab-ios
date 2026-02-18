@@ -560,7 +560,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		DA2AEB752D92D32000897D80 /* Cells */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Cells; sourceTree = "<group>"; };
 		DA8B15522F3BB74B007753FD /* openHABWatchTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = openHABWatchTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -1043,7 +1042,6 @@
 			children = (
 				65C2EF482E244C8500A0C19F /* OpenHABNavigationController.swift */,
 				652B81082E2193DA00648510 /* ScreenSaver */,
-				DA2AEB752D92D32000897D80 /* Cells */,
 				DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */,
 				653B54C1285E714900298ECD /* OpenHABViewController.swift */,
 				DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */,
@@ -1384,9 +1382,6 @@
 				DA07753A2346705F0086C685 /* PBXTargetDependency */,
 				4D6470D92561F935007B03FC /* PBXTargetDependency */,
 				657144542C1E438700C8A1F3 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				DA2AEB752D92D32000897D80 /* Cells */,
 			);
 			name = openHAB;
 			packageProductDependencies = (
@@ -2353,7 +2348,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHABWatch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/openHABWatch";
 				WATCHOS_DEPLOYMENT_TARGET = 10.6;
@@ -2391,7 +2386,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHABWatch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/openHABWatch";
 				WATCHOS_DEPLOYMENT_TARGET = 10.6;
