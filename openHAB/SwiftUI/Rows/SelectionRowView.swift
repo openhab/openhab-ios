@@ -21,23 +21,31 @@ struct SelectionRowView: View {
 
     private let logger = Logger(subsystem: "org.openhab", category: "SelectionRowView")
 
-    private var mappings: [OpenHABWidgetMapping] {
-        widget.mappingsOrItemOptions
-    }
+    @State private var optimisticCommand: String?
+    @State private var optimisticBaseState: String?
+    @State private var optimisticWidgetId: String?
+    @State private var optimisticStartVersion: Int?
 
     var body: some View {
         let displayState = widget.displayState
+        let mappings = displayState.mappings
+        let widgetVersion = viewModel.widgetUpdateVersion(for: displayState.widgetId)
+        let displayedCommand = effectiveCommand(displayState: displayState)
         ZStack {
-            rowContent(displayState: displayState)
+            rowContent(displayState: displayState, displayedCommand: displayedCommand)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .animation(nil, value: displayState.effectiveState)
+                .animation(nil, value: displayedCommand)
 
             Menu {
                 ForEach(mappings.indices, id: \.self) { index in
                     let mapping = mappings[index]
-                    let isSelected = displayState.effectiveState == mapping.command
+                    let isSelected = displayedCommand == mapping.command
                     Button {
                         logger.info("Selection changed to: \(mapping.label)")
+                        optimisticCommand = mapping.command
+                        optimisticBaseState = displayState.effectiveState
+                        optimisticWidgetId = displayState.widgetId
+                        optimisticStartVersion = widgetVersion
                         viewModel.sendCommand(mapping.command, for: widget)
                     } label: {
                         if isSelected {
@@ -55,10 +63,30 @@ struct SelectionRowView: View {
             .buttonStyle(.plain)
             .disabled(widget.readOnly ?? false)
         }
+        .onAppear {
+            clearOptimisticSelection()
+        }
+        .onChange(of: displayState.widgetId) { _ in
+            clearOptimisticSelection()
+        }
+        .onChange(of: widgetVersion) { _ in
+            guard let optimisticBaseState,
+                  optimisticWidgetId == displayState.widgetId,
+                  let optimisticStartVersion,
+                  widgetVersion != optimisticStartVersion else { return }
+
+            // Keep optimistic value while the server is still echoing the pre-command state.
+            // Clear once the server state actually changed (to selected value or anything else).
+            if displayState.effectiveState != optimisticBaseState {
+                clearOptimisticSelection()
+            } else {
+                self.optimisticStartVersion = widgetVersion
+            }
+        }
     }
 
     @ViewBuilder
-    private func rowContent(displayState: WidgetDisplayState) -> some View {
+    private func rowContent(displayState: WidgetDisplayState, displayedCommand: String) -> some View {
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
@@ -72,7 +100,7 @@ struct SelectionRowView: View {
 
             Spacer()
 
-            if let valueText = selectedValueText(displayState: displayState), !valueText.isEmpty {
+            if let valueText = selectedValueText(displayState: displayState, displayedCommand: displayedCommand), !valueText.isEmpty {
                 Text(valueText)
                     .ohTextToken(.rowValue)
                     .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
@@ -86,8 +114,25 @@ struct SelectionRowView: View {
         .contentShape(Rectangle())
     }
 
+    private func effectiveCommand(displayState: WidgetDisplayState) -> String {
+        if optimisticWidgetId == displayState.widgetId, let optimisticCommand {
+            return optimisticCommand
+        }
+        return displayState.effectiveState
+    }
+
     /// Returns the label of the currently selected mapping, or the widget's labelValue as fallback.
-    private func selectedValueText(displayState: WidgetDisplayState) -> String? {
-        displayState.selectedLabel ?? displayState.labelValue
+    private func selectedValueText(displayState: WidgetDisplayState, displayedCommand: String) -> String? {
+        if let selectedLabel = displayState.mappings.first(where: { $0.command == displayedCommand })?.label, !selectedLabel.isEmpty {
+            return selectedLabel
+        }
+        return displayState.selectedLabel ?? displayState.labelValue
+    }
+
+    private func clearOptimisticSelection() {
+        optimisticCommand = nil
+        optimisticBaseState = nil
+        optimisticWidgetId = nil
+        optimisticStartVersion = nil
     }
 }

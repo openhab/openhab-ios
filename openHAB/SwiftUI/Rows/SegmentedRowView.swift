@@ -26,13 +26,18 @@ struct SegmentedRowView: View {
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSegmentedView")
 
-    @State private var selectedIndex: Int?
+    @State private var optimisticSelectedIndex: Int?
+    @State private var optimisticBaseState: String?
+    @State private var optimisticWidgetId: String?
+    @State private var optimisticStartVersion: Int?
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
 
     var body: some View {
         let displayState = widget.displayState
         let mappings = displayState.mappings
+        let widgetVersion = viewModel.widgetUpdateVersion(for: displayState.widgetId)
+        let selectedIndex = effectiveSelectedIndex(displayState: displayState, mappings: mappings)
         HStack(spacing: 0) {
             IconView(widget: widget, fallbackSymbol: fallbackSymbol)
                 .frame(width: 32, height: 32)
@@ -68,12 +73,12 @@ struct SegmentedRowView: View {
                     if displayState.labelValue.isNilOrEmpty {
                         Spacer(minLength: 8)
                     }
-                    singleMappingButton(displayState: displayState, mappings: mappings)
+                    singleMappingButton(displayState: displayState, mappings: mappings, widgetVersion: widgetVersion)
                         .fixedSize(horizontal: true, vertical: false)
                         .padding(.leading, 8)
                 } else {
                     // Button-based segmented control with animated selection indicator
-                    segmentedButtons(mappings: mappings)
+                    segmentedButtons(mappings: mappings, selectedIndex: selectedIndex, displayState: displayState, widgetVersion: widgetVersion)
                         .frame(minWidth: 75)
                         .padding(.leading, 8)
                         .layoutPriority(1)
@@ -81,19 +86,41 @@ struct SegmentedRowView: View {
             }
         }
         .onAppear {
-            selectedIndex = selectedIndex(for: displayState.effectiveState, mappings: mappings)
+            clearOptimisticSelection()
         }
-        .onChange(of: displayState.effectiveState) { newState in
-            selectedIndex = selectedIndex(for: newState, mappings: mappings)
+        .onChange(of: displayState.widgetId) { _ in
+            clearOptimisticSelection()
+        }
+        .onChange(of: widgetVersion) { _ in
+            guard let optimisticBaseState,
+                  optimisticWidgetId == displayState.widgetId,
+                  let optimisticStartVersion,
+                  widgetVersion != optimisticStartVersion else { return }
+
+            // Keep optimistic selection while server still echoes pre-command state.
+            // Clear once the server state changed.
+            if displayState.effectiveState != optimisticBaseState {
+                clearOptimisticSelection()
+            } else {
+                self.optimisticStartVersion = widgetVersion
+            }
         }
     }
 
     /// Button-based segmented control with animated selection indicator
     @ViewBuilder
-    private func segmentedButtons(mappings: [OpenHABWidgetMapping]) -> some View {
+    private func segmentedButtons(mappings: [OpenHABWidgetMapping],
+                                  selectedIndex: Int?,
+                                  displayState: WidgetDisplayState,
+                                  widgetVersion: Int) -> some View {
         HStack(spacing: 0) {
             ForEach(0 ..< mappings.count, id: \.self) { index in
-                segmentButton(at: index, mappings: mappings)
+                segmentButton(
+                    at: index,
+                    mappings: mappings,
+                    displayState: displayState,
+                    widgetVersion: widgetVersion
+                )
             }
         }
         .background(
@@ -135,11 +162,13 @@ struct SegmentedRowView: View {
     /// Whether the single mapping button is selected (item state matches the mapping command)
     private func isSingleMappingSelected(displayState: WidgetDisplayState, mappings: [OpenHABWidgetMapping]) -> Bool {
         guard let mapping = mappings.first else { return false }
-        return displayState.effectiveState == mapping.command
+        let selected = effectiveSelectedIndex(displayState: displayState, mappings: mappings)
+        guard let selected else { return false }
+        return mappings.indices.contains(selected) && mappings[selected].command == mapping.command
     }
 
     @ViewBuilder
-    private func singleMappingButton(displayState: WidgetDisplayState, mappings: [OpenHABWidgetMapping]) -> some View {
+    private func singleMappingButton(displayState: WidgetDisplayState, mappings: [OpenHABWidgetMapping], widgetVersion: Int) -> some View {
         let mapping = mappings[0]
         let isSelected = isSingleMappingSelected(displayState: displayState, mappings: mappings)
 
@@ -164,6 +193,12 @@ struct SegmentedRowView: View {
                     .onChanged { _ in
                         if singlePressed == false {
                             singlePressed = true
+                            startOptimisticSelection(
+                                command: mapping.command,
+                                displayState: displayState,
+                                mappings: mappings,
+                                widgetVersion: widgetVersion
+                            )
                             logger.info("Segment mapping pressed, command: \(mapping.command)")
                             viewModel.sendCommand(mapping.command, for: widget)
                         }
@@ -190,14 +225,30 @@ struct SegmentedRowView: View {
         mappings.firstIndex { $0.command == state }
     }
 
+    private func effectiveSelectedIndex(displayState: WidgetDisplayState, mappings: [OpenHABWidgetMapping]) -> Int? {
+        if optimisticWidgetId == displayState.widgetId, let optimisticSelectedIndex {
+            return optimisticSelectedIndex
+        }
+        return selectedIndex(for: displayState.effectiveState, mappings: mappings)
+    }
+
     @ViewBuilder
-    private func segmentButton(at index: Int, mappings: [OpenHABWidgetMapping]) -> some View {
+    private func segmentButton(at index: Int,
+                               mappings: [OpenHABWidgetMapping],
+                               displayState: WidgetDisplayState,
+                               widgetVersion: Int) -> some View {
         let mapping = mappings[index]
 
         Button {
             logger.info("Segment tapped: \(index), command: \(mapping.command)")
+            startOptimisticSelection(
+                command: mapping.command,
+                displayState: displayState,
+                mappings: mappings,
+                widgetVersion: widgetVersion
+            )
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                selectedIndex = index
+                optimisticSelectedIndex = index
             }
             viewModel.sendCommand(mapping.command, for: widget)
         } label: {
@@ -263,6 +314,23 @@ struct SegmentedRowView: View {
                         }
                     }
             )
+    }
+
+    private func startOptimisticSelection(command: String,
+                                          displayState: WidgetDisplayState,
+                                          mappings: [OpenHABWidgetMapping],
+                                          widgetVersion: Int) {
+        optimisticSelectedIndex = selectedIndex(for: command, mappings: mappings)
+        optimisticBaseState = displayState.effectiveState
+        optimisticWidgetId = displayState.widgetId
+        optimisticStartVersion = widgetVersion
+    }
+
+    private func clearOptimisticSelection() {
+        optimisticSelectedIndex = nil
+        optimisticBaseState = nil
+        optimisticWidgetId = nil
+        optimisticStartVersion = nil
     }
 }
 
