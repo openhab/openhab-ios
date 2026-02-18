@@ -46,6 +46,26 @@ private struct OHTextTokenStyle {
     let minimumScaleFactor: CGFloat
 
     static func from(_ token: OHTextToken) -> OHTextTokenStyle {
+        #if os(watchOS)
+        switch token {
+        case .rowLabel:
+            OHTextTokenStyle(font: .caption, lineLimit: 2, minimumScaleFactor: 0.85)
+        case .rowValue:
+            OHTextTokenStyle(font: .footnote, lineLimit: 1, minimumScaleFactor: 0.85)
+        case .rowValueCompact:
+            OHTextTokenStyle(font: .caption2, lineLimit: 1, minimumScaleFactor: 0.8)
+        case .rowValueCallout:
+            OHTextTokenStyle(font: .footnote, lineLimit: 1, minimumScaleFactor: 0.85)
+        case .section:
+            OHTextTokenStyle(font: .callout, lineLimit: 1, minimumScaleFactor: 0.85)
+        case .control:
+            OHTextTokenStyle(font: .caption, lineLimit: 1, minimumScaleFactor: 0.8)
+        case .secondary:
+            OHTextTokenStyle(font: .caption2, lineLimit: 1, minimumScaleFactor: 0.8)
+        case .emphasis:
+            OHTextTokenStyle(font: .headline, lineLimit: 1, minimumScaleFactor: 0.8)
+        }
+        #else
         switch token {
         case .rowLabel:
             OHTextTokenStyle(font: .body, lineLimit: 1, minimumScaleFactor: 0.9)
@@ -64,6 +84,7 @@ private struct OHTextTokenStyle {
         case .emphasis:
             OHTextTokenStyle(font: .headline, lineLimit: 1, minimumScaleFactor: 0.9)
         }
+        #endif
     }
 }
 

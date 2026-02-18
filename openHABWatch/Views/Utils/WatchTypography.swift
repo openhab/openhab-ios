@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import SwiftUI
 
 struct WatchLabelText: View {
@@ -35,73 +36,19 @@ private struct WatchTextModifier: ViewModifier {
     func body(content: Content) -> some View {
         switch style {
         case .label:
-            content
-                .font(WatchTypography.labelFont)
-                .lineLimit(WatchTypography.labelLineLimit)
-                .minimumScaleFactor(WatchTypography.labelMinScale)
-                .truncationMode(.tail)
-                .multilineTextAlignment(.leading)
+            content.ohTextToken(.rowLabel)
         case .detail:
-            content
-                .font(WatchTypography.detailFont)
-                .lineLimit(WatchTypography.detailLineLimit)
-                .minimumScaleFactor(WatchTypography.detailMinScale)
-                .truncationMode(.tail)
-                .multilineTextAlignment(.leading)
+            content.ohTextToken(.rowValue)
         case .section:
-            content
-                .font(WatchTypography.sectionFont)
-                .lineLimit(WatchTypography.sectionLineLimit)
-                .minimumScaleFactor(WatchTypography.sectionMinScale)
-                .truncationMode(.tail)
-                .multilineTextAlignment(.leading)
+            content.ohTextToken(.section)
         case .control:
-            content
-                .font(WatchTypography.controlFont)
-                .lineLimit(WatchTypography.controlLineLimit)
-                .minimumScaleFactor(WatchTypography.controlMinScale)
-                .truncationMode(.tail)
-                .multilineTextAlignment(.leading)
+            content.ohTextToken(.control)
         case .secondary:
-            content
-                .font(WatchTypography.secondaryFont)
-                .lineLimit(WatchTypography.secondaryLineLimit)
-                .minimumScaleFactor(WatchTypography.secondaryMinScale)
-                .truncationMode(.tail)
-                .multilineTextAlignment(.leading)
+            content.ohTextToken(.secondary)
         case .emphasis:
-            content
-                .font(WatchTypography.emphasisFont)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-                .truncationMode(.tail)
-                .multilineTextAlignment(.leading)
+            content.ohTextToken(.emphasis)
         }
     }
-}
-
-enum WatchTypography {
-    static let labelFont: Font = .caption
-    static let labelLineLimit = 2
-    static let labelMinScale: CGFloat = 0.85
-
-    static let detailFont: Font = .footnote
-    static let detailLineLimit = 1
-    static let detailMinScale: CGFloat = 0.85
-
-    static let sectionFont: Font = .callout
-    static let sectionLineLimit = 1
-    static let sectionMinScale: CGFloat = 0.85
-
-    static let controlFont: Font = .caption
-    static let controlLineLimit = 1
-    static let controlMinScale: CGFloat = 0.8
-
-    static let secondaryFont: Font = .caption2
-    static let secondaryLineLimit = 1
-    static let secondaryMinScale: CGFloat = 0.8
-
-    static let emphasisFont: Font = .headline
 }
 
 extension View {
