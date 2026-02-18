@@ -1,0 +1,31 @@
+{
+  "configurations" : [
+    {
+      "id" : "73CD2A59-5CAE-496F-941B-191C3629CC4F",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false,
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:openHAB.xcodeproj",
+      "identifier" : "DA0775142346705D0086C685",
+      "name" : "openHABWatch"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:openHAB.xcodeproj",
+        "identifier" : "DA8B15502F3BB74B007753FD",
+        "name" : "openHABWatchTests"
+      }
+    }
+  ],
+  "version" : 1
+}
