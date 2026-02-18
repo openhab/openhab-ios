@@ -174,17 +174,11 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     }
 
     public func sendItemUpdate(state: NumberState?) {
-        guard let item, let state else {
+        guard let state else {
             Logger.restAPI.info("ItemUpdate for Item or State = nil")
             return
         }
-        if item.isOfTypeOrGroupType(.numberWithDimension) {
-            // For number items, include unit (if present) in command
-            sendCommand(state.toString(locale: Locale(identifier: "US")))
-        } else {
-            // For all other items, send the plain value
-            sendCommand(state.stringValue)
-        }
+        sendCommand(state.commandString)
     }
 
     public func sendCommandDouble(_ command: Double) {

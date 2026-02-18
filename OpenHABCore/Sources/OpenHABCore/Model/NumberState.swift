@@ -28,6 +28,16 @@ public struct NumberState: CustomStringConvertible, Equatable {
         String(value)
     }
 
+    /// Value string suitable for sending as a command to the server.
+    /// Preserves full numeric precision (never truncated by display format)
+    /// and appends the unit when present.
+    public var commandString: String {
+        if let unit, !unit.isEmpty {
+            return "\(stringValue) \(unit)"
+        }
+        return stringValue
+    }
+
     // Access to default memberwise initializer not permitted outside of package
     public init(value: Double, unit: String? = "", format: String? = "") {
         self.value = value
@@ -62,14 +72,6 @@ public struct NumberState: CustomStringConvertible, Equatable {
             return "\(stringValue) \(unit)"
         } else {
             return stringValue
-        }
-    }
-
-    private func getActualValue() -> NSNumber {
-        if format?.contains("%d") == true {
-            NSNumber(value: intValue)
-        } else {
-            NSNumber(value: value)
         }
     }
 }

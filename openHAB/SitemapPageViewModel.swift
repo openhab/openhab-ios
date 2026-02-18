@@ -119,10 +119,6 @@ class SitemapPageViewModel: ObservableObject {
         return .idle
     }
 
-    func widgetUpdateVersion(for widgetId: String) -> Int {
-        widgetUpdateVersions[widgetId] ?? 0
-    }
-
     init() {
         loadSettings()
         // Observe connection changes (skip initial value) — initial load is triggered by .task in the view
@@ -171,6 +167,10 @@ class SitemapPageViewModel: ObservableObject {
             widgets: widgets,
             icon: ""
         )
+    }
+
+    func widgetUpdateVersion(for widgetId: String) -> Int {
+        widgetUpdateVersions[widgetId] ?? 0
     }
 
     deinit {
@@ -643,13 +643,7 @@ extension SitemapPageViewModel {
             logger.info("ItemUpdate for Item or State = nil")
             return
         }
-        let command: String = if item.isOfTypeOrGroupType(.numberWithDimension) {
-            // For number items, include unit (if present) in command
-            state.toString(locale: Locale(identifier: "US"))
-        } else {
-            // For all other items, send the plain value
-            state.stringValue
-        }
+        let command = state.commandString
         commandDispatcher.send(command, for: item, policy: policy, phase: phase, key: key) { [weak self] itemname, command in
             self?.sendCommand(itemname: itemname, command: command)
         }

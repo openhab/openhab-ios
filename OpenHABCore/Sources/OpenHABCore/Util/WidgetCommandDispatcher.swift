@@ -107,11 +107,7 @@ public final class WidgetCommandDispatcher {
 
         if let item = widget.item ?? fallbackItem,
            let sendCommand = widget.sendCommand {
-            if item.isOfTypeOrGroupType(.numberWithDimension) {
-                sendCommand(item, state.toString(locale: Locale(identifier: "US")))
-            } else {
-                sendCommand(item, state.stringValue)
-            }
+            sendCommand(item, state.commandString)
             return
         }
 
