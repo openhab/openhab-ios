@@ -51,6 +51,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published var openHABRootUrl: String?
     @Published var showSearchField = false
     @Published private(set) var commandStates: [String: WidgetCommandLifecycleState] = [:]
+    @Published private(set) var widgetUpdateVersions: [String: Int] = [:]
 
     let networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
@@ -116,6 +117,10 @@ class SitemapPageViewModel: ObservableObject {
             return .sending(count: sendingCount)
         }
         return .idle
+    }
+
+    func widgetUpdateVersion(for widgetId: String) -> Int {
+        widgetUpdateVersions[widgetId] ?? 0
     }
 
     init() {
@@ -322,6 +327,14 @@ extension SitemapPageViewModel {
             currentPage?.widgets = reconciledWidgets
             // Inject sendCommand into existing widgets without replacing the page
             injectSendCommand(for: reconciledWidgets)
+        }
+
+        trackWidgetUpdates(in: reconciledWidgets)
+    }
+
+    private func trackWidgetUpdates(in widgets: [OpenHABWidget]) {
+        for widget in widgets {
+            widgetUpdateVersions[widget.widgetId, default: 0] += 1
         }
     }
 
