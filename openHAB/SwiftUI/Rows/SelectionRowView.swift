@@ -15,6 +15,27 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
+private struct SelectionRowInput {
+    let displayState: WidgetDisplayState
+    let mappings: [OpenHABWidgetMapping]
+    let labelColor: String
+    let valueColor: String
+    let readOnly: Bool
+    let widgetId: String
+
+    static func from(widget: OpenHABWidget) -> SelectionRowInput {
+        let displayState = widget.displayState
+        return SelectionRowInput(
+            displayState: displayState,
+            mappings: displayState.mappings,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            readOnly: widget.readOnly ?? false,
+            widgetId: displayState.widgetId
+        )
+    }
+}
+
 struct SelectionRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
@@ -27,24 +48,23 @@ struct SelectionRowView: View {
     @State private var optimisticStartVersion: Int?
 
     var body: some View {
-        let displayState = widget.displayState
-        let mappings = displayState.mappings
-        let widgetVersion = viewModel.widgetUpdateVersion(for: displayState.widgetId)
-        let displayedCommand = effectiveCommand(displayState: displayState)
+        let input = SelectionRowInput.from(widget: widget)
+        let widgetVersion = viewModel.widgetUpdateVersion(for: input.widgetId)
+        let displayedCommand = effectiveCommand(displayState: input.displayState)
         ZStack {
-            rowContent(displayState: displayState, displayedCommand: displayedCommand)
+            rowContent(input: input, displayedCommand: displayedCommand)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .animation(nil, value: displayedCommand)
 
             Menu {
-                ForEach(mappings.indices, id: \.self) { index in
-                    let mapping = mappings[index]
+                ForEach(input.mappings.indices, id: \.self) { index in
+                    let mapping = input.mappings[index]
                     let isSelected = displayedCommand == mapping.command
                     Button {
                         logger.info("Selection changed to: \(mapping.label)")
                         optimisticCommand = mapping.command
-                        optimisticBaseState = displayState.effectiveState
-                        optimisticWidgetId = displayState.widgetId
+                        optimisticBaseState = input.displayState.effectiveState
+                        optimisticWidgetId = input.widgetId
                         optimisticStartVersion = widgetVersion
                         viewModel.sendCommand(mapping.command, for: widget)
                     } label: {
@@ -61,23 +81,23 @@ struct SelectionRowView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .disabled(widget.readOnly ?? false)
+            .disabled(input.readOnly)
         }
         .onAppear {
             clearOptimisticSelection()
         }
-        .onChange(of: displayState.widgetId) { _ in
+        .onChange(of: input.widgetId) { _ in
             clearOptimisticSelection()
         }
         .onChange(of: widgetVersion) { _ in
             guard let optimisticBaseState,
-                  optimisticWidgetId == displayState.widgetId,
+                  optimisticWidgetId == input.widgetId,
                   let optimisticStartVersion,
                   widgetVersion != optimisticStartVersion else { return }
 
             // Keep optimistic value while the server is still echoing the pre-command state.
             // Clear once the server state actually changed (to selected value or anything else).
-            if displayState.effectiveState != optimisticBaseState {
+            if input.displayState.effectiveState != optimisticBaseState {
                 clearOptimisticSelection()
             } else {
                 self.optimisticStartVersion = widgetVersion
@@ -86,24 +106,24 @@ struct SelectionRowView: View {
     }
 
     @ViewBuilder
-    private func rowContent(displayState: WidgetDisplayState, displayedCommand: String) -> some View {
+    private func rowContent(input: SelectionRowInput, displayedCommand: String) -> some View {
         HStack {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
 
-            if !displayState.labelText.isEmpty {
-                let labelText = displayState.labelText
+            if !input.displayState.labelText.isEmpty {
+                let labelText = input.displayState.labelText
                 Text(labelText)
                     .ohTextToken(.rowLabel)
-                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
             Spacer()
 
-            if let valueText = selectedValueText(displayState: displayState, displayedCommand: displayedCommand), !valueText.isEmpty {
+            if let valueText = selectedValueText(displayState: input.displayState, displayedCommand: displayedCommand), !valueText.isEmpty {
                 Text(valueText)
                     .ohTextToken(.rowValue)
-                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
             }
 
             // Show disclosure indicator to indicate tappable selection

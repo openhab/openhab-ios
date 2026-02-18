@@ -15,6 +15,25 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
+private struct SegmentedRowInput {
+    let displayState: WidgetDisplayState
+    let mappings: [OpenHABWidgetMapping]
+    let labelColor: String
+    let valueColor: String
+    let widgetId: String
+
+    static func from(widget: OpenHABWidget) -> SegmentedRowInput {
+        let displayState = widget.displayState
+        return SegmentedRowInput(
+            displayState: displayState,
+            mappings: displayState.mappings,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            widgetId: displayState.widgetId
+        )
+    }
+}
+
 // swiftlint:disable:next file_types_order
 struct SegmentedRowView: View {
     @ObservedObject var widget: OpenHABWidget
@@ -34,51 +53,50 @@ struct SegmentedRowView: View {
     @State private var singlePressed = false
 
     var body: some View {
-        let displayState = widget.displayState
-        let mappings = displayState.mappings
-        let widgetVersion = viewModel.widgetUpdateVersion(for: displayState.widgetId)
-        let selectedIndex = effectiveSelectedIndex(displayState: displayState, mappings: mappings)
+        let input = SegmentedRowInput.from(widget: widget)
+        let widgetVersion = viewModel.widgetUpdateVersion(for: input.widgetId)
+        let selectedIndex = effectiveSelectedIndex(displayState: input.displayState, mappings: input.mappings)
         HStack(spacing: 0) {
             IconView(widget: widget, fallbackSymbol: fallbackSymbol)
                 .frame(width: 32, height: 32)
 
-            if !displayState.labelText.isEmpty {
-                let labelText = displayState.labelText
+            if !input.displayState.labelText.isEmpty {
+                let labelText = input.displayState.labelText
                 Text(labelText)
                     .ohTextToken(.rowLabel)
-                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
                     .padding(.leading, 8)
                     .layoutPriority(1)
             }
 
-            if let detailTextLabel = displayState.labelValue, !detailTextLabel.isEmpty {
+            if let detailTextLabel = input.displayState.labelValue, !detailTextLabel.isEmpty {
                 Spacer(minLength: 8)
                 Text(detailTextLabel)
                     .ohTextToken(.rowValue)
-                    .foregroundStyle(widget.valuecolor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(input.valueColor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: input.valueColor))
                     .layoutPriority(1)
             }
 
-            if !mappings.isEmpty {
-                if displayState.hasPressReleaseMappings {
+            if !input.mappings.isEmpty {
+                if input.displayState.hasPressReleaseMappings {
                     // Press-release buttons for mappings with releaseCommand
-                    if !(displayState.labelValue?.isEmpty == false) {
+                    if !(input.displayState.labelValue?.isEmpty == false) {
                         Spacer(minLength: 8)
                     }
-                    pressReleaseButtons(mappings: mappings)
+                    pressReleaseButtons(mappings: input.mappings)
                         .fixedSize(horizontal: true, vertical: false)
                         .padding(.leading, 8)
 
-                } else if mappings.count == 1 {
-                    if displayState.labelValue.isNilOrEmpty {
+                } else if input.mappings.count == 1 {
+                    if input.displayState.labelValue.isNilOrEmpty {
                         Spacer(minLength: 8)
                     }
-                    singleMappingButton(displayState: displayState, mappings: mappings, widgetVersion: widgetVersion)
+                    singleMappingButton(displayState: input.displayState, mappings: input.mappings, widgetVersion: widgetVersion)
                         .fixedSize(horizontal: true, vertical: false)
                         .padding(.leading, 8)
                 } else {
                     // Button-based segmented control with animated selection indicator
-                    segmentedButtons(mappings: mappings, selectedIndex: selectedIndex, displayState: displayState, widgetVersion: widgetVersion)
+                    segmentedButtons(mappings: input.mappings, selectedIndex: selectedIndex, displayState: input.displayState, widgetVersion: widgetVersion)
                         .frame(minWidth: 75)
                         .padding(.leading, 8)
                         .layoutPriority(1)
@@ -88,18 +106,18 @@ struct SegmentedRowView: View {
         .onAppear {
             clearOptimisticSelection()
         }
-        .onChange(of: displayState.widgetId) { _ in
+        .onChange(of: input.widgetId) { _ in
             clearOptimisticSelection()
         }
         .onChange(of: widgetVersion) { _ in
             guard let optimisticBaseState,
-                  optimisticWidgetId == displayState.widgetId,
+                  optimisticWidgetId == input.widgetId,
                   let optimisticStartVersion,
                   widgetVersion != optimisticStartVersion else { return }
 
             // Keep optimistic selection while server still echoes pre-command state.
             // Clear once the server state changed.
-            if displayState.effectiveState != optimisticBaseState {
+            if input.displayState.effectiveState != optimisticBaseState {
                 clearOptimisticSelection()
             } else {
                 self.optimisticStartVersion = widgetVersion
