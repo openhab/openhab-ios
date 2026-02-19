@@ -14,15 +14,35 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct DatePickerInputRowView: View {
-    @ObservedObject var widget: OpenHABWidget
+private struct DateInputRowConfig {
+    let input: BasicWidgetRowInput
+    let widget: OpenHABWidget
+    let viewModel: SitemapPageViewModel
+}
+
+@MainActor
+private func makeDateInputRowContent(_ config: DateInputRowConfig) -> DateInputRowContent {
+    DateInputRowContent(
+        input: config.input,
+        iconWidget: config.widget,
+        inputHint: config.widget.inputHint
+    ) { command in
+        config.viewModel.sendCommand(command, for: config.widget)
+    }
+}
+
+private struct DateInputRowContent: View {
+    let input: BasicWidgetRowInput
+    let iconWidget: OpenHABWidget
+    let inputHint: OpenHABWidget.InputHint
+    let onSendCommand: (String) -> Void
+
     @State private var selectedDate = Date()
-    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetDatePickerInputView")
 
     private var datePickerComponents: DatePickerComponents {
-        switch widget.inputHint {
+        switch inputHint {
         case .date: .date
         case .time: .hourAndMinute
         case .dateTime: [.date, .hourAndMinute]
@@ -30,21 +50,17 @@ struct DatePickerInputRowView: View {
         }
     }
 
-    private var useWheelStyle: Bool {
-        widget.inputHint == .time
-    }
-
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         HStack {
-            IconView(widget: widget)
+            IconView(widget: iconWidget)
                 .frame(width: 32, height: 32)
 
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
                 Text(labelText)
                     .ohTextToken(.rowLabel)
-                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
             Spacer()
@@ -58,7 +74,7 @@ struct DatePickerInputRowView: View {
             .onChange(of: selectedDate) { newDate in
                 sendDateCommand(newDate)
             }
-            .disabled(widget.readOnly ?? false)
+            .disabled(input.readOnly)
         }
         .onAppear {
             let state = displayState.effectiveState
@@ -71,7 +87,7 @@ struct DatePickerInputRowView: View {
     private func sendDateCommand(_ date: Date) {
         let formatter = DateFormatter()
 
-        switch widget.inputHint {
+        switch inputHint {
         case .date:
             formatter.dateFormat = "yyyy-MM-dd"
         case .time:
@@ -84,7 +100,7 @@ struct DatePickerInputRowView: View {
 
         let command = formatter.string(from: date)
         logger.info("Sending date command: \(command)")
-        viewModel.sendCommand(command, for: widget)
+        onSendCommand(command)
     }
 
     private func parseDate(from state: String) -> Date? {
@@ -102,6 +118,41 @@ struct DatePickerInputRowView: View {
             }
         }
         return nil
+    }
+}
+
+struct DatePickerInputRowInputView: View {
+    let rowID: RowID
+    let input: BasicWidgetRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeDateInputRowContent(
+                DateInputRowConfig(
+                    input: input,
+                    widget: widget,
+                    viewModel: viewModel
+                )
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+struct DatePickerInputRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        makeDateInputRowContent(
+            DateInputRowConfig(
+                input: BasicWidgetRowInput.from(widget: widget),
+                widget: widget,
+                viewModel: viewModel
+            )
+        )
     }
 }
 

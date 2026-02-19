@@ -14,6 +14,16 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
+private struct ButtonGridRowConfig {
+    let input: BasicWidgetRowInput
+    let widget: OpenHABWidget
+}
+
+@MainActor
+private func makeButtonGridRowContent(_ config: ButtonGridRowConfig) -> ButtonGridRowContent {
+    ButtonGridRowContent(input: config.input, widget: config.widget)
+}
+
 struct ButtonGridButton: View {
     @ObservedObject var widget: OpenHABWidget
     let parentItem: OpenHABItem?
@@ -144,11 +154,30 @@ private struct PressGestureModifier: ViewModifier {
     }
 }
 
-struct ButtonGridRowView: View {
-    @ObservedObject var widget: OpenHABWidget
+struct ButtonGridRowInputView: View {
+    let rowID: RowID
+    let input: BasicWidgetRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
-    private let logger = Logger(subsystem: "org.openhab", category: "ButtonGridRowView")
+    @ViewBuilder
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeButtonGridRowContent(
+                ButtonGridRowConfig(
+                    input: input,
+                    widget: widget
+                )
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+private struct ButtonGridRowContent: View {
+    let input: BasicWidgetRowInput
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     // Maximum number of columns based on screen width
     private let maxColumns = 12
@@ -174,7 +203,7 @@ struct ButtonGridRowView: View {
     }
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         VStack(alignment: .leading, spacing: 8) {
             if showLabelAndIcon {
                 HStack {
@@ -185,7 +214,7 @@ struct ButtonGridRowView: View {
                         let labelText = displayState.labelText
                         Text(labelText)
                             .ohTextToken(.rowLabel)
-                            .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                            .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
                     }
 
                     Spacer()
@@ -219,6 +248,19 @@ struct ButtonGridRowView: View {
             // OpenHAB uses 1-based indexing, convert to 0-based
             (button.row ?? 1) - 1 == row && (button.column ?? 1) - 1 == column
         }
+    }
+}
+
+struct ButtonGridRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+
+    var body: some View {
+        makeButtonGridRowContent(
+            ButtonGridRowConfig(
+                input: BasicWidgetRowInput.from(widget: widget),
+                widget: widget
+            )
+        )
     }
 }
 

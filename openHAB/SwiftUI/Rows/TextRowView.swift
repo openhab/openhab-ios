@@ -14,26 +14,36 @@ import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
 
-struct TextRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+private struct TextRowConfig {
+    let input: BasicWidgetRowInput
+    let widget: OpenHABWidget
+}
+
+@MainActor
+private func makeTextRowContent(_ config: TextRowConfig) -> TextRowContent {
+    TextRowContent(input: config.input, iconWidget: config.widget)
+}
+
+private struct TextRowContent: View {
+    let input: BasicWidgetRowInput
+    let iconWidget: OpenHABWidget
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         HStack {
-            IconView(widget: widget)
+            IconView(widget: iconWidget)
                 .frame(width: 32, height: 32)
 
             Text(displayState.labelText)
                 .ohTextToken(.rowLabel)
-                .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
 
             Spacer()
 
             if let value = displayState.labelValue {
                 Text(value)
                     .ohTextToken(.rowValue)
-                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
             }
         }
         .contextMenu {
@@ -45,6 +55,38 @@ struct TextRowView: View {
                 }
             }
         }
+    }
+}
+
+struct TextRowInputView: View {
+    let rowID: RowID
+    let input: BasicWidgetRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeTextRowContent(
+                TextRowConfig(
+                    input: input,
+                    widget: widget
+                )
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+struct TextRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+
+    var body: some View {
+        makeTextRowContent(
+            TextRowConfig(
+                input: BasicWidgetRowInput.from(widget: widget),
+                widget: widget
+            )
+        )
     }
 }
 

@@ -49,7 +49,7 @@ enum SitemapRowInputMapper {
         case .dateInput, .textInput:
             return SitemapRowInput.input(rowID, BasicWidgetRowInput.from(widget: widget))
         case .colorPicker:
-            return SitemapRowInput.colorPicker(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.colorPicker(rowID, ColorPickerRowInput.from(widget: widget))
         case .image, .chart, .video, .webview, .mapview:
             return SitemapRowInput.media(rowID, BasicWidgetRowInput.from(widget: widget))
         case .colorTemperaturePicker:

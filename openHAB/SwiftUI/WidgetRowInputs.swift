@@ -89,6 +89,28 @@ struct SetpointRowInput {
     }
 }
 
+struct ColorPickerRowInput {
+    let widgetId: String
+    let displayState: WidgetDisplayState
+    let labelColor: String
+    let valueColor: String
+    let readOnly: Bool
+
+    var colorCommandKey: String {
+        "color-\(widgetId)"
+    }
+
+    static func from(widget: OpenHABWidget) -> ColorPickerRowInput {
+        ColorPickerRowInput(
+            widgetId: widget.widgetId,
+            displayState: widget.displayState,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            readOnly: widget.readOnly ?? false
+        )
+    }
+}
+
 struct SliderRowInput {
     let widgetId: String
     let displayState: WidgetDisplayState

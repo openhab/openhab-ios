@@ -48,8 +48,33 @@ struct EmbeddingRowInputView: View {
                 .contentShape(Rectangle())
                 .listRowInsets(regularRowInsets)
                 .listRowBackground(regularRowBackground)
+        case let .text(rowID, input):
+            TextRowInputView(rowID: rowID, input: input)
+                .contentShape(Rectangle())
+                .listRowInsets(regularRowInsets)
+                .listRowBackground(regularRowBackground)
         case let .toggle(rowID, input):
             SwitchRowInputView(rowID: rowID, input: input)
+                .contentShape(Rectangle())
+                .listRowInsets(regularRowInsets)
+                .listRowBackground(regularRowBackground)
+        case let .rollershutter(rowID, input):
+            RollershutterRowInputView(rowID: rowID, input: input)
+                .contentShape(Rectangle())
+                .listRowInsets(regularRowInsets)
+                .listRowBackground(regularRowBackground)
+        case let .input(rowID, input):
+            InputRowInputView(rowID: rowID, input: input)
+                .contentShape(Rectangle())
+                .listRowInsets(regularRowInsets)
+                .listRowBackground(regularRowBackground)
+        case let .colorPicker(rowID, input):
+            ColorPickerRowInputView(rowID: rowID, input: input)
+                .contentShape(Rectangle())
+                .listRowInsets(regularRowInsets)
+                .listRowBackground(regularRowBackground)
+        case let .buttonGrid(rowID, input):
+            ButtonGridRowInputView(rowID: rowID, input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(regularRowInsets)
                 .listRowBackground(regularRowBackground)

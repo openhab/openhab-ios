@@ -14,29 +14,62 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct ColorPickerRowView: View {
-    @ObservedObject var widget: OpenHABWidget
+private struct ColorPickerRowConfig {
+    let input: ColorPickerRowInput
+    let iconWidget: OpenHABWidget
+    let commandWidget: OpenHABWidget
+    let viewModel: SitemapPageViewModel
+}
+
+@MainActor
+private func makeColorPickerRowContent(_ config: ColorPickerRowConfig) -> ColorPickerRowContent {
+    ColorPickerRowContent(
+        input: config.input,
+        iconWidget: config.iconWidget,
+        onSendImmediate: { command in
+            config.viewModel.sendCommand(command, for: config.commandWidget, policy: .immediate)
+        },
+        onSendDebounced: { command in
+            config.viewModel.sendCommand(
+                command,
+                for: config.commandWidget,
+                policy: WidgetCommandDefaults.colorPicker,
+                key: config.input.colorCommandKey
+            )
+        },
+        onCancelPending: {
+            if let item = config.commandWidget.item {
+                config.viewModel.cancelPendingCommand(for: item, key: config.input.colorCommandKey)
+            } else {
+                config.viewModel.cancelPendingCommand(for: config.commandWidget, key: config.input.colorCommandKey)
+            }
+        }
+    )
+}
+
+private struct ColorPickerRowContent: View {
+    let input: ColorPickerRowInput
+    let iconWidget: OpenHABWidget
+    let onSendImmediate: (String) -> Void
+    let onSendDebounced: (String) -> Void
+    let onCancelPending: () -> Void
+
     @State private var selectedColor: Color = .white
     @State private var lastImmediateSendAt: Date = .distantPast
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    private var colorCommandKey: String {
-        "color-\(widget.widgetId)"
-    }
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetColorPickerView")
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         HStack {
-            IconView(widget: widget)
+            IconView(widget: iconWidget)
                 .frame(width: 32, height: 32)
 
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
                 Text(labelText)
                     .ohTextToken(.rowLabel)
-                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
             Spacer()
@@ -46,12 +79,12 @@ struct ColorPickerRowView: View {
                 .onChange(of: selectedColor) { newColor in
                     sendColorCommand(newColor)
                 }
-                .disabled(widget.readOnly ?? false)
+                .disabled(input.readOnly)
 
             if let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .ohTextToken(.rowValueCompact)
-                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
             }
         }
         .onAppear {
@@ -65,11 +98,7 @@ struct ColorPickerRowView: View {
             selectedColor = parseColor(from: newState) ?? .white
         }
         .onDisappear {
-            if let item = widget.item {
-                viewModel.cancelPendingCommand(for: item, key: colorCommandKey)
-            } else {
-                viewModel.cancelPendingCommand(for: widget, key: colorCommandKey)
-            }
+            onCancelPending()
         }
     }
 
@@ -93,20 +122,11 @@ struct ColorPickerRowView: View {
         let now = Date()
         if now.timeIntervalSince(lastImmediateSendAt) >= 0.2 {
             lastImmediateSendAt = now
-            viewModel.sendCommand(
-                command,
-                for: widget,
-                policy: .immediate
-            )
+            onSendImmediate(command)
         }
 
         // Also debounce to ensure the final value is sent after interaction settles.
-        viewModel.sendCommand(
-            command,
-            for: widget,
-            policy: WidgetCommandDefaults.colorPicker,
-            key: colorCommandKey
-        )
+        onSendDebounced(command)
     }
 
     private func parseColor(from state: String) -> Color? {
@@ -119,6 +139,43 @@ struct ColorPickerRowView: View {
         }
 
         return Color(hue: hue / 360.0, saturation: saturation / 100.0, brightness: brightness / 100.0)
+    }
+}
+
+struct ColorPickerRowInputView: View {
+    let rowID: RowID
+    let input: ColorPickerRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeColorPickerRowContent(
+                ColorPickerRowConfig(
+                    input: input,
+                    iconWidget: widget,
+                    commandWidget: widget,
+                    viewModel: viewModel
+                )
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+struct ColorPickerRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        makeColorPickerRowContent(
+            ColorPickerRowConfig(
+                input: ColorPickerRowInput.from(widget: widget),
+                iconWidget: widget,
+                commandWidget: widget,
+                viewModel: viewModel
+            )
+        )
     }
 }
 

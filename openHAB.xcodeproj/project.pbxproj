@@ -153,6 +153,7 @@
 		DABB4CD62F471CDB00111AF3 /* SitemapRowInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CD52F471CDB00111AF3 /* SitemapRowInput.swift */; };
 		DABB4CD82F471D0300111AF3 /* SitemapRowInputMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CD72F471D0300111AF3 /* SitemapRowInputMapper.swift */; };
 		DABB4CDA2F471E9200111AF3 /* EmbeddingRowInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CD92F471E9200111AF3 /* EmbeddingRowInputView.swift */; };
+		DABB4CDC2F472E4200111AF3 /* InputRowInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CDB2F472E4200111AF3 /* InputRowInputView.swift */; };
 		DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */; };
 		DABED17B2E451694000B92EF /* BonjourDiscoverySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */; };
 		DABED17D2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */; };
@@ -505,6 +506,7 @@
 		DABB4CD52F471CDB00111AF3 /* SitemapRowInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapRowInput.swift; sourceTree = "<group>"; };
 		DABB4CD72F471D0300111AF3 /* SitemapRowInputMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapRowInputMapper.swift; sourceTree = "<group>"; };
 		DABB4CD92F471E9200111AF3 /* EmbeddingRowInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddingRowInputView.swift; sourceTree = "<group>"; };
+		DABB4CDB2F472E4200111AF3 /* InputRowInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputRowInputView.swift; sourceTree = "<group>"; };
 		DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoverySheet.swift; sourceTree = "<group>"; };
 		DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoveryViewModel.swift; sourceTree = "<group>"; };
 		DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandlerTests.swift; sourceTree = "<group>"; };
@@ -964,6 +966,7 @@
 				DAEA21DD2DBF481300D54342 /* TextRowView.swift */,
 				DA35E2BB2E1EEA9D003987BB /* VideoRowView.swift */,
 				DA35E2BC2E1EEA9D003987BB /* WebRowView.swift */,
+				DABB4CDB2F472E4200111AF3 /* InputRowInputView.swift */,
 			);
 			path = Rows;
 			sourceTree = "<group>";
@@ -1810,6 +1813,7 @@
 				DAE2800A2E35F5590028EE24 /* IconURLView.swift in Sources */,
 				DA6B2EEF2C861BC900DF77CF /* DrawerView.swift in Sources */,
 				DABED17D2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift in Sources */,
+				DABB4CDC2F472E4200111AF3 /* InputRowInputView.swift in Sources */,
 				DA94AEB42EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift in Sources */,
 				DA48001A2D83742A009CF127 /* DebugSettingsView.swift in Sources */,
 				938BF9D324EFD0B700E6B52F /* UIViewController+Localization.swift in Sources */,

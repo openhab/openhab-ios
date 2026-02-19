@@ -21,20 +21,44 @@ enum RollerShutterCommand: String {
     case stop = "STOP"
 }
 
-struct RollershutterRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-    @State private var triggerUpFeedback = false
-    @State private var triggerStopFeedback = false
-    @State private var triggerDownFeedback = false
+private struct RollershutterRowConfig {
+    let input: BasicWidgetRowInput
+    let iconWidget: OpenHABWidget
+    let commandWidget: OpenHABWidget
+    let viewModel: SitemapPageViewModel
+    let triggerUpFeedback: Binding<Bool>
+    let triggerStopFeedback: Binding<Bool>
+    let triggerDownFeedback: Binding<Bool>
+}
+
+@MainActor
+private func makeRollershutterRowContent(_ config: RollershutterRowConfig) -> RollershutterRowContent {
+    RollershutterRowContent(
+        input: config.input,
+        iconWidget: config.iconWidget,
+        triggerUpFeedback: config.triggerUpFeedback,
+        triggerStopFeedback: config.triggerStopFeedback,
+        triggerDownFeedback: config.triggerDownFeedback
+    ) { command in
+        config.viewModel.sendCommand(command.rawValue, for: config.commandWidget)
+    }
+}
+
+private struct RollershutterRowContent: View {
+    let input: BasicWidgetRowInput
+    let iconWidget: OpenHABWidget
+    @Binding var triggerUpFeedback: Bool
+    @Binding var triggerStopFeedback: Bool
+    @Binding var triggerDownFeedback: Bool
+    let onSendCommand: (RollerShutterCommand) -> Void
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetRollershutterView")
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                IconView(widget: widget)
+                IconView(widget: iconWidget)
                     .frame(width: 32, height: 32)
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -42,7 +66,7 @@ struct RollershutterRowView: View {
                         let labelText = displayState.labelText
                         Text(labelText)
                             .ohTextToken(.rowLabel)
-                            .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                            .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
                     }
                 }
 
@@ -51,7 +75,7 @@ struct RollershutterRowView: View {
                 Button {
                     triggerUpFeedback.toggle()
                     logger.info("\("up button pressed")")
-                    viewModel.sendCommand(RollerShutterCommand.up.rawValue, for: widget)
+                    onSendCommand(.up)
                 } label: {
                     Image(systemSymbol: .chevronUp)
                         .font(.title2)
@@ -64,7 +88,7 @@ struct RollershutterRowView: View {
                 Button {
                     triggerStopFeedback.toggle()
                     logger.info("\("stop button pressed")")
-                    viewModel.sendCommand(RollerShutterCommand.stop.rawValue, for: widget)
+                    onSendCommand(.stop)
                 } label: {
                     Image(systemSymbol: .stop)
                         .font(.title2)
@@ -77,7 +101,7 @@ struct RollershutterRowView: View {
                 Button {
                     triggerDownFeedback.toggle()
                     logger.info("\("down button pressed")")
-                    viewModel.sendCommand(RollerShutterCommand.down.rawValue, for: widget)
+                    onSendCommand(.down)
                 } label: {
                     Image(systemSymbol: .chevronDown)
                         .font(.title2)
@@ -88,6 +112,55 @@ struct RollershutterRowView: View {
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerDownFeedback)
             }
         }
+    }
+}
+
+struct RollershutterRowInputView: View {
+    let rowID: RowID
+    let input: BasicWidgetRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+    @State private var triggerUpFeedback = false
+    @State private var triggerStopFeedback = false
+    @State private var triggerDownFeedback = false
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeRollershutterRowContent(
+                RollershutterRowConfig(
+                    input: input,
+                    iconWidget: widget,
+                    commandWidget: widget,
+                    viewModel: viewModel,
+                    triggerUpFeedback: $triggerUpFeedback,
+                    triggerStopFeedback: $triggerStopFeedback,
+                    triggerDownFeedback: $triggerDownFeedback
+                )
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+struct RollershutterRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+    @State private var triggerUpFeedback = false
+    @State private var triggerStopFeedback = false
+    @State private var triggerDownFeedback = false
+
+    var body: some View {
+        makeRollershutterRowContent(
+            RollershutterRowConfig(
+                input: BasicWidgetRowInput.from(widget: widget),
+                iconWidget: widget,
+                commandWidget: widget,
+                viewModel: viewModel,
+                triggerUpFeedback: $triggerUpFeedback,
+                triggerStopFeedback: $triggerStopFeedback,
+                triggerDownFeedback: $triggerDownFeedback
+            )
+        )
     }
 }
 

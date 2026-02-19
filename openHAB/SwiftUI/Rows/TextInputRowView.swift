@@ -14,37 +14,57 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct TextInputRowView: View {
-    @ObservedObject var widget: OpenHABWidget
+private struct TextInputRowConfig {
+    let input: BasicWidgetRowInput
+    let widget: OpenHABWidget
+    let viewModel: SitemapPageViewModel
+}
+
+@MainActor
+private func makeTextInputRowContent(_ config: TextInputRowConfig) -> TextInputRowContent {
+    TextInputRowContent(
+        input: config.input,
+        iconWidget: config.widget,
+        inputHint: config.widget.inputHint
+    ) { command in
+        config.viewModel.sendCommand(command, for: config.widget)
+    }
+}
+
+private struct TextInputRowContent: View {
+    let input: BasicWidgetRowInput
+    let iconWidget: OpenHABWidget
+    let inputHint: OpenHABWidget.InputHint?
+    let onSendCommand: (String) -> Void
+
     @State private var inputText = ""
     @FocusState private var isTextFieldFocused: Bool
-    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         HStack {
-            IconView(widget: widget)
+            IconView(widget: iconWidget)
                 .frame(width: 32, height: 32)
 
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
                 Text(labelText)
                     .ohTextToken(.rowLabel)
-                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
             Spacer()
 
             TextField("Enter text", text: $inputText)
-                .multilineTextAlignment(widget.inputHint == .number ? .trailing : .leading)
+                .multilineTextAlignment(inputHint == .number ? .trailing : .leading)
                 .textFieldStyle(.roundedBorder)
                 .focused($isTextFieldFocused)
                 .onSubmit {
                     sendTextCommand()
                 }
-                .disabled(widget.readOnly ?? false)
+                .disabled(input.readOnly)
         }
         .onAppear {
             inputText = displayState.effectiveState
@@ -58,8 +78,43 @@ struct TextInputRowView: View {
 
     private func sendTextCommand() {
         logger.info("Sending text command: \(inputText)")
-        viewModel.sendCommand(inputText, for: widget)
+        onSendCommand(inputText)
         isTextFieldFocused = false
+    }
+}
+
+struct TextInputRowInputView: View {
+    let rowID: RowID
+    let input: BasicWidgetRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeTextInputRowContent(
+                TextInputRowConfig(
+                    input: input,
+                    widget: widget,
+                    viewModel: viewModel
+                )
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+struct TextInputRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        makeTextInputRowContent(
+            TextInputRowConfig(
+                input: BasicWidgetRowInput.from(widget: widget),
+                widget: widget,
+                viewModel: viewModel
+            )
+        )
     }
 }
 

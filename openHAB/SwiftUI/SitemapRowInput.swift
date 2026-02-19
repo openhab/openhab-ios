@@ -61,7 +61,7 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
     case rollershutter(RowID, BasicWidgetRowInput)
     case toggle(RowID, BasicWidgetRowInput)
     case input(RowID, BasicWidgetRowInput)
-    case colorPicker(RowID, BasicWidgetRowInput)
+    case colorPicker(RowID, ColorPickerRowInput)
     case media(RowID, BasicWidgetRowInput)
     case colorTemperature(RowID, BasicWidgetRowInput)
     case buttonGrid(RowID, BasicWidgetRowInput)
@@ -164,12 +164,21 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
                 input.numberPattern ?? "",
                 "\(input.readOnly)"
             ].joined(separator: "|")
+        case let .colorPicker(_, input):
+            [
+                input.widgetId,
+                input.displayState.effectiveState,
+                input.displayState.labelText,
+                input.displayState.labelValue ?? "",
+                input.labelColor,
+                input.valueColor,
+                "\(input.readOnly)"
+            ].joined(separator: "|")
         case let .frame(_, input),
              let .text(_, input),
              let .rollershutter(_, input),
              let .toggle(_, input),
              let .input(_, input),
-             let .colorPicker(_, input),
              let .media(_, input),
              let .colorTemperature(_, input),
              let .buttonGrid(_, input),
