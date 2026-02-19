@@ -149,6 +149,7 @@
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA599B82EAC0FE7003A8726 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DAA599B72EAC0FE7003A8726 /* AppIcon.icon */; };
 		DAA599B92EAC0FE7003A8726 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DAA599B72EAC0FE7003A8726 /* AppIcon.icon */; };
+		DABB4CD42F47135900111AF3 /* WidgetRowInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CD32F47135900111AF3 /* WidgetRowInputs.swift */; };
 		DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */; };
 		DABED17B2E451694000B92EF /* BonjourDiscoverySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */; };
 		DABED17D2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */; };
@@ -497,6 +498,7 @@
 		DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
 		DAA599B72EAC0FE7003A8726 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		DABB4CD22F45EFD100111AF3 /* openHABWatch.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = openHABWatch.xctestplan; path = TestPlans/openHABWatch.xctestplan; sourceTree = "<group>"; };
+		DABB4CD32F47135900111AF3 /* WidgetRowInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetRowInputs.swift; sourceTree = "<group>"; };
 		DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoverySheet.swift; sourceTree = "<group>"; };
 		DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoveryViewModel.swift; sourceTree = "<group>"; };
 		DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandlerTests.swift; sourceTree = "<group>"; };
@@ -886,6 +888,7 @@
 				DAF5AA672E4F3A38004F18D7 /* EmbeddingRowView.swift */,
 				DA64ACA92DBEAD9000294F60 /* SitemapNavigationView.swift */,
 				DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */,
+				DABB4CD32F47135900111AF3 /* WidgetRowInputs.swift */,
 				DAC949FF2E21A473007E67B7 /* Rows */,
 			);
 			path = SwiftUI;
@@ -1764,6 +1767,7 @@
 				DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */,
 				DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */,
 				DA7F002D2EB376CF00DE943A /* ServerCertificatesView.swift in Sources */,
+				DABB4CD42F47135900111AF3 /* WidgetRowInputs.swift in Sources */,
 				7BFFEA908B9E47FCB5C46E6E /* VideoStreamManager.swift in Sources */,
 				DFB2623B18830A3600D3244D /* AppDelegate.swift in Sources */,
 				652B81092E2193DA00648510 /* ScreenSaverManager.swift in Sources */,

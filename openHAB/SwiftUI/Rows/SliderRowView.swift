@@ -14,90 +14,14 @@ import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
 
-private struct SliderRowState {
-    let widgetId: String
-    let displayState: WidgetDisplayState
-    let numberPattern: String?
-    let unit: String?
-    let readOnly: Bool
-    let switchSupport: Bool
-    let step: Double
-    let labelColor: String
-    let valueColor: String
-    let shouldSendUpdatesDuringMove: Bool
-    let serverValue: Double
-
-    var sliderCommandKey: String {
-        "slider-\(widgetId)"
-    }
-
-    var sliderRange: ClosedRange<Double> {
-        displayState.minValue ... displayState.maxValue
-    }
-
-    static func from(widget: OpenHABWidget) -> SliderRowState {
-        let displayState = widget.displayState
-        let numberPattern = if let pattern = widget.pattern, !pattern.isEmpty {
-            pattern
-        } else {
-            widget.item?.stateDescription?.numberPattern
-        }
-        // For item-backed sliders, adjustedValue is the most stable source of truth for position.
-        // It is derived from the item state and avoids stale text/state snapshots.
-        let serverValue = if widget.item != nil {
-            displayState.adjustedValue
-        } else {
-            parseServerValue(displayState: displayState, numberPattern: numberPattern)
-        }
-
-        return SliderRowState(
-            widgetId: widget.widgetId,
-            displayState: displayState,
-            numberPattern: numberPattern,
-            unit: widget.unit,
-            readOnly: widget.readOnly ?? false,
-            switchSupport: widget.switchSupport,
-            step: widget.step,
-            labelColor: widget.labelcolor,
-            valueColor: widget.valuecolor,
-            shouldSendUpdatesDuringMove: widget.shouldUseSliderUpdatesDuringMove(),
-            serverValue: adjustedToStep(serverValue, displayState: displayState)
-        )
-    }
-
-    private static func parseServerValue(displayState: WidgetDisplayState, numberPattern: String?) -> Double {
-        let effectiveState = displayState.effectiveState
-        if !effectiveState.isEmpty,
-           effectiveState != "NULL",
-           effectiveState != "UNDEF",
-           effectiveState.caseInsensitiveCompare("undefined") != .orderedSame {
-            return effectiveState.parseAsNumber(format: numberPattern).value
-        }
-
-        // Fallback for widgets whose item state is not directly usable but label value is present.
-        if let labelValue = displayState.labelValue, !labelValue.isEmpty {
-            return labelValue.parseAsNumber(format: numberPattern).value
-        }
-
-        return displayState.adjustedValue
-    }
-
-    private static func adjustedToStep(_ raw: Double, displayState: WidgetDisplayState) -> Double {
-        let range = displayState.minValue ... displayState.maxValue
-        let clamped = raw.clamped(to: range)
-        guard displayState.step > 0 else { return clamped }
-
-        var adjusted = floor((clamped - displayState.minValue) / displayState.step) * displayState.step
-        adjusted += displayState.minValue
-        return adjusted.clamped(to: range)
-    }
-}
-
-struct SliderRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    var fallbackSymbol: SFSymbol?
-
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+private struct SliderRowContent: View {
+    let input: SliderRowInput
+    let widgetVersion: Int
+    let iconWidget: OpenHABWidget
+    let fallbackSymbol: SFSymbol?
+    let onToggleSwitch: (String) -> Void
+    let onCancelPending: (String?) -> Void
+    let onSendValue: (Double, WidgetCommandPolicy, WidgetCommandPhase, String?) -> Void
 
     /// Ephemeral local drag value. Server state remains authoritative outside active drag.
     @State private var dragValue: Double?
@@ -106,48 +30,42 @@ struct SliderRowView: View {
     @State private var dragWidgetId: String?
 
     var body: some View {
-        let state = SliderRowState.from(widget: widget)
-        let widgetVersion = viewModel.widgetUpdateVersion(for: state.widgetId)
-        let displayedSliderValue = effectiveValue(state: state)
+        let displayedSliderValue = effectiveValue(state: input)
         HStack {
-            if state.switchSupport {
+            if input.switchSupport {
                 Button {
-                    viewModel.sendCommand(displayedSliderValue <= state.displayState.minValue ? "ON" : "OFF", for: widget)
+                    onToggleSwitch(displayedSliderValue <= input.displayState.minValue ? "ON" : "OFF")
                 } label: {
-                    labelContent(state: state)
+                    labelContent(state: input)
                 }
                 .buttonStyle(.plain)
-                .disabled(state.readOnly)
+                .disabled(input.readOnly)
             } else {
-                labelContent(state: state)
+                labelContent(state: input)
             }
 
-            Slider(value: sliderBinding(state: state), in: state.sliderRange, step: state.step) { editing in
+            Slider(value: sliderBinding(state: input), in: input.sliderRange, step: input.step) { editing in
                 isEditing = editing
                 if editing {
-                    dragWidgetId = state.widgetId
+                    dragWidgetId = input.widgetId
                     dragStartVersion = widgetVersion
                     dragValue = displayedSliderValue
                     return
                 }
 
                 // Always send the final value on release
-                if let item = widget.item {
-                    viewModel.cancelPendingCommand(for: item, key: state.sliderCommandKey)
-                } else {
-                    viewModel.cancelPendingCommand(for: widget, key: state.sliderCommandKey)
-                }
-                sendSliderUpdate(
+                onCancelPending(input.sliderCommandKey)
+                onSendValue(
                     displayedSliderValue,
-                    policy: .finalOnly,
-                    phase: .release,
-                    key: state.sliderCommandKey
+                    .finalOnly,
+                    .release,
+                    input.sliderCommandKey
                 )
                 dragValue = nil
                 dragStartVersion = nil
                 dragWidgetId = nil
             }
-            .disabled(state.readOnly)
+            .disabled(input.readOnly)
         }
         .onAppear {
             isEditing = false
@@ -155,7 +73,7 @@ struct SliderRowView: View {
             dragStartVersion = nil
             dragWidgetId = nil
         }
-        .onChange(of: state.widgetId) { _ in
+        .onChange(of: input.widgetId) { _ in
             isEditing = false
             dragValue = nil
             dragStartVersion = nil
@@ -165,7 +83,7 @@ struct SliderRowView: View {
             guard isEditing else { return }
             // If server refresh advanced while dragging, only cancel when the server value diverges
             // meaningfully from the local drag value. This avoids jarring cancels on polling echoes.
-            guard dragWidgetId == state.widgetId, let dragStartVersion else {
+            guard dragWidgetId == input.widgetId, let dragStartVersion else {
                 isEditing = false
                 dragValue = nil
                 self.dragStartVersion = nil
@@ -174,9 +92,9 @@ struct SliderRowView: View {
             }
 
             if widgetVersion != dragStartVersion {
-                let threshold = max(state.step, 0.001)
-                let currentDragValue = dragValue ?? state.serverValue
-                let hasMeaningfulServerChange = abs(state.serverValue - currentDragValue) > threshold
+                let threshold = max(input.step, 0.001)
+                let currentDragValue = dragValue ?? input.serverValue
+                let hasMeaningfulServerChange = abs(input.serverValue - currentDragValue) > threshold
                 if hasMeaningfulServerChange {
                     isEditing = false
                     dragValue = nil
@@ -191,11 +109,11 @@ struct SliderRowView: View {
     }
 
     @ViewBuilder
-    private func labelContent(state: SliderRowState) -> some View {
+    private func labelContent(state: SliderRowInput) -> some View {
         let displayedValue = effectiveValue(state: state)
         let currentValueText = currentValueText(state: state, value: displayedValue)
         HStack {
-            IconView(widget: widget, fallbackSymbol: fallbackSymbol)
+            IconView(widget: iconWidget, fallbackSymbol: fallbackSymbol)
                 .frame(width: 32, height: 32)
 
             if !state.displayState.labelText.isEmpty {
@@ -216,21 +134,7 @@ struct SliderRowView: View {
         .contentShape(Rectangle())
     }
 
-    private func sendSliderUpdate(_ newValue: Double,
-                                  policy: WidgetCommandPolicy,
-                                  phase: WidgetCommandPhase = .change,
-                                  key: String?) {
-        var numberState = widget.stateValueAsNumberState
-        numberState = numberState ?? NumberState(
-            value: newValue,
-            unit: widget.unit,
-            format: widget.pattern ?? widget.item?.stateDescription?.numberPattern
-        )
-        numberState?.value = newValue
-        viewModel.sendToUpdate(item: widget.item, state: numberState, policy: policy, phase: phase, key: key)
-    }
-
-    private func sliderBinding(state: SliderRowState) -> Binding<Double> {
+    private func sliderBinding(state: SliderRowInput) -> Binding<Double> {
         Binding(
             get: { effectiveValue(state: state) },
             set: { newValue in
@@ -238,21 +142,22 @@ struct SliderRowView: View {
 
                 // Send updates during drag if enabled (throttled)
                 if isEditing, state.shouldSendUpdatesDuringMove {
-                    sendSliderUpdate(
+                    onSendValue(
                         newValue,
-                        policy: WidgetCommandDefaults.slider,
-                        key: state.sliderCommandKey
+                        WidgetCommandDefaults.slider,
+                        .change,
+                        state.sliderCommandKey
                     )
                 }
             }
         )
     }
 
-    private func effectiveValue(state: SliderRowState) -> Double {
+    private func effectiveValue(state: SliderRowInput) -> Double {
         isEditing ? (dragValue ?? state.serverValue) : state.serverValue
     }
 
-    private func currentValueText(state: SliderRowState, value: Double) -> String {
+    private func currentValueText(state: SliderRowInput, value: Double) -> String {
         if let numberPattern = state.numberPattern, !numberPattern.isEmpty {
             let formatted = NumberState(
                 value: value,
@@ -264,6 +169,43 @@ struct SliderRowView: View {
             }
         }
         return value.valueText(step: state.step)
+    }
+}
+
+struct SliderRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    var fallbackSymbol: SFSymbol?
+
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        let input = SliderRowInput.from(widget: widget)
+        SliderRowContent(
+            input: input,
+            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+            iconWidget: widget,
+            fallbackSymbol: fallbackSymbol,
+            onToggleSwitch: { command in
+                viewModel.sendCommand(command, for: widget)
+            },
+            onCancelPending: { key in
+                if let item = widget.item {
+                    viewModel.cancelPendingCommand(for: item, key: key)
+                } else {
+                    viewModel.cancelPendingCommand(for: widget, key: key)
+                }
+            },
+            onSendValue: { value, policy, phase, key in
+                var numberState = widget.stateValueAsNumberState
+                numberState = numberState ?? NumberState(
+                    value: value,
+                    unit: widget.unit,
+                    format: widget.pattern ?? widget.item?.stateDescription?.numberPattern
+                )
+                numberState?.value = value
+                viewModel.sendToUpdate(item: widget.item, state: numberState, policy: policy, phase: phase, key: key)
+            }
+        )
     }
 }
 

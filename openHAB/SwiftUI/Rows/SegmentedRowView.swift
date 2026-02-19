@@ -15,36 +15,38 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
-private struct SegmentedRowInput {
-    let displayState: WidgetDisplayState
-    let mappings: [OpenHABWidgetMapping]
-    let labelColor: String
-    let valueColor: String
-    let widgetId: String
-
-    static func from(widget: OpenHABWidget) -> SegmentedRowInput {
-        let displayState = widget.displayState
-        return SegmentedRowInput(
-            displayState: displayState,
-            mappings: displayState.mappings,
-            labelColor: widget.labelcolor,
-            valueColor: widget.valuecolor,
-            widgetId: displayState.widgetId
-        )
-    }
-}
-
 // swiftlint:disable:next file_types_order
 struct SegmentedRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
-    @Environment(\.colorScheme) var colorScheme
 
     /// Optional SF Symbol fallback for IconView (useful for previews)
     var fallbackSymbol: SFSymbol?
 
-    private let logger = Logger(subsystem: "org.openhab", category: "WidgetSegmentedView")
+    var body: some View {
+        let input = SegmentedRowInput.from(widget: widget)
+        SegmentedRowContent(
+            input: input,
+            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+            iconWidget: widget,
+            fallbackSymbol: fallbackSymbol,
+            sendCommand: { command, policy, phase in
+                viewModel.sendCommand(command, for: widget, policy: policy, phase: phase)
+            }
+        )
+    }
+}
 
+private struct SegmentedRowContent: View {
+    let input: SegmentedRowInput
+    let widgetVersion: Int
+    let iconWidget: OpenHABWidget
+    let fallbackSymbol: SFSymbol?
+    let sendCommand: (String, WidgetCommandPolicy, WidgetCommandPhase) -> Void
+
+    @Environment(\.colorScheme) var colorScheme
+
+    private let logger = Logger(subsystem: "org.openhab", category: "WidgetSegmentedView")
     @State private var optimisticSelectedIndex: Int?
     @State private var optimisticBaseState: String?
     @State private var optimisticWidgetId: String?
@@ -53,11 +55,9 @@ struct SegmentedRowView: View {
     @State private var singlePressed = false
 
     var body: some View {
-        let input = SegmentedRowInput.from(widget: widget)
-        let widgetVersion = viewModel.widgetUpdateVersion(for: input.widgetId)
         let selectedIndex = effectiveSelectedIndex(displayState: input.displayState, mappings: input.mappings)
         HStack(spacing: 0) {
-            IconView(widget: widget, fallbackSymbol: fallbackSymbol)
+            IconView(widget: iconWidget, fallbackSymbol: fallbackSymbol)
                 .frame(width: 32, height: 32)
 
             if !input.displayState.labelText.isEmpty {
@@ -218,7 +218,7 @@ struct SegmentedRowView: View {
                                 widgetVersion: widgetVersion
                             )
                             logger.info("Segment mapping pressed, command: \(mapping.command)")
-                            viewModel.sendCommand(mapping.command, for: widget)
+                            sendCommand(mapping.command, .immediate, .change)
                         }
                     }
                     .onEnded { _ in
@@ -268,7 +268,7 @@ struct SegmentedRowView: View {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 optimisticSelectedIndex = index
             }
-            viewModel.sendCommand(mapping.command, for: widget)
+            sendCommand(mapping.command, .immediate, .change)
         } label: {
             Text(mapping.label)
                 .ohTextToken(.control)
@@ -310,11 +310,10 @@ struct SegmentedRowView: View {
                             pressedIndex = index
                             // Send command on press
                             logger.info("Sending press command: \(mapping.command)")
-                            viewModel.sendCommand(
+                            sendCommand(
                                 mapping.command,
-                                for: widget,
-                                policy: .pressRelease,
-                                phase: .press
+                                .pressRelease,
+                                .press
                             )
                         }
                     }
@@ -323,11 +322,10 @@ struct SegmentedRowView: View {
                         // Send release command on release
                         if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
                             logger.info("Sending release command: \(releaseCommand)")
-                            viewModel.sendCommand(
+                            sendCommand(
                                 releaseCommand,
-                                for: widget,
-                                policy: .pressRelease,
-                                phase: .release
+                                .pressRelease,
+                                .release
                             )
                         }
                     }

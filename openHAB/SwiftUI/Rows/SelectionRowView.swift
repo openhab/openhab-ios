@@ -15,30 +15,11 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
-private struct SelectionRowInput {
-    let displayState: WidgetDisplayState
-    let mappings: [OpenHABWidgetMapping]
-    let labelColor: String
-    let valueColor: String
-    let readOnly: Bool
-    let widgetId: String
-
-    static func from(widget: OpenHABWidget) -> SelectionRowInput {
-        let displayState = widget.displayState
-        return SelectionRowInput(
-            displayState: displayState,
-            mappings: displayState.mappings,
-            labelColor: widget.labelcolor,
-            valueColor: widget.valuecolor,
-            readOnly: widget.readOnly ?? false,
-            widgetId: displayState.widgetId
-        )
-    }
-}
-
-struct SelectionRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+private struct SelectionRowContent: View {
+    let input: SelectionRowInput
+    let widgetVersion: Int
+    let iconWidget: OpenHABWidget
+    let onSelect: (String) -> Void
 
     private let logger = Logger(subsystem: "org.openhab", category: "SelectionRowView")
 
@@ -48,11 +29,9 @@ struct SelectionRowView: View {
     @State private var optimisticStartVersion: Int?
 
     var body: some View {
-        let input = SelectionRowInput.from(widget: widget)
-        let widgetVersion = viewModel.widgetUpdateVersion(for: input.widgetId)
         let displayedCommand = effectiveCommand(displayState: input.displayState)
         ZStack {
-            rowContent(input: input, displayedCommand: displayedCommand)
+            rowContent(displayedCommand: displayedCommand)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .animation(nil, value: displayedCommand)
 
@@ -66,7 +45,7 @@ struct SelectionRowView: View {
                         optimisticBaseState = input.displayState.effectiveState
                         optimisticWidgetId = input.widgetId
                         optimisticStartVersion = widgetVersion
-                        viewModel.sendCommand(mapping.command, for: widget)
+                        onSelect(mapping.command)
                     } label: {
                         if isSelected {
                             Label(mapping.label, systemSymbol: .checkmark)
@@ -106,9 +85,9 @@ struct SelectionRowView: View {
     }
 
     @ViewBuilder
-    private func rowContent(input: SelectionRowInput, displayedCommand: String) -> some View {
+    private func rowContent(displayedCommand: String) -> some View {
         HStack {
-            IconView(widget: widget)
+            IconView(widget: iconWidget)
                 .frame(width: 32, height: 32)
 
             if !input.displayState.labelText.isEmpty {
@@ -154,5 +133,21 @@ struct SelectionRowView: View {
         optimisticBaseState = nil
         optimisticWidgetId = nil
         optimisticStartVersion = nil
+    }
+}
+
+struct SelectionRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        let input = SelectionRowInput.from(widget: widget)
+        SelectionRowContent(
+            input: input,
+            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+            iconWidget: widget
+        ) { command in
+            viewModel.sendCommand(command, for: widget)
+        }
     }
 }
