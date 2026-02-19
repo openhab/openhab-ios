@@ -120,10 +120,32 @@ private struct SelectionRowContent: View {
 
     /// Returns the label of the currently selected mapping, or the widget's labelValue as fallback.
     private func selectedValueText(displayState: WidgetDisplayState, displayedCommand: String) -> String? {
-        if let selectedLabel = displayState.mappings.first(where: { $0.command == displayedCommand })?.label, !selectedLabel.isEmpty {
+        if let selectedLabel = mappedLabel(for: displayedCommand, mappings: input.mappings), !selectedLabel.isEmpty {
             return selectedLabel
         }
         return displayState.selectedLabel ?? displayState.labelValue
+    }
+
+    private func mappedLabel(for command: String, mappings: [OpenHABWidgetMapping]) -> String? {
+        if let exact = mappings.first(where: { $0.command == command })?.label {
+            return exact
+        }
+
+        let trimmedCommand = command.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let trimmed = mappings.first(where: { $0.command.trimmingCharacters(in: .whitespacesAndNewlines) == trimmedCommand })?.label {
+            return trimmed
+        }
+
+        if let commandValue = Double(trimmedCommand) {
+            if let numeric = mappings.first(where: {
+                guard let mappingValue = Double($0.command.trimmingCharacters(in: .whitespacesAndNewlines)) else { return false }
+                return mappingValue == commandValue
+            })?.label {
+                return numeric
+            }
+        }
+
+        return nil
     }
 
     private func clearOptimisticSelection() {

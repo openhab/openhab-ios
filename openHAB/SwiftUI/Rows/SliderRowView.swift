@@ -17,6 +17,7 @@ import SwiftUI
 private struct SliderRowConfig {
     let input: SliderRowInput
     let widgetVersion: Int
+    let overrideValue: Double?
     let fallbackSymbol: SFSymbol?
     let viewModel: SitemapPageViewModel
 }
@@ -26,6 +27,7 @@ private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent
     SliderRowContent(
         input: config.input,
         widgetVersion: config.widgetVersion,
+        overrideValue: config.overrideValue,
         fallbackSymbol: config.fallbackSymbol,
         onToggleSwitch: { command in
             guard let itemName = config.input.itemName else { return }
@@ -37,6 +39,7 @@ private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent
         },
         onSendValue: { value, policy, phase, key in
             guard let itemName = config.input.itemName else { return }
+            config.viewModel.setSliderOverrideValue(value, for: itemName)
             let numberState = NumberState(
                 value: value,
                 unit: config.input.unit,
@@ -50,6 +53,7 @@ private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent
 private struct SliderRowContent: View {
     let input: SliderRowInput
     let widgetVersion: Int
+    let overrideValue: Double?
     let fallbackSymbol: SFSymbol?
     let onToggleSwitch: (String) -> Void
     let onCancelPending: (String?) -> Void
@@ -185,7 +189,10 @@ private struct SliderRowContent: View {
     }
 
     private func effectiveValue(state: SliderRowInput) -> Double {
-        isEditing ? (dragValue ?? state.serverValue) : state.serverValue
+        if isEditing {
+            return dragValue ?? state.serverValue
+        }
+        return overrideValue ?? state.serverValue
     }
 
     private func currentValueText(state: SliderRowInput, value: Double) -> String {
@@ -214,6 +221,7 @@ struct SliderRowView: View {
             SliderRowConfig(
                 input: input,
                 widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+                overrideValue: viewModel.sliderOverrideValue(for: input.itemName),
                 fallbackSymbol: fallbackSymbol,
                 viewModel: viewModel
             )

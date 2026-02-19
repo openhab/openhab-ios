@@ -58,157 +58,6 @@ enum RowInteractionState: Equatable {
     case failed
 }
 
-private struct QueuedCommand {
-    let command: String
-    let version: Int
-}
-
-private struct WidgetRenderKey: Equatable {
-    let label: String
-    let icon: String
-    let state: String
-    let iconColor: String
-    let labelColor: String
-    let valueColor: String
-    let url: String
-    let period: String
-    let service: String
-    let legend: Bool?
-    let refresh: Int
-    let height: Double?
-    let forceAsItem: Bool?
-    let visibility: Bool
-    let staticIcon: Bool?
-    let switchSupport: Bool
-    let minValue: Double
-    let maxValue: Double
-    let step: Double
-    let pattern: String?
-    let unit: String?
-    let type: OpenHABWidget.WidgetType
-    let linkedPageLink: String?
-    let linkedPageTitle: String?
-    let mappings: [WidgetMappingKey]
-    let item: WidgetItemKey?
-    let childWidgetIDs: [String]
-
-    static func from(widget: OpenHABWidget) -> WidgetRenderKey {
-        WidgetRenderKey(
-            label: widget.label,
-            icon: widget.icon,
-            state: widget.state,
-            iconColor: widget.iconColor,
-            labelColor: widget.labelcolor,
-            valueColor: widget.valuecolor,
-            url: widget.url,
-            period: widget.period,
-            service: widget.service,
-            legend: widget.legend,
-            refresh: widget.refresh,
-            height: widget.height,
-            forceAsItem: widget.forceAsItem,
-            visibility: widget.visibility,
-            staticIcon: widget.staticIcon,
-            switchSupport: widget.switchSupport,
-            minValue: widget.minValue,
-            maxValue: widget.maxValue,
-            step: widget.step,
-            pattern: widget.pattern,
-            unit: widget.unit,
-            type: widget.type,
-            linkedPageLink: widget.linkedPage?.link,
-            linkedPageTitle: widget.linkedPage?.title,
-            mappings: widget.mappings.map(WidgetMappingKey.init),
-            item: WidgetItemKey.from(item: widget.item),
-            childWidgetIDs: widget.widgets.map(\.widgetId)
-        )
-    }
-}
-
-private struct WidgetMappingKey: Equatable {
-    let command: String
-    let label: String
-    let row: Int?
-    let column: Int?
-    let icon: String?
-    let releaseCommand: String?
-
-    init(_ mapping: OpenHABWidgetMapping) {
-        command = mapping.command
-        label = mapping.label
-        row = mapping.row
-        column = mapping.column
-        icon = mapping.icon
-        releaseCommand = mapping.releaseCommand
-    }
-}
-
-private struct WidgetItemKey: Equatable {
-    let name: String
-    let state: String?
-    let link: String
-    let label: String
-    let type: OpenHABItem.ItemType?
-    let groupType: OpenHABItem.ItemType?
-    let stateDescription: WidgetStateDescriptionKey?
-    let commandOptions: [WidgetCommandOptionKey]
-
-    static func from(item: OpenHABItem?) -> WidgetItemKey? {
-        guard let item else { return nil }
-        return WidgetItemKey(
-            name: item.name,
-            state: item.state,
-            link: item.link,
-            label: item.label,
-            type: item.type,
-            groupType: item.groupType,
-            stateDescription: WidgetStateDescriptionKey.from(stateDescription: item.stateDescription),
-            commandOptions: item.commandDescription?.commandOptions.map(WidgetCommandOptionKey.init) ?? []
-        )
-    }
-}
-
-private struct WidgetStateDescriptionKey: Equatable {
-    let minimum: Double
-    let maximum: Double
-    let step: Double
-    let readOnly: Bool
-    let numberPattern: String?
-    let options: [WidgetOptionKey]
-
-    static func from(stateDescription: OpenHABStateDescription?) -> WidgetStateDescriptionKey? {
-        guard let stateDescription else { return nil }
-        return WidgetStateDescriptionKey(
-            minimum: stateDescription.minimum,
-            maximum: stateDescription.maximum,
-            step: stateDescription.step,
-            readOnly: stateDescription.readOnly,
-            numberPattern: stateDescription.numberPattern,
-            options: stateDescription.options.map(WidgetOptionKey.init)
-        )
-    }
-}
-
-private struct WidgetOptionKey: Equatable {
-    let value: String
-    let label: String
-
-    init(_ option: OpenHABOptions) {
-        value = option.value
-        label = option.label
-    }
-}
-
-private struct WidgetCommandOptionKey: Equatable {
-    let command: String
-    let label: String?
-
-    init(_ option: OpenHABCommandOptions) {
-        command = option.command
-        label = option.label
-    }
-}
-
 @MainActor
 class SitemapPageViewModel: ObservableObject {
     @Published var currentPage: OpenHABPage?
@@ -248,6 +97,8 @@ class SitemapPageViewModel: ObservableObject {
     private var commandStateVersions: [String: Int] = [:]
     private var queuedCommands: [String: QueuedCommand] = [:]
     private var rowWidgetIndex: [RowID: OpenHABWidget] = [:]
+    private var sliderValueOverrides: [String: Double] = [:]
+    private var sliderOverrideResetTasks: [String: Task<Void, Never>] = [:]
 
     var relevantWidgets: [OpenHABWidget] {
         let widgets = currentPage?.widgets ?? []
@@ -442,12 +293,31 @@ class SitemapPageViewModel: ObservableObject {
         widgetUpdateVersions[widgetId] ?? 0
     }
 
+    func sliderOverrideValue(for itemname: String?) -> Double? {
+        guard let itemname, !itemname.isEmpty else { return nil }
+        return sliderValueOverrides[itemname]
+    }
+
+    func setSliderOverrideValue(_ value: Double, for itemname: String?) {
+        guard let itemname, !itemname.isEmpty else { return }
+        sliderOverrideResetTasks[itemname]?.cancel()
+        sliderOverrideResetTasks[itemname] = nil
+        sliderValueOverrides[itemname] = value
+    }
+
+    @discardableResult
+    func syncSliderOverridesWithServerState(for widgets: [OpenHABWidget]) -> Int {
+        clearSyncedSliderOverrides(using: widgets)
+    }
+
     deinit {
         connectionObserverTask?.cancel()
         networkStatusObserverTask?.cancel()
         pageHandlingTask?.cancel()
         commandStateResetTasks.values.forEach { $0.cancel() }
         commandStateResetTasks.removeAll()
+        sliderOverrideResetTasks.values.forEach { $0.cancel() }
+        sliderOverrideResetTasks.removeAll()
     }
 }
 
@@ -555,7 +425,7 @@ extension SitemapPageViewModel {
         }
 
         if let page = initialPage {
-            updateUI(with: page)
+            updateUI(with: page, origin: .initialPoll)
         }
     }
 
@@ -573,13 +443,14 @@ extension SitemapPageViewModel {
             }
 
             if let page {
-                updateUI(with: page)
+                updateUI(with: page, origin: .longPolling)
             }
         }
     }
 
     @MainActor
-    private func updateUI(with page: OpenHABPage) {
+    private func updateUI(with page: OpenHABPage, origin: PageUpdateOrigin) {
+        logger.debug("Incoming sitemap update origin=\(origin.rawValue, privacy: .public), widgets=\(page.widgets.count)")
         let newWidgets = page.widgets
 
         // Check if list structure changed (count, order, or IDs)
@@ -600,6 +471,7 @@ extension SitemapPageViewModel {
         }
 
         trackWidgetUpdates(in: reconciledWidgets)
+        _ = clearSyncedSliderOverrides(using: reconciledWidgets)
         rebuildRowInputs()
     }
 
@@ -607,6 +479,41 @@ extension SitemapPageViewModel {
         for widget in widgets {
             widgetUpdateVersions[widget.widgetId, default: 0] += 1
         }
+    }
+
+    private func clearSyncedSliderOverrides(using widgets: [OpenHABWidget]) -> Int {
+        guard !sliderValueOverrides.isEmpty else { return 0 }
+        var cleared = 0
+
+        for widget in widgets {
+            guard let item = widget.item else {
+                cleared += clearSyncedSliderOverrides(using: widget.widgets)
+                continue
+            }
+
+            let itemname = item.name
+            guard let overrideValue = sliderValueOverrides[itemname] else {
+                cleared += clearSyncedSliderOverrides(using: widget.widgets)
+                continue
+            }
+
+            let serverValue = item.state?.parseAsNumber(format: item.stateDescription?.numberPattern).value ?? .nan
+            guard serverValue.isFinite else {
+                cleared += clearSyncedSliderOverrides(using: widget.widgets)
+                continue
+            }
+
+            let threshold = max(widget.step, 0.001)
+            if abs(serverValue - overrideValue) <= threshold {
+                clearSliderOverride(for: itemname)
+                cleared += 1
+                logger.debug("Cleared slider override for \(itemname, privacy: .public) (server=\(serverValue), override=\(overrideValue))")
+            }
+
+            cleared += clearSyncedSliderOverrides(using: widget.widgets)
+        }
+
+        return cleared
     }
 
     func reload() async {
@@ -898,6 +805,7 @@ extension SitemapPageViewModel {
         commandDispatcher.cancelPending(for: itemname, key: key)
         if key == nil {
             queuedCommands.removeValue(forKey: itemname)
+            clearSliderOverride(for: itemname)
             if case .queued = commandStates[itemname] {
                 setCommandState(.idle, for: itemname)
             }
@@ -916,17 +824,22 @@ extension SitemapPageViewModel {
             phase: phase,
             key: key
         ) { [weak self] itemname, command in
-            self?.sendCommand(itemname: itemname, command: command)
+            self?.sendCommand(itemname: itemname, command: command, origin: .command)
         }
     }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         commandDispatcher.send(command, for: item, policy: .immediate, phase: .change) { [weak self] itemname, command in
-            self?.sendCommand(itemname: itemname, command: command)
+            self?.sendCommand(itemname: itemname, command: command, origin: .command)
         }
     }
 
     func sendCommand(itemname: String, command: String) {
+        sendCommand(itemname: itemname, command: command, origin: .command)
+    }
+
+    private func sendCommand(itemname: String, command: String, origin: CommandSendOrigin) {
+        logger.debug("Dispatching command origin=\(origin.rawValue, privacy: .public), item=\(itemname, privacy: .public), command=\(command, privacy: .private(mask: .hash))")
         let version = nextCommandVersion(for: itemname)
         if trackerStatus != .connected {
             queuedCommands[itemname] = QueuedCommand(command: command, version: version)
@@ -978,7 +891,7 @@ extension SitemapPageViewModel {
         }
         let command = state.commandString
         commandDispatcher.send(command, for: item, policy: policy, phase: phase, key: key) { [weak self] itemname, command in
-            self?.sendCommand(itemname: itemname, command: command)
+            self?.sendCommand(itemname: itemname, command: command, origin: .update)
         }
     }
 
@@ -993,7 +906,7 @@ extension SitemapPageViewModel {
         }
         let command = state.commandString
         commandDispatcher.send(command, for: itemname, policy: policy, phase: phase, key: key) { [weak self] itemname, command in
-            self?.sendCommand(itemname: itemname, command: command)
+            self?.sendCommand(itemname: itemname, command: command, origin: .update)
         }
     }
 }
@@ -1082,10 +995,12 @@ private extension SitemapPageViewModel {
     func handleCommandSuccess(for itemname: String, version: Int) {
         guard commandStateVersions[itemname] == version else { return }
         scheduleCommandStateReset(for: itemname, version: version, after: .milliseconds(450))
+        scheduleSliderOverrideResetFallback(for: itemname, version: version, after: .seconds(5))
     }
 
     func handleCommandFailure(for itemname: String, version: Int, errorDescription: String) {
         guard commandStateVersions[itemname] == version else { return }
+        clearSliderOverride(for: itemname)
         setCommandState(.failed(message: errorDescription), for: itemname)
     }
 
@@ -1097,6 +1012,22 @@ private extension SitemapPageViewModel {
             guard commandStateVersions[itemname] == version else { return }
             setCommandState(.idle, for: itemname)
         }
+    }
+
+    func scheduleSliderOverrideResetFallback(for itemname: String, version: Int, after delay: Duration) {
+        sliderOverrideResetTasks[itemname]?.cancel()
+        sliderOverrideResetTasks[itemname] = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: delay)
+            guard let self else { return }
+            guard commandStateVersions[itemname] == version else { return }
+            clearSliderOverride(for: itemname)
+        }
+    }
+
+    func clearSliderOverride(for itemname: String) {
+        sliderOverrideResetTasks[itemname]?.cancel()
+        sliderOverrideResetTasks[itemname] = nil
+        sliderValueOverrides.removeValue(forKey: itemname)
     }
 }
 
