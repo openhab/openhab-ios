@@ -97,13 +97,20 @@ struct EmbeddingRowInputView: View {
                 .contentShape(Rectangle())
                 .listRowInsets(regularRowInsets)
                 .listRowBackground(regularRowBackground)
-        case .generic:
-            Group {
-                if let widget = viewModel.widget(for: rowInput.rowID) {
-                    EmbeddingRowView(widget: widget)
-                } else {
-                    EmptyView()
+        case let .generic(rowID, input):
+            if input.hasLinkedPage {
+                Group {
+                    if let widget = viewModel.widget(for: rowID) {
+                        EmbeddingRowView(widget: widget)
+                    } else {
+                        EmptyView()
+                    }
                 }
+            } else {
+                GenericRowInputView(rowID: rowID, input: input)
+                    .contentShape(Rectangle())
+                    .listRowInsets(regularRowInsets)
+                    .listRowBackground(regularRowBackground)
             }
         @unknown default:
             Group {
@@ -116,7 +123,7 @@ struct EmbeddingRowInputView: View {
         }
     }
 
-    private func frameRowInsets(_ input: BasicWidgetRowInput) -> EdgeInsets {
+    private func frameRowInsets(_ input: FrameRowInput) -> EdgeInsets {
         let hasLabel = !input.displayState.labelText.isEmpty
         return hasLabel
             ? EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)

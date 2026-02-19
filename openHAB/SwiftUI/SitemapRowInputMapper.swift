@@ -37,9 +37,9 @@ enum SitemapRowInputMapper {
         case .segmentedSwitch:
             return SitemapRowInput.segmented(rowID, SegmentedRowInput.from(widget: widget))
         case .frame:
-            return SitemapRowInput.frame(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.frame(rowID, FrameRowInput.from(widget: widget))
         case .text:
-            return SitemapRowInput.text(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.text(rowID, TextRowInput.from(widget: widget))
         case .setpoint:
             return SitemapRowInput.setpoint(rowID, SetpointRowInput.from(widget: widget))
         case .rollershutterSwitch:

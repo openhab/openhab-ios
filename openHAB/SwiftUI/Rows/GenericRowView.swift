@@ -48,6 +48,25 @@ private struct GenericRowContent: View {
     }
 }
 
+struct GenericRowInputView: View {
+    let rowID: RowID
+    let input: GenericRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeGenericRowContent(
+                GenericRowConfig(
+                    input: input,
+                    widget: widget
+                )
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
 struct GenericRowView: View {
     @ObservedObject var widget: OpenHABWidget
 

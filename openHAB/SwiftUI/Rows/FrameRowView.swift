@@ -14,7 +14,7 @@ import OpenHABCore
 import SwiftUI
 
 private struct FrameRowConfig {
-    let input: BasicWidgetRowInput
+    let input: FrameRowInput
 }
 
 @MainActor
@@ -23,7 +23,7 @@ private func makeFrameRowContent(_ config: FrameRowConfig) -> FrameRowContent {
 }
 
 private struct FrameRowContent: View {
-    let input: BasicWidgetRowInput
+    let input: FrameRowInput
 
     var body: some View {
         let displayState = input.displayState
@@ -37,7 +37,7 @@ private struct FrameRowContent: View {
 }
 
 struct FrameRowInputView: View {
-    let input: BasicWidgetRowInput
+    let input: FrameRowInput
 
     var body: some View {
         makeFrameRowContent(
@@ -54,7 +54,7 @@ struct FrameRowView: View {
     var body: some View {
         makeFrameRowContent(
             FrameRowConfig(
-                input: BasicWidgetRowInput.from(widget: widget)
+                input: FrameRowInput.from(widget: widget)
             )
         )
     }

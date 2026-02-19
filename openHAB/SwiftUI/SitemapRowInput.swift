@@ -24,36 +24,11 @@ struct RowID: Hashable, Sendable {
     }
 }
 
-/// Lightweight generic row input for non-migrated row kinds.
-struct BasicWidgetRowInput: Sendable {
-    let widgetId: String
-    let renderingKind: WidgetRenderingKind
-    let displayState: WidgetDisplayState
-    let icon: String
-    let labelColor: String
-    let valueColor: String
-    let readOnly: Bool
-    let refresh: Int
-
-    static func from(widget: OpenHABWidget) -> BasicWidgetRowInput {
-        BasicWidgetRowInput(
-            widgetId: widget.widgetId,
-            renderingKind: widget.renderingKind,
-            displayState: widget.displayState,
-            icon: widget.icon,
-            labelColor: widget.labelcolor,
-            valueColor: widget.valuecolor,
-            readOnly: widget.readOnly ?? false,
-            refresh: widget.refresh
-        )
-    }
-}
-
 /// Draft immutable row union for a list-driven SwiftUI pipeline.
-/// Hot rows already have dedicated typed inputs.
+/// Each row case carries a dedicated typed input.
 enum SitemapRowInput: Identifiable, Equatable, Sendable {
-    case frame(RowID, BasicWidgetRowInput)
-    case text(RowID, BasicWidgetRowInput)
+    case frame(RowID, FrameRowInput)
+    case text(RowID, TextRowInput)
     case slider(RowID, SliderRowInput)
     case selection(RowID, SelectionRowInput)
     case segmented(RowID, SegmentedRowInput)
@@ -235,7 +210,8 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
                 input.displayState.labelText,
                 input.displayState.labelValue ?? "",
                 input.labelColor,
-                input.valueColor
+                input.valueColor,
+                "\(input.hasLinkedPage)"
             ].joined(separator: "|")
         case let .media(_, input):
             [
@@ -252,19 +228,21 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
                 input.labelSourceRawValue,
                 Self.kindRawValue(input.renderingKind)
             ].joined(separator: "|")
-        case let .frame(_, input),
-             let .text(_, input):
+        case let .frame(_, input):
+            [
+                input.widgetId,
+                input.displayState.effectiveState,
+                input.displayState.labelText,
+                input.displayState.labelValue ?? ""
+            ].joined(separator: "|")
+        case let .text(_, input):
             [
                 input.widgetId,
                 input.displayState.effectiveState,
                 input.displayState.labelText,
                 input.displayState.labelValue ?? "",
-                input.icon,
                 input.labelColor,
-                input.valueColor,
-                "\(input.readOnly)",
-                "\(input.refresh)",
-                Self.kindRawValue(input.renderingKind)
+                input.valueColor
             ].joined(separator: "|")
         }
     }

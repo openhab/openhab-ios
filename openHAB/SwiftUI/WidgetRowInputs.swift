@@ -194,13 +194,15 @@ struct GenericRowInput {
     let displayState: WidgetDisplayState
     let labelColor: String
     let valueColor: String
+    let hasLinkedPage: Bool
 
     static func from(widget: OpenHABWidget) -> GenericRowInput {
         GenericRowInput(
             widgetId: widget.widgetId,
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
-            valueColor: widget.valuecolor
+            valueColor: widget.valuecolor,
+            hasLinkedPage: widget.linkedPage != nil
         )
     }
 }
@@ -273,6 +275,34 @@ struct MediaRowInput {
             url: widget.url,
             encoding: widget.encoding,
             labelSourceRawValue: widget.labelSource.rawValue
+        )
+    }
+}
+
+struct FrameRowInput {
+    let widgetId: String
+    let displayState: WidgetDisplayState
+
+    static func from(widget: OpenHABWidget) -> FrameRowInput {
+        FrameRowInput(
+            widgetId: widget.widgetId,
+            displayState: widget.displayState
+        )
+    }
+}
+
+struct TextRowInput {
+    let widgetId: String
+    let displayState: WidgetDisplayState
+    let labelColor: String
+    let valueColor: String
+
+    static func from(widget: OpenHABWidget) -> TextRowInput {
+        TextRowInput(
+            widgetId: widget.widgetId,
+            displayState: widget.displayState,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor
         )
     }
 }

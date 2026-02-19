@@ -15,7 +15,7 @@ import SFSafeSymbols
 import SwiftUI
 
 private struct TextRowConfig {
-    let input: BasicWidgetRowInput
+    let input: TextRowInput
     let widget: OpenHABWidget
 }
 
@@ -25,7 +25,7 @@ private func makeTextRowContent(_ config: TextRowConfig) -> TextRowContent {
 }
 
 private struct TextRowContent: View {
-    let input: BasicWidgetRowInput
+    let input: TextRowInput
     let iconWidget: OpenHABWidget
 
     var body: some View {
@@ -60,7 +60,7 @@ private struct TextRowContent: View {
 
 struct TextRowInputView: View {
     let rowID: RowID
-    let input: BasicWidgetRowInput
+    let input: TextRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
@@ -83,7 +83,7 @@ struct TextRowView: View {
     var body: some View {
         makeTextRowContent(
             TextRowConfig(
-                input: BasicWidgetRowInput.from(widget: widget),
+                input: TextRowInput.from(widget: widget),
                 widget: widget
             )
         )
