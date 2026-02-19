@@ -41,6 +41,152 @@ enum CommandLifecycleSummary: Equatable {
     case failed(count: Int)
 }
 
+private struct WidgetRenderKey: Equatable {
+    let label: String
+    let icon: String
+    let state: String
+    let iconColor: String
+    let labelColor: String
+    let valueColor: String
+    let url: String
+    let period: String
+    let service: String
+    let legend: Bool?
+    let refresh: Int
+    let height: Double?
+    let forceAsItem: Bool?
+    let visibility: Bool
+    let staticIcon: Bool?
+    let switchSupport: Bool
+    let minValue: Double
+    let maxValue: Double
+    let step: Double
+    let pattern: String?
+    let unit: String?
+    let type: OpenHABWidget.WidgetType
+    let linkedPageLink: String?
+    let linkedPageTitle: String?
+    let mappings: [WidgetMappingKey]
+    let item: WidgetItemKey?
+    let childWidgetIDs: [String]
+
+    static func from(widget: OpenHABWidget) -> WidgetRenderKey {
+        WidgetRenderKey(
+            label: widget.label,
+            icon: widget.icon,
+            state: widget.state,
+            iconColor: widget.iconColor,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            url: widget.url,
+            period: widget.period,
+            service: widget.service,
+            legend: widget.legend,
+            refresh: widget.refresh,
+            height: widget.height,
+            forceAsItem: widget.forceAsItem,
+            visibility: widget.visibility,
+            staticIcon: widget.staticIcon,
+            switchSupport: widget.switchSupport,
+            minValue: widget.minValue,
+            maxValue: widget.maxValue,
+            step: widget.step,
+            pattern: widget.pattern,
+            unit: widget.unit,
+            type: widget.type,
+            linkedPageLink: widget.linkedPage?.link,
+            linkedPageTitle: widget.linkedPage?.title,
+            mappings: widget.mappings.map(WidgetMappingKey.init),
+            item: WidgetItemKey.from(item: widget.item),
+            childWidgetIDs: widget.widgets.map(\.widgetId)
+        )
+    }
+}
+
+private struct WidgetMappingKey: Equatable {
+    let command: String
+    let label: String
+    let row: Int?
+    let column: Int?
+    let icon: String?
+    let releaseCommand: String?
+
+    init(_ mapping: OpenHABWidgetMapping) {
+        command = mapping.command
+        label = mapping.label
+        row = mapping.row
+        column = mapping.column
+        icon = mapping.icon
+        releaseCommand = mapping.releaseCommand
+    }
+}
+
+private struct WidgetItemKey: Equatable {
+    let name: String
+    let state: String?
+    let link: String
+    let label: String
+    let type: OpenHABItem.ItemType?
+    let groupType: OpenHABItem.ItemType?
+    let stateDescription: WidgetStateDescriptionKey?
+    let commandOptions: [WidgetCommandOptionKey]
+
+    static func from(item: OpenHABItem?) -> WidgetItemKey? {
+        guard let item else { return nil }
+        return WidgetItemKey(
+            name: item.name,
+            state: item.state,
+            link: item.link,
+            label: item.label,
+            type: item.type,
+            groupType: item.groupType,
+            stateDescription: WidgetStateDescriptionKey.from(stateDescription: item.stateDescription),
+            commandOptions: item.commandDescription?.commandOptions.map(WidgetCommandOptionKey.init) ?? []
+        )
+    }
+}
+
+private struct WidgetStateDescriptionKey: Equatable {
+    let minimum: Double
+    let maximum: Double
+    let step: Double
+    let readOnly: Bool
+    let numberPattern: String?
+    let options: [WidgetOptionKey]
+
+    static func from(stateDescription: OpenHABStateDescription?) -> WidgetStateDescriptionKey? {
+        guard let stateDescription else { return nil }
+        return WidgetStateDescriptionKey(
+            minimum: stateDescription.minimum,
+            maximum: stateDescription.maximum,
+            step: stateDescription.step,
+            readOnly: stateDescription.readOnly,
+            numberPattern: stateDescription.numberPattern,
+            options: stateDescription.options.map(WidgetOptionKey.init)
+        )
+    }
+}
+
+private struct WidgetOptionKey: Equatable {
+    let value: String
+    let label: String
+
+    init(_ option: OpenHABOptions) {
+        value = option.value
+        label = option.label
+    }
+}
+
+private struct WidgetCommandOptionKey: Equatable {
+    let command: String
+    let label: String?
+
+    init(_ option: OpenHABCommandOptions) {
+        command = option.command
+        label = option.label
+    }
+}
+
 @MainActor
 class SitemapPageViewModel: ObservableObject {
     @Published var currentPage: OpenHABPage?
@@ -390,7 +536,12 @@ extension SitemapPageViewModel {
             if var candidates = buckets[newWidget.widgetId], !candidates.isEmpty {
                 let existing = candidates.removeFirst()
                 buckets[newWidget.widgetId] = candidates
-                copyWidgetProperties(from: newWidget, to: existing)
+                if hasRelevantWidgetDiff(from: existing, to: newWidget) {
+                    copyWidgetProperties(from: newWidget, to: existing)
+                } else if !newWidget.widgets.isEmpty {
+                    // Parent key is unchanged, but nested children can still receive state updates.
+                    existing.widgets = reconcileWidgets(newWidget.widgets, with: existing.widgets)
+                }
                 reconciled.append(existing)
             } else {
                 reconciled.append(newWidget)
@@ -404,6 +555,7 @@ extension SitemapPageViewModel {
         target.label = source.label
         target.icon = source.icon
         target.state = source.state
+        target.type = source.type
         target.item = source.item
         target.iconColor = source.iconColor
         target.labelcolor = source.labelcolor
@@ -415,11 +567,21 @@ extension SitemapPageViewModel {
         target.refresh = source.refresh
         target.height = source.height
         target.forceAsItem = source.forceAsItem
+        target.minValue = source.minValue
+        target.maxValue = source.maxValue
+        target.step = source.step
+        target.pattern = source.pattern
+        target.unit = source.unit
+        target.switchSupport = source.switchSupport
         target.mappings = source.mappings
         target.widgets = source.widgets
         target.linkedPage = source.linkedPage
         target.visibility = source.visibility
         target.staticIcon = source.staticIcon
+    }
+
+    private func hasRelevantWidgetDiff(from current: OpenHABWidget, to incoming: OpenHABWidget) -> Bool {
+        WidgetRenderKey.from(widget: current) != WidgetRenderKey.from(widget: incoming)
     }
 
     private func injectSendCommand(for widgets: [OpenHABWidget]) {
