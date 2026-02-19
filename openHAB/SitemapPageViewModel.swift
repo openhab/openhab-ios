@@ -190,7 +190,12 @@ private struct WidgetCommandOptionKey: Equatable {
 @MainActor
 class SitemapPageViewModel: ObservableObject {
     @Published var currentPage: OpenHABPage?
-    @Published var searchText = ""
+    @Published var searchText = "" {
+        didSet {
+            rebuildRowInputs()
+        }
+    }
+
     @Published var error: (any LocalizedError)?
     @Published var isLoading = true
     @Published var isUpdating = false
@@ -198,6 +203,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published var showSearchField = false
     @Published private(set) var commandStates: [String: WidgetCommandLifecycleState] = [:]
     @Published private(set) var widgetUpdateVersions: [String: Int] = [:]
+    @Published private(set) var rowInputs: [SitemapRowInput] = []
 
     let networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
@@ -216,6 +222,7 @@ class SitemapPageViewModel: ObservableObject {
     private var activePageHandlingID: UUID?
     private var commandStateResetTasks: [String: Task<Void, Never>] = [:]
     private var commandStateVersions: [String: Int] = [:]
+    private var rowWidgetIndex: [RowID: OpenHABWidget] = [:]
 
     var relevantWidgets: [OpenHABWidget] {
         let widgets = currentPage?.widgets ?? []
@@ -313,6 +320,32 @@ class SitemapPageViewModel: ObservableObject {
             widgets: widgets,
             icon: ""
         )
+        rebuildRowInputs()
+    }
+
+    func rebuildRowInputs() {
+        let pageKey = "\(defaultSitemap)|\(pageId)"
+        var occurrenceByWidgetID: [String: Int] = [:]
+        var inputs: [SitemapRowInput] = []
+        var index: [RowID: OpenHABWidget] = [:]
+        inputs.reserveCapacity(relevantWidgets.count)
+        index.reserveCapacity(relevantWidgets.count)
+
+        for widget in relevantWidgets {
+            occurrenceByWidgetID[widget.widgetId, default: 0] += 1
+            let occurrence = occurrenceByWidgetID[widget.widgetId]!
+            let rowID = RowID(pageKey: pageKey, widgetId: widget.widgetId, occurrence: occurrence)
+            let input = SitemapRowInputMapper.map(widget: widget, rowID: rowID)
+            inputs.append(input)
+            index[rowID] = widget
+        }
+
+        rowWidgetIndex = index
+        rowInputs = inputs
+    }
+
+    func widget(for rowID: RowID) -> OpenHABWidget? {
+        rowWidgetIndex[rowID]
     }
 
     func widgetUpdateVersion(for widgetId: String) -> Int {
@@ -476,6 +509,7 @@ extension SitemapPageViewModel {
         }
 
         trackWidgetUpdates(in: reconciledWidgets)
+        rebuildRowInputs()
     }
 
     private func trackWidgetUpdates(in widgets: [OpenHABWidget]) {
@@ -521,6 +555,7 @@ extension SitemapPageViewModel {
 
         injectSendCommand(for: page.widgets)
         currentPage = page
+        rebuildRowInputs()
     }
 
     private func reconcileWidgets(_ newWidgets: [OpenHABWidget], with currentWidgets: [OpenHABWidget]) -> [OpenHABWidget] {

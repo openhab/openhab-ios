@@ -9,8 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-// swiftlint:disable file_name
-
 import CommonUI
 import SwiftUI
 

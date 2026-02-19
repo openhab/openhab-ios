@@ -23,7 +23,7 @@ struct SitemapPageView: View {
 
     var body: some View {
         Group {
-            if viewModel.isLoading, viewModel.relevantWidgets.isEmpty {
+            if viewModel.isLoading, viewModel.rowInputs.isEmpty {
                 // Show skeleton/placeholder rows while loading
                 List {
                     ForEach(Self.placeholderWidgets, id: \.self) { widget in
@@ -33,8 +33,8 @@ struct SitemapPageView: View {
                     }
                 }
             } else {
-                List(viewModel.relevantWidgets, id: \.self) { widget in
-                    EmbeddingRowView(widget: widget)
+                List(viewModel.rowInputs) { rowInput in
+                    EmbeddingRowInputView(rowInput: rowInput)
                 }
             }
         }

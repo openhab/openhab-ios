@@ -150,6 +150,9 @@
 		DAA599B82EAC0FE7003A8726 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DAA599B72EAC0FE7003A8726 /* AppIcon.icon */; };
 		DAA599B92EAC0FE7003A8726 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DAA599B72EAC0FE7003A8726 /* AppIcon.icon */; };
 		DABB4CD42F47135900111AF3 /* WidgetRowInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CD32F47135900111AF3 /* WidgetRowInputs.swift */; };
+		DABB4CD62F471CDB00111AF3 /* SitemapRowInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CD52F471CDB00111AF3 /* SitemapRowInput.swift */; };
+		DABB4CD82F471D0300111AF3 /* SitemapRowInputMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CD72F471D0300111AF3 /* SitemapRowInputMapper.swift */; };
+		DABB4CDA2F471E9200111AF3 /* EmbeddingRowInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CD92F471E9200111AF3 /* EmbeddingRowInputView.swift */; };
 		DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */; };
 		DABED17B2E451694000B92EF /* BonjourDiscoverySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */; };
 		DABED17D2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */; };
@@ -499,6 +502,9 @@
 		DAA599B72EAC0FE7003A8726 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		DABB4CD22F45EFD100111AF3 /* openHABWatch.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = openHABWatch.xctestplan; path = TestPlans/openHABWatch.xctestplan; sourceTree = "<group>"; };
 		DABB4CD32F47135900111AF3 /* WidgetRowInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetRowInputs.swift; sourceTree = "<group>"; };
+		DABB4CD52F471CDB00111AF3 /* SitemapRowInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapRowInput.swift; sourceTree = "<group>"; };
+		DABB4CD72F471D0300111AF3 /* SitemapRowInputMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapRowInputMapper.swift; sourceTree = "<group>"; };
+		DABB4CD92F471E9200111AF3 /* EmbeddingRowInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddingRowInputView.swift; sourceTree = "<group>"; };
 		DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoverySheet.swift; sourceTree = "<group>"; };
 		DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoveryViewModel.swift; sourceTree = "<group>"; };
 		DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandlerTests.swift; sourceTree = "<group>"; };
@@ -885,8 +891,11 @@
 				DA35E2CC2E1F96CA003987BB /* IconView.swift */,
 				DAE280092E35F5590028EE24 /* IconURLView.swift */,
 				DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */,
+				DABB4CD92F471E9200111AF3 /* EmbeddingRowInputView.swift */,
 				DAF5AA672E4F3A38004F18D7 /* EmbeddingRowView.swift */,
 				DA64ACA92DBEAD9000294F60 /* SitemapNavigationView.swift */,
+				DABB4CD52F471CDB00111AF3 /* SitemapRowInput.swift */,
+				DABB4CD72F471D0300111AF3 /* SitemapRowInputMapper.swift */,
 				DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */,
 				DABB4CD32F47135900111AF3 /* WidgetRowInputs.swift */,
 				DAC949FF2E21A473007E67B7 /* Rows */,
@@ -1756,6 +1765,7 @@
 				DABED17B2E451694000B92EF /* BonjourDiscoverySheet.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
 				1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */,
+				DABB4CD82F471D0300111AF3 /* SitemapRowInputMapper.swift in Sources */,
 				2FBCF58C2DEB0B7700CD5D83 /* HomeSelectionView.swift in Sources */,
 				935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */,
 				DAEA21DA2DBF477E00D54342 /* SwitchRowView.swift in Sources */,
@@ -1821,8 +1831,10 @@
 				65F055442E3D4E41004E98FE /* ItemSelectionView.swift in Sources */,
 				DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */,
 				DAF5AA682E4F3A39004F18D7 /* EmbeddingRowView.swift in Sources */,
+				DABB4CD62F471CDB00111AF3 /* SitemapRowInput.swift in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
 				DA48001C2D837556009CF127 /* SitemapSettingsView.swift in Sources */,
+				DABB4CDA2F471E9200111AF3 /* EmbeddingRowInputView.swift in Sources */,
 				938BF9C624EFCC0700E6B52F /* UILabel+Localization.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

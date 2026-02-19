@@ -29,11 +29,10 @@ struct SegmentedRowView: View {
             input: input,
             widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
             iconWidget: widget,
-            fallbackSymbol: fallbackSymbol,
-            sendCommand: { command, policy, phase in
-                viewModel.sendCommand(command, for: widget, policy: policy, phase: phase)
-            }
-        )
+            fallbackSymbol: fallbackSymbol
+        ) { command, policy, phase in
+            viewModel.sendCommand(command, for: widget, policy: policy, phase: phase)
+        }
     }
 }
 
