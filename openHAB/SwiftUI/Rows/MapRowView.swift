@@ -109,7 +109,7 @@ private struct MapRowViewNew: View {
     }
 }
 
-struct MapRowInputView: View {
+struct MapRowView: View {
     let input: MediaRowInput
 
     var body: some View {

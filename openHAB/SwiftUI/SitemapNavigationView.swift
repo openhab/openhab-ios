@@ -161,6 +161,16 @@ struct SitemapNavigationView: View {
             }
             .foregroundStyle(.secondary)
             .accessibilityLabel("Offline")
+        case let .queued(count):
+            HStack(spacing: 4) {
+                Image(systemSymbol: .clock)
+                if count > 1 {
+                    Text("\(count)")
+                        .ohTextToken(.secondary)
+                }
+            }
+            .foregroundStyle(.secondary)
+            .accessibilityLabel("Queued commands: \(count)")
         case let .sending(count):
             HStack(spacing: 4) {
                 ProgressView()

@@ -55,13 +55,6 @@ struct IconInputView: View {
 
     @State private var currentImage: UIImage?
 
-    init(input: RowIconInput, rowIdentity: String, size: CGSize, fallbackSymbol: SFSymbol? = nil) {
-        self.input = input
-        self.rowIdentity = rowIdentity
-        self.size = size
-        self.fallbackSymbol = fallbackSymbol
-    }
-
     private var iconColorHex: String {
         let logicColor = !input.iconColor.isEmpty ? UIColor(fromString: input.iconColor) : .ohBlack
         return logicColor.semanticColorToHex() ?? "#000000"
@@ -129,6 +122,13 @@ struct IconInputView: View {
                     .id("\(viewModel.pageId)-\(rowIdentity)-\(colorScheme)")
             }
         }
+    }
+
+    init(input: RowIconInput, rowIdentity: String, size: CGSize, fallbackSymbol: SFSymbol? = nil) {
+        self.input = input
+        self.rowIdentity = rowIdentity
+        self.size = size
+        self.fallbackSymbol = fallbackSymbol
     }
 
     private func processorIconColor(for url: URL) -> String? {

@@ -136,7 +136,7 @@ private struct SetpointRowContent: View {
     }
 }
 
-struct SetpointRowInputView: View {
+struct SetpointRowView: View {
     let input: SetpointRowInput
 
     @EnvironmentObject var viewModel: SitemapPageViewModel
@@ -155,7 +155,7 @@ struct SetpointRowInputView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[3]
     VStack {
-        SetpointRowInputView(input: SetpointRowInput.from(widget: widget))
+        SetpointRowView(input: SetpointRowInput.from(widget: widget))
         Spacer()
     }
     .environmentObject(SitemapPageViewModel())

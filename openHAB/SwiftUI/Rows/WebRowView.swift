@@ -50,7 +50,7 @@ private struct WebContainerContent: View {
     }
 }
 
-struct WidgetWebViewContainerInputView: View {
+struct WidgetWebViewContainerView: View {
     let input: MediaRowInput
 
     var body: some View {

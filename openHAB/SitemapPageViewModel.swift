@@ -45,8 +45,22 @@ enum SitemapInteractionSummary: Equatable {
     case onlineIdle
     case connecting
     case offline
+    case queued(count: Int)
     case sending(count: Int)
     case failed(count: Int)
+}
+
+enum RowInteractionState: Equatable {
+    case idle
+    case offline
+    case queued
+    case sending
+    case failed
+}
+
+private struct QueuedCommand {
+    let command: String
+    let version: Int
 }
 
 private struct WidgetRenderKey: Equatable {
@@ -232,6 +246,7 @@ class SitemapPageViewModel: ObservableObject {
     private var activePageHandlingID: UUID?
     private var commandStateResetTasks: [String: Task<Void, Never>] = [:]
     private var commandStateVersions: [String: Int] = [:]
+    private var queuedCommands: [String: QueuedCommand] = [:]
     private var rowWidgetIndex: [RowID: OpenHABWidget] = [:]
 
     var relevantWidgets: [OpenHABWidget] {
@@ -285,6 +300,15 @@ class SitemapPageViewModel: ObservableObject {
     var sitemapInteractionSummary: SitemapInteractionSummary {
         if case let .failed(count) = commandLifecycleSummary {
             return .failed(count: count)
+        }
+
+        let queuedCount = commandStates.values.reduce(into: 0) { result, state in
+            if case .queued = state {
+                result += 1
+            }
+        }
+        if queuedCount > 0 {
+            return .queued(count: queuedCount)
         }
 
         switch trackerStatus {
@@ -344,6 +368,25 @@ class SitemapPageViewModel: ObservableObject {
         rebuildRowInputs()
     }
 
+    func rowInteractionState(for itemname: String?) -> RowInteractionState {
+        guard let itemname, !itemname.isEmpty else { return .idle }
+
+        if let lifecycleState = commandStates[itemname] {
+            switch lifecycleState {
+            case .queued:
+                return .queued
+            case .sending:
+                return .sending
+            case .failed:
+                return .failed
+            case .idle:
+                break
+            }
+        }
+
+        return trackerStatus == .connected ? .idle : .offline
+    }
+
     private func startObservers() {
         trackerStatus = networkTracker.status
 
@@ -362,6 +405,9 @@ class SitemapPageViewModel: ObservableObject {
             for await status in tracker.$status.values {
                 await MainActor.run { [weak self] in
                     self?.trackerStatus = status
+                    if status == .connected {
+                        self?.flushQueuedCommands()
+                    }
                 }
             }
         }
@@ -850,6 +896,12 @@ extension SitemapPageViewModel {
 
     func cancelPendingCommand(for itemname: String, key: String? = nil) {
         commandDispatcher.cancelPending(for: itemname, key: key)
+        if key == nil {
+            queuedCommands.removeValue(forKey: itemname)
+            if case .queued = commandStates[itemname] {
+                setCommandState(.idle, for: itemname)
+            }
+        }
     }
 
     func sendCommand(_ command: String?,
@@ -876,6 +928,15 @@ extension SitemapPageViewModel {
 
     func sendCommand(itemname: String, command: String) {
         let version = nextCommandVersion(for: itemname)
+        if trackerStatus != .connected {
+            queuedCommands[itemname] = QueuedCommand(command: command, version: version)
+            setCommandState(.queued, for: itemname)
+            return
+        }
+        sendCommandNow(itemname: itemname, command: command, version: version)
+    }
+
+    private func sendCommandNow(itemname: String, command: String, version: Int) {
         setCommandState(.sending, for: itemname)
         let deviceId = UIDevice.current.identifierForVendor?.uuidString
         Task { [weak self] in
@@ -893,6 +954,16 @@ extension SitemapPageViewModel {
                 logger.info("Failed to send command\(command) to \(itemname): \(error.localizedDescription)")
                 handleCommandFailure(for: itemname, version: version, errorDescription: error.localizedDescription)
             }
+        }
+    }
+
+    private func flushQueuedCommands() {
+        guard trackerStatus == .connected, !queuedCommands.isEmpty else { return }
+        let queued = queuedCommands
+        queuedCommands.removeAll()
+        for (itemname, queuedCommand) in queued {
+            guard commandStateVersions[itemname] == queuedCommand.version else { continue }
+            sendCommandNow(itemname: itemname, command: queuedCommand.command, version: queuedCommand.version)
         }
     }
 
@@ -1003,7 +1074,7 @@ private extension SitemapPageViewModel {
         switch state {
         case .idle:
             commandStates.removeValue(forKey: itemname)
-        case .sending, .failed:
+        case .queued, .sending, .failed:
             commandStates[itemname] = state
         }
     }

@@ -12,7 +12,7 @@
 import OpenHABCore
 import SwiftUI
 
-struct MediaRowInputView: View {
+struct MediaRowView: View {
     let input: MediaRowInput
 
     private var genericFallbackInput: GenericRowInput {
@@ -28,15 +28,15 @@ struct MediaRowInputView: View {
     var body: some View {
         switch input.renderingKind {
         case .image, .chart:
-            ImageRowInputView(input: input)
+            ImageRowView(input: input)
         case .video:
-            VideoRowInputView(input: input)
+            VideoRowView(input: input)
         case .webview:
-            WidgetWebViewContainerInputView(input: input)
+            WidgetWebViewContainerView(input: input)
         case .mapview:
-            MapRowInputView(input: input)
+            MapRowView(input: input)
         default:
-            GenericRowInputView(input: genericFallbackInput)
+            GenericRowView(input: genericFallbackInput)
         }
     }
 }

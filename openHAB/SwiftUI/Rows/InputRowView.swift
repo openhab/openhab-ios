@@ -12,17 +12,17 @@
 import OpenHABCore
 import SwiftUI
 
-struct InputRowInputView: View {
+struct InputRowView: View {
     let input: InputRowInput
 
     var body: some View {
         switch input.renderingKind {
         case .dateInput:
-            DatePickerInputRowInputView(input: input)
+            DatePickerInputRowView(input: input)
         case .textInput:
-            TextInputRowInputView(input: input)
+            TextInputRowView(input: input)
         default:
-            TextInputRowInputView(input: input)
+            TextInputRowView(input: input)
         }
     }
 }

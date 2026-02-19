@@ -81,19 +81,18 @@ private struct TextInputRowContent: View {
     }
 }
 
-struct TextInputRowInputView: View {
+struct TextInputRowView: View {
     let input: InputRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         makeTextInputRowContent(
             TextInputRowConfig(
-                input: input,
-                onSendCommand: { command in
+                input: input) { command in
                     guard let itemName = input.itemName else { return }
                     viewModel.sendCommand(command, for: itemName)
+                    // swiftlint:disable:next closure_end_indentation
                 }
-            )
         )
     }
 }
@@ -101,7 +100,7 @@ struct TextInputRowInputView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[17]
     VStack {
-        TextInputRowInputView(input: InputRowInput.from(widget: widget))
+        TextInputRowView(input: InputRowInput.from(widget: widget))
         Spacer()
     }
     .environmentObject(SitemapPageViewModel())

@@ -45,7 +45,7 @@ private struct GenericRowContent: View {
     }
 }
 
-struct GenericRowInputView: View {
+struct GenericRowView: View {
     let input: GenericRowInput
     var body: some View {
         makeGenericRowContent(GenericRowConfig(input: input))
@@ -55,7 +55,7 @@ struct GenericRowInputView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[6]
     List([widget]) { widget in
-        GenericRowInputView(input: GenericRowInput.from(widget: widget))
+        GenericRowView(input: GenericRowInput.from(widget: widget))
     }
     .environmentObject(SitemapPageViewModel())
 }

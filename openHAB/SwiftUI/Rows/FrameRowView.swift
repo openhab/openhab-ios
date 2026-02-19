@@ -36,7 +36,7 @@ private struct FrameRowContent: View {
     }
 }
 
-struct FrameRowInputView: View {
+struct FrameRowView: View {
     let input: FrameRowInput
 
     var body: some View {
@@ -51,7 +51,7 @@ struct FrameRowInputView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[6]
     List([widget]) { widget in
-        FrameRowInputView(input: FrameRowInput.from(widget: widget))
+        FrameRowView(input: FrameRowInput.from(widget: widget))
     }
     .environmentObject(SitemapPageViewModel())
 }

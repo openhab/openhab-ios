@@ -11,6 +11,7 @@
 
 public enum WidgetCommandLifecycleState: Sendable, Equatable {
     case idle
+    case queued
     case sending
     case failed(message: String?)
 }

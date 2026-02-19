@@ -119,19 +119,18 @@ private struct DateInputRowContent: View {
     }
 }
 
-struct DatePickerInputRowInputView: View {
+struct DatePickerInputRowView: View {
     let input: InputRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         makeDateInputRowContent(
             DateInputRowConfig(
-                input: input,
-                onSendCommand: { command in
+                input: input) { command in
                     guard let itemName = input.itemName else { return }
                     viewModel.sendCommand(command, for: itemName)
+                    // swiftlint:disable:next closure_end_indentation
                 }
-            )
         )
     }
 }
@@ -139,7 +138,7 @@ struct DatePickerInputRowInputView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[13]
     VStack {
-        DatePickerInputRowInputView(input: InputRowInput.from(widget: widget))
+        DatePickerInputRowView(input: InputRowInput.from(widget: widget))
             .padding()
         Spacer()
     }

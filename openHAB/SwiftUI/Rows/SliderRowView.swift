@@ -203,7 +203,7 @@ private struct SliderRowContent: View {
     }
 }
 
-struct SliderRowInputView: View {
+struct SliderRowView: View {
     let input: SliderRowInput
     var fallbackSymbol: SFSymbol?
 
@@ -224,7 +224,7 @@ struct SliderRowInputView: View {
 // MARK: - Preview Helpers
 
 #if DEBUG
-private extension SliderRowInputView {
+private extension SliderRowView {
     static func createPreviewInput(label: String,
                                    value: Double? = nil,
                                    minValue: Double = 0.0,
@@ -249,8 +249,8 @@ private extension SliderRowInputView {
 
 #Preview("Default Range (0-100)") {
     PreviewList {
-        SliderRowInputView(
-            input: SliderRowInputView.createPreviewInput(
+        SliderRowView(
+            input: SliderRowView.createPreviewInput(
                 label: "Brightness",
                 value: 75
             ),
@@ -261,8 +261,8 @@ private extension SliderRowInputView {
 
 #Preview("Custom Range (minValue)") {
     PreviewList {
-        SliderRowInputView(
-            input: SliderRowInputView.createPreviewInput(
+        SliderRowView(
+            input: SliderRowView.createPreviewInput(
                 label: "Temperature",
                 value: 21,
                 minValue: 16,
@@ -276,8 +276,8 @@ private extension SliderRowInputView {
 
 #Preview("With Switch Support") {
     PreviewList {
-        SliderRowInputView(
-            input: SliderRowInputView.createPreviewInput(
+        SliderRowView(
+            input: SliderRowView.createPreviewInput(
                 label: "Dimmer",
                 value: 50,
                 switchSupport: true
@@ -289,15 +289,15 @@ private extension SliderRowInputView {
 
 #Preview("All Scenarios") {
     PreviewList {
-        SliderRowInputView(
-            input: SliderRowInputView.createPreviewInput(
+        SliderRowView(
+            input: SliderRowView.createPreviewInput(
                 label: "Brightness",
                 value: 75
             ),
             fallbackSymbol: .sliderHorizontal3
         )
-        SliderRowInputView(
-            input: SliderRowInputView.createPreviewInput(
+        SliderRowView(
+            input: SliderRowView.createPreviewInput(
                 label: "Temperature",
                 value: 21,
                 minValue: 16,
@@ -306,8 +306,8 @@ private extension SliderRowInputView {
             ),
             fallbackSymbol: .thermometerMedium
         )
-        SliderRowInputView(
-            input: SliderRowInputView.createPreviewInput(
+        SliderRowView(
+            input: SliderRowView.createPreviewInput(
                 label: "Volume",
                 value: 30,
                 minValue: 0,
@@ -316,8 +316,8 @@ private extension SliderRowInputView {
             ),
             fallbackSymbol: .speakerWave2Fill
         )
-        SliderRowInputView(
-            input: SliderRowInputView.createPreviewInput(
+        SliderRowView(
+            input: SliderRowView.createPreviewInput(
                 label: "Dimmer",
                 value: 50,
                 switchSupport: true
@@ -329,7 +329,7 @@ private extension SliderRowInputView {
 
 #Preview("From PreviewConstants") {
     PreviewList {
-        SliderRowInputView(
+        SliderRowView(
             input: SliderRowInput.from(widget: PreviewConstants.openHABSitemapPage!.widgets[3]),
             fallbackSymbol: .sliderHorizontal3
         )

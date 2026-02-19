@@ -121,7 +121,7 @@ private struct ImageRowContent: View {
     }
 }
 
-struct ImageRowInputView: View {
+struct ImageRowView: View {
     let input: MediaRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
 

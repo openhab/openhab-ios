@@ -221,7 +221,7 @@ private struct ColorTemperaturePickerRowContent: View {
     }
 }
 
-struct ColorTemperaturePickerRowInputView: View {
+struct ColorTemperaturePickerRowView: View {
     let input: ColorTemperatureRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
@@ -238,7 +238,7 @@ struct ColorTemperaturePickerRowInputView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[13]
     VStack {
-        ColorTemperaturePickerRowInputView(input: ColorTemperatureRowInput.from(widget: widget))
+        ColorTemperaturePickerRowView(input: ColorTemperatureRowInput.from(widget: widget))
             .padding()
         Spacer()
     }

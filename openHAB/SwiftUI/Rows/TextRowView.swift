@@ -55,7 +55,7 @@ private struct TextRowContent: View {
     }
 }
 
-struct TextRowInputView: View {
+struct TextRowView: View {
     let input: TextRowInput
 
     var body: some View {
@@ -66,7 +66,7 @@ struct TextRowInputView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[3]
     VStack {
-        TextRowInputView(input: TextRowInput.from(widget: widget))
+        TextRowView(input: TextRowInput.from(widget: widget))
         Spacer()
     }
     .environmentObject(SitemapPageViewModel())

@@ -136,7 +136,7 @@ private struct ColorPickerRowContent: View {
     }
 }
 
-struct ColorPickerRowInputView: View {
+struct ColorPickerRowView: View {
     let input: ColorPickerRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
@@ -153,7 +153,7 @@ struct ColorPickerRowInputView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[15]
     VStack {
-        ColorPickerRowInputView(input: ColorPickerRowInput.from(widget: widget))
+        ColorPickerRowView(input: ColorPickerRowInput.from(widget: widget))
             .padding()
         Spacer()
     }

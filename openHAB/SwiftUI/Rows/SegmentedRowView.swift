@@ -15,24 +15,6 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
-struct SegmentedRowInputView: View {
-    let input: SegmentedRowInput
-    var fallbackSymbol: SFSymbol?
-
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    var body: some View {
-        SegmentedRowContent(
-            input: input,
-            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
-            fallbackSymbol: fallbackSymbol
-        ) { command, policy, phase in
-            guard let itemName = input.itemName else { return }
-            viewModel.sendCommand(command, for: itemName, policy: policy, phase: phase)
-        }
-    }
-}
-
 private struct SegmentedRowContent: View {
     let input: SegmentedRowInput
     let widgetVersion: Int
@@ -344,6 +326,25 @@ private struct SegmentedRowContent: View {
     }
 }
 
+// swiftlint:disable:next file_types_order
+struct SegmentedRowView: View {
+    let input: SegmentedRowInput
+    var fallbackSymbol: SFSymbol?
+
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        SegmentedRowContent(
+            input: input,
+            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+            fallbackSymbol: fallbackSymbol
+        ) { command, policy, phase in
+            guard let itemName = input.itemName else { return }
+            viewModel.sendCommand(command, for: itemName, policy: policy, phase: phase)
+        }
+    }
+}
+
 // MARK: - Preview Helpers
 
 #if DEBUG
@@ -363,7 +364,7 @@ struct PreviewList<Content: View>: View {
     }
 }
 
-private extension SegmentedRowInputView {
+private extension SegmentedRowView {
     static func createPreviewInput(label: String,
                                    detailLabel: String? = nil,
                                    icon: String = "switch",
@@ -384,8 +385,8 @@ private extension SegmentedRowInputView {
 
 #Preview("Short Labels") {
     PreviewList {
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "Light Switch",
                 detailLabel: "1",
                 mappings: [
@@ -400,8 +401,8 @@ private extension SegmentedRowInputView {
 
 #Preview("Charts Period") {
     PreviewList {
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "Charts Period",
                 mappings: [
                     OpenHABWidgetMapping(command: "D", label: "Day"),
@@ -417,8 +418,8 @@ private extension SegmentedRowInputView {
 
 #Preview("Long Labels") {
     PreviewList {
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "Temperature Control",
                 detailLabel: "3",
                 mappings: [
@@ -434,8 +435,8 @@ private extension SegmentedRowInputView {
 
 #Preview("Multiple Segments (4)") {
     PreviewList {
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "Fan Speed",
                 detailLabel: "4",
                 mappings: [
@@ -452,8 +453,8 @@ private extension SegmentedRowInputView {
 
 #Preview("PressRelease") {
     PreviewList {
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "All Shutters",
                 detailLabel: "NA",
                 mappings: [
@@ -467,8 +468,8 @@ private extension SegmentedRowInputView {
 
 #Preview("Single Mapping") {
     PreviewList {
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "Scene",
                 mappings: [
                     OpenHABWidgetMapping(command: "RUN", label: "Run")
@@ -481,8 +482,8 @@ private extension SegmentedRowInputView {
 
 #Preview("All Scenarios") {
     PreviewList {
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "Light",
                 detailLabel: "1",
                 mappings: [
@@ -492,8 +493,8 @@ private extension SegmentedRowInputView {
                 selectedState: "ON"
             )
         )
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "Climate Mode",
                 detailLabel: "2",
                 mappings: [
@@ -504,8 +505,8 @@ private extension SegmentedRowInputView {
                 selectedState: "a"
             )
         )
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "Fan Speed",
                 detailLabel: "2",
                 mappings: [
@@ -517,8 +518,8 @@ private extension SegmentedRowInputView {
                 selectedState: "2"
             )
         )
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "Charts Period",
                 mappings: [
                     OpenHABWidgetMapping(command: "D", label: "Day"),
@@ -529,8 +530,8 @@ private extension SegmentedRowInputView {
                 selectedState: "D"
             )
         )
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "All Shutters",
                 detailLabel: "NA",
                 mappings: [
@@ -542,8 +543,8 @@ private extension SegmentedRowInputView {
             )
         )
 
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "Office Shutter",
                 detailLabel: "NA",
                 mappings: [
@@ -554,8 +555,8 @@ private extension SegmentedRowInputView {
             )
         )
 
-        SegmentedRowInputView(
-            input: SegmentedRowInputView.createPreviewInput(
+        SegmentedRowView(
+            input: SegmentedRowView.createPreviewInput(
                 label: "Scene",
                 mappings: [
                     OpenHABWidgetMapping(command: "RUN", label: "DOWN")
@@ -568,7 +569,7 @@ private extension SegmentedRowInputView {
 
 #Preview("From PreviewConstants") {
     PreviewList {
-        SegmentedRowInputView(
+        SegmentedRowView(
             input: SegmentedRowInput.from(widget: PreviewConstants.openHABSitemapPage!.widgets[4])
         )
     }

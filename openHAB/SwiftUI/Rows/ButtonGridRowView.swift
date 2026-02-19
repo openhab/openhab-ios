@@ -189,7 +189,7 @@ private struct ButtonGridRowContent: View {
     }
 }
 
-struct ButtonGridRowInputView: View {
+struct ButtonGridRowView: View {
     let input: ButtonGridRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
@@ -239,7 +239,7 @@ extension View {
 #Preview {
     if let widget = PreviewConstants.openHABSitemapPage!.widgets.first(where: { $0.type == .buttongrid }) {
         VStack {
-            ButtonGridRowInputView(input: ButtonGridRowInput.from(widget: widget))
+            ButtonGridRowView(input: ButtonGridRowInput.from(widget: widget))
                 .padding()
             Spacer()
         }

@@ -111,7 +111,7 @@ private struct RollershutterRowContent: View {
     }
 }
 
-struct RollershutterRowInputView: View {
+struct RollershutterRowView: View {
     let input: RollershutterRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
     @State private var triggerUpFeedback = false
@@ -154,7 +154,7 @@ extension View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[5]
     VStack {
-        RollershutterRowInputView(input: RollershutterRowInput.from(widget: widget))
+        RollershutterRowView(input: RollershutterRowInput.from(widget: widget))
         Spacer()
     }
     .environmentObject(SitemapPageViewModel())

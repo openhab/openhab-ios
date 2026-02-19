@@ -130,7 +130,7 @@ struct EmbeddingRowInputView: View {
     var body: some View {
         switch rowInput {
         case let .frame(_, input):
-            FrameRowInputView(input: input)
+            FrameRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.rowInsets(for: rowInput))
                 .listRowBackground(frameRowBackground)
@@ -140,67 +140,67 @@ struct EmbeddingRowInputView: View {
                 .listRowInsets(RowLayoutPolicy.rowInsets(for: rowInput))
                 .listRowBackground(RowLayoutPolicy.backgroundKind(for: rowInput) == .frame ? frameRowBackground : regularRowBackground)
         case let .slider(_, input):
-            SliderRowInputView(input: input)
+            SliderRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .selection(_, input):
-            SelectionRowInputView(input: input)
+            SelectionRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .segmented(_, input):
-            SegmentedRowInputView(input: input)
+            SegmentedRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .setpoint(_, input):
-            SetpointRowInputView(input: input)
+            SetpointRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .text(_, input):
-            TextRowInputView(input: input)
+            TextRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .toggle(_, input):
-            SwitchRowInputView(input: input)
+            SwitchRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .rollershutter(_, input):
-            RollershutterRowInputView(input: input)
+            RollershutterRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .input(_, input):
-            InputRowInputView(input: input)
+            InputRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .colorPicker(_, input):
-            ColorPickerRowInputView(input: input)
+            ColorPickerRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .media(_, input):
-            MediaRowInputView(input: input)
+            MediaRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .colorTemperature(_, input):
-            ColorTemperaturePickerRowInputView(input: input)
+            ColorTemperaturePickerRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .buttonGrid(_, input):
-            ButtonGridRowInputView(input: input)
+            ButtonGridRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .generic(_, input):
-            GenericRowInputView(input: input)
+            GenericRowView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)

@@ -134,7 +134,7 @@ private struct SelectionRowContent: View {
     }
 }
 
-struct SelectionRowInputView: View {
+struct SelectionRowView: View {
     let input: SelectionRowInput
 
     @EnvironmentObject var viewModel: SitemapPageViewModel

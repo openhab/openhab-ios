@@ -153,9 +153,9 @@
 		DABB4CD62F471CDB00111AF3 /* SitemapRowInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CD52F471CDB00111AF3 /* SitemapRowInput.swift */; };
 		DABB4CD82F471D0300111AF3 /* SitemapRowInputMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CD72F471D0300111AF3 /* SitemapRowInputMapper.swift */; };
 		DABB4CDA2F471E9200111AF3 /* EmbeddingRowInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CD92F471E9200111AF3 /* EmbeddingRowInputView.swift */; };
-		DABB4CDC2F472E4200111AF3 /* InputRowInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CDB2F472E4200111AF3 /* InputRowInputView.swift */; };
+		DABB4CDC2F472E4200111AF3 /* InputRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CDB2F472E4200111AF3 /* InputRowView.swift */; };
 		DABB4CDE2F4746B100111AF3 /* SitemapRowInputMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CDD2F4746B100111AF3 /* SitemapRowInputMapperTests.swift */; };
-		DABB4CE02F474CBF00111AF3 /* MediaRowInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CDF2F474CBF00111AF3 /* MediaRowInputView.swift */; };
+		DABB4CE02F474CBF00111AF3 /* MediaRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CDF2F474CBF00111AF3 /* MediaRowView.swift */; };
 		DABB4CF22F4790AD00111AF3 /* RowLayoutPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CF12F4790AD00111AF3 /* RowLayoutPolicyTests.swift */; };
 		DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */; };
 		DABED17B2E451694000B92EF /* BonjourDiscoverySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */; };
@@ -507,9 +507,9 @@
 		DABB4CD52F471CDB00111AF3 /* SitemapRowInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapRowInput.swift; sourceTree = "<group>"; };
 		DABB4CD72F471D0300111AF3 /* SitemapRowInputMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapRowInputMapper.swift; sourceTree = "<group>"; };
 		DABB4CD92F471E9200111AF3 /* EmbeddingRowInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddingRowInputView.swift; sourceTree = "<group>"; };
-		DABB4CDB2F472E4200111AF3 /* InputRowInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputRowInputView.swift; sourceTree = "<group>"; };
+		DABB4CDB2F472E4200111AF3 /* InputRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputRowView.swift; sourceTree = "<group>"; };
 		DABB4CDD2F4746B100111AF3 /* SitemapRowInputMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapRowInputMapperTests.swift; sourceTree = "<group>"; };
-		DABB4CDF2F474CBF00111AF3 /* MediaRowInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRowInputView.swift; sourceTree = "<group>"; };
+		DABB4CDF2F474CBF00111AF3 /* MediaRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRowView.swift; sourceTree = "<group>"; };
 		DABB4CF12F4790AD00111AF3 /* RowLayoutPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowLayoutPolicyTests.swift; sourceTree = "<group>"; };
 		DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoverySheet.swift; sourceTree = "<group>"; };
 		DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoveryViewModel.swift; sourceTree = "<group>"; };
@@ -953,7 +953,7 @@
 				DAE7B4A62E26927C00B9FE99 /* ButtonGridRowView.swift */,
 				DA35E2B22E1EEA9D003987BB /* ColorPickerRowView.swift */,
 				DAEE35062E224F6000B4A7F1 /* ColorTemperaturePickerRowView.swift */,
-				DABB4CDF2F474CBF00111AF3 /* MediaRowInputView.swift */,
+				DABB4CDF2F474CBF00111AF3 /* MediaRowView.swift */,
 				DA35E2B32E1EEA9D003987BB /* DatePickerInputRowView.swift */,
 				DAC949FD2E21A2D1007E67B7 /* FrameRowView.swift */,
 				DAEA21DF2DBF483E00D54342 /* GenericRowView.swift */,
@@ -969,7 +969,7 @@
 				DAEA21DD2DBF481300D54342 /* TextRowView.swift */,
 				DA35E2BB2E1EEA9D003987BB /* VideoRowView.swift */,
 				DA35E2BC2E1EEA9D003987BB /* WebRowView.swift */,
-				DABB4CDB2F472E4200111AF3 /* InputRowInputView.swift */,
+				DABB4CDB2F472E4200111AF3 /* InputRowView.swift */,
 			);
 			path = Rows;
 			sourceTree = "<group>";
@@ -1772,7 +1772,7 @@
 				DA64ACA62DBEAD5600294F60 /* SitemapPageViewModel.swift in Sources */,
 				DABED17B2E451694000B92EF /* BonjourDiscoverySheet.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
-				DABB4CE02F474CBF00111AF3 /* MediaRowInputView.swift in Sources */,
+				DABB4CE02F474CBF00111AF3 /* MediaRowView.swift in Sources */,
 				1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */,
 				DABB4CD82F471D0300111AF3 /* SitemapRowInputMapper.swift in Sources */,
 				2FBCF58C2DEB0B7700CD5D83 /* HomeSelectionView.swift in Sources */,
@@ -1818,7 +1818,7 @@
 				DAE2800A2E35F5590028EE24 /* IconURLView.swift in Sources */,
 				DA6B2EEF2C861BC900DF77CF /* DrawerView.swift in Sources */,
 				DABED17D2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift in Sources */,
-				DABB4CDC2F472E4200111AF3 /* InputRowInputView.swift in Sources */,
+				DABB4CDC2F472E4200111AF3 /* InputRowView.swift in Sources */,
 				DA94AEB42EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift in Sources */,
 				DA48001A2D83742A009CF127 /* DebugSettingsView.swift in Sources */,
 				938BF9D324EFD0B700E6B52F /* UIViewController+Localization.swift in Sources */,

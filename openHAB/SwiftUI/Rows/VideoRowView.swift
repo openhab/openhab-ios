@@ -246,7 +246,7 @@ private struct VideoRowContent: View {
     }
 }
 
-struct VideoRowInputView: View {
+struct VideoRowView: View {
     let input: MediaRowInput
 
     var body: some View {

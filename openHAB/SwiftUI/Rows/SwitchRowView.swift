@@ -78,7 +78,7 @@ private struct SwitchRowContent: View {
     }
 }
 
-struct SwitchRowInputView: View {
+struct SwitchRowView: View {
     let input: ToggleRowInput
 
     @EnvironmentObject var viewModel: SitemapPageViewModel
@@ -91,7 +91,7 @@ struct SwitchRowInputView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[2]
     VStack {
-        SwitchRowInputView(input: ToggleRowInput.from(widget: widget))
+        SwitchRowView(input: ToggleRowInput.from(widget: widget))
         Spacer()
     }
     .environmentObject(SitemapPageViewModel())
