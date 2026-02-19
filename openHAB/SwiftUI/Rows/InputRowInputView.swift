@@ -13,23 +13,16 @@ import OpenHABCore
 import SwiftUI
 
 struct InputRowInputView: View {
-    let rowID: RowID
     let input: InputRowInput
 
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
     var body: some View {
-        if viewModel.widget(for: rowID) != nil {
-            switch input.renderingKind {
-            case .dateInput:
-                DatePickerInputRowInputView(rowID: rowID, input: input)
-            case .textInput:
-                TextInputRowInputView(rowID: rowID, input: input)
-            default:
-                TextInputRowInputView(rowID: rowID, input: input)
-            }
-        } else {
-            EmptyView()
+        switch input.renderingKind {
+        case .dateInput:
+            DatePickerInputRowInputView(input: input)
+        case .textInput:
+            TextInputRowInputView(input: input)
+        default:
+            TextInputRowInputView(input: input)
         }
     }
 }

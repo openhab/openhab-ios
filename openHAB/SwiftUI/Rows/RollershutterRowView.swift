@@ -23,8 +23,6 @@ enum RollerShutterCommand: String {
 
 private struct RollershutterRowConfig {
     let input: RollershutterRowInput
-    let iconWidget: OpenHABWidget
-    let commandWidget: OpenHABWidget
     let viewModel: SitemapPageViewModel
     let triggerUpFeedback: Binding<Bool>
     let triggerStopFeedback: Binding<Bool>
@@ -35,18 +33,17 @@ private struct RollershutterRowConfig {
 private func makeRollershutterRowContent(_ config: RollershutterRowConfig) -> RollershutterRowContent {
     RollershutterRowContent(
         input: config.input,
-        iconWidget: config.iconWidget,
         triggerUpFeedback: config.triggerUpFeedback,
         triggerStopFeedback: config.triggerStopFeedback,
         triggerDownFeedback: config.triggerDownFeedback
     ) { command in
-        config.viewModel.sendCommand(command.rawValue, for: config.commandWidget)
+        guard let itemName = config.input.itemName else { return }
+        config.viewModel.sendCommand(command.rawValue, for: itemName)
     }
 }
 
 private struct RollershutterRowContent: View {
     let input: RollershutterRowInput
-    let iconWidget: OpenHABWidget
     @Binding var triggerUpFeedback: Bool
     @Binding var triggerStopFeedback: Bool
     @Binding var triggerDownFeedback: Bool
@@ -58,8 +55,7 @@ private struct RollershutterRowContent: View {
         let displayState = input.displayState
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                IconView(widget: iconWidget)
-                    .frame(width: 32, height: 32)
+                IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
 
                 VStack(alignment: .leading, spacing: 2) {
                     if !displayState.labelText.isEmpty {
@@ -116,34 +112,7 @@ private struct RollershutterRowContent: View {
 }
 
 struct RollershutterRowInputView: View {
-    let rowID: RowID
     let input: RollershutterRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-    @State private var triggerUpFeedback = false
-    @State private var triggerStopFeedback = false
-    @State private var triggerDownFeedback = false
-
-    var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeRollershutterRowContent(
-                RollershutterRowConfig(
-                    input: input,
-                    iconWidget: widget,
-                    commandWidget: widget,
-                    viewModel: viewModel,
-                    triggerUpFeedback: $triggerUpFeedback,
-                    triggerStopFeedback: $triggerStopFeedback,
-                    triggerDownFeedback: $triggerDownFeedback
-                )
-            )
-        } else {
-            EmptyView()
-        }
-    }
-}
-
-struct RollershutterRowView: View {
-    @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
     @State private var triggerUpFeedback = false
     @State private var triggerStopFeedback = false
@@ -152,9 +121,7 @@ struct RollershutterRowView: View {
     var body: some View {
         makeRollershutterRowContent(
             RollershutterRowConfig(
-                input: RollershutterRowInput.from(widget: widget),
-                iconWidget: widget,
-                commandWidget: widget,
+                input: input,
                 viewModel: viewModel,
                 triggerUpFeedback: $triggerUpFeedback,
                 triggerStopFeedback: $triggerStopFeedback,
@@ -187,7 +154,7 @@ extension View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[5]
     VStack {
-        RollershutterRowView(widget: widget)
+        RollershutterRowInputView(input: RollershutterRowInput.from(widget: widget))
         Spacer()
     }
     .environmentObject(SitemapPageViewModel())

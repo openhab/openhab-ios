@@ -16,24 +16,23 @@ import SwiftUI
 
 private struct DateInputRowConfig {
     let input: InputRowInput
-    let widget: OpenHABWidget
-    let viewModel: SitemapPageViewModel
+    let onSendCommand: (String) -> Void
 }
 
 @MainActor
 private func makeDateInputRowContent(_ config: DateInputRowConfig) -> DateInputRowContent {
     DateInputRowContent(
         input: config.input,
-        iconWidget: config.widget,
+        iconInput: config.input.icon,
         inputHint: config.input.inputHint
     ) { command in
-        config.viewModel.sendCommand(command, for: config.widget)
+        config.onSendCommand(command)
     }
 }
 
 private struct DateInputRowContent: View {
     let input: InputRowInput
-    let iconWidget: OpenHABWidget
+    let iconInput: RowIconInput
     let inputHint: OpenHABWidget.InputHint
     let onSendCommand: (String) -> Void
 
@@ -53,8 +52,7 @@ private struct DateInputRowContent: View {
     var body: some View {
         let displayState = input.displayState
         HStack {
-            IconView(widget: iconWidget)
-                .frame(width: 32, height: 32)
+            IconInputView(input: iconInput, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
 
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
@@ -122,35 +120,17 @@ private struct DateInputRowContent: View {
 }
 
 struct DatePickerInputRowInputView: View {
-    let rowID: RowID
     let input: InputRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeDateInputRowContent(
-                DateInputRowConfig(
-                    input: input,
-                    widget: widget,
-                    viewModel: viewModel
-                )
-            )
-        } else {
-            EmptyView()
-        }
-    }
-}
-
-struct DatePickerInputRowView: View {
-    @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         makeDateInputRowContent(
             DateInputRowConfig(
-                input: InputRowInput.from(widget: widget),
-                widget: widget,
-                viewModel: viewModel
+                input: input,
+                onSendCommand: { command in
+                    guard let itemName = input.itemName else { return }
+                    viewModel.sendCommand(command, for: itemName)
+                }
             )
         )
     }
@@ -159,7 +139,7 @@ struct DatePickerInputRowView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[13]
     VStack {
-        DatePickerInputRowView(widget: widget)
+        DatePickerInputRowInputView(input: InputRowInput.from(widget: widget))
             .padding()
         Spacer()
     }

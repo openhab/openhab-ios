@@ -210,27 +210,6 @@ struct ButtonGridRowInputView: View {
     }
 }
 
-struct ButtonGridRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    var body: some View {
-        makeButtonGridRowContent(
-            ButtonGridRowConfig(
-                input: ButtonGridRowInput.from(widget: widget)
-            ) { command, itemName, policy, phase in
-                guard let itemName, !itemName.isEmpty else { return }
-                viewModel.sendCommand(
-                    command,
-                    for: itemName,
-                    policy: policy,
-                    phase: phase
-                )
-            }
-        )
-    }
-}
-
 extension OpenHABWidgetMapping {
     func toWidget(widgetId: String, item: OpenHABItem?) -> OpenHABWidget {
         let widget = OpenHABWidget()
@@ -260,7 +239,7 @@ extension View {
 #Preview {
     if let widget = PreviewConstants.openHABSitemapPage!.widgets.first(where: { $0.type == .buttongrid }) {
         VStack {
-            ButtonGridRowView(widget: widget)
+            ButtonGridRowInputView(input: ButtonGridRowInput.from(widget: widget))
                 .padding()
             Spacer()
         }

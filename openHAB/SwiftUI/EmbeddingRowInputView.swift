@@ -139,23 +139,23 @@ struct EmbeddingRowInputView: View {
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.rowInsets(for: rowInput))
                 .listRowBackground(RowLayoutPolicy.backgroundKind(for: rowInput) == .frame ? frameRowBackground : regularRowBackground)
-        case let .slider(rowID, input):
-            SliderRowInputView(rowID: rowID, input: input)
+        case let .slider(_, input):
+            SliderRowInputView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
-        case let .selection(rowID, input):
-            SelectionRowInputView(rowID: rowID, input: input)
+        case let .selection(_, input):
+            SelectionRowInputView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
-        case let .segmented(rowID, input):
-            SegmentedRowInputView(rowID: rowID, input: input)
+        case let .segmented(_, input):
+            SegmentedRowInputView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
-        case let .setpoint(rowID, input):
-            SetpointRowInputView(rowID: rowID, input: input)
+        case let .setpoint(_, input):
+            SetpointRowInputView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
@@ -169,18 +169,18 @@ struct EmbeddingRowInputView: View {
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
-        case let .rollershutter(rowID, input):
-            RollershutterRowInputView(rowID: rowID, input: input)
+        case let .rollershutter(_, input):
+            RollershutterRowInputView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
-        case let .input(rowID, input):
-            InputRowInputView(rowID: rowID, input: input)
+        case let .input(_, input):
+            InputRowInputView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
-        case let .colorPicker(rowID, input):
-            ColorPickerRowInputView(rowID: rowID, input: input)
+        case let .colorPicker(_, input):
+            ColorPickerRowInputView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
@@ -189,8 +189,8 @@ struct EmbeddingRowInputView: View {
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
-        case let .colorTemperature(rowID, input):
-            ColorTemperaturePickerRowInputView(rowID: rowID, input: input)
+        case let .colorTemperature(_, input):
+            ColorTemperaturePickerRowInputView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)

@@ -18,7 +18,6 @@ import SwiftUI
 private struct SelectionRowContent: View {
     let input: SelectionRowInput
     let widgetVersion: Int
-    let iconWidget: OpenHABWidget
     let onSelect: (String) -> Void
 
     private let logger = Logger(subsystem: "org.openhab", category: "SelectionRowView")
@@ -87,8 +86,7 @@ private struct SelectionRowContent: View {
     @ViewBuilder
     private func rowContent(displayedCommand: String) -> some View {
         HStack {
-            IconView(widget: iconWidget)
-                .frame(width: 32, height: 32)
+            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
 
             if !input.displayState.labelText.isEmpty {
                 let labelText = input.displayState.labelText
@@ -137,38 +135,17 @@ private struct SelectionRowContent: View {
 }
 
 struct SelectionRowInputView: View {
-    let rowID: RowID
     let input: SelectionRowInput
 
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            SelectionRowContent(
-                input: input,
-                widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
-                iconWidget: widget
-            ) { command in
-                viewModel.sendCommand(command, for: widget)
-            }
-        } else {
-            EmptyView()
-        }
-    }
-}
-
-struct SelectionRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    var body: some View {
-        let input = SelectionRowInput.from(widget: widget)
         SelectionRowContent(
             input: input,
-            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
-            iconWidget: widget
+            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId)
         ) { command in
-            viewModel.sendCommand(command, for: widget)
+            guard let itemName = input.itemName else { return }
+            viewModel.sendCommand(command, for: itemName)
         }
     }
 }

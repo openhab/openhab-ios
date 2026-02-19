@@ -88,19 +88,10 @@ struct SwitchRowInputView: View {
     }
 }
 
-struct SwitchRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    var body: some View {
-        makeSwitchRowContent(input: ToggleRowInput.from(widget: widget), viewModel: viewModel)
-    }
-}
-
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[2]
     VStack {
-        SwitchRowView(widget: widget)
+        SwitchRowInputView(input: ToggleRowInput.from(widget: widget))
         Spacer()
     }
     .environmentObject(SitemapPageViewModel())

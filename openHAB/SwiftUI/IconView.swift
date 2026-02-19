@@ -43,6 +43,7 @@ actor IconCacheTracker {
 struct IconInputView: View {
     let input: RowIconInput
     let rowIdentity: String
+    let fallbackSymbol: SFSymbol?
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject var viewModel: SitemapPageViewModel
@@ -53,6 +54,13 @@ struct IconInputView: View {
     private let logger = Logger(subsystem: "org.openhab", category: "IconInputView")
 
     @State private var currentImage: UIImage?
+
+    init(input: RowIconInput, rowIdentity: String, size: CGSize, fallbackSymbol: SFSymbol? = nil) {
+        self.input = input
+        self.rowIdentity = rowIdentity
+        self.size = size
+        self.fallbackSymbol = fallbackSymbol
+    }
 
     private var iconColorHex: String {
         let logicColor = !input.iconColor.isEmpty ? UIColor(fromString: input.iconColor) : .ohBlack
@@ -82,6 +90,18 @@ struct IconInputView: View {
 
     var body: some View {
         ZStack {
+            if let fallbackSymbol {
+                Image(systemSymbol: fallbackSymbol)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: size.width * 0.75, height: size.height * 0.75)
+                    .foregroundStyle(.primary)
+            } else {
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(width: size.width, height: size.height)
+            }
+
             if let iconURL {
                 KFImage(iconURL)
                     .retry(maxCount: 3, interval: .seconds(5))
@@ -107,10 +127,6 @@ struct IconInputView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
                     .id("\(viewModel.pageId)-\(rowIdentity)-\(colorScheme)")
-            } else {
-                Rectangle()
-                    .fill(Color.clear)
-                    .frame(width: size.width, height: size.height)
             }
         }
     }

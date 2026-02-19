@@ -16,8 +16,6 @@ import SwiftUI
 
 private struct ColorPickerRowConfig {
     let input: ColorPickerRowInput
-    let iconWidget: OpenHABWidget
-    let commandWidget: OpenHABWidget
     let viewModel: SitemapPageViewModel
 }
 
@@ -25,31 +23,28 @@ private struct ColorPickerRowConfig {
 private func makeColorPickerRowContent(_ config: ColorPickerRowConfig) -> ColorPickerRowContent {
     ColorPickerRowContent(
         input: config.input,
-        iconWidget: config.iconWidget,
         onSendImmediate: { command in
-            config.viewModel.sendCommand(command, for: config.commandWidget, policy: .immediate)
+            guard let itemName = config.input.itemName else { return }
+            config.viewModel.sendCommand(command, for: itemName, policy: .immediate)
         },
         onSendDebounced: { command in
+            guard let itemName = config.input.itemName else { return }
             config.viewModel.sendCommand(
                 command,
-                for: config.commandWidget,
+                for: itemName,
                 policy: WidgetCommandDefaults.colorPicker,
                 key: config.input.colorCommandKey
             )
         },
         onCancelPending: {
-            if let item = config.commandWidget.item {
-                config.viewModel.cancelPendingCommand(for: item, key: config.input.colorCommandKey)
-            } else {
-                config.viewModel.cancelPendingCommand(for: config.commandWidget, key: config.input.colorCommandKey)
-            }
+            guard let itemName = config.input.itemName else { return }
+            config.viewModel.cancelPendingCommand(for: itemName, key: config.input.colorCommandKey)
         }
     )
 }
 
 private struct ColorPickerRowContent: View {
     let input: ColorPickerRowInput
-    let iconWidget: OpenHABWidget
     let onSendImmediate: (String) -> Void
     let onSendDebounced: (String) -> Void
     let onCancelPending: () -> Void
@@ -62,8 +57,7 @@ private struct ColorPickerRowContent: View {
     var body: some View {
         let displayState = input.displayState
         HStack {
-            IconView(widget: iconWidget)
-                .frame(width: 32, height: 32)
+            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
 
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
@@ -143,36 +137,13 @@ private struct ColorPickerRowContent: View {
 }
 
 struct ColorPickerRowInputView: View {
-    let rowID: RowID
     let input: ColorPickerRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeColorPickerRowContent(
-                ColorPickerRowConfig(
-                    input: input,
-                    iconWidget: widget,
-                    commandWidget: widget,
-                    viewModel: viewModel
-                )
-            )
-        } else {
-            EmptyView()
-        }
-    }
-}
-
-struct ColorPickerRowView: View {
-    @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         makeColorPickerRowContent(
             ColorPickerRowConfig(
-                input: ColorPickerRowInput.from(widget: widget),
-                iconWidget: widget,
-                commandWidget: widget,
+                input: input,
                 viewModel: viewModel
             )
         )
@@ -182,7 +153,7 @@ struct ColorPickerRowView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[15]
     VStack {
-        ColorPickerRowView(widget: widget)
+        ColorPickerRowInputView(input: ColorPickerRowInput.from(widget: widget))
             .padding()
         Spacer()
     }

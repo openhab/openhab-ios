@@ -803,6 +803,10 @@ extension SitemapPageViewModel {
         commandDispatcher.cancelPending(for: item, key: key)
     }
 
+    func cancelPendingCommand(for itemname: String, key: String? = nil) {
+        commandDispatcher.cancelPending(for: itemname, key: key)
+    }
+
     func sendCommand(_ command: String?,
                      for itemname: String,
                      policy: WidgetCommandPolicy = .immediate,
@@ -858,6 +862,21 @@ extension SitemapPageViewModel {
         }
         let command = state.commandString
         commandDispatcher.send(command, for: item, policy: policy, phase: phase, key: key) { [weak self] itemname, command in
+            self?.sendCommand(itemname: itemname, command: command)
+        }
+    }
+
+    func sendToUpdate(itemname: String,
+                      state: NumberState?,
+                      policy: WidgetCommandPolicy = .immediate,
+                      phase: WidgetCommandPhase = .change,
+                      key: String? = nil) {
+        guard !itemname.isEmpty, let state else {
+            logger.info("ItemUpdate for itemname or state = nil")
+            return
+        }
+        let command = state.commandString
+        commandDispatcher.send(command, for: itemname, policy: policy, phase: phase, key: key) { [weak self] itemname, command in
             self?.sendCommand(itemname: itemname, command: command)
         }
     }

@@ -45,6 +45,8 @@ struct SelectionRowInput: Equatable {
     let valueColor: String
     let readOnly: Bool
     let widgetId: String
+    let icon: RowIconInput
+    let itemName: String?
 
     static func from(widget: OpenHABWidget) -> SelectionRowInput {
         let displayState = widget.displayState
@@ -54,7 +56,9 @@ struct SelectionRowInput: Equatable {
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
             readOnly: widget.readOnly ?? false,
-            widgetId: displayState.widgetId
+            widgetId: displayState.widgetId,
+            icon: RowIconInput.from(widget: widget),
+            itemName: widget.item?.name
         )
     }
 }
@@ -65,6 +69,8 @@ struct SegmentedRowInput: Equatable {
     let labelColor: String
     let valueColor: String
     let widgetId: String
+    let icon: RowIconInput
+    let itemName: String?
 
     static func from(widget: OpenHABWidget) -> SegmentedRowInput {
         let displayState = widget.displayState
@@ -73,7 +79,9 @@ struct SegmentedRowInput: Equatable {
             mappings: displayState.mappings,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
-            widgetId: displayState.widgetId
+            widgetId: displayState.widgetId,
+            icon: RowIconInput.from(widget: widget),
+            itemName: widget.item?.name
         )
     }
 }
@@ -87,6 +95,8 @@ struct SetpointRowInput: Equatable {
     let unit: String?
     let numberPattern: String?
     let serverValue: Double
+    let icon: RowIconInput
+    let itemName: String?
 
     static func from(widget: OpenHABWidget) -> SetpointRowInput {
         let displayState = widget.displayState
@@ -95,6 +105,7 @@ struct SetpointRowInput: Equatable {
         } else {
             widget.item?.stateDescription?.numberPattern
         }
+        let unit = resolvedSetpointUnit(from: widget)
         let serverValue: Double
         if let numberState = widget.stateValueAsNumberState {
             serverValue = numberState.value
@@ -109,10 +120,29 @@ struct SetpointRowInput: Equatable {
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
             readOnly: widget.readOnly ?? false,
-            unit: widget.unit,
+            unit: unit,
             numberPattern: numberPattern,
-            serverValue: serverValue
+            serverValue: serverValue,
+            icon: RowIconInput.from(widget: widget),
+            itemName: widget.item?.name
         )
+    }
+
+    private static func resolvedSetpointUnit(from widget: OpenHABWidget) -> String? {
+        if let explicitUnit = widget.unit, !explicitUnit.isEmpty {
+            return explicitUnit
+        }
+
+        let stateText: String = if !widget.state.isEmpty {
+            widget.state
+        } else {
+            widget.item?.state ?? ""
+        }
+        guard !stateText.isEmpty else { return nil }
+
+        let components = stateText.split(separator: " ").map(String.init)
+        guard components.count > 1 else { return nil }
+        return components[1]
     }
 }
 
@@ -122,6 +152,8 @@ struct ColorPickerRowInput: Equatable {
     let labelColor: String
     let valueColor: String
     let readOnly: Bool
+    let icon: RowIconInput
+    let itemName: String?
 
     var colorCommandKey: String {
         "color-\(widgetId)"
@@ -133,7 +165,9 @@ struct ColorPickerRowInput: Equatable {
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
-            readOnly: widget.readOnly ?? false
+            readOnly: widget.readOnly ?? false,
+            icon: RowIconInput.from(widget: widget),
+            itemName: widget.item?.name
         )
     }
 }
@@ -165,13 +199,17 @@ struct RollershutterRowInput: Equatable {
     let displayState: WidgetDisplayState
     let labelColor: String
     let valueColor: String
+    let icon: RowIconInput
+    let itemName: String?
 
     static func from(widget: OpenHABWidget) -> RollershutterRowInput {
         RollershutterRowInput(
             widgetId: widget.widgetId,
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
-            valueColor: widget.valuecolor
+            valueColor: widget.valuecolor,
+            icon: RowIconInput.from(widget: widget),
+            itemName: widget.item?.name
         )
     }
 }
@@ -184,6 +222,8 @@ struct InputRowInput: Sendable, Equatable {
     let valueColor: String
     let readOnly: Bool
     let inputHintRawValue: String
+    let icon: RowIconInput
+    let itemName: String?
 
     var inputHint: OpenHABWidget.InputHint {
         OpenHABWidget.InputHint(rawValue: inputHintRawValue)
@@ -197,7 +237,9 @@ struct InputRowInput: Sendable, Equatable {
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
             readOnly: widget.readOnly ?? false,
-            inputHintRawValue: widget.inputHint.rawValue
+            inputHintRawValue: widget.inputHint.rawValue,
+            icon: RowIconInput.from(widget: widget),
+            itemName: widget.item?.name
         )
     }
 }
@@ -321,6 +363,8 @@ struct ColorTemperatureRowInput: Equatable {
     let minValue: Double
     let maxValue: Double
     let serverValue: Double?
+    let icon: RowIconInput
+    let itemName: String?
 
     var colorTemperatureCommandKey: String {
         "color-temperature-\(widgetId)"
@@ -351,7 +395,9 @@ struct ColorTemperatureRowInput: Equatable {
             readOnly: widget.readOnly ?? false,
             minValue: widget.minValue,
             maxValue: widget.maxValue,
-            serverValue: parsedValue.isFinite ? parsedValue : nil
+            serverValue: parsedValue.isFinite ? parsedValue : nil,
+            icon: RowIconInput.from(widget: widget),
+            itemName: widget.item?.name
         )
     }
 }
@@ -438,6 +484,8 @@ struct SliderRowInput: Equatable {
     let valueColor: String
     let shouldSendUpdatesDuringMove: Bool
     let serverValue: Double
+    let icon: RowIconInput
+    let itemName: String?
 
     var sliderCommandKey: String {
         "slider-\(widgetId)"
@@ -454,6 +502,7 @@ struct SliderRowInput: Equatable {
         } else {
             widget.item?.stateDescription?.numberPattern
         }
+        let unit = resolvedSliderUnit(from: widget)
         let serverValue = if widget.item != nil {
             displayState.adjustedValue
         } else {
@@ -464,15 +513,34 @@ struct SliderRowInput: Equatable {
             widgetId: widget.widgetId,
             displayState: displayState,
             numberPattern: numberPattern,
-            unit: widget.unit,
+            unit: unit,
             readOnly: widget.readOnly ?? false,
             switchSupport: widget.switchSupport,
             step: widget.step,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
             shouldSendUpdatesDuringMove: widget.shouldUseSliderUpdatesDuringMove(),
-            serverValue: adjustedToStep(serverValue, displayState: displayState)
+            serverValue: adjustedToStep(serverValue, displayState: displayState),
+            icon: RowIconInput.from(widget: widget),
+            itemName: widget.item?.name
         )
+    }
+
+    private static func resolvedSliderUnit(from widget: OpenHABWidget) -> String? {
+        if let explicitUnit = widget.unit, !explicitUnit.isEmpty {
+            return explicitUnit
+        }
+
+        let stateText: String = if !widget.state.isEmpty {
+            widget.state
+        } else {
+            widget.item?.state ?? ""
+        }
+        guard !stateText.isEmpty else { return nil }
+
+        let components = stateText.split(separator: " ").map(String.init)
+        guard components.count > 1 else { return nil }
+        return components[1]
     }
 
     private static func parseServerValue(displayState: WidgetDisplayState, numberPattern: String?) -> Double {

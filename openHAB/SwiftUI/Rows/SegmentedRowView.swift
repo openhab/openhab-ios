@@ -15,46 +15,20 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
-// swiftlint:disable:next file_types_order
-struct SegmentedRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    /// Optional SF Symbol fallback for IconView (useful for previews)
-    var fallbackSymbol: SFSymbol?
-
-    var body: some View {
-        let input = SegmentedRowInput.from(widget: widget)
-        SegmentedRowContent(
-            input: input,
-            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
-            iconWidget: widget,
-            fallbackSymbol: fallbackSymbol
-        ) { command, policy, phase in
-            viewModel.sendCommand(command, for: widget, policy: policy, phase: phase)
-        }
-    }
-}
-
 struct SegmentedRowInputView: View {
-    let rowID: RowID
     let input: SegmentedRowInput
     var fallbackSymbol: SFSymbol?
 
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            SegmentedRowContent(
-                input: input,
-                widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
-                iconWidget: widget,
-                fallbackSymbol: fallbackSymbol
-            ) { command, policy, phase in
-                viewModel.sendCommand(command, for: widget, policy: policy, phase: phase)
-            }
-        } else {
-            EmptyView()
+        SegmentedRowContent(
+            input: input,
+            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+            fallbackSymbol: fallbackSymbol
+        ) { command, policy, phase in
+            guard let itemName = input.itemName else { return }
+            viewModel.sendCommand(command, for: itemName, policy: policy, phase: phase)
         }
     }
 }
@@ -62,7 +36,6 @@ struct SegmentedRowInputView: View {
 private struct SegmentedRowContent: View {
     let input: SegmentedRowInput
     let widgetVersion: Int
-    let iconWidget: OpenHABWidget
     let fallbackSymbol: SFSymbol?
     let sendCommand: (String, WidgetCommandPolicy, WidgetCommandPhase) -> Void
 
@@ -79,8 +52,7 @@ private struct SegmentedRowContent: View {
     var body: some View {
         let selectedIndex = effectiveSelectedIndex(displayState: input.displayState, mappings: input.mappings)
         HStack(spacing: 0) {
-            IconView(widget: iconWidget, fallbackSymbol: fallbackSymbol)
-                .frame(width: 32, height: 32)
+            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32), fallbackSymbol: fallbackSymbol)
 
             if !input.displayState.labelText.isEmpty {
                 let labelText = input.displayState.labelText
@@ -391,19 +363,19 @@ struct PreviewList<Content: View>: View {
     }
 }
 
-private extension SegmentedRowView {
-    static func createPreviewWidget(label: String,
-                                    detailLabel: String? = nil,
-                                    icon: String = "switch",
-                                    mappings: [OpenHABWidgetMapping],
-                                    selectedState: String? = nil) -> OpenHABWidget {
-        PreviewWidgetFactory.segmented(
+private extension SegmentedRowInputView {
+    static func createPreviewInput(label: String,
+                                   detailLabel: String? = nil,
+                                   icon: String = "switch",
+                                   mappings: [OpenHABWidgetMapping],
+                                   selectedState: String? = nil) -> SegmentedRowInput {
+        SegmentedRowInput.from(widget: PreviewWidgetFactory.segmented(
             label: label,
             mappings: mappings,
             selectedState: selectedState,
             icon: icon,
             valueText: detailLabel
-        )
+        ))
     }
 }
 #endif
@@ -412,8 +384,8 @@ private extension SegmentedRowView {
 
 #Preview("Short Labels") {
     PreviewList {
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "Light Switch",
                 detailLabel: "1",
                 mappings: [
@@ -421,16 +393,15 @@ private extension SegmentedRowView {
                     OpenHABWidgetMapping(command: "OFF", label: "OFF")
                 ],
                 selectedState: "ON"
-            ),
-            fallbackSymbol: .switch2
+            )
         )
     }
 }
 
 #Preview("Charts Period") {
     PreviewList {
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "Charts Period",
                 mappings: [
                     OpenHABWidgetMapping(command: "D", label: "Day"),
@@ -439,16 +410,15 @@ private extension SegmentedRowView {
                     OpenHABWidgetMapping(command: "4h", label: "4h")
                 ],
                 selectedState: "D"
-            ),
-            fallbackSymbol: .chartBarFill
+            )
         )
     }
 }
 
 #Preview("Long Labels") {
     PreviewList {
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "Temperature Control",
                 detailLabel: "3",
                 mappings: [
@@ -457,16 +427,15 @@ private extension SegmentedRowView {
                     OpenHABWidgetMapping(command: "automatic", label: "Automatic")
                 ],
                 selectedState: "automatic"
-            ),
-            fallbackSymbol: .thermometerMedium
+            )
         )
     }
 }
 
 #Preview("Multiple Segments (4)") {
     PreviewList {
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "Fan Speed",
                 detailLabel: "4",
                 mappings: [
@@ -476,47 +445,44 @@ private extension SegmentedRowView {
                     OpenHABWidgetMapping(command: "3", label: "High")
                 ],
                 selectedState: "3"
-            ),
-            fallbackSymbol: .fanOscillation
+            )
         )
     }
 }
 
 #Preview("PressRelease") {
     PreviewList {
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "All Shutters",
                 detailLabel: "NA",
                 mappings: [
                     OpenHABWidgetMapping(command: "DOWN", label: "DOWN", releaseCommand: "OFF")
                 ],
                 selectedState: "DOWN"
-            ),
-            fallbackSymbol: .romanShadeClosed
+            )
         )
     }
 }
 
 #Preview("Single Mapping") {
     PreviewList {
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "Scene",
                 mappings: [
                     OpenHABWidgetMapping(command: "RUN", label: "Run")
                 ],
                 selectedState: "RUN"
-            ),
-            fallbackSymbol: .theatermasksFill
+            )
         )
     }
 }
 
 #Preview("All Scenarios") {
     PreviewList {
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "Light",
                 detailLabel: "1",
                 mappings: [
@@ -524,11 +490,10 @@ private extension SegmentedRowView {
                     OpenHABWidgetMapping(command: "OFF", label: "OFF")
                 ],
                 selectedState: "ON"
-            ),
-            fallbackSymbol: .lightbulbFill
+            )
         )
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "Climate Mode",
                 detailLabel: "2",
                 mappings: [
@@ -537,11 +502,10 @@ private extension SegmentedRowView {
                     OpenHABWidgetMapping(command: "s", label: "Schedule")
                 ],
                 selectedState: "a"
-            ),
-            fallbackSymbol: .thermometerMedium
+            )
         )
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "Fan Speed",
                 detailLabel: "2",
                 mappings: [
@@ -551,11 +515,10 @@ private extension SegmentedRowView {
                     OpenHABWidgetMapping(command: "3", label: "High")
                 ],
                 selectedState: "2"
-            ),
-            fallbackSymbol: .fanOscillation
+            )
         )
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "Charts Period",
                 mappings: [
                     OpenHABWidgetMapping(command: "D", label: "Day"),
@@ -564,11 +527,10 @@ private extension SegmentedRowView {
                     OpenHABWidgetMapping(command: "4h", label: "4h")
                 ],
                 selectedState: "D"
-            ),
-            fallbackSymbol: .chartBarFill
+            )
         )
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "All Shutters",
                 detailLabel: "NA",
                 mappings: [
@@ -577,12 +539,11 @@ private extension SegmentedRowView {
 
                 ],
                 selectedState: "DOWN"
-            ),
-            fallbackSymbol: .romanShadeClosed
+            )
         )
 
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "Office Shutter",
                 detailLabel: "NA",
                 mappings: [
@@ -590,28 +551,25 @@ private extension SegmentedRowView {
                     OpenHABWidgetMapping(command: "UP", label: "UP", releaseCommand: "OFF")
                 ],
                 selectedState: "DOWN"
-            ),
-            fallbackSymbol: .romanShadeClosed
+            )
         )
 
-        SegmentedRowView(
-            widget: SegmentedRowView.createPreviewWidget(
+        SegmentedRowInputView(
+            input: SegmentedRowInputView.createPreviewInput(
                 label: "Scene",
                 mappings: [
                     OpenHABWidgetMapping(command: "RUN", label: "DOWN")
                 ],
                 selectedState: "DOWN"
-            ),
-            fallbackSymbol: .theatermasksFill
+            )
         )
     }
 }
 
 #Preview("From PreviewConstants") {
     PreviewList {
-        SegmentedRowView(
-            widget: PreviewConstants.openHABSitemapPage!.widgets[4],
-            fallbackSymbol: .switch2
+        SegmentedRowInputView(
+            input: SegmentedRowInput.from(widget: PreviewConstants.openHABSitemapPage!.widgets[4])
         )
     }
 }

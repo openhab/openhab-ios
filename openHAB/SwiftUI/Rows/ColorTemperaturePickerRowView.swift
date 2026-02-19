@@ -17,7 +17,6 @@ import SwiftUI
 
 private struct ColorTemperatureRowConfig {
     let input: ColorTemperatureRowInput
-    let widget: OpenHABWidget
     let viewModel: SitemapPageViewModel
 }
 
@@ -25,20 +24,18 @@ private struct ColorTemperatureRowConfig {
 private func makeColorTemperatureRowContent(_ config: ColorTemperatureRowConfig) -> ColorTemperaturePickerRowContent {
     ColorTemperaturePickerRowContent(
         input: config.input,
-        widget: config.widget
+        iconInput: config.input.icon
     ) { command, key in
+        guard let itemName = config.input.itemName else { return }
         config.viewModel.sendCommand(
             command,
-            for: config.widget,
+            for: itemName,
             policy: WidgetCommandDefaults.slider,
             key: key
         )
     } onCancelPending: { key in
-        if let item = config.widget.item {
-            config.viewModel.cancelPendingCommand(for: item, key: key)
-        } else {
-            config.viewModel.cancelPendingCommand(for: config.widget, key: key)
-        }
+        guard let itemName = config.input.itemName else { return }
+        config.viewModel.cancelPendingCommand(for: itemName, key: key)
     }
 }
 
@@ -90,7 +87,7 @@ struct CustomSliderView: View {
 
 private struct ColorTemperaturePickerRowContent: View {
     let input: ColorTemperatureRowInput
-    @ObservedObject var widget: OpenHABWidget
+    let iconInput: RowIconInput
     let onSendCommand: (String, String) -> Void
     let onCancelPending: (String) -> Void
 
@@ -110,8 +107,7 @@ private struct ColorTemperaturePickerRowContent: View {
     var body: some View {
         let displayState = input.displayState
         HStack(alignment: .top) {
-            IconView(widget: widget)
-                .frame(width: 32, height: 32)
+            IconInputView(input: iconInput, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
 
             VStack(spacing: 8) {
                 HStack {
@@ -226,34 +222,13 @@ private struct ColorTemperaturePickerRowContent: View {
 }
 
 struct ColorTemperaturePickerRowInputView: View {
-    let rowID: RowID
     let input: ColorTemperatureRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeColorTemperatureRowContent(
-                ColorTemperatureRowConfig(
-                    input: input,
-                    widget: widget,
-                    viewModel: viewModel
-                )
-            )
-        } else {
-            EmptyView()
-        }
-    }
-}
-
-struct ColorTemperaturePickerRowView: View {
-    @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         makeColorTemperatureRowContent(
             ColorTemperatureRowConfig(
-                input: ColorTemperatureRowInput.from(widget: widget),
-                widget: widget,
+                input: input,
                 viewModel: viewModel
             )
         )
@@ -263,7 +238,7 @@ struct ColorTemperaturePickerRowView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[13]
     VStack {
-        ColorTemperaturePickerRowView(widget: widget)
+        ColorTemperaturePickerRowInputView(input: ColorTemperatureRowInput.from(widget: widget))
             .padding()
         Spacer()
     }

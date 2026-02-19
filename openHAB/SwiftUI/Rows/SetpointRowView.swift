@@ -16,20 +16,18 @@ import SFSafeSymbols
 import SwiftUI
 
 @MainActor
-private func sendSetpointValue(_ value: Double, for widget: OpenHABWidget, viewModel: SitemapPageViewModel) {
-    var numberState = widget.stateValueAsNumberState
-    numberState = numberState ?? NumberState(
+private func sendSetpointValue(_ value: Double, for input: SetpointRowInput, viewModel: SitemapPageViewModel) {
+    guard let itemName = input.itemName else { return }
+    let state = NumberState(
         value: value,
-        unit: widget.unit,
-        format: widget.item?.stateDescription?.numberPattern
+        unit: input.unit,
+        format: input.numberPattern
     )
-    numberState?.value = value
-    viewModel.sendToUpdate(item: widget.item, state: numberState, policy: .immediate)
+    viewModel.sendToUpdate(itemname: itemName, state: state)
 }
 
 private struct SetpointRowContent: View {
     let input: SetpointRowInput
-    let iconWidget: OpenHABWidget
     @Binding var triggerFeedback: Bool
     let onSendValue: (Double) -> Void
 
@@ -40,8 +38,7 @@ private struct SetpointRowContent: View {
         let displayState = input.displayState
         let currentValue = currentValue(displayState: displayState)
         HStack {
-            IconView(widget: iconWidget)
-                .frame(width: 32, height: 32)
+            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
 
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
@@ -140,40 +137,17 @@ private struct SetpointRowContent: View {
 }
 
 struct SetpointRowInputView: View {
-    let rowID: RowID
     let input: SetpointRowInput
 
     @EnvironmentObject var viewModel: SitemapPageViewModel
     @State private var triggerFeedback = false
 
     var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            SetpointRowContent(
-                input: input,
-                iconWidget: widget,
-                triggerFeedback: $triggerFeedback
-            ) { value in
-                sendSetpointValue(value, for: widget, viewModel: viewModel)
-            }
-        } else {
-            EmptyView()
-        }
-    }
-}
-
-struct SetpointRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-    @State private var triggerFeedback = false
-
-    var body: some View {
-        let input = SetpointRowInput.from(widget: widget)
         SetpointRowContent(
             input: input,
-            iconWidget: widget,
             triggerFeedback: $triggerFeedback
         ) { value in
-            sendSetpointValue(value, for: widget, viewModel: viewModel)
+            sendSetpointValue(value, for: input, viewModel: viewModel)
         }
     }
 }
@@ -181,7 +155,7 @@ struct SetpointRowView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[3]
     VStack {
-        SetpointRowView(widget: widget)
+        SetpointRowInputView(input: SetpointRowInput.from(widget: widget))
         Spacer()
     }
     .environmentObject(SitemapPageViewModel())

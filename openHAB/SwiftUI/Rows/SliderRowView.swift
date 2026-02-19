@@ -17,9 +17,7 @@ import SwiftUI
 private struct SliderRowConfig {
     let input: SliderRowInput
     let widgetVersion: Int
-    let iconWidget: OpenHABWidget
     let fallbackSymbol: SFSymbol?
-    let commandWidget: OpenHABWidget
     let viewModel: SitemapPageViewModel
 }
 
@@ -28,27 +26,23 @@ private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent
     SliderRowContent(
         input: config.input,
         widgetVersion: config.widgetVersion,
-        iconWidget: config.iconWidget,
         fallbackSymbol: config.fallbackSymbol,
         onToggleSwitch: { command in
-            config.viewModel.sendCommand(command, for: config.commandWidget)
+            guard let itemName = config.input.itemName else { return }
+            config.viewModel.sendCommand(command, for: itemName)
         },
         onCancelPending: { key in
-            if let item = config.commandWidget.item {
-                config.viewModel.cancelPendingCommand(for: item, key: key)
-            } else {
-                config.viewModel.cancelPendingCommand(for: config.commandWidget, key: key)
-            }
+            guard let itemName = config.input.itemName else { return }
+            config.viewModel.cancelPendingCommand(for: itemName, key: key)
         },
         onSendValue: { value, policy, phase, key in
-            var numberState = config.commandWidget.stateValueAsNumberState
-            numberState = numberState ?? NumberState(
+            guard let itemName = config.input.itemName else { return }
+            let numberState = NumberState(
                 value: value,
-                unit: config.commandWidget.unit,
-                format: config.commandWidget.pattern ?? config.commandWidget.item?.stateDescription?.numberPattern
+                unit: config.input.unit,
+                format: config.input.numberPattern
             )
-            numberState?.value = value
-            config.viewModel.sendToUpdate(item: config.commandWidget.item, state: numberState, policy: policy, phase: phase, key: key)
+            config.viewModel.sendToUpdate(itemname: itemName, state: numberState, policy: policy, phase: phase, key: key)
         }
     )
 }
@@ -56,7 +50,6 @@ private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent
 private struct SliderRowContent: View {
     let input: SliderRowInput
     let widgetVersion: Int
-    let iconWidget: OpenHABWidget
     let fallbackSymbol: SFSymbol?
     let onToggleSwitch: (String) -> Void
     let onCancelPending: (String?) -> Void
@@ -152,8 +145,7 @@ private struct SliderRowContent: View {
         let displayedValue = effectiveValue(state: state)
         let currentValueText = currentValueText(state: state, value: displayedValue)
         HStack {
-            IconView(widget: iconWidget, fallbackSymbol: fallbackSymbol)
-                .frame(width: 32, height: 32)
+            IconInputView(input: state.icon, rowIdentity: state.widgetId, size: CGSize(width: 32, height: 32), fallbackSymbol: fallbackSymbol)
 
             if !state.displayState.labelText.isEmpty {
                 let labelText = state.displayState.labelText
@@ -212,27 +204,20 @@ private struct SliderRowContent: View {
 }
 
 struct SliderRowInputView: View {
-    let rowID: RowID
     let input: SliderRowInput
     var fallbackSymbol: SFSymbol?
 
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeSliderRowContent(
-                SliderRowConfig(
-                    input: input,
-                    widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
-                    iconWidget: widget,
-                    fallbackSymbol: fallbackSymbol,
-                    commandWidget: widget,
-                    viewModel: viewModel
-                )
+        makeSliderRowContent(
+            SliderRowConfig(
+                input: input,
+                widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+                fallbackSymbol: fallbackSymbol,
+                viewModel: viewModel
             )
-        } else {
-            EmptyView()
-        }
+        )
     }
 }
 
@@ -248,9 +233,7 @@ struct SliderRowView: View {
             SliderRowConfig(
                 input: input,
                 widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
-                iconWidget: widget,
                 fallbackSymbol: fallbackSymbol,
-                commandWidget: widget,
                 viewModel: viewModel
             )
         )
