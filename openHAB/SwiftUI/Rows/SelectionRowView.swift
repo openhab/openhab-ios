@@ -136,6 +136,27 @@ private struct SelectionRowContent: View {
     }
 }
 
+struct SelectionRowInputView: View {
+    let rowID: RowID
+    let input: SelectionRowInput
+
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            SelectionRowContent(
+                input: input,
+                widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+                iconWidget: widget
+            ) { command in
+                viewModel.sendCommand(command, for: widget)
+            }
+        } else {
+            EmptyView()
+        }
+    }
+}
+
 struct SelectionRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel

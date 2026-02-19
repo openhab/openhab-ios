@@ -14,6 +14,41 @@ import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
 
+@MainActor
+private func makeSliderRowContent(input: SliderRowInput,
+                                  widgetVersion: Int,
+                                  iconWidget: OpenHABWidget,
+                                  fallbackSymbol: SFSymbol?,
+                                  commandWidget: OpenHABWidget,
+                                  viewModel: SitemapPageViewModel) -> SliderRowContent {
+    SliderRowContent(
+        input: input,
+        widgetVersion: widgetVersion,
+        iconWidget: iconWidget,
+        fallbackSymbol: fallbackSymbol,
+        onToggleSwitch: { command in
+            viewModel.sendCommand(command, for: commandWidget)
+        },
+        onCancelPending: { key in
+            if let item = commandWidget.item {
+                viewModel.cancelPendingCommand(for: item, key: key)
+            } else {
+                viewModel.cancelPendingCommand(for: commandWidget, key: key)
+            }
+        },
+        onSendValue: { value, policy, phase, key in
+            var numberState = commandWidget.stateValueAsNumberState
+            numberState = numberState ?? NumberState(
+                value: value,
+                unit: commandWidget.unit,
+                format: commandWidget.pattern ?? commandWidget.item?.stateDescription?.numberPattern
+            )
+            numberState?.value = value
+            viewModel.sendToUpdate(item: commandWidget.item, state: numberState, policy: policy, phase: phase, key: key)
+        }
+    )
+}
+
 private struct SliderRowContent: View {
     let input: SliderRowInput
     let widgetVersion: Int
@@ -172,6 +207,29 @@ private struct SliderRowContent: View {
     }
 }
 
+struct SliderRowInputView: View {
+    let rowID: RowID
+    let input: SliderRowInput
+    var fallbackSymbol: SFSymbol?
+
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeSliderRowContent(
+                input: input,
+                widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+                iconWidget: widget,
+                fallbackSymbol: fallbackSymbol,
+                commandWidget: widget,
+                viewModel: viewModel
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
 struct SliderRowView: View {
     @ObservedObject var widget: OpenHABWidget
     var fallbackSymbol: SFSymbol?
@@ -180,31 +238,13 @@ struct SliderRowView: View {
 
     var body: some View {
         let input = SliderRowInput.from(widget: widget)
-        SliderRowContent(
+        makeSliderRowContent(
             input: input,
             widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
             iconWidget: widget,
             fallbackSymbol: fallbackSymbol,
-            onToggleSwitch: { command in
-                viewModel.sendCommand(command, for: widget)
-            },
-            onCancelPending: { key in
-                if let item = widget.item {
-                    viewModel.cancelPendingCommand(for: item, key: key)
-                } else {
-                    viewModel.cancelPendingCommand(for: widget, key: key)
-                }
-            },
-            onSendValue: { value, policy, phase, key in
-                var numberState = widget.stateValueAsNumberState
-                numberState = numberState ?? NumberState(
-                    value: value,
-                    unit: widget.unit,
-                    format: widget.pattern ?? widget.item?.stateDescription?.numberPattern
-                )
-                numberState?.value = value
-                viewModel.sendToUpdate(item: widget.item, state: numberState, policy: policy, phase: phase, key: key)
-            }
+            commandWidget: widget,
+            viewModel: viewModel
         )
     }
 }

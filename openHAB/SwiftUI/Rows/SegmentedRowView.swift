@@ -36,6 +36,29 @@ struct SegmentedRowView: View {
     }
 }
 
+struct SegmentedRowInputView: View {
+    let rowID: RowID
+    let input: SegmentedRowInput
+    var fallbackSymbol: SFSymbol?
+
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            SegmentedRowContent(
+                input: input,
+                widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+                iconWidget: widget,
+                fallbackSymbol: fallbackSymbol
+            ) { command, policy, phase in
+                viewModel.sendCommand(command, for: widget, policy: policy, phase: phase)
+            }
+        } else {
+            EmptyView()
+        }
+    }
+}
+
 private struct SegmentedRowContent: View {
     let input: SegmentedRowInput
     let widgetVersion: Int
