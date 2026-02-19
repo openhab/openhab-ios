@@ -16,47 +16,43 @@ import SwiftUI
 
 private struct ButtonGridRowConfig {
     let input: ButtonGridRowInput
-    let widget: OpenHABWidget
+    let onSendCommand: (String, String?, WidgetCommandPolicy, WidgetCommandPhase) -> Void
 }
 
 @MainActor
 private func makeButtonGridRowContent(_ config: ButtonGridRowConfig) -> ButtonGridRowContent {
-    ButtonGridRowContent(input: config.input, widget: config.widget)
+    ButtonGridRowContent(input: config.input, onSendCommand: config.onSendCommand)
 }
 
-struct ButtonGridButton: View {
-    @ObservedObject var widget: OpenHABWidget
-    let parentItem: OpenHABItem?
+private struct ButtonGridButton: View {
+    let button: ButtonGridRowInput.ButtonInput
+    let parentItemName: String?
+    let onSendCommand: (String, String?, WidgetCommandPolicy, WidgetCommandPhase) -> Void
 
     @State private var isPressed = false
-    @EnvironmentObject var viewModel: SitemapPageViewModel
     @State private var triggerFeedback = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "ButtonGridButton")
 
     private var hasPressRelease: Bool {
-        if let releaseCommand = widget.releaseCommand, !releaseCommand.isEmpty {
+        if let releaseCommand = button.releaseCommand, !releaseCommand.isEmpty {
             return true
         }
         return false
     }
 
     var body: some View {
-        let displayState = widget.displayState
         Button {
-            // Only handle tap for non-press-release buttons;
-            // press-release buttons are handled entirely by the gesture
             if !hasPressRelease {
                 triggerFeedback.toggle()
                 handleButtonPress()
             }
         } label: {
             HStack {
-                if !widget.icon.isEmpty {
-                    IconView(widget: widget)
-                        .frame(width: 16, height: 16)
+                if button.icon.showIcon {
+                    IconInputView(input: button.icon, rowIdentity: button.id, size: CGSize(width: 16, height: 16))
                 } else {
-                    Text(widget.label)
+                    Text(button.label)
                         .ohTextToken(.rowValueCompact)
                         .foregroundStyle(.primary)
                 }
@@ -65,16 +61,16 @@ struct ButtonGridButton: View {
             .frame(height: 44)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(isChecked(displayState: displayState) ? Color.accentColor : Color.secondary.opacity(0.1))
+                    .fill(isChecked ? Color.accentColor : Color.secondary.opacity(0.1))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(isChecked(displayState: displayState) ? Color.accentColor : Color.secondary.opacity(0.3), lineWidth: 1)
+                    .stroke(isChecked ? Color.accentColor : Color.secondary.opacity(0.3), lineWidth: 1)
             )
             .scaleEffect(isPressed ? 0.95 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
-        .disabled(widget.readOnly ?? false)
+        .disabled(button.readOnly)
         .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
         .onPressGesture(
             onPress: {
@@ -86,49 +82,38 @@ struct ButtonGridButton: View {
         )
     }
 
+    private var isChecked: Bool {
+        if button.stateless { return false }
+        return button.effectiveState == button.command
+    }
+
+    private func resolveItemName() -> String? {
+        button.itemName ?? parentItemName
+    }
+
     private func handleButtonPress() {
-        if let command = widget.command, !command.isEmpty {
-            logger.info("Sending command: \(command)")
-            sendCommand(command)
-        }
+        guard !button.command.isEmpty else { return }
+        logger.info("Sending command: \(button.command)")
+        onSendCommand(button.command, resolveItemName(), .immediate, .change)
     }
 
     private func handleTouchDown() {
         guard !isPressed else { return }
         isPressed = true
-        // For press-release buttons, send command on press
-        if hasPressRelease, let command = widget.command {
+        if hasPressRelease, !button.command.isEmpty {
             triggerFeedback.toggle()
-            logger.info("Sending press command: \(command)")
-            sendCommand(command, policy: .pressRelease, phase: .press)
+            logger.info("Sending press command: \(button.command)")
+            onSendCommand(button.command, resolveItemName(), .pressRelease, .press)
         }
     }
 
     private func handleTouchUp() {
         guard isPressed else { return }
         isPressed = false
-        // For press-release buttons, send release command on release
-        if let releaseCommand = widget.releaseCommand, !releaseCommand.isEmpty {
+        if let releaseCommand = button.releaseCommand, !releaseCommand.isEmpty {
             logger.info("Sending release command: \(releaseCommand)")
-            sendCommand(releaseCommand, policy: .pressRelease, phase: .release)
+            onSendCommand(releaseCommand, resolveItemName(), .pressRelease, .release)
         }
-    }
-
-    private func sendCommand(_ command: String,
-                             policy: WidgetCommandPolicy = .immediate,
-                             phase: WidgetCommandPhase = .change) {
-        viewModel.sendCommand(
-            command,
-            for: widget,
-            policy: policy,
-            phase: phase,
-            fallbackItem: parentItem
-        )
-    }
-
-    private func isChecked(displayState: WidgetDisplayState) -> Bool {
-        if let stateless = widget.stateless, stateless { return false }
-        return displayState.effectiveState == widget.command
     }
 }
 
@@ -154,61 +139,19 @@ private struct PressGestureModifier: ViewModifier {
     }
 }
 
-struct ButtonGridRowInputView: View {
-    let rowID: RowID
-    let input: ButtonGridRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    @ViewBuilder
-    var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeButtonGridRowContent(
-                ButtonGridRowConfig(
-                    input: input,
-                    widget: widget
-                )
-            )
-        } else {
-            EmptyView()
-        }
-    }
-}
-
 private struct ButtonGridRowContent: View {
     let input: ButtonGridRowInput
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    // Maximum number of columns based on screen width
-    private let maxColumns = 12
-
-    private var buttons: [OpenHABWidget] {
-        let childButtons = widget.widgets // .filter(\.visibility)
-        let mappingButtons = widget.mappings.enumerated().map { (index, mapping) in
-            mapping.toWidget(widgetId: "\(widget.widgetId)-mappings-\(index)", item: widget.item)
-        }
-        return childButtons + mappingButtons
-    }
-
-    private var gridRows: Int {
-        buttons.map { $0.row ?? 1 }.max() ?? 1
-    }
-
-    private var gridColumns: Int {
-        min(buttons.map { $0.column ?? 1 }.max() ?? 1, maxColumns)
-    }
+    let onSendCommand: (String, String?, WidgetCommandPolicy, WidgetCommandPhase) -> Void
 
     var body: some View {
         let displayState = input.displayState
         VStack(alignment: .leading, spacing: 8) {
             if input.showLabelAndIcon {
                 HStack {
-                    IconView(widget: widget)
-                        .frame(width: 32, height: 32)
+                    IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
 
                     if !displayState.labelText.isEmpty {
-                        let labelText = displayState.labelText
-                        Text(labelText)
+                        Text(displayState.labelText)
                             .ohTextToken(.rowLabel)
                             .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
                     }
@@ -217,17 +160,17 @@ private struct ButtonGridRowContent: View {
                 }
             }
             HStack {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: gridColumns), spacing: 8) {
-                    ForEach(0 ..< gridRows, id: \.self) { row in
-                        ForEach(0 ..< gridColumns, id: \.self) { column in
-                            let button = buttonForPosition(row: row, column: column)
-
-                            if let button,
-                               button.visibility {
-                                ButtonGridButton(widget: button, parentItem: widget.item)
-                                    .id(viewModel.pageId + button.widgetId)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: input.gridColumns), spacing: 8) {
+                    ForEach(0 ..< input.gridRows, id: \.self) { row in
+                        ForEach(0 ..< input.gridColumns, id: \.self) { column in
+                            if let button = buttonForPosition(row: row, column: column), button.visibility {
+                                ButtonGridButton(
+                                    button: button,
+                                    parentItemName: input.parentItemName,
+                                    onSendCommand: onSendCommand
+                                )
+                                .id("\(input.widgetId)-\(button.id)")
                             } else {
-                                // Empty cell to maintain grid structure
                                 Rectangle()
                                     .fill(Color.clear)
                                     .frame(height: 44)
@@ -239,28 +182,58 @@ private struct ButtonGridRowContent: View {
         }
     }
 
-    private func buttonForPosition(row: Int, column: Int) -> OpenHABWidget? {
-        buttons.first { button in
-            // OpenHAB uses 1-based indexing, convert to 0-based
-            (button.row ?? 1) - 1 == row && (button.column ?? 1) - 1 == column
+    private func buttonForPosition(row: Int, column: Int) -> ButtonGridRowInput.ButtonInput? {
+        input.buttons.first { button in
+            button.row == row && button.column == column
         }
     }
 }
 
-struct ButtonGridRowView: View {
-    @ObservedObject var widget: OpenHABWidget
+struct ButtonGridRowInputView: View {
+    let rowID: RowID
+    let input: ButtonGridRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         makeButtonGridRowContent(
             ButtonGridRowConfig(
-                input: ButtonGridRowInput.from(widget: widget),
-                widget: widget
+                input: input,
+                onSendCommand: { command, itemName, policy, phase in
+                    guard let itemName, !itemName.isEmpty else { return }
+                    viewModel.sendCommand(
+                        command,
+                        for: itemName,
+                        policy: policy,
+                        phase: phase
+                    )
+                }
             )
         )
     }
 }
 
-// Extension to convert OpenHABWidgetMapping to OpenHABWidget
+struct ButtonGridRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        makeButtonGridRowContent(
+            ButtonGridRowConfig(
+                input: ButtonGridRowInput.from(widget: widget),
+                onSendCommand: { command, itemName, policy, phase in
+                    guard let itemName, !itemName.isEmpty else { return }
+                    viewModel.sendCommand(
+                        command,
+                        for: itemName,
+                        policy: policy,
+                        phase: phase
+                    )
+                }
+            )
+        )
+    }
+}
+
 extension OpenHABWidgetMapping {
     func toWidget(widgetId: String, item: OpenHABItem?) -> OpenHABWidget {
         let widget = OpenHABWidget()
@@ -280,9 +253,6 @@ extension OpenHABWidgetMapping {
     }
 }
 
-/// A SwiftUI View extension to handle press and release gesture events.
-/// Used specifically for button grid buttons that need to send commands on press and release
-/// (supporting the releaseCommand feature from openHAB).
 extension View {
     func onPressGesture(onPress: @escaping () -> Void,
                         onRelease: @escaping () -> Void) -> some View {

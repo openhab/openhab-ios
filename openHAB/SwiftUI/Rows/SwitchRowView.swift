@@ -16,20 +16,15 @@ import SwiftUI
 
 @MainActor
 private func makeSwitchRowContent(input: ToggleRowInput,
-                                  iconWidget: OpenHABWidget,
-                                  commandWidget: OpenHABWidget,
                                   viewModel: SitemapPageViewModel) -> SwitchRowContent {
-    SwitchRowContent(
-        input: input,
-        iconWidget: iconWidget
-    ) { command in
-        viewModel.sendCommand(command, for: commandWidget)
+    SwitchRowContent(input: input) { command in
+        guard let itemName = input.itemName else { return }
+        viewModel.sendCommand(itemname: itemName, command: command)
     }
 }
 
 private struct SwitchRowContent: View {
     let input: ToggleRowInput
-    let iconWidget: OpenHABWidget
     let onSendCommand: (String) -> Void
     @State private var localIsOn: Bool?
 
@@ -38,8 +33,7 @@ private struct SwitchRowContent: View {
     var body: some View {
         let displayState = input.displayState
         HStack {
-            IconView(widget: iconWidget)
-                .frame(width: 32, height: 32)
+            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
 
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
@@ -91,16 +85,7 @@ struct SwitchRowInputView: View {
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeSwitchRowContent(
-                input: input,
-                iconWidget: widget,
-                commandWidget: widget,
-                viewModel: viewModel
-            )
-        } else {
-            EmptyView()
-        }
+        makeSwitchRowContent(input: input, viewModel: viewModel)
     }
 }
 
@@ -109,12 +94,7 @@ struct SwitchRowView: View {
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
-        makeSwitchRowContent(
-            input: ToggleRowInput.from(widget: widget),
-            iconWidget: widget,
-            commandWidget: widget,
-            viewModel: viewModel
-        )
+        makeSwitchRowContent(input: ToggleRowInput.from(widget: widget), viewModel: viewModel)
     }
 }
 

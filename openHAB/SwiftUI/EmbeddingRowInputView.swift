@@ -9,27 +9,44 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import SwiftUI
 
 private struct LinkedPageRowInputView: View {
-    let rowID: RowID
     let input: LinkedPageRowInput
 
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+    var body: some View {
+        NavigationLink(
+            destination: SitemapPageView(
+                viewModel: SitemapPageViewModel(pageUrl: input.linkedPageLink, title: input.linkedPageTitle)
+            )
+        ) {
+            LinkedPageRowContent(input: input)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct LinkedPageRowContent: View {
+    let input: LinkedPageRowInput
 
     var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            NavigationLink(
-                destination: SitemapPageView(
-                    viewModel: SitemapPageViewModel(pageUrl: input.linkedPageLink, title: input.linkedPageTitle)
-                )
-            ) {
-                RowViewFactory.view(for: widget)
+        let displayState = input.displayState
+        HStack {
+            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
+
+            Text(displayState.labelText)
+                .ohTextToken(.rowLabel)
+                .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
+
+            Spacer()
+
+            if let value = displayState.labelValue {
+                Text(value)
+                    .ohTextToken(.rowValue)
+                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
             }
-            .buttonStyle(.plain)
-        } else {
-            EmptyView()
         }
     }
 }
@@ -57,8 +74,8 @@ struct EmbeddingRowInputView: View {
                 .contentShape(Rectangle())
                 .listRowInsets(frameRowInsets(input))
                 .listRowBackground(frameRowBackground)
-        case let .linked(rowID, input):
-            LinkedPageRowInputView(rowID: rowID, input: input)
+        case let .linked(_, input):
+            LinkedPageRowInputView(input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(linkedRowInsets(input))
                 .listRowBackground(input.isFrame ? frameRowBackground : regularRowBackground)

@@ -15,23 +15,20 @@ import SwiftUI
 
 private struct GenericRowConfig {
     let input: GenericRowInput
-    let widget: OpenHABWidget
 }
 
 @MainActor
 private func makeGenericRowContent(_ config: GenericRowConfig) -> GenericRowContent {
-    GenericRowContent(input: config.input, iconWidget: config.widget)
+    GenericRowContent(input: config.input)
 }
 
 private struct GenericRowContent: View {
     let input: GenericRowInput
-    let iconWidget: OpenHABWidget
 
     var body: some View {
         let displayState = input.displayState
         HStack {
-            IconView(widget: iconWidget)
-                .frame(width: 32, height: 32)
+            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
 
             Text(displayState.labelText)
                 .ohTextToken(.rowLabel)
@@ -51,19 +48,9 @@ private struct GenericRowContent: View {
 struct GenericRowInputView: View {
     let rowID: RowID
     let input: GenericRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeGenericRowContent(
-                GenericRowConfig(
-                    input: input,
-                    widget: widget
-                )
-            )
-        } else {
-            EmptyView()
-        }
+        makeGenericRowContent(GenericRowConfig(input: input))
     }
 }
 
@@ -73,8 +60,7 @@ struct GenericRowView: View {
     var body: some View {
         makeGenericRowContent(
             GenericRowConfig(
-                input: GenericRowInput.from(widget: widget),
-                widget: widget
+                input: GenericRowInput.from(widget: widget)
             )
         )
     }

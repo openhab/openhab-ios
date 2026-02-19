@@ -16,23 +16,20 @@ import SwiftUI
 
 private struct TextRowConfig {
     let input: TextRowInput
-    let widget: OpenHABWidget
 }
 
 @MainActor
 private func makeTextRowContent(_ config: TextRowConfig) -> TextRowContent {
-    TextRowContent(input: config.input, iconWidget: config.widget)
+    TextRowContent(input: config.input)
 }
 
 private struct TextRowContent: View {
     let input: TextRowInput
-    let iconWidget: OpenHABWidget
 
     var body: some View {
         let displayState = input.displayState
         HStack {
-            IconView(widget: iconWidget)
-                .frame(width: 32, height: 32)
+            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
 
             Text(displayState.labelText)
                 .ohTextToken(.rowLabel)
@@ -61,19 +58,9 @@ private struct TextRowContent: View {
 struct TextRowInputView: View {
     let rowID: RowID
     let input: TextRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeTextRowContent(
-                TextRowConfig(
-                    input: input,
-                    widget: widget
-                )
-            )
-        } else {
-            EmptyView()
-        }
+        makeTextRowContent(TextRowConfig(input: input))
     }
 }
 
@@ -83,8 +70,7 @@ struct TextRowView: View {
     var body: some View {
         makeTextRowContent(
             TextRowConfig(
-                input: TextRowInput.from(widget: widget),
-                widget: widget
+                input: TextRowInput.from(widget: widget)
             )
         )
     }

@@ -136,6 +136,87 @@ struct IconView: View {
     }
 }
 
+struct IconInputView: View {
+    let input: RowIconInput
+    let rowIdentity: String
+    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    let size: CGSize
+    let iconType: IconType = .svg
+
+    private let logger = Logger(subsystem: "org.openhab", category: "IconInputView")
+
+    @State private var currentImage: UIImage?
+
+    private var iconColorHex: String {
+        let logicColor = !input.iconColor.isEmpty ? UIColor(fromString: input.iconColor) : .ohBlack
+        return logicColor.semanticColorToHex() ?? "#000000"
+    }
+
+    private var iconURL: URL? {
+        guard input.showIcon, !input.icon.isEmpty else { return nil }
+
+        guard
+            let activeConnection = networkTracker.activeConnection,
+            !activeConnection.configuration.url.isEmpty else {
+            logger.debug("No active connection to fetch icon")
+            return nil
+        }
+
+        return Endpoint.icon(
+            rootUrl: activeConnection.configuration.url,
+            version: activeConnection.version,
+            icon: input.icon,
+            state: input.iconState,
+            iconType: iconType,
+            iconColor: iconColorHex,
+            staticIcon: input.staticIcon
+        )?.url
+    }
+
+    var body: some View {
+        ZStack {
+            if let iconURL {
+                KFImage(iconURL)
+                    .retry(maxCount: 3, interval: .seconds(5))
+                    .resizable()
+                    .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
+                    .onFailure { error in
+                        logger.error("Icon loading failed: \(error.localizedDescription)")
+                        logger.error("Failed URL: \(iconURL.absoluteString)")
+                    }
+                    .onSuccess { result in
+                        currentImage = result.image
+                        if result.cacheType != .none {
+                            let cacheKey = iconURL.absoluteString
+                            Task {
+                                await IconCacheTracker.shared.addCacheKey(cacheKey)
+                            }
+                        }
+                    }
+                    .placeholder { _ in
+                        Image(uiImage: currentImage ?? .init()).resizable()
+                    }
+                    .cancelOnDisappear(true)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: size.width, height: size.height)
+                    .id("\(viewModel.pageId)-\(rowIdentity)-\(colorScheme)")
+            } else {
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(width: size.width, height: size.height)
+            }
+        }
+    }
+
+    private func processorIconColor(for url: URL) -> String? {
+        guard url.host != "api.iconify.design" else { return nil }
+        return iconColorHex
+    }
+}
+
 // MARK: - Convenience Extensions
 
 extension IconView {

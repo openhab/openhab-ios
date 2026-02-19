@@ -11,6 +11,33 @@
 
 import OpenHABCore
 
+struct RowIconInput: Equatable, Sendable {
+    let icon: String
+    let iconColor: String
+    let staticIcon: Bool
+    let iconState: String?
+    let showIcon: Bool
+
+    static func from(widget: OpenHABWidget) -> RowIconInput {
+        RowIconInput(
+            icon: widget.icon,
+            iconColor: widget.iconColor,
+            staticIcon: widget.staticIcon,
+            iconState: widget.iconState(),
+            showIcon: shouldShowIcon(for: widget)
+        )
+    }
+
+    private static func shouldShowIcon(for widget: OpenHABWidget) -> Bool {
+        switch widget.type {
+        case .frame, .image, .chart, .video, .webview:
+            false
+        default:
+            !widget.icon.isEmpty
+        }
+    }
+}
+
 struct SelectionRowInput {
     let displayState: WidgetDisplayState
     let mappings: [OpenHABWidgetMapping]
@@ -117,6 +144,8 @@ struct ToggleRowInput {
     let labelColor: String
     let valueColor: String
     let readOnly: Bool
+    let icon: RowIconInput
+    let itemName: String?
 
     static func from(widget: OpenHABWidget) -> ToggleRowInput {
         ToggleRowInput(
@@ -124,7 +153,9 @@ struct ToggleRowInput {
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
-            readOnly: widget.readOnly ?? false
+            readOnly: widget.readOnly ?? false,
+            icon: RowIconInput.from(widget: widget),
+            itemName: widget.item?.name
         )
     }
 }
@@ -172,19 +203,68 @@ struct InputRowInput: Sendable {
 }
 
 struct ButtonGridRowInput {
+    struct ButtonInput: Equatable, Sendable, Identifiable {
+        let id: String
+        let label: String
+        let icon: RowIconInput
+        let command: String
+        let releaseCommand: String?
+        let row: Int
+        let column: Int
+        let visibility: Bool
+        let readOnly: Bool
+        let stateless: Bool
+        let effectiveState: String
+        let itemName: String?
+    }
+
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
     let valueColor: String
     let showLabelAndIcon: Bool
+    let icon: RowIconInput
+    let parentItemName: String?
+    let buttons: [ButtonInput]
+    let gridRows: Int
+    let gridColumns: Int
 
     static func from(widget: OpenHABWidget) -> ButtonGridRowInput {
+        let childButtons = widget.widgets
+        let mappingButtons = widget.mappings.enumerated().map { (index, mapping) in
+            mapping.toWidget(widgetId: "\(widget.widgetId)-mappings-\(index)", item: widget.item)
+        }
+        let allButtons = childButtons + mappingButtons
+        let typedButtons = allButtons.map { button in
+            ButtonInput(
+                id: button.widgetId,
+                label: button.label,
+                icon: RowIconInput.from(widget: button),
+                command: button.command ?? "",
+                releaseCommand: button.releaseCommand,
+                row: max((button.row ?? 1) - 1, 0),
+                column: max((button.column ?? 1) - 1, 0),
+                visibility: button.visibility,
+                readOnly: button.readOnly ?? false,
+                stateless: button.stateless ?? false,
+                effectiveState: button.displayState.effectiveState,
+                itemName: button.item?.name
+            )
+        }
+        let gridRows = typedButtons.map(\.row).max().map { $0 + 1 } ?? 1
+        let gridColumns = min((typedButtons.map(\.column).max().map { $0 + 1 } ?? 1), 12)
+
         ButtonGridRowInput(
             widgetId: widget.widgetId,
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
-            showLabelAndIcon: !widget.label.isEmpty && widget.labelSource == .sitemapDefinition
+            showLabelAndIcon: !widget.label.isEmpty && widget.labelSource == .sitemapDefinition,
+            icon: RowIconInput.from(widget: widget),
+            parentItemName: widget.item?.name,
+            buttons: typedButtons,
+            gridRows: gridRows,
+            gridColumns: gridColumns
         )
     }
 }
@@ -194,13 +274,15 @@ struct GenericRowInput {
     let displayState: WidgetDisplayState
     let labelColor: String
     let valueColor: String
+    let icon: RowIconInput
 
     static func from(widget: OpenHABWidget) -> GenericRowInput {
         GenericRowInput(
             widgetId: widget.widgetId,
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
-            valueColor: widget.valuecolor
+            valueColor: widget.valuecolor,
+            icon: RowIconInput.from(widget: widget)
         )
     }
 }
@@ -210,6 +292,7 @@ struct LinkedPageRowInput {
     let displayState: WidgetDisplayState
     let labelColor: String
     let valueColor: String
+    let icon: RowIconInput
     let linkedPageLink: String
     let linkedPageTitle: String
     let isFrame: Bool
@@ -221,6 +304,7 @@ struct LinkedPageRowInput {
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
+            icon: RowIconInput.from(widget: widget),
             linkedPageLink: linkedPage.link,
             linkedPageTitle: linkedPage.title,
             isFrame: widget.type == .frame
@@ -317,13 +401,15 @@ struct TextRowInput {
     let displayState: WidgetDisplayState
     let labelColor: String
     let valueColor: String
+    let icon: RowIconInput
 
     static func from(widget: OpenHABWidget) -> TextRowInput {
         TextRowInput(
             widgetId: widget.widgetId,
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
-            valueColor: widget.valuecolor
+            valueColor: widget.valuecolor,
+            icon: RowIconInput.from(widget: widget)
         )
     }
 }

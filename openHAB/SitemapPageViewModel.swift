@@ -803,6 +803,22 @@ extension SitemapPageViewModel {
         commandDispatcher.cancelPending(for: item, key: key)
     }
 
+    func sendCommand(_ command: String?,
+                     for itemname: String,
+                     policy: WidgetCommandPolicy = .immediate,
+                     phase: WidgetCommandPhase = .change,
+                     key: String? = nil) {
+        commandDispatcher.send(
+            command,
+            for: itemname,
+            policy: policy,
+            phase: phase,
+            key: key
+        ) { [weak self] itemname, command in
+            self?.sendCommand(itemname: itemname, command: command)
+        }
+    }
+
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         commandDispatcher.send(command, for: item, policy: .immediate, phase: .change) { [weak self] itemname, command in
             self?.sendCommand(itemname: itemname, command: command)

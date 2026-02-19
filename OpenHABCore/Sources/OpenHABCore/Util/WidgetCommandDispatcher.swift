@@ -52,6 +52,39 @@ public final class WidgetCommandDispatcher {
 
     @MainActor
     public func send(_ command: String?,
+                     for itemname: String,
+                     policy: WidgetCommandPolicy,
+                     phase: WidgetCommandPhase = .change,
+                     key: String? = nil,
+                     execute: @escaping @MainActor (_ itemname: String, _ command: String) -> Void) {
+        guard let command, !command.isEmpty, !itemname.isEmpty else { return }
+
+        switch policy {
+        case .immediate:
+            execute(itemname, command)
+        case let .debounce(duration):
+            guard phase != .release else {
+                execute(itemname, command)
+                return
+            }
+            sendDebounced(
+                command,
+                for: itemname,
+                duration: duration,
+                key: key,
+                execute: execute
+            )
+        case .finalOnly:
+            guard phase == .release else { return }
+            execute(itemname, command)
+        case .pressRelease:
+            guard phase == .press || phase == .release else { return }
+            execute(itemname, command)
+        }
+    }
+
+    @MainActor
+    public func send(_ command: String?,
                      for item: OpenHABItem?,
                      policy: WidgetCommandPolicy,
                      phase: WidgetCommandPhase = .change,
@@ -129,6 +162,13 @@ public final class WidgetCommandDispatcher {
     }
 
     @MainActor
+    public func cancelPending(for itemname: String, key: String? = nil) {
+        let taskKey = commandKey(for: itemname, key: key)
+        pendingTasks[taskKey]?.cancel()
+        pendingTasks.removeValue(forKey: taskKey)
+    }
+
+    @MainActor
     private func sendDebounced(_ command: String,
                                for widget: OpenHABWidget,
                                duration: Duration,
@@ -161,6 +201,22 @@ public final class WidgetCommandDispatcher {
     }
 
     @MainActor
+    private func sendDebounced(_ command: String,
+                               for itemname: String,
+                               duration: Duration,
+                               key: String?,
+                               execute: @escaping @MainActor (_ itemname: String, _ command: String) -> Void) {
+        let taskKey = commandKey(for: itemname, key: key)
+        pendingTasks[taskKey]?.cancel()
+        pendingTasks[taskKey] = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: duration)
+            guard !Task.isCancelled else { return }
+            execute(itemname, command)
+            self?.pendingTasks.removeValue(forKey: taskKey)
+        }
+    }
+
+    @MainActor
     private func dispatch(command: String, for widget: OpenHABWidget, fallbackItem: OpenHABItem?) {
         if let item = widget.item ?? fallbackItem,
            let sendCommand = widget.sendCommand {
@@ -182,6 +238,13 @@ public final class WidgetCommandDispatcher {
             return "\(item.name)-\(key)"
         }
         return item.name
+    }
+
+    private func commandKey(for itemname: String, key: String?) -> String {
+        if let key {
+            return "\(itemname)-\(key)"
+        }
+        return itemname
     }
 
     deinit {

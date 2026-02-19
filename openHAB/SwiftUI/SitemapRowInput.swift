@@ -160,7 +160,13 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
                 input.displayState.labelValue ?? "",
                 input.labelColor,
                 input.valueColor,
-                "\(input.readOnly)"
+                "\(input.readOnly)",
+                input.icon.icon,
+                input.icon.iconColor,
+                "\(input.icon.staticIcon)",
+                input.icon.iconState ?? "",
+                "\(input.icon.showIcon)",
+                input.itemName ?? ""
             ].joined(separator: "|")
         case let .rollershutter(_, input):
             [
@@ -191,7 +197,35 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
                 input.displayState.labelValue ?? "",
                 input.labelColor,
                 input.valueColor,
-                "\(input.showLabelAndIcon)"
+                "\(input.showLabelAndIcon)",
+                input.icon.icon,
+                input.icon.iconColor,
+                "\(input.icon.staticIcon)",
+                input.icon.iconState ?? "",
+                "\(input.icon.showIcon)",
+                input.parentItemName ?? "",
+                "\(input.gridRows)",
+                "\(input.gridColumns)",
+                input.buttons.map {
+                    [
+                        $0.id,
+                        $0.label,
+                        $0.icon.icon,
+                        $0.icon.iconColor,
+                        "\($0.icon.staticIcon)",
+                        $0.icon.iconState ?? "",
+                        "\($0.icon.showIcon)",
+                        $0.command,
+                        $0.releaseCommand ?? "",
+                        "\($0.row)",
+                        "\($0.column)",
+                        "\($0.visibility)",
+                        "\($0.readOnly)",
+                        "\($0.stateless)",
+                        $0.effectiveState,
+                        $0.itemName ?? ""
+                    ].joined(separator: "~")
+                }.joined(separator: ",")
             ].joined(separator: "|")
         case let .colorTemperature(_, input):
             [
@@ -213,7 +247,12 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
                 input.displayState.labelText,
                 input.displayState.labelValue ?? "",
                 input.labelColor,
-                input.valueColor
+                input.valueColor,
+                input.icon.icon,
+                input.icon.iconColor,
+                "\(input.icon.staticIcon)",
+                input.icon.iconState ?? "",
+                "\(input.icon.showIcon)"
             ].joined(separator: "|")
         case let .linked(_, input):
             [
@@ -223,6 +262,11 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
                 input.displayState.labelValue ?? "",
                 input.labelColor,
                 input.valueColor,
+                input.icon.icon,
+                input.icon.iconColor,
+                "\(input.icon.staticIcon)",
+                input.icon.iconState ?? "",
+                "\(input.icon.showIcon)",
                 input.linkedPageLink,
                 input.linkedPageTitle,
                 "\(input.isFrame)"
@@ -256,7 +300,12 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
                 input.displayState.labelText,
                 input.displayState.labelValue ?? "",
                 input.labelColor,
-                input.valueColor
+                input.valueColor,
+                input.icon.icon,
+                input.icon.iconColor,
+                "\(input.icon.staticIcon)",
+                input.icon.iconState ?? "",
+                "\(input.icon.showIcon)"
             ].joined(separator: "|")
         }
     }
