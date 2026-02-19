@@ -41,6 +41,14 @@ enum CommandLifecycleSummary: Equatable {
     case failed(count: Int)
 }
 
+enum SitemapInteractionSummary: Equatable {
+    case onlineIdle
+    case connecting
+    case offline
+    case sending(count: Int)
+    case failed(count: Int)
+}
+
 private struct WidgetRenderKey: Equatable {
     let label: String
     let icon: String
@@ -202,6 +210,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published var openHABRootUrl: String?
     @Published var showSearchField = false
     @Published private(set) var commandStates: [String: WidgetCommandLifecycleState] = [:]
+    @Published private(set) var trackerStatus: NetworkStatus = .stopped
     @Published private(set) var widgetUpdateVersions: [String: Int] = [:]
     @Published private(set) var rowInputs: [SitemapRowInput] = []
 
@@ -210,6 +219,7 @@ class SitemapPageViewModel: ObservableObject {
     private var activeConnectionInfo: ConnectionInfo?
     private var pageHandlingTask: Task<Void, Never>?
     private var connectionObserverTask: Task<Void, Never>?
+    private var networkStatusObserverTask: Task<Void, Never>?
     private let commandDispatcher = WidgetCommandDispatcher()
     private var defaultSitemap = ""
     private var defaultSitemapLabel = ""
@@ -272,21 +282,32 @@ class SitemapPageViewModel: ObservableObject {
         return .idle
     }
 
+    var sitemapInteractionSummary: SitemapInteractionSummary {
+        if case let .failed(count) = commandLifecycleSummary {
+            return .failed(count: count)
+        }
+
+        switch trackerStatus {
+        case .connected:
+            if case let .sending(count) = commandLifecycleSummary {
+                return .sending(count: count)
+            }
+            return .onlineIdle
+        case .started, .connecting:
+            return .connecting
+        case .stopped:
+            return .offline
+        }
+    }
+
     init() {
         loadSettings()
-        // Observe connection changes (skip initial value) — initial load is triggered by .task in the view
-        connectionObserverTask = Task { [weak self] in
-            guard let tracker = self?.networkTracker else { return }
-            for await connection in tracker.$activeConnection.values.dropFirst() {
-                await MainActor.run { [weak self] in
-                    self?.handleActiveConnectionChange(connection)
-                }
-            }
-        }
+        startObservers()
     }
 
     init(pageUrl: String, title: String, pageId: String = "") {
         loadSettings()
+        startObservers()
         isLinkedPage = true
         fallbackTitle = title
         defaultSitemapLabel = title
@@ -323,6 +344,29 @@ class SitemapPageViewModel: ObservableObject {
         rebuildRowInputs()
     }
 
+    private func startObservers() {
+        trackerStatus = networkTracker.status
+
+        // Observe connection changes (skip initial value) — initial load is triggered by .task in the view.
+        connectionObserverTask = Task { [weak self] in
+            guard let tracker = self?.networkTracker else { return }
+            for await connection in tracker.$activeConnection.values.dropFirst() {
+                await MainActor.run { [weak self] in
+                    self?.handleActiveConnectionChange(connection)
+                }
+            }
+        }
+
+        networkStatusObserverTask = Task { [weak self] in
+            guard let tracker = self?.networkTracker else { return }
+            for await status in tracker.$status.values {
+                await MainActor.run { [weak self] in
+                    self?.trackerStatus = status
+                }
+            }
+        }
+    }
+
     func rebuildRowInputs() {
         let pageKey = "\(defaultSitemap)|\(pageId)"
         var occurrenceByWidgetID: [String: Int] = [:]
@@ -354,6 +398,7 @@ class SitemapPageViewModel: ObservableObject {
 
     deinit {
         connectionObserverTask?.cancel()
+        networkStatusObserverTask?.cancel()
         pageHandlingTask?.cancel()
         commandStateResetTasks.values.forEach { $0.cancel() }
         commandStateResetTasks.removeAll()

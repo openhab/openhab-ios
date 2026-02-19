@@ -32,9 +32,9 @@ struct SitemapNavigationView: View {
             .navigationTitle(viewModel.pageTitle)
             .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
-                if !isCommandLifecycleIdle {
+                if !isInteractionIdle {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        commandLifecycleIndicator
+                        interactionIndicator
                     }
                 }
                 if viewModel.showSearchField {
@@ -45,6 +45,7 @@ struct SitemapNavigationView: View {
                             } label: {
                                 Image(systemSymbol: .magnifyingglass)
                             }
+                            .ohMinimumHitTarget()
                             .accessibilityLabel("Search")
                         } else {
                             Button {
@@ -53,6 +54,7 @@ struct SitemapNavigationView: View {
                             } label: {
                                 Image(systemSymbol: .magnifyingglass)
                             }
+                            .ohMinimumHitTarget()
                             .accessibilityLabel("Search")
                         }
                     }
@@ -64,6 +66,7 @@ struct SitemapNavigationView: View {
                         Image(systemSymbol: .line3Horizontal)
                             .font(.title)
                     }
+                    .ohMinimumHitTarget()
                 }
             }
 
@@ -99,13 +102,13 @@ struct SitemapNavigationView: View {
         HStack(spacing: 8) {
             Image(systemSymbol: .magnifyingglass)
                 .foregroundStyle(.secondary)
-                .font(.footnote)
+                .ohTextToken(.secondary)
 
             TextField(NSLocalizedString("search_items", comment: ""), text: $viewModel.searchText)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .focused($isLegacySearchFocused)
-                .font(.footnote)
+                .ohTextToken(.secondary)
 
             if !viewModel.searchText.isEmpty {
                 Button {
@@ -137,27 +140,50 @@ struct SitemapNavigationView: View {
     }
 
     @ViewBuilder
-    private var commandLifecycleIndicator: some View {
-        switch viewModel.commandLifecycleSummary {
-        case .idle:
+    private var interactionIndicator: some View {
+        switch viewModel.sitemapInteractionSummary {
+        case .onlineIdle:
             EmptyView()
-        case .sending:
-            ProgressView()
-                .controlSize(.small)
-                .accessibilityLabel("Sending command")
+        case .connecting:
+            HStack(spacing: 4) {
+                ProgressView()
+                    .controlSize(.small)
+                Text("Connecting")
+                    .ohTextToken(.secondary)
+            }
+            .foregroundStyle(.secondary)
+            .accessibilityLabel("Connecting")
+        case .offline:
+            HStack(spacing: 4) {
+                Image(systemSymbol: .wifiExclamationmark)
+                Text("Offline")
+                    .ohTextToken(.secondary)
+            }
+            .foregroundStyle(.secondary)
+            .accessibilityLabel("Offline")
+        case let .sending(count):
+            HStack(spacing: 4) {
+                ProgressView()
+                    .controlSize(.small)
+                if count > 1 {
+                    Text("\(count)")
+                        .ohTextToken(.secondary)
+                }
+            }
+            .accessibilityLabel("Sending commands: \(count)")
         case let .failed(count):
             HStack(spacing: 4) {
                 Image(systemSymbol: .exclamationmarkTriangleFill)
                 Text("\(count)")
             }
             .foregroundStyle(.red)
-            .font(.caption)
+            .ohTextToken(.secondary)
             .accessibilityLabel("Command failures: \(count)")
         }
     }
 
-    private var isCommandLifecycleIdle: Bool {
-        if case .idle = viewModel.commandLifecycleSummary {
+    private var isInteractionIdle: Bool {
+        if case .onlineIdle = viewModel.sitemapInteractionSummary {
             return true
         }
         return false
