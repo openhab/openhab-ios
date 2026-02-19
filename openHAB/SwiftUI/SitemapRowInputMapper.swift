@@ -26,7 +26,7 @@ enum SitemapRowInputMapper {
         // Preserve legacy navigation behavior for linked-page rows.
         // These rows are still rendered through EmbeddingRowView, which owns NavigationLink wiring.
         if widget.linkedPage != nil {
-            return .generic(rowID, BasicWidgetRowInput.from(widget: widget))
+            return .generic(rowID, GenericRowInput.from(widget: widget))
         }
 
         switch widget.renderingKind {
@@ -43,21 +43,21 @@ enum SitemapRowInputMapper {
         case .setpoint:
             return SitemapRowInput.setpoint(rowID, SetpointRowInput.from(widget: widget))
         case .rollershutterSwitch:
-            return SitemapRowInput.rollershutter(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.rollershutter(rowID, RollershutterRowInput.from(widget: widget))
         case .toggleSwitch:
-            return SitemapRowInput.toggle(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.toggle(rowID, ToggleRowInput.from(widget: widget))
         case .dateInput, .textInput:
-            return SitemapRowInput.input(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.input(rowID, InputRowInput.from(widget: widget))
         case .colorPicker:
             return SitemapRowInput.colorPicker(rowID, ColorPickerRowInput.from(widget: widget))
         case .image, .chart, .video, .webview, .mapview:
-            return SitemapRowInput.media(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.media(rowID, MediaRowInput.from(widget: widget))
         case .colorTemperaturePicker:
-            return SitemapRowInput.colorTemperature(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.colorTemperature(rowID, ColorTemperatureRowInput.from(widget: widget))
         case .buttonGrid:
-            return SitemapRowInput.buttonGrid(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.buttonGrid(rowID, ButtonGridRowInput.from(widget: widget))
         case .generic:
-            return SitemapRowInput.generic(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.generic(rowID, GenericRowInput.from(widget: widget))
         }
     }
 }

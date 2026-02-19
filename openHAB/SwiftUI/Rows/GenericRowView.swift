@@ -13,28 +13,51 @@ import CommonUI
 import OpenHABCore
 import SwiftUI
 
-struct GenericRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+private struct GenericRowConfig {
+    let input: GenericRowInput
+    let widget: OpenHABWidget
+}
+
+@MainActor
+private func makeGenericRowContent(_ config: GenericRowConfig) -> GenericRowContent {
+    GenericRowContent(input: config.input, iconWidget: config.widget)
+}
+
+private struct GenericRowContent: View {
+    let input: GenericRowInput
+    let iconWidget: OpenHABWidget
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         HStack {
-            IconView(widget: widget)
+            IconView(widget: iconWidget)
                 .frame(width: 32, height: 32)
 
             Text(displayState.labelText)
                 .ohTextToken(.rowLabel)
-                .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
 
             Spacer()
 
             if let value = displayState.labelValue {
                 Text(value)
                     .ohTextToken(.rowValue)
-                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
             }
         }
+    }
+}
+
+struct GenericRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+
+    var body: some View {
+        makeGenericRowContent(
+            GenericRowConfig(
+                input: GenericRowInput.from(widget: widget),
+                widget: widget
+            )
+        )
     }
 }
 

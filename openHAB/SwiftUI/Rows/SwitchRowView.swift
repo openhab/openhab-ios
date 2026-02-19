@@ -15,7 +15,7 @@ import os.log
 import SwiftUI
 
 @MainActor
-private func makeSwitchRowContent(input: BasicWidgetRowInput,
+private func makeSwitchRowContent(input: ToggleRowInput,
                                   iconWidget: OpenHABWidget,
                                   commandWidget: OpenHABWidget,
                                   viewModel: SitemapPageViewModel) -> SwitchRowContent {
@@ -28,7 +28,7 @@ private func makeSwitchRowContent(input: BasicWidgetRowInput,
 }
 
 private struct SwitchRowContent: View {
-    let input: BasicWidgetRowInput
+    let input: ToggleRowInput
     let iconWidget: OpenHABWidget
     let onSendCommand: (String) -> Void
     @State private var localIsOn: Bool?
@@ -86,7 +86,7 @@ private struct SwitchRowContent: View {
 
 struct SwitchRowInputView: View {
     let rowID: RowID
-    let input: BasicWidgetRowInput
+    let input: ToggleRowInput
 
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
@@ -110,7 +110,7 @@ struct SwitchRowView: View {
 
     var body: some View {
         makeSwitchRowContent(
-            input: BasicWidgetRowInput.from(widget: widget),
+            input: ToggleRowInput.from(widget: widget),
             iconWidget: widget,
             commandWidget: widget,
             viewModel: viewModel

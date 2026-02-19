@@ -26,8 +26,17 @@ struct EmbeddingRowInputView: View {
         Color(UIColor.ohSecondarySystemGroupedBackground)
     }
 
+    private var frameRowBackground: Color {
+        Color(UIColor.ohSystemGroupedBackground)
+    }
+
     var body: some View {
         switch rowInput {
+        case let .frame(_, input):
+            FrameRowInputView(input: input)
+                .contentShape(Rectangle())
+                .listRowInsets(frameRowInsets(input))
+                .listRowBackground(frameRowBackground)
         case let .slider(rowID, input):
             SliderRowInputView(rowID: rowID, input: input)
                 .contentShape(Rectangle())
@@ -73,12 +82,30 @@ struct EmbeddingRowInputView: View {
                 .contentShape(Rectangle())
                 .listRowInsets(regularRowInsets)
                 .listRowBackground(regularRowBackground)
+        case let .media(rowID, input):
+            MediaRowInputView(rowID: rowID, input: input)
+                .contentShape(Rectangle())
+                .listRowInsets(regularRowInsets)
+                .listRowBackground(regularRowBackground)
+        case let .colorTemperature(rowID, input):
+            ColorTemperaturePickerRowInputView(rowID: rowID, input: input)
+                .contentShape(Rectangle())
+                .listRowInsets(regularRowInsets)
+                .listRowBackground(regularRowBackground)
         case let .buttonGrid(rowID, input):
             ButtonGridRowInputView(rowID: rowID, input: input)
                 .contentShape(Rectangle())
                 .listRowInsets(regularRowInsets)
                 .listRowBackground(regularRowBackground)
-        default:
+        case .generic:
+            Group {
+                if let widget = viewModel.widget(for: rowInput.rowID) {
+                    EmbeddingRowView(widget: widget)
+                } else {
+                    EmptyView()
+                }
+            }
+        @unknown default:
             Group {
                 if let widget = viewModel.widget(for: rowInput.rowID) {
                     EmbeddingRowView(widget: widget)
@@ -87,5 +114,12 @@ struct EmbeddingRowInputView: View {
                 }
             }
         }
+    }
+
+    private func frameRowInsets(_ input: BasicWidgetRowInput) -> EdgeInsets {
+        let hasLabel = !input.displayState.labelText.isEmpty
+        return hasLabel
+            ? EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)
+            : EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
     }
 }

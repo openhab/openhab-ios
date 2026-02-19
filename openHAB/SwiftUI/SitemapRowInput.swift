@@ -58,14 +58,14 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
     case selection(RowID, SelectionRowInput)
     case segmented(RowID, SegmentedRowInput)
     case setpoint(RowID, SetpointRowInput)
-    case rollershutter(RowID, BasicWidgetRowInput)
-    case toggle(RowID, BasicWidgetRowInput)
-    case input(RowID, BasicWidgetRowInput)
+    case rollershutter(RowID, RollershutterRowInput)
+    case toggle(RowID, ToggleRowInput)
+    case input(RowID, InputRowInput)
     case colorPicker(RowID, ColorPickerRowInput)
-    case media(RowID, BasicWidgetRowInput)
-    case colorTemperature(RowID, BasicWidgetRowInput)
-    case buttonGrid(RowID, BasicWidgetRowInput)
-    case generic(RowID, BasicWidgetRowInput)
+    case media(RowID, MediaRowInput)
+    case colorTemperature(RowID, ColorTemperatureRowInput)
+    case buttonGrid(RowID, ButtonGridRowInput)
+    case generic(RowID, GenericRowInput)
 
     var id: String {
         rowID.rawValue
@@ -174,15 +174,86 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
                 input.valueColor,
                 "\(input.readOnly)"
             ].joined(separator: "|")
+        case let .toggle(_, input):
+            [
+                input.widgetId,
+                input.displayState.effectiveState,
+                input.displayState.labelText,
+                input.displayState.labelValue ?? "",
+                input.labelColor,
+                input.valueColor,
+                "\(input.readOnly)"
+            ].joined(separator: "|")
+        case let .rollershutter(_, input):
+            [
+                input.widgetId,
+                input.displayState.effectiveState,
+                input.displayState.labelText,
+                input.displayState.labelValue ?? "",
+                input.labelColor,
+                input.valueColor
+            ].joined(separator: "|")
+        case let .input(_, input):
+            [
+                input.widgetId,
+                input.displayState.effectiveState,
+                input.displayState.labelText,
+                input.displayState.labelValue ?? "",
+                input.labelColor,
+                input.valueColor,
+                "\(input.readOnly)",
+                Self.kindRawValue(input.renderingKind),
+                input.inputHintRawValue
+            ].joined(separator: "|")
+        case let .buttonGrid(_, input):
+            [
+                input.widgetId,
+                input.displayState.effectiveState,
+                input.displayState.labelText,
+                input.displayState.labelValue ?? "",
+                input.labelColor,
+                input.valueColor,
+                "\(input.showLabelAndIcon)"
+            ].joined(separator: "|")
+        case let .colorTemperature(_, input):
+            [
+                input.widgetId,
+                input.displayState.effectiveState,
+                input.displayState.labelText,
+                input.displayState.labelValue ?? "",
+                input.labelColor,
+                input.valueColor,
+                "\(input.readOnly)",
+                "\(input.minValue)",
+                "\(input.maxValue)",
+                "\(input.serverValue ?? -1)"
+            ].joined(separator: "|")
+        case let .generic(_, input):
+            [
+                input.widgetId,
+                input.displayState.effectiveState,
+                input.displayState.labelText,
+                input.displayState.labelValue ?? "",
+                input.labelColor,
+                input.valueColor
+            ].joined(separator: "|")
+        case let .media(_, input):
+            [
+                input.widgetId,
+                input.displayState.effectiveState,
+                input.displayState.labelText,
+                input.displayState.labelValue ?? "",
+                input.labelColor,
+                input.valueColor,
+                "\(input.readOnly)",
+                "\(input.refresh)",
+                input.url,
+                input.encoding,
+                input.labelSourceRawValue,
+                Self.kindRawValue(input.renderingKind)
+            ].joined(separator: "|")
         case let .frame(_, input),
-             let .text(_, input),
-             let .rollershutter(_, input),
-             let .toggle(_, input),
-             let .input(_, input),
-             let .media(_, input),
-             let .colorTemperature(_, input),
-             let .buttonGrid(_, input),
-             let .generic(_, input):
+             let .text(_, input):
             [
                 input.widgetId,
                 input.displayState.effectiveState,

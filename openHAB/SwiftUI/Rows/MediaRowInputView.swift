@@ -12,21 +12,24 @@
 import OpenHABCore
 import SwiftUI
 
-struct InputRowInputView: View {
+struct MediaRowInputView: View {
     let rowID: RowID
-    let input: InputRowInput
-
+    let input: MediaRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
-        if viewModel.widget(for: rowID) != nil {
+        if let widget = viewModel.widget(for: rowID) {
             switch input.renderingKind {
-            case .dateInput:
-                DatePickerInputRowInputView(rowID: rowID, input: input)
-            case .textInput:
-                TextInputRowInputView(rowID: rowID, input: input)
+            case .image, .chart:
+                ImageRowView(widget: widget)
+            case .video:
+                VideoRowView(widget: widget)
+            case .webview:
+                WidgetWebViewContainer(widget: widget)
+            case .mapview:
+                MapRowView(widget: widget)
             default:
-                TextInputRowInputView(rowID: rowID, input: input)
+                GenericRowView(widget: widget)
             }
         } else {
             EmptyView()

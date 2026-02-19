@@ -13,18 +13,50 @@ import CommonUI
 import OpenHABCore
 import SwiftUI
 
-struct FrameRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+private struct FrameRowConfig {
+    let input: BasicWidgetRowInput
+}
+
+@MainActor
+private func makeFrameRowContent(_ config: FrameRowConfig) -> FrameRowContent {
+    FrameRowContent(input: config.input)
+}
+
+private struct FrameRowContent: View {
+    let input: BasicWidgetRowInput
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         HStack {
             Text(displayState.labelText.uppercased())
                 .ohTextToken(.section)
                 .foregroundStyle(.secondary)
             Spacer()
         }
+    }
+}
+
+struct FrameRowInputView: View {
+    let input: BasicWidgetRowInput
+
+    var body: some View {
+        makeFrameRowContent(
+            FrameRowConfig(
+                input: input
+            )
+        )
+    }
+}
+
+struct FrameRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+
+    var body: some View {
+        makeFrameRowContent(
+            FrameRowConfig(
+                input: BasicWidgetRowInput.from(widget: widget)
+            )
+        )
     }
 }
 

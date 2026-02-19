@@ -15,7 +15,7 @@ import os.log
 import SwiftUI
 
 private struct DateInputRowConfig {
-    let input: BasicWidgetRowInput
+    let input: InputRowInput
     let widget: OpenHABWidget
     let viewModel: SitemapPageViewModel
 }
@@ -25,14 +25,14 @@ private func makeDateInputRowContent(_ config: DateInputRowConfig) -> DateInputR
     DateInputRowContent(
         input: config.input,
         iconWidget: config.widget,
-        inputHint: config.widget.inputHint
+        inputHint: config.input.inputHint
     ) { command in
         config.viewModel.sendCommand(command, for: config.widget)
     }
 }
 
 private struct DateInputRowContent: View {
-    let input: BasicWidgetRowInput
+    let input: InputRowInput
     let iconWidget: OpenHABWidget
     let inputHint: OpenHABWidget.InputHint
     let onSendCommand: (String) -> Void
@@ -123,7 +123,7 @@ private struct DateInputRowContent: View {
 
 struct DatePickerInputRowInputView: View {
     let rowID: RowID
-    let input: BasicWidgetRowInput
+    let input: InputRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
@@ -148,7 +148,7 @@ struct DatePickerInputRowView: View {
     var body: some View {
         makeDateInputRowContent(
             DateInputRowConfig(
-                input: BasicWidgetRowInput.from(widget: widget),
+                input: InputRowInput.from(widget: widget),
                 widget: widget,
                 viewModel: viewModel
             )

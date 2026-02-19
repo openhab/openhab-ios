@@ -22,7 +22,7 @@ enum RollerShutterCommand: String {
 }
 
 private struct RollershutterRowConfig {
-    let input: BasicWidgetRowInput
+    let input: RollershutterRowInput
     let iconWidget: OpenHABWidget
     let commandWidget: OpenHABWidget
     let viewModel: SitemapPageViewModel
@@ -45,7 +45,7 @@ private func makeRollershutterRowContent(_ config: RollershutterRowConfig) -> Ro
 }
 
 private struct RollershutterRowContent: View {
-    let input: BasicWidgetRowInput
+    let input: RollershutterRowInput
     let iconWidget: OpenHABWidget
     @Binding var triggerUpFeedback: Bool
     @Binding var triggerStopFeedback: Bool
@@ -117,7 +117,7 @@ private struct RollershutterRowContent: View {
 
 struct RollershutterRowInputView: View {
     let rowID: RowID
-    let input: BasicWidgetRowInput
+    let input: RollershutterRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
     @State private var triggerUpFeedback = false
     @State private var triggerStopFeedback = false
@@ -152,7 +152,7 @@ struct RollershutterRowView: View {
     var body: some View {
         makeRollershutterRowContent(
             RollershutterRowConfig(
-                input: BasicWidgetRowInput.from(widget: widget),
+                input: RollershutterRowInput.from(widget: widget),
                 iconWidget: widget,
                 commandWidget: widget,
                 viewModel: viewModel,

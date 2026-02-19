@@ -15,6 +15,33 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
+private struct ColorTemperatureRowConfig {
+    let input: ColorTemperatureRowInput
+    let widget: OpenHABWidget
+    let viewModel: SitemapPageViewModel
+}
+
+@MainActor
+private func makeColorTemperatureRowContent(_ config: ColorTemperatureRowConfig) -> ColorTemperaturePickerRowContent {
+    ColorTemperaturePickerRowContent(
+        input: config.input,
+        widget: config.widget
+    ) { command, key in
+        config.viewModel.sendCommand(
+            command,
+            for: config.widget,
+            policy: WidgetCommandDefaults.slider,
+            key: key
+        )
+    } onCancelPending: { key in
+        if let item = config.widget.item {
+            config.viewModel.cancelPendingCommand(for: item, key: key)
+        } else {
+            config.viewModel.cancelPendingCommand(for: config.widget, key: key)
+        }
+    }
+}
+
 struct CustomSliderView: View {
     @Binding var value: Double
     let range: ClosedRange<Double>
@@ -61,28 +88,27 @@ struct CustomSliderView: View {
     }
 }
 
-struct ColorTemperaturePickerRowView: View {
+private struct ColorTemperaturePickerRowContent: View {
+    let input: ColorTemperatureRowInput
     @ObservedObject var widget: OpenHABWidget
-    @State private var selectedTemperature: Double = 2700 // Default warm white
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+    let onSendCommand: (String, String) -> Void
+    let onCancelPending: (String) -> Void
 
-    private var colorTemperatureCommandKey: String {
-        "color-temperature-\(widget.widgetId)"
-    }
+    @State private var selectedTemperature: Double = 2700 // Default warm white
 
     private let logger = Logger(subsystem: "org.openhab", category: "ColorTemperaturePickerRowView")
 
     // Use widget's min/max values, similar to Android implementation
     private var minTemperature: Double {
-        max(widget.minValue, 1000)
+        input.clampedMinTemperature
     }
 
     private var maxTemperature: Double {
-        min(widget.maxValue, 10000)
+        input.clampedMaxTemperature
     }
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         HStack(alignment: .top) {
             IconView(widget: widget)
                 .frame(width: 32, height: 32)
@@ -93,7 +119,7 @@ struct ColorTemperaturePickerRowView: View {
                         let labelText = displayState.labelText
                         Text(labelText)
                             .ohTextToken(.rowLabel)
-                            .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                            .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
                     }
 
                     Spacer()
@@ -143,7 +169,7 @@ struct ColorTemperaturePickerRowView: View {
                             sendTemperatureCommand()
                         }
                         .frame(height: 28)
-                        .disabled(widget.readOnly ?? false)
+                        .disabled(input.readOnly)
                     }
 
                     // Cool indicator
@@ -154,17 +180,13 @@ struct ColorTemperaturePickerRowView: View {
             }
         }
         .onAppear {
-            selectedTemperature = loadCurrentTemperature(state: displayState.effectiveState) ?? 2700
+            selectedTemperature = loadCurrentTemperature(state: displayState.effectiveState) ?? input.serverValue ?? 2700
         }
         .onChange(of: displayState.effectiveState) { newState in
-            selectedTemperature = loadCurrentTemperature(state: newState) ?? 2700
+            selectedTemperature = loadCurrentTemperature(state: newState) ?? input.serverValue ?? 2700
         }
         .onDisappear {
-            if let item = widget.item {
-                viewModel.cancelPendingCommand(for: item, key: colorTemperatureCommandKey)
-            } else {
-                viewModel.cancelPendingCommand(for: widget, key: colorTemperatureCommandKey)
-            }
+            onCancelPending(input.colorTemperatureCommandKey)
         }
     }
 
@@ -199,11 +221,41 @@ struct ColorTemperaturePickerRowView: View {
         let command = "\(Int(selectedTemperature))"
 
         logger.info("Sending color temperature command: \(command)K")
-        viewModel.sendCommand(
-            command,
-            for: widget,
-            policy: WidgetCommandDefaults.slider,
-            key: colorTemperatureCommandKey
+        onSendCommand(command, input.colorTemperatureCommandKey)
+    }
+}
+
+struct ColorTemperaturePickerRowInputView: View {
+    let rowID: RowID
+    let input: ColorTemperatureRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeColorTemperatureRowContent(
+                ColorTemperatureRowConfig(
+                    input: input,
+                    widget: widget,
+                    viewModel: viewModel
+                )
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+struct ColorTemperaturePickerRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        makeColorTemperatureRowContent(
+            ColorTemperatureRowConfig(
+                input: ColorTemperatureRowInput.from(widget: widget),
+                widget: widget,
+                viewModel: viewModel
+            )
         )
     }
 }

@@ -111,6 +111,172 @@ struct ColorPickerRowInput {
     }
 }
 
+struct ToggleRowInput {
+    let widgetId: String
+    let displayState: WidgetDisplayState
+    let labelColor: String
+    let valueColor: String
+    let readOnly: Bool
+
+    static func from(widget: OpenHABWidget) -> ToggleRowInput {
+        ToggleRowInput(
+            widgetId: widget.widgetId,
+            displayState: widget.displayState,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            readOnly: widget.readOnly ?? false
+        )
+    }
+}
+
+struct RollershutterRowInput {
+    let widgetId: String
+    let displayState: WidgetDisplayState
+    let labelColor: String
+    let valueColor: String
+
+    static func from(widget: OpenHABWidget) -> RollershutterRowInput {
+        RollershutterRowInput(
+            widgetId: widget.widgetId,
+            displayState: widget.displayState,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor
+        )
+    }
+}
+
+struct InputRowInput: Sendable {
+    let widgetId: String
+    let renderingKind: WidgetRenderingKind
+    let displayState: WidgetDisplayState
+    let labelColor: String
+    let valueColor: String
+    let readOnly: Bool
+    let inputHintRawValue: String
+
+    var inputHint: OpenHABWidget.InputHint {
+        OpenHABWidget.InputHint(rawValue: inputHintRawValue)
+    }
+
+    static func from(widget: OpenHABWidget) -> InputRowInput {
+        InputRowInput(
+            widgetId: widget.widgetId,
+            renderingKind: widget.renderingKind,
+            displayState: widget.displayState,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            readOnly: widget.readOnly ?? false,
+            inputHintRawValue: widget.inputHint.rawValue
+        )
+    }
+}
+
+struct ButtonGridRowInput {
+    let widgetId: String
+    let displayState: WidgetDisplayState
+    let labelColor: String
+    let valueColor: String
+    let showLabelAndIcon: Bool
+
+    static func from(widget: OpenHABWidget) -> ButtonGridRowInput {
+        ButtonGridRowInput(
+            widgetId: widget.widgetId,
+            displayState: widget.displayState,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            showLabelAndIcon: !widget.label.isEmpty && widget.labelSource == .sitemapDefinition
+        )
+    }
+}
+
+struct GenericRowInput {
+    let widgetId: String
+    let displayState: WidgetDisplayState
+    let labelColor: String
+    let valueColor: String
+
+    static func from(widget: OpenHABWidget) -> GenericRowInput {
+        GenericRowInput(
+            widgetId: widget.widgetId,
+            displayState: widget.displayState,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor
+        )
+    }
+}
+
+struct ColorTemperatureRowInput {
+    let widgetId: String
+    let displayState: WidgetDisplayState
+    let labelColor: String
+    let valueColor: String
+    let readOnly: Bool
+    let minValue: Double
+    let maxValue: Double
+    let serverValue: Double?
+
+    var colorTemperatureCommandKey: String {
+        "color-temperature-\(widgetId)"
+    }
+
+    var clampedMinTemperature: Double {
+        max(minValue, 1000)
+    }
+
+    var clampedMaxTemperature: Double {
+        min(maxValue, 10000)
+    }
+
+    static func from(widget: OpenHABWidget) -> ColorTemperatureRowInput {
+        let parsedValue = if let state = widget.item?.state, !state.isEmpty {
+            state.parseAsNumber().value
+        } else if !widget.state.isEmpty {
+            widget.state.parseAsNumber().value
+        } else {
+            Double.nan
+        }
+
+        return ColorTemperatureRowInput(
+            widgetId: widget.widgetId,
+            displayState: widget.displayState,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            readOnly: widget.readOnly ?? false,
+            minValue: widget.minValue,
+            maxValue: widget.maxValue,
+            serverValue: parsedValue.isFinite ? parsedValue : nil
+        )
+    }
+}
+
+struct MediaRowInput {
+    let widgetId: String
+    let renderingKind: WidgetRenderingKind
+    let displayState: WidgetDisplayState
+    let labelColor: String
+    let valueColor: String
+    let readOnly: Bool
+    let refresh: Int
+    let url: String
+    let encoding: String
+    let labelSourceRawValue: String
+
+    static func from(widget: OpenHABWidget) -> MediaRowInput {
+        MediaRowInput(
+            widgetId: widget.widgetId,
+            renderingKind: widget.renderingKind,
+            displayState: widget.displayState,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            readOnly: widget.readOnly ?? false,
+            refresh: widget.refresh,
+            url: widget.url,
+            encoding: widget.encoding,
+            labelSourceRawValue: widget.labelSource.rawValue
+        )
+    }
+}
+
 struct SliderRowInput {
     let widgetId: String
     let displayState: WidgetDisplayState

@@ -15,7 +15,7 @@ import os.log
 import SwiftUI
 
 private struct ButtonGridRowConfig {
-    let input: BasicWidgetRowInput
+    let input: ButtonGridRowInput
     let widget: OpenHABWidget
 }
 
@@ -156,7 +156,7 @@ private struct PressGestureModifier: ViewModifier {
 
 struct ButtonGridRowInputView: View {
     let rowID: RowID
-    let input: BasicWidgetRowInput
+    let input: ButtonGridRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     @ViewBuilder
@@ -175,7 +175,7 @@ struct ButtonGridRowInputView: View {
 }
 
 private struct ButtonGridRowContent: View {
-    let input: BasicWidgetRowInput
+    let input: ButtonGridRowInput
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
@@ -190,10 +190,6 @@ private struct ButtonGridRowContent: View {
         return childButtons + mappingButtons
     }
 
-    private var showLabelAndIcon: Bool {
-        !widget.label.isEmpty && widget.labelSource == .sitemapDefinition
-    }
-
     private var gridRows: Int {
         buttons.map { $0.row ?? 1 }.max() ?? 1
     }
@@ -205,7 +201,7 @@ private struct ButtonGridRowContent: View {
     var body: some View {
         let displayState = input.displayState
         VStack(alignment: .leading, spacing: 8) {
-            if showLabelAndIcon {
+            if input.showLabelAndIcon {
                 HStack {
                     IconView(widget: widget)
                         .frame(width: 32, height: 32)
@@ -257,7 +253,7 @@ struct ButtonGridRowView: View {
     var body: some View {
         makeButtonGridRowContent(
             ButtonGridRowConfig(
-                input: BasicWidgetRowInput.from(widget: widget),
+                input: ButtonGridRowInput.from(widget: widget),
                 widget: widget
             )
         )
