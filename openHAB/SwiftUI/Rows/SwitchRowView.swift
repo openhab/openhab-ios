@@ -14,24 +14,38 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct SwitchRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+@MainActor
+private func makeSwitchRowContent(input: BasicWidgetRowInput,
+                                  iconWidget: OpenHABWidget,
+                                  commandWidget: OpenHABWidget,
+                                  viewModel: SitemapPageViewModel) -> SwitchRowContent {
+    SwitchRowContent(
+        input: input,
+        iconWidget: iconWidget
+    ) { command in
+        viewModel.sendCommand(command, for: commandWidget)
+    }
+}
+
+private struct SwitchRowContent: View {
+    let input: BasicWidgetRowInput
+    let iconWidget: OpenHABWidget
+    let onSendCommand: (String) -> Void
     @State private var localIsOn: Bool?
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSwitchView")
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         HStack {
-            IconView(widget: widget)
+            IconView(widget: iconWidget)
                 .frame(width: 32, height: 32)
 
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
                 Text(labelText)
                     .ohTextToken(.rowLabel)
-                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
             Spacer()
@@ -39,7 +53,7 @@ struct SwitchRowView: View {
             if let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .ohTextToken(.rowValueCompact)
-                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
             }
 
             Toggle("", isOn: Binding(
@@ -52,11 +66,11 @@ struct SwitchRowView: View {
                     } else {
                         logger.info("\("Switch to OFF")")
                     }
-                    viewModel.sendCommand(newState, for: widget)
+                    onSendCommand(newState)
                 }
             ))
             .labelsHidden()
-            .disabled(widget.readOnly ?? false)
+            .disabled(input.readOnly)
         }
         .contentShape(Rectangle())
         .onChange(of: displayState.effectiveState) { _ in
@@ -67,6 +81,40 @@ struct SwitchRowView: View {
 
     private func isOn(displayState: WidgetDisplayState) -> Bool {
         localIsOn ?? displayState.isOn
+    }
+}
+
+struct SwitchRowInputView: View {
+    let rowID: RowID
+    let input: BasicWidgetRowInput
+
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeSwitchRowContent(
+                input: input,
+                iconWidget: widget,
+                commandWidget: widget,
+                viewModel: viewModel
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+struct SwitchRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        makeSwitchRowContent(
+            input: BasicWidgetRowInput.from(widget: widget),
+            iconWidget: widget,
+            commandWidget: widget,
+            viewModel: viewModel
+        )
     }
 }
 

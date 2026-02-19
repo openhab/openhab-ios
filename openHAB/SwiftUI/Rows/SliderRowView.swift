@@ -14,37 +14,41 @@ import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
 
+private struct SliderRowConfig {
+    let input: SliderRowInput
+    let widgetVersion: Int
+    let iconWidget: OpenHABWidget
+    let fallbackSymbol: SFSymbol?
+    let commandWidget: OpenHABWidget
+    let viewModel: SitemapPageViewModel
+}
+
 @MainActor
-private func makeSliderRowContent(input: SliderRowInput,
-                                  widgetVersion: Int,
-                                  iconWidget: OpenHABWidget,
-                                  fallbackSymbol: SFSymbol?,
-                                  commandWidget: OpenHABWidget,
-                                  viewModel: SitemapPageViewModel) -> SliderRowContent {
+private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent {
     SliderRowContent(
-        input: input,
-        widgetVersion: widgetVersion,
-        iconWidget: iconWidget,
-        fallbackSymbol: fallbackSymbol,
+        input: config.input,
+        widgetVersion: config.widgetVersion,
+        iconWidget: config.iconWidget,
+        fallbackSymbol: config.fallbackSymbol,
         onToggleSwitch: { command in
-            viewModel.sendCommand(command, for: commandWidget)
+            config.viewModel.sendCommand(command, for: config.commandWidget)
         },
         onCancelPending: { key in
-            if let item = commandWidget.item {
-                viewModel.cancelPendingCommand(for: item, key: key)
+            if let item = config.commandWidget.item {
+                config.viewModel.cancelPendingCommand(for: item, key: key)
             } else {
-                viewModel.cancelPendingCommand(for: commandWidget, key: key)
+                config.viewModel.cancelPendingCommand(for: config.commandWidget, key: key)
             }
         },
         onSendValue: { value, policy, phase, key in
-            var numberState = commandWidget.stateValueAsNumberState
+            var numberState = config.commandWidget.stateValueAsNumberState
             numberState = numberState ?? NumberState(
                 value: value,
-                unit: commandWidget.unit,
-                format: commandWidget.pattern ?? commandWidget.item?.stateDescription?.numberPattern
+                unit: config.commandWidget.unit,
+                format: config.commandWidget.pattern ?? config.commandWidget.item?.stateDescription?.numberPattern
             )
             numberState?.value = value
-            viewModel.sendToUpdate(item: commandWidget.item, state: numberState, policy: policy, phase: phase, key: key)
+            config.viewModel.sendToUpdate(item: config.commandWidget.item, state: numberState, policy: policy, phase: phase, key: key)
         }
     )
 }
@@ -217,12 +221,14 @@ struct SliderRowInputView: View {
     var body: some View {
         if let widget = viewModel.widget(for: rowID) {
             makeSliderRowContent(
-                input: input,
-                widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
-                iconWidget: widget,
-                fallbackSymbol: fallbackSymbol,
-                commandWidget: widget,
-                viewModel: viewModel
+                SliderRowConfig(
+                    input: input,
+                    widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+                    iconWidget: widget,
+                    fallbackSymbol: fallbackSymbol,
+                    commandWidget: widget,
+                    viewModel: viewModel
+                )
             )
         } else {
             EmptyView()
@@ -239,12 +245,14 @@ struct SliderRowView: View {
     var body: some View {
         let input = SliderRowInput.from(widget: widget)
         makeSliderRowContent(
-            input: input,
-            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
-            iconWidget: widget,
-            fallbackSymbol: fallbackSymbol,
-            commandWidget: widget,
-            viewModel: viewModel
+            SliderRowConfig(
+                input: input,
+                widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+                iconWidget: widget,
+                fallbackSymbol: fallbackSymbol,
+                commandWidget: widget,
+                viewModel: viewModel
+            )
         )
     }
 }

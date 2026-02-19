@@ -31,33 +31,33 @@ enum SitemapRowInputMapper {
 
         switch widget.renderingKind {
         case .slider:
-            .slider(rowID, SliderRowInput.from(widget: widget))
+            return SitemapRowInput.slider(rowID, SliderRowInput.from(widget: widget))
         case .selection:
-            .selection(rowID, SelectionRowInput.from(widget: widget))
+            return SitemapRowInput.selection(rowID, SelectionRowInput.from(widget: widget))
         case .segmentedSwitch:
-            .segmented(rowID, SegmentedRowInput.from(widget: widget))
+            return SitemapRowInput.segmented(rowID, SegmentedRowInput.from(widget: widget))
         case .frame:
-            .frame(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.frame(rowID, BasicWidgetRowInput.from(widget: widget))
         case .text:
-            .text(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.text(rowID, BasicWidgetRowInput.from(widget: widget))
         case .setpoint:
-            .setpoint(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.setpoint(rowID, SetpointRowInput.from(widget: widget))
         case .rollershutterSwitch:
-            .rollershutter(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.rollershutter(rowID, BasicWidgetRowInput.from(widget: widget))
         case .toggleSwitch:
-            .toggle(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.toggle(rowID, BasicWidgetRowInput.from(widget: widget))
         case .dateInput, .textInput:
-            .input(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.input(rowID, BasicWidgetRowInput.from(widget: widget))
         case .colorPicker:
-            .colorPicker(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.colorPicker(rowID, BasicWidgetRowInput.from(widget: widget))
         case .image, .chart, .video, .webview, .mapview:
-            .media(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.media(rowID, BasicWidgetRowInput.from(widget: widget))
         case .colorTemperaturePicker:
-            .colorTemperature(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.colorTemperature(rowID, BasicWidgetRowInput.from(widget: widget))
         case .buttonGrid:
-            .buttonGrid(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.buttonGrid(rowID, BasicWidgetRowInput.from(widget: widget))
         case .generic:
-            .generic(rowID, BasicWidgetRowInput.from(widget: widget))
+            return SitemapRowInput.generic(rowID, BasicWidgetRowInput.from(widget: widget))
         }
     }
 }

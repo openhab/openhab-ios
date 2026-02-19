@@ -57,7 +57,7 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
     case slider(RowID, SliderRowInput)
     case selection(RowID, SelectionRowInput)
     case segmented(RowID, SegmentedRowInput)
-    case setpoint(RowID, BasicWidgetRowInput)
+    case setpoint(RowID, SetpointRowInput)
     case rollershutter(RowID, BasicWidgetRowInput)
     case toggle(RowID, BasicWidgetRowInput)
     case input(RowID, BasicWidgetRowInput)
@@ -149,9 +149,23 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
                 input.valueColor,
                 input.mappings.map { "\($0.command)=\($0.label)|\($0.releaseCommand ?? "")" }.joined(separator: ",")
             ].joined(separator: "|")
+        case let .setpoint(_, input):
+            [
+                input.widgetId,
+                input.displayState.effectiveState,
+                input.displayState.labelText,
+                input.displayState.labelValue ?? "",
+                input.labelColor,
+                input.valueColor,
+                "\(input.displayState.minValue)",
+                "\(input.displayState.maxValue)",
+                "\(input.displayState.step)",
+                input.unit ?? "",
+                input.numberPattern ?? "",
+                "\(input.readOnly)"
+            ].joined(separator: "|")
         case let .frame(_, input),
              let .text(_, input),
-             let .setpoint(_, input),
              let .rollershutter(_, input),
              let .toggle(_, input),
              let .input(_, input),

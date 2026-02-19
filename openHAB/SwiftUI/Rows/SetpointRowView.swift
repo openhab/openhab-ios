@@ -15,26 +15,39 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
-struct SetpointRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-    @State private var triggerFeedback = false
+@MainActor
+private func sendSetpointValue(_ value: Double, for widget: OpenHABWidget, viewModel: SitemapPageViewModel) {
+    var numberState = widget.stateValueAsNumberState
+    numberState = numberState ?? NumberState(
+        value: value,
+        unit: widget.unit,
+        format: widget.item?.stateDescription?.numberPattern
+    )
+    numberState?.value = value
+    viewModel.sendToUpdate(item: widget.item, state: numberState, policy: .immediate)
+}
+
+private struct SetpointRowContent: View {
+    let input: SetpointRowInput
+    let iconWidget: OpenHABWidget
+    @Binding var triggerFeedback: Bool
+    let onSendValue: (Double) -> Void
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSetpointView")
     private let setpointService = SetPointService()
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         let currentValue = currentValue(displayState: displayState)
         HStack {
-            IconView(widget: widget)
+            IconView(widget: iconWidget)
                 .frame(width: 32, height: 32)
 
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
                 Text(labelText)
                     .ohTextToken(.rowLabel)
-                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
             Spacer()
@@ -52,12 +65,12 @@ struct SetpointRowView: View {
                 .ohMinimumHitTarget()
                 .disabled(currentValue <= displayState.minValue)
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
-                .disabled(widget.readOnly ?? false)
+                .disabled(input.readOnly)
 
                 Text(formattedValue(displayState: displayState))
                     .ohTextToken(.rowValue)
                     .monospacedDigit()
-                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
 
                 Button {
                     triggerFeedback.toggle()
@@ -71,7 +84,7 @@ struct SetpointRowView: View {
                 .ohMinimumHitTarget()
                 .disabled(currentValue >= displayState.maxValue)
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
-                .disabled(widget.readOnly ?? false)
+                .disabled(input.readOnly)
             }
         }
     }
@@ -85,8 +98,7 @@ struct SetpointRowView: View {
     }
 
     private func handleUpDown(isDecreasing: Bool, displayState: WidgetDisplayState) {
-        var numberState = widget.stateValueAsNumberState
-        let currentValue = numberState?.value ?? displayState.minValue
+        let currentValue = input.serverValue
 
         let limitedNewValue = setpointService.calculateNewValue(
             currentValue: currentValue,
@@ -101,31 +113,68 @@ struct SetpointRowView: View {
             return
         }
 
-        // Use widget's unit as fallback when creating NumberState
-        numberState = numberState ?? NumberState(
-            value: limitedNewValue,
-            unit: widget.unit,
-            format: widget.item?.stateDescription?.numberPattern
-        )
-        numberState?.value = limitedNewValue
-
-        logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState?.description ?? String(limitedNewValue))")
-        viewModel.sendToUpdate(item: widget.item, state: numberState, policy: .immediate)
+        logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(String(limitedNewValue))")
+        onSendValue(limitedNewValue)
     }
 
     private func currentValue(displayState: WidgetDisplayState) -> Double {
-        widget.stateValueAsNumberState?.value ?? displayState.minValue
+        input.serverValue
     }
 
     private func formattedValue(displayState: WidgetDisplayState) -> String {
-        if let numberState = widget.stateValueAsNumberState {
-            return numberState.toString(locale: Locale.current)
+        let numberState = NumberState(
+            value: currentValue(displayState: displayState),
+            unit: input.unit,
+            format: input.numberPattern
+        )
+        let formatted = numberState.toString(locale: Locale.current)
+        if !formatted.isEmpty {
+            return formatted
         }
         let text = currentValue(displayState: displayState).valueText(step: displayState.step)
-        if let unit = widget.unit, !unit.isEmpty {
+        if let unit = input.unit, !unit.isEmpty {
             return "\(text) \(unit)"
         }
         return text
+    }
+}
+
+struct SetpointRowInputView: View {
+    let rowID: RowID
+    let input: SetpointRowInput
+
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+    @State private var triggerFeedback = false
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            SetpointRowContent(
+                input: input,
+                iconWidget: widget,
+                triggerFeedback: $triggerFeedback
+            ) { value in
+                sendSetpointValue(value, for: widget, viewModel: viewModel)
+            }
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+struct SetpointRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+    @State private var triggerFeedback = false
+
+    var body: some View {
+        let input = SetpointRowInput.from(widget: widget)
+        SetpointRowContent(
+            input: input,
+            iconWidget: widget,
+            triggerFeedback: $triggerFeedback
+        ) { value in
+            sendSetpointValue(value, for: widget, viewModel: viewModel)
+        }
     }
 }
 

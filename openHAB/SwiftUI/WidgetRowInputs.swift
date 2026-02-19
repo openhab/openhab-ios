@@ -51,6 +51,44 @@ struct SegmentedRowInput {
     }
 }
 
+struct SetpointRowInput {
+    let widgetId: String
+    let displayState: WidgetDisplayState
+    let labelColor: String
+    let valueColor: String
+    let readOnly: Bool
+    let unit: String?
+    let numberPattern: String?
+    let serverValue: Double
+
+    static func from(widget: OpenHABWidget) -> SetpointRowInput {
+        let displayState = widget.displayState
+        let numberPattern = if let pattern = widget.pattern, !pattern.isEmpty {
+            pattern
+        } else {
+            widget.item?.stateDescription?.numberPattern
+        }
+        let serverValue: Double
+        if let numberState = widget.stateValueAsNumberState {
+            serverValue = numberState.value
+        } else {
+            let parsed = displayState.effectiveState.parseAsNumber(format: numberPattern).value
+            serverValue = parsed.isFinite ? parsed : displayState.minValue
+        }
+
+        return SetpointRowInput(
+            widgetId: widget.widgetId,
+            displayState: displayState,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            readOnly: widget.readOnly ?? false,
+            unit: widget.unit,
+            numberPattern: numberPattern,
+            serverValue: serverValue
+        )
+    }
+}
+
 struct SliderRowInput {
     let widgetId: String
     let displayState: WidgetDisplayState

@@ -43,6 +43,16 @@ struct EmbeddingRowInputView: View {
                 .contentShape(Rectangle())
                 .listRowInsets(regularRowInsets)
                 .listRowBackground(regularRowBackground)
+        case let .setpoint(rowID, input):
+            SetpointRowInputView(rowID: rowID, input: input)
+                .contentShape(Rectangle())
+                .listRowInsets(regularRowInsets)
+                .listRowBackground(regularRowBackground)
+        case let .toggle(rowID, input):
+            SwitchRowInputView(rowID: rowID, input: input)
+                .contentShape(Rectangle())
+                .listRowInsets(regularRowInsets)
+                .listRowBackground(regularRowBackground)
         default:
             Group {
                 if let widget = viewModel.widget(for: rowInput.rowID) {
