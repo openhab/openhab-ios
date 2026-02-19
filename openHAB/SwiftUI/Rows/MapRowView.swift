@@ -15,8 +15,32 @@ import MapKit
 import OpenHABCore
 import SwiftUI
 
+private struct MapRowConfig {
+    let input: MediaRowInput
+    let widget: OpenHABWidget
+}
+
+@MainActor
+private func makeMapRowContent(_ config: MapRowConfig) -> MapRowContent {
+    MapRowContent(input: config.input, widget: config.widget)
+}
+
+private struct MapRowContent: View {
+    let input: MediaRowInput
+    @ObservedObject var widget: OpenHABWidget
+
+    var body: some View {
+        if #available(iOS 17.0, *) {
+            MapRowViewNew(widget: widget, input: input)
+        } else {
+            MapRowViewLegacy(widget: widget, input: input)
+        }
+    }
+}
+
 struct MapRowViewLegacy: View {
     @ObservedObject var widget: OpenHABWidget
+    let input: MediaRowInput
 
     private var region: MKCoordinateRegion {
         let coordinate = CLLocationCoordinate2DIsValid(widget.coordinate) ? widget.coordinate : CLLocationCoordinate2D(latitude: 0, longitude: 0)
@@ -28,13 +52,13 @@ struct MapRowViewLegacy: View {
     }
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         VStack(alignment: .leading, spacing: 8) {
-            if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+            if !displayState.labelText.isEmpty, input.labelSourceRawValue == OpenHABWidget.LabelSource.sitemapDefinition.rawValue {
                 let labelText = displayState.labelText
                 Text(labelText)
                     .ohTextToken(.rowLabel)
-                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
             Map(coordinateRegion: .constant(region), annotationItems: CLLocationCoordinate2DIsValid(widget.coordinate) ? [widget.coordinate] : []) { location in
@@ -49,6 +73,7 @@ struct MapRowViewLegacy: View {
 @available(iOS 17.0, *)
 private struct MapRowViewNew: View {
     @ObservedObject var widget: OpenHABWidget
+    let input: MediaRowInput
     @State private var cameraPosition = MapCameraPosition.region(
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 0, longitude: 0),
@@ -56,7 +81,6 @@ private struct MapRowViewNew: View {
             longitudinalMeters: 1000
         )
     )
-    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         VStack {
@@ -83,10 +107,30 @@ struct MapRowView: View {
     @ObservedObject var widget: OpenHABWidget
 
     var body: some View {
-        if #available(iOS 17.0, *) {
-            MapRowViewNew(widget: widget)
+        makeMapRowContent(
+            MapRowConfig(
+                input: MediaRowInput.from(widget: widget),
+                widget: widget
+            )
+        )
+    }
+}
+
+struct MapRowInputView: View {
+    let rowID: RowID
+    let input: MediaRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeMapRowContent(
+                MapRowConfig(
+                    input: input,
+                    widget: widget
+                )
+            )
         } else {
-            MapRowViewLegacy(widget: widget)
+            EmptyView()
         }
     }
 }

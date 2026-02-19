@@ -16,7 +16,7 @@ import Testing
 @Suite
 struct SitemapRowInputMapperTests {
     @Test
-    func linkedPageWidgetsAlwaysMapToGeneric() {
+    func linkedPageWidgetsAlwaysMapToLinked() {
         let widgets = [
             makeSliderWidget(widgetID: "slider"),
             makeSetpointWidget(widgetID: "setpoint"),
@@ -36,12 +36,14 @@ struct SitemapRowInputMapperTests {
             let rowID = RowID(pageKey: "testPage", widgetId: widget.widgetId, occurrence: index + 1)
             let mapped = SitemapRowInputMapper.map(widget: widget, rowID: rowID)
 
-            guard case let .generic(mappedRowID, input) = mapped else {
-                #expect(Bool(false), "Expected .generic for linked widget \(widget.widgetId)")
+            guard case let .linked(mappedRowID, input) = mapped else {
+                #expect(Bool(false), "Expected .linked for linked widget \(widget.widgetId)")
                 continue
             }
             #expect(mappedRowID == rowID)
             #expect(input.widgetId == widget.widgetId)
+            #expect(input.linkedPageLink == "https://example.invalid/linked")
+            #expect(input.linkedPageTitle == "Linked")
         }
     }
 

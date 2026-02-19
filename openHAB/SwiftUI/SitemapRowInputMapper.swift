@@ -23,10 +23,8 @@ enum SitemapRowInputMapper {
     }
 
     static func map(widget: OpenHABWidget, rowID: RowID) -> SitemapRowInput {
-        // Preserve legacy navigation behavior for linked-page rows.
-        // These rows are still rendered through EmbeddingRowView, which owns NavigationLink wiring.
-        if widget.linkedPage != nil {
-            return .generic(rowID, GenericRowInput.from(widget: widget))
+        if let input = LinkedPageRowInput.from(widget: widget) {
+            return .linked(rowID, input)
         }
 
         switch widget.renderingKind {

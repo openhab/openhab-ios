@@ -15,17 +15,28 @@ import os.log
 import SwiftUI
 import WebKit
 
-struct WidgetWebViewContainer: View {
+private struct WebRowConfig {
+    let input: MediaRowInput
+    let widget: OpenHABWidget
+}
+
+@MainActor
+private func makeWebContainerContent(_ config: WebRowConfig) -> WebContainerContent {
+    WebContainerContent(input: config.input, widget: config.widget)
+}
+
+private struct WebContainerContent: View {
+    let input: MediaRowInput
     @ObservedObject var widget: OpenHABWidget
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         VStack(alignment: .leading, spacing: 8) {
-            if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+            if !displayState.labelText.isEmpty, input.labelSourceRawValue == OpenHABWidget.LabelSource.sitemapDefinition.rawValue {
                 let labelText = displayState.labelText
                 Text(labelText)
                     .ohTextToken(.rowLabel)
-                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
             WebRowView(widget: widget)
@@ -35,8 +46,40 @@ struct WidgetWebViewContainer: View {
             if let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .ohTextToken(.rowValueCompact)
-                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
             }
+        }
+    }
+}
+
+struct WidgetWebViewContainer: View {
+    @ObservedObject var widget: OpenHABWidget
+
+    var body: some View {
+        makeWebContainerContent(
+            WebRowConfig(
+                input: MediaRowInput.from(widget: widget),
+                widget: widget
+            )
+        )
+    }
+}
+
+struct WidgetWebViewContainerInputView: View {
+    let rowID: RowID
+    let input: MediaRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeWebContainerContent(
+                WebRowConfig(
+                    input: input,
+                    widget: widget
+                )
+            )
+        } else {
+            EmptyView()
         }
     }
 }
@@ -56,7 +99,6 @@ struct WebRowView: UIViewRepresentable {
     }
 
     @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private var webURL: URL? {
         guard !widget.url.isEmpty else { return nil }

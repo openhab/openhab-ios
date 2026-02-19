@@ -28,6 +28,7 @@ struct RowID: Hashable, Sendable {
 /// Each row case carries a dedicated typed input.
 enum SitemapRowInput: Identifiable, Equatable, Sendable {
     case frame(RowID, FrameRowInput)
+    case linked(RowID, LinkedPageRowInput)
     case text(RowID, TextRowInput)
     case slider(RowID, SliderRowInput)
     case selection(RowID, SelectionRowInput)
@@ -49,6 +50,7 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
     var rowID: RowID {
         switch self {
         case let .frame(id, _),
+             let .linked(id, _),
              let .text(id, _),
              let .slider(id, _),
              let .selection(id, _),
@@ -69,6 +71,7 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
     private var kindKey: String {
         switch self {
         case .frame: "frame"
+        case .linked: "linked"
         case .text: "text"
         case .slider: "slider"
         case .selection: "selection"
@@ -210,8 +213,19 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
                 input.displayState.labelText,
                 input.displayState.labelValue ?? "",
                 input.labelColor,
+                input.valueColor
+            ].joined(separator: "|")
+        case let .linked(_, input):
+            [
+                input.widgetId,
+                input.displayState.effectiveState,
+                input.displayState.labelText,
+                input.displayState.labelValue ?? "",
+                input.labelColor,
                 input.valueColor,
-                "\(input.hasLinkedPage)"
+                input.linkedPageLink,
+                input.linkedPageTitle,
+                "\(input.isFrame)"
             ].joined(separator: "|")
         case let .media(_, input):
             [

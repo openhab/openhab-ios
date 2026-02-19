@@ -15,22 +15,29 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct ImageRowView: View {
+private struct ImageRowConfig {
+    let input: MediaRowInput
+    let widget: OpenHABWidget
+    let viewModel: SitemapPageViewModel
+}
+
+@MainActor
+private func makeImageRowContent(_ config: ImageRowConfig) -> ImageRowContent {
+    ImageRowContent(input: config.input, widget: config.widget, viewModel: config.viewModel)
+}
+
+private struct ImageRowContent: View {
+    let input: MediaRowInput
     @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+    @ObservedObject var viewModel: SitemapPageViewModel
     @Environment(\.colorScheme) var colorScheme
     @State private var refreshTimer: Timer?
     @State private var forceRefreshKey = UUID()
 
     private let logger = Logger(subsystem: "org.openhab", category: "ImageRowView")
 
-    private var imageURL: URL? {
-        guard !widget.url.isEmpty else { return nil }
-        return URL(string: widget.url)
-    }
-
     private var shouldCache: Bool {
-        widget.refresh == 0
+        input.refresh == 0
     }
 
     private var chartStyle: ChartStyle {
@@ -38,13 +45,13 @@ struct ImageRowView: View {
     }
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         VStack(alignment: .leading, spacing: 8) {
-            if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+            if !displayState.labelText.isEmpty, input.labelSourceRawValue == OpenHABWidget.LabelSource.sitemapDefinition.rawValue {
                 let labelText = displayState.labelText
                 Text(labelText)
                     .ohTextToken(.rowLabel)
-                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
             switch widget.generateImageResult(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
             case let .embedded(data: data):
@@ -79,7 +86,7 @@ struct ImageRowView: View {
             if widget.type == .image, let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .ohTextToken(.rowValueCompact)
-                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
             }
         }
         .onAppear {
@@ -88,7 +95,7 @@ struct ImageRowView: View {
         .onDisappear {
             stopRefreshTimer()
         }
-        .onChange(of: widget.refresh) { _ in
+        .onChange(of: input.refresh) { _ in
             setupRefreshTimer()
         }
     }
@@ -96,9 +103,9 @@ struct ImageRowView: View {
     private func setupRefreshTimer() {
         stopRefreshTimer()
 
-        guard widget.refresh != 0 else { return }
+        guard input.refresh != 0 else { return }
 
-        let refreshInterval = TimeInterval(Double(widget.refresh) / 1000)
+        let refreshInterval = TimeInterval(Double(input.refresh) / 1000)
         guard refreshInterval > 0.09 else { return }
 
         logger.info("Scheduling image refresh every \(refreshInterval) seconds")
@@ -113,5 +120,40 @@ struct ImageRowView: View {
     private func stopRefreshTimer() {
         refreshTimer?.invalidate()
         refreshTimer = nil
+    }
+}
+
+struct ImageRowInputView: View {
+    let rowID: RowID
+    let input: MediaRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeImageRowContent(
+                ImageRowConfig(
+                    input: input,
+                    widget: widget,
+                    viewModel: viewModel
+                )
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+struct ImageRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        makeImageRowContent(
+            ImageRowConfig(
+                input: MediaRowInput.from(widget: widget),
+                widget: widget,
+                viewModel: viewModel
+            )
+        )
     }
 }

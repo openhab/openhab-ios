@@ -194,15 +194,36 @@ struct GenericRowInput {
     let displayState: WidgetDisplayState
     let labelColor: String
     let valueColor: String
-    let hasLinkedPage: Bool
 
     static func from(widget: OpenHABWidget) -> GenericRowInput {
         GenericRowInput(
             widgetId: widget.widgetId,
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor
+        )
+    }
+}
+
+struct LinkedPageRowInput {
+    let widgetId: String
+    let displayState: WidgetDisplayState
+    let labelColor: String
+    let valueColor: String
+    let linkedPageLink: String
+    let linkedPageTitle: String
+    let isFrame: Bool
+
+    static func from(widget: OpenHABWidget) -> LinkedPageRowInput? {
+        guard let linkedPage = widget.linkedPage else { return nil }
+        return LinkedPageRowInput(
+            widgetId: widget.widgetId,
+            displayState: widget.displayState,
+            labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
-            hasLinkedPage: widget.linkedPage != nil
+            linkedPageLink: linkedPage.link,
+            linkedPageTitle: linkedPage.title,
+            isFrame: widget.type == .frame
         )
     }
 }

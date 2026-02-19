@@ -21,13 +21,13 @@ struct MediaRowInputView: View {
         if let widget = viewModel.widget(for: rowID) {
             switch input.renderingKind {
             case .image, .chart:
-                ImageRowView(widget: widget)
+                ImageRowInputView(rowID: rowID, input: input)
             case .video:
-                VideoRowView(widget: widget)
+                VideoRowInputView(rowID: rowID, input: input)
             case .webview:
-                WidgetWebViewContainer(widget: widget)
+                WidgetWebViewContainerInputView(rowID: rowID, input: input)
             case .mapview:
-                MapRowView(widget: widget)
+                MapRowInputView(rowID: rowID, input: input)
             default:
                 GenericRowView(widget: widget)
             }

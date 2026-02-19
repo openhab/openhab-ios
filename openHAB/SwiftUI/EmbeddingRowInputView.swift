@@ -12,11 +12,31 @@
 import OpenHABCore
 import SwiftUI
 
+private struct LinkedPageRowInputView: View {
+    let rowID: RowID
+    let input: LinkedPageRowInput
+
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            NavigationLink(
+                destination: SitemapPageView(
+                    viewModel: SitemapPageViewModel(pageUrl: input.linkedPageLink, title: input.linkedPageTitle)
+                )
+            ) {
+                RowViewFactory.view(for: widget)
+            }
+            .buttonStyle(.plain)
+        } else {
+            EmptyView()
+        }
+    }
+}
+
 /// Transitional adapter: drives list from immutable row inputs while reusing existing widget-driven rows.
 struct EmbeddingRowInputView: View {
     let rowInput: SitemapRowInput
-
-    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private var regularRowInsets: EdgeInsets {
         EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16)
@@ -37,6 +57,11 @@ struct EmbeddingRowInputView: View {
                 .contentShape(Rectangle())
                 .listRowInsets(frameRowInsets(input))
                 .listRowBackground(frameRowBackground)
+        case let .linked(rowID, input):
+            LinkedPageRowInputView(rowID: rowID, input: input)
+                .contentShape(Rectangle())
+                .listRowInsets(linkedRowInsets(input))
+                .listRowBackground(input.isFrame ? frameRowBackground : regularRowBackground)
         case let .slider(rowID, input):
             SliderRowInputView(rowID: rowID, input: input)
                 .contentShape(Rectangle())
@@ -98,32 +123,22 @@ struct EmbeddingRowInputView: View {
                 .listRowInsets(regularRowInsets)
                 .listRowBackground(regularRowBackground)
         case let .generic(rowID, input):
-            if input.hasLinkedPage {
-                Group {
-                    if let widget = viewModel.widget(for: rowID) {
-                        EmbeddingRowView(widget: widget)
-                    } else {
-                        EmptyView()
-                    }
-                }
-            } else {
-                GenericRowInputView(rowID: rowID, input: input)
-                    .contentShape(Rectangle())
-                    .listRowInsets(regularRowInsets)
-                    .listRowBackground(regularRowBackground)
-            }
-        @unknown default:
-            Group {
-                if let widget = viewModel.widget(for: rowInput.rowID) {
-                    EmbeddingRowView(widget: widget)
-                } else {
-                    EmptyView()
-                }
-            }
+            GenericRowInputView(rowID: rowID, input: input)
+                .contentShape(Rectangle())
+                .listRowInsets(regularRowInsets)
+                .listRowBackground(regularRowBackground)
         }
     }
 
     private func frameRowInsets(_ input: FrameRowInput) -> EdgeInsets {
+        let hasLabel = !input.displayState.labelText.isEmpty
+        return hasLabel
+            ? EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)
+            : EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
+    }
+
+    private func linkedRowInsets(_ input: LinkedPageRowInput) -> EdgeInsets {
+        guard input.isFrame else { return regularRowInsets }
         let hasLabel = !input.displayState.labelText.isEmpty
         return hasLabel
             ? EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)

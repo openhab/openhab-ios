@@ -21,7 +21,18 @@ private enum VideoEncoding: String {
     case mjpeg
 }
 
-struct VideoRowView: View {
+private struct VideoRowConfig {
+    let input: MediaRowInput
+    let widget: OpenHABWidget
+}
+
+@MainActor
+private func makeVideoRowContent(_ config: VideoRowConfig) -> VideoRowContent {
+    VideoRowContent(input: config.input, widget: config.widget)
+}
+
+private struct VideoRowContent: View {
+    let input: MediaRowInput
     @ObservedObject var widget: OpenHABWidget
     @State private var player: AVPlayer?
     @State private var mjpegPlayer: SimpleMJPEGPlayer?
@@ -31,7 +42,6 @@ struct VideoRowView: View {
     @State private var currentStreamUrl: URL?
     @State private var imageObservationTimer: Timer?
     @State private var playerObserver: NSKeyValueObservation?
-    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "VideoRowView")
 
@@ -45,13 +55,13 @@ struct VideoRowView: View {
     }
 
     var body: some View {
-        let displayState = widget.displayState
+        let displayState = input.displayState
         VStack(alignment: .leading, spacing: 8) {
-            if !displayState.labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+            if !displayState.labelText.isEmpty, input.labelSourceRawValue == OpenHABWidget.LabelSource.sitemapDefinition.rawValue {
                 let labelText = displayState.labelText
                 Text(labelText)
                     .ohTextToken(.rowLabel)
-                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
             if let videoURL {
@@ -117,7 +127,7 @@ struct VideoRowView: View {
             if let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .ohTextToken(.rowValueCompact)
-                    .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
             }
         }
     }
@@ -235,5 +245,37 @@ struct VideoRowView: View {
         mjpegImage = nil
         currentStreamUrl = nil
         isLoading = false
+    }
+}
+
+struct VideoRowInputView: View {
+    let rowID: RowID
+    let input: MediaRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    var body: some View {
+        if let widget = viewModel.widget(for: rowID) {
+            makeVideoRowContent(
+                VideoRowConfig(
+                    input: input,
+                    widget: widget
+                )
+            )
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+struct VideoRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+
+    var body: some View {
+        makeVideoRowContent(
+            VideoRowConfig(
+                input: MediaRowInput.from(widget: widget),
+                widget: widget
+            )
+        )
     }
 }
