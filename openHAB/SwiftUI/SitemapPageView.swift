@@ -26,8 +26,8 @@ struct SitemapPageView: View {
             if viewModel.isLoading, viewModel.rowInputs.isEmpty {
                 // Show skeleton/placeholder rows while loading
                 List {
-                    ForEach(Self.placeholderWidgets, id: \.self) { widget in
-                        EmbeddingRowView(widget: widget)
+                    ForEach(0 ..< 6, id: \.self) { _ in
+                        PlaceholderRowView()
                             .redacted(reason: .placeholder)
                             .disabled(true)
                     }
@@ -82,28 +82,33 @@ struct SitemapPageView: View {
 }
 
 extension SitemapPageView {
-    /// Lightweight placeholder widgets for skeleton loading state — no dependency on PreviewConstants
-    static let placeholderWidgets: [OpenHABWidget] = (0 ..< 6).map { i in
-        OpenHABWidget(
-            widgetId: "placeholder_\(i)",
-            label: "Placeholder [100]",
-            icon: "none",
-            type: .text,
-            url: nil, period: nil, minValue: nil, maxValue: nil, step: nil,
-            refresh: nil, height: nil, isLeaf: nil, iconColor: nil,
-            labelColor: nil, valueColor: nil, service: nil, state: nil,
-            text: nil, legend: nil, inputHint: nil, encoding: nil,
-            item: nil, linkedPage: nil, mappings: [], widgets: [],
-            visibility: true, switchSupport: nil, forceAsItem: nil,
-            labelSource: .unknown, releaseOnly: nil
-        )
+    private struct PlaceholderRowView: View {
+        var body: some View {
+            HStack(spacing: 12) {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color.secondary.opacity(0.2))
+                    .frame(width: 28, height: 28)
+                VStack(alignment: .leading, spacing: 6) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.secondary.opacity(0.2))
+                        .frame(width: 160, height: 14)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.secondary.opacity(0.15))
+                        .frame(width: 90, height: 12)
+                }
+                Spacer()
+            }
+            .padding(.vertical, 6)
+            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+            .listRowBackground(Color(UIColor.ohSecondarySystemGroupedBackground))
+        }
     }
 }
 
 #Preview {
     let previewViewModel = SitemapPageViewModel(
         title: "Preview Page",
-        widgets: SitemapPageView.placeholderWidgets
+        widgets: []
     )
     SitemapPageView(viewModel: previewViewModel)
 }

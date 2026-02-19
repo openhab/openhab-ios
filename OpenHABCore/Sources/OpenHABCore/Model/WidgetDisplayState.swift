@@ -12,7 +12,7 @@
 import Foundation
 
 /// Immutable snapshot of widget values required for row rendering.
-public struct WidgetDisplayState: Sendable {
+public struct WidgetDisplayState: Sendable, Equatable {
     public let widgetId: String
     public let labelText: String
     public let labelValue: String?

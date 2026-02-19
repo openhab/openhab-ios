@@ -13,6 +13,70 @@ import CommonUI
 import OpenHABCore
 import SwiftUI
 
+enum RowBackgroundKind: Equatable {
+    case frame
+    case regular
+}
+
+enum RowLayoutPolicy {
+    static let regularInsets = EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16)
+
+    static func rowInsets(for rowInput: SitemapRowInput) -> EdgeInsets {
+        switch rowInput {
+        case let .frame(_, input):
+            return frameInsets(hasLabel: !input.displayState.labelText.isEmpty)
+        case let .linked(_, input):
+            if input.isFrame {
+                return frameInsets(hasLabel: !input.displayState.labelText.isEmpty)
+            }
+            return regularInsets
+        case .text,
+             .slider,
+             .selection,
+             .segmented,
+             .setpoint,
+             .rollershutter,
+             .toggle,
+             .input,
+             .colorPicker,
+             .media,
+             .colorTemperature,
+             .buttonGrid,
+             .generic:
+            return regularInsets
+        }
+    }
+
+    static func backgroundKind(for rowInput: SitemapRowInput) -> RowBackgroundKind {
+        switch rowInput {
+        case .frame:
+            .frame
+        case let .linked(_, input):
+            input.isFrame ? .frame : .regular
+        case .text,
+             .slider,
+             .selection,
+             .segmented,
+             .setpoint,
+             .rollershutter,
+             .toggle,
+             .input,
+             .colorPicker,
+             .media,
+             .colorTemperature,
+             .buttonGrid,
+             .generic:
+            .regular
+        }
+    }
+
+    private static func frameInsets(hasLabel: Bool) -> EdgeInsets {
+        hasLabel
+            ? EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)
+            : EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
+    }
+}
+
 private struct LinkedPageRowInputView: View {
     let input: LinkedPageRowInput
 
@@ -55,10 +119,6 @@ private struct LinkedPageRowContent: View {
 struct EmbeddingRowInputView: View {
     let rowInput: SitemapRowInput
 
-    private var regularRowInsets: EdgeInsets {
-        EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16)
-    }
-
     private var regularRowBackground: Color {
         Color(UIColor.ohSecondarySystemGroupedBackground)
     }
@@ -72,93 +132,78 @@ struct EmbeddingRowInputView: View {
         case let .frame(_, input):
             FrameRowInputView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(frameRowInsets(input))
+                .listRowInsets(RowLayoutPolicy.rowInsets(for: rowInput))
                 .listRowBackground(frameRowBackground)
         case let .linked(_, input):
             LinkedPageRowInputView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(linkedRowInsets(input))
-                .listRowBackground(input.isFrame ? frameRowBackground : regularRowBackground)
+                .listRowInsets(RowLayoutPolicy.rowInsets(for: rowInput))
+                .listRowBackground(RowLayoutPolicy.backgroundKind(for: rowInput) == .frame ? frameRowBackground : regularRowBackground)
         case let .slider(rowID, input):
             SliderRowInputView(rowID: rowID, input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .selection(rowID, input):
             SelectionRowInputView(rowID: rowID, input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .segmented(rowID, input):
             SegmentedRowInputView(rowID: rowID, input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .setpoint(rowID, input):
             SetpointRowInputView(rowID: rowID, input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
-        case let .text(rowID, input):
-            TextRowInputView(rowID: rowID, input: input)
+        case let .text(_, input):
+            TextRowInputView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
-        case let .toggle(rowID, input):
-            SwitchRowInputView(rowID: rowID, input: input)
+        case let .toggle(_, input):
+            SwitchRowInputView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .rollershutter(rowID, input):
             RollershutterRowInputView(rowID: rowID, input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .input(rowID, input):
             InputRowInputView(rowID: rowID, input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .colorPicker(rowID, input):
             ColorPickerRowInputView(rowID: rowID, input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
-        case let .media(rowID, input):
-            MediaRowInputView(rowID: rowID, input: input)
+        case let .media(_, input):
+            MediaRowInputView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         case let .colorTemperature(rowID, input):
             ColorTemperaturePickerRowInputView(rowID: rowID, input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
-        case let .buttonGrid(rowID, input):
-            ButtonGridRowInputView(rowID: rowID, input: input)
+        case let .buttonGrid(_, input):
+            ButtonGridRowInputView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
-        case let .generic(rowID, input):
-            GenericRowInputView(rowID: rowID, input: input)
+        case let .generic(_, input):
+            GenericRowInputView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(regularRowInsets)
+                .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         }
-    }
-
-    private func frameRowInsets(_ input: FrameRowInput) -> EdgeInsets {
-        let hasLabel = !input.displayState.labelText.isEmpty
-        return hasLabel
-            ? EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)
-            : EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
-    }
-
-    private func linkedRowInsets(_ input: LinkedPageRowInput) -> EdgeInsets {
-        guard input.isFrame else { return regularRowInsets }
-        let hasLabel = !input.displayState.labelText.isEmpty
-        return hasLabel
-            ? EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)
-            : EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
     }
 }

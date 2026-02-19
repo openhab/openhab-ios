@@ -17,33 +17,39 @@ import SwiftUI
 
 private struct MapRowConfig {
     let input: MediaRowInput
-    let widget: OpenHABWidget
 }
 
 @MainActor
 private func makeMapRowContent(_ config: MapRowConfig) -> MapRowContent {
-    MapRowContent(input: config.input, widget: config.widget)
+    MapRowContent(input: config.input)
 }
 
 private struct MapRowContent: View {
     let input: MediaRowInput
-    @ObservedObject var widget: OpenHABWidget
+
+    private var coordinate: CLLocationCoordinate2D? {
+        guard let latitude = input.coordinateLatitude,
+              let longitude = input.coordinateLongitude else {
+            return nil
+        }
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
 
     var body: some View {
         if #available(iOS 17.0, *) {
-            MapRowViewNew(widget: widget, input: input)
+            MapRowViewNew(input: input, coordinate: coordinate)
         } else {
-            MapRowViewLegacy(widget: widget, input: input)
+            MapRowViewLegacy(input: input, coordinate: coordinate)
         }
     }
 }
 
 struct MapRowViewLegacy: View {
-    @ObservedObject var widget: OpenHABWidget
     let input: MediaRowInput
+    let coordinate: CLLocationCoordinate2D?
 
     private var region: MKCoordinateRegion {
-        let coordinate = CLLocationCoordinate2DIsValid(widget.coordinate) ? widget.coordinate : CLLocationCoordinate2D(latitude: 0, longitude: 0)
+        let coordinate = coordinate ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
         return MKCoordinateRegion(
             center: coordinate,
             latitudinalMeters: 1000.0,
@@ -61,10 +67,10 @@ struct MapRowViewLegacy: View {
                     .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
-            Map(coordinateRegion: .constant(region), annotationItems: CLLocationCoordinate2DIsValid(widget.coordinate) ? [widget.coordinate] : []) { location in
+            Map(coordinateRegion: .constant(region), annotationItems: coordinate.map { [$0] } ?? []) { location in
                 MapMarker(coordinate: location, tint: .red)
             }
-            .frame(height: widget.preferredRowHeight)
+            .frame(height: input.preferredRowHeight.map { CGFloat($0) })
             .clipShape(.rect(cornerRadius: 8))
         }
     }
@@ -72,8 +78,8 @@ struct MapRowViewLegacy: View {
 
 @available(iOS 17.0, *)
 private struct MapRowViewNew: View {
-    @ObservedObject var widget: OpenHABWidget
     let input: MediaRowInput
+    let coordinate: CLLocationCoordinate2D?
     @State private var cameraPosition = MapCameraPosition.region(
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 0, longitude: 0),
@@ -84,15 +90,15 @@ private struct MapRowViewNew: View {
 
     var body: some View {
         VStack {
-            if CLLocationCoordinate2DIsValid(widget.coordinate) {
+            if let coordinate {
                 Map(position: $cameraPosition) {
-                    Marker("", coordinate: widget.coordinate)
+                    Marker("", coordinate: coordinate)
                 }
-                .frame(height: widget.preferredRowHeight)
+                .frame(height: input.preferredRowHeight.map { CGFloat($0) })
                 .onAppear {
                     cameraPosition = .region(
                         MKCoordinateRegion(
-                            center: widget.coordinate,
+                            center: coordinate,
                             latitudinalMeters: 1000,
                             longitudinalMeters: 1000
                         )
@@ -103,35 +109,15 @@ private struct MapRowViewNew: View {
     }
 }
 
-struct MapRowView: View {
-    @ObservedObject var widget: OpenHABWidget
+struct MapRowInputView: View {
+    let input: MediaRowInput
 
     var body: some View {
         makeMapRowContent(
             MapRowConfig(
-                input: MediaRowInput.from(widget: widget),
-                widget: widget
+                input: input
             )
         )
-    }
-}
-
-struct MapRowInputView: View {
-    let rowID: RowID
-    let input: MediaRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeMapRowContent(
-                MapRowConfig(
-                    input: input,
-                    widget: widget
-                )
-            )
-        } else {
-            EmptyView()
-        }
     }
 }
 

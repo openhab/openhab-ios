@@ -190,24 +190,22 @@ private struct ButtonGridRowContent: View {
 }
 
 struct ButtonGridRowInputView: View {
-    let rowID: RowID
     let input: ButtonGridRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         makeButtonGridRowContent(
             ButtonGridRowConfig(
-                input: input,
-                onSendCommand: { command, itemName, policy, phase in
-                    guard let itemName, !itemName.isEmpty else { return }
-                    viewModel.sendCommand(
-                        command,
-                        for: itemName,
-                        policy: policy,
-                        phase: phase
-                    )
-                }
-            )
+                input: input
+            ) { command, itemName, policy, phase in
+                guard let itemName, !itemName.isEmpty else { return }
+                viewModel.sendCommand(
+                    command,
+                    for: itemName,
+                    policy: policy,
+                    phase: phase
+                )
+            }
         )
     }
 }
@@ -219,17 +217,16 @@ struct ButtonGridRowView: View {
     var body: some View {
         makeButtonGridRowContent(
             ButtonGridRowConfig(
-                input: ButtonGridRowInput.from(widget: widget),
-                onSendCommand: { command, itemName, policy, phase in
-                    guard let itemName, !itemName.isEmpty else { return }
-                    viewModel.sendCommand(
-                        command,
-                        for: itemName,
-                        policy: policy,
-                        phase: phase
-                    )
-                }
-            )
+                input: ButtonGridRowInput.from(widget: widget)
+            ) { command, itemName, policy, phase in
+                guard let itemName, !itemName.isEmpty else { return }
+                viewModel.sendCommand(
+                    command,
+                    for: itemName,
+                    policy: policy,
+                    phase: phase
+                )
+            }
         )
     }
 }

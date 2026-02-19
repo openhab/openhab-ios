@@ -17,18 +17,16 @@ import SwiftUI
 
 private struct ImageRowConfig {
     let input: MediaRowInput
-    let widget: OpenHABWidget
     let viewModel: SitemapPageViewModel
 }
 
 @MainActor
 private func makeImageRowContent(_ config: ImageRowConfig) -> ImageRowContent {
-    ImageRowContent(input: config.input, widget: config.widget, viewModel: config.viewModel)
+    ImageRowContent(input: config.input, viewModel: config.viewModel)
 }
 
 private struct ImageRowContent: View {
     let input: MediaRowInput
-    @ObservedObject var widget: OpenHABWidget
     @ObservedObject var viewModel: SitemapPageViewModel
     @Environment(\.colorScheme) var colorScheme
     @State private var refreshTimer: Timer?
@@ -53,9 +51,9 @@ private struct ImageRowContent: View {
                     .ohTextToken(.rowLabel)
                     .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
-            switch widget.generateImageResult(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
+            switch input.imageDescriptor.resolveImagePayload(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
             case let .embedded(data: data):
-                let provider = RawImageDataProvider(data: data, cacheKey: shouldCache ? widget.widgetId : "\(widget.widgetId)-\(forceRefreshKey)")
+                let provider = RawImageDataProvider(data: data, cacheKey: shouldCache ? input.widgetId : "\(input.widgetId)-\(forceRefreshKey)")
                 KFImage(source: .provider(provider))
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -83,7 +81,7 @@ private struct ImageRowContent: View {
             }
 
             // Only show labelValue for image widgets, not charts
-            if widget.type == .image, let labelValue = displayState.labelValue, !labelValue.isEmpty {
+            if input.imageDescriptor.mediaKind == .image, let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .ohTextToken(.rowValueCompact)
                     .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
@@ -124,34 +122,13 @@ private struct ImageRowContent: View {
 }
 
 struct ImageRowInputView: View {
-    let rowID: RowID
     let input: MediaRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeImageRowContent(
-                ImageRowConfig(
-                    input: input,
-                    widget: widget,
-                    viewModel: viewModel
-                )
-            )
-        } else {
-            EmptyView()
-        }
-    }
-}
-
-struct ImageRowView: View {
-    @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         makeImageRowContent(
             ImageRowConfig(
-                input: MediaRowInput.from(widget: widget),
-                widget: widget,
+                input: input,
                 viewModel: viewModel
             )
         )

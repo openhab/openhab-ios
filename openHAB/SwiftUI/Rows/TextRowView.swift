@@ -56,7 +56,6 @@ private struct TextRowContent: View {
 }
 
 struct TextRowInputView: View {
-    let rowID: RowID
     let input: TextRowInput
 
     var body: some View {

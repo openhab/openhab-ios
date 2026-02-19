@@ -13,26 +13,30 @@ import OpenHABCore
 import SwiftUI
 
 struct MediaRowInputView: View {
-    let rowID: RowID
     let input: MediaRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    private var genericFallbackInput: GenericRowInput {
+        GenericRowInput(
+            widgetId: input.widgetId,
+            displayState: input.displayState,
+            labelColor: input.labelColor,
+            valueColor: input.valueColor,
+            icon: RowIconInput(icon: "", iconColor: "", staticIcon: false, iconState: nil, showIcon: false)
+        )
+    }
 
     var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            switch input.renderingKind {
-            case .image, .chart:
-                ImageRowInputView(rowID: rowID, input: input)
-            case .video:
-                VideoRowInputView(rowID: rowID, input: input)
-            case .webview:
-                WidgetWebViewContainerInputView(rowID: rowID, input: input)
-            case .mapview:
-                MapRowInputView(rowID: rowID, input: input)
-            default:
-                GenericRowView(widget: widget)
-            }
-        } else {
-            EmptyView()
+        switch input.renderingKind {
+        case .image, .chart:
+            ImageRowInputView(input: input)
+        case .video:
+            VideoRowInputView(input: input)
+        case .webview:
+            WidgetWebViewContainerInputView(input: input)
+        case .mapview:
+            MapRowInputView(input: input)
+        default:
+            GenericRowInputView(input: genericFallbackInput)
         }
     }
 }

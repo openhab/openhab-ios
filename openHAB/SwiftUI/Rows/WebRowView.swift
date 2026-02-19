@@ -17,17 +17,15 @@ import WebKit
 
 private struct WebRowConfig {
     let input: MediaRowInput
-    let widget: OpenHABWidget
 }
 
 @MainActor
 private func makeWebContainerContent(_ config: WebRowConfig) -> WebContainerContent {
-    WebContainerContent(input: config.input, widget: config.widget)
+    WebContainerContent(input: config.input)
 }
 
 private struct WebContainerContent: View {
     let input: MediaRowInput
-    @ObservedObject var widget: OpenHABWidget
 
     var body: some View {
         let displayState = input.displayState
@@ -39,8 +37,8 @@ private struct WebContainerContent: View {
                     .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
-            WebRowView(widget: widget)
-                .frame(height: widget.preferredRowHeight)
+            WebRowView(urlString: input.url)
+                .frame(height: input.preferredRowHeight.map { CGFloat($0) })
                 .clipShape(.rect(cornerRadius: 8))
 
             if let labelValue = displayState.labelValue, !labelValue.isEmpty {
@@ -52,35 +50,15 @@ private struct WebContainerContent: View {
     }
 }
 
-struct WidgetWebViewContainer: View {
-    @ObservedObject var widget: OpenHABWidget
+struct WidgetWebViewContainerInputView: View {
+    let input: MediaRowInput
 
     var body: some View {
         makeWebContainerContent(
             WebRowConfig(
-                input: MediaRowInput.from(widget: widget),
-                widget: widget
+                input: input
             )
         )
-    }
-}
-
-struct WidgetWebViewContainerInputView: View {
-    let rowID: RowID
-    let input: MediaRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeWebContainerContent(
-                WebRowConfig(
-                    input: input,
-                    widget: widget
-                )
-            )
-        } else {
-            EmptyView()
-        }
     }
 }
 
@@ -98,11 +76,11 @@ struct WebRowView: UIViewRepresentable {
         }
     }
 
-    @ObservedObject var widget: OpenHABWidget
+    let urlString: String
 
     private var webURL: URL? {
-        guard !widget.url.isEmpty else { return nil }
-        return URL(string: widget.url)
+        guard !urlString.isEmpty else { return nil }
+        return URL(string: urlString)
     }
 
     func makeUIView(context: Context) -> WKWebView {

@@ -46,30 +46,16 @@ private struct GenericRowContent: View {
 }
 
 struct GenericRowInputView: View {
-    let rowID: RowID
     let input: GenericRowInput
-
     var body: some View {
         makeGenericRowContent(GenericRowConfig(input: input))
-    }
-}
-
-struct GenericRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-
-    var body: some View {
-        makeGenericRowContent(
-            GenericRowConfig(
-                input: GenericRowInput.from(widget: widget)
-            )
-        )
     }
 }
 
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[6]
     List([widget]) { widget in
-        GenericRowView(widget: widget)
+        GenericRowInputView(input: GenericRowInput.from(widget: widget))
     }
     .environmentObject(SitemapPageViewModel())
 }

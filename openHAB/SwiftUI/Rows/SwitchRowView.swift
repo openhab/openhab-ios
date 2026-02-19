@@ -79,7 +79,6 @@ private struct SwitchRowContent: View {
 }
 
 struct SwitchRowInputView: View {
-    let rowID: RowID
     let input: ToggleRowInput
 
     @EnvironmentObject var viewModel: SitemapPageViewModel

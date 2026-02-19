@@ -23,17 +23,15 @@ private enum VideoEncoding: String {
 
 private struct VideoRowConfig {
     let input: MediaRowInput
-    let widget: OpenHABWidget
 }
 
 @MainActor
 private func makeVideoRowContent(_ config: VideoRowConfig) -> VideoRowContent {
-    VideoRowContent(input: config.input, widget: config.widget)
+    VideoRowContent(input: config.input)
 }
 
 private struct VideoRowContent: View {
     let input: MediaRowInput
-    @ObservedObject var widget: OpenHABWidget
     @State private var player: AVPlayer?
     @State private var mjpegPlayer: SimpleMJPEGPlayer?
     @State private var mjpegImage: UIImage?
@@ -46,12 +44,12 @@ private struct VideoRowContent: View {
     private let logger = Logger(subsystem: "org.openhab", category: "VideoRowView")
 
     private var videoURL: URL? {
-        guard !widget.url.isEmpty else { return nil }
-        return URL(string: widget.url)
+        guard !input.url.isEmpty else { return nil }
+        return URL(string: input.url)
     }
 
     private var isMJPEG: Bool {
-        widget.encoding.lowercased() == VideoEncoding.mjpeg.rawValue
+        input.encoding.lowercased() == VideoEncoding.mjpeg.rawValue
     }
 
     var body: some View {
@@ -105,7 +103,7 @@ private struct VideoRowContent: View {
                 .onDisappear {
                     cleanup()
                 }
-                .onChange(of: widget.url) { newValue in
+                .onChange(of: input.url) { newValue in
                     if !newValue.isEmpty, let newURL = URL(string: newValue) {
                         setupVideo(url: newURL)
                     } else {
@@ -249,32 +247,12 @@ private struct VideoRowContent: View {
 }
 
 struct VideoRowInputView: View {
-    let rowID: RowID
     let input: MediaRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
-    var body: some View {
-        if let widget = viewModel.widget(for: rowID) {
-            makeVideoRowContent(
-                VideoRowConfig(
-                    input: input,
-                    widget: widget
-                )
-            )
-        } else {
-            EmptyView()
-        }
-    }
-}
-
-struct VideoRowView: View {
-    @ObservedObject var widget: OpenHABWidget
 
     var body: some View {
         makeVideoRowContent(
             VideoRowConfig(
-                input: MediaRowInput.from(widget: widget),
-                widget: widget
+                input: input
             )
         )
     }

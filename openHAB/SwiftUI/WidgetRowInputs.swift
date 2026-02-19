@@ -22,7 +22,7 @@ struct RowIconInput: Equatable, Sendable {
         RowIconInput(
             icon: widget.icon,
             iconColor: widget.iconColor,
-            staticIcon: widget.staticIcon,
+            staticIcon: widget.staticIcon ?? false,
             iconState: widget.iconState(),
             showIcon: shouldShowIcon(for: widget)
         )
@@ -38,7 +38,7 @@ struct RowIconInput: Equatable, Sendable {
     }
 }
 
-struct SelectionRowInput {
+struct SelectionRowInput: Equatable {
     let displayState: WidgetDisplayState
     let mappings: [OpenHABWidgetMapping]
     let labelColor: String
@@ -59,7 +59,7 @@ struct SelectionRowInput {
     }
 }
 
-struct SegmentedRowInput {
+struct SegmentedRowInput: Equatable {
     let displayState: WidgetDisplayState
     let mappings: [OpenHABWidgetMapping]
     let labelColor: String
@@ -78,7 +78,7 @@ struct SegmentedRowInput {
     }
 }
 
-struct SetpointRowInput {
+struct SetpointRowInput: Equatable {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -116,7 +116,7 @@ struct SetpointRowInput {
     }
 }
 
-struct ColorPickerRowInput {
+struct ColorPickerRowInput: Equatable {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -138,7 +138,7 @@ struct ColorPickerRowInput {
     }
 }
 
-struct ToggleRowInput {
+struct ToggleRowInput: Equatable {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -160,7 +160,7 @@ struct ToggleRowInput {
     }
 }
 
-struct RollershutterRowInput {
+struct RollershutterRowInput: Equatable {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -176,7 +176,7 @@ struct RollershutterRowInput {
     }
 }
 
-struct InputRowInput: Sendable {
+struct InputRowInput: Sendable, Equatable {
     let widgetId: String
     let renderingKind: WidgetRenderingKind
     let displayState: WidgetDisplayState
@@ -202,7 +202,7 @@ struct InputRowInput: Sendable {
     }
 }
 
-struct ButtonGridRowInput {
+struct ButtonGridRowInput: Equatable {
     struct ButtonInput: Equatable, Sendable, Identifiable {
         let id: String
         let label: String
@@ -254,7 +254,7 @@ struct ButtonGridRowInput {
         let gridRows = typedButtons.map(\.row).max().map { $0 + 1 } ?? 1
         let gridColumns = min((typedButtons.map(\.column).max().map { $0 + 1 } ?? 1), 12)
 
-        ButtonGridRowInput(
+        return ButtonGridRowInput(
             widgetId: widget.widgetId,
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
@@ -269,7 +269,7 @@ struct ButtonGridRowInput {
     }
 }
 
-struct GenericRowInput {
+struct GenericRowInput: Equatable {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -287,7 +287,7 @@ struct GenericRowInput {
     }
 }
 
-struct LinkedPageRowInput {
+struct LinkedPageRowInput: Equatable {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -312,7 +312,7 @@ struct LinkedPageRowInput {
     }
 }
 
-struct ColorTemperatureRowInput {
+struct ColorTemperatureRowInput: Equatable {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -356,10 +356,11 @@ struct ColorTemperatureRowInput {
     }
 }
 
-struct MediaRowInput {
+struct MediaRowInput: Equatable {
     let widgetId: String
     let renderingKind: WidgetRenderingKind
     let displayState: WidgetDisplayState
+    let imageDescriptor: WidgetMediaImageDescriptor
     let labelColor: String
     let valueColor: String
     let readOnly: Bool
@@ -367,24 +368,35 @@ struct MediaRowInput {
     let url: String
     let encoding: String
     let labelSourceRawValue: String
+    let preferredRowHeight: Double?
+    let coordinateLatitude: Double?
+    let coordinateLongitude: Double?
 
     static func from(widget: OpenHABWidget) -> MediaRowInput {
-        MediaRowInput(
+        let coordinate = widget.coordinate
+        let hasValidCoordinate = (-90.0 ... 90.0).contains(coordinate.latitude)
+            && (-180.0 ... 180.0).contains(coordinate.longitude)
+
+        return MediaRowInput(
             widgetId: widget.widgetId,
             renderingKind: widget.renderingKind,
             displayState: widget.displayState,
+            imageDescriptor: widget.mediaImageDescriptor,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
             readOnly: widget.readOnly ?? false,
             refresh: widget.refresh,
             url: widget.url,
             encoding: widget.encoding,
-            labelSourceRawValue: widget.labelSource.rawValue
+            labelSourceRawValue: widget.labelSource.rawValue,
+            preferredRowHeight: widget.preferredRowHeight.map(Double.init),
+            coordinateLatitude: hasValidCoordinate ? coordinate.latitude : nil,
+            coordinateLongitude: hasValidCoordinate ? coordinate.longitude : nil
         )
     }
 }
 
-struct FrameRowInput {
+struct FrameRowInput: Equatable {
     let widgetId: String
     let displayState: WidgetDisplayState
 
@@ -396,7 +408,7 @@ struct FrameRowInput {
     }
 }
 
-struct TextRowInput {
+struct TextRowInput: Equatable {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -414,7 +426,7 @@ struct TextRowInput {
     }
 }
 
-struct SliderRowInput {
+struct SliderRowInput: Equatable {
     let widgetId: String
     let displayState: WidgetDisplayState
     let numberPattern: String?

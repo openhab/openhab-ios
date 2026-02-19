@@ -156,6 +156,7 @@
 		DABB4CDC2F472E4200111AF3 /* InputRowInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CDB2F472E4200111AF3 /* InputRowInputView.swift */; };
 		DABB4CDE2F4746B100111AF3 /* SitemapRowInputMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CDD2F4746B100111AF3 /* SitemapRowInputMapperTests.swift */; };
 		DABB4CE02F474CBF00111AF3 /* MediaRowInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CDF2F474CBF00111AF3 /* MediaRowInputView.swift */; };
+		DABB4CF22F4790AD00111AF3 /* RowLayoutPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABB4CF12F4790AD00111AF3 /* RowLayoutPolicyTests.swift */; };
 		DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */; };
 		DABED17B2E451694000B92EF /* BonjourDiscoverySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */; };
 		DABED17D2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */; };
@@ -175,7 +176,6 @@
 		DADC420A2E7AB899004E866F /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		DAE2800A2E35F5590028EE24 /* IconURLView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE280092E35F5590028EE24 /* IconURLView.swift */; };
 		DAE7B4A72E26927C00B9FE99 /* ButtonGridRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE7B4A62E26927C00B9FE99 /* ButtonGridRowView.swift */; };
-		DAEA21D82DBF472D00D54342 /* RowViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */; };
 		DAEA21DA2DBF477E00D54342 /* SwitchRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21D92DBF477E00D54342 /* SwitchRowView.swift */; };
 		DAEA21DC2DBF47DA00D54342 /* SliderRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DB2DBF47DA00D54342 /* SliderRowView.swift */; };
 		DAEA21DE2DBF481300D54342 /* TextRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DD2DBF481300D54342 /* TextRowView.swift */; };
@@ -197,7 +197,6 @@
 		DAF4581623DC48400018B495 /* GenericRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581523DC483F0018B495 /* GenericRow.swift */; };
 		DAF4581823DC4A050018B495 /* ImageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581723DC4A050018B495 /* ImageRow.swift */; };
 		DAF4581E23DC60020018B495 /* ImageRawRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581D23DC60020018B495 /* ImageRawRow.swift */; };
-		DAF5AA682E4F3A39004F18D7 /* EmbeddingRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF5AA672E4F3A38004F18D7 /* EmbeddingRowView.swift */; };
 		DAFF80982E4F47830084513E /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = DAFF80972E4F47830084513E /* SDWebImage */; };
 		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */; };
 		DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622A18830A3600D3244D /* Foundation.framework */; };
@@ -511,6 +510,7 @@
 		DABB4CDB2F472E4200111AF3 /* InputRowInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputRowInputView.swift; sourceTree = "<group>"; };
 		DABB4CDD2F4746B100111AF3 /* SitemapRowInputMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapRowInputMapperTests.swift; sourceTree = "<group>"; };
 		DABB4CDF2F474CBF00111AF3 /* MediaRowInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRowInputView.swift; sourceTree = "<group>"; };
+		DABB4CF12F4790AD00111AF3 /* RowLayoutPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowLayoutPolicyTests.swift; sourceTree = "<group>"; };
 		DABED17A2E451694000B92EF /* BonjourDiscoverySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoverySheet.swift; sourceTree = "<group>"; };
 		DABED17C2E4516B4000B92EF /* BonjourDiscoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoveryViewModel.swift; sourceTree = "<group>"; };
 		DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandlerTests.swift; sourceTree = "<group>"; };
@@ -534,7 +534,6 @@
 		DAD488B5287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		DAE280092E35F5590028EE24 /* IconURLView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconURLView.swift; sourceTree = "<group>"; };
 		DAE7B4A62E26927C00B9FE99 /* ButtonGridRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonGridRowView.swift; sourceTree = "<group>"; };
-		DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowViewFactory.swift; sourceTree = "<group>"; };
 		DAEA21D92DBF477E00D54342 /* SwitchRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchRowView.swift; sourceTree = "<group>"; };
 		DAEA21DB2DBF47DA00D54342 /* SliderRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderRowView.swift; sourceTree = "<group>"; };
 		DAEA21DD2DBF481300D54342 /* TextRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRowView.swift; sourceTree = "<group>"; };
@@ -556,7 +555,6 @@
 		DAF4581523DC483F0018B495 /* GenericRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericRow.swift; sourceTree = "<group>"; };
 		DAF4581723DC4A050018B495 /* ImageRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRow.swift; sourceTree = "<group>"; };
 		DAF4581D23DC60020018B495 /* ImageRawRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRawRow.swift; sourceTree = "<group>"; };
-		DAF5AA672E4F3A38004F18D7 /* EmbeddingRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddingRowView.swift; sourceTree = "<group>"; };
 		DAF6F4112C67E83B0083883E /* openapiCorrected.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = openapiCorrected.json; sourceTree = "<group>"; };
 		DAFD2FE62E0D96700059A1EB /* OsLogRewriter */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = OsLogRewriter; sourceTree = "<group>"; };
 		DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
@@ -882,6 +880,7 @@
 				DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */,
 				938BF89524EFBC5400E6B52F /* LocalizationTests.swift */,
 				DA9641592F292EE200CEC181 /* BonjourDiscoveryViewModelTests.swift */,
+				DABB4CF12F4790AD00111AF3 /* RowLayoutPolicyTests.swift */,
 				DABB4CDD2F4746B100111AF3 /* SitemapRowInputMapperTests.swift */,
 				DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */,
 				DAF231D127BB6EEA00AB916C /* OpenHABSVGTests.swift */,
@@ -899,11 +898,9 @@
 				DAE280092E35F5590028EE24 /* IconURLView.swift */,
 				DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */,
 				DABB4CD92F471E9200111AF3 /* EmbeddingRowInputView.swift */,
-				DAF5AA672E4F3A38004F18D7 /* EmbeddingRowView.swift */,
 				DA64ACA92DBEAD9000294F60 /* SitemapNavigationView.swift */,
 				DABB4CD52F471CDB00111AF3 /* SitemapRowInput.swift */,
 				DABB4CD72F471D0300111AF3 /* SitemapRowInputMapper.swift */,
-				DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */,
 				DABB4CD32F47135900111AF3 /* WidgetRowInputs.swift */,
 				DAC949FF2E21A473007E67B7 /* Rows */,
 			);
@@ -1736,6 +1733,7 @@
 				DA96415C2F292F0600CEC181 /* OpenHABEndPoint.swift in Sources */,
 				DA96415A2F292EE200CEC181 /* BonjourDiscoveryViewModelTests.swift in Sources */,
 				DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */,
+				DABB4CF22F4790AD00111AF3 /* RowLayoutPolicyTests.swift in Sources */,
 				938BF89624EFBC5400E6B52F /* LocalizationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1816,7 +1814,6 @@
 				DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */,
 				DAE7B4A72E26927C00B9FE99 /* ButtonGridRowView.swift in Sources */,
 				DA5ED9BE2C850955004875E0 /* ClientCertificatesViewModel.swift in Sources */,
-				DAEA21D82DBF472D00D54342 /* RowViewFactory.swift in Sources */,
 				DA21EAE22339621C001AB415 /* Throttler.swift in Sources */,
 				DAE2800A2E35F5590028EE24 /* IconURLView.swift in Sources */,
 				DA6B2EEF2C861BC900DF77CF /* DrawerView.swift in Sources */,
@@ -1842,7 +1839,6 @@
 				DA2AEB6E2D92BAD800897D80 /* PageLoader.swift in Sources */,
 				65F055442E3D4E41004E98FE /* ItemSelectionView.swift in Sources */,
 				DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */,
-				DAF5AA682E4F3A39004F18D7 /* EmbeddingRowView.swift in Sources */,
 				DABB4CD62F471CDB00111AF3 /* SitemapRowInput.swift in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
 				DA48001C2D837556009CF127 /* SitemapSettingsView.swift in Sources */,
