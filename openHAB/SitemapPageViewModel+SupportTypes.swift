@@ -11,11 +11,6 @@
 
 import OpenHABCore
 
-struct QueuedCommand {
-    let command: String
-    let version: Int
-}
-
 enum CommandSendOrigin: String {
     case command
     case update
@@ -26,6 +21,12 @@ enum PageUpdateOrigin: String {
     case longPolling
 }
 
+struct QueuedCommand {
+    let command: String
+    let version: Int
+}
+
+// swiftlint:disable:next file_types_order
 struct WidgetRenderKey: Equatable {
     let label: String
     let icon: String
@@ -87,6 +88,7 @@ struct WidgetRenderKey: Equatable {
         )
     }
 
+    // Could be synthesized automatically by compiler. But this takes too long
     static func == (lhs: WidgetRenderKey, rhs: WidgetRenderKey) -> Bool {
         lhs.label == rhs.label &&
             lhs.icon == rhs.icon &&

@@ -302,6 +302,7 @@ class SitemapPageViewModel: ObservableObject {
         guard let itemname, !itemname.isEmpty else { return }
         sliderOverrideResetTasks[itemname]?.cancel()
         sliderOverrideResetTasks[itemname] = nil
+        objectWillChange.send()
         sliderValueOverrides[itemname] = value
     }
 
@@ -1025,8 +1026,10 @@ private extension SitemapPageViewModel {
     }
 
     func clearSliderOverride(for itemname: String) {
+        guard sliderValueOverrides[itemname] != nil else { return }
         sliderOverrideResetTasks[itemname]?.cancel()
         sliderOverrideResetTasks[itemname] = nil
+        objectWillChange.send()
         sliderValueOverrides.removeValue(forKey: itemname)
     }
 }
