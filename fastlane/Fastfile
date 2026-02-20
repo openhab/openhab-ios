@@ -165,8 +165,18 @@ platform :ios do
 
         type = options[:bump]
 
-        if !options[:isfeaturebuild] && type != 'none'
-            # Increment version for all targets
+        if options[:isfeaturebuild]
+            # Feature branch: always patch-bump MARKETING_VERSION in xcconfig
+            current_version = get_xcconfig_value(path: 'Version.xcconfig', name: 'MARKETING_VERSION')
+            parts = current_version.split('.').map(&:to_i)
+            parts[2] += 1
+            update_xcconfig_value(
+                path: 'Version.xcconfig',
+                name: 'MARKETING_VERSION',
+                value: parts.join('.')
+            )
+        elsif type != 'none'
+            # develop: bump all targets in project.pbxproj
             ['openHAB', 'openHABWatch', 'openHABIntents', 'NotificationService', 'openHABTestsSwift', 'openHABUITests', 'openHABWatchSwiftUI Watch AppTests', 'openHABWatchSwiftUI Watch AppUITests'].each do |target|
                 increment_version_number_in_xcodeproj(
                     bump_type: type,
@@ -180,8 +190,11 @@ platform :ios do
         sh("cd .. && git clean -fd")
 
         build_number = get_build_number
-        version = get_version_number(xcodeproj: 'openHAB.xcodeproj',
-                                     target: 'openHAB')
+        version = if options[:isfeaturebuild]
+            get_xcconfig_value(path: 'Version.xcconfig', name: 'MARKETING_VERSION')
+        else
+            get_version_number(xcodeproj: 'openHAB.xcodeproj', target: 'openHAB')
+        end
 
         # get the last commit comments from Git history
         # and creates our changelog
@@ -230,12 +243,20 @@ platform :ios do
         clean_build_artifacts
 
         # commit to git the changes from bumping version number
-        commit_version_bump(
-            message: "committed version bump: #{version} (#{build_number})",
-            xcodeproj: 'openHAB.xcodeproj',
-            include: %w[CHANGELOG.md],
-            force: true
-        )
+        if options[:isfeaturebuild]
+            git_add(path: 'Version.xcconfig')
+            git_commit(
+                path: ['Version.xcconfig'],
+                message: "committed version bump: #{version} (#{build_number})"
+            )
+        else
+            commit_version_bump(
+                message: "committed version bump: #{version} (#{build_number})",
+                xcodeproj: 'openHAB.xcodeproj',
+                include: %w[CHANGELOG.md],
+                force: true
+            )
+        end
         if is_ci?
             sh 'git commit --amend --no-edit --signoff --author="openhab-bot <info@openhabfoundation.org>"'
         else
