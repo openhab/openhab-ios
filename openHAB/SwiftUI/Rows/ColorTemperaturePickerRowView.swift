@@ -44,6 +44,7 @@ struct CustomSliderView: View {
     let range: ClosedRange<Double>
     let step: Double
     let onEditingChanged: () -> Void
+    let onDragStateChanged: (Bool) -> Void
 
     @State private var lastSendTime: Date = .distantPast
 
@@ -66,6 +67,9 @@ struct CustomSliderView: View {
                     .gesture(
                         DragGesture()
                             .onChanged { gesture in
+                                if !isDraggingSlider {
+                                    onDragStateChanged(true)
+                                }
                                 let location = gesture.location.x.clamped(to: 0 ... width)
                                 let raw = Double(location / width) * (range.upperBound - range.lowerBound) + range.lowerBound
                                 let stepped = (raw / step).rounded() * step
@@ -77,6 +81,7 @@ struct CustomSliderView: View {
                                 }
                             }
                             .onEnded { _ in
+                                onDragStateChanged(false)
                                 onEditingChanged()
                             }
                     )
@@ -92,6 +97,8 @@ private struct ColorTemperaturePickerRowContent: View {
     let onCancelPending: (String) -> Void
 
     @State private var selectedTemperature: Double = 2700 // Default warm white
+    @State private var isDraggingSlider = false
+    @State private var suppressNextServerSync = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "ColorTemperaturePickerRowView")
 
@@ -160,10 +167,14 @@ private struct ColorTemperaturePickerRowContent: View {
                         CustomSliderView(
                             value: $selectedTemperature,
                             range: minTemperature ... maxTemperature,
-                            step: 100
-                        ) {
-                            sendTemperatureCommand()
-                        }
+                            step: 100,
+                            onEditingChanged: {
+                                sendTemperatureCommand()
+                            },
+                            onDragStateChanged: { isDragging in
+                                isDraggingSlider = isDragging
+                            }
+                        )
                         .frame(height: 28)
                         .disabled(input.readOnly)
                     }
@@ -179,6 +190,11 @@ private struct ColorTemperaturePickerRowContent: View {
             selectedTemperature = loadCurrentTemperature(state: displayState.effectiveState) ?? input.serverValue ?? 2700
         }
         .onChange(of: displayState.effectiveState) { newState in
+            guard !isDraggingSlider else { return }
+            if suppressNextServerSync {
+                suppressNextServerSync = false
+                return
+            }
             selectedTemperature = loadCurrentTemperature(state: newState) ?? input.serverValue ?? 2700
         }
         .onDisappear {
@@ -214,9 +230,11 @@ private struct ColorTemperaturePickerRowContent: View {
 
     private func sendTemperatureCommand() {
         // Send temperature directly as Kelvin value (like Android app)
-        let command = "\(Int(selectedTemperature))"
+        let clampedRoundedTemperature = Int(selectedTemperature.rounded()).clamped(to: Int(minTemperature) ... Int(maxTemperature))
+        let command = "\(clampedRoundedTemperature)"
 
         logger.info("Sending color temperature command: \(command)K")
+        suppressNextServerSync = true
         onSendCommand(command, input.colorTemperatureCommandKey)
     }
 }
