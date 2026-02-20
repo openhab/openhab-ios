@@ -47,6 +47,7 @@ struct CustomSliderView: View {
     let onDragStateChanged: (Bool) -> Void
 
     @State private var lastSendTime: Date = .distantPast
+    @State private var isDragging = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -67,7 +68,8 @@ struct CustomSliderView: View {
                     .gesture(
                         DragGesture()
                             .onChanged { gesture in
-                                if !isDraggingSlider {
+                                if !isDragging {
+                                    isDragging = true
                                     onDragStateChanged(true)
                                 }
                                 let location = gesture.location.x.clamped(to: 0 ... width)
@@ -81,6 +83,7 @@ struct CustomSliderView: View {
                                 }
                             }
                             .onEnded { _ in
+                                isDragging = false
                                 onDragStateChanged(false)
                                 onEditingChanged()
                             }
