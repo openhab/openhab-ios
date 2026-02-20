@@ -51,6 +51,7 @@ private struct ColorPickerRowContent: View {
 
     @State private var selectedColor: Color = .white
     @State private var lastImmediateSendAt: Date = .distantPast
+    @State private var suppressNextColorSend = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetColorPickerView")
 
@@ -82,14 +83,10 @@ private struct ColorPickerRowContent: View {
             }
         }
         .onAppear {
-            let state = displayState.effectiveState
-            if !state.isEmpty {
-                selectedColor = parseColor(from: state) ?? .white
-            }
+            applyServerState(displayState.effectiveState)
         }
         .onChange(of: displayState.effectiveState) { newState in
-            guard !newState.isEmpty else { return }
-            selectedColor = parseColor(from: newState) ?? .white
+            applyServerState(newState)
         }
         .onDisappear {
             onCancelPending()
@@ -97,6 +94,11 @@ private struct ColorPickerRowContent: View {
     }
 
     private func sendColorCommand(_ color: Color) {
+        if suppressNextColorSend {
+            suppressNextColorSend = false
+            return
+        }
+
         let uiColor = UIColor(color)
         var hue: CGFloat = 0
         var saturation: CGFloat = 0
@@ -105,9 +107,9 @@ private struct ColorPickerRowContent: View {
 
         uiColor.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
 
-        let hueValue = Int(hue * 360)
-        let saturationValue = Int(saturation * 100)
-        let brightnessValue = Int(brightness * 100)
+        let hueValue = Int((hue * 360).rounded()).clamped(to: 0 ... 360)
+        let saturationValue = Int((saturation * 100).rounded()).clamped(to: 0 ... 100)
+        let brightnessValue = Int((brightness * 100).rounded()).clamped(to: 0 ... 100)
 
         let command = "\(hueValue),\(saturationValue),\(brightnessValue)"
         logger.info("Sending color command: \(command)")
@@ -121,6 +123,12 @@ private struct ColorPickerRowContent: View {
 
         // Also debounce to ensure the final value is sent after interaction settles.
         onSendDebounced(command)
+    }
+
+    private func applyServerState(_ state: String) {
+        guard !state.isEmpty, let parsedColor = parseColor(from: state) else { return }
+        suppressNextColorSend = true
+        selectedColor = parsedColor
     }
 
     private func parseColor(from state: String) -> Color? {
