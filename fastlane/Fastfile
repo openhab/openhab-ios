@@ -326,7 +326,7 @@ platform :ios do
 
     desc 'Increment the build number.'
     private_lane :increment_build do
-        xcconfig_path = 'Version.xcconfig'
+        xcconfig_path = File.expand_path('../Version.xcconfig', __dir__)
         xcconfig = File.read(xcconfig_path)
         xcode_build = xcconfig.match(/CURRENT_PROJECT_VERSION\s*=\s*(\d+)/)[1].to_i
         testflight_build = latest_testflight_build_number
