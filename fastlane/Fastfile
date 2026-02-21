@@ -165,37 +165,36 @@ platform :ios do
 
         type = options[:bump]
 
+        xcconfig_path = File.expand_path('../Version.xcconfig', __dir__)
         if options[:isfeaturebuild]
             # Feature branch: always patch-bump MARKETING_VERSION in xcconfig
-            current_version = get_xcconfig_value(path: 'Version.xcconfig', name: 'MARKETING_VERSION')
-            parts = current_version.split('.').map(&:to_i)
+            xcconfig = File.read(xcconfig_path)
+            parts = xcconfig.match(/MARKETING_VERSION\s*=\s*([\d.]+)/)[1].split('.').map(&:to_i)
             parts[2] += 1
-            update_xcconfig_value(
-                path: 'Version.xcconfig',
-                name: 'MARKETING_VERSION',
-                value: parts.join('.')
-            )
+            File.write(xcconfig_path, xcconfig.gsub(
+                /MARKETING_VERSION\s*=\s*[\d.]+/,
+                "MARKETING_VERSION = #{parts.join('.')}"
+            ))
         elsif type != 'none'
             # develop: bump MARKETING_VERSION in xcconfig
-            current_version = get_xcconfig_value(path: 'Version.xcconfig', name: 'MARKETING_VERSION')
-            parts = current_version.split('.').map(&:to_i)
+            xcconfig = File.read(xcconfig_path)
+            parts = xcconfig.match(/MARKETING_VERSION\s*=\s*([\d.]+)/)[1].split('.').map(&:to_i)
             case type
             when 'patch' then parts[2] += 1
             when 'minor' then parts[1] += 1; parts[2] = 0
             when 'major' then parts[0] += 1; parts[1] = 0; parts[2] = 0
             end
-            update_xcconfig_value(
-                path: 'Version.xcconfig',
-                name: 'MARKETING_VERSION',
-                value: parts.join('.')
-            )
+            File.write(xcconfig_path, xcconfig.gsub(
+                /MARKETING_VERSION\s*=\s*[\d.]+/,
+                "MARKETING_VERSION = #{parts.join('.')}"
+            ))
         end
         # increment_version_if_required
         # NOTE: this resolves packages of the project so need to clean
         sh("cd .. && git clean -fd")
 
         build_number = get_build_number
-        version = get_xcconfig_value(path: 'Version.xcconfig', name: 'MARKETING_VERSION')
+        version = File.read(xcconfig_path).match(/MARKETING_VERSION\s*=\s*([\d.]+)/)[1]
 
         # get the last commit comments from Git history
         # and creates our changelog
