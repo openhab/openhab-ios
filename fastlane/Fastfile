@@ -176,25 +176,26 @@ platform :ios do
                 value: parts.join('.')
             )
         elsif type != 'none'
-            # develop: bump all targets in project.pbxproj
-            ['openHAB', 'openHABWatch', 'openHABIntents', 'NotificationService', 'openHABTestsSwift', 'openHABUITests', 'openHABWatchSwiftUI Watch AppTests', 'openHABWatchSwiftUI Watch AppUITests'].each do |target|
-                increment_version_number_in_xcodeproj(
-                    bump_type: type,
-                    xcodeproj: 'openHAB.xcodeproj',
-                    target: target
-                )
+            # develop: bump MARKETING_VERSION in xcconfig
+            current_version = get_xcconfig_value(path: 'Version.xcconfig', name: 'MARKETING_VERSION')
+            parts = current_version.split('.').map(&:to_i)
+            case type
+            when 'patch' then parts[2] += 1
+            when 'minor' then parts[1] += 1; parts[2] = 0
+            when 'major' then parts[0] += 1; parts[1] = 0; parts[2] = 0
             end
+            update_xcconfig_value(
+                path: 'Version.xcconfig',
+                name: 'MARKETING_VERSION',
+                value: parts.join('.')
+            )
         end
         # increment_version_if_required
         # NOTE: this resolves packages of the project so need to clean
         sh("cd .. && git clean -fd")
 
         build_number = get_build_number
-        version = if options[:isfeaturebuild]
-            get_xcconfig_value(path: 'Version.xcconfig', name: 'MARKETING_VERSION')
-        else
-            get_version_number(xcodeproj: 'openHAB.xcodeproj', target: 'openHAB')
-        end
+        version = get_xcconfig_value(path: 'Version.xcconfig', name: 'MARKETING_VERSION')
 
         # get the last commit comments from Git history
         # and creates our changelog
@@ -243,20 +244,11 @@ platform :ios do
         clean_build_artifacts
 
         # commit to git the changes from bumping version number
-        if options[:isfeaturebuild]
-            git_add(path: 'Version.xcconfig')
-            git_commit(
-                path: ['Version.xcconfig'],
-                message: "committed version bump: #{version} (#{build_number})"
-            )
-        else
-            commit_version_bump(
-                message: "committed version bump: #{version} (#{build_number})",
-                xcodeproj: 'openHAB.xcodeproj',
-                include: %w[CHANGELOG.md],
-                force: true
-            )
-        end
+        git_add(path: 'Version.xcconfig')
+        git_commit(
+            path: ['Version.xcconfig', 'CHANGELOG.md'],
+            message: "committed version bump: #{version} (#{build_number})"
+        )
         if is_ci?
             sh 'git commit --amend --no-edit --signoff --author="openhab-bot <info@openhabfoundation.org>"'
         else
@@ -334,12 +326,14 @@ platform :ios do
 
     desc 'Increment the build number.'
     private_lane :increment_build do
-        xcode_build = get_build_number.to_i
+        xcode_build = get_xcconfig_value(path: 'Version.xcconfig', name: 'CURRENT_PROJECT_VERSION').to_i
         testflight_build = latest_testflight_build_number
         build_no = (xcode_build > testflight_build ? xcode_build : testflight_build) + 1
 
-        increment_build_number_in_xcodeproj(
-            build_number: "#{build_no}"
+        update_xcconfig_value(
+            path: 'Version.xcconfig',
+            name: 'CURRENT_PROJECT_VERSION',
+            value: build_no.to_s
         )
     end
 

@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:Version.xcconfig">
+   </FileRef>
+   <FileRef
       location = "group:OpenHABCore">
    </FileRef>
    <FileRef
