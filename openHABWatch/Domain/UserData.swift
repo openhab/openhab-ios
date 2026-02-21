@@ -40,15 +40,19 @@ final class UserData: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init(preview: Bool = false) {
-        let data = PreviewConstants.sitemapJson
-        do {
-            let sitemapPage = try data.decoded(as: Components.Schemas.PageDTO.self)
-            openHABSitemapPage = OpenHABPage(sitemapPage)
-            widgets = openHABSitemapPage?.widgets ?? []
-            decorateWidgetsWithSendCommand(widgets)
-        } catch {
-            Logger.userData.error("Should not throw \(error.localizedDescription)")
+        #if DEBUG
+        if preview {
+            let data = PreviewConstants.sitemapJson
+            do {
+                let sitemapPage = try data.decoded(as: Components.Schemas.PageDTO.self)
+                openHABSitemapPage = OpenHABPage(sitemapPage)
+                widgets = openHABSitemapPage?.widgets ?? []
+                decorateWidgetsWithSendCommand(widgets)
+            } catch {
+                Logger.userData.error("Should not throw \(error.localizedDescription)")
+            }
         }
+        #endif
     }
 
     /// Initializes UserData for a linked page navigation

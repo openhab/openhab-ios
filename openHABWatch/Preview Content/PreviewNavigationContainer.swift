@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-#if DEBUG
 import OpenHABCore
 import SwiftUI
 
@@ -61,4 +60,3 @@ struct PreviewNavigationContainer<Content: View>: View {
         self.content = content()
     }
 }
-#endif

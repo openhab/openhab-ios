@@ -139,6 +139,7 @@
 		DA8B14B82F3A120E007753FD /* PreviewWidgetFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8B14B72F3A11F0007753FD /* PreviewWidgetFactory.swift */; };
 		DA8B14BA2F3A373A007753FD /* PreviewNavigationContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8B14B92F3A373A007753FD /* PreviewNavigationContainer.swift */; };
 		DA8B14BC2F3A3CB5007753FD /* WatchTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8B14BB2F3A3CB5007753FD /* WatchTypography.swift */; };
+		DA8B14BE2F3A3CB5007753FD /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8B14BD2F3A3CB5007753FD /* PreviewConstants.swift */; };
 		DA94AEB42EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA94AEB32EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift */; };
 		DA95F3332E0F2B1700FE4474 /* OpenHABRootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */; };
 		DA96415A2F292EE200CEC181 /* BonjourDiscoveryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9641592F292EE200CEC181 /* BonjourDiscoveryViewModelTests.swift */; };
@@ -496,6 +497,7 @@
 		DA8B14B72F3A11F0007753FD /* PreviewWidgetFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewWidgetFactory.swift; sourceTree = "<group>"; };
 		DA8B14B92F3A373A007753FD /* PreviewNavigationContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewNavigationContainer.swift; sourceTree = "<group>"; };
 		DA8B14BB2F3A3CB5007753FD /* WatchTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTypography.swift; sourceTree = "<group>"; };
+		DA8B14BD2F3A3CB5007753FD /* PreviewConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewConstants.swift; sourceTree = "<group>"; };
 		DA8B15512F3BB74B007753FD /* openHABWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABWatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA94AEB32EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleMJPEGPlayer.swift; sourceTree = "<group>"; };
 		DA94AF432EC8DE41003BB3C8 /* VideoStreamManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoStreamManager.swift; sourceTree = "<group>"; };
@@ -1056,6 +1058,7 @@
 				DA0749DF23E0BF510057FA83 /* ColorSelection.swift */,
 				DA32D1B32C8C98C40018D974 /* IconWithAction.swift */,
 				DA8B14BB2F3A3CB5007753FD /* WatchTypography.swift */,
+			DA8B14BD2F3A3CB5007753FD /* PreviewConstants.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1713,6 +1716,7 @@
 				10472F7AF99C4940A6144817 /* TextRow.swift in Sources */,
 				DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */,
 				DA8B14BC2F3A3CB5007753FD /* WatchTypography.swift in Sources */,
+				DA8B14BE2F3A3CB5007753FD /* PreviewConstants.swift in Sources */,
 				C4377202F7D642B5A8349008 /* SelectionRow.swift in Sources */,
 				DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */,
 				DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */,
