@@ -119,33 +119,33 @@ private struct ColorTemperaturePickerRowContent: View {
         HStack(alignment: .top) {
             IconInputView(input: iconInput, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
 
-            VStack(spacing: 8) {
-                HStack {
+            VStack(spacing: 6) {
+                HStack(alignment: .firstTextBaseline, spacing: 0) {
                     if !displayState.labelText.isEmpty {
-                        let labelText = displayState.labelText
-                        Text(labelText)
+                        Text(displayState.labelText)
                             .ohTextToken(.rowLabel)
                             .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
                     }
 
-                    Spacer()
+                    Spacer(minLength: 0)
 
                     // Temperature value display
-                    HStack {
+                    HStack(spacing: 0) {
                         Text("\(Int(selectedTemperature))K")
                             .ohTextToken(.rowValueCompact)
                             .foregroundStyle(.secondary)
+                            .monospacedDigit()
 
                         Text(" - ")
                             .ohTextToken(.rowValueCompact)
                             .foregroundStyle(.secondary)
 
-                        // Temperature description
                         Text(temperatureDescription)
                             .ohTextToken(.secondary)
                             .foregroundStyle(.secondary)
                     }
                 }
+                .padding(.top, 6)
 
                 // Color temperature slider with gradient background
                 HStack {
