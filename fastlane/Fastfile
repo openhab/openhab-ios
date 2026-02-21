@@ -193,7 +193,7 @@ platform :ios do
         # NOTE: this resolves packages of the project so need to clean
         sh("cd .. && git clean -fd")
 
-        build_number = get_build_number
+        build_number = File.read(xcconfig_path).match(/CURRENT_PROJECT_VERSION\s*=\s*(\d+)/)[1].to_i
         version = File.read(xcconfig_path).match(/MARKETING_VERSION\s*=\s*([\d.]+)/)[1]
 
         # get the last commit comments from Git history
