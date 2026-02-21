@@ -326,15 +326,16 @@ platform :ios do
 
     desc 'Increment the build number.'
     private_lane :increment_build do
-        xcode_build = get_xcconfig_value(path: 'Version.xcconfig', name: 'CURRENT_PROJECT_VERSION').to_i
+        xcconfig_path = 'Version.xcconfig'
+        xcconfig = File.read(xcconfig_path)
+        xcode_build = xcconfig.match(/CURRENT_PROJECT_VERSION\s*=\s*(\d+)/)[1].to_i
         testflight_build = latest_testflight_build_number
         build_no = (xcode_build > testflight_build ? xcode_build : testflight_build) + 1
 
-        update_xcconfig_value(
-            path: 'Version.xcconfig',
-            name: 'CURRENT_PROJECT_VERSION',
-            value: build_no.to_s
-        )
+        File.write(xcconfig_path, xcconfig.gsub(
+            /CURRENT_PROJECT_VERSION\s*=\s*\d+/,
+            "CURRENT_PROJECT_VERSION = #{build_no}"
+        ))
     end
 
     desc 'Increment the version number if required.'
