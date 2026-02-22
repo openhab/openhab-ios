@@ -243,6 +243,9 @@ platform :ios do
 
         clean_build_artifacts
 
+        # Restore project.pbxproj modified by update_code_signing_settings and Xcode normalisation
+        sh("git restore ../openHAB.xcodeproj/project.pbxproj")
+
         # commit to git the changes from bumping version number
         git_add(path: 'Version.xcconfig')
         git_commit(
