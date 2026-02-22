@@ -465,4 +465,14 @@ final class UserData: ObservableObject {
             }
         }
     }
+
+    /// Sets sendCommand closures on widgets that go directly to UserData,
+    /// bypassing the OpenHABPage closure chain and its weak-reference lifetime issues.
+    private func decorateWidgetsWithSendCommand(_ widgets: [OpenHABWidget]) {
+        for widget in widgets {
+            widget.sendCommand = { [weak self] item, command in
+                Task { await self?.sendCommand(item, command: command) }
+            }
+        }
+    }
 }

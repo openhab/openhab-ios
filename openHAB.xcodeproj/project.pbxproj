@@ -589,6 +589,17 @@
 			path = openHABWatchTests;
 			sourceTree = "<group>";
 		};
+		DA8B15522F3BB74B007753FD /* openHABWatchTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = openHABWatchTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
