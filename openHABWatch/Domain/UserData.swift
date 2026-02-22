@@ -46,9 +46,7 @@ final class UserData: ObservableObject {
                 let sitemapPage = try data.decoded(as: Components.Schemas.PageDTO.self)
                 openHABSitemapPage = OpenHABPage(sitemapPage)
                 widgets = openHABSitemapPage?.widgets ?? []
-                openHABSitemapPage?.sendCommand = { [weak self] item, command in
-                    Task { await self?.sendCommand(item, command: command) }
-                }
+                decorateWidgetsWithSendCommand(widgets)
             } catch {
                 Logger.userData.error("Should not throw \(error.localizedDescription)")
             }
@@ -417,5 +415,15 @@ final class UserData: ObservableObject {
         }
 
         widgets = updatedWidgets
+    }
+
+    /// Sets sendCommand closures on widgets that go directly to UserData,
+    /// bypassing the OpenHABPage closure chain and its weak-reference lifetime issues.
+    private func decorateWidgetsWithSendCommand(_ widgets: [OpenHABWidget]) {
+        for widget in widgets {
+            widget.sendCommand = { [weak self] item, command in
+                Task { await self?.sendCommand(item, command: command) }
+            }
+        }
     }
 }
