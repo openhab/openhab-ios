@@ -12,12 +12,20 @@
 import OpenHABCore
 
 enum SitemapRowInputMapper {
+    static func rowIdentityWidgetID(for widget: OpenHABWidget) -> String {
+        if widget.renderingKind == .chart, let itemName = widget.item?.name, !itemName.isEmpty {
+            return "chart-\(itemName)"
+        }
+        return widget.widgetId
+    }
+
     static func map(pageKey: String, widgets: [OpenHABWidget]) -> [SitemapRowInput] {
         var occurrenceByWidgetID: [String: Int] = [:]
         return widgets.map { widget in
-            occurrenceByWidgetID[widget.widgetId, default: 0] += 1
-            let occurrence = occurrenceByWidgetID[widget.widgetId]!
-            let rowID = RowID(pageKey: pageKey, widgetId: widget.widgetId, occurrence: occurrence)
+            let identityWidgetID = rowIdentityWidgetID(for: widget)
+            occurrenceByWidgetID[identityWidgetID, default: 0] += 1
+            let occurrence = occurrenceByWidgetID[identityWidgetID]!
+            let rowID = RowID(pageKey: pageKey, widgetId: identityWidgetID, occurrence: occurrence)
             return map(widget: widget, rowID: rowID)
         }
     }

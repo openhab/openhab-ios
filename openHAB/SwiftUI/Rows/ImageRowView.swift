@@ -31,6 +31,7 @@ private struct ImageRowContent: View {
     @Environment(\.colorScheme) var colorScheme
     @State private var refreshTimer: Timer?
     @State private var forceRefreshKey = UUID()
+    @State private var lastChartImage: KFCrossPlatformImage?
 
     private let logger = Logger(subsystem: "org.openhab", category: "ImageRowView")
 
@@ -40,6 +41,10 @@ private struct ImageRowContent: View {
 
     private var chartStyle: ChartStyle {
         colorScheme == .light ? .light : .dark
+    }
+
+    private var isChartByMediaKind: Bool {
+        input.imageDescriptor.mediaKind == .chart
     }
 
     var body: some View {
@@ -60,15 +65,39 @@ private struct ImageRowContent: View {
                     .frame(maxHeight: 300)
                     .clipShape(.rect(cornerRadius: 8))
             case let .link(url):
-                KFImage(url)
-                    .resizable()
-                    .cacheMemoryOnly(!shouldCache)
-                    .forceRefresh(shouldCache ? false : true)
-                    .cacheOriginalImage(!shouldCache ? false : true)
-                    .id(shouldCache ? url?.absoluteString : "\(url?.absoluteString ?? "")-\(forceRefreshKey)")
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxHeight: 300)
-                    .clipShape(.rect(cornerRadius: 8))
+                if isChartByMediaKind {
+                    KFImage(url)
+                        .cacheMemoryOnly(false)
+                        .cacheOriginalImage(true)
+                        .fade(duration: 0)
+                        .placeholder {
+                            if let lastChartImage {
+                                Image(uiImage: lastChartImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            } else {
+                                Color.clear
+                            }
+                        }
+                        .onSuccess { result in
+                            lastChartImage = result.image
+                        }
+                        .resizable()
+                        .id(url?.absoluteString)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxHeight: 300)
+                        .clipShape(.rect(cornerRadius: 8))
+                } else {
+                    KFImage(url)
+                        .resizable()
+                        .cacheMemoryOnly(!shouldCache)
+                        .forceRefresh(shouldCache ? false : true)
+                        .cacheOriginalImage(!shouldCache ? false : true)
+                        .id(shouldCache ? url?.absoluteString : "\(url?.absoluteString ?? "")-\(forceRefreshKey)")
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxHeight: 300)
+                        .clipShape(.rect(cornerRadius: 8))
+                }
             case .empty:
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
@@ -100,6 +129,12 @@ private struct ImageRowContent: View {
 
     private func setupRefreshTimer() {
         stopRefreshTimer()
+
+        // Chart widgets already update via sitemap long-poll responses.
+        // A local timer adds overlapping image swaps and causes visible flicker.
+        guard !isChartByMediaKind else {
+            return
+        }
 
         guard input.refresh != 0 else { return }
 

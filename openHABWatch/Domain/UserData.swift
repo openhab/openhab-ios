@@ -465,5 +465,4 @@ final class UserData: ObservableObject {
             }
         }
     }
-
 }

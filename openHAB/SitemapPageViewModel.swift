@@ -273,9 +273,10 @@ class SitemapPageViewModel: ObservableObject {
         index.reserveCapacity(relevantWidgets.count)
 
         for widget in relevantWidgets {
-            occurrenceByWidgetID[widget.widgetId, default: 0] += 1
-            let occurrence = occurrenceByWidgetID[widget.widgetId]!
-            let rowID = RowID(pageKey: pageKey, widgetId: widget.widgetId, occurrence: occurrence)
+            let identityWidgetID = SitemapRowInputMapper.rowIdentityWidgetID(for: widget)
+            occurrenceByWidgetID[identityWidgetID, default: 0] += 1
+            let occurrence = occurrenceByWidgetID[identityWidgetID]!
+            let rowID = RowID(pageKey: pageKey, widgetId: identityWidgetID, occurrence: occurrence)
             let input = SitemapRowInputMapper.map(widget: widget, rowID: rowID)
             inputs.append(input)
             index[rowID] = widget
