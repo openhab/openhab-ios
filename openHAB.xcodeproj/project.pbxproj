@@ -993,7 +993,7 @@
 				DA0749DF23E0BF510057FA83 /* ColorSelection.swift */,
 				DA32D1B32C8C98C40018D974 /* IconWithAction.swift */,
 				DA8B14BB2F3A3CB5007753FD /* WatchTypography.swift */,
-			DA8B14BD2F3A3CB5007753FD /* PreviewConstants.swift */,
+\t\t\t\tDA8B14BD2F3A3CB5007753FD /* PreviewConstants.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
