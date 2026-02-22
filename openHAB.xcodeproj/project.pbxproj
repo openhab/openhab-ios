@@ -156,6 +156,13 @@
 		DAD0857D2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857C2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift */; };
 		DAD0858B2AE56F0E001D36BE /* OpenHABWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0855F2AE47824001D36BE /* OpenHABWatch.swift */; };
 		DADC420A2E7AB899004E866F /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = DADC42092E7AB899004E866F /* SDWebImage */; };
+		DADC420A2E7AB899004E866F /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
+		DAE2800A2E35F5590028EE24 /* IconURLView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE280092E35F5590028EE24 /* IconURLView.swift */; };
+		DAE7B4A72E26927C00B9FE99 /* ButtonGridRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE7B4A62E26927C00B9FE99 /* ButtonGridRowView.swift */; };
+		DAEA21DA2DBF477E00D54342 /* SwitchRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21D92DBF477E00D54342 /* SwitchRowView.swift */; };
+		DAEA21DC2DBF47DA00D54342 /* SliderRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DB2DBF47DA00D54342 /* SliderRowView.swift */; };
+		DAEA21DE2DBF481300D54342 /* TextRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DD2DBF481300D54342 /* TextRowView.swift */; };
+		DAEA21E02DBF483E00D54342 /* GenericRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DF2DBF483E00D54342 /* GenericRowView.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
 		DAF0A28B2C56E3A300A14A6A /* RollershutterCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF0A28A2C56E3A300A14A6A /* RollershutterCell.swift */; };
@@ -546,6 +553,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DA2AEB752D92D32000897D80 /* Cells */ = {
+		DA8B15522F3BB74B007753FD /* openHABWatchTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 			);
@@ -554,6 +562,7 @@
 			explicitFolders = (
 			);
 			path = Cells;
+			path = openHABWatchTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
