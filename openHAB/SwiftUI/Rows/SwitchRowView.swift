@@ -88,6 +88,7 @@ struct SwitchRowView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[2]
     VStack {
@@ -96,3 +97,4 @@ struct SwitchRowView: View {
     }
     .environmentObject(SitemapPageViewModel())
 }
+#endif

@@ -158,6 +158,7 @@ struct ColorPickerRowView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[15]
     VStack {
@@ -167,3 +168,4 @@ struct ColorPickerRowView: View {
     }
     .environmentObject(SitemapPageViewModel())
 }
+#endif

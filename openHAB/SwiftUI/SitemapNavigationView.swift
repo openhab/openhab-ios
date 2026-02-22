@@ -210,6 +210,7 @@ struct SitemapNavigationView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let previewViewModel = SitemapPageViewModel(
         pageUrl: PreviewConstants.openHABSitemapPage?.link ?? "",
@@ -219,3 +220,4 @@ struct SitemapNavigationView: View {
         print("Show side menu tapped")
     }
 }
+#endif

@@ -347,7 +347,6 @@ struct SegmentedRowView: View {
 
 // MARK: - Preview Helpers
 
-#if DEBUG
 /// Wrapper for consistent preview list styling matching SitemapPageView
 struct PreviewList<Content: View>: View {
     @ViewBuilder let content: () -> Content
@@ -379,7 +378,6 @@ private extension SegmentedRowView {
         ))
     }
 }
-#endif
 
 // MARK: - Previews
 
@@ -567,6 +565,7 @@ private extension SegmentedRowView {
     }
 }
 
+#if DEBUG
 #Preview("From PreviewConstants") {
     PreviewList {
         SegmentedRowView(
@@ -574,3 +573,4 @@ private extension SegmentedRowView {
         )
     }
 }
+#endif

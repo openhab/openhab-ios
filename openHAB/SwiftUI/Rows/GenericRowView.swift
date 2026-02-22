@@ -52,6 +52,7 @@ struct GenericRowView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[6]
     List([widget]) { widget in
@@ -59,3 +60,4 @@ struct GenericRowView: View {
     }
     .environmentObject(SitemapPageViewModel())
 }
+#endif

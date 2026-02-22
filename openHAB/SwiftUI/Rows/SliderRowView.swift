@@ -231,7 +231,6 @@ struct SliderRowView: View {
 
 // MARK: - Preview Helpers
 
-#if DEBUG
 private extension SliderRowView {
     static func createPreviewInput(label: String,
                                    value: Double? = nil,
@@ -251,7 +250,6 @@ private extension SliderRowView {
         ))
     }
 }
-#endif
 
 // MARK: - Previews
 
@@ -335,6 +333,7 @@ private extension SliderRowView {
     }
 }
 
+#if DEBUG
 #Preview("From PreviewConstants") {
     PreviewList {
         SliderRowView(
@@ -343,3 +342,4 @@ private extension SliderRowView {
         )
     }
 }
+#endif

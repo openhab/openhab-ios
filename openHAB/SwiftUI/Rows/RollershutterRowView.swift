@@ -151,6 +151,7 @@ extension View {
     }
 }
 
+#if DEBUG
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[5]
     VStack {
@@ -159,3 +160,4 @@ extension View {
     }
     .environmentObject(SitemapPageViewModel())
 }
+#endif

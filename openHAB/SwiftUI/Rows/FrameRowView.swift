@@ -48,6 +48,7 @@ struct FrameRowView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[6]
     List([widget]) { widget in
@@ -55,3 +56,4 @@ struct FrameRowView: View {
     }
     .environmentObject(SitemapPageViewModel())
 }
+#endif

@@ -135,6 +135,7 @@ struct DatePickerInputRowView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[13]
     VStack {
@@ -144,3 +145,4 @@ struct DatePickerInputRowView: View {
     }
     .environmentObject(SitemapPageViewModel())
 }
+#endif

@@ -152,6 +152,7 @@ struct SetpointRowView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[3]
     VStack {
@@ -160,3 +161,4 @@ struct SetpointRowView: View {
     }
     .environmentObject(SitemapPageViewModel())
 }
+#endif

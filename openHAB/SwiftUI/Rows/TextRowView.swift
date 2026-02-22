@@ -63,6 +63,7 @@ struct TextRowView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[3]
     VStack {
@@ -71,3 +72,4 @@ struct TextRowView: View {
     }
     .environmentObject(SitemapPageViewModel())
 }
+#endif

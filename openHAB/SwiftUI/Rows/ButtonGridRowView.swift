@@ -236,6 +236,7 @@ extension View {
     }
 }
 
+#if DEBUG
 #Preview {
     if let widget = PreviewConstants.openHABSitemapPage!.widgets.first(where: { $0.type == .buttongrid }) {
         VStack {
@@ -248,3 +249,4 @@ extension View {
         Text("No button grid widget found")
     }
 }
+#endif
