@@ -14,6 +14,36 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
+enum InputCommandFormatter {
+    static func command(from rawText: String, hint: OpenHABWidget.InputHint?) -> String? {
+        let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        guard hint == .number else { return trimmed }
+        return normalizedNumberCommand(from: trimmed)
+    }
+
+    private static func normalizedNumberCommand(from value: String) -> String? {
+        let pattern = /^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)(?:[eE][+-]?\d+)?$/
+        guard value.wholeMatch(of: pattern) != nil else { return nil }
+
+        let hasDot = value.contains(".")
+        let hasComma = value.contains(",")
+        guard !(hasDot && hasComma) else { return nil }
+
+        var normalized = value.replacingOccurrences(of: ",", with: ".")
+        if normalized.hasPrefix(".") {
+            normalized = "0\(normalized)"
+        } else if normalized.hasPrefix("-.") {
+            normalized = "-0" + String(normalized.dropFirst(1))
+        } else if normalized.hasPrefix("+.") {
+            normalized = "+0" + String(normalized.dropFirst(1))
+        }
+
+        guard Double(normalized) != nil else { return nil }
+        return normalized
+    }
+}
+
 private struct TextInputRowConfig {
     let input: InputRowInput
     let onSendCommand: (String) -> Void
@@ -37,9 +67,19 @@ private struct TextInputRowContent: View {
     let onSendCommand: (String) -> Void
 
     @State private var inputText = ""
-    @FocusState private var isTextFieldFocused: Bool
+    @State private var draftInputText = ""
+    @State private var showInputAlert = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")
+    private var formattedCommand: String? {
+        InputCommandFormatter.command(from: draftInputText, hint: inputHint)
+    }
+
+    private var alertMessage: String {
+        let label = input.displayState.labelText.isEmpty ? "Unknown" : input.displayState.labelText
+        let value = input.displayState.labelValue.flatMap { $0.isEmpty ? nil : $0 } ?? "Unknown"
+        return "Current value for \(label) is \(value)"
+    }
 
     var body: some View {
         let displayState = input.displayState
@@ -55,29 +95,50 @@ private struct TextInputRowContent: View {
 
             Spacer()
 
-            TextField("Enter text", text: $inputText)
-                .multilineTextAlignment(inputHint == .number ? .trailing : .leading)
-                .textFieldStyle(.roundedBorder)
-                .focused($isTextFieldFocused)
-                .onSubmit {
-                    sendTextCommand()
-                }
-                .disabled(input.readOnly)
+            Button {
+                draftInputText = inputText
+                showInputAlert = true
+            } label: {
+                Text(inputText.isEmpty ? "Enter text" : inputText)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .foregroundStyle(inputText.isEmpty ? .secondary : (input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor)))
+            }
+            .buttonStyle(.plain)
+            .disabled(input.readOnly)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            guard !input.readOnly else { return }
+            draftInputText = inputText
+            showInputAlert = true
+        }
+        .alert("Enter new value", isPresented: $showInputAlert) {
+            TextField("Enter text", text: $draftInputText)
+                .keyboardType(inputHint == .number ? .numbersAndPunctuation : .default)
+            Button("Cancel", role: .cancel) {}
+            Button("Set value", role: .destructive) {
+                sendTextCommand()
+            }
+            .disabled(formattedCommand == nil)
+        } message: {
+            Text(alertMessage)
         }
         .onAppear {
             inputText = displayState.effectiveState
         }
         .onChange(of: displayState.effectiveState) { newState in
-            if !isTextFieldFocused {
-                inputText = newState
-            }
+            inputText = newState
         }
     }
 
     private func sendTextCommand() {
-        logger.info("Sending text command: \(inputText)")
-        onSendCommand(inputText)
-        isTextFieldFocused = false
+        guard let command = formattedCommand else {
+            logger.warning("Skipping invalid input command for hint \(String(describing: inputHint?.rawValue), privacy: .public)")
+            return
+        }
+        logger.info("Sending text command: \(command)")
+        onSendCommand(command)
     }
 }
 
