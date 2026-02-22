@@ -553,7 +553,6 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DA2AEB752D92D32000897D80 /* Cells */ = {
-		DA8B15522F3BB74B007753FD /* openHABWatchTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 			);
@@ -562,6 +561,16 @@
 			explicitFolders = (
 			);
 			path = Cells;
+			sourceTree = "<group>";
+		};
+		DA8B15522F3BB74B007753FD /* openHABWatchTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
 			path = openHABWatchTests;
 			sourceTree = "<group>";
 		};
