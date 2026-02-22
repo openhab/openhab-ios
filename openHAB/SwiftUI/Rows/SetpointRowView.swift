@@ -119,6 +119,10 @@ private struct SetpointRowContent: View {
     }
 
     private func formattedValue(displayState: WidgetDisplayState) -> String {
+        if let labelValue = displayState.labelValue, !labelValue.isEmpty {
+            return labelValue
+        }
+
         let numberState = NumberState(
             value: currentValue(displayState: displayState),
             unit: input.unit,

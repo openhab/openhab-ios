@@ -672,7 +672,7 @@
 				DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */,
 				DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */,
 				DAFF80982E4F47830084513E /* SDWebImage in Frameworks */,
-				DADC420A2E7AB899004E866F /* (null) in Frameworks */,
+				DADC420A2E7AB899004E866F /* BuildFile in Frameworks */,
 				93F8064A27AE7A2E0035A6B0 /* FlexColorPicker in Frameworks */,
 				DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */,
 				DAC949FA2E219F0D007E67B7 /* CommonUI in Frameworks */,
@@ -1067,7 +1067,7 @@
 				DA0749DF23E0BF510057FA83 /* ColorSelection.swift */,
 				DA32D1B32C8C98C40018D974 /* IconWithAction.swift */,
 				DA8B14BB2F3A3CB5007753FD /* WatchTypography.swift */,
-			DA8B14BD2F3A3CB5007753FD /* PreviewConstants.swift */,
+				DA8B14BD2F3A3CB5007753FD /* PreviewConstants.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1360,8 +1360,6 @@
 				DA8B15522F3BB74B007753FD /* openHABWatchTests */,
 			);
 			name = openHABWatchTests;
-			packageProductDependencies = (
-			);
 			productName = openHABWatchTests;
 			productReference = DA8B15512F3BB74B007753FD /* openHABWatchTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -2390,7 +2388,8 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
