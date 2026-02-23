@@ -26,14 +26,18 @@ private func makeImageRowContent(_ config: ImageRowConfig) -> ImageRowContent {
 }
 
 private struct ImageRowContent: View {
+    private struct ChartDisplayState {
+        let key: String
+        let url: URL?
+    }
+
     let input: MediaRowInput
     @ObservedObject var viewModel: SitemapPageViewModel
     @Environment(\.colorScheme) var colorScheme
     @State private var refreshTimer: Timer?
     @State private var forceRefreshKey = UUID()
     @State private var lastChartImage: KFCrossPlatformImage?
-    @State private var chartDisplayURL: URL?
-    @State private var chartDisplayKey: String?
+    @State private var chartDisplayState: ChartDisplayState?
 
     private let logger = Logger(subsystem: "org.openhab", category: "ImageRowView")
 
@@ -47,6 +51,15 @@ private struct ImageRowContent: View {
 
     private var isChartByMediaKind: Bool {
         input.imageDescriptor.mediaKind == .chart
+    }
+
+    private var chartSyncToken: String {
+        let themeKey = switch chartStyle {
+        case .dark: "dark"
+        case .light: "light"
+        }
+        let rootKey = viewModel.openHABRootUrl ?? ""
+        return "\(isChartByMediaKind)|\(input.widgetId)|\(input.imageDescriptor.period)|\(input.url)|\(rootKey)|\(themeKey)"
     }
 
     var body: some View {
@@ -72,34 +85,24 @@ private struct ImageRowContent: View {
             }
         }
         .onAppear {
-            syncChartDisplayURL()
             setupRefreshTimer()
         }
         .onDisappear {
             stopRefreshTimer()
         }
+        .task(id: chartSyncToken) {
+            syncChartDisplayURL()
+        }
         .onChange(of: input.refresh) { _ in
             setupRefreshTimer()
-        }
-        .onChange(of: input.widgetId) { _ in
-            syncChartDisplayURL()
-        }
-        .onChange(of: input.imageDescriptor.period) { _ in
-            syncChartDisplayURL()
-        }
-        .onChange(of: colorScheme) { _ in
-            syncChartDisplayURL()
-        }
-        .onChange(of: viewModel.openHABRootUrl) { _ in
-            syncChartDisplayURL()
         }
     }
 
     @ViewBuilder
     private var chartImageView: some View {
         let currentChartKey = makeChartDisplayKey()
-        let effectiveChartURL: URL? = if chartDisplayKey == currentChartKey {
-            chartDisplayURL
+        let effectiveChartURL: URL? = if chartDisplayState?.key == currentChartKey {
+            chartDisplayState?.url
         } else {
             nil
         }
@@ -120,6 +123,9 @@ private struct ImageRowContent: View {
                 }
             }
             .onSuccess { result in
+                guard chartDisplayState?.key == currentChartKey, chartDisplayState?.url == effectiveChartURL else {
+                    return
+                }
                 lastChartImage = result.image
             }
             .resizable()
@@ -191,19 +197,16 @@ private struct ImageRowContent: View {
 
     private func syncChartDisplayURL() {
         guard isChartByMediaKind else {
-            chartDisplayURL = nil
-            chartDisplayKey = nil
+            chartDisplayState = nil
             return
         }
 
         let currentChartKey = makeChartDisplayKey()
         switch input.imageDescriptor.resolveImagePayload(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
         case let .link(url):
-            chartDisplayURL = url
-            chartDisplayKey = currentChartKey
+            chartDisplayState = ChartDisplayState(key: currentChartKey, url: url)
         case .embedded, .empty:
-            chartDisplayURL = nil
-            chartDisplayKey = currentChartKey
+            chartDisplayState = ChartDisplayState(key: currentChartKey, url: nil)
         }
     }
 
@@ -212,7 +215,8 @@ private struct ImageRowContent: View {
         case .dark: "dark"
         case .light: "light"
         }
-        return "\(input.widgetId)|\(input.imageDescriptor.period)|\(themeKey)"
+        let rootKey = viewModel.openHABRootUrl ?? ""
+        return "\(input.widgetId)|\(input.imageDescriptor.period)|\(themeKey)|\(rootKey)"
     }
 }
 
