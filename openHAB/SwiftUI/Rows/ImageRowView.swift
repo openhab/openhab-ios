@@ -33,6 +33,7 @@ private struct ImageRowContent: View {
     @State private var forceRefreshKey = UUID()
     @State private var lastChartImage: KFCrossPlatformImage?
     @State private var chartDisplayURL: URL?
+    @State private var chartDisplayKey: String?
 
     private let logger = Logger(subsystem: "org.openhab", category: "ImageRowView")
 
@@ -67,7 +68,12 @@ private struct ImageRowContent: View {
                     .clipShape(.rect(cornerRadius: 8))
             case let .link(url):
                 if isChartByMediaKind {
-                    let effectiveChartURL = chartDisplayURL ?? url
+                    let currentChartKey = makeChartDisplayKey()
+                    let effectiveChartURL: URL? = if chartDisplayKey == currentChartKey {
+                        chartDisplayURL ?? url
+                    } else {
+                        url
+                    }
                     KFImage(effectiveChartURL)
                         .cacheMemoryOnly(false)
                         .cacheOriginalImage(true)
@@ -170,15 +176,27 @@ private struct ImageRowContent: View {
     private func syncChartDisplayURL() {
         guard isChartByMediaKind else {
             chartDisplayURL = nil
+            chartDisplayKey = nil
             return
         }
 
+        let currentChartKey = makeChartDisplayKey()
         switch input.imageDescriptor.resolveImagePayload(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
         case let .link(url):
             chartDisplayURL = url
+            chartDisplayKey = currentChartKey
         case .embedded, .empty:
             chartDisplayURL = nil
+            chartDisplayKey = currentChartKey
         }
+    }
+
+    private func makeChartDisplayKey() -> String {
+        let themeKey = switch chartStyle {
+        case .dark: "dark"
+        case .light: "light"
+        }
+        return "\(input.widgetId)|\(input.imageDescriptor.period)|\(themeKey)"
     }
 }
 
