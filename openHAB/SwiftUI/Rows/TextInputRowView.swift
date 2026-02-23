@@ -15,6 +15,11 @@ import os.log
 import SwiftUI
 
 enum InputCommandFormatter {
+    static func filteredDraftInput(from rawText: String, hint: OpenHABWidget.InputHint?) -> String {
+        guard hint == .number else { return rawText }
+        return sanitizedNumberDraft(from: rawText)
+    }
+
     static func command(from rawText: String, hint: OpenHABWidget.InputHint?) -> String? {
         let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
@@ -22,8 +27,34 @@ enum InputCommandFormatter {
         return normalizedNumberCommand(from: trimmed)
     }
 
+    private static func sanitizedNumberDraft(from value: String) -> String {
+        var result = ""
+        var hasSign = false
+        var hasDecimalSeparator = false
+
+        for character in value {
+            if character.isNumber {
+                result.append(character)
+                continue
+            }
+
+            if character == "+" || character == "-", !hasSign, result.isEmpty {
+                result.append(character)
+                hasSign = true
+                continue
+            }
+
+            if character == "." || character == ",", !hasDecimalSeparator {
+                result.append(character)
+                hasDecimalSeparator = true
+            }
+        }
+
+        return result
+    }
+
     private static func normalizedNumberCommand(from value: String) -> String? {
-        let pattern = /^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)(?:[eE][+-]?\d+)?$/
+        let pattern = /^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/
         guard value.wholeMatch(of: pattern) != nil else { return nil }
 
         let hasDot = value.contains(".")
@@ -75,6 +106,15 @@ private struct TextInputRowContent: View {
         InputCommandFormatter.command(from: draftInputText, hint: inputHint)
     }
 
+    private var draftInputBinding: Binding<String> {
+        Binding(
+            get: { draftInputText },
+            set: { newValue in
+                draftInputText = InputCommandFormatter.filteredDraftInput(from: newValue, hint: inputHint)
+            }
+        )
+    }
+
     private var alertMessage: String {
         let label = input.displayState.labelText.isEmpty ? "Unknown" : input.displayState.labelText
         let value = input.displayState.labelValue.flatMap { $0.isEmpty ? nil : $0 } ?? "Unknown"
@@ -114,7 +154,7 @@ private struct TextInputRowContent: View {
             showInputAlert = true
         }
         .alert("Enter new value", isPresented: $showInputAlert) {
-            TextField("Enter text", text: $draftInputText)
+            TextField("Enter text", text: draftInputBinding)
                 .keyboardType(inputHint == .number ? .numbersAndPunctuation : .default)
             Button("Cancel", role: .cancel) {}
             Button("Set value", role: .destructive) {
