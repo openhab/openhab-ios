@@ -58,63 +58,10 @@ private struct ImageRowContent: View {
                     .ohTextToken(.rowLabel)
                     .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
-            switch input.imageDescriptor.resolveImagePayload(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
-            case let .embedded(data: data):
-                let provider = RawImageDataProvider(data: data, cacheKey: shouldCache ? input.widgetId : "\(input.widgetId)-\(forceRefreshKey)")
-                KFImage(source: .provider(provider))
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxHeight: 300)
-                    .clipShape(.rect(cornerRadius: 8))
-            case let .link(url):
-                if isChartByMediaKind {
-                    let currentChartKey = makeChartDisplayKey()
-                    let effectiveChartURL: URL? = if chartDisplayKey == currentChartKey {
-                        chartDisplayURL ?? url
-                    } else {
-                        url
-                    }
-                    KFImage(effectiveChartURL)
-                        .cacheMemoryOnly(false)
-                        .cacheOriginalImage(true)
-                        .fade(duration: 0)
-                        .placeholder {
-                            if let lastChartImage {
-                                Image(uiImage: lastChartImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                            } else {
-                                Color.clear
-                            }
-                        }
-                        .onSuccess { result in
-                            lastChartImage = result.image
-                        }
-                        .resizable()
-                        .id(effectiveChartURL?.absoluteString)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(maxHeight: 300)
-                        .clipShape(.rect(cornerRadius: 8))
-                } else {
-                    KFImage(url)
-                        .resizable()
-                        .cacheMemoryOnly(!shouldCache)
-                        .forceRefresh(shouldCache ? false : true)
-                        .cacheOriginalImage(!shouldCache ? false : true)
-                        .id(shouldCache ? url?.absoluteString : "\(url?.absoluteString ?? "")-\(forceRefreshKey)")
-                        .aspectRatio(contentMode: .fit)
-                        .frame(maxHeight: 300)
-                        .clipShape(.rect(cornerRadius: 8))
-                }
-            case .empty:
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(height: 200)
-                    .overlay(
-                        Text("No Image URL")
-                            .foregroundStyle(.secondary)
-                    )
-                    .clipShape(.rect(cornerRadius: 8))
+            if isChartByMediaKind {
+                chartImageView
+            } else {
+                regularImageView
             }
 
             // Only show labelValue for image widgets, not charts
@@ -142,6 +89,75 @@ private struct ImageRowContent: View {
         }
         .onChange(of: colorScheme) { _ in
             syncChartDisplayURL()
+        }
+        .onChange(of: viewModel.openHABRootUrl) { _ in
+            syncChartDisplayURL()
+        }
+    }
+
+    @ViewBuilder
+    private var chartImageView: some View {
+        let currentChartKey = makeChartDisplayKey()
+        let effectiveChartURL: URL? = if chartDisplayKey == currentChartKey {
+            chartDisplayURL
+        } else {
+            nil
+        }
+
+        KFImage(effectiveChartURL)
+            .cacheMemoryOnly(false)
+            .cacheOriginalImage(true)
+            .fade(duration: 0)
+            .placeholder {
+                if let lastChartImage {
+                    Image(uiImage: lastChartImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } else {
+                    Color.gray.opacity(0.1)
+                        .frame(height: 200)
+                        .clipShape(.rect(cornerRadius: 8))
+                }
+            }
+            .onSuccess { result in
+                lastChartImage = result.image
+            }
+            .resizable()
+            .id(currentChartKey)
+            .aspectRatio(contentMode: .fit)
+            .frame(maxHeight: 300)
+            .clipShape(.rect(cornerRadius: 8))
+    }
+
+    @ViewBuilder
+    private var regularImageView: some View {
+        switch input.imageDescriptor.resolveImagePayload(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
+        case let .embedded(data: data):
+            let provider = RawImageDataProvider(data: data, cacheKey: shouldCache ? input.widgetId : "\(input.widgetId)-\(forceRefreshKey)")
+            KFImage(source: .provider(provider))
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(maxHeight: 300)
+                .clipShape(.rect(cornerRadius: 8))
+        case let .link(url):
+            KFImage(url)
+                .resizable()
+                .cacheMemoryOnly(!shouldCache)
+                .forceRefresh(shouldCache ? false : true)
+                .cacheOriginalImage(!shouldCache ? false : true)
+                .id(shouldCache ? url?.absoluteString : "\(url?.absoluteString ?? "")-\(forceRefreshKey)")
+                .aspectRatio(contentMode: .fit)
+                .frame(maxHeight: 300)
+                .clipShape(.rect(cornerRadius: 8))
+        case .empty:
+            Rectangle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 200)
+                .overlay(
+                    Text("No Image URL")
+                        .foregroundStyle(.secondary)
+                )
+                .clipShape(.rect(cornerRadius: 8))
         }
     }
 
