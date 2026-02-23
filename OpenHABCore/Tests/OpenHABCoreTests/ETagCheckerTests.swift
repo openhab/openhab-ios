@@ -13,6 +13,70 @@ import Foundation
 @testable import OpenHABCore
 import Testing
 
+// MARK: - Mock URLProtocol
+
+class MockURLProtocol: URLProtocol {
+    // Use nonisolated(unsafe) to suppress concurrency warnings
+    // Safe because tests run with .serialized, ensuring sequential execution
+    nonisolated(unsafe) static var mockResponses: [URL: (statusCode: Int, headers: [String: String])] = [:]
+    nonisolated(unsafe) static var shouldFail = false
+    nonisolated(unsafe) static var error: Error?
+
+    static func reset() {
+        mockResponses.removeAll()
+        shouldFail = false
+        error = nil
+    }
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        true
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+
+    override func startLoading() {
+        if MockURLProtocol.shouldFail {
+            let error = MockURLProtocol.error ?? URLError(.badServerResponse)
+            client?.urlProtocol(self, didFailWithError: error)
+            return
+        }
+
+        guard let url = request.url else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badURL))
+            return
+        }
+
+        guard let mock = MockURLProtocol.mockResponses[url] else {
+            // Return 404 if no mock configured
+            let response = HTTPURLResponse(
+                url: url,
+                statusCode: 404,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: Data())
+            client?.urlProtocolDidFinishLoading(self)
+            return
+        }
+
+        let response = HTTPURLResponse(
+            url: url,
+            statusCode: mock.statusCode,
+            httpVersion: "HTTP/1.1",
+            headerFields: mock.headers
+        )!
+
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data())
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+}
+
 @Suite("ETagChecker Tests", .serialized)
 struct ETagCheckerTests {
     @Test("First run stores ETag and returns changed")
@@ -244,69 +308,5 @@ struct ETagCheckerTests {
             connectionConfiguration: connConfig,
             sessionConfiguration: config
         )
-    }
-}
-
-// MARK: - Mock URLProtocol
-
-class MockURLProtocol: URLProtocol {
-    // Use nonisolated(unsafe) to suppress concurrency warnings
-    // Safe because tests run with .serialized, ensuring sequential execution
-    nonisolated(unsafe) static var mockResponses: [URL: (statusCode: Int, headers: [String: String])] = [:]
-    nonisolated(unsafe) static var shouldFail: Bool = false
-    nonisolated(unsafe) static var error: Error?
-
-    override class func canInit(with request: URLRequest) -> Bool {
-        true
-    }
-
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        request
-    }
-
-    override func startLoading() {
-        if MockURLProtocol.shouldFail {
-            let error = MockURLProtocol.error ?? URLError(.badServerResponse)
-            client?.urlProtocol(self, didFailWithError: error)
-            return
-        }
-
-        guard let url = request.url else {
-            client?.urlProtocol(self, didFailWithError: URLError(.badURL))
-            return
-        }
-
-        guard let mock = MockURLProtocol.mockResponses[url] else {
-            // Return 404 if no mock configured
-            let response = HTTPURLResponse(
-                url: url,
-                statusCode: 404,
-                httpVersion: "HTTP/1.1",
-                headerFields: nil
-            )!
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            client?.urlProtocol(self, didLoad: Data())
-            client?.urlProtocolDidFinishLoading(self)
-            return
-        }
-
-        let response = HTTPURLResponse(
-            url: url,
-            statusCode: mock.statusCode,
-            httpVersion: "HTTP/1.1",
-            headerFields: mock.headers
-        )!
-
-        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-        client?.urlProtocol(self, didLoad: Data())
-        client?.urlProtocolDidFinishLoading(self)
-    }
-
-    override func stopLoading() {}
-
-    static func reset() {
-        mockResponses.removeAll()
-        shouldFail = false
-        error = nil
     }
 }
