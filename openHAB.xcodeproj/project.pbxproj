@@ -138,6 +138,7 @@
 		DA8B14B62F3A0DFF007753FD /* WidgetRowFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8B14B52F3A0DFF007753FD /* WidgetRowFactory.swift */; };
 		DA8B14B82F3A120E007753FD /* PreviewWidgetFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8B14B72F3A11F0007753FD /* PreviewWidgetFactory.swift */; };
 		DA8B14BA2F3A373A007753FD /* PreviewNavigationContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8B14B92F3A373A007753FD /* PreviewNavigationContainer.swift */; };
+		DA8B14BC2F3A3CB5007753FD /* WatchTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8B14BB2F3A3CB5007753FD /* WatchTypography.swift */; };
 
 		DA94AEB42EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA94AEB32EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift */; };
 		DA95F3332E0F2B1700FE4474 /* OpenHABRootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA95F3322E0F2B1700FE4474 /* OpenHABRootViewController.swift */; };
@@ -494,6 +495,7 @@
 		DA8B14B52F3A0DFF007753FD /* WidgetRowFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetRowFactory.swift; sourceTree = "<group>"; };
 		DA8B14B72F3A11F0007753FD /* PreviewWidgetFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewWidgetFactory.swift; sourceTree = "<group>"; };
 		DA8B14B92F3A373A007753FD /* PreviewNavigationContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewNavigationContainer.swift; sourceTree = "<group>"; };
+		DA8B14BB2F3A3CB5007753FD /* WatchTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTypography.swift; sourceTree = "<group>"; };
 
 		DA8B15512F3BB74B007753FD /* openHABWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABWatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA94AEB32EC896BE003BB3C8 /* SimpleMJPEGPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleMJPEGPlayer.swift; sourceTree = "<group>"; };
@@ -1075,6 +1077,7 @@
 				DA2E0B0D23DCC152009B0A99 /* MapView.swift */,
 				DA0749DF23E0BF510057FA83 /* ColorSelection.swift */,
 				DA32D1B32C8C98C40018D974 /* IconWithAction.swift */,
+				DA8B14BB2F3A3CB5007753FD /* WatchTypography.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1711,6 +1714,7 @@
 				DA0F37D023D4ACC7007EAB48 /* SliderRow.swift in Sources */,
 				DA2741022EA62FA3002FE576 /* SegmentSelectionView.swift in Sources */,
 				DA32D1B42C8C98C40018D974 /* IconWithAction.swift in Sources */,
+				DA8B14BC2F3A3CB5007753FD /* WatchTypography.swift in Sources */,
 				DA07764A234683BC0086C685 /* SwitchRow.swift in Sources */,
 				DA2E0AA423DC96E9009B0A99 /* ImageWithAction.swift in Sources */,
 				DA8B14B82F3A120E007753FD /* PreviewWidgetFactory.swift in Sources */,
