@@ -32,6 +32,7 @@ private struct ImageRowContent: View {
     @State private var refreshTimer: Timer?
     @State private var forceRefreshKey = UUID()
     @State private var lastChartImage: KFCrossPlatformImage?
+    @State private var chartDisplayURL: URL?
 
     private let logger = Logger(subsystem: "org.openhab", category: "ImageRowView")
 
@@ -66,7 +67,8 @@ private struct ImageRowContent: View {
                     .clipShape(.rect(cornerRadius: 8))
             case let .link(url):
                 if isChartByMediaKind {
-                    KFImage(url)
+                    let effectiveChartURL = chartDisplayURL ?? url
+                    KFImage(effectiveChartURL)
                         .cacheMemoryOnly(false)
                         .cacheOriginalImage(true)
                         .fade(duration: 0)
@@ -83,7 +85,7 @@ private struct ImageRowContent: View {
                             lastChartImage = result.image
                         }
                         .resizable()
-                        .id(url?.absoluteString)
+                        .id(effectiveChartURL?.absoluteString)
                         .aspectRatio(contentMode: .fit)
                         .frame(maxHeight: 300)
                         .clipShape(.rect(cornerRadius: 8))
@@ -117,6 +119,7 @@ private struct ImageRowContent: View {
             }
         }
         .onAppear {
+            syncChartDisplayURL()
             setupRefreshTimer()
         }
         .onDisappear {
@@ -124,6 +127,15 @@ private struct ImageRowContent: View {
         }
         .onChange(of: input.refresh) { _ in
             setupRefreshTimer()
+        }
+        .onChange(of: input.widgetId) { _ in
+            syncChartDisplayURL()
+        }
+        .onChange(of: input.imageDescriptor.period) { _ in
+            syncChartDisplayURL()
+        }
+        .onChange(of: colorScheme) { _ in
+            syncChartDisplayURL()
         }
     }
 
@@ -153,6 +165,20 @@ private struct ImageRowContent: View {
     private func stopRefreshTimer() {
         refreshTimer?.invalidate()
         refreshTimer = nil
+    }
+
+    private func syncChartDisplayURL() {
+        guard isChartByMediaKind else {
+            chartDisplayURL = nil
+            return
+        }
+
+        switch input.imageDescriptor.resolveImagePayload(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
+        case let .link(url):
+            chartDisplayURL = url
+        case .embedded, .empty:
+            chartDisplayURL = nil
+        }
     }
 }
 
