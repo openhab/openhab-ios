@@ -396,11 +396,11 @@ final class UserData: ObservableObject {
         }
     }
 
-    func refreshUrl() async {
+    func refreshUrl(force: Bool = false) async {
         guard AppSettings.shared.haveReceivedAppContext, !AppSettings.shared.openHABRootUrl.isEmpty else { return }
 
         showAlert = false
-        startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)
+        startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch, force: force)
     }
 
     /// Updates existing widget instances instead of replacing them to preserve @ObservedObject references

@@ -35,10 +35,10 @@ import WebKit
 ///
 /// - SeeAlso: `ImageProcessor` from Kingfisher framework
 public struct OpenHABImageProcessor: ImageProcessor {
+    private static let defaultSVGMaxSize = CGSize(width: 64, height: 64)
     // `identifier` should be the same for processors with the same properties/functionality
     // It will be used when storing and retrieving the image to/from cache.
     public let identifier: String
-    private static let defaultSVGMaxSize = CGSize(width: 64, height: 64)
     let svgMaxSize: CGSize?
     let iconColor: String?
 

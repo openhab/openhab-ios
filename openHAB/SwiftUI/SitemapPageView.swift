@@ -12,6 +12,7 @@
 import CommonUI
 import OpenHABCore
 import SwiftUI
+import UIKit
 
 struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
