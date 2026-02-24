@@ -143,7 +143,12 @@ private struct ImageRowContent: View {
     private var regularImageView: some View {
         switch input.imageDescriptor.resolveImagePayload(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
         case let .embedded(data: data):
-            let provider = RawImageDataProvider(data: data, cacheKey: shouldCache ? input.widgetId : "\(input.widgetId)-\(forceRefreshKey)")
+            let cacheKey = if shouldCache {
+                "\(input.widgetId)-\(data.hashValue)"
+            } else {
+                "\(input.widgetId)-\(forceRefreshKey)"
+            }
+            let provider = RawImageDataProvider(data: data, cacheKey: cacheKey)
             KFImage(source: .provider(provider))
                 .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
                 .resizable()
