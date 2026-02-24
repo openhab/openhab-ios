@@ -25,17 +25,23 @@ struct ImageView: View {
     var body: some View {
         if !url.isEmpty {
             switch url {
-            case _ where url.hasPrefix("data:image"):
-                let provider = Base64ImageDataProvider(base64String: url.deletingPrefix("data:image/png;base64,"), cacheKey: UUID().uuidString)
-                return KFImage(source: .provider(provider)).resizable()
+            case _ where url.dataImageBase64Payload != nil:
+                let provider = Base64ImageDataProvider(base64String: url.dataImageBase64Payload ?? "", cacheKey: UUID().uuidString)
+                return KFImage(source: .provider(provider))
+                    .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
+                    .resizable()
             case _ where url.hasPrefix("http"):
-                return KFImage(URL(string: url)).resizable()
+                return KFImage(URL(string: url))
+                    .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
+                    .resizable()
             default:
                 let builtURL = Endpoint.resource(
                     openHABRootUrl: networkTracker.activeConnection?.configuration.url ?? "",
                     path: url.prepare()
                 ).url
-                return KFImage(builtURL).resizable()
+                return KFImage(builtURL)
+                    .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
+                    .resizable()
             }
         } else {
             // This will always fallback to placeholder

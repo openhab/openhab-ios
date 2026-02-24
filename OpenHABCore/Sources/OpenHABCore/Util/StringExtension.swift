@@ -191,6 +191,15 @@ public extension String? {
 }
 
 public extension String {
+    var dataImageBase64Payload: String? {
+        guard hasPrefix("data:image"),
+              let separatorRange = range(of: ",")
+        else {
+            return nil
+        }
+        return String(self[separatorRange.upperBound...])
+    }
+
     var isNoneIcon: Bool {
         let pattern = #"^(oh:([a-z]+:)?)?none$"#
         return range(of: pattern, options: .regularExpression) != nil

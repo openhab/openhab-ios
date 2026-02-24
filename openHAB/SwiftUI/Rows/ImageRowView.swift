@@ -145,12 +145,14 @@ private struct ImageRowContent: View {
         case let .embedded(data: data):
             let provider = RawImageDataProvider(data: data, cacheKey: shouldCache ? input.widgetId : "\(input.widgetId)-\(forceRefreshKey)")
             KFImage(source: .provider(provider))
+                .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(maxHeight: 300)
                 .clipShape(.rect(cornerRadius: 8))
         case let .link(url):
             KFImage(url)
+                .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
                 .resizable()
                 .cacheMemoryOnly(!shouldCache)
                 .forceRefresh(shouldCache ? false : true)

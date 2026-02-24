@@ -276,6 +276,20 @@ struct OpenHABImageProcessorTests {
         #expect(processor3.identifier == "org.openhab.svgprocessor")
     }
 
+    @Test func cacheIdentifier_fullSizeMode() async throws {
+        let processorWithoutColor = OpenHABImageProcessor(svgMaxSize: nil)
+        let processorWithColor = OpenHABImageProcessor(iconColor: "red", svgMaxSize: nil)
+
+        #expect(processorWithoutColor.identifier == "org.openhab.svgprocessor.fullsize")
+        #expect(processorWithColor.identifier == "org.openhab.svgprocessor.FF0000.fullsize")
+    }
+
+    @Test func cacheIdentifier_customSizeMode() async throws {
+        let processor = OpenHABImageProcessor(iconColor: "red", svgMaxSize: CGSize(width: 128, height: 128))
+
+        #expect(processor.identifier == "org.openhab.svgprocessor.FF0000.128x128")
+    }
+
     @Test func cacheIdentifier_normalizesOpenHABColors() async throws {
         // Verify that openHAB semantic colors are normalized
         let processor1 = OpenHABImageProcessor(iconColor: "maroon")

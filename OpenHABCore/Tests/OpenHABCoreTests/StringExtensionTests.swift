@@ -38,4 +38,17 @@ struct StringExtensionTests {
             #expect(input.isNoneIcon == expected, "\(input) failed")
         }
     }
+
+    @Test
+    func testDataImageBase64Payload() throws {
+        let svgPayload = "PHN2Zz48L3N2Zz4="
+        #expect("data:image/svg+xml;base64,\(svgPayload)".dataImageBase64Payload == svgPayload)
+
+        let pngPayload = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB"
+        #expect("data:image/png;base64,\(pngPayload)".dataImageBase64Payload == pngPayload)
+
+        #expect("data:image/svg+xml;base64".dataImageBase64Payload == nil)
+        #expect("http://example.com/image.png".dataImageBase64Payload == nil)
+        #expect("".dataImageBase64Payload == nil)
+    }
 }
