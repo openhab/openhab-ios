@@ -97,13 +97,14 @@ public extension Endpoint {
 
     // swiftlint:disable:next function_parameter_count
     static func chart(rootUrl: String, period: String?, type: OpenHABItem.ItemType?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light, forceAsItem: Bool?, yAxisDecimalPattern: String? = nil) -> Endpoint {
-        let random = Int.random(in: 0 ..< 1000)
+        // Use a high-entropy cache buster to avoid stale chart snapshots caused by collisions.
+        let random = UUID().uuidString
         var endpoint = Endpoint(
             baseURL: rootUrl,
             path: "/chart",
             queryItems: [
                 URLQueryItem(name: "period", value: period),
-                URLQueryItem(name: "random", value: String(random))
+                URLQueryItem(name: "random", value: random)
             ]
         )
 
@@ -208,6 +209,11 @@ public extension Endpoint {
         if source != "oh" {
             set = "classic"
             iconName = "none"
+        }
+
+        // openHAB classic icon set does not provide a "number" icon; skip request entirely.
+        if source == "oh", set == "classic", iconName == "number" {
+            return nil
         }
 
         if staticIcon != true, let state {

@@ -53,13 +53,17 @@ private struct ImageRowContent: View {
         input.imageDescriptor.mediaKind == .chart
     }
 
+    private var chartWidgetVersion: Int {
+        viewModel.widgetUpdateVersion(for: input.widgetId)
+    }
+
     private var chartSyncToken: String {
         let themeKey = switch chartStyle {
         case .dark: "dark"
         case .light: "light"
         }
         let rootKey = viewModel.openHABRootUrl ?? ""
-        return "\(isChartByMediaKind)|\(input.widgetId)|\(input.imageDescriptor.period)|\(input.url)|\(rootKey)|\(themeKey)"
+        return "\(isChartByMediaKind)|\(input.widgetId)|\(input.imageDescriptor.period)|\(input.url)|\(rootKey)|\(themeKey)|\(chartWidgetVersion)"
     }
 
     var body: some View {
@@ -129,7 +133,7 @@ private struct ImageRowContent: View {
                 lastChartImage = result.image
             }
             .resizable()
-            .id(currentChartKey)
+            .id(effectiveChartURL?.absoluteString ?? currentChartKey)
             .aspectRatio(contentMode: .fit)
             .frame(maxHeight: 300)
             .clipShape(.rect(cornerRadius: 8))
@@ -170,8 +174,9 @@ private struct ImageRowContent: View {
     private func setupRefreshTimer() {
         stopRefreshTimer()
 
-        // Chart widgets already update via sitemap long-poll responses.
-        // A local timer adds overlapping image swaps and causes visible flicker.
+        // Chart widgets should refresh from incoming sitemap updates to stay aligned
+        // with server state transitions (e.g. period switch visibility changes).
+        // A separate local timer can race with those updates and intermittently show lag.
         guard !isChartByMediaKind else {
             return
         }
