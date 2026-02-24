@@ -51,6 +51,7 @@ private struct SegmentedRowContent: View {
                     .ohTextToken(.rowValue)
                     .foregroundStyle(input.valueColor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: input.valueColor))
                     .layoutPriority(1)
+                    .monospacedDigit()
             }
 
             if !input.mappings.isEmpty {
@@ -71,10 +72,14 @@ private struct SegmentedRowContent: View {
                         .fixedSize(horizontal: true, vertical: false)
                         .padding(.leading, 8)
                 } else {
+                    if input.displayState.labelValue.isNilOrEmpty {
+                        Spacer(minLength: 8)
+                    }
+                    let leadingPadding: CGFloat = input.displayState.labelValue.isNilOrEmpty ? 0 : 8
                     // Button-based segmented control with animated selection indicator
                     segmentedButtons(mappings: input.mappings, selectedIndex: selectedIndex, displayState: input.displayState, widgetVersion: widgetVersion)
                         .frame(minWidth: 75)
-                        .padding(.leading, 8)
+                        .padding(.leading, leadingPadding)
                         .layoutPriority(1)
                 }
             }
