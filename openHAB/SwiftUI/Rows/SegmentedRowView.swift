@@ -75,7 +75,6 @@ private struct SegmentedRowContent: View {
                         Spacer(minLength: 8)
                     }
                     let leadingPadding: CGFloat = input.displayState.labelValue.isNilOrEmpty ? 0 : 8
-
                     // Button-based segmented control with animated selection indicator
                     segmentedButtons(mappings: input.mappings, selectedIndex: selectedIndex, displayState: input.displayState, widgetVersion: widgetVersion)
                         .frame(minWidth: 75)
