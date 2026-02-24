@@ -433,19 +433,29 @@ extension SitemapPageViewModel {
 
     private func runLongPollingLoop(runID: UUID) async throws {
         while !Task.isCancelled {
-            let page = try await openAPIService?.pollDataForPage(
-                sitemapname: defaultSitemap,
-                pageId: pageId,
-                longPolling: true
-            )
-            try Task.checkCancellation()
-            guard activePageHandlingID == runID else {
-                logger.info("Ignoring stale long-poll result for run \(runID.uuidString, privacy: .public)")
-                return
-            }
+            do {
+                let page = try await openAPIService?.pollDataForPage(
+                    sitemapname: defaultSitemap,
+                    pageId: pageId,
+                    longPolling: true
+                )
+                try Task.checkCancellation()
+                guard activePageHandlingID == runID else {
+                    logger.info("Ignoring stale long-poll result for run \(runID.uuidString, privacy: .public)")
+                    return
+                }
 
-            if let page {
-                updateUI(with: page, origin: .longPolling)
+                if let page {
+                    updateUI(with: page, origin: .longPolling)
+                }
+            } catch {
+                try Task.checkCancellation()
+                guard shouldRetryLongPolling(after: error) else {
+                    throw error
+                }
+
+                logger.info("Transient long-polling error, retrying: \(error.localizedDescription, privacy: .public)")
+                try? await Task.sleep(nanoseconds: 500_000_000)
             }
         }
     }
@@ -617,6 +627,28 @@ extension SitemapPageViewModel {
 
     private func hasRelevantWidgetDiff(from current: OpenHABWidget, to incoming: OpenHABWidget) -> Bool {
         WidgetRenderKey.from(widget: current) != WidgetRenderKey.from(widget: incoming)
+    }
+
+    private func shouldRetryLongPolling(after error: any Error) -> Bool {
+        if let clientError = error as? ClientError, let urlError = clientError.underlyingError as? URLError {
+            switch urlError.code {
+            case .timedOut, .networkConnectionLost, .cannotConnectToHost, .notConnectedToInternet, .cannotFindHost:
+                return true
+            default:
+                break
+            }
+        }
+
+        if let openAPIError = error as? OpenAPIServiceError {
+            switch openAPIError {
+            case let .undocumented(statusCode, _):
+                return statusCode == 408 || statusCode == 499 || statusCode == 502 || statusCode == 503 || statusCode == 504
+            case .badRequest, .notFound, .noRootURL, .unAuthorized:
+                break
+            }
+        }
+
+        return false
     }
 
     private func injectSendCommand(for widgets: [OpenHABWidget]) {
