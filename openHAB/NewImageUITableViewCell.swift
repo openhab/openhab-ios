@@ -181,8 +181,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             }
         case let .link(url):
             guard let url else { return }
-            let shouldForceBypassCache = forceRefresh && widget?.item?.type == .stringItem
-            loadRemoteImage(withURL: url, forceBypassingURLCache: shouldForceBypassCache)
+            loadRemoteImage(withURL: url, forceBypassingURLCache: forceRefresh)
         default:
             Logger.widgets.debug("Failed to determine widget payload.")
         }
