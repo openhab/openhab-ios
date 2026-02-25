@@ -184,11 +184,12 @@ actor NotificationServiceHandler {
 
     // Helper function to determine full URL
     private func resolveFullURL(from url: String, baseURL: String) -> URL? {
-        if url.starts(with: "/") {
-            URL(string: baseURL)?.appendingPathComponent(url)
-        } else {
-            URL(string: url)
+        if let parsedURL = URL(string: url), parsedURL.scheme != nil {
+            return parsedURL
         }
+
+        guard let parsedBaseURL = URL(string: baseURL) else { return nil }
+        return URL(string: url, relativeTo: parsedBaseURL)?.absoluteURL
     }
 
     func downloadAndAttachItemImage(itemURI: String) async throws -> UNNotificationAttachment? {
