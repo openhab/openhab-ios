@@ -62,9 +62,10 @@ struct SwitchRow: View {
 
 #Preview {
     let widget = PreviewWidgetFactory.switchWidget(label: "Outdoor Light", state: "OFF")
+    let previewRootURL = "http://192.168.2.10:8080"
     let mockSettings = {
         let obj = AppSettings()
-        obj.openHABRootUrl = PreviewConstants.remoteURLString
+        obj.openHABRootUrl = previewRootURL
         return obj
     }()
     NavigationStack {
