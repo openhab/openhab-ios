@@ -126,6 +126,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
     override func displayWidget() {
         let widgetId = widget?.id ?? ""
+        let shouldRefreshImageWidget = widget?.type == .image
         // Set displayedWidgetId before cache check to ensure consistency
         displayedWidgetId = widgetId
 
@@ -133,6 +134,11 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         if let cachedImage = Self.sharedImageCache.object(forKey: widgetId as NSString) {
             // Found in shared cache - use it immediately without reloading
             mainImageView?.image = cachedImage
+            // Image widgets can change their underlying content without changing widget ID.
+            // Revalidate to avoid serving stale snapshots from the shared in-memory cache.
+            if shouldRefreshImageWidget {
+                loadImage(forceRefresh: true)
+            }
         } else {
             // Not in cache - need to load
             mainImageView?.image = nil
@@ -161,7 +167,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         }
     }
 
-    func loadImage() {
+    func loadImage(forceRefresh: Bool = false) {
         let widgetId = widget?.id ?? ""
         switch widgetPayload {
         case let .embedded(image):
@@ -175,7 +181,8 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             }
         case let .link(url):
             guard let url else { return }
-            loadRemoteImage(withURL: url)
+            let shouldForceBypassCache = forceRefresh && widget?.item?.type == .stringItem
+            loadRemoteImage(withURL: url, forceBypassingURLCache: shouldForceBypassCache)
         default:
             Logger.widgets.debug("Failed to determine widget payload.")
         }
@@ -196,7 +203,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         }
     }
 
-    private func loadRemoteImage(withURL url: URL) {
+    private func loadRemoteImage(withURL url: URL, forceBypassingURLCache: Bool = false) {
         let widgetId = widget?.id ?? ""
         Logger.widgets.debug("Image URL: \(url.absoluteString)")
 
@@ -212,7 +219,13 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                     throw HTTPClientError.noConfiguration
                 }
                 let client = HTTPClient(connectionConfiguration: config)
-                let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, timeout: 10.0, type: .data, cacheingPolicy: !shouldCache ? .reloadIgnoringCacheData : .useProtocolCachePolicy)
+                let cachePolicy: URLRequest.CachePolicy
+                if forceBypassingURLCache || !shouldCache {
+                    cachePolicy = .reloadIgnoringCacheData
+                } else {
+                    cachePolicy = .useProtocolCachePolicy
+                }
+                let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, timeout: 10.0, type: .data, cacheingPolicy: cachePolicy)
                 await MainActor.run {
                     guard let image = UIImage(data: data) else { return }
                     // Only store in cache and update UI if this cell is still displaying the same widget
