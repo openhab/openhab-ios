@@ -397,7 +397,7 @@ final class UserData: ObservableObject {
     }
 
     func refreshUrl(force: Bool = false) async {
-        guard AppSettings.shared.haveReceivedAppContext, !AppSettings.shared.openHABRootUrl.isEmpty else { return }
+        guard AppSettings.shared.haveReceivedAppContext, !AppSettings.shared.sitemapForWatch.isEmpty else { return }
 
         showAlert = false
         startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch, force: force)
@@ -419,6 +419,10 @@ final class UserData: ObservableObject {
                 existingWidget.type = newWidget.type
                 existingWidget.icon = newWidget.icon
                 existingWidget.state = newWidget.state
+                existingWidget.text = newWidget.text
+                existingWidget.inputHint = newWidget.inputHint
+                existingWidget.encoding = newWidget.encoding
+                existingWidget.isLeaf = newWidget.isLeaf
                 existingWidget.item = newWidget.item
                 existingWidget.iconColor = newWidget.iconColor
                 existingWidget.labelcolor = newWidget.labelcolor
@@ -430,10 +434,25 @@ final class UserData: ObservableObject {
                 existingWidget.refresh = newWidget.refresh
                 existingWidget.height = newWidget.height
                 existingWidget.forceAsItem = newWidget.forceAsItem
+                existingWidget.minValue = newWidget.minValue
+                existingWidget.maxValue = newWidget.maxValue
+                existingWidget.step = newWidget.step
+                existingWidget.pattern = newWidget.pattern
+                existingWidget.unit = newWidget.unit
+                existingWidget.switchSupport = newWidget.switchSupport
                 existingWidget.mappings = newWidget.mappings
                 existingWidget.widgets = newWidget.widgets
                 existingWidget.linkedPage = newWidget.linkedPage
                 existingWidget.visibility = newWidget.visibility
+                existingWidget.staticIcon = newWidget.staticIcon
+                existingWidget.labelSource = newWidget.labelSource
+                existingWidget.releaseOnly = newWidget.releaseOnly
+                existingWidget.row = newWidget.row
+                existingWidget.column = newWidget.column
+                existingWidget.releaseCommand = newWidget.releaseCommand
+                existingWidget.command = newWidget.command
+                existingWidget.stateless = newWidget.stateless
+                existingWidget.yAxisDecimalPattern = newWidget.yAxisDecimalPattern
             }
         }
 

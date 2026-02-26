@@ -115,6 +115,9 @@ struct SitemapPageView: View {
                 }
             )
         }
+        .refreshable {
+            await viewModel.refreshUrl(force: true)
+        }
     }
 
     init(viewModel: UserData, isRoot: Bool = true) {

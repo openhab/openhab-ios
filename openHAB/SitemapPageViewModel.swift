@@ -581,12 +581,13 @@ extension SitemapPageViewModel {
             if var candidates = buckets[newWidget.widgetId], !candidates.isEmpty {
                 let existing = candidates.removeFirst()
                 buckets[newWidget.widgetId] = candidates
-                if hasRelevantWidgetDiff(from: existing, to: newWidget) {
-                    copyWidgetProperties(from: newWidget, to: existing)
-                } else if !newWidget.widgets.isEmpty {
-                    // Parent key is unchanged, but nested children can still receive state updates.
-                    existing.widgets = reconcileWidgets(newWidget.widgets, with: existing.widgets)
-                }
+
+                // Always copy server properties to avoid missing updates when
+                // non-keyed fields change (for example group summary/state rows).
+                let previousChildren = existing.widgets
+                copyWidgetProperties(from: newWidget, to: existing)
+                existing.widgets = reconcileWidgets(newWidget.widgets, with: previousChildren)
+
                 reconciled.append(existing)
             } else {
                 reconciled.append(newWidget)
@@ -601,6 +602,7 @@ extension SitemapPageViewModel {
         target.icon = source.icon
         target.state = source.state
         target.type = source.type
+        target.isLeaf = source.isLeaf
         target.item = source.item
         target.iconColor = source.iconColor
         target.labelcolor = source.labelcolor
@@ -619,14 +621,20 @@ extension SitemapPageViewModel {
         target.unit = source.unit
         target.switchSupport = source.switchSupport
         target.mappings = source.mappings
-        target.widgets = source.widgets
         target.linkedPage = source.linkedPage
         target.visibility = source.visibility
         target.staticIcon = source.staticIcon
-    }
-
-    private func hasRelevantWidgetDiff(from current: OpenHABWidget, to incoming: OpenHABWidget) -> Bool {
-        WidgetRenderKey.from(widget: current) != WidgetRenderKey.from(widget: incoming)
+        target.text = source.text
+        target.inputHint = source.inputHint
+        target.encoding = source.encoding
+        target.labelSource = source.labelSource
+        target.releaseOnly = source.releaseOnly
+        target.row = source.row
+        target.column = source.column
+        target.releaseCommand = source.releaseCommand
+        target.command = source.command
+        target.stateless = source.stateless
+        target.yAxisDecimalPattern = source.yAxisDecimalPattern
     }
 
     private func shouldRetryLongPolling(after error: any Error) -> Bool {

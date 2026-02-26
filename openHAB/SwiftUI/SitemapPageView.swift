@@ -45,6 +45,7 @@ struct SitemapPageView: View {
         .environment(\.defaultMinListRowHeight, 32)
         .refreshable {
             await viewModel.reload()
+            viewModel.startPageHandling(forceRestart: true, reason: "pull-to-refresh")
         }
         .task {
             viewModel.startPageHandling()
