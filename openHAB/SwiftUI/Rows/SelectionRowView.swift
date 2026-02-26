@@ -33,33 +33,6 @@ private struct SelectionRowContent: View {
             rowContent(displayedCommand: displayedCommand)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .animation(nil, value: displayedCommand)
-
-            Menu {
-                ForEach(input.mappings.indices, id: \.self) { index in
-                    let mapping = input.mappings[index]
-                    let isSelected = displayedCommand == mapping.command
-                    Button {
-                        logger.info("Selection changed to: \(mapping.label)")
-                        optimisticCommand = mapping.command
-                        optimisticBaseState = input.displayState.effectiveState
-                        optimisticWidgetId = input.widgetId
-                        optimisticStartVersion = widgetVersion
-                        onSelect(mapping.command)
-                    } label: {
-                        if isSelected {
-                            Label(mapping.label, systemSymbol: .checkmark)
-                        } else {
-                            Text(mapping.label)
-                        }
-                    }
-                }
-            } label: {
-                Color.clear
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .disabled(input.readOnly)
         }
         .onAppear {
             clearOptimisticSelection()
@@ -97,16 +70,60 @@ private struct SelectionRowContent: View {
 
             Spacer()
 
-            if let valueText = selectedValueText(displayState: input.displayState, displayedCommand: displayedCommand), !valueText.isEmpty {
-                Text(valueText)
-                    .ohTextToken(.rowValue)
-                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
-            }
+            // Make the entire trailing region (value + chevrons) the Menu label
+            Menu {
+                ForEach(input.mappings.indices, id: \.self) { index in
+                    let mapping = input.mappings[index]
+                    let isSelected = displayedCommand == mapping.command
+                    Button {
+                        logger.info("Selection changed to: \(mapping.label)")
+                        withTransaction(Transaction(animation: nil)) {
+                            optimisticCommand = mapping.command
+                            optimisticBaseState = input.displayState.effectiveState
+                            optimisticWidgetId = input.widgetId
+                            optimisticStartVersion = widgetVersion
+                        }
+                        onSelect(mapping.command)
+                    } label: {
+                        if isSelected {
+                            Label(mapping.label, systemSymbol: .checkmark)
+                        } else {
+                            Text(mapping.label)
+                        }
+                    }
+                }
+            } label: {
+                ZStack {
+                    // Make the entire remaining area after the row label tappable
+                    Color.clear
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .contentShape(Rectangle())
 
-            // Show disclosure indicator to indicate tappable selection
-            Image(systemSymbol: .chevronUpChevronDown)
-                .ohTextToken(.secondary)
-                .foregroundStyle(.secondary)
+                    // Right-aligned visible content (value + chevrons)
+                    HStack(spacing: 6) {
+                        if let valueText = selectedValueText(displayState: input.displayState, displayedCommand: displayedCommand), !valueText.isEmpty {
+                            Text(valueText)
+                                .ohTextToken(.rowValue)
+                                .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.85)
+                                .fixedSize(horizontal: true, vertical: false)
+                                .layoutPriority(1)
+                        }
+
+                        Image(systemSymbol: .chevronUpChevronDown)
+                            .ohTextToken(.secondary)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+                // Improve layout stability during optimistic updates
+                .layoutPriority(1)
+                .id("value-\(displayedCommand)")
+            }
+            .buttonStyle(.plain)
+            .disabled(input.readOnly)
         }
         .contentShape(Rectangle())
     }
