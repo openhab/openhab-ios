@@ -181,8 +181,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             }
         case let .link(url):
             guard let url else { return }
-            let shouldForceBypassCache = forceRefresh && widget?.item?.type == .stringItem
-            loadRemoteImage(withURL: url, forceBypassingURLCache: shouldForceBypassCache)
+            loadRemoteImage(withURL: url, forceBypassingURLCache: forceRefresh)
         default:
             Logger.widgets.debug("Failed to determine widget payload.")
         }
@@ -219,11 +218,10 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                     throw HTTPClientError.noConfiguration
                 }
                 let client = HTTPClient(connectionConfiguration: config)
-                let cachePolicy: URLRequest.CachePolicy
-                if forceBypassingURLCache || !shouldCache {
-                    cachePolicy = .reloadIgnoringCacheData
+                let cachePolicy: URLRequest.CachePolicy = if forceBypassingURLCache || !shouldCache {
+                    .reloadIgnoringCacheData
                 } else {
-                    cachePolicy = .useProtocolCachePolicy
+                    .useProtocolCachePolicy
                 }
                 let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, timeout: 10.0, type: .data, cacheingPolicy: cachePolicy)
                 await MainActor.run {
