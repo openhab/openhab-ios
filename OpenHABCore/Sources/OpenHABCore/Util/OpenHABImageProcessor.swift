@@ -240,6 +240,11 @@ public struct OpenHABImageProcessor: ImageProcessor {
             guard !data.isEmpty else { return nil }
 
             if isSVG(data: data) {
+                // `/icon/none` may legitimately return an empty SVG document.
+                // Render this as "no icon" instead of showing the warning fallback.
+                if isEmptySVGDocument(data: data) {
+                    return UIImage()
+                }
                 #if os(macOS)
                 if let image = renderSVGWithWebKit(data) {
                     return image
@@ -286,6 +291,29 @@ public struct OpenHABImageProcessor: ImageProcessor {
         if let start = String(data: data.prefix(200), encoding: .utf8) {
             return start.contains("<svg") || start.hasPrefix("<?xml")
         }
+        return false
+    }
+
+    func isEmptySVGDocument(data: Data) -> Bool {
+        guard let svgString = String(data: data, encoding: .utf8) else { return false }
+        let trimmed = svgString.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Self-closing root SVG with no children, optionally prefixed with XML declaration.
+        if trimmed.range(
+            of: #"^(?:<\?xml[^>]*>\s*)?<svg\b[^>]*\/>\s*$"#,
+            options: .regularExpression
+        ) != nil {
+            return true
+        }
+
+        // Paired root SVG with only whitespace between open/close tags.
+        if trimmed.range(
+            of: #"^(?:<\?xml[^>]*>\s*)?<svg\b[^>]*>\s*</svg>\s*$"#,
+            options: .regularExpression
+        ) != nil {
+            return true
+        }
+
         return false
     }
 }
