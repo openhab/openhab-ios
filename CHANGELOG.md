@@ -15,6 +15,20 @@
 - fastlane: restore project.pbxproj after build to keep git clean
 - committed version bump: 3.2.1 (203)
 - Pre-apply Xcode 26.2 project.pbxproj normalizations and fix SetpointRowView formatting
+
+## [Version 3.1.50, Build 207] - 2026-02-26Z
+
+- fix: bypass HTTP cache for all URL image widgets on state-change reload (#1083)
+- fix: use RFC 3986 relative URL resolution in resolveFullURL (#1084)
+- fix: revalidate image widget cache on state-change updates
+- Bump crowdin/github-action from 2.14.0 to 2.14.1 (#1074)
+- Swiftlint fix
+- project: remove stray WatchTypography and duplicate PreviewConstants from openHABWatch
+- project: remove duplicate orphan BuildFile entry for DADC420A
+- project: fix literal \t sequences in PreviewConstants.swift indentation
+- project: fix malformed PBXFileSystemSynchronizedRootGroup section
+- watchOS: use decorateWidgetsWithSendCommand in preview init to resolve merge conflict with openapigen-swiftui
+- CI: restore project.pbxproj after build; fix PreviewConstants indentation
 - fastlane: clear FL_CHANGELOG after use to reduce summary noise
 - project: pre-apply Xcode 26.2 project.pbxproj normalisations
 - openHABWatch: fix Release build failures due to #Preview type-checking
