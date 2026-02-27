@@ -20,7 +20,7 @@ struct WidgetRowView: View {
 
     private var refreshToken: String {
         let displayState = widget.displayState
-        return "\(widget.widgetId)|\(displayState.effectiveState)|\(displayState.labelValue ?? "")|\(widget.item?.state ?? "")"
+        return "\(widget.widgetId)|\(displayState.effectiveState)|\(displayState.labelValue ?? "")"
     }
 
     var body: some View {
