@@ -18,14 +18,21 @@ struct WidgetRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
 
+    private var refreshToken: String {
+        let displayState = widget.displayState
+        return "\(widget.widgetId)|\(displayState.effectiveState)|\(displayState.labelValue ?? "")|\(widget.item?.state ?? "")"
+    }
+
     var body: some View {
         if let linkedPage = widget.linkedPage {
             NavigationLink(value: linkedPage) {
                 WidgetRowFactory.make(widget: widget, settings: settings)
+                    .id(refreshToken)
             }
             .buttonStyle(.plain)
         } else {
             WidgetRowFactory.make(widget: widget, settings: settings)
+                .id(refreshToken)
         }
     }
 }
