@@ -299,18 +299,12 @@ public struct OpenHABImageProcessor: ImageProcessor {
         let trimmed = svgString.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Self-closing root SVG with no children, optionally prefixed with XML declaration.
-        if trimmed.range(
-            of: #"^(?:<\?xml[^>]*>\s*)?<svg\b[^>]*\/>\s*$"#,
-            options: .regularExpression
-        ) != nil {
+        if trimmed.wholeMatch(of: /(?:<\?xml[^>]*>\s*)?<svg\b[^>]*\/>\s*/) != nil {
             return true
         }
 
         // Paired root SVG with only whitespace between open/close tags.
-        if trimmed.range(
-            of: #"^(?:<\?xml[^>]*>\s*)?<svg\b[^>]*>\s*</svg>\s*$"#,
-            options: .regularExpression
-        ) != nil {
+        if trimmed.wholeMatch(of: /(?:<\?xml[^>]*>\s*)?<svg\b[^>]*>\s*<\/svg>\s*/) != nil {
             return true
         }
 

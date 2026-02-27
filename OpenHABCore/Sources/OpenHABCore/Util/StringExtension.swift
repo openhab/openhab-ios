@@ -123,7 +123,7 @@ public extension String {
     }
 
     func prepare() -> String {
-        var input = replacingOccurrences(of: "^\\.\\.", with: "", options: [.regularExpression])
+        var input = replacing(/^\.\./, with: "")
         if !input.starts(with: "/") {
             input.insert("/", at: startIndex)
         }
@@ -201,7 +201,6 @@ public extension String {
     }
 
     var isNoneIcon: Bool {
-        let pattern = #"^(oh:([a-z]+:)?)?none$"#
-        return range(of: pattern, options: .regularExpression) != nil
+        wholeMatch(of: /^(oh:([a-z]+:)?)?none$/) != nil
     }
 }

@@ -283,7 +283,7 @@ final class OsLogRewriter: SyntaxRewriter {
 
         // Clean up the format string - remove extra whitespace and normalize line breaks
         let cleanedFormat = format.replacingOccurrences(of: "\n", with: " ")
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .replacing(/\s+/, with: " ")
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
         return buildLoggerCall(format: cleanedFormat, args: formatArgs, severity: severity, indentation: originalIndentation)
