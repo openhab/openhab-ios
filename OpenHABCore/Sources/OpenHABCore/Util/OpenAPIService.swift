@@ -70,6 +70,10 @@ public actor OpenAPIService {
         case .asDefault:
             break
         case .longTerm:
+            // Watch sitemap polling must bypass URL cache to avoid serving stale
+            // pages after periods of inactivity.
+            config.requestCachePolicy = .reloadIgnoringLocalCacheData
+            config.urlCache = nil
             config.timeoutIntervalForRequest = 35.0
             config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
         case .shortTerm:
