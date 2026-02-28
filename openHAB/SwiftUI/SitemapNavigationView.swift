@@ -18,7 +18,6 @@ struct SitemapNavigationView: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject var viewModel = SitemapPageViewModel()
     @State private var isSearchPresented = false
-    @State private var wasInBackground = false
     @FocusState private var isLegacySearchFocused: Bool
     let onShowSideMenu: () -> Void
 
@@ -28,11 +27,7 @@ struct SitemapNavigationView: View {
         }
         .onChange(of: scenePhase) { newPhase in
             switch newPhase {
-            case .background:
-                wasInBackground = true
             case .active:
-                guard wasInBackground else { return }
-                wasInBackground = false
                 viewModel.startPageHandling(forceRestart: true, reason: "scene-became-active")
             default:
                 break

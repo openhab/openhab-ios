@@ -347,8 +347,11 @@ final class UserData: ObservableObject {
                         throw CancellationError()
                     } catch {
                         backoffAttempt += 1
-                        let baseDelay = min(UInt64(pow(2.0, Double(backoffAttempt))) * 1_000_000_000, maxBackoffDelay)
-                        let jitter = UInt64.random(in: 0 ..< (baseDelay / 2))
+                        // Cap exponential growth before conversion/multiplication to avoid UInt64 overflow.
+                        let retrySeconds = min((UInt64(1) << UInt64(min(backoffAttempt, 5))), 30)
+                        let baseDelay = retrySeconds * 1_000_000_000
+                        let jitterUpperBound = max(1, baseDelay / 2)
+                        let jitter = UInt64.random(in: 0 ..< jitterUpperBound)
                         let totalDelay = baseDelay + jitter
 
                         Logger.userData.warning("Polling failed: \(error.localizedDescription) (\(type(of: error))). Retrying in \(Double(totalDelay) / 1_000_000_000.0) seconds.")
