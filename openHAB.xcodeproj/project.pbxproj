@@ -10,6 +10,7 @@
 		10472F7AF99C4940A6144817 /* TextRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399449C421544C61AD83450C /* TextRow.swift */; };
 		1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F78D228A89FC00750965 /* WatchMessageService.swift */; };
 		2F08AFC72E5FADCF00E70611 /* NotificationCenterDelegateImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F08AFC62E5FADC500E70611 /* NotificationCenterDelegateImpl.swift */; };
+		2F399ABA2F5357E900F72A30 /* InputCommandFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F399AB92F5357E900F72A30 /* InputCommandFormatterTests.swift */; };
 		2F55E7BB2DEE447700EC8350 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F55E7BA2DEE447700EC8350 /* SettingsView.swift */; };
 		2F55E7BD2DEE44A800EC8350 /* ClientCertificatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F55E7BC2DEE44A800EC8350 /* ClientCertificatesView.swift */; };
 		2FBCF58C2DEB0B7700CD5D83 /* HomeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBCF58B2DEB0B7700CD5D83 /* HomeSelectionView.swift */; };
@@ -320,6 +321,7 @@
 /* Begin PBXFileReference section */
 		1224F78D228A89FC00750965 /* WatchMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchMessageService.swift; sourceTree = "<group>"; };
 		2F08AFC62E5FADC500E70611 /* NotificationCenterDelegateImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterDelegateImpl.swift; sourceTree = "<group>"; };
+		2F399AB92F5357E900F72A30 /* InputCommandFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputCommandFormatterTests.swift; sourceTree = "<group>"; };
 		2F55E7BA2DEE447700EC8350 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2F55E7BC2DEE44A800EC8350 /* ClientCertificatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientCertificatesView.swift; sourceTree = "<group>"; };
 		2FBCF58B2DEB0B7700CD5D83 /* HomeSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSelectionView.swift; sourceTree = "<group>"; };
@@ -912,6 +914,7 @@
 				DABB4CF12F4790AD00111AF3 /* RowLayoutPolicyTests.swift */,
 				DABB4CDD2F4746B100111AF3 /* SitemapRowInputMapperTests.swift */,
 				DABB4CF32F47BC5100111AF3 /* SliderOverrideSyncTests.swift */,
+				2F399AB92F5357E900F72A30 /* InputCommandFormatterTests.swift */,
 			);
 			path = openHABTestsSwift;
 			sourceTree = "<group>";
@@ -1754,6 +1757,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DAF231D227BB6EEA00AB916C /* OpenHABSVGTests.swift in Sources */,
+				2F399ABA2F5357E900F72A30 /* InputCommandFormatterTests.swift in Sources */,
 				DABB4CDE2F4746B100111AF3 /* SitemapRowInputMapperTests.swift in Sources */,
 				DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */,
 				DA96415C2F292F0600CEC181 /* OpenHABEndPoint.swift in Sources */,

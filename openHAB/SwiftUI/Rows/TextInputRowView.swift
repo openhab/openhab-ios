@@ -15,9 +15,9 @@ import os.log
 import SwiftUI
 
 enum InputCommandFormatter {
-    static func filteredDraftInput(from rawText: String, hint: OpenHABWidget.InputHint?) -> String {
+    static func filteredDraftInput(from rawText: String, previousText: String, hint: OpenHABWidget.InputHint?) -> String {
         guard hint == .number else { return rawText }
-        return sanitizedNumberDraft(from: rawText)
+        return isValidNumberDraft(rawText) ? rawText : previousText
     }
 
     static func command(from rawText: String, hint: OpenHABWidget.InputHint?) -> String? {
@@ -27,47 +27,45 @@ enum InputCommandFormatter {
         return normalizedNumberCommand(from: trimmed)
     }
 
-    private static func sanitizedNumberDraft(from value: String) -> String {
-        var result = ""
-        var hasSign = false
-        var hasDecimalSeparator = false
+    static func isValidNumberDraft(_ value: String, decimalSeparator: String = Locale.current.decimalSeparator ?? ".") -> Bool {
+        if value.isEmpty { return true }
 
-        for character in value {
-            if character.isNumber {
-                result.append(character)
-                continue
-            }
+        let wholeNumberPattern = /^-?[0-9]*$/
 
-            if character == "+" || character == "-", !hasSign, result.isEmpty {
-                result.append(character)
-                hasSign = true
-                continue
-            }
-
-            if character == "." || character == ",", !hasDecimalSeparator {
-                result.append(character)
-                hasDecimalSeparator = true
-            }
+        // Valid if it matches an optional sign followed by digits only
+        if value.firstRange(of: wholeNumberPattern) != nil {
+            return true
         }
 
-        return result
+        // Strip optional leading minus for decimal-separator check
+        let withoutSign = value.hasPrefix("-") ? String(value.dropFirst()) : value
+
+        // Check that after removing one decimal separator, only digits remain
+        let parts = withoutSign.components(separatedBy: decimalSeparator)
+        // Exactly one decimal separator yields exactly two parts
+        guard parts.count == 2 else { return false }
+        // Both parts must contain only digits (either may be empty, e.g. "3." or ".5")
+        let digitsOnly = /^[0-9]*$/
+        return parts.allSatisfy { $0.firstRange(of: digitsOnly) != nil }
     }
 
     private static func normalizedNumberCommand(from value: String) -> String? {
-        let pattern = /^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/
-        guard value.wholeMatch(of: pattern) != nil else { return nil }
+        let decimalSeparator = Locale.current.decimalSeparator ?? "."
 
-        let hasDot = value.contains(".")
-        let hasComma = value.contains(",")
-        guard !(hasDot && hasComma) else { return nil }
+        // Must be a valid draft and contain at least one digit
+        guard isValidNumberDraft(value),
+              value.contains(where: \.isNumber) else { return nil }
 
-        var normalized = value.replacingOccurrences(of: ",", with: ".")
+        var normalized = value.replacingOccurrences(of: decimalSeparator, with: ".")
         if normalized.hasPrefix(".") {
             normalized = "0\(normalized)"
         } else if normalized.hasPrefix("-.") {
             normalized = "-0" + String(normalized.dropFirst(1))
-        } else if normalized.hasPrefix("+.") {
-            normalized = "+0" + String(normalized.dropFirst(1))
+        }
+
+        // Strip trailing dot (e.g. "3." → "3")
+        if normalized.hasSuffix(".") {
+            normalized = String(normalized.dropLast())
         }
 
         guard Double(normalized) != nil else { return nil }
@@ -110,7 +108,7 @@ private struct TextInputRowContent: View {
         Binding(
             get: { draftInputText },
             set: { newValue in
-                draftInputText = InputCommandFormatter.filteredDraftInput(from: newValue, hint: inputHint)
+                draftInputText = InputCommandFormatter.filteredDraftInput(from: newValue, previousText: draftInputText, hint: inputHint)
             }
         )
     }
