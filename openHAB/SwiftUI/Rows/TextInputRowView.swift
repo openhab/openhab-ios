@@ -56,16 +56,27 @@ enum InputCommandFormatter {
         guard isValidNumberDraft(value),
               value.contains(where: \.isNumber) else { return nil }
 
-        var normalized = value.replacingOccurrences(of: decimalSeparator, with: ".")
+        let isNegative = value.hasPrefix("-")
+        // make things simpler by removing the minus sign, add it back at the end of the cleanup
+        var normalized = isNegative ? String(value.dropFirst()) : value
+
+        normalized = normalized.replacingOccurrences(of: decimalSeparator, with: ".")
         if normalized.hasPrefix(".") {
             normalized = "0\(normalized)"
-        } else if normalized.hasPrefix("-.") {
-            normalized = "-0" + String(normalized.dropFirst(1))
+        }
+
+        while normalized.hasPrefix("0"), !normalized.hasPrefix("0.") {
+            normalized = String(normalized.dropFirst())
         }
 
         // Strip trailing dot (e.g. "3." → "3")
         if normalized.hasSuffix(".") {
             normalized = String(normalized.dropLast())
+        }
+
+        if isNegative {
+            // add back previously stripped minus
+            normalized = "-\(normalized)"
         }
 
         guard Double(normalized) != nil else { return nil }
@@ -97,6 +108,7 @@ private struct TextInputRowContent: View {
 
     @State private var inputText = ""
     @State private var draftInputText = ""
+    @State private var lastValidDraft = ""
     @State private var showInputAlert = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")
@@ -104,13 +116,17 @@ private struct TextInputRowContent: View {
         InputCommandFormatter.command(from: draftInputText, hint: inputHint)
     }
 
-    private var draftInputBinding: Binding<String> {
-        Binding(
-            get: { draftInputText },
-            set: { newValue in
-                draftInputText = InputCommandFormatter.filteredDraftInput(from: newValue, previousText: draftInputText, hint: inputHint)
+    private func filterDraftInput(_ newValue: String) {
+        let filtered = InputCommandFormatter.filteredDraftInput(from: newValue, previousText: lastValidDraft, hint: inputHint)
+        if filtered != newValue {
+            // Defer the revert so SwiftUI picks up the new value
+            // after the current TextField update cycle completes.
+            Task { @MainActor in
+                draftInputText = filtered
             }
-        )
+        } else {
+            lastValidDraft = newValue
+        }
     }
 
     private var alertMessage: String {
@@ -135,6 +151,7 @@ private struct TextInputRowContent: View {
 
             Button {
                 draftInputText = inputText
+                lastValidDraft = inputText
                 showInputAlert = true
             } label: {
                 Text(inputText.isEmpty ? "Enter text" : inputText)
@@ -149,11 +166,15 @@ private struct TextInputRowContent: View {
         .onTapGesture {
             guard !input.readOnly else { return }
             draftInputText = inputText
+            lastValidDraft = inputText
             showInputAlert = true
         }
         .alert("Enter new value", isPresented: $showInputAlert) {
-            TextField("Enter text", text: draftInputBinding)
+            TextField("Enter text", text: $draftInputText)
                 .keyboardType(inputHint == .number ? .numbersAndPunctuation : .default)
+                .onChange(of: draftInputText) { newValue in
+                    filterDraftInput(newValue)
+                }
             Button("Cancel", role: .cancel) {}
             Button("Set value", role: .destructive) {
                 sendTextCommand()
