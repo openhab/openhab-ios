@@ -125,9 +125,7 @@ private struct TextInputRowContent: View {
 
     var body: some View {
         let displayState = input.displayState
-        HStack {
-            IconInputView(input: iconInput, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
-
+        RowViewWithIcon(input: input) {
             HFlow {
                 if !displayState.labelText.isEmpty {
                     let labelText = displayState.labelText

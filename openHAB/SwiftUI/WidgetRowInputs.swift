@@ -11,6 +11,11 @@
 
 import OpenHABCore
 
+protocol RowWithIconInput {
+    var widgetId: String { get }
+    var icon: RowIconInput { get }
+}
+
 struct RowIconInput: Equatable, Sendable {
     let icon: String
     let iconColor: String
@@ -38,7 +43,7 @@ struct RowIconInput: Equatable, Sendable {
     }
 }
 
-struct SelectionRowInput: Equatable {
+struct SelectionRowInput: Equatable, RowWithIconInput {
     let displayState: WidgetDisplayState
     let mappings: [OpenHABWidgetMapping]
     let labelColor: String
@@ -63,7 +68,7 @@ struct SelectionRowInput: Equatable {
     }
 }
 
-struct SegmentedRowInput: Equatable {
+struct SegmentedRowInput: Equatable, RowWithIconInput {
     let displayState: WidgetDisplayState
     let mappings: [OpenHABWidgetMapping]
     let labelColor: String
@@ -86,7 +91,7 @@ struct SegmentedRowInput: Equatable {
     }
 }
 
-struct SetpointRowInput: Equatable {
+struct SetpointRowInput: Equatable, RowWithIconInput {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -146,7 +151,7 @@ struct SetpointRowInput: Equatable {
     }
 }
 
-struct ColorPickerRowInput: Equatable {
+struct ColorPickerRowInput: Equatable, RowWithIconInput {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -172,7 +177,7 @@ struct ColorPickerRowInput: Equatable {
     }
 }
 
-struct ToggleRowInput: Equatable {
+struct ToggleRowInput: Equatable, RowWithIconInput {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -194,7 +199,7 @@ struct ToggleRowInput: Equatable {
     }
 }
 
-struct RollershutterRowInput: Equatable {
+struct RollershutterRowInput: Equatable, RowWithIconInput {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -214,7 +219,7 @@ struct RollershutterRowInput: Equatable {
     }
 }
 
-struct InputRowInput: Sendable, Equatable {
+struct InputRowInput: Sendable, Equatable, RowWithIconInput {
     let widgetId: String
     let renderingKind: WidgetRenderingKind
     let displayState: WidgetDisplayState
@@ -244,7 +249,7 @@ struct InputRowInput: Sendable, Equatable {
     }
 }
 
-struct ButtonGridRowInput: Equatable {
+struct ButtonGridRowInput: Equatable, RowWithIconInput {
     struct ButtonInput: Equatable, Sendable, Identifiable {
         let id: String
         let label: String
@@ -311,7 +316,7 @@ struct ButtonGridRowInput: Equatable {
     }
 }
 
-struct GenericRowInput: Equatable {
+struct GenericRowInput: Equatable, RowWithIconInput {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -329,7 +334,7 @@ struct GenericRowInput: Equatable {
     }
 }
 
-struct LinkedPageRowInput: Equatable {
+struct LinkedPageRowInput: Equatable, RowWithIconInput {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -354,7 +359,7 @@ struct LinkedPageRowInput: Equatable {
     }
 }
 
-struct ColorTemperatureRowInput: Equatable {
+struct ColorTemperatureRowInput: Equatable, RowWithIconInput {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -454,7 +459,7 @@ struct FrameRowInput: Equatable {
     }
 }
 
-struct TextRowInput: Equatable {
+struct TextRowInput: Equatable, RowWithIconInput {
     let widgetId: String
     let displayState: WidgetDisplayState
     let labelColor: String
@@ -472,7 +477,7 @@ struct TextRowInput: Equatable {
     }
 }
 
-struct SliderRowInput: Equatable {
+struct SliderRowInput: Equatable, RowWithIconInput {
     let widgetId: String
     let displayState: WidgetDisplayState
     let numberPattern: String?

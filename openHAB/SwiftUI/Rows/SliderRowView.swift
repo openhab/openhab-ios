@@ -148,9 +148,7 @@ private struct SliderRowContent: View {
     private func labelContent(state: SliderRowInput) -> some View {
         let displayedValue = effectiveValue(state: state)
         let currentValueText = currentValueText(state: state, value: displayedValue)
-        HStack {
-            IconInputView(input: state.icon, rowIdentity: state.widgetId, size: CGSize(width: 32, height: 32), fallbackSymbol: fallbackSymbol)
-
+        RowViewWithIcon(input: state, fallbackSymbol: fallbackSymbol) {
             if !state.displayState.labelText.isEmpty {
                 let labelText = state.displayState.labelText
                 Text(labelText)

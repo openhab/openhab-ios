@@ -57,9 +57,7 @@ private struct ColorPickerRowContent: View {
 
     var body: some View {
         let displayState = input.displayState
-        HStack {
-            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
-
+        RowViewWithIcon(input: input) {
             if !displayState.labelText.isEmpty {
                 let labelText = displayState.labelText
                 Text(labelText)

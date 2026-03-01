@@ -147,9 +147,7 @@ private struct ButtonGridRowContent: View {
         let displayState = input.displayState
         VStack(alignment: .leading, spacing: 8) {
             if input.showLabelAndIcon {
-                HStack {
-                    IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
-
+                RowViewWithIcon(input: input) {
                     if !displayState.labelText.isEmpty {
                         Text(displayState.labelText)
                             .ohTextToken(.rowLabel)

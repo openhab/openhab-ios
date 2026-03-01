@@ -116,9 +116,7 @@ private struct ColorTemperaturePickerRowContent: View {
 
     var body: some View {
         let displayState = input.displayState
-        HStack(alignment: .top) {
-            IconInputView(input: iconInput, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
-
+        RowViewWithIcon(input: input, alignment: .top) {
             VStack(spacing: 6) {
                 HStack(alignment: .firstTextBaseline, spacing: 0) {
                     if !displayState.labelText.isEmpty {

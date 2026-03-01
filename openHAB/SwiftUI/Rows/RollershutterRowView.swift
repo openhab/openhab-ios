@@ -54,9 +54,7 @@ private struct RollershutterRowContent: View {
     var body: some View {
         let displayState = input.displayState
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
-
+            RowViewWithIcon(input: input) {
                 VStack(alignment: .leading, spacing: 2) {
                     if !displayState.labelText.isEmpty {
                         let labelText = displayState.labelText

@@ -83,7 +83,7 @@ struct IconInputView: View {
 
     var body: some View {
         ZStack {
-            if let fallbackSymbol {
+            if let fallbackSymbol, currentImage == nil {
                 Image(systemSymbol: fallbackSymbol)
                     .resizable()
                     .aspectRatio(contentMode: .fit)

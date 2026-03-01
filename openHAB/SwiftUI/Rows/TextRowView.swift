@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import CommonUI
+import Flow
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
@@ -28,19 +29,19 @@ private struct TextRowContent: View {
 
     var body: some View {
         let displayState = input.displayState
-        HStack {
-            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
+        RowViewWithIcon(input: input) {
+            HFlow {
+                Text(displayState.labelText)
+                    .ohTextToken(.rowLabel)
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
 
-            Text(displayState.labelText)
-                .ohTextToken(.rowLabel)
-                .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
+                Spacer()
 
-            Spacer()
-
-            if let value = displayState.labelValue {
-                Text(value)
-                    .ohTextToken(.rowValue)
-                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
+                if let value = displayState.labelValue {
+                    Text(value)
+                        .ohTextToken(.rowValue)
+                        .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
+                }
             }
         }
         .contextMenu {

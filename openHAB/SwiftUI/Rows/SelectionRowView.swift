@@ -58,9 +58,7 @@ private struct SelectionRowContent: View {
 
     @ViewBuilder
     private func rowContent(displayedCommand: String) -> some View {
-        HStack {
-            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
-
+        RowViewWithIcon(input: input) {
             if !input.displayState.labelText.isEmpty {
                 let labelText = input.displayState.labelText
                 Text(labelText)

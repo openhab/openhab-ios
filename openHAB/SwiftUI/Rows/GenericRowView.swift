@@ -27,9 +27,7 @@ private struct GenericRowContent: View {
 
     var body: some View {
         let displayState = input.displayState
-        HStack {
-            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
-
+        RowViewWithIcon(input: input) {
             Text(displayState.labelText)
                 .ohTextToken(.rowLabel)
                 .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
