@@ -17,6 +17,7 @@ import SwiftUI
 struct SitemapNavigationView: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject var viewModel = SitemapPageViewModel()
+    @State private var hasSeenActivePhase = false
     @State private var isSearchPresented = false
     @FocusState private var isLegacySearchFocused: Bool
     let onShowSideMenu: () -> Void
@@ -28,6 +29,11 @@ struct SitemapNavigationView: View {
         .onChange(of: scenePhase) { newPhase in
             switch newPhase {
             case .active:
+                // Skip only the first activation to avoid racing the initial .task startup.
+                guard hasSeenActivePhase else {
+                    hasSeenActivePhase = true
+                    return
+                }
                 viewModel.startPageHandling(forceRestart: true, reason: "scene-became-active")
             default:
                 break

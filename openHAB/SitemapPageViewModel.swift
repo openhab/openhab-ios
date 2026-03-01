@@ -409,7 +409,7 @@ extension SitemapPageViewModel {
 
     private func setupServiceIfNeeded(activeConnection: ConnectionInfo) throws {
         if openAPIService == nil {
-            openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
+            openAPIService = try makeSitemapService(for: activeConnection)
         }
     }
 
@@ -549,7 +549,7 @@ extension SitemapPageViewModel {
         }
 
         activeConnectionInfo = activeConnection
-        openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
+        openAPIService = try makeSitemapService(for: activeConnection)
     }
 
     private func loadCurrentPage() async throws {
@@ -800,7 +800,7 @@ extension SitemapPageViewModel {
 
         do {
             // Setup the OpenAPI service based on the new connection
-            openAPIService = try OpenAPIService(connectionConfiguration: connection.configuration)
+            openAPIService = try makeSitemapService(for: connection)
             // Restart when connection changed, or when polling is currently inactive.
             let shouldRestart = connectionDidChange
                 || pageHandlingTask == nil
@@ -815,6 +815,15 @@ extension SitemapPageViewModel {
 
     func selectSitemap() async {
         startPageHandling(forceRestart: true, reason: "select-sitemap")
+    }
+
+    private func makeSitemapService(for connection: ConnectionInfo) throws -> OpenAPIService {
+        // Keep sitemap polling fresh after foreground transitions or long inactivity.
+        // Long-term config disables URL cache and aligns with watchOS behavior.
+        try OpenAPIService(
+            connectionConfiguration: connection.configuration,
+            serviceConfiguration: .longTerm
+        )
     }
 
     // MARK: - Command Sending
