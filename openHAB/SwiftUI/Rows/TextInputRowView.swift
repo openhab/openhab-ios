@@ -65,7 +65,7 @@ enum InputCommandFormatter {
             normalized = "0\(normalized)"
         }
 
-        while normalized.hasPrefix("0"), !normalized.hasPrefix("0.") {
+        while normalized.hasPrefix("0"), normalized.count > 1, !normalized.hasPrefix("0.") {
             normalized = String(normalized.dropFirst())
         }
 
@@ -74,7 +74,7 @@ enum InputCommandFormatter {
             normalized = String(normalized.dropLast())
         }
 
-        if isNegative {
+        if isNegative && normalized != "0" {
             // add back previously stripped minus
             normalized = "-\(normalized)"
         }

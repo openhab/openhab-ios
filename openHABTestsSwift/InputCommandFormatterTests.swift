@@ -56,6 +56,11 @@ struct InputCommandFormatterTests {
     // MARK: - isValidNumberDraft with dot separator
 
     @Test
+    func zeroIsValid() {
+        #expect(InputCommandFormatter.isValidNumberDraft("0", decimalSeparator: "."))
+    }
+
+    @Test
     func emptyStringIsValid() {
         #expect(InputCommandFormatter.isValidNumberDraft("", decimalSeparator: "."))
     }
@@ -238,6 +243,11 @@ struct InputCommandFormatterTests {
     }
 
     @Test
+    func commandFromZeroIntegerReturnsNormalized() {
+        #expect(InputCommandFormatter.command(from: "0", hint: .number) == "0")
+    }
+
+    @Test
     func commandFromIntegerReturnsNormalized() {
         #expect(InputCommandFormatter.command(from: "42", hint: .number) == "42")
     }
@@ -261,6 +271,7 @@ struct InputCommandFormatterTests {
         // Simulate typing various number strings character by character.
         // At each keystroke both the oracle and isValidNumberDraft must agree.
         let sequences: [String] = [
+            "0",
             "123",
             "-42",
             "3\(sep)14",
