@@ -31,19 +31,27 @@ private struct OHTextTokenModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         let style = OHTextTokenStyle.from(token)
-        content
+        return content
             .font(style.font)
             .lineLimit(style.lineLimit)
             .minimumScaleFactor(style.minimumScaleFactor)
-            .truncationMode(.tail)
             .multilineTextAlignment(.leading)
+            .truncationMode(style.truncationMode)
     }
 }
 
 private struct OHTextTokenStyle {
     let font: Font
-    let lineLimit: Int
+    let lineLimit: Int?
     let minimumScaleFactor: CGFloat
+    let truncationMode: Text.TruncationMode
+
+    init(font: Font, lineLimit: Int?, minimumScaleFactor: CGFloat, truncationMode: Text.TruncationMode = .tail) {
+        self.font = font
+        self.lineLimit = lineLimit
+        self.minimumScaleFactor = minimumScaleFactor
+        self.truncationMode = truncationMode
+    }
 
     static func from(_ token: OHTextToken) -> OHTextTokenStyle {
         #if os(watchOS)
@@ -68,7 +76,7 @@ private struct OHTextTokenStyle {
         #else
         switch token {
         case .rowLabel:
-            OHTextTokenStyle(font: .body, lineLimit: 1, minimumScaleFactor: 0.9)
+            OHTextTokenStyle(font: .body, lineLimit: nil, minimumScaleFactor: 1.0)
         case .rowValue:
             OHTextTokenStyle(font: .body, lineLimit: 1, minimumScaleFactor: 0.9)
         case .rowValueCompact:

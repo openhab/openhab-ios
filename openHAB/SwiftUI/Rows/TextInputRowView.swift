@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import CommonUI
+import Flow
 import OpenHABCore
 import os.log
 import SwiftUI
@@ -74,7 +75,7 @@ enum InputCommandFormatter {
             normalized = String(normalized.dropLast())
         }
 
-        if isNegative && normalized != "0" {
+        if isNegative, normalized != "0" {
             // add back previously stripped minus
             normalized = "-\(normalized)"
         }
@@ -116,6 +117,74 @@ private struct TextInputRowContent: View {
         InputCommandFormatter.command(from: draftInputText, hint: inputHint)
     }
 
+    private var alertMessage: String {
+        let label = input.displayState.labelText.isEmpty ? "Unknown" : input.displayState.labelText
+        let value = input.displayState.labelValue.flatMap { $0.isEmpty ? nil : $0 } ?? "Unknown"
+        return "Current value for \"\(label)\" is \"\(value)\"."
+    }
+
+    var body: some View {
+        let displayState = input.displayState
+        HStack {
+            IconInputView(input: iconInput, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
+
+            HFlow {
+                if !displayState.labelText.isEmpty {
+                    let labelText = displayState.labelText
+                    Text(labelText)
+                        .ohTextToken(.rowLabel)
+                        .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
+                }
+
+                Spacer()
+
+                Button {
+                    draftInputText = inputText
+                    lastValidDraft = inputText
+                    showInputAlert = true
+                } label: {
+                    Text(inputText.isEmpty
+                        ? "Enter \(inputHint == .number ? "number" : "text")"
+                        : inputText)
+                        .lineLimit(nil)
+                        .foregroundStyle(inputText.isEmpty ? .secondary : (input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor)))
+                }
+                .buttonStyle(.plain)
+                .disabled(input.readOnly)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                guard !input.readOnly else { return }
+                draftInputText = inputText
+                lastValidDraft = inputText
+                showInputAlert = true
+            }
+            .alert("Enter new value", isPresented: $showInputAlert) {
+                TextField("Enter text", text: $draftInputText)
+                    .keyboardType(inputHint == .number ? .numbersAndPunctuation : .default)
+                    
+                    .onChange(of: draftInputText) { newValue in
+                        filterDraftInput(newValue)
+                    }
+                Button("Cancel", role: .cancel) {}
+                Button("Set value", role: .destructive) {
+                    sendTextCommand()
+                }
+                .disabled(formattedCommand == nil)
+            } message: {
+                Text(alertMessage)
+                    .lineLimit(10)
+                    .truncationMode(.tail)
+            }
+            .onAppear {
+                inputText = displayState.effectiveState
+            }
+            .onChange(of: displayState.effectiveState) { newState in
+                inputText = newState
+            }
+        }
+    }
+
     private func filterDraftInput(_ newValue: String) {
         let filtered = InputCommandFormatter.filteredDraftInput(from: newValue, previousText: lastValidDraft, hint: inputHint)
         if filtered != newValue {
@@ -126,68 +195,6 @@ private struct TextInputRowContent: View {
             }
         } else {
             lastValidDraft = newValue
-        }
-    }
-
-    private var alertMessage: String {
-        let label = input.displayState.labelText.isEmpty ? "Unknown" : input.displayState.labelText
-        let value = input.displayState.labelValue.flatMap { $0.isEmpty ? nil : $0 } ?? "Unknown"
-        return "Current value for \(label) is \(value)"
-    }
-
-    var body: some View {
-        let displayState = input.displayState
-        HStack {
-            IconInputView(input: iconInput, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
-
-            if !displayState.labelText.isEmpty {
-                let labelText = displayState.labelText
-                Text(labelText)
-                    .ohTextToken(.rowLabel)
-                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
-            }
-
-            Spacer()
-
-            Button {
-                draftInputText = inputText
-                lastValidDraft = inputText
-                showInputAlert = true
-            } label: {
-                Text(inputText.isEmpty ? "Enter text" : inputText)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .foregroundStyle(inputText.isEmpty ? .secondary : (input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor)))
-            }
-            .buttonStyle(.plain)
-            .disabled(input.readOnly)
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            guard !input.readOnly else { return }
-            draftInputText = inputText
-            lastValidDraft = inputText
-            showInputAlert = true
-        }
-        .alert("Enter new value", isPresented: $showInputAlert) {
-            TextField("Enter text", text: $draftInputText)
-                .keyboardType(inputHint == .number ? .numbersAndPunctuation : .default)
-                .onChange(of: draftInputText) { newValue in
-                    filterDraftInput(newValue)
-                }
-            Button("Cancel", role: .cancel) {}
-            Button("Set value", role: .destructive) {
-                sendTextCommand()
-            }
-            .disabled(formattedCommand == nil)
-        } message: {
-            Text(alertMessage)
-        }
-        .onAppear {
-            inputText = displayState.effectiveState
-        }
-        .onChange(of: displayState.effectiveState) { newState in
-            inputText = newState
         }
     }
 
