@@ -513,6 +513,10 @@ public actor NetworkTracker {
 }
 
 public extension NetworkTracker {
+    func configuredConnections() -> [ConnectionConfiguration] {
+        connectionConfigurations
+    }
+
     private func service() async throws -> any OpenAPIServiceProtocol {
         guard let connection = await waitForActiveConnection()?.configuration else {
             throw NetworkTrackerError.noActiveConnection

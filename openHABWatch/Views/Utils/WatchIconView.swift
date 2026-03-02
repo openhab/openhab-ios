@@ -28,16 +28,15 @@ struct WatchIconView: View {
     let model: IconRenderModel
     @ObservedObject var settings = AppSettings.shared
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    @State private var lastResolvedIconURL: URL?
+    @State private var keepLastResolvedIconURLUntil: Date = .distantPast
 
-    var iconURL: URL? {
-        guard !model.icon.isEmpty,
-              let activeConnection = networkTracker.activeConnection,
+    private let iconURLGraceSeconds: TimeInterval = 3
+
+    private var iconURL: URL? {
+        guard !model.icon.isEmpty, model.icon != "number" else { return nil }
+        guard let activeConnection = networkTracker.activeConnection,
               !activeConnection.configuration.url.isEmpty else { return nil }
-        // Skip loading number icons as they don't exist/aren't useful
-        if model.icon == "number" {
-            return nil
-        }
-
         return Endpoint.icon(
             rootUrl: activeConnection.configuration.url,
             version: activeConnection.version,
@@ -49,9 +48,18 @@ struct WatchIconView: View {
         )?.url
     }
 
+    // During a transient connection handover activeConnection can briefly be nil.
+    // Hold the last successfully resolved URL for a short grace period so icons
+    // don't flash blank between reconnects.
+    private var displayIconURL: URL? {
+        if let url = iconURL { return url }
+        guard Date() <= keepLastResolvedIconURLUntil else { return nil }
+        return lastResolvedIconURL
+    }
+
     var body: some View {
         Group {
-            if let iconURL {
+            if let iconURL = displayIconURL {
                 // Only apply color preprocessing for non-iconify icons
                 let processorIconColor = iconURL.host == "api.iconify.design" ? nil : model.iconColorHex
                 KFImage.url(iconURL)
@@ -79,6 +87,14 @@ struct WatchIconView: View {
                 Rectangle()
                     .foregroundStyle(.background)
                     .frame(width: 20, height: 20)
+            }
+        }
+        .onChange(of: iconURL) { _, newURL in
+            if let newURL {
+                lastResolvedIconURL = newURL
+                keepLastResolvedIconURLUntil = .distantPast
+            } else if lastResolvedIconURL != nil {
+                keepLastResolvedIconURLUntil = Date().addingTimeInterval(iconURLGraceSeconds)
             }
         }
     }

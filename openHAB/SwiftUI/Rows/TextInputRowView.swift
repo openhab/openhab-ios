@@ -160,7 +160,6 @@ private struct TextInputRowContent: View {
             .alert("Enter new value", isPresented: $showInputAlert) {
                 TextField("Enter text", text: $draftInputText)
                     .keyboardType(inputHint == .number ? .numbersAndPunctuation : .default)
-                    
                     .onChange(of: draftInputText) { newValue in
                         filterDraftInput(newValue)
                     }

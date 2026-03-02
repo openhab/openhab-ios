@@ -30,6 +30,7 @@ final class UserData: ObservableObject {
     // Cache last successful widgets to prevent empty state during reconnections
     private var cachedWidgets: [OpenHABWidget] = []
     private var currentlyLoadingSitemap: String?
+    private var lastObservedConnectionURL: String?
 
     private var pageHandlingTask: Task<Void, Never>?
     @Published var isPolling = false
@@ -189,10 +190,25 @@ final class UserData: ObservableObject {
         let activeConnectionStream = await NetworkTracker.shared.activeConnectionStream()
         for await activeConnection in activeConnectionStream {
             guard let activeConnection else {
+                if let lastObservedConnectionURL {
+                    Logger.userData.info("Network connection became unavailable (previous: \(lastObservedConnectionURL, privacy: .public))")
+                    self.lastObservedConnectionURL = nil
+                } else {
+                    Logger.userData.debug("Network connection stream emitted nil (no active connection)")
+                }
                 continue
             }
 
-            Logger.userData.debug("Network connection became available: \(activeConnection.configuration.url)")
+            if lastObservedConnectionURL != activeConnection.configuration.url {
+                if let previousConnectionURL = lastObservedConnectionURL {
+                    Logger.userData.info("Network connection changed: \(previousConnectionURL, privacy: .public) -> \(activeConnection.configuration.url, privacy: .public)")
+                } else {
+                    Logger.userData.info("Network connection became available: \(activeConnection.configuration.url, privacy: .public)")
+                }
+                lastObservedConnectionURL = activeConnection.configuration.url
+            } else {
+                Logger.userData.debug("Network connection still active: \(activeConnection.configuration.url, privacy: .public)")
+            }
 
             if !AppSettings.shared.haveReceivedAppContext {
                 AppMessageService.singleton.requestApplicationContext()
