@@ -351,7 +351,7 @@ extension SitemapPageViewModel {
         guard foregroundRefreshTask == nil else { return }
         logger.info("FG refresh: scheduled")
         foregroundRefreshTask = Task { [weak self] in
-            await self?.startPageHandling(
+            self?.startPageHandling(
                 forceRestart: true,
                 reason: "scene-became-active",
                 preserveCurrentContent: true,

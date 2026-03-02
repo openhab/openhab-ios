@@ -92,6 +92,8 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
 
     @MainActor
     func refreshOnForegroundIfNeeded() {
+        // Avoid restarting the very first page load on initial app activation.
+        guard viewModel.currentPage != nil || !viewModel.isLoading else { return }
         viewModel.refreshOnForeground()
     }
 
@@ -218,6 +220,13 @@ class OpenHABRootViewController: UIViewController {
                 let isSideMenuVisible = SideMenuManager.default.rightMenuNavigationController?.presentingViewController != nil
                 if isSideMenuVisible {
                     becameActiveWhileSideMenuVisible = true
+                    return
+                }
+
+                Task { @MainActor in
+                    if let sitemapVC = currentView as? HostingSitemapViewController {
+                        sitemapVC.refreshOnForegroundIfNeeded()
+                    }
                 }
             }
             .store(in: &cancellables)
