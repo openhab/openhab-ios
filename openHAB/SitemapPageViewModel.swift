@@ -81,6 +81,7 @@ class SitemapPageViewModel: ObservableObject {
     private var openAPIService: OpenAPIService?
     private var activeConnectionInfo: ConnectionInfo?
     private var pageHandlingTask: Task<Void, Never>?
+    private var foregroundRefreshTask: Task<Void, Never>?
     private var connectionObserverTask: Task<Void, Never>?
     private var networkStatusObserverTask: Task<Void, Never>?
     private let commandDispatcher = WidgetCommandDispatcher()
@@ -99,6 +100,7 @@ class SitemapPageViewModel: ObservableObject {
     private var rowWidgetIndex: [RowID: OpenHABWidget] = [:]
     private var sliderValueOverrides: [String: Double] = [:]
     private var sliderOverrideResetTasks: [String: Task<Void, Never>] = [:]
+    private var lastForegroundRefreshAt: Date = .distantPast
 
     var relevantWidgets: [OpenHABWidget] {
         let widgets = currentPage?.widgets ?? []
@@ -316,6 +318,7 @@ class SitemapPageViewModel: ObservableObject {
         connectionObserverTask?.cancel()
         networkStatusObserverTask?.cancel()
         pageHandlingTask?.cancel()
+        foregroundRefreshTask?.cancel()
         commandStateResetTasks.values.forEach { $0.cancel() }
         commandStateResetTasks.removeAll()
         sliderOverrideResetTasks.values.forEach { $0.cancel() }
@@ -333,11 +336,33 @@ extension SitemapPageViewModel {
     func stopPageHandling() {
         pageHandlingTask?.cancel()
         pageHandlingTask = nil
+        foregroundRefreshTask?.cancel()
+        foregroundRefreshTask = nil
         activePageHandlingKey = nil
         activePageHandlingID = nil
     }
 
-    func startPageHandling(forceRestart: Bool = false, reason: String = "manual") {
+    func refreshOnForeground() {
+        // Coalesce repeated .active transitions from scene/system churn.
+        let now = Date()
+        guard now.timeIntervalSince(lastForegroundRefreshAt) > 0.75 else { return }
+        lastForegroundRefreshAt = now
+
+        guard foregroundRefreshTask == nil else { return }
+        logger.info("FG refresh: scheduled")
+        foregroundRefreshTask = Task { [weak self] in
+            await self?.performForegroundRefresh()
+            await MainActor.run {
+                self?.foregroundRefreshTask = nil
+            }
+        }
+    }
+
+    func startPageHandling(forceRestart: Bool = false,
+                           reason: String = "manual",
+                           preserveCurrentContent: Bool = false,
+                           recreateService: Bool = false) {
+        let pipelineStart = Date()
         let requestedKey = "\(defaultSitemap)|\(pageId)"
         if !forceRestart,
            let activeTask = pageHandlingTask,
@@ -349,7 +374,13 @@ extension SitemapPageViewModel {
 
         pageHandlingTask?.cancel()
         error = nil // Clear any previous errors when starting a new page handling session
-        isLoading = true // Show redacted view immediately
+        if preserveCurrentContent, currentPage != nil {
+            isLoading = false
+            isUpdating = true
+        } else {
+            isLoading = true // Show redacted view immediately
+            isUpdating = false
+        }
 
         let runID = UUID()
         activePageHandlingID = runID
@@ -358,30 +389,55 @@ extension SitemapPageViewModel {
         logger.info("🚀 Starting page load and long polling flow (reason: \(reason, privacy: .public), run: \(runID.uuidString, privacy: .public), key: \(requestedKey, privacy: .public))")
 
         pageHandlingTask = Task {
-            defer {
-                if activePageHandlingID == runID {
-                    pageHandlingTask = nil
-                    activePageHandlingID = nil
-                }
-            }
+            await runPageHandling(
+                runID: runID,
+                recreateService: recreateService,
+                pipelineStart: pipelineStart
+            )
+        }
+    }
 
-            do {
-                guard await ensureSitemapAvailableForHandling() else { return }
-                guard let activeConnection = await waitForConnectionForHandling() else { return }
-
-                try setupServiceIfNeeded(activeConnection: activeConnection)
-
-                if defaultSitemapLabel.isEmpty {
-                    await fetchSitemapLabel()
-                }
-
-                try await loadInitialPageForHandling(runID: runID)
-                isLoading = false
-                try await runLongPollingLoop(runID: runID)
-            } catch {
-                handlePageHandlingError(error)
+    private func runPageHandling(
+        runID: UUID,
+        recreateService: Bool,
+        pipelineStart: Date
+    ) async {
+        defer {
+            if activePageHandlingID == runID {
+                pageHandlingTask = nil
+                activePageHandlingID = nil
             }
         }
+
+        do {
+            guard await ensureSitemapAvailableForHandling() else { return }
+
+            guard let activeConnection = await waitForConnectionForHandling() else { return }
+
+            try setupServiceIfNeeded(activeConnection: activeConnection, forceRecreate: recreateService)
+
+            if defaultSitemapLabel.isEmpty {
+                await fetchSitemapLabel()
+            }
+
+            try await loadInitialPageForHandling(runID: runID)
+            isLoading = false
+            isUpdating = false
+            let totalDurationMs = Date().timeIntervalSince(pipelineStart) * 1000
+            logger.info("Sitemap pipeline ready in \(Int(totalDurationMs.rounded()), privacy: .public)ms")
+            try await runLongPollingLoop(runID: runID)
+        } catch {
+            handlePageHandlingError(error)
+        }
+    }
+
+    private func performForegroundRefresh() async {
+        startPageHandling(
+            forceRestart: true,
+            reason: "scene-became-active",
+            preserveCurrentContent: true,
+            recreateService: true
+        )
     }
 
     private func ensureSitemapAvailableForHandling() async -> Bool {
@@ -391,15 +447,27 @@ extension SitemapPageViewModel {
         guard !defaultSitemap.isEmpty else {
             logger.error("startPageHandling: Cannot run with empty sitemap after discovery")
             isLoading = false
+            isUpdating = false
             return false
         }
         return true
     }
 
     private func waitForConnectionForHandling() async -> ConnectionInfo? {
+        if let activeConnection = networkTracker.activeConnection {
+            activeConnectionInfo = activeConnection
+            openHABRootUrl = activeConnection.configuration.url
+            return activeConnection
+        }
+        if let lastKnownConnection = activeConnectionInfo {
+            openHABRootUrl = lastKnownConnection.configuration.url
+            return lastKnownConnection
+        }
+
         guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
             logger.error("Failed to establish connection within timeout")
             isLoading = false
+            isUpdating = false
             return nil
         }
         activeConnectionInfo = activeConnection
@@ -407,9 +475,12 @@ extension SitemapPageViewModel {
         return activeConnection
     }
 
-    private func setupServiceIfNeeded(activeConnection: ConnectionInfo) throws {
-        if openAPIService == nil {
+    private func setupServiceIfNeeded(activeConnection: ConnectionInfo, forceRecreate: Bool = false) throws {
+        if forceRecreate || openAPIService == nil {
             openAPIService = try makeSitemapService(for: activeConnection)
+            if forceRecreate {
+                logger.info("Recreated OpenAPIService for fresh sitemap polling")
+            }
         }
     }
 
@@ -428,6 +499,8 @@ extension SitemapPageViewModel {
 
         if let page = initialPage {
             updateUI(with: page, origin: .initialPoll)
+        } else {
+            logger.info("Initial sitemap poll returned no page data")
         }
     }
 

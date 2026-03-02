@@ -90,6 +90,11 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
         await viewModel.pushSitemap(name: name, path: path)
     }
 
+    @MainActor
+    func refreshOnForegroundIfNeeded() {
+        viewModel.refreshOnForeground()
+    }
+
     // swiftlint:disable:next  function_parameter_count
     func showPopupMessage(seconds: Double,
                           title: String,
@@ -111,6 +116,7 @@ class OpenHABRootViewController: UIViewController {
     var cancellables = Set<AnyCancellable>()
     private let currentViewState = CurrentViewState()
     private var streamTask: Task<Void, Never>?
+    private var becameActiveWhileSideMenuVisible = false
 
     private var apsRegistrationData: [AnyHashable: Any]?
 
@@ -177,6 +183,7 @@ class OpenHABRootViewController: UIViewController {
         switchToSavedView()
         setupTracker()
         startSSEListening()
+        observeAppForegroundForSideMenu()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -202,6 +209,18 @@ class OpenHABRootViewController: UIViewController {
                 await MainActor.run { self.handleSSEMessage(msg) }
             }
         }
+    }
+
+    private func observeAppForegroundForSideMenu() {
+        NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                let isSideMenuVisible = SideMenuManager.default.rightMenuNavigationController?.presentingViewController != nil
+                if isSideMenuVisible {
+                    becameActiveWhileSideMenuVisible = true
+                }
+            }
+            .store(in: &cancellables)
     }
 
     private func handleSSEMessage(_ msg: StreamOutput<StateStreamMessage>) {
@@ -410,6 +429,7 @@ class OpenHABRootViewController: UIViewController {
         .environmentObject(currentViewState)
         let hostingController = UIHostingController(rootView: drawerView)
         let menu = SideMenuNavigationController(rootViewController: hostingController)
+        menu.sideMenuDelegate = self
 
         SideMenuManager.default.rightMenuNavigationController = menu
 
@@ -980,6 +1000,17 @@ class OpenHABRootViewController: UIViewController {
 extension OpenHABRootViewController: SideMenuNavigationControllerDelegate {
     nonisolated func sideMenuWillAppear(menu: SideMenuNavigationController, animated: Bool) {
         Logger.viewController.info("OpenHABRootViewController sideMenuWillAppear")
+    }
+
+    nonisolated func sideMenuDidDisappear(menu: SideMenuNavigationController, animated: Bool) {
+        Task { @MainActor in
+            guard becameActiveWhileSideMenuVisible else { return }
+            becameActiveWhileSideMenuVisible = false
+
+            if let sitemapVC = currentView as? HostingSitemapViewController {
+                sitemapVC.refreshOnForegroundIfNeeded()
+            }
+        }
     }
 }
 

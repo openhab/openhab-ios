@@ -34,7 +34,7 @@ struct SitemapNavigationView: View {
                     hasSeenActivePhase = true
                     return
                 }
-                viewModel.startPageHandling(forceRestart: true, reason: "scene-became-active")
+                viewModel.refreshOnForeground()
             default:
                 break
             }
