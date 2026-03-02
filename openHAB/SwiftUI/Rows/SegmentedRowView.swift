@@ -35,53 +35,52 @@ private struct SegmentedRowContent: View {
     var body: some View {
         let selectedIndex = effectiveSelectedIndex(displayState: input.displayState, mappings: input.mappings)
         RowViewWithIcon(input: input, fallbackSymbol: fallbackSymbol, spacing: 0) {
-            HFlow {
-                if !input.displayState.labelText.isEmpty {
-                    let labelText = input.displayState.labelText
-                    Text(labelText)
-                        .ohTextToken(.rowLabel)
-                        .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
-                        .padding(.leading, 8)
-                        .layoutPriority(1)
-                }
+            if !input.displayState.labelText.isEmpty {
+                let labelText = input.displayState.labelText
+                Text(labelText)
+                    .ohTextToken(.rowLabel)
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
+                    .padding(.leading, 8)
+                    .layoutPriority(1)
+            }
 
-                if let detailTextLabel = input.displayState.labelValue, !detailTextLabel.isEmpty {
-                    Spacer(minLength: 8)
-                    Text(detailTextLabel)
-                        .ohTextToken(.rowValue)
-                        .foregroundStyle(input.valueColor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: input.valueColor))
-                        .layoutPriority(1)
-                        .monospacedDigit()
-                }
+            if let detailTextLabel = input.displayState.labelValue, !detailTextLabel.isEmpty {
+                Spacer(minLength: 8)
+                Text(detailTextLabel)
+                    .ohTextToken(.rowValue)
+                    .foregroundStyle(input.valueColor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: input.valueColor))
+                    .layoutPriority(1)
+                    .monospacedDigit()
+            }
 
-                if !input.mappings.isEmpty {
-                    if input.displayState.hasPressReleaseMappings {
-                        // Press-release buttons for mappings with releaseCommand
-                        if !(input.displayState.labelValue?.isEmpty == false) {
-                            Spacer(minLength: 8)
-                        }
-                        pressReleaseButtons(mappings: input.mappings)
-                            .fixedSize(horizontal: true, vertical: false)
-                            .padding(.leading, 8)
-
-                    } else if input.mappings.count == 1 {
-                        if input.displayState.labelValue.isNilOrEmpty {
-                            Spacer(minLength: 8)
-                        }
-                        singleMappingButton(displayState: input.displayState, mappings: input.mappings, widgetVersion: widgetVersion)
-                            .fixedSize(horizontal: true, vertical: false)
-                            .padding(.leading, 8)
-                    } else {
-                        if input.displayState.labelValue.isNilOrEmpty {
-                            Spacer(minLength: 8)
-                        }
-                        let leadingPadding: CGFloat = input.displayState.labelValue.isNilOrEmpty ? 0 : 8
-                        // Button-based segmented control with animated selection indicator
-                        segmentedButtons(mappings: input.mappings, selectedIndex: selectedIndex, displayState: input.displayState, widgetVersion: widgetVersion)
-                            .frame(minWidth: 75)
-                            .padding(.leading, leadingPadding)
-                            .layoutPriority(1)
+            if !input.mappings.isEmpty {
+                let noInputLabelValue = input.displayState.labelValue.isNilOrEmpty
+                if input.displayState.hasPressReleaseMappings {
+                    // Press-release buttons for mappings with releaseCommand
+                    if !(input.displayState.labelValue?.isEmpty == false) {
+                        Spacer(minLength: 8)
                     }
+                    pressReleaseButtons(mappings: input.mappings)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .padding(.leading, 8)
+
+                } else if input.mappings.count == 1 {
+                    if noInputLabelValue {
+                        Spacer(minLength: 8)
+                    }
+                    singleMappingButton(displayState: input.displayState, mappings: input.mappings, widgetVersion: widgetVersion)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .padding(.leading, 8)
+                } else {
+                    if noInputLabelValue {
+                        Spacer(minLength: 8)
+                    }
+                    let leadingPadding: CGFloat = noInputLabelValue ? 0 : 8
+                    // Button-based segmented control with animated selection indicator
+                    segmentedButtons(mappings: input.mappings, selectedIndex: selectedIndex, displayState: input.displayState, widgetVersion: widgetVersion)
+                        .frame(minWidth: 75)
+                        .padding(.leading, leadingPadding)
+                        .layoutPriority(1)
                 }
             }
         }

@@ -78,7 +78,7 @@ private struct OHTextTokenStyle {
         case .rowLabel:
             OHTextTokenStyle(font: .body, lineLimit: nil, minimumScaleFactor: 1.0)
         case .rowValue:
-            OHTextTokenStyle(font: .body, lineLimit: 1, minimumScaleFactor: 0.9)
+            OHTextTokenStyle(font: .body, lineLimit: nil, minimumScaleFactor: 0.9)
         case .rowValueCompact:
             OHTextTokenStyle(font: .caption, lineLimit: 1, minimumScaleFactor: 0.9)
         case .rowValueCallout:

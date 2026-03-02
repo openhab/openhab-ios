@@ -29,18 +29,24 @@ private struct TextRowContent: View {
 
     var body: some View {
         let displayState = input.displayState
-        RowViewWithIcon(input: input) {
-            HFlow {
-                Text(displayState.labelText)
-                    .ohTextToken(.rowLabel)
-                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
-
-                Spacer()
+        RowViewWithIcon(input: input, spacing: 8) {
+            let labelShown = !displayState.labelText.isEmpty
+            HFlow(spacing: labelShown ? 8 : 0, justified: true) {
+                if labelShown {
+                    Text(displayState.labelText)
+                        .ohTextToken(.rowLabel)
+                        .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
+                }
 
                 if let value = displayState.labelValue {
-                    Text(value)
+                    let text = Text(value)
                         .ohTextToken(.rowValue)
                         .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
+                    if !labelShown {
+                        text.frame(maxWidth: .infinity, alignment: .trailing)
+                    } else {
+                        text
+                    }
                 }
             }
         }

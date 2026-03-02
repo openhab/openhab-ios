@@ -125,16 +125,16 @@ private struct TextInputRowContent: View {
 
     var body: some View {
         let displayState = input.displayState
-        RowViewWithIcon(input: input) {
-            HFlow {
-                if !displayState.labelText.isEmpty {
+        RowViewWithIcon(input: input, spacing: 8) {
+            HFlow(spacing: 8) {
+                let labelShown = !displayState.labelText.isEmpty
+                if labelShown {
                     let labelText = displayState.labelText
                     Text(labelText)
                         .ohTextToken(.rowLabel)
                         .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-
-                Spacer()
 
                 Button {
                     draftInputText = inputText
