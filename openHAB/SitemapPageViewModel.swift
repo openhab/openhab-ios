@@ -351,7 +351,12 @@ extension SitemapPageViewModel {
         guard foregroundRefreshTask == nil else { return }
         logger.info("FG refresh: scheduled")
         foregroundRefreshTask = Task { [weak self] in
-            await self?.performForegroundRefresh()
+            await self?.startPageHandling(
+                forceRestart: true,
+                reason: "scene-became-active",
+                preserveCurrentContent: true,
+                recreateService: true
+            )
             await MainActor.run {
                 self?.foregroundRefreshTask = nil
             }
@@ -431,15 +436,6 @@ extension SitemapPageViewModel {
         }
     }
 
-    private func performForegroundRefresh() async {
-        startPageHandling(
-            forceRestart: true,
-            reason: "scene-became-active",
-            preserveCurrentContent: true,
-            recreateService: true
-        )
-    }
-
     private func ensureSitemapAvailableForHandling() async -> Bool {
         if defaultSitemap.isEmpty {
             await discoverAndSelectSitemap()
@@ -459,10 +455,7 @@ extension SitemapPageViewModel {
             openHABRootUrl = activeConnection.configuration.url
             return activeConnection
         }
-        if let lastKnownConnection = activeConnectionInfo {
-            openHABRootUrl = lastKnownConnection.configuration.url
-            return lastKnownConnection
-        }
+        activeConnectionInfo = nil
 
         guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
             logger.error("Failed to establish connection within timeout")
