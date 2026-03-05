@@ -29,17 +29,16 @@ struct RollershutterRow: View {
             }
             HStack {
                 Spacer()
-                IconWithAction(systemSymbol: .chevronUpCircleFill, accessibilityLabel: "Move up") {
-                    commandSender.send("UP", for: widget, policy: .immediate)
+                IconWithAction(systemSymbol: .chevronDownCircleFill, accessibilityLabel: "Move down") {
+                    commandSender.send("DOWN", for: widget, policy: .immediate)
                 }
                 Spacer()
                 IconWithAction(systemSymbol: .square, accessibilityLabel: "Stop") {
                     commandSender.send("STOP", for: widget, policy: .immediate)
                 }
                 Spacer()
-
-                IconWithAction(systemSymbol: .chevronDownCircleFill, accessibilityLabel: "Move down") {
-                    commandSender.send("DOWN", for: widget, policy: .immediate)
+                IconWithAction(systemSymbol: .chevronUpCircleFill, accessibilityLabel: "Move up") {
+                    commandSender.send("UP", for: widget, policy: .immediate)
                 }
                 Spacer()
             }

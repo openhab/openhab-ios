@@ -47,13 +47,13 @@ private struct SetpointRowContent: View {
 
             Spacer()
 
-            HStack(spacing: 12) {
+            HStack(spacing: 6) {
                 Button {
                     triggerFeedback.toggle()
                     decreaseValue(displayState: displayState)
                 } label: {
                     Image(systemSymbol: .chevronDown)
-                        .font(.body)
+                        .font(.title2)
                         .foregroundStyle(currentValue <= displayState.minValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
@@ -72,7 +72,7 @@ private struct SetpointRowContent: View {
                     increaseValue(displayState: displayState)
                 } label: {
                     Image(systemSymbol: .chevronUp)
-                        .font(.body)
+                        .font(.title2)
                         .foregroundStyle(currentValue >= displayState.maxValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)

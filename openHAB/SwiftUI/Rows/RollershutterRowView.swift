@@ -62,28 +62,28 @@ private struct RollershutterRowContent: View {
                             .ohTextToken(.rowLabel)
                             .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
                     }
-
-                    if let value = displayState.labelValue {
-                        Text(value)
-                            .ohTextToken(.rowValue)
-                            .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
-                    }
                 }
 
-                Spacer()
+                Spacer(minLength: 8)
+
+                if let value = displayState.labelValue {
+                    Text(value)
+                        .ohTextToken(.rowValue)
+                        .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
+                }
 
                 Button {
-                    triggerUpFeedback.toggle()
-                    logger.info("up button pressed")
-                    onSendCommand(.up)
+                    triggerDownFeedback.toggle()
+                    logger.info("down button pressed")
+                    onSendCommand(.down)
                 } label: {
-                    Image(systemSymbol: .chevronUp)
+                    Image(systemSymbol: .chevronDown)
                         .font(.title2)
                         .foregroundStyle(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
                 .ohMinimumHitTarget()
-                .sensoryHeavyFeedbackIfAvailable(trigger: triggerUpFeedback)
+                .sensoryHeavyFeedbackIfAvailable(trigger: triggerDownFeedback)
 
                 Button {
                     triggerStopFeedback.toggle()
@@ -99,17 +99,17 @@ private struct RollershutterRowContent: View {
                 .sensoryStopFeedbackIfAvailable(trigger: triggerStopFeedback)
 
                 Button {
-                    triggerDownFeedback.toggle()
-                    logger.info("down button pressed")
-                    onSendCommand(.down)
+                    triggerUpFeedback.toggle()
+                    logger.info("up button pressed")
+                    onSendCommand(.up)
                 } label: {
-                    Image(systemSymbol: .chevronDown)
+                    Image(systemSymbol: .chevronUp)
                         .font(.title2)
                         .foregroundStyle(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
                 .ohMinimumHitTarget()
-                .sensoryHeavyFeedbackIfAvailable(trigger: triggerDownFeedback)
+                .sensoryHeavyFeedbackIfAvailable(trigger: triggerUpFeedback)
             }
         }
     }
