@@ -62,13 +62,19 @@ private struct RollershutterRowContent: View {
                             .ohTextToken(.rowLabel)
                             .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
                     }
+
+                    if let value = displayState.labelValue {
+                        Text(value)
+                            .ohTextToken(.rowValue)
+                            .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
+                    }
                 }
 
                 Spacer()
 
                 Button {
                     triggerUpFeedback.toggle()
-                    logger.info("\("up button pressed")")
+                    logger.info("up button pressed")
                     onSendCommand(.up)
                 } label: {
                     Image(systemSymbol: .chevronUp)
@@ -81,7 +87,7 @@ private struct RollershutterRowContent: View {
 
                 Button {
                     triggerStopFeedback.toggle()
-                    logger.info("\("stop button pressed")")
+                    logger.info("stop button pressed")
                     onSendCommand(.stop)
                 } label: {
                     Image(systemSymbol: .stop)
@@ -90,11 +96,11 @@ private struct RollershutterRowContent: View {
                 }
                 .buttonStyle(.plain)
                 .ohMinimumHitTarget()
-                .sensoryHeavyFeedbackIfAvailable(trigger: triggerStopFeedback)
+                .sensoryStopFeedbackIfAvailable(trigger: triggerStopFeedback)
 
                 Button {
                     triggerDownFeedback.toggle()
-                    logger.info("\("down button pressed")")
+                    logger.info("down button pressed")
                     onSendCommand(.down)
                 } label: {
                     Image(systemSymbol: .chevronDown)
