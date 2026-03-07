@@ -30,9 +30,15 @@ struct SetpointRow: View {
     }
 
     private var valueText: String {
-        formattedValue(
-            for: currentValue,
-            locale: Locale.current
+        SetpointDisplayFormatter.text(
+            labelValue: viewModel.labelValue,
+            localValue: localValue,
+            serverValue: currentValue,
+            minValue: viewModel.minValue,
+            step: viewModel.step,
+            unit: widget.unit,
+            numberPattern: widget.item?.stateDescription?.numberPattern,
+            locale: SetpointDisplayFormatter.dotDecimalLocale
         )
     }
 
@@ -122,22 +128,6 @@ struct SetpointRow: View {
 
     func increaseValue() {
         handleUpDown(isDecreasing: false)
-    }
-
-    private func formattedValue(for value: Double, locale: Locale) -> String {
-        if let numberPattern = widget.item?.stateDescription?.numberPattern,
-           !numberPattern.isEmpty {
-            return NumberState(
-                value: value,
-                unit: widget.unit,
-                format: numberPattern
-            ).toString(locale: locale)
-        }
-        let fallback = value.valueText(step: viewModel.step)
-        if let unit = widget.unit, !unit.isEmpty {
-            return "\(fallback) \(unit)"
-        }
-        return fallback
     }
 }
 

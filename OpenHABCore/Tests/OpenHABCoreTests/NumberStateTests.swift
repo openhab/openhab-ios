@@ -41,6 +41,122 @@ struct NumberStateTests {
         #expect(NumberState(value: 30.3, unit: "", format: "%d").commandString == "30.3")
     }
 
+    @Test("setpoint formatter prefers server label when idle")
+    func setpointFormatterPrefersServerLabel() {
+        #expect(
+            SetpointDisplayFormatter.text(
+                labelValue: "21.0 °C",
+                localValue: nil,
+                serverValue: 21.0,
+                minValue: 16.0,
+                step: 0.5,
+                unit: "°C",
+                numberPattern: "%.1f %unit%",
+                locale: Locale(identifier: "de")
+            ) == "21.0 °C"
+        )
+    }
+
+    @Test("setpoint formatter formats local override with provided locale")
+    func setpointFormatterFormatsLocalOverride() {
+        #expect(
+            SetpointDisplayFormatter.text(
+                labelValue: "21.0 °C",
+                localValue: 21.5,
+                serverValue: 21.0,
+                minValue: 16.0,
+                step: 0.5,
+                unit: "°C",
+                numberPattern: "%.1f %unit%",
+                locale: Locale(identifier: "en_US")
+            ) == "21.5 °C"
+        )
+        #expect(
+            SetpointDisplayFormatter.text(
+                labelValue: "21.0 °C",
+                localValue: 21.5,
+                serverValue: 21.0,
+                minValue: 16.0,
+                step: 0.5,
+                unit: "°C",
+                numberPattern: "%.1f %unit%",
+                locale: Locale(identifier: "de")
+            ) == "21,5 °C"
+        )
+    }
+
+    @Test("setpoint formatter falls back without number pattern")
+    func setpointFormatterFallsBackWithoutPattern() {
+        #expect(
+            SetpointDisplayFormatter.text(
+                labelValue: nil,
+                localValue: 21.5,
+                serverValue: 21.0,
+                minValue: 16.0,
+                step: 0.5,
+                unit: "°C",
+                numberPattern: nil,
+                locale: Locale(identifier: "de")
+            ) == "21.5 °C"
+        )
+        #expect(
+            SetpointDisplayFormatter.text(
+                labelValue: nil,
+                localValue: 21.5,
+                serverValue: 21.0,
+                minValue: 16.0,
+                step: 0.5,
+                unit: nil,
+                numberPattern: "",
+                locale: Locale(identifier: "de")
+            ) == "21.5"
+        )
+    }
+
+    @Test("setpoint formatter falls back to min value for non-finite input")
+    func setpointFormatterUsesMinValueForNonFiniteInput() {
+        #expect(
+            SetpointDisplayFormatter.text(
+                labelValue: nil,
+                localValue: .nan,
+                serverValue: 21.0,
+                minValue: 16.0,
+                step: 0.5,
+                unit: "°C",
+                numberPattern: nil,
+                locale: SetpointDisplayFormatter.dotDecimalLocale
+            ) == "16.0 °C"
+        )
+        #expect(
+            SetpointDisplayFormatter.text(
+                labelValue: nil,
+                localValue: nil,
+                serverValue: .infinity,
+                minValue: 16.0,
+                step: 0.5,
+                unit: "°C",
+                numberPattern: nil,
+                locale: SetpointDisplayFormatter.dotDecimalLocale
+            ) == "16.0 °C"
+        )
+    }
+
+    @Test("setpoint dot-decimal locale uses dot separator")
+    func dotDecimalLocaleUsesDotSeparator() {
+        #expect(
+            SetpointDisplayFormatter.text(
+                labelValue: nil,
+                localValue: 21.5,
+                serverValue: 21.0,
+                minValue: 16.0,
+                step: 0.5,
+                unit: "°C",
+                numberPattern: "%.1f %unit%",
+                locale: SetpointDisplayFormatter.dotDecimalLocale
+            ) == "21.5 °C"
+        )
+    }
+
     @Test("toItemType parses item type strings")
     func toItemType() {
         #expect("NumberItem".toItemType() == OpenHABItem.ItemType.number)

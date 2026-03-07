@@ -117,24 +117,16 @@ private struct SetpointRowContent: View {
     }
 
     private func formattedValue(displayState: WidgetDisplayState) -> String {
-        if let labelValue = displayState.labelValue, !labelValue.isEmpty {
-            return labelValue
-        }
-
-        let numberState = NumberState(
-            value: currentValue(displayState: displayState),
+        SetpointDisplayFormatter.text(
+            labelValue: displayState.labelValue,
+            localValue: nil,
+            serverValue: currentValue(displayState: displayState),
+            minValue: displayState.minValue,
+            step: displayState.step,
             unit: input.unit,
-            format: input.numberPattern
+            numberPattern: input.numberPattern,
+            locale: Locale.current
         )
-        let formatted = numberState.toString(locale: Locale.current)
-        if !formatted.isEmpty {
-            return formatted
-        }
-        let text = currentValue(displayState: displayState).valueText(step: displayState.step)
-        if let unit = input.unit, !unit.isEmpty {
-            return "\(text) \(unit)"
-        }
-        return text
     }
 }
 
