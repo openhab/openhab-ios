@@ -36,12 +36,14 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
         self.mockServerProperties = mockServerProperties
     }
 
+    // swiftlint:disable:next async_without_await
     func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) async throws {
         if shouldFail {
             throw networkTrackerError
         }
     }
 
+    // swiftlint:disable:next async_without_await
     func updateItemState(itemname: String, with: String, sourcePrefix: String?, deviceId: String?) async throws {
         if shouldFail {
             throw networkTrackerError
@@ -52,6 +54,7 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
         try await getItems()
     }
 
+    // swiftlint:disable:next async_without_await
     func getItems() async throws -> [OpenHABCore.OpenHABItem] {
         if shouldFail {
             throw networkTrackerError
@@ -59,6 +62,7 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
         return []
     }
 
+    // swiftlint:disable:next async_without_await
     func getItemByName(id: String) async throws -> OpenHABCore.OpenHABItem? {
         if shouldFail {
             throw networkTrackerError
@@ -66,6 +70,7 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
         return nil
     }
 
+    // swiftlint:disable:next async_without_await
     func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) async throws -> OpenHABCore.OpenHABPage? {
         if shouldFail {
             throw networkTrackerError
@@ -73,12 +78,14 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
         return nil
     }
 
+    // swiftlint:disable:next async_without_await
     func runNow(ruleUID: String, payload: [String: any Sendable]) async throws {
         if shouldFail {
             throw networkTrackerError
         }
     }
 
+    // swiftlint:disable:next async_without_await
     func getRootVersion() async throws -> Int {
         if shouldFail {
             throw networkTrackerError
@@ -87,6 +94,7 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
     }
 
     @discardableResult
+    // swiftlint:disable:next async_without_await
     func getRoot() async throws -> OpenHABServerProperties {
         if shouldFail {
             throw networkTrackerError

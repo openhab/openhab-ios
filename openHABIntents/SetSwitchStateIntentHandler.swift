@@ -33,6 +33,7 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
         await OpenHABIntentHelper.getHomeOptions()
     }
 
+    // swiftlint:disable:next async_without_await
     func provideActionOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
         Logger.intentHandling.info("SetSwitchStateIntentHandler provideActionOptionsCollection")
         return INObjectCollection(items: Self.localizedActions as [NSString])
@@ -48,6 +49,7 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
         return await OpenHABIntentHelper.getItemOptions(home: intent.home, itemTypes: [.switchItem])
     }
 
+    // swiftlint:disable:next async_without_await
     func confirm(intent: OpenHABSetSwitchStateIntent) async -> OpenHABSetSwitchStateIntentResponse {
         .init(code: .ready, userActivity: nil)
     }

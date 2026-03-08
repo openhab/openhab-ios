@@ -50,7 +50,7 @@ struct LoggerView: View {
         }
         .task {
             if logs.isEmpty { // Prevents overwriting preview logs
-                await loadLogs()
+                loadLogs()
             }
         }
         .toolbar {
@@ -71,13 +71,13 @@ struct LoggerView: View {
         _isLoading = State(initialValue: logs.isEmpty) // Set isLoading based on logs
     }
 
-    private func loadLogs() async {
+    private func loadLogs() {
         isLoading = true
         defer { isLoading = false }
-        logs = await fetchLogs(with: template)
+        logs = fetchLogs(with: template)
     }
 
-    func fetchLogs(with template: NSPredicate) async -> [LogEntry] {
+    func fetchLogs(with template: NSPredicate) -> [LogEntry] {
         let predicate = template.withSubstitutionVariables(["PREFIX": "org.openhab"])
 
         do {

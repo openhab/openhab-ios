@@ -230,6 +230,7 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
     }
 
     // Show alert if certificate import failed
+    // swiftlint:disable:next async_without_await
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async {
         let alertController = UIAlertController(
             title: NSLocalizedString("certificate_import_title", comment: ""),

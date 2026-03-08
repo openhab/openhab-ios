@@ -59,7 +59,7 @@ struct OpenHABWatch: App {
                     guard wasInBackground else { return }
                     wasInBackground = false
                     Task { @MainActor in
-                        await userData.refreshUrl(force: true)
+                        userData.refreshUrl(force: true)
                     }
                 default:
                     break

@@ -530,6 +530,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         return .allow
     }
 
+    // swiftlint:disable:next async_without_await
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         if let response = navigationResponse.response as? HTTPURLResponse {
             Logger.viewController.info("navigationResponse: \(response.statusCode)")
@@ -630,10 +631,12 @@ extension OpenHABWebViewController: WKUIDelegate {
         return nil
     }
 
+    // swiftlint:disable async_without_await
     func webView(_ webView: WKWebView,
                  decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
                  initiatedBy frame: WKFrameInfo,
                  type: WKMediaCaptureType) async -> WKPermissionDecision {
         Preferences.shared.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
     }
+    // swiftlint:enable async_without_await
 }

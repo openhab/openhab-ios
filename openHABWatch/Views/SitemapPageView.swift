@@ -123,7 +123,7 @@ struct SitemapPageView: View {
             )
         }
         .refreshable {
-            await viewModel.refreshUrl(force: true)
+            viewModel.refreshUrl(force: true)
         }
     }
 

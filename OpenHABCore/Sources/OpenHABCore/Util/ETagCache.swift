@@ -81,29 +81,29 @@ public actor ETagCache {
     }
 
     /// Stores an ETag for a given URL and persists to disk
-    public func storeETag(_ etag: String, for url: String) async {
+    public func storeETag(_ etag: String, for url: String) {
         etags[url] = etag
-        await saveETags()
+        saveETags()
         Logger.etagCache.debug("Stored ETag for \(url): \(etag)")
     }
 
     /// Removes the cached ETag for a given URL
-    public func clearETag(for url: String) async {
+    public func clearETag(for url: String) {
         etags.removeValue(forKey: url)
-        await saveETags()
+        saveETags()
         Logger.etagCache.debug("Cleared ETag for \(url)")
     }
 
     /// Clears all cached ETags
-    public func clearAll() async {
+    public func clearAll() {
         etags.removeAll()
-        await saveETags()
+        saveETags()
         Logger.etagCache.info("Cleared all cached ETags")
     }
 
     // MARK: - Persistence
 
-    private func saveETags() async {
+    private func saveETags() {
         guard let path = persistencePath else {
             Logger.etagCache.debug("No persistence path, skipping save")
             return

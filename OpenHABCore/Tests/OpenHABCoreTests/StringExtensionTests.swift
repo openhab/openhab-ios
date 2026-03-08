@@ -12,7 +12,7 @@
 import Testing
 
 struct StringExtensionTests {
-    @Test func testRemoveTrailingSlashes() async throws {
+    @Test func testRemoveTrailingSlashes() throws {
         #expect("example/".removeTrailingSlashes() == "example")
         #expect("example//".removeTrailingSlashes() == "example")
         #expect("example/path//".removeTrailingSlashes() == "example/path")

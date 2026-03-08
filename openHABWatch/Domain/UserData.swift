@@ -415,7 +415,7 @@ final class UserData: ObservableObject {
         }
     }
 
-    func refreshUrl(force: Bool = false) async {
+    func refreshUrl(force: Bool = false) {
         guard AppSettings.shared.haveReceivedAppContext, !AppSettings.shared.sitemapForWatch.isEmpty else { return }
 
         showAlert = false

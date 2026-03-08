@@ -57,10 +57,10 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
                 let result = await handleServerTrust(challenge: challenge)
                 return result
             case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
-                let result = await handleBasicAuth(challenge: challenge)
+                let result = handleBasicAuth(challenge: challenge)
                 return result
             case NSURLAuthenticationMethodClientCertificate:
-                let result = await handleClientCertificateAuth(challenge: challenge)
+                let result = handleClientCertificateAuth(challenge: challenge)
                 return result
             default:
                 return (.performDefaultHandling, nil)
@@ -151,12 +151,12 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
         }
     }
 
-    private func handleBasicAuth(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+    private func handleBasicAuth(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         let credential = URLCredential(user: connectionConfiguration.username, password: connectionConfiguration.password, persistence: .forSession)
         return (.useCredential, credential)
     }
 
-    private func handleClientCertificateAuth(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+    private func handleClientCertificateAuth(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         let certificateManager = ClientCertificateManager()
         let (disposition, credential) = certificateManager.evaluateTrust(with: challenge)
         return (disposition, credential)

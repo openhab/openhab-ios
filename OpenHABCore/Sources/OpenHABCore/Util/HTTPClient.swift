@@ -95,7 +95,7 @@ public actor CertificateStore {
         // If migration occurred, persist the new format
         if needsMigration {
             Task {
-                await self.saveTrustedCertificates()
+                self.saveTrustedCertificates()
                 Logger.httpClient.info("Migration completed, saved in new format")
             }
         }
@@ -112,7 +112,7 @@ public actor CertificateStore {
             // If migration occurred, persist the new format
             if needsMigration {
                 Task {
-                    await self.saveTrustedCertificates()
+                    self.saveTrustedCertificates()
                     Logger.httpClient.info("Migration completed, saved in new format")
                 }
             }
@@ -173,7 +173,7 @@ public actor CertificateStore {
         }
     }
 
-    private func saveTrustedCertificates() async {
+    private func saveTrustedCertificates() {
         guard let path = persistencePath else {
             // In-memory mode, no persistence
             return
@@ -203,7 +203,7 @@ public actor CertificateStore {
         }
     }
 
-    public func storeCertificateData(_ certificate: Data?, forDomain domain: String) async {
+    public func storeCertificateData(_ certificate: Data?, forDomain domain: String) {
         if let certificate {
             trustedCertificates[domain] = CertificateEntry(data: certificate, dateAccepted: Date())
             Logger.httpClient.debug("Stored certificate for domain \(domain), size: \(certificate.count) bytes")
@@ -211,26 +211,26 @@ public actor CertificateStore {
             trustedCertificates[domain] = nil
             Logger.httpClient.debug("Removed certificate for domain \(domain)")
         }
-        await saveTrustedCertificates()
+        saveTrustedCertificates()
     }
 
-    public func certificateData(forDomain domain: String) async -> Data? {
+    public func certificateData(forDomain domain: String) -> Data? {
         let data = trustedCertificates[domain]?.data
         Logger.httpClient.debug("Retrieved certificate for domain \(domain): \(data?.count ?? 0) bytes")
         return data
     }
 
-    public func getAllCertificates() async -> [String: CertificateEntry] {
+    public func getAllCertificates() -> [String: CertificateEntry] {
         trustedCertificates
     }
 
-    public func getCertificateInfo(forDomain domain: String) async -> CertificateEntry? {
+    public func getCertificateInfo(forDomain domain: String) -> CertificateEntry? {
         trustedCertificates[domain]
     }
 
-    public func removeCertificate(forDomain domain: String) async {
+    public func removeCertificate(forDomain domain: String) {
         trustedCertificates.removeValue(forKey: domain)
-        await saveTrustedCertificates()
+        saveTrustedCertificates()
     }
 }
 

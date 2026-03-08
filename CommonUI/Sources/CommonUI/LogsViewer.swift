@@ -32,13 +32,13 @@ public struct LogsViewer: View {
                 .padding()
         }
         .task {
-            text = await fetchLogs()
+            text = fetchLogs()
         }
     }
 
     public init() {}
 
-    private func fetchLogs() async -> String {
+    private func fetchLogs() -> String {
         let calendar = Calendar.current
         guard let dayAgo = calendar.date(
             byAdding: .day,
@@ -54,7 +54,7 @@ public struct LogsViewer: View {
                     "PREFIX": "org.openhab"
                 ])
 
-            let logs = try await Logger.fetch(
+            let logs = try Logger.fetch(
                 since: dayAgo,
                 predicateFormat: predicate.predicateFormat
             )
@@ -81,7 +81,7 @@ private extension OSLogEntryLog.Level {
 
 public extension Logger {
     static func fetch(since date: Date,
-                      predicateFormat: String) async throws -> [String] {
+                      predicateFormat: String) throws -> [String] {
         let store = try OSLogStore(scope: .currentProcessIdentifier)
         let position = store.position(date: date)
         let predicate = NSPredicate(format: predicateFormat)

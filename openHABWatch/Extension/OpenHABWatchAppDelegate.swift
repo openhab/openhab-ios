@@ -66,11 +66,13 @@ extension OpenHABWatchAppDelegate: WKApplicationDelegate {
 
 extension OpenHABWatchAppDelegate: ClientCertificateManagerDelegate {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
+    // swiftlint:disable:next async_without_await
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool {
         true
     }
 
     // delegate should ask user for the export password used to decode the PKCS#12
+    // swiftlint:disable:next async_without_await
     func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String? {
         nil
     }

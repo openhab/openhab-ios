@@ -169,7 +169,7 @@ actor NotificationServiceHandler {
     private func downloadAndAttachMedia(url: String, config: ConnectionConfiguration) async throws -> UNNotificationAttachment? {
         let (localURL, mimeType) = try await downloadMedia(url: url, config: config)
         guard let localURL else { return nil }
-        return await attachFile(localURL: localURL, mimeType: mimeType)
+        return attachFile(localURL: localURL, mimeType: mimeType)
     }
 
     private func downloadMedia(url: String, config: ConnectionConfiguration) async throws -> (URL?, String?) {
@@ -195,7 +195,7 @@ actor NotificationServiceHandler {
     func downloadAndAttachItemImage(itemURI: String) async throws -> UNNotificationAttachment? {
         let (tempFileURL, mimeType) = try await downloadItemImage(itemURI: itemURI)
         guard let tempFileURL else { return nil }
-        return await attachFile(localURL: tempFileURL, mimeType: mimeType)
+        return attachFile(localURL: tempFileURL, mimeType: mimeType)
     }
 
     func downloadItemImage(itemURI: String) async throws -> (URL?, String?) {
@@ -228,7 +228,7 @@ actor NotificationServiceHandler {
         return (tempFileURL, mimeType)
     }
 
-    func attachFile(localURL: URL, mimeType: String?) async -> UNNotificationAttachment? {
+    func attachFile(localURL: URL, mimeType: String?) -> UNNotificationAttachment? {
         do {
             let fileManager = FileManager.default
             let tempDirectory = NSTemporaryDirectory()

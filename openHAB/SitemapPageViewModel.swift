@@ -737,7 +737,7 @@ extension SitemapPageViewModel {
     }
 
     @MainActor
-    func pushSitemap(name: String, path: String?) async {
+    func pushSitemap(name: String, path: String?) {
         defaultSitemap = name
         defaultSitemapLabel = "" // Clear old label so it gets fetched for the new sitemap
         pageId = path ?? ""
@@ -830,7 +830,7 @@ extension SitemapPageViewModel {
         }
 
         Task {
-            await handleActiveConnection(activeConnection)
+            handleActiveConnection(activeConnection)
         }
     }
 
@@ -855,7 +855,7 @@ extension SitemapPageViewModel {
         }
     }
 
-    private func handleActiveConnection(_ connection: ConnectionInfo) async {
+    private func handleActiveConnection(_ connection: ConnectionInfo) {
         let previousURL = activeConnectionInfo?.configuration.url
         let newURL = connection.configuration.url
         let connectionDidChange = previousURL != newURL
@@ -879,7 +879,7 @@ extension SitemapPageViewModel {
         }
     }
 
-    func selectSitemap() async {
+    func selectSitemap() {
         startPageHandling(forceRestart: true, reason: "select-sitemap")
     }
 

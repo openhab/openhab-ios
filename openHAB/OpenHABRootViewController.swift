@@ -85,9 +85,9 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
         }
     }
 
-    func pushSitemap(name: String, path: String?) async {
+    func pushSitemap(name: String, path: String?) {
         // Implement pushing logic into SitemapPageViewModel
-        await viewModel.pushSitemap(name: name, path: path)
+        viewModel.pushSitemap(name: name, path: path)
     }
 
     @MainActor
@@ -676,7 +676,7 @@ class OpenHABRootViewController: UIViewController {
                 }
                 if let sitemap {
                     Task { @MainActor in
-                        await (sitemapViewController as? HostingSitemapViewController)?.pushSitemap(name: sitemap, path: widgetId)
+                        (sitemapViewController as? HostingSitemapViewController)?.pushSitemap(name: sitemap, path: widgetId)
                     }
                 }
             } else {
@@ -1031,7 +1031,7 @@ extension OpenHABRootViewController: ModalHandler {
             switch to {
             case let .sitemap(sitemapName):
                 switchView(target: to)
-                await (sitemapViewController as? HostingSitemapViewController)?.pushSitemap(name: sitemapName, path: nil)
+                (sitemapViewController as? HostingSitemapViewController)?.pushSitemap(name: sitemapName, path: nil)
             case .settings:
                 let hostingController = UIHostingController(rootView: NavigationView { SettingsView() })
                 present(hostingController, animated: true)

@@ -67,7 +67,7 @@ public actor ConnectionPool {
     }
 
     @discardableResult
-    func getOrCreateService(for configuration: ConnectionConfiguration) async throws -> any OpenAPIServiceProtocol {
+    func getOrCreateService(for configuration: ConnectionConfiguration) throws -> any OpenAPIServiceProtocol {
         if let existing = services[configuration] {
             return existing
         }
