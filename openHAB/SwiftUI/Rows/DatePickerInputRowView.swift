@@ -36,7 +36,9 @@ private struct DateInputRowContent: View {
     let inputHint: OpenHABWidget.InputHint
     let onSendCommand: (String) -> Void
 
-    @State private var selectedDate = Date()
+    @State private var suppressSendingNewValue = false
+    @State private var suppressNextServerSync = false
+    @State private var selectedDate = Date.distantPast
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetDatePickerInputView")
 
@@ -48,7 +50,7 @@ private struct DateInputRowContent: View {
         default: [.date, .hourAndMinute]
         }
     }
-
+    
     var body: some View {
         let displayState = input.displayState
         RowViewWithIcon(input: input) {
@@ -68,52 +70,39 @@ private struct DateInputRowContent: View {
                 EmptyView()
             }
             .onChange(of: selectedDate) { newDate in
+                guard !suppressSendingNewValue else {
+                    suppressSendingNewValue = false
+                    return
+                }
                 sendDateCommand(newDate)
             }
             .disabled(input.readOnly)
         }
         .onAppear {
-            let state = displayState.effectiveState
-            if !state.isEmpty {
-                selectedDate = parseDate(from: state) ?? Date()
-            }
+            let newDate = DateFormatter.iso8601Full.date(from: displayState.effectiveState) ?? Date.now
+            programmaticallySetDate(newDate)
         }
+        .onChange(of: displayState.effectiveState) { newState in
+            guard !suppressNextServerSync else {
+                suppressNextServerSync = false
+                return
+            }
+            let newDate = DateFormatter.iso8601Full.date(from: newState) ?? Date()
+            programmaticallySetDate(newDate)
+        }
+    }
+    
+    private func programmaticallySetDate(_ newDate: Date) {
+        suppressSendingNewValue = selectedDate != newDate
+        selectedDate = newDate
     }
 
     private func sendDateCommand(_ date: Date) {
-        let formatter = DateFormatter()
-
-        switch inputHint {
-        case .date:
-            formatter.dateFormat = "yyyy-MM-dd"
-        case .time:
-            formatter.dateFormat = "HH:mm"
-        case .dateTime:
-            formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        default:
-            formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        }
-
+        let formatter = DateFormatter.iso8601Full
         let command = formatter.string(from: date)
         logger.info("Sending date command: \(command)")
+        suppressNextServerSync = true
         onSendCommand(command)
-    }
-
-    private func parseDate(from state: String) -> Date? {
-        let formatters = [
-            "yyyy-MM-dd'T'HH:mm:ss",
-            "yyyy-MM-dd",
-            "HH:mm"
-        ]
-
-        for format in formatters {
-            let formatter = DateFormatter()
-            formatter.dateFormat = format
-            if let date = formatter.date(from: state) {
-                return date
-            }
-        }
-        return nil
     }
 }
 
