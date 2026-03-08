@@ -26,14 +26,18 @@ struct SetpointRow: View {
     @State private var commandSender = WidgetCommandDispatcher()
 
     private var currentValue: Double {
-        localValue ?? viewModel.numberState?.value ?? viewModel.minValue
+        localValue ?? serverValue
+    }
+
+    private var serverValue: Double {
+        viewModel.numberState?.value ?? viewModel.minValue
     }
 
     private var valueText: String {
         SetpointDisplayFormatter.text(
             labelValue: viewModel.labelValue,
             localValue: localValue,
-            serverValue: currentValue,
+            serverValue: serverValue,
             minValue: viewModel.minValue,
             step: viewModel.step,
             unit: widget.unit,
