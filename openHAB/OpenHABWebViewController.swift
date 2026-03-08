@@ -530,7 +530,8 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         return .allow
     }
 
-    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) -> WKNavigationResponsePolicy {
+    // swiftlint:disable:next async_without_await
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         if let response = navigationResponse.response as? HTTPURLResponse {
             Logger.viewController.info("navigationResponse: \(response.statusCode)")
 
