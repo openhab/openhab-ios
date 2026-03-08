@@ -95,7 +95,7 @@ public actor CertificateStore {
         // If migration occurred, persist the new format
         if needsMigration {
             Task {
-                self.saveTrustedCertificates()
+                await self.saveTrustedCertificates()
                 Logger.httpClient.info("Migration completed, saved in new format")
             }
         }
@@ -112,7 +112,7 @@ public actor CertificateStore {
             // If migration occurred, persist the new format
             if needsMigration {
                 Task {
-                    self.saveTrustedCertificates()
+                    await self.saveTrustedCertificates()
                     Logger.httpClient.info("Migration completed, saved in new format")
                 }
             }
