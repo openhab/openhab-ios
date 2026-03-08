@@ -20,7 +20,7 @@ public protocol ClientCertificateManagerDelegate: AnyObject {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
     func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String?
     // delegate should alert the user that an error occured importing the certificate
-    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String)
 }
 
 public class ClientCertificateManager {
@@ -183,7 +183,7 @@ public class ClientCertificateManager {
 
         default:
             let errMsg = String(format: NSLocalizedString("unable_to_decode_certificate", comment: ""), "\(status)")
-            await delegate?.alertClientCertificateError(self, errMsg: errMsg)
+            delegate?.alertClientCertificateError(self, errMsg: errMsg)
         }
     }
 
@@ -265,7 +265,7 @@ public class ClientCertificateManager {
                 errorMessage = NSLocalizedString("certficate_exists", comment: "")
             }
 
-            await delegate?.alertClientCertificateError(self, errMsg: errorMessage)
+            delegate?.alertClientCertificateError(self, errMsg: errorMessage)
         }
     }
 

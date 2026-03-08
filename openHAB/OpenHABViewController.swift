@@ -159,7 +159,9 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
     func acceptedServerCertificatesChanged() {
         // User's decision about trusting server certificates has changed.  Send updates to the paired watch.
         Task {
-            await WatchMessageService.singleton.syncPreferencesToWatch()
+            await MainActor.run {
+                WatchMessageService.singleton.syncPreferencesToWatch()
+            }
         }
     }
 }
@@ -230,8 +232,7 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
     }
 
     // Show alert if certificate import failed
-    // swiftlint:disable:next async_without_await
-    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async {
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {
         let alertController = UIAlertController(
             title: NSLocalizedString("certificate_import_title", comment: ""),
             message: errMsg,

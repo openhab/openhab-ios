@@ -68,20 +68,18 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     // MARK: - Sync Preferences
 
     @MainActor
-    // swiftlint:disable:next async_without_await
-    func subscribeToPreferences() async {
+    func subscribeToPreferences() {
         preferencesSubscription = Preferences.shared.$currentHomePreferences
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { _ in } receiveValue: { homeSettings in
                 Task { @MainActor in
-                    await self.syncPreferencesToWatch(homeSettings)
+                    self.syncPreferencesToWatch(homeSettings)
                 }
             }
     }
 
     @MainActor
-    // swiftlint:disable:next async_without_await
-    func syncPreferencesToWatch(_ homeSettings: HomePreferences? = nil) async {
+    func syncPreferencesToWatch(_ homeSettings: HomePreferences? = nil) {
         guard WCSession.default.activationState == .activated else {
             Logger.preferences.warning("WCSession not activated; skipping sync.")
             return

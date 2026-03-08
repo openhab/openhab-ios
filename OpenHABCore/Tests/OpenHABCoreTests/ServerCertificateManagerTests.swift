@@ -19,20 +19,17 @@ final class MockServerCertificateDelegate: ServerCertificateManagerDelegate, @un
     nonisolated(unsafe) var expectedResult: ServerCertificateManager.EvaluateResult = .permitOnce
     nonisolated(unsafe) var acceptedChangedCalled = false
 
-    // swiftlint:disable:next async_without_await
-    nonisolated func evaluateServerTrust(summary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult {
+    nonisolated func evaluateServerTrust(summary: String?, forDomain domain: String?) -> ServerCertificateManager.EvaluateResult {
         lastCall = "evaluateServerTrust"
         return expectedResult
     }
 
-    // swiftlint:disable:next async_without_await
-    nonisolated func evaluateCertificateMismatch(summary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult {
+    nonisolated func evaluateCertificateMismatch(summary: String?, forDomain domain: String?) -> ServerCertificateManager.EvaluateResult {
         lastCall = "evaluateCertificateMismatch"
         return expectedResult
     }
 
-    // swiftlint:disable:next async_without_await
-    nonisolated func acceptedServerCertificatesChanged() async {
+    nonisolated func acceptedServerCertificatesChanged() {
         acceptedChangedCalled = true
     }
 }

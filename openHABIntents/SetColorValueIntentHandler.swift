@@ -32,8 +32,7 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
         await OpenHABIntentHelper.getItemOptions(home: intent.home, itemTypes: [.color])
     }
 
-    // swiftlint:disable:next async_without_await
-    func confirm(intent: OpenHABSetColorValueIntent) async -> OpenHABSetColorValueIntentResponse {
+    func confirm(intent: OpenHABSetColorValueIntent) -> OpenHABSetColorValueIntentResponse {
         OpenHABSetColorValueIntentResponse(code: .ready, userActivity: nil)
     }
 

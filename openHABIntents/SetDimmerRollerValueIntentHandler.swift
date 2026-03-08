@@ -32,8 +32,7 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
         await OpenHABIntentHelper.getItemOptions(home: intent.home, itemTypes: [.dimmer, .rollershutter])
     }
 
-    // swiftlint:disable:next async_without_await
-    func confirm(intent: OpenHABSetDimmerRollerValueIntent) async -> OpenHABSetDimmerRollerValueIntentResponse {
+    func confirm(intent: OpenHABSetDimmerRollerValueIntent) -> OpenHABSetDimmerRollerValueIntentResponse {
         OpenHABSetDimmerRollerValueIntentResponse(code: .ready, userActivity: nil)
     }
 

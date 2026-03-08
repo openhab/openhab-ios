@@ -32,8 +32,7 @@ class SetNumberValueIntentHandler: NSObject, OpenHABSetNumberValueIntentHandling
         await OpenHABIntentHelper.getItemOptions(home: intent.home, itemTypes: [.number])
     }
 
-    // swiftlint:disable:next async_without_await
-    func confirm(intent: OpenHABSetNumberValueIntent) async -> OpenHABSetNumberValueIntentResponse {
+    func confirm(intent: OpenHABSetNumberValueIntent) -> OpenHABSetNumberValueIntentResponse {
         OpenHABSetNumberValueIntentResponse(code: .ready, userActivity: nil)
     }
 

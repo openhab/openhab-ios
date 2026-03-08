@@ -365,7 +365,7 @@ class OpenHABRootViewController: UIViewController {
             queue: nil
         ) { _ in
             Task { @MainActor in
-                await WatchMessageService.singleton.syncPreferencesToWatch()
+                WatchMessageService.singleton.syncPreferencesToWatch()
                 await NetworkTracker.shared.restartTracking()
             }
         }

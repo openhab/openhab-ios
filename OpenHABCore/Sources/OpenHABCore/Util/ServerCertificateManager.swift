@@ -19,7 +19,7 @@ public protocol ServerCertificateManagerDelegate: AnyObject, Sendable {
     // certificate received from openHAB doesn't match our record, ask user for a decision
     func evaluateCertificateMismatch(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult
     // notify delegate that the certificagtes that a user is willing to trust has changed
-    func acceptedServerCertificatesChanged() async
+    func acceptedServerCertificatesChanged()
 }
 
 enum ServerCertificateManagerError: Error {
@@ -129,7 +129,7 @@ public final class ServerCertificateManager {
             // User decided to accept invalid certificate and remember decision
             // Add certificate to storage
             await storeCertificateData(certificateData, forDomain: domain)
-            await delegate.acceptedServerCertificatesChanged()
+            delegate.acceptedServerCertificatesChanged()
             Logger.serverCert.info("User chose to trust cert for \(domain) permanently")
             return
         @unknown default:

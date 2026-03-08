@@ -20,18 +20,15 @@ final class MockClientCertDelegate: ClientCertificateManagerDelegate {
     var receivedErrorMessage: String?
     var receivedErrorCode: OSStatus?
 
-    // swiftlint:disable:next async_without_await
-    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool {
+    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) -> Bool {
         shouldImport
     }
 
-    // swiftlint:disable:next async_without_await
-    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String? {
+    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) -> String? {
         password
     }
 
-    // swiftlint:disable:next async_without_await
-    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async {
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {
         receivedErrorMessage = errMsg
         if let code = Int(errMsg.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()) {
             receivedErrorCode = OSStatus(code)

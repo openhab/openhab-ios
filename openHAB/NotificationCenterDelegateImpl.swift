@@ -69,8 +69,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
     }
 
     // this is called when clicking a notification while in the background
-    // swiftlint:disable:next async_without_await
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) {
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier
 

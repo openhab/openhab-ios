@@ -32,8 +32,7 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
         await OpenHABIntentHelper.getItemOptions(home: intent.home)
     }
 
-    // swiftlint:disable:next async_without_await
-    func confirm(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
+    func confirm(intent: OpenHABGetItemStateIntent) -> OpenHABGetItemStateIntentResponse {
         OpenHABGetItemStateIntentResponse(code: .ready, userActivity: nil)
     }
 

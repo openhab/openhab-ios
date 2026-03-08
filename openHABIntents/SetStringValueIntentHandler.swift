@@ -32,8 +32,7 @@ class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling
         await OpenHABIntentHelper.getItemOptions(home: intent.home, itemTypes: [.stringItem])
     }
 
-    // swiftlint:disable:next async_without_await
-    func confirm(intent: OpenHABSetStringValueIntent) async -> OpenHABSetStringValueIntentResponse {
+    func confirm(intent: OpenHABSetStringValueIntent) -> OpenHABSetStringValueIntentResponse {
         OpenHABSetStringValueIntentResponse(code: .ready, userActivity: nil)
     }
 
