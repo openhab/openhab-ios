@@ -2,6 +2,41 @@
 
 ## [Unreleased]
 
+### Architecture
+- iOS: retire legacy UIKit sitemap view controller and cell providers; rewrite sitemap page fully in SwiftUI
+- iOS: introduce immutable typed row-input pipeline; decouple all row views from OpenHABWidget
+- iOS/watchOS: extract WidgetDisplayState for snapshot-based consistent rendering
+- iOS/watchOS: centralise command dispatch with WidgetCommandDispatcher/WidgetCommandSender
+- iOS: add OHTextToken design system for consistent typography and value formatting
+- iOS: add command lifecycle tracking with toolbar indicator; add offline command queuing
+
+### Rows
+- iOS/watchOS: rollershutter and setpoint chevron convergence; display rollershutter value in row
+- iOS/watchOS: unify setpoint value formatting with locale-aware SetpointDisplayFormatter
+- iOS: color picker — suppress echo sends; clamp and round HSB values
+- iOS: color temperature picker — suppress echo sends; guard drag state; layout adjustments (#1073)
+- iOS: slider — fix yo-yo and stale state; ephemeral drag value; fix integer format truncation
+- iOS: segmented/selection — add optimistic selection; restrict hit target after label (#1079); iPad layout adjustments (#1078)
+- iOS: text/number input — inline validation; multiline labels; allow 0; match UIKit alert style
+- iOS/watchOS: apply Liquid Glass flow effect to more row types; improve spacing
+- watchOS: inline buttons fire on release within bounds; constrain hit area to visible region
+
+### Reliability
+- iOS/watchOS: fix stale widget state on background→foreground (#1075)
+- iOS/watchOS: force page refresh when returning from background; refresh on every scene-active transition
+- iOS: keep sitemap long-polling alive across transient failures; cancel on view disappear
+- iOS: disable URL cache for sitemap service; bypass HTTP cache for image widgets on reload (#1083)
+- iOS: fix RFC 3986 relative URL resolution in resolveFullURL (#1084)
+- iOS: fix auth challenge host matching; fix scene-active URL cache race
+- iOS: fix chart rendering — stable flicker-free architecture, widget identity, cache buster
+- iOS: decode SVG images at full size for media/image widgets; handle empty SVG icons
+- iOS: fix webview authentication, scroll-to-top on long-poll, and ButtonGrid command target
+- watchOS: fix commands silently failing after long poll; disable request caching for long-poll
+- watchOS: fix transient icon dropout; fix backoff overflow; fix stale row state token
+
+### watchOS
+- watchOS: add accessibility labels across all row views
+- watchOS: add dedicated Swift Testing test target
 
 
 ## [Version 3.1.50, Build 207] - 2026-02-26Z
