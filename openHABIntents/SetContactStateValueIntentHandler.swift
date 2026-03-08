@@ -33,7 +33,8 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
         await OpenHABIntentHelper.getHomeOptions()
     }
 
-    func provideStateOptionsCollection(for intent: OpenHABSetContactStateValueIntent) throws -> INObjectCollection<NSString> {
+    // swiftlint:disable:next async_without_await
+    func provideStateOptionsCollection(for intent: OpenHABSetContactStateValueIntent) async throws -> INObjectCollection<NSString> {
         INObjectCollection(items: Self.localizedActions as [NSString])
     }
 
