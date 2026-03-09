@@ -58,7 +58,7 @@ struct SetpointRow: View {
                 Spacer()
 
                 Button(action: decreaseValue) {
-                    Image(systemSymbol: .chevronDownCircleFill)
+                    Image(systemSymbol: .minusCircleFill)
                         .font(.system(size: 25))
                         .foregroundStyle(currentValue <= viewModel.minValue ? Color.gray : Color.blue)
                 }
@@ -77,7 +77,7 @@ struct SetpointRow: View {
                 Spacer()
 
                 Button(action: increaseValue) {
-                    Image(systemSymbol: .chevronUpCircleFill)
+                    Image(systemSymbol: .plusCircleFill)
                         .font(.system(size: 25))
                         .foregroundStyle(currentValue >= viewModel.maxValue ? Color.gray : Color.blue)
                 }
