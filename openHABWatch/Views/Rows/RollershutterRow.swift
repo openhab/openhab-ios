@@ -33,7 +33,7 @@ struct RollershutterRow: View {
                     commandSender.send("DOWN", for: widget, policy: .immediate)
                 }
                 Spacer()
-                IconWithAction(systemSymbol: .squareFill, accessibilityLabel: "Stop") {
+                IconWithAction(systemSymbol: .stopCircleFill, accessibilityLabel: "Stop") {
                     commandSender.send("STOP", for: widget, policy: .immediate)
                 }
                 Spacer()
