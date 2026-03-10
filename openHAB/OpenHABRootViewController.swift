@@ -1037,6 +1037,7 @@ extension OpenHABRootViewController: ModalHandler {
                 present(hostingController, animated: true)
             case .notifications:
                 let hostingController = UIHostingController(rootView: NotificationsView())
+                navigationController?.setNavigationBarHidden(false, animated: true)
                 navigationController?.pushViewController(hostingController, animated: true)
             case .webview:
                 switchView(target: to)

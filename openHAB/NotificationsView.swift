@@ -13,6 +13,7 @@ import Combine
 import Kingfisher
 import OpenHABCore
 import os.log
+import SFSafeSymbols
 import SwiftUI
 
 typealias NotificationLoader = () async -> [OpenHABNotification]
@@ -116,6 +117,7 @@ struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: Observab
     @ObservedObject var networkTracker: Tracker
     @State var notifications: [OpenHABNotification] = []
     let loadNotifications: NotificationLoader
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         List(notifications, id: \.id) { notification in
@@ -126,7 +128,18 @@ struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: Observab
         .refreshable {
             await notifications = loadNotifications()
         }
+        .navigationBarBackButtonHidden(true)
         .navigationTitle("Notifications")
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: {
+                    dismiss()
+                }, label: {
+                    Image(systemSymbol: .chevronBackward)
+                        .accessibilityLabel("Back")
+                })
+            }
+        }
         .task {
             await notifications = loadNotifications()
         }

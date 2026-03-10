@@ -334,7 +334,6 @@ final class UserData: ObservableObject {
 
                 // Long polling loop with backoff
                 var backoffAttempt = 0
-                let maxBackoffDelay: UInt64 = 30_000_000_000 // 30 seconds
 
                 Logger.userData.debug("Starting long polling loop for sitemap: \(taskSitemapName)")
                 while !Task.isCancelled {
