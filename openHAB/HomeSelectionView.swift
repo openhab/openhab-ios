@@ -133,8 +133,17 @@ struct HomeSelectionView: View {
             }
         }
         .onAppear(perform: loadHomesList)
+        .navigationBarBackButtonHidden(true)
         .navigationBarTitle("Manage Homes")
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: {
+                    dismiss()
+                }, label: {
+                    Image(systemSymbol: .chevronBackward)
+                        .accessibilityLabel("Back")
+                })
+            }
             if showEditOptions {
                 ToolbarItemGroup(placement: .primaryAction) {
                     Button(action: {

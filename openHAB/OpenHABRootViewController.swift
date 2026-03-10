@@ -1047,6 +1047,7 @@ extension OpenHABRootViewController: ModalHandler {
                 openTileURL(urlString)
             case .homeSelection:
                 let hostingController = UIHostingController(rootView: HomeSelectionView())
+                navigationController?.setNavigationBarHidden(false, animated: true)
                 navigationController?.pushViewController(hostingController, animated: true)
             }
         }
