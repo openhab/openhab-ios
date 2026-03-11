@@ -17,6 +17,8 @@ import Testing
 struct ScreenSaverLayoutCalculatorTests {
     @Test
     func oversizedTimeTextScalesDownToFitHorizontalMargins() {
+        let containerSize = CGSize(width: 320, height: 568)
+        let maxWidth = containerSize.width - ScreenSaverLayoutCalculator.edgeMargin * 2
         let configuration = ScreenSaverConfiguration(
             showsTime: true,
             showsDate: false,
@@ -24,14 +26,14 @@ struct ScreenSaverLayoutCalculatorTests {
         )
 
         let layout = ScreenSaverLayoutCalculator.layout(
-            containerSize: CGSize(width: 320, height: 568),
+            containerSize: containerSize,
             configuration: configuration,
             dateText: nil,
-            timeText: "11:11:11 PMMMMM",
+            timeText: "11:11:11 PMMMMMMMMMMMMMMMMMMMMM",
             fontName: nil
         )
 
-        #expect(layout.contentSize.width <= 280)
+        #expect(layout.contentSize.width <= maxWidth)
         #expect(layout.timeFontSize < 112)
     }
 
