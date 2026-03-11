@@ -49,32 +49,23 @@ enum ScreenSaverLayoutCalculator {
         let baseTimeFontSize = max(shortSide * configuration.timeFontSizeRatio, 48)
         let baseDateFontSize = baseTimeFontSize * configuration.dateFontRelativeSize
         let maximumWidth = max(containerSize.width - edgeMargin * 2, 1)
-
-        let baseFonts = fonts(
-            timeFontSize: baseTimeFontSize,
-            dateFontSize: baseDateFontSize,
-            fontName: fontName
-        )
-
-        let baseWidth = measuredWidth(
+        let fittedSizes = fittedFontSizes(
+            maximumWidth: maximumWidth,
+            baseTimeFontSize: baseTimeFontSize,
+            baseDateFontSize: baseDateFontSize,
             dateText: dateText,
             timeText: timeText,
-            dateFont: baseFonts.date,
-            timeFont: baseFonts.time
+            fontName: fontName
         )
-        let scale = baseWidth > maximumWidth ? maximumWidth / baseWidth : 1
-
-        let fittedTimeFontSize = baseTimeFontSize * scale
-        let fittedDateFontSize = baseDateFontSize * scale
         let fittedFonts = fonts(
-            timeFontSize: fittedTimeFontSize,
-            dateFontSize: fittedDateFontSize,
+            timeFontSize: fittedSizes.time,
+            dateFontSize: fittedSizes.date,
             fontName: fontName
         )
 
         return ScreenSaverTextLayout(
-            timeFontSize: fittedTimeFontSize,
-            dateFontSize: fittedDateFontSize,
+            timeFontSize: fittedSizes.time,
+            dateFontSize: fittedSizes.date,
             contentSize: measuredSize(
                 dateText: dateText,
                 timeText: timeText,
@@ -82,6 +73,42 @@ enum ScreenSaverLayoutCalculator {
                 timeFont: fittedFonts.time
             )
         )
+    }
+
+    private static func fittedFontSizes(
+        maximumWidth: CGFloat,
+        baseTimeFontSize: CGFloat,
+        baseDateFontSize: CGFloat,
+        dateText: String?,
+        timeText: String?,
+        fontName: String?
+    ) -> (time: CGFloat, date: CGFloat) {
+        var timeFontSize = baseTimeFontSize
+        var dateFontSize = baseDateFontSize
+
+        for _ in 0 ..< 3 {
+            let currentFonts = fonts(
+                timeFontSize: timeFontSize,
+                dateFontSize: dateFontSize,
+                fontName: fontName
+            )
+            let currentWidth = measuredWidth(
+                dateText: dateText,
+                timeText: timeText,
+                dateFont: currentFonts.date,
+                timeFont: currentFonts.time
+            )
+
+            guard currentWidth > maximumWidth else {
+                break
+            }
+
+            let correction = maximumWidth / currentWidth
+            timeFontSize *= correction
+            dateFontSize *= correction
+        }
+
+        return (timeFontSize, dateFontSize)
     }
 
     private static func fonts(
