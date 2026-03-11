@@ -82,13 +82,13 @@ struct HomeSelectionView: View {
                     }
                 }
             }
-            .alert("Enter new name for home \(homeNameForAlert)", isPresented: $showingRenameHomeAlert, actions: {
+            .alert("Enter a new name for the home '\(homeNameForAlert)'", isPresented: $showingRenameHomeAlert, actions: {
                 TextField("New name", text: $newHomeName)
                 HStack {
-                    Button("Abort", role: .cancel) {
+                    Button("Cancel", role: .cancel) {
                         showingRenameHomeAlert.toggle()
                     }
-                    Button("OK") {
+                    Button("Rename") {
                         rename(home: homeForAlert)
                         showingRenameHomeAlert.toggle()
                     }
@@ -98,7 +98,7 @@ struct HomeSelectionView: View {
             })
             .alert("Delete home \(homeNameForAlert)?", isPresented: $showingDeleteHomeAlert) {
                 HStack {
-                    Button("Abort", role: .cancel) {
+                    Button("Cancel", role: .cancel) {
                         showingDeleteHomeAlert.toggle()
                     }
                     Button("Delete", role: .destructive) {
@@ -152,13 +152,13 @@ struct HomeSelectionView: View {
                     }, label: {
                         Image(systemSymbol: .plus)
                     })
-                    .alert("Enter name for new home", isPresented: $showingNewHomeAlert) {
+                    .alert("Enter a name for the new home", isPresented: $showingNewHomeAlert) {
                         TextField("Name for new home", text: $newHomeName)
                         HStack {
-                            Button("Abort", role: .cancel) {
+                            Button("Cancel", role: .cancel) {
                                 showingNewHomeAlert.toggle()
                             }
-                            Button("OK") {
+                            Button("Create") {
                                 addHome()
                                 showingNewHomeAlert.toggle()
                             }
