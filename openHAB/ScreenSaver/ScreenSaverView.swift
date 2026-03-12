@@ -15,41 +15,6 @@ import os.log
 import SwiftUI
 
 struct ScreenSaverView: View {
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter
-    }()
-
-    private static let time24Formatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.dateFormat = "H:mm"
-        return formatter
-    }()
-
-    private static let time24SecondsFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.dateFormat = "H:mm:ss"
-        return formatter
-    }()
-
-    private static let time12Formatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.dateFormat = "h:mm a"
-        return formatter
-    }()
-
-    private static let time12SecondsFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.dateFormat = "h:mm:ss a"
-        return formatter
-    }()
-
     let configuration: ScreenSaverConfiguration
 
     @State private var currentAnchor = CGPoint(x: 0.5, y: 0.5)
@@ -136,16 +101,24 @@ struct ScreenSaverView: View {
     // MARK: - Private Methods
 
     private func timeString(for date: Date) -> String {
-        let formatter: DateFormatter = if configuration.showsSeconds {
-            configuration.uses24HourTime ? Self.time24SecondsFormatter : Self.time12SecondsFormatter
-        } else {
-            configuration.uses24HourTime ? Self.time24Formatter : Self.time12Formatter
+        let amPM: Date.FormatStyle.Symbol.Hour.AMPMStyle = configuration.uses24HourTime ? .omitted : .abbreviated
+        var formatStyle: Date.FormatStyle = configuration.uses24HourTime
+            ? .dateTime.hour(.twoDigits(amPM: amPM)).minute(.twoDigits)
+            : .dateTime.hour(.defaultDigits(amPM: amPM)).minute(.twoDigits)
+
+        if configuration.showsSeconds {
+            formatStyle = formatStyle.second(.twoDigits)
         }
-        return formatter.string(from: date)
+
+        if configuration.uses24HourTime {
+            return date.formatted(formatStyle)
+        }
+
+        return date.formatted(formatStyle.locale(Locale(identifier: "en_US_POSIX")))
     }
 
     private func dateString(for date: Date) -> String {
-        Self.dateFormatter.string(from: date)
+        date.formatted(date: .abbreviated, time: .omitted)
     }
 
     private func timeFont(size: CGFloat, fontName: String?) -> Font {
