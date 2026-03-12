@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+@testable import OpenHABCore
 import Testing
 
 struct StringExtensionTests {
