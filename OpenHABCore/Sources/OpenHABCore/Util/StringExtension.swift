@@ -16,18 +16,16 @@ import UIKit
 
 public extension String {
     internal var doubleValue: Double {
-        let formatter = NumberFormatter()
-        formatter.decimalSeparator = "."
-        if let asNumber = formatter.number(from: self) {
-            return asNumber.doubleValue
+        if let value = try? Double(self, format: .number.locale(Locale(identifier: "en_US_POSIX"))) {
+            value
         } else {
-            return Double.nan
+            Double.nan
         }
     }
 
     internal var intValue: Int {
-        if let asNumber = NumberFormatter().number(from: self) {
-            asNumber.intValue
+        if let value = try? Int(self, format: .number.locale(Locale(identifier: "en_US_POSIX"))) {
+            value
         } else {
             Int.max
         }
@@ -39,10 +37,11 @@ public extension String {
 
      */
     internal var numberValue: NSNumber? {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .scientific
-        formatter.decimalSeparator = "."
-        return formatter.number(from: filter("01234567890E.+-".contains))
+        let filtered = filter("01234567890E.+-".contains)
+        if let value = Double(filtered) {
+            return NSNumber(value: value)
+        }
+        return nil
     }
 
     internal var asDouble: Double {
