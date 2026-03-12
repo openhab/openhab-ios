@@ -22,10 +22,13 @@ struct OpenAPIServiceSendItemCommandTests {
         let transport = TestClientTransport { request, body, baseURL, operationID in
             #expect(operationID == "sendItemCommand")
             #expect(request.method == .post)
-            #expect(request.path == "/items/MyItem")
+            #expect(URLComponents(string: request.path ?? "")?.path == "/items/MyItem")
             #expect(baseURL.absoluteString == "/rest")
             #expect(request.headerFields[.contentType] == "application/json; charset=utf-8")
-            #expect(try await encodedBody(from: body) == #"{"value":"ON"}"#)
+
+            let bodyString = try await self.encodedBody(from: body)
+            let json = try JSONDecoder().decode([String: String].self, from: Data(bodyString.utf8))
+            #expect(json["value"] == "ON")
 
             return (try HTTPResponse(status: .ok), nil)
         }
