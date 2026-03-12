@@ -19,7 +19,7 @@ public struct LogsViewer: View {
     private static let template = NSPredicate(format:
         "(subsystem BEGINSWITH $PREFIX)")
 
-    @State private var text = "Loading..."
+    @State private var text = String(localized: "Loading…")
 
     let myFont = Font
         .system(size: 10)
