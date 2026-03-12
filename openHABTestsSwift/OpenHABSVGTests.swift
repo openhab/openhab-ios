@@ -9,18 +9,36 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import SDWebImageSVGCoder
+import UIKit
 import XCTest
+
+/// Mirrors the subset of SDImageCoder used by these tests.
+/// Defined locally so the test target needs no direct link to SDWebImageSVGCoder.
+@objc private protocol AnyImageCoder {
+    func decodedImage(with data: Data, options: [AnyHashable: Any]?) -> UIImage?
+}
 
 class OpenHABSVGTests: XCTestCase {
     // SDImageSVGCoder is registered by AppDelegate before any tests run.
 
-    func decodeSVG(named name: String) throws -> UIImage? {
+    private func decodeSVG(named name: String) throws -> UIImage? {
         guard let url = Bundle(for: Self.self).url(forResource: name, withExtension: "svg") else {
-            throw NSError(domain: "TestError", code: 1, userInfo: [NSLocalizedDescriptionKey: "SVG file not found"])
+            throw NSError(
+                domain: "TestError",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "SVG file \(name).svg not found in test bundle"]
+            )
         }
         let data = try Data(contentsOf: url)
-        return SDImageSVGCoder.shared.decodedImage(with: data, options: nil)
+
+        // Resolve SDImageSVGCoder via the ObjC runtime — the class is loaded by
+        // the host app and the coder is already registered by AppDelegate.
+        guard
+            let cls = NSClassFromString("SDImageSVGCoder") as? NSObject.Type,
+            let coder = cls.perform(NSSelectorFromString("shared"))?.takeUnretainedValue() as? AnyImageCoder
+        else { return nil }
+
+        return coder.decodedImage(with: data, options: nil)
     }
 
     // ✅ Valid SVG test
