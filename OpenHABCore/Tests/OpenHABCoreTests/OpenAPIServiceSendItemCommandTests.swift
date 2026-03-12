@@ -30,7 +30,7 @@ struct OpenAPIServiceSendItemCommandTests {
             let json = try JSONDecoder().decode([String: String].self, from: Data(bodyString.utf8))
             #expect(json["value"] == "ON")
 
-            return (try HTTPResponse(status: .ok), nil)
+            return (HTTPResponse(status: .ok), nil)
         }
         let client = try Client(
             serverURL: URL(validatingOpenAPIServerURL: "/rest"),
