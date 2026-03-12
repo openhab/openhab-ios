@@ -383,6 +383,7 @@
 		935D3449257B7EA50020A404 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = Resources/ru.lproj/Intents.strings; sourceTree = "<group>"; };
 		935D3451257B7EA60020A404 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = Resources/es.lproj/Intents.strings; sourceTree = "<group>"; };
 		93685A792ADE755C0077A9A6 /* openHABTests.xctestplan */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = openHABTests.xctestplan; sourceTree = "<group>"; };
+		93685A7B2ADE755C0077A9A6 /* openHABTestsSwift.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = openHABTestsSwift.xctestplan; sourceTree = "<group>"; };
 		938BF89524EFBC5400E6B52F /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
 		938BF9C324EFCB9F00E6B52F /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+Localization.swift"; sourceTree = "<group>"; };
@@ -768,6 +769,7 @@
 			isa = PBXGroup;
 			children = (
 				93685A792ADE755C0077A9A6 /* openHABTests.xctestplan */,
+				93685A7B2ADE755C0077A9A6 /* openHABTestsSwift.xctestplan */,
 			);
 			path = TestPlans;
 			sourceTree = "<group>";

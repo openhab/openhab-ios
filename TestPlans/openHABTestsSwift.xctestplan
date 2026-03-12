@@ -1,0 +1,25 @@
+{
+  "configurations" : [
+    {
+      "id" : "B08D1D3E-6B99-4CC2-B1F7-2D8FC7F8C7D1",
+      "name" : "Test",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:openHAB.xcodeproj",
+        "identifier" : "DA2DC22E21F2736C00830730",
+        "name" : "openHABTestsSwift"
+      }
+    }
+  ],
+  "version" : 1
+}

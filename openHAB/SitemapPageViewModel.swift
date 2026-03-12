@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @preconcurrency import Combine
-import OpenAPIRuntime
 import OpenHABCore
 import os.log
 import SwiftUI
@@ -704,7 +703,7 @@ extension SitemapPageViewModel {
     }
 
     private func shouldRetryLongPolling(after error: any Error) -> Bool {
-        if let clientError = error as? ClientError, let urlError = clientError.underlyingError as? URLError {
+        if let urlError = OpenAPIErrorInspector.underlyingURLError(from: error) {
             switch urlError.code {
             case .timedOut, .networkConnectionLost, .cannotConnectToHost, .notConnectedToInternet, .cannotFindHost:
                 return true
@@ -1052,21 +1051,31 @@ private extension SitemapPageViewModel {
             return
         }
 
-        if let clientError = error as? ClientError {
-            if let urlError = clientError.underlyingError as? URLError, urlError.code == .cancelled {
+        if let urlError = OpenAPIErrorInspector.underlyingURLError(from: error) {
+            if urlError.code == .cancelled {
                 logger.info("Task cancelled (URLError: cancelled)")
-            } else if let urlError = clientError.underlyingError as? URLError, urlError.code == .timedOut {
+            } else if urlError.code == .timedOut {
                 logger.info("Task timed out (URLError: timedOut)")
-            } else {
-                guard !Task.isCancelled else {
-                    logger.info("Task cancelled, ignoring ClientError")
-                    isLoading = false
-                    isUpdating = false
-                    return
-                }
-                logger.error("ClientError: \(clientError.localizedDescription)")
+            } else if !Task.isCancelled {
+                logger.error("ClientError: \(urlError.localizedDescription)")
                 self.error = SitemapPageError.serviceUnavailable
+            } else {
+                logger.info("Task cancelled, ignoring ClientError")
             }
+            isLoading = false
+            isUpdating = false
+            return
+        }
+
+        if let clientErrorDescription = OpenAPIErrorInspector.clientErrorDescription(from: error) {
+            guard !Task.isCancelled else {
+                logger.info("Task cancelled, ignoring ClientError")
+                isLoading = false
+                isUpdating = false
+                return
+            }
+            logger.error("ClientError: \(clientErrorDescription)")
+            self.error = SitemapPageError.serviceUnavailable
             isLoading = false
             isUpdating = false
             return

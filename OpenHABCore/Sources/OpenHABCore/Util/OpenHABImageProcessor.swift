@@ -230,6 +230,10 @@ public struct OpenHABImageProcessor: ImageProcessor {
         return img.withTintColor(.orange, renderingMode: .alwaysOriginal)
     }
 
+    func process(data: Data) -> UIImage? {
+        process(item: .data(data), options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
+    }
+
     // Convert input data/image to target image and return it.
     public func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         switch item {

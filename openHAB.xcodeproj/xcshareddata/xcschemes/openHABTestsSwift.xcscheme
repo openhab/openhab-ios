@@ -29,7 +29,7 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <TestPlans>
          <TestPlanReference
-            reference = "container:TestPlans/openHABTests.xctestplan"
+            reference = "container:TestPlans/openHABTestsSwift.xctestplan"
             default = "YES">
          </TestPlanReference>
       </TestPlans>
