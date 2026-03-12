@@ -13,13 +13,7 @@ import SDWebImageSVGCoder
 import XCTest
 
 class OpenHABSVGTests: XCTestCase {
-    override func setUpWithError() throws {
-        SDImageCodersManager.shared.addCoder(SDImageSVGCoder.shared)
-    }
-
-    override func tearDownWithError() throws {
-        // Optional: Remove coder if needed
-    }
+    // SDImageSVGCoder is registered by AppDelegate before any tests run.
 
     func decodeSVG(named name: String) throws -> UIImage? {
         guard let url = Bundle(for: Self.self).url(forResource: name, withExtension: "svg") else {

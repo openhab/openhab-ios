@@ -21,8 +21,6 @@
 		652B81042E2193B500648510 /* ScreenSaverSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652B81032E2193B500648510 /* ScreenSaverSettingsView.swift */; };
 		652B81092E2193DA00648510 /* ScreenSaverManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652B81062E2193DA00648510 /* ScreenSaverManager.swift */; };
 		652B810A2E2193DA00648510 /* ScreenSaverConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652B81052E2193DA00648510 /* ScreenSaverConfiguration.swift */; };
-		E1AA00012F5D000100000001 /* ScreenSaverLayoutCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1AA00022F5D000100000001 /* ScreenSaverLayoutCalculator.swift */; };
-		E1AA00032F5D000100000001 /* ScreenSaverLayoutCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1AA00042F5D000100000001 /* ScreenSaverLayoutCalculatorTests.swift */; };
 		653B54C2285E714900298ECD /* OpenHABViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 653B54C1285E714900298ECD /* OpenHABViewController.swift */; };
 		65570A7D2476D16A00D524EA /* OpenHABWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */; };
 		6557AF8F2C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */; };
@@ -188,6 +186,8 @@
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
 		DAEE35072E224F6000B4A7F1 /* ColorTemperaturePickerRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEE35062E224F6000B4A7F1 /* ColorTemperaturePickerRowView.swift */; };
+		DAEFAA7F2F63536A00AC300B /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = DAEFAA7E2F63536A00AC300B /* OpenHABCore */; };
+		DAEFAA812F63537600AC300B /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DAEFAA802F63537600AC300B /* SDWebImageSVGCoder */; };
 		DAF231D227BB6EEA00AB916C /* OpenHABSVGTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF231D127BB6EEA00AB916C /* OpenHABSVGTests.swift */; };
 		DAF231D827BB702500AB916C /* valid_xmlns.svg in Resources */ = {isa = PBXBuildFile; fileRef = DAF231D527BB702400AB916C /* valid_xmlns.svg */; };
 		DAF231D927BB702500AB916C /* invalid_xmlns.svg in Resources */ = {isa = PBXBuildFile; fileRef = DAF231D627BB702500AB916C /* invalid_xmlns.svg */; };
@@ -213,6 +213,8 @@
 		DFDF45311932042B00A6E581 /* legal.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DFDF45301932042B00A6E581 /* legal.rtf */; };
 		DFE10414197415F900D94943 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFE10413197415F900D94943 /* Security.framework */; };
 		DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */; };
+		E1AA00012F5D000100000001 /* ScreenSaverLayoutCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1AA00022F5D000100000001 /* ScreenSaverLayoutCalculator.swift */; };
+		E1AA00032F5D000100000001 /* ScreenSaverLayoutCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1AA00042F5D000100000001 /* ScreenSaverLayoutCalculatorTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -344,8 +346,6 @@
 		652B81032E2193B500648510 /* ScreenSaverSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverSettingsView.swift; sourceTree = "<group>"; };
 		652B81052E2193DA00648510 /* ScreenSaverConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverConfiguration.swift; sourceTree = "<group>"; };
 		652B81062E2193DA00648510 /* ScreenSaverManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverManager.swift; sourceTree = "<group>"; };
-		E1AA00022F5D000100000001 /* ScreenSaverLayoutCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverLayoutCalculator.swift; sourceTree = "<group>"; };
-		E1AA00042F5D000100000001 /* ScreenSaverLayoutCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverLayoutCalculatorTests.swift; sourceTree = "<group>"; };
 		653B54C1285E714900298ECD /* OpenHABViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABViewController.swift; sourceTree = "<group>"; };
 		653C09D41EAD691A00BA4C4A /* openHAB.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = openHAB.entitlements; sourceTree = "<group>"; };
 		65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWebViewController.swift; sourceTree = "<group>"; };
@@ -581,6 +581,8 @@
 		DFDF45301932042B00A6E581 /* legal.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = legal.rtf; sourceTree = "<group>"; };
 		DFE10413197415F900D94943 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UICircleButton.swift; sourceTree = "<group>"; };
+		E1AA00022F5D000100000001 /* ScreenSaverLayoutCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverLayoutCalculator.swift; sourceTree = "<group>"; };
+		E1AA00042F5D000100000001 /* ScreenSaverLayoutCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverLayoutCalculatorTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -634,6 +636,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAEFAA7F2F63536A00AC300B /* OpenHABCore in Frameworks */,
+				DAEFAA812F63537600AC300B /* SDWebImageSVGCoder in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2288,6 +2292,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = "-undefined dynamic_lookup";
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.openHABTestsSwift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_INSTALL_OBJC_HEADER = NO;
@@ -2323,6 +2328,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = "-undefined dynamic_lookup";
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.openHABTestsSwift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -3074,6 +3080,15 @@
 		DAC949FB2E219F30007E67B7 /* CommonUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CommonUI;
+		};
+		DAEFAA7E2F63536A00AC300B /* OpenHABCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OpenHABCore;
+		};
+		DAEFAA802F63537600AC300B /* SDWebImageSVGCoder */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA2C4FD32B4F573300D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */;
+			productName = SDWebImageSVGCoder;
 		};
 		DAFF80972E4F47830084513E /* SDWebImage */ = {
 			isa = XCSwiftPackageProductDependency;
