@@ -25,13 +25,6 @@ class ServerCertificatesViewModel: ObservableObject {
 
     @Published var certificates: [CertificateInfo] = []
 
-    let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter
-    }()
-
     func loadCertificates() {
         Task {
             Logger.serverCert.info("Loading certificates")
@@ -88,7 +81,7 @@ struct ServerCertificatesView: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        Text("Added: \(certificate.dateAdded, formatter: viewModel.dateFormatter)")
+                        Text("Added: \(certificate.dateAdded, format: .dateTime.year().month().day().hour().minute())")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }

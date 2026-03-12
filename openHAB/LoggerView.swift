@@ -99,9 +99,7 @@ struct LoggerView: View {
 
     // Custom Date Formatting Function
     private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm:ss.SSS" // Hours:Minutes:Seconds.Milliseconds
-        return formatter.string(from: date)
+        date.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute().second().secondFraction(.fractional(3)))
     }
 
     private func shareLogs() -> String {
