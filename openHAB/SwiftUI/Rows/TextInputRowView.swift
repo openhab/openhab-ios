@@ -23,8 +23,8 @@ enum InputCommandFormatter {
 
     static func command(from rawText: String, hint: OpenHABWidget.InputHint?) -> String? {
         let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
         guard hint == .number else { return trimmed }
+        guard !trimmed.isEmpty else { return nil }
         return normalizedNumberCommand(from: trimmed)
     }
 

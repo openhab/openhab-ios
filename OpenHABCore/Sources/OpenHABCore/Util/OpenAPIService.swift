@@ -360,7 +360,8 @@ public extension OpenAPIService {
 
     func sendItemCommand(itemname: String, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
         let path = Operations.sendItemCommand.Input.Path(itemname: itemname)
-        let body = Operations.sendItemCommand.Input.Body.plainText(.init(command))
+        let payload = Operations.sendItemCommand.Input.Body.jsonPayload(value: command)
+        let body = Operations.sendItemCommand.Input.Body.json(payload)
         let query = Operations.sendItemCommand.Input.Query(source: buildSource(sourcePrefix: sourcePrefix, deviceId: deviceId))
         let response = try await client.sendItemCommand(path: path, query: query, body: body)
         _ = try response.ok

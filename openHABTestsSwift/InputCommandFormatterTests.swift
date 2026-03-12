@@ -228,8 +228,18 @@ struct InputCommandFormatterTests {
     }
 
     @Test
+    func commandFromEmptyStringForTextReturnsEmptyString() {
+        #expect(InputCommandFormatter.command(from: "", hint: nil) == "")
+    }
+
+    @Test
     func commandFromWhitespaceReturnsNil() {
         #expect(InputCommandFormatter.command(from: "   ", hint: .number) == nil)
+    }
+
+    @Test
+    func commandFromWhitespaceForTextReturnsEmptyString() {
+        #expect(InputCommandFormatter.command(from: "   ", hint: nil) == "")
     }
 
     @Test
