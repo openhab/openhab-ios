@@ -13,10 +13,8 @@ import Foundation
 
 extension CGFloat {
     init(state string: String, divisor: Float) {
-        let numberFormatter = NumberFormatter()
-        numberFormatter.locale = Locale(identifier: "US")
-        if let number = numberFormatter.number(from: string) {
-            self.init(number.floatValue / divisor)
+        if let number = try? Float(string, format: .number.locale(Locale(identifier: "en_US_POSIX"))) {
+            self.init(number / divisor)
         } else {
             self.init(0)
         }
