@@ -34,9 +34,6 @@ public enum OpenAPIErrorInspector {
         guard let clientError = error as? ClientError else {
             return nil
         }
-        guard let underlyingError = clientError.underlyingError else {
-            return nil
-        }
-        return underlyingError.localizedDescription
+        return clientError.underlyingError.localizedDescription
     }
 }
