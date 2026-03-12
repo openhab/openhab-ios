@@ -15,8 +15,8 @@ import OpenHABCore
 import os.log
 
 class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIntentHandling {
-    private static let onLabel = NSLocalizedString("on", comment: "").capitalized
-    private static let offLabel = NSLocalizedString("off", comment: "").capitalized
+    private static let onLabel = String(localized: "on", comment: "").capitalized
+    private static let offLabel = String(localized: "off", comment: "").capitalized
 
     private static let localizedActions = [onLabel, offLabel]
     private static let actionMap: [String: String] = [
@@ -54,17 +54,17 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(
-                NSLocalizedString("empty", comment: "empty item / home name")
+                String(localized: "empty", comment: "empty item / home name")
             )
         }
 
         guard let homeId = home.uuid, await Preferences.shared.storedHomes[homeId] != nil else {
-            return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
+            return .failureInvalidItem(String(localized: "unknownHome", comment: "unknown home"))
         }
 
         guard let state = intent.state else {
             return .failureInvalidAction(
-                state: NSLocalizedString("empty", comment: "empty value"),
+                state: String(localized: "empty", comment: "empty value"),
                 item: itemName
             )
         }

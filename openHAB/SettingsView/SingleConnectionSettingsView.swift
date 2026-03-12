@@ -118,12 +118,12 @@ struct SingleConnectionSettingsView: View {
             } label: {
                 Text("Username")
                 if connectionConfig.username.isEmpty {
-                    Text("Enter username on server, if required")
+                    Text("Enter username for server, if required")
                 }
             }
 
             LabeledContent {
-                AnimatedSecureTextField(text: $connectionConfig.password, titleKey: "password")
+                AnimatedSecureTextField(text: $connectionConfig.password, titleKey: String(localized: "Password"))
                     .fixedSize()
                     .textInputAutocapitalization(.never)
                     .disableAutocorrection(true) //   or  .autocorrectionDisabled(true) ??
@@ -132,7 +132,7 @@ struct SingleConnectionSettingsView: View {
             } label: {
                 Text("Password")
                 if connectionConfig.password.isEmpty {
-                    Text("Enter password on server")
+                    Text("Enter password for server")
                 }
             }
 
@@ -159,13 +159,13 @@ struct SingleConnectionSettingsView: View {
 
         do {
             try await testConnection()
-            connectionTestMessage = "Connection successful"
+            connectionTestMessage = String(localized: "Connection successful")
             connectionTestSuccess = true
         } catch is CancellationError {
-            connectionTestMessage = "Cancellation occurred"
+            connectionTestMessage = String(localized: "Cancellation occurred")
             connectionTestSuccess = false
         } catch let error as DecodingError {
-            connectionTestMessage = "Unexpected error: \(error.localizedDescription)"
+            connectionTestMessage = String(localized: "Unexpected error: \(error.localizedDescription)")
             connectionTestSuccess = false
         } catch {
             if let urlError = OpenAPIErrorInspector.underlyingURLError(from: error) {
@@ -179,6 +179,15 @@ struct SingleConnectionSettingsView: View {
             } else {
                 connectionTestMessage = "Unexpected error: \(error.localizedDescription)"
             }
+            connectionTestSuccess = false
+        } catch let openAPIError as OpenAPIServiceError {
+            connectionTestMessage = "\(openAPIError.localizedDescription)"
+            connectionTestSuccess = false
+        } catch let urlError as URLError {
+            connectionTestMessage = friendlyMessage(for: urlError)
+            connectionTestSuccess = false
+        } catch {
+            connectionTestMessage = String(localized: "Unexpected error: \(error.localizedDescription)")
             connectionTestSuccess = false
         }
 
@@ -195,17 +204,17 @@ struct SingleConnectionSettingsView: View {
     private func friendlyMessage(for error: URLError) -> String {
         switch error.code {
         case .badURL:
-            "The URL is invalid. Please check the format (e.g., http://192.168.2.1:8080)."
+            String(localized: "The URL is invalid. Please check the format (e.g., http://192.168.2.1:8080).")
         case .cannotFindHost:
-            "Cannot find the server. Is the URL correct?"
+            String(localized: "Cannot find the server. Is the URL correct?")
         case .cannotConnectToHost:
-            "Cannot connect to the server. Is it online?"
+            String(localized: "Cannot connect to the server. Is it online?")
         case .notConnectedToInternet:
-            "You appear to be offline. Check your internet connection."
+            String(localized: "You appear to be offline. Check your internet connection.")
         case .timedOut:
-            "The connection timed out. Try again later."
+            String(localized: "The connection timed out. Try again later.")
         case .secureConnectionFailed:
-            "SSL error. The connection couldn’t be established securely."
+            String(localized: "SSL error. The connection couldn’t be established securely.")
         default:
             error.localizedDescription
         }
@@ -224,7 +233,7 @@ struct SingleConnectionSettingsView: View {
         var body: some View {
             NavigationStack {
                 Form {
-                    SingleConnectionSettingsView(headerText: "Connection Settings for local server", connectionConfig: $connectionConfig, showNotificationToggle: false)
+                    SingleConnectionSettingsView(headerText: String(localized: "Connection Settings for local server"), connectionConfig: $connectionConfig, showNotificationToggle: false)
                 }
             }
         }

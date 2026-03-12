@@ -96,7 +96,7 @@ struct SitemapSettingsView: View {
 
     @ViewBuilder
     private var watchSitemapPicker: some View {
-        Picker("Sitemap For Apple Watch", selection: $settingsSitemapForWatch) {
+        Picker("Sitemap for Apple Watch", selection: $settingsSitemapForWatch) {
             if sitemaps.isEmpty {
                 Text("No sitemaps available").tag("").foregroundStyle(.secondary)
             } else {

@@ -148,22 +148,22 @@ class OpenHABRootViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABRootViewController.handleApsRegistration(_:)), name: NSNotification.Name("apsRegistered"), object: nil)
 
         if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !Preferences.shared.sendCrashReports {
-            let alertController = UIAlertController(title: NSLocalizedString("crash_detected", comment: "").capitalized, message: NSLocalizedString("crash_reporting_info", comment: ""), preferredStyle: .alert)
+            let alertController = UIAlertController(title: String(localized: "crash_detected", comment: "").capitalized, message: String(localized: "crash_reporting_info", comment: ""), preferredStyle: .alert)
             alertController.addAction(
-                UIAlertAction(title: NSLocalizedString("activate", comment: ""), style: .default) { _ in
+                UIAlertAction(title: String(localized: "activate", comment: ""), style: .default) { _ in
                     Preferences.shared.sendCrashReports = true
                     Crashlytics.crashlytics().sendUnsentReports()
                 }
             )
             alertController.addAction(
-                UIAlertAction(title: NSLocalizedString("privacy_policy", comment: ""), style: .default) { [weak self] _ in
+                UIAlertAction(title: String(localized: "privacy_policy", comment: ""), style: .default) { [weak self] _ in
                     let webViewController = SFSafariViewController(url: URL.privacyPolicy)
                     webViewController.configuration.barCollapsingEnabled = true
                     self?.present(webViewController, animated: true)
                 }
             )
             alertController.addAction(
-                UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .default) { _ in
+                UIAlertAction(title: String(localized: "cancel", comment: ""), style: .default) { _ in
                     Crashlytics.crashlytics().deleteUnsentReports()
                 }
             )
@@ -261,12 +261,12 @@ class OpenHABRootViewController: UIViewController {
                     return
                 }
                 Logger.viewController.info("OpenHABWebViewController tracker status \(status.rawValue)")
-                let retryButtonTitle: String = NSLocalizedString("retry", comment: "retry connection")
+                let retryButtonTitle: String = String(localized: "retry", comment: "retry connection")
                 switch status {
                 case .started:
                     currentView.showPopupMessage(
                         seconds: -1,
-                        title: NSLocalizedString("no_connection_will_reconnect", comment: ""),
+                        title: String(localized: "no_connection_will_reconnect", comment: ""),
                         message: "",
                         theme: .warning,
                         viewTapAction: nil,
@@ -279,7 +279,7 @@ class OpenHABRootViewController: UIViewController {
                 case .connecting:
                     currentView.showPopupMessage(
                         seconds: 60,
-                        title: NSLocalizedString("connecting", comment: ""),
+                        title: String(localized: "connecting", comment: ""),
                         message: "",
                         theme: .info,
                         viewTapAction: nil,
@@ -289,8 +289,8 @@ class OpenHABRootViewController: UIViewController {
                 case .connected:
                     currentView.hidePopupMessages()
                 case .stopped:
-                    let error: String = NSLocalizedString("error", comment: "")
-                    let no_network: String = NSLocalizedString("network_not_available", comment: "")
+                    let error: String = String(localized: "Error", comment: "")
+                    let no_network: String = String(localized: "network_not_available", comment: "")
                     currentView.showPopupMessage(
                         seconds: -1,
                         title: error,
@@ -948,7 +948,7 @@ class OpenHABRootViewController: UIViewController {
         guard let summary = notification.userInfo?["summary"] as? String,
               let domain = notification.userInfo?["domain"] as? String,
               let delegate = notification.object as? HTTPClientDelegate else { return }
-        let title = NSLocalizedString("ssl_certificate_warning", comment: "")
+        let title = String(localized: "ssl_certificate_warning", comment: "")
         let message = String(format: NSLocalizedString(message, comment: ""), summary, domain)
         DispatchQueue.main.async {
             // Show alert to user
@@ -977,7 +977,7 @@ class OpenHABRootViewController: UIViewController {
     @MainActor
     @objc
     func handleCertificateTrust(summary: String, domain: String, delegate: HTTPClientDelegate, messageTemplateKey: String) {
-        let title = NSLocalizedString("ssl_certificate_warning", comment: "")
+        let title = String(localized: "ssl_certificate_warning", comment: "")
         let message = String(format: NSLocalizedString(messageTemplateKey, comment: ""), summary, domain)
 
         let alert = UIAlertController(

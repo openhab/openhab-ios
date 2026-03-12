@@ -66,7 +66,7 @@ struct SitemapPageView: View {
             if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {
                 VStack {
                     Spacer()
-                    ProgressView("Loading sitemap...")
+                    ProgressView("Loading sitemap…")
                         .progressViewStyle(CircularProgressViewStyle())
                         .watchTextStyle(.detail)
                     Spacer()
@@ -84,7 +84,7 @@ struct SitemapPageView: View {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
                                     .scaleEffect(0.7)
-                                Text("Updating...")
+                                Text("Updating…")
                                     .watchTextStyle(.secondary)
                                     .foregroundStyle(.secondary)
                                 Spacer()
@@ -108,14 +108,14 @@ struct SitemapPageView: View {
         }
         .alert(isPresented: $viewModel.showCertificateAlert) {
             Alert(
-                title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),
+                title: Text(String(localized: "ssl_certificate_warning", comment: "")),
                 message: Text(viewModel.certificateErrorDescription),
-                primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
+                primaryButton: .default(Text(String(localized: "Always", comment: ""))) {
                     if let delegate = viewModel.currentClientDelegate {
                         delegate.completeEvaluation(.permitAlways)
                     }
                 },
-                secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
+                secondaryButton: .destructive(Text(String(localized: "Deny", comment: ""))) {
                     if let delegate = viewModel.currentClientDelegate {
                         delegate.completeEvaluation(.deny)
                     }

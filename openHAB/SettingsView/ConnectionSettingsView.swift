@@ -24,8 +24,8 @@ struct ConnectionSettingsView: View {
 
         if !settingsDemomode {
             Group {
-                SingleConnectionSettingsView(headerText: "Local server", isLocalConnection: true, connectionConfig: $localConnectionConfiguration, showNotificationToggle: false)
-                SingleConnectionSettingsView(headerText: "Remote server", connectionConfig: $remoteConnectionConfiguration, showNotificationToggle: true)
+                SingleConnectionSettingsView(headerText: String(localized: "Local server"), isLocalConnection: true, connectionConfig: $localConnectionConfiguration, showNotificationToggle: false)
+                SingleConnectionSettingsView(headerText: String(localized: "Remote server"), connectionConfig: $remoteConnectionConfiguration, showNotificationToggle: true)
             }
         }
     }

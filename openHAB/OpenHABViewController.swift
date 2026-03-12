@@ -48,7 +48,7 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
                           message: String,
                           theme: Theme,
                           viewTapAction: (() -> Void)? = nil,
-                          buttonTitle: String = NSLocalizedString("dismiss", comment: ""),
+                          buttonTitle: String = String(localized: "dismiss", comment: ""),
                           buttonAction: (() -> Void)? = nil) {
         var config = SwiftMessages.Config()
         if seconds >= 0 {
@@ -115,17 +115,17 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
     @MainActor
     func evaluateServerTrust(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult {
         await withCheckedContinuation { continuation in
-            let title = NSLocalizedString("ssl_certificate_warning", comment: "")
-            let message = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), certificateSummary ?? "", domain ?? "")
+            let title = String(localized: "ssl_certificate_warning", comment: "")
+            let message = String(format: String(localized: "ssl_certificate_invalid", comment: ""), certificateSummary ?? "", domain ?? "")
             let alertView = UIAlertController(title: title, message: message, preferredStyle: .alert)
 
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("abort", comment: ""), style: .default) { _ in
+            alertView.addAction(UIAlertAction(title: String(localized: "Cancel", comment: ""), style: .default) { _ in
                 continuation.resume(returning: .deny)
             })
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("once", comment: ""), style: .default) { _ in
+            alertView.addAction(UIAlertAction(title: String(localized: "Once", comment: ""), style: .default) { _ in
                 continuation.resume(returning: .permitOnce)
             })
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("always", comment: ""), style: .default) { _ in
+            alertView.addAction(UIAlertAction(title: String(localized: "Always", comment: ""), style: .default) { _ in
                 continuation.resume(returning: .permitAlways)
             })
 
@@ -137,17 +137,17 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
     @MainActor
     func evaluateCertificateMismatch(summary certificateSummary: String?, forDomain domain: String?) async -> OpenHABCore.ServerCertificateManager.EvaluateResult {
         await withCheckedContinuation { continuation in
-            let title = NSLocalizedString("ssl_certificate_warning", comment: "")
-            let message = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), certificateSummary ?? "", domain ?? "")
+            let title = String(localized: "ssl_certificate_warning", comment: "")
+            let message = String(format: String(localized: "ssl_certificate_no_match", comment: ""), certificateSummary ?? "", domain ?? "")
             let alertView = UIAlertController(title: title, message: message, preferredStyle: .alert)
 
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("abort", comment: ""), style: .default) { _ in
+            alertView.addAction(UIAlertAction(title: String(localized: "Cancel", comment: ""), style: .default) { _ in
                 continuation.resume(returning: .deny)
             })
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("once", comment: ""), style: .default) { _ in
+            alertView.addAction(UIAlertAction(title: String(localized: "Once", comment: ""), style: .default) { _ in
                 continuation.resume(returning: .permitOnce)
             })
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("always", comment: ""), style: .default) { _ in
+            alertView.addAction(UIAlertAction(title: String(localized: "Always", comment: ""), style: .default) { _ in
                 continuation.resume(returning: .permitAlways)
             })
 
@@ -172,16 +172,16 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool {
         let shouldImport = await withCheckedContinuation { continuation in
             let alertController = UIAlertController(
-                title: NSLocalizedString("certificate_import_title", comment: ""),
-                message: NSLocalizedString("certificate_import_text", comment: ""),
+                title: String(localized: "certificate_import_title", comment: ""),
+                message: String(localized: "certificate_import_text", comment: ""),
                 preferredStyle: .alert
             )
 
-            let okay = UIAlertAction(title: NSLocalizedString("okay", comment: ""), style: .default) { _ in
+            let okay = UIAlertAction(title: String(localized: "okay", comment: ""), style: .default) { _ in
                 continuation.resume(returning: true)
             }
 
-            let cancel = UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel) { _ in
+            let cancel = UIAlertAction(title: String(localized: "cancel", comment: ""), style: .cancel) { _ in
                 continuation.resume(returning: false)
             }
 
@@ -203,22 +203,22 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
     func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String? {
         await withCheckedContinuation { continuation in
             let alertController = UIAlertController(
-                title: NSLocalizedString("certificate_import_title", comment: ""),
-                message: NSLocalizedString("certificate_import_password", comment: ""),
+                title: String(localized: "certificate_import_title", comment: ""),
+                message: String(localized: "certificate_import_password", comment: ""),
                 preferredStyle: .alert
             )
 
             alertController.addTextField { textField in
-                textField.placeholder = NSLocalizedString("password", comment: "")
+                textField.placeholder = String(localized: "password", comment: "")
                 textField.isSecureTextEntry = true
             }
 
-            let okay = UIAlertAction(title: NSLocalizedString("okay", comment: ""), style: .default) { _ in
+            let okay = UIAlertAction(title: String(localized: "okay", comment: ""), style: .default) { _ in
                 let password = alertController.textFields?.first?.text
                 continuation.resume(returning: password)
             }
 
-            let cancel = UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel) { _ in
+            let cancel = UIAlertAction(title: String(localized: "cancel", comment: ""), style: .cancel) { _ in
                 continuation.resume(returning: nil)
             }
 
@@ -232,12 +232,12 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
     // Show alert if certificate import failed
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async {
         let alertController = UIAlertController(
-            title: NSLocalizedString("certificate_import_title", comment: ""),
+            title: String(localized: "certificate_import_title", comment: ""),
             message: errMsg,
             preferredStyle: .alert
         )
 
-        let okay = UIAlertAction(title: NSLocalizedString("okay", comment: ""), style: .default)
+        let okay = UIAlertAction(title: String(localized: "okay", comment: ""), style: .default)
         alertController.addAction(okay)
 
         present(alertController, animated: true)

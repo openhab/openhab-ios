@@ -15,8 +15,8 @@ import OpenHABCore
 import os
 
 final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling {
-    private static let onLabel = NSLocalizedString("on", comment: "").capitalized
-    private static let offLabel = NSLocalizedString("off", comment: "").capitalized
+    private static let onLabel = String(localized: "on", comment: "").capitalized
+    private static let offLabel = String(localized: "off", comment: "").capitalized
 
     private static let localizedActions = [onLabel, offLabel]
     private static let actionMap: [String: String] = [
@@ -57,20 +57,20 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(
-                NSLocalizedString("empty", comment: "empty item / home name")
+                String(localized: "empty", comment: "empty item / home name")
             )
         }
 
         guard let homeId = home.uuid, await Preferences.shared.storedHomes[homeId] != nil else {
-            return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
+            return .failureInvalidItem(String(localized: "unknownHome", comment: "unknown home"))
         }
 
         guard !itemName.isEmpty else {
-            return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item name"))
+            return .failureInvalidItem(String(localized: "empty", comment: "empty item name"))
         }
 
         guard let action = intent.action else {
-            return .failureInvalidAction(NSLocalizedString("empty", comment: "empty action"), item: itemName)
+            return .failureInvalidAction(String(localized: "empty", comment: "empty action"), item: itemName)
         }
 
         guard let command = Self.actionMap[action] else {
