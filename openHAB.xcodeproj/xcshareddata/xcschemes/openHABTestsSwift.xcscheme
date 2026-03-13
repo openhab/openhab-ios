@@ -32,6 +32,9 @@
             reference = "container:TestPlans/openHABTestsSwift.xctestplan"
             default = "YES">
          </TestPlanReference>
+         <TestPlanReference
+            reference = "container:TestPlans/openHABTests.xctestplan">
+         </TestPlanReference>
       </TestPlans>
       <Testables>
          <TestableReference
