@@ -3000,11 +3000,13 @@
             },
             "application/json": {
               "schema": {
-                "type": "string",
-                "example": {
-                  "value": "ON",
-                  "source": "org.openhab.ios"
-                }
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": ["value"]
               }
             }
           },

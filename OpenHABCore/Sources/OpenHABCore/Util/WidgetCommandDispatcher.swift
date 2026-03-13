@@ -24,7 +24,7 @@ public final class WidgetCommandDispatcher {
                      phase: WidgetCommandPhase = .change,
                      key: String? = nil,
                      fallbackItem: OpenHABItem? = nil) {
-        guard let command, !command.isEmpty else { return }
+        guard let command else { return }
 
         switch policy {
         case .immediate:
@@ -57,7 +57,7 @@ public final class WidgetCommandDispatcher {
                      phase: WidgetCommandPhase = .change,
                      key: String? = nil,
                      execute: @escaping @MainActor (_ itemname: String, _ command: String) -> Void) {
-        guard let command, !command.isEmpty, !itemname.isEmpty else { return }
+        guard let command, !itemname.isEmpty else { return }
 
         switch policy {
         case .immediate:
@@ -90,7 +90,7 @@ public final class WidgetCommandDispatcher {
                      phase: WidgetCommandPhase = .change,
                      key: String? = nil,
                      execute: @escaping @MainActor (_ itemname: String, _ command: String) -> Void) {
-        guard let command, !command.isEmpty, let item else { return }
+        guard let command, let item else { return }
 
         switch policy {
         case .immediate:
@@ -120,7 +120,7 @@ public final class WidgetCommandDispatcher {
     public func sendPress(_ command: String?,
                           for widget: OpenHABWidget,
                           fallbackItem: OpenHABItem? = nil) {
-        guard let command, !command.isEmpty else { return }
+        guard let command else { return }
         dispatch(command: command, for: widget, fallbackItem: fallbackItem)
     }
 
@@ -128,7 +128,7 @@ public final class WidgetCommandDispatcher {
     public func sendRelease(_ command: String?,
                             for widget: OpenHABWidget,
                             fallbackItem: OpenHABItem? = nil) {
-        guard let command, !command.isEmpty else { return }
+        guard let command else { return }
         dispatch(command: command, for: widget, fallbackItem: fallbackItem)
     }
 
