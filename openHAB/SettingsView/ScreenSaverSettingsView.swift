@@ -160,12 +160,14 @@ struct ScreenSaverSettingsView: View {
             VStack(alignment: .leading) {
                 Text("Clock Size: \(Int(config.timeFontSizeRatio * 100)) %")
                     .font(.caption)
+                    .monospacedDigit()
                 Slider(value: timeFontSizeBinding, in: 0.05 ... 0.4, step: 0.01)
             }
 
             VStack(alignment: .leading) {
                 Text("Date relative: \(Int(config.dateFontRelativeSize * 100)) %")
                     .font(.caption)
+                    .monospacedDigit()
                 Slider(value: dateFontSizeBinding, in: 0.1 ... 1.0, step: 0.05)
             }
         }
@@ -178,6 +180,7 @@ struct ScreenSaverSettingsView: View {
             VStack(alignment: .leading) {
                 Text("Fade Duration: \(String(format: "%.1f", config.fadeDuration)) s")
                     .font(.caption)
+                    .monospacedDigit()
                 Slider(value: $config.fadeDuration, in: 0.1 ... 3.0, step: 0.1)
             }
         }
@@ -192,6 +195,7 @@ struct ScreenSaverSettingsView: View {
             VStack(alignment: .leading) {
                 Text("Dim Level: \(Int(config.dimLevel * 100)) %")
                     .font(.caption)
+                    .monospacedDigit()
                 Slider(value: dimLevelBinding, in: 0 ... 100, step: 1)
             }
             .disabled(!config.enablesAutoDimming)
@@ -202,6 +206,7 @@ struct ScreenSaverSettingsView: View {
             VStack(alignment: .leading) {
                 Text("Restore Brightness: \(Int(config.wakeBrightnessLevel * 100)) %")
                     .font(.caption)
+                    .monospacedDigit()
                 Slider(value: wakeBrightnessBinding, in: 0 ... 100, step: 1)
             }
             .disabled(!config.enablesAutoDimming || config.restoresBrightness)

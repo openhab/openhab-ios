@@ -180,15 +180,6 @@ struct SingleConnectionSettingsView: View {
                 connectionTestMessage = "Unexpected error: \(error.localizedDescription)"
             }
             connectionTestSuccess = false
-        } catch let openAPIError as OpenAPIServiceError {
-            connectionTestMessage = "\(openAPIError.localizedDescription)"
-            connectionTestSuccess = false
-        } catch let urlError as URLError {
-            connectionTestMessage = friendlyMessage(for: urlError)
-            connectionTestSuccess = false
-        } catch {
-            connectionTestMessage = String(localized: "Unexpected error: \(error.localizedDescription)")
-            connectionTestSuccess = false
         }
 
         isTestingConnection = false
