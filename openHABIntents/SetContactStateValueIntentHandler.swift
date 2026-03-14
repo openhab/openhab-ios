@@ -54,7 +54,7 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(
-                String(localized: "empty", comment: "empty item / home name")
+                String(localized: "empty.itemorhome", defaultValue: "Empty Item or empty Home", comment: "Empty Item or empty Home")
             )
         }
 
@@ -64,7 +64,7 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
 
         guard let state = intent.state else {
             return .failureInvalidAction(
-                state: String(localized: "empty", comment: "empty value"),
+                state: String(localized: "empty.value", defaultValue: "Empty", comment: "Empty, with value name behind"),
                 item: itemName
             )
         }

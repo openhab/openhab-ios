@@ -57,7 +57,7 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(
-                String(localized: "empty", comment: "empty item / home name")
+                String(localized: "empty.itemorhome", defaultValue: "Empty Item or empty Home", comment: "Empty Item or empty Home")
             )
         }
 
@@ -66,11 +66,11 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
         }
 
         guard !itemName.isEmpty else {
-            return .failureInvalidItem(String(localized: "empty", comment: "empty item name"))
+            return .failureInvalidItem(String(localized: "empty.itemname", defaultValue: "Empty Item name", comment: "empty item name"))
         }
 
         guard let action = intent.action else {
-            return .failureInvalidAction(String(localized: "empty", comment: "empty action"), item: itemName)
+            return .failureInvalidAction(String(localized: "empty.action", defaultValue: "Empty action", comment: "empty action"), item: itemName)
         }
 
         guard let command = Self.actionMap[action] else {

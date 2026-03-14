@@ -41,7 +41,7 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(
-                String(localized: "empty", comment: "empty item / home name")
+                String(localized: "empty.itemorhome", defaultValue: "Empty Item or empty Home", comment: "Empty Item or empty Home")
             )
         }
 

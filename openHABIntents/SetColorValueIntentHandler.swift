@@ -41,7 +41,7 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
 
         guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(
-                String(localized: "empty", comment: "empty item / home name")
+                String(localized: "empty.itemorhome", defaultValue: "Empty Item or empty Home", comment: "Empty Item or empty Home")
             )
         }
 
@@ -51,7 +51,7 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
 
         guard var value = intent.value else {
             return .failureInvalidValue(
-                String(localized: "empty", comment: "empty value"),
+                String(localized: "empty.value", defaultValue: "Empty", comment: "Empty, with value name behind"),
                 item: itemName
             )
         }

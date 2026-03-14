@@ -2564,59 +2564,6 @@
         }
       }
     },
-    "empty" : {
-      "comment" : "empty action\nempty item / home name\nempty item name\nempty value",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "leer"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "vacío"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "empty"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "vide"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "vuoto"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "tom"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "leeg"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "empty"
-          }
-        }
-      }
-    },
     "empty_sitemap" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2672,6 +2619,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "openHAB returned empty sitemap list"
+          }
+        }
+      }
+    },
+    "empty.action" : {
+      "comment" : "empty action",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leere Aktion"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Empty action"
+          }
+        }
+      }
+    },
+    "empty.itemname" : {
+      "comment" : "empty item name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leerer Item-Name"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Empty Item name"
+          }
+        }
+      }
+    },
+    "empty.itemorhome" : {
+      "comment" : "Empty Item or empty Home",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leeres Item oder leeres Zuhause"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Empty Item or empty Home"
+          }
+        }
+      }
+    },
+    "empty.value" : {
+      "comment" : "Empty, with value name behind",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leer:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Empty"
           }
         }
       }
