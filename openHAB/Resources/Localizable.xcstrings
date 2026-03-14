@@ -160,7 +160,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Akzeptierte Server Zertifikate"
+            "value" : "Akzeptierte Server-Zertifikate"
           }
         }
       }
@@ -289,7 +289,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hinzugeügt: %@"
+            "value" : "Hinzugefügt am: %@"
           }
         }
       }
@@ -1049,7 +1049,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clientzertifikatimport"
+            "value" : "Client-Zertifikatimport"
           }
         },
         "en" : {
@@ -3207,6 +3207,65 @@
         }
       }
     },
+    "invalid_connection_configuration" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ungültige Verbindungskonfiguration."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid connection configuration."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configuración de conexión no válida."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Virheellinen yhteysasetukset."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configuration de connexion invalide."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurazione della connessione non valida."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ugyldig tilkoblingskonfigurasjon."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ongeldige verbindingsconfiguratie."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Недопустимая конфигурация подключения."
+          }
+        }
+      }
+    },
     "Label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3730,7 +3789,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keine akzeptierten Serverzertifikate"
+            "value" : "Keine akzeptierten Server-Zertifikate"
           }
         }
       }
@@ -4036,6 +4095,12 @@
             "state" : "translated",
             "value" : "Benachrichtigungen"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notificaties"
+          }
         }
       }
     },
@@ -4099,6 +4164,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aus"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uit"
           }
         }
       }
