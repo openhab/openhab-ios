@@ -2564,6 +2564,17 @@
         }
       }
     },
+    "empty" : {
+      "comment" : "local or remote URL: empty",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "leer"
+          }
+        }
+      }
+    },
     "empty_sitemap" : {
       "extractionState" : "manual",
       "localizations" : {
