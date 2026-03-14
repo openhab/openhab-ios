@@ -3200,6 +3200,17 @@
         }
       }
     },
+    "Label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Label"
+          }
+        }
+      }
+    },
     "legal" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3608,6 +3619,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bewegungsintervall: %lld s"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
           }
         }
       }
@@ -4617,6 +4639,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Farbe auswählen"
+          }
+        }
+      }
+    },
+    "PNG" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PNG"
           }
         }
       }
@@ -6016,6 +6049,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zustand"
+          }
+        }
+      }
+    },
+    "SVG" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SVG"
           }
         }
       }
