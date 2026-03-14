@@ -165,7 +165,7 @@ struct ScreenSaverSettingsView: View {
             }
 
             VStack(alignment: .leading) {
-                Text("Date relative: \(Int(config.dateFontRelativeSize * 100)) %")
+                Text("Relative Date: \(Int(config.dateFontRelativeSize * 100)) %")
                     .font(.caption)
                     .monospacedDigit()
                 Slider(value: dateFontSizeBinding, in: 0.1 ... 1.0, step: 0.05)
