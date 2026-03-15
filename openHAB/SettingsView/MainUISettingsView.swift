@@ -43,7 +43,7 @@ struct MainUISettingsView: View {
                         "uselastpath_settings",
                         isPresented: $showUselastPathAlert
                     ) {
-                        Button("Ok") {
+                        Button("OK") {
                             settingsDefaultMainUIPath = Preferences.shared.currentWebViewPath
                         }
                         Button(role: .cancel) {} label: {

@@ -182,7 +182,7 @@ public class ClientCertificateManager {
             await clientCertificateAccepted(password: retryPassword)
 
         default:
-            let errMsg = String(format: NSLocalizedString("unable_to_decode_certificate", comment: ""), "\(status)")
+            let errMsg = String(format: String(localized: "unable_to_decode_certificate", comment: ""), "\(status)")
             await delegate?.alertClientCertificateError(self, errMsg: errMsg)
         }
     }
@@ -260,9 +260,9 @@ public class ClientCertificateManager {
         if status != errSecSuccess {
             _ = deleteFromKeychain(identity)
 
-            var errorMessage = String(format: NSLocalizedString("unable_to_add_certificate", comment: ""), "\(status)")
+            var errorMessage = String(format: String(localized: "unable_to_add_certificate", comment: ""), "\(status)")
             if status == errSecDuplicateItem {
-                errorMessage = NSLocalizedString("certficate_exists", comment: "")
+                errorMessage = String(localized: "certficate_exists", comment: "")
             }
 
             await delegate?.alertClientCertificateError(self, errMsg: errorMessage)

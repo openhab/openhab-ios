@@ -359,7 +359,7 @@ class OpenHABWebViewController: OpenHABViewController {
 
     func pageLoadError(message: String) {
         showActivityIndicator(show: true)
-        showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: message, theme: .error)
+        showPopupMessage(seconds: 60, title: String(localized: "Error", comment: ""), message: message, theme: .error)
     }
 
     // swiftformat:enable redundantSelf
@@ -508,7 +508,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                 sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
                     guard let self else { return }
                     Task { @MainActor in
-                        self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                        self.showPopupMessage(seconds: 20, title: String(localized: "connecting", comment: ""), message: "", theme: .info)
                         self.acceptsCommands = false
                     }
                 }

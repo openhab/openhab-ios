@@ -27,9 +27,9 @@ public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible, 
     public var description: String {
         switch self {
         case .png:
-            "PNG"
+            String(localized: "PNG")
         case .svg:
-            "SVG"
+            String(localized: "SVG")
         }
     }
 }
@@ -41,9 +41,9 @@ public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible {
     public var description: String {
         switch self {
         case .label:
-            "Label"
+            String(localized: "Label")
         case .name:
-            "Name"
+            String(localized: "Name")
         }
     }
 }

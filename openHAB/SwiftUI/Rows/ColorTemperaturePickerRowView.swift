@@ -205,14 +205,14 @@ private struct ColorTemperaturePickerRowContent: View {
 
     private var temperatureDescription: String {
         switch selectedTemperature {
-        case 1000 ..< 2000: "Candlelight"
-        case 2000 ..< 2700: "Very Warm"
-        case 2700 ..< 3000: "Warm White"
-        case 3000 ..< 4000: "Soft White"
-        case 4000 ..< 5000: "Cool White"
-        case 5000 ..< 6500: "Daylight"
-        case 6500 ..< 8000: "Cool Daylight"
-        default: "Very Cool"
+        case 1000 ..< 2000: String(localized: "Candlelight")
+        case 2000 ..< 2700: String(localized: "Very Warm")
+        case 2700 ..< 3000: String(localized: "Warm White")
+        case 3000 ..< 4000: String(localized: "Soft White")
+        case 4000 ..< 5000: String(localized: "Cool White")
+        case 5000 ..< 6500: String(localized: "Daylight")
+        case 6500 ..< 8000: String(localized: "Cool Daylight")
+        default: String(localized: "Very Cool")
         }
     }
 
