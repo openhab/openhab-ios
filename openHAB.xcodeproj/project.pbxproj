@@ -952,6 +952,8 @@
 				DA448E772EF435B400F0893C /* Home.swift */,
 			);
 			path = AppIntents;
+			sourceTree = "<group>";
+		};
 		DA35E2B12E1EEA58003987BB /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
