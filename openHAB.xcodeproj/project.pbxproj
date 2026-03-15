@@ -1021,14 +1021,6 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		DAC1310F2DA3208E00075AE2 /* openHABIntentsTests */ = {
-			isa = PBXGroup;
-			children = (
-				DAC131102DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift */,
-			);
-			path = openHABIntentsTests;
-			sourceTree = "<group>";
-		};
 		DAC949FF2E21A473007E67B7 /* Rows */ = {
 			isa = PBXGroup;
 			children = (
@@ -1207,8 +1199,7 @@
 				DA0775162346705D0086C685 /* openHABWatch */,
 				DAD0856F2AE4782D001D36BE /* openHABWatchSwiftUI Watch AppTests */,
 				4D6470D42561F935007B03FC /* openHABIntents */,
-				DAC1310F2DA3208E00075AE2 /* openHABIntentsTests */,
-				DAD085792AE4782F001D36BE /* openHABWatchSwiftUI Watch AppUITests */,
+					DAD085792AE4782F001D36BE /* openHABWatchSwiftUI Watch AppUITests */,
 				6571444F2C1E438700C8A1F3 /* NotificationService */,
 				DA8B15522F3BB74B007753FD /* openHABWatchTests */,
 				DFB2622818830A3600D3244D /* Products */,
@@ -1863,8 +1854,7 @@
 				DA64ACA82DBEAD8300294F60 /* SitemapPageView.swift in Sources */,
 				DA64ACAA2DBEAD9000294F60 /* SitemapNavigationView.swift in Sources */,
 				DA4800212D839D3A009CF127 /* AnimatedSecureTextField.swift in Sources */,
-				DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */,
-				DA35E2BD2E1EEA9D003987BB /* MapRowView.swift in Sources */,
+					DA35E2BD2E1EEA9D003987BB /* MapRowView.swift in Sources */,
 				DA35E2BE2E1EEA9D003987BB /* DatePickerInputRowView.swift in Sources */,
 				DAC949FE2E21A2D1007E67B7 /* FrameRowView.swift in Sources */,
 				DA35E2BF2E1EEA9D003987BB /* WebRowView.swift in Sources */,
