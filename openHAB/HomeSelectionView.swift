@@ -94,7 +94,7 @@ struct HomeSelectionView: View {
                     }
                 }
             }, message: {
-                Text("Warning: Renaming the home might cause external integrations like shortcuts to fail until reconfigured")
+                Text("Warning: Renaming the home might cause external integrations like shortcuts to fail until reconfigured.")
             })
             .alert("Delete home '\(homeNameForAlert)'?", isPresented: $showingDeleteHomeAlert) {
                 HStack {
