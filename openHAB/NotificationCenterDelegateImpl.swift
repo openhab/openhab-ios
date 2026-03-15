@@ -60,7 +60,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             userInfo: userInfo
         )
 
-        let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
+        let message = userInfo["message"] as? String ?? String(localized: "message_not_decoded", comment: "")
         let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
         let cloudUserId = userInfo["userId"] as? String
         await displayNotification(message: message, action: action, cloudUserId: cloudUserId)
@@ -115,8 +115,8 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             SwiftMessages.show(config: config) {
                 let view = MessageView.viewFromNib(layout: .cardView)
                 view.configureTheme(.info)
-                view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
-                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
+                view.configureContent(title: String(localized: "notification", comment: ""), body: message)
+                view.button?.setTitle(String(localized: "dismiss", comment: ""), for: .normal)
                 view.buttonTapHandler = { _ in SwiftMessages.hide() }
 
                 // Use closure-based tap gesture insteae of #selector

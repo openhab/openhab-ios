@@ -93,7 +93,7 @@ struct SitemapNavigationView: View {
                             text: $viewModel.searchText,
                             isPresented: $isSearchPresented,
                             placement: .navigationBarDrawer(displayMode: .always),
-                            prompt: Text(NSLocalizedString("search_items", comment: ""))
+                            prompt: Text(String(localized: "search_items", comment: ""))
                         )
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
@@ -119,7 +119,7 @@ struct SitemapNavigationView: View {
                 .foregroundStyle(.secondary)
                 .ohTextToken(.secondary)
 
-            TextField(NSLocalizedString("search_items", comment: ""), text: $viewModel.searchText)
+            TextField(String(localized: "search_items", comment: ""), text: $viewModel.searchText)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .focused($isLegacySearchFocused)

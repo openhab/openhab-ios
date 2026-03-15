@@ -152,7 +152,7 @@ final class UserData: ObservableObject {
                   let domain = notification.userInfo?["domain"] as? String,
                   let delegate = notification.object as? HTTPClientDelegate else { return }
             DispatchQueue.main.async {
-                self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), summary, domain)
+                self.certificateErrorDescription = String(format: String(localized: "ssl_certificate_invalid", comment: ""), summary, domain)
                 self.currentClientDelegate = delegate
                 self.showCertificateAlert = true
             }
@@ -168,7 +168,7 @@ final class UserData: ObservableObject {
                   let domain = notification.userInfo?["domain"] as? String,
                   let delegate = notification.object as? HTTPClientDelegate else { return }
             DispatchQueue.main.async {
-                self.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), summary, domain)
+                self.certificateErrorDescription = String(format: String(localized: "ssl_certificate_no_match", comment: ""), summary, domain)
                 self.currentClientDelegate = delegate
                 self.showCertificateAlert = true
             }
@@ -212,7 +212,7 @@ final class UserData: ObservableObject {
 
             if !AppSettings.shared.haveReceivedAppContext {
                 AppMessageService.singleton.requestApplicationContext()
-                errorDescription = NSLocalizedString("settings_not_received", comment: "")
+                errorDescription = String(localized: "settings_not_received", comment: "")
                 showAlert = true
                 continue
             }
@@ -309,7 +309,7 @@ final class UserData: ObservableObject {
                 guard let connectionInfo else {
                     Logger.userData.error("No active connection available after timeout")
                     await MainActor.run {
-                        self.errorDescription = NSLocalizedString("settings_not_received", comment: "")
+                        self.errorDescription = String(localized: "settings_not_received", comment: "")
                         self.showAlert = true
                         self.isLoadingSitemap = false
                     }

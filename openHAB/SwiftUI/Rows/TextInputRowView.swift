@@ -15,43 +15,23 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-enum InputCommandFormatter {
-    static func filteredDraftInput(from rawText: String, previousText: String, hint: OpenHABWidget.InputHint?) -> String {
-        guard hint == .number else { return rawText }
-        return isValidNumberDraft(rawText) ? rawText : previousText
-    }
-
-    static func command(from rawText: String, hint: OpenHABWidget.InputHint?) -> String? {
+struct InputCommandFormatter {
+    
+    var decimalSeparator: String = Locale.current.decimalSeparator ?? "."
+    
+    // MARK: after typing
+    
+    func command(from rawText: String, hint: OpenHABWidget.InputHint?) -> String? {
         let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard hint == .number else { return trimmed }
-        guard !trimmed.isEmpty else { return nil }
-        return normalizedNumberCommand(from: trimmed)
-    }
-
-    static func isValidNumberDraft(_ value: String, decimalSeparator: String = Locale.current.decimalSeparator ?? ".") -> Bool {
-        if value.isEmpty { return true }
-
-        let wholeNumberPattern = /^-?[0-9]*$/
-
-        // Valid if it matches an optional sign followed by digits only
-        if value.firstRange(of: wholeNumberPattern) != nil {
-            return true
+        switch hint {
+        case .number:
+            return normalizedNumberCommand(from: trimmed)
+        default:
+            return trimmed
         }
-
-        // Strip optional leading minus for decimal-separator check
-        let withoutSign = value.hasPrefix("-") ? String(value.dropFirst()) : value
-
-        // Check that after removing one decimal separator, only digits remain
-        let parts = withoutSign.components(separatedBy: decimalSeparator)
-        // Exactly one decimal separator yields exactly two parts
-        guard parts.count == 2 else { return false }
-        // Both parts must contain only digits (either may be empty, e.g. "3." or ".5")
-        let digitsOnly = /^[0-9]*$/
-        return parts.allSatisfy { $0.firstRange(of: digitsOnly) != nil }
     }
 
-    private static func normalizedNumberCommand(from value: String) -> String? {
-        let decimalSeparator = Locale.current.decimalSeparator ?? "."
+    private func normalizedNumberCommand(from value: String) -> String? {
 
         // Must be a valid draft and contain at least one digit
         guard isValidNumberDraft(value),
@@ -83,6 +63,35 @@ enum InputCommandFormatter {
         guard Double(normalized) != nil else { return nil }
         return normalized
     }
+
+    // MARK: during typing
+    
+    func filteredDraftInput(from rawText: String, previousText: String, hint: OpenHABWidget.InputHint?) -> String {
+        guard hint == .number else { return rawText }
+        return isValidNumberDraft(rawText) ? rawText : previousText
+    }
+
+    func isValidNumberDraft(_ value: String) -> Bool {
+        if value.isEmpty { return true }
+
+        let wholeNumberPattern = /^-?[0-9]*$/
+
+        // Valid if it matches an optional sign followed by digits only
+        if value.firstRange(of: wholeNumberPattern) != nil {
+            return true
+        }
+
+        // Strip optional leading minus for decimal-separator check
+        let withoutSign = value.hasPrefix("-") ? String(value.dropFirst()) : value
+
+        // Check that after removing one decimal separator, only digits remain
+        let parts = withoutSign.components(separatedBy: decimalSeparator)
+        // Exactly one decimal separator yields exactly two parts
+        guard parts.count == 2 else { return false }
+        // Both parts must contain only digits (either may be empty, e.g. "3." or ".5")
+        let digitsOnly = /^[0-9]*$/
+        return parts.allSatisfy { $0.firstRange(of: digitsOnly) != nil }
+    }
 }
 
 private struct TextInputRowConfig {
@@ -113,8 +122,9 @@ private struct TextInputRowContent: View {
     @State private var showInputAlert = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")
+    private let inputCommandFormatter = InputCommandFormatter()
     private var formattedCommand: String? {
-        InputCommandFormatter.command(from: draftInputText, hint: inputHint)
+        inputCommandFormatter.command(from: draftInputText, hint: inputHint)
     }
 
     private var alertMessage: String {
@@ -183,7 +193,7 @@ private struct TextInputRowContent: View {
     }
 
     private func filterDraftInput(_ newValue: String) {
-        let filtered = InputCommandFormatter.filteredDraftInput(from: newValue, previousText: lastValidDraft, hint: inputHint)
+        let filtered = inputCommandFormatter.filteredDraftInput(from: newValue, previousText: lastValidDraft, hint: inputHint)
         if filtered != newValue {
             // Defer the revert so SwiftUI picks up the new value
             // after the current TextField update cycle completes.
