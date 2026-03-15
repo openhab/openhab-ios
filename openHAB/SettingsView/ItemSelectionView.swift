@@ -37,29 +37,9 @@ struct ItemSelectionView: View {
     var body: some View {
         VStack {
             if isLoading {
-                Spacer()
-                ProgressView("Loading Items…")
-                Spacer()
+                loadingView
             } else {
-                TextField("Search", text: $searchText)
-                    .textFieldStyle(.roundedBorder)
-                    .padding(.horizontal)
-
-                List {
-                    ForEach(filteredItems, id: \.name) { item in
-                        Button {
-                            selectedItemName = (selectedItemName == item.name) ? nil : item.name
-                        } label: {
-                            HStack {
-                                Text(item.name)
-                                Spacer()
-                                if selectedItemName == item.name {
-                                    Image(systemSymbol: .checkmark)
-                                }
-                            }
-                        }
-                    }
-                }
+                loadedView
             }
         }
         .navigationTitle("Items")
@@ -71,6 +51,41 @@ struct ItemSelectionView: View {
                     Logger.selectionView.error("Failed to load items: \(error.localizedDescription)")
                 }
                 isLoading = false
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var loadingView: some View {
+        Spacer()
+        ProgressView("Loading Items…")
+        Spacer()
+    }
+
+    @ViewBuilder
+    private var loadedView: some View {
+        TextField("Search", text: $searchText)
+            .textFieldStyle(.roundedBorder)
+            .padding(.horizontal)
+
+        List {
+            ForEach(filteredItems, id: \.name) { item in
+                itemRow(item)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func itemRow(_ item: OpenHABItem) -> some View {
+        Button {
+            selectedItemName = (selectedItemName == item.name) ? nil : item.name
+        } label: {
+            HStack {
+                Text(item.name)
+                Spacer()
+                if selectedItemName == item.name {
+                    Image(systemSymbol: .checkmark)
+                }
             }
         }
     }

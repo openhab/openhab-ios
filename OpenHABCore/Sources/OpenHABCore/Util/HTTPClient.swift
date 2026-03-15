@@ -328,8 +328,7 @@ public final class HTTPClient: NSObject, Sendable {
         guard let url = Endpoint.notification(prefsURL: urlString).url else { throw HTTPClientError.couldNotLoadNotification }
         let data = try await notification(url: url)
 
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+        let decoder = JSONDecoder.makeISO8601TolerantDecoder()
         let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
         return codingDatas.map(\.openHABNotification)
     }

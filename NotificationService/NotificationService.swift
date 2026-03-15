@@ -97,7 +97,7 @@ actor NotificationServiceHandler {
                         options: .customDismissAction
                     )
                 UNUserNotificationCenter.current().getNotificationCategories { existingCategories in
-                    var updatedCategories = existingCategories
+                    var updatedCategories = Set(existingCategories.filter { $0.identifier != category })
                     Logger.notificationService.info("handleNotification adding category \(category)")
                     updatedCategories.insert(notificationCategory)
                     UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
@@ -184,11 +184,12 @@ actor NotificationServiceHandler {
 
     // Helper function to determine full URL
     private func resolveFullURL(from url: String, baseURL: String) -> URL? {
-        if url.starts(with: "/") {
-            URL(string: baseURL)?.appendingPathComponent(url)
-        } else {
-            URL(string: url)
+        if let parsedURL = URL(string: url), parsedURL.scheme != nil {
+            return parsedURL
         }
+
+        guard let parsedBaseURL = URL(string: baseURL) else { return nil }
+        return URL(string: url, relativeTo: parsedBaseURL)?.absoluteURL
     }
 
     func downloadAndAttachItemImage(itemURI: String) async throws -> UNNotificationAttachment? {

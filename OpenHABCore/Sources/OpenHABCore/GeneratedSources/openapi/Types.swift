@@ -8004,8 +8004,23 @@ public enum Operations {
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/{itemname}/POST/requestBody/content/text\/plain`.
                 case plainText(OpenAPIRuntime.HTTPBody)
+                /// - Remark: Generated from `#/paths/items/{itemname}/POST/requestBody/json`.
+                public struct jsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/items/{itemname}/POST/requestBody/json/value`.
+                    public var value: Swift.String
+                    /// Creates a new `jsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - value:
+                    public init(value: Swift.String) {
+                        self.value = value
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case value
+                    }
+                }
                 /// - Remark: Generated from `#/paths/items/{itemname}/POST/requestBody/content/application\/json`.
-                case json(Swift.String)
+                case json(Operations.sendItemCommand.Input.Body.jsonPayload)
             }
             public var body: Operations.sendItemCommand.Input.Body
             /// Creates a new `Input`.

@@ -22,18 +22,18 @@ class MockURLProtocol: URLProtocol {
     nonisolated(unsafe) static var shouldFail = false
     nonisolated(unsafe) static var error: Error?
 
+    static func reset() {
+        mockResponses.removeAll()
+        shouldFail = false
+        error = nil
+    }
+
     override class func canInit(with request: URLRequest) -> Bool {
         true
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
         request
-    }
-
-    static func reset() {
-        mockResponses.removeAll()
-        shouldFail = false
-        error = nil
     }
 
     override func startLoading() {

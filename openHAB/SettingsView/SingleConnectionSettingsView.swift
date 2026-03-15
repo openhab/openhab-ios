@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import OpenAPIRuntime
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
@@ -81,7 +80,7 @@ struct SingleConnectionSettingsView: View {
                                 Image(systemSymbol: .wifiCircle)
                             }
                             .buttonStyle(.plain)
-                            .foregroundColor(.accentColor)
+                            .foregroundStyle(Color.accentColor)
                             .disabled(connectionConfig.url.isEmpty)
                             .help("Test Connection")
                         }
@@ -97,9 +96,9 @@ struct SingleConnectionSettingsView: View {
                 if let message = connectionTestMessage, let success = connectionTestSuccess {
                     HStack(spacing: 4) {
                         Image(systemSymbol: success ? .checkmarkCircle : .xmarkOctagon)
-                            .foregroundColor(success ? .green : .red)
+                            .foregroundStyle(success ? .green : .red)
                         Text(message)
-                            .foregroundColor(success ? .green : .red)
+                            .foregroundStyle(success ? .green : .red)
                             .font(.caption2)
                     }
                     .transition(.opacity)
@@ -168,23 +167,18 @@ struct SingleConnectionSettingsView: View {
         } catch let error as DecodingError {
             connectionTestMessage = "Unexpected error: \(error.localizedDescription)"
             connectionTestSuccess = false
-        } catch let error as ClientError {
-            if let urlError = error.underlyingError as? URLError {
+        } catch {
+            if let urlError = OpenAPIErrorInspector.underlyingURLError(from: error) {
+                connectionTestMessage = friendlyMessage(for: urlError)
+            } else if let message = OpenAPIErrorInspector.underlyingErrorDescription(from: error) {
+                connectionTestMessage = message
+            } else if let openAPIError = error as? OpenAPIServiceError {
+                connectionTestMessage = openAPIError.localizedDescription
+            } else if let urlError = error as? URLError {
                 connectionTestMessage = friendlyMessage(for: urlError)
             } else {
-                connectionTestMessage = """
-                \(String(describing: error.underlyingError))
-                """
+                connectionTestMessage = "Unexpected error: \(error.localizedDescription)"
             }
-            connectionTestSuccess = false
-        } catch let openAPIError as OpenAPIServiceError {
-            connectionTestMessage = "\(openAPIError.localizedDescription)"
-            connectionTestSuccess = false
-        } catch let urlError as URLError {
-            connectionTestMessage = friendlyMessage(for: urlError)
-            connectionTestSuccess = false
-        } catch {
-            connectionTestMessage = "Unexpected error: \(error.localizedDescription)"
             connectionTestSuccess = false
         }
 

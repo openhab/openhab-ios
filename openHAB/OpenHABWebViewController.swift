@@ -561,6 +561,95 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         Logger.viewController.info("didFinish - webView.url: \(String(describing: webView.url?.description))")
 
+        // Fix: the Main UI script editor height does not account for the bottom toolbar's safe area
+        // padding on iPhone, so the last few lines are hidden behind the toolbar (issue #1092).
+        // Add padding to account for safe area and FAB button at the bottom.
+        let safeAreaBottom = webView.safeAreaInsets.bottom
+        let editorFixJS = """
+        (function() {
+            if (window.__ohEditorFixInstalled) return;
+            window.__ohEditorFixInstalled = true;
+
+            var safeAreaBottom = \(safeAreaBottom);
+
+            function fixScriptEditorHeight() {
+                var editor = document.querySelector('.rule-script-editor.v-codemirror');
+                if (!editor) return;
+
+                var page = editor.closest('.page');
+                if (!page) return;
+
+                var toolbar = page.querySelector('.toolbar');
+                if (!toolbar) return;
+
+                // Find FAB button and calculate total padding needed
+                var fab = page.querySelector('.fab') || document.querySelector('.fab');
+                var fabHeight = 0;
+                if (fab) {
+                    var fabRect = fab.getBoundingClientRect();
+                    fabHeight = fabRect.height || 56;
+                }
+
+                var totalBottomPadding = safeAreaBottom;
+                if (fab && fabHeight > 0) {
+                    totalBottomPadding += fabHeight + 16;
+                } else if (fab) {
+                    totalBottomPadding += 56 + 16;
+                }
+
+                // Add padding to page content
+                var pageContent = page.querySelector('.page-content');
+                if (pageContent) {
+                    pageContent.style.paddingBottom = totalBottomPadding + 'px';
+                }
+
+                // Add padding to CodeMirror scroll container
+                var scrollContainer = editor.querySelector('.cm-scroller') ||
+                                     editor.querySelector('.CodeMirror-scroll') ||
+                                     editor.querySelector('.cm-content');
+
+                if (scrollContainer && scrollContainer !== editor) {
+                    scrollContainer.style.paddingBottom = totalBottomPadding + 'px';
+                    scrollContainer.style.overflowY = 'auto';
+                    editor.style.marginBottom = totalBottomPadding + 'px';
+                } else {
+                    editor.style.paddingBottom = totalBottomPadding + 'px';
+                    editor.style.marginBottom = totalBottomPadding + 'px';
+                }
+            }
+
+            // Watch for editor appearing via MutationObserver
+            new MutationObserver(function(mutations) {
+                for (var i = 0; i < mutations.length; i++) {
+                    for (var j = 0; j < mutations[i].addedNodes.length; j++) {
+                        var n = mutations[i].addedNodes[j];
+                        if (n.nodeType === 1 &&
+                            ((n.classList && n.classList.contains('rule-script-editor')) ||
+                             (n.querySelector && n.querySelector('.rule-script-editor')))) {
+                            setTimeout(function() {
+                                requestAnimationFrame(fixScriptEditorHeight);
+                            }, 100);
+                            return;
+                        }
+                    }
+                }
+            }).observe(document.body || document.documentElement, { subtree: true, childList: true });
+
+            // Watch for window resize events
+            window.addEventListener('resize', function() {
+                setTimeout(function() {
+                    requestAnimationFrame(fixScriptEditorHeight);
+                }, 100);
+            });
+
+            // Initial fix attempt
+            setTimeout(function() {
+                fixScriptEditorHeight();
+            }, 500);
+        })();
+        """
+        webView.evaluateJavaScript(editorFixJS)
+
         // Track the successfully loaded URL for ETag comparison
         lastLoadedURL = webView.url?.absoluteString
 

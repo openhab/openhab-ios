@@ -13,6 +13,7 @@ import Combine
 import Kingfisher
 import OpenHABCore
 import os.log
+import SFSafeSymbols
 import SwiftUI
 
 typealias NotificationLoader = () async -> [OpenHABNotification]
@@ -29,14 +30,14 @@ struct NotificationRow: View {
                 }
                 .resizable()
                 .frame(width: 40, height: 40)
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 8))
             VStack(alignment: .leading) {
                 Text(notification.message ?? "")
                     .font(.body)
                 if let timeStamp = notification.created {
                     Text(dateString(from: timeStamp))
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
             }
         }
@@ -64,11 +65,7 @@ struct NotificationRow: View {
     }
 
     private func dateString(from date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .medium
-        formatter.timeZone = TimeZone.current
-        return formatter.string(from: date)
+        date.formatted(date: .abbreviated, time: .shortened)
     }
 }
 
@@ -116,6 +113,7 @@ struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: Observab
     @ObservedObject var networkTracker: Tracker
     @State var notifications: [OpenHABNotification] = []
     let loadNotifications: NotificationLoader
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         List(notifications, id: \.id) { notification in
@@ -126,7 +124,18 @@ struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: Observab
         .refreshable {
             await notifications = loadNotifications()
         }
+        .navigationBarBackButtonHidden(true)
         .navigationTitle("Notifications")
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: {
+                    dismiss()
+                }, label: {
+                    Image(systemSymbol: .chevronBackward)
+                        .accessibilityLabel("Back")
+                })
+            }
+        }
         .task {
             await notifications = loadNotifications()
         }

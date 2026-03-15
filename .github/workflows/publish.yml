@@ -2,7 +2,7 @@ name: Deploy on TestFlight
 
 on:
   schedule:
-    - cron: "0 6 1 * *"
+    - cron: "0 6 1 * *"  # runs on default branch (develop) only
   workflow_dispatch:
     inputs:
       bump_type:

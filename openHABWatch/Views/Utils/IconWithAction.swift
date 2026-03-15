@@ -14,19 +14,23 @@ import SwiftUI
 
 struct IconWithAction: View {
     var systemSymbol: SFSymbol
+    var accessibilityLabel: String
     var action: () -> Void
+
     var body: some View {
-        Image(systemSymbol: systemSymbol)
-            .font(.system(size: 25))
-            .colorMultiply(.blue)
-            .saturation(0.8)
-            .onTapGesture {
-                action()
-            }
+        Button(action: action) {
+            Image(systemSymbol: systemSymbol)
+                .font(.system(size: 25))
+                .colorMultiply(.blue)
+                .saturation(0.8)
+                .frame(width: 32, height: 32)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityAddTraits(.isButton)
     }
 }
 
 #Preview {
-    IconWithAction(systemSymbol:
-        .chevronUpCircleFill) {}
+    IconWithAction(systemSymbol: .chevronUpCircleFill, accessibilityLabel: "Increase") {}
 }

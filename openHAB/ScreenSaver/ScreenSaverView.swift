@@ -15,49 +15,9 @@ import os.log
 import SwiftUI
 
 struct ScreenSaverView: View {
-    // Constants for text dimension estimation
-    private static let timeTextWidthMultiplier: CGFloat = 4.0
-    private static let dateTextHeightMultiplier: CGFloat = 1.4
-
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter
-    }()
-
-    private static let time24Formatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.dateFormat = "H:mm"
-        return formatter
-    }()
-
-    private static let time24SecondsFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.dateFormat = "H:mm:ss"
-        return formatter
-    }()
-
-    private static let time12Formatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.dateFormat = "h:mm a"
-        return formatter
-    }()
-
-    private static let time12SecondsFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.dateFormat = "h:mm:ss a"
-        return formatter
-    }()
-
     let configuration: ScreenSaverConfiguration
 
-    @State private var currentPosition: CGPoint = .zero
-    @State private var screenSize: CGSize = .zero
+    @State private var currentAnchor = CGPoint(x: 0.5, y: 0.5)
     @State private var fadeOpacity = 1.0
     @State private var movementTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     @State private var isTimerActive = false
@@ -73,23 +33,30 @@ struct ScreenSaverView: View {
                     }
 
                 TimelineView(.periodic(from: .now, by: 1.0)) { context in
+                    let fontName = validatedFontName()
+                    let layout = currentLayout(for: context.date, size: geometry.size, fontName: fontName)
+
                     VStack(spacing: 0) {
                         if configuration.showsDate {
                             Text(dateString(for: context.date))
-                                .font(dateFont(for: geometry.size))
+                                .font(dateFont(size: layout.dateFontSize, fontName: fontName))
                                 .monospacedDigit()
-                                .foregroundColor(.white.opacity(0.85 * alphaFactor))
+                                .foregroundStyle(.white.opacity(0.85 * alphaFactor))
                         }
 
                         if configuration.showsTime {
                             Text(timeString(for: context.date))
-                                .font(timeFont(for: geometry.size))
+                                .font(timeFont(size: layout.timeFontSize, fontName: fontName))
                                 .monospacedDigit()
-                                .foregroundColor(.white.opacity(alphaFactor))
+                                .foregroundStyle(.white.opacity(alphaFactor))
                         }
                     }
                     .opacity(fadeOpacity)
-                    .position(currentPosition)
+                    .position(layout.position(
+                        in: geometry.size,
+                        anchor: currentAnchor,
+                        edgeMargin: ScreenSaverLayoutCalculator.edgeMargin
+                    ))
                 }
             }
             .onReceive(movementTimer) { _ in
@@ -106,23 +73,21 @@ struct ScreenSaverView: View {
                     try? await Task.sleep(nanoseconds: UInt64(half * 1_000_000_000))
                     guard !Task.isCancelled else { return }
 
-                    currentPosition = calculateRandomPosition(for: screenSize)
+                    currentAnchor = randomAnchor()
                     withAnimation(.easeInOut(duration: half)) {
                         fadeOpacity = 1.0
                     }
                 }
             }
             .onAppear {
-                screenSize = geometry.size
-                currentPosition = calculateRandomPosition(for: geometry.size)
+                currentAnchor = randomAnchor()
                 startMovementTimer()
             }
             .onDisappear {
                 stopMovementTimer()
             }
-            .onChange(of: geometry.size) { newSize in
-                screenSize = newSize
-                currentPosition = calculateRandomPosition(for: newSize)
+            .onChange(of: geometry.size) { _ in
+                currentAnchor = randomAnchor()
             }
         }
     }
@@ -136,43 +101,39 @@ struct ScreenSaverView: View {
     // MARK: - Private Methods
 
     private func timeString(for date: Date) -> String {
-        let formatter: DateFormatter = if configuration.showsSeconds {
-            configuration.uses24HourTime ? Self.time24SecondsFormatter : Self.time12SecondsFormatter
-        } else {
-            configuration.uses24HourTime ? Self.time24Formatter : Self.time12Formatter
+        let amPM: Date.FormatStyle.Symbol.Hour.AMPMStyle = configuration.uses24HourTime ? .omitted : .abbreviated
+        var formatStyle: Date.FormatStyle = configuration.uses24HourTime
+            ? .dateTime.hour(.twoDigits(amPM: amPM)).minute(.twoDigits)
+            : .dateTime.hour(.defaultDigits(amPM: amPM)).minute(.twoDigits)
+
+        if configuration.showsSeconds {
+            formatStyle = formatStyle.second(.twoDigits)
         }
-        return formatter.string(from: date)
+
+        if configuration.uses24HourTime {
+            return date.formatted(formatStyle)
+        }
+
+        return date.formatted(formatStyle.locale(Locale(identifier: "en_US_POSIX")))
     }
 
     private func dateString(for date: Date) -> String {
-        Self.dateFormatter.string(from: date)
+        date.formatted(date: .abbreviated, time: .omitted)
     }
 
-    private func timeFont(for size: CGSize) -> Font {
-        let shortSide = min(size.width, size.height)
-        let fontSize = max(shortSide * configuration.timeFontSizeRatio, 48)
-
-        if let fontName = configuration.fontName {
-            if isFontAvailable(fontName) {
-                return .custom(fontName, size: fontSize)
-            } else {
-                Logger.screenSaver.warning("Custom font '\(fontName)' not found. Falling back to system font.")
-                return .system(size: fontSize, weight: .thin)
-            }
+    private func timeFont(size: CGFloat, fontName: String?) -> Font {
+        if let fontName {
+            .custom(fontName, size: size)
         } else {
-            return .system(size: fontSize, weight: .thin)
+            .system(size: size, weight: .thin)
         }
     }
 
-    private func dateFont(for size: CGSize) -> Font {
-        let shortSide = min(size.width, size.height)
-        let timeFontSize = max(shortSide * configuration.timeFontSizeRatio, 48)
-        let dateFontSize = timeFontSize * configuration.dateFontRelativeSize
-
-        if let fontName = configuration.fontName {
-            return .custom(fontName, size: dateFontSize)
+    private func dateFont(size: CGFloat, fontName: String?) -> Font {
+        if let fontName {
+            .custom(fontName, size: size)
         } else {
-            return .system(size: dateFontSize, weight: .regular)
+            .system(size: size, weight: .regular)
         }
     }
 
@@ -189,44 +150,40 @@ struct ScreenSaverView: View {
         movementTimer.upstream.connect().cancel()
     }
 
-    private func calculateRandomPosition(for size: CGSize) -> CGPoint {
-        guard size.width > 0, size.height > 0 else {
-            return CGPoint(x: size.width / 2, y: size.height / 2)
+    private func currentLayout(for date: Date, size: CGSize, fontName: String?) -> ScreenSaverTextLayout {
+        ScreenSaverLayoutCalculator.layout(
+            containerSize: size,
+            configuration: configuration,
+            dateText: configuration.showsDate ? dateString(for: date) : nil,
+            timeText: configuration.showsTime ? timeString(for: date) : nil,
+            fontName: fontName
+        )
+    }
+
+    private func randomAnchor() -> CGPoint {
+        CGPoint(x: CGFloat.random(in: 0 ... 1), y: CGFloat.random(in: 0 ... 1))
+    }
+
+    private func validatedFontName() -> String? {
+        guard let fontName = configuration.fontName else {
+            return nil
         }
 
-        let edgeMargin: CGFloat = 20
-
-        // Estimate label size (this is approximate since we can't measure exactly in SwiftUI)
-        let shortSide = min(size.width, size.height)
-        let timeFontSize = max(shortSide * configuration.timeFontSizeRatio, 48)
-        let estimatedWidth = timeFontSize * Self.timeTextWidthMultiplier
-        let estimatedHeight = timeFontSize * (configuration.showsDate ? Self.dateTextHeightMultiplier : 1.0)
-
-        let availableWidth = size.width - estimatedWidth - edgeMargin * 2
-        let availableHeight = size.height - estimatedHeight - edgeMargin * 2
-
-        if availableWidth > 0, availableHeight > 0 {
-            let randomX = edgeMargin + estimatedWidth / 2 + CGFloat.random(in: 0 ... availableWidth)
-            let randomY = edgeMargin + estimatedHeight / 2 + CGFloat.random(in: 0 ... availableHeight)
-            return CGPoint(x: randomX, y: randomY)
-        } else {
-            // Fallback for small screens - use full screen area with minimum margins
-            let minMargin: CGFloat = 10
-            let safeWidth = max(size.width - minMargin * 2, size.width * 0.1)
-            let safeHeight = max(size.height - minMargin * 2, size.height * 0.1)
-            let fallbackX = minMargin + CGFloat.random(in: 0 ... safeWidth)
-            let fallbackY = minMargin + CGFloat.random(in: 0 ... safeHeight)
-            return CGPoint(x: fallbackX, y: fallbackY)
+        guard isFontAvailable(fontName) else {
+            Logger.screenSaver.warning("Custom font '\(fontName)' not found. Falling back to system font.")
+            return nil
         }
+
+        return fontName
     }
 
     func isFontAvailable(_ fontName: String) -> Bool {
         #if os(iOS) || os(tvOS) || os(watchOS)
-        return UIFont(name: fontName, size: 12) != nil
+            return UIFont(name: fontName, size: 12) != nil
         #elseif os(macOS)
-        return NSFont(name: fontName, size: 12) != nil
+            return NSFont(name: fontName, size: 12) != nil
         #else
-        return false
+            return false
         #endif
     }
 }

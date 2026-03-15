@@ -165,37 +165,36 @@ platform :ios do
 
         type = options[:bump]
 
+        xcconfig_path = File.expand_path('../Version.xcconfig', __dir__)
         if options[:isfeaturebuild]
             # Feature branch: always patch-bump MARKETING_VERSION in xcconfig
-            current_version = get_xcconfig_value(path: 'Version.xcconfig', name: 'MARKETING_VERSION')
-            parts = current_version.split('.').map(&:to_i)
+            xcconfig = File.read(xcconfig_path)
+            parts = xcconfig.match(/MARKETING_VERSION\s*=\s*([\d.]+)/)[1].split('.').map(&:to_i)
             parts[2] += 1
-            update_xcconfig_value(
-                path: 'Version.xcconfig',
-                name: 'MARKETING_VERSION',
-                value: parts.join('.')
-            )
+            File.write(xcconfig_path, xcconfig.gsub(
+                /MARKETING_VERSION\s*=\s*[\d.]+/,
+                "MARKETING_VERSION = #{parts.join('.')}"
+            ))
         elsif type != 'none'
             # develop: bump MARKETING_VERSION in xcconfig
-            current_version = get_xcconfig_value(path: 'Version.xcconfig', name: 'MARKETING_VERSION')
-            parts = current_version.split('.').map(&:to_i)
+            xcconfig = File.read(xcconfig_path)
+            parts = xcconfig.match(/MARKETING_VERSION\s*=\s*([\d.]+)/)[1].split('.').map(&:to_i)
             case type
             when 'patch' then parts[2] += 1
             when 'minor' then parts[1] += 1; parts[2] = 0
             when 'major' then parts[0] += 1; parts[1] = 0; parts[2] = 0
             end
-            update_xcconfig_value(
-                path: 'Version.xcconfig',
-                name: 'MARKETING_VERSION',
-                value: parts.join('.')
-            )
+            File.write(xcconfig_path, xcconfig.gsub(
+                /MARKETING_VERSION\s*=\s*[\d.]+/,
+                "MARKETING_VERSION = #{parts.join('.')}"
+            ))
         end
         # increment_version_if_required
         # NOTE: this resolves packages of the project so need to clean
         sh("cd .. && git clean -fd")
 
-        build_number = get_build_number
-        version = get_xcconfig_value(path: 'Version.xcconfig', name: 'MARKETING_VERSION')
+        build_number = File.read(xcconfig_path).match(/CURRENT_PROJECT_VERSION\s*=\s*(\d+)/)[1].to_i
+        version = File.read(xcconfig_path).match(/MARKETING_VERSION\s*=\s*([\d.]+)/)[1]
 
         # get the last commit comments from Git history
         # and creates our changelog
@@ -206,8 +205,9 @@ platform :ios do
             match_lightweight_tag: false,
             merge_commit_filtering: 'exclude_merges'
         )
+        # Clear FL_CHANGELOG so it doesn't bloat the Fastlane summary table
+        Actions.lane_context[Fastlane::Actions::SharedValues::FL_CHANGELOG] = nil
 
-        
         # Write git commits to CHANGELOG.md
         File.write('../CHANGELOG.md', "# Change Log\n\n## [Unreleased]\n\n#{comments}\n\n#{File.read('../CHANGELOG.md').gsub(/^# Change Log\s*\n\n## \[Unreleased\].*?\n\n/m, '') rescue ''}")
 
@@ -242,6 +242,9 @@ platform :ios do
         )
 
         clean_build_artifacts
+
+        # Restore project.pbxproj modified by update_code_signing_settings and Xcode normalisation
+        sh("git restore ../openHAB.xcodeproj/project.pbxproj")
 
         # commit to git the changes from bumping version number
         git_add(path: 'Version.xcconfig')
@@ -326,15 +329,16 @@ platform :ios do
 
     desc 'Increment the build number.'
     private_lane :increment_build do
-        xcode_build = get_xcconfig_value(path: 'Version.xcconfig', name: 'CURRENT_PROJECT_VERSION').to_i
+        xcconfig_path = File.expand_path('../Version.xcconfig', __dir__)
+        xcconfig = File.read(xcconfig_path)
+        xcode_build = xcconfig.match(/CURRENT_PROJECT_VERSION\s*=\s*(\d+)/)[1].to_i
         testflight_build = latest_testflight_build_number
         build_no = (xcode_build > testflight_build ? xcode_build : testflight_build) + 1
 
-        update_xcconfig_value(
-            path: 'Version.xcconfig',
-            name: 'CURRENT_PROJECT_VERSION',
-            value: build_no.to_s
-        )
+        File.write(xcconfig_path, xcconfig.gsub(
+            /CURRENT_PROJECT_VERSION\s*=\s*\d+/,
+            "CURRENT_PROJECT_VERSION = #{build_no}"
+        ))
     end
 
     desc 'Increment the version number if required.'

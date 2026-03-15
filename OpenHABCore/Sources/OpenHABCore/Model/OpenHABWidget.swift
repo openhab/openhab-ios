@@ -9,32 +9,10 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
+@_exported import Combine
 import Foundation
-import MapKit
+@_exported import MapKit
 import os.log
-
-public enum WidgetTypeEnum {
-    case switcher(Bool)
-    case slider //
-    case segmented(Int)
-    case unassigned
-    case rollershutter
-    case frame
-    case setpoint
-    case selection
-    case colorpicker
-    case chart
-    case image
-    case video
-    case webview
-    case mapview
-
-    public var boolState: Bool {
-        guard case let .switcher(value) = self else { return false }
-        return value
-    }
-}
 
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
     public enum WidgetType: String, Decodable {
@@ -53,11 +31,38 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         case text = "Text"
         case video = "Video"
         case webview = "Webview"
+        case colortemperaturepicker = "Colortemperaturepicker"
+        case buttongrid = "Buttongrid"
+        case button = "Button"
         case unknown = "Unknown"
     }
 
+    public enum LabelSource: String, Decodable {
+        case sitemapDefinition = "SITEMAP_WIDGET"
+        case itemLabel = "ITEM_LABEL"
+        case itemName = "ITEM_NAME"
+        case unknown = "UNKNOWN"
+    }
+
     public enum InputHint: String, Decodable {
-        case text, number, date, time, datetime, unknown
+        case text, number, date, time, dateTime, unknown
+
+        public init(rawValue: String) {
+            switch rawValue.lowercased() {
+            case "text":
+                self = .text
+            case "number":
+                self = .number
+            case "date":
+                self = .date
+            case "time":
+                self = .time
+            case "datetime", "dateTime":
+                self = .dateTime
+            default:
+                self = .unknown
+            }
+        }
     }
 
     public var id = ""
@@ -65,7 +70,8 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     public var widgetId = ""
     @Published public var label = ""
-    public var icon = ""
+    @Published public var icon = ""
+
     public var type: WidgetType = .unknown
     public var url = ""
     public var period = ""
@@ -90,14 +96,22 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var mappings: [OpenHABWidgetMapping] = []
     public var widgets: [OpenHABWidget] = []
     public var visibility = true
-    public var unit = ""
-    public var pattern = ""
-    public var staticIcon: Bool?
-    public var labelSource = ""
+    public var unit: String?
+    public var pattern: String?
+    @Published public var staticIcon: Bool?
     public var switchSupport = false
-    public var yAxisDecimalPattern: String?
+    public var labelSource = LabelSource.unknown
+    public var releaseOnly: Bool?
+    public var row: Int?
+    public var column: Int?
+    public var releaseCommand: String?
+    public var command: String?
+    public var stateless: Bool?
+    public var readOnly: Bool? {
+        item?.stateDescription?.readOnly
+    }
 
-    @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
+    public var yAxisDecimalPattern: String?
 
     // Text prior to "["
     public var labelText: String? {
@@ -124,6 +138,11 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         } else {
             mappings
         }
+    }
+
+    /// Returns true if any mapping has press-and-release behavior
+    public var hasPressReleaseMappings: Bool {
+        mappingsOrItemOptions.contains { $0.hasPressReleaseBehavior }
     }
 
     public var stateValueAsBool: Bool? {
@@ -154,58 +173,12 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         }
     }
 
-    public var stateEnum: WidgetTypeEnum {
-        switch type {
-        case .frame:
-            .frame
-        case .switchWidget:
-            // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
-            if !mappings.isEmpty {
-                .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
-            } else if item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                .switcher(item?.state == "ON" ? true : false)
-            } else if item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                .rollershutter
-            } else if !mappingsOrItemOptions.isEmpty {
-                .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
-            } else {
-                .switcher(item?.state == "ON" ? true : false)
-            }
-        case .setpoint:
-            .setpoint
-        case .slider:
-            .slider
-        case .selection:
-            .selection
-        case .colorpicker:
-            .colorpicker
-        case .chart:
-            .chart
-        case .image:
-            .image
-        case .video:
-            .video
-        case .webview:
-            .webview
-        case .mapview:
-            .mapview
-        default:
-            .unassigned
-        }
-    }
-
     public func sendItemUpdate(state: NumberState?) {
-        guard let item, let state else {
+        guard let state else {
             Logger.restAPI.info("ItemUpdate for Item or State = nil")
             return
         }
-        if item.isOfTypeOrGroupType(.numberWithDimension) {
-            // For number items, include unit (if present) in command
-            sendCommand(state.toString(locale: Locale(identifier: "US")))
-        } else {
-            // For all other items, send the plain value
-            sendCommand(state.stringValue)
-        }
+        sendCommand(state.commandString)
     }
 
     public func sendCommandDouble(_ command: Double) {
@@ -228,37 +201,80 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         mappingsOrItemOptions.firstIndex { $0.command == command }
     }
 
-    public func iconState() -> String {
-        var iconState = item?.state ?? ""
-        if let item, let itemState = item.state {
-            if item.isOfTypeOrGroupType(.color) {
-                // For items that control a color item fetch the correct icon
-                if type == .slider || (type == .switchWidget && mappings.isEmpty) {
-                    if let brightness = itemState.parseAsBrightness() {
-                        iconState = String(brightness)
-                        if type == .switchWidget {
-                            iconState = iconState == "0" ? "OFF" : "ON"
-                        }
+    public func mapCommandtoIndex(with command: String?) -> Int {
+        Int(mappingIndex(byCommand: command) ?? 0)
+    }
+
+    public func iconState() -> String? {
+        guard let item, let itemState = item.state else { return nil }
+        guard !itemState.isNoneIcon else { return nil }
+        if item.isOfTypeOrGroupType(.color) {
+            // For items that control a color item fetch the correct icon
+            if type == .slider || (type == .switchWidget && mappings.isEmpty) {
+                if let brightness = itemState.parseAsBrightness() {
+                    let brightness = String(brightness)
+                    if type == .switchWidget {
+                        return brightness == "0" ? "OFF" : "ON"
                     } else {
-                        iconState = "OFF"
+                        return brightness
                     }
-                } else if let color = itemState.parseAsUIColor() {
-                    iconState = "#\(color.toHex() ?? "000000")"
+                } else {
+                    return "OFF"
                 }
-            } else if type == .switchWidget, mappings.isEmpty, !item.isOfTypeOrGroupType(.rollershutter) {
-                // For switch items without mappings (just ON and OFF) that control a dimmer item
-                // and which are not ON or OFF already, set the state to "OFF" instead of 0
-                // or to "ON" to fetch the correct icon
-                iconState = (itemState == "0" || itemState == "OFF") ? "OFF" : "ON"
+            } else if let color = itemState.parseAsUIColor() {
+                return "#\(color.hexString ?? "000000")"
             }
+        } else if item.isOfTypeOrGroupType(.number) || item.isOfTypeOrGroupType(.numberWithDimension) {
+            let numberState = itemState.parseAsNumber(format: item.stateDescription?.numberPattern)
+            return numberState.toString(locale: Locale(identifier: "US"))
+        } else if type == .switchWidget, mappings.isEmpty, !item.isOfTypeOrGroupType(.rollershutter) {
+            // For switch items without mappings (just ON and OFF) that control a dimmer item
+            // and which are not ON or OFF already, set the state to "OFF" instead of 0
+            // or to "ON" to fetch the correct icon
+            return (itemState == "0" || itemState == "OFF") ? "OFF" : "ON"
         }
-        return iconState
+        return itemState
     }
 
     private func adj(_ raw: Double) -> Double {
         var valueAdjustedToStep = floor((raw - minValue) / step) * step
         valueAdjustedToStep += minValue
         return valueAdjustedToStep.clamped(to: minValue ... maxValue)
+    }
+
+    public func generateImageResult(rootUrl: String,
+                                    chartStyle: ChartStyle = .light) -> ImagePayload {
+        switch type {
+        case .chart:
+            guard let url = Endpoint.chart(
+                rootUrl: rootUrl,
+                period: period,
+                type: item?.type,
+                service: service,
+                name: item?.name,
+                legend: legend,
+                theme: chartStyle,
+                forceAsItem: forceAsItem,
+                yAxisDecimalPattern: yAxisDecimalPattern
+            ).url else {
+                Logger.restAPI.error("Failed to generate chart URL")
+                return .empty
+            }
+            return .link(url: url)
+
+        case .image:
+            if let item {
+                return item.getImagePayload()
+            }
+            guard let url = URL(string: url) else {
+                Logger.restAPI.error("Invalid image URL: \(self.url)")
+                return .empty
+            }
+            return .link(url: url)
+
+        default:
+            return .empty
+        }
     }
 }
 
@@ -292,10 +308,16 @@ public extension OpenHABWidget {
                      visibility: Bool?,
                      switchSupport: Bool?,
                      forceAsItem: Bool?,
-                     unit: String?,
-                     pattern: String?,
-                     staticIcon: Bool?,
-                     labelSource: String?,
+                     labelSource: LabelSource = .unknown,
+                     releaseOnly: Bool? = nil,
+                     row: Int? = nil,
+                     column: Int? = nil,
+                     releaseCommand: String? = nil,
+                     command: String? = nil,
+                     stateless: Bool? = nil,
+                     staticIcon: Bool? = nil,
+                     unit: String? = nil,
+                     pattern: String? = nil,
                      yAxisDecimalPattern: String? = nil) {
         self.init()
         id = widgetId
@@ -305,8 +327,7 @@ public extension OpenHABWidget {
         self.icon = icon
         self.url = url ?? ""
         self.period = period ?? ""
-        self.minValue = minValue ?? 0.0
-        self.maxValue = maxValue ?? 100.0
+
         self.step = step ?? 1.0
         // Consider a minimal refresh rate of 100 ms, but 0 is special and means 'no refresh'
         if let refreshVal = refresh, refreshVal > 0 {
@@ -331,18 +352,35 @@ public extension OpenHABWidget {
         self.widgets = widgets
 
         // Sanitize minValue, maxValue and step: min <= max, step >= 0
-        self.maxValue = max(self.minValue, self.maxValue)
+        if type != .colortemperaturepicker {
+            self.minValue = minValue ?? 0.0
+            self.maxValue = maxValue ?? 100.0
+            self.maxValue = max(self.minValue, self.maxValue)
+        } else {
+            self.minValue = minValue ?? 1000.0
+            self.maxValue = maxValue ?? 10000.0
+            self.maxValue = max(self.minValue, self.maxValue)
+        }
         self.step = abs(self.step)
         self.visibility = visibility ?? true
         self.switchSupport = switchSupport ?? false
 
         self.forceAsItem = forceAsItem
-        self.unit = unit ?? ""
-        self.pattern = pattern ?? ""
-        self.staticIcon = staticIcon ?? false
-        self.labelSource = labelSource ?? ""
-        stateEnumBinding = stateEnum
+        self.unit = unit
+        self.pattern = pattern
+        self.staticIcon = staticIcon
+        self.labelSource = labelSource
+        self.releaseOnly = releaseOnly
+        self.row = row
+        self.column = column
+        self.releaseCommand = releaseCommand
+        self.command = command
+        self.stateless = stateless
         self.yAxisDecimalPattern = yAxisDecimalPattern
+    }
+
+    convenience init(icon: String, iconColor: String? = nil) {
+        self.init(widgetId: "\(UUID())", label: "", icon: icon, type: .unknown, url: nil, period: nil, minValue: nil, maxValue: nil, step: nil, refresh: nil, height: nil, isLeaf: nil, iconColor: iconColor, labelColor: nil, valueColor: nil, service: nil, state: nil, text: nil, legend: nil, inputHint: nil, encoding: nil, item: nil, linkedPage: nil, mappings: [], widgets: [], visibility: nil, switchSupport: nil, forceAsItem: nil, labelSource: .unknown, releaseOnly: nil)
     }
 }
 
@@ -351,7 +389,24 @@ public extension [OpenHABWidget] {
     mutating func flatten(_ widgets: [Element]) {
         for widget in widgets {
             append(widget)
-            flatten(widget.widgets)
+            if widget.type != .buttongrid {
+                flatten(widget.widgets)
+            }
+        }
+    }
+}
+
+public extension OpenHABWidget {
+    var preferredRowHeight: CGFloat? {
+        switch type {
+        case .frame:
+            label.isEmpty ? 0 : 35.0
+        case .image, .chart, .video:
+            nil // Automatic sizing
+        case .webview, .mapview:
+            44.0 * CGFloat(height ?? 8)
+        default:
+            44.0
         }
     }
 }
@@ -378,7 +433,7 @@ extension OpenHABWidget {
             state: widget.state,
             text: "",
             legend: widget.legend,
-            inputHint: InputHint(rawValue: widget.inputHint ?? "unknown") ?? .unknown,
+            inputHint: InputHint(rawValue: widget.inputHint ?? "unknown"),
             encoding: widget.encoding,
             item: OpenHABItem(widget.item),
             linkedPage: OpenHABPage(widget.linkedPage),
@@ -387,11 +442,43 @@ extension OpenHABWidget {
             visibility: widget.visibility,
             switchSupport: widget.switchSupport,
             forceAsItem: widget.forceAsItem,
+            labelSource: OpenHABWidget.LabelSource(rawValue: widget.labelSource ?? "") ?? .unknown,
+            releaseOnly: widget.releaseOnly,
+            row: widget.row.map { Int($0) },
+            column: widget.column.map { Int($0) },
+            releaseCommand: widget.releaseCommand,
+            command: widget.command,
+            stateless: widget.stateless,
+            staticIcon: widget.staticIcon,
             unit: widget.unit,
             pattern: widget.pattern,
-            staticIcon: widget.staticIcon,
-            labelSource: widget.labelSource,
             yAxisDecimalPattern: widget.yAxisDecimalPattern
         )
+    }
+}
+
+// Required for behavior of Slider
+public extension OpenHABWidget {
+    func shouldUseSliderUpdatesDuringMove() -> Bool {
+        if let releaseOnly {
+            return !releaseOnly
+        }
+
+        guard let item else {
+            return false
+        }
+
+        if item.isOfTypeOrGroupType(.dimmer) ||
+            item.isOfTypeOrGroupType(.number) ||
+            item.isOfTypeOrGroupType(.color) {
+            return true
+        }
+
+        if item.isOfTypeOrGroupType(.numberWithDimension) {
+            // Allow live updates for percent values, but not for e.g. temperatures
+            return stateValueAsNumberState?.unit == "%"
+        }
+
+        return false
     }
 }

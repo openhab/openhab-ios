@@ -9,27 +9,29 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
-import os.log
 import SwiftUI
 
 struct GenericRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     @ObservedObject var settings = AppSettings.shared
 
     var body: some View {
         HStack {
-            IconView(widget: widget, settings: settings)
-            TextLabelView(widget: widget)
+            WatchIconView(model: widget.iconRenderModel(), settings: settings)
+            WatchLabelText(text: widget.labelText ?? widget.label)
             Spacer()
-            DetailTextLabelView(widget: widget)
+            DetailTextLabelView(text: widget.labelValue, valueColor: widget.valuecolor)
             widget.makeView(settings: settings)
         }
+        .accessibilityLabel(widget.labelText ?? "")
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[6]
-    GenericRow(widget: widget)
-        .environmentObject(AppSettings())
+    let widget = PreviewWidgetFactory.generic(label: "Unsupported Widget", valueText: "N/A")
+    PreviewNavigationContainer {
+        GenericRow(widget: widget)
+    }
 }

@@ -14,34 +14,71 @@ import os
 
 @MainActor
 public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-    Logger.sessionChallenge.info("onReceiveSessionTaskChallenge host: \(String(describing: challenge.protectionSpace.host))")
-    var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
-    var credential: URLCredential?
+    let host = challenge.protectionSpace.host
+    let authenticationMethod = challenge.protectionSpace.authenticationMethod
+    Logger.sessionChallenge.info("onReceiveSessionTaskChallenge host=\(host, privacy: .public), method=\(authenticationMethod, privacy: .public)")
+
+    func logDecision(_ disposition: URLSession.AuthChallengeDisposition, reason: String) {
+        Logger.sessionChallenge.info("Session task challenge decision host=\(host, privacy: .public), method=\(authenticationMethod, privacy: .public), disposition=\(String(describing: disposition), privacy: .public), reason=\(reason, privacy: .public)")
+    }
 
     if challenge.previousFailureCount > 0 {
-        return (.cancelAuthenticationChallenge, credential)
-    } else if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
+        let decision: URLSession.AuthChallengeDisposition = .cancelAuthenticationChallenge
+        logDecision(decision, reason: "previous-failure")
+        return (decision, nil)
+    } else if authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
         let networkTracker = NetworkTracker.shared
         let activeConnection = await networkTracker.activeConnection
-        guard let configuration = activeConnection?.configuration else { return (.cancelAuthenticationChallenge, credential) }
-        let proxyHost = activeConnection?.proxyURL?.host
-        if challenge.protectionSpace.host == URL(string: configuration.url)?.host
-            || challenge.protectionSpace.host == proxyHost {
-            credential = URLCredential(user: configuration.username, password: configuration.password, persistence: .forSession)
-            disposition = .useCredential
-            Logger.sessionChallenge.info(".useCredential")
-        } else {
-            Logger.sessionChallenge.error("No match \(challenge.protectionSpace.host) <> \(configuration.url)")
+
+        var candidateConfigurations: [ConnectionConfiguration] = []
+        if let activeConfiguration = activeConnection?.configuration {
+            candidateConfigurations.append(activeConfiguration)
         }
+        for configuration in await networkTracker.configuredConnections() where !candidateConfigurations.contains(configuration) {
+            candidateConfigurations.append(configuration)
+        }
+
+        let proxyHost = activeConnection?.proxyURL?.host
+        let matchedConfiguration = candidateConfigurations.first { configuration in
+            URL(string: configuration.url)?.host == host
+        }
+
+        if let matchedConfiguration {
+            let credential = URLCredential(user: matchedConfiguration.username, password: matchedConfiguration.password, persistence: .forSession)
+            let decision: URLSession.AuthChallengeDisposition = .useCredential
+            logDecision(decision, reason: "matched-connection-host")
+            return (decision, credential)
+        }
+
+        if let proxyHost, host == proxyHost, let activeConfiguration = activeConnection?.configuration {
+            let credential = URLCredential(user: activeConfiguration.username, password: activeConfiguration.password, persistence: .forSession)
+            let decision: URLSession.AuthChallengeDisposition = .useCredential
+            logDecision(decision, reason: "matched-active-proxy-host")
+            return (decision, credential)
+        }
+
+        let candidateHosts = candidateConfigurations.compactMap { URL(string: $0.url)?.host }.joined(separator: ",")
+        Logger.sessionChallenge.error("No host match for challenge host=\(host, privacy: .public). Candidate hosts: \(candidateHosts, privacy: .public)")
+        let decision: URLSession.AuthChallengeDisposition = .performDefaultHandling
+        logDecision(decision, reason: "no-host-match-default-handling")
+        return (decision, nil)
     }
-    return (disposition, credential)
+    let decision: URLSession.AuthChallengeDisposition = .performDefaultHandling
+    logDecision(decision, reason: "unsupported-auth-method-default-handling")
+    return (decision, nil)
 }
 
 @MainActor
 public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+    let host = challenge.protectionSpace.host
+    let authenticationMethod = challenge.protectionSpace.authenticationMethod
     Logger.sessionChallenge.warning("onReceiveSessionChallenge is not implemented fully (see TODOs)")
-    Logger.sessionChallenge.info("onReceiveSessionChallenge host: \(String(describing: challenge.protectionSpace.host))")
+    Logger.sessionChallenge.info("onReceiveSessionChallenge host=\(host, privacy: .public), method=\(authenticationMethod, privacy: .public)")
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
+
+    func logDecision(_ disposition: URLSession.AuthChallengeDisposition, reason: String) {
+        Logger.sessionChallenge.info("Session challenge decision host=\(host, privacy: .public), method=\(authenticationMethod, privacy: .public), disposition=\(String(describing: disposition), privacy: .public), reason=\(reason, privacy: .public)")
+    }
 
     switch challenge.protectionSpace.authenticationMethod {
     case NSURLAuthenticationMethodServerTrust:
@@ -50,21 +87,29 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
            activeConnection.configuration.ignoreSSL,
            let serverTrust = challenge.protectionSpace.serverTrust {
             Logger.sessionChallenge.info("Ignoring SSL certificate validation (ignoreSSL enabled)")
-            return (.useCredential, URLCredential(trust: serverTrust))
+            let decision: URLSession.AuthChallengeDisposition = .useCredential
+            logDecision(decision, reason: "ignore-ssl-enabled")
+            return (decision, URLCredential(trust: serverTrust))
         }
-        return await CertificateManagers.serverCertificateManager.evaluateTrust(with: challenge)
+        let result = await CertificateManagers.serverCertificateManager.evaluateTrust(with: challenge)
+        logDecision(result.0, reason: "server-trust-manager")
+        return result
     case NSURLAuthenticationMethodClientCertificate:
-        return CertificateManagers.clientCertificateManager.evaluateTrust(with: challenge)
+        let result = CertificateManagers.clientCertificateManager.evaluateTrust(with: challenge)
+        logDecision(result.0, reason: "client-certificate-manager")
+        return result
     // attemptCredentialAuthentication
     default:
         if challenge.previousFailureCount > 0 {
             disposition = .cancelAuthenticationChallenge
+            logDecision(disposition, reason: "previous-failure")
         } else {
             // TODO: in the last version, the httpClient had never been set and always remained nil. Figure out if and how this worked and if it is still needed
             // credential = await NetworkTracker.shared.httpClient?.session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace)
             // if credential != nil {
             //    disposition = .useCredential
             // }
+            logDecision(disposition, reason: "default-handling-no-credential")
         }
         return (disposition, nil)
     }

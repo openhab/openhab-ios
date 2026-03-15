@@ -122,6 +122,20 @@ public extension OpenHABItem {
         }
         return nil
     }
+
+    func getImagePayload() -> ImagePayload {
+        switch type {
+        case .image:
+            guard let data = state?.components(separatedBy: ",")[safe: 1], let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters) else {
+                return .empty
+            }
+            return .embedded(data: decodedData)
+        case .stringItem:
+            return .link(url: URL(string: state ?? ""))
+        default:
+            return .empty
+        }
+    }
 }
 
 extension OpenHABItem {

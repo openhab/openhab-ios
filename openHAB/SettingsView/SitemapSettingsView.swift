@@ -23,54 +23,111 @@ struct SitemapSettingsView: View {
     @Binding var sitemaps: [OpenHABSitemap]
 
     @State private var showingCacheAlert = false
+    @State var cacheSizeResult: Result<UInt, KingfisherError>?
 
     var body: some View {
         Section(header: Text(LocalizedStringKey("sitemap_settings"))) {
-            Toggle(isOn: $settingsRealTimeSliders) {
-                Text("Real-time Sliders")
-            }
+            realtimeSliderToggle
+            searchFieldToggle
+            cacheButton
+            iconTypePicker
+            sortOrderPicker
+            watchSitemapPicker
+        }
+    }
 
-            Toggle(isOn: $settingsShowSearchField) {
-                Text("Show Search Field")
-            }
+    @ViewBuilder
+    private var realtimeSliderToggle: some View {
+        Toggle(isOn: $settingsRealTimeSliders) {
+            Text("Real-time Sliders")
+        }
+    }
 
-            Button {
+    @ViewBuilder
+    private var searchFieldToggle: some View {
+        Toggle(isOn: $settingsShowSearchField) {
+            Text("Show Search Field")
+        }
+    }
+
+    @ViewBuilder
+    private var cacheButton: some View {
+        Button {
+            KingfisherManager.shared.cache.calculateDiskStorageSize { result in
+                Task { @MainActor in
+                    cacheSizeResult = result
+                    showingCacheAlert = true
+                }
+            }
+        } label: {
+            NavigationLink("Check & Clear Image Cache", destination: EmptyView())
+        }
+        .foregroundStyle(Color(uiColor: .label))
+        .alert(
+            "Image Cache",
+            isPresented: $showingCacheAlert,
+            presenting: cacheSizeResult,
+            actions: cacheAlertActions,
+            message: cacheAlertMessage
+        )
+    }
+
+    @ViewBuilder
+    private var iconTypePicker: some View {
+        Picker(selection: $settingsIconType) {
+            ForEach(IconType.allCases, id: \.self) { icontype in
+                Text(verbatim: "\(icontype)").tag(icontype)
+            }
+        } label: {
+            Text("Icon Type")
+        }
+    }
+
+    @ViewBuilder
+    private var sortOrderPicker: some View {
+        Picker(selection: $settingsSortSitemapsBy) {
+            ForEach(SortSitemapsOrder.allCases, id: \.self) { sortsitemaporder in
+                Text(verbatim: "\(sortsitemaporder)").tag(sortsitemaporder)
+            }
+        } label: {
+            Text("Sort sitemaps by")
+        }
+    }
+
+    @ViewBuilder
+    private var watchSitemapPicker: some View {
+        Picker("Sitemap For Apple Watch", selection: $settingsSitemapForWatch) {
+            if sitemaps.isEmpty {
+                Text("No sitemaps available").tag("").foregroundStyle(.secondary)
+            } else {
+                ForEach(sitemaps, id: \.name) { sitemap in
+                    Text(sitemap.label).tag(sitemap.name)
+                }
+            }
+        }
+        .disabled(sitemaps.isEmpty)
+    }
+
+    @ViewBuilder
+    private func cacheAlertActions(_ result: Result<UInt, KingfisherError>) -> some View {
+        switch result {
+        case .success:
+            Button("Clear") {
                 clearWebsiteCache()
-                showingCacheAlert = true
-            } label: {
-                NavigationLink("Clear Image Cache", destination: EmptyView())
             }
-            .foregroundColor(Color(uiColor: .label))
-            .alert("cache_cleared", isPresented: $showingCacheAlert) {
-                Button("OK", role: .cancel) {}
-            }
+            Button("Cancel", role: .cancel) {}
+        case .failure:
+            Button("OK") {}
+        }
+    }
 
-            Picker(selection: $settingsIconType) {
-                ForEach(IconType.allCases, id: \.self) { icontype in
-                    Text(verbatim: "\(icontype)").tag(icontype)
-                }
-            } label: {
-                Text("Icon Type")
-            }
-
-            Picker(selection: $settingsSortSitemapsBy) {
-                ForEach(SortSitemapsOrder.allCases, id: \.self) { sortsitemaporder in
-                    Text(verbatim: "\(sortsitemaporder)").tag(sortsitemaporder)
-                }
-            } label: {
-                Text("Sort sitemaps by")
-            }
-
-            Picker("Sitemap For Apple Watch", selection: $settingsSitemapForWatch) {
-                if sitemaps.isEmpty {
-                    Text("No sitemaps available").tag("").foregroundColor(.secondary)
-                } else {
-                    ForEach(sitemaps, id: \.name) { sitemap in
-                        Text(sitemap.label).tag(sitemap.name)
-                    }
-                }
-            }
-            .disabled(sitemaps.isEmpty)
+    @ViewBuilder
+    private func cacheAlertMessage(_ result: Result<UInt, KingfisherError>) -> some View {
+        switch result {
+        case let .success(size):
+            Text("Size: \(size / 1_048_576) MB")
+        case let .failure(error):
+            Text(error.localizedDescription)
         }
     }
 

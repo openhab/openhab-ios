@@ -32,14 +32,14 @@ struct LoggerView: View {
                     .padding()
             } else if logs.isEmpty {
                 Text("No logs found")
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .padding()
             } else {
                 List(logs, id: \.id) { log in
                     VStack(alignment: .leading, spacing: 1) {
                         Text(formattedDate(log.timestamp))
                             .font(.caption.monospacedDigit())
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
 
                         Text(log.message)
                             .font(.body)
@@ -99,9 +99,7 @@ struct LoggerView: View {
 
     // Custom Date Formatting Function
     private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm:ss.SSS" // Hours:Minutes:Seconds.Milliseconds
-        return formatter.string(from: date)
+        date.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute().second().secondFraction(.fractional(3)))
     }
 
     private func shareLogs() -> String {

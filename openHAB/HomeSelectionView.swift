@@ -48,7 +48,7 @@ struct HomeSelectionView: View {
                     if Preferences.shared.currentHomePreferences.id == home, !showEditOptions {
                         Spacer()
                         Image(systemSymbol: .checkmark)
-                            .foregroundColor(.blue)
+                            .foregroundStyle(.blue)
                     } else if !showEditOptions {
                         Spacer() // make more of the cell clickable
                     }
@@ -82,13 +82,13 @@ struct HomeSelectionView: View {
                     }
                 }
             }
-            .alert("Enter new name for home \(homeNameForAlert)", isPresented: $showingRenameHomeAlert, actions: {
+            .alert("Enter a new name for the home '\(homeNameForAlert)'", isPresented: $showingRenameHomeAlert, actions: {
                 TextField("New name", text: $newHomeName)
                 HStack {
-                    Button("Abort", role: .cancel) {
+                    Button("Cancel", role: .cancel) {
                         showingRenameHomeAlert.toggle()
                     }
-                    Button("OK") {
+                    Button("Rename") {
                         rename(home: homeForAlert)
                         showingRenameHomeAlert.toggle()
                     }
@@ -98,7 +98,7 @@ struct HomeSelectionView: View {
             })
             .alert("Delete home \(homeNameForAlert)?", isPresented: $showingDeleteHomeAlert) {
                 HStack {
-                    Button("Abort", role: .cancel) {
+                    Button("Cancel", role: .cancel) {
                         showingDeleteHomeAlert.toggle()
                     }
                     Button("Delete", role: .destructive) {
@@ -133,8 +133,17 @@ struct HomeSelectionView: View {
             }
         }
         .onAppear(perform: loadHomesList)
+        .navigationBarBackButtonHidden(true)
         .navigationBarTitle("Manage Homes")
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: {
+                    dismiss()
+                }, label: {
+                    Image(systemSymbol: .chevronBackward)
+                        .accessibilityLabel("Back")
+                })
+            }
             if showEditOptions {
                 ToolbarItemGroup(placement: .primaryAction) {
                     Button(action: {
@@ -143,13 +152,13 @@ struct HomeSelectionView: View {
                     }, label: {
                         Image(systemSymbol: .plus)
                     })
-                    .alert("Enter name for new home", isPresented: $showingNewHomeAlert) {
+                    .alert("Enter a name for the new home", isPresented: $showingNewHomeAlert) {
                         TextField("Name for new home", text: $newHomeName)
                         HStack {
-                            Button("Abort", role: .cancel) {
+                            Button("Cancel", role: .cancel) {
                                 showingNewHomeAlert.toggle()
                             }
-                            Button("OK") {
+                            Button("Create") {
                                 addHome()
                                 showingNewHomeAlert.toggle()
                             }

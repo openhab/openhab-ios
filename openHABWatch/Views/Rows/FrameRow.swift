@@ -9,25 +9,23 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import OpenHABCore
 import SwiftUI
 
 struct FrameRow: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: AppSettings
+    let title: String
 
     var body: some View {
         HStack {
-            Text(widget.labelText?.uppercased() ?? "")
-                .font(.callout)
-                .lineLimit(1)
+            Text(title.uppercased())
+                .watchTextStyle(.section)
             Spacer()
         }
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[6]
-    FrameRow(widget: widget)
-        .environmentObject(AppSettings())
+    let widget = PreviewWidgetFactory.frame(label: "Environment")
+    PreviewNavigationContainer {
+        FrameRow(title: widget.labelText ?? "")
+    }
 }

@@ -11,6 +11,9 @@
       location = "group:openHAB.xcodeproj">
    </FileRef>
    <FileRef
+      location = "group:CommonUI">
+   </FileRef>
+   <FileRef
       location = "group:ControlItemIntent.swift">
    </FileRef>
 </Workspace>

@@ -114,10 +114,11 @@ class LocalizationTests: XCTestCase {
     }
 
     func testIntentsPlaceholders() {
+        let regex = /\$\{([a-z0-9]*)\}/.ignoresCase()
+
         guard let path = Bundle.main.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: "en"),
               let placeholderTuples = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ $0.value.contains("${") }),
-              !placeholderTuples.isEmpty,
-              let regex = try? NSRegularExpression(pattern: "\\$\\{([a-z0-9]*)\\}", options: .caseInsensitive)
+              !placeholderTuples.isEmpty
         else {
             XCTFail("Failed to load bundle.")
             return
@@ -142,12 +143,12 @@ class LocalizationTests: XCTestCase {
                     continue
                 }
 
-                let numberOfOccurrencesInPlaceholder = regex.numberOfMatches(in: placeholderString, range: NSRange(placeholderString.startIndex..., in: placeholderString))
-                let numberOfOccurrencesInTranslation = regex.numberOfMatches(in: translation, range: NSRange(translation.startIndex..., in: translation))
+                let numberOfOccurrencesInPlaceholder = placeholderString.matches(of: regex).count
+                let numberOfOccurrencesInTranslation = translation.matches(of: regex).count
                 XCTAssertEqual(numberOfOccurrencesInPlaceholder, numberOfOccurrencesInTranslation, "Number of placeholders for key '\(placeholderTuple.key)' in language '\(language)' does not match.")
 
-                let matchesPlaceholder = regex.matches(in: placeholderString, options: [], range: NSRange(location: 0, length: placeholderString.utf16.count)).compactMap { Range($0.range, in: placeholderString).map { String(placeholderString[$0]) } }
-                let matchesTranslation = regex.matches(in: translation, options: [], range: NSRange(location: 0, length: translation.utf16.count)).compactMap { Range($0.range, in: translation).map { String(translation[$0]) } }
+                let matchesPlaceholder = placeholderString.matches(of: regex).map { String($0.0) }
+                let matchesTranslation = translation.matches(of: regex).map { String($0.0) }
                 XCTAssertTrue(matchesPlaceholder.elementsEqual(matchesTranslation), "Placeholders do not match for key '\(placeholderTuple.key)' in language '\(language)'.")
                 print("Placeholders: \(matchesPlaceholder) == \(matchesTranslation)")
             }

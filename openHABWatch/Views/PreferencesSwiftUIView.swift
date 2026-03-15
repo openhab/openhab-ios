@@ -35,11 +35,11 @@ struct CompactLabeledContentStyle: LabeledContentStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack {
             configuration.label
-                .font(.footnote)
+                .watchTextStyle(.detail)
             Spacer()
             configuration.content
-                .font(.footnote)
-                .foregroundColor(.secondary)
+                .watchTextStyle(.detail)
+                .foregroundStyle(.secondary)
         }
 //        .padding(.vertical, 4) // Reduces vertical space
     }

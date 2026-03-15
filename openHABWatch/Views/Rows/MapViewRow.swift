@@ -15,6 +15,7 @@ import SwiftUI
 struct MapViewRow: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    @State private var viewModel: WidgetRowViewModel
 
     var body: some View {
         VStack {
@@ -23,11 +24,24 @@ struct MapViewRow: View {
                 .padding()
             // .frame(height: 300)
         }
+        .accessibilityLabel(viewModel.labelText)
+        .onAppear {
+            viewModel.update(from: widget)
+        }
+        .onChange(of: widget.item?.state, initial: false) { _, _ in
+            viewModel.update(from: widget)
+        }
+    }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[9]
-    MapViewRow(widget: widget)
-        .environmentObject(AppSettings())
+    let widget = PreviewWidgetFactory.mapview(label: "Location", state: "51.5074,0.1278")
+    PreviewNavigationContainer {
+        MapViewRow(widget: widget)
+    }
 }

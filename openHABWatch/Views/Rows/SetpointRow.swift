@@ -9,81 +9,142 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import os.log
 import SFSafeSymbols
 import SwiftUI
 
 struct SetpointRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
+    let stateToken: String
     @EnvironmentObject var settings: AppSettings
+    private let setpointService = SetPointService()
+    private let logger = Logger(subsystem: "org.openhab.watch", category: "SetpointRow")
+    @State private var viewModel: WidgetRowViewModel
+    @State private var localValue: Double?
+    @State private var commandSender = WidgetCommandDispatcher()
 
-    private var isIntStep: Bool {
-        widget.step.truncatingRemainder(dividingBy: 1) == 0
+    private var currentValue: Double {
+        localValue ?? serverValue
     }
 
-    private var stateFormat: String {
-        isIntStep ? "%ld" : "%.01f"
+    private var serverValue: Double {
+        viewModel.numberState?.value ?? viewModel.minValue
+    }
+
+    private var valueText: String {
+        SetpointDisplayFormatter.text(
+            labelValue: viewModel.labelValue,
+            localValue: localValue,
+            serverValue: serverValue,
+            minValue: viewModel.minValue,
+            step: viewModel.step,
+            unit: widget.unit,
+            numberPattern: widget.item?.stateDescription?.numberPattern,
+            locale: SetpointDisplayFormatter.dotDecimalLocale
+        )
     }
 
     var body: some View {
         VStack(spacing: 5) {
             HStack {
-                IconView(widget: widget, settings: settings)
-                TextLabelView(widget: widget)
+                WatchIconView(model: widget.iconRenderModel(), settings: settings)
+                Text(viewModel.labelText)
+                    .watchTextStyle(.label)
                 Spacer()
             }
             HStack {
                 Spacer()
 
-                IconWithAction(
-                    systemSymbol: .chevronDownCircleFill,
-                    action: decreaseValue
-                )
+                Button(action: decreaseValue) {
+                    Image(systemSymbol: .minusCircleFill)
+                        .font(.system(size: 25))
+                        .foregroundStyle(currentValue <= viewModel.minValue ? Color.gray : Color.blue)
+                }
+                .buttonStyle(.plain)
+                .disabled(currentValue <= viewModel.minValue)
+                .accessibilityLabel("Decrease \(viewModel.labelText)")
+                .accessibilityHint("Lowers by \(viewModel.step.valueText(step: viewModel.step))")
 
                 Spacer()
 
-                DetailTextLabelView(widget: widget)
-                    .font(.headline)
+                Text(valueText)
+                    .watchTextStyle(.emphasis)
+                    .accessibilityLabel("\(viewModel.labelText) value")
+                    .accessibilityValue(valueText)
 
                 Spacer()
 
-                IconWithAction(
-                    systemSymbol: .chevronUpCircleFill,
-                    action: increaseValue
-                )
+                Button(action: increaseValue) {
+                    Image(systemSymbol: .plusCircleFill)
+                        .font(.system(size: 25))
+                        .foregroundStyle(currentValue >= viewModel.maxValue ? Color.gray : Color.blue)
+                }
+                .buttonStyle(.plain)
+                .disabled(currentValue >= viewModel.maxValue)
+                .accessibilityLabel("Increase \(viewModel.labelText)")
+                .accessibilityHint("Raises by \(viewModel.step.valueText(step: viewModel.step))")
 
                 Spacer()
             }
         }
+        .onChange(of: stateToken, initial: false) { _, _ in
+            viewModel.update(from: widget)
+            localValue = nil
+        }
     }
 
-    private func handleUpDown(down: Bool) {
-        var numberState = widget.stateValueAsNumberState
-        let stateValue = numberState?.value ?? widget.minValue
-        let newValue: Double = switch down {
-        case true:
-            stateValue - widget.step
-        case false:
-            stateValue + widget.step
+    init(widget: OpenHABWidget, stateToken: String) {
+        self.widget = widget
+        self.stateToken = stateToken
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+    }
+
+    private func handleUpDown(isDecreasing: Bool) {
+        let limitedNewValue = setpointService.calculateNewValue(
+            currentValue: currentValue,
+            step: viewModel.step,
+            minValue: viewModel.minValue,
+            maxValue: viewModel.maxValue,
+            isDecreasing: isDecreasing
+        )
+
+        guard limitedNewValue != currentValue else {
+            // nothing to update, skip sending value
+            return
         }
-        if newValue >= widget.minValue, newValue <= widget.maxValue {
-            numberState?.value = newValue
-            widget.sendItemUpdate(state: numberState)
-        }
+
+        localValue = limitedNewValue
+        let numberState = NumberState(
+            value: limitedNewValue,
+            unit: widget.unit,
+            format: widget.item?.stateDescription?.numberPattern
+        )
+
+        logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState.description)")
+        commandSender.sendItemUpdate(numberState, for: widget)
     }
 
     func decreaseValue() {
-        handleUpDown(down: true)
+        handleUpDown(isDecreasing: true)
     }
 
     func increaseValue() {
-        handleUpDown(down: false)
+        handleUpDown(isDecreasing: false)
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[3]
-    SetpointRow(widget: widget)
-        .environmentObject(AppSettings())
+    let widget = PreviewWidgetFactory.setpoint(
+        label: "Temperature",
+        value: 21,
+        minValue: 16,
+        maxValue: 28,
+        step: 0.5,
+        unit: "°C"
+    )
+    PreviewNavigationContainer {
+        SetpointRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
+    }
 }

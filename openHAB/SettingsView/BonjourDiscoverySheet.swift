@@ -39,7 +39,7 @@ struct BonjourDiscoverySheet: View {
                             HStack {
                                 Spacer()
                                 Text("no_servers_found")
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.secondary)
                                     .padding(.vertical, 8)
                                 Spacer()
                             }

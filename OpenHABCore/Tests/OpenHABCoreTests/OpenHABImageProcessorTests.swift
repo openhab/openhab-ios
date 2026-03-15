@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import Kingfisher
 @testable import OpenHABCore
 import Testing
 
@@ -222,6 +223,52 @@ struct OpenHABImageProcessorTests {
         #expect(processedString.contains("fill:#"))
     }
 
+    @Test func emptySVG_selfClosingRoot_isDetectedAsEmpty() async throws {
+        let svgString = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <svg viewBox="0 0 1 1" xmlns="http://www.w3.org/2000/svg"/>
+        """
+        let svgData = Data(svgString.utf8)
+        let processor = OpenHABImageProcessor()
+
+        #expect(processor.isEmptySVGDocument(data: svgData))
+    }
+
+    @Test func emptySVG_withOpenAndCloseTag_isDetectedAsEmpty() async throws {
+        let svgString = """
+        <svg viewBox="0 0 1 1" xmlns="http://www.w3.org/2000/svg"></svg>
+        """
+        let svgData = Data(svgString.utf8)
+        let processor = OpenHABImageProcessor()
+
+        #expect(processor.isEmptySVGDocument(data: svgData))
+    }
+
+    @Test func nonEmptySVG_isNotDetectedAsEmpty() async throws {
+        let svgString = """
+        <svg viewBox="0 0 1 1" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h1v1H0z"/></svg>
+        """
+        let svgData = Data(svgString.utf8)
+        let processor = OpenHABImageProcessor()
+
+        #expect(!processor.isEmptySVGDocument(data: svgData))
+    }
+
+    @Test func process_emptySVG_returnsEmptyImageNotWarningSymbol() async throws {
+        let svgString = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <svg viewBox="0 0 1 1" xmlns="http://www.w3.org/2000/svg"/>
+        """
+        let svgData = Data(svgString.utf8)
+        let processor = OpenHABImageProcessor(iconColor: "red")
+        let options = KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions)
+
+        let image = processor.process(item: .data(svgData), options: options)
+
+        #expect(image != nil)
+        #expect(image?.size == .zero)
+    }
+
     @Test func preprocessSVG_verifyColorValue() async throws {
         // Verify that the exact hex color value is correctly inserted
         let svgString = """
@@ -274,6 +321,20 @@ struct OpenHABImageProcessorTests {
         #expect(processor1.identifier == "org.openhab.svgprocessor")
         #expect(processor2.identifier == "org.openhab.svgprocessor")
         #expect(processor3.identifier == "org.openhab.svgprocessor")
+    }
+
+    @Test func cacheIdentifier_fullSizeMode() async throws {
+        let processorWithoutColor = OpenHABImageProcessor(svgMaxSize: nil)
+        let processorWithColor = OpenHABImageProcessor(iconColor: "red", svgMaxSize: nil)
+
+        #expect(processorWithoutColor.identifier == "org.openhab.svgprocessor.fullsize")
+        #expect(processorWithColor.identifier == "org.openhab.svgprocessor.FF0000.fullsize")
+    }
+
+    @Test func cacheIdentifier_customSizeMode() async throws {
+        let processor = OpenHABImageProcessor(iconColor: "red", svgMaxSize: CGSize(width: 128, height: 128))
+
+        #expect(processor.identifier == "org.openhab.svgprocessor.FF0000.128x128")
     }
 
     @Test func cacheIdentifier_normalizesOpenHABColors() async throws {
