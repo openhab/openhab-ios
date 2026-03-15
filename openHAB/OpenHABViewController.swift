@@ -119,7 +119,7 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
             let message = String(format: String(localized: "ssl_certificate_invalid", comment: ""), certificateSummary ?? "", domain ?? "")
             let alertView = UIAlertController(title: title, message: message, preferredStyle: .alert)
 
-            alertView.addAction(UIAlertAction(title: String(localized: "Cancel", comment: ""), style: .default) { _ in
+            alertView.addAction(UIAlertAction(title: String(localized: "Deny", comment: ""), style: .default) { _ in
                 continuation.resume(returning: .deny)
             })
             alertView.addAction(UIAlertAction(title: String(localized: "Once", comment: ""), style: .default) { _ in
@@ -141,7 +141,7 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
             let message = String(format: String(localized: "ssl_certificate_no_match", comment: ""), certificateSummary ?? "", domain ?? "")
             let alertView = UIAlertController(title: title, message: message, preferredStyle: .alert)
 
-            alertView.addAction(UIAlertAction(title: String(localized: "Cancel", comment: ""), style: .default) { _ in
+            alertView.addAction(UIAlertAction(title: String(localized: "Deny", comment: ""), style: .default) { _ in
                 continuation.resume(returning: .deny)
             })
             alertView.addAction(UIAlertAction(title: String(localized: "Once", comment: ""), style: .default) { _ in
@@ -177,11 +177,11 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
                 preferredStyle: .alert
             )
 
-            let okay = UIAlertAction(title: String(localized: "okay", comment: ""), style: .default) { _ in
+            let okay = UIAlertAction(title: String(localized: "Import", comment: ""), style: .default) { _ in
                 continuation.resume(returning: true)
             }
 
-            let cancel = UIAlertAction(title: String(localized: "cancel", comment: ""), style: .cancel) { _ in
+            let cancel = UIAlertAction(title: String(localized: "Cancel", comment: ""), style: .cancel) { _ in
                 continuation.resume(returning: false)
             }
 
@@ -213,12 +213,12 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
                 textField.isSecureTextEntry = true
             }
 
-            let okay = UIAlertAction(title: String(localized: "okay", comment: ""), style: .default) { _ in
+            let okay = UIAlertAction(title: String(localized: "Import", comment: ""), style: .default) { _ in
                 let password = alertController.textFields?.first?.text
                 continuation.resume(returning: password)
             }
 
-            let cancel = UIAlertAction(title: String(localized: "cancel", comment: ""), style: .cancel) { _ in
+            let cancel = UIAlertAction(title: String(localized: "Cancel", comment: ""), style: .cancel) { _ in
                 continuation.resume(returning: nil)
             }
 
@@ -237,7 +237,7 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
             preferredStyle: .alert
         )
 
-        let okay = UIAlertAction(title: String(localized: "okay", comment: ""), style: .default)
+        let okay = UIAlertAction(title: String(localized: "OK", comment: ""), style: .default)
         alertController.addAction(okay)
 
         present(alertController, animated: true)
