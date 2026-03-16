@@ -210,6 +210,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				OpenHABUITests.swift,
+				SnapshotHelper.swift,
 			);
 			target = 933D7F0322E7015000621A03 /* openHABUITests */;
 		};
