@@ -19,6 +19,11 @@ struct LocalizationTests {
         Bundle.main.localizations.filter { $0 != "Base" }
     }
 
+    private static var intentsBundle: Bundle? {
+        guard let pluginsURL = Bundle.main.builtInPlugInsURL else { return nil }
+        return Bundle(url: pluginsURL.appendingPathComponent("openHABIntents.appex"))
+    }
+
     // MARK: - Tests
 
     @Test func infoPlistLocalizations() {
@@ -38,7 +43,8 @@ struct LocalizationTests {
     }
 
     @Test func intentsLocalizations() {
-        guard let path = Bundle.main.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: "en"),
+        guard let bundle = LocalizationTests.intentsBundle,
+              let path = bundle.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: "en"),
               let localizableStrings = NSDictionary(contentsOf: path) as? [String: String],
               !localizableStrings.isEmpty
         else {
@@ -46,11 +52,13 @@ struct LocalizationTests {
             return
         }
 
-        for language in LocalizationTests.localizations {
+        let localizations = bundle.localizations.filter { $0 != "Base" }
+
+        for language in localizations {
             print("Testing language: '\(language)'.")
 
             for localizableString in localizableStrings {
-                let translation = localizableString.key.localized(for: language, with: "Intents")
+                let translation = localizableString.key.localized(for: language, with: "Intents", in: bundle)
                 #expect(translation != nil, "Failed to get translation for key '\(localizableString.key)' in language '\(language)'.")
                 #expect(translation != "__MISSING__", "Missing translation for key '\(localizableString.key)' in language '\(language)'.")
                 #expect(translation?.isEmpty == false, "Translation for key '\(localizableString.key)' in language '\(language)' is empty.")
@@ -62,7 +70,8 @@ struct LocalizationTests {
     @Test func intentsPlaceholders() {
         let regex = #/\$\{([a-z0-9]*)\}/#.ignoresCase()
 
-        guard let path = Bundle.main.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: "en"),
+        guard let bundle = LocalizationTests.intentsBundle,
+              let path = bundle.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: "en"),
               let placeholderTuples = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ $0.value.contains("${") }),
               !placeholderTuples.isEmpty
         else {
@@ -70,10 +79,12 @@ struct LocalizationTests {
             return
         }
 
-        for language in LocalizationTests.localizations {
+        let localizations = bundle.localizations.filter { $0 != "Base" }
+
+        for language in localizations {
             print("Testing language: '\(language)'.")
 
-            guard let path = Bundle.main.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: language),
+            guard let path = bundle.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: language),
                   let languageTuples = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ $0.value.contains("${") }),
                   !languageTuples.isEmpty
             else {
@@ -85,7 +96,7 @@ struct LocalizationTests {
 
             for placeholderTuple in placeholderTuples {
                 let placeholderString = placeholderTuple.value
-                guard let translation = placeholderTuple.key.localized(for: language, with: "Intents") else {
+                guard let translation = placeholderTuple.key.localized(for: language, with: "Intents", in: bundle) else {
                     continue
                 }
 
@@ -103,12 +114,11 @@ struct LocalizationTests {
 }
 
 private extension String {
-    func localized(for language: String, with table: String? = nil) -> String? {
-        guard let path = Bundle.main.path(forResource: language, ofType: "lproj") else {
+    func localized(for language: String, with table: String? = nil, in bundle: Bundle = .main) -> String? {
+        guard let path = bundle.path(forResource: language, ofType: "lproj") else {
             return nil
         }
 
         return Bundle(path: path)?.localizedString(forKey: self, value: "__MISSING__", table: table)
     }
-
 }
