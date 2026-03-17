@@ -111,6 +111,7 @@ private struct RollershutterRowContent: View {
                 .ohMinimumHitTarget()
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerUpFeedback)
             }
+            .padding(.trailing, -2)
         }
     }
 }
