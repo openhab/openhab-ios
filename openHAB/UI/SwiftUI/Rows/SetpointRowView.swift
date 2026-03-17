@@ -45,7 +45,7 @@ private struct SetpointRowContent: View {
                     .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
-            Spacer()
+            Spacer(minLength: 8)
 
             HStack(spacing: 6) {
                 Button {
@@ -81,6 +81,7 @@ private struct SetpointRowContent: View {
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
                 .disabled(input.readOnly)
             }
+            .padding(.trailing, -2)
         }
     }
 
