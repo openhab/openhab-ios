@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2F399AC92F54599400F72A30 /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 2F399AC82F54599400F72A30 /* Flow */; };
+		DAC131122DA32F5D00075AE2 /* Intents.intentdefinition in Resources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
 		4D6470DA2561F935007B03FC /* openHABIntents.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4D6470D32561F935007B03FC /* openHABIntents.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		6557AF8F2C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */; };
 		6557AF902C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */; };
@@ -157,6 +158,7 @@
 
 /* Begin PBXFileReference section */
 		4D6470D32561F935007B03FC /* openHABIntents.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = openHABIntents.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		935D340A257B7DC00020A404 /* Intents.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; name = "Intents.intentdefinition"; path = "openHABIntents/Intents.intentdefinition"; sourceTree = SOURCE_ROOT; };
 		6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		6571444E2C1E438700C8A1F3 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		933D7F0422E7015000621A03 /* openHABUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -822,6 +824,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAC131122DA32F5D00075AE2 /* Intents.intentdefinition in Resources */,
 				6557AF8F2C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */,
 				DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */,
 				DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */,
