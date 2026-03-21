@@ -237,7 +237,7 @@ platform :ios do
         )
 
         upload_symbols_to_crashlytics(
-            gsp_path: "openHAB/GoogleService-Info.plist",
+            gsp_path: "openHAB/Supporting Files/GoogleService-Info.plist",
             binary_path: './scripts/upload-symbols'
         )
 
