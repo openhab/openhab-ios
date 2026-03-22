@@ -60,7 +60,7 @@ extension NWPathMonitor {
                 continuation.yield(path)
             }
             continuation.onTermination = { [weak self] _ in
-                self?.cancel()
+                DispatchQueue.global(qos: .utility).async { self?.cancel() }
             }
             start(queue: DispatchQueue(label: "NSPathMonitor.paths"))
         }
