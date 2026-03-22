@@ -22,15 +22,9 @@ final class RealPathMonitor: NWPathMonitoring, Sendable {
     }
 
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
-        if #available(iOS 17, watchOS 10, *) {
-            for await path in monitor {
-                Logger.nwPathMonitoring.debug("Path monitor update: \(path.debugDescription)")
-                await handler(path.status == .satisfied || path.status == .requiresConnection)
-            }
-        } else {
-            for await path in monitor.paths() {
-                await handler(path.status == .satisfied || path.status == .requiresConnection)
-            }
+        for await path in monitor.paths() {
+            Logger.nwPathMonitoring.debug("Path monitor update: \(path.debugDescription)")
+            await handler(path.status == .satisfied || path.status == .requiresConnection)
         }
     }
 
@@ -48,11 +42,17 @@ public protocol NWPathMonitoring: AnyObject, Sendable {
     func cancel()
 }
 
-// MARK: Extension for version iOS <17
+// MARK: - AsyncStream wrapper for NWPathMonitor
 
-// this line breaks availability checking, since watchos 10 is minimum for the app
-// @available(watchOS, obsoleted: 10.0)
-@available(iOS, obsoleted: 17.0)
+// Avoids NWPathMonitor's native AsyncSequence conformance (iOS 17+), which has a
+// bug where NWPathMonitor.startLocked(lockedState:) holds an internal os_unfair_lock
+// and then calls AsyncStream.Continuation.finish() from within that locked context
+// via makeAsyncStream(). finish() tries to re-acquire the same lock, causing
+// _os_unfair_lock_recursive_abort on com.apple.network.connections.
+//
+// Our own paths() wrapper avoids makeAsyncStream() entirely. The onTermination
+// handler defers cancel() off the AsyncStream._Storage lock context to prevent
+// a symmetric re-entrancy risk on the other side.
 extension NWPathMonitor {
     func paths() -> AsyncStream<NWPath> {
         AsyncStream { continuation in
@@ -62,7 +62,7 @@ extension NWPathMonitor {
             continuation.onTermination = { [weak self] _ in
                 DispatchQueue.global(qos: .utility).async { self?.cancel() }
             }
-            start(queue: DispatchQueue(label: "NSPathMonitor.paths"))
+            start(queue: DispatchQueue(label: "NWPathMonitor.paths"))
         }
     }
 }
