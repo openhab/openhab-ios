@@ -48,6 +48,9 @@ struct StringExtensionTests {
         let pngPayload = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB"
         #expect("data:image/png;base64,\(pngPayload)".dataImageBase64Payload == pngPayload)
 
+        // Non-base64 data URLs must return nil — passing them to Base64ImageDataProvider
+        // would force-unwrap Data(base64Encoded:) and crash.
+        #expect("data:image/svg+xml,<svg></svg>".dataImageBase64Payload == nil)
         #expect("data:image/svg+xml;base64".dataImageBase64Payload == nil)
         #expect("http://example.com/image.png".dataImageBase64Payload == nil)
         #expect("".dataImageBase64Payload == nil)
