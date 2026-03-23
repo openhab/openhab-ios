@@ -41,8 +41,12 @@ struct ImageView: View {
         if !url.isEmpty {
             switch url {
             case _ where url.hasPrefix("data:image"):
-                let provider = Base64ImageDataProvider(base64String: url.deletingPrefix("data:image/png;base64,"), cacheKey: UUID().uuidString)
-                return KFImage(source: .provider(provider)).resizable()
+                if let base64Range = url.range(of: ";base64,") {
+                    let payload = String(url[base64Range.upperBound...])
+                    let provider = Base64ImageDataProvider(base64String: payload, cacheKey: UUID().uuidString)
+                    return KFImage(source: .provider(provider)).resizable()
+                }
+                return KFImage(URL(string: url)).resizable()
             case _ where url.hasPrefix("http"):
                 return KFImage(URL(string: url)).resizable()
             default:
