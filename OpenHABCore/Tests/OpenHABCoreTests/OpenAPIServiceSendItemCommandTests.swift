@@ -24,7 +24,7 @@ struct OpenAPIServiceSendItemCommandTests {
             #expect(request.method == .post)
             #expect(URLComponents(string: request.path ?? "")?.path == "/items/MyItem")
             #expect(baseURL.absoluteString == "/rest")
-            #expect(request.headerFields[.contentType] == "text/plain; charset=utf-8")
+            #expect(request.headerFields[.contentType] == "text/plain")
 
             let bodyString = try await self.encodedBody(from: body)
             #expect(bodyString == "ON")
