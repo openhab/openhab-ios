@@ -513,8 +513,17 @@ public actor NetworkTracker {
 }
 
 public extension NetworkTracker {
-    func configuredConnections() -> [ConnectionConfiguration] {
-        connectionConfigurations
+    /// Finds the connection configuration whose URL host or proxy host matches the given host,
+    /// prioritising the active connection.
+    func connectionConfiguration(forHost host: String) -> ConnectionConfiguration? {
+        if let activeConnection,
+           activeConnection.configuration.host == host || activeConnection.proxyURL?.host == host {
+            activeConnection.configuration
+        } else {
+            connectionConfigurations
+                .filter { $0 != activeConnection?.configuration }
+                .first { $0.host == host }
+        }
     }
 
     private func service() async throws -> any OpenAPIServiceProtocol {
@@ -581,6 +590,10 @@ public extension NetworkTracker {
 public extension NetworkTracker {
     func setMockConnection(_ connection: ConnectionInfo) {
         activeConnection = connection
+    }
+
+    func setMockConnectionConfigurations(_ configurations: [ConnectionConfiguration]) {
+        connectionConfigurations = configurations
     }
 }
 #endif

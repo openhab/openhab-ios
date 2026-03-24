@@ -26,7 +26,15 @@
 - Avoid trailing closure syntax when passing multiple closures (use parentheses for all closures to prevent multiple_closures_with_trailing_closure warnings)
 - Respect "BuildTools/.swiftformat"  and "BuildTools/.swiftlint.yml"
 - Always use Swift Regex with Swift 6 syntax
+- Prefer `guard` for early exits over `if/else if` chains — when a branch returns, use `guard`/early return to flatten nesting
+- Move logic to the type that owns the data — methods that operate on a type's internals belong on that type, not in the caller
+- Drop argument labels for parameters already implied by the function name — use `_` for positional parameters whose meaning is obvious from the function name, keep labels only for semantically distinct parameters
+- Prefer direct calls to shared helpers over thin wrapper closures that just forward arguments
+
+## Rules for writing tests
+
 - Always write tests with Swift Testing
+- Add a parameter with a default value (e.g. `networkTracker: NetworkTracker = .shared`) to make functions testable without coupling them to singletons
 
 ## git
 - Always use git commit with -s -S 
