@@ -1,3 +1,5 @@
+"0hYnWM" = "Ter bevestiging, u bedoelde '${home}'?";
+
 "1GaCDV" = "Actie";
 
 "1Kf0qe" = "Kleurwaarde instellen";
@@ -6,9 +8,15 @@
 
 "1USOx9" = "Item";
 
+"1cBKdm" = "Stel ${item} in op ${value}";
+
 "2q0TdY" = "Sorry kan ${item} niet vinden";
 
+"3LMXV8" = "Voor welk huis wilt u de waarde ophalen?";
+
 "3evvza" = "Waarde";
+
+"4WCzFG" = "Voor welk huis wilt u de waarde ophalen?";
 
 "5B4e9l" = "De tekenreeks van een string controle item instellen";
 
@@ -20,19 +28,33 @@
 
 "6hUiXZ" = "De staat van ${item} is ${state}";
 
+"71MWtI" = "huis";
+
+"7BE642" = "Er zijn ${count} geconfigureerde huizen met een item genaamd '${item}'.";
+
+"7GA2x6" = "huis";
+
 "80K2Dt" = "Sorry kan ${item} niet vinden";
 
 "8OBnvT" = "Ongeldige lege waarde voor ${item}";
 
 "8dhboX" = "Waarde";
 
+"9Pu17E" = "Voor welk huis wilt u de waarde ophalen?";
+
 "B2I9b5" = "Item";
+
+"BaNYuS" = "Er zijn ${count} geconfigureerde huizen met een item genaamd '${item}'.";
 
 "CZfT5a" = "De waarde ${value} is verzonden naar ${item}";
 
 "Cdg015" = "Stel ${item} in op ${value}";
 
+"Ch9Akw" = "Stel ${item} in op ${value}";
+
 "DxO2wk" = "Stel de kleur van een kleurbesturingsitem in";
+
+"E07xjp" = "Stel ${item} in op ${value} (HSB)";
 
 "E291x3" = "Waarde";
 
@@ -48,11 +70,17 @@
 
 "H26PEQ" = "De status van ${item} is ingesteld op ${state}";
 
+"H2V4UV" = "Er zijn ${count} geconfigureerde huizen met een item genaamd '${item}'.";
+
 "HGbUGw" = "Waarde";
+
+"IS2nO0" = "Huisnaam";
 
 "IpbXHW" = "${action} verzenden naar ${item}";
 
 "JUznKl" = "De waarde ${value} is verzonden naar ${item}";
+
+"Jn2aNw" = "Ter bevestiging, u bedoelde '${home}'?";
 
 "KXqi2s" = "Item";
 
@@ -62,7 +90,11 @@
 
 "MGYSky" = "Stel ${item} in op ${value}";
 
+"MIqlld" = "Er zijn ${count} geconfigureerde huizen met een item genaamd '${item}'.";
+
 "N5YsnB" = "Sorry kan ${item} niet vinden";
+
+"Ncumus" = "Huisnaam";
 
 "NehcMF" = "Item Naam";
 
@@ -74,6 +106,10 @@
 
 "Oazi8d" = "Sorry kan ${item} niet vinden";
 
+"P9kblb" = "Huisnaam";
+
+"QATq1i" = "Voor welk huis wilt u de waarde ophalen?";
+
 "SMYYBh" = "Stel ${item} in op ${value}";
 
 "TJ1p5Y" = "Actie";
@@ -84,31 +120,65 @@
 
 "V0QsN4" = "Ongeldige waarde ${value} voor ${item} (0-100)";
 
+"VEApie" = "Ter bevestiging, u bedoelde '${home}'?";
+
 "VTeXc1" = "Item";
 
 "VmFkwo" = "Stel ${item} in op ${value} (HSB)";
 
+"WsMKz2" = "Zet de status van ${item} op ${state}";
+
+"X9cN9h" = "huis";
+
 "XMNs7r" = "Stel schakelstatus in";
+
+"YFIIBn" = "Huisnaam";
+
+"YUoeAL" = "Er zijn ${count} geconfigureerde huizen met een item genaamd '${item}'.";
+
+"ZuBsOg" = "huis";
 
 "cBrxnz" = "Item";
 
 "dtRamI" = "Waarde";
 
+"eFNxrT" = "Huisnaam";
+
 "eFb7vM" = "Zet de status van een contact open of gesloten";
+
+"exrmKW" = "Ter bevestiging, u bedoelde '${home}'?";
 
 "gBn7U6" = "Zet String Control Waarde in";
 
 "gQzHiG" = "Item";
 
+"gobcZi" = "Ter bevestiging, u bedoelde '${home}'?";
+
+"h91G9C" = "Voor welk huis wilt u de waarde ophalen?";
+
 "hflKDd" = "Sorry kan ${item} niet vinden";
 
 "i8fP5e" = "Actie";
 
+"iBrALm" = "huis";
+
 "iCUEet" = "Status ongeldig: ${action} voor ${item}";
+
+"iKSmqU" = "Ter bevestiging, u bedoelde '${home}'?";
 
 "iRjffC" = "Ongeldige lege waarde voor ${item}";
 
+"jP4VSa" = "Er zijn ${count} geconfigureerde huizen met een item genaamd '${item}'.";
+
+"jbUbYw" = "Voor welk huis wilt u de waarde ophalen?";
+
+"jyXazc" = "${action} verzenden naar ${item}";
+
 "k0eXWc" = "Item";
+
+"k6pj4o" = "huis";
+
+"lLFYtM" = "Er zijn ${count} geconfigureerde huizen met een item genaamd '${item}'.";
 
 "llL4sP" = "Waarde";
 
@@ -119,6 +189,8 @@
 "m9yAKr" = "Haal ${item} state op";
 
 "mAKsWc" = "Waarde";
+
+"mHbznY" = "Voor welk huis wilt u de waarde ophalen?";
 
 "mVz5mJ" = "Stel ${item} in op ${value}";
 
@@ -140,13 +212,21 @@
 
 "ptGHON" = "Sorry kan ${item} niet vinden";
 
+"qYPBPC" = "Stel ${item} in op ${value}";
+
 "qu9K9v" = "Zet de status van ${item} op ${state}";
 
+"rVXwR2" = "Huisnaam";
+
 "raIAR6" = "Ongeldige waarde: ${value} voor ${item} moet HSB zijn (0-360,0-100,0-100)";
+
+"rsrXB9" = "Huisnaam";
 
 "skEQxZ" = "Item";
 
 "tclrCp" = "Item";
+
+"tkWfxz" = "Ter bevestiging, u bedoelde '${home}'?";
 
 "ttiBzN" = "Zet de status van ${item} op ${state}";
 
@@ -154,4 +234,10 @@
 
 "uGsyyj" = "240,100,100";
 
+"v3hsWV" = "Huisnaam";
+
 "wm0fqx" = "De waarde van ${value} is verzonden naar ${item}";
+
+"zLlY3g" = "huis";
+
+"zV2TH2" = "Huis";

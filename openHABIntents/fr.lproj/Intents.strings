@@ -1,3 +1,5 @@
+"0hYnWM" = "Pour confirmer, vous vouliez '${home}' ?";
+
 "1GaCDV" = "Action";
 
 "1Kf0qe" = "Définir la valeur de contrôle de couleur";
@@ -6,9 +8,15 @@
 
 "1USOx9" = "Item";
 
+"1cBKdm" = "Définir ${item} à ${value}";
+
 "2q0TdY" = "Désolé impossible de trouver ${item}";
 
+"3LMXV8" = "Pour quelle maison voulez-vous obtenir la valeur ?";
+
 "3evvza" = "Valeur";
+
+"4WCzFG" = "Pour quelle maison voulez-vous obtenir la valeur ?";
 
 "5B4e9l" = "Définir la chaîne d'un item de contrôle de chaîne";
 
@@ -20,19 +28,33 @@
 
 "6hUiXZ" = "L'état de ${item} est ${state}";
 
+"71MWtI" = "maison";
+
+"7BE642" = "Il y a ${count} maisons configurées avec un élément nommé '${item}'.";
+
+"7GA2x6" = "maison";
+
 "80K2Dt" = "Désolé impossible de trouver ${item}";
 
 "8OBnvT" = "Valeur vide invalide pour ${item}";
 
 "8dhboX" = "Valeur";
 
+"9Pu17E" = "Pour quelle maison voulez-vous obtenir la valeur ?";
+
 "B2I9b5" = "Item";
+
+"BaNYuS" = "Il y a ${count} maisons configurées avec un élément nommé '${item}'.";
 
 "CZfT5a" = "Envoyé le numéro ${value} à ${item}";
 
 "Cdg015" = "Définir ${item} à ${value}";
 
+"Ch9Akw" = "Définir ${item} à ${value}";
+
 "DxO2wk" = "Définir la couleur d'un élément de contrôle de couleur";
+
+"E07xjp" = "Définir ${item} à ${value} (HSB)";
 
 "E291x3" = "Valeur";
 
@@ -48,11 +70,17 @@
 
 "H26PEQ" = "L'état de ${item} a été réglé sur ${state}";
 
+"H2V4UV" = "Il y a ${count} maisons configurées avec un élément nommé '${item}'.";
+
 "HGbUGw" = "Valeur";
+
+"IS2nO0" = "Nom de la maison";
 
 "IpbXHW" = "Envoyer ${action} à ${item}";
 
 "JUznKl" = "Envoi de la chaîne ${value} à ${item}";
+
+"Jn2aNw" = "Pour confirmer, vous vouliez '${home}' ?";
 
 "KXqi2s" = "Item";
 
@@ -62,7 +90,11 @@
 
 "MGYSky" = "Définir ${item} à ${value}";
 
+"MIqlld" = "Il y a ${count} maisons configurées avec un élément nommé '${item}'.";
+
 "N5YsnB" = "Désolé impossible de trouver ${item}";
+
+"Ncumus" = "Nom de la maison";
 
 "NehcMF" = "Nom d'Item";
 
@@ -74,6 +106,10 @@
 
 "Oazi8d" = "Désolé impossible de trouver ${item}";
 
+"P9kblb" = "Nom de la maison";
+
+"QATq1i" = "Pour quelle maison voulez-vous obtenir la valeur ?";
+
 "SMYYBh" = "Définir ${item} à ${value}";
 
 "TJ1p5Y" = "Action";
@@ -84,31 +120,65 @@
 
 "V0QsN4" = "Valeur ${value} invalide pour ${item} (0-100)";
 
+"VEApie" = "Pour confirmer, vous vouliez '${home}' ?";
+
 "VTeXc1" = "Item";
 
 "VmFkwo" = "Définir ${item} à ${value} (HSB)";
 
+"WsMKz2" = "Définit l'état de ${item} à ${state}";
+
+"X9cN9h" = "maison";
+
 "XMNs7r" = "Définir l'état du Switch";
+
+"YFIIBn" = "Nom de la maison";
+
+"YUoeAL" = "Il y a ${count} maisons configurées avec un élément nommé '${item}'.";
+
+"ZuBsOg" = "maison";
 
 "cBrxnz" = "Item";
 
 "dtRamI" = "Valeur";
 
+"eFNxrT" = "Nom de la maison";
+
 "eFb7vM" = "Définir l'état d'un contacteur ouvert ou fermé";
+
+"exrmKW" = "Pour confirmer, vous vouliez '${home}' ?";
 
 "gBn7U6" = "Définir la valeur de contrôle de chaîne";
 
 "gQzHiG" = "Item";
 
+"gobcZi" = "Pour confirmer, vous vouliez '${home}' ?";
+
+"h91G9C" = "Pour quelle maison voulez-vous obtenir la valeur ?";
+
 "hflKDd" = "Désolé impossible de trouver ${item}";
 
 "i8fP5e" = "Action";
 
+"iBrALm" = "maison";
+
 "iCUEet" = "Action invalide : ${action} pour ${item}";
+
+"iKSmqU" = "Pour confirmer, vous vouliez '${home}' ?";
 
 "iRjffC" = "Valeur vide invalide pour ${item}";
 
+"jP4VSa" = "Il y a ${count} maisons configurées avec un élément nommé '${item}'.";
+
+"jbUbYw" = "Pour quelle maison voulez-vous obtenir la valeur ?";
+
+"jyXazc" = "Envoyer ${action} à ${item}";
+
 "k0eXWc" = "Item";
+
+"k6pj4o" = "maison";
+
+"lLFYtM" = "Il y a ${count} maisons configurées avec un élément nommé '${item}'.";
 
 "llL4sP" = "Valeur";
 
@@ -119,6 +189,8 @@
 "m9yAKr" = "Récupérer l'état de ${item}";
 
 "mAKsWc" = "Valeur";
+
+"mHbznY" = "Pour quelle maison voulez-vous obtenir la valeur ?";
 
 "mVz5mJ" = "Définir ${item} à ${value}";
 
@@ -140,13 +212,21 @@
 
 "ptGHON" = "Désolé impossible de trouver ${item}";
 
+"qYPBPC" = "Définir ${item} à ${value}";
+
 "qu9K9v" = "Définit l'état de ${item} à ${state}";
 
+"rVXwR2" = "Nom de la maison";
+
 "raIAR6" = "Valeur invalide : ${value} pour ${item} doit être HSB (0-360,0-100,0-100)";
+
+"rsrXB9" = "Nom de la maison";
 
 "skEQxZ" = "Item";
 
 "tclrCp" = "Item";
+
+"tkWfxz" = "Pour confirmer, vous vouliez '${home}' ?";
 
 "ttiBzN" = "Définit l'état de ${item} à ${state}";
 
@@ -154,4 +234,10 @@
 
 "uGsyyj" = "240,100,100";
 
+"v3hsWV" = "Nom de la maison";
+
 "wm0fqx" = "Envoyé la valeur ${value} à ${item}";
+
+"zLlY3g" = "maison";
+
+"zV2TH2" = "Maison";

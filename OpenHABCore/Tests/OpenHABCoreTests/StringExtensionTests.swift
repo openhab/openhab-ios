@@ -49,6 +49,7 @@ struct StringExtensionTests {
         #expect("data:image/png;base64,\(pngPayload)".dataImageBase64Payload == pngPayload)
 
         #expect("data:image/svg+xml;base64".dataImageBase64Payload == nil)
+        #expect("data:image/svg+xml,<svg></svg>".dataImageBase64Payload == nil) // plain data URI must not be treated as base64
         #expect("http://example.com/image.png".dataImageBase64Payload == nil)
         #expect("".dataImageBase64Payload == nil)
     }

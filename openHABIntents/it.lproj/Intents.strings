@@ -1,3 +1,5 @@
+"0hYnWM" = "Per confermare, volevi '${home}'?";
+
 "1GaCDV" = "Azione";
 
 "1Kf0qe" = "Imposta Valore Controllo Colore";
@@ -6,9 +8,15 @@
 
 "1USOx9" = "Item";
 
+"1cBKdm" = "Imposta ${item} a ${value}";
+
 "2q0TdY" = "Spiacente non posso trovare ${item}";
 
+"3LMXV8" = "Per quale casa vuoi ottenere il valore?";
+
 "3evvza" = "Valore";
+
+"4WCzFG" = "Per quale casa vuoi ottenere il valore?";
 
 "5B4e9l" = "Imposta il valore di una item di controllo di tipo stringa";
 
@@ -20,19 +28,33 @@
 
 "6hUiXZ" = "Lo stato di ${item} è ${state}";
 
+"71MWtI" = "casa";
+
+"7BE642" = "Ci sono ${count} case configurate con un elemento chiamato '${item}'.";
+
+"7GA2x6" = "casa";
+
 "80K2Dt" = "Spiacente non posso trovare ${item}";
 
 "8OBnvT" = "Valore vuoto non valido per ${item}";
 
 "8dhboX" = "Valore";
 
+"9Pu17E" = "Per quale casa vuoi ottenere il valore?";
+
 "B2I9b5" = "Item";
+
+"BaNYuS" = "Ci sono ${count} case configurate con un elemento chiamato '${item}'.";
 
 "CZfT5a" = "Inviato il numero ${value} a ${item}";
 
 "Cdg015" = "Imposta ${item} a ${value}";
 
+"Ch9Akw" = "Imposta ${item} a ${value}";
+
 "DxO2wk" = "Imposta il colore di un Item di controllo colore";
+
+"E07xjp" = "Imposta ${item} a ${value} (HSB)";
 
 "E291x3" = "Valore";
 
@@ -48,11 +70,17 @@
 
 "H26PEQ" = "Lo stato di ${item} è stato impostato su ${state}";
 
+"H2V4UV" = "Ci sono ${count} case configurate con un elemento chiamato '${item}'.";
+
 "HGbUGw" = "Valore";
+
+"IS2nO0" = "Nome della casa";
 
 "IpbXHW" = "Invia ${action} a ${item}";
 
 "JUznKl" = "Inviata la stringa ${value} a ${item}";
+
+"Jn2aNw" = "Per confermare, volevi '${home}'?";
 
 "KXqi2s" = "Item";
 
@@ -62,7 +90,11 @@
 
 "MGYSky" = "Imposta ${item} a ${value}";
 
+"MIqlld" = "Ci sono ${count} case configurate con un elemento chiamato '${item}'.";
+
 "N5YsnB" = "Spiacente non posso trovare ${item}";
+
+"Ncumus" = "Nome della casa";
 
 "NehcMF" = "Nome Item";
 
@@ -74,6 +106,10 @@
 
 "Oazi8d" = "Spiacente non posso trovare ${item}";
 
+"P9kblb" = "Nome della casa";
+
+"QATq1i" = "Per quale casa vuoi ottenere il valore?";
+
 "SMYYBh" = "Imposta ${item} a ${value}";
 
 "TJ1p5Y" = "Azione";
@@ -84,31 +120,65 @@
 
 "V0QsN4" = "Valore non valido ${value} per ${item} (0-100)";
 
+"VEApie" = "Per confermare, volevi '${home}'?";
+
 "VTeXc1" = "Item";
 
 "VmFkwo" = "Imposta ${item} a ${value} (HSB)";
 
+"WsMKz2" = "Imposta lo stato di ${item} a ${state}";
+
+"X9cN9h" = "casa";
+
 "XMNs7r" = "Imposta stato Interruttore";
+
+"YFIIBn" = "Nome della casa";
+
+"YUoeAL" = "Ci sono ${count} case configurate con un elemento chiamato '${item}'.";
+
+"ZuBsOg" = "casa";
 
 "cBrxnz" = "Item";
 
 "dtRamI" = "Valore";
 
+"eFNxrT" = "Nome della casa";
+
 "eFb7vM" = "Imposta lo stato di un contatto aperto o chiuso";
+
+"exrmKW" = "Per confermare, volevi '${home}'?";
 
 "gBn7U6" = "Imposta Valore della Stringa di Controllo";
 
 "gQzHiG" = "Item";
 
+"gobcZi" = "Per confermare, volevi '${home}'?";
+
+"h91G9C" = "Per quale casa vuoi ottenere il valore?";
+
 "hflKDd" = "Spiacente non posso trovare ${item}";
 
 "i8fP5e" = "Azione";
 
+"iBrALm" = "casa";
+
 "iCUEet" = "Azione non valida: ${action} per ${item}";
+
+"iKSmqU" = "Per confermare, volevi '${home}'?";
 
 "iRjffC" = "Valore vuoto non valido per ${item}";
 
+"jP4VSa" = "Ci sono ${count} case configurate con un elemento chiamato '${item}'.";
+
+"jbUbYw" = "Per quale casa vuoi ottenere il valore?";
+
+"jyXazc" = "Invia ${action} a ${item}";
+
 "k0eXWc" = "Item";
+
+"k6pj4o" = "casa";
+
+"lLFYtM" = "Ci sono ${count} case configurate con un elemento chiamato '${item}'.";
 
 "llL4sP" = "Valore";
 
@@ -119,6 +189,8 @@
 "m9yAKr" = "Leggi lo stato di ${item}";
 
 "mAKsWc" = "Valore";
+
+"mHbznY" = "Per quale casa vuoi ottenere il valore?";
 
 "mVz5mJ" = "Imposta ${item} a ${value}";
 
@@ -140,13 +212,21 @@
 
 "ptGHON" = "Spiacente non posso trovare ${item}";
 
+"qYPBPC" = "Imposta ${item} a ${value}";
+
 "qu9K9v" = "Imposta lo stato di ${item} a ${state}";
 
+"rVXwR2" = "Nome della casa";
+
 "raIAR6" = "Valore non valido: ${value} per ${item} deve essere HSB (0-360,0-100,0-100)";
+
+"rsrXB9" = "Nome della casa";
 
 "skEQxZ" = "Item";
 
 "tclrCp" = "Item";
+
+"tkWfxz" = "Per confermare, volevi '${home}'?";
 
 "ttiBzN" = "Imposta lo stato di ${item} a ${state}";
 
@@ -154,4 +234,10 @@
 
 "uGsyyj" = "240,100,100";
 
+"v3hsWV" = "Nome della casa";
+
 "wm0fqx" = "Imposta il valore di ${value} a ${item}";
+
+"zLlY3g" = "casa";
+
+"zV2TH2" = "Casa";

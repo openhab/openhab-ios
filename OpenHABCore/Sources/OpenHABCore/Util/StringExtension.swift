@@ -192,7 +192,7 @@ public extension String? {
 public extension String {
     var dataImageBase64Payload: String? {
         guard hasPrefix("data:image"),
-              let separatorRange = range(of: ",")
+              let separatorRange = range(of: ";base64,")
         else {
             return nil
         }
