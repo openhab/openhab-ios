@@ -17,18 +17,17 @@ import Testing
 
 @Suite
 struct OpenAPIServiceSendItemCommandTests {
-    @Test("sendItemCommand uses application/json with object payload")
-    func sendItemCommandUsesJSONPayload() async throws {
+    @Test("sendItemCommand uses text/plain for non-empty commands")
+    func sendItemCommandUsesPlainTextForNonEmptyCommand() async throws {
         let transport = TestClientTransport { request, body, baseURL, operationID in
             #expect(operationID == "sendItemCommand")
             #expect(request.method == .post)
             #expect(URLComponents(string: request.path ?? "")?.path == "/items/MyItem")
             #expect(baseURL.absoluteString == "/rest")
-            #expect(request.headerFields[.contentType] == "application/json; charset=utf-8")
+            #expect(request.headerFields[.contentType] == "text/plain; charset=utf-8")
 
             let bodyString = try await self.encodedBody(from: body)
-            let json = try JSONDecoder().decode([String: String].self, from: Data(bodyString.utf8))
-            #expect(json["value"] == "ON")
+            #expect(bodyString == "ON")
 
             return (HTTPResponse(status: .ok), nil)
         }
@@ -40,6 +39,28 @@ struct OpenAPIServiceSendItemCommandTests {
         let service = OpenAPIService(client: client)
 
         try await service.sendItemCommand(itemname: "MyItem", command: "ON")
+    }
+
+    @Test("sendItemCommand uses application/json for empty string command")
+    func sendItemCommandUsesJSONForEmptyCommand() async throws {
+        let transport = TestClientTransport { request, body, baseURL, operationID in
+            #expect(operationID == "sendItemCommand")
+            #expect(request.headerFields[.contentType] == "application/json; charset=utf-8")
+
+            let bodyString = try await self.encodedBody(from: body)
+            let json = try JSONDecoder().decode([String: String].self, from: Data(bodyString.utf8))
+            #expect(json["value"] == "")
+
+            return (HTTPResponse(status: .ok), nil)
+        }
+        let client = try Client(
+            serverURL: URL(validatingOpenAPIServerURL: "/rest"),
+            configuration: .init(multipartBoundaryGenerator: .constant),
+            transport: transport
+        )
+        let service = OpenAPIService(client: client)
+
+        try await service.sendItemCommand(itemname: "MyItem", command: "")
     }
 
     private func encodedBody(from body: HTTPBody?) async throws -> String {

@@ -360,8 +360,13 @@ public extension OpenAPIService {
 
     func sendItemCommand(itemname: String, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
         let path = Operations.sendItemCommand.Input.Path(itemname: itemname)
-        let payload = Operations.sendItemCommand.Input.Body.jsonPayload(value: command)
-        let body = Operations.sendItemCommand.Input.Body.json(payload)
+        // Use JSON only for empty-string commands: swift-openapi-generator drops an empty
+        // text/plain body, but {"value":""} correctly conveys an empty command (e.g., clearing
+        // a String item). Non-empty commands use text/plain, which is accepted by all openHAB
+        // versions (4.x and 5.x), avoiding a 400 from servers that predate the JSON body format.
+        let body: Operations.sendItemCommand.Input.Body = command.isEmpty
+            ? .json(.init(value: command))
+            : .plainText(.init(command))
         let query = Operations.sendItemCommand.Input.Query(source: buildSource(sourcePrefix: sourcePrefix, deviceId: deviceId))
         let response = try await client.sendItemCommand(path: path, query: query, body: body)
         _ = try response.ok
