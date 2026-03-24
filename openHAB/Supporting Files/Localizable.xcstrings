@@ -5435,12 +5435,12 @@
       }
     },
     "Enter password for server" : {
-      "comment" : "A prompt instructing the user to enter a password for the server.",
+      "comment" : "A prompt instructing the user to enter a password for the server. Try to keep shortish.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Passwort für den Server eingeben"
+            "value" : "Server-Passwort eingeben"
           }
         },
         "en" : {
@@ -5612,12 +5612,12 @@
       }
     },
     "Enter username for server, if required" : {
-      "comment" : "A message displayed below the username field, instructing the user to enter a username if one is required by the server.",
+      "comment" : "A message displayed below the username field, instructing the user to enter a username if one is required by the server. Try to keep shortish.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Benutzername für den Server eingeben, falls erforderlich"
+            "value" : "Server-Benutzername eingeben, falls erforderlich"
           }
         },
         "en" : {
