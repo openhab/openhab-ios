@@ -32,6 +32,7 @@ enum DrawerViewError: Error, CustomDebugStringConvertible {
     }
 }
 
+
 // Display the connected URL
 struct ConnectionView: View {
     @StateObject private var networkTracker = MainActorNetworkTracker.shared
