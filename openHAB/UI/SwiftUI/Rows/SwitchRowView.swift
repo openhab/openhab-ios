@@ -61,6 +61,7 @@ private struct SwitchRowContent: View {
                     onSendCommand(newState)
                 }
             ))
+            .padding(2)
             .labelsHidden()
             .disabled(input.readOnly)
         }

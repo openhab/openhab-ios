@@ -52,7 +52,7 @@ private struct SetpointRowContent: View {
                     triggerFeedback.toggle()
                     decreaseValue(displayState: displayState)
                 } label: {
-                    Image(systemSymbol: .minusCircle)
+                    Image(systemName: "minus.circle")
                         .font(.title2)
                         .foregroundStyle(currentValue <= displayState.minValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
                 }
@@ -71,7 +71,7 @@ private struct SetpointRowContent: View {
                     triggerFeedback.toggle()
                     increaseValue(displayState: displayState)
                 } label: {
-                    Image(systemSymbol: .plusCircle)
+                    Image(systemName: "plus.circle")
                         .font(.title2)
                         .foregroundStyle(currentValue >= displayState.maxValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
                 }

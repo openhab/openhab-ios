@@ -77,7 +77,7 @@ private struct RollershutterRowContent: View {
                     logger.info("down button pressed")
                     onSendCommand(.down)
                 } label: {
-                    Image(systemSymbol: .arrowtriangleDownCircle)
+                    Image(systemName: "arrowtriangle.down.circle")
                         .font(.title2)
                         .foregroundStyle(Color(UIColor.systemBlue))
                 }
@@ -90,7 +90,7 @@ private struct RollershutterRowContent: View {
                     logger.info("stop button pressed")
                     onSendCommand(.stop)
                 } label: {
-                    Image(systemSymbol: .stopCircle)
+                    Image(systemName: "stop.circle")
                         .font(.title2)
                         .foregroundStyle(Color(UIColor.systemBlue))
                 }
@@ -103,7 +103,7 @@ private struct RollershutterRowContent: View {
                     logger.info("up button pressed")
                     onSendCommand(.up)
                 } label: {
-                    Image(systemSymbol: .arrowtriangleUpCircle)
+                    Image(systemName: "arrowtriangle.up.circle")
                         .font(.title2)
                         .foregroundStyle(Color(UIColor.systemBlue))
                 }

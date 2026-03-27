@@ -113,7 +113,7 @@ private struct SelectionRowContent: View {
                             .ohTextToken(.secondary)
                             .foregroundStyle(.secondary)
                     }
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 6)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                 }
                 // Improve layout stability during optimistic updates
