@@ -23,7 +23,7 @@ struct RollershutterRow: View {
         VStack(spacing: -5) {
             HStack {
                 WatchIconView(model: widget.iconRenderModel(), settings: settings)
-                WatchLabelText(text: widget.labelText ?? widget.label)
+                WatchLabelText(text: widget.labelText ?? widget.label, valueColor: widget.labelcolor)
                 Spacer()
                 DetailTextLabelView(text: widget.labelValue, valueColor: widget.valuecolor)
             }

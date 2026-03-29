@@ -13,11 +13,20 @@ import CommonUI
 import SwiftUI
 
 struct WatchLabelText: View {
-    let text: String
+    let text: String?
+    let valueColor: String
 
     var body: some View {
-        Text(text)
-            .watchTextStyle(.label)
+        if let text {
+            Text(text)
+                .watchTextStyle(.label)
+                .foregroundStyle(!valueColor.isEmpty ? Color(fromString: valueColor) : .primary)
+        }
+    }
+    
+    init(text: String?, valueColor: String = "") {
+        self.text = text
+        self.valueColor = valueColor
     }
 }
 
