@@ -26,6 +26,8 @@ OsLogRewriter/.build
 OsLogRewriter/.swiftpm
 
 .claude/
+skills-lock.json
+.agents/
 
 BonjourDiscoveryTool/.build
 BonjourDiscoveryTool/.swiftpm

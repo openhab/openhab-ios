@@ -42,6 +42,17 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DA8B15502F3BB74B007753FD"
+               BuildableName = "openHABWatchTests.xctest"
+               BlueprintName = "openHABWatchTests"
+               ReferencedContainer = "container:openHAB.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -54,8 +65,7 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
-      launchAutomaticallySubstyle = "8"
-      notificationPayloadFile = "openHABWatch/Extension/PushNotificationPayload.apns">
+      launchAutomaticallySubstyle = "8">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
@@ -73,8 +83,7 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES"
-      launchAutomaticallySubstyle = "8"
-      notificationPayloadFile = "openHABWatch/Extension/PushNotificationPayload.apns">
+      launchAutomaticallySubstyle = "8">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference

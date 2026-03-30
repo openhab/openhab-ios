@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "2600"
+   LastUpgradeVersion = "2610"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -38,6 +38,16 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "OpenHABCoreTests"
+               BuildableName = "OpenHABCoreTests"
+               BlueprintName = "OpenHABCoreTests"
+               ReferencedContainer = "container:OpenHABCore">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "DA2DC22E21F2736C00830730"
                BuildableName = "openHABTestsSwift.xctest"
                BlueprintName = "openHABTestsSwift"
@@ -52,6 +62,16 @@
                BuildableName = "openHABUITests.xctest"
                BlueprintName = "openHABUITests"
                ReferencedContainer = "container:openHAB.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "CommonUITests"
+               BuildableName = "CommonUITests"
+               BlueprintName = "CommonUITests"
+               ReferencedContainer = "container:CommonUI">
             </BuildableReference>
          </TestableReference>
       </Testables>

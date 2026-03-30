@@ -9,44 +9,48 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
 
 struct RollershutterRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    @State private var commandSender = WidgetCommandDispatcher()
 
     var body: some View {
         VStack(spacing: -5) {
             HStack {
-                IconView(widget: widget, settings: settings)
-                TextLabelView(widget: widget)
+                WatchIconView(model: widget.iconRenderModel(), settings: settings)
+                WatchLabelText(text: widget.labelText ?? widget.label, labelColor: widget.labelcolor)
                 Spacer()
+                DetailTextLabelView(text: widget.labelValue, valueColor: widget.valuecolor)
             }
             HStack {
                 Spacer()
-                IconWithAction(systemSymbol: .chevronUpCircleFill) {
-                    widget.sendCommand("UP")
+                IconWithAction(systemSymbol: .arrowtriangleDownCircleFill, accessibilityLabel: "Move down") {
+                    commandSender.send("DOWN", for: widget, policy: .immediate)
                 }
                 Spacer()
-                IconWithAction(systemSymbol: .square) {
-                    widget.sendCommand("STOP")
+                IconWithAction(systemSymbol: .stopCircleFill, accessibilityLabel: "Stop") {
+                    commandSender.send("STOP", for: widget, policy: .immediate)
                 }
                 Spacer()
-
-                IconWithAction(systemSymbol: .chevronDownCircleFill) {
-                    widget.sendCommand("DOWN")
+                IconWithAction(systemSymbol: .arrowtriangleUpCircleFill, accessibilityLabel: "Move up") {
+                    commandSender.send("UP", for: widget, policy: .immediate)
                 }
                 Spacer()
             }
             .frame(height: 50)
         }
+        .accessibilityLabel(widget.labelText ?? "")
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[5]
-    RollershutterRow(widget: widget)
-        .environmentObject(AppSettings())
+    let widget = PreviewWidgetFactory.rollershutter(label: "Blinds", state: "STOP")
+    PreviewNavigationContainer {
+        RollershutterRow(widget: widget)
+    }
 }

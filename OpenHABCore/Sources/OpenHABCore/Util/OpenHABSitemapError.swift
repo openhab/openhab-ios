@@ -18,9 +18,9 @@ public enum OpenHABSitemapError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .noActiveConnection:
-            NSLocalizedString("no_active_connection", comment: "No active connection available.")
+            String(localized: "no_active_connection", comment: "No active connection available.")
         case .invalidConnectionConfiguration:
-            NSLocalizedString("invalid_connection_configuration", comment: "Invalid connection configuration.")
+            String(localized: "invalid_connection_configuration", comment: "Invalid connection configuration.")
         }
     }
 }

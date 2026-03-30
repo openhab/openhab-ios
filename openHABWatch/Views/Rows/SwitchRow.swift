@@ -9,59 +9,67 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
-import os.log
 import SwiftUI
 
 struct SwitchRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    let stateToken: String
+    @State private var localIsOn: Bool?
+    @State private var commandSender = WidgetCommandDispatcher()
 
-    // https://stackoverflow.com/questions/59395501/do-something-when-toggle-state-changes
-    var stateBinding: Binding<Bool> {
-        .init(
-            get: { widget.stateEnumBinding.boolState },
-            set: {
-                if $0 {
-                    Logger.rowViews.info("Switch to ON")
-                    widget.sendCommand("ON")
-                } else {
-                    Logger.rowViews.info("Switch to OFF")
-                    widget.sendCommand("OFF")
-                }
-                widget.stateEnumBinding = .switcher($0)
-            }
-        )
+    private var isOn: Bool {
+        localIsOn ?? stateToken.parseAsBool()
     }
 
     var body: some View {
-        Toggle(isOn: stateBinding) {
+        Toggle(isOn: Binding(
+            get: { isOn },
+            set: { newValue in
+                localIsOn = newValue
+                if newValue {
+                    commandSender.send("ON", for: widget, policy: .immediate)
+                } else {
+                    commandSender.send("OFF", for: widget, policy: .immediate)
+                }
+            }
+        )) {
             HStack {
-                IconView(widget: widget, settings: settings)
+                WatchIconView(model: widget.iconRenderModel(), settings: settings)
                 VStack {
-                    TextLabelView(widget: widget, lineLimit: 1)
-                    DetailTextLabelView(widget: widget)
+                    WatchLabelText(text: widget.labelText ?? widget.label, labelColor: widget.labelcolor)
+                    DetailTextLabelView(text: widget.labelValue, valueColor: widget.valuecolor)
                 }
             }
         }
         .padding(.trailing)
         .cornerRadius(5)
+        .accessibilityValue(isOn ? "On" : "Off")
+        .onChange(of: stateToken) {
+            localIsOn = nil
+        }
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[2]
-    SwitchRow(widget: widget)
-        .environmentObject(AppSettings())
+    let widget = PreviewWidgetFactory.switchWidget(label: "Outdoor Light", state: "ON")
+    PreviewNavigationContainer {
+        SwitchRow(widget: widget, stateToken: widget.item?.state ?? "OFF")
+    }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[2]
+    let widget = PreviewWidgetFactory.switchWidget(label: "Outdoor Light", state: "OFF")
+    let previewRootURL = "http://192.168.2.10:8080"
     let mockSettings = {
         let obj = AppSettings()
-        obj.openHABRootUrl = PreviewConstants.remoteURLString
+        obj.openHABRootUrl = previewRootURL
         return obj
     }()
-    SwitchRow(widget: widget)
-        .environmentObject(mockSettings)
+    NavigationStack {
+        SwitchRow(widget: widget, stateToken: widget.item?.state ?? "OFF")
+    }
+    .environmentObject(mockSettings)
 }

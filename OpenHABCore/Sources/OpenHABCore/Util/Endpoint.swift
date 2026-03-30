@@ -27,9 +27,9 @@ public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible, 
     public var description: String {
         switch self {
         case .png:
-            "PNG"
+            String(localized: "PNG")
         case .svg:
-            "SVG"
+            String(localized: "SVG")
         }
     }
 }
@@ -41,9 +41,9 @@ public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible {
     public var description: String {
         switch self {
         case .label:
-            "Label"
+            String(localized: "Label")
         case .name:
-            "Name"
+            String(localized: "Name")
         }
     }
 }
@@ -97,13 +97,14 @@ public extension Endpoint {
 
     // swiftlint:disable:next function_parameter_count
     static func chart(rootUrl: String, period: String?, type: OpenHABItem.ItemType?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light, forceAsItem: Bool?, yAxisDecimalPattern: String? = nil) -> Endpoint {
-        let random = Int.random(in: 0 ..< 1000)
+        // Use a high-entropy cache buster to avoid stale chart snapshots caused by collisions.
+        let random = UUID().uuidString
         var endpoint = Endpoint(
             baseURL: rootUrl,
             path: "/chart",
             queryItems: [
                 URLQueryItem(name: "period", value: period),
-                URLQueryItem(name: "random", value: String(random))
+                URLQueryItem(name: "random", value: random)
             ]
         )
 
@@ -187,8 +188,12 @@ public extension Endpoint {
 
         if source == "if" || source == "iconify" {
             queryItems = [URLQueryItem(name: "height", value: "64")]
-            if !iconColor.isEmpty, let colorString = UIColor(fromString: iconColor).toHex() {
-                queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
+            if !iconColor.isEmpty {
+                let uiColor = UIColor(fromString: iconColor)
+                let colorString = uiColor.hexString
+                if let colorString {
+                    queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
+                }
             }
             if let widgetId {
                 queryItems.append(URLQueryItem(name: "widgetId", value: widgetId))
@@ -206,8 +211,13 @@ public extension Endpoint {
             iconName = "none"
         }
 
-        if staticIcon != true {
-            queryItems.append(URLQueryItem(name: "state", value: state ?? "null"))
+        // openHAB classic icon set does not provide a "number" icon; skip request entirely.
+        if source == "oh", set == "classic", iconName == "number" {
+            return nil
+        }
+
+        if staticIcon != true, let state {
+            queryItems.append(URLQueryItem(name: "state", value: state))
         }
 
         queryItems.append(contentsOf: [

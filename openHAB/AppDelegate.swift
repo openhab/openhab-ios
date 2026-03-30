@@ -55,15 +55,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Logger.appDelegate.info("didFinishLaunchingWithOptions started")
 
+        // Only essential setup here - defer everything else to show UI faster
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
         UserDefaults.standard.register(defaults: appDefaults)
 
         Preferences.migratePreferences()
 
+        // Firebase must be configured before the storyboard loads its root view controller,
+        // because OpenHABRootViewController.viewDidLoad calls Crashlytics before the deferred
+        // task would have had a chance to run. Calling Crashlytics before FirebaseApp.configure()
+        // silences crash detection for the entire session.
         setupFirebase()
 
         UNUserNotificationCenter.current().delegate = notificationDelegate
 
+        Logger.appDelegate.info("didFinishLaunchingWithOptions ended")
+
+        // Defer non-essential initialization to after first frame renders
+        Task { @MainActor in
+            // Small delay to ensure UI has appeared
+            try? await Task.sleep(for: .milliseconds(100))
+            performDeferredSetup()
+        }
+
+        return true
+    }
+
+    /// Setup that can be deferred until after the UI appears
+    @MainActor
+    private func performDeferredSetup() {
         registerForPushNotifications()
         Logger.appDelegate.info("uniq id: \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
         Logger.appDelegate.info("device name: \(UIDevice.current.name)")
@@ -74,7 +94,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         } catch {
             Logger.appDelegate.info("Setting category to AVAudioSessionCategoryPlayback failed.")
         }
-        Logger.appDelegate.info("didFinishLaunchingWithOptions ended")
 
         activateWatchConnectivity()
 
@@ -100,8 +119,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
             ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
         }
-
-        return true
     }
 
     @MainActor

@@ -10,4 +10,7 @@
    <FileRef
       location = "group:openHAB.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:CommonUI">
+   </FileRef>
 </Workspace>

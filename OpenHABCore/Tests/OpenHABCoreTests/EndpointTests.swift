@@ -232,6 +232,19 @@ struct EndpointTests {
         #expect(endpoint.queryItems.contains(URLQueryItem(name: "format", value: "PNG")))
     }
 
+    @Test
+    func classicNumberIconReturnsNil() throws {
+        let result = Endpoint.icon(
+            rootUrl: "https://example.org",
+            version: 4,
+            icon: "number",
+            state: "80.0",
+            iconType: .svg,
+            iconColor: "#000000"
+        )
+        #expect(result == nil)
+    }
+
     // TODO: test for iconset
 //    "light" to "icon/light?format=PNG&anyFormat=true&iconset=classic",
 //                "oh:light" to "icon/light?format=PNG&anyFormat=true&iconset=classic",

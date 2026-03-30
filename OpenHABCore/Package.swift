@@ -19,6 +19,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.1.0"),
         .package(url: "https://github.com/apple/swift-http-types.git", from: "1.5.1"),
+        .package(url: "https://github.com/SDWebImage/SDWebImage.git", from: "5.21.5"),
         .package(url: "https://github.com/SDWebImage/SDWebImageSVGCoder.git", from: "1.4.0"),
         .package(url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git", from: "7.0.0"),
         .package(url: "https://github.com/swhitty/swift-timeout.git", from: "0.4.0")
@@ -33,6 +34,7 @@ let package = Package(
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
                 .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
                 .product(name: "HTTPTypes", package: "swift-http-types"),
+                .product(name: "SDWebImage", package: "SDWebImage"),
                 .product(name: "SDWebImageSVGCoder", package: "SDWebImageSVGCoder"),
                 .product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
                 .product(name: "Timeout", package: "swift-timeout")
