@@ -39,7 +39,7 @@ struct SwitchRow: View {
             HStack {
                 WatchIconView(model: widget.iconRenderModel(), settings: settings)
                 VStack {
-                    WatchLabelText(text: widget.labelText ?? widget.label)
+                    WatchLabelText(text: widget.labelText ?? widget.label, valueColor: widget.labelcolor)
                     DetailTextLabelView(text: widget.labelValue, valueColor: widget.valuecolor)
                 }
             }
