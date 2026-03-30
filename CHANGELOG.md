@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [Version 3.1.52, Build 221] - 2026-03-30Z
+
+- Fix crash in ImageView for non-PNG base64 data URLs (#1113)
+- Bump crowdin/github-action from 2.15.0 to 2.15.2 (#1105)
+- Bump webfactory/ssh-agent from 0.9.1 to 0.10.0 (#1106)
+- Bump json from 2.18.0 to 2.19.2 (#1110)
+- Bump crowdin/github-action from 2.14.1 to 2.15.0 (#1088)
+
 
 
 ## [Version 3.1.50, Build 207] - 2026-02-26Z
