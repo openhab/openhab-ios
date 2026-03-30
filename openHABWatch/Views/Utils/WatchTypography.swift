@@ -14,19 +14,19 @@ import SwiftUI
 
 struct WatchLabelText: View {
     let text: String?
-    let valueColor: String
+    let labelColor: String
 
     var body: some View {
         if let text {
             Text(text)
                 .watchTextStyle(.label)
-                .foregroundStyle(!valueColor.isEmpty ? Color(fromString: valueColor) : .primary)
+                .foregroundStyle(!labelColor.isEmpty ? Color(fromString: labelColor) : .primary)
         }
     }
-    
-    init(text: String?, valueColor: String = "") {
+
+    init(text: String?, labelColor: String = "") {
         self.text = text
-        self.valueColor = valueColor
+        self.labelColor = labelColor
     }
 }
 
