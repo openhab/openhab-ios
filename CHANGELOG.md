@@ -2,23 +2,9 @@
 
 ## [Unreleased]
 
-- ci: fix bundle install permission error in pull request workflow
-- revert intents extension back to group
-- fix: remove empty metadata string IDs from Intents.strings
-- fix: add remaining metadata string IDs to all Siri intent locale files
-- committed version bump: 3.2.14 (219)
-- fix: add missing Siri intent localization strings and fix base64 crash
 - Shorten German Settings Server user name and password entry field hints (#1115)
-- committed version bump: 3.2.13 (218)
-- fix: correct expected Content-Type in sendItemCommand plain text test
 - workaround: use text/plain for non-empty sendItemCommand payloads
 - Fix crash in ImageView for non-PNG base64 data URLs (#1113)
-- committed version bump: 3.2.12 (217)
-- Fix Crashlytics symbol upload path after filesystem migration
-- Fix Shortcuts integration broken by filesystem migration (#1104)
-- Bump crowdin/github-action from 2.15.0 to 2.15.2 (#1105)
-- Bump webfactory/ssh-agent from 0.9.1 to 0.10.0 (#1106)
-- Bump json from 2.18.0 to 2.19.2 (#1110)
 - Fix Firebase/Crashlytics silenced by deferred initialization (#1111)
 - Small alignment changes to Setpoint and Rollershutter rows (#1109)
 - Fix intentsLocalizations/intentsPlaceholders tests after filesystem migration
