@@ -103,9 +103,8 @@ private struct SelectionRowContent: View {
                             Text(valueText)
                                 .ohTextToken(.rowValue)
                                 .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
-                                .lineLimit(1)
+                                .lineLimit(2)
                                 .minimumScaleFactor(0.85)
-                                .fixedSize(horizontal: true, vertical: false)
                                 .layoutPriority(1)
                         }
 

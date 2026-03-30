@@ -118,6 +118,7 @@ struct SelectionRow: View {
                     if let valueText = selectedValueText {
                         Text(valueText)
                             .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                            .lineLimit(2)
                             .watchTextStyle(.secondary)
                     }
                     Image(systemSymbol: .chevronUpChevronDown)
