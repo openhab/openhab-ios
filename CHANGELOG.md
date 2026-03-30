@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [Version 3.2.16, Build 222] - 2026-03-30Z
+
+- Migrate OpenHABSitemapViewController to SwiftUI (#892)
+- Bump crowdin/github-action from 2.15.2 to 2.16.0 (#1121)
+- ci: fix bundle install permission error in pull request workflow (#1124)
+
 - Shorten German Settings Server user name and password entry field hints (#1115)
 - workaround: use text/plain for non-empty sendItemCommand payloads
 - Fix crash in ImageView for non-PNG base64 data URLs (#1113)
