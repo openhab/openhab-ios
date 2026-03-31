@@ -177,8 +177,6 @@ class OpenHABRootViewController: UIViewController {
                 homePreferences.demomode = true
             }
         }
-        // setup accessibilityIdentifiers for UITest
-        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
         #endif
         // save this so we know if its changed later
         isDemoMode = Preferences.shared.currentHomePreferences.demomode
