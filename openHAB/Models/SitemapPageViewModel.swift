@@ -70,7 +70,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published var isLoading = true
     @Published var isUpdating = false
     @Published var openHABRootUrl: String?
-    @Published var showSearchField = false
+    @Published var showSearchField = true
     @Published private(set) var commandStates: [String: WidgetCommandLifecycleState] = [:]
     @Published private(set) var trackerStatus: NetworkStatus = .stopped
     @Published private(set) var widgetUpdateVersions: [String: Int] = [:]
@@ -329,7 +329,7 @@ class SitemapPageViewModel: ObservableObject {
 extension SitemapPageViewModel {
     func loadSettings() {
         defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
-        showSearchField = Preferences.shared.applicationPreferences.showSearchField
+        showSearchField = Preferences.shared.currentHomePreferences.showSearchField
     }
 
     func stopPageHandling() {
