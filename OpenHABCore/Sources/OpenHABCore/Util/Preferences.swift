@@ -87,12 +87,31 @@ public struct UserDefaultObject<T: Codable & Sendable> {
     }
 }
 
-@MainActor
-public struct HomePreferences: Codable, Equatable {
+public struct HomePreferences: Codable, Equatable, Sendable {
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case defaultView
+        case demomode
+        case realTimeSliders
+        case showSearchField
+        case iconType
+        case defaultSitemap
+        case sortSitemapsBy
+        case defaultMainUIPath
+        case alwaysAllowWebRTC
+        case sitemapForWatch
+        case localConnectionConfig
+        case remoteConnectionConfig
+        case sitemapForWatchLabel
+        case homeName
+        case sseCommandItem
+    }
+
     public let id: UUID
     public var defaultView = "web"
     public var demomode = true
     public var realTimeSliders = false
+    public var showSearchField = true
     public var iconType = 0
     public var defaultSitemap = "demo"
     public var sortSitemapsBy = 0
@@ -108,24 +127,29 @@ public struct HomePreferences: Codable, Equatable {
     fileprivate init(id: UUID) {
         self.id = id
     }
-}
 
-@MainActor
-public struct ApplicationPreferences: Codable, Equatable {
-    public var showSearchField = true
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = (try? container.decode(UUID.self, forKey: .id)) ?? UUID()
+        defaultView = try container.decodeIfPresent(String.self, forKey: .defaultView) ?? "web"
+        demomode = try container.decodeIfPresent(Bool.self, forKey: .demomode) ?? true
+        realTimeSliders = try container.decodeIfPresent(Bool.self, forKey: .realTimeSliders) ?? false
+        showSearchField = try container.decodeIfPresent(Bool.self, forKey: .showSearchField) ?? true
+        iconType = try container.decodeIfPresent(Int.self, forKey: .iconType) ?? 0
+        defaultSitemap = try container.decodeIfPresent(String.self, forKey: .defaultSitemap) ?? "demo"
+        sortSitemapsBy = try container.decodeIfPresent(Int.self, forKey: .sortSitemapsBy) ?? 0
+        defaultMainUIPath = try container.decodeIfPresent(String.self, forKey: .defaultMainUIPath) ?? ""
+        alwaysAllowWebRTC = try container.decodeIfPresent(Bool.self, forKey: .alwaysAllowWebRTC) ?? false
+        sitemapForWatch = try container.decodeIfPresent(String.self, forKey: .sitemapForWatch) ?? "watch"
+        localConnectionConfig = try container.decodeIfPresent(ConnectionConfiguration.self, forKey: .localConnectionConfig) ?? .localDefault
+        remoteConnectionConfig = try container.decodeIfPresent(ConnectionConfiguration.self, forKey: .remoteConnectionConfig) ?? .remoteDefault
+        sitemapForWatchLabel = try container.decodeIfPresent(String.self, forKey: .sitemapForWatchLabel) ?? "watch"
+        homeName = try container.decodeIfPresent(String.self, forKey: .homeName) ?? "Home"
+        sseCommandItem = try container.decodeIfPresent(String.self, forKey: .sseCommandItem) ?? ""
+    }
 }
 
 // MARK: Retrieving preference from user defaults, reacting to preference change
-
-// MARK: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-// MARK: !!
-
-// MARK: When making changes to Preferences, always consider a migration for existing users. Otherwise, they risk to loose their existing preferences.
-
-// MARK: !!
-
-// MARK: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 private enum PreferencesAccess {
     @MainActor fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
@@ -176,12 +200,8 @@ public actor Preferences {
     @UserDefault("idleOff", defaultValue: false)
     public var idleOff: Bool
 
-    @UserDefaultObject(
-        "applicationPreferences",
-        defaultValue:
-        ApplicationPreferences()
-    )
-    public private(set) var applicationPreferences: ApplicationPreferences
+    @UserDefault("showSearchField", defaultValue: true)
+    public var showSearchField: Bool
 
     @UserDefault("screensaverEnabled", defaultValue: false)
     public var screensaverEnabled: Bool
@@ -355,12 +375,6 @@ public extension Preferences {
         currentHomePreferences = homePreferences
         storeActiveHome()
     }
-
-    func modifyApplicationPreferences(modificationFunction: @MainActor (inout ApplicationPreferences) -> Void) {
-        var applicationPreferences = applicationPreferences
-        modificationFunction(&applicationPreferences)
-        self.applicationPreferences = applicationPreferences
-    }
 }
 
 @MainActor
@@ -404,6 +418,7 @@ public extension Preferences {
             currentHomePreferences.remoteConnectionConfig.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? currentHomePreferences.remoteConnectionConfig.ignoreSSL
             currentHomePreferences.demomode = UserDefaults.standard.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
             currentHomePreferences.realTimeSliders = UserDefaults.standard.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
+            currentHomePreferences.showSearchField = UserDefaults.standard.object(forKey: "showSearchField") as? Bool ?? currentHomePreferences.showSearchField
             currentHomePreferences.iconType = UserDefaults.standard.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
             currentHomePreferences.defaultSitemap = UserDefaults.standard.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
         }
@@ -446,6 +461,7 @@ public extension Preferences {
             currentHomePreferences.defaultView = sharedDefaults.string(forKey: "defaultView") ?? currentHomePreferences.defaultView
             currentHomePreferences.demomode = sharedDefaults.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
             currentHomePreferences.realTimeSliders = sharedDefaults.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
+            currentHomePreferences.showSearchField = sharedDefaults.object(forKey: "showSearchField") as? Bool ?? currentHomePreferences.showSearchField
             currentHomePreferences.iconType = sharedDefaults.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
             currentHomePreferences.defaultSitemap = sharedDefaults.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
             currentHomePreferences.sortSitemapsBy = sharedDefaults.object(forKey: "sortSitemapsBy") as? Int ?? currentHomePreferences.sortSitemapsBy
