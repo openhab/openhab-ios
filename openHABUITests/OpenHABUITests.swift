@@ -35,7 +35,7 @@ class OpenHABUITests: XCTestCase {
         let app = XCUIApplication()
         app.activate()
 
-        let hamburgerButton = app.navigationBars.buttons["HamburgerButton"]
+        let hamburgerButton = app.navigationBars.buttons["line.3.horizontal"]
         hamburgerButton.tap()
         sleep(3)
 
