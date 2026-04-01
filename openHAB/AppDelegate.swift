@@ -22,11 +22,7 @@ import UIKit
 @preconcurrency import UserNotifications
 import WatchConnectivity
 
-@main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    static var appDelegate: AppDelegate!
-
-    var window: UIWindow?
 
     private var crashlyticsSubscriber: AnyCancellable?
 
@@ -49,7 +45,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     override init() {
         super.init()
-        AppDelegate.appDelegate = self
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
