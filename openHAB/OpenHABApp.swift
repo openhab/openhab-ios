@@ -9,17 +9,15 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
-import Foundation
-import UIKit
+import SwiftUI
 
-extension UIViewController {
-    @IBInspectable var localizationKey: String {
-        get {
-            ""
-        }
-        set {
-            title = NSLocalizedString(newValue, comment: "").uppercased()
+@main
+struct OpenHABApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
+    var body: some Scene {
+        WindowGroup {
+            OpenHABRootView()
         }
     }
 }
