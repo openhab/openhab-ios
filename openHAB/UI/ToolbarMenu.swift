@@ -15,6 +15,44 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
+// MARK: - Navigation targets
+
+enum TargetController {
+    case webview
+    case settings
+    case sitemap(String)
+    case notifications
+    case browser(String)
+    case tile(String)
+    case homeSelection
+}
+
+// MARK: - Connection status indicator
+
+struct ConnectionView: View {
+    @StateObject private var networkTracker = MainActorNetworkTracker.shared
+
+    var body: some View {
+        HStack {
+            if let activeConnection = networkTracker.activeConnection {
+                Image(systemSymbol: .cloudFill)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 20, height: 20)
+                Text(activeConnection.configuration.url).font(.footnote)
+            } else {
+                Image(systemSymbol: .exclamationmarkIcloudFill)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 20, height: 20)
+                Text("connecting").font(.footnote)
+            }
+        }
+    }
+}
+
+// MARK: - Toolbar dropdown menu
+
 /// Toolbar dropdown menu replacing the SideMenu drawer.
 struct ToolbarMenu: View {
     @Binding var isPresented: Bool
