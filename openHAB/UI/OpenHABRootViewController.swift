@@ -107,6 +107,83 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
     func hidePopupMessages() {}
 }
 
+// MARK: - Hosting Web View Controller (SwiftUI WebView wrapped for UIKit)
+
+class HostingWebViewController: UIViewController, OpenHABViewable {
+    let webViewModel = OpenHABWebViewModel()
+    private var hostingController: UIHostingController<AnyView>?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        let container = OpenHABWebViewContainer(viewModel: webViewModel)
+        let hosting = UIHostingController(rootView: AnyView(container))
+        addChild(hosting)
+        view.addSubview(hosting.view)
+        hosting.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            hosting.view.topAnchor.constraint(equalTo: view.topAnchor),
+            hosting.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            hosting.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            hosting.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+        hosting.didMove(toParent: self)
+        hostingController = hosting
+    }
+
+    func viewName() -> String { "web" }
+
+    nonisolated func reloadView() {
+        Task { @MainActor in
+            webViewModel.reloadView()
+        }
+    }
+
+    func loadWebView(force: Bool = false, path: String? = nil) {
+        webViewModel.loadWebView(force: force, path: path)
+    }
+
+    func navigateCommand(_ command: String) {
+        webViewModel.navigateCommand(command)
+    }
+
+    // swiftlint:disable:next  function_parameter_count
+    func showPopupMessage(seconds: Double,
+                          title: String,
+                          message: String,
+                          theme: Theme,
+                          viewTapAction: (() -> Void)?,
+                          buttonTitle: String,
+                          buttonAction: (() -> Void)?) {
+        var config = SwiftMessages.Config()
+        if seconds >= 0 {
+            config.duration = .seconds(seconds: seconds)
+        } else {
+            config.duration = .forever
+        }
+        config.presentationStyle = .bottom
+        config.presentationContext = .view(view)
+        SwiftMessages.hideAll()
+        SwiftMessages.show(config: config) {
+            let msgView = MessageView.viewFromNib(layout: .cardView)
+            msgView.configureTheme(theme)
+            msgView.configureContent(title: title, body: message)
+            msgView.button?.setTitle(buttonTitle, for: .normal)
+            msgView.buttonTapHandler = { _ in
+                SwiftMessages.hide()
+                buttonAction?()
+            }
+            msgView.tapHandler = { _ in
+                viewTapAction?()
+            }
+            return msgView
+        }
+    }
+
+    func hidePopupMessages() {
+        SwiftMessages.hideAll()
+    }
+}
+
 // MARK: - Root View Controller (delegates to AppServicesViewModel)
 
 class OpenHABRootViewController: UIViewController {
@@ -119,10 +196,12 @@ class OpenHABRootViewController: UIViewController {
 
     private var networkStatusButton: UIButton = .init(type: .custom)
 
-    private lazy var webViewController: OpenHABWebViewController = {
-        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
-        var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABWebViewController") as! OpenHABWebViewController
-        return viewController
+    private lazy var webViewController: HostingWebViewController = {
+        let controller = HostingWebViewController()
+        controller.webViewModel.onExitToApp = { [weak self] in
+            self?.showSideMenu()
+        }
+        return controller
     }()
 
     lazy var sitemapViewController: any (UIViewController & OpenHABViewable) = {
@@ -171,7 +250,7 @@ class OpenHABRootViewController: UIViewController {
                 guard let self else { return }
                 switch command {
                 case let .switchToWebView(path):
-                    if currentView != webViewController {
+                    if currentView !== webViewController {
                         switchView(target: .webview)
                     }
                     if let path {
@@ -444,7 +523,7 @@ class OpenHABRootViewController: UIViewController {
             currentView = targetView
 
             // Update webview active state
-            currentViewState.isWebViewActive = (targetView == webViewController)
+            currentViewState.isWebViewActive = (targetView === webViewController)
 
             // Don't save our view in demo mode
             if !Preferences.shared.currentHomePreferences.demomode {
