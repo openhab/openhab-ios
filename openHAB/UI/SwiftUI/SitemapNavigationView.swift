@@ -20,7 +20,7 @@ struct SitemapNavigationView: View {
     @State private var hasSeenActivePhase = false
     @State private var isSearchPresented = false
     @FocusState private var isLegacySearchFocused: Bool
-    let onShowSideMenu: () -> Void
+    var onShowSideMenu: (() -> Void)?
 
     var body: some View {
         NavigationStack {
@@ -74,14 +74,16 @@ struct SitemapNavigationView: View {
                         }
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        onShowSideMenu()
-                    } label: {
-                        Image(systemSymbol: .line3Horizontal)
-                            .font(.title)
+                if let onShowSideMenu {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            onShowSideMenu()
+                        } label: {
+                            Image(systemSymbol: .line3Horizontal)
+                                .font(.title)
+                        }
+                        .ohMinimumHitTarget()
                     }
-                    .ohMinimumHitTarget()
                 }
             }
 
