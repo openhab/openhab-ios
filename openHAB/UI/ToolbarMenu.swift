@@ -229,6 +229,8 @@ struct ToolbarMenuButton: View {
         } label: {
             Image(systemSymbol: .line3Horizontal)
                 .imageScale(.large)
+                .padding(8)
+                .background(.regularMaterial, in: Circle())
         }
         .accessibilityIdentifier("HamburgerButton")
         .accessibilityLabel("Menu")
