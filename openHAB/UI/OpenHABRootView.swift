@@ -26,10 +26,12 @@ struct OpenHABRootView: View {
     @State private var showNotifications = false
     @State private var showHomeSelection = false
     @State private var isDemoMode = false
+    @State private var sitemapResetID = UUID()
 
     enum ContentType: Equatable {
         case webview
         case sitemap(name: String)
+        case tile(url: String)
     }
 
     var body: some View {
@@ -40,15 +42,15 @@ struct OpenHABRootView: View {
             ToolbarMenu(
                 isPresented: $menuPresented,
                 menuData: menuData,
-                isWebViewActive: currentContent == .webview
+                isWebViewActive: isWebOrTileContent
             ) { target in
                 handleMenuSelection(target)
             }
         }
         .overlay(alignment: .topTrailing) {
-            // Only show floating button for webview (which has no NavigationStack toolbar).
+            // Only show floating button for webview/tile (which have no NavigationStack toolbar).
             // SitemapNavigationView gets the button via its onShowSideMenu closure.
-            if currentContent == .webview, !menuPresented {
+            if isWebOrTileContent, !menuPresented {
                 ToolbarMenuButton(isMenuPresented: $menuPresented)
                     .padding(.trailing, 16)
                     .padding(.top, 8)
@@ -110,6 +112,10 @@ struct OpenHABRootView: View {
                 .ignoresSafeArea()
         case let .sitemap(name):
             SitemapNavigationView(onShowSideMenu: { menuPresented = true })
+                .id(sitemapResetID)
+        case .tile:
+            OpenHABWebViewContainer(viewModel: webViewModel)
+                .ignoresSafeArea()
         }
     }
 
@@ -134,15 +140,35 @@ struct OpenHABRootView: View {
             case .webview:
                 webViewModel.reloadView()
             case .sitemap:
-                break // SitemapNavigationView handles its own reload
+                sitemapResetID = UUID() // pop to root by recreating the NavigationStack
+            case let .tile(url):
+                if let url = URL(string: url) {
+                    webViewModel.loadDirectURL(url)
+                }
             }
         } else {
+            let wasShowingTile: Bool
+            if case .tile = currentContent { wasShowingTile = true } else { wasShowingTile = false }
+
             currentContent = newContent
+
+            switch newContent {
+            case .webview:
+                if wasShowingTile { webViewModel.reloadView() }
+            case .sitemap:
+                break
+            case let .tile(url):
+                if let url = URL(string: url) {
+                    webViewModel.loadDirectURL(url)
+                }
+            }
+
             if !Preferences.shared.currentHomePreferences.demomode {
                 let viewName: String
                 switch newContent {
                 case .webview: viewName = "web"
                 case .sitemap: viewName = "sitemap"
+                case .tile: viewName = "web" // treat tile as web for persistence
                 }
                 Preferences.shared.modifyActiveHome { $0.defaultView = viewName }
             }
@@ -165,7 +191,7 @@ struct OpenHABRootView: View {
         case .homeSelection:
             showHomeSelection = true
         case let .tile(urlString):
-            openTileURL(urlString)
+            switchToTile(urlString)
         case let .browser(urlString):
             if let url = URL(string: urlString) {
                 openSafari(url: url)
@@ -196,22 +222,31 @@ struct OpenHABRootView: View {
 
     // MARK: - Helpers
 
+    private var isWebOrTileContent: Bool {
+        switch currentContent {
+        case .webview, .tile: return true
+        case .sitemap: return false
+        }
+    }
+
     private func setupExitToApp() {
         webViewModel.onExitToApp = {
             menuPresented = true
         }
     }
 
-    private func openTileURL(_ urlString: String) {
+    private func switchToTile(_ urlString: String) {
         guard !urlString.isEmpty else { return }
-        let url: URL?
+        let resolvedUrl: URL?
         if urlString.hasPrefix("http") || urlString.hasPrefix("https") {
-            url = URL(string: urlString)
+            resolvedUrl = URL(string: urlString)
         } else {
             guard let rootUrl = MainActorNetworkTracker.shared.activeConnection?.configuration.url else { return }
-            url = Endpoint.resource(openHABRootUrl: rootUrl, path: urlString.prepare()).url
+            resolvedUrl = Endpoint.resource(openHABRootUrl: rootUrl, path: urlString.prepare()).url
         }
-        if let url { openSafari(url: url) }
+        if let resolvedUrl {
+            switchContent(to: .tile(url: resolvedUrl.absoluteString))
+        }
     }
 
     private func openSafari(url: URL) {
