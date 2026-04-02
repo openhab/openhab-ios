@@ -36,5 +36,34 @@
 - Always write tests with Swift Testing
 - Add a parameter with a default value (e.g. `networkTracker: NetworkTracker = .shared`) to make functions testable without coupling them to singletons
 
+## Verification cycle
+
+After every set of code changes, always run a full verification cycle before committing:
+
+1. **Build** using the Xcode MCP server (`mcp__xcode__BuildProject`, tab `windowtab1`). Fix any errors before proceeding.
+2. **Install & run** in the simulator using the Xcode MCP server (build via Xcode, then `mcp__ios-simulator__install_app` + `mcp__ios-simulator__launch_app`).
+3. **Visually confirm** the changed behaviour with `mcp__ios-simulator__screenshot` or `mcp__ios-simulator__record_video`. Walk through the affected screens interactively with `mcp__ios-simulator__ui_tap`, `mcp__ios-simulator__ui_describe_all`, etc.
+4. Only commit once the simulator confirms the fix is working as expected.
+
+## MCP servers and skills for Swift / iOS development
+
+| Tool | When to use |
+|------|-------------|
+| `mcp__xcode__BuildProject` | Build the workspace (tab `windowtab1`). Prefer this over `xcodebuild` on the command line. |
+| `mcp__xcode__XcodeListWindows` | Retrieve the current tab identifier before building. |
+| `mcp__xcode__GetBuildLog` | Inspect detailed build output after a failure. |
+| `mcp__xcode__RunAllTests` / `mcp__xcode__RunSomeTests` | Run the test suite without leaving Xcode. |
+| `mcp__xcode__XcodeGrep` / `mcp__xcode__XcodeRead` | Search and read source files through Xcode's index. |
+| `mcp__xcode__XcodeListNavigatorIssues` | List current compiler warnings/errors in the Xcode navigator. |
+| `mcp__xcode__RenderPreview` | Render a SwiftUI `#Preview` without launching the full simulator. |
+| `mcp__ios-simulator__get_booted_sim_id` | Get the UDID of the running simulator. |
+| `mcp__ios-simulator__open_simulator` | Open Simulator.app if it is not already running. |
+| `mcp__ios-simulator__install_app` | Sideload a freshly-built `.app` bundle onto the simulator. |
+| `mcp__ios-simulator__launch_app` | Launch the installed app by bundle ID. |
+| `mcp__ios-simulator__screenshot` | Capture the current simulator screen for visual verification. |
+| `mcp__ios-simulator__record_video` | Record a walkthrough video. Close all other simulators first so the tool targets the right device. |
+| `mcp__ios-simulator__ui_tap` / `mcp__ios-simulator__ui_type` / `mcp__ios-simulator__ui_swipe` | Interact with the running app. |
+| `mcp__ios-simulator__ui_describe_all` / `mcp__ios-simulator__ui_describe_point` / `mcp__ios-simulator__ui_view` | Inspect the accessibility tree to find element coordinates. |
+
 ## git
-- Always use git commit with -s -S 
+- Always use git commit with -s -S
