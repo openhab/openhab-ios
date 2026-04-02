@@ -33,7 +33,45 @@ struct SettingsView: View {
     @State private var viewAppearedOnce = false
     @State private var settingsSSECommandItem = ""
 
+    @State private var initialSnapshot: SettingsSnapshot?
+    @State private var isDirty = false
+    @State private var showDiscardAlert = false
+
     @Environment(\.dismiss) private var dismiss
+
+    private struct SettingsSnapshot: Equatable {
+        var demomode: Bool
+        var idleOff: Bool
+        var realTimeSliders: Bool
+        var showSearchField: Bool
+        var sendCrashReports: Bool
+        var iconType: IconType
+        var sortSitemapsBy: SortSitemapsOrder
+        var defaultMainUIPath: String
+        var alwaysAllowWebRTC: Bool
+        var sitemapForWatch: String
+        var localConnectionConfig: ConnectionConfiguration
+        var remoteConnectionConfig: ConnectionConfiguration
+        var sseCommandItem: String
+    }
+
+    private var currentSnapshot: SettingsSnapshot {
+        SettingsSnapshot(
+            demomode: settingsDemomode,
+            idleOff: settingsIdleOff,
+            realTimeSliders: settingsRealTimeSliders,
+            showSearchField: settingsShowSearchField,
+            sendCrashReports: settingsSendCrashReports,
+            iconType: settingsIconType,
+            sortSitemapsBy: settingsSortSitemapsBy,
+            defaultMainUIPath: settingsDefaultMainUIPath,
+            alwaysAllowWebRTC: settingsAlwaysAllowWebRTC,
+            sitemapForWatch: settingsSitemapForWatch,
+            localConnectionConfig: settingsLocalConnectionConfiguration,
+            remoteConnectionConfig: settingsRemoteConnectionConfiguration,
+            sseCommandItem: settingsSSECommandItem
+        )
+    }
 
     var body: some View {
         Form {
@@ -69,26 +107,53 @@ struct SettingsView: View {
             AboutSettingsView()
         }
         .formStyle(.grouped)
-        .navigationBarBackButtonHidden(true)
+        .navigationBarBackButtonHidden(isDirty)
         .navigationTitle("\(settingsHomeName) Settings")
         .toolbar {
-            ToolbarItemGroup(placement: .primaryAction) {
-                Button("Save") {
-                    saveSettings()
-                    NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
-                    dismiss()
+            if isDirty {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        saveSettings()
+                        NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+                        dismiss()
+                    } label: {
+                        Image(systemName: "checkmark")
+                    }
+                }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        showDiscardAlert = true
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                }
+            } else {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
                 }
             }
-            ToolbarItemGroup(placement: .cancellationAction) {
-                Button("Cancel") {
-                    dismiss()
-                }
+        }
+        .interactiveDismissDisabled(isDirty)
+        .confirmationDialog("Unsaved Changes", isPresented: $showDiscardAlert, titleVisibility: .visible) {
+            Button("Discard Changes", role: .destructive) {
+                dismiss()
             }
+            Button("Keep Editing", role: .cancel) {}
+        } message: {
+            Text("Do you want to discard your changes?")
+        }
+        .onChange(of: currentSnapshot) { newSnapshot in
+            isDirty = newSnapshot != initialSnapshot
         }
         .task {
             if !viewAppearedOnce {
                 viewAppearedOnce = true
                 loadSettings()
+                initialSnapshot = currentSnapshot
                 let activeConfiguration = settingsLocalConnectionConfiguration
                 await updateSitemaps(activeConfiguration: activeConfiguration)
             }
