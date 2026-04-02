@@ -46,7 +46,9 @@ struct OpenHABRootView: View {
             }
         }
         .overlay(alignment: .topTrailing) {
-            if !menuPresented {
+            // Only show floating button for webview (which has no NavigationStack toolbar).
+            // SitemapNavigationView gets the button via its onShowSideMenu closure.
+            if currentContent == .webview, !menuPresented {
                 ToolbarMenuButton(isMenuPresented: $menuPresented)
                     .padding(.trailing, 16)
                     .padding(.top, 8)
@@ -107,11 +109,7 @@ struct OpenHABRootView: View {
             OpenHABWebViewContainer(viewModel: webViewModel)
                 .ignoresSafeArea()
         case let .sitemap(name):
-            SitemapNavigationView()
-                .task {
-                    // If a specific sitemap is requested, the viewModel will load it
-                    // The default sitemap is handled by preferences
-                }
+            SitemapNavigationView(onShowSideMenu: { menuPresented = true })
         }
     }
 

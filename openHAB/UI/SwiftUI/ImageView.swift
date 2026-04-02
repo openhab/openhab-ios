@@ -20,7 +20,7 @@ import SwiftUI
 struct ImageView: View {
     let url: String
 
-    @EnvironmentObject var networkTracker: MainActorNetworkTracker
+    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
 
     @ViewBuilder
     var body: some View {

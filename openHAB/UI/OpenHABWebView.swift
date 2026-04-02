@@ -59,6 +59,8 @@ struct OpenHABWebView: UIViewRepresentable {
             }
             webView.navigationDelegate = self
             webView.uiDelegate = self
+            webView.configuration.userContentController.removeScriptMessageHandler(forName: "mainUi")
+            webView.configuration.userContentController.removeScriptMessageHandler(forName: "pathChanged")
             webView.configuration.userContentController.add(self, name: "mainUi")
             webView.configuration.userContentController.add(self, name: "pathChanged")
             currentWebView = webView
@@ -256,6 +258,9 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
 
             webView.navigationDelegate = self
             webView.uiDelegate = self
+            // Remove any existing handlers (a previous coordinator may have registered them)
+            webView.configuration.userContentController.removeScriptMessageHandler(forName: "mainUi")
+            webView.configuration.userContentController.removeScriptMessageHandler(forName: "pathChanged")
             webView.configuration.userContentController.add(self, name: "mainUi")
             webView.configuration.userContentController.add(self, name: "pathChanged")
             currentWebView = webView

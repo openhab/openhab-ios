@@ -14,6 +14,19 @@ import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
 
+// MARK: - Environment key for side-menu action
+
+private struct SitemapSideMenuKey: EnvironmentKey {
+    nonisolated(unsafe) static let defaultValue: (() -> Void)? = nil
+}
+
+extension EnvironmentValues {
+    var sitemapSideMenuAction: (() -> Void)? {
+        get { self[SitemapSideMenuKey.self] }
+        set { self[SitemapSideMenuKey.self] = newValue }
+    }
+}
+
 struct SitemapNavigationView: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject var viewModel = SitemapPageViewModel()
@@ -26,6 +39,7 @@ struct SitemapNavigationView: View {
         NavigationStack {
             sitemapContent
         }
+        .environment(\.sitemapSideMenuAction, onShowSideMenu)
         .onChange(of: scenePhase) { newPhase in
             switch newPhase {
             case .active:
@@ -54,7 +68,18 @@ struct SitemapNavigationView: View {
                 }
                 if viewModel.showSearchField {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        if #available(iOS 17.0, *) {
+                        if #available(iOS 26.0, *) {
+                            // iOS 26: bottom search bar — also focus the field
+                            Button {
+                                isSearchPresented = true
+                                isLegacySearchFocused = true
+                            } label: {
+                                Image(systemSymbol: .magnifyingglass)
+                            }
+                            .ohMinimumHitTarget()
+                            .accessibilityLabel("Search")
+                        } else if #available(iOS 17.0, *) {
+                            // iOS 17–25: system .searchable at the top
                             Button {
                                 isSearchPresented = true
                             } label: {
@@ -63,6 +88,7 @@ struct SitemapNavigationView: View {
                             .ohMinimumHitTarget()
                             .accessibilityLabel("Search")
                         } else {
+                            // pre-iOS 17: bottom search bar
                             Button {
                                 isSearchPresented = true
                                 isLegacySearchFocused = true
@@ -74,39 +100,34 @@ struct SitemapNavigationView: View {
                         }
                     }
                 }
-                if let onShowSideMenu {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button {
-                            onShowSideMenu()
-                        } label: {
-                            Image(systemSymbol: .line3Horizontal)
-                                .font(.title)
-                        }
-                        .ohMinimumHitTarget()
-                    }
-                }
             }
 
         if viewModel.showSearchField {
-            if #available(iOS 17.0, *) {
-                if isSearchPresented {
-                    page
-                        .searchable(
-                            text: $viewModel.searchText,
-                            isPresented: $isSearchPresented,
-                            placement: .navigationBarDrawer(displayMode: .always),
-                            prompt: Text(String(localized: "search_items", comment: ""))
-                        )
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                } else {
-                    page
-                }
-            } else {
+            if #available(iOS 26.0, *) {
+                // iOS 26: bottom search bar (stable identity — no if/else on the view tree)
                 page
                     .safeAreaInset(edge: .bottom) {
                         if isSearchPresented {
-                            legacySearchBar
+                            bottomSearchBar
+                        }
+                    }
+            } else if #available(iOS 17.0, *) {
+                // iOS 17–25: system .searchable — always applied so view identity stays stable
+                page
+                    .searchable(
+                        text: $viewModel.searchText,
+                        isPresented: $isSearchPresented,
+                        placement: .navigationBarDrawer(displayMode: .always),
+                        prompt: Text(String(localized: "search_items", comment: ""))
+                    )
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+            } else {
+                // pre-iOS 17: bottom search bar
+                page
+                    .safeAreaInset(edge: .bottom) {
+                        if isSearchPresented {
+                            bottomSearchBar
                         }
                     }
             }
@@ -115,7 +136,7 @@ struct SitemapNavigationView: View {
         }
     }
 
-    private var legacySearchBar: some View {
+    private var bottomSearchBar: some View {
         HStack(spacing: 8) {
             Image(systemSymbol: .magnifyingglass)
                 .foregroundStyle(.secondary)
@@ -221,7 +242,7 @@ struct SitemapNavigationView: View {
         self.onShowSideMenu = onShowSideMenu
     }
 
-    init(onShowSideMenu: @escaping () -> Void = {}) {
+    init(onShowSideMenu: (() -> Void)? = nil) {
         _viewModel = StateObject(wrappedValue: SitemapPageViewModel())
         self.onShowSideMenu = onShowSideMenu
     }
