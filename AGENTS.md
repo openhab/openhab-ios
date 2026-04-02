@@ -35,6 +35,13 @@
 
 - Always write tests with Swift Testing
 - Add a parameter with a default value (e.g. `networkTracker: NetworkTracker = .shared`) to make functions testable without coupling them to singletons
+- **Always write UI tests** for any new or modified UI surface. See **[docs/UI_TESTING_GUIDE.md](docs/UI_TESTING_GUIDE.md)** for the full guide, including how to register new test files, inject test state, write layout assertions, and pitfalls to avoid.
+
+## Verification cycle
+
+After every set of code changes, run a full verification cycle before committing. See **[docs/SIMULATOR_VERIFICATION.md](docs/SIMULATOR_VERIFICATION.md)** for the step-by-step process and full MCP tool reference.
+
+To replicate the MCP server setup, see **[docs/MCP_SETUP.md](docs/MCP_SETUP.md)**.
 
 ## git
-- Always use git commit with -s -S 
+- Always use git commit with -s (signed-off-by)
