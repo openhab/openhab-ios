@@ -320,6 +320,13 @@ class OpenHABWebViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Direct URL loading (for tiles)
+
+    func loadDirectURL(_ url: URL) {
+        isLoading = true
+        webView.load(URLRequest(url: url))
+    }
+
     // MARK: - Reload
 
     func reloadView() {
