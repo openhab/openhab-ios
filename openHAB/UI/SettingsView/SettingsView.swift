@@ -17,7 +17,8 @@ import SwiftUI
 struct SettingsView: View {
     /// Called after the sheet is dismissed via swipe with unsaved changes.
     /// The passed closure performs the save when invoked by the parent.
-    var onDismissedDirty: ((@escaping () -> Void) -> Void)?
+    var onDismissedDirty: ((SettingsSnapshot, @escaping () -> Void) -> Void)?
+    var initialValues: SettingsSnapshot?
 
     @State private var settingsDemomode = false
     @State private var settingsIdleOff = true
@@ -43,7 +44,7 @@ struct SettingsView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    private struct SettingsSnapshot: Equatable {
+    struct SettingsSnapshot: Equatable {
         var demomode: Bool
         var idleOff: Bool
         var realTimeSliders: Bool
@@ -146,7 +147,8 @@ struct SettingsView: View {
             let lcc = settingsLocalConnectionConfiguration
             let rcc = settingsRemoteConnectionConfiguration
             let sseCI = settingsSSECommandItem
-            onDismissedDirty? {
+            let snapshot = currentSnapshot
+            onDismissedDirty?(snapshot) {
                 Preferences.shared.modifyActiveHome { @MainActor prefs in
                     prefs.demomode = dm
                     prefs.realTimeSliders = rts
@@ -176,6 +178,9 @@ struct SettingsView: View {
                 viewAppearedOnce = true
                 loadSettings()
                 initialSnapshot = currentSnapshot
+                if let initialValues {
+                    applySnapshot(initialValues)
+                }
                 let activeConfiguration = settingsLocalConnectionConfiguration
                 await updateSitemaps(activeConfiguration: activeConfiguration)
             }
@@ -220,6 +225,22 @@ struct SettingsView: View {
         settingsRemoteConnectionConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
         settingsHomeName = Preferences.shared.currentHomePreferences.homeName
         settingsSSECommandItem = Preferences.shared.currentHomePreferences.sseCommandItem
+    }
+
+    private func applySnapshot(_ snapshot: SettingsSnapshot) {
+        settingsDemomode = snapshot.demomode
+        settingsIdleOff = snapshot.idleOff
+        settingsRealTimeSliders = snapshot.realTimeSliders
+        settingsShowSearchField = snapshot.showSearchField
+        settingsSendCrashReports = snapshot.sendCrashReports
+        settingsIconType = snapshot.iconType
+        settingsSortSitemapsBy = snapshot.sortSitemapsBy
+        settingsDefaultMainUIPath = snapshot.defaultMainUIPath
+        settingsAlwaysAllowWebRTC = snapshot.alwaysAllowWebRTC
+        settingsSitemapForWatch = snapshot.sitemapForWatch
+        settingsLocalConnectionConfiguration = snapshot.localConnectionConfig
+        settingsRemoteConnectionConfiguration = snapshot.remoteConnectionConfig
+        settingsSSECommandItem = snapshot.sseCommandItem
     }
 
     func saveSettings() {
