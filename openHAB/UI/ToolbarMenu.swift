@@ -225,17 +225,15 @@ struct ToolbarMenuButton: View {
 
     var body: some View {
         if #available(iOS 26.0, *) {
-            // iOS 26: .glass matches the Liquid Glass capsule that NavigationBar
-            // toolbar buttons receive automatically.
             Button {
                 isMenuPresented.toggle()
             } label: {
                 Image(systemSymbol: .line3Horizontal)
                     .font(.title)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 7)
+                    .padding(10)
+                    .glassEffect(.regular.interactive(), in: Circle())
             }
-            .buttonStyle(.glass)
+            .buttonStyle(.plain)
             .accessibilityIdentifier("HamburgerButton")
             .accessibilityLabel("Menu")
         } else {
@@ -244,9 +242,8 @@ struct ToolbarMenuButton: View {
             } label: {
                 Image(systemSymbol: .line3Horizontal)
                     .font(.title)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 7)
-                    .background(.regularMaterial, in: Capsule())
+                    .padding(10)
+                    .background(.regularMaterial, in: Circle())
             }
             .accessibilityIdentifier("HamburgerButton")
             .accessibilityLabel("Menu")
