@@ -224,15 +224,32 @@ struct ToolbarMenuButton: View {
     @Binding var isMenuPresented: Bool
 
     var body: some View {
-        Button {
-            isMenuPresented.toggle()
-        } label: {
-            Image(systemSymbol: .line3Horizontal)
-                .imageScale(.large)
-                .padding(8)
-                .background(.regularMaterial, in: Circle())
+        if #available(iOS 26.0, *) {
+            // iOS 26: .glass matches the Liquid Glass capsule that NavigationBar
+            // toolbar buttons receive automatically.
+            Button {
+                isMenuPresented.toggle()
+            } label: {
+                Image(systemSymbol: .line3Horizontal)
+                    .font(.title)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+            }
+            .buttonStyle(.glass)
+            .accessibilityIdentifier("HamburgerButton")
+            .accessibilityLabel("Menu")
+        } else {
+            Button {
+                isMenuPresented.toggle()
+            } label: {
+                Image(systemSymbol: .line3Horizontal)
+                    .font(.title)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(.regularMaterial, in: Capsule())
+            }
+            .accessibilityIdentifier("HamburgerButton")
+            .accessibilityLabel("Menu")
         }
-        .accessibilityIdentifier("HamburgerButton")
-        .accessibilityLabel("Menu")
     }
 }
