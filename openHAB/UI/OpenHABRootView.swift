@@ -66,7 +66,7 @@ struct OpenHABRootView: View {
             handleNavigationCommand(command)
         }
         .sheet(isPresented: $showSettings) {
-            NavigationView { SettingsView() }
+            NavigationStack { SettingsView() }
         }
         .sheet(isPresented: $showNotifications) {
             NavigationView { NotificationsView() }
