@@ -25,6 +25,7 @@ struct OpenHABRootView: View {
     @State private var showSettings = false
     @State private var showNotifications = false
     @State private var showHomeSelection = false
+    @State private var settingsPendingSave: (() -> Void)? = nil
     @State private var isDemoMode = false
     @State private var sitemapResetID = UUID()
 
@@ -66,7 +67,22 @@ struct OpenHABRootView: View {
             handleNavigationCommand(command)
         }
         .sheet(isPresented: $showSettings) {
-            NavigationStack { SettingsView() }
+            NavigationStack {
+                SettingsView(onDismissedDirty: { save in settingsPendingSave = save })
+            }
+        }
+        .confirmationDialog(
+            "Unsaved Changes",
+            isPresented: Binding(
+                get: { settingsPendingSave != nil },
+                set: { if !$0 { settingsPendingSave = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Save") { settingsPendingSave?(); settingsPendingSave = nil }
+            Button("Discard Changes", role: .destructive) { settingsPendingSave = nil }
+        } message: {
+            Text("Do you want to save or discard your changes?")
         }
         .sheet(isPresented: $showNotifications) {
             NavigationView { NotificationsView() }
