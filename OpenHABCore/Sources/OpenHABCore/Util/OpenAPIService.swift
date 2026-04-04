@@ -156,6 +156,15 @@ public extension OpenAPIService {
             .ok.body.json
             .map(OpenHABUiTile.init)
     }
+
+    func getUIPages(rootUrl: String) async throws -> [OpenHABUIPage] {
+        try await client.getRegisteredUIComponentsInNamespace(
+            path: .init(namespace: "ui:page")
+        )
+        .ok.body.json
+        .compactMap { OpenHABUIPage($0, rootUrl: rootUrl) }
+        .sorted { $0.navbarOrder < $1.navbarOrder }
+    }
 }
 
 public extension OpenAPIService {

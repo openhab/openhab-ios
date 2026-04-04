@@ -19,6 +19,7 @@ import os.log
 class MenuDataService: ObservableObject {
     @Published var sitemaps: [OpenHABSitemap] = []
     @Published var uiTiles: [OpenHABUiTile] = []
+    @Published var uiPages: [OpenHABUIPage] = []
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -40,10 +41,12 @@ class MenuDataService: ObservableObject {
             let openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
             await fetchSitemaps(using: openAPIService)
             await fetchTiles(using: openAPIService)
+            await fetchPages(using: openAPIService, rootUrl: activeConnection.configuration.url)
         } catch {
             Logger.drawerView.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
             sitemaps = []
             uiTiles = []
+            uiPages = []
         }
     }
 
@@ -65,6 +68,16 @@ class MenuDataService: ObservableObject {
         } catch {
             Logger.drawerView.error("Failed to fetch UI tiles: \(error.localizedDescription)")
             uiTiles = []
+        }
+    }
+
+    private func fetchPages(using service: OpenAPIService, rootUrl: String) async {
+        do {
+            uiPages = try await service.getUIPages(rootUrl: rootUrl)
+            Logger.drawerView.info("Fetched UI pages successfully")
+        } catch {
+            Logger.drawerView.error("Failed to fetch UI pages: \(error.localizedDescription)")
+            uiPages = []
         }
     }
 

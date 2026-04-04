@@ -123,6 +123,20 @@ struct ToolbarMenu: View {
                 Divider().padding(.horizontal, 12)
             }
 
+            // Pages
+            if !menuData.uiPages.isEmpty {
+                sectionHeader(String(localized: "Pages"))
+                ForEach(menuData.uiPages, id: \.uid) { page in
+                    menuRow(
+                        icon: AnyView(pageIcon(for: page)),
+                        label: page.label
+                    ) {
+                        select(.tile(page.url))
+                    }
+                }
+                Divider().padding(.horizontal, 12)
+            }
+
             // System
             sectionHeader(String(localized: "System"))
             systemRow(symbol: .gear, label: String(localized: "settings", comment: "")) { select(.settings) }
@@ -192,6 +206,23 @@ struct ToolbarMenu: View {
             .padding(.horizontal, 16)
             .padding(.top, 10)
             .padding(.bottom, 2)
+    }
+
+    private func pageIcon(for page: OpenHABUIPage) -> some View {
+        Group {
+            if page.icon.isEmpty || page.icon.isNoneIcon {
+                Image(systemSymbol: .squareGrid2x2).resizable().aspectRatio(contentMode: .fit)
+            } else {
+                let url = Endpoint.iconForDrawer(
+                    rootUrl: MainActorNetworkTracker.shared.activeConnection?.configuration.url ?? "",
+                    icon: page.icon
+                ).url
+                KFImage(url)
+                    .placeholder { Image(systemSymbol: .squareGrid2x2).resizable().aspectRatio(contentMode: .fit) }
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            }
+        }
     }
 
     private func sitemapIcon(for sitemap: OpenHABSitemap) -> some View {
