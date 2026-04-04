@@ -30,7 +30,6 @@ struct OpenHABRootView: View {
     @State private var settingsPendingSnapshot: SettingsView.SettingsSnapshot? = nil
     @State private var isDemoMode = false
     @State private var sitemapResetID = UUID()
-    @State private var webNavBarVisible = true
 
     enum ContentType: Equatable {
         case webview
@@ -145,14 +144,9 @@ struct OpenHABRootView: View {
                         }
                     }
                     .navigationBarTitleDisplayMode(.inline)
-                    .toolbar(webNavBarVisible ? .visible : .hidden, for: .navigationBar)
+                    .toolbar(webViewModel.showAppMenuButton ? .visible : .hidden, for: .navigationBar)
             }
             .onAppear { webViewModel.triggerAppMenuProbe() }
-            .onChange(of: webViewModel.showAppMenuButton) { show in
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    webNavBarVisible = show
-                }
-            }
         case let .sitemap(name):
             SitemapNavigationView(onShowSideMenu: { menuPresented = true })
                 .id(sitemapResetID)
