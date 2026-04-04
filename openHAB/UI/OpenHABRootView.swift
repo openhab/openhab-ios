@@ -146,7 +146,7 @@ struct OpenHABRootView: View {
                             Button {
                                 menuPresented = true
                             } label: {
-                                Image(systemSymbol: .line3Horizontal)
+                                Image(systemName: "line.3.horizontal")
                                     .font(.title)
                             }
                             .ohMinimumHitTarget()
