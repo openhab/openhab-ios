@@ -83,7 +83,8 @@ struct ToolbarMenu: View {
 
     private var menuContent: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Home
+            // Main UI: Home + sidebar pages
+            sectionHeader(String(localized: "Main UI"))
             menuRow(
                 icon: AnyView(Image("openHABIcon").resizable()),
                 label: String(localized: "Home"),
@@ -91,6 +92,16 @@ struct ToolbarMenu: View {
                 trailing: isWebViewActive ? AnyView(Image(systemSymbol: .arrowClockwise).foregroundStyle(.secondary)) : nil
             ) {
                 select(.webview)
+            }
+            if !menuData.isLoading {
+                ForEach(menuData.uiPages, id: \.uid) { page in
+                    menuRow(
+                        icon: AnyView(pageIcon(for: page)),
+                        label: page.label
+                    ) {
+                        select(.tile(page.url))
+                    }
+                }
             }
 
             Divider().padding(.horizontal, 12)
@@ -120,20 +131,6 @@ struct ToolbarMenu: View {
                         label: tile.name
                     ) {
                         select(.tile(tile.url))
-                    }
-                }
-                Divider().padding(.horizontal, 12)
-            }
-
-            // Pages
-            if !menuData.isLoading, !menuData.uiPages.isEmpty {
-                sectionHeader(String(localized: "Pages"))
-                ForEach(menuData.uiPages, id: \.uid) { page in
-                    menuRow(
-                        icon: AnyView(pageIcon(for: page)),
-                        label: page.label
-                    ) {
-                        select(.tile(page.url))
                     }
                 }
                 Divider().padding(.horizontal, 12)
