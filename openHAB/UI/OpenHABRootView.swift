@@ -50,22 +50,6 @@ struct OpenHABRootView: View {
                 handleMenuSelection(target)
             }
         }
-        .overlay(alignment: .topTrailing) {
-            // Only show floating button for the main webview.
-            // Tiles have a nav bar button; sitemaps use their own onShowSideMenu toolbar item.
-            // Keep the button permanently in the hierarchy while in webview mode so SwiftUI
-            // doesn't recreate it on every show/hide, which causes the iOS 26 glass style
-            // to be applied inconsistently. Use opacity + allowsHitTesting instead.
-            if case .webview = currentContent {
-                let visible = !menuPresented && webViewModel.showAppMenuButton
-                ToolbarMenuButton(isMenuPresented: $menuPresented)
-                    .padding(.trailing, 16)
-                    .padding(.top, 8)
-                    .opacity(visible ? 1 : 0)
-                    .allowsHitTesting(visible)
-                    .animation(.easeInOut(duration: 0.2), value: webViewModel.showAppMenuButton)
-            }
-        }
         .onAppear {
             ImageDownloader.default.authenticationChallengeResponder = appServices
             isDemoMode = Preferences.shared.currentHomePreferences.demomode
@@ -140,9 +124,25 @@ struct OpenHABRootView: View {
     private var contentView: some View {
         switch currentContent {
         case .webview:
-            OpenHABWebViewContainer(viewModel: webViewModel)
-                .ignoresSafeArea()
-                .onAppear { webViewModel.triggerAppMenuProbe() }
+            NavigationStack {
+                OpenHABWebViewContainer(viewModel: webViewModel)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button {
+                                menuPresented = true
+                            } label: {
+                                Image(systemName: "line.3.horizontal")
+                                    .font(.title)
+                            }
+                            .ohMinimumHitTarget()
+                            .accessibilityIdentifier("HamburgerButton")
+                            .accessibilityLabel("Menu")
+                        }
+                    }
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar(webViewModel.showAppMenuButton ? .visible : .hidden, for: .navigationBar)
+            }
+            .onAppear { webViewModel.triggerAppMenuProbe() }
         case let .sitemap(name):
             SitemapNavigationView(onShowSideMenu: { menuPresented = true })
                 .id(sitemapResetID)

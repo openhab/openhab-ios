@@ -219,21 +219,3 @@ struct ToolbarMenu: View {
     }
 }
 
-// MARK: - Toolbar button that toggles the menu
-
-struct ToolbarMenuButton: View {
-    @Binding var isMenuPresented: Bool
-
-    var body: some View {
-        Button {
-            isMenuPresented.toggle()
-        } label: {
-            Image(systemSymbol: .line3Horizontal)
-                .font(.title)
-        }
-        .buttonStyle(.plain)
-        .ohMinimumHitTarget()
-        .accessibilityIdentifier("HamburgerButton")
-        .accessibilityLabel("Menu")
-    }
-}
