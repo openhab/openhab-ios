@@ -60,6 +60,7 @@ struct ToolbarMenu: View {
     @ObservedObject var menuData: MenuDataService
     var isWebViewActive: Bool
     var onSelect: (TargetController) -> Void
+    var onReload: (() -> Void)?
 
     @ScaledMetric private var iconWidth = 20.0
 
@@ -96,7 +97,9 @@ struct ToolbarMenu: View {
             Divider().padding(.horizontal, 12)
 
             // Sitemaps
-            if !menuData.sitemaps.isEmpty {
+            if menuData.isLoading {
+                loadingRow(label: String(localized: "Sitemaps"))
+            } else if !menuData.sitemaps.isEmpty {
                 sectionHeader(String(localized: "Sitemaps"))
                 ForEach(menuData.sitemaps, id: \.name) { sitemap in
                     menuRow(
@@ -110,7 +113,7 @@ struct ToolbarMenu: View {
             }
 
             // Tiles
-            if !menuData.uiTiles.isEmpty {
+            if !menuData.isLoading, !menuData.uiTiles.isEmpty {
                 sectionHeader(String(localized: "Tiles"))
                 ForEach(menuData.uiTiles, id: \.url) { tile in
                     menuRow(
@@ -124,7 +127,7 @@ struct ToolbarMenu: View {
             }
 
             // Pages
-            if !menuData.uiPages.isEmpty {
+            if !menuData.isLoading, !menuData.uiPages.isEmpty {
                 sectionHeader(String(localized: "Pages"))
                 ForEach(menuData.uiPages, id: \.uid) { page in
                     menuRow(
@@ -148,10 +151,8 @@ struct ToolbarMenu: View {
 
             Divider().padding(.horizontal, 12)
 
-            // Connection status
-            ConnectionView()
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+            // Connection status footer
+            connectionFooter
         }
         .frame(width: 280)
         .background(.ultraThinMaterial)
@@ -159,6 +160,53 @@ struct ToolbarMenu: View {
         .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
         .padding(.trailing, 8)
         .padding(.top, 4)
+    }
+
+    // MARK: - Connection footer
+
+    private var connectionFooter: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                let homeName = Preferences.shared.currentHomePreferences.homeName
+                if !homeName.isEmpty {
+                    Text(homeName)
+                        .font(.footnote)
+                        .fontWeight(.medium)
+                        .lineLimit(1)
+                }
+                ConnectionView()
+            }
+            Spacer()
+            Button {
+                menuData.refresh()
+                onReload?()
+                isPresented = false
+            } label: {
+                Image(systemSymbol: .arrowClockwise)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+    }
+
+    // MARK: - Loading row
+
+    private func loadingRow(label: String) -> some View {
+        HStack(spacing: 8) {
+            ProgressView()
+                .controlSize(.small)
+            Text(label)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 10)
+        .padding(.bottom, 6)
     }
 
     // MARK: - Row helpers

@@ -45,10 +45,10 @@ struct OpenHABRootView: View {
             ToolbarMenu(
                 isPresented: $menuPresented,
                 menuData: menuData,
-                isWebViewActive: isWebOrTileContent
-            ) { target in
-                handleMenuSelection(target)
-            }
+                isWebViewActive: isWebOrTileContent,
+                onSelect: { target in handleMenuSelection(target) },
+                onReload: { webViewModel.reloadView() }
+            )
         }
         .onAppear {
             ImageDownloader.default.authenticationChallengeResponder = appServices
@@ -58,6 +58,10 @@ struct OpenHABRootView: View {
         }
         .onReceive(appServices.$navigationCommand.compactMap { $0 }) { command in
             handleNavigationCommand(command)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
+            menuData.refresh()
+            webViewModel.reloadView()
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack {
