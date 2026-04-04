@@ -53,7 +53,7 @@ struct OpenHABRootView: View {
         .overlay(alignment: .topTrailing) {
             // Only show floating button for the main webview.
             // Tiles have a nav bar button; sitemaps use their own onShowSideMenu toolbar item.
-            if case .webview = currentContent, !menuPresented {
+            if case .webview = currentContent, !menuPresented, webViewModel.showAppMenuButton {
                 ToolbarMenuButton(isMenuPresented: $menuPresented)
                     .padding(.trailing, 16)
                     .padding(.top, 8)
@@ -135,6 +135,7 @@ struct OpenHABRootView: View {
         case .webview:
             OpenHABWebViewContainer(viewModel: webViewModel)
                 .ignoresSafeArea()
+                .onAppear { webViewModel.triggerAppMenuProbe() }
         case let .sitemap(name):
             SitemapNavigationView(onShowSideMenu: { menuPresented = true })
                 .id(sitemapResetID)

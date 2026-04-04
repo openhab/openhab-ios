@@ -298,6 +298,12 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                     viewModel.onExitToApp?()
                 case "goFullscreen":
                     viewModel.hideNavigationBar = true
+                case "ready":
+                    viewModel.handleReady()
+                case "appMenu-hidden":
+                    viewModel.handleAppMenuProbe(hidden: true)
+                case "appMenu-visible":
+                    viewModel.handleAppMenuProbe(hidden: false)
                 case "sseConnected-true":
                     viewModel.handleSSEConnected(true)
                 case "sseConnected-false":
@@ -334,6 +340,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation?) {
             Logger.viewController.info("didStartProvisionalNavigation - webView.url: \(String(describing: webView.url?.description))")
             viewModel.isLoading = true
+            viewModel.handleNavigationStart()
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {

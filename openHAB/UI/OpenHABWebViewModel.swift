@@ -24,6 +24,10 @@ class OpenHABWebViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var hideNavigationBar = false
     @Published private(set) var webView: WKWebView
+    /// Whether the iOS floating menu button should be visible.
+    /// Starts true (visible while loading) and is hidden once the openHAB
+    /// Main UI signals it has rendered its own native-app exit button.
+    @Published var showAppMenuButton = true
 
     // MARK: - Internal state (used by Coordinator)
 
@@ -48,6 +52,22 @@ class OpenHABWebViewModel: ObservableObject {
 
     private let js = """
     (function() {
+        // App-menu button probe.
+        // window.MainUI is the global registered by the openHAB Main UI SPA.
+        // Its presence means the Main UI is loaded and its own exit-to-app
+        // button is available, so the iOS floating button is redundant.
+        var _probeTimer = null;
+        function probeMainUIButton() {
+            var isOnMainUI = (typeof window.MainUI !== 'undefined');
+            window.webkit.messageHandlers.mainUi.postMessage(
+                isOnMainUI ? 'appMenu-hidden' : 'appMenu-visible'
+            );
+        }
+        function scheduleProbe() {
+            if (_probeTimer !== null) { clearTimeout(_probeTimer); }
+            _probeTimer = setTimeout(function() { _probeTimer = null; probeMainUIButton(); }, 800);
+        }
+
         // Main UI Callbacks
         window.OHApp = {
             exitToApp : function(){
@@ -67,6 +87,7 @@ class OpenHABWebViewModel: ObservableObject {
         // Detect Path changes in SPA
         function notifyPathChange() {
             window.webkit.messageHandlers.pathChanged.postMessage(window.location.pathname);
+            scheduleProbe();
         }
 
         const originalPushState = history.pushState;
@@ -83,7 +104,7 @@ class OpenHABWebViewModel: ObservableObject {
 
         window.addEventListener('popstate', notifyPathChange);
 
-        // Notify initial path on load
+        // Notify initial path on load and run initial probe
         notifyPathChange();
     })();
     """
@@ -374,6 +395,40 @@ class OpenHABWebViewModel: ObservableObject {
         }
 
         injectEditorHeightFix()
+    }
+
+    // MARK: - App menu button visibility
+
+    /// Called when a new top-level navigation starts (full page load).
+    /// Resets the button to visible until the page signals otherwise.
+    func handleNavigationStart() {
+        showAppMenuButton = true
+    }
+
+    /// Called when the openHAB Main UI fires its `OHApp.ready()` callback,
+    /// confirming the SPA has loaded and its own exit button is present.
+    func handleReady() {
+        showAppMenuButton = false
+    }
+
+    /// Called with the result of the JS probe that checks window.MainUI.
+    /// - Parameter hidden: true when the Main UI is present (iOS button should be hidden).
+    func handleAppMenuProbe(hidden: Bool) {
+        showAppMenuButton = !hidden
+    }
+
+    /// Evaluates the app-menu probe immediately in the current webview.
+    /// Use this when re-entering the webview content without a full page reload.
+    func triggerAppMenuProbe() {
+        let probeJS = """
+        (function() {
+            var isOnMainUI = (typeof window.MainUI !== 'undefined');
+            window.webkit.messageHandlers.mainUi.postMessage(
+                isOnMainUI ? 'appMenu-hidden' : 'appMenu-visible'
+            );
+        })();
+        """
+        webView.evaluateJavaScript(probeJS)
     }
 
     private func injectEditorHeightFix() {
