@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -224,29 +225,14 @@ struct ToolbarMenuButton: View {
     @Binding var isMenuPresented: Bool
 
     var body: some View {
-        if #available(iOS 26.0, *) {
-            Button {
-                isMenuPresented.toggle()
-            } label: {
-                Image(systemSymbol: .line3Horizontal)
-                    .font(.title)
-                    .padding(10)
-                    .glassEffect(.regular.interactive(), in: Circle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("HamburgerButton")
-            .accessibilityLabel("Menu")
-        } else {
-            Button {
-                isMenuPresented.toggle()
-            } label: {
-                Image(systemSymbol: .line3Horizontal)
-                    .font(.title)
-                    .padding(10)
-                    .background(.regularMaterial, in: Circle())
-            }
-            .accessibilityIdentifier("HamburgerButton")
-            .accessibilityLabel("Menu")
+        Button {
+            isMenuPresented.toggle()
+        } label: {
+            Image(systemSymbol: .line3Horizontal)
+                .font(.title)
         }
+        .ohMinimumHitTarget()
+        .accessibilityIdentifier("HamburgerButton")
+        .accessibilityLabel("Menu")
     }
 }

@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Combine
+import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -50,9 +51,9 @@ struct OpenHABRootView: View {
             }
         }
         .overlay(alignment: .topTrailing) {
-            // Only show floating button for webview/tile (which have no NavigationStack toolbar).
-            // SitemapNavigationView gets the button via its onShowSideMenu closure.
-            if isWebOrTileContent, !menuPresented {
+            // Only show floating button for the main webview.
+            // Tiles have a nav bar button; sitemaps use their own onShowSideMenu toolbar item.
+            if case .webview = currentContent, !menuPresented {
                 ToolbarMenuButton(isMenuPresented: $menuPresented)
                     .padding(.trailing, 16)
                     .padding(.top, 8)
@@ -138,8 +139,23 @@ struct OpenHABRootView: View {
             SitemapNavigationView(onShowSideMenu: { menuPresented = true })
                 .id(sitemapResetID)
         case .tile:
-            OpenHABWebViewContainer(viewModel: webViewModel)
-                .ignoresSafeArea()
+            NavigationStack {
+                OpenHABWebViewContainer(viewModel: webViewModel)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button {
+                                menuPresented = true
+                            } label: {
+                                Image(systemSymbol: .line3Horizontal)
+                                    .font(.title)
+                            }
+                            .ohMinimumHitTarget()
+                            .accessibilityIdentifier("HamburgerButton")
+                            .accessibilityLabel("Menu")
+                        }
+                    }
+                    .navigationBarTitleDisplayMode(.inline)
+            }
         }
     }
 
