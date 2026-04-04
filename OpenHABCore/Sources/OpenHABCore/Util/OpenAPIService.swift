@@ -51,6 +51,7 @@ public actor OpenAPIService {
     private var url: URL?
     private var longPolling = false
     private var connectionConfiguration: ConnectionConfiguration
+    private var urlSession: URLSession = .shared
 
     /// Creates a new client for OpenAPIService.
     public init(client: any APIProtocol) {
@@ -81,6 +82,7 @@ public actor OpenAPIService {
             config.timeoutIntervalForResource = 10.0
         }
         let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
+        urlSession = session
         let url = URL(string: connectionConfiguration.url) ?? URL(staticString: "about:blank")
         let resolvedURL = OpenAPIService.getServerURL(for: url)
         self.url = resolvedURL
@@ -158,12 +160,42 @@ public extension OpenAPIService {
     }
 
     func getUIPages(rootUrl: String) async throws -> [OpenHABUIPage] {
-        try await client.getRegisteredUIComponentsInNamespace(
-            path: .init(namespace: "ui:page")
-        )
-        .ok.body.json
-        .compactMap { OpenHABUIPage($0, rootUrl: rootUrl) }
-        .sorted { $0.navbarOrder < $1.navbarOrder }
+        guard let base = url else { throw OpenAPIServiceError.noRootURL }
+        let endpoint = base.appending(path: "/rest/ui/components/ui:page")
+        var request = URLRequest(url: endpoint)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        if !connectionConfiguration.username.isEmpty {
+            let creds = "\(connectionConfiguration.username):\(connectionConfiguration.password)"
+            if let data = creds.data(using: .utf8) {
+                request.setValue("Basic \(data.base64EncodedString())", forHTTPHeaderField: "Authorization")
+            }
+        }
+        let (data, _) = try await urlSession.data(for: request)
+
+        struct UIPageDTO: Decodable {
+            var uid: String?
+            var config: Config?
+            struct Config: Decodable {
+                var label: String?
+                var icon: String?
+                var order: String?
+                var sidebar: Bool?
+            }
+        }
+
+        return try JSONDecoder()
+            .decode([UIPageDTO].self, from: data)
+            .compactMap { dto -> OpenHABUIPage? in
+                guard let uid = dto.uid, !uid.isEmpty,
+                      dto.config?.sidebar == true
+                else { return nil }
+                let label = dto.config?.label ?? uid
+                let icon = dto.config?.icon ?? ""
+                let order = dto.config?.order.flatMap(Int.init) ?? Int.max
+                let url = "\(rootUrl.removeTrailingSlashes())/ui/#/\(uid)"
+                return OpenHABUIPage(uid: uid, label: label, icon: icon, order: order, url: url)
+            }
+            .sorted { $0.order < $1.order }
     }
 }
 
