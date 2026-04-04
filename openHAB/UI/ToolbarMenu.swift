@@ -231,6 +231,7 @@ struct ToolbarMenuButton: View {
             Image(systemSymbol: .line3Horizontal)
                 .font(.title)
         }
+        .buttonStyle(.plain)
         .ohMinimumHitTarget()
         .accessibilityIdentifier("HamburgerButton")
         .accessibilityLabel("Menu")

@@ -53,10 +53,17 @@ struct OpenHABRootView: View {
         .overlay(alignment: .topTrailing) {
             // Only show floating button for the main webview.
             // Tiles have a nav bar button; sitemaps use their own onShowSideMenu toolbar item.
-            if case .webview = currentContent, !menuPresented, webViewModel.showAppMenuButton {
+            // Keep the button permanently in the hierarchy while in webview mode so SwiftUI
+            // doesn't recreate it on every show/hide, which causes the iOS 26 glass style
+            // to be applied inconsistently. Use opacity + allowsHitTesting instead.
+            if case .webview = currentContent {
+                let visible = !menuPresented && webViewModel.showAppMenuButton
                 ToolbarMenuButton(isMenuPresented: $menuPresented)
                     .padding(.trailing, 16)
                     .padding(.top, 8)
+                    .opacity(visible ? 1 : 0)
+                    .allowsHitTesting(visible)
+                    .animation(.easeInOut(duration: 0.2), value: webViewModel.showAppMenuButton)
             }
         }
         .onAppear {
