@@ -320,10 +320,37 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             guard let url = navigationAction.request.url else { return .allow }
             Logger.viewController.info("decidePolicyFor - url: \(url.absoluteString)")
             if navigationAction.navigationType == .linkActivated {
+                if matchesHomeConnection(url) {
+                    // Link points to a configured home server — stay in-app
+                    return .allow
+                }
                 await UIApplication.shared.open(url)
                 return .cancel
             }
             return .allow
+        }
+
+        /// Returns true if `url`'s host+port matches any known openHAB server URL:
+        /// the currently active connection, or any stored home's local/remote URL.
+        private func matchesHomeConnection(_ url: URL) -> Bool {
+            guard let host = url.host, !host.isEmpty else { return false }
+            let port = url.port
+
+            func matches(_ connectionUrl: String) -> Bool {
+                guard let parsed = URL(string: connectionUrl), let connHost = parsed.host else { return false }
+                return connHost == host && parsed.port == port
+            }
+
+            // Active connection covers demo mode and the currently selected server
+            if let activeUrl = MainActorNetworkTracker.shared.activeConnection?.configuration.url,
+               matches(activeUrl) { return true }
+
+            // All stored home connection URLs (local + remote for every configured home)
+            for home in Preferences.shared.storedHomes.values {
+                if matches(home.localConnectionConfig.url) { return true }
+                if matches(home.remoteConnectionConfig.url) { return true }
+            }
+            return false
         }
 
         func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
