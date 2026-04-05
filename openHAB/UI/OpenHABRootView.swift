@@ -15,6 +15,7 @@ import Kingfisher
 import OpenHABCore
 import os.log
 import SafariServices
+import SFSafeSymbols
 import SwiftUI
 
 struct OpenHABRootView: View {
@@ -128,47 +129,63 @@ struct OpenHABRootView: View {
     private var contentView: some View {
         switch currentContent {
         case .webview:
-            NavigationStack {
+            VStack(spacing: 0) {
+                if webViewModel.showMenuBar {
+                    menuBar
+                        .transition(.move(edge: .top))
+                }
                 OpenHABWebViewContainer(viewModel: webViewModel)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Button {
-                                menuPresented = true
-                            } label: {
-                                Image(systemName: "line.3.horizontal")
-                                    .font(.title)
-                            }
-                            .ohMinimumHitTarget()
-                            .accessibilityIdentifier("HamburgerButton")
-                            .accessibilityLabel("Menu")
-                        }
-                    }
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar(webViewModel.showAppMenuButton ? .visible : .hidden, for: .navigationBar)
             }
+            .clipped()
+            .animation(.easeInOut(duration: 0.3), value: webViewModel.showMenuBar)
             .onAppear { webViewModel.triggerAppMenuProbe() }
         case let .sitemap(name):
             SitemapNavigationView(onShowSideMenu: { menuPresented = true })
                 .id(sitemapResetID)
         case .tile:
-            NavigationStack {
+            VStack(spacing: 0) {
+                if webViewModel.showMenuBar {
+                    menuBar
+                        .transition(.move(edge: .top))
+                }
                 OpenHABWebViewContainer(viewModel: webViewModel)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Button {
-                                menuPresented = true
-                            } label: {
-                                Image(systemName: "line.3.horizontal")
-                                    .font(.title)
-                            }
-                            .ohMinimumHitTarget()
-                            .accessibilityIdentifier("HamburgerButton")
-                            .accessibilityLabel("Menu")
-                        }
-                    }
-                    .navigationBarTitleDisplayMode(.inline)
+            }
+            .clipped()
+            .animation(.easeInOut(duration: 0.3), value: webViewModel.showMenuBar)
+        }
+    }
+
+    @ViewBuilder
+    private var menuBar: some View {
+        HStack {
+            Spacer()
+            if #available(iOS 26, *) {
+                Button {
+                    menuPresented = true
+                } label: {
+                    Image(systemSymbol: .line3Horizontal)
+                        .font(.title)
+                }
+                .buttonStyle(.glass)
+                .ohMinimumHitTarget()
+                .accessibilityIdentifier("HamburgerButton")
+                .accessibilityLabel("Menu")
+                .padding(.trailing)
+            } else {
+                Button {
+                    menuPresented = true
+                } label: {
+                    Image(systemSymbol: .line3Horizontal)
+                        .font(.title)
+                }
+                .ohMinimumHitTarget()
+                .accessibilityIdentifier("HamburgerButton")
+                .accessibilityLabel("Menu")
+                .padding(.trailing)
             }
         }
+        .frame(height: 44)
+        .background(.bar, ignoresSafeAreaEdges: .top)
     }
 
     private func switchToSavedView() {

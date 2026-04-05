@@ -96,7 +96,7 @@ struct OpenHABWebView: UIViewRepresentable {
                 case "exitToApp":
                     viewModel.onExitToApp?()
                 case "goFullscreen":
-                    viewModel.hideNavigationBar = true
+                    viewModel.showMenuBar = false
                 case "sseConnected-true":
                     viewModel.handleSSEConnected(true)
                 case "sseConnected-false":
@@ -138,7 +138,6 @@ struct OpenHABWebView: UIViewRepresentable {
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {
             Logger.viewController.error("didFail - webView.url: \(String(describing: webView.url?.description))")
-            viewModel.hideNavigationBar = false
             if let urlError = error as? URLError, urlError.code == .cancelled {
                 return
             }
@@ -176,7 +175,6 @@ struct OpenHABWebView: UIViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
-            viewModel.hideNavigationBar = false
             viewModel.reloadView()
         }
 
@@ -297,7 +295,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                 case "exitToApp":
                     viewModel.onExitToApp?()
                 case "goFullscreen":
-                    viewModel.hideNavigationBar = true
+                    viewModel.showMenuBar = false
                 case "ready":
                     viewModel.handleReady()
                 case "appMenu-hidden":
@@ -372,7 +370,6 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {
             Logger.viewController.error("didFail - webView.url: \(String(describing: webView.url?.description))")
-            viewModel.hideNavigationBar = false
             if let urlError = error as? URLError, urlError.code == .cancelled {
                 return
             }
@@ -410,7 +407,6 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
-            viewModel.hideNavigationBar = false
             viewModel.reloadView()
         }
 

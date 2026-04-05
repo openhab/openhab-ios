@@ -22,12 +22,12 @@ class OpenHABWebViewModel: ObservableObject {
     // MARK: - Published state
 
     @Published var isLoading = false
-    @Published var hideNavigationBar = false
     @Published private(set) var webView: WKWebView
-    /// Whether the iOS floating menu button should be visible.
+    /// Whether the iOS menu bar (and its hamburger button) should be visible.
     /// Starts true (visible while loading) and is hidden once the openHAB
-    /// Main UI signals it has rendered its own native-app exit button.
-    @Published var showAppMenuButton = true
+    /// Main UI signals it has rendered its own native-app exit button,
+    /// or when the page requests fullscreen via JS.
+    @Published var showMenuBar = true
 
     // MARK: - Internal state (used by Coordinator)
 
@@ -374,7 +374,6 @@ class OpenHABWebViewModel: ObservableObject {
         currentTarget = ""
         webView.stopLoading()
         webView.evaluateJavaScript("document.body.remove()")
-        hideNavigationBar = false
         loadWebView(force: true)
     }
 
@@ -382,7 +381,6 @@ class OpenHABWebViewModel: ObservableObject {
 
     func handleDidFinish() {
         lastLoadedURL = webView.url?.absoluteString
-        hideNavigationBar = true
         isLoading = false
         acceptsCommands = true
 
@@ -397,24 +395,24 @@ class OpenHABWebViewModel: ObservableObject {
         injectEditorHeightFix()
     }
 
-    // MARK: - App menu button visibility
+    // MARK: - Menu bar visibility
 
     /// Called when a new top-level navigation starts (full page load).
-    /// Resets the button to visible until the page signals otherwise.
+    /// Resets the bar to visible until the page signals otherwise.
     func handleNavigationStart() {
-        showAppMenuButton = true
+        showMenuBar = true
     }
 
     /// Called when the openHAB Main UI fires its `OHApp.ready()` callback,
-    /// confirming the SPA has loaded and its own exit button is present.
+    /// confirming the SPA has loaded and its own native-app exit button is present.
     func handleReady() {
-        showAppMenuButton = false
+        showMenuBar = false
     }
 
     /// Called with the result of the JS probe that checks window.MainUI.
-    /// - Parameter hidden: true when the Main UI is present (iOS button should be hidden).
+    /// - Parameter hidden: true when the Main UI is present (iOS bar should be hidden).
     func handleAppMenuProbe(hidden: Bool) {
-        showAppMenuButton = !hidden
+        showMenuBar = !hidden
     }
 
     /// Evaluates the app-menu probe immediately in the current webview.

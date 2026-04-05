@@ -192,7 +192,7 @@ public extension OpenAPIService {
                 let label = dto.config?.label ?? uid
                 let icon = dto.config?.icon ?? ""
                 let order = dto.config?.order.flatMap(Int.init) ?? Int.max
-                let url = "\(rootUrl.removeTrailingSlashes())/ui/#/\(uid)"
+                let url = "\(rootUrl.removeTrailingSlashes())/ui/#/page/\(uid)"
                 return OpenHABUIPage(uid: uid, label: label, icon: icon, order: order, url: url)
             }
             .sorted { $0.order < $1.order }

@@ -63,7 +63,7 @@ After every set of code changes, always run a full verification cycle before com
 | `mcp__ios-simulator__screenshot` | Capture the current simulator screen for visual verification. |
 | `mcp__ios-simulator__record_video` | Record a walkthrough video. Close all other simulators first so the tool targets the right device. |
 | `mcp__ios-simulator__ui_tap` / `mcp__ios-simulator__ui_type` / `mcp__ios-simulator__ui_swipe` | Interact with the running app. |
-| `mcp__ios-simulator__ui_describe_all` / `mcp__ios-simulator__ui_describe_point` / `mcp__ios-simulator__ui_view` | Inspect the accessibility tree to find element coordinates. |
+| `mcp__ios-simulator__ui_describe_all` / `mcp__ios-simulator__ui_describe_point` / `mcp__ios-simulator__ui_view` | Inspect the accessibility tree to find element coordinates. Prefer this over screenshots for determining tap targets and verifying text content. Only take a screenshot when confirming graphical/visual changes (layout, new UI components, color/style). |
 
 ## git
 - Always use git commit with -s -S
