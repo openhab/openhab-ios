@@ -15,16 +15,59 @@ import OpenHABCore
 
 @MainActor
 public enum OpenHABIntentHelper {
+    /// Returns a stable, cross-device identifier for a home that is the same on every device
+    /// configured for the same openHAB server. Used as OpenHABHome.identifier so that shortcuts
+    /// synced via iCloud can resolve the home on a different device.
+    ///
+    /// Priority:
+    /// 1. cloudUserId — unique per myopenhab.org account
+    /// 2. remote URL — unique for self-hosted servers
+    /// 3. local URL — fallback for local-only setups
+    /// 4. UUID string — last resort (no cross-device benefit, but avoids empty identifier)
+    static func stableIdentifier(for homePrefs: HomePreferences) -> String {
+        if let cloudId = homePrefs.remoteConnectionConfig.cloudUserId, !cloudId.isEmpty {
+            return cloudId
+        }
+        if !homePrefs.remoteConnectionConfig.url.isEmpty {
+            return homePrefs.remoteConnectionConfig.url
+        }
+        if !homePrefs.localConnectionConfig.url.isEmpty {
+            return homePrefs.localConnectionConfig.url
+        }
+        return homePrefs.id.uuidString
+    }
+
+    /// Resolves the local home UUID for the given OpenHABHome.
+    ///
+    /// Supports both the current stable-identifier format and legacy shortcuts that stored a
+    /// device-local UUID, so old shortcuts migrate automatically on first run.
+    /// Returns `UUID?` (a `Sendable` type) so callers outside MainActor can use it safely.
+    static func resolveHomeId(for home: OpenHABHome) -> UUID? {
+        guard let identifier = home.identifier, !identifier.isEmpty else { return nil }
+        let storedHomes = Preferences.shared.storedHomes
+
+        // Current format: match by stable cross-device identifier
+        if let match = storedHomes.values.first(where: { stableIdentifier(for: $0) == identifier }) {
+            return match.id
+        }
+
+        // Legacy format: identifier is a device-local UUID string (shortcuts created before this fix)
+        if let uuid = UUID(uuidString: identifier), storedHomes[uuid] != nil {
+            return uuid
+        }
+
+        return nil
+    }
+
     static func resolveHome(home: OpenHABHome?, item: String?) async -> OpenHABHomeResolutionResult {
-        if let home, let homeId = home.uuid {
-            // TODO: fuzzy matching / account for potential renaming?
-            // TODO: accept potential mismatches if item name is unique
-            let homePrefs = Preferences.shared.storedHomes.first { $0.key == homeId }
-            if homePrefs != nil {
-                return .success(with: home)
-            } else {
-                return .unsupported() // given home is not found in preferences
+        if let home {
+            guard let homeId = resolveHomeId(for: home),
+                  let homePrefs = Preferences.shared.storedHomes[homeId] else {
+                return .unsupported()
             }
+            // Return a fresh OpenHABHome with the stable identifier so Shortcuts updates
+            // any legacy UUID-based shortcuts to the new format going forward.
+            return .success(with: OpenHABHome(homePrefs: homePrefs))
         } else if let item {
             // try to find the home by home-specific item selection
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
@@ -33,7 +76,7 @@ public enum OpenHABIntentHelper {
             }
             let potentialHomes = homeIdsWithMatchingItems
                 .compactMap { Preferences.shared.storedHomes[$0] }
-                .map { OpenHABHome(homeId: $0.id, homeName: $0.homeName) }
+                .map { OpenHABHome(homePrefs: $0) }
             if potentialHomes.count == 1 {
                 return .success(with: potentialHomes[0])
             } else {
@@ -45,7 +88,7 @@ public enum OpenHABIntentHelper {
     }
 
     static func getHomeOptions() -> INObjectCollection<OpenHABHome> {
-        INObjectCollection(items: Preferences.shared.storedHomes.map { OpenHABHome(homeId: $0.value.id, homeName: $0.value.homeName) })
+        INObjectCollection(items: Preferences.shared.storedHomes.map { OpenHABHome(homePrefs: $0.value) })
     }
 
     static func getItemOptions(home: OpenHABHome?, searchTerm: String? = nil, itemTypes: [OpenHABItem.ItemType]? = nil) async -> INObjectCollection<NSString> {
@@ -55,7 +98,7 @@ public enum OpenHABIntentHelper {
     }
 
     private static func getAllItems(home: OpenHABHome?) async -> [OpenHABItem] {
-        if let home, let homeId = home.uuid {
+        if let home, let homeId = resolveHomeId(for: home) {
             await OpenHABItemCache.instance.getCachedItems(home: homeId) ?? []
         } else {
             await OpenHABItemCache.instance.getAllCachedItems().flatMap(\.value)
@@ -64,12 +107,9 @@ public enum OpenHABIntentHelper {
 }
 
 extension OpenHABHome: @unchecked Sendable {
-    var uuid: UUID? {
-        UUID(uuidString: identifier ?? "")
-    }
-
-    convenience init(homeId: UUID, homeName: String) {
-        self.init(identifier: homeId.uuidString, display: homeName)
+    @MainActor
+    convenience init(homePrefs: HomePreferences) {
+        self.init(identifier: OpenHABIntentHelper.stableIdentifier(for: homePrefs), display: homePrefs.homeName)
     }
 }
 

@@ -58,7 +58,7 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
             )
         }
 
-        guard let homeId = home.uuid, await Preferences.shared.storedHomes[homeId] != nil else {
+        guard let homeId = await OpenHABIntentHelper.resolveHomeId(for: home) else {
             return .failureInvalidItem(String(localized: "unknownHome", comment: "unknown home"))
         }
 
