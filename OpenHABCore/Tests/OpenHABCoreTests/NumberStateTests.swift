@@ -18,17 +18,48 @@ import UIKit
 struct NumberStateTests {
     @Test("toString formats with display pattern")
     func toStringFormatting() {
+        // Basic specifiers
         #expect(NumberState(value: 100.3, format: "%d").toString(locale: nil) == "100")
         #expect(NumberState(value: 100.4, format: "%d").toString(locale: Locale(identifier: "US")) == "100")
         #expect(NumberState(value: 100.4, format: "%.1f").toString(locale: Locale(identifier: "US")) == "100.4")
         #expect(NumberState(value: 100.4, format: "%.1f").toString(locale: Locale(identifier: "de")) == "100,4")
+
+        // %unit% placeholder
         #expect(NumberState(value: 100.4, unit: "K", format: "%.1f %unit%").toString(locale: Locale(identifier: "US")) == "100.4 K")
         #expect(NumberState(value: 100.4, unit: "", format: "%.1f %unit%").toString(locale: Locale(identifier: "US")) == "100.4 ")
+        #expect(NumberState(value: 100.4, unit: "°C", format: "%.1f %unit%").toString(locale: Locale(identifier: "de")) == "100,4 °C")
+
+        // Fallback when no format
         #expect(NumberState(value: 100.4, unit: "°C", format: nil).toString(locale: Locale(identifier: "US")) == "100.4 °C")
         #expect(NumberState(value: 100.4, unit: nil, format: nil).toString(locale: Locale(identifier: "US")) == "100.4")
-        #expect(NumberState(value: 100.4, unit: "°C", format: "%.1f %unit%").toString(locale: Locale(identifier: "de")) == "100,4 °C")
-        // %,.1f is an invalid format string in Swift
-        #expect(NumberState(value: 100.4, unit: "°C", format: "%,.1f %unit%").toString(locale: Locale(identifier: "de")) == ",.1f °C")
+
+        // %s string specifier (Java-style, arg 1 = value as string)
+        #expect(NumberState(value: 100.4, format: "%s").toString(locale: Locale(identifier: "US")) == "100.4")
+
+        // Positional argument indices: %1$ = value, %2$ = unit
+        #expect(NumberState(value: 100.4, unit: "°C", format: "%1$.1f %2$s").toString(locale: Locale(identifier: "US")) == "100.4 °C")
+        #expect(NumberState(value: 100.4, unit: "°C", format: "%1$.1f %2$s").toString(locale: Locale(identifier: "de")) == "100,4 °C")
+
+        // Grouping-separator flag (Java ',') via NumberFormatter
+        #expect(NumberState(value: 1234.5, unit: "W", format: "%,.1f %unit%").toString(locale: Locale(identifier: "en_US")) == "1,234.5 W")
+        #expect(NumberState(value: 1234.5, unit: "W", format: "%,.1f %unit%").toString(locale: Locale(identifier: "de")) == "1.234,5 W")
+        #expect(NumberState(value: 1234567.0, format: "%,.0f").toString(locale: Locale(identifier: "en_US")) == "1,234,567")
+
+        // Negative-in-parentheses flag
+        #expect(NumberState(value: -42.5, format: "%(,.1f").toString(locale: Locale(identifier: "en_US")) == "(42.5)")
+
+        // %n newline
+        #expect(NumberState(value: 100.4, format: "%.1f%n").toString(locale: Locale(identifier: "en_US")) == "100.4\n")
+
+        // %b boolean
+        #expect(NumberState(value: 1.0, format: "%b").toString(locale: nil) == "true")
+        #expect(NumberState(value: 0.0, format: "%b").toString(locale: nil) == "false")
+
+        // %% literal percent
+        #expect(NumberState(value: 75.0, format: "%.0f%%").toString(locale: nil) == "75%")
+
+        // Fallback for unsupported/malformed patterns
+        #expect(NumberState(value: 100.4, unit: "°C", format: "%.1f / %.1f %unit%").toString(locale: Locale(identifier: "de")) == "100.4 °C")
     }
 
     @Test("commandString preserves full precision regardless of display format")

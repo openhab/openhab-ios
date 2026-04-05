@@ -47,31 +47,24 @@ public struct NumberState: CustomStringConvertible, Equatable {
 
     public func toString(locale: Locale?) -> String {
         if let format, !format.isEmpty {
-            var actualFormat = format
-                .replacingOccurrences(of: "%unit%", with: unit ?? "")
-                // %s in Java is for Strings, but does not work in Swift, see
-                // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Strings/Articles/formatSpecifiers.html)
-                .replacingOccurrences(of: "%s", with: "%@")
+            var javaFormat = format.replacingOccurrences(of: "%unit%", with: unit ?? "")
 
-            // Escape trailing % that isn't already escaped (e.g., "%.0f %" should become "%.0f %%")
-            // This handles server-side format patterns that forgot to escape the percent sign
-            if actualFormat.hasSuffix(" %"), !actualFormat.hasSuffix(" %%") {
-                actualFormat = String(actualFormat.dropLast()) + "%%"
+            // Escape a bare trailing % the server forgot to escape (e.g. "%.0f %")
+            if javaFormat.hasSuffix(" %"), !javaFormat.hasSuffix(" %%") {
+                javaFormat = String(javaFormat.dropLast()) + "%%"
             }
 
-            let formatValue: any CVarArg = if format.contains("%d") {
-                intValue
-            } else if format.contains("%s") {
-                stringValue
-            } else {
-                value
+            if let rendered = JavaFormatConverter.render(javaFormat: javaFormat, value: value, unit: unit, locale: locale) {
+                return rendered
             }
-            return String(format: actualFormat, locale: locale, formatValue)
         }
+        return fallbackString
+    }
+
+    private var fallbackString: String {
         if let unit, !unit.isEmpty {
             return "\(stringValue) \(unit)"
-        } else {
-            return stringValue
         }
+        return stringValue
     }
 }
