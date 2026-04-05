@@ -27,8 +27,11 @@ struct NumberStateTests {
         #expect(NumberState(value: 100.4, unit: "°C", format: nil).toString(locale: Locale(identifier: "US")) == "100.4 °C")
         #expect(NumberState(value: 100.4, unit: nil, format: nil).toString(locale: Locale(identifier: "US")) == "100.4")
         #expect(NumberState(value: 100.4, unit: "°C", format: "%.1f %unit%").toString(locale: Locale(identifier: "de")) == "100,4 °C")
-        // %,.1f is an invalid format string in Swift
-        #expect(NumberState(value: 100.4, unit: "°C", format: "%,.1f %unit%").toString(locale: Locale(identifier: "de")) == ",.1f °C")
+        #expect(NumberState(value: 100.4, format: "%1$.1f").toString(locale: Locale(identifier: "US")) == "100.4")
+        #expect(NumberState(value: 100.4, format: "%1$s").toString(locale: Locale(identifier: "US")) == "100.4")
+        #expect(NumberState(value: 100.4, unit: "°C", format: "%,.1f %unit%").toString(locale: Locale(identifier: "de")) == "100.4 °C")
+        #expect(NumberState(value: 100.4, unit: "°C", format: "%1$.1f %2$s").toString(locale: Locale(identifier: "de")) == "100.4 °C")
+        #expect(NumberState(value: 100.4, unit: "°C", format: "%.1f / %.1f %unit%").toString(locale: Locale(identifier: "de")) == "100.4 °C")
     }
 
     @Test("commandString preserves full precision regardless of display format")

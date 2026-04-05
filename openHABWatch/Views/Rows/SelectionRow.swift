@@ -105,7 +105,7 @@ struct SelectionRow: View {
         HStack {
             HStack {
                 WatchIconView(model: widget.iconRenderModel(), settings: settings)
-                WatchLabelText(text: title)
+                WatchLabelText(text: title, labelColor: widget.labelcolor)
                 Spacer()
             }
             NavigationLink(destination: LazyView(SelectionListView(
@@ -117,7 +117,8 @@ struct SelectionRow: View {
                 HStack(spacing: 4) {
                     if let valueText = selectedValueText {
                         Text(valueText)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                            .lineLimit(2)
                             .watchTextStyle(.secondary)
                     }
                     Image(systemSymbol: .chevronUpChevronDown)

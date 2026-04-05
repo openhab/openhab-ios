@@ -82,7 +82,7 @@ struct SliderRow: View {
                     HStack {
                         WatchIconView(model: widget.iconRenderModel(fallbackSymbol: fallbackSymbol), settings: settings)
                         VStack(alignment: .leading) {
-                            WatchLabelText(text: viewModel.labelText)
+                            WatchLabelText(text: viewModel.labelText, labelColor: widget.labelcolor)
                             if pendingValue != nil {
                                 Text(currentValueText)
                                     .watchTextStyle(.secondary)
@@ -98,7 +98,7 @@ struct SliderRow: View {
             } else {
                 HStack {
                     WatchIconView(model: widget.iconRenderModel(fallbackSymbol: fallbackSymbol), settings: settings)
-                    WatchLabelText(text: viewModel.labelText)
+                    WatchLabelText(text: viewModel.labelText, labelColor: widget.labelcolor)
                     Spacer()
                     if pendingValue != nil {
                         Text(currentValueText)

@@ -52,6 +52,7 @@ struct SetpointRow: View {
                 WatchIconView(model: widget.iconRenderModel(), settings: settings)
                 Text(viewModel.labelText)
                     .watchTextStyle(.label)
+                    .foregroundStyle(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                 Spacer()
             }
             HStack {
@@ -71,6 +72,7 @@ struct SetpointRow: View {
 
                 Text(valueText)
                     .watchTextStyle(.emphasis)
+                    .foregroundStyle(widget.valuecolor.isEmpty ? .primary : Color(fromString: widget.valuecolor))
                     .accessibilityLabel("\(viewModel.labelText) value")
                     .accessibilityValue(valueText)
 

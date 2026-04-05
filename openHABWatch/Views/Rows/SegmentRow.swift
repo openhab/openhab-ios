@@ -48,7 +48,7 @@ struct SegmentRow: View {
         if viewModel.mappings.count <= 2 {
             HStack {
                 WatchIconView(model: widget.iconRenderModel(), settings: settings)
-                WatchLabelText(text: viewModel.labelText)
+                WatchLabelText(text: viewModel.labelText, labelColor: widget.labelcolor)
                 Spacer()
                 pressReleaseButtons
                     .layoutPriority(1)
@@ -102,7 +102,7 @@ struct SegmentRow: View {
     private var iconTitleRow: some View {
         HStack {
             WatchIconView(model: widget.iconRenderModel(), settings: settings)
-            WatchLabelText(text: viewModel.labelText)
+            WatchLabelText(text: viewModel.labelText, labelColor: widget.labelcolor)
             Spacer()
         }
     }
@@ -121,7 +121,7 @@ struct SegmentRow: View {
         HStack {
             HStack {
                 WatchIconView(model: widget.iconRenderModel(), settings: settings)
-                WatchLabelText(text: viewModel.labelText)
+                WatchLabelText(text: viewModel.labelText, labelColor: widget.labelcolor)
                 Spacer()
             }
             NavigationLink(destination: LazyView(SegmentSelectionView(
@@ -154,7 +154,7 @@ struct SegmentRow: View {
         let mapping = viewModel.mappings[0]
         HStack {
             WatchIconView(model: widget.iconRenderModel(), settings: settings)
-            WatchLabelText(text: viewModel.labelText)
+            WatchLabelText(text: viewModel.labelText, labelColor: widget.labelcolor)
             Spacer()
             singleButton(for: mapping)
                 .layoutPriority(1)

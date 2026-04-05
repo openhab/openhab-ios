@@ -48,11 +48,6 @@ platform :ios do
         capture_screenshots(workspace: 'openHAB.xcworkspace',
                             scheme: 'openHABUITests',
                             dark_mode: true)
-        # Optional: Convert iPhone 15 screenshots to 5.5-inch
-        Dir["./fastlane/screenshots/en-US/*iPhone_15*portrait*.png"].each do |file|
-            output_file = file.sub("iPhone_15", "iPhone_8_Plus")
-            sh "sips -Z 2208 #{file} --out #{output_file}"  # resize to height 2208 px
-        end
     end
 
     desc 'Run unit tests.'
@@ -237,7 +232,7 @@ platform :ios do
         )
 
         upload_symbols_to_crashlytics(
-            gsp_path: "openHAB/GoogleService-Info.plist",
+            gsp_path: "openHAB/Supporting Files/GoogleService-Info.plist",
             binary_path: './scripts/upload-symbols'
         )
 
