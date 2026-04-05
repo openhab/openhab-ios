@@ -18,9 +18,6 @@
 		2FEFD8F62BE7C5BE00E387B9 /* TextInputUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FEFD8F52BE7C5BE00E387B9 /* TextInputUITableViewCell.swift */; };
 		2FD655E52F5491E000E85BC9 /* RowViewWithIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FD655E42F5491E000E85BC9 /* RowViewWithIcon.swift */; };
 		2FF459362E230C6A00C0B640 /* OpenHABIntentHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF459352E230C6A00C0B640 /* OpenHABIntentHelper.swift */; };
-		3A009EA12F63045700A0490E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 3A009EA02F63045700A0490E /* Localizable.xcstrings */; };
-		3A009EA22F63045700A0490E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 3A009EA02F63045700A0490E /* Localizable.xcstrings */; };
-		3A009EA32F63045700A0490E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 3A009EA02F63045700A0490E /* Localizable.xcstrings */; };
 		2F21508A2F75C2FC001BA057 /* GetItemStateIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2150732F75C2FC001BA057 /* GetItemStateIntentHandler.swift */; };
 		2F21508B2F75C2FC001BA057 /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2150752F75C2FC001BA057 /* IntentHandler.swift */; };
 		2F21508D2F75C2FC001BA057 /* OpenHABIntentHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2150812F75C2FC001BA057 /* OpenHABIntentHelper.swift */; };
@@ -345,7 +342,6 @@
 		2FD655E42F5491E000E85BC9 /* RowViewWithIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowViewWithIcon.swift; sourceTree = "<group>"; };
 		2FF459352E230C6A00C0B640 /* OpenHABIntentHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABIntentHelper.swift; sourceTree = "<group>"; };
 		399449C421544C61AD83450C /* TextRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRow.swift; sourceTree = "<group>"; };
-		3A009EA02F63045700A0490E /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		4D38D951256897490039DA6E /* SetNumberValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetNumberValueIntentHandler.swift; sourceTree = "<group>"; };
 		4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetStringValueIntentHandler.swift; sourceTree = "<group>"; };
 		4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetColorValueIntentHandler.swift; sourceTree = "<group>"; };
@@ -894,7 +890,6 @@
 		938BF9C724EFCCC000E6B52F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				3A009EA02F63045700A0490E /* Localizable.xcstrings */,
 				938BF9CA24EFCCC000E6B52F /* InfoPlist.strings */,
 			);
 			path = Resources;
@@ -1741,7 +1736,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3A009EA12F63045700A0490E /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1765,7 +1759,6 @@
 			files = (
 				6557AF902C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */,
 				DA07751B2346705F0086C685 /* Assets.xcassets in Resources */,
-				3A009EA32F63045700A0490E /* Localizable.xcstrings in Resources */,
 				932602EE2382892B00EAD685 /* Assets.xcassets in Resources */,
 				DAA599B82EAC0FE7003A8726 /* AppIcon.icon in Resources */,
 			);
@@ -1817,7 +1810,6 @@
 				DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */,
 				DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */,
 				DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */,
-				3A009EA22F63045700A0490E /* Localizable.xcstrings in Resources */,
 				DFDF45311932042B00A6E581 /* legal.rtf in Resources */,
 				656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */,
 				A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */,
