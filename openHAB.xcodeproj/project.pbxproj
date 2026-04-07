@@ -1301,8 +1301,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6557AF902C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */,
-				DA07751B2346705F0086C685 /* Assets.xcassets in Resources */,
-				);
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		DA2DC22D21F2736C00830730 /* Resources */ = {
@@ -1387,45 +1386,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DACA368E2D7440B9003CD237 /* OpenHABWidgetExtension.swift in Sources */,
-				DA2E0B0E23DCC153009B0A99 /* MapView.swift in Sources */,
-				DA15BFBD23C6726400BD8ADA /* AppSettings.swift in Sources */,
-				DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */,
-				DA0F37D023D4ACC7007EAB48 /* SliderRow.swift in Sources */,
-				DA2741022EA62FA3002FE576 /* SegmentSelectionView.swift in Sources */,
-				DA32D1B42C8C98C40018D974 /* IconWithAction.swift in Sources */,
-				DA8B14BC2F3A3CB5007753FD /* WatchTypography.swift in Sources */,
-				DA07764A234683BC0086C685 /* SwitchRow.swift in Sources */,
-				DA2E0AA423DC96E9009B0A99 /* ImageWithAction.swift in Sources */,
-				DA8B14B82F3A120E007753FD /* PreviewWidgetFactory.swift in Sources */,
-				DA8B14B62F3A0DFF007753FD /* WidgetRowFactory.swift in Sources */,
-				DA0749DE23E0B5950057FA83 /* ColorPickerRow.swift in Sources */,
-				DAF4581E23DC60020018B495 /* ImageRawRow.swift in Sources */,
-				DAD0858B2AE56F0E001D36BE /* (null) in Sources */,
-				DAF4578223D630C70018B495 /* WatchIconView.swift in Sources */,
-				DA07752D2346705F0086C685 /* NotificationController.swift in Sources */,
-				DA0749E023E0BF510057FA83 /* ColorSelection.swift in Sources */,
-				DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */,
-				DA2D2F8A2F3943A800EC605A /* WidgetRowViewModel.swift in Sources */,
-				DA9721C324E29A8F0092CCFD /* UserDefaultsBacked.swift in Sources */,
-				DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */,
-				DA07752B2346705F0086C685 /* OpenHABWatchAppDelegate.swift in Sources */,
-				DAF4581623DC48400018B495 /* GenericRow.swift in Sources */,
-				10472F7AF99C4940A6144817 /* TextRow.swift in Sources */,
-				DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */,
-				C4377202F7D642B5A8349008 /* SelectionRow.swift in Sources */,
-				DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */,
-				DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */,
-				DA0776F0234788010086C685 /* UserData.swift in Sources */,
-				DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */,
-				DAF457A623DB9CE00018B495 /* SetpointRow.swift in Sources */,
-				DAF4581823DC4A050018B495 /* ImageRow.swift in Sources */,
-				DA2741002EA62F1F002FE576 /* SitemapPageView.swift in Sources */,
-				DA07752F2346705F0086C685 /* NotificationView.swift in Sources */,
-				DA0775312346705F0086C685 /* ComplicationController.swift in Sources */,
-				DAF457A223DB6C640018B495 /* RollershutterRow.swift in Sources */,
-				DA8B14BA2F3A373A007753FD /* PreviewNavigationContainer.swift in Sources */,
-				DAF457A923DBA4990018B495 /* FrameRow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1433,16 +1393,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAF231D227BB6EEA00AB916C /* OpenHABSVGTests.swift in Sources */,
-				2F399ABA2F5357E900F72A30 /* InputCommandFormatterTests.swift in Sources */,
-				DABB4CDE2F4746B100111AF3 /* SitemapRowInputMapperTests.swift in Sources */,
-				DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */,
-				DA96415C2F292F0600CEC181 /* OpenHABEndPoint.swift in Sources */,
-				DABB4CF42F47BC5100111AF3 /* SliderOverrideSyncTests.swift in Sources */,
-				DA96415A2F292EE200CEC181 /* BonjourDiscoveryViewModelTests.swift in Sources */,
-				DABB4CF22F4790AD00111AF3 /* RowLayoutPolicyTests.swift in Sources */,
-				E1AA00032F5D000100000001 /* ScreenSaverLayoutCalculatorTests.swift in Sources */,
-				938BF89624EFBC5400E6B52F /* LocalizationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
