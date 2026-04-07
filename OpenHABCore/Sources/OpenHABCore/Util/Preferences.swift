@@ -87,8 +87,26 @@ public struct UserDefaultObject<T: Codable & Sendable> {
     }
 }
 
-@MainActor
-public struct HomePreferences: Codable, Equatable {
+public struct HomePreferences: Codable, Equatable, Sendable {
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case defaultView
+        case demomode
+        case realTimeSliders
+        case iconType
+        case defaultSitemap
+        case sortSitemapsBy
+        case defaultMainUIPath
+        case alwaysAllowWebRTC
+        case sitemapForWatch
+        case localConnectionConfig
+        case remoteConnectionConfig
+        case sitemapForWatchLabel
+        case homeName
+        case sseCommandItem
+        case alwaysSendSameAuthenticationToWebView
+    }
+
     public let id: UUID
     public var defaultView = "web"
     public var demomode = true
@@ -104,9 +122,30 @@ public struct HomePreferences: Codable, Equatable {
     public var sitemapForWatchLabel = "watch"
     public var homeName = "Home"
     public var sseCommandItem = ""
+    public var alwaysSendSameAuthenticationToWebView = false
 
     fileprivate init(id: UUID) {
         self.id = id
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = (try? container.decode(UUID.self, forKey: .id)) ?? UUID()
+        defaultView = try container.decodeIfPresent(String.self, forKey: .defaultView) ?? "web"
+        demomode = try container.decodeIfPresent(Bool.self, forKey: .demomode) ?? true
+        realTimeSliders = try container.decodeIfPresent(Bool.self, forKey: .realTimeSliders) ?? false
+        iconType = try container.decodeIfPresent(Int.self, forKey: .iconType) ?? 0
+        defaultSitemap = try container.decodeIfPresent(String.self, forKey: .defaultSitemap) ?? "demo"
+        sortSitemapsBy = try container.decodeIfPresent(Int.self, forKey: .sortSitemapsBy) ?? 0
+        defaultMainUIPath = try container.decodeIfPresent(String.self, forKey: .defaultMainUIPath) ?? ""
+        alwaysAllowWebRTC = try container.decodeIfPresent(Bool.self, forKey: .alwaysAllowWebRTC) ?? false
+        sitemapForWatch = try container.decodeIfPresent(String.self, forKey: .sitemapForWatch) ?? "watch"
+        localConnectionConfig = try container.decodeIfPresent(ConnectionConfiguration.self, forKey: .localConnectionConfig) ?? .localDefault
+        remoteConnectionConfig = try container.decodeIfPresent(ConnectionConfiguration.self, forKey: .remoteConnectionConfig) ?? .remoteDefault
+        sitemapForWatchLabel = try container.decodeIfPresent(String.self, forKey: .sitemapForWatchLabel) ?? "watch"
+        homeName = try container.decodeIfPresent(String.self, forKey: .homeName) ?? "Home"
+        sseCommandItem = try container.decodeIfPresent(String.self, forKey: .sseCommandItem) ?? ""
+        alwaysSendSameAuthenticationToWebView = try container.decodeIfPresent(Bool.self, forKey: .alwaysSendSameAuthenticationToWebView) ?? false
     }
 }
 

@@ -72,7 +72,6 @@ public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChall
 public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
     let host = challenge.protectionSpace.host
     let authenticationMethod = challenge.protectionSpace.authenticationMethod
-    Logger.sessionChallenge.warning("onReceiveSessionChallenge is not implemented fully (see TODOs)")
     Logger.sessionChallenge.info("onReceiveSessionChallenge host=\(host, privacy: .public), method=\(authenticationMethod, privacy: .public)")
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
 
@@ -98,19 +97,43 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
         let result = CertificateManagers.clientCertificateManager.evaluateTrust(with: challenge)
         logDecision(result.0, reason: "client-certificate-manager")
         return result
-    // attemptCredentialAuthentication
-    default:
+    case NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault:
         if challenge.previousFailureCount > 0 {
             disposition = .cancelAuthenticationChallenge
             logDecision(disposition, reason: "previous-failure")
-        } else {
-            // TODO: in the last version, the httpClient had never been set and always remained nil. Figure out if and how this worked and if it is still needed
-            // credential = await NetworkTracker.shared.httpClient?.session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace)
-            // if credential != nil {
-            //    disposition = .useCredential
-            // }
-            logDecision(disposition, reason: "default-handling-no-credential")
+            return (disposition, nil)
         }
+
+        let networkTracker = NetworkTracker.shared
+        let activeConnection = await networkTracker.activeConnection
+
+        var candidateConfigurations: [ConnectionConfiguration] = []
+        if let activeConfiguration = activeConnection?.configuration {
+            candidateConfigurations.append(activeConfiguration)
+        }
+        for configuration in await networkTracker.configuredConnections() where !candidateConfigurations.contains(configuration) {
+            candidateConfigurations.append(configuration)
+        }
+
+        let alwaysSend = await Preferences.shared.currentHomePreferences.alwaysSendSameAuthenticationToWebView
+        let matchedConfiguration = candidateConfigurations.first { configuration in
+            URL(string: configuration.url)?.host == host
+                || host == "home.myopenhab.org"
+                || alwaysSend
+        }
+
+        if let matchedConfiguration {
+            let credential = URLCredential(user: matchedConfiguration.username, password: matchedConfiguration.password, persistence: .forSession)
+            let decision: URLSession.AuthChallengeDisposition = .useCredential
+            logDecision(decision, reason: "matched-webview-host-or-always-send")
+            return (decision, credential)
+        }
+
+        logDecision(disposition, reason: "no-webview-host-match-default-handling")
+        return (disposition, nil)
+
+    default:
+        logDecision(disposition, reason: "unsupported-auth-method-default-handling")
         return (disposition, nil)
     }
 }
