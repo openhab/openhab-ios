@@ -105,6 +105,7 @@ public struct HomePreferences: Codable, Equatable, Sendable {
         case sitemapForWatchLabel
         case homeName
         case sseCommandItem
+        case alwaysSendSameAuthenticationToWebView
     }
 
     public let id: UUID
@@ -123,6 +124,7 @@ public struct HomePreferences: Codable, Equatable, Sendable {
     public var sitemapForWatchLabel = "watch"
     public var homeName = "Home"
     public var sseCommandItem = ""
+    public var alwaysSendSameAuthenticationToWebView = false
 
     fileprivate init(id: UUID) {
         self.id = id
@@ -146,6 +148,7 @@ public struct HomePreferences: Codable, Equatable, Sendable {
         sitemapForWatchLabel = try container.decodeIfPresent(String.self, forKey: .sitemapForWatchLabel) ?? "watch"
         homeName = try container.decodeIfPresent(String.self, forKey: .homeName) ?? "Home"
         sseCommandItem = try container.decodeIfPresent(String.self, forKey: .sseCommandItem) ?? ""
+        alwaysSendSameAuthenticationToWebView = try container.decodeIfPresent(Bool.self, forKey: .alwaysSendSameAuthenticationToWebView) ?? false
     }
 }
 

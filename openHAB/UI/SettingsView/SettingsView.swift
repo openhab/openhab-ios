@@ -24,6 +24,7 @@ struct SettingsView: View {
     @State private var settingsSortSitemapsBy: SortSitemapsOrder = .label
     @State private var settingsDefaultMainUIPath = ""
     @State private var settingsAlwaysAllowWebRTC = true
+    @State private var settingsAlwaysSendSameAuthenticationToWebView = false
     @State private var settingsSitemapForWatch = ""
 
     @State private var sitemaps: [OpenHABSitemap] = []
@@ -40,7 +41,8 @@ struct SettingsView: View {
             ConnectionSettingsView(
                 settingsDemomode: $settingsDemomode,
                 localConnectionConfiguration: $settingsLocalConnectionConfiguration,
-                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration
+                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration,
+                alwaysSendSameAuthenticationToWebView: $settingsAlwaysSendSameAuthenticationToWebView
             )
 
             ApplicationSettingsView(
@@ -128,6 +130,7 @@ struct SettingsView: View {
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label
         settingsDefaultMainUIPath = Preferences.shared.currentHomePreferences.defaultMainUIPath
         settingsAlwaysAllowWebRTC = Preferences.shared.currentHomePreferences.alwaysAllowWebRTC
+        settingsAlwaysSendSameAuthenticationToWebView = Preferences.shared.currentHomePreferences.alwaysSendSameAuthenticationToWebView
         settingsSitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
         settingsLocalConnectionConfiguration = Preferences.shared.currentHomePreferences.localConnectionConfig
         settingsRemoteConnectionConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
@@ -144,6 +147,7 @@ struct SettingsView: View {
             homePreferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
             homePreferences.defaultMainUIPath = settingsDefaultMainUIPath
             homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
+            homePreferences.alwaysSendSameAuthenticationToWebView = settingsAlwaysSendSameAuthenticationToWebView
             homePreferences.sitemapForWatch = settingsSitemapForWatch
             homePreferences.sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
             homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration

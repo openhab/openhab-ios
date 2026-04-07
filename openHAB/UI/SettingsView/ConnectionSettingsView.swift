@@ -17,6 +17,7 @@ struct ConnectionSettingsView: View {
     @Binding var settingsDemomode: Bool
     @Binding var localConnectionConfiguration: ConnectionConfiguration
     @Binding var remoteConnectionConfiguration: ConnectionConfiguration
+    @Binding var alwaysSendSameAuthenticationToWebView: Bool
 
     var body: some View {
         Toggle("Demo Mode", isOn: $settingsDemomode)
@@ -26,6 +27,10 @@ struct ConnectionSettingsView: View {
             Group {
                 SingleConnectionSettingsView(headerText: String(localized: "Local server"), isLocalConnection: true, connectionConfig: $localConnectionConfiguration, showNotificationToggle: false)
                 SingleConnectionSettingsView(headerText: String(localized: "Remote server"), connectionConfig: $remoteConnectionConfiguration, showNotificationToggle: true)
+            }
+            Toggle(isOn: $alwaysSendSameAuthenticationToWebView) {
+                Text("Always send credentials to web views")
+                Text("Send the server credentials to all web view authentication challenges, not only when the host matches the configured server URL.")
             }
         }
     }
@@ -51,6 +56,7 @@ struct ConnectionSettingsView: View {
             username: "user",
             password: "password123"
         )
+        @State var alwaysSendSameAuthenticationToWebView = false
 
         var body: some View {
             NavigationStack {
@@ -58,7 +64,8 @@ struct ConnectionSettingsView: View {
                     ConnectionSettingsView(
                         settingsDemomode: $demoMode,
                         localConnectionConfiguration: $connectionConfig1,
-                        remoteConnectionConfiguration: $connectionConfig2
+                        remoteConnectionConfiguration: $connectionConfig2,
+                        alwaysSendSameAuthenticationToWebView: $alwaysSendSameAuthenticationToWebView
                     )
                 }
             }
