@@ -20,8 +20,7 @@ struct LocalizationTests {
     }
 
     private static var intentsBundle: Bundle? {
-        guard let pluginsURL = Bundle.main.builtInPlugInsURL else { return nil }
-        return Bundle(url: pluginsURL.appendingPathComponent("openHABIntents.appex"))
+        Bundle.main
     }
 
     // MARK: - Tests
