@@ -13,63 +13,103 @@
 
 import Testing
 
+private enum TestValues {
+    static let oversizedKelvin = 15_000.0
+    static let miredWarmest = 370.0
+    static let miredCoolest = 153.0
+    static let convertedWarmestKelvin = 2702.7027027027025
+    static let convertedCoolestKelvin = 6535.947712418301
+    static let miredState = "250"
+    static let convertedStateKelvin = 4_000.0
+    static let invalidState = "not-a-number"
+    static let clampedServerValue = 6_500.0
+    static let oversizedServerValue = 9_000.0
+    static let minimumRangeKelvin = 1_000.0
+    static let narrowMaximumKelvin = 6_500.0
+    static let degenerateRangeKelvin = 4_000.0
+    static let gradientStartKelvin = 2_000.0
+    static let gradientEndKelvin = 3_000.0
+    static let gradientSteps = 4
+    static let gradientCount = 5
+    static let tolerance = 0.0001
+    static let zero = 0.0
+}
+
 @Suite
 struct ColorTemperatureRowMathTests {
     @Test
     func normalizedRangeUsesFallbackForZeroSpan() {
-        let range = ColorTemperatureRowMath.normalizedRange(minValue: 15000, maxValue: 15000)
+        let range = ColorTemperatureRowMath.normalizedRange(
+            minValue: TestValues.oversizedKelvin,
+            maxValue: TestValues.oversizedKelvin
+        )
 
-        #expect(range.lowerBound == 1000)
-        #expect(range.upperBound == 10000)
+        #expect(range.lowerBound == ColorTemperatureRowMath.minimumKelvin)
+        #expect(range.upperBound == ColorTemperatureRowMath.maximumKelvin)
     }
 
     @Test
     func normalizedRangeConvertsMiredBoundsToKelvin() {
-        let range = ColorTemperatureRowMath.normalizedRange(minValue: 370, maxValue: 153)
+        let range = ColorTemperatureRowMath.normalizedRange(
+            minValue: TestValues.miredWarmest,
+            maxValue: TestValues.miredCoolest
+        )
 
-        #expect(abs(range.lowerBound - 2702.7027027027025) < 0.0001)
-        #expect(abs(range.upperBound - 6535.947712418301) < 0.0001)
+        #expect(abs(range.lowerBound - TestValues.convertedWarmestKelvin) < TestValues.tolerance)
+        #expect(abs(range.upperBound - TestValues.convertedCoolestKelvin) < TestValues.tolerance)
     }
 
     @Test
     func normalizedTemperatureConvertsMiredStateAndClampsIntoRange() {
-        let range = ColorTemperatureRowMath.normalizedRange(minValue: 370, maxValue: 153)
+        let range = ColorTemperatureRowMath.normalizedRange(
+            minValue: TestValues.miredWarmest,
+            maxValue: TestValues.miredCoolest
+        )
 
         let temperature = ColorTemperatureRowMath.normalizedTemperature(
-            state: "250",
+            state: TestValues.miredState,
             serverValue: nil,
             range: range
         )
 
-        #expect(temperature == 4000)
+        #expect(temperature == TestValues.convertedStateKelvin)
     }
 
     @Test
     func normalizedTemperatureFallsBackToClampedServerValue() {
-        let range = ColorTemperatureRowMath.normalizedRange(minValue: 1000, maxValue: 6500)
+        let range = ColorTemperatureRowMath.normalizedRange(
+            minValue: TestValues.minimumRangeKelvin,
+            maxValue: TestValues.narrowMaximumKelvin
+        )
 
         let temperature = ColorTemperatureRowMath.normalizedTemperature(
-            state: "not-a-number",
-            serverValue: 9000,
+            state: TestValues.invalidState,
+            serverValue: TestValues.oversizedServerValue,
             range: range
         )
 
-        #expect(temperature == 6500)
+        #expect(temperature == TestValues.clampedServerValue)
     }
 
     @Test
     func sliderFractionReturnsZeroForDegenerateRange() {
-        let fraction = ColorTemperatureRowMath.sliderFraction(value: 3000, range: 4000 ... 4000)
+        let fraction = ColorTemperatureRowMath.sliderFraction(
+            value: TestValues.gradientEndKelvin,
+            range: TestValues.degenerateRangeKelvin ... TestValues.degenerateRangeKelvin
+        )
 
-        #expect(fraction == 0)
+        #expect(fraction == TestValues.zero)
     }
 
     @Test
     func gradientTemperaturesAlwaysIncludeBothBounds() {
-        let temperatures = ColorTemperatureRowMath.gradientTemperatures(for: 2000 ... 3000, steps: 4)
+        let temperatures = ColorTemperatureRowMath.gradientTemperatures(
+            for: TestValues.gradientStartKelvin ... TestValues.gradientEndKelvin,
+            steps: TestValues.gradientSteps
+        )
 
-        #expect(temperatures.count == 5)
-        #expect(temperatures.first == 2000)
-        #expect(temperatures.last == 3000)
+        #expect(temperatures.count == TestValues.gradientCount)
+        #expect(temperatures.first == TestValues.gradientStartKelvin)
+        #expect(temperatures.last == TestValues.gradientEndKelvin)
     }
 }

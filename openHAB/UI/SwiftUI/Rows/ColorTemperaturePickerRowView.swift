@@ -16,8 +16,18 @@ import SFSafeSymbols
 import SwiftUI
 
 enum ColorTemperatureRowMath {
-    static let fallbackRange: ClosedRange<Double> = 1000 ... 10000
-    static let fallbackTemperature = 2700.0
+    static let minimumKelvin = 1_000.0
+    static let maximumKelvin = 10_000.0
+    static let warmWhiteKelvin = 2_700.0
+    static let minimumGradientSteps = 1
+    static let minimumSliderStep = 1.0
+    static let minimumValidSpan = 0.0
+    static let minimumConvertibleKelvin = 0.0
+    static let fractionLowerBound = 0.0
+    static let fractionUpperBound = 1.0
+
+    static let fallbackRange: ClosedRange<Double> = minimumKelvin ... maximumKelvin
+    static let fallbackTemperature = warmWhiteKelvin
 
     static func normalizedRange(minValue: Double, maxValue: Double) -> ClosedRange<Double> {
         let lowerCandidate = sanitizeTemperatureValue(minValue) ?? fallbackRange.lowerBound
@@ -41,7 +51,7 @@ enum ColorTemperatureRowMath {
     }
 
     static func gradientTemperatures(for range: ClosedRange<Double>, steps: Int) -> [Double] {
-        let safeSteps = max(steps, 1)
+        let safeSteps = max(steps, minimumGradientSteps)
         let span = range.upperBound - range.lowerBound
         return (0 ... safeSteps).map { index in
             range.lowerBound + (span * Double(index) / Double(safeSteps))
@@ -50,14 +60,14 @@ enum ColorTemperatureRowMath {
 
     static func sliderFraction(value: Double, range: ClosedRange<Double>) -> Double {
         let span = range.upperBound - range.lowerBound
-        guard span.isFinite, span > 0 else { return 0 }
+        guard span.isFinite, span > minimumValidSpan else { return fractionLowerBound }
 
         let fraction = (value - range.lowerBound) / span
-        return fraction.clamped(to: 0 ... 1)
+        return fraction.clamped(to: fractionLowerBound ... fractionUpperBound)
     }
 
     static func sanitizeTemperatureValue(_ value: Double?) -> Double? {
-        guard let value, value.isFinite, value > 0 else { return nil }
+        guard let value, value.isFinite, value > minimumConvertibleKelvin else { return nil }
         let convertedValue = value < fallbackRange.lowerBound ? value.asColorTemperatureInKelvin : value
         return convertedValue.isFinite ? convertedValue : nil
     }
@@ -125,10 +135,10 @@ struct CustomSliderView: View {
                                     isDragging = true
                                     onDragStateChanged(true)
                                 }
-                                guard width > 0 else { return }
+                                guard width > ColorTemperatureRowMath.minimumValidSpan else { return }
                                 let location = gesture.location.x.clamped(to: 0 ... width)
                                 let raw = Double(location / width) * (range.upperBound - range.lowerBound) + range.lowerBound
-                                let safeStep = max(step, 1)
+                                let safeStep = max(step, ColorTemperatureRowMath.minimumSliderStep)
                                 let stepped = (raw / safeStep).rounded() * safeStep
                                 value = stepped.clamped(to: range)
                                 let now = Date()
@@ -162,14 +172,6 @@ private struct ColorTemperaturePickerRowContent: View {
 
     private var temperatureRange: ClosedRange<Double> {
         ColorTemperatureRowMath.normalizedRange(minValue: input.minValue, maxValue: input.maxValue)
-    }
-
-    private var minTemperature: Double {
-        temperatureRange.lowerBound
-    }
-
-    private var maxTemperature: Double {
-        temperatureRange.upperBound
     }
 
     var body: some View {
@@ -225,7 +227,7 @@ private struct ColorTemperaturePickerRowContent: View {
                         // Actual slider
                         CustomSliderView(
                             value: $selectedTemperature,
-                            range: minTemperature ... maxTemperature,
+                            range: temperatureRange,
                             step: 100,
                             onEditingChanged: {
                                 sendTemperatureCommand()
@@ -289,7 +291,9 @@ private struct ColorTemperaturePickerRowContent: View {
 
     private func sendTemperatureCommand() {
         // Send temperature directly as Kelvin value (like Android app)
-        let clampedRoundedTemperature = Int(selectedTemperature.rounded()).clamped(to: Int(minTemperature) ... Int(maxTemperature))
+        let clampedRoundedTemperature = Int(selectedTemperature.rounded()).clamped(
+            to: Int(temperatureRange.lowerBound) ... Int(temperatureRange.upperBound)
+        )
         let command = "\(clampedRoundedTemperature)"
 
         logger.info("Sending color temperature command: \(command)K")
