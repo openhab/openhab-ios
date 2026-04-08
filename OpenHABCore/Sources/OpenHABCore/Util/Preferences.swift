@@ -130,7 +130,7 @@ public struct HomePreferences: Codable, Equatable, Sendable {
         self.id = id
     }
 
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = (try? container.decode(UUID.self, forKey: .id)) ?? UUID()
         defaultView = try container.decodeIfPresent(String.self, forKey: .defaultView) ?? "web"

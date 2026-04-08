@@ -115,7 +115,7 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
             candidateConfigurations.append(configuration)
         }
 
-        let alwaysSend = await Preferences.shared.currentHomePreferences.alwaysSendSameAuthenticationToWebView
+        let alwaysSend = Preferences.shared.currentHomePreferences.alwaysSendSameAuthenticationToWebView
         let matchedConfiguration = candidateConfigurations.first { configuration in
             URL(string: configuration.url)?.host == host
                 || host == "home.myopenhab.org"

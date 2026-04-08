@@ -27,10 +27,10 @@ struct ConnectionSettingsView: View {
             Group {
                 SingleConnectionSettingsView(headerText: String(localized: "Local server"), isLocalConnection: true, connectionConfig: $localConnectionConfiguration, showNotificationToggle: false)
                 SingleConnectionSettingsView(headerText: String(localized: "Remote server"), connectionConfig: $remoteConnectionConfiguration, showNotificationToggle: true)
-            }
-            Toggle(isOn: $alwaysSendSameAuthenticationToWebView) {
-                Text("Always send credentials to web views")
-                Text("Send the server credentials to all web view authentication challenges, not only when the host matches the configured server URL.")
+                Toggle(isOn: $alwaysSendSameAuthenticationToWebView) {
+                    Text("Always send credentials to web views")
+                    Text("Send the server credentials to all web view authentication challenges, not only when the host matches the configured server URL.")
+                }
             }
         }
     }
