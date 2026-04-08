@@ -15,6 +15,59 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
+enum ColorTemperatureRowMath {
+    static let fallbackRange: ClosedRange<Double> = 1000 ... 10000
+    static let fallbackTemperature = 2700.0
+
+    static func normalizedRange(minValue: Double, maxValue: Double) -> ClosedRange<Double> {
+        let lowerCandidate = sanitizeTemperatureValue(minValue) ?? fallbackRange.lowerBound
+        let upperCandidate = sanitizeTemperatureValue(maxValue) ?? fallbackRange.upperBound
+
+        let lower = min(lowerCandidate, upperCandidate).clamped(to: fallbackRange)
+        let upper = max(lowerCandidate, upperCandidate).clamped(to: fallbackRange)
+
+        guard lower.isFinite, upper.isFinite, lower < upper else {
+            return fallbackRange
+        }
+
+        return lower ... upper
+    }
+
+    static func normalizedTemperature(state: String?, serverValue: Double?, range: ClosedRange<Double>) -> Double {
+        let resolvedValue = state.flatMap { parseTemperature(state: $0) }
+            ?? sanitizeTemperatureValue(serverValue)
+            ?? fallbackTemperature
+        return resolvedValue.clamped(to: range)
+    }
+
+    static func gradientTemperatures(for range: ClosedRange<Double>, steps: Int) -> [Double] {
+        let safeSteps = max(steps, 1)
+        let span = range.upperBound - range.lowerBound
+        return (0 ... safeSteps).map { index in
+            range.lowerBound + (span * Double(index) / Double(safeSteps))
+        }
+    }
+
+    static func sliderFraction(value: Double, range: ClosedRange<Double>) -> Double {
+        let span = range.upperBound - range.lowerBound
+        guard span.isFinite, span > 0 else { return 0 }
+
+        let fraction = (value - range.lowerBound) / span
+        return fraction.clamped(to: 0 ... 1)
+    }
+
+    static func sanitizeTemperatureValue(_ value: Double?) -> Double? {
+        guard let value, value.isFinite, value > 0 else { return nil }
+        let convertedValue = value < fallbackRange.lowerBound ? value.asColorTemperatureInKelvin : value
+        return convertedValue.isFinite ? convertedValue : nil
+    }
+
+    private static func parseTemperature(state: String) -> Double? {
+        guard !state.isEmpty else { return nil }
+        return sanitizeTemperatureValue(state.parseAsNumber().value)
+    }
+}
+
 private struct ColorTemperatureRowConfig {
     let input: ColorTemperatureRowInput
     let viewModel: SitemapPageViewModel
@@ -53,7 +106,7 @@ struct CustomSliderView: View {
         GeometryReader { geometry in
             let width = geometry.size.width
             let height = geometry.size.height
-            let normalized = CGFloat((value - range.lowerBound) / (range.upperBound - range.lowerBound))
+            let normalized = CGFloat(ColorTemperatureRowMath.sliderFraction(value: value, range: range))
             let xPos = normalized * width
 
             ZStack(alignment: .leading) {
@@ -72,9 +125,11 @@ struct CustomSliderView: View {
                                     isDragging = true
                                     onDragStateChanged(true)
                                 }
+                                guard width > 0 else { return }
                                 let location = gesture.location.x.clamped(to: 0 ... width)
                                 let raw = Double(location / width) * (range.upperBound - range.lowerBound) + range.lowerBound
-                                let stepped = (raw / step).rounded() * step
+                                let safeStep = max(step, 1)
+                                let stepped = (raw / safeStep).rounded() * safeStep
                                 value = stepped.clamped(to: range)
                                 let now = Date()
                                 if now.timeIntervalSince(lastSendTime) > 0.2 {
@@ -105,13 +160,16 @@ private struct ColorTemperaturePickerRowContent: View {
 
     private let logger = Logger(subsystem: "org.openhab", category: "ColorTemperaturePickerRowView")
 
-    // Use widget's min/max values, similar to Android implementation
+    private var temperatureRange: ClosedRange<Double> {
+        ColorTemperatureRowMath.normalizedRange(minValue: input.minValue, maxValue: input.maxValue)
+    }
+
     private var minTemperature: Double {
-        input.clampedMinTemperature
+        temperatureRange.lowerBound
     }
 
     private var maxTemperature: Double {
-        input.clampedMaxTemperature
+        temperatureRange.upperBound
     }
 
     var body: some View {
@@ -188,7 +246,7 @@ private struct ColorTemperaturePickerRowContent: View {
             }
         }
         .onAppear {
-            selectedTemperature = loadCurrentTemperature(state: displayState.effectiveState) ?? input.serverValue ?? 2700
+            selectedTemperature = loadCurrentTemperature(state: displayState.effectiveState)
         }
         .onChange(of: displayState.effectiveState) { newState in
             guard !isDraggingSlider else { return }
@@ -196,7 +254,7 @@ private struct ColorTemperaturePickerRowContent: View {
                 suppressNextServerSync = false
                 return
             }
-            selectedTemperature = loadCurrentTemperature(state: newState) ?? input.serverValue ?? 2700
+            selectedTemperature = loadCurrentTemperature(state: newState)
         }
         .onDisappear {
             onCancelPending(input.colorTemperatureCommandKey)
@@ -218,15 +276,15 @@ private struct ColorTemperaturePickerRowContent: View {
 
     // Generate gradient colors similar to Android implementation
     private func colorTemperatureGradient(steps: Int = 20) -> [Color] {
-        stride(from: minTemperature, through: maxTemperature, by: (maxTemperature - minTemperature) / Double(steps)).map { Color(temperature: $0) }
+        ColorTemperatureRowMath.gradientTemperatures(for: temperatureRange, steps: steps).map { Color(temperature: $0) }
     }
 
-    private func loadCurrentTemperature(state: String?) -> Double? {
-        guard let state, !state.isEmpty else { return nil }
-
-        // Parse color temperature directly from Kelvin value (like Android app)
-        let kelvin = state.parseAsNumber().value
-        return kelvin.clamped(to: minTemperature ... maxTemperature)
+    private func loadCurrentTemperature(state: String?) -> Double {
+        ColorTemperatureRowMath.normalizedTemperature(
+            state: state,
+            serverValue: input.serverValue,
+            range: temperatureRange
+        )
     }
 
     private func sendTemperatureCommand() {
