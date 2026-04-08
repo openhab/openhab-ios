@@ -200,9 +200,6 @@ public actor Preferences {
     @UserDefault("idleOff", defaultValue: false)
     public var idleOff: Bool
 
-    @UserDefault("showSearchField", defaultValue: true)
-    public var showSearchField: Bool
-
     @UserDefault("screensaverEnabled", defaultValue: false)
     public var screensaverEnabled: Bool
 
