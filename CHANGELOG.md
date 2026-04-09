@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.2.18, Build 224] - 2026-04-09Z
+
+- Improve clarity in SessionChallengeHandler (#1116)
+
 ## [Version 3.2.17, Build 223] - 2026-04-08Z
 
 - Feature/color temperature row crash guard (#1133)
