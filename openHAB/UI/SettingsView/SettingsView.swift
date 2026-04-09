@@ -24,6 +24,7 @@ struct SettingsView: View {
     @State private var settingsSortSitemapsBy: SortSitemapsOrder = .label
     @State private var settingsDefaultMainUIPath = ""
     @State private var settingsAlwaysAllowWebRTC = true
+    @State private var settingsAlwaysSendSameAuthenticationToWebView = false
     @State private var settingsSitemapForWatch = ""
 
     @State private var sitemaps: [OpenHABSitemap] = []
@@ -40,7 +41,8 @@ struct SettingsView: View {
             ConnectionSettingsView(
                 settingsDemomode: $settingsDemomode,
                 localConnectionConfiguration: $settingsLocalConnectionConfiguration,
-                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration
+                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration,
+                alwaysSendSameAuthenticationToWebView: $settingsAlwaysSendSameAuthenticationToWebView
             )
 
             ApplicationSettingsView(
@@ -122,12 +124,13 @@ struct SettingsView: View {
         settingsDemomode = Preferences.shared.currentHomePreferences.demomode
         settingsIdleOff = Preferences.shared.idleOff
         settingsRealTimeSliders = Preferences.shared.currentHomePreferences.realTimeSliders
-        settingsShowSearchField = Preferences.shared.applicationPreferences.showSearchField
+        settingsShowSearchField = Preferences.shared.currentHomePreferences.showSearchField
         settingsSendCrashReports = Preferences.shared.sendCrashReports
         settingsIconType = IconType(rawValue: Preferences.shared.currentHomePreferences.iconType) ?? .svg
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label
         settingsDefaultMainUIPath = Preferences.shared.currentHomePreferences.defaultMainUIPath
         settingsAlwaysAllowWebRTC = Preferences.shared.currentHomePreferences.alwaysAllowWebRTC
+        settingsAlwaysSendSameAuthenticationToWebView = Preferences.shared.currentHomePreferences.alwaysSendSameAuthenticationToWebView
         settingsSitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
         settingsLocalConnectionConfiguration = Preferences.shared.currentHomePreferences.localConnectionConfig
         settingsRemoteConnectionConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
@@ -139,10 +142,12 @@ struct SettingsView: View {
         Preferences.shared.modifyActiveHome { @MainActor homePreferences in
             homePreferences.demomode = settingsDemomode
             homePreferences.realTimeSliders = settingsRealTimeSliders
+            homePreferences.showSearchField = settingsShowSearchField
             homePreferences.iconType = settingsIconType.rawValue
             homePreferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
             homePreferences.defaultMainUIPath = settingsDefaultMainUIPath
             homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
+            homePreferences.alwaysSendSameAuthenticationToWebView = settingsAlwaysSendSameAuthenticationToWebView
             homePreferences.sitemapForWatch = settingsSitemapForWatch
             homePreferences.sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
             homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration
@@ -151,10 +156,6 @@ struct SettingsView: View {
         }
         Preferences.shared.idleOff = settingsIdleOff
         Preferences.shared.sendCrashReports = settingsSendCrashReports
-
-        Preferences.shared.modifyApplicationPreferences { @MainActor applicationPreferences in
-            applicationPreferences.showSearchField = settingsShowSearchField
-        }
 
         // Apply global UI changes immediately (status bar visibility)
         UIApplication.shared.connectedScenes
