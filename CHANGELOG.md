@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [Version 3.2.17, Build 223] - 2026-04-08Z
+
+- Feature/color temperature row crash guard (#1133)
+- Bump addressable from 2.8.9 to 2.9.0 (#1132)
+- Fix clipped Sitemap top left interaction indicator (#1134)
+- Guard NumberState format fallbacks (#1100)
+- fastlane: update screenshots config for current simulators and App Store requirements
+
 ## [Version 3.2.16, Build 222] - 2026-03-30Z
 
 - Migrate OpenHABSitemapViewController to SwiftUI (#892)

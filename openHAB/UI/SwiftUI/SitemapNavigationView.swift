@@ -50,6 +50,8 @@ struct SitemapNavigationView: View {
                 if !isInteractionIdle {
                     ToolbarItem(placement: .navigationBarLeading) {
                         interactionIndicator
+                            .padding(6)
+                            .fixedSize(horizontal: true, vertical: false)
                     }
                 }
                 if viewModel.showSearchField {
