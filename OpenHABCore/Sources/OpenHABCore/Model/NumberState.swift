@@ -12,6 +12,12 @@
 import Foundation
 
 public struct NumberState: CustomStringConvertible, Equatable {
+    private enum FormatArgument {
+        case int
+        case double
+        case string
+    }
+
     public var description: String {
         toString(locale: Locale.current)
     }
@@ -49,9 +55,6 @@ public struct NumberState: CustomStringConvertible, Equatable {
         if let format, !format.isEmpty {
             var actualFormat = format
                 .replacingOccurrences(of: "%unit%", with: unit ?? "")
-                // %s in Java is for Strings, but does not work in Swift, see
-                // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Strings/Articles/formatSpecifiers.html)
-                .replacingOccurrences(of: "%s", with: "%@")
 
             // Escape trailing % that isn't already escaped (e.g., "%.0f %" should become "%.0f %%")
             // This handles server-side format patterns that forgot to escape the percent sign
@@ -59,19 +62,136 @@ public struct NumberState: CustomStringConvertible, Equatable {
                 actualFormat = String(actualFormat.dropLast()) + "%%"
             }
 
-            let formatValue: any CVarArg = if format.contains("%d") {
-                intValue
-            } else if format.contains("%s") {
-                stringValue
-            } else {
-                value
+            guard let normalized = normalizedFormat(actualFormat) else {
+                return fallbackString
             }
-            return String(format: actualFormat, locale: locale, formatValue)
+
+            switch normalized.argument {
+            case .int:
+                return String(format: normalized.format, locale: locale, intValue)
+            case .double:
+                return String(format: normalized.format, locale: locale, value)
+            case .string:
+                return String(format: normalized.format, locale: locale, stringValue)
+            }
         }
+        return fallbackString
+    }
+
+    private var fallbackString: String {
         if let unit, !unit.isEmpty {
             return "\(stringValue) \(unit)"
-        } else {
-            return stringValue
         }
+        return stringValue
+    }
+
+    private func normalizedFormat(_ format: String) -> (format: String, argument: FormatArgument)? {
+        var normalized = ""
+        var index = format.startIndex
+        var firstArgument: FormatArgument?
+        var consumesArgumentCount = 0
+        var usesExplicitArgumentIndex = false
+
+        while index < format.endIndex {
+            let character = format[index]
+            if character != "%" {
+                normalized.append(character)
+                index = format.index(after: index)
+                continue
+            }
+
+            let percentIndex = index
+            index = format.index(after: index)
+
+            if index == format.endIndex {
+                return nil
+            }
+
+            if format[index] == "%" {
+                normalized.append("%%")
+                index = format.index(after: index)
+                continue
+            }
+
+            let placeholderStart = index
+
+            while index < format.endIndex, "-+# 0".contains(format[index]) {
+                index = format.index(after: index)
+            }
+
+            while index < format.endIndex, format[index].isNumber {
+                index = format.index(after: index)
+            }
+
+            if index < format.endIndex, format[index] == "$" {
+                let digits = format[placeholderStart ..< index]
+                guard digits == "1" else { return nil }
+                usesExplicitArgumentIndex = true
+                index = format.index(after: index)
+            }
+
+            while index < format.endIndex, "-+# 0".contains(format[index]) {
+                index = format.index(after: index)
+            }
+
+            while index < format.endIndex, format[index].isNumber {
+                index = format.index(after: index)
+            }
+
+            if index < format.endIndex, format[index] == "." {
+                index = format.index(after: index)
+                guard index < format.endIndex else { return nil }
+                while index < format.endIndex, format[index].isNumber {
+                    index = format.index(after: index)
+                }
+            }
+
+            if index < format.endIndex, "hlLqjzt".contains(format[index]) {
+                index = format.index(after: index)
+                if index < format.endIndex,
+                   ((format[format.index(before: index)] == "h" && format[index] == "h") ||
+                    (format[format.index(before: index)] == "l" && format[index] == "l")) {
+                    index = format.index(after: index)
+                }
+            }
+
+            guard index < format.endIndex else { return nil }
+
+            let specifier = format[index]
+            let argument: FormatArgument
+            let finalSpecifier: Character
+            switch specifier {
+            case "@", "s":
+                argument = .string
+                finalSpecifier = "@"
+            case "d", "i", "u", "o", "x", "X":
+                argument = .int
+                finalSpecifier = specifier
+            case "f", "F", "e", "E", "g", "G", "a", "A":
+                argument = .double
+                finalSpecifier = specifier
+            default:
+                return nil
+            }
+
+            if let firstArgument, firstArgument != argument {
+                return nil
+            }
+            firstArgument = argument
+            consumesArgumentCount += 1
+
+            normalized.append(contentsOf: format[percentIndex ..< index])
+            normalized.append(finalSpecifier)
+            index = format.index(after: index)
+        }
+
+        guard let firstArgument else {
+            return nil
+        }
+        guard consumesArgumentCount == 1 || usesExplicitArgumentIndex else {
+            return nil
+        }
+
+        return (normalized, firstArgument)
     }
 }
