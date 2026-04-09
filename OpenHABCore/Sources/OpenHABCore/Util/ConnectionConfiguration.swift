@@ -89,6 +89,9 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
 }
 
 public extension ConnectionConfiguration {
+    /// The host component of the connection URL, if parseable.
+    var host: String? { URL(string: url)?.host }
+
     /// Whether this connection is to an openHAB Cloud instance.
     /// Currently determined by the "openHAB Cloud Service" user preference (`supportsNotifications`).
     var isCloudConnection: Bool { supportsNotifications }
