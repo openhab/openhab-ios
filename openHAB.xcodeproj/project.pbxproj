@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2F2150A22F75C434001BA057 /* Intents.intentdefinition in Resources */ = {isa = PBXBuildFile; fileRef = 2F2150972F75C306001BA057 /* Intents.intentdefinition */; };
 		2F399AC92F54599400F72A30 /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 2F399AC82F54599400F72A30 /* Flow */; };
 		6557AF8F2C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */; };
 		6557AF902C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */; };
@@ -165,27 +164,6 @@
 /* Begin PBXFileReference section */
 		1224F78D228A89FC00750965 /* WatchMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchMessageService.swift; sourceTree = "<group>"; };
 		2F08AFC62E5FADC500E70611 /* NotificationCenterDelegateImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterDelegateImpl.swift; sourceTree = "<group>"; };
-		2F2150732F75C2FC001BA057 /* GetItemStateIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetItemStateIntentHandler.swift; sourceTree = "<group>"; };
-		2F2150742F75C2FC001BA057 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2F2150752F75C2FC001BA057 /* IntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentHandler.swift; sourceTree = "<group>"; };
-		2F2150812F75C2FC001BA057 /* OpenHABIntentHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABIntentHelper.swift; sourceTree = "<group>"; };
-		2F2150822F75C2FC001BA057 /* openHABIntents.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = openHABIntents.entitlements; sourceTree = "<group>"; };
-		2F2150832F75C2FC001BA057 /* SetColorValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetColorValueIntentHandler.swift; sourceTree = "<group>"; };
-		2F2150842F75C2FC001BA057 /* SetContactStateValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetContactStateValueIntentHandler.swift; sourceTree = "<group>"; };
-		2F2150852F75C2FC001BA057 /* SetDimmerRollerValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDimmerRollerValueIntentHandler.swift; sourceTree = "<group>"; };
-		2F2150862F75C2FC001BA057 /* SetNumberValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetNumberValueIntentHandler.swift; sourceTree = "<group>"; };
-		2F2150872F75C2FC001BA057 /* SetStringValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetStringValueIntentHandler.swift; sourceTree = "<group>"; };
-		2F2150882F75C2FC001BA057 /* SetSwitchStateIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandler.swift; sourceTree = "<group>"; };
-		2F2150962F75C306001BA057 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; name = Base; path = Base.lproj/Intents.intentdefinition; sourceTree = "<group>"; };
-		2F2150992F75C325001BA057 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Intents.strings; sourceTree = "<group>"; };
-		2F21509A2F75C327001BA057 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Intents.strings; sourceTree = "<group>"; };
-		2F21509B2F75C329001BA057 /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/Intents.strings; sourceTree = "<group>"; };
-		2F21509C2F75C32B001BA057 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Intents.strings; sourceTree = "<group>"; };
-		2F21509D2F75C32D001BA057 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Intents.strings; sourceTree = "<group>"; };
-		2F21509E2F75C32F001BA057 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Intents.strings; sourceTree = "<group>"; };
-		2F21509F2F75C331001BA057 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Intents.strings; sourceTree = "<group>"; };
-		2F2150A02F75C333001BA057 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Intents.strings; sourceTree = "<group>"; };
-		2F2150A12F75C335001BA057 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Intents.strings; sourceTree = "<group>"; };
 		2F399AB92F5357E900F72A30 /* InputCommandFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputCommandFormatterTests.swift; sourceTree = "<group>"; };
 		2F55E7BA2DEE447700EC8350 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2F55E7BC2DEE44A800EC8350 /* ClientCertificatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientCertificatesView.swift; sourceTree = "<group>"; };
@@ -235,7 +213,6 @@
 		DA0776EF234788010086C685 /* UserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserData.swift; sourceTree = "<group>"; };
 		DA0DA9E12E0C9B74000C5D0A /* BuildTools */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = BuildTools; sourceTree = "<group>"; };
 		DA0F37CF23D4ACC7007EAB48 /* SliderRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderRow.swift; sourceTree = "<group>"; };
-		DA1009262F84206600B1108D /* openHABIntents.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = openHABIntents.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA15BFBC23C6726400BD8ADA /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABGeneralTests.swift; sourceTree = "<group>"; };
 		DA21EAE12339621C001AB415 /* Throttler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttler.swift; sourceTree = "<group>"; };
@@ -312,7 +289,6 @@
 		DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesSwiftUIView.swift; sourceTree = "<group>"; };
 		DAC9AF4624F9669F006DAE93 /* OpenHABWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWidgetExtension.swift; sourceTree = "<group>"; };
 		DAC9AF4824F966FA006DAE93 /* LazyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyView.swift; sourceTree = "<group>"; };
-		DACB636127D3FC6500041931 /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = error.png; sourceTree = "<group>"; };
 		DACC0F7B2E883AC700B62043 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		DAD0856C2AE4782B001D36BE /* openHABWatchSwiftUI Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "openHABWatchSwiftUI Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAD085762AE4782E001D36BE /* openHABWatchSwiftUI Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "openHABWatchSwiftUI Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -420,7 +396,6 @@
 		2FD4E1E22F66EF0200EBB340 /* fastlane */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = fastlane; sourceTree = "<group>"; };
 		2FD4E1E62F66EF4800EBB340 /* NotificationService */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2FD4E1E82F66EF4800EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = NotificationService; sourceTree = "<group>"; };
 		2FD4E1EB2F66EF4F00EBB340 /* openHABWatchSwiftUI Watch AppUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "openHABWatchSwiftUI Watch AppUITests"; sourceTree = "<group>"; };
-		2FD4E1EF2F66EF5500EBB340 /* openHABIntentsTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = openHABIntentsTests; sourceTree = "<group>"; };
 		2FD4E29C2F66F9A500EBB340 /* openHABWatch */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2FD4E2CA2F66F9A500EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = openHABWatch; sourceTree = "<group>"; };
 		2FD4E2CD2F66F9F600EBB340 /* openHABUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2FD4E2CF2F66F9F700EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = openHABUITests; sourceTree = "<group>"; };
 		2FD4E2E02F66F9FE00EBB340 /* openHABTestsSwift */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2FD4E2F02F66F9FE00EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = openHABTestsSwift; sourceTree = "<group>"; };
@@ -746,26 +721,6 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		DAE238252806E5C800196467 /* openHABIntents */ = {
-			isa = PBXGroup;
-			children = (
-				DACB636127D3FC6500041931 /* error.png */,
-				2F2150732F75C2FC001BA057 /* GetItemStateIntentHandler.swift */,
-				2F2150742F75C2FC001BA057 /* Info.plist */,
-				2F2150752F75C2FC001BA057 /* IntentHandler.swift */,
-				2F2150972F75C306001BA057 /* Intents.intentdefinition */,
-				2F2150812F75C2FC001BA057 /* OpenHABIntentHelper.swift */,
-				2F2150822F75C2FC001BA057 /* openHABIntents.entitlements */,
-				2F2150832F75C2FC001BA057 /* SetColorValueIntentHandler.swift */,
-				2F2150842F75C2FC001BA057 /* SetContactStateValueIntentHandler.swift */,
-				2F2150852F75C2FC001BA057 /* SetDimmerRollerValueIntentHandler.swift */,
-				2F2150862F75C2FC001BA057 /* SetNumberValueIntentHandler.swift */,
-				2F2150872F75C2FC001BA057 /* SetStringValueIntentHandler.swift */,
-				2F2150882F75C2FC001BA057 /* SetSwitchStateIntentHandler.swift */,
-			);
-			path = openHABIntents;
-			sourceTree = "<group>";
-		};
 		DAF231D327BB6F5C00AB916C /* Ressources */ = {
 			isa = PBXGroup;
 			children = (
@@ -873,7 +828,6 @@
 				2FD4E2E02F66F9FE00EBB340 /* openHABTestsSwift */,
 				2FD4E2CD2F66F9F600EBB340 /* openHABUITests */,
 				2FD4E29C2F66F9A500EBB340 /* openHABWatch */,
-				2FD4E1EF2F66EF5500EBB340 /* openHABIntentsTests */,
 				2FD4E1EB2F66EF4F00EBB340 /* openHABWatchSwiftUI Watch AppUITests */,
 				2FD4E1E62F66EF4800EBB340 /* NotificationService */,
 				DA8B15522F3BB74B007753FD /* openHABWatchTests */,
@@ -883,7 +837,6 @@
 				2FD4E1E22F66EF0200EBB340 /* fastlane */,
 				DAFD2FE62E0D96700059A1EB /* OsLogRewriter */,
 				DA0DA9E12E0C9B74000C5D0A /* BuildTools */,
-				DAE238252806E5C800196467 /* openHABIntents */,
 				DA83C81D2F48AF7600CDACED /* Version.xcconfig */,
 			);
 			sourceTree = "<group>";
@@ -899,7 +852,6 @@
 				DAD085762AE4782E001D36BE /* openHABWatchSwiftUI Watch AppUITests.xctest */,
 				6571444E2C1E438700C8A1F3 /* NotificationService.appex */,
 				DA8B15512F3BB74B007753FD /* openHABWatchTests.xctest */,
-				DA1009262F84206600B1108D /* openHABIntents.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1121,7 +1073,6 @@
 				657144542C1E438700C8A1F3 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				2FD4E1EF2F66EF5500EBB340 /* openHABIntentsTests */,
 				2FD4E52B2F670BA500EBB340 /* openHAB */,
 			);
 			name = openHAB;
@@ -1304,7 +1255,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2F2150A22F75C434001BA057 /* Intents.intentdefinition in Resources */,
 				6557AF8F2C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */,
 				DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */,
 				DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */,
@@ -1451,23 +1401,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		2F2150972F75C306001BA057 /* Intents.intentdefinition */ = {
-			isa = PBXVariantGroup;
-			children = (
-				2F2150962F75C306001BA057 /* Base */,
-				2F2150992F75C325001BA057 /* en */,
-				2F21509A2F75C327001BA057 /* nl */,
-				2F21509B2F75C329001BA057 /* fi */,
-				2F21509C2F75C32B001BA057 /* fr */,
-				2F21509D2F75C32D001BA057 /* de */,
-				2F21509E2F75C32F001BA057 /* it */,
-				2F21509F2F75C331001BA057 /* nb */,
-				2F2150A02F75C333001BA057 /* ru */,
-				2F2150A12F75C335001BA057 /* es */,
-			);
-			name = Intents.intentdefinition;
-			sourceTree = "<group>";
-		};
 		938BF9CA24EFCCC000E6B52F /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
