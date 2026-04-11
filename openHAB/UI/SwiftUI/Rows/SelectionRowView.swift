@@ -178,7 +178,7 @@ struct SelectionRowView: View {
     var body: some View {
         SelectionRowContent(
             input: input,
-            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId)
+            widgetVersion: viewModel.widgetUpdateVersion(for: input.rowID)
         ) { command in
             guard let itemName = input.itemName else { return }
             viewModel.sendCommand(command, for: itemName)

@@ -44,6 +44,7 @@ struct RowIconInput: Equatable, Sendable {
 }
 
 struct SelectionRowInput: Equatable, RowWithIconInput {
+    let rowID: RowID
     let displayState: WidgetDisplayState
     let mappings: [OpenHABWidgetMapping]
     let labelColor: String
@@ -53,9 +54,10 @@ struct SelectionRowInput: Equatable, RowWithIconInput {
     let icon: RowIconInput
     let itemName: String?
 
-    static func from(widget: OpenHABWidget) -> SelectionRowInput {
+    static func from(widget: OpenHABWidget, rowID: RowID) -> SelectionRowInput {
         let displayState = widget.displayState
         return SelectionRowInput(
+            rowID: rowID,
             displayState: displayState,
             mappings: displayState.mappings,
             labelColor: widget.labelcolor,
@@ -69,6 +71,7 @@ struct SelectionRowInput: Equatable, RowWithIconInput {
 }
 
 struct SegmentedRowInput: Equatable, RowWithIconInput {
+    let rowID: RowID
     let displayState: WidgetDisplayState
     let mappings: [OpenHABWidgetMapping]
     let labelColor: String
@@ -77,9 +80,10 @@ struct SegmentedRowInput: Equatable, RowWithIconInput {
     let icon: RowIconInput
     let itemName: String?
 
-    static func from(widget: OpenHABWidget) -> SegmentedRowInput {
+    static func from(widget: OpenHABWidget, rowID: RowID) -> SegmentedRowInput {
         let displayState = widget.displayState
         return SegmentedRowInput(
+            rowID: rowID,
             displayState: displayState,
             mappings: displayState.mappings,
             labelColor: widget.labelcolor,
@@ -408,6 +412,7 @@ struct ColorTemperatureRowInput: Equatable, RowWithIconInput {
 }
 
 struct MediaRowInput: Equatable {
+    let rowID: RowID
     let widgetId: String
     let renderingKind: WidgetRenderingKind
     let displayState: WidgetDisplayState
@@ -423,12 +428,13 @@ struct MediaRowInput: Equatable {
     let coordinateLatitude: Double?
     let coordinateLongitude: Double?
 
-    static func from(widget: OpenHABWidget) -> MediaRowInput {
+    static func from(widget: OpenHABWidget, rowID: RowID) -> MediaRowInput {
         let coordinate = widget.coordinate
         let hasValidCoordinate = (-90.0 ... 90.0).contains(coordinate.latitude)
             && (-180.0 ... 180.0).contains(coordinate.longitude)
 
         return MediaRowInput(
+            rowID: rowID,
             widgetId: widget.widgetId,
             renderingKind: widget.renderingKind,
             displayState: widget.displayState,
@@ -478,6 +484,7 @@ struct TextRowInput: Equatable, RowWithIconInput {
 }
 
 struct SliderRowInput: Equatable, RowWithIconInput {
+    let rowID: RowID
     let widgetId: String
     let displayState: WidgetDisplayState
     let numberPattern: String?
@@ -500,7 +507,7 @@ struct SliderRowInput: Equatable, RowWithIconInput {
         displayState.minValue ... displayState.maxValue
     }
 
-    static func from(widget: OpenHABWidget) -> SliderRowInput {
+    static func from(widget: OpenHABWidget, rowID: RowID) -> SliderRowInput {
         let displayState = widget.displayState
         let numberPattern = if let pattern = widget.pattern, !pattern.isEmpty {
             pattern
@@ -515,6 +522,7 @@ struct SliderRowInput: Equatable, RowWithIconInput {
         }
 
         return SliderRowInput(
+            rowID: rowID,
             widgetId: widget.widgetId,
             displayState: displayState,
             numberPattern: numberPattern,
