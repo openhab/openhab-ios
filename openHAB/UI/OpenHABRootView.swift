@@ -134,15 +134,11 @@ struct OpenHABRootView: View {
     private var contentView: some View {
         switch currentContent {
         case .webview:
-            VStack(spacing: 0) {
-                if webViewModel.showMenuBar {
-                    menuBar
-                        .transition(.move(edge: .top))
-                }
+            ZStack(alignment: .top) {
                 OpenHABWebViewContainer(viewModel: webViewModel)
+                    .background(.clear)
+                menuBar
             }
-            .clipped()
-            .animation(.easeInOut(duration: 0.3), value: webViewModel.showMenuBar)
             .onAppear { webViewModel.triggerAppMenuProbe() }
         case let .sitemap(name):
             SitemapNavigationView(onShowSideMenu: { menuPresented = true })
@@ -157,10 +153,23 @@ struct OpenHABRootView: View {
 
     @ViewBuilder
     private var menuBar: some View {
+        let isWebviewMode: Bool = {
+            if case .webview = currentContent { return true }
+            return false
+        }()
+
         HStack {
-            // Connection-status indicator (mirrors the Sitemap view's toolbar indicator)
+            // Left side: proxied navbar items (webview mode with items available),
+            // or connection-status indicator as fallback.
             Group {
-                if webViewModel.isLoading {
+                if isWebviewMode, !webViewModel.navbarItems.isEmpty {
+                    ForEach(webViewModel.navbarItems) { item in
+                        Button(item.label) {
+                            webViewModel.evaluateJS(item.jsAction)
+                        }
+                        .ohMinimumHitTarget()
+                    }
+                } else if webViewModel.isLoading {
                     HStack(spacing: 4) {
                         ProgressView()
                             .controlSize(.small)
@@ -168,7 +177,7 @@ struct OpenHABRootView: View {
                             .ohTextToken(.secondary)
                     }
                     .foregroundStyle(.secondary)
-                } else if case .webview = currentContent, !webViewModel.isSSEConnected {
+                } else if isWebviewMode, !webViewModel.isSSEConnected {
                     HStack(spacing: 4) {
                         Image(systemSymbol: .wifiExclamationmark)
                         Text("Offline")
@@ -207,7 +216,12 @@ struct OpenHABRootView: View {
             }
         }
         .frame(height: 44)
-        .background(Color(.systemBackground), ignoresSafeAreaEdges: .top)
+        .background(
+            isWebviewMode
+                ? AnyShapeStyle(.bar)
+                : AnyShapeStyle(Color(.systemBackground)),
+            ignoresSafeAreaEdges: .top
+        )
     }
 
     private func switchToSavedView() {

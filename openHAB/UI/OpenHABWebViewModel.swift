@@ -16,6 +16,13 @@ import SafariServices
 import UIKit
 import WebKit
 
+/// A single action button proxied from the MainUI web navbar.
+struct WebNavbarItem: Identifiable {
+    let id = UUID()
+    let label: String
+    let jsAction: String
+}
+
 @MainActor
 class OpenHABWebViewModel: ObservableObject {
     // MARK: - Published state
@@ -31,6 +38,9 @@ class OpenHABWebViewModel: ObservableObject {
     /// Used to determine when the native menu bar can be hidden and to show
     /// a connection-status indicator while connecting or offline.
     @Published private(set) var isSSEConnected = false
+    /// Navbar items proxied from the MainUI web top bar. Empty until the JS
+    /// MutationObserver posts the first `navbarElements` message.
+    @Published private(set) var navbarItems: [WebNavbarItem] = []
 
     // MARK: - Internal state (used by Coordinator)
 
@@ -52,6 +62,63 @@ class OpenHABWebViewModel: ObservableObject {
     private var etagChecker: ETagChecker?
     private var etagCheckerConfigURL: String?
     private var trackerCancellables = Set<AnyCancellable>()
+
+    /// JS injected after each page load to proxy the MainUI Framework7 navbar
+    /// into the native bar and hide the web navbar.
+    private let navbarProxyJS = """
+    (function() {
+        function serializeNavbar() {
+            var navbar = document.querySelector('.navbar');
+            if (!navbar) return;
+            navbar.style.display = 'none';
+
+            var items = [];
+            navbar.querySelectorAll('[aria-label]').forEach(function(el) {
+                var label = el.getAttribute('aria-label') || el.innerText || '';
+                label = label.trim();
+                if (!label) return;
+                // Build a JS expression that calls the element's click handler
+                var idx = Array.from(navbar.querySelectorAll('[aria-label]')).indexOf(el);
+                items.push({
+                    label: label,
+                    action: '(function(){var els=document.querySelectorAll(".navbar [aria-label]");if(els[' + idx + '])els[' + idx + '].click();})()'
+                });
+            });
+
+            window.webkit.messageHandlers.mainUi.postMessage({
+                type: 'navbarElements',
+                items: items
+            });
+        }
+
+        // Observe navbar mutations to react to SPA navigation changes
+        function observeNavbar() {
+            var navbar = document.querySelector('.navbar');
+            if (!navbar) return;
+            new MutationObserver(function() {
+                serializeNavbar();
+            }).observe(navbar, { childList: true, subtree: true, attributes: true });
+        }
+
+        serializeNavbar();
+        observeNavbar();
+
+        // Re-run on SPA navigations
+        var origPush = history.pushState;
+        history.pushState = function() {
+            origPush.apply(this, arguments);
+            setTimeout(function() { serializeNavbar(); observeNavbar(); }, 300);
+        };
+        var origReplace = history.replaceState;
+        history.replaceState = function() {
+            origReplace.apply(this, arguments);
+            setTimeout(function() { serializeNavbar(); observeNavbar(); }, 300);
+        };
+        window.addEventListener('popstate', function() {
+            setTimeout(function() { serializeNavbar(); observeNavbar(); }, 300);
+        });
+    })();
+    """
 
     private let js = """
     (function() {
@@ -297,6 +364,7 @@ class OpenHABWebViewModel: ObservableObject {
         newWebView.scrollView.bounces = false
         newWebView.isOpaque = false
         newWebView.backgroundColor = UIColor.clear
+        newWebView.scrollView.backgroundColor = UIColor.clear
         if UIDevice.current.userInterfaceIdiom == .pad {
             newWebView.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
         }
@@ -407,6 +475,18 @@ class OpenHABWebViewModel: ObservableObject {
         showMenuBar = true
     }
 
+    // MARK: - JS evaluation
+
+    /// Evaluates an arbitrary JS expression in the current webview.
+    /// Used by the native navbar proxy to trigger action buttons.
+    func evaluateJS(_ js: String) {
+        webView.evaluateJavaScript(js) { _, error in
+            if let error {
+                Logger.viewController.error("evaluateJS failed: \(error.localizedDescription)")
+            }
+        }
+    }
+
     // MARK: - didFinish helpers
 
     func handleDidFinish() {
@@ -422,7 +502,16 @@ class OpenHABWebViewModel: ObservableObject {
             }
         }
 
+        injectNavbarProxy()
         injectEditorHeightFix()
+    }
+
+    private func injectNavbarProxy() {
+        webView.evaluateJavaScript(navbarProxyJS) { _, error in
+            if let error {
+                Logger.viewController.debug("navbarProxyJS: \(error.localizedDescription)")
+            }
+        }
     }
 
     // MARK: - Menu bar visibility
@@ -432,6 +521,12 @@ class OpenHABWebViewModel: ObservableObject {
     func handleNavigationStart() {
         showMenuBar = true
         isSSEConnected = false
+        navbarItems = []
+    }
+
+    /// Updates the proxied navbar items received from the web content.
+    func updateNavbarItems(_ items: [WebNavbarItem]) {
+        navbarItems = items
     }
 
     /// Called when the openHAB Main UI fires its `OHApp.ready()` callback.
