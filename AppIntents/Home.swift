@@ -41,7 +41,12 @@ struct Home: AppEntity {
     var id: String // if your identifier is not a String, conform the entity to EntityIdentifierConvertible.
     var displayString: String
     var displayRepresentation: DisplayRepresentation {
-        DisplayRepresentation(title: "\(displayString)")
+        DisplayRepresentation(
+            title: LocalizedStringResource(
+                "__app_intents_home_name__",
+                defaultValue: "\(displayString)"
+            )
+        )
     }
 
     init(id: String, displayString: String) {

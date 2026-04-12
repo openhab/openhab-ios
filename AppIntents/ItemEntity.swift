@@ -39,11 +39,14 @@ extension ItemEntity {
     var displayRepresentation: DisplayRepresentation {
         if let homeName {
             DisplayRepresentation(
-                title: "\(label)",
-                subtitle: "\(item.name) • \(homeName)"
+                title: nonLocalizedDisplayString(label, key: "__app_intents_item_label__"),
+                subtitle: nonLocalizedDisplayString("\(item.name) • \(homeName)", key: "__app_intents_item_subtitle__")
             )
         } else {
-            DisplayRepresentation(title: "\(label)", subtitle: "\(item.name)")
+            DisplayRepresentation(
+                title: nonLocalizedDisplayString(label, key: "__app_intents_item_label__"),
+                subtitle: nonLocalizedDisplayString(item.name, key: "__app_intents_item_name__")
+            )
         }
     }
 
@@ -53,5 +56,9 @@ extension ItemEntity {
             item: openHABItem,
             homeName: homeName
         )
+    }
+
+    func nonLocalizedDisplayString(_ value: String, key: StaticString) -> LocalizedStringResource {
+        LocalizedStringResource(key, defaultValue: "\(value)")
     }
 }
