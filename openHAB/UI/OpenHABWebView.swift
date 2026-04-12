@@ -96,7 +96,7 @@ struct OpenHABWebView: UIViewRepresentable {
                 case "exitToApp":
                     viewModel.onExitToApp?()
                 case "goFullscreen":
-                    viewModel.hideNavigationBar = true
+                    viewModel.showMenuBar = false
                 case "sseConnected-true":
                     viewModel.handleSSEConnected(true)
                 case "sseConnected-false":
@@ -138,7 +138,6 @@ struct OpenHABWebView: UIViewRepresentable {
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {
             Logger.viewController.error("didFail - webView.url: \(String(describing: webView.url?.description))")
-            viewModel.hideNavigationBar = false
             if let urlError = error as? URLError, urlError.code == .cancelled {
                 return
             }
@@ -176,7 +175,6 @@ struct OpenHABWebView: UIViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
-            viewModel.hideNavigationBar = false
             viewModel.reloadView()
         }
 
@@ -297,7 +295,13 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                 case "exitToApp":
                     viewModel.onExitToApp?()
                 case "goFullscreen":
-                    viewModel.hideNavigationBar = true
+                    viewModel.showMenuBar = false
+                case "ready":
+                    viewModel.handleReady()
+                case "appMenu-hidden":
+                    viewModel.handleAppMenuProbe(hidden: true)
+                case "appMenu-visible":
+                    viewModel.handleAppMenuProbe(hidden: false)
                 case "sseConnected-true":
                     viewModel.handleSSEConnected(true)
                 case "sseConnected-false":
@@ -314,10 +318,30 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             guard let url = navigationAction.request.url else { return .allow }
             Logger.viewController.info("decidePolicyFor - url: \(url.absoluteString)")
             if navigationAction.navigationType == .linkActivated {
+                if let rewritten = rewriteToActiveConnection(url) {
+                    Logger.viewController.info("decidePolicyFor - loading in-app (rewritten): \(rewritten.absoluteString)")
+                    webView.load(URLRequest(url: rewritten))
+                    return .cancel
+                }
                 await UIApplication.shared.open(url)
                 return .cancel
             }
             return .allow
+        }
+
+        /// Rewrites `url` to use the active connection's origin when the URL's host+port
+        /// matches any configured home server connection.  Returns `nil` if no match is found,
+        /// meaning the link should be opened externally.
+        private func rewriteToActiveConnection(_ url: URL) -> URL? {
+            guard let activeUrl = MainActorNetworkTracker.shared.activeConnection?.configuration.url else {
+                return nil
+            }
+            var knownURLStrings = [activeUrl]
+            for home in Preferences.shared.storedHomes.values {
+                knownURLStrings.append(home.localConnectionConfig.url)
+                knownURLStrings.append(home.remoteConnectionConfig.url)
+            }
+            return WebViewURLHelper.rewriteToActiveConnection(url, knownBaseURLStrings: knownURLStrings, activeBaseURLString: activeUrl)
         }
 
         func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
@@ -334,11 +358,11 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation?) {
             Logger.viewController.info("didStartProvisionalNavigation - webView.url: \(String(describing: webView.url?.description))")
             viewModel.isLoading = true
+            viewModel.handleNavigationStart()
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {
             Logger.viewController.error("didFail - webView.url: \(String(describing: webView.url?.description))")
-            viewModel.hideNavigationBar = false
             if let urlError = error as? URLError, urlError.code == .cancelled {
                 return
             }
@@ -376,7 +400,6 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
-            viewModel.hideNavigationBar = false
             viewModel.reloadView()
         }
 

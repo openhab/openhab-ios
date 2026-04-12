@@ -13,6 +13,44 @@ import Foundation
 
 /// Pure URL helper functions for the web view, extracted for testability.
 enum WebViewURLHelper {
+    /// Rewrites `linkURL` to use the active connection's scheme, host, and port if the link's
+    /// host+port matches any of the supplied `knownBaseURLStrings`.
+    ///
+    /// This keeps tile links in-app when the user follows a URL that points to one of the
+    /// configured home servers, even if the link uses a different connection endpoint than the
+    /// currently active one (e.g. a local-network URL while connected via remote/cloud).
+    ///
+    /// - Parameters:
+    ///   - linkURL: The URL the user tapped.
+    ///   - knownBaseURLStrings: All configured connection base URL strings (local + remote for
+    ///     every stored home).  Non-parseable strings are silently ignored.
+    ///   - activeBaseURLString: The URL string of the currently active connection.  When a match
+    ///     is found the link is rewritten to use this origin.
+    /// - Returns: The rewritten URL (preserving path, query, and fragment) or `nil` when the
+    ///   link does not target a known home server.
+    static func rewriteToActiveConnection(
+        _ linkURL: URL,
+        knownBaseURLStrings: [String],
+        activeBaseURLString: String
+    ) -> URL? {
+        guard let linkHost = linkURL.host, !linkHost.isEmpty else { return nil }
+        let linkPort = linkURL.port
+
+        let hostMatches = knownBaseURLStrings.contains { baseString in
+            guard let base = URL(string: baseString), let baseHost = base.host else { return false }
+            return baseHost == linkHost && base.port == linkPort
+        }
+        guard hostMatches else { return nil }
+        guard let activeBase = URL(string: activeBaseURLString),
+              var components = URLComponents(url: linkURL, resolvingAgainstBaseURL: false),
+              let activeComponents = URLComponents(url: activeBase, resolvingAgainstBaseURL: false)
+        else { return nil }
+
+        components.scheme = activeComponents.scheme
+        components.host = activeComponents.host
+        components.port = activeComponents.port
+        return components.url
+    }
     /// Appends a path (and optional query) to a base URL.
     static func appendPath(_ path: String, to baseURL: URL) -> URL? {
         guard var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
