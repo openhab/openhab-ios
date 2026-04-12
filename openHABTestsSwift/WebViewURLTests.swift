@@ -82,6 +82,96 @@ struct WebViewURLTests {
         #expect(url1 != url2)
     }
 
+    // MARK: - rewriteToActiveConnection
+
+    @Test("Returns nil when host does not match any known connection")
+    func rewriteNoMatch() {
+        let link = URL(string: "https://external.example.com/page")!
+        let result = WebViewURLHelper.rewriteToActiveConnection(
+            link,
+            knownBaseURLStrings: ["https://openhab.local:8443", "https://remote.myopenhab.org"],
+            activeBaseURLString: "https://openhab.local:8443"
+        )
+        #expect(result == nil)
+    }
+
+    @Test("Rewrites URL when host matches active connection")
+    func rewriteMatchesActive() {
+        let link = URL(string: "https://openhab.local:8443/page?q=1#anchor")!
+        let result = WebViewURLHelper.rewriteToActiveConnection(
+            link,
+            knownBaseURLStrings: ["https://openhab.local:8443"],
+            activeBaseURLString: "https://openhab.local:8443"
+        )
+        #expect(result?.absoluteString == "https://openhab.local:8443/page?q=1#anchor")
+    }
+
+    @Test("Rewrites local URL to active remote connection")
+    func rewriteLocalToRemote() {
+        let link = URL(string: "http://192.168.1.100:8080/dashboard")!
+        let result = WebViewURLHelper.rewriteToActiveConnection(
+            link,
+            knownBaseURLStrings: ["http://192.168.1.100:8080", "https://remote.myopenhab.org"],
+            activeBaseURLString: "https://remote.myopenhab.org"
+        )
+        #expect(result?.absoluteString == "https://remote.myopenhab.org/dashboard")
+    }
+
+    @Test("Rewrites remote URL to active local connection")
+    func rewriteRemoteToLocal() {
+        let link = URL(string: "https://remote.myopenhab.org/settings")!
+        let result = WebViewURLHelper.rewriteToActiveConnection(
+            link,
+            knownBaseURLStrings: ["http://192.168.1.100:8080", "https://remote.myopenhab.org"],
+            activeBaseURLString: "http://192.168.1.100:8080"
+        )
+        #expect(result?.absoluteString == "http://192.168.1.100:8080/settings")
+    }
+
+    @Test("Returns nil when link has no host")
+    func rewriteNoHost() {
+        let link = URL(string: "/relative/path")!
+        let result = WebViewURLHelper.rewriteToActiveConnection(
+            link,
+            knownBaseURLStrings: ["https://openhab.local:8443"],
+            activeBaseURLString: "https://openhab.local:8443"
+        )
+        #expect(result == nil)
+    }
+
+    @Test("Does not match when port differs")
+    func rewritePortMismatch() {
+        let link = URL(string: "https://openhab.local:9090/page")!
+        let result = WebViewURLHelper.rewriteToActiveConnection(
+            link,
+            knownBaseURLStrings: ["https://openhab.local:8443"],
+            activeBaseURLString: "https://openhab.local:8443"
+        )
+        #expect(result == nil)
+    }
+
+    @Test("Returns nil when knownBaseURLStrings is empty")
+    func rewriteEmptyKnownList() {
+        let link = URL(string: "https://openhab.local:8443/page")!
+        let result = WebViewURLHelper.rewriteToActiveConnection(
+            link,
+            knownBaseURLStrings: [],
+            activeBaseURLString: "https://openhab.local:8443"
+        )
+        #expect(result == nil)
+    }
+
+    @Test("Preserves query and fragment when rewriting")
+    func rewritePreservesQueryAndFragment() {
+        let link = URL(string: "http://192.168.1.10:8080/ui/page?tab=2#section")!
+        let result = WebViewURLHelper.rewriteToActiveConnection(
+            link,
+            knownBaseURLStrings: ["http://192.168.1.10:8080"],
+            activeBaseURLString: "https://myopenhab.org"
+        )
+        #expect(result?.absoluteString == "https://myopenhab.org/ui/page?tab=2#section")
+    }
+
     // MARK: - resolveWebViewURL
 
     @Test("Uses base URL when no proxy and no path")
