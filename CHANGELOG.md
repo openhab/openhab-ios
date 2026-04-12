@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [Version 3.2.20, Build 226] - 2026-04-12Z
+
+- Remove widget reconciliation from SwiftUI sitemap update path (#1139)
+
+## [Version 3.2.19, Build 225] - 2026-04-12Z
+
+- Fix sitemap scroll hitching under frequent long-poll updates (#1136) (#1138)
+
 ## [Version 3.2.18, Build 224] - 2026-04-09Z
 
 - Improve clarity in SessionChallengeHandler (#1116)

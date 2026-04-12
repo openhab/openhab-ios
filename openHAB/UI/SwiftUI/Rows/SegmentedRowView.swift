@@ -344,7 +344,7 @@ struct SegmentedRowView: View {
     var body: some View {
         SegmentedRowContent(
             input: input,
-            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+            widgetVersion: viewModel.widgetUpdateVersion(for: input.rowID),
             fallbackSymbol: fallbackSymbol
         ) { command, policy, phase in
             guard let itemName = input.itemName else { return }
@@ -377,13 +377,16 @@ private extension SegmentedRowView {
                                    icon: String = "switch",
                                    mappings: [OpenHABWidgetMapping],
                                    selectedState: String? = nil) -> SegmentedRowInput {
-        SegmentedRowInput.from(widget: PreviewWidgetFactory.segmented(
-            label: label,
-            mappings: mappings,
-            selectedState: selectedState,
-            icon: icon,
-            valueText: detailLabel
-        ))
+        SegmentedRowInput.from(
+            widget: PreviewWidgetFactory.segmented(
+                label: label,
+                mappings: mappings,
+                selectedState: selectedState,
+                icon: icon,
+                valueText: detailLabel
+            ),
+            rowID: RowID(pageKey: "preview", widgetId: UUID().uuidString, occurrence: 1)
+        )
     }
 }
 
@@ -577,7 +580,10 @@ private extension SegmentedRowView {
 #Preview("From PreviewConstants") {
     PreviewList {
         SegmentedRowView(
-            input: SegmentedRowInput.from(widget: PreviewConstants.openHABSitemapPage!.widgets[4])
+            input: SegmentedRowInput.from(
+                widget: PreviewConstants.openHABSitemapPage!.widgets[4],
+                rowID: RowID(pageKey: "preview", widgetId: UUID().uuidString, occurrence: 1)
+            )
         )
     }
 }
