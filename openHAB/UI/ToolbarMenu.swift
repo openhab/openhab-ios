@@ -92,7 +92,9 @@ struct ToolbarMenu: View {
             ) {
                 select(.webview)
             }
-            if !menuData.isLoading {
+            if menuData.isLoading {
+                loadingRow(label: String(localized: "Pages"))
+            } else {
                 ForEach(menuData.uiPages, id: \.uid) { page in
                     menuRow(
                         icon: AnyView(pageIcon(for: page)),
@@ -122,7 +124,9 @@ struct ToolbarMenu: View {
             }
 
             // Tiles
-            if !menuData.isLoading, !menuData.uiTiles.isEmpty {
+            if menuData.isLoading {
+                loadingRow(label: String(localized: "Tiles"))
+            } else if !menuData.uiTiles.isEmpty {
                 sectionHeader(String(localized: "Tiles"))
                 ForEach(menuData.uiTiles, id: \.url) { tile in
                     menuRow(

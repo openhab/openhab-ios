@@ -63,6 +63,12 @@ struct OpenHABRootView: View {
             menuData.refresh()
             webViewModel.reloadView()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
+            webViewModel.clearView()
+            menuData.clearAll()
+            currentContent = .webview
+            switchToSavedView()
+        }
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 SettingsView(

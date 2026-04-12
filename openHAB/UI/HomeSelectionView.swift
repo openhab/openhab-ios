@@ -184,6 +184,7 @@ struct HomeSelectionView: View {
 
     private func select(home: UUID) {
         Preferences.shared.switchActiveHome(to: home)
+        NotificationCenter.default.post(name: .homeDidSwitch, object: nil)
         dismiss()
     }
 
@@ -217,4 +218,9 @@ struct HomeSelectionView: View {
 
 #Preview {
     HomeSelectionView()
+}
+
+extension Notification.Name {
+    /// Posted immediately after the active home is switched in `HomeSelectionView`.
+    static let homeDidSwitch = Notification.Name("org.openhab.homeDidSwitch")
 }
