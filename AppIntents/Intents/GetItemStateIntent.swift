@@ -49,7 +49,8 @@ struct GetItemStateIntent: AppIntent {
             throw ItemStateError.itemNotInHome(itemEntity.label, home.displayString)
         }
 
-        let state = itemEntity.item.state ?? "Unknown state"
+        let freshItem = await OpenHABItemCache.instance.getItemUncached(name: itemEntity.itemName, home: homeId)
+        let state = freshItem?.state ?? itemEntity.item.state ?? "Unknown state"
 
         return .result(
             value: state,
