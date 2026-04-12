@@ -6305,7 +6305,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Erhalte Status eines Items"
+            "value" : "Status eines Items erhalten"
           }
         },
         "en" : {
@@ -13755,7 +13755,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Status eines Kontakts öffnen oder schließen"
+            "value" : "Status eines Kontakts auf offen oder geschlossen setzen"
           }
         },
         "en" : {
@@ -15224,7 +15224,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zustand"
+            "value" : "Status"
           }
         },
         "en" : {
@@ -16359,7 +16359,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unbekannter Zustand"
+            "value" : "Unbekannter Status"
           }
         },
         "en" : {
