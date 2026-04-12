@@ -37,11 +37,11 @@ enum SitemapRowInputMapper {
 
         switch widget.renderingKind {
         case .slider:
-            return SitemapRowInput.slider(rowID, SliderRowInput.from(widget: widget))
+            return SitemapRowInput.slider(rowID, SliderRowInput.from(widget: widget, rowID: rowID))
         case .selection:
-            return SitemapRowInput.selection(rowID, SelectionRowInput.from(widget: widget))
+            return SitemapRowInput.selection(rowID, SelectionRowInput.from(widget: widget, rowID: rowID))
         case .segmentedSwitch:
-            return SitemapRowInput.segmented(rowID, SegmentedRowInput.from(widget: widget))
+            return SitemapRowInput.segmented(rowID, SegmentedRowInput.from(widget: widget, rowID: rowID))
         case .frame:
             return SitemapRowInput.frame(rowID, FrameRowInput.from(widget: widget))
         case .text:
@@ -57,7 +57,7 @@ enum SitemapRowInputMapper {
         case .colorPicker:
             return SitemapRowInput.colorPicker(rowID, ColorPickerRowInput.from(widget: widget))
         case .image, .chart, .video, .webview, .mapview:
-            return SitemapRowInput.media(rowID, MediaRowInput.from(widget: widget))
+            return SitemapRowInput.media(rowID, MediaRowInput.from(widget: widget, rowID: rowID))
         case .colorTemperaturePicker:
             return SitemapRowInput.colorTemperature(rowID, ColorTemperatureRowInput.from(widget: widget))
         case .buttonGrid:

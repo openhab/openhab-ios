@@ -218,7 +218,7 @@ struct SliderRowView: View {
         makeSliderRowContent(
             SliderRowConfig(
                 input: input,
-                widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+                widgetVersion: viewModel.widgetUpdateVersion(for: input.rowID),
                 overrideValue: viewModel.sliderOverrideValue(for: input.itemName),
                 fallbackSymbol: fallbackSymbol,
                 viewModel: viewModel
@@ -245,7 +245,7 @@ private extension SliderRowView {
             step: step,
             icon: icon,
             switchSupport: switchSupport
-        ))
+        ), rowID: RowID(pageKey: "preview", widgetId: UUID().uuidString, occurrence: 1))
     }
 }
 
@@ -335,7 +335,10 @@ private extension SliderRowView {
 #Preview("From PreviewConstants") {
     PreviewList {
         SliderRowView(
-            input: SliderRowInput.from(widget: PreviewConstants.openHABSitemapPage!.widgets[3]),
+            input: SliderRowInput.from(
+                widget: PreviewConstants.openHABSitemapPage!.widgets[3],
+                rowID: RowID(pageKey: "preview", widgetId: UUID().uuidString, occurrence: 1)
+            ),
             fallbackSymbol: .sliderHorizontal3
         )
     }
