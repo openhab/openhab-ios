@@ -34,6 +34,14 @@ public actor OpenHABItemCache {
     public static let instance = OpenHABItemCache()
 
     private static let networkTimeout: TimeInterval = 5
+    private static let stubsDefaultsKey = "openHABItemStubs"
+    private static let sharedDefaultsSuiteName = "group.org.openhab.app"
+
+    private struct ItemStub: Codable {
+        let name: String
+        let label: String
+        let type: String
+    }
 
     private var networkTrackers: [UUID: NetworkTracker] = [:]
 
@@ -55,7 +63,9 @@ public actor OpenHABItemCache {
 
     public func getCachedItem(name: String, home: UUID) async -> [OpenHABItem]? {
         await reloadCacheIfNeeded(homes: [home])
-        return items[home]?.filter { $0.name == name }
+        let live = items[home]?.filter { $0.name == name }
+        if let live, !live.isEmpty { return live }
+        return persistedItem(name: name, home: home).map { [$0] }
     }
 
     public func getItemUncached(name: String, home: UUID) async -> OpenHABItem? {
@@ -94,6 +104,22 @@ public actor OpenHABItemCache {
         }
     }
 
+    private func persistStubs() {
+        var allStubs: [String: [ItemStub]] = [:]
+        for (homeId, homeItems) in items {
+            allStubs[homeId.uuidString] = homeItems.map { ItemStub(name: $0.name, label: $0.label, type: $0.type?.rawValue ?? "") }
+        }
+        guard let data = try? JSONEncoder().encode(allStubs) else { return }
+        UserDefaults(suiteName: Self.sharedDefaultsSuiteName)?.set(data, forKey: Self.stubsDefaultsKey)
+    }
+
+    private func persistedItem(name: String, home: UUID) -> OpenHABItem? {
+        guard let data = UserDefaults(suiteName: Self.sharedDefaultsSuiteName)?.data(forKey: Self.stubsDefaultsKey),
+              let allStubs = try? JSONDecoder().decode([String: [ItemStub]].self, from: data),
+              let stub = allStubs[home.uuidString]?.first(where: { $0.name == name }) else { return nil }
+        return OpenHABItem(name: stub.name, type: stub.type, state: nil, link: "", label: stub.label, groupType: nil, stateDescription: nil, commandDescription: nil, members: [], category: nil, options: nil)
+    }
+
     public func reloadCacheIfNeeded(homes: [UUID]) async {
         let homesNeedingReload = homes.filter { Date.now.timeIntervalSince(lastLoad[$0] ?? Date.distantPast) > ttl }
         Logger.itemCache.info("Cache reload needed for homes \(homesNeedingReload)")
@@ -108,6 +134,7 @@ public actor OpenHABItemCache {
             homes.forEach { items[$0] = loadedItems[$0] }
             let now = Date.now
             homes.forEach { lastLoad[$0] = now }
+            persistStubs()
             let itemCounts = items.map { ($0.key, $0.value.count) }
             Logger.itemCache.info("Loaded \(itemCounts) items to cache")
         } catch {
