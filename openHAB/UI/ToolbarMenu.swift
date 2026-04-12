@@ -58,7 +58,6 @@ struct ConnectionView: View {
 struct ToolbarMenu: View {
     @Binding var isPresented: Bool
     @ObservedObject var menuData: MenuDataService
-    var isWebViewActive: Bool
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
@@ -89,8 +88,7 @@ struct ToolbarMenu: View {
             menuRow(
                 icon: AnyView(Image("openHABIcon").resizable()),
                 label: String(localized: "Home"),
-                accessibilityId: "Home",
-                trailing: isWebViewActive ? AnyView(Image(systemSymbol: .arrowClockwise).foregroundStyle(.secondary)) : nil
+                accessibilityId: "Home"
             ) {
                 select(.webview)
             }

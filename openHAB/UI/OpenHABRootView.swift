@@ -46,7 +46,6 @@ struct OpenHABRootView: View {
             ToolbarMenu(
                 isPresented: $menuPresented,
                 menuData: menuData,
-                isWebViewActive: isWebOrTileContent,
                 onSelect: { target in handleMenuSelection(target) },
                 onReload: { webViewModel.reloadView() }
             )
@@ -144,21 +143,38 @@ struct OpenHABRootView: View {
                 .id(sitemapResetID)
         case .tile:
             VStack(spacing: 0) {
-                if webViewModel.showMenuBar {
-                    menuBar
-                        .transition(.move(edge: .top))
-                }
+                menuBar
                 OpenHABWebViewContainer(viewModel: webViewModel)
             }
-            .clipped()
-            .animation(.easeInOut(duration: 0.3), value: webViewModel.showMenuBar)
         }
     }
 
     @ViewBuilder
     private var menuBar: some View {
         HStack {
+            // Connection-status indicator (mirrors the Sitemap view's toolbar indicator)
+            Group {
+                if webViewModel.isLoading {
+                    HStack(spacing: 4) {
+                        ProgressView()
+                            .controlSize(.small)
+                        Text("Connecting")
+                            .ohTextToken(.secondary)
+                    }
+                    .foregroundStyle(.secondary)
+                } else if case .webview = currentContent, !webViewModel.isSSEConnected {
+                    HStack(spacing: 4) {
+                        Image(systemSymbol: .wifiExclamationmark)
+                        Text("Offline")
+                            .ohTextToken(.secondary)
+                    }
+                    .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.leading)
+
             Spacer()
+
             if #available(iOS 26, *) {
                 Button {
                     menuPresented = true
@@ -185,7 +201,7 @@ struct OpenHABRootView: View {
             }
         }
         .frame(height: 44)
-        .background(.bar, ignoresSafeAreaEdges: .top)
+        .background(Color(.systemBackground), ignoresSafeAreaEdges: .top)
     }
 
     private func switchToSavedView() {
@@ -212,7 +228,7 @@ struct OpenHABRootView: View {
                 sitemapResetID = UUID() // pop to root by recreating the NavigationStack
             case let .tile(url):
                 if let url = URL(string: url) {
-                    webViewModel.loadDirectURL(url)
+                    webViewModel.loadTilePage(url)
                 }
             }
         } else {
@@ -228,7 +244,7 @@ struct OpenHABRootView: View {
                 break
             case let .tile(url):
                 if let url = URL(string: url) {
-                    webViewModel.loadDirectURL(url)
+                    webViewModel.loadTilePage(url)
                 }
             }
 
@@ -291,13 +307,6 @@ struct OpenHABRootView: View {
     }
 
     // MARK: - Helpers
-
-    private var isWebOrTileContent: Bool {
-        switch currentContent {
-        case .webview, .tile: return true
-        case .sitemap: return false
-        }
-    }
 
     private func setupExitToApp() {
         webViewModel.onExitToApp = {

@@ -13,7 +13,6 @@ import Combine
 import OpenHABCore
 import os.log
 import SafariServices
-import SwiftMessages
 import UIKit
 import WebKit
 
@@ -25,9 +24,13 @@ class OpenHABWebViewModel: ObservableObject {
     @Published private(set) var webView: WKWebView
     /// Whether the iOS menu bar (and its hamburger button) should be visible.
     /// Starts true (visible while loading) and is hidden once the openHAB
-    /// Main UI signals it has rendered its own native-app exit button,
+    /// Main UI signals it has rendered its own native-app exit button via SSE,
     /// or when the page requests fullscreen via JS.
     @Published var showMenuBar = true
+    /// True once the Main UI SPA has established its SSE connection.
+    /// Used to determine when the native menu bar can be hidden and to show
+    /// a connection-status indicator while connecting or offline.
+    @Published private(set) var isSSEConnected = false
 
     // MARK: - Internal state (used by Coordinator)
 
@@ -345,13 +348,18 @@ class OpenHABWebViewModel: ObservableObject {
     // MARK: - SSE connection state
 
     func handleSSEConnected(_ connected: Bool) {
+        isSSEConnected = connected
         if connected {
             Logger.viewController.info("WKScriptMessage sseConnected is true")
             sseTimer?.invalidate()
             acceptsCommands = true
             executeQueuedCommands()
+            // SPA is live — hide the native menu bar so the SPA's own UI takes over.
+            showMenuBar = false
         } else {
             Logger.viewController.info("WKScriptMessage sseConnected is false")
+            // Show the native bar so the connection-status indicator is visible
+            showMenuBar = true
             sseTimer?.invalidate()
             sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
                 Task { @MainActor in
@@ -364,6 +372,17 @@ class OpenHABWebViewModel: ObservableObject {
     // MARK: - Direct URL loading (for tiles)
 
     func loadDirectURL(_ url: URL) {
+        isLoading = true
+        webView.load(URLRequest(url: url))
+    }
+
+    /// Loads a MainUI tile page by navigating directly to its URL.
+    ///
+    /// The Main UI SPA uses Framework7 with the HTML5 History API (pushState).
+    /// Page URLs are clean paths — e.g. `{rootUrl}/page/EMS` — with no hash fragment.
+    /// Loading the URL causes the server to return the SPA's index.html; Framework7
+    /// reads the URL path on startup and routes to the correct page automatically.
+    func loadTilePage(_ url: URL) {
         isLoading = true
         webView.load(URLRequest(url: url))
     }
@@ -398,21 +417,27 @@ class OpenHABWebViewModel: ObservableObject {
     // MARK: - Menu bar visibility
 
     /// Called when a new top-level navigation starts (full page load).
-    /// Resets the bar to visible until the page signals otherwise.
+    /// Resets connection state and shows the bar until SSE confirms everything is live.
     func handleNavigationStart() {
         showMenuBar = true
+        isSSEConnected = false
     }
 
-    /// Called when the openHAB Main UI fires its `OHApp.ready()` callback,
-    /// confirming the SPA has loaded and its own native-app exit button is present.
+    /// Called when the openHAB Main UI fires its `OHApp.ready()` callback.
     func handleReady() {
-        showMenuBar = false
+        // Navigation is handled via direct URL loading (see loadTilePage); nothing to do here.
     }
 
     /// Called with the result of the JS probe that checks window.MainUI.
-    /// - Parameter hidden: true when the Main UI is present (iOS bar should be hidden).
+    /// Hides the bar only when the SPA is present AND SSE is already connected
+    /// (re-entry into the webview without a full reload).
+    /// - Parameter hidden: true when the Main UI is present (iOS bar would be redundant).
     func handleAppMenuProbe(hidden: Bool) {
-        showMenuBar = !hidden
+        if hidden, isSSEConnected {
+            showMenuBar = false
+        } else if !hidden {
+            showMenuBar = true
+        }
     }
 
     /// Evaluates the app-menu probe immediately in the current webview.
