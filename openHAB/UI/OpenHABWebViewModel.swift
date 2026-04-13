@@ -70,24 +70,39 @@ class OpenHABWebViewModel: ObservableObject {
     /// into the native bar and hide the web navbar.
     private let navbarProxyJS = """
     (function() {
+        // Returns the active/visible navbar. Framework7 marks the current page
+        // with .page-current; fall back to the first non-hidden navbar.
+        function activeNavbar() {
+            return document.querySelector('.page-current .navbar')
+                || document.querySelector('.navbar:not(.navbar-hidden)')
+                || document.querySelector('.navbar');
+        }
+
         function serializeNavbar() {
-            var navbar = document.querySelector('.navbar');
+            var navbar = activeNavbar();
             if (!navbar) return;
             navbar.style.display = 'none';
 
             var titleEl = navbar.querySelector('.title') || navbar.querySelector('[class*="title"]');
             var title = titleEl ? titleEl.innerText.trim() : '';
 
+            // Collect interactive elements from left/right regions only —
+            // avoids picking up the title text as a button label.
+            var btns = Array.from(navbar.querySelectorAll(
+                '.navbar-inner .left a, .navbar-inner .left button,' +
+                '.navbar-inner .right a, .navbar-inner .right button'
+            ));
             var items = [];
-            navbar.querySelectorAll('[aria-label]').forEach(function(el) {
-                var label = el.getAttribute('aria-label') || el.innerText || '';
-                label = label.trim();
+            btns.forEach(function(el, idx) {
+                var label = (el.getAttribute('aria-label')
+                    || el.getAttribute('title')
+                    || el.innerText || '').trim();
                 if (!label) return;
-                // Build a JS expression that calls the element's click handler
-                var idx = Array.from(navbar.querySelectorAll('[aria-label]')).indexOf(el);
+                // Tag element so the click action can locate it precisely.
+                el.setAttribute('data-oh-proxy', String(idx));
                 items.push({
                     label: label,
-                    action: '(function(){var els=document.querySelectorAll(".navbar [aria-label]");if(els[' + idx + '])els[' + idx + '].click();})()'
+                    action: '(function(){var el=document.querySelector("[data-oh-proxy=\\'' + idx + '\\']");if(el)el.click();})()'
                 });
             });
 
@@ -98,20 +113,27 @@ class OpenHABWebViewModel: ObservableObject {
             });
         }
 
-        // Observe navbar mutations to react to SPA content changes
+        // Observe the active navbar for content changes.
+        // Debounced 150 ms and limited to class/style attributes to avoid
+        // firing on every animation tick during scroll.
         function observeNavbar() {
-            var navbar = document.querySelector('.navbar');
+            var navbar = activeNavbar();
             if (!navbar) return;
+            var timer = null;
             new MutationObserver(function() {
-                serializeNavbar();
-            }).observe(navbar, { childList: true, subtree: true, attributes: true });
+                clearTimeout(timer);
+                timer = setTimeout(serializeNavbar, 150);
+            }).observe(navbar, {
+                childList: true, subtree: true,
+                attributes: true, attributeFilter: ['class', 'style']
+            });
         }
 
-        // Wait for .navbar to appear in the DOM, then serialize.
+        // Wait for a navbar to appear in the DOM, then serialize.
         // Uses a MutationObserver on document.body — fires the instant .navbar
         // is inserted, with no arbitrary delay.
         function waitAndSerialize() {
-            if (document.querySelector('.navbar')) {
+            if (activeNavbar()) {
                 serializeNavbar();
                 observeNavbar();
                 return;
@@ -119,7 +141,7 @@ class OpenHABWebViewModel: ObservableObject {
             var root = document.body || document.documentElement;
             if (!root) return;
             var bodyObserver = new MutationObserver(function() {
-                if (document.querySelector('.navbar')) {
+                if (activeNavbar()) {
                     bodyObserver.disconnect();
                     serializeNavbar();
                     observeNavbar();

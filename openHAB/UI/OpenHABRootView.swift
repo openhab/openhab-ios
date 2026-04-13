@@ -25,6 +25,7 @@ struct OpenHABRootView: View {
     @State private var menuPresented = false
     @State private var currentContent: ContentType = .webview
     @State private var currentViewTitle: String = ""
+    @State private var activeNetworkConnection: ConnectionInfo? = MainActorNetworkTracker.shared.activeConnection
     @State private var showNotifications = false
     @State private var showHomeSelection = false
     @State private var isDemoMode = false
@@ -66,6 +67,11 @@ struct OpenHABRootView: View {
             menuData.clearAll()
             currentContent = .webview
             switchToSavedView()
+        }
+        .task {
+            for await connection in MainActorNetworkTracker.shared.$activeConnection.values {
+                activeNetworkConnection = connection
+            }
         }
         .sheet(isPresented: $showNotifications) {
             NavigationView { NotificationsView() }
@@ -148,18 +154,21 @@ struct OpenHABRootView: View {
                         }
                         .ohMinimumHitTarget()
                     }
+                } else if isWebviewMode, activeNetworkConnection == nil {
+                    HStack(spacing: 4) {
+                        Image(systemSymbol: .wifiExclamationmark)
+                        Text("Offline")
+                            .ohTextToken(.secondary)
+                        Button { webViewModel.reloadView() } label: {
+                            Image(systemSymbol: .arrowClockwise)
+                        }
+                    }
+                    .foregroundStyle(.secondary)
                 } else if webViewModel.isLoading {
                     HStack(spacing: 4) {
                         ProgressView()
                             .controlSize(.small)
                         Text("Connecting")
-                            .ohTextToken(.secondary)
-                    }
-                    .foregroundStyle(.secondary)
-                } else if isWebviewMode, !webViewModel.isSSEConnected {
-                    HStack(spacing: 4) {
-                        Image(systemSymbol: .wifiExclamationmark)
-                        Text("Offline")
                             .ohTextToken(.secondary)
                     }
                     .foregroundStyle(.secondary)
