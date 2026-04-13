@@ -45,6 +45,7 @@ struct RowIconInput: Equatable, Sendable {
 
 struct SelectionRowInput: Equatable, RowWithIconInput {
     let rowID: RowID
+    let widgetVersion: Int
     let displayState: WidgetDisplayState
     let mappings: [OpenHABWidgetMapping]
     let labelColor: String
@@ -58,6 +59,7 @@ struct SelectionRowInput: Equatable, RowWithIconInput {
         let displayState = widget.displayState
         return SelectionRowInput(
             rowID: rowID,
+            widgetVersion: 0,
             displayState: displayState,
             mappings: displayState.mappings,
             labelColor: widget.labelcolor,
@@ -68,10 +70,26 @@ struct SelectionRowInput: Equatable, RowWithIconInput {
             itemName: widget.item?.name
         )
     }
+
+    func withWidgetVersion(_ widgetVersion: Int) -> SelectionRowInput {
+        SelectionRowInput(
+            rowID: rowID,
+            widgetVersion: widgetVersion,
+            displayState: displayState,
+            mappings: mappings,
+            labelColor: labelColor,
+            valueColor: valueColor,
+            readOnly: readOnly,
+            widgetId: widgetId,
+            icon: icon,
+            itemName: itemName
+        )
+    }
 }
 
 struct SegmentedRowInput: Equatable, RowWithIconInput {
     let rowID: RowID
+    let widgetVersion: Int
     let displayState: WidgetDisplayState
     let mappings: [OpenHABWidgetMapping]
     let labelColor: String
@@ -84,6 +102,7 @@ struct SegmentedRowInput: Equatable, RowWithIconInput {
         let displayState = widget.displayState
         return SegmentedRowInput(
             rowID: rowID,
+            widgetVersion: 0,
             displayState: displayState,
             mappings: displayState.mappings,
             labelColor: widget.labelcolor,
@@ -91,6 +110,20 @@ struct SegmentedRowInput: Equatable, RowWithIconInput {
             widgetId: displayState.widgetId,
             icon: RowIconInput.from(widget: widget),
             itemName: widget.item?.name
+        )
+    }
+
+    func withWidgetVersion(_ widgetVersion: Int) -> SegmentedRowInput {
+        SegmentedRowInput(
+            rowID: rowID,
+            widgetVersion: widgetVersion,
+            displayState: displayState,
+            mappings: mappings,
+            labelColor: labelColor,
+            valueColor: valueColor,
+            widgetId: widgetId,
+            icon: icon,
+            itemName: itemName
         )
     }
 }
@@ -485,6 +518,7 @@ struct TextRowInput: Equatable, RowWithIconInput {
 
 struct SliderRowInput: Equatable, RowWithIconInput {
     let rowID: RowID
+    let widgetVersion: Int
     let widgetId: String
     let displayState: WidgetDisplayState
     let numberPattern: String?
@@ -523,6 +557,7 @@ struct SliderRowInput: Equatable, RowWithIconInput {
 
         return SliderRowInput(
             rowID: rowID,
+            widgetVersion: 0,
             widgetId: widget.widgetId,
             displayState: displayState,
             numberPattern: numberPattern,
@@ -536,6 +571,26 @@ struct SliderRowInput: Equatable, RowWithIconInput {
             serverValue: adjustedToStep(serverValue, displayState: displayState),
             icon: RowIconInput.from(widget: widget),
             itemName: widget.item?.name
+        )
+    }
+
+    func withWidgetVersion(_ widgetVersion: Int) -> SliderRowInput {
+        SliderRowInput(
+            rowID: rowID,
+            widgetVersion: widgetVersion,
+            widgetId: widgetId,
+            displayState: displayState,
+            numberPattern: numberPattern,
+            unit: unit,
+            readOnly: readOnly,
+            switchSupport: switchSupport,
+            step: step,
+            labelColor: labelColor,
+            valueColor: valueColor,
+            shouldSendUpdatesDuringMove: shouldSendUpdatesDuringMove,
+            serverValue: serverValue,
+            icon: icon,
+            itemName: itemName
         )
     }
 

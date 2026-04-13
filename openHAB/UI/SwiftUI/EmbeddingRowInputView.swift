@@ -98,7 +98,7 @@ private struct LinkedPageRowContent: View {
     var body: some View {
         let displayState = input.displayState
         HStack {
-            IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32))
+            IconInputView(input: input.icon, rowIdentity: input.linkedPageLink, size: CGSize(width: 32, height: 32))
 
             Text(displayState.labelText)
                 .ohTextToken(.rowLabel)

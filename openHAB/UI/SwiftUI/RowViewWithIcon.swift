@@ -16,6 +16,7 @@ import SwiftUI
 /// caller-provided content inside an `HStack`.
 struct RowViewWithIcon<Content: View>: View {
     let input: any RowWithIconInput
+    let rowIdentity: String
     let fallbackSymbol: SFSymbol?
     let alignment: VerticalAlignment
     let spacing: CGFloat?
@@ -24,18 +25,20 @@ struct RowViewWithIcon<Content: View>: View {
     var body: some View {
         HStack(alignment: alignment, spacing: spacing) {
             if input.icon.showIcon {
-                IconInputView(input: input.icon, rowIdentity: input.widgetId, size: CGSize(width: 32, height: 32), fallbackSymbol: fallbackSymbol)
+                IconInputView(input: input.icon, rowIdentity: rowIdentity, size: CGSize(width: 32, height: 32), fallbackSymbol: fallbackSymbol)
             }
             content()
         }
     }
 
     init(input: any RowWithIconInput,
+         rowIdentity: String? = nil,
          fallbackSymbol: SFSymbol? = .questionmark,
          alignment: VerticalAlignment = .center,
          spacing: CGFloat? = nil,
          @ViewBuilder content: @escaping () -> Content) {
         self.input = input
+        self.rowIdentity = rowIdentity ?? input.widgetId
         self.fallbackSymbol = fallbackSymbol
         self.alignment = alignment
         self.spacing = spacing
