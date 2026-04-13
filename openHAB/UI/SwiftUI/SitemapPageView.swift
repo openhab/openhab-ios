@@ -77,6 +77,14 @@ struct SitemapPageView: View {
                 UIApplication.shared.isIdleTimerDisabled = false
             }
         }
+        .navigationDestination(for: LinkedPageDestination.self) { destination in
+            SitemapPageView(
+                viewModel: SitemapPageViewModel(
+                    pageUrl: destination.pageUrl,
+                    title: destination.title
+                )
+            )
+        }
         .navigationTitle(viewModel.pageTitle)
         .navigationBarTitleDisplayMode(.large)
         .alert("Error", isPresented: Binding(

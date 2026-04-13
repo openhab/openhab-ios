@@ -81,11 +81,7 @@ private struct LinkedPageRowInputView: View {
     let input: LinkedPageRowInput
 
     var body: some View {
-        NavigationLink(
-            destination: SitemapPageView(
-                viewModel: SitemapPageViewModel(pageUrl: input.linkedPageLink, title: input.linkedPageTitle)
-            )
-        ) {
+        NavigationLink(value: input.destination) {
             LinkedPageRowContent(input: input)
         }
         .buttonStyle(.plain)
@@ -98,7 +94,7 @@ private struct LinkedPageRowContent: View {
     var body: some View {
         let displayState = input.displayState
         HStack {
-            IconInputView(input: input.icon, rowIdentity: input.linkedPageLink, size: CGSize(width: 32, height: 32))
+            IconInputView(input: input.icon, rowIdentity: input.destination.pageUrl, size: CGSize(width: 32, height: 32))
 
             Text(displayState.labelText)
                 .ohTextToken(.rowLabel)
