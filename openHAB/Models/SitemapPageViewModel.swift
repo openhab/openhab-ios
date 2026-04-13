@@ -59,7 +59,7 @@ enum RowInteractionState: Equatable {
 
 @MainActor
 class SitemapPageViewModel: ObservableObject {
-    @Published var currentPage: OpenHABPage?
+    var currentPage: OpenHABPage?
     @Published var searchText = "" {
         didSet {
             rebuildRowInputs()
@@ -69,6 +69,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published var error: (any LocalizedError)?
     @Published var isLoading = true
     @Published var isUpdating = false
+    @Published private(set) var pageTitle = ""
     @Published var openHABRootUrl: String?
     @Published var showSearchField = false
     @Published private(set) var commandStates: [String: WidgetCommandLifecycleState] = [:]
@@ -87,8 +88,7 @@ class SitemapPageViewModel: ObservableObject {
     private var defaultSitemap = ""
     private var defaultSitemapLabel = ""
     private var fallbackTitle = ""
-    @Published var pageId = ""
-    private var isLinkedPage = false
+    var pageId = ""
     private var pageNetworkStatus: NetworkStatus?
     private var pageNetworkStatusAvailable = false
     private var activePageHandlingKey: String?
@@ -108,7 +108,7 @@ class SitemapPageViewModel: ObservableObject {
         }
     }
 
-    var pageTitle: String {
+    private func computePageTitle() -> String {
         // Strip bracket content from title (e.g., "Living Room[2]" becomes "Living Room")
         let title = currentPage?.title.components(separatedBy: "[")[0].trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !title.isEmpty {
@@ -123,8 +123,11 @@ class SitemapPageViewModel: ObservableObject {
         }
     }
 
-    var isLinked: Bool {
-        isLinkedPage
+    private func refreshPageTitle() {
+        let newTitle = computePageTitle()
+        if pageTitle != newTitle {
+            pageTitle = newTitle
+        }
     }
 
     var commandLifecycleSummary: CommandLifecycleSummary {
@@ -183,7 +186,6 @@ class SitemapPageViewModel: ObservableObject {
     init(pageUrl: String, title: String, pageId: String = "") {
         loadSettings()
         startObservers()
-        isLinkedPage = true
         fallbackTitle = title
         defaultSitemapLabel = title
 
@@ -201,11 +203,11 @@ class SitemapPageViewModel: ObservableObject {
         } else {
             self.pageId = pageId
         }
+        refreshPageTitle()
     }
 
     /// Initializes the view model with a fixed set of widgets, without loading or polling
     init(pageUrl: String = "", title: String = "Preview Page", pageId: String = "", widgets: [OpenHABWidget]) {
-        isLinkedPage = !pageUrl.isEmpty
         fallbackTitle = title
         self.pageId = pageId
         currentPage = OpenHABPage(
@@ -216,6 +218,7 @@ class SitemapPageViewModel: ObservableObject {
             widgets: widgets,
             icon: ""
         )
+        refreshPageTitle()
         rebuildRowInputs()
     }
 
@@ -299,7 +302,6 @@ class SitemapPageViewModel: ObservableObject {
         guard let itemname, !itemname.isEmpty else { return }
         sliderOverrideResetTasks[itemname]?.cancel()
         sliderOverrideResetTasks[itemname] = nil
-        objectWillChange.send()
         sliderValueOverrides[itemname] = value
     }
 
@@ -325,6 +327,7 @@ extension SitemapPageViewModel {
     func loadSettings() {
         defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
         showSearchField = Preferences.shared.applicationPreferences.showSearchField
+        refreshPageTitle()
     }
 
     func stopPageHandling() {
@@ -548,12 +551,13 @@ extension SitemapPageViewModel {
 
         // Replace currentPage wholesale — no in-place widget reconciliation.
         currentPage = page
+        refreshPageTitle()
 
         _ = clearSyncedSliderOverrides(using: page.widgets)
 
         if inputsChanged {
             bumpWidgetVersions(from: rowInputs, to: previewInputs)
-            rowInputs = previewInputs
+            rowInputs = previewInputs.map { $0.applyingWidgetVersions(widgetUpdateVersions) }
         }
     }
 
@@ -628,6 +632,7 @@ extension SitemapPageViewModel {
         }
 
         currentPage = page
+        refreshPageTitle()
         rebuildRowInputs()
     }
 
@@ -658,6 +663,7 @@ extension SitemapPageViewModel {
         defaultSitemap = name
         defaultSitemapLabel = "" // Clear old label so it gets fetched for the new sitemap
         pageId = path ?? ""
+        refreshPageTitle()
         error = nil // Clear any previous errors when switching sitemaps
         startPageHandling(forceRestart: true, reason: "push-sitemap")
     }
@@ -674,6 +680,7 @@ extension SitemapPageViewModel {
             // Find the sitemap matching our defaultSitemap name and get its label
             if let sitemap = sitemaps.first(where: { $0.name == defaultSitemap }) {
                 defaultSitemapLabel = sitemap.label
+                refreshPageTitle()
                 // swiftformat:disable:next redundantSelf
                 logger.info("Found label '\(self.defaultSitemapLabel)' for sitemap '\(self.defaultSitemap)'")
             } else {
@@ -704,6 +711,7 @@ extension SitemapPageViewModel {
                 // Auto-select the only available sitemap
                 defaultSitemap = filteredSitemaps[0].name
                 defaultSitemapLabel = filteredSitemaps[0].label
+                refreshPageTitle()
                 // swiftformat:disable:next redundantSelf
                 logger.info("Auto-selected single sitemap: \(self.defaultSitemap)")
 
@@ -715,6 +723,7 @@ extension SitemapPageViewModel {
                 // Multiple sitemaps available - select the first one
                 defaultSitemap = filteredSitemaps[0].name
                 defaultSitemapLabel = filteredSitemaps[0].label
+                refreshPageTitle()
                 // swiftformat:disable:next redundantSelf
                 logger.info("Auto-selected first sitemap from \(filteredSitemaps.count) available: \(self.defaultSitemap)")
 
@@ -1072,7 +1081,6 @@ private extension SitemapPageViewModel {
         guard sliderValueOverrides[itemname] != nil else { return }
         sliderOverrideResetTasks[itemname]?.cancel()
         sliderOverrideResetTasks[itemname] = nil
-        objectWillChange.send()
         sliderValueOverrides.removeValue(forKey: itemname)
     }
 }

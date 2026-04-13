@@ -16,36 +16,35 @@ import SwiftUI
 
 private struct SliderRowConfig {
     let input: SliderRowInput
-    let widgetVersion: Int
-    let overrideValue: Double?
     let fallbackSymbol: SFSymbol?
-    let viewModel: SitemapPageViewModel
+    let rowActions: SitemapRowActions
 }
 
 @MainActor
 private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent {
     SliderRowContent(
         input: config.input,
-        widgetVersion: config.widgetVersion,
-        overrideValue: config.overrideValue,
+        widgetVersion: config.input.widgetVersion,
         fallbackSymbol: config.fallbackSymbol,
         onToggleSwitch: { command in
             guard let itemName = config.input.itemName else { return }
-            config.viewModel.sendCommand(command, for: itemName)
+            config.rowActions.sendCommand(itemName, command, .immediate, .change)
         },
         onCancelPending: { key in
             guard let itemName = config.input.itemName else { return }
-            config.viewModel.cancelPendingCommand(for: itemName, key: key)
+            config.rowActions.cancelPendingCommand(itemName, key)
         },
         onSendValue: { value, policy, phase, key in
             guard let itemName = config.input.itemName else { return }
-            config.viewModel.setSliderOverrideValue(value, for: itemName)
-            let numberState = NumberState(
-                value: value,
-                unit: config.input.unit,
-                format: config.input.numberPattern
+            config.rowActions.sendNumericUpdate(
+                itemName,
+                value,
+                config.input.unit,
+                config.input.numberPattern,
+                policy,
+                phase,
+                key
             )
-            config.viewModel.sendToUpdate(itemname: itemName, state: numberState, policy: policy, phase: phase, key: key)
         }
     )
 }
@@ -53,7 +52,6 @@ private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent
 private struct SliderRowContent: View {
     let input: SliderRowInput
     let widgetVersion: Int
-    let overrideValue: Double?
     let fallbackSymbol: SFSymbol?
     let onToggleSwitch: (String) -> Void
     let onCancelPending: (String?) -> Void
@@ -148,7 +146,7 @@ private struct SliderRowContent: View {
     private func labelContent(state: SliderRowInput) -> some View {
         let displayedValue = effectiveValue(state: state)
         let currentValueText = currentValueText(state: state, value: displayedValue)
-        RowViewWithIcon(input: state, fallbackSymbol: fallbackSymbol) {
+        RowViewWithIcon(input: state, rowIdentity: state.rowID.rawValue, fallbackSymbol: fallbackSymbol) {
             if !state.displayState.labelText.isEmpty {
                 let labelText = state.displayState.labelText
                 Text(labelText)
@@ -190,7 +188,7 @@ private struct SliderRowContent: View {
         if isEditing {
             return dragValue ?? state.serverValue
         }
-        return overrideValue ?? state.serverValue
+        return state.serverValue
     }
 
     private func currentValueText(state: SliderRowInput, value: Double) -> String {
@@ -211,17 +209,14 @@ private struct SliderRowContent: View {
 struct SliderRowView: View {
     let input: SliderRowInput
     var fallbackSymbol: SFSymbol?
-
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+    @Environment(\.sitemapRowActions) private var rowActions
 
     var body: some View {
         makeSliderRowContent(
             SliderRowConfig(
                 input: input,
-                widgetVersion: viewModel.widgetUpdateVersion(for: input.rowID),
-                overrideValue: viewModel.sliderOverrideValue(for: input.itemName),
                 fallbackSymbol: fallbackSymbol,
-                viewModel: viewModel
+                rowActions: rowActions
             )
         )
     }

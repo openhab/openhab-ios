@@ -46,8 +46,6 @@ struct IconInputView: View {
     let fallbackSymbol: SFSymbol?
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
     let size: CGSize
     let iconType: IconType = .svg
 
@@ -119,7 +117,7 @@ struct IconInputView: View {
                     .cancelOnDisappear(true)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id("\(viewModel.pageId)-\(rowIdentity)-\(colorScheme)")
+                    .id("\(rowIdentity)-\(colorScheme)")
             }
         }
     }
@@ -142,8 +140,6 @@ struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject var viewModel: SitemapPageViewModel
-
     let size: CGSize
     let iconType: IconType = .svg
     /// Optional SF Symbol to show as fallback when network icon is unavailable (useful for previews)
@@ -220,7 +216,7 @@ struct IconView: View {
                     .cancelOnDisappear(true)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id("\(viewModel.pageId)-\(widget.id)-\(colorScheme)")
+                    .id("\(widget.id)-\(colorScheme)")
             }
         }
     }
