@@ -28,6 +28,45 @@ extension ItemEntityQuery {
         Preferences.shared.storedHomes[homeId]?.homeName
     }
 
+    func entityResults(from itemsByHome: [UUID: [OpenHABItem]]) async -> [EntityType] {
+        var result: [EntityType] = []
+
+        for (homeId, items) in itemsByHome {
+            let homeName = await getHomeName(for: homeId)
+            result.append(contentsOf: items.map { EntityType($0, homeId: homeId, homeName: homeName) })
+        }
+
+        return result.sorted {
+            if $0.item.name.localizedCaseInsensitiveCompare($1.item.name) != .orderedSame {
+                return $0.item.name.localizedCaseInsensitiveCompare($1.item.name) == .orderedAscending
+            }
+
+            let leftHomeName = $0.homeName ?? ""
+            let rightHomeName = $1.homeName ?? ""
+            return leftHomeName.localizedCaseInsensitiveCompare(rightHomeName) == .orderedAscending
+        }
+    }
+
+    func uniqueExactMatch(from itemsByHome: [UUID: [OpenHABItem]], searchTerm: String) async -> EntityType? {
+        let normalizedSearchTerm = searchTerm.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedSearchTerm.isEmpty else {
+            return nil
+        }
+
+        let matches = itemsByHome.flatMap { homeId, items in
+            items.compactMap { item in
+                item.name.localizedCaseInsensitiveCompare(normalizedSearchTerm) == .orderedSame ? (homeId, item) : nil
+            }
+        }
+
+        guard matches.count == 1, let match = matches.first else {
+            return nil
+        }
+
+        let homeName = await getHomeName(for: match.0)
+        return EntityType(match.1, homeId: match.0, homeName: homeName)
+    }
+
     func entities(for identifiers: [ItemIdentifier]) async throws -> [EntityType] {
         var result: [EntityType] = []
 
@@ -45,31 +84,22 @@ extension ItemEntityQuery {
     }
 
     func suggestedEntities() async throws -> [EntityType] {
-        var result: [EntityType] = []
-
         // If the user selected a Home in the intent UI, scope results to that home.
         if let selectedHomeId {
-            let items = await OpenHABItemCache.instance.getCachedOrPersistedItems(
+            let itemsByHome = await OpenHABItemCache.instance.getCachedOrPersistedItems(
                 types: allowedTypes.isEmpty ? nil : allowedTypes,
-                home: selectedHomeId
+                homes: [selectedHomeId]
             )
-            let homeName = await getHomeName(for: selectedHomeId)
-            result.append(contentsOf: items.map { EntityType($0, homeId: selectedHomeId, homeName: homeName) })
-            return result
+            return await entityResults(from: itemsByHome)
         }
 
         // Fallback (e.g. Siri request without an explicit Home selection): return items across all homes.
         let storedHomes = await Preferences.shared.listStoredHomes()
-        for homeId in storedHomes {
-            let items = await OpenHABItemCache.instance.getCachedOrPersistedItems(
-                types: allowedTypes.isEmpty ? nil : allowedTypes,
-                home: homeId
-            )
-            let homeName = await getHomeName(for: homeId)
-            result.append(contentsOf: items.map { EntityType($0, homeId: homeId, homeName: homeName) })
-        }
-
-        return result
+        let itemsByHome = await OpenHABItemCache.instance.getCachedOrPersistedItems(
+            types: allowedTypes.isEmpty ? nil : allowedTypes,
+            homes: storedHomes
+        )
+        return await entityResults(from: itemsByHome)
     }
 
     func entities(matching string: String) async throws -> [EntityType] {
@@ -78,23 +108,19 @@ extension ItemEntityQuery {
             types: allowedTypes.isEmpty ? nil : allowedTypes,
             homes: selectedHomeId.map { [$0] }
         )
-        var result: [EntityType] = []
 
         // If the user selected a Home in the intent UI, scope results to that home.
         if let selectedHomeId {
-            if let items = searchResults[selectedHomeId] {
-                let homeName = await getHomeName(for: selectedHomeId)
-                result.append(contentsOf: items.map { EntityType($0, homeId: selectedHomeId, homeName: homeName) })
-            }
-            return result
+            return await entityResults(from: searchResults.filter { $0.key == selectedHomeId })
+        }
+
+        // If the typed item name resolves to exactly one item across all homes,
+        // prefer that single result to avoid unnecessary cross-home ambiguity.
+        if let uniqueExactMatch = await uniqueExactMatch(from: searchResults, searchTerm: string) {
+            return [uniqueExactMatch]
         }
 
         // Fallback (e.g. Siri request without an explicit Home selection): return matches across all homes.
-        for (homeId, items) in searchResults {
-            let homeName = await getHomeName(for: homeId)
-            result.append(contentsOf: items.map { EntityType($0, homeId: homeId, homeName: homeName) })
-        }
-
-        return result
+        return await entityResults(from: searchResults)
     }
 }
