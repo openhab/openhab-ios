@@ -429,8 +429,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                let url = navigationAction.request.url,
                let scheme = url.scheme,
                schemes.contains(scheme) {
-                let svc = SFSafariViewController(url: url)
-                hostController?.present(svc, animated: true)
+                Task { await UIApplication.shared.open(url) }
             }
             return nil
         }

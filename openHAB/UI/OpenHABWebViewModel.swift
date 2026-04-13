@@ -79,12 +79,13 @@ class OpenHABWebViewModel: ObservableObject {
     /// into the native bar and hide the web navbar.
     private let navbarProxyJS = """
     (function() {
-        // Returns the active/visible navbar scoped to the main view only.
-        // Scoping to .view-main prevents panel pages (e.g. the right panel
-        // with title "Other Apps") from matching — they appear earlier in
-        // the DOM and can briefly carry .page-current during F7 initialisation.
+        // Returns the active/visible navbar. Popups take highest priority;
+        // then the main view's current page. Scoping .view-main selectors
+        // prevents the right panel ("Other Apps") from matching during
+        // F7 initialisation when it briefly carries .page-current.
         function activeNavbar() {
-            return document.querySelector('.view-main .page-current .navbar')
+            return document.querySelector('.popup.modal-in .navbar')
+                || document.querySelector('.view-main .page-current .navbar')
                 || document.querySelector('.view-main .navbar.navbar-current')
                 || document.querySelector('.page-current .navbar:not(.panel *)')
                 || document.querySelector('.navbar:not(.navbar-hidden):not(.panel *)')
@@ -141,13 +142,17 @@ class OpenHABWebViewModel: ObservableObject {
                         || el.getAttribute('title')
                         || el.innerText || '').trim();
                     if (!label) return;
-                    // Tag element so the click action can locate it precisely.
-                    el.setAttribute('data-oh-proxy', String(idx));
-                    var item = {
-                        label: label,
-                        action: '(function(){var el=document.querySelector("[data-oh-proxy=\\'' + idx + '\\']");if(el)el.click();})()'
-                    };
-                    var b64 = iconBase64(el);
+                    // Back links: use history.back() — clicking the hidden element
+                    // is ignored by F7. All other buttons: tag and click.
+                    var action;
+                    if (el.classList.contains('back')) {
+                        action = 'window.history.back()';
+                    } else {
+                        el.setAttribute('data-oh-proxy', String(idx));
+                        action = '(function(){var el=document.querySelector("[data-oh-proxy=\\'' + idx + '\\']");if(el)el.click();})()';
+                    }
+                    var item = { label: label, action: action };
+                    var b64 = el.querySelector('.f7-icons') ? iconBase64(el) : null;
                     if (b64) item.icon = b64;
                     items.push(item);
                 });
@@ -160,25 +165,26 @@ class OpenHABWebViewModel: ObservableObject {
             });
         }
 
-        // Observe the active navbar for content changes.
-        // Debounced 150 ms and limited to class/style attributes to avoid
-        // firing on every animation tick during scroll.
+        // Observe document.body for page transitions and popup open/close.
+        // Watching .view-main alone misses popups (they are siblings of .view-main).
+        // class changes on .popup.modal-in and page elements all bubble up to body.
+        // Debounced 200 ms.
         function observeNavbar() {
-            var navbar = activeNavbar();
-            if (!navbar) return;
+            var root = document.body || document.documentElement;
             var timer = null;
             new MutationObserver(function() {
                 clearTimeout(timer);
-                timer = setTimeout(serializeNavbar, 150);
-            }).observe(navbar, {
+                timer = setTimeout(serializeNavbar, 200);
+            }).observe(root, {
                 childList: true, subtree: true,
-                attributes: true, attributeFilter: ['class', 'style']
+                attributes: true, attributeFilter: ['class']
             });
         }
 
-        // Wait for the *correct* navbar — scoped to .view-main to exclude panels.
+        // Wait for the *correct* navbar. Popups first, then .view-main.
         function readyNavbar() {
-            return document.querySelector('.view-main .page-current .navbar')
+            return document.querySelector('.popup.modal-in .navbar')
+                || document.querySelector('.view-main .page-current .navbar')
                 || document.querySelector('.view-main .navbar.navbar-current')
                 || document.querySelector('.page-current .navbar:not(.panel *)');
         }
