@@ -28,6 +28,8 @@ enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 struct SetSwitchItemIntent: AppIntent {
+    static var openAppWhenRun: Bool { false }
+
     static var allowedItemTypes: [OpenHABItem.ItemType] { [.switchItem] }
 
     static var parameterSummary: some ParameterSummary {

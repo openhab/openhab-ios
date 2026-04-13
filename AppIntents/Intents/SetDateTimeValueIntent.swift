@@ -28,6 +28,8 @@ enum DateTimeValueError: Error, CustomLocalizedStringResourceConvertible {
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 struct SetDateTimeValueIntent: AppIntent {
+    static var openAppWhenRun: Bool { false }
+
     static var allowedItemTypes: [OpenHABItem.ItemType] { [.dateTime] }
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$value)") {

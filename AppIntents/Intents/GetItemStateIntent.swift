@@ -25,6 +25,8 @@ enum ItemStateError: Error, CustomLocalizedStringResourceConvertible {
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 struct GetItemStateIntent: AppIntent {
+    static var openAppWhenRun: Bool { false }
+
     static var parameterSummary: some ParameterSummary {
         Summary("Get \(\.$itemEntity) State") {
             \.$home
