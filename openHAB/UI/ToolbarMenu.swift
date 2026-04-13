@@ -72,10 +72,13 @@ struct ToolbarMenu: View {
                     .transition(.opacity)
 
                 menuContent
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .transition(
+                        .scale(scale: 0.01, anchor: .topTrailing)
+                        .combined(with: .opacity)
+                    )
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: isPresented)
+        .animation(.spring(response: 0.32, dampingFraction: 0.78), value: isPresented)
     }
 
     // MARK: - Menu content

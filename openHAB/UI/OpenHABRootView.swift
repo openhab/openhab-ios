@@ -188,30 +188,35 @@ struct OpenHABRootView: View {
 
             Spacer()
 
-            if #available(iOS 26, *) {
-                Button {
-                    menuPresented = true
-                } label: {
-                    Image(systemSymbol: .line3Horizontal)
-                        .font(.title)
+            Group {
+                if #available(iOS 26, *) {
+                    Button {
+                        menuPresented = true
+                    } label: {
+                        Image(systemSymbol: .line3Horizontal)
+                            .font(.title)
+                    }
+                    .buttonStyle(.glass)
+                    .ohMinimumHitTarget()
+                    .accessibilityIdentifier("HamburgerButton")
+                    .accessibilityLabel("Menu")
+                    .padding(.trailing)
+                } else {
+                    Button {
+                        menuPresented = true
+                    } label: {
+                        Image(systemSymbol: .line3Horizontal)
+                            .font(.title)
+                    }
+                    .ohMinimumHitTarget()
+                    .accessibilityIdentifier("HamburgerButton")
+                    .accessibilityLabel("Menu")
+                    .padding(.trailing)
                 }
-                .buttonStyle(.glass)
-                .ohMinimumHitTarget()
-                .accessibilityIdentifier("HamburgerButton")
-                .accessibilityLabel("Menu")
-                .padding(.trailing)
-            } else {
-                Button {
-                    menuPresented = true
-                } label: {
-                    Image(systemSymbol: .line3Horizontal)
-                        .font(.title)
-                }
-                .ohMinimumHitTarget()
-                .accessibilityIdentifier("HamburgerButton")
-                .accessibilityLabel("Menu")
-                .padding(.trailing)
             }
+            .scaleEffect(menuPresented ? 3.0 : 1.0, anchor: .topTrailing)
+            .opacity(menuPresented ? 0.0 : 1.0)
+            .animation(.spring(response: 0.32, dampingFraction: 0.78), value: menuPresented)
         }
         .frame(height: 44)
         .overlay {
