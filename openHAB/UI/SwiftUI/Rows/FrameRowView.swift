@@ -54,6 +54,5 @@ struct FrameRowView: View {
     List([widget]) { widget in
         FrameRowView(input: FrameRowInput.from(widget: widget))
     }
-    .environmentObject(SitemapPageViewModel())
 }
 #endif
