@@ -98,7 +98,7 @@ class OpenHABWebViewModel: ObservableObject {
             });
         }
 
-        // Observe navbar mutations to react to SPA navigation changes
+        // Observe navbar mutations to react to SPA content changes
         function observeNavbar() {
             var navbar = document.querySelector('.navbar');
             if (!navbar) return;
@@ -107,22 +107,52 @@ class OpenHABWebViewModel: ObservableObject {
             }).observe(navbar, { childList: true, subtree: true, attributes: true });
         }
 
-        serializeNavbar();
-        observeNavbar();
+        // Wait for .navbar to appear in the DOM, then serialize.
+        // Uses a MutationObserver on document.body — fires the instant .navbar
+        // is inserted, with no arbitrary delay.
+        function waitAndSerialize() {
+            if (document.querySelector('.navbar')) {
+                serializeNavbar();
+                observeNavbar();
+                return;
+            }
+            var root = document.body || document.documentElement;
+            if (!root) return;
+            var bodyObserver = new MutationObserver(function() {
+                if (document.querySelector('.navbar')) {
+                    bodyObserver.disconnect();
+                    serializeNavbar();
+                    observeNavbar();
+                }
+            });
+            bodyObserver.observe(root, { childList: true, subtree: true });
+        }
 
-        // Re-run on SPA navigations
+        // Guard against re-installation when Swift injects this script multiple
+        // times (on ready, sseConnected, didFinish). Only set up history hooks once;
+        // always re-run waitAndSerialize so a fresh page or SPA navigation is covered.
+        if (window.__ohNavbarProxyInstalled) {
+            waitAndSerialize();
+            return;
+        }
+        window.__ohNavbarProxyInstalled = true;
+
+        waitAndSerialize();
+
+        // Re-run after SPA navigations. requestAnimationFrame fires after the
+        // browser's next paint, by which time Framework7 has updated the navbar.
         var origPush = history.pushState;
         history.pushState = function() {
             origPush.apply(this, arguments);
-            setTimeout(function() { serializeNavbar(); observeNavbar(); }, 300);
+            requestAnimationFrame(waitAndSerialize);
         };
         var origReplace = history.replaceState;
         history.replaceState = function() {
             origReplace.apply(this, arguments);
-            setTimeout(function() { serializeNavbar(); observeNavbar(); }, 300);
+            requestAnimationFrame(waitAndSerialize);
         };
         window.addEventListener('popstate', function() {
-            setTimeout(function() { serializeNavbar(); observeNavbar(); }, 300);
+            requestAnimationFrame(waitAndSerialize);
         });
     })();
     """
@@ -431,6 +461,10 @@ class OpenHABWebViewModel: ObservableObject {
             executeQueuedCommands()
             // SPA is live — hide the native menu bar so the SPA's own UI takes over.
             showMenuBar = false
+            // Re-inject navbar proxy and re-run app-menu probe now that the SPA
+            // is fully live. window.MainUI is guaranteed defined at this point.
+            injectNavbarProxy()
+            triggerAppMenuProbe()
         } else {
             Logger.viewController.info("WKScriptMessage sseConnected is false")
             // Show the native bar so the connection-status indicator is visible
@@ -530,6 +564,8 @@ class OpenHABWebViewModel: ObservableObject {
         isSSEConnected = false
         navbarItems = []
         navbarTitle = ""
+        // Clear the re-installation guard so the next page gets a fresh proxy.
+        webView.evaluateJavaScript("window.__ohNavbarProxyInstalled = undefined;")
     }
 
     /// Updates the proxied navbar items and title received from the web content.
@@ -539,8 +575,11 @@ class OpenHABWebViewModel: ObservableObject {
     }
 
     /// Called when the openHAB Main UI fires its `OHApp.ready()` callback.
+    /// At this point the SPA has fully initialised: `window.MainUI` is defined
+    /// and Vue has mounted its components, so both the proxy and probe are reliable.
     func handleReady() {
-        // Navigation is handled via direct URL loading (see loadTilePage); nothing to do here.
+        injectNavbarProxy()
+        triggerAppMenuProbe()
     }
 
     /// Called with the result of the JS probe that checks window.MainUI.
