@@ -21,11 +21,21 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     private static let preferencesKey = "watchPreferences"
 
+    private func isExpectedApplicationContextRequestFailure(_ error: any Error) -> Bool {
+        let nsError = error as NSError
+        guard nsError.domain == WCErrorDomain else { return false }
+
+        let normalizedDescription = nsError.localizedDescription.lowercased()
+        return normalizedDescription.contains("counterpart app not installed")
+            || normalizedDescription.contains("companion app not installed")
+            || normalizedDescription.contains("watch app not installed")
+            || normalizedDescription.contains("not paired")
+    }
+
     @MainActor
     static func updateValuesFromApplicationContext(_ data: Data?) {
         guard let data else {
-            let key = preferencesKey
-            Logger.preferences.warning("⚠️ No \(key) data found in applicationContext.")
+            Logger.preferences.debug("No watch preferences received in applicationContext yet.")
             return
         }
 
@@ -56,6 +66,10 @@ class AppMessageService: NSObject, WCSessionDelegate {
                 AppMessageService.updateValuesFromApplicationContext(data)
             }
         } errorHandler: { error in
+            guard !self.isExpectedApplicationContextRequestFailure(error) else {
+                Logger.preferences.debug("Skipping application context request: \(error.localizedDescription)")
+                return
+            }
             Logger.preferences.error("Error sending message \(error.localizedDescription)")
         }
     }

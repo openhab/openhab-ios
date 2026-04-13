@@ -32,10 +32,10 @@ extension ItemEntityQuery {
         var result: [EntityType] = []
 
         for identifier in identifiers {
-            if let items = await OpenHABItemCache.instance.getCachedItem(
+            if let item = await OpenHABItemCache.instance.getCachedOrPersistedItem(
                 name: identifier.itemName,
                 home: identifier.homeId
-            ), let item = items.first {
+            ) {
                 let homeName = await getHomeName(for: identifier.homeId)
                 result.append(EntityType(item, homeId: identifier.homeId, homeName: homeName))
             }
@@ -45,39 +45,38 @@ extension ItemEntityQuery {
     }
 
     func suggestedEntities() async throws -> [EntityType] {
-        let allItems = await OpenHABItemCache.instance.getAllCachedItems()
         var result: [EntityType] = []
 
         // If the user selected a Home in the intent UI, scope results to that home.
         if let selectedHomeId {
-            if let items = allItems[selectedHomeId] {
-                let homeName = await getHomeName(for: selectedHomeId)
-                let filteredItems = items.filter { item in
-                    guard let type = item.type else { return false }
-                    return allowedTypes.isEmpty || allowedTypes.contains(type)
-                }
-                result.append(contentsOf: filteredItems.map { EntityType($0, homeId: selectedHomeId, homeName: homeName) })
-            }
+            let items = await OpenHABItemCache.instance.getCachedOrPersistedItems(
+                types: allowedTypes.isEmpty ? nil : allowedTypes,
+                home: selectedHomeId
+            )
+            let homeName = await getHomeName(for: selectedHomeId)
+            result.append(contentsOf: items.map { EntityType($0, homeId: selectedHomeId, homeName: homeName) })
             return result
         }
 
         // Fallback (e.g. Siri request without an explicit Home selection): return items across all homes.
-        for (homeId, items) in allItems {
+        let storedHomes = await Preferences.shared.listStoredHomes()
+        for homeId in storedHomes {
+            let items = await OpenHABItemCache.instance.getCachedOrPersistedItems(
+                types: allowedTypes.isEmpty ? nil : allowedTypes,
+                home: homeId
+            )
             let homeName = await getHomeName(for: homeId)
-            let filteredItems = items.filter { item in
-                guard let type = item.type else { return false }
-                return allowedTypes.isEmpty || allowedTypes.contains(type)
-            }
-            result.append(contentsOf: filteredItems.map { EntityType($0, homeId: homeId, homeName: homeName) })
+            result.append(contentsOf: items.map { EntityType($0, homeId: homeId, homeName: homeName) })
         }
 
         return result
     }
 
     func entities(matching string: String) async throws -> [EntityType] {
-        let searchResults = await OpenHABItemCache.instance.searchItems(
+        let searchResults = await OpenHABItemCache.instance.searchCachedOrPersistedItems(
             searchTerm: string,
-            types: allowedTypes.isEmpty ? nil : allowedTypes
+            types: allowedTypes.isEmpty ? nil : allowedTypes,
+            homes: selectedHomeId.map { [$0] }
         )
         var result: [EntityType] = []
 

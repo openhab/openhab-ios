@@ -120,6 +120,26 @@ public actor OpenHABItemCache {
         return OpenHABItem(name: stub.name, type: stub.type, state: nil, link: "", label: stub.label, groupType: nil, stateDescription: nil, commandDescription: nil, members: [], category: nil, options: nil)
     }
 
+    private func persistedItems(home: UUID) -> [OpenHABItem] {
+        guard let data = UserDefaults(suiteName: Self.sharedDefaultsSuiteName)?.data(forKey: Self.stubsDefaultsKey),
+              let allStubs = try? JSONDecoder().decode([String: [ItemStub]].self, from: data) else { return [] }
+        return (allStubs[home.uuidString] ?? []).map {
+            OpenHABItem(
+                name: $0.name,
+                type: $0.type,
+                state: nil,
+                link: "",
+                label: $0.label,
+                groupType: nil,
+                stateDescription: nil,
+                commandDescription: nil,
+                members: [],
+                category: nil,
+                options: nil
+            )
+        }
+    }
+
     public func reloadCacheIfNeeded(homes: [UUID]) async {
         let homesNeedingReload = homes.filter { Date.now.timeIntervalSince(lastLoad[$0] ?? Date.distantPast) > ttl }
         Logger.itemCache.info("Cache reload needed for homes \(homesNeedingReload)")
@@ -237,6 +257,45 @@ public extension [OpenHABItem] {
 }
 
 public extension OpenHABItemCache {
+    func getCachedOrPersistedItem(name: String, home: UUID) async -> OpenHABItem? {
+        if let item = items[home]?.first(where: { $0.name == name }) {
+            return item
+        }
+        return persistedItem(name: name, home: home)
+    }
+
+    func getCachedOrPersistedItems(types: [OpenHABItem.ItemType]?, home: UUID) async -> [OpenHABItem] {
+        let sourceItems = items[home] ?? persistedItems(home: home)
+        return sourceItems
+            .filtered(for: types)
+            .sorted(by: \.name)
+    }
+
+    func searchCachedOrPersistedItems(searchTerm: String, types: [OpenHABItem.ItemType]? = nil, homes: [UUID]? = nil) async -> [UUID: [OpenHABItem]] {
+        let targetHomes: [UUID]
+        if let homes {
+            targetHomes = homes
+        } else {
+            targetHomes = await Preferences.shared.listStoredHomes()
+        }
+        var result: [UUID: [OpenHABItem]] = [:]
+
+        for homeId in targetHomes {
+            let sourceItems = items[homeId] ?? persistedItems(home: homeId)
+            let filtered = sourceItems.filter { item in
+                let matchesSearch = item.name.localizedCaseInsensitiveContains(searchTerm) ||
+                    item.label.localizedCaseInsensitiveContains(searchTerm)
+                let matchesType = item.matches(types: types)
+                return matchesSearch && matchesType
+            }
+            if !filtered.isEmpty {
+                result[homeId] = filtered
+            }
+        }
+
+        return result
+    }
+
     func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, home: UUID) async -> [String] {
         await reloadCacheIfNeeded(homes: [home])
         return items[home]?
