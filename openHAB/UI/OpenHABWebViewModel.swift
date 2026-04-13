@@ -21,6 +21,15 @@ struct WebNavbarItem: Identifiable {
     let id = UUID()
     let label: String
     let jsAction: String
+    /// Base64-encoded PNG of the icon rendered from the web navbar element.
+    /// Nil if capture failed; fall back to `label` text in that case.
+    let iconBase64: String?
+
+    var iconImage: UIImage? {
+        guard let b64 = iconBase64,
+              let data = Data(base64Encoded: b64) else { return nil }
+        return UIImage(data: data)
+    }
 }
 
 @MainActor
@@ -70,46 +79,84 @@ class OpenHABWebViewModel: ObservableObject {
     /// into the native bar and hide the web navbar.
     private let navbarProxyJS = """
     (function() {
-        // Returns the active/visible navbar. Framework7 marks the current page
-        // with .page-current; fall back to the first non-hidden navbar.
+        // Returns the active/visible navbar scoped to the main view only.
+        // Scoping to .view-main prevents panel pages (e.g. the right panel
+        // with title "Other Apps") from matching — they appear earlier in
+        // the DOM and can briefly carry .page-current during F7 initialisation.
         function activeNavbar() {
-            return document.querySelector('.page-current .navbar')
-                || document.querySelector('.navbar:not(.navbar-hidden)')
+            return document.querySelector('.view-main .page-current .navbar')
+                || document.querySelector('.view-main .navbar.navbar-current')
+                || document.querySelector('.page-current .navbar:not(.panel *)')
+                || document.querySelector('.navbar:not(.navbar-hidden):not(.panel *)')
                 || document.querySelector('.navbar');
         }
 
         function serializeNavbar() {
             var navbar = activeNavbar();
             if (!navbar) return;
-            navbar.style.display = 'none';
+            // Wait for web fonts (Framework7 Icons) to be ready before canvas rendering.
+            // document.fonts.ready resolves immediately on subsequent calls once fonts are loaded.
+            (document.fonts ? document.fonts.ready : Promise.resolve()).then(function() {
+                navbar.style.display = 'none';
 
-            var titleEl = navbar.querySelector('.title') || navbar.querySelector('[class*="title"]');
-            var title = titleEl ? titleEl.innerText.trim() : '';
+                var titleEl = navbar.querySelector('.title') || navbar.querySelector('[class*="title"]');
+                var title = titleEl ? titleEl.innerText.trim() : '';
 
-            // Collect interactive elements from left/right regions only —
-            // avoids picking up the title text as a button label.
-            var btns = Array.from(navbar.querySelectorAll(
-                '.navbar-inner .left a, .navbar-inner .left button,' +
-                '.navbar-inner .right a, .navbar-inner .right button'
-            ));
-            var items = [];
-            btns.forEach(function(el, idx) {
-                var label = (el.getAttribute('aria-label')
-                    || el.getAttribute('title')
-                    || el.innerText || '').trim();
-                if (!label) return;
-                // Tag element so the click action can locate it precisely.
-                el.setAttribute('data-oh-proxy', String(idx));
-                items.push({
-                    label: label,
-                    action: '(function(){var el=document.querySelector("[data-oh-proxy=\\'' + idx + '\\']");if(el)el.click();})()'
+                // Collect interactive elements from left/right regions only —
+                // avoids picking up the title text as a button label.
+                var btns = Array.from(navbar.querySelectorAll(
+                    '.navbar-inner .left a, .navbar-inner .left button,' +
+                    '.navbar-inner .right a, .navbar-inner .right button'
+                ));
+                // Renders an element's icon glyph to a canvas and returns base64 PNG.
+                // Drawn in black on transparent so Swift can apply template tinting.
+                function iconBase64(el) {
+                    try {
+                        var iconEl = el.querySelector('i.icon, .icon') || el;
+                        var style = window.getComputedStyle(iconEl);
+                        var text = iconEl.innerText.trim() || el.innerText.trim();
+                        if (!text) return null;
+                        var px = 128;
+                        var canvas = document.createElement('canvas');
+                        canvas.width = px; canvas.height = px;
+                        var ctx = canvas.getContext('2d');
+                        ctx.font = 'normal ' + Math.round(px * 0.9) + 'px ' + style.fontFamily;
+                        ctx.fillStyle = 'black';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(text, px / 2, px / 2);
+                        return canvas.toDataURL('image/png').split(',')[1];
+                    } catch(e) { return null; }
+                }
+
+                var items = [];
+                btns.forEach(function(el, idx) {
+                    var inRight = !!el.closest('.navbar-inner .right');
+                    // Skip right-side panel-open buttons (the web "Other Apps" drawer).
+                    if (inRight && el.classList.contains('panel-open')) return;
+                    // Skip the in-app exit-to-app button (F7 icon: square_arrow_right).
+                    var iconChild = el.querySelector('i.icon, .icon');
+                    if (inRight && iconChild && iconChild.innerText.trim() === 'square_arrow_right') return;
+                    var label = (el.getAttribute('aria-label')
+                        || el.getAttribute('title')
+                        || el.innerText || '').trim();
+                    if (!label) return;
+                    // Tag element so the click action can locate it precisely.
+                    el.setAttribute('data-oh-proxy', String(idx));
+                    var item = {
+                        label: label,
+                        action: '(function(){var el=document.querySelector("[data-oh-proxy=\\'' + idx + '\\']");if(el)el.click();})()'
+                    };
+                    var b64 = iconBase64(el);
+                    if (b64) item.icon = b64;
+                    items.push(item);
                 });
-            });
 
-            window.webkit.messageHandlers.mainUi.postMessage({
-                type: 'navbarElements',
-                title: title,
-                items: items
+                window.webkit.messageHandlers.mainUi.postMessage({
+                    type: 'navbarElements',
+                    title: title,
+                    items: items
+                });
             });
         }
 
@@ -129,11 +176,14 @@ class OpenHABWebViewModel: ObservableObject {
             });
         }
 
-        // Wait for a navbar to appear in the DOM, then serialize.
-        // Uses a MutationObserver on document.body — fires the instant .navbar
-        // is inserted, with no arbitrary delay.
+        // Wait for the *correct* navbar — scoped to .view-main to exclude panels.
+        function readyNavbar() {
+            return document.querySelector('.view-main .page-current .navbar')
+                || document.querySelector('.view-main .navbar.navbar-current')
+                || document.querySelector('.page-current .navbar:not(.panel *)');
+        }
         function waitAndSerialize() {
-            if (activeNavbar()) {
+            if (readyNavbar()) {
                 serializeNavbar();
                 observeNavbar();
                 return;
@@ -141,13 +191,16 @@ class OpenHABWebViewModel: ObservableObject {
             var root = document.body || document.documentElement;
             if (!root) return;
             var bodyObserver = new MutationObserver(function() {
-                if (activeNavbar()) {
+                if (readyNavbar()) {
                     bodyObserver.disconnect();
                     serializeNavbar();
                     observeNavbar();
                 }
             });
-            bodyObserver.observe(root, { childList: true, subtree: true });
+            // Watch childList for new elements AND attributes for .page-current
+            // being added to an existing element.
+            bodyObserver.observe(root, { childList: true, subtree: true,
+                                         attributes: true, attributeFilter: ['class'] });
         }
 
         // Guard against re-installation when Swift injects this script multiple

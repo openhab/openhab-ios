@@ -149,8 +149,18 @@ struct OpenHABRootView: View {
             Group {
                 if isWebviewMode, !webViewModel.navbarItems.isEmpty {
                     ForEach(webViewModel.navbarItems) { item in
-                        Button(item.label) {
+                        Button {
                             webViewModel.evaluateJS(item.jsAction)
+                        } label: {
+                            if let uiImg = item.iconImage {
+                                Image(uiImage: uiImg)
+                                    .renderingMode(.template)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 28, height: 28)
+                            } else {
+                                Text(item.label)
+                            }
                         }
                         .ohMinimumHitTarget()
                     }
