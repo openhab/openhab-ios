@@ -199,6 +199,13 @@ public extension String {
         return String(self[separatorRange.upperBound...])
     }
 
+    var dataImageBase64Data: Data? {
+        guard let payload = dataImageBase64Payload else {
+            return nil
+        }
+        return Data(base64Encoded: payload)
+    }
+
     var isNoneIcon: Bool {
         wholeMatch(of: /^(oh:([a-z]+:)?)?none$/) != nil
     }

@@ -25,11 +25,17 @@ struct ImageView: View {
     var body: some View {
         if !url.isEmpty {
             switch url {
-            case _ where url.dataImageBase64Payload != nil:
-                let provider = Base64ImageDataProvider(base64String: url.dataImageBase64Payload ?? "", cacheKey: UUID().uuidString)
-                return KFImage(source: .provider(provider))
-                    .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
-                    .resizable()
+            case _ where url.hasPrefix("data:image"):
+                if let imageData = url.dataImageBase64Data {
+                    let provider = RawImageDataProvider(data: imageData, cacheKey: UUID().uuidString)
+                    return AnyView(
+                        KFImage(source: .provider(provider))
+                            .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
+                            .resizable()
+                    )
+                } else {
+                    return AnyView(Image("openHABIcon").resizable())
+                }
             case _ where url.hasPrefix("http"):
                 return KFImage(URL(string: url))
                     .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
