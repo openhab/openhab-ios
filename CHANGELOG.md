@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [Version 3.2.21, Build 227] - 2026-04-13Z
+
+- [codex] Handle invalid inline image data (#1146)
+- Upgrade GitHub workflow v3 (#1145)
+- Feature/lazy linked page navigation v3 (#1142)
+- Decouple hot sitemap rows from shared view model (#1140)
+- Simplify test scheme discovery configuration
+
 ## [Version 3.2.20, Build 226] - 2026-04-12Z
 
 - Remove widget reconciliation from SwiftUI sitemap update path (#1139)

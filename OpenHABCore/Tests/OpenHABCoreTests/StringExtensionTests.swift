@@ -54,6 +54,17 @@ struct StringExtensionTests {
         #expect("".dataImageBase64Payload == nil)
     }
 
+    @Test
+    func testDataImageBase64Data() throws {
+        let validPayload = "PHN2Zz48L3N2Zz4="
+        #expect("data:image/svg+xml;base64,\(validPayload)".dataImageBase64Data == Data(base64Encoded: validPayload))
+
+        #expect("data:image/png;base64,%%%".dataImageBase64Data == nil)
+        #expect("data:image/png;base64,".dataImageBase64Data == Data())
+        #expect("data:image/svg+xml,<svg></svg>".dataImageBase64Data == nil)
+        #expect("http://example.com/image.png".dataImageBase64Data == nil)
+    }
+
     // MARK: - doubleValue Tests
 
     @Test func doubleValueWithSimpleInteger() async throws {
