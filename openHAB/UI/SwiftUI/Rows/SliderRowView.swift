@@ -62,6 +62,7 @@ private struct SliderRowContent: View {
     @State private var isEditing = false
     @State private var dragStartVersion: Int?
     @State private var dragWidgetId: String?
+    @State private var optimisticValue: Double?
 
     var body: some View {
         let displayedSliderValue = effectiveValue(state: input)
@@ -95,6 +96,7 @@ private struct SliderRowContent: View {
                     .release,
                     input.sliderCommandKey
                 )
+                optimisticValue = displayedSliderValue
                 dragValue = nil
                 dragStartVersion = nil
                 dragWidgetId = nil
@@ -106,14 +108,22 @@ private struct SliderRowContent: View {
             dragValue = nil
             dragStartVersion = nil
             dragWidgetId = nil
+            optimisticValue = nil
         }
         .onChange(of: input.widgetId) { _ in
             isEditing = false
             dragValue = nil
             dragStartVersion = nil
             dragWidgetId = nil
+            optimisticValue = nil
         }
         .onChange(of: widgetVersion) { _ in
+            let threshold = max(input.step, 0.001)
+            if !isEditing, optimisticValue != nil {
+                optimisticValue = nil
+                return
+            }
+
             guard isEditing else { return }
             // If server refresh advanced while dragging, only cancel when the server value diverges
             // meaningfully from the local drag value. This avoids jarring cancels on polling echoes.
@@ -126,7 +136,6 @@ private struct SliderRowContent: View {
             }
 
             if widgetVersion != dragStartVersion {
-                let threshold = max(input.step, 0.001)
                 let currentDragValue = dragValue ?? input.serverValue
                 let hasMeaningfulServerChange = abs(input.serverValue - currentDragValue) > threshold
                 if hasMeaningfulServerChange {
@@ -187,6 +196,9 @@ private struct SliderRowContent: View {
     private func effectiveValue(state: SliderRowInput) -> Double {
         if isEditing {
             return dragValue ?? state.serverValue
+        }
+        if let optimisticValue {
+            return optimisticValue
         }
         return state.serverValue
     }

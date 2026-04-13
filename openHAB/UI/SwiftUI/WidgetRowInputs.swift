@@ -70,6 +70,21 @@ struct SelectionRowInput: Equatable, RowWithIconInput {
             itemName: widget.item?.name
         )
     }
+
+    func withWidgetVersion(_ widgetVersion: Int) -> SelectionRowInput {
+        SelectionRowInput(
+            rowID: rowID,
+            widgetVersion: widgetVersion,
+            displayState: displayState,
+            mappings: mappings,
+            labelColor: labelColor,
+            valueColor: valueColor,
+            readOnly: readOnly,
+            widgetId: widgetId,
+            icon: icon,
+            itemName: itemName
+        )
+    }
 }
 
 struct SegmentedRowInput: Equatable, RowWithIconInput {
@@ -95,6 +110,20 @@ struct SegmentedRowInput: Equatable, RowWithIconInput {
             widgetId: displayState.widgetId,
             icon: RowIconInput.from(widget: widget),
             itemName: widget.item?.name
+        )
+    }
+
+    func withWidgetVersion(_ widgetVersion: Int) -> SegmentedRowInput {
+        SegmentedRowInput(
+            rowID: rowID,
+            widgetVersion: widgetVersion,
+            displayState: displayState,
+            mappings: mappings,
+            labelColor: labelColor,
+            valueColor: valueColor,
+            widgetId: widgetId,
+            icon: icon,
+            itemName: itemName
         )
     }
 }
@@ -542,6 +571,26 @@ struct SliderRowInput: Equatable, RowWithIconInput {
             serverValue: adjustedToStep(serverValue, displayState: displayState),
             icon: RowIconInput.from(widget: widget),
             itemName: widget.item?.name
+        )
+    }
+
+    func withWidgetVersion(_ widgetVersion: Int) -> SliderRowInput {
+        SliderRowInput(
+            rowID: rowID,
+            widgetVersion: widgetVersion,
+            widgetId: widgetId,
+            displayState: displayState,
+            numberPattern: numberPattern,
+            unit: unit,
+            readOnly: readOnly,
+            switchSupport: switchSupport,
+            step: step,
+            labelColor: labelColor,
+            valueColor: valueColor,
+            shouldSendUpdatesDuringMove: shouldSendUpdatesDuringMove,
+            serverValue: serverValue,
+            icon: icon,
+            itemName: itemName
         )
     }
 

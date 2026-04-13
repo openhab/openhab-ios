@@ -75,57 +75,11 @@ extension SitemapRowInput {
 
         switch self {
         case let .slider(rowID, input):
-            return .slider(
-                rowID,
-                SliderRowInput(
-                    rowID: input.rowID,
-                    widgetVersion: version,
-                    widgetId: input.widgetId,
-                    displayState: input.displayState,
-                    numberPattern: input.numberPattern,
-                    unit: input.unit,
-                    readOnly: input.readOnly,
-                    switchSupport: input.switchSupport,
-                    step: input.step,
-                    labelColor: input.labelColor,
-                    valueColor: input.valueColor,
-                    shouldSendUpdatesDuringMove: input.shouldSendUpdatesDuringMove,
-                    serverValue: input.serverValue,
-                    icon: input.icon,
-                    itemName: input.itemName
-                )
-            )
+            return .slider(rowID, input.withWidgetVersion(version))
         case let .selection(rowID, input):
-            return .selection(
-                rowID,
-                SelectionRowInput(
-                    rowID: input.rowID,
-                    widgetVersion: version,
-                    displayState: input.displayState,
-                    mappings: input.mappings,
-                    labelColor: input.labelColor,
-                    valueColor: input.valueColor,
-                    readOnly: input.readOnly,
-                    widgetId: input.widgetId,
-                    icon: input.icon,
-                    itemName: input.itemName
-                )
-            )
+            return .selection(rowID, input.withWidgetVersion(version))
         case let .segmented(rowID, input):
-            return .segmented(
-                rowID,
-                SegmentedRowInput(
-                    rowID: input.rowID,
-                    widgetVersion: version,
-                    displayState: input.displayState,
-                    mappings: input.mappings,
-                    labelColor: input.labelColor,
-                    valueColor: input.valueColor,
-                    widgetId: input.widgetId,
-                    icon: input.icon,
-                    itemName: input.itemName
-                )
-            )
+            return .segmented(rowID, input.withWidgetVersion(version))
         case .frame,
              .linked,
              .text,

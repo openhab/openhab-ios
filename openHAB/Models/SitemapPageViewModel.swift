@@ -96,8 +96,6 @@ class SitemapPageViewModel: ObservableObject {
     private var commandStateResetTasks: [String: Task<Void, Never>] = [:]
     private var commandStateVersions: [String: Int] = [:]
     private var queuedCommands: [String: QueuedCommand] = [:]
-    private var sliderValueOverrides: [String: Double] = [:]
-    private var sliderOverrideResetTasks: [String: Task<Void, Never>] = [:]
     private var lastForegroundRefreshAt: Date = .distantPast
 
     var relevantWidgets: [OpenHABWidget] {
@@ -293,23 +291,6 @@ class SitemapPageViewModel: ObservableObject {
         widgetUpdateVersions[rowID.rawValue] ?? 0
     }
 
-    func sliderOverrideValue(for itemname: String?) -> Double? {
-        guard let itemname, !itemname.isEmpty else { return nil }
-        return sliderValueOverrides[itemname]
-    }
-
-    func setSliderOverrideValue(_ value: Double, for itemname: String?) {
-        guard let itemname, !itemname.isEmpty else { return }
-        sliderOverrideResetTasks[itemname]?.cancel()
-        sliderOverrideResetTasks[itemname] = nil
-        sliderValueOverrides[itemname] = value
-    }
-
-    @discardableResult
-    func syncSliderOverridesWithServerState(for widgets: [OpenHABWidget]) -> Int {
-        clearSyncedSliderOverrides(using: widgets)
-    }
-
     deinit {
         connectionObserverTask?.cancel()
         networkStatusObserverTask?.cancel()
@@ -317,8 +298,6 @@ class SitemapPageViewModel: ObservableObject {
         foregroundRefreshTask?.cancel()
         commandStateResetTasks.values.forEach { $0.cancel() }
         commandStateResetTasks.removeAll()
-        sliderOverrideResetTasks.values.forEach { $0.cancel() }
-        sliderOverrideResetTasks.removeAll()
     }
 }
 
@@ -327,7 +306,6 @@ extension SitemapPageViewModel {
     func loadSettings() {
         defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
         showSearchField = Preferences.shared.applicationPreferences.showSearchField
-        refreshPageTitle()
     }
 
     func stopPageHandling() {
@@ -545,7 +523,6 @@ extension SitemapPageViewModel {
 
         // When search is empty and nothing the UI renders has changed, skip the update entirely.
         if searchText.isEmpty, !inputsChanged, !titleChanged {
-            _ = clearSyncedSliderOverrides(using: page.widgets)
             return
         }
 
@@ -553,47 +530,10 @@ extension SitemapPageViewModel {
         currentPage = page
         refreshPageTitle()
 
-        _ = clearSyncedSliderOverrides(using: page.widgets)
-
         if inputsChanged {
             bumpWidgetVersions(from: rowInputs, to: previewInputs)
             rowInputs = previewInputs.map { $0.applyingWidgetVersions(widgetUpdateVersions) }
         }
-    }
-
-    private func clearSyncedSliderOverrides(using widgets: [OpenHABWidget]) -> Int {
-        guard !sliderValueOverrides.isEmpty else { return 0 }
-        var cleared = 0
-
-        for widget in widgets {
-            guard let item = widget.item else {
-                cleared += clearSyncedSliderOverrides(using: widget.widgets)
-                continue
-            }
-
-            let itemname = item.name
-            guard let overrideValue = sliderValueOverrides[itemname] else {
-                cleared += clearSyncedSliderOverrides(using: widget.widgets)
-                continue
-            }
-
-            let serverValue = item.state?.parseAsNumber(format: item.stateDescription?.numberPattern).value ?? .nan
-            guard serverValue.isFinite else {
-                cleared += clearSyncedSliderOverrides(using: widget.widgets)
-                continue
-            }
-
-            let threshold = max(widget.step, 0.001)
-            if abs(serverValue - overrideValue) <= threshold {
-                clearSliderOverride(for: itemname)
-                cleared += 1
-                logger.debug("Cleared slider override for \(itemname, privacy: .public) (server=\(serverValue), override=\(overrideValue))")
-            }
-
-            cleared += clearSyncedSliderOverrides(using: widget.widgets)
-        }
-
-        return cleared
     }
 
     func reload() async {
@@ -848,7 +788,6 @@ extension SitemapPageViewModel {
         commandDispatcher.cancelPending(for: itemname, key: key)
         if key == nil {
             queuedCommands.removeValue(forKey: itemname)
-            clearSliderOverride(for: itemname)
             if case .queued = commandStates[itemname] {
                 setCommandState(.idle, for: itemname)
             }
@@ -1048,12 +987,10 @@ private extension SitemapPageViewModel {
     func handleCommandSuccess(for itemname: String, version: Int) {
         guard commandStateVersions[itemname] == version else { return }
         scheduleCommandStateReset(for: itemname, version: version, after: .milliseconds(450))
-        scheduleSliderOverrideResetFallback(for: itemname, version: version, after: .seconds(5))
     }
 
     func handleCommandFailure(for itemname: String, version: Int, errorDescription: String) {
         guard commandStateVersions[itemname] == version else { return }
-        clearSliderOverride(for: itemname)
         setCommandState(.failed(message: errorDescription), for: itemname)
     }
 
@@ -1067,22 +1004,6 @@ private extension SitemapPageViewModel {
         }
     }
 
-    func scheduleSliderOverrideResetFallback(for itemname: String, version: Int, after delay: Duration) {
-        sliderOverrideResetTasks[itemname]?.cancel()
-        sliderOverrideResetTasks[itemname] = Task { @MainActor [weak self] in
-            try? await Task.sleep(for: delay)
-            guard let self else { return }
-            guard commandStateVersions[itemname] == version else { return }
-            clearSliderOverride(for: itemname)
-        }
-    }
-
-    func clearSliderOverride(for itemname: String) {
-        guard sliderValueOverrides[itemname] != nil else { return }
-        sliderOverrideResetTasks[itemname]?.cancel()
-        sliderOverrideResetTasks[itemname] = nil
-        sliderValueOverrides.removeValue(forKey: itemname)
-    }
 }
 
 extension Published.Publisher where Output: Sendable {
