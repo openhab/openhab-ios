@@ -3467,7 +3467,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kontaktstatus"
+            "value" : "Kontakt-Status"
           }
         },
         "en" : {
@@ -13086,7 +13086,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wert des Kontaktstatus festlegen"
+            "value" : "Wert eines Kontakt=Status festlegen"
           }
         },
         "en" : {
@@ -13204,7 +13204,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wert eines Dimmers oder Rolladens festlegen"
+            "value" : "Wert eines Dimmers oder Rollladens festlegen"
           }
         },
         "en" : {
@@ -13381,7 +13381,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Player-Kontrollelements setzen"
+            "value" : "Player-Kontrollelement setzen"
           }
         },
         "en" : {
@@ -13440,7 +13440,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "String Kontrollwert setzen"
+            "value" : "String-Kontrollwert setzen"
           }
         },
         "en" : {
