@@ -20,7 +20,6 @@ import SwiftUI
 
 enum TargetController {
     case webview
-    case settings
     case sitemap(String)
     case notifications
     case browser(String)
@@ -141,7 +140,6 @@ struct ToolbarMenu: View {
 
             // System
             sectionHeader(String(localized: "System"))
-            systemRow(symbol: .gear, label: String(localized: "settings", comment: "")) { select(.settings) }
             if Preferences.shared.getNotificationConnection() != nil,
                !Preferences.shared.currentHomePreferences.demomode {
                 systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }

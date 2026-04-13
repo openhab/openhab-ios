@@ -41,6 +41,9 @@ class OpenHABWebViewModel: ObservableObject {
     /// Navbar items proxied from the MainUI web top bar. Empty until the JS
     /// MutationObserver posts the first `navbarElements` message.
     @Published private(set) var navbarItems: [WebNavbarItem] = []
+    /// Title text proxied from the MainUI web navbar. Empty until the JS
+    /// proxy posts the first `navbarElements` message.
+    @Published private(set) var navbarTitle: String = ""
 
     // MARK: - Internal state (used by Coordinator)
 
@@ -72,6 +75,9 @@ class OpenHABWebViewModel: ObservableObject {
             if (!navbar) return;
             navbar.style.display = 'none';
 
+            var titleEl = navbar.querySelector('.title') || navbar.querySelector('[class*="title"]');
+            var title = titleEl ? titleEl.innerText.trim() : '';
+
             var items = [];
             navbar.querySelectorAll('[aria-label]').forEach(function(el) {
                 var label = el.getAttribute('aria-label') || el.innerText || '';
@@ -87,6 +93,7 @@ class OpenHABWebViewModel: ObservableObject {
 
             window.webkit.messageHandlers.mainUi.postMessage({
                 type: 'navbarElements',
+                title: title,
                 items: items
             });
         }
@@ -522,11 +529,13 @@ class OpenHABWebViewModel: ObservableObject {
         showMenuBar = true
         isSSEConnected = false
         navbarItems = []
+        navbarTitle = ""
     }
 
-    /// Updates the proxied navbar items received from the web content.
-    func updateNavbarItems(_ items: [WebNavbarItem]) {
+    /// Updates the proxied navbar items and title received from the web content.
+    func updateNavbarItems(_ items: [WebNavbarItem], title: String = "") {
         navbarItems = items
+        navbarTitle = title
     }
 
     /// Called when the openHAB Main UI fires its `OHApp.ready()` callback.

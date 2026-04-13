@@ -299,7 +299,8 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                         guard let label = raw["label"], let action = raw["action"] else { return nil }
                         return WebNavbarItem(label: label, jsAction: action)
                     }
-                    viewModel.updateNavbarItems(items)
+                    let title = dict["title"] as? String ?? ""
+                    viewModel.updateNavbarItems(items, title: title)
                     return
                 }
                 // String body — standard callbacks

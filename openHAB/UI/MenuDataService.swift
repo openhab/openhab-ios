@@ -43,6 +43,13 @@ class MenuDataService: ObservableObject {
         uiPages = []
     }
 
+    /// Returns the display label for a tile or page URL, or an empty string if not found.
+    func label(forURL url: String) -> String {
+        if let tile = uiTiles.first(where: { $0.url == url }) { return tile.name }
+        if let page = uiPages.first(where: { $0.url == url }) { return page.label }
+        return ""
+    }
+
     /// Re-fetches all menu data from the currently active connection.
     func refresh() {
         let connection = MainActorNetworkTracker.shared.activeConnection
