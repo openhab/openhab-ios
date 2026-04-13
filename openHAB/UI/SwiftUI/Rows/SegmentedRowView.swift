@@ -34,7 +34,7 @@ private struct SegmentedRowContent: View {
 
     var body: some View {
         let selectedIndex = effectiveSelectedIndex(displayState: input.displayState, mappings: input.mappings)
-        RowViewWithIcon(input: input, fallbackSymbol: fallbackSymbol, spacing: 0) {
+        RowViewWithIcon(input: input, rowIdentity: input.rowID.rawValue, fallbackSymbol: fallbackSymbol, spacing: 0) {
             if !input.displayState.labelText.isEmpty {
                 let labelText = input.displayState.labelText
                 Text(labelText)
@@ -338,17 +338,16 @@ private struct SegmentedRowContent: View {
 struct SegmentedRowView: View {
     let input: SegmentedRowInput
     var fallbackSymbol: SFSymbol?
-
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+    @Environment(\.sitemapRowActions) private var rowActions
 
     var body: some View {
         SegmentedRowContent(
             input: input,
-            widgetVersion: viewModel.widgetUpdateVersion(for: input.rowID),
+            widgetVersion: input.widgetVersion,
             fallbackSymbol: fallbackSymbol
         ) { command, policy, phase in
             guard let itemName = input.itemName else { return }
-            viewModel.sendCommand(command, for: itemName, policy: policy, phase: phase)
+            rowActions.sendCommand(itemName, command, policy, phase)
         }
     }
 }
