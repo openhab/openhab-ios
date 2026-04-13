@@ -13,6 +13,55 @@ import CommonUI
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
+import UIKit
+
+// MARK: - Native UISearchBar wrapper for iOS 26 (reliable bottom placement)
+
+@available(iOS 26.0, *)
+private struct NativeSearchBar: UIViewRepresentable {
+    @Binding var text: String
+    @Binding var isPresented: Bool
+    var placeholder: String
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    func makeUIView(context: Context) -> UISearchBar {
+        let bar = UISearchBar()
+        bar.searchBarStyle = .minimal
+        bar.placeholder = placeholder
+        bar.autocorrectionType = .no
+        bar.autocapitalizationType = .none
+        bar.showsCancelButton = true
+        bar.delegate = context.coordinator
+        bar.becomeFirstResponder()
+        return bar
+    }
+
+    func updateUIView(_ uiView: UISearchBar, context: Context) {
+        if uiView.text != text {
+            uiView.text = text
+        }
+    }
+
+    final class Coordinator: NSObject, UISearchBarDelegate {
+        var parent: NativeSearchBar
+        init(_ parent: NativeSearchBar) { self.parent = parent }
+
+        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+            parent.text = searchText
+        }
+
+        func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+            parent.text = ""
+            parent.isPresented = false
+            searchBar.resignFirstResponder()
+        }
+
+        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+            searchBar.resignFirstResponder()
+        }
+    }
+}
 
 struct SitemapNavigationView: View {
     @Environment(\.scenePhase) private var scenePhase
@@ -86,7 +135,22 @@ struct SitemapNavigationView: View {
             }
 
         if viewModel.showSearchField {
-            if #available(iOS 17.0, *) {
+            if #available(iOS 26.0, *) {
+                // iOS 26: use safeAreaInset for reliable bottom-above-keyboard placement.
+                // .searchable on iOS 26 places the bar at the top after the first use due to
+                // UINavigationController caching UISearchController placement state.
+                page
+                    .safeAreaInset(edge: .bottom) {
+                        if isSearchPresented {
+                            NativeSearchBar(
+                                text: $viewModel.searchText,
+                                isPresented: $isSearchPresented,
+                                placeholder: String(localized: "search_items", comment: "")
+                            )
+                            .frame(height: 56)
+                        }
+                    }
+            } else if #available(iOS 17.0, *) {
                 if isSearchPresented {
                     page
                         .searchable(
