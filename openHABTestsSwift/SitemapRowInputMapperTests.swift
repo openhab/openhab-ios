@@ -42,8 +42,8 @@ struct SitemapRowInputMapperTests {
             }
             #expect(mappedRowID == rowID)
             #expect(input.widgetId == widget.widgetId)
-            #expect(input.linkedPageLink == "https://example.invalid/linked")
-            #expect(input.linkedPageTitle == "Linked")
+            #expect(input.destination.pageUrl == "https://example.invalid/linked")
+            #expect(input.destination.title == "Linked")
         }
     }
 
