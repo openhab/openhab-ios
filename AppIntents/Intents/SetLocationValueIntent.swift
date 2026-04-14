@@ -47,7 +47,7 @@ struct SetLocationValueIntent: AppIntent {
     static let description = IntentDescription("Set the latitude and longitude of a location control item")
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     @Parameter(
         title: "Item",
@@ -62,9 +62,12 @@ struct SetLocationValueIntent: AppIntent {
     var longitude: Double
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw LocationValueError.itemNotInHome(itemEntity.label, home.displayString)
-        }
+        let homeId = try HomeResolver.resolvedHomeId(
+            selectedHome: home,
+            itemHomeId: itemEntity.homeId,
+            itemLabel: itemEntity.label,
+            mismatchError: LocationValueError.itemNotInHome
+        )
 
         guard (-90 ... 90).contains(latitude) else {
             throw LocationValueError.invalidLatitude

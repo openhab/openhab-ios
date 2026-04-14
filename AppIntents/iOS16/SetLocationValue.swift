@@ -14,8 +14,6 @@ import Foundation
 import OpenHABCore
 
 enum SetLocationValueError: Error, CustomLocalizedStringResourceConvertible {
-    case invalidHomeIdentifier
-    case unknownHome
     case itemNotFound(String)
     case invalidLatitude
     case invalidLongitude
@@ -23,10 +21,6 @@ enum SetLocationValueError: Error, CustomLocalizedStringResourceConvertible {
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case .invalidHomeIdentifier:
-            "Invalid home identifier"
-        case .unknownHome:
-            "Unknown home"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
         case .invalidLatitude:
@@ -63,7 +57,7 @@ struct SetLocationValue: AppIntent, PredictableIntent {
     var longitude: Double
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$item) to \(\.$latitude), \(\.$longitude)") {
@@ -83,17 +77,11 @@ struct SetLocationValue: AppIntent, PredictableIntent {
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let homeId = UUID(uuidString: home.id) else {
-            throw SetLocationValueError.invalidHomeIdentifier
-        }
-
-        let homeExists = await MainActor.run {
-            Preferences.shared.storedHomes[homeId] != nil
-        }
-
-        guard homeExists else {
-            throw SetLocationValueError.unknownHome
-        }
+        let homeId = try await HomeResolver.resolveHomeId(
+            selectedHome: home,
+            itemName: item,
+            allowedTypes: [.location]
+        )
 
         guard (-90 ... 90).contains(latitude) else {
             throw SetLocationValueError.invalidLatitude

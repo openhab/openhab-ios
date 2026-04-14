@@ -14,16 +14,10 @@ import Foundation
 import OpenHABCore
 
 enum GetItemStateError: Error, CustomLocalizedStringResourceConvertible {
-    case invalidHomeIdentifier
-    case unknownHome
     case itemNotFound(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case .invalidHomeIdentifier:
-            "Invalid home identifier"
-        case .unknownHome:
-            "Unknown home"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
         }
@@ -49,7 +43,7 @@ struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent
     var item: String
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     static var parameterSummary: some ParameterSummary {
         Summary("Get \(\.$item) State") {
@@ -69,17 +63,10 @@ struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent
     }
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> {
-        guard let homeId = UUID(uuidString: home.id) else {
-            throw GetItemStateError.invalidHomeIdentifier
-        }
-
-        let homeExists = await MainActor.run {
-            Preferences.shared.storedHomes[homeId] != nil
-        }
-
-        guard homeExists else {
-            throw GetItemStateError.unknownHome
-        }
+        let homeId = try await HomeResolver.resolveHomeId(
+            selectedHome: home,
+            itemName: item
+        )
 
         guard let openHABItem = await OpenHABItemCache.instance.getItemUncached(name: item, home: homeId) else {
             throw GetItemStateError.itemNotFound(item)

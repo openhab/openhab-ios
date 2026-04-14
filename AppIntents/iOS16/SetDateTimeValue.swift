@@ -14,17 +14,11 @@ import Foundation
 import OpenHABCore
 
 enum SetDateTimeValueError: Error, CustomLocalizedStringResourceConvertible {
-    case invalidHomeIdentifier
-    case unknownHome
     case itemNotFound(String)
     case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case .invalidHomeIdentifier:
-            "Invalid home identifier"
-        case .unknownHome:
-            "Unknown home"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
         case let .commandFailed(message):
@@ -54,7 +48,7 @@ struct SetDateTimeValue: AppIntent, PredictableIntent {
     var value: Date
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$item) to \(\.$value)") {
@@ -74,17 +68,11 @@ struct SetDateTimeValue: AppIntent, PredictableIntent {
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let homeId = UUID(uuidString: home.id) else {
-            throw SetDateTimeValueError.invalidHomeIdentifier
-        }
-
-        let homeExists = await MainActor.run {
-            Preferences.shared.storedHomes[homeId] != nil
-        }
-
-        guard homeExists else {
-            throw SetDateTimeValueError.unknownHome
-        }
+        let homeId = try await HomeResolver.resolveHomeId(
+            selectedHome: home,
+            itemName: item,
+            allowedTypes: [.dateTime]
+        )
 
         guard let items = await OpenHABItemCache.instance.getCachedItem(name: item, home: homeId),
               !items.isEmpty else {

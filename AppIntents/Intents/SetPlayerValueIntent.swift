@@ -42,7 +42,7 @@ struct SetPlayerValueIntent: AppIntent {
     static let description = IntentDescription("Send a player command such as play, pause, next, or previous")
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     @Parameter(
         title: "Item",
@@ -54,9 +54,12 @@ struct SetPlayerValueIntent: AppIntent {
     var action: PlayerAction
 
     func perform() async throws -> some IntentResult {
-        guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw PlayerValueError.itemNotInHome(itemEntity.label, home.displayString)
-        }
+        let homeId = try HomeResolver.resolvedHomeId(
+            selectedHome: home,
+            itemHomeId: itemEntity.homeId,
+            itemLabel: itemEntity.label,
+            mismatchError: PlayerValueError.itemNotInHome
+        )
 
         do {
             try await OpenHABItemCache.instance.sendCommand(

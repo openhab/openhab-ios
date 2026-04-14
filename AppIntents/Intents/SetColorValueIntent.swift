@@ -44,7 +44,7 @@ struct SetColorValueIntent: AppIntent {
     static let description = IntentDescription("Set the color of a color control item")
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     @Parameter(
         title: "Item",
@@ -57,9 +57,12 @@ struct SetColorValueIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         // Validate that the item belongs to the selected home
-        guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw ColorValueError.itemNotInHome(itemEntity.label, home.displayString)
-        }
+        let homeId = try HomeResolver.resolvedHomeId(
+            selectedHome: home,
+            itemHomeId: itemEntity.homeId,
+            itemLabel: itemEntity.label,
+            mismatchError: ColorValueError.itemNotInHome
+        )
 
         var colorValue = value
         let hsb = colorValue.split(separator: ",")

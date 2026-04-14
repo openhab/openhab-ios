@@ -14,18 +14,12 @@ import Foundation
 import OpenHABCore
 
 enum SetDimmerRollerValueError: Error, CustomLocalizedStringResourceConvertible {
-    case invalidHomeIdentifier
-    case unknownHome
     case itemNotFound(String)
     case invalidValue(Int, String)
     case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case .invalidHomeIdentifier:
-            "Invalid Home identifier"
-        case .unknownHome:
-            "Unknown Home"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
         case let .invalidValue(value, itemName):
@@ -59,7 +53,7 @@ struct SetDimmerRollerValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
     var value: Int
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$item) to \(\.$value)") {
@@ -79,17 +73,11 @@ struct SetDimmerRollerValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let homeId = UUID(uuidString: home.id) else {
-            throw SetDimmerRollerValueError.invalidHomeIdentifier
-        }
-
-        let homeExists = await MainActor.run {
-            Preferences.shared.storedHomes[homeId] != nil
-        }
-
-        guard homeExists else {
-            throw SetDimmerRollerValueError.unknownHome
-        }
+        let homeId = try await HomeResolver.resolveHomeId(
+            selectedHome: home,
+            itemName: item,
+            allowedTypes: [.dimmer, .rollershutter]
+        )
 
         guard (0 ... 100).contains(value) else {
             throw SetDimmerRollerValueError.invalidValue(value, item)

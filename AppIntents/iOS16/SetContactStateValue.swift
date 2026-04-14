@@ -14,18 +14,12 @@ import Foundation
 import OpenHABCore
 
 enum SetContactStateValueError: Error, CustomLocalizedStringResourceConvertible {
-    case invalidHomeIdentifier
-    case unknownHome
     case itemNotFound(String)
     case invalidState(String, String)
     case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case .invalidHomeIdentifier:
-            "Invalid home identifier"
-        case .unknownHome:
-            "Unknown home"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
         case let .invalidState(state, itemName):
@@ -65,7 +59,7 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
     var state: String
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     static var parameterSummary: some ParameterSummary {
         Summary("Set the state of \(\.$item) to \(\.$state)") {
@@ -85,17 +79,11 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let homeId = UUID(uuidString: home.id) else {
-            throw SetContactStateValueError.invalidHomeIdentifier
-        }
-
-        let homeExists = await MainActor.run {
-            Preferences.shared.storedHomes[homeId] != nil
-        }
-
-        guard homeExists else {
-            throw SetContactStateValueError.unknownHome
-        }
+        let homeId = try await HomeResolver.resolveHomeId(
+            selectedHome: home,
+            itemName: item,
+            allowedTypes: [.contact]
+        )
 
         guard let realState = ActionMapper.command(from: state) else {
             throw SetContactStateValueError.invalidState(state, item)

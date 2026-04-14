@@ -23,7 +23,12 @@ struct DimmerItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.dimmer, .rollershutter]
-        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+        var selectedHomeId: UUID? {
+            guard let intent else {
+                return nil
+            }
+            return UUID(uuidString: intent.home.id)
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Dimmer/Roller Item")
@@ -51,7 +56,12 @@ struct ColorItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.color]
-        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+        var selectedHomeId: UUID? {
+            guard let intent else {
+                return nil
+            }
+            return UUID(uuidString: intent.home.id)
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Color Item")
@@ -79,7 +89,12 @@ struct NumberItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.number, .numberWithDimension]
-        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+        var selectedHomeId: UUID? {
+            guard let intent else {
+                return nil
+            }
+            return UUID(uuidString: intent.home.id)
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Number Item")
@@ -107,7 +122,12 @@ struct StringItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.stringItem]
-        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+        var selectedHomeId: UUID? {
+            guard let intent else {
+                return nil
+            }
+            return UUID(uuidString: intent.home.id)
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "String Item")
@@ -135,7 +155,12 @@ struct ContactItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.contact]
-        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+        var selectedHomeId: UUID? {
+            guard let intent else {
+                return nil
+            }
+            return UUID(uuidString: intent.home.id)
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Contact Item")
@@ -163,7 +188,12 @@ struct GenericItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [] // Empty means all types
-        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+        var selectedHomeId: UUID? {
+            guard let intent else {
+                return nil
+            }
+            return UUID(uuidString: intent.home.id)
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Item")
@@ -191,7 +221,12 @@ struct PlayerItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.player]
-        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+        var selectedHomeId: UUID? {
+            guard let intent else {
+                return nil
+            }
+            return UUID(uuidString: intent.home.id)
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Player Item")
@@ -219,7 +254,12 @@ struct DateTimeItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.dateTime]
-        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+        var selectedHomeId: UUID? {
+            guard let intent else {
+                return nil
+            }
+            return UUID(uuidString: intent.home.id)
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "DateTime Item")
@@ -247,7 +287,12 @@ struct LocationItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.location]
-        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+        var selectedHomeId: UUID? {
+            guard let intent else {
+                return nil
+            }
+            return UUID(uuidString: intent.home.id)
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Location Item")
@@ -275,7 +320,12 @@ struct SwitchItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.switchItem]
-        var selectedHomeId: UUID? { UUID(uuidString: intent?.home.id ?? "") }
+        var selectedHomeId: UUID? {
+            guard let intent else {
+                return nil
+            }
+            return UUID(uuidString: intent.home.id)
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Switch Item")

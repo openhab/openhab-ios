@@ -15,7 +15,6 @@ import OpenHABCore
 
 @available(iOS, introduced: 16.0, obsoleted: 17.0)
 enum SetSwitchStateError: Error, CustomLocalizedStringResourceConvertible {
-    case invalidHomeIdentifier
     case itemNotFound(String)
     case invalidAction(String, String)
     case itemNotInHome(String, String)
@@ -23,8 +22,6 @@ enum SetSwitchStateError: Error, CustomLocalizedStringResourceConvertible {
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case .invalidHomeIdentifier:
-            "Invalid home identifier"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
         case let .invalidAction(action, itemName):
@@ -46,7 +43,7 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
     static let description = IntentDescription("Set the state of a switch on or off")
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     struct ItemOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
@@ -86,9 +83,11 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let homeId = UUID(uuidString: home.id) else {
-            throw SetSwitchStateError.invalidHomeIdentifier
-        }
+        let homeId = try await HomeResolver.resolveHomeId(
+            selectedHome: home,
+            itemName: item,
+            allowedTypes: [.switchItem]
+        )
 
         guard let command = ActionMapper.command(from: action) else {
             throw SetSwitchStateError.invalidAction(action, item)

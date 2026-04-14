@@ -14,18 +14,12 @@ import Foundation
 import OpenHABCore
 
 enum SetColorValueError: Error, CustomLocalizedStringResourceConvertible {
-    case invalidHomeIdentifier
-    case unknownHome
     case itemNotFound(String)
     case invalidValue(String, String)
     case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case .invalidHomeIdentifier:
-            "Invalid home identifier"
-        case .unknownHome:
-            "Unknown home"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
         case let .invalidValue(value, itemName):
@@ -59,7 +53,7 @@ struct SetColorValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInten
     var value: String
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$item) to \(\.$value) (HSB)") {
@@ -81,17 +75,11 @@ struct SetColorValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInten
     func perform() async throws -> some IntentResult & ProvidesDialog {
         var colorValue = value
 
-        guard let homeId = UUID(uuidString: home.id) else {
-            throw SetColorValueError.invalidHomeIdentifier
-        }
-
-        let homeExists = await MainActor.run {
-            Preferences.shared.storedHomes[homeId] != nil
-        }
-
-        guard homeExists else {
-            throw SetColorValueError.unknownHome
-        }
+        let homeId = try await HomeResolver.resolveHomeId(
+            selectedHome: home,
+            itemName: item,
+            allowedTypes: [.color]
+        )
 
         let hsb = colorValue.split(separator: ",")
         guard hsb.count == 3,

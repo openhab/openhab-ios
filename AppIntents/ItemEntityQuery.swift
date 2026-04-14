@@ -55,7 +55,7 @@ extension ItemEntityQuery {
 
         let matches = itemsByHome.flatMap { homeId, items in
             items.compactMap { item in
-                item.name.localizedCaseInsensitiveCompare(normalizedSearchTerm) == .orderedSame ? (homeId, item) : nil
+                isExactMatch(item, searchTerm: normalizedSearchTerm) ? (homeId, item) : nil
             }
         }
 
@@ -110,8 +110,8 @@ extension ItemEntityQuery {
         )
 
         // If the user selected a Home in the intent UI, scope results to that home.
-        if let selectedHomeId {
-            return await entityResults(from: searchResults.filter { $0.key == selectedHomeId })
+        if selectedHomeId != nil {
+            return await entityResults(from: searchResults)
         }
 
         // If the typed item name resolves to exactly one item across all homes,
@@ -122,5 +122,11 @@ extension ItemEntityQuery {
 
         // Fallback (e.g. Siri request without an explicit Home selection): return matches across all homes.
         return await entityResults(from: searchResults)
+    }
+
+    func isExactMatch(_ item: OpenHABItem, searchTerm: String) -> Bool {
+        let hasExactNameMatch = item.name.localizedCaseInsensitiveCompare(searchTerm) == .orderedSame
+        let hasExactLabelMatch = item.label.localizedCaseInsensitiveCompare(searchTerm) == .orderedSame
+        return hasExactNameMatch || hasExactLabelMatch
     }
 }

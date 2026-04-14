@@ -41,7 +41,7 @@ struct SetNumberValueIntent: AppIntent {
     static let description = IntentDescription("Set the decimal value of a number control item")
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     @Parameter(
         title: "Item",
@@ -54,9 +54,12 @@ struct SetNumberValueIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         // Validate that the item belongs to the selected home
-        guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw NumberValueError.itemNotInHome(itemEntity.label, home.displayString)
-        }
+        let homeId = try HomeResolver.resolvedHomeId(
+            selectedHome: home,
+            itemHomeId: itemEntity.homeId,
+            itemLabel: itemEntity.label,
+            mismatchError: NumberValueError.itemNotInHome
+        )
 
         do {
             try await OpenHABItemCache.instance.sendCommand(

@@ -216,6 +216,87 @@ struct SetSwitchItemIntentTests {
     }
 }
 
+// MARK: - Home Resolution
+
+@Suite("HomeResolver")
+struct HomeResolverTests {
+    let homeId = UUID()
+
+    @Test func optionalHomeUsesItemHomeId() throws {
+        let resolved = try HomeResolver.resolvedHomeId(
+            selectedHome: nil,
+            itemHomeId: homeId,
+            itemLabel: "Test Item",
+            mismatchError: ItemStateError.itemNotInHome
+        )
+
+        #expect(resolved == homeId)
+    }
+
+    @Test func selectedHomeMismatchThrows() throws {
+        let wrongHome = Home(id: UUID().uuidString, displayString: "Wrong Home")
+
+        #expect(throws: ItemStateError.self) {
+            try HomeResolver.resolvedHomeId(
+                selectedHome: wrongHome,
+                itemHomeId: homeId,
+                itemLabel: "Test Item",
+                mismatchError: ItemStateError.itemNotInHome
+            )
+        }
+    }
+
+    @Test func invalidSelectedHomeIdentifierThrows() throws {
+        let invalidHome = Home(id: "not-a-uuid", displayString: "Broken Home")
+
+        #expect(throws: HomeResolutionError.self) {
+            try HomeResolver.resolvedHomeId(
+                selectedHome: invalidHome,
+                itemHomeId: homeId,
+                itemLabel: "Test Item",
+                mismatchError: ItemStateError.itemNotInHome
+            )
+        }
+    }
+
+    @Test func singleStoredHomeBecomesDefault() async throws {
+        let resolved = try await HomeResolver.resolveHomeId(
+            selectedHome: nil,
+            itemName: "TestItem",
+            listStoredHomes: { [homeId] },
+            exactMatchedHomes: { [] }
+        )
+
+        #expect(resolved == homeId)
+    }
+
+    @Test func uniqueExactMatchChoosesHome() async throws {
+        let otherHomeId = UUID()
+
+        let resolved = try await HomeResolver.resolveHomeId(
+            selectedHome: nil,
+            itemName: "TestItem",
+            listStoredHomes: { [homeId, otherHomeId] },
+            exactMatchedHomes: { [otherHomeId] }
+        )
+
+        #expect(resolved == otherHomeId)
+    }
+
+    @Test func ambiguousHomesRequireSelection() async {
+        let otherHomeId = UUID()
+
+        await #expect(throws: HomeResolutionError.self) {
+            try await HomeResolver.resolveHomeId(
+                selectedHome: nil,
+                itemName: "TestItem",
+                listStoredHomes: { [homeId, otherHomeId] },
+                exactMatchedHomes: { [homeId, otherHomeId] }
+            )
+        }
+    }
+}
+
 // MARK: - Error Descriptions
 
 @Suite("Intent error descriptions")

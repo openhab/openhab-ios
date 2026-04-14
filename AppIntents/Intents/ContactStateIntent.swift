@@ -42,7 +42,7 @@ struct ContactStateIntent: AppIntent {
     static let description = IntentDescription("Set the state of a contact open or closed")
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     @Parameter(
         title: "Item",
@@ -55,9 +55,12 @@ struct ContactStateIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         // Validate that the item belongs to the selected home
-        guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw ContactStateError.itemNotInHome(itemEntity.label, home.displayString)
-        }
+        let homeId = try HomeResolver.resolvedHomeId(
+            selectedHome: home,
+            itemHomeId: itemEntity.homeId,
+            itemLabel: itemEntity.label,
+            mismatchError: ContactStateError.itemNotInHome
+        )
 
         do {
             try await OpenHABItemCache.instance.sendCommand(

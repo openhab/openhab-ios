@@ -37,7 +37,7 @@ struct GetItemStateIntent: AppIntent {
     static let description = IntentDescription("Retrieve the current state of an item")
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     @Parameter(
         title: "Item",
@@ -47,9 +47,12 @@ struct GetItemStateIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
         // Validate that the item belongs to the selected home
-        guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw ItemStateError.itemNotInHome(itemEntity.label, home.displayString)
-        }
+        let homeId = try HomeResolver.resolvedHomeId(
+            selectedHome: home,
+            itemHomeId: itemEntity.homeId,
+            itemLabel: itemEntity.label,
+            mismatchError: ItemStateError.itemNotInHome
+        )
 
         let freshItem = await OpenHABItemCache.instance.getItemUncached(name: itemEntity.itemName, home: homeId)
         let state = freshItem?.state ?? itemEntity.item.state ?? "Unknown state"

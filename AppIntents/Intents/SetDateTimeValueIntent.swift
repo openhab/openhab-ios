@@ -41,7 +41,7 @@ struct SetDateTimeValueIntent: AppIntent {
     static let description = IntentDescription("Set the date and time of a DateTime control item")
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     @Parameter(
         title: "Item",
@@ -53,9 +53,12 @@ struct SetDateTimeValueIntent: AppIntent {
     var value: Date
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw DateTimeValueError.itemNotInHome(itemEntity.label, home.displayString)
-        }
+        let homeId = try HomeResolver.resolvedHomeId(
+            selectedHome: home,
+            itemHomeId: itemEntity.homeId,
+            itemLabel: itemEntity.label,
+            mismatchError: DateTimeValueError.itemNotInHome
+        )
 
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]

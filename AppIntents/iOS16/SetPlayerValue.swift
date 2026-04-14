@@ -15,15 +15,12 @@ import OpenHABCore
 
 @available(iOS, introduced: 16.0, obsoleted: 17.0)
 enum SetPlayerValueError: Error, CustomLocalizedStringResourceConvertible {
-    case invalidHomeIdentifier
     case itemNotFound(String)
     case invalidAction(String, String)
     case commandFailed(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case .invalidHomeIdentifier:
-            "Invalid home identifier"
         case let .itemNotFound(itemName):
             "Item '\(itemName)' not found"
         case let .invalidAction(action, itemName):
@@ -42,7 +39,7 @@ struct SetPlayerValue: AppIntent, PredictableIntent {
     static let description = IntentDescription("Send a player command such as play, pause, next, or previous")
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     struct ItemOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
@@ -91,9 +88,11 @@ struct SetPlayerValue: AppIntent, PredictableIntent {
     ]
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let homeId = UUID(uuidString: home.id) else {
-            throw SetPlayerValueError.invalidHomeIdentifier
-        }
+        let homeId = try await HomeResolver.resolveHomeId(
+            selectedHome: home,
+            itemName: item,
+            allowedTypes: [.player]
+        )
 
         guard let command = Self.actionMap[action] else {
             throw SetPlayerValueError.invalidAction(action, item)

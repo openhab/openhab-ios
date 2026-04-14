@@ -44,7 +44,7 @@ struct SetDimmerRollerValueIntent: AppIntent {
     static let description = IntentDescription("Set the integer value of a dimmer or roller shutter")
 
     @Parameter(title: "Home")
-    var home: Home
+    var home: Home?
 
     @Parameter(
         title: "Item",
@@ -57,9 +57,12 @@ struct SetDimmerRollerValueIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         // Validate that the item belongs to the selected home
-        guard let homeId = UUID(uuidString: home.id), homeId == itemEntity.homeId else {
-            throw DimmerRollerValueError.itemNotInHome(itemEntity.label, home.displayString)
-        }
+        let homeId = try HomeResolver.resolvedHomeId(
+            selectedHome: home,
+            itemHomeId: itemEntity.homeId,
+            itemLabel: itemEntity.label,
+            mismatchError: DimmerRollerValueError.itemNotInHome
+        )
 
         guard (0 ... 100).contains(value) else {
             throw DimmerRollerValueError.invalidValue(value, itemEntity.label)
