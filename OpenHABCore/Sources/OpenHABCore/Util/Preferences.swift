@@ -114,6 +114,25 @@ public struct HomePreferences: Codable, Equatable {
 public struct ApplicationPreferences: Codable, Equatable {
     public var showSearchField = true
     public var sitemapDiagnosticsLogging = false
+
+    public init(
+        showSearchField: Bool = true,
+        sitemapDiagnosticsLogging: Bool = false
+    ) {
+        self.showSearchField = showSearchField
+        self.sitemapDiagnosticsLogging = sitemapDiagnosticsLogging
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case showSearchField
+        case sitemapDiagnosticsLogging
+    }
+
+    nonisolated public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        showSearchField = try container.decodeIfPresent(Bool.self, forKey: .showSearchField) ?? true
+        sitemapDiagnosticsLogging = try container.decodeIfPresent(Bool.self, forKey: .sitemapDiagnosticsLogging) ?? false
+    }
 }
 
 // MARK: Retrieving preference from user defaults, reacting to preference change
@@ -147,15 +166,15 @@ private enum PreferencesAccess {
 
     @MainActor fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
         guard let sanitized = sanitize(newValue) else {
-            Logger.preferences.debug("Preference \(key) new value \(String(describing: newValue), privacy: .private) could not be sanitized, will be ignored")
+            Logger.preferences.debug("Preference \(key, privacy: .public) value of type \(String(describing: T.self), privacy: .public) could not be sanitized, will be ignored")
             return
         }
         let convertedValue = converter(sanitized)
         guard convertedValue != nil else {
-            Logger.preferences.debug("Preference \(key) conversion of new value \(String(describing: sanitized), privacy: .private) failed, do not store.")
+            Logger.preferences.debug("Preference \(key, privacy: .public) conversion failed for value type \(String(describing: T.self), privacy: .public)")
             return
         }
-        Logger.preferences.debug("Preference \(key) will be changed to value \(String(describing: newValue), privacy: .private)")
+        Logger.preferences.debug("Preference \(key, privacy: .public) will be changed for value type \(String(describing: T.self), privacy: .public)")
         sharedDefaults.set(convertedValue, forKey: key)
 
         subject.send(sanitized)

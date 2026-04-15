@@ -17,12 +17,12 @@ import SwiftUI
 
 private struct ImageRowConfig {
     let input: MediaRowInput
-    let viewModel: SitemapPageViewModel
+    let rootUrl: String
 }
 
 @MainActor
 private func makeImageRowContent(_ config: ImageRowConfig) -> ImageRowContent {
-    ImageRowContent(input: config.input, viewModel: config.viewModel)
+    ImageRowContent(input: config.input, rootUrl: config.rootUrl)
 }
 
 private struct ImageRowContent: View {
@@ -32,7 +32,7 @@ private struct ImageRowContent: View {
     }
 
     let input: MediaRowInput
-    @ObservedObject var viewModel: SitemapPageViewModel
+    let rootUrl: String
     @Environment(\.colorScheme) var colorScheme
     @State private var refreshTimer: Timer?
     @State private var forceRefreshKey = UUID()
@@ -54,7 +54,7 @@ private struct ImageRowContent: View {
     }
 
     private var chartWidgetVersion: Int {
-        viewModel.widgetUpdateVersion(for: input.rowID)
+        input.widgetVersion
     }
 
     private var chartSyncToken: String {
@@ -62,7 +62,7 @@ private struct ImageRowContent: View {
         case .dark: "dark"
         case .light: "light"
         }
-        let rootKey = viewModel.openHABRootUrl ?? ""
+        let rootKey = rootUrl
         return "\(isChartByMediaKind)|\(input.widgetId)|\(input.imageDescriptor.period)|\(input.url)|\(rootKey)|\(themeKey)|\(chartWidgetVersion)"
     }
 
@@ -146,7 +146,7 @@ private struct ImageRowContent: View {
 
     @ViewBuilder
     private var regularImageView: some View {
-        switch input.imageDescriptor.resolveImagePayload(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
+        switch input.imageDescriptor.resolveImagePayload(rootUrl: rootUrl, chartStyle: chartStyle) {
         case let .embedded(data: data):
             let cacheKey = if shouldCache {
                 "\(input.widgetId)-\(data.hashValue)"
@@ -219,7 +219,7 @@ private struct ImageRowContent: View {
         }
 
         let currentChartKey = makeChartDisplayKey()
-        switch input.imageDescriptor.resolveImagePayload(rootUrl: viewModel.openHABRootUrl ?? "", chartStyle: chartStyle) {
+        switch input.imageDescriptor.resolveImagePayload(rootUrl: rootUrl, chartStyle: chartStyle) {
         case let .link(url):
             chartDisplayState = ChartDisplayState(key: currentChartKey, url: url)
         case .embedded, .empty:
@@ -232,20 +232,20 @@ private struct ImageRowContent: View {
         case .dark: "dark"
         case .light: "light"
         }
-        let rootKey = viewModel.openHABRootUrl ?? ""
+        let rootKey = rootUrl
         return "\(input.widgetId)|\(input.imageDescriptor.period)|\(themeKey)|\(rootKey)"
     }
 }
 
 struct ImageRowView: View {
     let input: MediaRowInput
-    @EnvironmentObject var viewModel: SitemapPageViewModel
+    @Environment(\.sitemapIconConnection) private var iconConnection
 
     var body: some View {
         makeImageRowContent(
             ImageRowConfig(
                 input: input,
-                viewModel: viewModel
+                rootUrl: iconConnection.rootUrl
             )
         )
     }

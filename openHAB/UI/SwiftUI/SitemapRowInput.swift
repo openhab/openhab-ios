@@ -80,6 +80,8 @@ extension SitemapRowInput {
             return .selection(rowID, input.withWidgetVersion(version))
         case let .segmented(rowID, input):
             return .segmented(rowID, input.withWidgetVersion(version))
+        case let .media(rowID, input):
+            return .media(rowID, input.withWidgetVersion(version))
         case .frame,
              .linked,
              .text,
@@ -88,7 +90,6 @@ extension SitemapRowInput {
              .toggle,
              .input,
              .colorPicker,
-             .media,
              .colorTemperature,
              .buttonGrid,
              .generic:

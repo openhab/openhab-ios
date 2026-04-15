@@ -452,6 +452,7 @@ struct ColorTemperatureRowInput: Equatable, RowWithIconInput {
 
 struct MediaRowInput: Equatable {
     let rowID: RowID
+    let widgetVersion: Int
     let widgetId: String
     let renderingKind: WidgetRenderingKind
     let displayState: WidgetDisplayState
@@ -474,6 +475,7 @@ struct MediaRowInput: Equatable {
 
         return MediaRowInput(
             rowID: rowID,
+            widgetVersion: 0,
             widgetId: widget.widgetId,
             renderingKind: widget.renderingKind,
             displayState: widget.displayState,
@@ -488,6 +490,27 @@ struct MediaRowInput: Equatable {
             preferredRowHeight: widget.preferredRowHeight.map(Double.init),
             coordinateLatitude: hasValidCoordinate ? coordinate.latitude : nil,
             coordinateLongitude: hasValidCoordinate ? coordinate.longitude : nil
+        )
+    }
+
+    func withWidgetVersion(_ widgetVersion: Int) -> MediaRowInput {
+        MediaRowInput(
+            rowID: rowID,
+            widgetVersion: widgetVersion,
+            widgetId: widgetId,
+            renderingKind: renderingKind,
+            displayState: displayState,
+            imageDescriptor: imageDescriptor,
+            labelColor: labelColor,
+            valueColor: valueColor,
+            readOnly: readOnly,
+            refresh: refresh,
+            url: url,
+            encoding: encoding,
+            labelSourceRawValue: labelSourceRawValue,
+            preferredRowHeight: preferredRowHeight,
+            coordinateLatitude: coordinateLatitude,
+            coordinateLongitude: coordinateLongitude
         )
     }
 }

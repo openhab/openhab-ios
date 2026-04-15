@@ -20,6 +20,7 @@ public struct LogsViewer: View {
         "(subsystem BEGINSWITH $PREFIX)")
 
     @State private var text = String(localized: "Loading…")
+    @State private var exportURL: URL?
 
     let myFont = Font
         .system(size: 10)
@@ -31,8 +32,20 @@ public struct LogsViewer: View {
                 .font(myFont)
                 .padding()
         }
+        .navigationTitle("Logs")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if let exportURL {
+                    ShareLink(item: exportURL) {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                    .accessibilityLabel("Share Logs")
+                }
+            }
+        }
         .task {
             text = await fetchLogs()
+            exportURL = makeExportURL(for: text)
         }
     }
 
@@ -61,6 +74,21 @@ public struct LogsViewer: View {
             return logs.joined()
         } catch {
             return error.localizedDescription
+        }
+    }
+
+    private func makeExportURL(for text: String) -> URL? {
+        let fileName = "openhab-logs-\(Date.now.formatted(.iso8601.year().month().day().time(includingFractionalSeconds: false)))"
+            .replacingOccurrences(of: ":", with: "-")
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent(fileName)
+            .appendingPathExtension("log")
+
+        do {
+            try text.write(to: url, atomically: true, encoding: .utf8)
+            return url
+        } catch {
+            return nil
         }
     }
 }

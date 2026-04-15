@@ -128,6 +128,16 @@ class SitemapPageViewModel: ObservableObject {
         }
     }
 
+    var sitemapIconConnection: SitemapIconConnection {
+        guard let activeConnectionInfo else {
+            return .none
+        }
+        return SitemapIconConnection(
+            rootUrl: activeConnectionInfo.configuration.url,
+            version: activeConnectionInfo.version
+        )
+    }
+
     var commandLifecycleSummary: CommandLifecycleSummary {
         let failedCount = commandStates.values.reduce(into: 0) { result, state in
             if case .failed = state {
@@ -331,6 +341,18 @@ extension SitemapPageViewModel {
         let now = Date()
         guard now.timeIntervalSince(lastForegroundRefreshAt) > 0.75 else { return }
         lastForegroundRefreshAt = now
+
+        let hasActiveHealthyPipeline = trackerStatus == .connected
+            && currentPage != nil
+            && pageHandlingTask != nil
+            && pageHandlingTask?.isCancelled == false
+            && error == nil
+            && !isLoading
+            && !isUpdating
+        if hasActiveHealthyPipeline {
+            logger.info("FG refresh: skipped while sitemap is already active and connected")
+            return
+        }
 
         guard foregroundRefreshTask == nil else { return }
         logger.info("FG refresh: scheduled")

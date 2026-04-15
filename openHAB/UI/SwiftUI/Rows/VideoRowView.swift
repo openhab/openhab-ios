@@ -40,6 +40,7 @@ private struct VideoRowContent: View {
     @State private var currentStreamUrl: URL?
     @State private var imageObservationTimer: Timer?
     @State private var playerObserver: NSKeyValueObservation?
+    @State private var cleanupTask: Task<Void, Never>?
 
     private let logger = Logger(subsystem: "org.openhab", category: "VideoRowView")
 
@@ -98,12 +99,14 @@ private struct VideoRowContent: View {
                 }
                 .frame(maxWidth: .infinity)
                 .onAppear {
+                    cancelScheduledCleanup()
                     setupVideo(url: videoURL)
                 }
                 .onDisappear {
-                    cleanup()
+                    scheduleCleanup()
                 }
                 .onChange(of: input.url) { newValue in
+                    cancelScheduledCleanup()
                     if !newValue.isEmpty, let newURL = URL(string: newValue) {
                         setupVideo(url: newURL)
                     } else {
@@ -132,6 +135,8 @@ private struct VideoRowContent: View {
 
     @MainActor
     private func setupVideo(url: URL) {
+        cancelScheduledCleanup()
+
         // Avoid redundant setup if URL hasn't changed
         if currentStreamUrl?.absoluteString == url.absoluteString {
             return
@@ -147,6 +152,20 @@ private struct VideoRowContent: View {
         } else {
             setupHLS(url: url)
         }
+    }
+
+    private func scheduleCleanup() {
+        cleanupTask?.cancel()
+        cleanupTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            cleanup()
+        }
+    }
+
+    private func cancelScheduledCleanup() {
+        cleanupTask?.cancel()
+        cleanupTask = nil
     }
 
     @MainActor
@@ -223,6 +242,8 @@ private struct VideoRowContent: View {
     }
 
     private func cleanup() {
+        cancelScheduledCleanup()
+
         // Clean up timer
         imageObservationTimer?.invalidate()
         imageObservationTimer = nil

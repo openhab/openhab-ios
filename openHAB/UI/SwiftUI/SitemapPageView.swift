@@ -37,6 +37,7 @@ struct SitemapPageView: View {
         }
         .environmentObject(viewModel)
         .environment(\.sitemapPageIdentity, viewModel.pageId)
+        .environment(\.sitemapIconConnection, viewModel.sitemapIconConnection)
         .environment(\.sitemapRowActions, SitemapRowActions(
             sendCommand: { itemName, command, policy, phase in
                 viewModel.sendCommand(command, for: itemName, policy: policy, phase: phase)

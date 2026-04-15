@@ -44,10 +44,26 @@ private struct SitemapPageIdentityKey: EnvironmentKey {
     static let defaultValue = ""
 }
 
+private struct SitemapIconConnectionKey: EnvironmentKey {
+    static let defaultValue = SitemapIconConnection.none
+}
+
+struct SitemapIconConnection: Equatable, Sendable {
+    let rootUrl: String
+    let version: Int
+
+    static let none = SitemapIconConnection(rootUrl: "", version: 0)
+}
+
 extension EnvironmentValues {
     var sitemapPageIdentity: String {
         get { self[SitemapPageIdentityKey.self] }
         set { self[SitemapPageIdentityKey.self] = newValue }
+    }
+
+    var sitemapIconConnection: SitemapIconConnection {
+        get { self[SitemapIconConnectionKey.self] }
+        set { self[SitemapIconConnectionKey.self] = newValue }
     }
 }
 
@@ -55,9 +71,9 @@ struct IconInputView: View {
     let input: RowIconInput
     let rowIdentity: String
     let fallbackSymbol: SFSymbol?
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.sitemapPageIdentity) private var pageIdentity
+    @Environment(\.sitemapIconConnection) private var iconConnection
     let size: CGSize
     let iconType: IconType = .svg
 
@@ -72,17 +88,14 @@ struct IconInputView: View {
 
     private var iconURL: URL? {
         guard input.showIcon, !input.icon.isEmpty else { return nil }
-
-        guard
-            let activeConnection = networkTracker.activeConnection,
-            !activeConnection.configuration.url.isEmpty else {
+        guard !iconConnection.rootUrl.isEmpty else {
             logger.debug("No active connection to fetch icon")
             return nil
         }
 
         return Endpoint.icon(
-            rootUrl: activeConnection.configuration.url,
-            version: activeConnection.version,
+            rootUrl: iconConnection.rootUrl,
+            version: iconConnection.version,
             icon: input.icon,
             state: input.iconState,
             iconType: iconType,
@@ -151,9 +164,9 @@ struct IconInputView: View {
 /// A SwiftUI view that displays widget icons with openHAB-specific styling and caching
 struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.sitemapPageIdentity) private var pageIdentity
+    @Environment(\.sitemapIconConnection) private var iconConnection
     let size: CGSize
     let iconType: IconType = .svg
     /// Optional SF Symbol to show as fallback when network icon is unavailable (useful for previews)
@@ -171,17 +184,14 @@ struct IconView: View {
 
     private var iconURL: URL? {
         guard !widget.icon.isEmpty else { return nil }
-
-        guard
-            let activeConnection = networkTracker.activeConnection,
-            !activeConnection.configuration.url.isEmpty else {
+        guard !iconConnection.rootUrl.isEmpty else {
             logger.debug("No active connection to fetch icon")
             return nil
         }
 
         return Endpoint.icon(
-            rootUrl: activeConnection.configuration.url,
-            version: activeConnection.version,
+            rootUrl: iconConnection.rootUrl,
+            version: iconConnection.version,
             icon: widget.icon,
             state: widget.iconState(),
             iconType: iconType,
