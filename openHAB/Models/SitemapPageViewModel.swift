@@ -276,15 +276,24 @@ class SitemapPageViewModel: ObservableObject {
     /// Increments `widgetUpdateVersions` for each row whose content differs between `oldInputs`
     /// and `newInputs`, keyed by full row identity.
     func bumpWidgetVersions(from oldInputs: [SitemapRowInput], to newInputs: [SitemapRowInput]) {
+        let changedKinds = SitemapDiagnostics.changedRowKinds(from: oldInputs, to: newInputs)
+        let changedRowCount: Int
         if newInputs.count == oldInputs.count {
+            changedRowCount = zip(newInputs, oldInputs).reduce(into: 0) { count, pair in
+                if pair.0 != pair.1 {
+                    count += 1
+                }
+            }
             for (new, old) in zip(newInputs, oldInputs) where new != old {
                 widgetUpdateVersions[new.rowID.rawValue, default: 0] += 1
             }
         } else {
+            changedRowCount = newInputs.count
             for input in newInputs {
                 widgetUpdateVersions[input.rowID.rawValue, default: 0] += 1
             }
         }
+        SitemapDiagnostics.logWidgetVersions(changedRowCount: changedRowCount, changedRowKinds: changedKinds)
     }
 
     func widgetUpdateVersion(for rowID: RowID) -> Int {
@@ -504,6 +513,7 @@ extension SitemapPageViewModel {
     @MainActor
     private func updateUI(with page: OpenHABPage, origin: PageUpdateOrigin) {
         logger.debug("Incoming sitemap update origin=\(origin.rawValue, privacy: .public), widgets=\(page.widgets.count)")
+        let mapStart = Date()
 
         let pageKey = "\(defaultSitemap)|\(pageId)"
 
@@ -517,9 +527,34 @@ extension SitemapPageViewModel {
             }
         }
         let previewInputs = SitemapRowInputMapper.map(pageKey: pageKey, widgets: incomingFiltered)
+        let mapDurationMs = Int((Date().timeIntervalSince(mapStart) * 1000).rounded())
 
+        let diffStart = Date()
         let titleChanged = currentPage == nil || currentPage?.title != page.title
         let inputsChanged = previewInputs != rowInputs
+        let changedRowCount: Int
+        if previewInputs.count == rowInputs.count {
+            changedRowCount = zip(previewInputs, rowInputs).reduce(into: 0) { count, pair in
+                if pair.0 != pair.1 {
+                    count += 1
+                }
+            }
+        } else {
+            changedRowCount = previewInputs.count
+        }
+        let changedRowKinds = SitemapDiagnostics.changedRowKinds(from: rowInputs, to: previewInputs)
+        let diffDurationMs = Int((Date().timeIntervalSince(diffStart) * 1000).rounded())
+        SitemapDiagnostics.logUpdate(
+            origin: origin,
+            widgetCount: page.widgets.count,
+            rowCount: previewInputs.count,
+            inputsChanged: inputsChanged,
+            titleChanged: titleChanged,
+            changedRowCount: changedRowCount,
+            changedRowKinds: changedRowKinds,
+            mapDurationMs: mapDurationMs,
+            diffDurationMs: diffDurationMs
+        )
 
         // When search is empty and nothing the UI renders has changed, skip the update entirely.
         if searchText.isEmpty, !inputsChanged, !titleChanged {
@@ -533,6 +568,7 @@ extension SitemapPageViewModel {
         if inputsChanged {
             bumpWidgetVersions(from: rowInputs, to: previewInputs)
             rowInputs = previewInputs.map { $0.applyingWidgetVersions(widgetUpdateVersions) }
+            SitemapDiagnostics.logPublishedRows(rowCount: rowInputs.count, changedRowCount: changedRowCount)
         }
     }
 

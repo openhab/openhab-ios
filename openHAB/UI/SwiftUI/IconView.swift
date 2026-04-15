@@ -92,6 +92,7 @@ struct IconInputView: View {
     }
 
     var body: some View {
+        let _ = SitemapDiagnostics.logRender(kind: "iconInput", identity: "\(pageIdentity)|\(rowIdentity)", detail: input.icon)
         ZStack {
             if let fallbackSymbol, currentImage == nil {
                 Image(systemSymbol: fallbackSymbol)
@@ -190,6 +191,7 @@ struct IconView: View {
     }
 
     var body: some View {
+        let _ = SitemapDiagnostics.logRender(kind: "iconWidget", identity: "\(pageIdentity)|\(widget.id)", detail: widget.icon)
         ZStack {
             // No icon URL - show fallback symbol if available
             if let fallbackSymbol {

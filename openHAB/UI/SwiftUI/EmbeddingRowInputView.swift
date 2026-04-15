@@ -92,6 +92,7 @@ private struct LinkedPageRowContent: View {
     let input: LinkedPageRowInput
 
     var body: some View {
+        let _ = SitemapDiagnostics.logRender(kind: "linked", identity: input.destination.pageUrl)
         let displayState = input.displayState
         HStack {
             IconInputView(input: input.icon, rowIdentity: input.destination.pageUrl, size: CGSize(width: 32, height: 32))

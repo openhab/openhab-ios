@@ -20,6 +20,7 @@ struct SettingsView: View {
     @State private var settingsRealTimeSliders = true
     @State private var settingsShowSearchField = true
     @State private var settingsSendCrashReports = false
+    @State private var settingsSitemapDiagnosticsLogging = false
     @State private var settingsIconType: IconType = .svg
     @State private var settingsSortSitemapsBy: SortSitemapsOrder = .label
     @State private var settingsDefaultMainUIPath = ""
@@ -63,7 +64,8 @@ struct SettingsView: View {
             )
 
             DebugSettingsView(
-                settingsSendCrashReports: $settingsSendCrashReports
+                settingsSendCrashReports: $settingsSendCrashReports,
+                settingsSitemapDiagnosticsLogging: $settingsSitemapDiagnosticsLogging
             )
 
             AboutSettingsView()
@@ -123,6 +125,7 @@ struct SettingsView: View {
         settingsIdleOff = Preferences.shared.idleOff
         settingsRealTimeSliders = Preferences.shared.currentHomePreferences.realTimeSliders
         settingsShowSearchField = Preferences.shared.applicationPreferences.showSearchField
+        settingsSitemapDiagnosticsLogging = Preferences.shared.applicationPreferences.sitemapDiagnosticsLogging
         settingsSendCrashReports = Preferences.shared.sendCrashReports
         settingsIconType = IconType(rawValue: Preferences.shared.currentHomePreferences.iconType) ?? .svg
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label
@@ -154,6 +157,7 @@ struct SettingsView: View {
 
         Preferences.shared.modifyApplicationPreferences { @MainActor applicationPreferences in
             applicationPreferences.showSearchField = settingsShowSearchField
+            applicationPreferences.sitemapDiagnosticsLogging = settingsSitemapDiagnosticsLogging
         }
 
         // Apply global UI changes immediately (status bar visibility)

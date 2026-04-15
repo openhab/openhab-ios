@@ -113,6 +113,7 @@ public struct HomePreferences: Codable, Equatable {
 @MainActor
 public struct ApplicationPreferences: Codable, Equatable {
     public var showSearchField = true
+    public var sitemapDiagnosticsLogging = false
 }
 
 // MARK: Retrieving preference from user defaults, reacting to preference change

@@ -67,6 +67,11 @@ private struct ImageRowContent: View {
     }
 
     var body: some View {
+        let _ = SitemapDiagnostics.logRender(
+            kind: isChartByMediaKind ? "chartImage" : "mediaImage",
+            identity: input.rowID.rawValue,
+            detail: "refresh=\(input.refresh)"
+        )
         let displayState = input.displayState
         VStack(alignment: .leading, spacing: 8) {
             if !displayState.labelText.isEmpty, input.labelSourceRawValue == OpenHABWidget.LabelSource.sitemapDefinition.rawValue {
