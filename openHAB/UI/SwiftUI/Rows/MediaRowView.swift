@@ -18,6 +18,7 @@ struct MediaRowView: View {
     private var genericFallbackInput: GenericRowInput {
         GenericRowInput(
             widgetId: input.widgetId,
+            widgetVersion: input.widgetVersion,
             displayState: input.displayState,
             labelColor: input.labelColor,
             valueColor: input.valueColor,

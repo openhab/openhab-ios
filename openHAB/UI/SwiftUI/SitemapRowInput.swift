@@ -95,8 +95,7 @@ extension SitemapRowInput {
              .input,
              .colorPicker,
              .colorTemperature,
-             .buttonGrid,
-             .generic:
+             .buttonGrid:
             return self
         }
     }
