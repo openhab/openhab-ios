@@ -13,15 +13,6 @@ import CommonUI
 import OpenHABCore
 import SwiftUI
 
-private struct GenericRowConfig {
-    let input: GenericRowInput
-}
-
-@MainActor
-private func makeGenericRowContent(_ config: GenericRowConfig) -> GenericRowContent {
-    GenericRowContent(input: config.input)
-}
-
 private struct GenericRowContent: View {
     let input: GenericRowInput
 
@@ -46,7 +37,7 @@ private struct GenericRowContent: View {
 struct GenericRowView: View {
     let input: GenericRowInput
     var body: some View {
-        makeGenericRowContent(GenericRowConfig(input: input))
+        GenericRowContent(input: input)
     }
 }
 

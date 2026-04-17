@@ -360,6 +360,7 @@ struct ButtonGridRowInput: Equatable, RowWithIconInput {
 
 struct GenericRowInput: Equatable, RowWithIconInput {
     let widgetId: String
+    let widgetVersion: Int
     let displayState: WidgetDisplayState
     let labelColor: String
     let valueColor: String
@@ -368,16 +369,29 @@ struct GenericRowInput: Equatable, RowWithIconInput {
     static func from(widget: OpenHABWidget) -> GenericRowInput {
         GenericRowInput(
             widgetId: widget.widgetId,
+            widgetVersion: 0,
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
             icon: RowIconInput.from(widget: widget)
         )
     }
+
+    func withWidgetVersion(_ widgetVersion: Int) -> GenericRowInput {
+        GenericRowInput(
+            widgetId: widgetId,
+            widgetVersion: widgetVersion,
+            displayState: displayState,
+            labelColor: labelColor,
+            valueColor: valueColor,
+            icon: icon
+        )
+    }
 }
 
 struct LinkedPageRowInput: Equatable, RowWithIconInput {
     let widgetId: String
+    let widgetVersion: Int
     let displayState: WidgetDisplayState
     let labelColor: String
     let valueColor: String
@@ -389,6 +403,7 @@ struct LinkedPageRowInput: Equatable, RowWithIconInput {
         guard let linkedPage = widget.linkedPage else { return nil }
         return LinkedPageRowInput(
             widgetId: widget.widgetId,
+            widgetVersion: 0,
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
@@ -398,6 +413,19 @@ struct LinkedPageRowInput: Equatable, RowWithIconInput {
                 title: linkedPage.title
             ),
             isFrame: widget.type == .frame
+        )
+    }
+
+    func withWidgetVersion(_ widgetVersion: Int) -> LinkedPageRowInput {
+        LinkedPageRowInput(
+            widgetId: widgetId,
+            widgetVersion: widgetVersion,
+            displayState: displayState,
+            labelColor: labelColor,
+            valueColor: valueColor,
+            icon: icon,
+            destination: destination,
+            isFrame: isFrame
         )
     }
 }
@@ -529,6 +557,7 @@ struct FrameRowInput: Equatable {
 
 struct TextRowInput: Equatable, RowWithIconInput {
     let widgetId: String
+    let widgetVersion: Int
     let displayState: WidgetDisplayState
     let labelColor: String
     let valueColor: String
@@ -537,10 +566,22 @@ struct TextRowInput: Equatable, RowWithIconInput {
     static func from(widget: OpenHABWidget) -> TextRowInput {
         TextRowInput(
             widgetId: widget.widgetId,
+            widgetVersion: 0,
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
             icon: RowIconInput.from(widget: widget)
+        )
+    }
+
+    func withWidgetVersion(_ widgetVersion: Int) -> TextRowInput {
+        TextRowInput(
+            widgetId: widgetId,
+            widgetVersion: widgetVersion,
+            displayState: displayState,
+            labelColor: labelColor,
+            valueColor: valueColor,
+            icon: icon
         )
     }
 }

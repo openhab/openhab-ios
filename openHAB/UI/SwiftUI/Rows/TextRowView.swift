@@ -15,15 +15,6 @@ import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
 
-private struct TextRowConfig {
-    let input: TextRowInput
-}
-
-@MainActor
-private func makeTextRowContent(_ config: TextRowConfig) -> TextRowContent {
-    TextRowContent(input: config.input)
-}
-
 private struct TextRowContent: View {
     let input: TextRowInput
 
@@ -66,7 +57,7 @@ struct TextRowView: View {
     let input: TextRowInput
 
     var body: some View {
-        makeTextRowContent(TextRowConfig(input: input))
+        TextRowContent(input: input)
     }
 }
 

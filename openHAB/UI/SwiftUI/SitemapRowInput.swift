@@ -82,9 +82,13 @@ extension SitemapRowInput {
             return .segmented(rowID, input.withWidgetVersion(version))
         case let .media(rowID, input):
             return .media(rowID, input.withWidgetVersion(version))
+        case let .text(rowID, input):
+            return .text(rowID, input.withWidgetVersion(version))
+        case let .linked(rowID, input):
+            return .linked(rowID, input.withWidgetVersion(version))
+        case let .generic(rowID, input):
+            return .generic(rowID, input.withWidgetVersion(version))
         case .frame,
-             .linked,
-             .text,
              .setpoint,
              .rollershutter,
              .toggle,
