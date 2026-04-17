@@ -796,11 +796,12 @@ extension SitemapPageViewModel {
     }
 
     private func makeSitemapService(for connection: ConnectionInfo) throws -> OpenAPIService {
-        // Keep sitemap polling fresh after foreground transitions or long inactivity.
-        // Long-term config disables URL cache and aligns with watchOS behavior.
+        // Preserve normal URL caching on iOS so a recreated sitemap view can
+        // render the last page snapshot immediately while the foreground refresh
+        // fetches updated data in the background.
         try OpenAPIService(
             connectionConfiguration: connection.configuration,
-            serviceConfiguration: .longTerm
+            serviceConfiguration: .asDefault
         )
     }
 
