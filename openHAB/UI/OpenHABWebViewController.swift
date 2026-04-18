@@ -437,6 +437,7 @@ class OpenHABWebViewController: OpenHABViewController {
         // support dark mode and avoid white flashing when loading
         webview.isOpaque = false
         webview.backgroundColor = UIColor.clear
+        webview.underPageBackgroundColor = .systemBackground
         if UIDevice.current.userInterfaceIdiom == .pad {
             // since ios 13 Safari sets the user agent to desktop mode on iPads so the view renders correctly with larger screens
             webview.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
