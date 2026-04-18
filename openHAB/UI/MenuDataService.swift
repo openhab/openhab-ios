@@ -13,12 +13,14 @@ import Combine
 import OpenHABCore
 import os.log
 
-/// Provides menu data (sitemaps, tiles) for the navigation menu.
+/// Provides menu data (sitemaps, tiles, pages) for the navigation menu.
 /// Extracted from DrawerView for testability and reuse.
 @MainActor
 class MenuDataService: ObservableObject {
     @Published var sitemaps: [OpenHABSitemap] = []
     @Published var uiTiles: [OpenHABUiTile] = []
+    @Published var uiPages: [OpenHABUIPage] = []
+    @Published var isLoading = false
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -26,6 +28,7 @@ class MenuDataService: ObservableObject {
         MainActorNetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
             .sink { [weak self] activeConnection in
+                self?.clearAll()
                 Task { [weak self] in
                     await self?.fetchData(activeConnection: activeConnection)
                 }
@@ -33,17 +36,36 @@ class MenuDataService: ObservableObject {
             .store(in: &cancellables)
     }
 
+    /// Clears all data immediately (shows empty state while fetching).
+    func clearAll() {
+        sitemaps = []
+        uiTiles = []
+        uiPages = []
+    }
+
+    /// Re-fetches all menu data from the currently active connection.
+    func refresh() {
+        let connection = MainActorNetworkTracker.shared.activeConnection
+        clearAll()
+        Task { await fetchData(activeConnection: connection) }
+    }
+
     func fetchData(activeConnection: ConnectionInfo?) async {
         guard let activeConnection else { return }
+
+        isLoading = true
+        defer { isLoading = false }
 
         do {
             let openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
             await fetchSitemaps(using: openAPIService)
             await fetchTiles(using: openAPIService)
+            await fetchPages(using: openAPIService, rootUrl: activeConnection.configuration.url)
         } catch {
             Logger.drawerView.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
             sitemaps = []
             uiTiles = []
+            uiPages = []
         }
     }
 
@@ -65,6 +87,16 @@ class MenuDataService: ObservableObject {
         } catch {
             Logger.drawerView.error("Failed to fetch UI tiles: \(error.localizedDescription)")
             uiTiles = []
+        }
+    }
+
+    private func fetchPages(using service: OpenAPIService, rootUrl: String) async {
+        do {
+            uiPages = try await service.getUIPages(rootUrl: rootUrl)
+            Logger.drawerView.info("Fetched UI pages successfully")
+        } catch {
+            Logger.drawerView.error("Failed to fetch UI pages: \(error.localizedDescription)")
+            uiPages = []
         }
     }
 
