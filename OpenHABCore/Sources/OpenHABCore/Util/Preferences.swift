@@ -381,6 +381,19 @@ public extension Preferences {
         modificationFunction(&applicationPreferences)
         self.applicationPreferences = applicationPreferences
     }
+
+    /// Modify an arbitrary stored home by UUID.  If `homeId` matches the active home,
+    /// delegates to `modifyActiveHome` so that `currentHomePreferences` stays in sync.
+    func modifyStoredHome(_ homeId: UUID, modificationFunction: @MainActor (inout HomePreferences) -> Void) {
+        if homeId == activeHomeId {
+            modifyActiveHome(modificationFunction: modificationFunction)
+        } else {
+            var stored = storedHomes
+            guard stored[homeId] != nil else { return }
+            modificationFunction(&stored[homeId]!)
+            storedHomes = stored
+        }
+    }
 }
 
 @MainActor

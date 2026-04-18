@@ -33,6 +33,8 @@ struct HomeSelectionView: View {
 
     @State private var showingDeleteHomeAlert = false
 
+    @State private var homeForSettings: UUID?
+
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -44,7 +46,12 @@ struct HomeSelectionView: View {
                         Image(systemSymbol: .pencil)
                             .foregroundStyle(.blue)
                     }
-                    Text(homeName)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(homeName)
+                        if !showEditOptions {
+                            HomeSummaryView(homeId: home)
+                        }
+                    }
                     if Preferences.shared.currentHomePreferences.id == home, !showEditOptions {
                         Spacer()
                         Image(systemSymbol: .checkmark)
@@ -80,6 +87,14 @@ struct HomeSelectionView: View {
                                 .foregroundStyle(.white)
                         }
                     }
+                } else {
+                    Button(action: {
+                        homeForSettings = home
+                    }, label: {
+                        Image(systemSymbol: .gear)
+                            .foregroundStyle(.secondary)
+                    })
+                    .buttonStyle(.plain)
                 }
             }
             .alert("Enter a new name for the home '\(homeNameForAlert)'", isPresented: $showingRenameHomeAlert, actions: {
@@ -180,6 +195,16 @@ struct HomeSelectionView: View {
                 }
             }
         }
+        .sheet(isPresented: Binding(
+            get: { homeForSettings != nil },
+            set: { if !$0 { homeForSettings = nil } }
+        )) {
+            if let target = homeForSettings {
+                NavigationStack {
+                    SettingsView(homeId: target)
+                }
+            }
+        }
     }
 
     private func select(home: UUID) {
@@ -213,6 +238,76 @@ struct HomeSelectionView: View {
     private func addHome() {
         Preferences.shared.createAndLoadNewStoredSettings(homeName: newHomeName)
         loadHomesList()
+    }
+}
+
+// MARK: - Summary
+
+private struct HomeSummaryView: View {
+    let homeId: UUID
+
+    private var homePrefs: HomePreferences? {
+        Preferences.shared.storedHomes[homeId]
+    }
+
+    var body: some View {
+        if let prefs = homePrefs {
+            VStack(alignment: .leading, spacing: 1) {
+                HStack(spacing: 6) {
+                    summaryItem(
+                        label: "Local",
+                        value: prefs.localConnectionConfig.url.isEmpty
+                            ? String(localized: "Not set")
+                            : (URL(string: prefs.localConnectionConfig.url)?.host ?? prefs.localConnectionConfig.url)
+                    )
+                    Text("·").foregroundStyle(.tertiary)
+                    summaryItem(
+                        label: "Remote",
+                        value: prefs.remoteConnectionConfig.url.isEmpty
+                            ? String(localized: "Not set")
+                            : (URL(string: prefs.remoteConnectionConfig.url)?.host ?? prefs.remoteConnectionConfig.url)
+                    )
+                }
+                HStack(spacing: 6) {
+                    let hasCredentials = !prefs.localConnectionConfig.username.isEmpty
+                        || !prefs.remoteConnectionConfig.username.isEmpty
+                    Text(hasCredentials ? String(localized: "Credentials set") : String(localized: "No credentials"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    if prefs.localConnectionConfig.ignoreSSL || prefs.remoteConnectionConfig.ignoreSSL {
+                        Text("·").foregroundStyle(.tertiary)
+                        Text("SSL off")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
+                    if prefs.demomode {
+                        Text("·").foregroundStyle(.tertiary)
+                        Text("Demo")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    let defaultView = prefs.defaultView
+                    if defaultView != "web" {
+                        Text("·").foregroundStyle(.tertiary)
+                        Text("Sitemap: \(prefs.defaultSitemap)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func summaryItem(label: String, value: String) -> some View {
+        HStack(spacing: 2) {
+            Text(label + ":")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+            Text(value)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
     }
 }
 

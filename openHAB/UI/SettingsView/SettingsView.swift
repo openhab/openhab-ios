@@ -15,6 +15,9 @@ import os
 import SwiftUI
 
 struct SettingsView: View {
+    /// When non-nil, the view edits the specified stored home instead of the active home.
+    var homeId: UUID?
+
     /// Called after the sheet is dismissed via swipe with unsaved changes.
     /// The passed closure performs the save when invoked by the parent.
     var onDismissedDirty: ((SettingsSnapshot, @escaping () -> Void) -> Void)?
@@ -149,9 +152,11 @@ struct SettingsView: View {
             let lcc = settingsLocalConnectionConfiguration
             let rcc = settingsRemoteConnectionConfiguration
             let sseCI = settingsSSECommandItem
+            let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
+            let isActiveHome = homeId == nil || homeId == Preferences.shared.currentHomePreferences.id
             let snapshot = currentSnapshot
             onDismissedDirty?(snapshot) {
-                Preferences.shared.modifyActiveHome { @MainActor prefs in
+                Preferences.shared.modifyStoredHome(targetId) { @MainActor prefs in
                     prefs.demomode = dm
                     prefs.realTimeSliders = rts
                     prefs.iconType = it.rawValue
@@ -164,10 +169,12 @@ struct SettingsView: View {
                     prefs.remoteConnectionConfig = rcc
                     prefs.sseCommandItem = sseCI
                 }
-                Preferences.shared.idleOff = io
-                Preferences.shared.sendCrashReports = scr
-                Preferences.shared.modifyApplicationPreferences { @MainActor prefs in
-                    prefs.showSearchField = ssf
+                if isActiveHome {
+                    Preferences.shared.idleOff = io
+                    Preferences.shared.sendCrashReports = scr
+                    Preferences.shared.modifyApplicationPreferences { @MainActor prefs in
+                        prefs.showSearchField = ssf
+                    }
                 }
                 NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
             }
@@ -213,21 +220,27 @@ struct SettingsView: View {
         #if !DEBUG
         Logger.settingsView.debug("Loading Settings")
         #endif
-        settingsDemomode = Preferences.shared.currentHomePreferences.demomode
+        let homePrefs: HomePreferences
+        if let homeId, let stored = Preferences.shared.storedHomes[homeId] {
+            homePrefs = stored
+        } else {
+            homePrefs = Preferences.shared.currentHomePreferences
+        }
+        settingsDemomode = homePrefs.demomode
         settingsIdleOff = Preferences.shared.idleOff
-        settingsRealTimeSliders = Preferences.shared.currentHomePreferences.realTimeSliders
+        settingsRealTimeSliders = homePrefs.realTimeSliders
         settingsShowSearchField = Preferences.shared.applicationPreferences.showSearchField
         settingsSitemapDiagnosticsLogging = Preferences.shared.applicationPreferences.sitemapDiagnosticsLogging
         settingsSendCrashReports = Preferences.shared.sendCrashReports
-        settingsIconType = IconType(rawValue: Preferences.shared.currentHomePreferences.iconType) ?? .svg
-        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label
-        settingsDefaultMainUIPath = Preferences.shared.currentHomePreferences.defaultMainUIPath
-        settingsAlwaysAllowWebRTC = Preferences.shared.currentHomePreferences.alwaysAllowWebRTC
-        settingsSitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
-        settingsLocalConnectionConfiguration = Preferences.shared.currentHomePreferences.localConnectionConfig
-        settingsRemoteConnectionConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
-        settingsHomeName = Preferences.shared.currentHomePreferences.homeName
-        settingsSSECommandItem = Preferences.shared.currentHomePreferences.sseCommandItem
+        settingsIconType = IconType(rawValue: homePrefs.iconType) ?? .svg
+        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: homePrefs.sortSitemapsBy) ?? .label
+        settingsDefaultMainUIPath = homePrefs.defaultMainUIPath
+        settingsAlwaysAllowWebRTC = homePrefs.alwaysAllowWebRTC
+        settingsSitemapForWatch = homePrefs.sitemapForWatch
+        settingsLocalConnectionConfiguration = homePrefs.localConnectionConfig
+        settingsRemoteConnectionConfiguration = homePrefs.remoteConnectionConfig
+        settingsHomeName = homePrefs.homeName
+        settingsSSECommandItem = homePrefs.sseCommandItem
     }
 
     private func applySnapshot(_ snapshot: SettingsSnapshot) {
@@ -247,7 +260,9 @@ struct SettingsView: View {
     }
 
     func saveSettings() {
-        Preferences.shared.modifyActiveHome { @MainActor homePreferences in
+        let sitemapLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
+        let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
+        Preferences.shared.modifyStoredHome(targetId) { @MainActor homePreferences in
             homePreferences.demomode = settingsDemomode
             homePreferences.realTimeSliders = settingsRealTimeSliders
             homePreferences.iconType = settingsIconType.rawValue
@@ -255,7 +270,7 @@ struct SettingsView: View {
             homePreferences.defaultMainUIPath = settingsDefaultMainUIPath
             homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
             homePreferences.sitemapForWatch = settingsSitemapForWatch
-            homePreferences.sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
+            homePreferences.sitemapForWatchLabel = sitemapLabel
             homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration
             homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
             homePreferences.sseCommandItem = settingsSSECommandItem
@@ -267,13 +282,6 @@ struct SettingsView: View {
             applicationPreferences.showSearchField = settingsShowSearchField
             applicationPreferences.sitemapDiagnosticsLogging = settingsSitemapDiagnosticsLogging
         }
-
-        // Apply global UI changes immediately (status bar visibility)
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap(\.windows)
-            .first?.rootViewController?
-            .setNeedsStatusBarAppearanceUpdate()
     }
 }
 
