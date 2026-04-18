@@ -13,7 +13,6 @@ import Combine
 import OpenHABCore
 import os.log
 import SafariServices
-import SwiftMessages
 import UIKit
 import WebKit
 
@@ -22,8 +21,16 @@ class OpenHABWebViewModel: ObservableObject {
     // MARK: - Published state
 
     @Published var isLoading = false
-    @Published var hideNavigationBar = false
     @Published private(set) var webView: WKWebView
+    /// Whether the iOS menu bar (and its hamburger button) should be visible.
+    /// Starts true (visible while loading) and is hidden once the openHAB
+    /// Main UI signals it has rendered its own native-app exit button via SSE,
+    /// or when the page requests fullscreen via JS.
+    @Published var showMenuBar = true
+    /// True once the Main UI SPA has established its SSE connection.
+    /// Used to determine when the native menu bar can be hidden and to show
+    /// a connection-status indicator while connecting or offline.
+    @Published private(set) var isSSEConnected = false
 
     // MARK: - Internal state (used by Coordinator)
 
@@ -47,6 +54,22 @@ class OpenHABWebViewModel: ObservableObject {
 
     private let js = """
     (function() {
+        // App-menu button probe.
+        // window.MainUI is the global registered by the openHAB Main UI SPA.
+        // Its presence means the Main UI is loaded and its own exit-to-app
+        // button is available, so the iOS floating button is redundant.
+        var _probeTimer = null;
+        function probeMainUIButton() {
+            var isOnMainUI = (typeof window.MainUI !== 'undefined');
+            window.webkit.messageHandlers.mainUi.postMessage(
+                isOnMainUI ? 'appMenu-hidden' : 'appMenu-visible'
+            );
+        }
+        function scheduleProbe() {
+            if (_probeTimer !== null) { clearTimeout(_probeTimer); }
+            _probeTimer = setTimeout(function() { _probeTimer = null; probeMainUIButton(); }, 800);
+        }
+
         // Main UI Callbacks
         window.OHApp = {
             exitToApp : function(){
@@ -66,6 +89,7 @@ class OpenHABWebViewModel: ObservableObject {
         // Detect Path changes in SPA
         function notifyPathChange() {
             window.webkit.messageHandlers.pathChanged.postMessage(window.location.pathname);
+            scheduleProbe();
         }
 
         const originalPushState = history.pushState;
@@ -82,7 +106,7 @@ class OpenHABWebViewModel: ObservableObject {
 
         window.addEventListener('popstate', notifyPathChange);
 
-        // Notify initial path on load
+        // Notify initial path on load and run initial probe
         notifyPathChange();
     })();
     """
@@ -304,13 +328,18 @@ class OpenHABWebViewModel: ObservableObject {
     // MARK: - SSE connection state
 
     func handleSSEConnected(_ connected: Bool) {
+        isSSEConnected = connected
         if connected {
             Logger.viewController.info("WKScriptMessage sseConnected is true")
             sseTimer?.invalidate()
             acceptsCommands = true
             executeQueuedCommands()
+            // SPA is live — hide the native menu bar so the SPA's own UI takes over.
+            showMenuBar = false
         } else {
             Logger.viewController.info("WKScriptMessage sseConnected is false")
+            // Show the native bar so the connection-status indicator is visible
+            showMenuBar = true
             sseTimer?.invalidate()
             sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
                 Task { @MainActor in
@@ -327,13 +356,23 @@ class OpenHABWebViewModel: ObservableObject {
         webView.load(URLRequest(url: url))
     }
 
+    /// Loads a MainUI tile page by navigating directly to its URL.
+    ///
+    /// The Main UI SPA uses Framework7 with the HTML5 History API (pushState).
+    /// Page URLs are clean paths — e.g. `{rootUrl}/page/EMS` — with no hash fragment.
+    /// Loading the URL causes the server to return the SPA's index.html; Framework7
+    /// reads the URL path on startup and routes to the correct page automatically.
+    func loadTilePage(_ url: URL) {
+        isLoading = true
+        webView.load(URLRequest(url: url))
+    }
+
     // MARK: - Reload
 
     func reloadView() {
         currentTarget = ""
         webView.stopLoading()
         webView.evaluateJavaScript("document.body.remove()")
-        hideNavigationBar = false
         loadWebView(force: true)
     }
 
@@ -341,7 +380,6 @@ class OpenHABWebViewModel: ObservableObject {
 
     func handleDidFinish() {
         lastLoadedURL = webView.url?.absoluteString
-        hideNavigationBar = true
         isLoading = false
         acceptsCommands = true
 
@@ -354,6 +392,46 @@ class OpenHABWebViewModel: ObservableObject {
         }
 
         injectEditorHeightFix()
+    }
+
+    // MARK: - Menu bar visibility
+
+    /// Called when a new top-level navigation starts (full page load).
+    /// Resets connection state and shows the bar until SSE confirms everything is live.
+    func handleNavigationStart() {
+        showMenuBar = true
+        isSSEConnected = false
+    }
+
+    /// Called when the openHAB Main UI fires its `OHApp.ready()` callback.
+    func handleReady() {
+        // Navigation is handled via direct URL loading (see loadTilePage); nothing to do here.
+    }
+
+    /// Called with the result of the JS probe that checks window.MainUI.
+    /// Hides the bar only when the SPA is present AND SSE is already connected
+    /// (re-entry into the webview without a full reload).
+    /// - Parameter hidden: true when the Main UI is present (iOS bar would be redundant).
+    func handleAppMenuProbe(hidden: Bool) {
+        if hidden, isSSEConnected {
+            showMenuBar = false
+        } else if !hidden {
+            showMenuBar = true
+        }
+    }
+
+    /// Evaluates the app-menu probe immediately in the current webview.
+    /// Use this when re-entering the webview content without a full page reload.
+    func triggerAppMenuProbe() {
+        let probeJS = """
+        (function() {
+            var isOnMainUI = (typeof window.MainUI !== 'undefined');
+            window.webkit.messageHandlers.mainUi.postMessage(
+                isOnMainUI ? 'appMenu-hidden' : 'appMenu-visible'
+            );
+        })();
+        """
+        webView.evaluateJavaScript(probeJS)
     }
 
     private func injectEditorHeightFix() {

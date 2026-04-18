@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -19,7 +20,6 @@ import SwiftUI
 
 enum TargetController: Equatable {
     case webview
-    case settings
     case sitemap(String)
     case notifications
     case browser(String)
@@ -30,6 +30,8 @@ enum TargetController: Equatable {
 // MARK: - Connection status indicator
 
 struct ConnectionView: View {
+    static let cornerRadius: CGFloat = 14
+    
     @StateObject private var networkTracker = MainActorNetworkTracker.shared
 
     var body: some View {
@@ -57,105 +59,145 @@ struct ConnectionView: View {
 struct ToolbarMenu: View {
     @Binding var isPresented: Bool
     @ObservedObject var menuData: MenuDataService
-    var isWebViewActive: Bool
+    @State var scrollViewContentSize: Double = 0
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
     @ScaledMetric private var iconWidth = 20.0
 
     var body: some View {
+        GeometryReader { proxy in
+            overlayContent(proxy: proxy)
+        }
+    }
+
+    private func overlayContent(proxy: GeometryProxy) -> some View {
         ZStack(alignment: .topTrailing) {
             // Dimming backdrop — tapping dismisses the menu
             if isPresented {
-                Color.black.opacity(0.3)
+                
+                Color.black.opacity(0.1)
                     .ignoresSafeArea()
                     .onTapGesture { isPresented = false }
                     .transition(.opacity)
-
-                menuContent
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                
+                let menu = menuContent(height: proxy.size.height * 0.8)
+                    .transition(
+                        .scale(scale: 0.01, anchor: .topTrailing)
+                        .combined(with: .opacity)
+                    )
+                
+                styleMenu(menu)
+                    .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
+                    .padding(.trailing, 8)
+                    .padding(.top, 4)
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: isPresented)
+        .animation(.spring(response: 0.32, dampingFraction: 0.78), value: isPresented)
+    }
+    
+    @ViewBuilder
+    private func styleMenu<Content: View>(_ menu: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            GlassEffectContainer {
+                menu
+            }.glassEffect(.regular, in: .rect(cornerRadius: ConnectionView.cornerRadius))
+        } else {
+            menu
+                .background(.regularMaterial)
+                .cornerRadius(ConnectionView.cornerRadius)
+        }
     }
 
     // MARK: - Menu content
 
-    private var menuContent: some View {
+    private func menuContent(height: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Main UI: Home + sidebar pages
-            sectionHeader(String(localized: "Main UI"))
-            menuRow(
-                icon: AnyView(Image("openHABIcon").resizable()),
-                label: String(localized: "Home"),
-                accessibilityId: "Home",
-                trailing: isWebViewActive ? AnyView(Image(systemSymbol: .arrowClockwise).foregroundStyle(.secondary)) : nil
-            ) {
-                select(.webview)
-            }
-            if !menuData.isLoading {
-                ForEach(menuData.uiPages, id: \.uid) { page in
+            let scrollView = ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Main UI: Home + sidebar pages
+                    sectionHeader(String(localized: "Main UI"))
                     menuRow(
-                        icon: AnyView(pageIcon(for: page)),
-                        label: page.label
+                        icon: AnyView(Image("openHABIcon").resizable()),
+                        label: String(localized: "Home"),
+                        accessibilityId: "Home"
                     ) {
-                        select(.tile(page.url))
+                        select(.webview)
                     }
+                    if menuData.isLoading {
+                        loadingRow(label: String(localized: "Pages"))
+                    } else {
+                        ForEach(menuData.uiPages, id: \.uid) { page in
+                            menuRow(
+                                icon: AnyView(pageIcon(for: page)),
+                                label: page.label
+                            ) {
+                                select(.tile(page.url))
+                            }
+                        }
+                    }
+
+                    Divider().padding(.horizontal, 12)
+
+                    // Sitemaps
+                    if menuData.isLoading {
+                        loadingRow(label: String(localized: "Sitemaps"))
+                    } else if !menuData.sitemaps.isEmpty {
+                        sectionHeader(String(localized: "Sitemaps"))
+                        ForEach(menuData.sitemaps, id: \.name) { sitemap in
+                            menuRow(
+                                icon: AnyView(sitemapIcon(for: sitemap)),
+                                label: sitemap.label
+                            ) {
+                                select(.sitemap(sitemap.name))
+                            }
+                        }
+                        Divider().padding(.horizontal, 12)
+                    }
+
+                    // Tiles
+                    if menuData.isLoading {
+                        loadingRow(label: String(localized: "Tiles"))
+                    } else if !menuData.uiTiles.isEmpty {
+                        sectionHeader(String(localized: "Tiles"))
+                        ForEach(menuData.uiTiles, id: \.url) { tile in
+                            menuRow(
+                                icon: AnyView(ImageView(url: tile.imageUrl).aspectRatio(contentMode: .fit)),
+                                label: tile.name
+                            ) {
+                                select(.tile(tile.url))
+                            }
+                        }
+                        Divider().padding(.horizontal, 12)
+                    }
+
+                    // System
+                    sectionHeader(String(localized: "System"))
+                    if Preferences.shared.getNotificationConnection() != nil,
+                       !Preferences.shared.currentHomePreferences.demomode {
+                        systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
+                    }
+                    systemRow(symbol: .house, label: String(localized: "Manage Homes")) { select(.homeSelection) }
                 }
             }
+                .frame(maxHeight: scrollViewContentSize > 0 ? min(scrollViewContentSize, height) : height)
+            .scrollBounceBehavior(.basedOnSize)
 
+            if #available(iOS 18.0, *) {
+                scrollView.onScrollGeometryChange(for: Double.self, of: { $0.contentSize.height
+                }) { oldValue, newValue in
+                    scrollViewContentSize = newValue
+                }
+            } else {
+                scrollView
+            }
+            
             Divider().padding(.horizontal, 12)
 
-            // Sitemaps
-            if menuData.isLoading {
-                loadingRow(label: String(localized: "Sitemaps"))
-            } else if !menuData.sitemaps.isEmpty {
-                sectionHeader(String(localized: "Sitemaps"))
-                ForEach(menuData.sitemaps, id: \.name) { sitemap in
-                    menuRow(
-                        icon: AnyView(sitemapIcon(for: sitemap)),
-                        label: sitemap.label
-                    ) {
-                        select(.sitemap(sitemap.name))
-                    }
-                }
-                Divider().padding(.horizontal, 12)
-            }
-
-            // Tiles
-            if !menuData.isLoading, !menuData.uiTiles.isEmpty {
-                sectionHeader(String(localized: "Tiles"))
-                ForEach(menuData.uiTiles, id: \.url) { tile in
-                    menuRow(
-                        icon: AnyView(ImageView(url: tile.imageUrl).aspectRatio(contentMode: .fit)),
-                        label: tile.name
-                    ) {
-                        select(.tile(tile.url))
-                    }
-                }
-                Divider().padding(.horizontal, 12)
-            }
-
-            // System
-            sectionHeader(String(localized: "System"))
-            systemRow(symbol: .gear, label: String(localized: "settings", comment: "")) { select(.settings) }
-            if Preferences.shared.getNotificationConnection() != nil,
-               !Preferences.shared.currentHomePreferences.demomode {
-                systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
-            }
-            systemRow(symbol: .house, label: String(localized: "Manage Homes")) { select(.homeSelection) }
-
-            Divider().padding(.horizontal, 12)
-
-            // Connection status footer
+            // Connection status footer — always visible
             connectionFooter
         }
         .frame(width: 280)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
-        .padding(.trailing, 8)
-        .padding(.top, 4)
     }
 
     // MARK: - Connection footer
@@ -294,19 +336,3 @@ struct ToolbarMenu: View {
     }
 }
 
-// MARK: - Toolbar button that toggles the menu
-
-struct ToolbarMenuButton: View {
-    @Binding var isMenuPresented: Bool
-
-    var body: some View {
-        Button {
-            isMenuPresented.toggle()
-        } label: {
-            Image(systemSymbol: .line3Horizontal)
-                .imageScale(.large)
-        }
-        .accessibilityIdentifier("HamburgerButton")
-        .accessibilityLabel("Menu")
-    }
-}

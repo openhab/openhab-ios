@@ -10,10 +10,12 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Combine
+import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
 import SafariServices
+import SFSafeSymbols
 import SwiftUI
 
 struct OpenHABRootView: View {
@@ -41,19 +43,9 @@ struct OpenHABRootView: View {
             ToolbarMenu(
                 isPresented: $menuPresented,
                 menuData: menuData,
-                isWebViewActive: isWebOrTileContent,
                 onSelect: { target in handleMenuSelection(target) },
                 onReload: { webViewModel.reloadView() }
             )
-        }
-        .overlay(alignment: .topTrailing) {
-            // Only show floating button for webview/tile (which have no NavigationStack toolbar).
-            // SitemapNavigationView gets the button via its onShowSideMenu closure.
-            if isWebOrTileContent, !menuPresented {
-                ToolbarMenuButton(isMenuPresented: $menuPresented)
-                    .padding(.trailing, 16)
-                    .padding(.top, 8)
-            }
         }
         .onAppear {
             ImageDownloader.default.authenticationChallengeResponder = networkService
@@ -133,17 +125,82 @@ struct OpenHABRootView: View {
     private var contentView: some View {
         switch currentContent {
         case .webview:
-            OpenHABWebViewContainer(viewModel: webViewModel)
-                .ignoresSafeArea()
+            VStack(spacing: 0) {
+                if webViewModel.showMenuBar {
+                    menuBar
+                        .transition(.move(edge: .top))
+                }
+                OpenHABWebViewContainer(viewModel: webViewModel)
+            }
+            .clipped()
+            .animation(.easeInOut(duration: 0.3), value: webViewModel.showMenuBar)
+            .onAppear { webViewModel.triggerAppMenuProbe() }
         case let .sitemap(name):
             SitemapNavigationView(onShowSideMenu: { menuPresented = true })
                 .id("\(name)-\(sitemapResetID)")
         case .tile:
-            OpenHABWebViewContainer(viewModel: webViewModel)
-                .ignoresSafeArea()
+            VStack(spacing: 0) {
+                menuBar
+                OpenHABWebViewContainer(viewModel: webViewModel)
+            }
         case .settings, .notifications, .homeSelection, .browser:
             preconditionFailure("Modal/transient targets must never become currentContent")
         }
+    }
+
+    @ViewBuilder
+    private var menuBar: some View {
+        HStack {
+            // Connection-status indicator (mirrors the Sitemap view's toolbar indicator)
+            Group {
+                if webViewModel.isLoading {
+                    HStack(spacing: 4) {
+                        ProgressView()
+                            .controlSize(.small)
+                        Text("Connecting")
+                            .ohTextToken(.secondary)
+                    }
+                    .foregroundStyle(.secondary)
+                } else if case .webview = currentContent, !webViewModel.isSSEConnected {
+                    HStack(spacing: 4) {
+                        Image(systemSymbol: .wifiExclamationmark)
+                        Text("Offline")
+                            .ohTextToken(.secondary)
+                    }
+                    .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.leading)
+
+            Spacer()
+
+            if #available(iOS 26, *) {
+                Button {
+                    menuPresented = true
+                } label: {
+                    Image(systemSymbol: .line3Horizontal)
+                        .font(.title)
+                }
+                .buttonStyle(.glass)
+                .ohMinimumHitTarget()
+                .accessibilityIdentifier("HamburgerButton")
+                .accessibilityLabel("Menu")
+                .padding(.trailing)
+            } else {
+                Button {
+                    menuPresented = true
+                } label: {
+                    Image(systemSymbol: .line3Horizontal)
+                        .font(.title)
+                }
+                .ohMinimumHitTarget()
+                .accessibilityIdentifier("HamburgerButton")
+                .accessibilityLabel("Menu")
+                .padding(.trailing)
+            }
+        }
+        .frame(height: 44)
+        .background(Color(.systemBackground), ignoresSafeAreaEdges: .top)
     }
 
     private func switchToSavedView() {
@@ -170,7 +227,7 @@ struct OpenHABRootView: View {
                 sitemapResetID = UUID() // pop to root by recreating the NavigationStack
             case let .tile(url):
                 if let url = URL(string: url) {
-                    webViewModel.loadDirectURL(url)
+                    webViewModel.loadTilePage(url)
                 }
             default:
                 break // modal/transient targets never reach switchContent
@@ -188,7 +245,7 @@ struct OpenHABRootView: View {
                 break
             case let .tile(url):
                 if let url = URL(string: url) {
-                    webViewModel.loadDirectURL(url)
+                    webViewModel.loadTilePage(url)
                 }
             }
 
@@ -253,6 +310,7 @@ struct OpenHABRootView: View {
 
     // MARK: - Helpers
 
+<<<<<<< HEAD
     private var isWebOrTileContent: Bool {
         switch currentContent {
         case .webview, .tile: return true
@@ -261,6 +319,8 @@ struct OpenHABRootView: View {
         }
     }
 
+=======
+>>>>>>> c473db08 (Feature: Nav bar and menu UX — show/hide, animation, floating→toolbar, dropdown animation)
     private func setupExitToApp() {
         webViewModel.onExitToApp = {
             menuPresented = true
