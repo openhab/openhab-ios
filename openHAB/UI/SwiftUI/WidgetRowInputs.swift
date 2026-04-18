@@ -16,11 +16,6 @@ protocol RowWithIconInput {
     var icon: RowIconInput { get }
 }
 
-struct LinkedPageDestination: Hashable, Sendable {
-    let pageUrl: String
-    let title: String
-}
-
 struct RowIconInput: Equatable, Sendable {
     let icon: String
     let iconColor: String
@@ -382,7 +377,8 @@ struct LinkedPageRowInput: Equatable, RowWithIconInput {
     let labelColor: String
     let valueColor: String
     let icon: RowIconInput
-    let destination: LinkedPageDestination
+    let linkedPageLink: String
+    let linkedPageTitle: String
     let isFrame: Bool
 
     static func from(widget: OpenHABWidget) -> LinkedPageRowInput? {
@@ -393,10 +389,8 @@ struct LinkedPageRowInput: Equatable, RowWithIconInput {
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
             icon: RowIconInput.from(widget: widget),
-            destination: LinkedPageDestination(
-                pageUrl: linkedPage.link,
-                title: linkedPage.title
-            ),
+            linkedPageLink: linkedPage.link,
+            linkedPageTitle: linkedPage.title,
             isFrame: widget.type == .frame
         )
     }
