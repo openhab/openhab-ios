@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+- Add SFSafeSymbols dependency to CommonUI
+- Fix LogsViewer: use systemName instead of SFSafeSymbols
+- Git update Version.xcconfig
+- Use SFSafeSymbols in LogsViewer share button
+- Add sitemap diagnostics logging
+- Revert "Fix sitemap scroll hitching under frequent long-poll updates (#1136) (#1138)"
+- Revert "Remove widget reconciliation from SwiftUI sitemap update path (#1139)"
+- Revert "Decouple hot sitemap rows from shared view model (#1140)"
+- Revert "Feature/lazy linked page navigation v3 (#1142)"
+
 ## [Version 3.2.21, Build 227] - 2026-04-13Z
 
 - [codex] Handle invalid inline image data (#1146)
