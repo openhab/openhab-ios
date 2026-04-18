@@ -284,7 +284,9 @@ class SitemapPageViewModel: ObservableObject {
         }
 
         rowWidgetIndex = index
-        rowInputs = inputs
+        if inputs != rowInputs {
+            rowInputs = inputs
+        }
     }
 
     func widget(for rowID: RowID) -> OpenHABWidget? {
@@ -550,12 +552,18 @@ extension SitemapPageViewModel {
             injectSendCommand(for: reconciledWidgets)
         }
 
-        trackWidgetUpdates(in: reconciledWidgets)
         _ = clearSyncedSliderOverrides(using: reconciledWidgets)
         rebuildRowInputs()
 
         let mapDurationMs = Int((Date().timeIntervalSince(mapStart) * 1000).rounded())
         let inputsChanged = rowInputs != oldInputs
+
+        // Only bump widget update versions when row content actually changed.
+        // This prevents SwiftUI from re-evaluating unchanged rows on every long-poll.
+        if inputsChanged {
+            trackWidgetUpdates(in: reconciledWidgets)
+        }
+
         let changedRowCount = rowInputs.count == oldInputs.count
             ? zip(rowInputs, oldInputs).reduce(into: 0) { n, pair in if pair.0 != pair.1 { n += 1 } }
             : rowInputs.count
