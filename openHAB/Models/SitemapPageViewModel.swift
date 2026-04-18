@@ -100,6 +100,9 @@ class SitemapPageViewModel: ObservableObject {
     private var sliderValueOverrides: [String: Double] = [:]
     private var sliderOverrideResetTasks: [String: Task<Void, Never>] = [:]
     private var lastForegroundRefreshAt: Date = .distantPast
+    private var lastUIUpdateAt: Date = .distantPast
+    private var pendingLongPollPage: OpenHABPage?
+    private var longPollDebounceTask: Task<Void, Never>?
 
     var relevantWidgets: [OpenHABWidget] {
         let widgets = currentPage?.widgets ?? []
@@ -320,6 +323,7 @@ class SitemapPageViewModel: ObservableObject {
         networkStatusObserverTask?.cancel()
         pageHandlingTask?.cancel()
         foregroundRefreshTask?.cancel()
+        longPollDebounceTask?.cancel()
         commandStateResetTasks.values.forEach { $0.cancel() }
         commandStateResetTasks.removeAll()
         sliderOverrideResetTasks.values.forEach { $0.cancel() }
@@ -339,6 +343,9 @@ extension SitemapPageViewModel {
         pageHandlingTask = nil
         foregroundRefreshTask?.cancel()
         foregroundRefreshTask = nil
+        longPollDebounceTask?.cancel()
+        longPollDebounceTask = nil
+        pendingLongPollPage = nil
         activePageHandlingKey = nil
         activePageHandlingID = nil
     }
@@ -379,6 +386,10 @@ extension SitemapPageViewModel {
         }
 
         pageHandlingTask?.cancel()
+        longPollDebounceTask?.cancel()
+        longPollDebounceTask = nil
+        pendingLongPollPage = nil
+        lastUIUpdateAt = .distantPast
         error = nil // Clear any previous errors when starting a new page handling session
         if preserveCurrentContent, currentPage != nil {
             isLoading = false
@@ -513,7 +524,7 @@ extension SitemapPageViewModel {
                 }
 
                 if let page {
-                    updateUI(with: page, origin: .longPolling)
+                    scheduleLongPollUIUpdate(page: page, runID: runID)
                 }
             } catch {
                 try Task.checkCancellation()
@@ -523,6 +534,35 @@ extension SitemapPageViewModel {
 
                 logger.info("Transient long-polling error, retrying: \(error.localizedDescription, privacy: .public)")
                 try? await Task.sleep(nanoseconds: 500_000_000)
+            }
+        }
+    }
+
+    private func scheduleLongPollUIUpdate(page: OpenHABPage, runID: UUID) {
+        let minInterval: TimeInterval = 0.25
+        let elapsed = Date().timeIntervalSince(lastUIUpdateAt)
+
+        if elapsed >= minInterval {
+            // Quiet period has elapsed — apply immediately, no delay.
+            longPollDebounceTask?.cancel()
+            longPollDebounceTask = nil
+            pendingLongPollPage = nil
+            lastUIUpdateAt = Date()
+            updateUI(with: page, origin: .longPolling)
+        } else {
+            // Within burst window — store latest page and (re)schedule a deferred apply.
+            // Earlier pending page is discarded; the newest server state always wins.
+            pendingLongPollPage = page
+            longPollDebounceTask?.cancel()
+            let remaining = minInterval - elapsed
+            longPollDebounceTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .seconds(remaining))
+                guard let self, !Task.isCancelled,
+                      self.activePageHandlingID == runID,
+                      let page = self.pendingLongPollPage else { return }
+                self.pendingLongPollPage = nil
+                self.lastUIUpdateAt = Date()
+                self.updateUI(with: page, origin: .longPolling)
             }
         }
     }
