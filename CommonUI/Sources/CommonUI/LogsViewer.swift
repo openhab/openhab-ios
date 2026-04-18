@@ -86,9 +86,33 @@ public struct LogsViewer: View {
                 since: dayAgo,
                 predicateFormat: predicate.predicateFormat
             )
-            return logs.joined()
+            return makeLogHeader() + logs.joined()
         } catch {
             return error.localizedDescription
+        }
+    }
+
+    private func makeLogHeader() -> String {
+        let bundle = Bundle.main
+        let appVersion = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
+        let buildNumber = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown"
+        let osVersion = ProcessInfo.processInfo.operatingSystemVersionString
+        let modelIdentifier = Self.modelIdentifier()
+        let generated = Date.now.formatted(.iso8601.year().month().day().time(includingFractionalSeconds: false))
+
+        return """
+        openHAB iOS \(appVersion) (\(buildNumber))
+        \(osVersion) — \(modelIdentifier)
+        Generated: \(generated)
+        \(String(repeating: "-", count: 60))
+        """
+    }
+
+    private static func modelIdentifier() -> String {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        return withUnsafeBytes(of: &systemInfo.machine) { ptr in
+            String(bytes: ptr.prefix(while: { $0 != 0 }), encoding: .utf8) ?? "unknown"
         }
     }
 }
