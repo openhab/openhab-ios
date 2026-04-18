@@ -267,48 +267,32 @@ class SitemapPageViewModel: ObservableObject {
 
     func rebuildRowInputs() {
         let pageKey = "\(defaultSitemap)|\(pageId)"
-        let widgets = relevantWidgets
-        let inputs = SitemapRowInputMapper.map(pageKey: pageKey, widgets: widgets)
-        rowWidgetIndex = buildWidgetIndex(pageKey: pageKey, widgets: widgets)
-        if inputs != rowInputs {
-            rowInputs = inputs
-        }
-    }
-
-    private func buildWidgetIndex(pageKey: String, widgets: [OpenHABWidget]) -> [RowID: OpenHABWidget] {
         var occurrenceByWidgetID: [String: Int] = [:]
+        var inputs: [SitemapRowInput] = []
         var index: [RowID: OpenHABWidget] = [:]
-        index.reserveCapacity(widgets.count)
-        for widget in widgets {
+        inputs.reserveCapacity(relevantWidgets.count)
+        index.reserveCapacity(relevantWidgets.count)
+
+        for widget in relevantWidgets {
             let identityWidgetID = SitemapRowInputMapper.rowIdentityWidgetID(for: widget)
             occurrenceByWidgetID[identityWidgetID, default: 0] += 1
             let occurrence = occurrenceByWidgetID[identityWidgetID]!
             let rowID = RowID(pageKey: pageKey, widgetId: identityWidgetID, occurrence: occurrence)
+            let input = SitemapRowInputMapper.map(widget: widget, rowID: rowID)
+            inputs.append(input)
             index[rowID] = widget
         }
-        return index
-    }
 
-    /// Increments `widgetUpdateVersions` for each row whose content differs between `oldInputs`
-    /// and `newInputs`, keyed by full row identity.
-    func bumpWidgetVersions(from oldInputs: [SitemapRowInput], to newInputs: [SitemapRowInput]) {
-        if newInputs.count == oldInputs.count {
-            for (new, old) in zip(newInputs, oldInputs) where new != old {
-                widgetUpdateVersions[new.rowID.rawValue, default: 0] += 1
-            }
-        } else {
-            for input in newInputs {
-                widgetUpdateVersions[input.rowID.rawValue, default: 0] += 1
-            }
-        }
+        rowWidgetIndex = index
+        rowInputs = inputs
     }
 
     func widget(for rowID: RowID) -> OpenHABWidget? {
         rowWidgetIndex[rowID]
     }
 
-    func widgetUpdateVersion(for rowID: RowID) -> Int {
-        widgetUpdateVersions[rowID.rawValue] ?? 0
+    func widgetUpdateVersion(for widgetId: String) -> Int {
+        widgetUpdateVersions[widgetId] ?? 0
     }
 
     func sliderOverrideValue(for itemname: String?) -> Double? {
@@ -544,51 +528,34 @@ extension SitemapPageViewModel {
     @MainActor
     private func updateUI(with page: OpenHABPage, origin: PageUpdateOrigin) {
         logger.debug("Incoming sitemap update origin=\(origin.rawValue, privacy: .public), widgets=\(page.widgets.count)")
+        let newWidgets = page.widgets
 
-        let pageKey = "\(defaultSitemap)|\(pageId)"
-
-        // Snapshot what the list would render from the new data — before any widget mutation.
-        let incomingFiltered: [OpenHABWidget]
-        if searchText.isEmpty {
-            incomingFiltered = page.widgets
-        } else {
-            incomingFiltered = page.widgets.filter {
-                $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
-            }
-        }
-        let previewInputs = SitemapRowInputMapper.map(pageKey: pageKey, widgets: incomingFiltered)
-
-        let titleChanged = currentPage == nil || currentPage?.title != page.title
-        let canSkipReconciliation = searchText.isEmpty && previewInputs == rowInputs && !titleChanged
-        guard !canSkipReconciliation else {
-            _ = clearSyncedSliderOverrides(using: page.widgets)
-            return
-        }
-
-        // Something changed — reconcile widget objects and update stored state.
+        // Check if list structure changed (count, order, or IDs)
         let currentWidgets = currentPage?.widgets ?? []
-        let structureChanged = currentWidgets.count != page.widgets.count
-            || !zip(currentWidgets, page.widgets).allSatisfy { $0.widgetId == $1.widgetId }
-        let reconciledWidgets = reconcileWidgets(page.widgets, with: currentWidgets)
-        injectSendCommand(for: reconciledWidgets)
+        let structureChanged = currentWidgets.count != newWidgets.count
+            || !zip(currentWidgets, newWidgets).allSatisfy { $0.widgetId == $1.widgetId }
+        let reconciledWidgets = reconcileWidgets(newWidgets, with: currentWidgets)
 
-        if structureChanged || titleChanged {
+        // Only replace currentPage when structure or title changed
+        if structureChanged || currentPage?.title != page.title || currentPage == nil {
             page.widgets = reconciledWidgets
+            injectSendCommand(for: reconciledWidgets)
             currentPage = page
         } else {
             currentPage?.widgets = reconciledWidgets
+            // Inject sendCommand into existing widgets without replacing the page
+            injectSendCommand(for: reconciledWidgets)
         }
 
+        trackWidgetUpdates(in: reconciledWidgets)
         _ = clearSyncedSliderOverrides(using: reconciledWidgets)
+        rebuildRowInputs()
+    }
 
-        // Rebuild command-dispatch index from the now-current reconciled widgets.
-        rowWidgetIndex = buildWidgetIndex(pageKey: pageKey, widgets: relevantWidgets)
-
-        // Bump widget versions only for rows whose content actually changed.
-        bumpWidgetVersions(from: rowInputs, to: previewInputs)
-
-        // Publish new row inputs — guaranteed to differ from current (checked above).
-        rowInputs = previewInputs
+    private func trackWidgetUpdates(in widgets: [OpenHABWidget]) {
+        for widget in widgets {
+            widgetUpdateVersions[widget.widgetId, default: 0] += 1
+        }
     }
 
     private func clearSyncedSliderOverrides(using widgets: [OpenHABWidget]) -> Int {

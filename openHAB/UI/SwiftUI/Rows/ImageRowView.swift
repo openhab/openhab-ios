@@ -54,7 +54,7 @@ private struct ImageRowContent: View {
     }
 
     private var chartWidgetVersion: Int {
-        viewModel.widgetUpdateVersion(for: input.rowID)
+        viewModel.widgetUpdateVersion(for: input.widgetId)
     }
 
     private var chartSyncToken: String {
