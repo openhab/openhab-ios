@@ -17,6 +17,7 @@ import UIKit
 struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
     @State private var idleTimerDisabled = false
+    @Environment(\.sitemapSideMenuAction) private var sideMenuAction
 
     private var isLinkedPage: Bool {
         viewModel.isLinked
@@ -74,6 +75,19 @@ struct SitemapPageView: View {
         }
         .navigationTitle(viewModel.pageTitle)
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            if let sideMenuAction {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        sideMenuAction()
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.title)
+                    }
+                    .ohMinimumHitTarget()
+                }
+            }
+        }
         .alert("Error", isPresented: Binding(
             get: { viewModel.error != nil },
             set: { if !$0 { viewModel.error = nil } }
