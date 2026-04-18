@@ -18,6 +18,7 @@ import SwiftUI
 
 struct DebugSettingsView: View {
     @Binding var settingsSendCrashReports: Bool
+    @Binding var settingsSitemapDiagnosticsLogging: Bool
 
     @State private var hasBeenLoaded = false
     @State var showCrashReportingAlert = false
@@ -57,6 +58,7 @@ struct DebugSettingsView: View {
                 Text(LocalizedStringKey("crash_reporting_info"))
             }
         Section(header: Text(LocalizedStringKey("debug"))) {
+            Toggle("Sitemap Diagnostics Logging", isOn: $settingsSitemapDiagnosticsLogging)
             NavigationLink {
                 LogsViewer()
             } label: {
@@ -80,11 +82,13 @@ struct DebugSettingsView: View {
         @State private var ignoreSSL = true
         @State private var idleOff = false
         @State private var sendCrashReports = false
+        @State private var sitemapDiagnosticsLogging = false
 
         var body: some View {
             Form {
                 DebugSettingsView(
-                    settingsSendCrashReports: $sendCrashReports
+                    settingsSendCrashReports: $sendCrashReports,
+                    settingsSitemapDiagnosticsLogging: $sitemapDiagnosticsLogging
                 )
             }
         }

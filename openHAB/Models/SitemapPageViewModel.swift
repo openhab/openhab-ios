@@ -528,6 +528,9 @@ extension SitemapPageViewModel {
     @MainActor
     private func updateUI(with page: OpenHABPage, origin: PageUpdateOrigin) {
         logger.debug("Incoming sitemap update origin=\(origin.rawValue, privacy: .public), widgets=\(page.widgets.count)")
+        let mapStart = Date()
+        let titleChanged = currentPage == nil || currentPage?.title != page.title
+        let oldInputs = rowInputs
         let newWidgets = page.widgets
 
         // Check if list structure changed (count, order, or IDs)
@@ -550,6 +553,23 @@ extension SitemapPageViewModel {
         trackWidgetUpdates(in: reconciledWidgets)
         _ = clearSyncedSliderOverrides(using: reconciledWidgets)
         rebuildRowInputs()
+
+        let mapDurationMs = Int((Date().timeIntervalSince(mapStart) * 1000).rounded())
+        let inputsChanged = rowInputs != oldInputs
+        let changedRowCount = rowInputs.count == oldInputs.count
+            ? zip(rowInputs, oldInputs).reduce(into: 0) { n, pair in if pair.0 != pair.1 { n += 1 } }
+            : rowInputs.count
+        SitemapDiagnostics.logUpdate(
+            origin: origin,
+            widgetCount: page.widgets.count,
+            rowCount: rowInputs.count,
+            inputsChanged: inputsChanged,
+            titleChanged: titleChanged,
+            changedRowCount: changedRowCount,
+            changedRowKinds: SitemapDiagnostics.changedRowKinds(from: oldInputs, to: rowInputs),
+            mapDurationMs: mapDurationMs,
+            diffDurationMs: 0
+        )
     }
 
     private func trackWidgetUpdates(in widgets: [OpenHABWidget]) {
