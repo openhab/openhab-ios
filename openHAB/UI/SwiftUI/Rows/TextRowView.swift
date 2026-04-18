@@ -77,5 +77,6 @@ struct TextRowView: View {
         TextRowView(input: TextRowInput.from(widget: widget))
         Spacer()
     }
+    .environmentObject(SitemapPageViewModel())
 }
 #endif

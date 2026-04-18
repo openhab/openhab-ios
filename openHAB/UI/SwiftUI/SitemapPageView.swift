@@ -18,6 +18,10 @@ struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
     @State private var idleTimerDisabled = false
 
+    private var isLinkedPage: Bool {
+        viewModel.isLinked
+    }
+
     var body: some View {
         Group {
             if viewModel.isLoading, viewModel.rowInputs.isEmpty {
@@ -36,23 +40,6 @@ struct SitemapPageView: View {
             }
         }
         .environmentObject(viewModel)
-        .environment(\.sitemapPageIdentity, viewModel.pageId)
-        .environment(\.sitemapRowActions, SitemapRowActions(
-            sendCommand: { itemName, command, policy, phase in
-                viewModel.sendCommand(command, for: itemName, policy: policy, phase: phase)
-            },
-            cancelPendingCommand: { itemName, key in
-                viewModel.cancelPendingCommand(for: itemName, key: key)
-            },
-            sendNumericUpdate: { itemName, value, unit, format, policy, phase, key in
-                let state = NumberState(
-                    value: value,
-                    unit: unit,
-                    format: format
-                )
-                viewModel.sendToUpdate(itemname: itemName, state: state, policy: policy, phase: phase, key: key)
-            }
-        ))
         .listStyle(.plain)
         .listRowSpacing(0)
         .environment(\.defaultMinListRowHeight, 32)

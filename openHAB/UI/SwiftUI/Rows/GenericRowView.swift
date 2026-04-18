@@ -56,5 +56,6 @@ struct GenericRowView: View {
     List([widget]) { widget in
         GenericRowView(input: GenericRowInput.from(widget: widget))
     }
+    .environmentObject(SitemapPageViewModel())
 }
 #endif

@@ -16,35 +16,36 @@ import SwiftUI
 
 private struct SliderRowConfig {
     let input: SliderRowInput
+    let widgetVersion: Int
+    let overrideValue: Double?
     let fallbackSymbol: SFSymbol?
-    let rowActions: SitemapRowActions
+    let viewModel: SitemapPageViewModel
 }
 
 @MainActor
 private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent {
     SliderRowContent(
         input: config.input,
-        widgetVersion: config.input.widgetVersion,
+        widgetVersion: config.widgetVersion,
+        overrideValue: config.overrideValue,
         fallbackSymbol: config.fallbackSymbol,
         onToggleSwitch: { command in
             guard let itemName = config.input.itemName else { return }
-            config.rowActions.sendCommand(itemName, command, .immediate, .change)
+            config.viewModel.sendCommand(command, for: itemName)
         },
         onCancelPending: { key in
             guard let itemName = config.input.itemName else { return }
-            config.rowActions.cancelPendingCommand(itemName, key)
+            config.viewModel.cancelPendingCommand(for: itemName, key: key)
         },
         onSendValue: { value, policy, phase, key in
             guard let itemName = config.input.itemName else { return }
-            config.rowActions.sendNumericUpdate(
-                itemName,
-                value,
-                config.input.unit,
-                config.input.numberPattern,
-                policy,
-                phase,
-                key
+            config.viewModel.setSliderOverrideValue(value, for: itemName)
+            let numberState = NumberState(
+                value: value,
+                unit: config.input.unit,
+                format: config.input.numberPattern
             )
+            config.viewModel.sendToUpdate(itemname: itemName, state: numberState, policy: policy, phase: phase, key: key)
         }
     )
 }
@@ -52,6 +53,7 @@ private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent
 private struct SliderRowContent: View {
     let input: SliderRowInput
     let widgetVersion: Int
+    let overrideValue: Double?
     let fallbackSymbol: SFSymbol?
     let onToggleSwitch: (String) -> Void
     let onCancelPending: (String?) -> Void
@@ -62,7 +64,6 @@ private struct SliderRowContent: View {
     @State private var isEditing = false
     @State private var dragStartVersion: Int?
     @State private var dragWidgetId: String?
-    @State private var optimisticValue: Double?
 
     var body: some View {
         let displayedSliderValue = effectiveValue(state: input)
@@ -96,7 +97,6 @@ private struct SliderRowContent: View {
                     .release,
                     input.sliderCommandKey
                 )
-                optimisticValue = displayedSliderValue
                 dragValue = nil
                 dragStartVersion = nil
                 dragWidgetId = nil
@@ -108,22 +108,14 @@ private struct SliderRowContent: View {
             dragValue = nil
             dragStartVersion = nil
             dragWidgetId = nil
-            optimisticValue = nil
         }
         .onChange(of: input.widgetId) { _ in
             isEditing = false
             dragValue = nil
             dragStartVersion = nil
             dragWidgetId = nil
-            optimisticValue = nil
         }
         .onChange(of: widgetVersion) { _ in
-            let threshold = max(input.step, 0.001)
-            if !isEditing, optimisticValue != nil {
-                optimisticValue = nil
-                return
-            }
-
             guard isEditing else { return }
             // If server refresh advanced while dragging, only cancel when the server value diverges
             // meaningfully from the local drag value. This avoids jarring cancels on polling echoes.
@@ -136,6 +128,7 @@ private struct SliderRowContent: View {
             }
 
             if widgetVersion != dragStartVersion {
+                let threshold = max(input.step, 0.001)
                 let currentDragValue = dragValue ?? input.serverValue
                 let hasMeaningfulServerChange = abs(input.serverValue - currentDragValue) > threshold
                 if hasMeaningfulServerChange {
@@ -155,7 +148,7 @@ private struct SliderRowContent: View {
     private func labelContent(state: SliderRowInput) -> some View {
         let displayedValue = effectiveValue(state: state)
         let currentValueText = currentValueText(state: state, value: displayedValue)
-        RowViewWithIcon(input: state, rowIdentity: state.rowID.rawValue, fallbackSymbol: fallbackSymbol) {
+        RowViewWithIcon(input: state, fallbackSymbol: fallbackSymbol) {
             if !state.displayState.labelText.isEmpty {
                 let labelText = state.displayState.labelText
                 Text(labelText)
@@ -197,10 +190,7 @@ private struct SliderRowContent: View {
         if isEditing {
             return dragValue ?? state.serverValue
         }
-        if let optimisticValue {
-            return optimisticValue
-        }
-        return state.serverValue
+        return overrideValue ?? state.serverValue
     }
 
     private func currentValueText(state: SliderRowInput, value: Double) -> String {
@@ -221,14 +211,17 @@ private struct SliderRowContent: View {
 struct SliderRowView: View {
     let input: SliderRowInput
     var fallbackSymbol: SFSymbol?
-    @Environment(\.sitemapRowActions) private var rowActions
+
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         makeSliderRowContent(
             SliderRowConfig(
                 input: input,
+                widgetVersion: viewModel.widgetUpdateVersion(for: input.rowID),
+                overrideValue: viewModel.sliderOverrideValue(for: input.itemName),
                 fallbackSymbol: fallbackSymbol,
-                rowActions: rowActions
+                viewModel: viewModel
             )
         )
     }
