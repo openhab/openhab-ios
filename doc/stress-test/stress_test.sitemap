@@ -1,0 +1,45 @@
+// Stress-test sitemap for iOS long-poll flooding reproduction
+// Place in: $OPENHAB_CONF/sitemaps/stress_test.sitemap
+
+sitemap stress_test label="Stress Test" {
+
+    // --- Segmented block ---
+    // Matches the `segmented:4` pattern seen in user logs.
+    // Seg1/Seg2 cycle (genuine changes); Seg3/Seg4 are fixed (artefact probe).
+    // Expected in diagnostics:
+    //   changedKinds=segmented:2  → comparison is correct
+    //   changedKinds=segmented:4  → Seg3/Seg4 are a false positive, artefact confirmed
+    Frame label="Segmented (4 rows)" {
+        Segmented item=StressTest_Seg1 label="Mode A" mappings=[0="Off", 1="Eco", 2="Normal", 3="Boost"]
+        Segmented item=StressTest_Seg2 label="Mode B" mappings=[0="Off", 1="Eco", 2="Normal", 3="Boost"]
+        Segmented item=StressTest_Seg3 label="Mode C (fixed)" mappings=[0="Off", 1="Eco", 2="Normal", 3="Boost"]
+        Segmented item=StressTest_Seg4 label="Mode D (fixed)" mappings=[0="Off", 1="Eco", 2="Normal", 3="Boost"]
+    }
+
+    // --- Fast text updates ---
+    Frame label="Fast Text Updates" {
+        Text item=StressTest_Counter  label="Tick"
+        Text item=StressTest_Power    label="Power"
+        Text item=StressTest_Temp     label="Temperature"
+        Text item=StressTest_Humidity label="Humidity"
+        Text item=StressTest_Status   label="Status"
+    }
+
+    // --- Slow controls (should not appear in changedKinds on 1Hz ticks) ---
+    Frame label="Slow Controls" {
+        Switch item=StressTest_Switch1
+        Switch item=StressTest_Switch2
+        Slider item=StressTest_Dimmer
+    }
+
+    // --- Linked sub-page ---
+    // Linked rows show group summary; child updates will mark these as changed.
+    Frame label="Sub-page" {
+        Text item=StressTest_Group label="Sub-page [%d items]" {
+            Text item=StressTest_Child1
+            Text item=StressTest_Child2
+            Text item=StressTest_Child3
+            Text item=StressTest_Child4
+        }
+    }
+}
