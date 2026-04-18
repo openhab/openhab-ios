@@ -116,6 +116,11 @@ private struct LinkedPageRowContent: View {
 struct EmbeddingRowInputView: View {
     let rowInput: SitemapRowInput
 
+    // Subscribes to the view model so SwiftUI re-evaluates this view when
+    // rowInputs change — without this, rows that scroll into view after a
+    // foreground refresh may render stale data from a cached render.
+    @EnvironmentObject private var viewModel: SitemapPageViewModel
+
     private var regularRowBackground: Color {
         Color(UIColor.ohSecondarySystemGroupedBackground)
     }
