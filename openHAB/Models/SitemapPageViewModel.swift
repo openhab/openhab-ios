@@ -558,10 +558,19 @@ extension SitemapPageViewModel {
         let mapDurationMs = Int((Date().timeIntervalSince(mapStart) * 1000).rounded())
         let inputsChanged = rowInputs != oldInputs
 
-        // Only bump widget update versions when row content actually changed.
-        // This prevents SwiftUI from re-evaluating unchanged rows on every long-poll.
+        // Bump widget update versions only for rows whose content changed.
+        // When count is stable, zip lets us pinpoint exactly which rows differ.
+        // When structure changed (rows added/removed), fall back to bumping all.
         if inputsChanged {
-            trackWidgetUpdates(in: reconciledWidgets)
+            if rowInputs.count == oldInputs.count {
+                for (newInput, oldInput) in zip(rowInputs, oldInputs) where newInput != oldInput {
+                    if let widget = rowWidgetIndex[newInput.rowID] {
+                        widgetUpdateVersions[widget.widgetId, default: 0] += 1
+                    }
+                }
+            } else {
+                trackWidgetUpdates(in: reconciledWidgets)
+            }
         }
 
         let changedRowCount = rowInputs.count == oldInputs.count
