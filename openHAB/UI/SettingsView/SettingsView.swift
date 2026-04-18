@@ -15,6 +15,11 @@ import os
 import SwiftUI
 
 struct SettingsView: View {
+    /// Called after the sheet is dismissed via swipe with unsaved changes.
+    /// The passed closure performs the save when invoked by the parent.
+    var onDismissedDirty: ((SettingsSnapshot, @escaping () -> Void) -> Void)?
+    var initialValues: SettingsSnapshot?
+
     @State private var settingsDemomode = false
     @State private var settingsIdleOff = true
     @State private var settingsRealTimeSliders = true
@@ -34,7 +39,45 @@ struct SettingsView: View {
     @State private var viewAppearedOnce = false
     @State private var settingsSSECommandItem = ""
 
+    @State private var initialSnapshot: SettingsSnapshot?
+    @State private var isDirty = false
+    @State private var savedExplicitly = false
+
     @Environment(\.dismiss) private var dismiss
+
+    struct SettingsSnapshot: Equatable {
+        var demomode: Bool
+        var idleOff: Bool
+        var realTimeSliders: Bool
+        var showSearchField: Bool
+        var sendCrashReports: Bool
+        var iconType: IconType
+        var sortSitemapsBy: SortSitemapsOrder
+        var defaultMainUIPath: String
+        var alwaysAllowWebRTC: Bool
+        var sitemapForWatch: String
+        var localConnectionConfig: ConnectionConfiguration
+        var remoteConnectionConfig: ConnectionConfiguration
+        var sseCommandItem: String
+    }
+
+    private var currentSnapshot: SettingsSnapshot {
+        SettingsSnapshot(
+            demomode: settingsDemomode,
+            idleOff: settingsIdleOff,
+            realTimeSliders: settingsRealTimeSliders,
+            showSearchField: settingsShowSearchField,
+            sendCrashReports: settingsSendCrashReports,
+            iconType: settingsIconType,
+            sortSitemapsBy: settingsSortSitemapsBy,
+            defaultMainUIPath: settingsDefaultMainUIPath,
+            alwaysAllowWebRTC: settingsAlwaysAllowWebRTC,
+            sitemapForWatch: settingsSitemapForWatch,
+            localConnectionConfig: settingsLocalConnectionConfiguration,
+            remoteConnectionConfig: settingsRemoteConnectionConfiguration,
+            sseCommandItem: settingsSSECommandItem
+        )
+    }
 
     var body: some View {
         Form {
@@ -71,26 +114,75 @@ struct SettingsView: View {
             AboutSettingsView()
         }
         .formStyle(.grouped)
-        .navigationBarBackButtonHidden(true)
         .navigationTitle("\(settingsHomeName) Settings")
         .toolbar {
-            ToolbarItemGroup(placement: .primaryAction) {
-                Button("Save") {
-                    saveSettings()
-                    NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
-                    dismiss()
+            if isDirty {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        savedExplicitly = true
+                        saveSettings()
+                        NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+                        dismiss()
+                    } label: {
+                        Image(systemName: "checkmark")
+                    }
                 }
             }
-            ToolbarItemGroup(placement: .cancellationAction) {
-                Button("Cancel") {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    savedExplicitly = true // treat explicit X as intentional discard — no dialog
                     dismiss()
+                } label: {
+                    Image(systemName: "xmark")
                 }
             }
+        }
+        .onDisappear {
+            guard isDirty, !savedExplicitly else { return }
+            // Sheet was swiped away with unsaved changes — capture values and notify parent
+            let dm = settingsDemomode, io = settingsIdleOff, rts = settingsRealTimeSliders
+            let ssf = settingsShowSearchField, scr = settingsSendCrashReports
+            let it = settingsIconType, ssb = settingsSortSitemapsBy
+            let dmu = settingsDefaultMainUIPath, aawrtc = settingsAlwaysAllowWebRTC
+            let sfw = settingsSitemapForWatch
+            let sfwLabel = sitemaps.first { $0.name == sfw }?.label ?? "unknown"
+            let lcc = settingsLocalConnectionConfiguration
+            let rcc = settingsRemoteConnectionConfiguration
+            let sseCI = settingsSSECommandItem
+            let snapshot = currentSnapshot
+            onDismissedDirty?(snapshot) {
+                Preferences.shared.modifyActiveHome { @MainActor prefs in
+                    prefs.demomode = dm
+                    prefs.realTimeSliders = rts
+                    prefs.iconType = it.rawValue
+                    prefs.sortSitemapsBy = ssb.rawValue
+                    prefs.defaultMainUIPath = dmu
+                    prefs.alwaysAllowWebRTC = aawrtc
+                    prefs.sitemapForWatch = sfw
+                    prefs.sitemapForWatchLabel = sfwLabel
+                    prefs.localConnectionConfig = lcc
+                    prefs.remoteConnectionConfig = rcc
+                    prefs.sseCommandItem = sseCI
+                }
+                Preferences.shared.idleOff = io
+                Preferences.shared.sendCrashReports = scr
+                Preferences.shared.modifyApplicationPreferences { @MainActor prefs in
+                    prefs.showSearchField = ssf
+                }
+                NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+            }
+        }
+        .onChange(of: currentSnapshot) { newSnapshot in
+            isDirty = newSnapshot != initialSnapshot
         }
         .task {
             if !viewAppearedOnce {
                 viewAppearedOnce = true
                 loadSettings()
+                initialSnapshot = currentSnapshot
+                if let initialValues {
+                    applySnapshot(initialValues)
+                }
                 let activeConfiguration = settingsLocalConnectionConfiguration
                 await updateSitemaps(activeConfiguration: activeConfiguration)
             }
@@ -136,6 +228,22 @@ struct SettingsView: View {
         settingsRemoteConnectionConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
         settingsHomeName = Preferences.shared.currentHomePreferences.homeName
         settingsSSECommandItem = Preferences.shared.currentHomePreferences.sseCommandItem
+    }
+
+    private func applySnapshot(_ snapshot: SettingsSnapshot) {
+        settingsDemomode = snapshot.demomode
+        settingsIdleOff = snapshot.idleOff
+        settingsRealTimeSliders = snapshot.realTimeSliders
+        settingsShowSearchField = snapshot.showSearchField
+        settingsSendCrashReports = snapshot.sendCrashReports
+        settingsIconType = snapshot.iconType
+        settingsSortSitemapsBy = snapshot.sortSitemapsBy
+        settingsDefaultMainUIPath = snapshot.defaultMainUIPath
+        settingsAlwaysAllowWebRTC = snapshot.alwaysAllowWebRTC
+        settingsSitemapForWatch = snapshot.sitemapForWatch
+        settingsLocalConnectionConfiguration = snapshot.localConnectionConfig
+        settingsRemoteConnectionConfiguration = snapshot.remoteConnectionConfig
+        settingsSSECommandItem = snapshot.sseCommandItem
     }
 
     func saveSettings() {
