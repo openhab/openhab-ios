@@ -11,6 +11,7 @@
 
 import Foundation
 import OSLog
+import SFSafeSymbols
 import SwiftUI
 
 // Thanks to https://useyourloaf.com/blog/fetching-oslog-messages-in-swift/
@@ -37,7 +38,7 @@ public struct LogsViewer: View {
             ToolbarItem(placement: .topBarTrailing) {
                 if let exportURL {
                     ShareLink(item: exportURL) {
-                        Image(systemName: "square.and.arrow.up")
+                        Image(systemSymbol: .squareAndArrowUp)
                     }
                     .accessibilityLabel("Share Logs")
                 }
