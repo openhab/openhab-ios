@@ -25,6 +25,7 @@ class OpenHABWebViewController: OpenHABViewController {
     private var activeConfig: ConnectionConfiguration? { activeConnectionInfo?.configuration }
     private var hideNavigationBar = false
     private var activityIndicator: UIActivityIndicatorView!
+    private var loadingOverlay: UIView!
     private var sseTimer: Timer?
     private var commandQueue: [String] = []
     private var acceptsCommands = false
@@ -87,12 +88,38 @@ class OpenHABWebViewController: OpenHABViewController {
         super.viewDidLoad()
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
         attachWebViewToLayout(webView)
+
+        // Opaque overlay to hide the white WebKit canvas flash during navigation.
+        // WKWebView renders in a separate GPU process so isOpaque/backgroundColor don't
+        // prevent the flash — we cover it with a systemBackground view instead.
+        loadingOverlay = UIView()
+        loadingOverlay.backgroundColor = .systemBackground
+        loadingOverlay.translatesAutoresizingMaskIntoConstraints = false
+        loadingOverlay.isUserInteractionEnabled = false
+        view.addSubview(loadingOverlay)
+        NSLayoutConstraint.activate([
+            loadingOverlay.topAnchor.constraint(equalTo: view.topAnchor),
+            loadingOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            loadingOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            loadingOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+
         activityIndicator = UIActivityIndicatorView()
         activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
         activityIndicator.style = UIActivityIndicatorView.Style.large
 
         view.addSubview(activityIndicator)
+    }
+
+    private func showLoadingOverlay() {
+        loadingOverlay.alpha = 1
+    }
+
+    private func hideLoadingOverlay() {
+        UIView.animate(withDuration: 0.2) {
+            self.loadingOverlay.alpha = 0
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -351,6 +378,7 @@ class OpenHABWebViewController: OpenHABViewController {
 
     func clearExistingPage() {
         Logger.viewController.info("clearExistingPage")
+        showLoadingOverlay()
         setHideNavigationBar(shouldHide: false)
         // clear out existing page while we load.
         webView.stopLoading()
@@ -437,7 +465,6 @@ class OpenHABWebViewController: OpenHABViewController {
         // support dark mode and avoid white flashing when loading
         webview.isOpaque = false
         webview.backgroundColor = UIColor.clear
-        webview.underPageBackgroundColor = .systemBackground
         if UIDevice.current.userInterfaceIdiom == .pad {
             // since ios 13 Safari sets the user agent to desktop mode on iPads so the view renders correctly with larger screens
             webview.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
@@ -545,6 +572,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation?) {
         Logger.viewController.info("didStartProvisionalNavigation - webView.url: \(String(describing: webView.url?.description))")
+        showLoadingOverlay()
         showActivityIndicator(show: true)
     }
 
@@ -552,6 +580,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         Logger.viewController.error("didFail - webView.url: \(String(describing: webView.url?.description))")
 
         setHideNavigationBar(shouldHide: false)
+        hideLoadingOverlay()
         if let urlError = error as? URLError, urlError.code == .cancelled {
             return // Ignore cancelled requests
         }
@@ -656,6 +685,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
         setHideNavigationBar(shouldHide: true)
         showActivityIndicator(show: false)
+        hideLoadingOverlay()
         hidePopupMessages()
         acceptsCommands = true
         // watch for URL changes so we can store the last visited path
