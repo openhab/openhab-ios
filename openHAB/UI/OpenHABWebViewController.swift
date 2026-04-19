@@ -96,6 +96,7 @@ class OpenHABWebViewController: OpenHABViewController {
         loadingOverlay.backgroundColor = .systemBackground
         loadingOverlay.translatesAutoresizingMaskIntoConstraints = false
         loadingOverlay.isUserInteractionEnabled = false
+        loadingOverlay.alpha = 1
         view.addSubview(loadingOverlay)
         NSLayoutConstraint.activate([
             loadingOverlay.topAnchor.constraint(equalTo: view.topAnchor),
@@ -490,7 +491,9 @@ class OpenHABWebViewController: OpenHABViewController {
 
     func attachWebViewToLayout(_ webView: WKWebView) {
         if webView.superview !== view {
-            view.addSubview(webView)
+            // Insert at index 0 so the webview always sits below the loading overlay
+            // and activity indicator, regardless of when it is attached.
+            view.insertSubview(webView, at: 0)
         }
         webView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
