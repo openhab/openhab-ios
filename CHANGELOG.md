@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+- Break down mapMs into per-phase timing in diagnostics
+- Fix inline media playback for web rows (#1158)
+- Add device and app version header to exported log file
+- Throttle long-poll UI updates to max 4/s with leading-edge immediacy
+- committed version bump: 3.2.26 (233)
+- Bump widget versions selectively for changed rows only
+- committed version bump: 3.2.25 (232)
+- Skip no-op UI updates on long-poll when row content unchanged
+- Add openHAB stress-test config for long-poll flooding reproduction
+- committed version bump: 3.2.24 (231)
+- Add SFSafeSymbols dependency to CommonUI
+- Fix LogsViewer: use systemName instead of SFSafeSymbols
+- Git update Version.xcconfig
+- Use SFSafeSymbols in LogsViewer share button
+- Add sitemap diagnostics logging
+- Revert "Fix sitemap scroll hitching under frequent long-poll updates (#1136) (#1138)"
+- Revert "Remove widget reconciliation from SwiftUI sitemap update path (#1139)"
+- Revert "Decouple hot sitemap rows from shared view model (#1140)"
+- Revert "Feature/lazy linked page navigation v3 (#1142)"
+
 - Bump widget versions selectively for changed rows only
 - committed version bump: 3.2.25 (232)
 - Skip no-op UI updates on long-poll when row content unchanged
