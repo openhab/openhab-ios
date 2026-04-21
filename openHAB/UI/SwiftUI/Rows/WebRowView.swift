@@ -50,6 +50,15 @@ private struct WebContainerContent: View {
     }
 }
 
+enum WebRowViewConfigurationFactory {
+    static func make() -> WKWebViewConfiguration {
+        let configuration = WKWebViewConfiguration()
+        configuration.allowsInlineMediaPlayback = true
+        configuration.mediaTypesRequiringUserActionForPlayback = []
+        return configuration
+    }
+}
+
 struct WidgetWebViewContainerView: View {
     let input: MediaRowInput
 
@@ -84,7 +93,7 @@ struct WebRowView: UIViewRepresentable {
     }
 
     func makeUIView(context: Context) -> WKWebView {
-        let webView = WKWebView()
+        let webView = WKWebView(frame: .zero, configuration: WebRowViewConfigurationFactory.make())
         webView.navigationDelegate = context.coordinator
         return webView
     }
