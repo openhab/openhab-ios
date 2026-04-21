@@ -570,12 +570,12 @@ extension SitemapPageViewModel {
     @MainActor
     private func updateUI(with page: OpenHABPage, origin: PageUpdateOrigin) {
         logger.debug("Incoming sitemap update origin=\(origin.rawValue, privacy: .public), widgets=\(page.widgets.count)")
-        let mapStart = Date()
         let titleChanged = currentPage == nil || currentPage?.title != page.title
         let oldInputs = rowInputs
         let newWidgets = page.widgets
 
-        // Check if list structure changed (count, order, or IDs)
+        // Phase 1: reconcile widgets
+        let t0 = Date()
         let currentWidgets = currentPage?.widgets ?? []
         let structureChanged = currentWidgets.count != newWidgets.count
             || !zip(currentWidgets, newWidgets).allSatisfy { $0.widgetId == $1.widgetId }
@@ -591,11 +591,18 @@ extension SitemapPageViewModel {
             // Inject sendCommand into existing widgets without replacing the page
             injectSendCommand(for: reconciledWidgets)
         }
+        let reconcileMs = Int((Date().timeIntervalSince(t0) * 1000).rounded())
 
+        // Phase 2: slider override sync
+        let t1 = Date()
         _ = clearSyncedSliderOverrides(using: reconciledWidgets)
-        rebuildRowInputs()
+        let sliderMs = Int((Date().timeIntervalSince(t1) * 1000).rounded())
 
-        let mapDurationMs = Int((Date().timeIntervalSince(mapStart) * 1000).rounded())
+        // Phase 3: row input rebuild
+        let t2 = Date()
+        rebuildRowInputs()
+        let rebuildMs = Int((Date().timeIntervalSince(t2) * 1000).rounded())
+
         let inputsChanged = rowInputs != oldInputs
 
         // Bump widget update versions only for rows whose content changed.
@@ -624,8 +631,9 @@ extension SitemapPageViewModel {
             titleChanged: titleChanged,
             changedRowCount: changedRowCount,
             changedRowKinds: SitemapDiagnostics.changedRowKinds(from: oldInputs, to: rowInputs),
-            mapDurationMs: mapDurationMs,
-            diffDurationMs: 0
+            reconcileMs: reconcileMs,
+            sliderMs: sliderMs,
+            rebuildMs: rebuildMs
         )
     }
 

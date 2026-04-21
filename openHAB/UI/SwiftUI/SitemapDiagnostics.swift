@@ -29,8 +29,9 @@ enum SitemapDiagnostics {
         titleChanged: Bool,
         changedRowCount: Int,
         changedRowKinds: String,
-        mapDurationMs: Int,
-        diffDurationMs: Int
+        reconcileMs: Int,
+        sliderMs: Int,
+        rebuildMs: Int
     ) {
         guard isEnabled else { return }
         logger.info(
@@ -38,7 +39,7 @@ enum SitemapDiagnostics {
             update origin=\(origin.rawValue, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) \
             inputsChanged=\(inputsChanged, privacy: .public) titleChanged=\(titleChanged, privacy: .public) \
             changedRows=\(changedRowCount, privacy: .public) changedKinds=\(changedRowKinds, privacy: .public) \
-            mapMs=\(mapDurationMs, privacy: .public) diffMs=\(diffDurationMs, privacy: .public)
+            reconcileMs=\(reconcileMs, privacy: .public) sliderMs=\(sliderMs, privacy: .public) rebuildMs=\(rebuildMs, privacy: .public)
             """
         )
     }
