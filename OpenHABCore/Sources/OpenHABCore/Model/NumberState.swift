@@ -23,8 +23,8 @@ public struct NumberState: CustomStringConvertible, Equatable {
     }
 
     public var value: Double
-    private(set) var unit: String? = ""
-    private(set) var format: String? = ""
+    public private(set) var unit: String? = ""
+    public private(set) var format: String? = ""
 
     public var intValue: Int {
         Int(value)

@@ -36,6 +36,28 @@ public struct WidgetMediaImageDescriptor: Sendable, Equatable {
     public let yAxisDecimalPattern: String?
     public let itemPayload: WidgetMediaItemPayloadSnapshot
 
+    public init(mediaKind: WidgetMediaKind,
+                url: String,
+                period: String,
+                service: String,
+                itemTypeRawValue: String?,
+                itemName: String?,
+                legend: Bool?,
+                forceAsItem: Bool?,
+                yAxisDecimalPattern: String?,
+                itemPayload: WidgetMediaItemPayloadSnapshot) {
+        self.mediaKind = mediaKind
+        self.url = url
+        self.period = period
+        self.service = service
+        self.itemTypeRawValue = itemTypeRawValue
+        self.itemName = itemName
+        self.legend = legend
+        self.forceAsItem = forceAsItem
+        self.yAxisDecimalPattern = yAxisDecimalPattern
+        self.itemPayload = itemPayload
+    }
+
     public func resolveImagePayload(rootUrl: String,
                                     chartStyle: ChartStyle = .light) -> ImagePayload {
         switch mediaKind {

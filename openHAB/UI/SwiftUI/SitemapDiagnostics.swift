@@ -27,6 +27,7 @@ enum SitemapDiagnostics {
         rowCount: Int,
         inputsChanged: Bool,
         titleChanged: Bool,
+        reusedInputCount: Int,
         changedRowCount: Int,
         changedRowKinds: String,
         reconcileMs: Int,
@@ -38,6 +39,7 @@ enum SitemapDiagnostics {
             """
             update origin=\(origin.rawValue, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) \
             inputsChanged=\(inputsChanged, privacy: .public) titleChanged=\(titleChanged, privacy: .public) \
+            reusedInputs=\(reusedInputCount, privacy: .public) \
             changedRows=\(changedRowCount, privacy: .public) changedKinds=\(changedRowKinds, privacy: .public) \
             reconcileMs=\(reconcileMs, privacy: .public) sliderMs=\(sliderMs, privacy: .public) rebuildMs=\(rebuildMs, privacy: .public)
             """

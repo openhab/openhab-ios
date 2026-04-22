@@ -15,7 +15,7 @@ import Foundation
 import os.log
 
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
-    public enum WidgetType: String, Decodable {
+    public enum WidgetType: String, Decodable, Sendable {
         case chart = "Chart"
         case colorpicker = "Colorpicker"
         case defaultWidget = "Default"

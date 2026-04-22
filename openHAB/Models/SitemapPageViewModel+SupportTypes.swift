@@ -27,7 +27,7 @@ struct QueuedCommand {
 }
 
 // swiftlint:disable:next file_types_order
-struct WidgetRenderKey: Equatable {
+struct WidgetRenderKey: Equatable, Sendable {
     let label: String
     let icon: String
     let state: String
@@ -44,17 +44,27 @@ struct WidgetRenderKey: Equatable {
     let visibility: Bool
     let staticIcon: Bool?
     let switchSupport: Bool
+    let releaseOnly: Bool?
     let minValue: Double
     let maxValue: Double
     let step: Double
     let pattern: String?
     let unit: String?
     let type: OpenHABWidget.WidgetType
+    let inputHintRawValue: String
+    let encoding: String
+    let labelSourceRawValue: String
+    let yAxisDecimalPattern: String?
+    let row: Int?
+    let column: Int?
+    let releaseCommand: String?
+    let command: String?
+    let stateless: Bool?
     let linkedPageLink: String?
     let linkedPageTitle: String?
     let mappings: [WidgetMappingKey]
     let item: WidgetItemKey?
-    let childWidgetIDs: [String]
+    let childWidgets: [WidgetRenderKey]
 
     static func from(widget: OpenHABWidget) -> WidgetRenderKey {
         WidgetRenderKey(
@@ -74,21 +84,31 @@ struct WidgetRenderKey: Equatable {
             visibility: widget.visibility,
             staticIcon: widget.staticIcon,
             switchSupport: widget.switchSupport,
+            releaseOnly: widget.releaseOnly,
             minValue: widget.minValue,
             maxValue: widget.maxValue,
             step: widget.step,
             pattern: widget.pattern,
             unit: widget.unit,
             type: widget.type,
+            inputHintRawValue: widget.inputHint.rawValue,
+            encoding: widget.encoding,
+            labelSourceRawValue: widget.labelSource.rawValue,
+            yAxisDecimalPattern: widget.yAxisDecimalPattern,
+            row: widget.row,
+            column: widget.column,
+            releaseCommand: widget.releaseCommand,
+            command: widget.command,
+            stateless: widget.stateless,
             linkedPageLink: widget.linkedPage?.link,
             linkedPageTitle: widget.linkedPage?.title,
             mappings: widget.mappings.map(WidgetMappingKey.init),
             item: WidgetItemKey.from(item: widget.item),
-            childWidgetIDs: widget.widgets.map(\.widgetId)
+            childWidgets: widget.widgets.map(WidgetRenderKey.from)
         )
     }
 
-    // Could be synthesized automatically by compiler. But this takes too long
+    // Keep this manual to avoid slow compile times for a very large synthesized implementation.
     static func == (lhs: WidgetRenderKey, rhs: WidgetRenderKey) -> Bool {
         lhs.label == rhs.label &&
             lhs.icon == rhs.icon &&
@@ -106,21 +126,31 @@ struct WidgetRenderKey: Equatable {
             lhs.visibility == rhs.visibility &&
             lhs.staticIcon == rhs.staticIcon &&
             lhs.switchSupport == rhs.switchSupport &&
+            lhs.releaseOnly == rhs.releaseOnly &&
             lhs.minValue == rhs.minValue &&
             lhs.maxValue == rhs.maxValue &&
             lhs.step == rhs.step &&
             lhs.pattern == rhs.pattern &&
             lhs.unit == rhs.unit &&
             lhs.type == rhs.type &&
+            lhs.inputHintRawValue == rhs.inputHintRawValue &&
+            lhs.encoding == rhs.encoding &&
+            lhs.labelSourceRawValue == rhs.labelSourceRawValue &&
+            lhs.yAxisDecimalPattern == rhs.yAxisDecimalPattern &&
+            lhs.row == rhs.row &&
+            lhs.column == rhs.column &&
+            lhs.releaseCommand == rhs.releaseCommand &&
+            lhs.command == rhs.command &&
+            lhs.stateless == rhs.stateless &&
             lhs.linkedPageLink == rhs.linkedPageLink &&
             lhs.linkedPageTitle == rhs.linkedPageTitle &&
             lhs.mappings == rhs.mappings &&
             lhs.item == rhs.item &&
-            lhs.childWidgetIDs == rhs.childWidgetIDs
+            lhs.childWidgets == rhs.childWidgets
     }
 }
 
-struct WidgetMappingKey: Equatable {
+struct WidgetMappingKey: Equatable, Sendable {
     let command: String
     let label: String
     let row: Int?
@@ -138,7 +168,7 @@ struct WidgetMappingKey: Equatable {
     }
 }
 
-struct WidgetItemKey: Equatable {
+struct WidgetItemKey: Equatable, Sendable {
     let name: String
     let state: String?
     let link: String
@@ -163,7 +193,7 @@ struct WidgetItemKey: Equatable {
     }
 }
 
-struct WidgetStateDescriptionKey: Equatable {
+struct WidgetStateDescriptionKey: Equatable, Sendable {
     let minimum: Double
     let maximum: Double
     let step: Double
@@ -184,7 +214,7 @@ struct WidgetStateDescriptionKey: Equatable {
     }
 }
 
-struct WidgetOptionKey: Equatable {
+struct WidgetOptionKey: Equatable, Sendable {
     let value: String
     let label: String
 
@@ -194,12 +224,56 @@ struct WidgetOptionKey: Equatable {
     }
 }
 
-struct WidgetCommandOptionKey: Equatable {
+struct WidgetCommandOptionKey: Equatable, Sendable {
     let command: String
     let label: String?
 
     init(_ option: OpenHABCommandOptions) {
         command = option.command
         label = option.label
+    }
+}
+
+extension WidgetRenderKey {
+    static func from(snapshot: WidgetMappingSnapshot) -> WidgetRenderKey {
+        WidgetRenderKey(
+            label: snapshot.label,
+            icon: snapshot.icon,
+            state: snapshot.state,
+            iconColor: snapshot.iconColor,
+            labelColor: snapshot.labelColor,
+            valueColor: snapshot.valueColor,
+            url: snapshot.url,
+            period: snapshot.period,
+            service: snapshot.service,
+            legend: snapshot.legend,
+            refresh: snapshot.refresh,
+            height: snapshot.height,
+            forceAsItem: snapshot.forceAsItem,
+            visibility: snapshot.visibility,
+            staticIcon: snapshot.staticIcon,
+            switchSupport: snapshot.switchSupport,
+            releaseOnly: snapshot.releaseOnly,
+            minValue: snapshot.minValue,
+            maxValue: snapshot.maxValue,
+            step: snapshot.step,
+            pattern: snapshot.pattern,
+            unit: snapshot.unit,
+            type: snapshot.widgetType,
+            inputHintRawValue: snapshot.inputHintRawValue,
+            encoding: snapshot.encoding,
+            labelSourceRawValue: snapshot.labelSourceRawValue,
+            yAxisDecimalPattern: snapshot.yAxisDecimalPattern,
+            row: snapshot.row,
+            column: snapshot.column,
+            releaseCommand: snapshot.releaseCommand,
+            command: snapshot.command,
+            stateless: snapshot.stateless,
+            linkedPageLink: snapshot.linkedPage?.link,
+            linkedPageTitle: snapshot.linkedPage?.title,
+            mappings: snapshot.mappings.map(WidgetMappingKey.init),
+            item: WidgetItemKey.from(item: snapshot.item),
+            childWidgets: snapshot.widgets.map(WidgetRenderKey.from)
+        )
     }
 }

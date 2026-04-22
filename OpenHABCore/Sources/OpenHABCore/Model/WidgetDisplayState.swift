@@ -29,6 +29,40 @@ public struct WidgetDisplayState: Sendable, Equatable {
     public let hasPressReleaseMappings: Bool
     public let selectedIndex: Int?
     public let selectedLabel: String?
+
+    public init(widgetId: String,
+                labelText: String,
+                labelValue: String?,
+                effectiveState: String,
+                isOn: Bool,
+                adjustedValue: Double,
+                minValue: Double,
+                maxValue: Double,
+                step: Double,
+                switchSupport: Bool,
+                hasLinkedPage: Bool,
+                readOnly: Bool,
+                mappings: [OpenHABWidgetMapping],
+                hasPressReleaseMappings: Bool,
+                selectedIndex: Int?,
+                selectedLabel: String?) {
+        self.widgetId = widgetId
+        self.labelText = labelText
+        self.labelValue = labelValue
+        self.effectiveState = effectiveState
+        self.isOn = isOn
+        self.adjustedValue = adjustedValue
+        self.minValue = minValue
+        self.maxValue = maxValue
+        self.step = step
+        self.switchSupport = switchSupport
+        self.hasLinkedPage = hasLinkedPage
+        self.readOnly = readOnly
+        self.mappings = mappings
+        self.hasPressReleaseMappings = hasPressReleaseMappings
+        self.selectedIndex = selectedIndex
+        self.selectedLabel = selectedLabel
+    }
 }
 
 public extension OpenHABWidget {
