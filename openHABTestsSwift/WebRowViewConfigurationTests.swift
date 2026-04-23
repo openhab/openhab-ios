@@ -15,6 +15,7 @@ import WebKit
 
 @Suite
 struct WebRowViewConfigurationTests {
+    @MainActor
     @Test
     func webRowConfigurationAllowsInlineMutedAutoplay() {
         let configuration = WebRowViewConfigurationFactory.make()
