@@ -50,6 +50,7 @@ private struct WebContainerContent: View {
     }
 }
 
+@MainActor
 enum WebRowViewConfigurationFactory {
     static func make() -> WKWebViewConfiguration {
         let configuration = WKWebViewConfiguration()
