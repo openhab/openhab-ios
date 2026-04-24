@@ -16,7 +16,6 @@ import UIKit
 
 struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
-    @Environment(\.scenePhase) private var scenePhase
     @State private var idleTimerDisabled = false
 
     private var isLinkedPage: Bool {
@@ -64,12 +63,6 @@ struct SitemapPageView: View {
             if idleTimerDisabled {
                 UIApplication.shared.isIdleTimerDisabled = false
             }
-        }
-        .onChange(of: scenePhase) { newPhase in
-            // Linked pages are not covered by SitemapNavigationView's scene-phase observer,
-            // which only refreshes the root page. Refresh here when returning to foreground.
-            guard viewModel.isLinked, case .active = newPhase else { return }
-            viewModel.refreshOnForeground()
         }
         .navigationTitle(viewModel.pageTitle)
         .navigationBarTitleDisplayMode(.large)

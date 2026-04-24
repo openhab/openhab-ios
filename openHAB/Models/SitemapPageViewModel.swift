@@ -105,6 +105,7 @@ class SitemapPageViewModel: ObservableObject {
     private var lastUIUpdateAt: Date = .distantPast
     private var pendingLongPollPage: OpenHABPage?
     private var longPollDebounceTask: Task<Void, Never>?
+    private var foregroundObserverTask: Task<Void, Never>?
     private var rowInputRebuildTask: Task<Void, Never>?
 
     var relevantWidgets: [OpenHABWidget] {
@@ -269,6 +270,22 @@ class SitemapPageViewModel: ObservableObject {
                 }
             }
         }
+
+        // Linked pages are not covered by SitemapNavigationView's scenePhase observer.
+        // Observe UIApplication.didBecomeActiveNotification directly — more reliable than
+        // scenePhase environment propagation through NavigationLink destinations.
+        if isLinkedPage {
+            foregroundObserverTask = Task { [weak self] in
+                let notifications = NotificationCenter.default.notifications(
+                    named: UIApplication.didBecomeActiveNotification
+                )
+                for await _ in notifications {
+                    await MainActor.run { [weak self] in
+                        self?.refreshOnForeground()
+                    }
+                }
+            }
+        }
     }
 
     func rebuildRowInputs() {
@@ -313,6 +330,7 @@ class SitemapPageViewModel: ObservableObject {
     deinit {
         connectionObserverTask?.cancel()
         networkStatusObserverTask?.cancel()
+        foregroundObserverTask?.cancel()
         pageHandlingTask?.cancel()
         foregroundRefreshTask?.cancel()
         longPollDebounceTask?.cancel()
