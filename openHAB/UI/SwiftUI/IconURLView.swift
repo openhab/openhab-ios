@@ -34,10 +34,10 @@ struct IconURLView: View {
                 .resizable()
                 .setProcessor(OpenHABImageProcessor())
                 .onFailure { error in
-                    logger.error("Icon loading failed for URL : \(iconURL): \(error.localizedDescription)")
+                    logger.error("Icon loading failed for URL '\(iconURL.absoluteString, privacy: .public)': \(error.localizedDescription, privacy: .public)")
                 }
                 .onSuccess { _ in
-                    logger.info("Loading succeeded for URL : \(iconURL)")
+                    logger.info("Loading succeeded for URL: \(iconURL.absoluteString, privacy: .public)")
                 }
                 .fade(duration: 0.25)
                 .cancelOnDisappear(true)

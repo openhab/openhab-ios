@@ -589,24 +589,14 @@ extension SitemapPageViewModel {
 
         // Phase 1: apply new page directly — no reconcile needed.
         // The new architecture (SitemapRowInput value types + WidgetRenderKey change detection)
-        // does not rely on widget object identity. sliderValueOverrides and commandStates are
-        // keyed by item name, and rowWidgetIndex is rebuilt on every update, so reusing existing
-        // widget objects provides no benefit while costing 3-7ms of synchronous main-thread work.
-        let t0 = Date()
-        let oldWidgets = currentPage?.widgets ?? []
-        let structureChanged = oldWidgets.count != newWidgets.count
-            || !zip(oldWidgets, newWidgets).allSatisfy { $0.widgetId == $1.widgetId }
+        // does not rely on widget object identity.
         injectSendCommand(for: newWidgets)
         currentPage = page
-        let reconcileMs = Int((Date().timeIntervalSince(t0) * 1000).rounded())
 
         // Phase 2: slider override sync
-        let t1 = Date()
         _ = clearSyncedSliderOverrides(using: newWidgets)
-        let sliderMs = Int((Date().timeIntervalSince(t1) * 1000).rounded())
 
         // Phase 3: row input rebuild (incremental — reuses inputs for unchanged rows)
-        let t2 = Date()
         let pageKey = "\(defaultSitemap)|\(pageId)"
         let visibleWidgets = relevantWidgets
         let prevRenderKeys = previousBuildRenderKeys
@@ -622,7 +612,6 @@ extension SitemapPageViewModel {
             previousRowIDs: prevRowIDs
         )
         applySnapshotRowInputBuildResult(rowInputBuildResult, widgets: visibleWidgets)
-        let rebuildMs = Int((Date().timeIntervalSince(t2) * 1000).rounded())
 
         let inputsChanged = rowInputs != oldInputs
 
@@ -641,22 +630,26 @@ extension SitemapPageViewModel {
             }
         }
 
-        let changedRowCount = rowInputs.count == oldInputs.count
-            ? zip(rowInputs, oldInputs).reduce(into: 0) { n, pair in if pair.0 != pair.1 { n += 1 } }
-            : rowInputs.count
-        SitemapDiagnostics.logUpdate(
-            origin: origin,
-            widgetCount: page.widgets.count,
-            rowCount: rowInputs.count,
-            inputsChanged: inputsChanged,
-            titleChanged: titleChanged,
-            reusedInputCount: rowInputBuildResult.reusedInputCount,
-            changedRowCount: changedRowCount,
-            changedRowKinds: SitemapDiagnostics.changedRowKinds(from: oldInputs, to: rowInputs),
-            reconcileMs: reconcileMs,
-            sliderMs: sliderMs,
-            rebuildMs: rebuildMs
-        )
+        // Diagnostic logging — all O(N) analysis work is guarded so it never runs in production.
+        if SitemapDiagnostics.isEnabled {
+            let t0 = Date()
+            let changedRowCount = rowInputs.count == oldInputs.count
+                ? zip(rowInputs, oldInputs).reduce(into: 0) { n, pair in if pair.0 != pair.1 { n += 1 } }
+                : rowInputs.count
+            let changedRowKinds = SitemapDiagnostics.changedRowKinds(from: oldInputs, to: rowInputs)
+            let analysisMs = Int((Date().timeIntervalSince(t0) * 1000).rounded())
+            SitemapDiagnostics.logUpdate(
+                origin: origin,
+                widgetCount: page.widgets.count,
+                rowCount: rowInputs.count,
+                inputsChanged: inputsChanged,
+                titleChanged: titleChanged,
+                reusedInputCount: rowInputBuildResult.reusedInputCount,
+                changedRowCount: changedRowCount,
+                changedRowKinds: changedRowKinds,
+                analysisMs: analysisMs
+            )
+        }
     }
 
     private func applySnapshotRowInputBuildResult(_ result: SnapshotRowInputBuildResult, widgets: [OpenHABWidget]) {
