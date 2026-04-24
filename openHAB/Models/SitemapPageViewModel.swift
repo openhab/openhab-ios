@@ -569,28 +569,22 @@ extension SitemapPageViewModel {
         let oldInputs = rowInputs
         let newWidgets = page.widgets
 
-        // Phase 1: reconcile widgets
+        // Phase 1: apply new page directly — no reconcile needed.
+        // The new architecture (SitemapRowInput value types + WidgetRenderKey change detection)
+        // does not rely on widget object identity. sliderValueOverrides and commandStates are
+        // keyed by item name, and rowWidgetIndex is rebuilt on every update, so reusing existing
+        // widget objects provides no benefit while costing 3-7ms of synchronous main-thread work.
         let t0 = Date()
-        let currentWidgets = currentPage?.widgets ?? []
-        let structureChanged = currentWidgets.count != newWidgets.count
-            || !zip(currentWidgets, newWidgets).allSatisfy { $0.widgetId == $1.widgetId }
-        let reconciledWidgets = reconcileWidgets(newWidgets, with: currentWidgets)
-
-        // Only replace currentPage when structure or title changed
-        if structureChanged || currentPage?.title != page.title || currentPage == nil {
-            page.widgets = reconciledWidgets
-            injectSendCommand(for: reconciledWidgets)
-            currentPage = page
-        } else {
-            currentPage?.widgets = reconciledWidgets
-            // Inject sendCommand into existing widgets without replacing the page
-            injectSendCommand(for: reconciledWidgets)
-        }
+        let oldWidgets = currentPage?.widgets ?? []
+        let structureChanged = oldWidgets.count != newWidgets.count
+            || !zip(oldWidgets, newWidgets).allSatisfy { $0.widgetId == $1.widgetId }
+        injectSendCommand(for: newWidgets)
+        currentPage = page
         let reconcileMs = Int((Date().timeIntervalSince(t0) * 1000).rounded())
 
         // Phase 2: slider override sync
         let t1 = Date()
-        _ = clearSyncedSliderOverrides(using: reconciledWidgets)
+        _ = clearSyncedSliderOverrides(using: newWidgets)
         let sliderMs = Int((Date().timeIntervalSince(t1) * 1000).rounded())
 
         // Phase 3: row input rebuild (incremental — reuses inputs for unchanged rows)
@@ -625,7 +619,7 @@ extension SitemapPageViewModel {
                     }
                 }
             } else {
-                trackWidgetUpdates(in: reconciledWidgets)
+                trackWidgetUpdates(in: newWidgets)
             }
         }
 
@@ -759,75 +753,6 @@ extension SitemapPageViewModel {
         currentPage = page
         let result = await SitemapPageViewModel.buildRowInputs(pageKey: "\(defaultSitemap)|\(pageId)", widgets: relevantWidgets)
         applySnapshotRowInputBuildResult(result, widgets: relevantWidgets)
-    }
-
-    private func reconcileWidgets(_ newWidgets: [OpenHABWidget], with currentWidgets: [OpenHABWidget]) -> [OpenHABWidget] {
-        var buckets: [String: [OpenHABWidget]] = [:]
-        for widget in currentWidgets {
-            buckets[widget.widgetId, default: []].append(widget)
-        }
-
-        var reconciled: [OpenHABWidget] = []
-        reconciled.reserveCapacity(newWidgets.count)
-
-        for newWidget in newWidgets {
-            if var candidates = buckets[newWidget.widgetId], !candidates.isEmpty {
-                let existing = candidates.removeFirst()
-                buckets[newWidget.widgetId] = candidates
-
-                // Always copy server properties to avoid missing updates when
-                // non-keyed fields change (for example group summary/state rows).
-                let previousChildren = existing.widgets
-                copyWidgetProperties(from: newWidget, to: existing)
-                existing.widgets = reconcileWidgets(newWidget.widgets, with: previousChildren)
-
-                reconciled.append(existing)
-            } else {
-                reconciled.append(newWidget)
-            }
-        }
-
-        return reconciled
-    }
-
-    private func copyWidgetProperties(from source: OpenHABWidget, to target: OpenHABWidget) {
-        target.label = source.label
-        target.icon = source.icon
-        target.state = source.state
-        target.type = source.type
-        target.isLeaf = source.isLeaf
-        target.item = source.item
-        target.iconColor = source.iconColor
-        target.labelcolor = source.labelcolor
-        target.valuecolor = source.valuecolor
-        target.url = source.url
-        target.period = source.period
-        target.service = source.service
-        target.legend = source.legend
-        target.refresh = source.refresh
-        target.height = source.height
-        target.forceAsItem = source.forceAsItem
-        target.minValue = source.minValue
-        target.maxValue = source.maxValue
-        target.step = source.step
-        target.pattern = source.pattern
-        target.unit = source.unit
-        target.switchSupport = source.switchSupport
-        target.mappings = source.mappings
-        target.linkedPage = source.linkedPage
-        target.visibility = source.visibility
-        target.staticIcon = source.staticIcon
-        target.text = source.text
-        target.inputHint = source.inputHint
-        target.encoding = source.encoding
-        target.labelSource = source.labelSource
-        target.releaseOnly = source.releaseOnly
-        target.row = source.row
-        target.column = source.column
-        target.releaseCommand = source.releaseCommand
-        target.command = source.command
-        target.stateless = source.stateless
-        target.yAxisDecimalPattern = source.yAxisDecimalPattern
     }
 
     private func shouldRetryLongPolling(after error: any Error) -> Bool {
