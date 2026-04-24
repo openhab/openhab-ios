@@ -190,8 +190,8 @@ class SitemapPageViewModel: ObservableObject {
 
     init(pageUrl: String, title: String, pageId: String = "") {
         loadSettings()
-        startObservers()
         isLinkedPage = true
+        startObservers()
         fallbackTitle = title
         defaultSitemapLabel = title
 
