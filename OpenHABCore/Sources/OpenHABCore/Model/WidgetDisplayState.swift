@@ -65,32 +65,3 @@ public struct WidgetDisplayState: Sendable, Equatable {
     }
 }
 
-public extension OpenHABWidget {
-    var displayState: WidgetDisplayState {
-        let mappings = mappingsOrItemOptions
-        let effectiveState = state.isEmpty ? (item?.state ?? "") : state
-        let selectedIndex = mappingIndex(byCommand: item?.state).map { Int($0) }
-        let selectedLabel = selectedIndex.flatMap { index in
-            mappings.indices.contains(index) ? mappings[index].label : nil
-        }
-
-        return WidgetDisplayState(
-            widgetId: widgetId,
-            labelText: labelText ?? label,
-            labelValue: labelValue,
-            effectiveState: effectiveState,
-            isOn: effectiveState.parseAsBool(),
-            adjustedValue: adjustedValue,
-            minValue: minValue,
-            maxValue: maxValue,
-            step: step,
-            switchSupport: switchSupport,
-            hasLinkedPage: linkedPage != nil,
-            readOnly: readOnly ?? false,
-            mappings: mappings,
-            hasPressReleaseMappings: hasPressReleaseMappings,
-            selectedIndex: selectedIndex,
-            selectedLabel: selectedLabel
-        )
-    }
-}

@@ -173,157 +173,7 @@ extension WidgetMappingSnapshot {
         OpenHABWidget.LabelSource(rawValue: labelSourceRawValue) ?? .unknown
     }
 
-    var renderingKind: WidgetRenderingKind {
-        switch widgetType {
-        case .switchWidget:
-            if !mappings.isEmpty {
-                return .segmentedSwitch
-            }
-            if item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                return .toggleSwitch
-            }
-            if item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                return .rollershutterSwitch
-            }
-            if !mappingsOrItemOptions.isEmpty {
-                return .segmentedSwitch
-            }
-            return .toggleSwitch
-        case .slider:
-            return .slider
-        case .input:
-            if [.date, .time, .dateTime].contains(inputHint) {
-                return .dateInput
-            }
-            return .textInput
-        case .text:
-            return .text
-        case .frame:
-            return .frame
-        case .setpoint:
-            return .setpoint
-        case .selection:
-            return .selection
-        case .colorpicker:
-            return .colorPicker
-        case .image:
-            return .image
-        case .chart:
-            return .chart
-        case .video:
-            return .video
-        case .webview:
-            return .webview
-        case .mapview:
-            return .mapview
-        case .colortemperaturepicker:
-            return .colorTemperaturePicker
-        case .buttongrid:
-            return .buttonGrid
-        case .group, .defaultWidget, .button, .unknown:
-            return .generic
-        }
-    }
-
-    var readOnly: Bool {
-        item?.stateDescription?.readOnly ?? false
-    }
-
-    var labelText: String {
-        let array = label.components(separatedBy: "[")
-        return array[0].trimmingCharacters(in: .whitespaces)
-    }
-
-    var labelValue: String? {
-        let pattern = /\[(.*?)\]/.dotMatchesNewlines()
-        guard let firstMatch = label.firstMatch(of: pattern) else { return nil }
-        return String(firstMatch.1)
-    }
-
-    var mappingsOrItemOptions: [OpenHABWidgetMapping] {
-        if mappings.isEmpty, let commandOptions = item?.commandDescription?.commandOptions {
-            commandOptions.map { OpenHABWidgetMapping(command: $0.command, label: $0.label ?? "") }
-        } else if mappings.isEmpty, let stateOptions = item?.stateDescription?.options {
-            stateOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
-        } else {
-            mappings
-        }
-    }
-
-    var hasPressReleaseMappings: Bool {
-        mappingsOrItemOptions.contains { $0.hasPressReleaseBehavior }
-    }
-
-    var stateValueAsNumberState: NumberState? {
-        if !state.isEmpty {
-            state.parseAsNumber(format: item?.stateDescription?.numberPattern)
-        } else {
-            item?.state?.parseAsNumber(format: item?.stateDescription?.numberPattern)
-        }
-    }
-
-    var adjustedValue: Double {
-        if let item {
-            adjusted(item.stateAsDouble())
-        } else {
-            minValue
-        }
-    }
-
-    var displayState: WidgetDisplayState {
-        let mappings = mappingsOrItemOptions
-        let effectiveState = state.isEmpty ? (item?.state ?? "") : state
-        let selectedIndex = mappingIndex(byCommand: item?.state).map { Int($0) }
-        let selectedLabel = selectedIndex.flatMap { index in
-            mappings.indices.contains(index) ? mappings[index].label : nil
-        }
-
-        return WidgetDisplayState(
-            widgetId: widgetId,
-            labelText: labelText,
-            labelValue: labelValue,
-            effectiveState: effectiveState,
-            isOn: effectiveState.parseAsBool(),
-            adjustedValue: adjustedValue,
-            minValue: minValue,
-            maxValue: maxValue,
-            step: step,
-            switchSupport: switchSupport,
-            hasLinkedPage: linkedPage != nil,
-            readOnly: readOnly,
-            mappings: mappings,
-            hasPressReleaseMappings: hasPressReleaseMappings,
-            selectedIndex: selectedIndex,
-            selectedLabel: selectedLabel
-        )
-    }
-
-    func iconState() -> String? {
-        guard let item, let itemState = item.state else { return nil }
-        guard !itemState.isNoneIcon else { return nil }
-        if item.isOfTypeOrGroupType(.color) {
-            if widgetType == .slider || (widgetType == .switchWidget && mappings.isEmpty) {
-                if let brightness = itemState.parseAsBrightness() {
-                    let brightness = String(brightness)
-                    if widgetType == .switchWidget {
-                        return brightness == "0" ? "OFF" : "ON"
-                    } else {
-                        return brightness
-                    }
-                } else {
-                    return "OFF"
-                }
-            } else if let color = itemState.parseAsUIColor() {
-                return "#\(color.hexString ?? "000000")"
-            }
-        } else if item.isOfTypeOrGroupType(.number) || item.isOfTypeOrGroupType(.numberWithDimension) {
-            let numberState = itemState.parseAsNumber(format: item.stateDescription?.numberPattern)
-            return numberState.toString(locale: Locale(identifier: "US"))
-        } else if widgetType == .switchWidget, mappings.isEmpty, !item.isOfTypeOrGroupType(.rollershutter) {
-            return (itemState == "0" || itemState == "OFF") ? "OFF" : "ON"
-        }
-        return itemState
-    }
+    var hasLinkedPage: Bool { linkedPage != nil }
 
     var mediaImageDescriptor: WidgetMediaImageDescriptor {
         let itemPayload: WidgetMediaItemPayloadSnapshot = if let item {
@@ -366,45 +216,15 @@ extension WidgetMappingSnapshot {
         }
     }
 
-    func shouldUseSliderUpdatesDuringMove() -> Bool {
-        if let releaseOnly {
-            return !releaseOnly
-        }
-
-        guard let item else {
-            return false
-        }
-
-        if item.isOfTypeOrGroupType(.dimmer) ||
-            item.isOfTypeOrGroupType(.number) ||
-            item.isOfTypeOrGroupType(.color) {
-            return true
-        }
-
-        if item.isOfTypeOrGroupType(.numberWithDimension) {
-            return stateValueAsNumberState?.unit == "%"
-        }
-
-        return false
-    }
-
     func rowIdentityWidgetID() -> String {
         if renderingKind == .chart, let itemName = item?.name, !itemName.isEmpty {
             return "chart-\(itemName)"
         }
         return widgetId
     }
-
-    private func mappingIndex(byCommand command: String?) -> Int? {
-        mappingsOrItemOptions.firstIndex { $0.command == command }
-    }
-
-    private func adjusted(_ raw: Double) -> Double {
-        var valueAdjustedToStep = floor((raw - minValue) / step) * step
-        valueAdjustedToStep += minValue
-        return valueAdjustedToStep.clamped(to: minValue ... maxValue)
-    }
 }
+
+extension WidgetMappingSnapshot: WidgetRendering {}
 
 private extension OpenHABWidget.WidgetType {
     var mediaKind: WidgetMediaKind {
