@@ -33,14 +33,14 @@ enum SitemapDiagnostics {
         analysisMs: Int
     ) {
         guard isEnabled else { return }
-        logger.notice(
+        logger.info(
             "update origin=\(origin.rawValue, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) inputsChanged=\(inputsChanged, privacy: .public) titleChanged=\(titleChanged, privacy: .public) reusedInputs=\(reusedInputCount, privacy: .public) changedRows=\(changedRowCount, privacy: .public) changedKinds=\(changedRowKinds, privacy: .public) analysisMs=\(analysisMs, privacy: .public)"
         )
     }
 
     static func logPublishedRows(rowCount: Int, changedRowCount: Int) {
         guard isEnabled else { return }
-        logger.notice("rowInputs published rows=\(rowCount, privacy: .public) changedRows=\(changedRowCount, privacy: .public)")
+        logger.info("rowInputs published rows=\(rowCount, privacy: .public) changedRows=\(changedRowCount, privacy: .public)")
     }
 
     static func logRender(kind: String, identity: String, detail: String = "") {
