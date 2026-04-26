@@ -513,6 +513,19 @@ public actor NetworkTracker {
 }
 
 public extension NetworkTracker {
+    /// Finds the connection configuration whose URL host or proxy host matches the given host,
+    /// prioritising the active connection.
+    func connectionConfiguration(forHost host: String) -> ConnectionConfiguration? {
+        if let activeConnection,
+           activeConnection.configuration.host == host || activeConnection.proxyURL?.host == host {
+            activeConnection.configuration
+        } else {
+            connectionConfigurations
+                .filter { $0 != activeConnection?.configuration }
+                .first { $0.host == host }
+        }
+    }
+
     private func service() async throws -> any OpenAPIServiceProtocol {
         guard let connection = await waitForActiveConnection()?.configuration else {
             throw NetworkTrackerError.noActiveConnection
@@ -523,16 +536,16 @@ public extension NetworkTracker {
         return service
     }
 
-    func send(to item: OpenHABItem, command: String) async throws {
-        try await send(to: item.name, command: command)
+    func send(to item: OpenHABItem, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
+        try await send(to: item.name, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
     }
 
-    func send(to item: String, command: String) async throws {
-        try await service().sendItemCommand(itemname: item, command: command)
+    func send(to item: String, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
+        try await service().sendItemCommand(itemname: item, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
     }
 
-    func updateState(item: OpenHABItem, state: String) async throws {
-        try await service().updateItemState(itemname: item.name, with: state)
+    func updateState(item: OpenHABItem, state: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
+        try await service().updateItemState(itemname: item.name, with: state, sourcePrefix: sourcePrefix, deviceId: deviceId)
     }
 
     func getStaticItems() async throws -> [OpenHABItem] {
@@ -577,6 +590,10 @@ public extension NetworkTracker {
 public extension NetworkTracker {
     func setMockConnection(_ connection: ConnectionInfo) {
         activeConnection = connection
+    }
+
+    func setMockConnectionConfigurations(_ configurations: [ConnectionConfiguration]) {
+        connectionConfigurations = configurations
     }
 }
 #endif

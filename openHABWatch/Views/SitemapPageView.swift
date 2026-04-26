@@ -18,68 +18,21 @@ struct WidgetRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
 
+    private var refreshToken: String {
+        let displayState = widget.displayState
+        return "\(widget.widgetId)|\(displayState.effectiveState)|\(displayState.labelValue ?? "")"
+    }
+
     var body: some View {
         if let linkedPage = widget.linkedPage {
             NavigationLink(value: linkedPage) {
-                rowWidget(widget: widget)
+                WidgetRowFactory.make(widget: widget, settings: settings)
+                    .id(refreshToken)
             }
             .buttonStyle(.plain)
         } else {
-            rowWidget(widget: widget)
-        }
-    }
-
-    @ViewBuilder func rowWidget(widget: OpenHABWidget) -> some View {
-        switch widget.type {
-        case .switchWidget:
-            if !widget.mappings.isEmpty {
-                SegmentRow(widget: widget)
-            } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                SwitchRow(widget: widget)
-            } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                RollershutterRow(widget: widget)
-            } else if !widget.mappingsOrItemOptions.isEmpty {
-                SegmentRow(widget: widget)
-            } else {
-                SwitchRow(widget: widget)
-            }
-        case .slider:
-            SliderRow(widget: widget)
-        case .setpoint:
-            SetpointRow(widget: widget)
-        case .frame:
-            FrameRow(widget: widget)
-        case .text:
-            TextRow(widget: widget)
-        case .image:
-            if widget.item != nil {
-                ImageRawRow(widget: widget)
-            } else {
-                EquatableView(content: ImageRow(url: URL(string: widget.url), refresh: widget.refresh))
-            }
-        case .chart:
-            let url = Endpoint.chart(
-                rootUrl: settings.openHABRootUrl,
-                period: widget.period,
-                type: widget.item?.type ?? .none,
-                service: widget.service,
-                name: widget.item?.name,
-                legend: widget.legend,
-                theme: .dark,
-                forceAsItem: widget.forceAsItem
-            ).url
-            EquatableView(content: ImageRow(url: url, refresh: widget.refresh))
-        case .mapview:
-            MapViewRow(widget: widget)
-        case .colorpicker:
-            ColorPickerRow(widget: widget)
-        case .selection:
-            SelectionRow(widget: widget)
-        case .video, .webview, .input, .colortemperaturepicker, .buttongrid:
-            // Not yet implemented for watchOS
-            GenericRow(widget: widget)
-        case .group, .defaultWidget, .button, .unknown:
-            GenericRow(widget: widget)
+            WidgetRowFactory.make(widget: widget, settings: settings)
+                .id(refreshToken)
         }
     }
 }
@@ -113,9 +66,9 @@ struct SitemapPageView: View {
             if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {
                 VStack {
                     Spacer()
-                    ProgressView("Loading sitemap...")
+                    ProgressView("Loading sitemap…")
                         .progressViewStyle(CircularProgressViewStyle())
-                        .font(.footnote)
+                        .watchTextStyle(.detail)
                     Spacer()
                 }
             } else if !viewModel.widgets.isEmpty {
@@ -131,8 +84,8 @@ struct SitemapPageView: View {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
                                     .scaleEffect(0.7)
-                                Text("Updating...")
-                                    .font(.caption2)
+                                Text("Updating…")
+                                    .watchTextStyle(.secondary)
                                     .foregroundStyle(.secondary)
                                 Spacer()
                             }
@@ -147,7 +100,7 @@ struct SitemapPageView: View {
                 VStack {
                     Spacer()
                     Text("No widgets available.")
-                        .font(.footnote)
+                        .watchTextStyle(.detail)
                         .foregroundStyle(.secondary)
                     Spacer()
                 }
@@ -155,19 +108,22 @@ struct SitemapPageView: View {
         }
         .alert(isPresented: $viewModel.showCertificateAlert) {
             Alert(
-                title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),
+                title: Text(String(localized: "ssl_certificate_warning", comment: "")),
                 message: Text(viewModel.certificateErrorDescription),
-                primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
+                primaryButton: .default(Text(String(localized: "Always", comment: ""))) {
                     if let delegate = viewModel.currentClientDelegate {
                         delegate.completeEvaluation(.permitAlways)
                     }
                 },
-                secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
+                secondaryButton: .destructive(Text(String(localized: "Deny", comment: ""))) {
                     if let delegate = viewModel.currentClientDelegate {
                         delegate.completeEvaluation(.deny)
                     }
                 }
             )
+        }
+        .refreshable {
+            await viewModel.refreshUrl(force: true)
         }
     }
 

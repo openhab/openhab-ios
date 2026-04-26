@@ -11,23 +11,17 @@
 
 import CommonUI
 import OpenHABCore
-import os.log
 import SFSafeSymbols
 import SwiftUI
 
 /// Selection list view for picking from available options
 struct SelectionListView: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
+    let mappings: [OpenHABWidgetMapping]
+    let title: String
     @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
-
-    private var mappings: [OpenHABWidgetMapping] {
-        widget.mappingsOrItemOptions
-    }
-
-    private var currentIndex: Int? {
-        selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
-    }
+    @State private var commandSender = WidgetCommandDispatcher()
 
     var body: some View {
         ScrollView {
@@ -40,18 +34,18 @@ struct SelectionListView: View {
                         HStack {
                             Text(mapping.label)
                                 .foregroundStyle(.primary)
-                                .multilineTextAlignment(.leading)
+                                .watchTextStyle(.label)
                             Spacer()
-                            if currentIndex == index {
+                            if selectedIndex == index {
                                 Image(systemSymbol: .checkmark)
                                     .foregroundStyle(Color.accentColor)
-                                    .font(.caption.weight(.bold))
+                                    .watchTextStyle(.control)
                             }
                         }
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(currentIndex == index ? Color.accentColor.opacity(0.2) : Color.clear)
+                                .fill(selectedIndex == index ? Color.accentColor.opacity(0.2) : Color.clear)
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
@@ -63,82 +57,116 @@ struct SelectionListView: View {
             }
             .padding()
         }
-        .navigationTitle(widget.labelText ?? "Select")
+        .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private func selectOption(at index: Int) {
         selectedIndex = index
         if let selectedCommand = mappings[safe: index]?.command {
-            Logger.rowViews.info("Selection changed to: \(selectedCommand)")
-            widget.sendCommand(selectedCommand)
+            commandSender.send(
+                selectedCommand,
+                for: widget,
+                policy: .immediate,
+                key: "selection-list"
+            )
             dismiss()
         }
     }
 }
 
 struct SelectionRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
+    let mappings: [OpenHABWidgetMapping]
+    let title: String
+    let initialSelectedIndex: Int?
+    let labelValue: String?
     @EnvironmentObject var settings: AppSettings
     @State private var selectedIndex: Int?
 
-    private var mappings: [OpenHABWidgetMapping] {
-        widget.mappingsOrItemOptions
-    }
-
-    private var currentIndex: Int? {
-        selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
-    }
-
     /// Returns the label of the currently selected mapping
     private var selectedValueText: String? {
-        if let index = currentIndex, index >= 0, index < mappings.count {
+        if let index = selectedIndex,
+           index >= 0,
+           index < mappings.count {
             return mappings[index].label
         }
-        return widget.labelValue
+        return labelValue
+    }
+
+    private var selectedIndexBinding: Binding<Int?> {
+        Binding(
+            get: { selectedIndex },
+            set: { selectedIndex = $0 }
+        )
     }
 
     var body: some View {
         HStack {
             HStack {
-                IconView(widget: widget, settings: settings)
-                TextLabelView(widget: widget, font: .caption)
+                WatchIconView(model: widget.iconRenderModel(), settings: settings)
+                WatchLabelText(text: title, labelColor: widget.labelcolor)
                 Spacer()
             }
-            NavigationLink(destination: LazyView(SelectionListView(widget: widget, selectedIndex: $selectedIndex))) {
+            NavigationLink(destination: LazyView(SelectionListView(
+                widget: widget,
+                mappings: mappings,
+                title: title,
+                selectedIndex: selectedIndexBinding
+            ))) {
                 HStack(spacing: 4) {
                     if let valueText = selectedValueText {
                         Text(valueText)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                            .foregroundStyle(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+                            .lineLimit(2)
+                            .watchTextStyle(.secondary)
                     }
                     Image(systemSymbol: .chevronUpChevronDown)
                         .foregroundStyle(.secondary)
-                        .font(.caption2)
+                        .watchTextStyle(.secondary)
                 }
             }
             .buttonStyle(.plain)
         }
         .onAppear {
-            selectedIndex = widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) }
+            selectedIndex = initialSelectedIndex
         }
-        .onChange(of: widget.item?.state) { _, newState in
-            selectedIndex = widget.mappingIndex(byCommand: newState).map { Int($0) }
+        .onChange(of: initialSelectedIndex) { _, newValue in
+            selectedIndex = newValue
         }
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[4]
-    SelectionRow(widget: widget)
-        .environmentObject(AppSettings())
+    let widget = PreviewWidgetFactory.selection(
+        label: "Mode",
+        options: [("auto", "Auto"), ("manual", "Manual"), ("away", "Away")],
+        selectedIndex: 1
+    )
+    PreviewNavigationContainer {
+        SelectionRow(
+            widget: widget,
+            mappings: widget.mappingsOrItemOptions,
+            title: widget.labelText ?? "Select",
+            initialSelectedIndex: widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) },
+            labelValue: widget.labelValue
+        )
+    }
 }
 
 #Preview("Selection List") {
     @Previewable @State var selectedIndex: Int? = 0
-    let widget = UserData(preview: true).widgets[4]
-    NavigationStack {
-        SelectionListView(widget: widget, selectedIndex: $selectedIndex)
+    let widget = PreviewWidgetFactory.selection(
+        label: "Mode",
+        options: [("auto", "Auto"), ("manual", "Manual"), ("away", "Away")],
+        selectedIndex: 0
+    )
+    PreviewNavigationContainer {
+        SelectionListView(
+            widget: widget,
+            mappings: widget.mappingsOrItemOptions,
+            title: widget.labelText ?? "Select",
+            selectedIndex: $selectedIndex
+        )
     }
-    .environmentObject(AppSettings())
 }

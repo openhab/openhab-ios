@@ -32,8 +32,8 @@ public enum OpenAPIServiceConfiguration {
 protocol OpenAPIServiceProtocol: AnyObject, Sendable {
     func getRootVersion() async throws -> Int
     @discardableResult func getRoot() async throws -> OpenHABServerProperties
-    func sendItemCommand(itemname: String, command: String) async throws
-    func updateItemState(itemname: String, with: String) async throws
+    func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) async throws
+    func updateItemState(itemname: String, with: String, sourcePrefix: String?, deviceId: String?) async throws
     func getItems() async throws -> [OpenHABItem]
     func getItems(
         query: Operations.getItems.Input.Query
@@ -70,6 +70,10 @@ public actor OpenAPIService {
         case .asDefault:
             break
         case .longTerm:
+            // Watch sitemap polling must bypass URL cache to avoid serving stale
+            // pages after periods of inactivity.
+            config.requestCachePolicy = .reloadIgnoringLocalCacheData
+            config.urlCache = nil
             config.timeoutIntervalForRequest = 35.0
             config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
         case .shortTerm:
@@ -95,18 +99,9 @@ public actor OpenAPIService {
     }
 
     private static func getServerURL(for url: URL) -> URL {
-        if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
-           let host = urlComponents.host,
-           host.contains("myopenhab.org"),
-           host != "home.myopenhab.org" {
-//            URL(string: "https://home.myopenhab.org")!
-            var newComponents = urlComponents
-            newComponents.host = "home.myopenhab.org"
-//            newComponents.scheme = "https"
-            return newComponents.url!
-        } else {
-            return url
-        }
+        // Respect the configured connection URL. Forcing cloud hosts can fail
+        // DNS resolution on some networks/simulators and breaks sitemap loading.
+        url
     }
 
     private func prepareURLSessionConfiguration(longPolling: Bool) -> URLSessionConfiguration {
@@ -114,6 +109,28 @@ public actor OpenAPIService {
 //        config.timeoutIntervalForRequest = if longPolling { 35.0 } else { 20.0 }
 //        config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
         return config
+    }
+
+    private func sourceComponent(deviceId: String?) -> String? {
+        #if os(watchOS)
+        let base = "org.openhab.watchos"
+        #else
+        let base = "org.openhab.ios"
+        #endif
+        guard let deviceId else { return base }
+        let trimmed = deviceId.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Actor must not include the delegation separator per openHAB source spec.
+        if trimmed.isEmpty || trimmed.contains("=>") {
+            return base
+        }
+        return "\(base)$\(trimmed)"
+    }
+
+    private func buildSource(sourcePrefix: String?, deviceId: String?) -> String? {
+        let base = sourceComponent(deviceId: deviceId)
+        guard let sourcePrefix, !sourcePrefix.isEmpty else { return base }
+        guard let base else { return sourcePrefix }
+        return "\(sourcePrefix)=>\(base)"
     }
 }
 
@@ -369,17 +386,25 @@ public extension OpenAPIService {
 // MARK: State changes and commands
 
 public extension OpenAPIService {
-    func updateItemState(itemname: String, with state: String) async throws {
+    func updateItemState(itemname: String, with state: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
         let path = Operations.updateItemState.Input.Path(itemname: itemname)
         let body = Operations.updateItemState.Input.Body.plainText(.init(state))
-        let response = try await client.updateItemState(path: path, body: body)
+        let query = Operations.updateItemState.Input.Query(source: buildSource(sourcePrefix: sourcePrefix, deviceId: deviceId))
+        let response = try await client.updateItemState(path: path, query: query, body: body)
         _ = try response.accepted
     }
 
-    func sendItemCommand(itemname: String, command: String) async throws {
+    func sendItemCommand(itemname: String, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
         let path = Operations.sendItemCommand.Input.Path(itemname: itemname)
-        let body = Operations.sendItemCommand.Input.Body.plainText(.init(command))
-        let response = try await client.sendItemCommand(path: path, body: body)
+        // Use JSON only for empty-string commands: swift-openapi-generator drops an empty
+        // text/plain body, but {"value":""} correctly conveys an empty command (e.g., clearing
+        // a String item). Non-empty commands use text/plain, which is accepted by all openHAB
+        // versions (4.x and 5.x), avoiding a 400 from servers that predate the JSON body format.
+        let body: Operations.sendItemCommand.Input.Body = command.isEmpty
+            ? .json(.init(value: command))
+            : .plainText(.init(command))
+        let query = Operations.sendItemCommand.Input.Query(source: buildSource(sourcePrefix: sourcePrefix, deviceId: deviceId))
+        let response = try await client.sendItemCommand(path: path, query: query, body: body)
         _ = try response.ok
     }
 }

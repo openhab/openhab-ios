@@ -101,8 +101,9 @@ struct ImageRow: View, Equatable {
 }
 
 #Preview {
+    let previewRootURL = "http://192.168.2.10:8080"
     let iconUrl = Endpoint.icon(
-        rootUrl: PreviewConstants.remoteURLString,
+        rootUrl: previewRootURL,
         version: 2,
         icon: "Switch",
         state: "ON",

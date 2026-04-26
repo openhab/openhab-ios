@@ -16,34 +16,36 @@ import SFSafeSymbols
 import SwiftUI
 
 struct SliderRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
+    let stateToken: String
     @EnvironmentObject var settings: AppSettings
     var fallbackSymbol: SFSymbol?
     @State private var pendingValue: Double?
+    @State private var viewModel: WidgetRowViewModel
+    @State private var commandSender = WidgetCommandDispatcher()
 
     private var currentValue: Double {
-        pendingValue ?? widget.adjustedValue
+        pendingValue ?? viewModel.adjustedValue
     }
 
     private var currentValueText: String {
-        currentValue.valueText(step: widget.step)
+        formattedValue(for: currentValue, locale: Locale.current)
     }
 
     var valueBinding: Binding<Double> {
         .init(
             get: {
-                pendingValue ?? widget.adjustedValue
+                pendingValue ?? viewModel.adjustedValue
             },
             set: { newValue in
                 Logger.rowViews.info("SliderRow new value = \(newValue)")
                 pendingValue = newValue
-                Task { @MainActor in
-                    try? await Task.sleep(for: .milliseconds(500))
-                    if pendingValue == newValue { // Ensure no new updates came in
-                        widget.sendCommand(newValue.valueText(step: widget.step))
-                        pendingValue = nil
-                    }
-                }
+                commandSender.send(
+                    formattedValue(for: newValue, locale: Locale(identifier: "US")),
+                    for: widget,
+                    policy: WidgetCommandDefaults.slider,
+                    key: "slider-value"
+                )
             }
         )
     }
@@ -51,15 +53,23 @@ struct SliderRow: View {
     private var stateBinding: Binding<Bool> {
         Binding<Bool>(
             get: {
-                widget.adjustedValue > widget.minValue
+                viewModel.adjustedValue > viewModel.minValue
             },
             set: { newValue in
                 if newValue {
-                    Logger.rowViews.info("SliderRow switch to ON")
-                    widget.sendCommand(widget.maxValue.valueText(step: widget.step))
+                    commandSender.send(
+                        formattedValue(for: viewModel.maxValue, locale: Locale(identifier: "US")),
+                        for: widget,
+                        policy: .immediate,
+                        key: "slider-toggle"
+                    )
                 } else {
-                    Logger.rowViews.info("SliderRow switch to OFF")
-                    widget.sendCommand(widget.minValue.valueText(step: widget.step))
+                    commandSender.send(
+                        formattedValue(for: viewModel.minValue, locale: Locale(identifier: "US")),
+                        for: widget,
+                        policy: .immediate,
+                        key: "slider-toggle"
+                    )
                 }
             }
         )
@@ -67,18 +77,18 @@ struct SliderRow: View {
 
     var body: some View {
         VStack(spacing: 3) {
-            if widget.switchSupport {
+            if viewModel.switchSupport {
                 Toggle(isOn: stateBinding) {
                     HStack {
-                        IconView(widget: widget, settings: settings, fallbackSymbol: fallbackSymbol)
+                        WatchIconView(model: widget.iconRenderModel(fallbackSymbol: fallbackSymbol), settings: settings)
                         VStack(alignment: .leading) {
-                            TextLabelView(widget: widget, font: .caption, lineLimit: 2)
+                            WatchLabelText(text: viewModel.labelText, labelColor: widget.labelcolor)
                             if pendingValue != nil {
                                 Text(currentValueText)
-                                    .font(.caption2)
+                                    .watchTextStyle(.secondary)
                                     .foregroundStyle(.secondary)
                             } else {
-                                DetailTextLabelView(widget: widget)
+                                DetailTextLabelView(text: viewModel.labelValue, valueColor: widget.valuecolor)
                             }
                         }
                     }
@@ -87,145 +97,137 @@ struct SliderRow: View {
                 .cornerRadius(5)
             } else {
                 HStack {
-                    IconView(widget: widget, settings: settings, fallbackSymbol: fallbackSymbol)
-                    TextLabelView(widget: widget, font: .caption, lineLimit: 2)
+                    WatchIconView(model: widget.iconRenderModel(fallbackSymbol: fallbackSymbol), settings: settings)
+                    WatchLabelText(text: viewModel.labelText, labelColor: widget.labelcolor)
                     Spacer()
                     if pendingValue != nil {
                         Text(currentValueText)
-                            .font(.caption2)
+                            .watchTextStyle(.secondary)
                             .foregroundStyle(.secondary)
                     } else {
-                        DetailTextLabelView(widget: widget)
+                        DetailTextLabelView(text: viewModel.labelValue, valueColor: widget.valuecolor)
                     }
                 }.padding(.top, 8)
             }
 
-            Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
+            Slider(value: valueBinding, in: viewModel.minValue ... viewModel.maxValue, step: viewModel.step)
                 .labelsHidden()
+                .accessibilityLabel(viewModel.labelText)
+                .accessibilityValue(currentValueText)
+        }
+        .accessibilityElement(children: .contain)
+        .onChange(of: stateToken, initial: false) { _, _ in
+            viewModel.update(from: widget)
+            pendingValue = nil
         }
     }
-}
 
-// MARK: - Preview Helpers
+    init(widget: OpenHABWidget, stateToken: String, fallbackSymbol: SFSymbol? = nil) {
+        self.widget = widget
+        self.stateToken = stateToken
+        self.fallbackSymbol = fallbackSymbol
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+    }
 
-#if DEBUG
-private extension SliderRow {
-    static func createPreviewWidget(label: String,
-                                    value: Double? = nil,
-                                    minValue: Double = 0.0,
-                                    maxValue: Double = 100.0,
-                                    step: Double = 1.0,
-                                    icon: String = "slider",
-                                    switchSupport: Bool = false) -> OpenHABWidget {
-        let widget = OpenHABWidget()
-        widget.widgetId = UUID().uuidString
-        widget.type = .slider
-        widget.icon = icon
-        widget.minValue = minValue
-        widget.maxValue = maxValue
-        widget.step = step
-        widget.switchSupport = switchSupport
-
-        if let value {
-            widget.label = "\(label) [\(Int(value))]"
-        } else {
-            widget.label = label
+    private func formattedValue(for value: Double, locale: Locale) -> String {
+        if let numberPattern = widget.item?.stateDescription?.numberPattern,
+           !numberPattern.isEmpty {
+            return NumberState(
+                value: value,
+                unit: widget.unit,
+                format: numberPattern
+            ).toString(locale: locale)
         }
-
-        let item = OpenHABItem(
-            name: "Preview_\(label.replacingOccurrences(of: " ", with: "_"))",
-            type: "Dimmer",
-            state: value.map { String($0) } ?? "NULL",
-            link: "",
-            label: label,
-            groupType: nil,
-            stateDescription: nil,
-            commandDescription: nil,
-            members: [],
-            category: nil,
-            options: nil
-        )
-        widget.item = item
-
-        return widget
+        return value.valueText(step: viewModel.step)
     }
 }
-#endif
 
 // MARK: - Previews
 
 #Preview("Default Range") {
-    SliderRow(
-        widget: SliderRow.createPreviewWidget(
-            label: "Brightness",
-            value: 75
-        ),
-        fallbackSymbol: .sliderHorizontal3
-    )
-    .environmentObject(AppSettings())
-}
-
-#Preview("Custom Range (minValue)") {
-    SliderRow(
-        widget: SliderRow.createPreviewWidget(
-            label: "Temperature",
-            value: 16,
-            minValue: 16,
-            maxValue: 28,
-            step: 0.5
-        ),
-        fallbackSymbol: .thermometerMedium
-    )
-    .environmentObject(AppSettings())
-}
-
-#Preview("With Switch Support") {
-    SliderRow(
-        widget: SliderRow.createPreviewWidget(
-            label: "Dimmer",
-            value: 50,
-            switchSupport: true
-        ),
-        fallbackSymbol: .lightbulbFill
-    )
-    .environmentObject(AppSettings())
-}
-
-#Preview("All Scenarios") {
-    List {
+    PreviewNavigationContainer {
         SliderRow(
-            widget: SliderRow.createPreviewWidget(
+            widget: PreviewWidgetFactory.slider(
                 label: "Brightness",
                 value: 75
             ),
+            stateToken: "75",
             fallbackSymbol: .sliderHorizontal3
         )
+    }
+}
+
+#Preview("Custom Range (minValue)") {
+    PreviewNavigationContainer {
         SliderRow(
-            widget: SliderRow.createPreviewWidget(
+            widget: PreviewWidgetFactory.slider(
                 label: "Temperature",
-                value: 21,
+                value: 16,
                 minValue: 16,
                 maxValue: 28,
                 step: 0.5
             ),
+            stateToken: "16",
             fallbackSymbol: .thermometerMedium
         )
+    }
+}
+
+#Preview("With Switch Support") {
+    PreviewNavigationContainer {
         SliderRow(
-            widget: SliderRow.createPreviewWidget(
+            widget: PreviewWidgetFactory.slider(
                 label: "Dimmer",
                 value: 50,
                 switchSupport: true
             ),
+            stateToken: "50",
             fallbackSymbol: .lightbulbFill
         )
     }
-    .environmentObject(AppSettings())
+}
+
+#Preview("All Scenarios") {
+    PreviewNavigationContainer {
+        List {
+            SliderRow(
+                widget: PreviewWidgetFactory.slider(
+                    label: "Brightness",
+                    value: 75
+                ),
+                stateToken: "75",
+                fallbackSymbol: .sliderHorizontal3
+            )
+            SliderRow(
+                widget: PreviewWidgetFactory.slider(
+                    label: "Temperature",
+                    value: 21,
+                    minValue: 16,
+                    maxValue: 28,
+                    step: 0.5
+                ),
+                stateToken: "21",
+                fallbackSymbol: .thermometerMedium
+            )
+            SliderRow(
+                widget: PreviewWidgetFactory.slider(
+                    label: "Dimmer",
+                    value: 50,
+                    switchSupport: true
+                ),
+                stateToken: "50",
+                fallbackSymbol: .lightbulbFill
+            )
+        }
+    }
 }
 
 #Preview("From UserData") {
-    SliderRow(
-        widget: UserData(preview: true).widgets[3],
-        fallbackSymbol: .sliderHorizontal3
-    )
-    .environmentObject(AppSettings())
+    PreviewNavigationContainer {
+        SliderRow(
+            widget: UserData(preview: true).widgets[3],
+            stateToken: "0",
+            fallbackSymbol: .sliderHorizontal3
+        )
+    }
 }

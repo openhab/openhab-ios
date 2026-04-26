@@ -15,26 +15,28 @@ import SFSafeSymbols
 import SwiftUI
 
 struct TextRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    let hasLinkedPage: Bool
 
     var body: some View {
         HStack {
-            IconView(widget: widget, settings: settings)
-            TextLabelView(widget: widget, font: .caption, lineLimit: 2)
+            WatchIconView(model: widget.iconRenderModel(), settings: settings)
+            WatchLabelText(text: widget.labelText ?? widget.label, labelColor: widget.labelcolor)
             Spacer()
-            DetailTextLabelView(widget: widget)
-            if widget.linkedPage != nil {
+            DetailTextLabelView(text: widget.labelValue, valueColor: widget.valuecolor)
+            if hasLinkedPage {
                 Image(systemSymbol: .chevronRight)
                     .foregroundStyle(.secondary)
-                    .font(.caption)
+                    .watchTextStyle(.control)
             }
         }
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[3]
-    TextRow(widget: widget)
-        .environmentObject(AppSettings())
+    let widget = PreviewWidgetFactory.text(label: "Energy Usage", valueText: "450 W")
+    PreviewNavigationContainer {
+        TextRow(widget: widget, hasLinkedPage: false)
+    }
 }

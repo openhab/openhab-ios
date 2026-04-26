@@ -33,28 +33,6 @@
             default = "YES">
          </TestPlanReference>
       </TestPlans>
-      <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DA2DC22E21F2736C00830730"
-               BuildableName = "openHABTestsSwift.xctest"
-               BlueprintName = "openHABTestsSwift"
-               ReferencedContainer = "container:openHAB.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "933D7F0322E7015000621A03"
-               BuildableName = "openHABUITests.xctest"
-               BlueprintName = "openHABUITests"
-               ReferencedContainer = "container:openHAB.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"

@@ -19,7 +19,7 @@ public struct LogsViewer: View {
     private static let template = NSPredicate(format:
         "(subsystem BEGINSWITH $PREFIX)")
 
-    @State private var text = "Loading..."
+    @State private var text = String(localized: "Loading…")
 
     let myFont = Font
         .system(size: 10)
@@ -90,18 +90,25 @@ public extension Logger {
             matching: predicate
         )
 
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-
         var logs: [String] = []
         for entry in entries {
             try Task.checkCancellation()
             if let log = entry as? OSLogEntryLog {
-                var attributedMessage = AttributedString(dateFormatter.string(from: entry.date))
+                let dateString = entry.date.formatted(
+                    .dateTime
+                        .year()
+                        .month(.twoDigits)
+                        .day(.twoDigits)
+                        .hour(.twoDigits(amPM: .omitted))
+                        .minute(.twoDigits)
+                        .second(.twoDigits)
+                        .locale(Locale(identifier: "en_US_POSIX"))
+                )
+                var attributedMessage = AttributedString(dateString)
                 attributedMessage.font = .headline
 
                 logs.append("""
-                \(dateFormatter.string(from: entry.date)): \
+                \(dateString): \
                 \(log.category):\(log.level.description): \
                 \(entry.composedMessage)\n
                 """)

@@ -35,10 +35,10 @@ struct CompactLabeledContentStyle: LabeledContentStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack {
             configuration.label
-                .font(.footnote)
+                .watchTextStyle(.detail)
             Spacer()
             configuration.content
-                .font(.footnote)
+                .watchTextStyle(.detail)
                 .foregroundStyle(.secondary)
         }
 //        .padding(.vertical, 4) // Reduces vertical space
@@ -56,9 +56,9 @@ struct PreferencesSwiftUIView: View {
 
     var body: some View {
         List {
-            LabeledContent(LocalizedStringKey("local_url"), value: settings.localConnectionConfig?.url ?? "empty")
+            LabeledContent(LocalizedStringKey("local_url"), value: settings.localConnectionConfig?.url ?? String(localized: "empty", comment: "local or remote URL: empty"))
                 .highlightDotRow(if: settings.localConnectionConfig?.url == settings.openHABRootUrl)
-            LabeledContent(LocalizedStringKey("remote_url"), value: settings.remoteConnectionConfig?.url ?? "empty")
+            LabeledContent(LocalizedStringKey("remote_url"), value: settings.remoteConnectionConfig?.url ?? String(localized: "empty", comment: "local or remote URL: empty"))
                 .highlightDotRow(if: settings.remoteConnectionConfig?.url == settings.openHABRootUrl)
             LabeledContent(LocalizedStringKey("sitemap"), value: settings.sitemapForWatchLabel)
                 .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))

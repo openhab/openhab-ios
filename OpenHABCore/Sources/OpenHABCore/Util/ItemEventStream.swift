@@ -68,6 +68,7 @@ public actor EventStream<Event: Sendable> {
     private var sessionUUID: String?
     private var service: OpenAPIService?
     private var lastEventTime = Date.now
+    private let jsonDecoder = JSONDecoder()
 
     public func stream() -> AsyncStream<StreamOutput<Event>> {
         AsyncStream { continuation in
@@ -211,7 +212,7 @@ public actor EventStream<Event: Sendable> {
             }
         case "alive":
             if let data = sse.data!.data(using: String.Encoding.utf8),
-               let obj = try? JSONDecoder().decode(
+               let obj = try? jsonDecoder.decode(
                    Alive.self, from: data
                ) {
                 return [.alive(interval: obj.interval)]
@@ -219,7 +220,7 @@ public actor EventStream<Event: Sendable> {
         default:
             // sometime message omit the `event:` field and send only `data:` with the JSON.
             if let data = sse.data?.data(using: String.Encoding.utf8),
-               let changes = try? JSONDecoder().decode(ItemStateChanges.self, from: data) {
+               let changes = try? jsonDecoder.decode(ItemStateChanges.self, from: data) {
                 return changes.wrapped.map { key, value in
                     .state(item: key, state: value.state)
                 }

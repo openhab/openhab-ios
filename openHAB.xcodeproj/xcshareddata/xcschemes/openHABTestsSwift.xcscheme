@@ -29,22 +29,13 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <TestPlans>
          <TestPlanReference
-            reference = "container:TestPlans/openHABTests.xctestplan"
+            reference = "container:TestPlans/openHABTestsSwift.xctestplan"
             default = "YES">
          </TestPlanReference>
+         <TestPlanReference
+            reference = "container:TestPlans/openHABTests.xctestplan">
+         </TestPlanReference>
       </TestPlans>
-      <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DA2DC22E21F2736C00830730"
-               BuildableName = "openHABTestsSwift.xctest"
-               BlueprintName = "openHABTestsSwift"
-               ReferencedContainer = "container:openHAB.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"

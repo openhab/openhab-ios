@@ -48,11 +48,6 @@ platform :ios do
         capture_screenshots(workspace: 'openHAB.xcworkspace',
                             scheme: 'openHABUITests',
                             dark_mode: true)
-        # Optional: Convert iPhone 15 screenshots to 5.5-inch
-        Dir["./fastlane/screenshots/en-US/*iPhone_15*portrait*.png"].each do |file|
-            output_file = file.sub("iPhone_15", "iPhone_8_Plus")
-            sh "sips -Z 2208 #{file} --out #{output_file}"  # resize to height 2208 px
-        end
     end
 
     desc 'Run unit tests.'
@@ -165,23 +160,36 @@ platform :ios do
 
         type = options[:bump]
 
-        if !options[:isfeaturebuild] && type != 'none'
-            # Increment version for all targets
-            ['openHAB', 'openHABWatch', 'openHABIntents', 'NotificationService', 'openHABTestsSwift', 'openHABUITests', 'openHABWatchSwiftUI Watch AppTests', 'openHABWatchSwiftUI Watch AppUITests'].each do |target|
-                increment_version_number_in_xcodeproj(
-                    bump_type: type,
-                    xcodeproj: 'openHAB.xcodeproj',
-                    target: target
-                )
+        xcconfig_path = File.expand_path('../Version.xcconfig', __dir__)
+        if options[:isfeaturebuild]
+            # Feature branch: always patch-bump MARKETING_VERSION in xcconfig
+            xcconfig = File.read(xcconfig_path)
+            parts = xcconfig.match(/MARKETING_VERSION\s*=\s*([\d.]+)/)[1].split('.').map(&:to_i)
+            parts[2] += 1
+            File.write(xcconfig_path, xcconfig.gsub(
+                /MARKETING_VERSION\s*=\s*[\d.]+/,
+                "MARKETING_VERSION = #{parts.join('.')}"
+            ))
+        elsif type != 'none'
+            # develop: bump MARKETING_VERSION in xcconfig
+            xcconfig = File.read(xcconfig_path)
+            parts = xcconfig.match(/MARKETING_VERSION\s*=\s*([\d.]+)/)[1].split('.').map(&:to_i)
+            case type
+            when 'patch' then parts[2] += 1
+            when 'minor' then parts[1] += 1; parts[2] = 0
+            when 'major' then parts[0] += 1; parts[1] = 0; parts[2] = 0
             end
+            File.write(xcconfig_path, xcconfig.gsub(
+                /MARKETING_VERSION\s*=\s*[\d.]+/,
+                "MARKETING_VERSION = #{parts.join('.')}"
+            ))
         end
         # increment_version_if_required
         # NOTE: this resolves packages of the project so need to clean
         sh("cd .. && git clean -fd")
 
-        build_number = get_build_number
-        version = get_version_number(xcodeproj: 'openHAB.xcodeproj',
-                                     target: 'openHAB')
+        build_number = File.read(xcconfig_path).match(/CURRENT_PROJECT_VERSION\s*=\s*(\d+)/)[1].to_i
+        version = File.read(xcconfig_path).match(/MARKETING_VERSION\s*=\s*([\d.]+)/)[1]
 
         # get the last commit comments from Git history
         # and creates our changelog
@@ -192,8 +200,9 @@ platform :ios do
             match_lightweight_tag: false,
             merge_commit_filtering: 'exclude_merges'
         )
+        # Clear FL_CHANGELOG so it doesn't bloat the Fastlane summary table
+        Actions.lane_context[Fastlane::Actions::SharedValues::FL_CHANGELOG] = nil
 
-        
         # Write git commits to CHANGELOG.md
         File.write('../CHANGELOG.md', "# Change Log\n\n## [Unreleased]\n\n#{comments}\n\n#{File.read('../CHANGELOG.md').gsub(/^# Change Log\s*\n\n## \[Unreleased\].*?\n\n/m, '') rescue ''}")
 
@@ -223,18 +232,20 @@ platform :ios do
         )
 
         upload_symbols_to_crashlytics(
-            gsp_path: "openHAB/GoogleService-Info.plist",
+            gsp_path: "openHAB/Supporting Files/GoogleService-Info.plist",
             binary_path: './scripts/upload-symbols'
         )
 
         clean_build_artifacts
 
+        # Restore project.pbxproj modified by update_code_signing_settings and Xcode normalisation
+        sh("git restore ../openHAB.xcodeproj/project.pbxproj")
+
         # commit to git the changes from bumping version number
-        commit_version_bump(
-            message: "committed version bump: #{version} (#{build_number})",
-            xcodeproj: 'openHAB.xcodeproj',
-            include: %w[CHANGELOG.md],
-            force: true
+        git_add(path: 'Version.xcconfig')
+        git_commit(
+            path: ['Version.xcconfig', 'CHANGELOG.md'],
+            message: "committed version bump: #{version} (#{build_number})"
         )
         if is_ci?
             sh 'git commit --amend --no-edit --signoff --author="openhab-bot <info@openhabfoundation.org>"'
@@ -313,13 +324,16 @@ platform :ios do
 
     desc 'Increment the build number.'
     private_lane :increment_build do
-        xcode_build = get_build_number.to_i
+        xcconfig_path = File.expand_path('../Version.xcconfig', __dir__)
+        xcconfig = File.read(xcconfig_path)
+        xcode_build = xcconfig.match(/CURRENT_PROJECT_VERSION\s*=\s*(\d+)/)[1].to_i
         testflight_build = latest_testflight_build_number
         build_no = (xcode_build > testflight_build ? xcode_build : testflight_build) + 1
 
-        increment_build_number_in_xcodeproj(
-            build_number: "#{build_no}"
-        )
+        File.write(xcconfig_path, xcconfig.gsub(
+            /CURRENT_PROJECT_VERSION\s*=\s*\d+/,
+            "CURRENT_PROJECT_VERSION = #{build_no}"
+        ))
     end
 
     desc 'Increment the version number if required.'

@@ -19,7 +19,7 @@ final class JSONParserTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+        decoder.dateDecodingStrategy = JSONDecoder.makeISO8601TolerantDecoder().dateDecodingStrategy
 
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }

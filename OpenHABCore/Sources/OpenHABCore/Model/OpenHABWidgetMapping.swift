@@ -11,7 +11,7 @@
 
 import Foundation
 
-public struct OpenHABWidgetMapping: Decodable, Sendable {
+public struct OpenHABWidgetMapping: Decodable, Sendable, Equatable {
     public var command = ""
     public var label = ""
     public var row: Int?

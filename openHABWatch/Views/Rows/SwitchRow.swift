@@ -11,24 +11,17 @@
 
 import CommonUI
 import OpenHABCore
-import os.log
 import SwiftUI
 
 struct SwitchRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    let stateToken: String
     @State private var localIsOn: Bool?
-
-    private var effectiveState: String {
-        var state = widget.state
-        if state.isEmpty {
-            state = widget.item?.state ?? ""
-        }
-        return state
-    }
+    @State private var commandSender = WidgetCommandDispatcher()
 
     private var isOn: Bool {
-        localIsOn ?? effectiveState.parseAsBool()
+        localIsOn ?? stateToken.parseAsBool()
     }
 
     var body: some View {
@@ -37,43 +30,46 @@ struct SwitchRow: View {
             set: { newValue in
                 localIsOn = newValue
                 if newValue {
-                    Logger.rowViews.info("Switch to ON")
-                    widget.sendCommand("ON")
+                    commandSender.send("ON", for: widget, policy: .immediate)
                 } else {
-                    Logger.rowViews.info("Switch to OFF")
-                    widget.sendCommand("OFF")
+                    commandSender.send("OFF", for: widget, policy: .immediate)
                 }
             }
         )) {
             HStack {
-                IconView(widget: widget, settings: settings)
+                WatchIconView(model: widget.iconRenderModel(), settings: settings)
                 VStack {
-                    TextLabelView(widget: widget, font: .caption)
-                    DetailTextLabelView(widget: widget)
+                    WatchLabelText(text: widget.labelText ?? widget.label, labelColor: widget.labelcolor)
+                    DetailTextLabelView(text: widget.labelValue, valueColor: widget.valuecolor)
                 }
             }
         }
         .padding(.trailing)
         .cornerRadius(5)
-        .onChange(of: effectiveState) {
+        .accessibilityValue(isOn ? "On" : "Off")
+        .onChange(of: stateToken) {
             localIsOn = nil
         }
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[2]
-    SwitchRow(widget: widget)
-        .environmentObject(AppSettings())
+    let widget = PreviewWidgetFactory.switchWidget(label: "Outdoor Light", state: "ON")
+    PreviewNavigationContainer {
+        SwitchRow(widget: widget, stateToken: widget.item?.state ?? "OFF")
+    }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[2]
+    let widget = PreviewWidgetFactory.switchWidget(label: "Outdoor Light", state: "OFF")
+    let previewRootURL = "http://192.168.2.10:8080"
     let mockSettings = {
         let obj = AppSettings()
-        obj.openHABRootUrl = PreviewConstants.remoteURLString
+        obj.openHABRootUrl = previewRootURL
         return obj
     }()
-    SwitchRow(widget: widget)
-        .environmentObject(mockSettings)
+    NavigationStack {
+        SwitchRow(widget: widget, stateToken: widget.item?.state ?? "OFF")
+    }
+    .environmentObject(mockSettings)
 }

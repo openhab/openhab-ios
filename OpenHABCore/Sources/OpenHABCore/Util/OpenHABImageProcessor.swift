@@ -35,10 +35,11 @@ import WebKit
 ///
 /// - SeeAlso: `ImageProcessor` from Kingfisher framework
 public struct OpenHABImageProcessor: ImageProcessor {
+    private static let defaultSVGMaxSize = CGSize(width: 64, height: 64)
     // `identifier` should be the same for processors with the same properties/functionality
     // It will be used when storing and retrieving the image to/from cache.
     public let identifier: String
-    let maxSize = CGSize(width: 64, height: 64)
+    let svgMaxSize: CGSize?
     let iconColor: String?
 
     /// Creates a new image processor for openHAB icons and images.
@@ -72,8 +73,10 @@ public struct OpenHABImageProcessor: ImageProcessor {
     ///   // Create processor without color modification
     ///   let processor3 = OpenHABImageProcessor()
     ///   ```
-    public init(iconColor: String? = nil) {
+    public init(iconColor: String? = nil, svgMaxSize: CGSize? = CGSize(width: 64, height: 64)) {
         self.iconColor = iconColor
+        self.svgMaxSize = svgMaxSize
+        let sizeIdentifier = Self.makeSizeIdentifier(svgMaxSize)
         if let color = iconColor, !color.isEmpty {
             // Normalize the color to hex format for consistent cache identifiers.
             // This ensures that equivalent colors (e.g., "red", "#FF0000", "#ff0000")
@@ -89,10 +92,20 @@ public struct OpenHABImageProcessor: ImageProcessor {
             if normalizedColor.uppercased() == "808080", trimmedLowercased != "gray", !trimmedLowercased.contains("808080") {
                 normalizedColor = trimmedLowercased
             }
-            identifier = "org.openhab.svgprocessor.\(normalizedColor)"
+            identifier = "org.openhab.svgprocessor.\(normalizedColor)\(sizeIdentifier)"
         } else {
-            identifier = "org.openhab.svgprocessor"
+            identifier = "org.openhab.svgprocessor\(sizeIdentifier)"
         }
+    }
+
+    private static func makeSizeIdentifier(_ size: CGSize?) -> String {
+        guard let size else {
+            return ".fullsize"
+        }
+        guard size != defaultSVGMaxSize else {
+            return ""
+        }
+        return ".\(Int(size.width.rounded()))x\(Int(size.height.rounded()))"
     }
 
     /// Execute `body` on the main thread synchronously, but avoid deadlock when already on main.
@@ -217,6 +230,10 @@ public struct OpenHABImageProcessor: ImageProcessor {
         return img.withTintColor(.orange, renderingMode: .alwaysOriginal)
     }
 
+    func process(data: Data) -> UIImage? {
+        process(item: .data(data), options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
+    }
+
     // Convert input data/image to target image and return it.
     public func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         switch item {
@@ -227,6 +244,11 @@ public struct OpenHABImageProcessor: ImageProcessor {
             guard !data.isEmpty else { return nil }
 
             if isSVG(data: data) {
+                // `/icon/none` may legitimately return an empty SVG document.
+                // Render this as "no icon" instead of showing the warning fallback.
+                if isEmptySVGDocument(data: data) {
+                    return UIImage()
+                }
                 #if os(macOS)
                 if let image = renderSVGWithWebKit(data) {
                     return image
@@ -236,8 +258,8 @@ public struct OpenHABImageProcessor: ImageProcessor {
                 // Apply color preprocessing to SVG if iconColor is specified
                 let processedData = preprocessSVG(data)
 
-                // Limit SVG decode size (to prevent memory issues
-                if let image = decodeSVGOnMain(processedData, targetSize: maxSize, preserveAspectRatio: true) {
+                // Limit decode size for icon contexts; allow full-size decoding for media contexts.
+                if let image = decodeSVGOnMain(processedData, targetSize: svgMaxSize, preserveAspectRatio: true) {
                     return image
                 } else {
                     return warningSymbol()
@@ -273,6 +295,23 @@ public struct OpenHABImageProcessor: ImageProcessor {
         if let start = String(data: data.prefix(200), encoding: .utf8) {
             return start.contains("<svg") || start.hasPrefix("<?xml")
         }
+        return false
+    }
+
+    func isEmptySVGDocument(data: Data) -> Bool {
+        guard let svgString = String(data: data, encoding: .utf8) else { return false }
+        let trimmed = svgString.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Self-closing root SVG with no children, optionally prefixed with XML declaration.
+        if trimmed.wholeMatch(of: /(?:<\?xml[^>]*>\s*)?<svg\b[^>]*\/>\s*/) != nil {
+            return true
+        }
+
+        // Paired root SVG with only whitespace between open/close tags.
+        if trimmed.wholeMatch(of: /(?:<\?xml[^>]*>\s*)?<svg\b[^>]*>\s*<\/svg>\s*/) != nil {
+            return true
+        }
+
         return false
     }
 }

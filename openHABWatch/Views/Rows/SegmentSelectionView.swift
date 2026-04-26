@@ -10,27 +10,24 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import OpenHABCore
-import os.log
 import SwiftUI
 
 struct SegmentSelectionView: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
+    let stateToken: String
     @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
-    @State private var pendingValue: String?
     @State private var pressedIndex: Int?
-
-    private var currentIndex: Int {
-        selectedIndex ?? widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) } ?? 0
-    }
+    @State private var viewModel: WidgetRowViewModel
+    @State private var commandSender = WidgetCommandDispatcher()
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
-                ForEach(0 ..< widget.mappingsOrItemOptions.count, id: \.self) { index in
-                    let mapping = widget.mappingsOrItemOptions[index]
+                ForEach(0 ..< viewModel.mappings.count, id: \.self) { index in
+                    let mapping = viewModel.mappings[index]
 
-                    if widget.hasPressReleaseMappings {
+                    if viewModel.hasPressReleaseMappings {
                         // Press-release button for mappings with releaseCommand
                         pressReleaseButton(for: mapping, at: index)
                     } else {
@@ -41,8 +38,23 @@ struct SegmentSelectionView: View {
             }
             .padding()
         }
-        .navigationTitle("Select Option")
+        .navigationTitle(viewModel.labelText)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            selectedIndex = viewModel.selectedIndex
+        }
+        .onChange(of: stateToken, initial: false) { _, _ in
+            viewModel.update(from: widget)
+            selectedIndex = viewModel.selectedIndex
+        }
+    }
+
+    init(widget: OpenHABWidget, stateToken: String, selectedIndex: Binding<Int?>) {
+        self.widget = widget
+        self.stateToken = stateToken
+        _selectedIndex = selectedIndex
+        let viewModel = WidgetRowViewModel(widget: widget)
+        _viewModel = State(wrappedValue: viewModel)
     }
 
     @ViewBuilder
@@ -63,18 +75,12 @@ struct SegmentSelectionView: View {
                     .onChanged { _ in
                         if pressedIndex != index {
                             pressedIndex = index
-                            // Send command on press
-                            Logger.rowViews.info("Sending press command: \(mapping.command)")
-                            widget.sendCommand(mapping.command)
+                            commandSender.sendPress(mapping.command, for: widget)
                         }
                     }
                     .onEnded { _ in
                         pressedIndex = nil
-                        // Send release command on release
-                        if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
-                            Logger.rowViews.info("Sending release command: \(releaseCommand)")
-                            widget.sendCommand(releaseCommand)
-                        }
+                        commandSender.sendRelease(mapping.releaseCommand, for: widget)
                     }
             )
     }
@@ -84,12 +90,12 @@ struct SegmentSelectionView: View {
         HStack {
             Text(mapping.label)
                 .foregroundStyle(.primary)
-                .multilineTextAlignment(.leading)
+                .watchTextStyle(.label)
             Spacer()
-            if isSelected(index: index), !widget.hasPressReleaseMappings {
+            if isSelected(index: index), !viewModel.hasPressReleaseMappings {
                 Image(systemSymbol: .checkmark)
                     .foregroundStyle(Color.accentColor)
-                    .font(.caption.weight(.bold))
+                    .watchTextStyle(.control)
             }
         }
         .padding()
@@ -101,6 +107,8 @@ struct SegmentSelectionView: View {
             RoundedRectangle(cornerRadius: 8)
                 .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
         )
+        .accessibilityLabel(mapping.label)
+        .accessibilityAddTraits(.isButton)
     }
 
     private func backgroundColor(for index: Int, isPressed: Bool) -> Color {
@@ -114,30 +122,40 @@ struct SegmentSelectionView: View {
     }
 
     private func isSelected(index: Int) -> Bool {
-        currentIndex == index
+        selectedIndex == index
     }
 
     private func selectOption(at index: Int) {
         selectedIndex = index
-        if let selectedCommand = widget.mappingsOrItemOptions[safe: index]?.command {
-            pendingValue = selectedCommand
-            Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(300))
-                if pendingValue == selectedCommand {
-                    widget.sendCommand(selectedCommand)
-                    pendingValue = nil
-                    dismiss()
-                }
-            }
+        if let selectedCommand = viewModel.mappings[safe: index]?.command {
+            commandSender.send(
+                selectedCommand,
+                for: widget,
+                policy: WidgetCommandDefaults.immediate,
+                key: "segment-selection"
+            )
+            dismiss()
         }
     }
 }
 
 #Preview {
     @Previewable @State var selectedIndex: Int? = 0
-    let widget = UserData(preview: true).widgets[4]
-    return NavigationStack {
-        SegmentSelectionView(widget: widget, selectedIndex: $selectedIndex)
+    let widget = PreviewWidgetFactory.segmented(
+        label: "Climate Mode",
+        mappings: [
+            OpenHABWidgetMapping(command: "manual", label: "Manual"),
+            OpenHABWidgetMapping(command: "auto", label: "Auto"),
+            OpenHABWidgetMapping(command: "schedule", label: "Schedule")
+        ],
+        selectedState: "auto",
+        icon: "temperature"
+    )
+    return PreviewNavigationContainer {
+        SegmentSelectionView(
+            widget: widget,
+            stateToken: widget.item?.state ?? widget.state,
+            selectedIndex: $selectedIndex
+        )
     }
-    .environmentObject(AppSettings())
 }

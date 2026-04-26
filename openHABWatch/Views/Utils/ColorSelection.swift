@@ -59,7 +59,7 @@ struct ColorSelection: View {
     @State private var xpos: Double = 100
     @State private var ypos: Double = 100
     @State private var dragStart: CGPoint?
-    @State private var lastSendTime: Date = .distantPast
+    @State private var commandSender = WidgetCommandDispatcher()
 
     private let handleRadius = 12.5
 
@@ -210,21 +210,21 @@ struct ColorSelection: View {
         let maxRadius = max(1.0, Double(min(size.width, size.height) / 2))
         saturation = max(0.0, min(1.0, radius / maxRadius))
         if send {
-            let now = Date()
-            if force || now.timeIntervalSince(lastSendTime) > 0.2 {
-                lastSendTime = now
-                sendColorCommand()
-            }
+            sendColorCommand(force: force)
         }
     }
 
-    private func sendColorCommand() {
+    private func sendColorCommand(force: Bool) {
         let hueValue = Int(hue * 360.0)
         let saturationValue = Int(saturation * 100.0)
         let brightnessValue = Int(brightness * 100.0)
         let command = "\(hueValue),\(saturationValue),\(brightnessValue)"
-        Logger.rowViews.info("Sending color command: \(command)")
-        widget.sendCommand(command)
+        if force {
+            commandSender.cancelPending(for: widget, key: "color-wheel")
+            commandSender.send(command, for: widget, policy: .immediate, key: "color-wheel-final")
+            return
+        }
+        commandSender.send(command, for: widget, policy: WidgetCommandDefaults.colorPicker, key: "color-wheel")
     }
 }
 

@@ -11,27 +11,30 @@
 
 import CommonUI
 import OpenHABCore
-import os.log
 import SFSafeSymbols
 import SwiftUI
 
 struct ColorPickerRow: View {
-    @ObservedObject var widget: OpenHABWidget
-    @ObservedObject var settings = AppSettings.shared
+    let widget: OpenHABWidget
+    let stateToken: String
+    @EnvironmentObject var settings: AppSettings
+    @State private var viewModel: WidgetRowViewModel
+    @State private var commandSender = WidgetCommandDispatcher()
     var body: some View {
-        let uiColor = widget.item?.stateAsUIColor()
+        let uiColor = viewModel.colorState
 
         return
             VStack(spacing: 0) {
                 HStack {
-                    IconView(widget: widget, settings: settings)
-                    TextLabelView(widget: widget, font: .caption, lineLimit: 2)
+                    WatchIconView(model: widget.iconRenderModel(), settings: settings)
+                    WatchLabelText(text: viewModel.labelText)
                     Spacer()
                 }
                 HStack {
                     Spacer()
                     IconWithAction(
                         systemSymbol: .chevronDownCircleFill,
+                        accessibilityLabel: "Decrease brightness",
                         action: downButtonPressed
                     )
 
@@ -48,32 +51,68 @@ struct ColorPickerRow: View {
                                 }
                             }
                     }
+                    .accessibilityLabel("Select color")
 
                     Spacer()
 
                     IconWithAction(
                         systemSymbol:
                         .chevronUpCircleFill,
+                        accessibilityLabel: "Increase brightness",
                         action: upButtonPressed
                     )
                     Spacer()
                 }
             }
+            .onChange(of: stateToken, initial: false) { _, _ in
+                viewModel.update(from: widget)
+            }
+    }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        stateToken = widget.item?.state ?? widget.state
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
+    }
+
+    init(widget: OpenHABWidget, stateToken: String) {
+        self.widget = widget
+        self.stateToken = stateToken
+        _viewModel = State(wrappedValue: WidgetRowViewModel(widget: widget))
     }
 
     func upButtonPressed() {
-        Logger.rowViews.info("ON button pressed")
-        widget.sendCommand("ON")
+        commandSender.send("ON", for: widget, policy: .immediate)
     }
 
     func downButtonPressed() {
-        Logger.rowViews.info("OFF button pressed")
-        widget.sendCommand("OFF")
+        commandSender.send("OFF", for: widget, policy: .immediate)
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[10]
-    ColorPickerRow(widget: widget)
-        .environmentObject(AppSettings())
+    let widget = PreviewWidgetFactory.colorpicker(
+        label: "Color",
+        state: "120,100,100",
+        icon: "colorwheel"
+    )
+    PreviewNavigationContainer {
+        ColorPickerRow(widget: widget, stateToken: widget.item?.state ?? widget.state)
+    }
+}
+
+#Preview("Interactive State Token") {
+    let widget = PreviewWidgetFactory.colorpicker(
+        label: "Color",
+        state: "120,100,100",
+        icon: "colorwheel"
+    )
+    PreviewNavigationContainer {
+        InteractiveStateTokenPreview(
+            widget: widget,
+            states: ["0,100,100", "120,100,100", "240,100,100", "NULL"]
+        ) { targetWidget, stateToken in
+            ColorPickerRow(widget: targetWidget, stateToken: stateToken)
+        }
+    }
 }

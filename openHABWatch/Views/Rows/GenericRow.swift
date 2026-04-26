@@ -11,26 +11,27 @@
 
 import CommonUI
 import OpenHABCore
-import os.log
 import SwiftUI
 
 struct GenericRow: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     @ObservedObject var settings = AppSettings.shared
 
     var body: some View {
         HStack {
-            IconView(widget: widget, settings: settings)
-            TextLabelView(widget: widget, font: .caption, lineLimit: 2)
+            WatchIconView(model: widget.iconRenderModel(), settings: settings)
+            WatchLabelText(text: widget.labelText ?? widget.label, labelColor: widget.labelcolor)
             Spacer()
-            DetailTextLabelView(widget: widget)
+            DetailTextLabelView(text: widget.labelValue, valueColor: widget.valuecolor)
             widget.makeView(settings: settings)
         }
+        .accessibilityLabel(widget.labelText ?? "")
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[6]
-    GenericRow(widget: widget)
-        .environmentObject(AppSettings())
+    let widget = PreviewWidgetFactory.generic(label: "Unsupported Widget", valueText: "N/A")
+    PreviewNavigationContainer {
+        GenericRow(widget: widget)
+    }
 }

@@ -61,6 +61,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Preferences.migratePreferences()
 
+        // Firebase must be configured before the storyboard loads its root view controller,
+        // because OpenHABRootViewController.viewDidLoad calls Crashlytics before the deferred
+        // task would have had a chance to run. Calling Crashlytics before FirebaseApp.configure()
+        // silences crash detection for the entire session.
+        setupFirebase()
+
+
         UNUserNotificationCenter.current().delegate = notificationDelegate
 
         Logger.appDelegate.info("didFinishLaunchingWithOptions ended")
@@ -78,8 +85,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     /// Setup that can be deferred until after the UI appears
     @MainActor
     private func performDeferredSetup() {
-        setupFirebase()
-
         registerForPushNotifications()
         Logger.appDelegate.info("uniq id: \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
         Logger.appDelegate.info("device name: \(UIDevice.current.name)")

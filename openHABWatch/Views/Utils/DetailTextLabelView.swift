@@ -10,23 +10,26 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import CommonUI
-import OpenHABCore
 import SwiftUI
 
 struct DetailTextLabelView: View {
-    @ObservedObject var widget: OpenHABWidget
+    let text: String?
+    let valueColor: String
 
     var body: some View {
-        if let label = widget.labelValue {
-            Text(label)
-                .font(.footnote)
-                .lineLimit(1)
-                .foregroundStyle(!widget.valuecolor.isEmpty ? Color(fromString: widget.valuecolor) : .secondary)
+        if let text {
+            Text(text)
+                .watchTextStyle(.detail)
+                .foregroundStyle(!valueColor.isEmpty ? Color(fromString: valueColor) : .secondary)
         }
+    }
+
+    init(text: String?, valueColor: String = "") {
+        self.text = text
+        self.valueColor = valueColor
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[2]
-    DetailTextLabelView(widget: widget)
+    DetailTextLabelView(text: "450 W", valueColor: "#00AEEF")
 }
