@@ -280,7 +280,7 @@ extension WidgetMappingSnapshot {
 
         return WidgetDisplayState(
             widgetId: widgetId,
-            labelText: labelText.isEmpty ? label : labelText,
+            labelText: labelText,
             labelValue: labelValue,
             effectiveState: effectiveState,
             isOn: effectiveState.parseAsBool(),
