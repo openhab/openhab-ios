@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Combine
+import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -37,6 +38,7 @@ struct ImageView: View {
                 }
             case _ where url.hasPrefix("http"):
                 KFImage(URL(string: url))
+                    .withOpenHABCredentials(for: networkTracker.activeConnection)
                     .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
                     .resizable()
             default:
@@ -45,6 +47,7 @@ struct ImageView: View {
                     path: url.prepare()
                 ).url
                 KFImage(builtURL)
+                    .withOpenHABCredentials(for: networkTracker.activeConnection)
                     .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
                     .resizable()
             }

@@ -61,6 +61,30 @@ struct SitemapRowInputMapperTests {
         #expect(mappedRowID == rowID)
         #expect(input.widgetId == widget.widgetId)
     }
+
+    @Test
+    func videoWidgetUsesItemStateURLBeforeConfiguredURL() {
+        let widget = makeVideoWidget(
+            widgetID: "video",
+            url: "http://default.example.invalid/video.m3u8",
+            itemState: "http://camera.example.invalid/live.m3u8"
+        )
+        let input = MediaRowInput.from(widget: widget)
+
+        #expect(input.url == "http://camera.example.invalid/live.m3u8")
+    }
+
+    @Test
+    func videoWidgetFallsBackToConfiguredURLWhenItemStateIsNotURL() {
+        let widget = makeVideoWidget(
+            widgetID: "video",
+            url: "http://default.example.invalid/video.m3u8",
+            itemState: "OFF"
+        )
+        let input = MediaRowInput.from(widget: widget)
+
+        #expect(input.url == "http://default.example.invalid/video.m3u8")
+    }
 }
 
 private extension SitemapRowInputMapperTests {
@@ -178,6 +202,15 @@ private extension SitemapRowInputMapperTests {
         let widget = OpenHABWidget()
         widget.widgetId = widgetID
         widget.type = .frame
+        return widget
+    }
+
+    func makeVideoWidget(widgetID: String, url: String, itemState: String) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = widgetID
+        widget.type = .video
+        widget.url = url
+        widget.item = makeItem(name: "VideoItem", type: "String", state: itemState)
         return widget
     }
 }

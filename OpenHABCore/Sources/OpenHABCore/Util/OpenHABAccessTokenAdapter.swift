@@ -53,3 +53,4 @@ extension OpenHABAccessTokenAdapter: ImageDownloadRequestModifier {
         }
     }
 }
+
