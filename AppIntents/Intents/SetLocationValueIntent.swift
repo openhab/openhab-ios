@@ -62,7 +62,7 @@ struct SetLocationValueIntent: AppIntent {
     var longitude: Double
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let homeId = try HomeResolver.resolvedHomeId(
+        let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,
             itemHomeId: itemEntity.homeId,
             itemLabel: itemEntity.label,
