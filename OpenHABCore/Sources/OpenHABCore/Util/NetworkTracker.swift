@@ -11,7 +11,6 @@
 
 @preconcurrency import Combine
 import Foundation
-import Kingfisher
 import Network
 import OpenAPIRuntime
 import os.log
@@ -499,10 +498,6 @@ public actor NetworkTracker {
             activeConnection = connection
         }
 
-        if let connection {
-            // TODO: suspicious call to "shared" instance with specific connection
-            KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(connectionConfiguration: connection.configuration))]
-        }
     }
 
     private func updateStatus(_ newStatus: NetworkStatus) {

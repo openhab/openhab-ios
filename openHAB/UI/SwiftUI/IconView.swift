@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Combine
+import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -97,6 +98,7 @@ struct IconInputView: View {
 
             if let iconURL {
                 KFImage(iconURL)
+                    .withOpenHABCredentials(for: networkTracker.activeConnection)
                     .retry(maxCount: 3, interval: .seconds(5))
                     .resizable()
                     .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
@@ -197,6 +199,7 @@ struct IconView: View {
 
             if let iconURL {
                 KFImage(iconURL)
+                    .withOpenHABCredentials(for: networkTracker.activeConnection)
                     .retry(maxCount: 3, interval: .seconds(5))
                     .resizable()
                     .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
