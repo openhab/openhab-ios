@@ -82,7 +82,7 @@ struct SetLocationValueIntent: AppIntent {
         do {
             try await OpenHABItemCache.instance.sendCommand(
                 to: itemEntity.item,
-                home: itemEntity.homeId,
+                home: homeId,
                 command: command
             )
         } catch {
