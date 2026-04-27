@@ -442,7 +442,7 @@ struct MediaRowInput: Equatable {
             url: url,
             encoding: widget.encoding,
             labelSourceRawValue: widget.labelSource.rawValue,
-            preferredRowHeight: widget.preferredRowHeight.map(Double.init),
+            preferredRowHeight: WidgetMappingSnapshot.preferredRowHeight(type: widget.type, label: widget.label, height: widget.height),
             coordinateLatitude: hasValidCoordinate ? coordinate.latitude : nil,
             coordinateLongitude: hasValidCoordinate ? coordinate.longitude : nil
         )

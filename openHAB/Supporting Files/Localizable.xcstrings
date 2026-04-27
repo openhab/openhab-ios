@@ -1533,6 +1533,7 @@
     },
     "Brightness: %.2f" : {
       "comment" : "A label displaying the brightness value in the checkout view.",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6144,6 +6145,7 @@
     },
     "Hue: %.2f" : {
       "comment" : "A label displaying the hue value of the currently selected color. The value is formatted to two decimal places.",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -9558,6 +9560,7 @@
     },
     "Pick a Color" : {
       "comment" : "A title for the color picker interface.",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -10619,6 +10622,7 @@
     },
     "Saturation: %.2f" : {
       "comment" : "A label displaying the saturation value in the color picker view.",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

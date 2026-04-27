@@ -116,28 +116,12 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
-    public var stateValueAsBool: Bool? {
-        item?.state?.parseAsBool()
-    }
-
-    public var stateValueAsBrightness: Int? {
-        item?.state?.parseAsBrightness()
-    }
-
-    public var stateValueAsUIColor: UIColor? {
-        item?.state?.parseAsUIColor()
-    }
-
     public func sendItemUpdate(state: NumberState?) {
         guard let state else {
             Logger.restAPI.info("ItemUpdate for Item or State = nil")
             return
         }
         sendCommand(state.commandString)
-    }
-
-    public func sendCommandDouble(_ command: Double) {
-        sendCommand(String(command))
     }
 
     public func sendCommand(_ command: String?) {
@@ -152,44 +136,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         sendCommand(item, command)
     }
 
-    public func mapCommandtoIndex(with command: String?) -> Int {
-        Int(mappingIndex(byCommand: command) ?? 0)
-    }
-
-    public func generateImageResult(rootUrl: String,
-                                    chartStyle: ChartStyle = .light) -> ImagePayload {
-        switch type {
-        case .chart:
-            guard let url = Endpoint.chart(
-                rootUrl: rootUrl,
-                period: period,
-                type: item?.type,
-                service: service,
-                name: item?.name,
-                legend: legend,
-                theme: chartStyle,
-                forceAsItem: forceAsItem,
-                yAxisDecimalPattern: yAxisDecimalPattern
-            ).url else {
-                Logger.restAPI.error("Failed to generate chart URL")
-                return .empty
-            }
-            return .link(url: url)
-
-        case .image:
-            if let item {
-                return item.getImagePayload()
-            }
-            guard let url = URL(string: url) else {
-                Logger.restAPI.error("Invalid image URL: \(self.url)")
-                return .empty
-            }
-            return .link(url: url)
-
-        default:
-            return .empty
-        }
-    }
 }
 
 public extension OpenHABWidget {
@@ -310,20 +256,6 @@ public extension [OpenHABWidget] {
     }
 }
 
-public extension OpenHABWidget {
-    var preferredRowHeight: CGFloat? {
-        switch type {
-        case .frame:
-            label.isEmpty ? 0 : 35.0
-        case .image, .chart, .video:
-            nil // Automatic sizing
-        case .webview, .mapview:
-            44.0 * CGFloat(height ?? 8)
-        default:
-            44.0
-        }
-    }
-}
 
 extension OpenHABWidget {
     convenience init(_ widget: Components.Schemas.WidgetDTO) {

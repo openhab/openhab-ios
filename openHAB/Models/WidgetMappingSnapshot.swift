@@ -55,6 +55,7 @@ struct WidgetMappingSnapshot: Sendable {
     let stateless: Bool?
     let forceAsItem: Bool?
     let yAxisDecimalPattern: String?
+    let preferredRowHeight: Double?
 
     init(widget: OpenHABWidget) {
         widgetId = widget.widgetId
@@ -96,6 +97,7 @@ struct WidgetMappingSnapshot: Sendable {
         stateless = widget.stateless
         forceAsItem = widget.forceAsItem
         yAxisDecimalPattern = widget.yAxisDecimalPattern
+        preferredRowHeight = WidgetMappingSnapshot.preferredRowHeight(type: widget.type, label: widget.label, height: widget.height)
     }
 
     init(widgetId: String,
@@ -144,6 +146,7 @@ struct WidgetMappingSnapshot: Sendable {
         stateless = true
         forceAsItem = nil
         yAxisDecimalPattern = nil
+        preferredRowHeight = nil
     }
 }
 
@@ -203,8 +206,8 @@ extension WidgetMappingSnapshot {
         )
     }
 
-    var preferredRowHeight: Double? {
-        switch widgetType {
+    static func preferredRowHeight(type: OpenHABWidget.WidgetType, label: String, height: Double?) -> Double? {
+        switch type {
         case .frame:
             label.isEmpty ? 0 : 35.0
         case .image, .chart, .video:
