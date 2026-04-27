@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Combine
+import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -209,6 +210,7 @@ struct DrawerView: View {
                     icon: sitemap.icon
                 ).url
                 KFImage(url)
+                    .withOpenHABCredentials(for: networkTracker.activeConnection)
                     .placeholder { Image("openHABIcon").resizable() }
                     .resizable()
             }

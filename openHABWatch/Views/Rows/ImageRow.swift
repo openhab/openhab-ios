@@ -62,6 +62,7 @@ struct ImageRow: View, Equatable {
     let refresh: Int // Refresh interval in milliseconds, 0 means no refresh
 
     @StateObject private var refreshTimer = ImageRefreshTimer()
+    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
 
     // For refreshing images, append a query parameter to bust the cache
     private var displayUrl: URL? {
@@ -78,6 +79,7 @@ struct ImageRow: View, Equatable {
 
     var body: some View {
         KFImage.url(displayUrl)
+            .withOpenHABCredentials(for: networkTracker.activeConnection)
             .cacheMemoryOnly(refresh > 0)
             .loadDiskFileSynchronously()
             .resizable()
