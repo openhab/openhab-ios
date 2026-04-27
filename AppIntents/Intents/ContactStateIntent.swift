@@ -55,7 +55,7 @@ struct ContactStateIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         // Validate that the item belongs to the selected home
-        let homeId = try HomeResolver.resolvedHomeId(
+        let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,
             itemHomeId: itemEntity.homeId,
             itemLabel: itemEntity.label,
@@ -65,7 +65,7 @@ struct ContactStateIntent: AppIntent {
         do {
             try await OpenHABItemCache.instance.sendCommand(
                 to: itemEntity.item,
-                home: itemEntity.homeId,
+                home: homeId,
                 command: state.rawValue
             )
         } catch {

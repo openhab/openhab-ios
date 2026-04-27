@@ -14,6 +14,8 @@
 import Foundation
 import Testing
 
+private final class BundleLocator: AnyObject {}
+
 struct LocalizationTests {
     private struct StringCatalog: Decodable {
         let sourceLanguage: String
@@ -39,15 +41,23 @@ struct LocalizationTests {
         Bundle.main.localizations.filter { $0 != "Base" }
     }
 
-    private static var stringCatalogURL: URL {
-        URL(fileURLWithPath: #filePath)
+    private static var stringCatalogURL: URL? {
+        // Primary: bundle resource (avoids #filePath sandbox restrictions in iOS Simulator)
+        if let url = Bundle(for: BundleLocator.self)
+            .url(forResource: "LocalizableTestCatalog", withExtension: "json") {
+            return url
+        }
+        // Fallback: source-relative path
+        let url = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .appendingPathComponent("openHAB/Supporting Files/Localizable.xcstrings")
+        return FileManager.default.fileExists(atPath: url.path) ? url : nil
     }
 
     private static var stringCatalog: StringCatalog? {
-        guard let data = try? Data(contentsOf: stringCatalogURL) else {
+        guard let url = stringCatalogURL,
+              let data = try? Data(contentsOf: url) else {
             return nil
         }
 

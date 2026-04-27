@@ -53,7 +53,7 @@ struct SetDateTimeValueIntent: AppIntent {
     var value: Date
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let homeId = try HomeResolver.resolvedHomeId(
+        let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,
             itemHomeId: itemEntity.homeId,
             itemLabel: itemEntity.label,
@@ -67,7 +67,7 @@ struct SetDateTimeValueIntent: AppIntent {
         do {
             try await OpenHABItemCache.instance.sendCommand(
                 to: itemEntity.item,
-                home: itemEntity.homeId,
+                home: homeId,
                 command: command
             )
         } catch {
