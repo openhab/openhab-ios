@@ -33,6 +33,7 @@ private struct ImageRowContent: View {
 
     let input: MediaRowInput
     @ObservedObject var viewModel: SitemapPageViewModel
+    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @Environment(\.colorScheme) var colorScheme
     @State private var refreshTimer: Timer?
     @State private var forceRefreshKey = UUID()
@@ -112,6 +113,7 @@ private struct ImageRowContent: View {
         }
 
         KFImage(effectiveChartURL)
+            .withOpenHABCredentials(for: networkTracker.activeConnection)
             .cacheMemoryOnly(false)
             .cacheOriginalImage(true)
             .fade(duration: 0)
@@ -150,6 +152,7 @@ private struct ImageRowContent: View {
             }
             let provider = RawImageDataProvider(data: data, cacheKey: cacheKey)
             KFImage(source: .provider(provider))
+                .withOpenHABCredentials(for: networkTracker.activeConnection)
                 .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
                 .resizable()
                 .aspectRatio(contentMode: .fit)
@@ -157,6 +160,7 @@ private struct ImageRowContent: View {
                 .clipShape(.rect(cornerRadius: 8))
         case let .link(url):
             KFImage(url)
+                .withOpenHABCredentials(for: networkTracker.activeConnection)
                 .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
                 .resizable()
                 .cacheMemoryOnly(!shouldCache)
