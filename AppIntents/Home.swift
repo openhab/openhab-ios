@@ -115,17 +115,16 @@ enum HomeResolver {
     /// Validates that `selectedHome` matches `itemHomeId` and returns the resolved local UUID.
     ///
     /// Resolution order:
-    /// 1. Match `selectedHome.id` against each home's stable cross-device identifier.
+    /// 1. Match `selectedHome.id` against entries in `stableIdentifierToLocalUUID`.
     /// 2. Fall back to treating `selectedHome.id` as a legacy device-local UUID string.
     ///
-    /// Passing an empty `storedHomes` dict (the default) skips the stable-identifier lookup
-    /// and falls straight through to the UUID fallback — this keeps unit tests working without
-    /// Preferences setup.
+    /// The default empty array skips stable-identifier lookup and falls straight through to the
+    /// UUID fallback — this keeps unit tests working without any Preferences setup.
     static func resolvedHomeId<E: Error>(
         selectedHome: Home?,
         itemHomeId: UUID,
         itemLabel: String,
-        storedHomes: [UUID: HomePreferences] = [:],
+        stableIdentifierToLocalUUID: [(String, UUID)] = [],
         mismatchError: (String, String) -> E
     ) throws -> UUID {
         guard let selectedHome else {
@@ -133,8 +132,8 @@ enum HomeResolver {
         }
 
         let homeId: UUID
-        if let match = storedHomes.values.first(where: { $0.stableIdentifier == selectedHome.id }) {
-            homeId = match.id
+        if let match = stableIdentifierToLocalUUID.first(where: { $0.0 == selectedHome.id }) {
+            homeId = match.1
         } else if let uuid = UUID(uuidString: selectedHome.id) {
             homeId = uuid
         } else {
@@ -148,8 +147,8 @@ enum HomeResolver {
         return homeId
     }
 
-    /// Production overload — fetches live `storedHomes` from Preferences before delegating to the
-    /// testable sync overload. Intent `perform()` methods call this with `try await`.
+    /// Production overload — builds the stable-identifier map on the main actor before delegating
+    /// to the testable sync overload. Intent `perform()` methods call this with `try await`.
     @MainActor
     static func resolvedHomeId<E: Error>(
         selectedHome: Home?,
@@ -157,11 +156,12 @@ enum HomeResolver {
         itemLabel: String,
         mismatchError: (String, String) -> E
     ) async throws -> UUID {
-        try resolvedHomeId(
+        let map = Preferences.shared.storedHomes.values.map { ($0.stableIdentifier, $0.id) }
+        return try resolvedHomeId(
             selectedHome: selectedHome,
             itemHomeId: itemHomeId,
             itemLabel: itemLabel,
-            storedHomes: Preferences.shared.storedHomes,
+            stableIdentifierToLocalUUID: map,
             mismatchError: mismatchError
         )
     }
@@ -177,14 +177,17 @@ enum HomeResolver {
             selectedHome: selectedHome,
             itemName: itemName,
             findHomeId: { identifier in
-                let storedHomes = await MainActor.run { Preferences.shared.storedHomes }
-                if let match = storedHomes.values.first(where: { $0.stableIdentifier == identifier }) {
-                    return match.id
+                // All HomePreferences property access must happen on the main actor.
+                await MainActor.run {
+                    let storedHomes = Preferences.shared.storedHomes
+                    if let match = storedHomes.values.first(where: { $0.stableIdentifier == identifier }) {
+                        return match.id
+                    }
+                    if let uuid = UUID(uuidString: identifier), storedHomes[uuid] != nil {
+                        return uuid
+                    }
+                    return nil
                 }
-                if let uuid = UUID(uuidString: identifier), storedHomes[uuid] != nil {
-                    return uuid
-                }
-                return nil
             },
             listStoredHomes: { await Preferences.shared.listStoredHomes() },
             exactMatchedHomes: {
