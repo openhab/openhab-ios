@@ -68,31 +68,3 @@ enum SitemapRowInput: Identifiable, Equatable, Sendable {
         }
     }
 }
-
-extension SitemapRowInput {
-    func applyingWidgetVersions(_ versions: [String: Int]) -> SitemapRowInput {
-        let version = versions[rowID.rawValue] ?? 0
-
-        switch self {
-        case let .slider(rowID, input):
-            return .slider(rowID, input.withWidgetVersion(version))
-        case let .selection(rowID, input):
-            return .selection(rowID, input.withWidgetVersion(version))
-        case let .segmented(rowID, input):
-            return .segmented(rowID, input.withWidgetVersion(version))
-        case .frame,
-             .linked,
-             .text,
-             .setpoint,
-             .rollershutter,
-             .toggle,
-             .input,
-             .colorPicker,
-             .media,
-             .colorTemperature,
-             .buttonGrid,
-             .generic:
-            return self
-        }
-    }
-}

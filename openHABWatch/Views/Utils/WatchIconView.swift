@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -29,6 +30,7 @@ struct WatchIconView: View {
     @ObservedObject var settings = AppSettings.shared
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @State private var lastResolvedIconURL: URL?
+    @State private var lastResolvedConnection: ConnectionInfo?
     @State private var keepLastResolvedIconURLUntil: Date = .distantPast
 
     private let iconURLGraceSeconds: TimeInterval = 3
@@ -49,12 +51,18 @@ struct WatchIconView: View {
     }
 
     // During a transient connection handover activeConnection can briefly be nil.
-    // Hold the last successfully resolved URL for a short grace period so icons
-    // don't flash blank between reconnects.
+    // Hold the last successfully resolved URL and connection for a short grace period
+    // so icons don't flash blank between reconnects, and retained auth carries over.
     private var displayIconURL: URL? {
         if let url = iconURL { return url }
         guard Date() <= keepLastResolvedIconURLUntil else { return nil }
         return lastResolvedIconURL
+    }
+
+    private var displayConnection: ConnectionInfo? {
+        if let connection = networkTracker.activeConnection { return connection }
+        guard Date() <= keepLastResolvedIconURLUntil else { return nil }
+        return lastResolvedConnection
     }
 
     var body: some View {
@@ -63,6 +71,7 @@ struct WatchIconView: View {
                 // Only apply color preprocessing for non-iconify icons
                 let processorIconColor = iconURL.host == "api.iconify.design" ? nil : model.iconColorHex
                 KFImage.url(iconURL)
+                    .withOpenHABCredentials(for: displayConnection)
                     .onFailure { _ in
                         Logger.rowViews.debug("Failed to load image : \(iconURL.absoluteString)")
                     }
@@ -92,6 +101,7 @@ struct WatchIconView: View {
         .onChange(of: iconURL) { _, newURL in
             if let newURL {
                 lastResolvedIconURL = newURL
+                lastResolvedConnection = networkTracker.activeConnection
                 keepLastResolvedIconURLUntil = .distantPast
             } else if lastResolvedIconURL != nil {
                 keepLastResolvedIconURLUntil = Date().addingTimeInterval(iconURLGraceSeconds)

@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Combine
+import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -40,24 +41,14 @@ actor IconCacheTracker {
     }
 }
 
-private struct SitemapPageIdentityKey: EnvironmentKey {
-    static let defaultValue = ""
-}
-
-extension EnvironmentValues {
-    var sitemapPageIdentity: String {
-        get { self[SitemapPageIdentityKey.self] }
-        set { self[SitemapPageIdentityKey.self] = newValue }
-    }
-}
-
 struct IconInputView: View {
     let input: RowIconInput
     let rowIdentity: String
     let fallbackSymbol: SFSymbol?
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.sitemapPageIdentity) private var pageIdentity
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
     let size: CGSize
     let iconType: IconType = .svg
 
@@ -107,6 +98,7 @@ struct IconInputView: View {
 
             if let iconURL {
                 KFImage(iconURL)
+                    .withOpenHABCredentials(for: networkTracker.activeConnection)
                     .retry(maxCount: 3, interval: .seconds(5))
                     .resizable()
                     .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
@@ -129,7 +121,7 @@ struct IconInputView: View {
                     .cancelOnDisappear(true)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id("\(pageIdentity)-\(rowIdentity)-\(colorScheme)")
+                    .id("\(viewModel.pageId)-\(rowIdentity)-\(colorScheme)")
             }
         }
     }
@@ -152,7 +144,8 @@ struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.sitemapPageIdentity) private var pageIdentity
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+
     let size: CGSize
     let iconType: IconType = .svg
     /// Optional SF Symbol to show as fallback when network icon is unavailable (useful for previews)
@@ -206,6 +199,7 @@ struct IconView: View {
 
             if let iconURL {
                 KFImage(iconURL)
+                    .withOpenHABCredentials(for: networkTracker.activeConnection)
                     .retry(maxCount: 3, interval: .seconds(5))
                     .resizable()
                     .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
@@ -229,7 +223,7 @@ struct IconView: View {
                     .cancelOnDisappear(true)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id("\(pageIdentity)-\(widget.id)-\(colorScheme)")
+                    .id("\(viewModel.pageId)-\(widget.id)-\(colorScheme)")
             }
         }
     }

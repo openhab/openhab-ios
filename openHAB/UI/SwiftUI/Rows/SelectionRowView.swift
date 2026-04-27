@@ -58,7 +58,7 @@ private struct SelectionRowContent: View {
 
     @ViewBuilder
     private func rowContent(displayedCommand: String) -> some View {
-        RowViewWithIcon(input: input, rowIdentity: input.rowID.rawValue) {
+        RowViewWithIcon(input: input) {
             if !input.displayState.labelText.isEmpty {
                 let labelText = input.displayState.labelText
                 Text(labelText)
@@ -172,15 +172,16 @@ private struct SelectionRowContent: View {
 
 struct SelectionRowView: View {
     let input: SelectionRowInput
-    @Environment(\.sitemapRowActions) private var rowActions
+
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         SelectionRowContent(
             input: input,
-            widgetVersion: input.widgetVersion
+            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId)
         ) { command in
             guard let itemName = input.itemName else { return }
-            rowActions.sendCommand(itemName, command, .immediate, .change)
+            viewModel.sendCommand(command, for: itemName)
         }
     }
 }

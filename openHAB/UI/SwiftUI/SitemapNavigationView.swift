@@ -44,6 +44,8 @@ struct SitemapNavigationView: View {
     @ViewBuilder
     private var sitemapContent: some View {
         let page = SitemapPageView(viewModel: viewModel)
+            .navigationTitle(viewModel.pageTitle)
+            .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
                 if !isInteractionIdle {
                     ToolbarItem(placement: .navigationBarLeading) {

@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Combine
+import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -25,6 +26,7 @@ struct NotificationRow: View {
     var body: some View {
         HStack {
             KFImage(iconUrl)
+                .withOpenHABCredentials(for: connection)
                 .placeholder {
                     Image("openHABIcon").resizable()
                 }

@@ -9,16 +9,12 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Foundation
 import OpenHABCore
 
 protocol RowWithIconInput {
     var widgetId: String { get }
     var icon: RowIconInput { get }
-}
-
-struct LinkedPageDestination: Hashable, Sendable {
-    let pageUrl: String
-    let title: String
 }
 
 struct RowIconInput: Equatable, Sendable {
@@ -49,8 +45,6 @@ struct RowIconInput: Equatable, Sendable {
 }
 
 struct SelectionRowInput: Equatable, RowWithIconInput {
-    let rowID: RowID
-    let widgetVersion: Int
     let displayState: WidgetDisplayState
     let mappings: [OpenHABWidgetMapping]
     let labelColor: String
@@ -60,11 +54,9 @@ struct SelectionRowInput: Equatable, RowWithIconInput {
     let icon: RowIconInput
     let itemName: String?
 
-    static func from(widget: OpenHABWidget, rowID: RowID) -> SelectionRowInput {
+    static func from(widget: OpenHABWidget) -> SelectionRowInput {
         let displayState = widget.displayState
         return SelectionRowInput(
-            rowID: rowID,
-            widgetVersion: 0,
             displayState: displayState,
             mappings: displayState.mappings,
             labelColor: widget.labelcolor,
@@ -75,26 +67,9 @@ struct SelectionRowInput: Equatable, RowWithIconInput {
             itemName: widget.item?.name
         )
     }
-
-    func withWidgetVersion(_ widgetVersion: Int) -> SelectionRowInput {
-        SelectionRowInput(
-            rowID: rowID,
-            widgetVersion: widgetVersion,
-            displayState: displayState,
-            mappings: mappings,
-            labelColor: labelColor,
-            valueColor: valueColor,
-            readOnly: readOnly,
-            widgetId: widgetId,
-            icon: icon,
-            itemName: itemName
-        )
-    }
 }
 
 struct SegmentedRowInput: Equatable, RowWithIconInput {
-    let rowID: RowID
-    let widgetVersion: Int
     let displayState: WidgetDisplayState
     let mappings: [OpenHABWidgetMapping]
     let labelColor: String
@@ -103,11 +78,9 @@ struct SegmentedRowInput: Equatable, RowWithIconInput {
     let icon: RowIconInput
     let itemName: String?
 
-    static func from(widget: OpenHABWidget, rowID: RowID) -> SegmentedRowInput {
+    static func from(widget: OpenHABWidget) -> SegmentedRowInput {
         let displayState = widget.displayState
         return SegmentedRowInput(
-            rowID: rowID,
-            widgetVersion: 0,
             displayState: displayState,
             mappings: displayState.mappings,
             labelColor: widget.labelcolor,
@@ -115,20 +88,6 @@ struct SegmentedRowInput: Equatable, RowWithIconInput {
             widgetId: displayState.widgetId,
             icon: RowIconInput.from(widget: widget),
             itemName: widget.item?.name
-        )
-    }
-
-    func withWidgetVersion(_ widgetVersion: Int) -> SegmentedRowInput {
-        SegmentedRowInput(
-            rowID: rowID,
-            widgetVersion: widgetVersion,
-            displayState: displayState,
-            mappings: mappings,
-            labelColor: labelColor,
-            valueColor: valueColor,
-            widgetId: widgetId,
-            icon: icon,
-            itemName: itemName
         )
     }
 }
@@ -382,7 +341,8 @@ struct LinkedPageRowInput: Equatable, RowWithIconInput {
     let labelColor: String
     let valueColor: String
     let icon: RowIconInput
-    let destination: LinkedPageDestination
+    let linkedPageLink: String
+    let linkedPageTitle: String
     let isFrame: Bool
 
     static func from(widget: OpenHABWidget) -> LinkedPageRowInput? {
@@ -393,10 +353,8 @@ struct LinkedPageRowInput: Equatable, RowWithIconInput {
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
             icon: RowIconInput.from(widget: widget),
-            destination: LinkedPageDestination(
-                pageUrl: linkedPage.link,
-                title: linkedPage.title
-            ),
+            linkedPageLink: linkedPage.link,
+            linkedPageTitle: linkedPage.title,
             isFrame: widget.type == .frame
         )
     }
@@ -451,7 +409,6 @@ struct ColorTemperatureRowInput: Equatable, RowWithIconInput {
 }
 
 struct MediaRowInput: Equatable {
-    let rowID: RowID
     let widgetId: String
     let renderingKind: WidgetRenderingKind
     let displayState: WidgetDisplayState
@@ -467,13 +424,13 @@ struct MediaRowInput: Equatable {
     let coordinateLatitude: Double?
     let coordinateLongitude: Double?
 
-    static func from(widget: OpenHABWidget, rowID: RowID) -> MediaRowInput {
+    static func from(widget: OpenHABWidget) -> MediaRowInput {
         let coordinate = widget.coordinate
         let hasValidCoordinate = (-90.0 ... 90.0).contains(coordinate.latitude)
             && (-180.0 ... 180.0).contains(coordinate.longitude)
+        let url = effectiveURL(for: widget)
 
         return MediaRowInput(
-            rowID: rowID,
             widgetId: widget.widgetId,
             renderingKind: widget.renderingKind,
             displayState: widget.displayState,
@@ -482,13 +439,31 @@ struct MediaRowInput: Equatable {
             valueColor: widget.valuecolor,
             readOnly: widget.readOnly ?? false,
             refresh: widget.refresh,
-            url: widget.url,
+            url: url,
             encoding: widget.encoding,
             labelSourceRawValue: widget.labelSource.rawValue,
             preferredRowHeight: widget.preferredRowHeight.map(Double.init),
             coordinateLatitude: hasValidCoordinate ? coordinate.latitude : nil,
             coordinateLongitude: hasValidCoordinate ? coordinate.longitude : nil
         )
+    }
+
+    private static func effectiveURL(for widget: OpenHABWidget) -> String {
+        guard widget.renderingKind == .video,
+              let itemState = widget.item?.state?.trimmingCharacters(in: .whitespacesAndNewlines),
+              isAbsoluteURL(itemState) else {
+            return widget.url
+        }
+
+        return itemState
+    }
+
+    private static func isAbsoluteURL(_ value: String) -> Bool {
+        guard let url = URL(string: value),
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return false
+        }
+        return components.scheme != nil && (components.host != nil || components.path.hasPrefix("/"))
     }
 }
 
@@ -523,8 +498,6 @@ struct TextRowInput: Equatable, RowWithIconInput {
 }
 
 struct SliderRowInput: Equatable, RowWithIconInput {
-    let rowID: RowID
-    let widgetVersion: Int
     let widgetId: String
     let displayState: WidgetDisplayState
     let numberPattern: String?
@@ -547,7 +520,7 @@ struct SliderRowInput: Equatable, RowWithIconInput {
         displayState.minValue ... displayState.maxValue
     }
 
-    static func from(widget: OpenHABWidget, rowID: RowID) -> SliderRowInput {
+    static func from(widget: OpenHABWidget) -> SliderRowInput {
         let displayState = widget.displayState
         let numberPattern = if let pattern = widget.pattern, !pattern.isEmpty {
             pattern
@@ -562,8 +535,6 @@ struct SliderRowInput: Equatable, RowWithIconInput {
         }
 
         return SliderRowInput(
-            rowID: rowID,
-            widgetVersion: 0,
             widgetId: widget.widgetId,
             displayState: displayState,
             numberPattern: numberPattern,
@@ -577,26 +548,6 @@ struct SliderRowInput: Equatable, RowWithIconInput {
             serverValue: adjustedToStep(serverValue, displayState: displayState),
             icon: RowIconInput.from(widget: widget),
             itemName: widget.item?.name
-        )
-    }
-
-    func withWidgetVersion(_ widgetVersion: Int) -> SliderRowInput {
-        SliderRowInput(
-            rowID: rowID,
-            widgetVersion: widgetVersion,
-            widgetId: widgetId,
-            displayState: displayState,
-            numberPattern: numberPattern,
-            unit: unit,
-            readOnly: readOnly,
-            switchSupport: switchSupport,
-            step: step,
-            labelColor: labelColor,
-            valueColor: valueColor,
-            shouldSendUpdatesDuringMove: shouldSendUpdatesDuringMove,
-            serverValue: serverValue,
-            icon: icon,
-            itemName: itemName
         )
     }
 

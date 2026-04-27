@@ -34,7 +34,7 @@ private struct SegmentedRowContent: View {
 
     var body: some View {
         let selectedIndex = effectiveSelectedIndex(displayState: input.displayState, mappings: input.mappings)
-        RowViewWithIcon(input: input, rowIdentity: input.rowID.rawValue, fallbackSymbol: fallbackSymbol, spacing: 0) {
+        RowViewWithIcon(input: input, fallbackSymbol: fallbackSymbol, spacing: 0) {
             if !input.displayState.labelText.isEmpty {
                 let labelText = input.displayState.labelText
                 Text(labelText)
@@ -338,16 +338,17 @@ private struct SegmentedRowContent: View {
 struct SegmentedRowView: View {
     let input: SegmentedRowInput
     var fallbackSymbol: SFSymbol?
-    @Environment(\.sitemapRowActions) private var rowActions
+
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         SegmentedRowContent(
             input: input,
-            widgetVersion: input.widgetVersion,
+            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
             fallbackSymbol: fallbackSymbol
         ) { command, policy, phase in
             guard let itemName = input.itemName else { return }
-            rowActions.sendCommand(itemName, command, policy, phase)
+            viewModel.sendCommand(command, for: itemName, policy: policy, phase: phase)
         }
     }
 }
@@ -376,16 +377,13 @@ private extension SegmentedRowView {
                                    icon: String = "switch",
                                    mappings: [OpenHABWidgetMapping],
                                    selectedState: String? = nil) -> SegmentedRowInput {
-        SegmentedRowInput.from(
-            widget: PreviewWidgetFactory.segmented(
-                label: label,
-                mappings: mappings,
-                selectedState: selectedState,
-                icon: icon,
-                valueText: detailLabel
-            ),
-            rowID: RowID(pageKey: "preview", widgetId: UUID().uuidString, occurrence: 1)
-        )
+        SegmentedRowInput.from(widget: PreviewWidgetFactory.segmented(
+            label: label,
+            mappings: mappings,
+            selectedState: selectedState,
+            icon: icon,
+            valueText: detailLabel
+        ))
     }
 }
 
@@ -579,10 +577,7 @@ private extension SegmentedRowView {
 #Preview("From PreviewConstants") {
     PreviewList {
         SegmentedRowView(
-            input: SegmentedRowInput.from(
-                widget: PreviewConstants.openHABSitemapPage!.widgets[4],
-                rowID: RowID(pageKey: "preview", widgetId: UUID().uuidString, occurrence: 1)
-            )
+            input: SegmentedRowInput.from(widget: PreviewConstants.openHABSitemapPage!.widgets[4])
         )
     }
 }
