@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Foundation
 import OpenHABCore
 
 protocol RowWithIconInput {
@@ -427,6 +428,7 @@ struct MediaRowInput: Equatable {
         let coordinate = widget.coordinate
         let hasValidCoordinate = (-90.0 ... 90.0).contains(coordinate.latitude)
             && (-180.0 ... 180.0).contains(coordinate.longitude)
+        let url = effectiveURL(for: widget)
 
         return MediaRowInput(
             widgetId: widget.widgetId,
@@ -437,13 +439,31 @@ struct MediaRowInput: Equatable {
             valueColor: widget.valuecolor,
             readOnly: widget.readOnly,
             refresh: widget.refresh,
-            url: widget.url,
+            url: url,
             encoding: widget.encoding,
             labelSourceRawValue: widget.labelSource.rawValue,
             preferredRowHeight: widget.preferredRowHeight.map(Double.init),
             coordinateLatitude: hasValidCoordinate ? coordinate.latitude : nil,
             coordinateLongitude: hasValidCoordinate ? coordinate.longitude : nil
         )
+    }
+
+    private static func effectiveURL(for widget: OpenHABWidget) -> String {
+        guard widget.renderingKind == .video,
+              let itemState = widget.item?.state?.trimmingCharacters(in: .whitespacesAndNewlines),
+              isAbsoluteURL(itemState) else {
+            return widget.url
+        }
+
+        return itemState
+    }
+
+    private static func isAbsoluteURL(_ value: String) -> Bool {
+        guard let url = URL(string: value),
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return false
+        }
+        return components.scheme != nil && (components.host != nil || components.path.hasPrefix("/"))
     }
 }
 

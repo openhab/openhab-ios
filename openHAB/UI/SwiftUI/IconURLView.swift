@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -17,6 +18,7 @@ import SwiftUI
 /// A SwiftUI view that displays widget icons with openHAB-specific styling and caching
 struct IconURLView: View {
     @State var iconURL: URL
+    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
 
     let size: CGSize
 
@@ -30,6 +32,7 @@ struct IconURLView: View {
                 .frame(width: size.width, height: size.height)
 
             KFImage(iconURL)
+                .withOpenHABCredentials(for: networkTracker.activeConnection)
                 .retry(maxCount: 3, interval: .seconds(5))
                 .resizable()
                 .setProcessor(OpenHABImageProcessor())
