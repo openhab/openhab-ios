@@ -58,6 +58,7 @@ struct SitemapPageView: View {
             viewModel.startPageHandling()
         }
         .onAppear {
+            viewModel.markAppeared()
             // Disable idle timer if configured in settings
             if Preferences.shared.idleOff {
                 UIApplication.shared.isIdleTimerDisabled = true

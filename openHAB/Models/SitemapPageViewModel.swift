@@ -101,7 +101,8 @@ class SitemapPageViewModel: ObservableObject {
     private var previousBuildRowIDs: [RowID] = []
     private var sliderValueOverrides: [String: Double] = [:]
     private var sliderOverrideResetTasks: [String: Task<Void, Never>] = [:]
-    private var lastForegroundRefreshAt: Date = .distantPast
+    var lastForegroundRefreshAt: Date = .distantPast
+    private var isPageVisibleForRefresh = false
     private var lastUIUpdateAt: Date = .distantPast
     private var pendingLongPollPage: OpenHABPage?
     private var longPollDebounceTask: Task<Void, Never>?
@@ -349,7 +350,12 @@ extension SitemapPageViewModel {
         showSearchField = Preferences.shared.applicationPreferences.showSearchField
     }
 
+    func markAppeared() {
+        isPageVisibleForRefresh = true
+    }
+
     func stopPageHandling() {
+        isPageVisibleForRefresh = false
         pageHandlingTask?.cancel()
         pageHandlingTask = nil
         foregroundRefreshTask?.cancel()
@@ -362,6 +368,9 @@ extension SitemapPageViewModel {
     }
 
     func refreshOnForeground() {
+        // Only refresh pages that are currently visible. Off-screen pages are marked not visible via
+        // stopPageHandling() when they disappear; they restart via .task when re-shown.
+        guard isPageVisibleForRefresh else { return }
         // Coalesce repeated .active transitions from scene/system churn.
         let now = Date()
         guard now.timeIntervalSince(lastForegroundRefreshAt) > 0.75 else { return }
