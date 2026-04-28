@@ -116,18 +116,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
-    public func sendCommand(_ command: String?) {
-        guard let item else {
-            Logger.restAPI.info("Command for Item = nil")
-            return
-        }
-        guard let sendCommand else {
-            Logger.restAPI.info("sendCommand closure not set")
-            return
-        }
-        sendCommand(item, command)
-    }
-
 }
 
 public extension OpenHABWidget {
