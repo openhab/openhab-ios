@@ -133,18 +133,11 @@ public final class WidgetCommandDispatcher {
     }
 
     @MainActor
-    public func sendItemUpdate(_ state: NumberState?,
-                               for widget: OpenHABWidget,
-                               fallbackItem: OpenHABItem? = nil) {
+    public func send(_ state: NumberState?,
+                     for widget: OpenHABWidget,
+                     fallbackItem: OpenHABItem? = nil) {
         guard let state else { return }
-
-        if let item = widget.item ?? fallbackItem,
-           let sendCommand = widget.sendCommand {
-            sendCommand(item, state.commandString)
-            return
-        }
-
-        widget.sendItemUpdate(state: state)
+        send(state.commandString, for: widget, policy: .immediate, fallbackItem: fallbackItem)
     }
 
     @MainActor
