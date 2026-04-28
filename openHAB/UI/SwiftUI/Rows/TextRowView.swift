@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import CommonUI
-import Flow
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
@@ -30,24 +29,31 @@ private struct TextRowContent: View {
     var body: some View {
         let displayState = input.displayState
         RowViewWithIcon(input: input, spacing: 8) {
+            let labelColor: Color = input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor)
+            let valueColor: Color = input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor)
             let labelShown = !displayState.labelText.isEmpty
-            HFlow(spacing: labelShown ? 8 : 0, justified: true) {
-                if labelShown {
-                    Text(displayState.labelText)
-                        .ohTextToken(.rowLabel)
-                        .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
-                }
 
-                if let value = displayState.labelValue {
-                    let text = Text(value)
-                        .ohTextToken(.rowValue)
-                        .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
-                    if !labelShown {
-                        text.frame(maxWidth: .infinity, alignment: .trailing)
-                    } else {
-                        text
-                    }
-                }
+            if labelShown, let value = displayState.labelValue {
+                // Concatenate label and value into one Text so the value trails inline
+                // when the label wraps, instead of starting a new line on its own.
+                // foregroundColor (not foregroundStyle) is used because only Text-returning
+                // modifiers can be applied before Text + Text concatenation on iOS 16.
+                // swiftlint:disable:next deprecated
+                (Text(displayState.labelText).foregroundColor(labelColor)
+                    + Text("  ")
+                    // swiftlint:disable:next deprecated
+                    + Text(value).foregroundColor(valueColor))
+                    .font(.body)
+                    .multilineTextAlignment(.leading)
+            } else if labelShown {
+                Text(displayState.labelText)
+                    .ohTextToken(.rowLabel)
+                    .foregroundStyle(labelColor)
+            } else if let value = displayState.labelValue {
+                Text(value)
+                    .ohTextToken(.rowValue)
+                    .foregroundStyle(valueColor)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
         .contextMenu {
