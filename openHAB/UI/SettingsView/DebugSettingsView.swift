@@ -59,7 +59,7 @@ struct DebugSettingsView: View {
             }
         Section(header: Text(LocalizedStringKey("debug"))) {
             Toggle("Sitemap Diagnostics Logging", isOn: $settingsSitemapDiagnosticsLogging)
-                .onChange(of: settingsSitemapDiagnosticsLogging) { _, newValue in
+                .onChange(of: settingsSitemapDiagnosticsLogging) { newValue in
                     Preferences.shared.modifyApplicationPreferences { prefs in
                         prefs.sitemapDiagnosticsLogging = newValue
                     }
