@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [Version 3.2.35, Build 242] - 2026-04-29Z
+
+- Sitemap SwiftUI performance improvement (#1151)
+- Bump crowdin/github-action from 2.16.0 to 2.16.2 (#1162)
+- Use video item state URL before default (#1161)
+- Fix data race on KingfisherManager and apply per-request auth credentials (#1160)
+- Fix main actor warnings in web row config (#1159)
+- Fix inline media playback for web rows (#1158)
+- Revert "Fix sitemap scroll hitching under frequent long-poll updates (#1136) (#1138)"
+- Revert "Remove widget reconciliation from SwiftUI sitemap update path (#1139)"
+- Revert "Decouple hot sitemap rows from shared view model (#1140)"
+- Revert "Feature/lazy linked page navigation v3 (#1142)"
+
 - Revert "Fix value text wrapping to a new line when label is long" (#1164)
 - committed version bump: 3.2.33 (240)
 - Inline dispatch guards and remove OpenHABWidget.sendCommand method
