@@ -125,7 +125,7 @@ struct SetpointRow: View {
         )
 
         logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(numberState.description)")
-        commandSender.sendItemUpdate(numberState, for: widget)
+        commandSender.send(numberState, for: widget)
     }
 
     func decreaseValue() {

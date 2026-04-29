@@ -714,24 +714,6 @@
             </objects>
             <point key="canvasLocation" x="1103" y="875"/>
         </scene>
-        <!--Color Picker View Controller-->
-        <scene sceneID="1cJ-Yb-6jQ">
-            <objects>
-                <viewController storyboardIdentifier="ColorPickerViewController" id="XTW-gz-4RR" customClass="ColorPickerViewController" customModule="openHAB" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="Nl6-qJ-2g2"/>
-                        <viewControllerLayoutGuide type="bottom" id="fDm-8Z-sSa"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="KR6-1e-R5X">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                    </view>
-                    <navigationItem key="navigationItem" id="AYD-aP-DDS"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="o8x-QB-mZ6" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2753" y="1654"/>
-        </scene>
         <!--OpenHAB Navigation Controller-->
         <scene sceneID="T9Q-vI-vaw">
             <objects>

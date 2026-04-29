@@ -1,0 +1,32 @@
+// Stress-test items for iOS long-poll flooding reproduction
+// Place in: $OPENHAB_CONF/items/stress_test.items
+
+// --- Tick counter ---
+Number StressTest_Counter "Tick [%d]"
+
+// --- Segmented items ---
+// Seg1 + Seg2: cycle through states every second (genuine changes)
+// Seg3 + Seg4: held at a fixed value every second (artefact probe —
+//   if diagnostics still report these as changed, the comparison is unstable)
+Number StressTest_Seg1 "Mode A [%d]"
+Number StressTest_Seg2 "Mode B [%d]"
+Number StressTest_Seg3 "Mode C [%d]"
+Number StressTest_Seg4 "Mode D [%d]"
+
+// --- Fast-updating numeric items ---
+Number StressTest_Power    "Power [%.1f W]"
+Number StressTest_Temp     "Temperature [%.1f °C]"
+Number StressTest_Humidity "Humidity [%.1f %%]"
+
+// --- Slow-updating items (toggle every 10s) ---
+Switch  StressTest_Switch1 "Switch 1"
+Switch  StressTest_Switch2 "Switch 2"
+Dimmer  StressTest_Dimmer  "Dimmer [%d %%]"
+String  StressTest_Status  "Status [%s]"
+
+// --- Linked sub-page items ---
+Group  StressTest_Group  "Sub-page"
+Number StressTest_Child1 "Child Power [%.1f W]"   (StressTest_Group)
+Number StressTest_Child2 "Child Temp [%.1f °C]"   (StressTest_Group)
+Number StressTest_Child3 "Child Humid [%.1f %%]"  (StressTest_Group)
+Number StressTest_Child4 "Child Counter [%d]"     (StressTest_Group)

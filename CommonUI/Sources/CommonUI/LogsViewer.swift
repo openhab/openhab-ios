@@ -11,6 +11,7 @@
 
 import Foundation
 import OSLog
+import SFSafeSymbols
 import SwiftUI
 
 // Thanks to https://useyourloaf.com/blog/fetching-oslog-messages-in-swift/
@@ -20,6 +21,7 @@ public struct LogsViewer: View {
         "(subsystem BEGINSWITH $PREFIX)")
 
     @State private var text = String(localized: "Loading…")
+    @State private var exportURL: URL?
 
     let myFont = Font
         .system(size: 10)
@@ -31,12 +33,38 @@ public struct LogsViewer: View {
                 .font(myFont)
                 .padding()
         }
+        .navigationTitle("Logs")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if let exportURL {
+                    ShareLink(item: exportURL) {
+                        Image(systemSymbol: .squareAndArrowUp)
+                    }
+                    .accessibilityLabel("Share Logs")
+                }
+            }
+        }
         .task {
             text = await fetchLogs()
+            exportURL = makeExportURL(for: text)
         }
     }
 
     public init() {}
+
+    private func makeExportURL(for text: String) -> URL? {
+        let fileName = "openhab-logs-\(Date.now.formatted(.iso8601.year().month().day().time(includingFractionalSeconds: false)))"
+            .replacingOccurrences(of: ":", with: "-")
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent(fileName)
+            .appendingPathExtension("log")
+        do {
+            try text.write(to: url, atomically: true, encoding: .utf8)
+            return url
+        } catch {
+            return nil
+        }
+    }
 
     private func fetchLogs() async -> String {
         let calendar = Calendar.current
@@ -58,9 +86,33 @@ public struct LogsViewer: View {
                 since: dayAgo,
                 predicateFormat: predicate.predicateFormat
             )
-            return logs.joined()
+            return makeLogHeader() + logs.joined()
         } catch {
             return error.localizedDescription
+        }
+    }
+
+    private func makeLogHeader() -> String {
+        let bundle = Bundle.main
+        let appVersion = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
+        let buildNumber = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown"
+        let osVersion = ProcessInfo.processInfo.operatingSystemVersionString
+        let modelIdentifier = Self.modelIdentifier()
+        let generated = Date.now.formatted(.iso8601.year().month().day().time(includingFractionalSeconds: false))
+
+        return """
+        openHAB iOS \(appVersion) (\(buildNumber))
+        \(osVersion) — \(modelIdentifier)
+        Generated: \(generated)
+        \(String(repeating: "-", count: 60))
+        """
+    }
+
+    private static func modelIdentifier() -> String {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        return withUnsafeBytes(of: &systemInfo.machine) { ptr in
+            String(bytes: ptr.prefix(while: { $0 != 0 }), encoding: .utf8) ?? "unknown"
         }
     }
 }

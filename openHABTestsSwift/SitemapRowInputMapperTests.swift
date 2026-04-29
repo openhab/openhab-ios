@@ -63,6 +63,30 @@ struct SitemapRowInputMapperTests {
     }
 
     @Test
+    func snapshotMappingMatchesWidgetMapping() {
+        let widgets = [
+            makeSliderWidget(widgetID: "slider"),
+            makeSetpointWidget(widgetID: "setpoint"),
+            makeSegmentedSwitchWidget(widgetID: "segmented"),
+            makeToggleSwitchWidget(widgetID: "toggle"),
+            makeRollershutterSwitchWidget(widgetID: "rollershutter"),
+            makeTextInputWidget(widgetID: "textInput"),
+            makeDateInputWidget(widgetID: "dateInput"),
+            makeColorPickerWidget(widgetID: "colorPicker"),
+            makeButtonGridWidget(widgetID: "buttonGrid"),
+            makeTextWidget(widgetID: "text"),
+            makeFrameWidget(widgetID: "frame")
+        ]
+
+        for (index, widget) in widgets.enumerated() {
+            let rowID = RowID(pageKey: "testPage", widgetId: widget.widgetId, occurrence: index + 1)
+            let mapped = SitemapRowInputMapper.map(widget: widget, rowID: rowID)
+            let snapshotMapped = SitemapRowInputMapper.map(snapshot: WidgetMappingSnapshot(widget: widget), rowID: rowID)
+            #expect(snapshotMapped == mapped)
+        }
+    }
+
+    @Test
     func videoWidgetUsesItemStateURLBeforeConfiguredURL() {
         let widget = makeVideoWidget(
             widgetID: "video",

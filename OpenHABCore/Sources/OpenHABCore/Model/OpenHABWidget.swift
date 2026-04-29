@@ -15,7 +15,7 @@ import Foundation
 import os.log
 
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
-    public enum WidgetType: String, Decodable {
+    public enum WidgetType: String, Decodable, Sendable {
         case chart = "Chart"
         case colorpicker = "Colorpicker"
         case defaultWidget = "Default"
@@ -107,175 +107,15 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var releaseCommand: String?
     public var command: String?
     public var stateless: Bool?
-    public var readOnly: Bool? {
-        item?.stateDescription?.readOnly
-    }
-
     public var yAxisDecimalPattern: String?
 
-    // Text prior to "["
-    public var labelText: String? {
-        let array = label.components(separatedBy: "[")
-        return array[0].trimmingCharacters(in: .whitespaces)
-    }
-
-    // Text between square brackets
-    public var labelValue: String? {
-        let pattern = /\[(.*?)\]/.dotMatchesNewlines()
-        guard let firstMatch = label.firstMatch(of: pattern) else { return nil }
-        return String(firstMatch.1)
-    }
+    public var widgetType: WidgetType { type }
+    public var hasLinkedPage: Bool { linkedPage != nil }
 
     public var coordinate: CLLocationCoordinate2D {
         item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
-    public var mappingsOrItemOptions: [OpenHABWidgetMapping] {
-        if mappings.isEmpty, let commandOptions = item?.commandDescription?.commandOptions {
-            commandOptions.map { OpenHABWidgetMapping(command: $0.command, label: $0.label ?? "") }
-        } else if mappings.isEmpty, let stateOptions = item?.stateDescription?.options {
-            stateOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
-        } else {
-            mappings
-        }
-    }
-
-    /// Returns true if any mapping has press-and-release behavior
-    public var hasPressReleaseMappings: Bool {
-        mappingsOrItemOptions.contains { $0.hasPressReleaseBehavior }
-    }
-
-    public var stateValueAsBool: Bool? {
-        item?.state?.parseAsBool()
-    }
-
-    public var stateValueAsBrightness: Int? {
-        item?.state?.parseAsBrightness()
-    }
-
-    public var stateValueAsUIColor: UIColor? {
-        item?.state?.parseAsUIColor()
-    }
-
-    public var stateValueAsNumberState: NumberState? {
-        if state != "" {
-            state.parseAsNumber(format: item?.stateDescription?.numberPattern)
-        } else {
-            item?.state?.parseAsNumber(format: item?.stateDescription?.numberPattern)
-        }
-    }
-
-    public var adjustedValue: Double {
-        if let item {
-            adj(item.stateAsDouble())
-        } else {
-            minValue
-        }
-    }
-
-    public func sendItemUpdate(state: NumberState?) {
-        guard let state else {
-            Logger.restAPI.info("ItemUpdate for Item or State = nil")
-            return
-        }
-        sendCommand(state.commandString)
-    }
-
-    public func sendCommandDouble(_ command: Double) {
-        sendCommand(String(command))
-    }
-
-    public func sendCommand(_ command: String?) {
-        guard let item else {
-            Logger.restAPI.info("Command for Item = nil")
-            return
-        }
-        guard let sendCommand else {
-            Logger.restAPI.info("sendCommand closure not set")
-            return
-        }
-        sendCommand(item, command)
-    }
-
-    public func mappingIndex(byCommand command: String?) -> Int? {
-        mappingsOrItemOptions.firstIndex { $0.command == command }
-    }
-
-    public func mapCommandtoIndex(with command: String?) -> Int {
-        Int(mappingIndex(byCommand: command) ?? 0)
-    }
-
-    public func iconState() -> String? {
-        guard let item, let itemState = item.state else { return nil }
-        guard !itemState.isNoneIcon else { return nil }
-        if item.isOfTypeOrGroupType(.color) {
-            // For items that control a color item fetch the correct icon
-            if type == .slider || (type == .switchWidget && mappings.isEmpty) {
-                if let brightness = itemState.parseAsBrightness() {
-                    let brightness = String(brightness)
-                    if type == .switchWidget {
-                        return brightness == "0" ? "OFF" : "ON"
-                    } else {
-                        return brightness
-                    }
-                } else {
-                    return "OFF"
-                }
-            } else if let color = itemState.parseAsUIColor() {
-                return "#\(color.hexString ?? "000000")"
-            }
-        } else if item.isOfTypeOrGroupType(.number) || item.isOfTypeOrGroupType(.numberWithDimension) {
-            let numberState = itemState.parseAsNumber(format: item.stateDescription?.numberPattern)
-            return numberState.toString(locale: Locale(identifier: "US"))
-        } else if type == .switchWidget, mappings.isEmpty, !item.isOfTypeOrGroupType(.rollershutter) {
-            // For switch items without mappings (just ON and OFF) that control a dimmer item
-            // and which are not ON or OFF already, set the state to "OFF" instead of 0
-            // or to "ON" to fetch the correct icon
-            return (itemState == "0" || itemState == "OFF") ? "OFF" : "ON"
-        }
-        return itemState
-    }
-
-    private func adj(_ raw: Double) -> Double {
-        var valueAdjustedToStep = floor((raw - minValue) / step) * step
-        valueAdjustedToStep += minValue
-        return valueAdjustedToStep.clamped(to: minValue ... maxValue)
-    }
-
-    public func generateImageResult(rootUrl: String,
-                                    chartStyle: ChartStyle = .light) -> ImagePayload {
-        switch type {
-        case .chart:
-            guard let url = Endpoint.chart(
-                rootUrl: rootUrl,
-                period: period,
-                type: item?.type,
-                service: service,
-                name: item?.name,
-                legend: legend,
-                theme: chartStyle,
-                forceAsItem: forceAsItem,
-                yAxisDecimalPattern: yAxisDecimalPattern
-            ).url else {
-                Logger.restAPI.error("Failed to generate chart URL")
-                return .empty
-            }
-            return .link(url: url)
-
-        case .image:
-            if let item {
-                return item.getImagePayload()
-            }
-            guard let url = URL(string: url) else {
-                Logger.restAPI.error("Invalid image URL: \(self.url)")
-                return .empty
-            }
-            return .link(url: url)
-
-        default:
-            return .empty
-        }
-    }
 }
 
 public extension OpenHABWidget {
@@ -396,20 +236,6 @@ public extension [OpenHABWidget] {
     }
 }
 
-public extension OpenHABWidget {
-    var preferredRowHeight: CGFloat? {
-        switch type {
-        case .frame:
-            label.isEmpty ? 0 : 35.0
-        case .image, .chart, .video:
-            nil // Automatic sizing
-        case .webview, .mapview:
-            44.0 * CGFloat(height ?? 8)
-        default:
-            44.0
-        }
-    }
-}
 
 extension OpenHABWidget {
     convenience init(_ widget: Components.Schemas.WidgetDTO) {
@@ -457,28 +283,4 @@ extension OpenHABWidget {
     }
 }
 
-// Required for behavior of Slider
-public extension OpenHABWidget {
-    func shouldUseSliderUpdatesDuringMove() -> Bool {
-        if let releaseOnly {
-            return !releaseOnly
-        }
-
-        guard let item else {
-            return false
-        }
-
-        if item.isOfTypeOrGroupType(.dimmer) ||
-            item.isOfTypeOrGroupType(.number) ||
-            item.isOfTypeOrGroupType(.color) {
-            return true
-        }
-
-        if item.isOfTypeOrGroupType(.numberWithDimension) {
-            // Allow live updates for percent values, but not for e.g. temperatures
-            return stateValueAsNumberState?.unit == "%"
-        }
-
-        return false
-    }
-}
+extension OpenHABWidget: WidgetRendering {}

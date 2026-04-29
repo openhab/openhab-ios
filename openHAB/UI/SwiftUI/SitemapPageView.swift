@@ -25,12 +25,19 @@ struct SitemapPageView: View {
     var body: some View {
         Group {
             if viewModel.isLoading, viewModel.rowInputs.isEmpty {
-                // Show skeleton/placeholder rows while loading
-                List {
-                    ForEach(0 ..< 6, id: \.self) { _ in
-                        PlaceholderRowView()
-                            .redacted(reason: .placeholder)
-                            .disabled(true)
+                if isLinkedPage {
+                    // Linked page: structure unknown until poll returns — show a plain spinner
+                    // rather than a skeleton that implies known structure.
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    // Root page: show skeleton/placeholder rows while loading
+                    List {
+                        ForEach(0 ..< 6, id: \.self) { _ in
+                            PlaceholderRowView()
+                                .redacted(reason: .placeholder)
+                                .disabled(true)
+                        }
                     }
                 }
             } else {
@@ -51,6 +58,7 @@ struct SitemapPageView: View {
             viewModel.startPageHandling()
         }
         .onAppear {
+            viewModel.markAppeared()
             // Disable idle timer if configured in settings
             if Preferences.shared.idleOff {
                 UIApplication.shared.isIdleTimerDisabled = true

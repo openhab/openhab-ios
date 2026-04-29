@@ -17,6 +17,7 @@ let package = Package(
     dependencies: [
         .package(path: "../OpenHABCore"),
         .package(url: "https://github.com/apple/swift-numerics", from: "1.0.0"),
+        .package(url: "https://github.com/SFSafeSymbols/SFSafeSymbols", from: "7.0.0"),
         .package(url: "https://github.com/onevcat/Kingfisher.git", from: "8.6.1")
     ],
     targets: [
@@ -26,6 +27,7 @@ let package = Package(
             name: "CommonUI",
             dependencies: [
                 "OpenHABCore",
+                .product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
                 .product(name: "Kingfisher", package: "Kingfisher")
             ],
             swiftSettings: [

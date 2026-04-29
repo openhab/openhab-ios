@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import os.log
 
 @MainActor
 public final class WidgetCommandDispatcher {
@@ -133,18 +134,11 @@ public final class WidgetCommandDispatcher {
     }
 
     @MainActor
-    public func sendItemUpdate(_ state: NumberState?,
-                               for widget: OpenHABWidget,
-                               fallbackItem: OpenHABItem? = nil) {
+    public func send(_ state: NumberState?,
+                     for widget: OpenHABWidget,
+                     fallbackItem: OpenHABItem? = nil) {
         guard let state else { return }
-
-        if let item = widget.item ?? fallbackItem,
-           let sendCommand = widget.sendCommand {
-            sendCommand(item, state.commandString)
-            return
-        }
-
-        widget.sendItemUpdate(state: state)
+        send(state.commandString, for: widget, policy: .immediate, fallbackItem: fallbackItem)
     }
 
     @MainActor
@@ -218,12 +212,15 @@ public final class WidgetCommandDispatcher {
 
     @MainActor
     private func dispatch(command: String, for widget: OpenHABWidget, fallbackItem: OpenHABItem?) {
-        if let item = widget.item ?? fallbackItem,
-           let sendCommand = widget.sendCommand {
-            sendCommand(item, command)
+        guard let item = widget.item ?? fallbackItem else {
+            Logger.restAPI.info("Command for Item = nil")
             return
         }
-        widget.sendCommand(command)
+        guard let sendCommand = widget.sendCommand else {
+            Logger.restAPI.info("sendCommand closure not set")
+            return
+        }
+        sendCommand(item, command)
     }
 
     private func commandKey(for widget: OpenHABWidget, key: String?) -> String {

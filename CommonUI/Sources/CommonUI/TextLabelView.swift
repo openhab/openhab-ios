@@ -19,7 +19,7 @@ public struct TextLabelView: View {
     var lineLimit: Int
 
     public var body: some View {
-        Text(widget.labelText ?? "")
+        Text(widget.labelText)
             .ohTextToken(token)
             .font(font)
             .lineLimit(lineLimit)

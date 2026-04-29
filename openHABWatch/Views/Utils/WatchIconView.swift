@@ -72,8 +72,9 @@ struct WatchIconView: View {
                 let processorIconColor = iconURL.host == "api.iconify.design" ? nil : model.iconColorHex
                 KFImage.url(iconURL)
                     .withOpenHABCredentials(for: displayConnection)
-                    .onFailure { _ in
-                        Logger.rowViews.debug("Failed to load image : \(iconURL.absoluteString)")
+                    .onFailure { error in
+                        Logger.rowViews.error("Icon loading failed for icon '\(model.icon, privacy: .public)': \(error.localizedDescription, privacy: .public)")
+                        Logger.rowViews.error("Failed URL: \(iconURL.absoluteString, privacy: .public)")
                     }
                     .onFailureView {
                         Rectangle()
