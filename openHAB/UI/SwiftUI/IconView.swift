@@ -118,7 +118,6 @@ struct IconInputView: View {
                     .placeholder { _ in
                         Image(uiImage: currentImage ?? .init()).resizable()
                     }
-                    .cancelOnDisappear(true)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
                     .id("\(viewModel.pageId)-\(rowIdentity)-\(colorScheme)")
@@ -220,7 +219,6 @@ struct IconView: View {
                         // Workaround to show current image before new image is displayed. See https://github.com/onevcat/Kingfisher/issues/2028
                         Image(uiImage: currentImage ?? .init()).resizable()
                     }
-                    .cancelOnDisappear(true)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
                     .id("\(viewModel.pageId)-\(widget.id)-\(colorScheme)")
