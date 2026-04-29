@@ -18,7 +18,7 @@ import OpenHABCore
 protocol ItemEntityQuery: EntityStringQuery {
     associatedtype EntityType: ItemEntity
     var allowedTypes: [OpenHABItem.ItemType] { get set }
-    var selectedHomeId: UUID? { get }
+    var selectedHome: Home? { get }
 }
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
@@ -26,6 +26,16 @@ extension ItemEntityQuery {
     @MainActor
     func getHomeName(for homeId: UUID) -> String? {
         Preferences.shared.storedHomes[homeId]?.homeName
+    }
+
+    @MainActor
+    func resolvedSelectedHomeId() -> UUID? {
+        guard let home = selectedHome else { return nil }
+        let storedHomes = Preferences.shared.storedHomes
+        if let match = storedHomes.values.first(where: { $0.stableIdentifier == home.id }) {
+            return match.id
+        }
+        return UUID(uuidString: home.id)
     }
 
     func entityResults(from itemsByHome: [UUID: [OpenHABItem]]) async -> [EntityType] {
@@ -85,7 +95,8 @@ extension ItemEntityQuery {
 
     func suggestedEntities() async throws -> [EntityType] {
         // If the user selected a Home in the intent UI, scope results to that home.
-        if let selectedHomeId {
+        if let selectedHomeId = await resolvedSelectedHomeId() {
+            await OpenHABItemCache.instance.reloadCacheIfNeeded(homes: [selectedHomeId])
             let itemsByHome = await OpenHABItemCache.instance.getCachedOrPersistedItems(
                 types: allowedTypes.isEmpty ? nil : allowedTypes,
                 homes: [selectedHomeId]
@@ -95,6 +106,7 @@ extension ItemEntityQuery {
 
         // Fallback (e.g. Siri request without an explicit Home selection): return items across all homes.
         let storedHomes = await Preferences.shared.listStoredHomes()
+        await OpenHABItemCache.instance.reloadCacheIfNeeded(homes: storedHomes)
         let itemsByHome = await OpenHABItemCache.instance.getCachedOrPersistedItems(
             types: allowedTypes.isEmpty ? nil : allowedTypes,
             homes: storedHomes
@@ -103,6 +115,7 @@ extension ItemEntityQuery {
     }
 
     func entities(matching string: String) async throws -> [EntityType] {
+        let selectedHomeId = await resolvedSelectedHomeId()
         let searchResults = await OpenHABItemCache.instance.searchCachedOrPersistedItems(
             searchTerm: string,
             types: allowedTypes.isEmpty ? nil : allowedTypes,

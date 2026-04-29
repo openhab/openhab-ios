@@ -23,11 +23,11 @@ struct DimmerItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.dimmer, .rollershutter]
-        var selectedHomeId: UUID? {
+        var selectedHome: Home? {
             guard let intent else {
                 return nil
             }
-            return UUID(uuidString: intent.home.id)
+            return intent.home
         }
     }
 
@@ -56,11 +56,11 @@ struct ColorItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.color]
-        var selectedHomeId: UUID? {
+        var selectedHome: Home? {
             guard let intent else {
                 return nil
             }
-            return UUID(uuidString: intent.home.id)
+            return intent.home
         }
     }
 
@@ -89,11 +89,11 @@ struct NumberItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.number, .numberWithDimension]
-        var selectedHomeId: UUID? {
+        var selectedHome: Home? {
             guard let intent else {
                 return nil
             }
-            return UUID(uuidString: intent.home.id)
+            return intent.home
         }
     }
 
@@ -122,11 +122,11 @@ struct StringItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.stringItem]
-        var selectedHomeId: UUID? {
+        var selectedHome: Home? {
             guard let intent else {
                 return nil
             }
-            return UUID(uuidString: intent.home.id)
+            return intent.home
         }
     }
 
@@ -155,11 +155,11 @@ struct ContactItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.contact]
-        var selectedHomeId: UUID? {
+        var selectedHome: Home? {
             guard let intent else {
                 return nil
             }
-            return UUID(uuidString: intent.home.id)
+            return intent.home
         }
     }
 
@@ -188,11 +188,11 @@ struct GenericItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [] // Empty means all types
-        var selectedHomeId: UUID? {
+        var selectedHome: Home? {
             guard let intent else {
                 return nil
             }
-            return UUID(uuidString: intent.home.id)
+            return intent.home
         }
     }
 
@@ -221,11 +221,11 @@ struct PlayerItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.player]
-        var selectedHomeId: UUID? {
+        var selectedHome: Home? {
             guard let intent else {
                 return nil
             }
-            return UUID(uuidString: intent.home.id)
+            return intent.home
         }
     }
 
@@ -254,11 +254,11 @@ struct DateTimeItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.dateTime]
-        var selectedHomeId: UUID? {
+        var selectedHome: Home? {
             guard let intent else {
                 return nil
             }
-            return UUID(uuidString: intent.home.id)
+            return intent.home
         }
     }
 
@@ -287,11 +287,11 @@ struct LocationItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.location]
-        var selectedHomeId: UUID? {
+        var selectedHome: Home? {
             guard let intent else {
                 return nil
             }
-            return UUID(uuidString: intent.home.id)
+            return intent.home
         }
     }
 
@@ -320,11 +320,11 @@ struct SwitchItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.switchItem]
-        var selectedHomeId: UUID? {
+        var selectedHome: Home? {
             guard let intent else {
                 return nil
             }
-            return UUID(uuidString: intent.home.id)
+            return intent.home
         }
     }
 
