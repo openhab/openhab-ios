@@ -10,19 +10,9 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import CommonUI
-import Flow
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
-
-private struct TextRowConfig {
-    let input: TextRowInput
-}
-
-@MainActor
-private func makeTextRowContent(_ config: TextRowConfig) -> TextRowContent {
-    TextRowContent(input: config.input)
-}
 
 private struct TextRowContent: View {
     let input: TextRowInput
@@ -36,7 +26,7 @@ private struct TextRowContent: View {
                 Text(displayState.labelText)
                     .ohTextToken(.rowLabel)
                     .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
-                    
+
                     Spacer(minLength: 8)
                 }
 
@@ -68,7 +58,7 @@ struct TextRowView: View {
     let input: TextRowInput
 
     var body: some View {
-        makeTextRowContent(TextRowConfig(input: input))
+        TextRowContent(input: input)
     }
 }
 
