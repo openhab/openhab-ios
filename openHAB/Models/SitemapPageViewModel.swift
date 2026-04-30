@@ -395,6 +395,16 @@ extension SitemapPageViewModel {
                            reason: String = "manual",
                            preserveCurrentContent: Bool = false,
                            recreateService: Bool = false) {
+        guard networkTracker.activeConnection != nil || networkTracker.status != .stopped else {
+            logger.info("Deferring page load until NetworkTracker starts (reason: \(reason, privacy: .public))")
+            error = nil
+            if currentPage == nil {
+                isLoading = true
+            }
+            isUpdating = false
+            return
+        }
+
         let pipelineStart = Date()
         let requestedKey = "\(defaultSitemap)|\(pageId)"
         if !forceRestart,
