@@ -31,11 +31,13 @@ private struct TextRowContent: View {
         let displayState = input.displayState
         RowViewWithIcon(input: input, spacing: 8) {
             let labelShown = !displayState.labelText.isEmpty
-            HFlow(spacing: labelShown ? 8 : 0, justified: true) {
+            HStack {
                 if labelShown {
-                    Text(displayState.labelText)
-                        .ohTextToken(.rowLabel)
-                        .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
+                Text(displayState.labelText)
+                    .ohTextToken(.rowLabel)
+                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
+                    
+                    Spacer(minLength: 8)
                 }
 
                 if let value = displayState.labelValue {

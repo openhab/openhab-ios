@@ -26,6 +26,6 @@ struct FrameRow: View {
 #Preview {
     let widget = PreviewWidgetFactory.frame(label: "Environment")
     PreviewNavigationContainer {
-        FrameRow(title: widget.labelText ?? "")
+        FrameRow(title: widget.labelText)
     }
 }

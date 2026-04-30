@@ -147,7 +147,7 @@ struct SelectionRow: View {
         SelectionRow(
             widget: widget,
             mappings: widget.mappingsOrItemOptions,
-            title: widget.labelText ?? "Select",
+            title: widget.labelText.isEmpty ? "Select" : widget.labelText,
             initialSelectedIndex: widget.mappingIndex(byCommand: widget.item?.state).map { Int($0) },
             labelValue: widget.labelValue
         )
@@ -165,7 +165,7 @@ struct SelectionRow: View {
         SelectionListView(
             widget: widget,
             mappings: widget.mappingsOrItemOptions,
-            title: widget.labelText ?? "Select",
+            title: widget.labelText.isEmpty ? "Select" : widget.labelText,
             selectedIndex: $selectedIndex
         )
     }

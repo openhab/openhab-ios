@@ -113,6 +113,26 @@ public struct HomePreferences: Codable, Equatable {
 @MainActor
 public struct ApplicationPreferences: Codable, Equatable {
     public var showSearchField = true
+    public var sitemapDiagnosticsLogging = false
+
+    public init(
+        showSearchField: Bool = true,
+        sitemapDiagnosticsLogging: Bool = false
+    ) {
+        self.showSearchField = showSearchField
+        self.sitemapDiagnosticsLogging = sitemapDiagnosticsLogging
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case showSearchField
+        case sitemapDiagnosticsLogging
+    }
+
+    nonisolated public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        showSearchField = try container.decodeIfPresent(Bool.self, forKey: .showSearchField) ?? true
+        sitemapDiagnosticsLogging = try container.decodeIfPresent(Bool.self, forKey: .sitemapDiagnosticsLogging) ?? false
+    }
 }
 
 // MARK: Retrieving preference from user defaults, reacting to preference change

@@ -97,9 +97,17 @@ class SitemapPageViewModel: ObservableObject {
     private var commandStateVersions: [String: Int] = [:]
     private var queuedCommands: [String: QueuedCommand] = [:]
     private var rowWidgetIndex: [RowID: OpenHABWidget] = [:]
+    private var previousBuildRenderKeys: [WidgetRenderKey] = []
+    private var previousBuildRowIDs: [RowID] = []
     private var sliderValueOverrides: [String: Double] = [:]
     private var sliderOverrideResetTasks: [String: Task<Void, Never>] = [:]
-    private var lastForegroundRefreshAt: Date = .distantPast
+    var lastForegroundRefreshAt: Date = .distantPast
+    private var isPageVisibleForRefresh = false
+    private var lastUIUpdateAt: Date = .distantPast
+    private var pendingLongPollPage: OpenHABPage?
+    private var longPollDebounceTask: Task<Void, Never>?
+    private var foregroundObserverTask: Task<Void, Never>?
+    private var rowInputRebuildTask: Task<Void, Never>?
 
     var relevantWidgets: [OpenHABWidget] {
         let widgets = currentPage?.widgets ?? []
@@ -183,8 +191,8 @@ class SitemapPageViewModel: ObservableObject {
 
     init(pageUrl: String, title: String, pageId: String = "") {
         loadSettings()
-        startObservers()
         isLinkedPage = true
+        startObservers()
         fallbackTitle = title
         defaultSitemapLabel = title
 
@@ -263,28 +271,35 @@ class SitemapPageViewModel: ObservableObject {
                 }
             }
         }
+
+        // Linked pages are not covered by SitemapNavigationView's scenePhase observer.
+        // Observe UIApplication.didBecomeActiveNotification directly — more reliable than
+        // scenePhase environment propagation through NavigationLink destinations.
+        if isLinkedPage {
+            foregroundObserverTask = Task { [weak self] in
+                let notifications = NotificationCenter.default.notifications(
+                    named: UIApplication.didBecomeActiveNotification
+                )
+                for await _ in notifications {
+                    await MainActor.run { [weak self] in
+                        self?.refreshOnForeground()
+                    }
+                }
+            }
+        }
     }
 
     func rebuildRowInputs() {
         let pageKey = "\(defaultSitemap)|\(pageId)"
-        var occurrenceByWidgetID: [String: Int] = [:]
-        var inputs: [SitemapRowInput] = []
-        var index: [RowID: OpenHABWidget] = [:]
-        inputs.reserveCapacity(relevantWidgets.count)
-        index.reserveCapacity(relevantWidgets.count)
-
-        for widget in relevantWidgets {
-            let identityWidgetID = SitemapRowInputMapper.rowIdentityWidgetID(for: widget)
-            occurrenceByWidgetID[identityWidgetID, default: 0] += 1
-            let occurrence = occurrenceByWidgetID[identityWidgetID]!
-            let rowID = RowID(pageKey: pageKey, widgetId: identityWidgetID, occurrence: occurrence)
-            let input = SitemapRowInputMapper.map(widget: widget, rowID: rowID)
-            inputs.append(input)
-            index[rowID] = widget
+        let widgets = relevantWidgets
+        rowInputRebuildTask?.cancel()
+        rowInputRebuildTask = Task { [weak self, pageKey, widgets] in
+            let result = await SitemapPageViewModel.buildRowInputs(pageKey: pageKey, widgets: widgets)
+            await MainActor.run {
+                guard let self, !Task.isCancelled else { return }
+                self.applySnapshotRowInputBuildResult(result, widgets: widgets)
+            }
         }
-
-        rowWidgetIndex = index
-        rowInputs = inputs
     }
 
     func widget(for rowID: RowID) -> OpenHABWidget? {
@@ -316,12 +331,15 @@ class SitemapPageViewModel: ObservableObject {
     deinit {
         connectionObserverTask?.cancel()
         networkStatusObserverTask?.cancel()
+        foregroundObserverTask?.cancel()
         pageHandlingTask?.cancel()
         foregroundRefreshTask?.cancel()
+        longPollDebounceTask?.cancel()
         commandStateResetTasks.values.forEach { $0.cancel() }
         commandStateResetTasks.removeAll()
         sliderOverrideResetTasks.values.forEach { $0.cancel() }
         sliderOverrideResetTasks.removeAll()
+        rowInputRebuildTask?.cancel()
     }
 }
 
@@ -332,16 +350,27 @@ extension SitemapPageViewModel {
         showSearchField = Preferences.shared.applicationPreferences.showSearchField
     }
 
+    func markAppeared() {
+        isPageVisibleForRefresh = true
+    }
+
     func stopPageHandling() {
+        isPageVisibleForRefresh = false
         pageHandlingTask?.cancel()
         pageHandlingTask = nil
         foregroundRefreshTask?.cancel()
         foregroundRefreshTask = nil
+        longPollDebounceTask?.cancel()
+        longPollDebounceTask = nil
+        pendingLongPollPage = nil
         activePageHandlingKey = nil
         activePageHandlingID = nil
     }
 
     func refreshOnForeground() {
+        // Only refresh pages that are currently visible. Off-screen pages are marked not visible via
+        // stopPageHandling() when they disappear; they restart via .task when re-shown.
+        guard isPageVisibleForRefresh else { return }
         // Coalesce repeated .active transitions from scene/system churn.
         let now = Date()
         guard now.timeIntervalSince(lastForegroundRefreshAt) > 0.75 else { return }
@@ -377,6 +406,10 @@ extension SitemapPageViewModel {
         }
 
         pageHandlingTask?.cancel()
+        longPollDebounceTask?.cancel()
+        longPollDebounceTask = nil
+        pendingLongPollPage = nil
+        lastUIUpdateAt = .distantPast
         error = nil // Clear any previous errors when starting a new page handling session
         if preserveCurrentContent, currentPage != nil {
             isLoading = false
@@ -490,7 +523,7 @@ extension SitemapPageViewModel {
         }
 
         if let page = initialPage {
-            updateUI(with: page, origin: .initialPoll)
+            await updateUI(with: page, origin: .initialPoll)
         } else {
             logger.info("Initial sitemap poll returned no page data")
         }
@@ -511,7 +544,7 @@ extension SitemapPageViewModel {
                 }
 
                 if let page {
-                    updateUI(with: page, origin: .longPolling)
+                    scheduleLongPollUIUpdate(page: page, runID: runID)
                 }
             } catch {
                 try Task.checkCancellation()
@@ -525,31 +558,139 @@ extension SitemapPageViewModel {
         }
     }
 
+    private func scheduleLongPollUIUpdate(page: OpenHABPage, runID: UUID) {
+        let minInterval: TimeInterval = 0.25
+        let elapsed = Date().timeIntervalSince(lastUIUpdateAt)
+
+        if elapsed >= minInterval {
+            // Quiet period has elapsed — apply immediately, no delay.
+            longPollDebounceTask?.cancel()
+            longPollDebounceTask = nil
+            pendingLongPollPage = nil
+            lastUIUpdateAt = Date()
+            Task { @MainActor [weak self] in
+                await self?.updateUI(with: page, origin: .longPolling)
+            }
+        } else {
+            // Within burst window — store latest page and (re)schedule a deferred apply.
+            // Earlier pending page is discarded; the newest server state always wins.
+            pendingLongPollPage = page
+            longPollDebounceTask?.cancel()
+            let remaining = minInterval - elapsed
+            longPollDebounceTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .seconds(remaining))
+                guard let self, !Task.isCancelled,
+                      self.activePageHandlingID == runID,
+                      let page = self.pendingLongPollPage else { return }
+                self.pendingLongPollPage = nil
+                self.lastUIUpdateAt = Date()
+                await self.updateUI(with: page, origin: .longPolling)
+            }
+        }
+    }
+
     @MainActor
-    private func updateUI(with page: OpenHABPage, origin: PageUpdateOrigin) {
+    private func updateUI(with page: OpenHABPage, origin: PageUpdateOrigin) async {
         logger.debug("Incoming sitemap update origin=\(origin.rawValue, privacy: .public), widgets=\(page.widgets.count)")
+        let titleChanged = currentPage == nil || currentPage?.title != page.title
+        let oldInputs = rowInputs
         let newWidgets = page.widgets
 
-        // Check if list structure changed (count, order, or IDs)
-        let currentWidgets = currentPage?.widgets ?? []
-        let structureChanged = currentWidgets.count != newWidgets.count
-            || !zip(currentWidgets, newWidgets).allSatisfy { $0.widgetId == $1.widgetId }
-        let reconciledWidgets = reconcileWidgets(newWidgets, with: currentWidgets)
+        // Phase 1: apply new page directly — no reconcile needed.
+        // The new architecture (SitemapRowInput value types + WidgetRenderKey change detection)
+        // does not rely on widget object identity.
+        injectSendCommand(for: newWidgets)
+        currentPage = page
 
-        // Only replace currentPage when structure or title changed
-        if structureChanged || currentPage?.title != page.title || currentPage == nil {
-            page.widgets = reconciledWidgets
-            injectSendCommand(for: reconciledWidgets)
-            currentPage = page
-        } else {
-            currentPage?.widgets = reconciledWidgets
-            // Inject sendCommand into existing widgets without replacing the page
-            injectSendCommand(for: reconciledWidgets)
+        // Phase 2: slider override sync
+        _ = clearSyncedSliderOverrides(using: newWidgets)
+
+        // Phase 3: row input rebuild (incremental — reuses inputs for unchanged rows)
+        let pageKey = "\(defaultSitemap)|\(pageId)"
+        let visibleWidgets = relevantWidgets
+        let prevRenderKeys = previousBuildRenderKeys
+        let prevRowIDs = previousBuildRowIDs
+        let prevInputs = rowInputs
+        rowInputRebuildTask?.cancel()
+        rowInputRebuildTask = nil
+        let rowInputBuildResult = await SitemapPageViewModel.buildRowInputs(
+            pageKey: pageKey,
+            widgets: visibleWidgets,
+            previousRenderKeys: prevRenderKeys,
+            previousInputs: prevInputs,
+            previousRowIDs: prevRowIDs
+        )
+        applySnapshotRowInputBuildResult(rowInputBuildResult, widgets: visibleWidgets)
+
+        let inputsChanged = rowInputs != oldInputs
+
+        // Bump widget update versions only for rows whose content changed.
+        // When count is stable, zip lets us pinpoint exactly which rows differ.
+        // When structure changed (rows added/removed), fall back to bumping all.
+        if inputsChanged {
+            if rowInputs.count == oldInputs.count {
+                for (newInput, oldInput) in zip(rowInputs, oldInputs) where newInput != oldInput {
+                    if let widget = rowWidgetIndex[newInput.rowID] {
+                        widgetUpdateVersions[widget.widgetId, default: 0] += 1
+                    }
+                }
+            } else {
+                trackWidgetUpdates(in: newWidgets)
+            }
         }
 
-        trackWidgetUpdates(in: reconciledWidgets)
-        _ = clearSyncedSliderOverrides(using: reconciledWidgets)
-        rebuildRowInputs()
+        // Diagnostic logging — all O(N) analysis work is guarded so it never runs in production.
+        if SitemapDiagnostics.isEnabled {
+            let t0 = Date()
+            let changedRowCount = rowInputs.count == oldInputs.count
+                ? zip(rowInputs, oldInputs).reduce(into: 0) { n, pair in if pair.0 != pair.1 { n += 1 } }
+                : rowInputs.count
+            let changedRowKinds = SitemapDiagnostics.changedRowKinds(from: oldInputs, to: rowInputs)
+            let analysisMs = Int((Date().timeIntervalSince(t0) * 1000).rounded())
+            SitemapDiagnostics.logUpdate(
+                origin: origin,
+                widgetCount: page.widgets.count,
+                rowCount: rowInputs.count,
+                inputsChanged: inputsChanged,
+                titleChanged: titleChanged,
+                reusedInputCount: rowInputBuildResult.reusedInputCount,
+                changedRowCount: changedRowCount,
+                changedRowKinds: changedRowKinds,
+                analysisMs: analysisMs
+            )
+        }
+    }
+
+    private func applySnapshotRowInputBuildResult(_ result: SnapshotRowInputBuildResult, widgets: [OpenHABWidget]) {
+        var index: [RowID: OpenHABWidget] = [:]
+        index.reserveCapacity(min(result.rowIDs.count, widgets.count))
+        for (rowID, widget) in zip(result.rowIDs, widgets) {
+            index[rowID] = widget
+        }
+
+        rowWidgetIndex = index
+        previousBuildRenderKeys = result.renderKeys
+        previousBuildRowIDs = result.rowIDs
+        if result.inputs != rowInputs {
+            rowInputs = result.inputs
+        }
+    }
+
+    private static func buildRowInputs(pageKey: String,
+                                       widgets: [OpenHABWidget],
+                                       previousRenderKeys: [WidgetRenderKey] = [],
+                                       previousInputs: [SitemapRowInput] = [],
+                                       previousRowIDs: [RowID] = []) async -> SnapshotRowInputBuildResult {
+        let snapshots = widgets.map { WidgetMappingSnapshot(widget: $0) }
+        return await Task.detached(priority: .userInitiated) {
+            SitemapRowInputSnapshotBuilder.buildIncrementally(
+                pageKey: pageKey,
+                widgets: snapshots,
+                previousRenderKeys: previousRenderKeys,
+                previousInputs: previousInputs,
+                previousRowIDs: previousRowIDs
+            )
+        }.value
     }
 
     private func trackWidgetUpdates(in widgets: [OpenHABWidget]) {
@@ -630,76 +771,8 @@ extension SitemapPageViewModel {
 
         injectSendCommand(for: page.widgets)
         currentPage = page
-        rebuildRowInputs()
-    }
-
-    private func reconcileWidgets(_ newWidgets: [OpenHABWidget], with currentWidgets: [OpenHABWidget]) -> [OpenHABWidget] {
-        var buckets: [String: [OpenHABWidget]] = [:]
-        for widget in currentWidgets {
-            buckets[widget.widgetId, default: []].append(widget)
-        }
-
-        var reconciled: [OpenHABWidget] = []
-        reconciled.reserveCapacity(newWidgets.count)
-
-        for newWidget in newWidgets {
-            if var candidates = buckets[newWidget.widgetId], !candidates.isEmpty {
-                let existing = candidates.removeFirst()
-                buckets[newWidget.widgetId] = candidates
-
-                // Always copy server properties to avoid missing updates when
-                // non-keyed fields change (for example group summary/state rows).
-                let previousChildren = existing.widgets
-                copyWidgetProperties(from: newWidget, to: existing)
-                existing.widgets = reconcileWidgets(newWidget.widgets, with: previousChildren)
-
-                reconciled.append(existing)
-            } else {
-                reconciled.append(newWidget)
-            }
-        }
-
-        return reconciled
-    }
-
-    private func copyWidgetProperties(from source: OpenHABWidget, to target: OpenHABWidget) {
-        target.label = source.label
-        target.icon = source.icon
-        target.state = source.state
-        target.type = source.type
-        target.isLeaf = source.isLeaf
-        target.item = source.item
-        target.iconColor = source.iconColor
-        target.labelcolor = source.labelcolor
-        target.valuecolor = source.valuecolor
-        target.url = source.url
-        target.period = source.period
-        target.service = source.service
-        target.legend = source.legend
-        target.refresh = source.refresh
-        target.height = source.height
-        target.forceAsItem = source.forceAsItem
-        target.minValue = source.minValue
-        target.maxValue = source.maxValue
-        target.step = source.step
-        target.pattern = source.pattern
-        target.unit = source.unit
-        target.switchSupport = source.switchSupport
-        target.mappings = source.mappings
-        target.linkedPage = source.linkedPage
-        target.visibility = source.visibility
-        target.staticIcon = source.staticIcon
-        target.text = source.text
-        target.inputHint = source.inputHint
-        target.encoding = source.encoding
-        target.labelSource = source.labelSource
-        target.releaseOnly = source.releaseOnly
-        target.row = source.row
-        target.column = source.column
-        target.releaseCommand = source.releaseCommand
-        target.command = source.command
-        target.stateless = source.stateless
-        target.yAxisDecimalPattern = source.yAxisDecimalPattern
+        let result = await SitemapPageViewModel.buildRowInputs(pageKey: "\(defaultSitemap)|\(pageId)", widgets: relevantWidgets)
+        applySnapshotRowInputBuildResult(result, widgets: relevantWidgets)
     }
 
     private func shouldRetryLongPolling(after error: any Error) -> Bool {
