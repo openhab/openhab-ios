@@ -122,6 +122,12 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     }
 }
 
+public enum SitemapWidgetEventApplicationResult: Equatable, Sendable {
+    case applied
+    case notFound
+    case requiresPageReload
+}
+
 public extension OpenHABWidget {
     /// This is an ugly initializer
     convenience init(widgetId: String,
@@ -238,6 +244,43 @@ public extension [OpenHABWidget] {
                 flatten(widget.widgets)
             }
         }
+    }
+}
+
+public extension OpenHABWidget {
+    @discardableResult
+    func apply(event: OpenHABSitemapWidgetEvent) -> SitemapWidgetEventApplicationResult {
+        guard let eventWidgetId = event.widgetId else { return .notFound }
+
+        if widgetId == eventWidgetId {
+            guard event.descriptionChanged != true else {
+                return .requiresPageReload
+            }
+            if let label = event.label { self.label = label }
+            if let icon = event.icon { self.icon = icon }
+            if let labelcolor = event.labelcolor { self.labelcolor = labelcolor }
+            if let valuecolor = event.valuecolor { self.valuecolor = valuecolor }
+            if let iconcolor = event.iconcolor { iconColor = iconcolor }
+            if let visibility = event.visibility { self.visibility = visibility }
+            if let state = event.state {
+                self.state = state
+            } else if let itemState = event.enrichedItem?.state {
+                state = itemState
+            }
+            if let item = event.enrichedItem { self.item = item }
+            if let labelSource = event.labelSource {
+                self.labelSource = OpenHABWidget.LabelSource(rawValue: labelSource) ?? .unknown
+            }
+            return .applied
+        }
+
+        for widget in widgets {
+            let result = widget.apply(event: event)
+            if result != .notFound {
+                return result
+            }
+        }
+        return .notFound
     }
 }
 

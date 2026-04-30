@@ -40,11 +40,14 @@ class SitemapPageViewModel: ObservableObject {
     let networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
     private var activeConnectionInfo: ConnectionInfo?
+    private var serverProperties: OpenHABServerProperties?
     private var pageHandlingTask: Task<Void, Never>?
+    private var sseStreamTask: Task<Void, Never>?
     private var foregroundRefreshTask: Task<Void, Never>?
     private var connectionObserverTask: Task<Void, Never>?
     private var networkStatusObserverTask: Task<Void, Never>?
     private let commandDispatcher = WidgetCommandDispatcher()
+    private let sitemapEventStream = SitemapEventStream()
     private var defaultSitemap = ""
     private var defaultSitemapLabel = ""
     private var fallbackTitle = ""
@@ -52,6 +55,8 @@ class SitemapPageViewModel: ObservableObject {
     private var isLinkedPage = false
     private var pageNetworkStatus: NetworkStatus?
     private var pageNetworkStatusAvailable = false
+    private var sseConnected = false
+    private var ssePreferred = true
     private var activePageHandlingKey: String?
     private var activePageHandlingID: UUID?
     private var commandStateResetTasks: [String: Task<Void, Never>] = [:]
@@ -235,6 +240,9 @@ class SitemapPageViewModel: ObservableObject {
         networkStatusObserverTask?.cancel()
         foregroundObserverTask?.cancel()
         pageHandlingTask?.cancel()
+        sseStreamTask?.cancel()
+        let stream = sitemapEventStream
+        Task { await stream.stop() }
         foregroundRefreshTask?.cancel()
         longPollDebounceTask?.cancel()
         commandStateResetTasks.values.forEach { $0.cancel() }
@@ -277,6 +285,10 @@ extension SitemapPageViewModel {
         isPageVisibleForRefresh = false
         pageHandlingTask?.cancel()
         pageHandlingTask = nil
+        sseStreamTask?.cancel()
+        sseStreamTask = nil
+        let stream = sitemapEventStream
+        Task { await stream.stop() }
         foregroundRefreshTask?.cancel()
         foregroundRefreshTask = nil
         longPollDebounceTask?.cancel()
@@ -335,12 +347,17 @@ extension SitemapPageViewModel {
         }
 
         pageHandlingTask?.cancel()
+        sseStreamTask?.cancel()
+        sseStreamTask = nil
         longPollDebounceTask?.cancel()
         longPollDebounceTask = nil
         pendingLongPollPage = nil
         lastUIUpdateAt = .distantPast
         coalescedLongPollUpdateCount = 0
         error = nil // Clear any previous errors when starting a new page handling session
+        if reason != "sse-fallback" {
+            ssePreferred = true
+        }
         if preserveCurrentContent, currentPage != nil {
             isLoading = false
             isUpdating = true
@@ -407,6 +424,9 @@ extension SitemapPageViewModel {
 
             diagnostics.beginServiceSetup(connection: activeConnection.configuration)
             try setupServiceIfNeeded(activeConnection: activeConnection, forceRecreate: recreateService)
+            if serverProperties == nil {
+                serverProperties = try? await openAPIService?.getRoot()
+            }
 
             if defaultSitemapLabel.isEmpty {
                 diagnostics.beginLabelFetch()
@@ -463,7 +483,13 @@ extension SitemapPageViewModel {
                         page: page,
                         rowCount: rowInputs.count
                     )
-                    logger.info("Sitemap pipeline initial load completed")
+                    if shouldUseSSE() {
+                        logger.info("Using SSE for sitemap updates")
+                        let ssePageId = currentPage?.pageId.isEmpty == false ? currentPage!.pageId : defaultSitemap
+                        await startSSE(sitemap: defaultSitemap, pageId: ssePageId)
+                        return // SSE takes over; stream task cancelled via onTermination
+                    }
+                    logger.info("Using long polling for sitemap updates")
                 case let .longPoll(page, requestMs):
                     let responseGapMs = lastResponseAt.map { Int((responseAt.timeIntervalSince($0) * 1000).rounded()) }
                     SitemapDiagnostics.logLongPoll(
@@ -517,6 +543,7 @@ extension SitemapPageViewModel {
         }
         activeConnectionInfo = activeConnection
         openHABRootUrl = activeConnection.configuration.url
+        serverProperties = nil
         return activeConnection
     }
 
@@ -757,6 +784,7 @@ extension SitemapPageViewModel {
 
         activeConnectionInfo = activeConnection
         openAPIService = try makeSitemapService(for: activeConnection)
+        serverProperties = try? await openAPIService?.getRoot()
     }
 
     private func loadCurrentPage() async throws {
@@ -817,6 +845,7 @@ extension SitemapPageViewModel {
         navigationPath = []
         pendingLinkedPageNavigation = nil
         error = nil
+        ssePreferred = true
     }
 
     @MainActor
@@ -950,10 +979,15 @@ extension SitemapPageViewModel {
         // Save the active connection information
         activeConnectionInfo = connection
         openHABRootUrl = newURL
+        if connectionDidChange {
+            serverProperties = nil
+        }
+        ssePreferred = true
 
         do {
             // Setup the OpenAPI service based on the new connection
             openAPIService = try makeSitemapService(for: connection)
+            serverProperties = try? await openAPIService?.getRoot()
             // Restart when connection changed, or when polling is currently inactive.
             let shouldRestart = connectionDidChange
                 || pageHandlingTask == nil
@@ -968,6 +1002,7 @@ extension SitemapPageViewModel {
 
     // swiftlint:disable:next async_without_await
     func selectSitemap() async {
+        ssePreferred = true
         startPageHandling(forceRestart: true, reason: "select-sitemap")
     }
 
@@ -1113,6 +1148,136 @@ extension SitemapPageViewModel {
         let command = state.commandString
         commandDispatcher.send(command, for: itemname, policy: policy, phase: phase, key: key) { [weak self] itemname, command in
             self?.sendCommand(itemname: itemname, command: command, origin: .update)
+        }
+    }
+}
+
+@MainActor
+private extension SitemapPageViewModel {
+    func shouldUseSSE() -> Bool {
+        ssePreferred && serverProperties?.hasSseSupport() == true
+    }
+
+    func startSSE(sitemap: String, pageId: String) async {
+        sseConnected = false
+        sseStreamTask?.cancel()
+
+        logger.info("Starting sitemap SSE for \(sitemap, privacy: .public)/\(pageId, privacy: .public)")
+        await sitemapEventStream.startMonitoringNetworkIfNeeded()
+        let stream = await sitemapEventStream.stream(sitemap: sitemap, pageId: pageId)
+
+        sseStreamTask = Task { [weak self] in
+            guard let self else { return }
+            for await msg in stream {
+                await MainActor.run { [weak self] in
+                    guard let self else { return }
+                    handleSseOutput(msg)
+                }
+            }
+        }
+    }
+
+    func handleSseOutput(_ msg: StreamOutput<SitemapEventMessage>) {
+        switch msg {
+        case .connected:
+            logger.info("Sitemap SSE connected")
+            sseConnected = true
+            ssePreferred = true
+            isUpdating = false
+        case let .disconnected(error):
+            logger.warning("Sitemap SSE disconnected: \(error?.localizedDescription ?? "nil", privacy: .public)")
+            isUpdating = false
+            guard shouldFallbackToLongPolling(after: error) else { return }
+            startLongPollingFallback(error)
+        case let .event(message):
+            handleSseMessage(message)
+        }
+    }
+
+    func shouldFallbackToLongPolling(after error: (any Error)?) -> Bool {
+        guard let error else { return !sseConnected }
+        if let sseError = error as? SitemapSseError {
+            switch sseError {
+            case .unsupported:
+                return true
+            }
+        }
+        return !sseConnected
+    }
+
+    func startLongPollingFallback(_ error: (any Error)?) {
+        ssePreferred = false
+        sseStreamTask?.cancel()
+        sseStreamTask = nil
+        Task {
+            await sitemapEventStream.stop()
+        }
+
+        if let error {
+            logger.warning("SSE unavailable (\(error.localizedDescription, privacy: .public)), falling back to long polling")
+        } else {
+            logger.warning("SSE unavailable, falling back to long polling")
+        }
+        startPageHandling(
+            forceRestart: true,
+            reason: "sse-fallback",
+            preserveCurrentContent: true,
+            recreateService: false
+        )
+    }
+
+    func handleSseMessage(_ message: SitemapEventMessage) {
+        switch message {
+        case .alive:
+            return
+        case let .sitemapChanged(sitemap, pageId):
+            logger.info("SSE sitemap changed \(sitemap.orEmpty, privacy: .public)/\(pageId.orEmpty, privacy: .public)")
+            startPageHandling(
+                forceRestart: true,
+                reason: "sse-sitemap-changed",
+                preserveCurrentContent: true,
+                recreateService: false
+            )
+        case let .widget(event):
+            applySseWidgetEvent(event)
+        case let .unknown(raw):
+            logger.debug("SSE unknown event: \(raw, privacy: .public)")
+        }
+    }
+
+    func applySseWidgetEvent(_ event: OpenHABSitemapWidgetEvent) {
+        guard let currentPage else { return }
+        guard let widgetId = event.widgetId else { return }
+
+        if widgetId == pageId, let label = event.label {
+            objectWillChange.send()
+            currentPage.title = label
+            return
+        }
+
+        switch currentPage.apply(event: event) {
+        case .applied:
+            objectWillChange.send()
+            widgetUpdateVersions[widgetId, default: 0] += 1
+            _ = clearSyncedSliderOverrides(using: currentPage.widgets)
+            rebuildRowInputs()
+            isUpdating = false
+        case .requiresPageReload:
+            logger.info("SSE widget \(widgetId, privacy: .public) requires full sitemap reload")
+            startPageHandling(
+                forceRestart: true,
+                reason: "sse-widget-reload-required",
+                preserveCurrentContent: true,
+                recreateService: false
+            )
+        case .notFound:
+            logger.info("SSE widget \(widgetId, privacy: .public) not found, reloading sitemap")
+            startPageHandling(
+                forceRestart: true,
+                reason: "sse-widget-missing",
+                preserveCurrentContent: true,
+                recreateService: false
+            )
         }
     }
 }

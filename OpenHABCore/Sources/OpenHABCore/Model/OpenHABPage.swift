@@ -62,9 +62,18 @@ public extension OpenHABPage {
             icon: icon
         )
     }
-}
 
-public extension OpenHABPage {
+    @discardableResult
+    func apply(event: OpenHABSitemapWidgetEvent) -> SitemapWidgetEventApplicationResult {
+        for widget in widgets {
+            let result = widget.apply(event: event)
+            if result != .notFound {
+                return result
+            }
+        }
+        return .notFound
+    }
+
     convenience init?(_ page: Components.Schemas.PageDTO?) {
         if let page {
             self.init(

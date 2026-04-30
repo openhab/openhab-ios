@@ -11,23 +11,36 @@
 
 import Foundation
 
-public class OpenHABSitemapWidgetEvent {
-    var sitemapName: String?
-    var pageId: String?
-    var widgetId: String?
-    var label: String?
-    var labelSource: String?
-    var icon: String?
-    var reloadIcon: Bool?
-    var labelcolor: String?
-    var valuecolor: String?
-    var iconcolor: String?
-    var visibility: Bool?
-    var state: String?
-    var enrichedItem: OpenHABItem?
-    var descriptionChanged: Bool?
+public struct OpenHABSitemapWidgetEvent: Sendable {
+    public let sitemapName: String?
+    public let pageId: String?
+    public let widgetId: String?
+    public let label: String?
+    public let labelSource: String?
+    public let icon: String?
+    public let reloadIcon: Bool?
+    public let labelcolor: String?
+    public let valuecolor: String?
+    public let iconcolor: String?
+    public let visibility: Bool?
+    public let state: String?
+    public let enrichedItem: OpenHABItem?
+    public let descriptionChanged: Bool?
 
-    init(sitemapName: String? = nil, pageId: String? = nil, widgetId: String? = nil, label: String? = nil, labelSource: String? = nil, icon: String? = nil, reloadIcon: Bool? = nil, labelcolor: String? = nil, valuecolor: String? = nil, iconcolor: String? = nil, visibility: Bool? = nil, state: String? = nil, enrichedItem: OpenHABItem? = nil, descriptionChanged: Bool? = nil) {
+    public init(sitemapName: String? = nil,
+                pageId: String? = nil,
+                widgetId: String? = nil,
+                label: String? = nil,
+                labelSource: String? = nil,
+                icon: String? = nil,
+                reloadIcon: Bool? = nil,
+                labelcolor: String? = nil,
+                valuecolor: String? = nil,
+                iconcolor: String? = nil,
+                visibility: Bool? = nil,
+                state: String? = nil,
+                enrichedItem: OpenHABItem? = nil,
+                descriptionChanged: Bool? = nil) {
         self.sitemapName = sitemapName
         self.pageId = pageId
         self.widgetId = widgetId
@@ -44,10 +57,24 @@ public class OpenHABSitemapWidgetEvent {
         self.descriptionChanged = descriptionChanged
     }
 
-    convenience init?(_ event: Components.Schemas.SitemapWidgetEvent?) {
+    public init?(_ event: Components.Schemas.SitemapWidgetEvent?) {
         guard let event else { return nil }
-        // swiftlint:disable:next line_length
-        self.init(sitemapName: event.sitemapName, pageId: event.pageId, widgetId: event.widgetId, label: event.label, labelSource: event.labelSource, icon: event.icon, reloadIcon: event.reloadIcon, labelcolor: event.labelcolor, valuecolor: event.valuecolor, iconcolor: event.iconcolor, visibility: event.visibility, state: event.state, enrichedItem: OpenHABItem(event.item), descriptionChanged: event.descriptionChanged)
+        self.init(
+            sitemapName: event.sitemapName,
+            pageId: event.pageId,
+            widgetId: event.widgetId,
+            label: event.label,
+            labelSource: event.labelSource,
+            icon: event.icon,
+            reloadIcon: event.reloadIcon,
+            labelcolor: event.labelcolor,
+            valuecolor: event.valuecolor,
+            iconcolor: event.iconcolor,
+            visibility: event.visibility,
+            state: event.state,
+            enrichedItem: OpenHABItem(event.item),
+            descriptionChanged: event.descriptionChanged
+        )
     }
 }
 
