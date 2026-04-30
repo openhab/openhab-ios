@@ -103,8 +103,8 @@ struct IconInputView: View {
                     .resizable()
                     .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
                     .onFailure { error in
-                        logger.error("Icon loading failed: \(error.localizedDescription)")
-                        logger.error("Failed URL: \(iconURL.absoluteString)")
+                        logger.error("Icon loading failed for icon '\(input.icon, privacy: .public)': \(error.localizedDescription, privacy: .public)")
+                        logger.error("Failed URL: \(iconURL.absoluteString, privacy: .public)")
                     }
                     .onSuccess { result in
                         currentImage = result.image
@@ -118,7 +118,6 @@ struct IconInputView: View {
                     .placeholder { _ in
                         Image(uiImage: currentImage ?? .init()).resizable()
                     }
-                    .cancelOnDisappear(true)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
                     .id("\(viewModel.pageId)-\(rowIdentity)-\(colorScheme)")
@@ -204,8 +203,8 @@ struct IconView: View {
                     .resizable()
                     .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
                     .onFailure { error in
-                        logger.error("Icon loading failed for widget \(widget.label): \(error.localizedDescription)")
-                        logger.error("Failed URL: \(iconURL.absoluteString)")
+                        logger.error("Icon loading failed for icon '\(widget.icon, privacy: .public)': \(error.localizedDescription, privacy: .public)")
+                        logger.error("Failed URL: \(iconURL.absoluteString, privacy: .public)")
                     }
                     .onSuccess { result in
                         currentImage = result.image
@@ -220,7 +219,6 @@ struct IconView: View {
                         // Workaround to show current image before new image is displayed. See https://github.com/onevcat/Kingfisher/issues/2028
                         Image(uiImage: currentImage ?? .init()).resizable()
                     }
-                    .cancelOnDisappear(true)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
                     .id("\(viewModel.pageId)-\(widget.id)-\(colorScheme)")

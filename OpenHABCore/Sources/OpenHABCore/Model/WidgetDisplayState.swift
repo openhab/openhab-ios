@@ -29,34 +29,39 @@ public struct WidgetDisplayState: Sendable, Equatable {
     public let hasPressReleaseMappings: Bool
     public let selectedIndex: Int?
     public let selectedLabel: String?
-}
 
-public extension OpenHABWidget {
-    var displayState: WidgetDisplayState {
-        let mappings = mappingsOrItemOptions
-        let effectiveState = state.isEmpty ? (item?.state ?? "") : state
-        let selectedIndex = mappingIndex(byCommand: item?.state).map { Int($0) }
-        let selectedLabel = selectedIndex.flatMap { index in
-            mappings.indices.contains(index) ? mappings[index].label : nil
-        }
-
-        return WidgetDisplayState(
-            widgetId: widgetId,
-            labelText: labelText ?? label,
-            labelValue: labelValue,
-            effectiveState: effectiveState,
-            isOn: effectiveState.parseAsBool(),
-            adjustedValue: adjustedValue,
-            minValue: minValue,
-            maxValue: maxValue,
-            step: step,
-            switchSupport: switchSupport,
-            hasLinkedPage: linkedPage != nil,
-            readOnly: readOnly ?? false,
-            mappings: mappings,
-            hasPressReleaseMappings: hasPressReleaseMappings,
-            selectedIndex: selectedIndex,
-            selectedLabel: selectedLabel
-        )
+    public init(widgetId: String,
+                labelText: String,
+                labelValue: String?,
+                effectiveState: String,
+                isOn: Bool,
+                adjustedValue: Double,
+                minValue: Double,
+                maxValue: Double,
+                step: Double,
+                switchSupport: Bool,
+                hasLinkedPage: Bool,
+                readOnly: Bool,
+                mappings: [OpenHABWidgetMapping],
+                hasPressReleaseMappings: Bool,
+                selectedIndex: Int?,
+                selectedLabel: String?) {
+        self.widgetId = widgetId
+        self.labelText = labelText
+        self.labelValue = labelValue
+        self.effectiveState = effectiveState
+        self.isOn = isOn
+        self.adjustedValue = adjustedValue
+        self.minValue = minValue
+        self.maxValue = maxValue
+        self.step = step
+        self.switchSupport = switchSupport
+        self.hasLinkedPage = hasLinkedPage
+        self.readOnly = readOnly
+        self.mappings = mappings
+        self.hasPressReleaseMappings = hasPressReleaseMappings
+        self.selectedIndex = selectedIndex
+        self.selectedLabel = selectedLabel
     }
 }
+

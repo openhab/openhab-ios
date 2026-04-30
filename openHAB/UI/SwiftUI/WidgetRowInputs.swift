@@ -61,7 +61,7 @@ struct SelectionRowInput: Equatable, RowWithIconInput {
             mappings: displayState.mappings,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
-            readOnly: widget.readOnly ?? false,
+            readOnly: widget.readOnly,
             widgetId: displayState.widgetId,
             icon: RowIconInput.from(widget: widget),
             itemName: widget.item?.name
@@ -125,7 +125,7 @@ struct SetpointRowInput: Equatable, RowWithIconInput {
             displayState: displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
-            readOnly: widget.readOnly ?? false,
+            readOnly: widget.readOnly,
             unit: unit,
             numberPattern: numberPattern,
             serverValue: serverValue,
@@ -171,7 +171,7 @@ struct ColorPickerRowInput: Equatable, RowWithIconInput {
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
-            readOnly: widget.readOnly ?? false,
+            readOnly: widget.readOnly,
             icon: RowIconInput.from(widget: widget),
             itemName: widget.item?.name
         )
@@ -193,7 +193,7 @@ struct ToggleRowInput: Equatable, RowWithIconInput {
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
-            readOnly: widget.readOnly ?? false,
+            readOnly: widget.readOnly,
             icon: RowIconInput.from(widget: widget),
             itemName: widget.item?.name
         )
@@ -242,7 +242,7 @@ struct InputRowInput: Sendable, Equatable, RowWithIconInput {
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
-            readOnly: widget.readOnly ?? false,
+            readOnly: widget.readOnly,
             inputHintRawValue: widget.inputHint.rawValue,
             icon: RowIconInput.from(widget: widget),
             itemName: widget.item?.name
@@ -293,7 +293,7 @@ struct ButtonGridRowInput: Equatable, RowWithIconInput {
                 row: max((button.row ?? 1) - 1, 0),
                 column: max((button.column ?? 1) - 1, 0),
                 visibility: button.visibility,
-                readOnly: button.readOnly ?? false,
+                readOnly: button.readOnly,
                 stateless: button.stateless ?? false,
                 effectiveState: button.displayState.effectiveState,
                 itemName: button.item?.name
@@ -398,7 +398,7 @@ struct ColorTemperatureRowInput: Equatable, RowWithIconInput {
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
-            readOnly: widget.readOnly ?? false,
+            readOnly: widget.readOnly,
             minValue: widget.minValue,
             maxValue: widget.maxValue,
             serverValue: parsedValue.isFinite ? parsedValue : nil,
@@ -437,12 +437,12 @@ struct MediaRowInput: Equatable {
             imageDescriptor: widget.mediaImageDescriptor,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
-            readOnly: widget.readOnly ?? false,
+            readOnly: widget.readOnly,
             refresh: widget.refresh,
             url: url,
             encoding: widget.encoding,
             labelSourceRawValue: widget.labelSource.rawValue,
-            preferredRowHeight: widget.preferredRowHeight.map(Double.init),
+            preferredRowHeight: WidgetMappingSnapshot.preferredRowHeight(type: widget.type, label: widget.label, height: widget.height),
             coordinateLatitude: hasValidCoordinate ? coordinate.latitude : nil,
             coordinateLongitude: hasValidCoordinate ? coordinate.longitude : nil
         )
@@ -539,7 +539,7 @@ struct SliderRowInput: Equatable, RowWithIconInput {
             displayState: displayState,
             numberPattern: numberPattern,
             unit: unit,
-            readOnly: widget.readOnly ?? false,
+            readOnly: widget.readOnly,
             switchSupport: widget.switchSupport,
             step: widget.step,
             labelColor: widget.labelcolor,

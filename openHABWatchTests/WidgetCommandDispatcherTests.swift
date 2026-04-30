@@ -102,8 +102,8 @@ struct WidgetCommandDispatcherTests {
         let widget = makeWidget(widgetId: "item-update", recorder: recorder)
         let sender = WidgetCommandDispatcher()
 
-        sender.sendItemUpdate(NumberState(value: 21), for: widget)
-        sender.sendItemUpdate(nil, for: widget)
+        sender.send(NumberState(value: 21), for: widget)
+        sender.send(nil as NumberState?, for: widget)
 
         #expect(recorder.commands.count == 1)
         #expect(recorder.commands.first?.contains("21") == true)

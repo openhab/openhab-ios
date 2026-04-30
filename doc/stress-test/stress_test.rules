@@ -1,0 +1,82 @@
+// Stress-test rules for iOS long-poll flooding reproduction
+// Place in: $OPENHAB_CONF/rules/stress_test.rules
+
+import java.util.Random
+
+val Random rng        = new Random()
+var int    tick       = 0
+var int    seg1State  = 0
+var int    seg2State  = 2   // start offset so Seg1/Seg2 don't move in sync
+var int    slowTick   = 0
+
+// ---------------------------------------------------------------------------
+// 1 Hz flood rule
+//
+// Updates per tick:
+//   - Counter            → always changes  (text row)
+//   - Seg1, Seg2         → cycle 0-1-2-3   (genuine segmented changes)
+//   - Seg3, Seg4         → always posted as 0 (artefact probe — value unchanged)
+//   - Power/Temp/Humidity → random within a realistic range (text rows)
+//   - Child1-4           → same random updates, drives linked row changes
+//   - Status             → cycles through 4 strings
+//
+// Slow-toggle rule (every 10s) exercises Switch/Dimmer without contributing
+// to the 1Hz flood, so their absence from changedKinds confirms the diff is
+// not bumping unrelated rows.
+// ---------------------------------------------------------------------------
+
+rule "Stress Test — 1 Hz flood"
+when
+    Time cron "0/1 * * ? * * *"
+then
+    tick = tick + 1
+
+    // Counter
+    StressTest_Counter.postUpdate(tick)
+
+    // Segmented — cycling (genuine changes every tick)
+    seg1State = (seg1State + 1) % 4
+    seg2State = (seg2State + 1) % 4
+    StressTest_Seg1.postUpdate(seg1State)
+    StressTest_Seg2.postUpdate(seg2State)
+
+    // Segmented — fixed at 0 (artefact probe)
+    // If diagnostics show these in changedKinds, the row comparison is unstable.
+    StressTest_Seg3.postUpdate(0)
+    StressTest_Seg4.postUpdate(0)
+
+    // Fast numeric updates
+    val double power    = 800.0  + rng.nextInt(400)
+    val double temp     = 20.0   + rng.nextInt(60) / 10.0
+    val double humidity = 40.0   + rng.nextInt(400) / 10.0
+    StressTest_Power.postUpdate(power)
+    StressTest_Temp.postUpdate(temp)
+    StressTest_Humidity.postUpdate(humidity)
+
+    // Sub-page children (drives linked row state changes)
+    StressTest_Child1.postUpdate(power * 0.4)
+    StressTest_Child2.postUpdate(temp + 1.5)
+    StressTest_Child3.postUpdate(humidity - 5.0)
+    StressTest_Child4.postUpdate(tick)
+
+    // Status string cycling
+    val String[] statuses = #["OK", "Active", "Updating", "Idle"]
+    StressTest_Status.postUpdate(statuses.get(tick % 4))
+end
+
+rule "Stress Test — slow toggle (10 s)"
+when
+    Time cron "0/10 * * ? * * *"
+then
+    slowTick = slowTick + 1
+
+    if ((slowTick % 2) == 0) {
+        StressTest_Switch1.postUpdate(ON)
+        StressTest_Switch2.postUpdate(OFF)
+    } else {
+        StressTest_Switch1.postUpdate(OFF)
+        StressTest_Switch2.postUpdate(ON)
+    }
+
+    StressTest_Dimmer.postUpdate((slowTick * 10) % 100)
+end

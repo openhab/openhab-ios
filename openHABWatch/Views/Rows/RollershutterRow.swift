@@ -23,7 +23,7 @@ struct RollershutterRow: View {
         VStack(spacing: -5) {
             HStack {
                 WatchIconView(model: widget.iconRenderModel(), settings: settings)
-                WatchLabelText(text: widget.labelText ?? widget.label, labelColor: widget.labelcolor)
+                WatchLabelText(text: widget.labelText, labelColor: widget.labelcolor)
                 Spacer()
                 DetailTextLabelView(text: widget.labelValue, valueColor: widget.valuecolor)
             }
@@ -44,7 +44,7 @@ struct RollershutterRow: View {
             }
             .frame(height: 50)
         }
-        .accessibilityLabel(widget.labelText ?? "")
+        .accessibilityLabel(widget.labelText)
     }
 }
 
