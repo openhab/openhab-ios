@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [Version 3.2.36, Build 243] - 2026-04-30Z
+
+- Fix icon load hiccups, drawer double-fetch, and tracker double-start (#1169)
+- Fix stale row rendering on scroll and foreground refresh (#1167)
+
 ## [Version 3.2.35, Build 242] - 2026-04-29Z
 
 - Sitemap SwiftUI performance improvement (#1151)
