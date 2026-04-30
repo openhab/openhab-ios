@@ -33,6 +33,52 @@ enum TargetController {
     case homeSelection
 }
 
+private struct TrackerStartupSettings: Equatable {
+    let demomode: Bool
+    let localConnectionConfig: ConnectionConfiguration
+    let remoteConnectionConfig: ConnectionConfiguration
+    let sseCommandItem: String
+
+    @MainActor
+    init(homeSettings: HomePreferences) {
+        demomode = homeSettings.demomode
+        localConnectionConfig = homeSettings.localConnectionConfig
+        remoteConnectionConfig = homeSettings.remoteConnectionConfig
+        sseCommandItem = homeSettings.sseCommandItem
+    }
+
+    static func == (lhs: TrackerStartupSettings, rhs: TrackerStartupSettings) -> Bool {
+        lhs.demomode == rhs.demomode &&
+            lhs.localConnectionConfig.trackerIdentity == rhs.localConnectionConfig.trackerIdentity &&
+            lhs.remoteConnectionConfig.trackerIdentity == rhs.remoteConnectionConfig.trackerIdentity &&
+            lhs.sseCommandItem == rhs.sseCommandItem
+    }
+}
+
+private struct TrackerConnectionIdentity: Equatable {
+    let url: String
+    let username: String
+    let password: String
+    let alwaysSendBasicAuth: Bool
+    let ignoreSSL: Bool
+    let priority: Int
+    let supportsNotifications: Bool
+}
+
+private extension ConnectionConfiguration {
+    var trackerIdentity: TrackerConnectionIdentity {
+        TrackerConnectionIdentity(
+            url: url,
+            username: username,
+            password: password,
+            alwaysSendBasicAuth: alwaysSendBasicAuth,
+            ignoreSSL: ignoreSSL,
+            priority: priority,
+            supportsNotifications: supportsNotifications
+        )
+    }
+}
+
 protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
@@ -137,6 +183,7 @@ class OpenHABRootViewController: UIViewController {
     }()
 
     private var activeConnection: ConnectionInfo?
+    private var lastTrackerStartupSettings: TrackerStartupSettings?
     private let synthesizer = AVSpeechSynthesizer()
 
     override func viewDidLoad() {
@@ -369,11 +416,20 @@ class OpenHABRootViewController: UIViewController {
         }
 
         serverInfo.debounce(for: .milliseconds(500), scheduler: RunLoop.main) // ensures if multiple values are saved, we get called once
-            .sink { homeSettings in
-                let localConnectionConfig = homeSettings.localConnectionConfig
-                let remoteConnectionConfig = homeSettings.remoteConnectionConfig
-                let demomode = homeSettings.demomode
-                let sseCommandItem = homeSettings.sseCommandItem
+            .sink { [weak self] homeSettings in
+                guard let self else { return }
+
+                let settings = TrackerStartupSettings(homeSettings: homeSettings)
+                guard lastTrackerStartupSettings != settings else {
+                    Logger.viewController.debug("Skipping duplicate tracker startup settings")
+                    return
+                }
+                lastTrackerStartupSettings = settings
+
+                let localConnectionConfig = settings.localConnectionConfig
+                let remoteConnectionConfig = settings.remoteConnectionConfig
+                let demomode = settings.demomode
+                let sseCommandItem = settings.sseCommandItem
 
                 Task {
                     if demomode {

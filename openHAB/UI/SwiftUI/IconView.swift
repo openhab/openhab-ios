@@ -103,6 +103,7 @@ struct IconInputView: View {
                     .resizable()
                     .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
                     .onFailure { error in
+                        guard !error.isTaskCancelled else { return }
                         logger.error("Icon loading failed for icon '\(input.icon, privacy: .public)': \(error.localizedDescription, privacy: .public)")
                         logger.error("Failed URL: \(iconURL.absoluteString, privacy: .public)")
                     }
@@ -203,6 +204,7 @@ struct IconView: View {
                     .resizable()
                     .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
                     .onFailure { error in
+                        guard !error.isTaskCancelled else { return }
                         logger.error("Icon loading failed for icon '\(widget.icon, privacy: .public)': \(error.localizedDescription, privacy: .public)")
                         logger.error("Failed URL: \(iconURL.absoluteString, privacy: .public)")
                     }

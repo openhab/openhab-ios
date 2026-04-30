@@ -33,6 +33,53 @@ enum DrawerViewError: Error, CustomDebugStringConvertible {
     }
 }
 
+enum DrawerFetchResult<Value> {
+    case value(Value)
+    case cancelled
+    case failed(any Error)
+}
+
+@MainActor
+enum DrawerFetch {
+    static func sitemaps(
+        sortOrder: SortSitemapsOrder,
+        fetch: () async throws -> [OpenHABSitemap]
+    ) async -> DrawerFetchResult<[OpenHABSitemap]> {
+        do {
+            var sitemaps = try await fetch()
+            try Task.checkCancellation()
+            if sitemaps.last?.name == "_default", sitemaps.count > 1 {
+                sitemaps = Array(sitemaps.dropLast())
+            }
+            switch sortOrder {
+            case .label:
+                sitemaps.sort { $0.label < $1.label }
+            case .name:
+                sitemaps.sort { $0.name < $1.name }
+            }
+            try Task.checkCancellation()
+            return .value(sitemaps)
+        } catch is CancellationError {
+            return .cancelled
+        } catch {
+            return .failed(error)
+        }
+    }
+
+    static func uiTiles(
+        fetch: () async throws -> [OpenHABUiTile]
+    ) async -> DrawerFetchResult<[OpenHABUiTile]> {
+        do {
+            let uiTiles = try await fetch()
+            try Task.checkCancellation()
+            return .value(uiTiles)
+        } catch is CancellationError {
+            return .cancelled
+        } catch {
+            return .failed(error)
+        }
+    }
+}
 
 // Display the connected URL
 struct ConnectionView: View {
@@ -147,15 +194,9 @@ struct DrawerView: View {
                 .padding(.bottom, 5)
         }
         .listStyle(.inset)
-        .task {
-            let activeConnection = networkTracker.activeConnection
-            await updateSitemapsAndUITiles(activeConnection: activeConnection)
+        .task(id: networkTracker.activeConnection) {
+            await updateSitemapsAndUITiles(activeConnection: networkTracker.activeConnection)
             sitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
-        }
-        .onReceive(networkTracker.$activeConnection) { activeConnection in
-            Task {
-                await updateSitemapsAndUITiles(activeConnection: activeConnection)
-            }
         }
     }
 
@@ -238,32 +279,35 @@ struct DrawerView: View {
         do {
             let openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
 
-            do {
-                sitemaps = try await openAPIService.openHABSitemaps()
-                if sitemaps.last?.name == "_default", sitemaps.count > 1 {
-                    sitemaps = Array(sitemaps.dropLast())
-                }
-                let sortSitemapsBy = Preferences.shared.currentHomePreferences.sortSitemapsBy
-                switch SortSitemapsOrder(rawValue: sortSitemapsBy) ?? .label {
-                case .label:
-                    sitemaps.sort { $0.label < $1.label }
-                case .name:
-                    sitemaps.sort { $0.name < $1.name }
-                }
-
-            } catch {
+            let sortSitemapsBy = Preferences.shared.currentHomePreferences.sortSitemapsBy
+            let sortOrder = SortSitemapsOrder(rawValue: sortSitemapsBy) ?? .label
+            switch await DrawerFetch.sitemaps(sortOrder: sortOrder, fetch: {
+                try await openAPIService.openHABSitemaps()
+            }) {
+            case let .value(fetchedSitemaps):
+                sitemaps = fetchedSitemaps
+            case .cancelled:
+                return
+            case let .failed(error):
                 Logger.drawerView.error("Failed to fetch sitemaps: \(error.localizedDescription)")
                 sitemaps = []
             }
 
-            do {
-                uiTiles = try await openAPIService.getUITiles()
+            switch await DrawerFetch.uiTiles(fetch: {
+                try await openAPIService.getUITiles()
+            }) {
+            case let .value(fetchedUITiles):
+                uiTiles = fetchedUITiles
                 Logger.drawerView.info("Fetched UI tiles successfully")
-            } catch {
+            case .cancelled:
+                return
+            case let .failed(error):
                 Logger.drawerView.error("Failed to fetch UI tiles: \(error.localizedDescription)")
                 uiTiles = []
             }
 
+        } catch is CancellationError {
+            return
         } catch {
             Logger.drawerView.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
             sitemaps = []
