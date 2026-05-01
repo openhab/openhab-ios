@@ -305,7 +305,7 @@ class OpenHABRootViewController: UIViewController {
                 guard let self, let currentView else {
                     return
                 }
-                Logger.viewController.info("OpenHABWebViewController tracker status \(status.rawValue)")
+                Logger.viewController.info("OpenHABWebViewController tracker status \(status.rawValue, privacy: .public)")
                 let retryButtonTitle: String = String(localized: "retry", comment: "retry connection")
                 switch status {
                 case .started:
@@ -607,12 +607,12 @@ class OpenHABRootViewController: UIViewController {
         let openhabConnectionSubscription = differences.sink { [weak self] diff in
             Logger.viewController.info("openhabConnectionSubscription updated")
             for newHome in diff.newValues {
-                Logger.viewController.info("openhabConnectionSubscription uuid \(newHome.uuid) registering for push notifications ")
+                Logger.viewController.info("openhabConnectionSubscription registering home for push notifications")
                 self?.registerHome(uuid: newHome.uuid, connection: newHome.connection)
             }
             for deletedHome in diff.deletedValues {
                 // TODO: implement deregistration
-                Logger.viewController.warning("APNS Deregistration is missing (wanted to deregister \(deletedHome.connection.url))")
+                Logger.viewController.warning("APNS Deregistration is missing (wanted to deregister \(deletedHome.connection.publicLogURL, privacy: .public))")
             }
         }
 
@@ -629,7 +629,7 @@ class OpenHABRootViewController: UIViewController {
               let deviceName = apsRegistrationData["deviceName"] as? String else {
             return
         }
-        Logger.viewController.info("Registering notifications with \(connection.url)")
+        Logger.viewController.info("Registering notifications with \(connection.publicLogURL, privacy: .public)")
         _ = registerHome(uuid, connection, deviceToken, deviceId, deviceName)
     }
 

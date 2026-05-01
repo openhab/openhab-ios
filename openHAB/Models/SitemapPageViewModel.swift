@@ -840,13 +840,13 @@ extension SitemapPageViewModel {
             if let sitemap = sitemaps.first(where: { $0.name == defaultSitemap }) {
                 defaultSitemapLabel = sitemap.label
                 // swiftformat:disable:next redundantSelf
-                logger.info("Found label '\(self.defaultSitemapLabel)' for sitemap '\(self.defaultSitemap)'")
+                logger.info("Found label '\(self.defaultSitemapLabel, privacy: .public)' for sitemap '\(self.defaultSitemap, privacy: .public)'")
             } else {
                 // swiftformat:disable:next redundantSelf
-                logger.warning("Could not find sitemap '\(self.defaultSitemap)' in available sitemaps")
+                logger.warning("Could not find sitemap '\(self.defaultSitemap, privacy: .public)' in available sitemaps")
             }
         } catch {
-            logger.warning("Failed to fetch sitemap label: \(error)")
+            logger.warning("Failed to fetch sitemap label: \(error.localizedDescription, privacy: .public)")
             // Don't set error here as this is not critical - we can continue without the label
         }
     }
@@ -870,7 +870,7 @@ extension SitemapPageViewModel {
                 defaultSitemap = filteredSitemaps[0].name
                 defaultSitemapLabel = filteredSitemaps[0].label
                 // swiftformat:disable:next redundantSelf
-                logger.info("Auto-selected single sitemap: \(self.defaultSitemap)")
+                logger.info("Auto-selected single sitemap: \(self.defaultSitemap, privacy: .public)")
 
                 // Save as default for future launches
                 Preferences.shared.modifyActiveHome { homePreferences in
@@ -881,7 +881,7 @@ extension SitemapPageViewModel {
                 defaultSitemap = filteredSitemaps[0].name
                 defaultSitemapLabel = filteredSitemaps[0].label
                 // swiftformat:disable:next redundantSelf
-                logger.info("Auto-selected first sitemap from \(filteredSitemaps.count) available: \(self.defaultSitemap)")
+                logger.info("Auto-selected first sitemap from \(filteredSitemaps.count, privacy: .public) available: \(self.defaultSitemap, privacy: .public)")
 
                 // Save as default for future launches
                 Preferences.shared.modifyActiveHome { homePreferences in
@@ -892,7 +892,7 @@ extension SitemapPageViewModel {
                 error = SitemapPageError.serviceUnavailable
             }
         } catch {
-            logger.error("Failed to discover sitemaps: \(error)")
+            logger.error("Failed to discover sitemaps: \(error.localizedDescription, privacy: .public)")
             self.error = error as? any LocalizedError ?? SitemapPageError.serviceUnavailable
         }
     }
@@ -900,7 +900,7 @@ extension SitemapPageViewModel {
     func handleActiveConnectionChange(_ activeConnection: ConnectionInfo?) {
         guard let activeConnection else { return }
 
-        logger.info("SitemapPageViewModel tracker URL \(activeConnection.configuration.url)")
+        logger.info("SitemapPageViewModel tracker connection \(activeConnection.configuration.publicLogDescription, privacy: .public)")
 
         // Skip if already connected to this URL — avoids restarting long-polling
         // when the NetworkTracker re-evaluates to the same connection
@@ -1060,10 +1060,10 @@ extension SitemapPageViewModel {
                     sourcePrefix: nil,
                     deviceId: deviceId
                 )
-                logger.info("Successfully sent command \(command) to \(itemname)")
+                logger.info("Successfully sent command \(command, privacy: .private(mask: .hash)) to \(itemname, privacy: .public)")
                 handleCommandSuccess(for: itemname, version: version)
             } catch {
-                logger.info("Failed to send command\(command) to \(itemname): \(error.localizedDescription)")
+                logger.info("Failed to send command \(command, privacy: .private(mask: .hash)) to \(itemname, privacy: .public): \(error.localizedDescription, privacy: .public)")
                 handleCommandFailure(for: itemname, version: version, errorDescription: error.localizedDescription)
             }
         }
