@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.2.38, Build 246] - 2026-05-01Z
+
+- Use lazy navigationDestination to avoid eager SitemapPageViewModel creation (#1173)
+
 ## [Version 3.2.37, Build 244] - 2026-05-01Z
 
 - Improve diagnostic log visibility (#1170)
