@@ -81,11 +81,7 @@ private struct LinkedPageRowInputView: View {
     let input: LinkedPageRowInput
 
     var body: some View {
-        NavigationLink(
-            destination: SitemapPageView(
-                viewModel: SitemapPageViewModel(pageUrl: input.linkedPageLink, title: input.linkedPageTitle)
-            )
-        ) {
+        NavigationLink(value: LinkedPageNavigation(pageLink: input.linkedPageLink, pageTitle: input.linkedPageTitle)) {
             LinkedPageRowContent(input: input)
         }
         .buttonStyle(.plain)
@@ -116,7 +112,7 @@ private struct LinkedPageRowContent: View {
 }
 
 /// Transitional adapter: drives list from immutable row inputs while reusing existing widget-driven rows.
-struct EmbeddingRowInputView: View {
+struct EmbeddingRowInputView: View, Equatable {
     let rowInput: SitemapRowInput
 
     // Subscribes to the view model so SwiftUI re-evaluates this view when
@@ -130,6 +126,10 @@ struct EmbeddingRowInputView: View {
 
     private var frameRowBackground: Color {
         Color(UIColor.ohSystemGroupedBackground)
+    }
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.rowInput == rhs.rowInput
     }
 
     var body: some View {

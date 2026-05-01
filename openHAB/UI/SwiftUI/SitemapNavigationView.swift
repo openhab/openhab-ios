@@ -25,6 +25,9 @@ struct SitemapNavigationView: View {
     var body: some View {
         NavigationStack {
             sitemapContent
+                .navigationDestination(for: LinkedPageNavigation.self) { nav in
+                    SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: nav.pageLink, title: nav.pageTitle))
+                }
         }
         .onChange(of: scenePhase) { newPhase in
             switch newPhase {
