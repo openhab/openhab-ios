@@ -13,6 +13,98 @@ import Foundation
 import OpenHABCore
 import os.log
 
+struct IconLoadDiagnosticsSnapshot {
+    let starts: Int
+    let successes: Int
+    let memoryHits: Int
+    let diskHits: Int
+    let networkLoads: Int
+    let cancellations: Int
+    let failures: Int
+    let distinctURLs: Int
+    let distinctRows: Int
+
+    var isEmpty: Bool {
+        starts == 0 &&
+            successes == 0 &&
+            memoryHits == 0 &&
+            diskHits == 0 &&
+            networkLoads == 0 &&
+            cancellations == 0 &&
+            failures == 0
+    }
+}
+
+actor IconLoadDiagnostics {
+    static let shared = IconLoadDiagnostics()
+
+    private var starts = 0
+    private var successes = 0
+    private var memoryHits = 0
+    private var diskHits = 0
+    private var networkLoads = 0
+    private var cancellations = 0
+    private var failures = 0
+    private var distinctURLs: Set<String> = []
+    private var distinctRows: Set<String> = []
+
+    func recordStart(url: URL, rowIdentity: String) {
+        starts += 1
+        distinctURLs.insert(url.absoluteString)
+        distinctRows.insert(rowIdentity)
+    }
+
+    func recordSuccess(url: URL, rowIdentity: String, cacheType: String) {
+        successes += 1
+        distinctURLs.insert(url.absoluteString)
+        distinctRows.insert(rowIdentity)
+        switch cacheType {
+        case "memory":
+            memoryHits += 1
+        case "disk":
+            diskHits += 1
+        default:
+            networkLoads += 1
+        }
+    }
+
+    func recordCancellation(url: URL, rowIdentity: String) {
+        cancellations += 1
+        distinctURLs.insert(url.absoluteString)
+        distinctRows.insert(rowIdentity)
+    }
+
+    func recordFailure(url: URL, rowIdentity: String) {
+        failures += 1
+        distinctURLs.insert(url.absoluteString)
+        distinctRows.insert(rowIdentity)
+    }
+
+    func snapshotAndReset() -> IconLoadDiagnosticsSnapshot {
+        let snapshot = IconLoadDiagnosticsSnapshot(
+            starts: starts,
+            successes: successes,
+            memoryHits: memoryHits,
+            diskHits: diskHits,
+            networkLoads: networkLoads,
+            cancellations: cancellations,
+            failures: failures,
+            distinctURLs: distinctURLs.count,
+            distinctRows: distinctRows.count
+        )
+        starts = 0
+        successes = 0
+        memoryHits = 0
+        diskHits = 0
+        networkLoads = 0
+        cancellations = 0
+        failures = 0
+        distinctURLs.removeAll(keepingCapacity: true)
+        distinctRows.removeAll(keepingCapacity: true)
+        return snapshot
+    }
+}
+
 @MainActor
 enum SitemapDiagnostics {
     private static let logger = Logger(subsystem: "org.openhab", category: "SitemapDiagnostics")
@@ -30,11 +122,46 @@ enum SitemapDiagnostics {
         reusedInputCount: Int,
         changedRowCount: Int,
         changedRowKinds: String,
-        analysisMs: Int
+        analysisMs: Int,
+        buildRowInputsMs: Int,
+        applyStateMs: Int,
+        totalUpdateMs: Int
     ) {
         guard isEnabled else { return }
         logger.info(
-            "update origin=\(origin.rawValue, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) inputsChanged=\(inputsChanged, privacy: .public) titleChanged=\(titleChanged, privacy: .public) reusedInputs=\(reusedInputCount, privacy: .public) changedRows=\(changedRowCount, privacy: .public) changedKinds=\(changedRowKinds, privacy: .public) analysisMs=\(analysisMs, privacy: .public)"
+            "update origin=\(origin.rawValue, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) inputsChanged=\(inputsChanged, privacy: .public) titleChanged=\(titleChanged, privacy: .public) reusedInputs=\(reusedInputCount, privacy: .public) changedRows=\(changedRowCount, privacy: .public) changedKinds=\(changedRowKinds, privacy: .public) buildRowInputsMs=\(buildRowInputsMs, privacy: .public) applyStateMs=\(applyStateMs, privacy: .public) analysisMs=\(analysisMs, privacy: .public) totalUpdateMs=\(totalUpdateMs, privacy: .public)"
+        )
+    }
+
+    static func logLongPoll(
+        requestMs: Int,
+        returnedPage: Bool,
+        status: String,
+        responseGapMs: Int?
+    ) {
+        guard isEnabled else { return }
+        logger.info(
+            "longPoll requestMs=\(requestMs, privacy: .public) returnedPage=\(returnedPage, privacy: .public) status=\(status, privacy: .public) responseGapMs=\(responseGapMs ?? -1, privacy: .public)"
+        )
+    }
+
+    static func logLongPollDebounce(
+        action: String,
+        elapsedMs: Int,
+        remainingMs: Int,
+        replacedPendingPage: Bool,
+        coalescedUpdates: Int
+    ) {
+        guard isEnabled else { return }
+        logger.info(
+            "longPollDebounce action=\(action, privacy: .public) elapsedMs=\(elapsedMs, privacy: .public) remainingMs=\(remainingMs, privacy: .public) replacedPendingPage=\(replacedPendingPage, privacy: .public) coalescedUpdates=\(coalescedUpdates, privacy: .public)"
+        )
+    }
+
+    static func logIconSummary(_ snapshot: IconLoadDiagnosticsSnapshot) {
+        guard isEnabled, !snapshot.isEmpty else { return }
+        logger.info(
+            "icons starts=\(snapshot.starts, privacy: .public) successes=\(snapshot.successes, privacy: .public) memoryHits=\(snapshot.memoryHits, privacy: .public) diskHits=\(snapshot.diskHits, privacy: .public) networkLoads=\(snapshot.networkLoads, privacy: .public) cancellations=\(snapshot.cancellations, privacy: .public) failures=\(snapshot.failures, privacy: .public) distinctURLs=\(snapshot.distinctURLs, privacy: .public) distinctRows=\(snapshot.distinctRows, privacy: .public)"
         )
     }
 
