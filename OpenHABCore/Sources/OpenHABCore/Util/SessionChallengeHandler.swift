@@ -69,7 +69,6 @@ public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChall
 public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge, networkTracker: NetworkTracker = .shared) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
     let host = challenge.protectionSpace.host
     let authenticationMethod = challenge.protectionSpace.authenticationMethod
-    Logger.sessionChallenge.warning("onReceiveSessionChallenge is not implemented fully (see TODOs)")
     Logger.sessionChallenge.info("onReceiveSessionChallenge host=\(host, privacy: .public), method=\(authenticationMethod, privacy: .public)")
 
     switch challenge.protectionSpace.authenticationMethod {
@@ -90,7 +89,6 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
         let result = CertificateManagers.clientCertificateManager.evaluateTrust(with: challenge)
         logSessionChallengeDecision(challenge, result.0, reason: "client-certificate-manager")
         return result
-    // attemptCredentialAuthentication
     default:
         guard challenge.previousFailureCount == 0 else {
             let decision: URLSession.AuthChallengeDisposition = .cancelAuthenticationChallenge
@@ -98,10 +96,8 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
             return (decision, nil)
         }
 
-        // TODO: Figure out if credential lookup for the default case is needed.
-        // The old httpClient-based lookup was never wired up. A possible replacement:
-        // return await credentialForMatchedHost(challenge, networkTracker: networkTracker, log: logSessionChallengeDecision)
-
+        // Credential lookup for non-server-trust challenges is not wired up; fall back to system handling.
+        // Requests that need credentials carry them in the Authorization header via OpenHABAccessTokenAdapter.
         let decision: URLSession.AuthChallengeDisposition = .performDefaultHandling
         logSessionChallengeDecision(challenge, decision, reason: "default-handling-no-credential")
         return (decision, nil)
