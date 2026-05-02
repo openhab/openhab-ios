@@ -12,6 +12,7 @@
 import CommonUI
 import OpenHABCore
 import os.log
+import SFSafeSymbols
 import SwiftUI
 
 private struct ColorPickerRowConfig {
@@ -43,6 +44,64 @@ private func makeColorPickerRowContent(_ config: ColorPickerRowConfig) -> ColorP
     )
 }
 
+/// A button that sends `tapCommand` on a short press and `longPressCommand` after a 0.5 s hold,
+/// matching the openHAB BasicUI colorpicker behaviour (ON/OFF for tap, INCREASE/DECREASE for hold).
+private struct BrightnessButton: View {
+    let symbol: SFSymbol
+    let accessibilityLabel: String
+    let tapCommand: String
+    let longPressCommand: String
+    let onSend: (String) -> Void
+
+    @State private var longPressTask: Task<Void, Never>?
+    @State private var isLongPress = false
+    @State private var triggerFeedback = false
+
+    var body: some View {
+        Image(systemSymbol: symbol)
+            .font(.title2)
+            .foregroundStyle(Color(UIColor.systemBlue))
+            .ohMinimumHitTarget()
+            .contentShape(Rectangle())
+            .accessibilityLabel(accessibilityLabel)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction { onSend(tapCommand) }
+            .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in pressStarted() }
+                    .onEnded { _ in pressEnded() }
+            )
+            .onDisappear {
+                longPressTask?.cancel()
+                longPressTask = nil
+            }
+    }
+
+    private func pressStarted() {
+        guard longPressTask == nil else { return }
+        isLongPress = false
+        longPressTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            guard !Task.isCancelled else { return }
+            isLongPress = true
+            triggerFeedback.toggle()
+            onSend(longPressCommand)
+        }
+    }
+
+    private func pressEnded() {
+        longPressTask?.cancel()
+        longPressTask = nil
+        guard !isLongPress else {
+            isLongPress = false
+            return
+        }
+        triggerFeedback.toggle()
+        onSend(tapCommand)
+    }
+}
+
 private struct ColorPickerRowContent: View {
     let input: ColorPickerRowInput
     let onSendImmediate: (String) -> Void
@@ -67,6 +126,22 @@ private struct ColorPickerRowContent: View {
 
             Spacer()
 
+            if let labelValue = displayState.labelValue, !labelValue.isEmpty {
+                Text(labelValue)
+                    .ohTextToken(.rowValueCompact)
+                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
+            }
+
+            if !input.readOnly {
+                BrightnessButton(
+                    symbol: .arrowtriangleDownCircle,
+                    accessibilityLabel: "Decrease brightness",
+                    tapCommand: "OFF",
+                    longPressCommand: "DECREASE",
+                    onSend: onSendImmediate
+                )
+            }
+
             ColorPicker("Color", selection: $selectedColor, supportsOpacity: false)
                 .labelsHidden()
                 .onChange(of: selectedColor) { newColor in
@@ -74,10 +149,14 @@ private struct ColorPickerRowContent: View {
                 }
                 .disabled(input.readOnly)
 
-            if let labelValue = displayState.labelValue, !labelValue.isEmpty {
-                Text(labelValue)
-                    .ohTextToken(.rowValueCompact)
-                    .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
+            if !input.readOnly {
+                BrightnessButton(
+                    symbol: .arrowtriangleUpCircle,
+                    accessibilityLabel: "Increase brightness",
+                    tapCommand: "ON",
+                    longPressCommand: "INCREASE",
+                    onSend: onSendImmediate
+                )
             }
         }
         .onAppear {
