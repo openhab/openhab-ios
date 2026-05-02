@@ -139,7 +139,7 @@ public extension OpenAPIService {
         // swiftformat:disable:next redundantSelf
         guard let url else { throw OpenAPIServiceError.noRootURL }
 
-        Logger.openAPIService.log("Trying to getSitemaps for : \(url.debugDescription)")
+        Logger.openAPIService.log("Trying to getSitemaps for: \(url.debugDescription, privacy: .public)")
         let response = try await client.getSitemaps(.init())
         switch response {
         case let .ok(okresponse):

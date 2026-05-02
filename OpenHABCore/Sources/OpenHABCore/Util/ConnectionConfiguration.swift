@@ -92,6 +92,21 @@ public extension ConnectionConfiguration {
     /// The host component of the connection URL, if parseable.
     var host: String? { URL(string: url)?.host }
 
+    /// URL suitable for diagnostics; credentials embedded in the URL are stripped.
+    var publicLogURL: String {
+        guard var components = URLComponents(string: url) else {
+            return url
+        }
+        components.user = nil
+        components.password = nil
+        return components.string ?? url
+    }
+
+    /// Connection details safe to expose in diagnostics.
+    var publicLogDescription: String {
+        "url: \(publicLogURL), priority: \(priority), cloud: \(isCloudConnection), usernameConfigured: \(!username.isEmpty)"
+    }
+
     /// Whether this connection is to an openHAB Cloud instance.
     /// Currently determined by the "openHAB Cloud Service" user preference (`supportsNotifications`).
     var isCloudConnection: Bool { supportsNotifications }
