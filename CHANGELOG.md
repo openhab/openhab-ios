@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [Version 3.2.38, Build 246] - 2026-05-01Z
+
+- Use lazy navigationDestination to avoid eager SitemapPageViewModel creation (#1173)
+
+## [Version 3.2.37, Build 244] - 2026-05-01Z
+
+- Improve diagnostic log visibility (#1170)
+
 ## [Version 3.2.36, Build 243] - 2026-04-30Z
 
 - Fix icon load hiccups, drawer double-fetch, and tracker double-start (#1169)
