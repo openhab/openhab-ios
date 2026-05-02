@@ -75,7 +75,12 @@ struct SitemapRowInputMapperTests {
             makeColorPickerWidget(widgetID: "colorPicker"),
             makeButtonGridWidget(widgetID: "buttonGrid"),
             makeTextWidget(widgetID: "text"),
-            makeFrameWidget(widgetID: "frame")
+            makeFrameWidget(widgetID: "frame"),
+            makeVideoWidget(
+                widgetID: "video",
+                url: "http://default.example.invalid/video.m3u8",
+                itemState: "http://camera.example.invalid/live.m3u8"
+            )
         ]
 
         for (index, widget) in widgets.enumerated() {
@@ -96,6 +101,23 @@ struct SitemapRowInputMapperTests {
         let input = MediaRowInput.from(widget: widget)
 
         #expect(input.url == "http://camera.example.invalid/live.m3u8")
+    }
+
+    @Test
+    func videoSnapshotUsesItemStateURLBeforeConfiguredURL() {
+        let widget = makeVideoWidget(
+            widgetID: "video",
+            url: "dummy",
+            itemState: "http://camera.example.invalid/live.m3u8"
+        )
+        let rowID = RowID(pageKey: "testPage", widgetId: widget.widgetId, occurrence: 1)
+        let input = SitemapRowInputMapper.map(snapshot: WidgetMappingSnapshot(widget: widget), rowID: rowID)
+
+        guard case let .media(_, mediaInput) = input else {
+            Issue.record("Expected media row input")
+            return
+        }
+        #expect(mediaInput.url == "http://camera.example.invalid/live.m3u8")
     }
 
     @Test
