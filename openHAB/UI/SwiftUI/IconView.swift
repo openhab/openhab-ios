@@ -103,12 +103,17 @@ struct IconInputView: View {
                     .resizable()
                     .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
                     .onFailure { error in
-                        guard !error.isTaskCancelled else { return }
+                        guard !error.isTaskCancelled else {
+                            recordIconCancellation(url: iconURL)
+                            return
+                        }
+                        recordIconFailure(url: iconURL)
                         logger.error("Icon loading failed for icon '\(input.icon, privacy: .public)': \(error.localizedDescription, privacy: .public)")
                         logger.error("Failed URL: \(iconURL.absoluteString, privacy: .public)")
                     }
                     .onSuccess { result in
                         currentImage = result.image
+                        recordIconSuccess(url: iconURL, cacheType: result.cacheType)
                         if result.cacheType != .none {
                             let cacheKey = iconURL.absoluteString
                             Task {
@@ -122,6 +127,9 @@ struct IconInputView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
                     .id("\(viewModel.pageId)-\(rowIdentity)-\(colorScheme)")
+                    .onAppear {
+                        recordIconStart(url: iconURL)
+                    }
             }
         }
     }
@@ -136,6 +144,38 @@ struct IconInputView: View {
     private func processorIconColor(for url: URL) -> String? {
         guard url.host != "api.iconify.design" else { return nil }
         return iconColorHex
+    }
+
+    private func recordIconStart(url: URL) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        Task {
+            await IconLoadDiagnostics.shared.recordStart(url: url, rowIdentity: rowIdentity)
+        }
+    }
+
+    private func recordIconSuccess(url: URL, cacheType: CacheType) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        Task {
+            await IconLoadDiagnostics.shared.recordSuccess(
+                url: url,
+                rowIdentity: rowIdentity,
+                cacheType: cacheType.diagnosticsName
+            )
+        }
+    }
+
+    private func recordIconCancellation(url: URL) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        Task {
+            await IconLoadDiagnostics.shared.recordCancellation(url: url, rowIdentity: rowIdentity)
+        }
+    }
+
+    private func recordIconFailure(url: URL) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        Task {
+            await IconLoadDiagnostics.shared.recordFailure(url: url, rowIdentity: rowIdentity)
+        }
     }
 }
 
@@ -204,12 +244,17 @@ struct IconView: View {
                     .resizable()
                     .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
                     .onFailure { error in
-                        guard !error.isTaskCancelled else { return }
+                        guard !error.isTaskCancelled else {
+                            recordIconCancellation(url: iconURL)
+                            return
+                        }
+                        recordIconFailure(url: iconURL)
                         logger.error("Icon loading failed for icon '\(widget.icon, privacy: .public)': \(error.localizedDescription, privacy: .public)")
                         logger.error("Failed URL: \(iconURL.absoluteString, privacy: .public)")
                     }
                     .onSuccess { result in
                         currentImage = result.image
+                        recordIconSuccess(url: iconURL, cacheType: result.cacheType)
                         if result.cacheType != .none {
                             let cacheKey = iconURL.absoluteString
                             Task {
@@ -224,6 +269,9 @@ struct IconView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
                     .id("\(viewModel.pageId)-\(widget.id)-\(colorScheme)")
+                    .onAppear {
+                        recordIconStart(url: iconURL)
+                    }
             }
         }
     }
@@ -234,9 +282,54 @@ struct IconView: View {
         guard url.host != "api.iconify.design" else { return nil }
         return iconColorHex
     }
+
+    private func recordIconStart(url: URL) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        Task {
+            await IconLoadDiagnostics.shared.recordStart(url: url, rowIdentity: widget.id)
+        }
+    }
+
+    private func recordIconSuccess(url: URL, cacheType: CacheType) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        Task {
+            await IconLoadDiagnostics.shared.recordSuccess(
+                url: url,
+                rowIdentity: widget.id,
+                cacheType: cacheType.diagnosticsName
+            )
+        }
+    }
+
+    private func recordIconCancellation(url: URL) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        Task {
+            await IconLoadDiagnostics.shared.recordCancellation(url: url, rowIdentity: widget.id)
+        }
+    }
+
+    private func recordIconFailure(url: URL) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        Task {
+            await IconLoadDiagnostics.shared.recordFailure(url: url, rowIdentity: widget.id)
+        }
+    }
 }
 
 // MARK: - Convenience Extensions
+
+private extension CacheType {
+    var diagnosticsName: String {
+        switch self {
+        case .memory:
+            "memory"
+        case .disk:
+            "disk"
+        case .none:
+            "none"
+        }
+    }
+}
 
 extension IconView {
     /// Creates a widget icon view with standard size (32x32, matching UIKit cells)

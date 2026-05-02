@@ -591,6 +591,7 @@ extension SitemapRowInputMapper {
         let hasValidCoordinate = coordinate.map {
             (-90.0 ... 90.0).contains($0.latitude) && (-180.0 ... 180.0).contains($0.longitude)
         } ?? false
+        let url = effectiveMediaURL(for: snapshot)
 
         return MediaRowInput(
             widgetId: snapshot.widgetId,
@@ -601,13 +602,31 @@ extension SitemapRowInputMapper {
             valueColor: snapshot.valueColor,
             readOnly: snapshot.readOnly,
             refresh: snapshot.refresh,
-            url: snapshot.url,
+            url: url,
             encoding: snapshot.encoding,
             labelSourceRawValue: snapshot.labelSourceRawValue,
             preferredRowHeight: snapshot.preferredRowHeight,
             coordinateLatitude: hasValidCoordinate ? coordinate?.latitude : nil,
             coordinateLongitude: hasValidCoordinate ? coordinate?.longitude : nil
         )
+    }
+
+    private static func effectiveMediaURL(for snapshot: WidgetMappingSnapshot) -> String {
+        guard snapshot.renderingKind == .video,
+              let itemState = snapshot.item?.state?.trimmingCharacters(in: .whitespacesAndNewlines),
+              isAbsoluteURL(itemState) else {
+            return snapshot.url
+        }
+
+        return itemState
+    }
+
+    private static func isAbsoluteURL(_ value: String) -> Bool {
+        guard let url = URL(string: value),
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return false
+        }
+        return components.scheme != nil && (components.host != nil || components.path.hasPrefix("/"))
     }
 
     private static func textRowInput(from snapshot: WidgetMappingSnapshot) -> TextRowInput {

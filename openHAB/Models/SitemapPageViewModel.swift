@@ -104,6 +104,8 @@ class SitemapPageViewModel: ObservableObject {
     var lastForegroundRefreshAt: Date = .distantPast
     private var isPageVisibleForRefresh = false
     private var lastUIUpdateAt: Date = .distantPast
+    private var lastLongPollResponseAt: Date?
+    private var coalescedLongPollUpdateCount = 0
     private var pendingLongPollPage: OpenHABPage?
     private var longPollDebounceTask: Task<Void, Never>?
     private var foregroundObserverTask: Task<Void, Never>?
@@ -363,6 +365,8 @@ extension SitemapPageViewModel {
         longPollDebounceTask?.cancel()
         longPollDebounceTask = nil
         pendingLongPollPage = nil
+        lastLongPollResponseAt = nil
+        coalescedLongPollUpdateCount = 0
         activePageHandlingKey = nil
         activePageHandlingID = nil
     }
@@ -420,6 +424,8 @@ extension SitemapPageViewModel {
         longPollDebounceTask = nil
         pendingLongPollPage = nil
         lastUIUpdateAt = .distantPast
+        lastLongPollResponseAt = nil
+        coalescedLongPollUpdateCount = 0
         error = nil // Clear any previous errors when starting a new page handling session
         if preserveCurrentContent, currentPage != nil {
             isLoading = false
@@ -541,27 +547,57 @@ extension SitemapPageViewModel {
 
     private func runLongPollingLoop(runID: UUID) async throws {
         while !Task.isCancelled {
+            let requestStartedAt = Date()
             do {
                 let page = try await openAPIService?.pollDataForPage(
                     sitemapname: defaultSitemap,
                     pageId: pageId,
                     longPolling: true
                 )
+                let responseAt = Date()
+                let requestMs = Int((responseAt.timeIntervalSince(requestStartedAt) * 1000).rounded())
+                let responseGapMs = lastLongPollResponseAt.map { Int((responseAt.timeIntervalSince($0) * 1000).rounded()) }
+                lastLongPollResponseAt = responseAt
                 try Task.checkCancellation()
                 guard activePageHandlingID == runID else {
+                    SitemapDiagnostics.logLongPoll(
+                        requestMs: requestMs,
+                        returnedPage: page != nil,
+                        status: "stale",
+                        responseGapMs: responseGapMs
+                    )
                     logger.info("Ignoring stale long-poll result for run \(runID.uuidString, privacy: .public)")
                     return
                 }
 
+                SitemapDiagnostics.logLongPoll(
+                    requestMs: requestMs,
+                    returnedPage: page != nil,
+                    status: "success",
+                    responseGapMs: responseGapMs
+                )
                 if let page {
                     scheduleLongPollUIUpdate(page: page, runID: runID)
                 }
             } catch {
+                let requestMs = Int((Date().timeIntervalSince(requestStartedAt) * 1000).rounded())
                 try Task.checkCancellation()
                 guard shouldRetryLongPolling(after: error) else {
+                    SitemapDiagnostics.logLongPoll(
+                        requestMs: requestMs,
+                        returnedPage: false,
+                        status: "failed",
+                        responseGapMs: nil
+                    )
                     throw error
                 }
 
+                SitemapDiagnostics.logLongPoll(
+                    requestMs: requestMs,
+                    returnedPage: false,
+                    status: "retry",
+                    responseGapMs: nil
+                )
                 logger.info("Transient long-polling error, retrying: \(error.localizedDescription, privacy: .public)")
                 try? await Task.sleep(nanoseconds: 500_000_000)
             }
@@ -578,15 +614,33 @@ extension SitemapPageViewModel {
             longPollDebounceTask = nil
             pendingLongPollPage = nil
             lastUIUpdateAt = Date()
+            SitemapDiagnostics.logLongPollDebounce(
+                action: "immediate",
+                elapsedMs: Int((elapsed * 1000).rounded()),
+                remainingMs: 0,
+                replacedPendingPage: false,
+                coalescedUpdates: coalescedLongPollUpdateCount
+            )
+            coalescedLongPollUpdateCount = 0
             Task { @MainActor [weak self] in
                 await self?.updateUI(with: page, origin: .longPolling)
             }
         } else {
             // Within burst window — store latest page and (re)schedule a deferred apply.
             // Earlier pending page is discarded; the newest server state always wins.
+            let replacedPendingPage = pendingLongPollPage != nil
+            coalescedLongPollUpdateCount += 1
             pendingLongPollPage = page
             longPollDebounceTask?.cancel()
             let remaining = minInterval - elapsed
+            SitemapDiagnostics.logLongPollDebounce(
+                action: "scheduled",
+                elapsedMs: Int((elapsed * 1000).rounded()),
+                remainingMs: Int((remaining * 1000).rounded()),
+                replacedPendingPage: replacedPendingPage,
+                coalescedUpdates: coalescedLongPollUpdateCount
+            )
+            let deferredStartedAt = Date()
             longPollDebounceTask = Task { @MainActor [weak self] in
                 try? await Task.sleep(for: .seconds(remaining))
                 guard let self, !Task.isCancelled,
@@ -594,6 +648,14 @@ extension SitemapPageViewModel {
                       let page = self.pendingLongPollPage else { return }
                 self.pendingLongPollPage = nil
                 self.lastUIUpdateAt = Date()
+                SitemapDiagnostics.logLongPollDebounce(
+                    action: "deferredApply",
+                    elapsedMs: Int((Date().timeIntervalSince(deferredStartedAt) * 1000).rounded()),
+                    remainingMs: 0,
+                    replacedPendingPage: false,
+                    coalescedUpdates: self.coalescedLongPollUpdateCount
+                )
+                self.coalescedLongPollUpdateCount = 0
                 await self.updateUI(with: page, origin: .longPolling)
             }
         }
@@ -601,6 +663,7 @@ extension SitemapPageViewModel {
 
     @MainActor
     private func updateUI(with page: OpenHABPage, origin: PageUpdateOrigin) async {
+        let updateStartedAt = Date()
         logger.debug("Incoming sitemap update origin=\(origin.rawValue, privacy: .public), widgets=\(page.widgets.count)")
         let titleChanged = currentPage == nil || currentPage?.title != page.title
         let oldInputs = rowInputs
@@ -609,11 +672,13 @@ extension SitemapPageViewModel {
         // Phase 1: apply new page directly — no reconcile needed.
         // The new architecture (SitemapRowInput value types + WidgetRenderKey change detection)
         // does not rely on widget object identity.
+        let applyStartedAt = Date()
         injectSendCommand(for: newWidgets)
         currentPage = page
 
         // Phase 2: slider override sync
         _ = clearSyncedSliderOverrides(using: newWidgets)
+        let firstApplyMs = Int((Date().timeIntervalSince(applyStartedAt) * 1000).rounded())
 
         // Phase 3: row input rebuild (incremental — reuses inputs for unchanged rows)
         let pageKey = "\(defaultSitemap)|\(pageId)"
@@ -623,6 +688,7 @@ extension SitemapPageViewModel {
         let prevInputs = rowInputs
         rowInputRebuildTask?.cancel()
         rowInputRebuildTask = nil
+        let buildStartedAt = Date()
         let rowInputBuildResult = await SitemapPageViewModel.buildRowInputs(
             pageKey: pageKey,
             widgets: visibleWidgets,
@@ -630,7 +696,10 @@ extension SitemapPageViewModel {
             previousInputs: prevInputs,
             previousRowIDs: prevRowIDs
         )
+        let buildRowInputsMs = Int((Date().timeIntervalSince(buildStartedAt) * 1000).rounded())
+        let snapshotApplyStartedAt = Date()
         applySnapshotRowInputBuildResult(rowInputBuildResult, widgets: visibleWidgets)
+        let snapshotApplyMs = Int((Date().timeIntervalSince(snapshotApplyStartedAt) * 1000).rounded())
 
         let inputsChanged = rowInputs != oldInputs
 
@@ -666,8 +735,13 @@ extension SitemapPageViewModel {
                 reusedInputCount: rowInputBuildResult.reusedInputCount,
                 changedRowCount: changedRowCount,
                 changedRowKinds: changedRowKinds,
-                analysisMs: analysisMs
+                analysisMs: analysisMs,
+                buildRowInputsMs: buildRowInputsMs,
+                applyStateMs: firstApplyMs + snapshotApplyMs,
+                totalUpdateMs: Int((Date().timeIntervalSince(updateStartedAt) * 1000).rounded())
             )
+            let iconSnapshot = await IconLoadDiagnostics.shared.snapshotAndReset()
+            SitemapDiagnostics.logIconSummary(iconSnapshot)
         }
     }
 
