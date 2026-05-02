@@ -30,7 +30,6 @@ enum SetContactStateValueError: Error, CustomLocalizedStringResourceConvertible 
     }
 }
 
-@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use ContactStateIntent for iOS 17+")
 struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct ItemOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
@@ -50,6 +49,8 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
 
     static let title: LocalizedStringResource = "Set Contact State Value"
     static let description = IntentDescription("Set the state of a contact open or closed")
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    static var isDiscoverable: Bool { false }
 
     // swiftlint:disable type_contents_order
     @Parameter(title: "Item", optionsProvider: ItemOptionsProvider())

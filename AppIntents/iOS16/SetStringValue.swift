@@ -27,7 +27,6 @@ enum SetStringValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use SetStringValueIntent for iOS 17+")
 struct SetStringValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct StringOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
@@ -41,6 +40,8 @@ struct SetStringValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
 
     static let title: LocalizedStringResource = "Set String Control Value"
     static let description = IntentDescription("Set the string of a string control item")
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    static var isDiscoverable: Bool { false }
 
     // swiftlint:disable type_contents_order
     @Parameter(title: "Item", optionsProvider: StringOptionsProvider())

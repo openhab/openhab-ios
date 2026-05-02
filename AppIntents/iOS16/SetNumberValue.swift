@@ -27,7 +27,6 @@ enum SetNumberValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS, introduced: 16.0, obsoleted: 17.0, message: "Use SetNumberValueIntent for iOS 17+")
 struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct StringOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
@@ -41,6 +40,8 @@ struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
 
     static let title: LocalizedStringResource = "Set Number Control Value"
     static let description = IntentDescription("Set the decimal value of a number control item")
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    static var isDiscoverable: Bool { false }
 
     // swiftlint:disable type_contents_order
     @Parameter(title: "Item", optionsProvider: StringOptionsProvider())

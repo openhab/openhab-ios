@@ -41,6 +41,8 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
     static let intentClassName = "OpenHABSetSwitchStateIntent"
     static let title: LocalizedStringResource = "Set Switch State"
     static let description = IntentDescription("Set the state of a switch on or off")
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    static var isDiscoverable: Bool { false }
 
     @Parameter(title: "Home")
     var home: Home?
