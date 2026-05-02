@@ -116,11 +116,23 @@ extension ItemEntityQuery {
 
     func entities(matching string: String) async throws -> [EntityType] {
         let selectedHomeId = await resolvedSelectedHomeId()
-        let searchResults = await OpenHABItemCache.instance.searchCachedOrPersistedItems(
-            searchTerm: string,
-            types: allowedTypes.isEmpty ? nil : allowedTypes,
-            homes: selectedHomeId.map { [$0] }
-        )
+        let searchResults: [UUID: [OpenHABItem]]
+        if let selectedHomeId {
+            searchResults = await OpenHABItemCache.instance.searchCachedOrPersistedItems(
+                searchTerm: string,
+                types: allowedTypes.isEmpty ? nil : allowedTypes,
+                homes: [selectedHomeId]
+            )
+        } else {
+            let storedHomes = await Preferences.shared.listStoredHomes()
+            let homeNames = await homeNames(for: storedHomes)
+            searchResults = await homeAwareSearchResults(
+                matching: string,
+                types: allowedTypes.isEmpty ? nil : allowedTypes,
+                homes: storedHomes,
+                homeNames: homeNames
+            )
+        }
 
         // If the user selected a Home in the intent UI, scope results to that home.
         if selectedHomeId != nil {
@@ -141,5 +153,45 @@ extension ItemEntityQuery {
         let hasExactNameMatch = item.name.localizedCaseInsensitiveCompare(searchTerm) == .orderedSame
         let hasExactLabelMatch = item.label.localizedCaseInsensitiveCompare(searchTerm) == .orderedSame
         return hasExactNameMatch || hasExactLabelMatch
+    }
+
+    @MainActor
+    func homeNames(for homeIds: [UUID]) -> [UUID: String] {
+        let storedHomes = Preferences.shared.storedHomes
+        return Dictionary(uniqueKeysWithValues: homeIds.compactMap { homeId in
+            storedHomes[homeId].map { (homeId, $0.homeName) }
+        })
+    }
+
+    func homeAwareSearchResults(
+        matching string: String,
+        types: [OpenHABItem.ItemType]?,
+        homes: [UUID],
+        homeNames: [UUID: String]
+    ) async -> [UUID: [OpenHABItem]] {
+        let itemsByHome = await OpenHABItemCache.instance.getCachedOrPersistedItems(types: types, homes: homes)
+        var result: [UUID: [OpenHABItem]] = [:]
+
+        for homeId in homes {
+            let homeName = homeNames[homeId]
+            let filtered = (itemsByHome[homeId] ?? [])
+                .ranked(searchTerm: string, for: types) { item in
+                    guard let homeName else {
+                        return []
+                    }
+                    return [
+                        homeName,
+                        "\(item.name) \(homeName)",
+                        "\(item.label) \(homeName)"
+                    ]
+                }
+                .map(\.item)
+
+            if !filtered.isEmpty {
+                result[homeId] = filtered
+            }
+        }
+
+        return result
     }
 }

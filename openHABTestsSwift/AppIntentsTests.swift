@@ -297,6 +297,21 @@ struct HomeResolverTests {
     }
 }
 
+// MARK: - Item Search Ranking
+
+@Suite("Item search ranking")
+struct ItemSearchRankingTests {
+    @Test func homeNameCanContributeToItemSearch() {
+        let officeSensor = makeItem(name: "TemperatureSensorOffice", type: "Number", label: "Office Sensor")
+
+        let ranked = [officeSensor].ranked(searchTerm: "main temp", for: nil) { item in
+            ["\(item.name) Main Home", "\(item.label) Main Home"]
+        }
+
+        #expect(ranked.map(\.item.name) == ["TemperatureSensorOffice"])
+    }
+}
+
 // MARK: - Error Descriptions
 
 @Suite("Intent error descriptions")

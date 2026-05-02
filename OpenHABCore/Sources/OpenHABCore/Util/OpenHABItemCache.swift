@@ -244,8 +244,8 @@ public extension OpenHABItem {
         types == nil || (type.flatMap { types?.contains($0) } == true)
     }
 
-    func searchScore(for searchTerm: String) -> Int? {
-        ItemSearchRanker.score(for: self, searchTerm: searchTerm)
+    func searchScore(for searchTerm: String, additionalCandidates: [String] = []) -> Int? {
+        ItemSearchRanker.score(for: self, searchTerm: searchTerm, additionalCandidates: additionalCandidates)
     }
 }
 
@@ -254,7 +254,11 @@ public extension [OpenHABItem] {
         ranked(searchTerm: searchTerm, for: types).map(\.item)
     }
 
-    func ranked(searchTerm: String? = nil, for types: [OpenHABItem.ItemType]? = nil) -> [(item: OpenHABItem, score: Int)] {
+    func ranked(
+        searchTerm: String? = nil,
+        for types: [OpenHABItem.ItemType]? = nil,
+        additionalCandidates: (OpenHABItem) -> [String] = { _ in [] }
+    ) -> [(item: OpenHABItem, score: Int)] {
         compactMap { item in
             guard item.matches(types: types) else {
                 return nil
@@ -264,7 +268,7 @@ public extension [OpenHABItem] {
                 return (item: item, score: 0)
             }
 
-            guard let score = item.searchScore(for: searchTerm) else {
+            guard let score = item.searchScore(for: searchTerm, additionalCandidates: additionalCandidates(item)) else {
                 return nil
             }
 
@@ -359,13 +363,13 @@ public extension OpenHABItemCache {
 }
 
 private enum ItemSearchRanker {
-    static func score(for item: OpenHABItem, searchTerm: String) -> Int? {
+    static func score(for item: OpenHABItem, searchTerm: String, additionalCandidates: [String] = []) -> Int? {
         let tokens = normalizedTokens(in: searchTerm)
         guard !tokens.isEmpty else {
             return 0
         }
 
-        let candidates = [item.name, item.label]
+        let candidates = [item.name, item.label] + additionalCandidates
         return candidates.enumerated().compactMap { index, candidate in
             score(candidate: candidate, tokens: tokens).map { ($0 * 10) + index }
         }.min()
