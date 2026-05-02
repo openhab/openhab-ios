@@ -35,13 +35,22 @@ public struct NumberState: CustomStringConvertible, Equatable {
     }
 
     /// Value string suitable for sending as a command to the server.
-    /// Preserves full numeric precision (never truncated by display format)
-    /// and appends the unit when present.
+    /// Sends integers without decimal suffix (36 not 36.0) so HTTP binding
+    /// string substitution (%2$s) passes clean values to downstream devices.
+    /// Fractional values are preserved (30.3 is never truncated to 30).
     public var commandString: String {
-        if let unit, !unit.isEmpty {
-            return "\(stringValue) \(unit)"
+        let valueString: String
+        if value.truncatingRemainder(dividingBy: 1) == 0,
+           value >= Double(Int.min),
+           value <= Double(Int.max) {
+            valueString = String(Int(value))
+        } else {
+            valueString = String(value)
         }
-        return stringValue
+        if let unit, !unit.isEmpty {
+            return "\(valueString) \(unit)"
+        }
+        return valueString
     }
 
     // Access to default memberwise initializer not permitted outside of package
