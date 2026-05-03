@@ -566,6 +566,17 @@ class OpenHABWebViewModel: ObservableObject {
         loadWebView(force: true)
     }
 
+    /// Blanks the webview immediately by loading `about:blank`.
+    /// Use this before a home switch so the previous home's content
+    /// disappears instantly, before the new connection is established.
+    func clearView() {
+        webView.stopLoading()
+        webView.load(URLRequest(url: URL(string: "about:blank")!))
+        isLoading = true
+        isSSEConnected = false
+        showMenuBar = true
+    }
+
     // MARK: - JS evaluation
 
     /// Evaluates an arbitrary JS expression in the current webview.

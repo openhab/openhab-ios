@@ -59,6 +59,12 @@ struct OpenHABRootView: View {
             menuData.refresh()
             webViewModel.reloadView()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
+            webViewModel.clearView()
+            menuData.clearAll()
+            currentContent = .webview
+            switchToSavedView()
+        }
         .task {
             for await connection in MainActorNetworkTracker.shared.$activeConnection.values {
                 activeNetworkConnection = connection
