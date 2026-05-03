@@ -27,11 +27,10 @@ struct OpenHABRootView: View {
     @StateObject private var webViewModel = OpenHABWebViewModel()
     @State private var menuPresented = false
     @State private var currentContent: TargetController = .webview
-    @State private var showSettings = false
+    @State private var currentViewTitle: String = ""
+    @State private var activeNetworkConnection: ConnectionInfo? = MainActorNetworkTracker.shared.activeConnection
     @State private var showNotifications = false
     @State private var showHomeSelection = false
-    @State private var settingsPendingSave: (() -> Void)? = nil
-    @State private var settingsPendingSnapshot: SettingsView.SettingsSnapshot? = nil
     @State private var isDemoMode = false
     @State private var sitemapResetID = UUID()
 
@@ -60,30 +59,10 @@ struct OpenHABRootView: View {
             menuData.refresh()
             webViewModel.reloadView()
         }
-        .sheet(isPresented: $showSettings) {
-            NavigationStack {
-                SettingsView(
-                    onDismissedDirty: { snapshot, save in
-                        settingsPendingSnapshot = snapshot
-                        settingsPendingSave = save
-                    },
-                    initialValues: settingsPendingSnapshot
-                )
+        .task {
+            for await connection in MainActorNetworkTracker.shared.$activeConnection.values {
+                activeNetworkConnection = connection
             }
-        }
-        .confirmationDialog(
-            "Unsaved Settings Changes",
-            isPresented: Binding(
-                get: { settingsPendingSave != nil },
-                set: { if !$0 { settingsPendingSave = nil } }
-            ),
-            titleVisibility: .visible
-        ) {
-            Button("Save") { settingsPendingSave?(); settingsPendingSave = nil; settingsPendingSnapshot = nil }
-            Button("Continue Editing") { showSettings = true; settingsPendingSave = nil }
-            Button("Discard Changes", role: .destructive) { settingsPendingSave = nil; settingsPendingSnapshot = nil }
-        } message: {
-            Text("Your settings changes have not been saved. What would you like to do?")
         }
         .sheet(isPresented: $showNotifications) {
             NavigationView { NotificationsView() }
@@ -125,15 +104,11 @@ struct OpenHABRootView: View {
     private var contentView: some View {
         switch currentContent {
         case .webview:
-            VStack(spacing: 0) {
-                if webViewModel.showMenuBar {
-                    menuBar
-                        .transition(.move(edge: .top))
-                }
+            ZStack(alignment: .top) {
                 OpenHABWebViewContainer(viewModel: webViewModel)
+                    .background(.clear)
+                menuBar
             }
-            .clipped()
-            .animation(.easeInOut(duration: 0.3), value: webViewModel.showMenuBar)
             .onAppear { webViewModel.triggerAppMenuProbe() }
         case let .sitemap(name):
             SitemapNavigationView(onShowSideMenu: { menuPresented = true })
@@ -143,28 +118,60 @@ struct OpenHABRootView: View {
                 menuBar
                 OpenHABWebViewContainer(viewModel: webViewModel)
             }
-        case .settings, .notifications, .homeSelection, .browser:
+        case .notifications, .homeSelection, .browser:
             preconditionFailure("Modal/transient targets must never become currentContent")
         }
     }
 
     @ViewBuilder
     private var menuBar: some View {
+        let isWebviewMode: Bool = {
+            if case .webview = currentContent { return true }
+            return false
+        }()
+
+        let barTitle: String = {
+            if isWebviewMode { return webViewModel.navbarTitle }
+            if case .tile = currentContent { return currentViewTitle }
+            return ""
+        }()
+
         HStack {
-            // Connection-status indicator (mirrors the Sitemap view's toolbar indicator)
+            // Left side: proxied navbar items (webview mode with items available),
+            // or connection-status indicator as fallback.
             Group {
-                if webViewModel.isLoading {
+                if isWebviewMode, !webViewModel.navbarItems.isEmpty {
+                    ForEach(webViewModel.navbarItems) { item in
+                        Button {
+                            webViewModel.evaluateJS(item.jsAction)
+                        } label: {
+                            if let uiImg = item.iconImage {
+                                Image(uiImage: uiImg)
+                                    .renderingMode(.template)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 28, height: 28)
+                            } else {
+                                Text(item.label)
+                            }
+                        }
+                        .ohMinimumHitTarget()
+                    }
+                } else if isWebviewMode, activeNetworkConnection == nil {
+                    HStack(spacing: 4) {
+                        Image(systemSymbol: .wifiExclamationmark)
+                        Text("Offline")
+                            .ohTextToken(.secondary)
+                        Button { webViewModel.reloadView() } label: {
+                            Image(systemSymbol: .arrowClockwise)
+                        }
+                    }
+                    .foregroundStyle(.secondary)
+                } else if webViewModel.isLoading {
                     HStack(spacing: 4) {
                         ProgressView()
                             .controlSize(.small)
                         Text("Connecting")
-                            .ohTextToken(.secondary)
-                    }
-                    .foregroundStyle(.secondary)
-                } else if case .webview = currentContent, !webViewModel.isSSEConnected {
-                    HStack(spacing: 4) {
-                        Image(systemSymbol: .wifiExclamationmark)
-                        Text("Offline")
                             .ohTextToken(.secondary)
                     }
                     .foregroundStyle(.secondary)
@@ -174,33 +181,52 @@ struct OpenHABRootView: View {
 
             Spacer()
 
-            if #available(iOS 26, *) {
-                Button {
-                    menuPresented = true
-                } label: {
-                    Image(systemSymbol: .line3Horizontal)
-                        .font(.title)
+            Group {
+                if #available(iOS 26, *) {
+                    Button {
+                        menuPresented = true
+                    } label: {
+                        Image(systemSymbol: .line3Horizontal)
+                            .font(.title)
+                    }
+                    .buttonStyle(.glass)
+                    .ohMinimumHitTarget()
+                    .accessibilityIdentifier("HamburgerButton")
+                    .accessibilityLabel("Menu")
+                    .padding(.trailing)
+                } else {
+                    Button {
+                        menuPresented = true
+                    } label: {
+                        Image(systemSymbol: .line3Horizontal)
+                            .font(.title)
+                    }
+                    .ohMinimumHitTarget()
+                    .accessibilityIdentifier("HamburgerButton")
+                    .accessibilityLabel("Menu")
+                    .padding(.trailing)
                 }
-                .buttonStyle(.glass)
-                .ohMinimumHitTarget()
-                .accessibilityIdentifier("HamburgerButton")
-                .accessibilityLabel("Menu")
-                .padding(.trailing)
-            } else {
-                Button {
-                    menuPresented = true
-                } label: {
-                    Image(systemSymbol: .line3Horizontal)
-                        .font(.title)
-                }
-                .ohMinimumHitTarget()
-                .accessibilityIdentifier("HamburgerButton")
-                .accessibilityLabel("Menu")
-                .padding(.trailing)
             }
+            .scaleEffect(menuPresented ? 3.0 : 1.0, anchor: .topTrailing)
+            .opacity(menuPresented ? 0.0 : 1.0)
+            .animation(.spring(response: 0.32, dampingFraction: 0.78), value: menuPresented)
         }
         .frame(height: 44)
-        .background(Color(.systemBackground), ignoresSafeAreaEdges: .top)
+        .overlay {
+            if !barTitle.isEmpty {
+                Text(barTitle)
+                    .font(.headline)
+                    .lineLimit(1)
+                    .frame(maxWidth: 200)
+                    .allowsHitTesting(false)
+            }
+        }
+        .background(
+            isWebviewMode
+                ? AnyShapeStyle(.bar)
+                : AnyShapeStyle(Color(.systemBackground)),
+            ignoresSafeAreaEdges: .top
+        )
     }
 
     private func switchToSavedView() {
@@ -247,6 +273,8 @@ struct OpenHABRootView: View {
                 if let url = URL(string: url) {
                     webViewModel.loadTilePage(url)
                 }
+            default:
+                break // modal/transient targets never reach switchContent
             }
 
             if !Preferences.shared.currentHomePreferences.demomode {
@@ -267,18 +295,17 @@ struct OpenHABRootView: View {
     private func handleMenuSelection(_ target: TargetController) {
         switch target {
         case .webview:
+            currentViewTitle = ""
             switchContent(to: .webview)
         case let .sitemap(name):
             Preferences.shared.modifyActiveHome { $0.defaultSitemap = name }
             switchContent(to: .sitemap(name))
-        case .settings:
-            settingsPendingSnapshot = nil
-            showSettings = true
         case .notifications:
             showNotifications = true
         case .homeSelection:
             showHomeSelection = true
         case let .tile(urlString):
+            currentViewTitle = menuData.label(forURL: urlString)
             switchToTile(urlString)
         case let .browser(urlString):
             if let url = URL(string: urlString) {
@@ -310,17 +337,6 @@ struct OpenHABRootView: View {
 
     // MARK: - Helpers
 
-<<<<<<< HEAD
-    private var isWebOrTileContent: Bool {
-        switch currentContent {
-        case .webview, .tile: return true
-        case .sitemap: return false
-        default: return false
-        }
-    }
-
-=======
->>>>>>> c473db08 (Feature: Nav bar and menu UX — show/hide, animation, floating→toolbar, dropdown animation)
     private func setupExitToApp() {
         webViewModel.onExitToApp = {
             menuPresented = true

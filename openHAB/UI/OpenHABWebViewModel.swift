@@ -16,6 +16,22 @@ import SafariServices
 import UIKit
 import WebKit
 
+/// A single action button proxied from the MainUI web navbar.
+struct WebNavbarItem: Identifiable {
+    let id = UUID()
+    let label: String
+    let jsAction: String
+    /// Base64-encoded PNG of the icon rendered from the web navbar element.
+    /// Nil if capture failed; fall back to `label` text in that case.
+    let iconBase64: String?
+
+    var iconImage: UIImage? {
+        guard let b64 = iconBase64,
+              let data = Data(base64Encoded: b64) else { return nil }
+        return UIImage(data: data)
+    }
+}
+
 @MainActor
 class OpenHABWebViewModel: ObservableObject {
     // MARK: - Published state
@@ -31,6 +47,12 @@ class OpenHABWebViewModel: ObservableObject {
     /// Used to determine when the native menu bar can be hidden and to show
     /// a connection-status indicator while connecting or offline.
     @Published private(set) var isSSEConnected = false
+    /// Navbar items proxied from the MainUI web top bar. Empty until the JS
+    /// MutationObserver posts the first `navbarElements` message.
+    @Published private(set) var navbarItems: [WebNavbarItem] = []
+    /// Title text proxied from the MainUI web navbar. Empty until the JS
+    /// proxy posts the first `navbarElements` message.
+    @Published private(set) var navbarTitle: String = ""
 
     // MARK: - Internal state (used by Coordinator)
 
@@ -51,6 +73,169 @@ class OpenHABWebViewModel: ObservableObject {
     private var etagChecker: ETagChecker?
     private var etagCheckerConfigURL: String?
     private var trackerCancellables = Set<AnyCancellable>()
+
+    /// JS injected after each page load to proxy the MainUI Framework7 navbar
+    /// into the native bar and hide the web navbar.
+    private let navbarProxyJS = """
+    (function() {
+        // Returns the active/visible navbar. Popups take highest priority;
+        // then the main view's current page. Scoping .view-main selectors
+        // prevents the right panel ("Other Apps") from matching during
+        // F7 initialisation when it briefly carries .page-current.
+        function activeNavbar() {
+            return document.querySelector('.popup.modal-in .navbar')
+                || document.querySelector('.view-main .page-current .navbar')
+                || document.querySelector('.view-main .navbar.navbar-current')
+                || document.querySelector('.page-current .navbar:not(.panel *)')
+                || document.querySelector('.navbar:not(.navbar-hidden):not(.panel *)')
+                || document.querySelector('.navbar');
+        }
+
+        function serializeNavbar() {
+            var navbar = activeNavbar();
+            if (!navbar) return;
+            // Wait for web fonts (Framework7 Icons) to be ready before canvas rendering.
+            // document.fonts.ready resolves immediately on subsequent calls once fonts are loaded.
+            (document.fonts ? document.fonts.ready : Promise.resolve()).then(function() {
+                navbar.style.display = 'none';
+
+                var titleEl = navbar.querySelector('.title') || navbar.querySelector('[class*="title"]');
+                var title = titleEl ? titleEl.innerText.trim() : '';
+
+                // Collect interactive elements from left/right regions only —
+                // avoids picking up the title text as a button label.
+                var btns = Array.from(navbar.querySelectorAll(
+                    '.navbar-inner .left a, .navbar-inner .left button,' +
+                    '.navbar-inner .right a, .navbar-inner .right button'
+                ));
+                // Renders an element's icon glyph to a canvas and returns base64 PNG.
+                // Drawn in black on transparent so Swift can apply template tinting.
+                function iconBase64(el) {
+                    try {
+                        var iconEl = el.querySelector('i.icon, .icon') || el;
+                        var style = window.getComputedStyle(iconEl);
+                        var text = iconEl.innerText.trim() || el.innerText.trim();
+                        if (!text) return null;
+                        var px = 128;
+                        var canvas = document.createElement('canvas');
+                        canvas.width = px; canvas.height = px;
+                        var ctx = canvas.getContext('2d');
+                        ctx.font = 'normal ' + Math.round(px * 0.9) + 'px ' + style.fontFamily;
+                        ctx.fillStyle = 'black';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(text, px / 2, px / 2);
+                        return canvas.toDataURL('image/png').split(',')[1];
+                    } catch(e) { return null; }
+                }
+
+                var items = [];
+                btns.forEach(function(el, idx) {
+                    var inRight = !!el.closest('.navbar-inner .right');
+                    // Skip right-side panel-open buttons (the web "Other Apps" drawer).
+                    if (inRight && el.classList.contains('panel-open')) return;
+                    // Skip the in-app exit-to-app button (F7 icon: square_arrow_right).
+                    var iconChild = el.querySelector('i.icon, .icon');
+                    if (inRight && iconChild && iconChild.innerText.trim() === 'square_arrow_right') return;
+                    var label = (el.getAttribute('aria-label')
+                        || el.getAttribute('title')
+                        || el.innerText || '').trim();
+                    if (!label) return;
+                    // Back links: use history.back() — clicking the hidden element
+                    // is ignored by F7. All other buttons: tag and click.
+                    var action;
+                    if (el.classList.contains('back')) {
+                        action = 'window.history.back()';
+                    } else {
+                        el.setAttribute('data-oh-proxy', String(idx));
+                        action = '(function(){var el=document.querySelector("[data-oh-proxy=\\'' + idx + '\\']");if(el)el.click();})()';
+                    }
+                    var item = { label: label, action: action };
+                    var b64 = el.querySelector('.f7-icons') ? iconBase64(el) : null;
+                    if (b64) item.icon = b64;
+                    items.push(item);
+                });
+
+                window.webkit.messageHandlers.mainUi.postMessage({
+                    type: 'navbarElements',
+                    title: title,
+                    items: items
+                });
+            });
+        }
+
+        // Observe document.body for page transitions and popup open/close.
+        // Watching .view-main alone misses popups (they are siblings of .view-main).
+        // class changes on .popup.modal-in and page elements all bubble up to body.
+        // Debounced 200 ms.
+        function observeNavbar() {
+            var root = document.body || document.documentElement;
+            var timer = null;
+            new MutationObserver(function() {
+                clearTimeout(timer);
+                timer = setTimeout(serializeNavbar, 200);
+            }).observe(root, {
+                childList: true, subtree: true,
+                attributes: true, attributeFilter: ['class']
+            });
+        }
+
+        // Wait for the *correct* navbar. Popups first, then .view-main.
+        function readyNavbar() {
+            return document.querySelector('.popup.modal-in .navbar')
+                || document.querySelector('.view-main .page-current .navbar')
+                || document.querySelector('.view-main .navbar.navbar-current')
+                || document.querySelector('.page-current .navbar:not(.panel *)');
+        }
+        function waitAndSerialize() {
+            if (readyNavbar()) {
+                serializeNavbar();
+                observeNavbar();
+                return;
+            }
+            var root = document.body || document.documentElement;
+            if (!root) return;
+            var bodyObserver = new MutationObserver(function() {
+                if (readyNavbar()) {
+                    bodyObserver.disconnect();
+                    serializeNavbar();
+                    observeNavbar();
+                }
+            });
+            // Watch childList for new elements AND attributes for .page-current
+            // being added to an existing element.
+            bodyObserver.observe(root, { childList: true, subtree: true,
+                                         attributes: true, attributeFilter: ['class'] });
+        }
+
+        // Guard against re-installation when Swift injects this script multiple
+        // times (on ready, sseConnected, didFinish). Only set up history hooks once;
+        // always re-run waitAndSerialize so a fresh page or SPA navigation is covered.
+        if (window.__ohNavbarProxyInstalled) {
+            waitAndSerialize();
+            return;
+        }
+        window.__ohNavbarProxyInstalled = true;
+
+        waitAndSerialize();
+
+        // Re-run after SPA navigations. requestAnimationFrame fires after the
+        // browser's next paint, by which time Framework7 has updated the navbar.
+        var origPush = history.pushState;
+        history.pushState = function() {
+            origPush.apply(this, arguments);
+            requestAnimationFrame(waitAndSerialize);
+        };
+        var origReplace = history.replaceState;
+        history.replaceState = function() {
+            origReplace.apply(this, arguments);
+            requestAnimationFrame(waitAndSerialize);
+        };
+        window.addEventListener('popstate', function() {
+            requestAnimationFrame(waitAndSerialize);
+        });
+    })();
+    """
 
     private let js = """
     (function() {
@@ -285,6 +470,7 @@ class OpenHABWebViewModel: ObservableObject {
         newWebView.scrollView.bounces = false
         newWebView.isOpaque = false
         newWebView.backgroundColor = UIColor.clear
+        newWebView.scrollView.backgroundColor = UIColor.clear
         if UIDevice.current.userInterfaceIdiom == .pad {
             newWebView.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
         }
@@ -336,6 +522,10 @@ class OpenHABWebViewModel: ObservableObject {
             executeQueuedCommands()
             // SPA is live — hide the native menu bar so the SPA's own UI takes over.
             showMenuBar = false
+            // Re-inject navbar proxy and re-run app-menu probe now that the SPA
+            // is fully live. window.MainUI is guaranteed defined at this point.
+            injectNavbarProxy()
+            triggerAppMenuProbe()
         } else {
             Logger.viewController.info("WKScriptMessage sseConnected is false")
             // Show the native bar so the connection-status indicator is visible
@@ -376,6 +566,18 @@ class OpenHABWebViewModel: ObservableObject {
         loadWebView(force: true)
     }
 
+    // MARK: - JS evaluation
+
+    /// Evaluates an arbitrary JS expression in the current webview.
+    /// Used by the native navbar proxy to trigger action buttons.
+    func evaluateJS(_ js: String) {
+        webView.evaluateJavaScript(js) { _, error in
+            if let error {
+                Logger.viewController.error("evaluateJS failed: \(error.localizedDescription)")
+            }
+        }
+    }
+
     // MARK: - didFinish helpers
 
     func handleDidFinish() {
@@ -391,7 +593,16 @@ class OpenHABWebViewModel: ObservableObject {
             }
         }
 
+        injectNavbarProxy()
         injectEditorHeightFix()
+    }
+
+    private func injectNavbarProxy() {
+        webView.evaluateJavaScript(navbarProxyJS) { _, error in
+            if let error {
+                Logger.viewController.debug("navbarProxyJS: \(error.localizedDescription)")
+            }
+        }
     }
 
     // MARK: - Menu bar visibility
@@ -401,11 +612,24 @@ class OpenHABWebViewModel: ObservableObject {
     func handleNavigationStart() {
         showMenuBar = true
         isSSEConnected = false
+        navbarItems = []
+        navbarTitle = ""
+        // Clear the re-installation guard so the next page gets a fresh proxy.
+        webView.evaluateJavaScript("window.__ohNavbarProxyInstalled = undefined;")
+    }
+
+    /// Updates the proxied navbar items and title received from the web content.
+    func updateNavbarItems(_ items: [WebNavbarItem], title: String = "") {
+        navbarItems = items
+        navbarTitle = title
     }
 
     /// Called when the openHAB Main UI fires its `OHApp.ready()` callback.
+    /// At this point the SPA has fully initialised: `window.MainUI` is defined
+    /// and Vue has mounted its components, so both the proxy and probe are reliable.
     func handleReady() {
-        // Navigation is handled via direct URL loading (see loadTilePage); nothing to do here.
+        injectNavbarProxy()
+        triggerAppMenuProbe()
     }
 
     /// Called with the result of the JS probe that checks window.MainUI.

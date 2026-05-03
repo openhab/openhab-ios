@@ -289,7 +289,22 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                 Logger.viewController.debug("Path changed to: \(newPath)")
                 Preferences.shared.currentWebViewPath = newPath
             }
-            if message.name == "mainUi", let callbackName = message.body as? String {
+            if message.name == "mainUi" {
+                // Dict body — navbar proxy elements
+                if let dict = message.body as? [String: Any],
+                   let type = dict["type"] as? String,
+                   type == "navbarElements",
+                   let rawItems = dict["items"] as? [[String: String]] {
+                    let items = rawItems.compactMap { raw -> WebNavbarItem? in
+                        guard let label = raw["label"], let action = raw["action"] else { return nil }
+                        return WebNavbarItem(label: label, jsAction: action, iconBase64: raw["icon"])
+                    }
+                    let title = dict["title"] as? String ?? ""
+                    viewModel.updateNavbarItems(items, title: title)
+                    return
+                }
+                // String body — standard callbacks
+                guard let callbackName = message.body as? String else { return }
                 Logger.viewController.info("WKScriptMessage \(callbackName)")
                 switch callbackName {
                 case "exitToApp":
@@ -414,8 +429,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                let url = navigationAction.request.url,
                let scheme = url.scheme,
                schemes.contains(scheme) {
-                let svc = SFSafariViewController(url: url)
-                hostController?.present(svc, animated: true)
+                Task { await UIApplication.shared.open(url) }
             }
             return nil
         }
