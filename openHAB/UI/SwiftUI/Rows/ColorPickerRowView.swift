@@ -125,12 +125,12 @@ private struct ColorWheelView: View {
             let dotCount = ringIndex * 6
 
             for dotIndex in 0 ..< dotCount {
-                let angle = (CGFloat(dotIndex) / CGFloat(dotCount)) * 2 * .pi
+                let angle = (Double(dotIndex) / Double(dotCount)) * 2 * Double.pi
                 let point = CGPoint(
-                    x: center.x + sin(angle) * ringRadius,
-                    y: center.y + cos(angle) * ringRadius
+                    x: center.x + CGFloat(sin(angle)) * ringRadius,
+                    y: center.y + CGFloat(cos(angle)) * ringRadius
                 )
-                let hue = wrappedHue(hueRotation - Double(angle) / (2 * Double.pi))
+                let hue = wrappedHue(hueRotation - angle / (2 * Double.pi))
                 let saturation = (ringRadius / availableRadius).clamped(to: 0 ... 1)
                 let color = Color(hue: hue, saturation: saturation, brightness: 1)
                 drawDot(at: point, color: color, dotRadius: dotRadius, in: context)
@@ -149,12 +149,12 @@ private struct ColorWheelView: View {
     }
 
     private func indicatorPosition(for size: CGFloat) -> CGPoint {
-        let radius = size / 2
-        let angle = (hueRotation - selection.hue) * 2 * .pi
+        let radius = Double(size) / 2
+        let angle = (hueRotation - selection.hue) * 2 * Double.pi
         let distance = selection.saturation * radius
         return CGPoint(
-            x: radius + sin(angle) * distance,
-            y: radius + cos(angle) * distance
+            x: CGFloat(radius + sin(angle) * distance),
+            y: CGFloat(radius + cos(angle) * distance)
         )
     }
 
