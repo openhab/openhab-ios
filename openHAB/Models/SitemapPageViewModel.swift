@@ -120,14 +120,13 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     var pageTitle: String {
-        // Strip bracket content from title (e.g., "Living Room[2]" becomes "Living Room")
-        let title = currentPage?.title.components(separatedBy: "[")[0].trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let title = currentPage?.title.labelText ?? ""
         if !title.isEmpty {
             return title
         } else if !fallbackTitle.isEmpty {
-            return fallbackTitle
+            return fallbackTitle.labelText
         } else if !defaultSitemapLabel.isEmpty {
-            return defaultSitemapLabel
+            return defaultSitemapLabel.labelText
         } else {
             // Return empty — SitemapPageView shows a redacted placeholder title when loading
             return ""
