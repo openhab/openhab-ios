@@ -405,10 +405,11 @@ final class UserData: ObservableObject {
 
     func sendCommand(_ item: OpenHABItem?, command: String?) async {
         guard let item, let command else { return }
+        let sitemapName = AppSettings.shared.sitemapForWatch
+        let pageId = openHABSitemapPage?.pageId ?? ""
+        let sourcePrefix = (!sitemapName.isEmpty && !pageId.isEmpty) ? "org.openhab.ui.basic$\(sitemapName):\(pageId)" : nil
         do {
-            // Watch commands currently rely on server defaults for `source`.
-            // Explicit source formatting can be rejected by some deployments.
-            try await NetworkTracker.shared.send(to: item, command: command)
+            try await NetworkTracker.shared.send(to: item, command: command, sourcePrefix: sourcePrefix, deviceId: AppSettings.deviceId)
         } catch {
             Logger.userData.error("Failed to send command '\(command)' to '\(item.name)': \(error.localizedDescription)")
         }

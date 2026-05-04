@@ -114,4 +114,16 @@ final class AppSettings: ObservableObject {
         self.init()
         self.openHABRootUrl = openHABRootUrl
     }
+
+    /// Stable per-install identifier, analogous to UIDevice.identifierForVendor on iOS.
+    static var deviceId: String {
+        let key = "watchDeviceId"
+        let store = UserDefaults.standard
+        if let existing = store.string(forKey: key) {
+            return existing
+        }
+        let new = UUID().uuidString
+        store.set(new, forKey: key)
+        return new
+    }
 }

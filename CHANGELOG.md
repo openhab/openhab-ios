@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [Version 3.2.39, Build 247] - 2026-05-03Z
+
+- Add brightness up/down buttons to colorpicker sitemap row (#1178)
+- Fix slider commands sending 36.0 instead of 36 for Number items (#1177)
+- Fix submenu navigation title briefly flashing item value (#1179)
+- Video snapshot item url precedence (#1171)
+- Remove misleading SessionChallenge warning and stale TODO (#1174)
+
 ## [Version 3.2.38, Build 246] - 2026-05-01Z
 
 - Use lazy navigationDestination to avoid eager SitemapPageViewModel creation (#1173)

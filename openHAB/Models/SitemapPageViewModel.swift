@@ -120,14 +120,13 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     var pageTitle: String {
-        // Strip bracket content from title (e.g., "Living Room[2]" becomes "Living Room")
-        let title = currentPage?.title.components(separatedBy: "[")[0].trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let title = currentPage?.title.labelText ?? ""
         if !title.isEmpty {
             return title
         } else if !fallbackTitle.isEmpty {
-            return fallbackTitle
+            return fallbackTitle.labelText
         } else if !defaultSitemapLabel.isEmpty {
-            return defaultSitemapLabel
+            return defaultSitemapLabel.labelText
         } else {
             // Return empty — SitemapPageView shows a redacted placeholder title when loading
             return ""
@@ -1125,13 +1124,14 @@ extension SitemapPageViewModel {
     private func sendCommandNow(itemname: String, command: String, version: Int) {
         setCommandState(.sending, for: itemname)
         let deviceId = UIDevice.current.identifierForVendor?.uuidString
+        let sourcePrefix = pageId.isEmpty ? nil : "org.openhab.ui.basic$\(defaultSitemap):\(pageId)"
         Task { [weak self] in
             guard let self else { return }
             do {
                 try await openAPIService?.sendItemCommand(
                     itemname: itemname,
                     command: command,
-                    sourcePrefix: nil,
+                    sourcePrefix: sourcePrefix,
                     deviceId: deviceId
                 )
                 logger.info("Successfully sent command \(command, privacy: .private(mask: .hash)) to \(itemname, privacy: .public)")
