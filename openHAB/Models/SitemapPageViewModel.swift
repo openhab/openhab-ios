@@ -1124,13 +1124,14 @@ extension SitemapPageViewModel {
     private func sendCommandNow(itemname: String, command: String, version: Int) {
         setCommandState(.sending, for: itemname)
         let deviceId = UIDevice.current.identifierForVendor?.uuidString
+        let sourcePrefix = pageId.isEmpty ? nil : "org.openhab.ui.basic$\(defaultSitemap):\(pageId)"
         Task { [weak self] in
             guard let self else { return }
             do {
                 try await openAPIService?.sendItemCommand(
                     itemname: itemname,
                     command: command,
-                    sourcePrefix: nil,
+                    sourcePrefix: sourcePrefix,
                     deviceId: deviceId
                 )
                 logger.info("Successfully sent command \(command, privacy: .private(mask: .hash)) to \(itemname, privacy: .public)")
