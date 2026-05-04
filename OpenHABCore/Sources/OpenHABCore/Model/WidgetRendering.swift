@@ -44,7 +44,7 @@ private func _widgetAdjustStep(_ raw: Double, minValue: Double, maxValue: Double
 public extension WidgetRendering {
     /// Text portion of the label (everything before the first "[").
     var labelText: String {
-        label.components(separatedBy: "[")[0].trimmingCharacters(in: .whitespaces)
+        label.labelText
     }
 
     /// Value portion of the label (content of the first "[…]"), if present.

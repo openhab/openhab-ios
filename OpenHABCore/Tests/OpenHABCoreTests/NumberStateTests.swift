@@ -34,14 +34,18 @@ struct NumberStateTests {
         #expect(NumberState(value: 100.4, unit: "°C", format: "%.1f / %.1f %unit%").toString(locale: Locale(identifier: "de")) == "100.4 °C")
     }
 
-    @Test("commandString preserves full precision regardless of display format")
+    @Test("commandString preserves fractional values but strips .0 from whole numbers")
     func commandString() {
+        // Fractional values must not be truncated by display format
         #expect(NumberState(value: 30.3, format: "%d").commandString == "30.3")
         #expect(NumberState(value: 30.3, unit: "°C", format: "%d %unit%").commandString == "30.3 °C")
         #expect(NumberState(value: 30.3, unit: "°C", format: "%.1f %unit%").commandString == "30.3 °C")
-        #expect(NumberState(value: 30.0, format: "%d").commandString == "30.0")
         #expect(NumberState(value: 30.3, unit: nil, format: "%d").commandString == "30.3")
         #expect(NumberState(value: 30.3, unit: "", format: "%d").commandString == "30.3")
+        // Whole numbers must be sent without decimal suffix so HTTP binding %2$s passes clean values
+        #expect(NumberState(value: 30.0, format: "%d").commandString == "30")
+        #expect(NumberState(value: 36.0, format: "%d").commandString == "36")
+        #expect(NumberState(value: 100.0, unit: "°C", format: "%d %unit%").commandString == "100 °C")
     }
 
     @Test("setpoint formatter prefers server label when idle")

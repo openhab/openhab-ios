@@ -172,6 +172,12 @@ public extension String {
     func removeTrailingSlashes() -> String {
         replacing(/\/+$/, with: "")
     }
+
+    /// The text portion of an openHAB label — everything before the first "[".
+    /// e.g. "Living Room [21°C]" → "Living Room"
+    var labelText: String {
+        components(separatedBy: "[")[0].trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 }
 
 public extension String? {
