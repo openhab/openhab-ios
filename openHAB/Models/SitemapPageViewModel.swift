@@ -120,15 +120,16 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     var pageTitle: String {
-        let title = currentPage?.title.labelText ?? ""
+        let title = currentPage?.title.labelValueTitle ?? ""
+
         if !title.isEmpty {
             return title
         } else if !fallbackTitle.isEmpty {
-            return fallbackTitle.labelText
+            return fallbackTitle.labelValueTitle
         } else if !defaultSitemapLabel.isEmpty {
-            return defaultSitemapLabel.labelText
+            return defaultSitemapLabel.labelValueTitle
         } else {
-            // Return empty — SitemapPageView shows a redacted placeholder title when loading
+            // SitemapPageView shows a redacted placeholder title when loading
             return ""
         }
     }
