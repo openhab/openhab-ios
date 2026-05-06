@@ -14,6 +14,7 @@ import OpenHABCore
 import os.log
 
 struct IconLoadDiagnosticsSnapshot {
+    let resolutionFailures: Int
     let starts: Int
     let successes: Int
     let memoryHits: Int
@@ -25,7 +26,8 @@ struct IconLoadDiagnosticsSnapshot {
     let distinctRows: Int
 
     var isEmpty: Bool {
-        starts == 0 &&
+        resolutionFailures == 0 &&
+            starts == 0 &&
             successes == 0 &&
             memoryHits == 0 &&
             diskHits == 0 &&
@@ -39,6 +41,7 @@ actor IconLoadDiagnostics {
     static let shared = IconLoadDiagnostics()
 
     private var starts = 0
+    private var resolutionFailures = 0
     private var successes = 0
     private var memoryHits = 0
     private var diskHits = 0
@@ -47,6 +50,11 @@ actor IconLoadDiagnostics {
     private var failures = 0
     private var distinctURLs: Set<String> = []
     private var distinctRows: Set<String> = []
+
+    func recordResolutionFailure(rowIdentity: String) {
+        resolutionFailures += 1
+        distinctRows.insert(rowIdentity)
+    }
 
     func recordStart(url: URL, rowIdentity: String) {
         starts += 1
@@ -82,6 +90,7 @@ actor IconLoadDiagnostics {
 
     func snapshotAndReset() -> IconLoadDiagnosticsSnapshot {
         let snapshot = IconLoadDiagnosticsSnapshot(
+            resolutionFailures: resolutionFailures,
             starts: starts,
             successes: successes,
             memoryHits: memoryHits,
@@ -92,6 +101,7 @@ actor IconLoadDiagnostics {
             distinctURLs: distinctURLs.count,
             distinctRows: distinctRows.count
         )
+        resolutionFailures = 0
         starts = 0
         successes = 0
         memoryHits = 0
@@ -161,7 +171,41 @@ enum SitemapDiagnostics {
     static func logIconSummary(_ snapshot: IconLoadDiagnosticsSnapshot) {
         guard isEnabled, !snapshot.isEmpty else { return }
         logger.info(
-            "icons starts=\(snapshot.starts, privacy: .public) successes=\(snapshot.successes, privacy: .public) memoryHits=\(snapshot.memoryHits, privacy: .public) diskHits=\(snapshot.diskHits, privacy: .public) networkLoads=\(snapshot.networkLoads, privacy: .public) cancellations=\(snapshot.cancellations, privacy: .public) failures=\(snapshot.failures, privacy: .public) distinctURLs=\(snapshot.distinctURLs, privacy: .public) distinctRows=\(snapshot.distinctRows, privacy: .public)"
+            "icons resolutionFailures=\(snapshot.resolutionFailures, privacy: .public) starts=\(snapshot.starts, privacy: .public) successes=\(snapshot.successes, privacy: .public) memoryHits=\(snapshot.memoryHits, privacy: .public) diskHits=\(snapshot.diskHits, privacy: .public) networkLoads=\(snapshot.networkLoads, privacy: .public) cancellations=\(snapshot.cancellations, privacy: .public) failures=\(snapshot.failures, privacy: .public) distinctURLs=\(snapshot.distinctURLs, privacy: .public) distinctRows=\(snapshot.distinctRows, privacy: .public)"
+        )
+    }
+
+    static func logIconResolutionFailure(
+        rowIdentity: String,
+        icon: String,
+        reason: String,
+        trackerStatus: String,
+        connectionDescription: String
+    ) {
+        guard isEnabled else { return }
+        logger.info(
+            "iconResolutionFailure row=\(rowIdentity, privacy: .private(mask: .hash)) icon=\(icon, privacy: .public) reason=\(reason, privacy: .public) trackerStatus=\(trackerStatus, privacy: .public) connection=\(connectionDescription, privacy: .public)"
+        )
+    }
+
+    static func logIconStart(rowIdentity: String, icon: String, url: URL, cacheKey: String) {
+        guard isEnabled else { return }
+        logger.debug(
+            "iconStart row=\(rowIdentity, privacy: .private(mask: .hash)) icon=\(icon, privacy: .public) url=\(url.absoluteString, privacy: .public) cacheKey=\(cacheKey, privacy: .public)"
+        )
+    }
+
+    static func logIconSuccess(rowIdentity: String, icon: String, url: URL, cacheType: String) {
+        guard isEnabled else { return }
+        logger.info(
+            "iconSuccess row=\(rowIdentity, privacy: .private(mask: .hash)) icon=\(icon, privacy: .public) url=\(url.absoluteString, privacy: .public) cacheType=\(cacheType, privacy: .public)"
+        )
+    }
+
+    static func logIconFailure(rowIdentity: String, icon: String, url: URL, reason: String, cancelled: Bool) {
+        guard isEnabled else { return }
+        logger.info(
+            "iconFailure row=\(rowIdentity, privacy: .private(mask: .hash)) icon=\(icon, privacy: .public) url=\(url.absoluteString, privacy: .public) cancelled=\(cancelled, privacy: .public) reason=\(reason, privacy: .public)"
         )
     }
 

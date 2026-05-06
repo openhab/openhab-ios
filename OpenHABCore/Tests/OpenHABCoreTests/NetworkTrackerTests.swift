@@ -29,11 +29,16 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
 
     var shouldFail = false
     var returnedVersion = 123
+    var rootVersionDelay: Duration?
     var mockServerProperties = OpenHABServerProperties(version: "", links: [])
 
-    init(returnedVersion: Int = 123, shouldFail: Bool = false, mockServerProperties: OpenHABServerProperties = .init(version: "", links: [])) {
+    init(returnedVersion: Int = 123,
+         shouldFail: Bool = false,
+         rootVersionDelay: Duration? = nil,
+         mockServerProperties: OpenHABServerProperties = .init(version: "", links: [])) {
         self.returnedVersion = returnedVersion
         self.shouldFail = shouldFail
+        self.rootVersionDelay = rootVersionDelay
         self.mockServerProperties = mockServerProperties
     }
 
@@ -81,6 +86,9 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
     }
 
     func getRootVersion() async throws -> Int {
+        if let rootVersionDelay {
+            try await Task.sleep(for: rootVersionDelay)
+        }
         if shouldFail {
             throw networkTrackerError
         }
@@ -221,6 +229,46 @@ final class NetworkTrackerTests: XCTestCase {
 
         await fulfillment(of: [connectedExpectation], timeout: 2.0)
         statusTask.cancel()
+    }
+
+    func testFallbackConnectionBecomesActiveBeforePreferredConnectionTimesOut() async {
+        let localConfig = ConnectionConfiguration(
+            url: "http://local",
+            username: "",
+            password: "",
+            priority: 0
+        )
+        let remoteConfig = ConnectionConfiguration(
+            url: "https://remote",
+            username: "",
+            password: "",
+            priority: 1
+        )
+
+        let localService = MockOpenAPIService(shouldFail: true, rootVersionDelay: .seconds(5))
+        let remoteService = MockOpenAPIService(returnedVersion: 8)
+        let mockPool = ConnectionPool { configuration in
+            if configuration == localConfig {
+                return localService
+            }
+            return remoteService
+        }
+        let mockMonitor = MockPathMonitor()
+        let networkTracker = NetworkTracker(
+            monitor: mockMonitor,
+            connectionPool: mockPool,
+            failureTracker: ConnectionFailureTracker(),
+            timeout: 5
+        )
+
+        let startedAt = Date()
+        await networkTracker.startTracking(connectionConfigurations: [localConfig, remoteConfig])
+
+        let activeConnection = await networkTracker.waitForActiveConnection()
+        let elapsed = Date().timeIntervalSince(startedAt)
+
+        #expect(activeConnection?.configuration == remoteConfig)
+        #expect(elapsed < 2.5)
     }
 
 //    @MainActor
