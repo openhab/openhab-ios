@@ -47,6 +47,13 @@ enum RowLayoutPolicy {
         }
     }
 
+    static let frameBackground = Color(UIColor.ohSystemGroupedBackground)
+    static let regularBackground = Color(UIColor.ohSecondarySystemGroupedBackground)
+
+    static func rowBackground(for rowInput: SitemapRowInput) -> Color {
+        backgroundKind(for: rowInput) == .frame ? frameBackground : regularBackground
+    }
+
     static func backgroundKind(for rowInput: SitemapRowInput) -> RowBackgroundKind {
         switch rowInput {
         case .frame:
@@ -120,15 +127,7 @@ struct EmbeddingRowInputView: View, Equatable {
     // foreground refresh may render stale data from a cached render.
     @EnvironmentObject private var viewModel: SitemapPageViewModel
 
-    private var regularRowBackground: Color {
-        Color(UIColor.ohSecondarySystemGroupedBackground)
-    }
-
-    private var frameRowBackground: Color {
-        Color(UIColor.ohSystemGroupedBackground)
-    }
-
-    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+    nonisolated static func ==(lhs: Self, rhs: Self) -> Bool {
         lhs.rowInput == rhs.rowInput
     }
 
@@ -137,78 +136,48 @@ struct EmbeddingRowInputView: View, Equatable {
         case let .frame(_, input):
             FrameRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.rowInsets(for: rowInput))
-                .listRowBackground(frameRowBackground)
         case let .linked(_, input):
             LinkedPageRowInputView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.rowInsets(for: rowInput))
-                .listRowBackground(RowLayoutPolicy.backgroundKind(for: rowInput) == .frame ? frameRowBackground : regularRowBackground)
         case let .slider(_, input):
             SliderRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         case let .selection(_, input):
             SelectionRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         case let .segmented(_, input):
             SegmentedRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         case let .setpoint(_, input):
             SetpointRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         case let .text(_, input):
             TextRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         case let .toggle(_, input):
             SwitchRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         case let .rollershutter(_, input):
             RollershutterRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         case let .input(_, input):
             InputRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         case let .colorPicker(_, input):
             ColorPickerRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         case let .media(_, input):
             MediaRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         case let .colorTemperature(_, input):
             ColorTemperaturePickerRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         case let .buttonGrid(_, input):
             ButtonGridRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         case let .generic(_, input):
             GenericRowView(input: input)
                 .contentShape(Rectangle())
-                .listRowInsets(RowLayoutPolicy.regularInsets)
-                .listRowBackground(regularRowBackground)
         }
     }
 }
