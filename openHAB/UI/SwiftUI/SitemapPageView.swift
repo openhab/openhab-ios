@@ -43,6 +43,7 @@ struct SitemapPageView: View {
             } else {
                 List(viewModel.rowInputs) { rowInput in
                     EmbeddingRowInputView(rowInput: rowInput)
+                        .equatable()
                 }
             }
         }
