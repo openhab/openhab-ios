@@ -256,6 +256,13 @@ public extension OpenHABWidget {
             guard event.descriptionChanged != true else {
                 return .requiresPageReload
             }
+            // reloadIcon arrives on virtually every SSE event but carries no
+            // displayable payload of its own — skip the rebuild if nothing else changed.
+            guard event.label != nil || event.icon != nil || event.state != nil
+                || event.enrichedItem != nil || event.labelcolor != nil
+                || event.valuecolor != nil || event.iconcolor != nil
+                || event.visibility != nil || event.labelSource != nil
+            else { return .applied }
             if let label = event.label { self.label = label }
             if let icon = event.icon { self.icon = icon }
             if let labelcolor = event.labelcolor { self.labelcolor = labelcolor }
