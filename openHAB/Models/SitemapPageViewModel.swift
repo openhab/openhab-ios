@@ -1163,16 +1163,14 @@ private extension SitemapPageViewModel {
         sseStreamTask?.cancel()
 
         logger.info("Starting sitemap SSE for \(sitemap, privacy: .public)/\(pageId, privacy: .public)")
-        await sitemapEventStream.startMonitoringNetworkIfNeeded()
+        await sitemapEventStream.startMonitoringNetworkIfNeeded(initialConnection: networkTracker.activeConnection)
         let stream = await sitemapEventStream.stream(sitemap: sitemap, pageId: pageId)
 
         sseStreamTask = Task { [weak self] in
             guard let self else { return }
             for await msg in stream {
-                await MainActor.run { [weak self] in
-                    guard let self else { return }
-                    handleSseOutput(msg)
-                }
+                guard !Task.isCancelled else { break }
+                handleSseOutput(msg)
             }
         }
     }

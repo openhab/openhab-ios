@@ -35,11 +35,12 @@ public actor SitemapEventStream {
 
     private var continuations = [UUID: AsyncStream<StreamOutput<SitemapEventMessage>>.Continuation]()
     private var listenTask: Task<Void, Never>?
+    private var networkMonitoringTask: Task<Void, Never>?
     private var currentConfig: ConnectionConfiguration?
     private var currentTarget: Target?
-    private var isMonitoringNetwork = false
     private var isStopped = false
     private var lastEventTime = Date.now
+    private let jsonDecoder = JSONDecoder()
 
     public func stream(sitemap: String, pageId: String) -> AsyncStream<StreamOutput<SitemapEventMessage>> {
         isStopped = false
@@ -80,10 +81,14 @@ public actor SitemapEventStream {
         listenTask = nil
     }
 
-    public func startMonitoringNetworkIfNeeded() {
-        guard !isMonitoringNetwork else { return }
-        isMonitoringNetwork = true
-        Task { [weak self] in
+    public func startMonitoringNetworkIfNeeded(initialConnection: ConnectionInfo?) {
+        updateConnection(initialConnection)
+
+        // Keep network monitoring alive for the actor lifetime. Stop/restart
+        // behavior is handled by updateConnection cancelling listenTask.
+        guard networkMonitoringTask == nil else { return }
+
+        networkMonitoringTask = Task { [weak self] in
             for await conn in await NetworkTracker.shared.activeConnectionStream() {
                 guard let self else { return }
                 await updateConnection(conn)
@@ -224,7 +229,7 @@ public actor SitemapEventStream {
             }
         }
 
-        if let decoded = try? JSONDecoder().decode(Components.Schemas.SitemapWidgetEvent.self, from: data),
+        if let decoded = try? jsonDecoder.decode(Components.Schemas.SitemapWidgetEvent.self, from: data),
            let event = OpenHABSitemapWidgetEvent(decoded) {
             Logger.restAPI.debug("Sitemap SSE widget event decoded: \(event.widgetId.orEmpty, privacy: .public)")
             return .widget(event)

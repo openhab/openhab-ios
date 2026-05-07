@@ -271,10 +271,13 @@ public extension ItemEventStream {
         await shared.trackItems(items)
     }
 
+<<<<<<< HEAD
     nonisolated static func setItems(_ items: [String], for namespace: String) async {
         await shared.setItems(items, for: namespace)
     }
 
+=======
+>>>>>>> c1160165 (Fix SSE startup race and eliminate MainActor dispatch overhead)
     static func startMonitoringNetwork(initialConnection: ConnectionInfo? = nil) async {
         await shared.startMonitoringNetworkIfNeeded(initialConnection: initialConnection)
     }
