@@ -1254,6 +1254,8 @@ private extension SitemapPageViewModel {
         }
 
         switch currentPage.apply(event: event) {
+        case .unchanged:
+            isUpdating = false
         case .applied:
             objectWillChange.send()
             widgetUpdateVersions[widgetId, default: 0] += 1

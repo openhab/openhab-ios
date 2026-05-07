@@ -124,6 +124,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
 public enum SitemapWidgetEventApplicationResult: Equatable, Sendable {
     case applied
+    case unchanged
     case notFound
     case requiresPageReload
 }
@@ -262,7 +263,7 @@ public extension OpenHABWidget {
                 || event.enrichedItem != nil || event.labelcolor != nil
                 || event.valuecolor != nil || event.iconcolor != nil
                 || event.visibility != nil || event.labelSource != nil
-            else { return .applied }
+            else { return .unchanged }
             if let label = event.label { self.label = label }
             if let icon = event.icon { self.icon = icon }
             if let labelcolor = event.labelcolor { self.labelcolor = labelcolor }

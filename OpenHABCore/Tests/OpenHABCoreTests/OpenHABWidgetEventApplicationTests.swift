@@ -99,7 +99,7 @@ struct OpenHABWidgetEventApplicationTests {
             reloadIcon: true
         ))
 
-        #expect(result == .applied)
+        #expect(result == .unchanged)
     }
 
     @Test
