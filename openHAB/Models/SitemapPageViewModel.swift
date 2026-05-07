@@ -56,6 +56,7 @@ class SitemapPageViewModel: ObservableObject {
     private var pageNetworkStatus: NetworkStatus?
     private var pageNetworkStatusAvailable = false
     private var sseConnected = false
+    private var sseNeedsRefreshOnReconnect = false
     private var ssePreferred = true
     private var activePageHandlingKey: String?
     private var activePageHandlingID: UUID?
@@ -1160,6 +1161,7 @@ private extension SitemapPageViewModel {
 
     func startSSE(sitemap: String, pageId: String) async {
         sseConnected = false
+        sseNeedsRefreshOnReconnect = false
         sseStreamTask?.cancel()
 
         logger.info("Starting sitemap SSE for \(sitemap, privacy: .public)/\(pageId, privacy: .public)")
@@ -1182,10 +1184,23 @@ private extension SitemapPageViewModel {
             sseConnected = true
             ssePreferred = true
             isUpdating = false
+            if sseNeedsRefreshOnReconnect {
+                sseNeedsRefreshOnReconnect = false
+                logger.info("Sitemap SSE reconnected, refreshing page to recover missed events")
+                startPageHandling(
+                    forceRestart: true,
+                    reason: "sse-reconnected",
+                    preserveCurrentContent: true,
+                    recreateService: false
+                )
+            }
         case let .disconnected(error):
             logger.warning("Sitemap SSE disconnected: \(error?.localizedDescription ?? "nil", privacy: .public)")
             isUpdating = false
-            guard shouldFallbackToLongPolling(after: error) else { return }
+            guard shouldFallbackToLongPolling(after: error) else {
+                sseNeedsRefreshOnReconnect = true
+                return
+            }
             startLongPollingFallback(error)
         case let .event(message):
             handleSseMessage(message)

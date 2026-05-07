@@ -196,11 +196,11 @@ class OpenHABRootViewController: UIViewController {
         streamTask = Task { [weak self] in
             guard let self else { return }
             await ItemEventStream.startMonitoringNetwork(
-                initialConnection: await NetworkTracker.shared.activeConnection
+                initialConnection: NetworkTracker.shared.activeConnection
             )
             for await msg in await ItemEventStream.shared.stream() {
                 guard !Task.isCancelled else { break }
-                self.handleSSEMessage(msg)
+                handleSSEMessage(msg)
             }
         }
     }
