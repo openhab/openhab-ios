@@ -127,6 +127,44 @@ struct InputCommandFormatterTests {
         #expect(!formatter.isValidNumberDraft("3,14"))
     }
 
+    // MARK: - numericDraftFromState
+
+    @Test
+    func numericDraftFromIntegerWithUnit() {
+        #expect(formatter.numericDraftFromState("220 °C") == "220")
+    }
+
+    @Test
+    func numericDraftFromDecimalWithUnit() {
+        #expect(formatter.numericDraftFromState("21.5 °C") == "21.5")
+    }
+
+    @Test
+    func numericDraftFromNegativeWithUnit() {
+        #expect(formatter.numericDraftFromState("-10 °C") == "-10")
+    }
+
+    @Test
+    func numericDraftFromUnitNoSpace() {
+        #expect(formatter.numericDraftFromState("220°C") == "220")
+    }
+
+    @Test
+    func numericDraftFromPlainNumber() {
+        #expect(formatter.numericDraftFromState("220") == "220")
+    }
+
+    @Test
+    func numericDraftFromEmptyString() {
+        #expect(formatter.numericDraftFromState("") == "")
+    }
+
+    @Test
+    func numericDraftFromNonNumericTextPassesThrough() {
+        // Non-numeric state (e.g. text input): fall back to original
+        #expect(formatter.numericDraftFromState("hello") == "hello")
+    }
+
     // MARK: - filteredDraftInput
 
     @Test
@@ -269,6 +307,11 @@ struct InputCommandFormatterCommaTests {
     @Test
     func dotRejectedWhenCommaIsSeparator() {
         #expect(!formatter.isValidNumberDraft("3.14"))
+    }
+
+    @Test
+    func numericDraftFromDecimalWithUnitCommaLocale() {
+        #expect(formatter.numericDraftFromState("21,5 °C") == "21,5")
     }
 }
 

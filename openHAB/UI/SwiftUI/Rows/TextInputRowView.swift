@@ -64,8 +64,31 @@ struct InputCommandFormatter {
         return normalized
     }
 
+    // MARK: initial draft from server state
+
+    // Extracts the numeric portion from a formatted state string, e.g. "220 °C" → "220".
+    // For non-number inputs the string is returned unchanged.
+    func numericDraftFromState(_ text: String) -> String {
+        guard !text.isEmpty else { return text }
+        var result = ""
+        var seenDecimalSep = false
+        for (index, char) in text.enumerated() {
+            if index == 0, char == "-" {
+                result.append(char)
+            } else if char.isNumber {
+                result.append(char)
+            } else if String(char) == decimalSeparator, !seenDecimalSep {
+                seenDecimalSep = true
+                result.append(char)
+            } else {
+                break
+            }
+        }
+        return result.isEmpty ? text : result
+    }
+
     // MARK: during typing
-    
+
     func filteredDraftInput(from rawText: String, previousText: String, hint: OpenHABWidget.InputHint?) -> String {
         guard hint == .number else { return rawText }
         return isValidNumberDraft(rawText) ? rawText : previousText
@@ -147,8 +170,9 @@ private struct TextInputRowContent: View {
                 }
 
                 Button {
-                    draftInputText = inputText
-                    lastValidDraft = inputText
+                    let draft = inputHint == .number ? inputCommandFormatter.numericDraftFromState(inputText) : inputText
+                    draftInputText = draft
+                    lastValidDraft = draft
                     showInputAlert = true
                 } label: {
                     Text(inputText.isEmpty
@@ -163,8 +187,9 @@ private struct TextInputRowContent: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 guard !input.readOnly else { return }
-                draftInputText = inputText
-                lastValidDraft = inputText
+                let draft = inputHint == .number ? inputCommandFormatter.numericDraftFromState(inputText) : inputText
+                draftInputText = draft
+                lastValidDraft = draft
                 showInputAlert = true
             }
             .alert("Enter new value", isPresented: $showInputAlert) {
