@@ -19,6 +19,7 @@ struct SegmentRow: View {
     @EnvironmentObject var settings: AppSettings
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
+    @State private var triggerPressFeedback = false
     @State private var viewModel: WidgetRowViewModel
     @State private var commandSender = WidgetCommandDispatcher()
 
@@ -39,6 +40,7 @@ struct SegmentRow: View {
         .onChange(of: stateToken, initial: false) { _, _ in
             viewModel.update(from: widget)
         }
+        .sensoryFeedback(.click, trigger: triggerPressFeedback)
     }
 
     // MARK: - Press-Release
@@ -81,6 +83,7 @@ struct SegmentRow: View {
                                             guard bounds.contains(value.startLocation) else { return }
                                             if pressedIndex != index {
                                                 pressedIndex = index
+                                                triggerPressFeedback.toggle()
                                                 commandSender.sendPress(mapping.command, for: widget)
                                             }
                                         }
@@ -190,6 +193,7 @@ struct SegmentRow: View {
                                 }
                                 .onEnded { value in
                                     if singlePressed, bounds.contains(value.location) {
+                                        triggerPressFeedback.toggle()
                                         commandSender.send(mapping.command, for: widget, policy: .immediate)
                                     }
                                     singlePressed = false
