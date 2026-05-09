@@ -37,7 +37,7 @@ struct SegmentRow: View {
                 multiSegmentContent
             }
         }
-        .sensoryFeedback(.click, trigger: triggerPressFeedback)
+        .sensoryFeedback(.impact(weight: .medium), trigger: triggerPressFeedback)
         .onChange(of: stateToken, initial: false) { _, _ in
             viewModel.update(from: widget)
         }
