@@ -606,7 +606,7 @@ struct InputCommandFormatterTests {
 
     @Test
     func numericDraftFromEmptyString() {
-        #expect(formatter.numericDraftFromState("") == "")
+        #expect(formatter.numericDraftFromState("").isEmpty)
     }
 
     @Test
@@ -639,12 +639,12 @@ struct InputCommandFormatterTests {
 
     @Test
     func unitSuffixFromPlainNumber() {
-        #expect(formatter.unitSuffixFromState("220") == "")
+        #expect(formatter.unitSuffixFromState("220").isEmpty)
     }
 
     @Test
     func unitSuffixFromEmptyString() {
-        #expect(formatter.unitSuffixFromState("") == "")
+        #expect(formatter.unitSuffixFromState("").isEmpty)
     }
 
     // MARK: - command with unit suffix
