@@ -44,7 +44,7 @@ private func _widgetAdjustStep(_ raw: Double, minValue: Double, maxValue: Double
 public extension WidgetRendering {
     /// Text portion of the label (everything before the first "[").
     var labelText: String {
-        label.labelText
+        label.components(separatedBy: "[")[0].trimmingCharacters(in: .whitespaces)
     }
 
     /// Value portion of the label (content of the first "[…]"), if present.
@@ -57,7 +57,8 @@ public extension WidgetRendering {
     var mappingsOrItemOptions: [OpenHABWidgetMapping] {
         if mappings.isEmpty, let commandOptions = item?.commandDescription?.commandOptions {
             return commandOptions.map { OpenHABWidgetMapping(command: $0.command, label: $0.label ?? "") }
-        } else if mappings.isEmpty, let stateOptions = item?.stateDescription?.options {
+        }
+        if mappings.isEmpty, let stateOptions = item?.stateDescription?.options {
             return stateOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
         }
         return mappings

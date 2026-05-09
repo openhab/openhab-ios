@@ -246,7 +246,8 @@ public class ClientCertificateManager {
                         Logger.clientCert.info("Cert chain item already exists; skipping")
 
                         continue // Ignore duplicates
-                    } else if chainStatus != errSecSuccess {
+                    }
+                    if chainStatus != errSecSuccess {
                         status = chainStatus
                         break
                     }

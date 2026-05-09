@@ -415,6 +415,7 @@ final class UserData: ObservableObject {
         }
     }
 
+    // swiftlint:disable:next async_without_await
     func refreshUrl(force: Bool = false) async {
         guard AppSettings.shared.haveReceivedAppContext, !AppSettings.shared.sitemapForWatch.isEmpty else { return }
 

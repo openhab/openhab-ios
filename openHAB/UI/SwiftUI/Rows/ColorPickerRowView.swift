@@ -16,11 +16,11 @@ import SFSafeSymbols
 import SwiftUI
 
 private struct HSBSelection: Equatable {
+    static let `default` = HSBSelection(hue: 0, saturation: 0, brightness: 1)
+
     var hue: Double
     var saturation: Double
     var brightness: Double
-
-    static let `default` = HSBSelection(hue: 0, saturation: 0, brightness: 1)
 
     var color: Color {
         Color(hue: hue, saturation: saturation, brightness: brightness)
@@ -33,7 +33,7 @@ private struct HSBSelection: Equatable {
     var brightnessGradientColors: [Color] {
         [
             Color(hue: hue, saturation: saturation, brightness: 0),
-            Color(hue: hue, saturation: saturation, brightness: 1),
+            Color(hue: hue, saturation: saturation, brightness: 1)
         ]
     }
 
@@ -348,6 +348,7 @@ private struct ColorPickerRowContent: View {
     @State private var isEditingColor = false
     @State private var isPresentingColorWheel = false
     @State private var suppressNextColorSync = false
+    @State private var triggerFeedback = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetColorPickerView")
 
@@ -379,6 +380,7 @@ private struct ColorPickerRowContent: View {
                 )
 
                 Button {
+                    triggerFeedback.toggle()
                     isPresentingColorWheel = true
                 } label: {
                     Circle()
@@ -391,6 +393,7 @@ private struct ColorPickerRowContent: View {
                         .shadow(color: .black.opacity(0.15), radius: 2, y: 1)
                 }
                 .buttonStyle(.plain)
+                .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
                 .accessibilityLabel("Choose color")
                 .accessibilityValue(colorAccessibilityValue)
 
@@ -434,6 +437,13 @@ private struct ColorPickerRowContent: View {
         .onDisappear {
             onCancelPending()
         }
+    }
+
+    private var colorAccessibilityValue: String {
+        let huePercent = Int((selection.hue * 100).rounded())
+        let saturationPercent = Int((selection.saturation * 100).rounded())
+        let brightnessPercent = Int((selection.brightness * 100).rounded())
+        return "Hue \(huePercent) percent, saturation \(saturationPercent) percent, brightness \(brightnessPercent) percent"
     }
 
     private func sendColorCommand() {
@@ -485,13 +495,6 @@ private struct ColorPickerRowContent: View {
         if !isEditing {
             onSendImmediate(selection.openHABCommand)
         }
-    }
-
-    private var colorAccessibilityValue: String {
-        let huePercent = Int((selection.hue * 100).rounded())
-        let saturationPercent = Int((selection.saturation * 100).rounded())
-        let brightnessPercent = Int((selection.brightness * 100).rounded())
-        return "Hue \(huePercent) percent, saturation \(saturationPercent) percent, brightness \(brightnessPercent) percent"
     }
 
     private func dismissColorWheel() {

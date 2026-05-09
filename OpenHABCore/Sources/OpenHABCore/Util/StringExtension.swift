@@ -57,6 +57,26 @@ public extension String {
         URL(string: self) == URL(string: self)?.absoluteURL
     }
 
+    // Sub-view gape title optionally concatenated with one space and value if present - to be inline with Nsic UI
+    // e.g. "Living Room [21°C]" → "Living Room 21°C"
+    var labelValueTitle: String {
+        // Base text before the first “[”
+        let base = components(separatedBy: "[")[0]
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Extract first bracket content (without the brackets)
+        let value: String? = {
+            guard let match = self.firstMatch(of: /\[(.*?)\]/.dotMatchesNewlines()) else { return nil }
+            return String(match.1)
+        }()
+
+        // Concatenate base + space + value (if present), else just base
+        if let v = value, !v.isEmpty {
+            return "\(base) \(v)"
+        }
+        return base
+    }
+
     internal func toItemType() -> OpenHABItem.ItemType? {
         var typeString: String = self
         // Earlier OH2 versions returned e.g. 'Switch' as 'SwitchItem'
@@ -172,12 +192,6 @@ public extension String {
     func removeTrailingSlashes() -> String {
         replacing(/\/+$/, with: "")
     }
-
-    /// The text portion of an openHAB label — everything before the first "[".
-    /// e.g. "Living Room [21°C]" → "Living Room"
-    var labelText: String {
-        components(separatedBy: "[")[0].trimmingCharacters(in: .whitespacesAndNewlines)
-    }
 }
 
 public extension String? {
@@ -191,7 +205,7 @@ public extension String? {
     }
 
     var isNilOrEmpty: Bool {
-        self == nil || self == ""
+        self == nil || self!.isEmpty
     }
 }
 

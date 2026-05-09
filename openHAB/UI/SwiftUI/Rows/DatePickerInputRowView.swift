@@ -50,7 +50,7 @@ private struct DateInputRowContent: View {
         default: [.date, .hourAndMinute]
         }
     }
-    
+
     var body: some View {
         let displayState = input.displayState
         RowViewWithIcon(input: input) {
@@ -91,7 +91,7 @@ private struct DateInputRowContent: View {
             programmaticallySetDate(newDate)
         }
     }
-    
+
     private func programmaticallySetDate(_ newDate: Date) {
         suppressSendingNewValue = selectedDate != newDate
         selectedDate = newDate

@@ -16,6 +16,19 @@ import SwiftUI
 
 final class AppSettings: ObservableObject {
     @MainActor static let shared = AppSettings()
+
+    /// Stable per-install identifier, analogous to UIDevice.identifierForVendor on iOS.
+    static var deviceId: String {
+        let key = "watchDeviceId"
+        let store = UserDefaults.standard
+        if let existing = store.string(forKey: key) {
+            return existing
+        }
+        let new = UUID().uuidString
+        store.set(new, forKey: key)
+        return new
+    }
+
     var openHABVersion = 2
     var cancellables = Set<AnyCancellable>()
 
@@ -113,17 +126,5 @@ final class AppSettings: ObservableObject {
     convenience init(debug: Bool = false, openHABRootUrl: String = "") {
         self.init()
         self.openHABRootUrl = openHABRootUrl
-    }
-
-    /// Stable per-install identifier, analogous to UIDevice.identifierForVendor on iOS.
-    static var deviceId: String {
-        let key = "watchDeviceId"
-        let store = UserDefaults.standard
-        if let existing = store.string(forKey: key) {
-            return existing
-        }
-        let new = UUID().uuidString
-        store.set(new, forKey: key)
-        return new
     }
 }

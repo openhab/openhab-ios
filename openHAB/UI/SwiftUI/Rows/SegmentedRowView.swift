@@ -31,6 +31,8 @@ private struct SegmentedRowContent: View {
     @State private var optimisticStartVersion: Int?
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
+    @State private var triggerSelectionFeedback = false
+    @State private var triggerPressFeedback = false
 
     var body: some View {
         let selectedIndex = effectiveSelectedIndex(displayState: input.displayState, mappings: input.mappings)
@@ -104,6 +106,8 @@ private struct SegmentedRowContent: View {
                 self.optimisticStartVersion = widgetVersion
             }
         }
+        .sensorySelectionFeedbackIfAvailable(trigger: triggerSelectionFeedback)
+        .sensoryHeavyFeedbackIfAvailable(trigger: triggerPressFeedback)
     }
 
     /// Button-based segmented control with animated selection indicator
@@ -194,6 +198,7 @@ private struct SegmentedRowContent: View {
                     .onChanged { _ in
                         if singlePressed == false {
                             singlePressed = true
+                            triggerSelectionFeedback.toggle()
                             startOptimisticSelection(
                                 command: mapping.command,
                                 displayState: displayState,
@@ -251,6 +256,7 @@ private struct SegmentedRowContent: View {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 optimisticSelectedIndex = index
             }
+            triggerSelectionFeedback.toggle()
             sendCommand(mapping.command, .immediate, .change)
         } label: {
             Text(mapping.label)
@@ -292,6 +298,7 @@ private struct SegmentedRowContent: View {
                     .onChanged { _ in
                         if pressedIndex != index {
                             pressedIndex = index
+                            triggerPressFeedback.toggle()
                             // Send command on press
                             logger.info("Sending press command: \(mapping.command)")
                             sendCommand(

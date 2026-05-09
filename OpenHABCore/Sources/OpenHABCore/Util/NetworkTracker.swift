@@ -66,6 +66,7 @@ public actor ConnectionPool {
     }
 
     @discardableResult
+    // swiftlint:disable:next async_without_await
     func getOrCreateService(for configuration: ConnectionConfiguration) async throws -> any OpenAPIServiceProtocol {
         if let existing = services[configuration] {
             return existing
@@ -340,27 +341,52 @@ public actor NetworkTracker {
     /// Search for available connections among connectionConfigurations
     /// When the first one was found, we wait a small grace period if there is a preferred one that also works
     private func findBestConnection() async -> ConnectionInfo? {
-        await withTaskGroup(of: ConnectionInfo?.self, returning: ConnectionInfo?.self) { group in
+        enum ConnectionSearchResult: Sendable {
+            case connection(ConnectionInfo?)
+            case gracePeriodExpired
+            case networkTimeoutExpired
+        }
+
+        return await withTaskGroup(of: ConnectionSearchResult.self, returning: ConnectionInfo?.self) { group in
             let sortedConfigs = connectionConfigurations.sorted { $0.priority < $1.priority }
 
             for config in sortedConfigs {
                 _ = group.addTaskUnlessCancelled {
                     let connection = await self.testConnection(configuration: config)
-                    return connection
+                    return .connection(connection)
                 }
             }
 
-            var currentBestConnection: ConnectionInfo?
+            group.addTask {
+                try? await Task.sleep(for: .seconds(self.networkTimeout))
+                return .networkTimeoutExpired
+            }
 
-            try? await withThrowingTimeout(seconds: networkTimeout) { timeoutController in
-                for await connectionInfo in group {
+            var currentBestConnection: ConnectionInfo?
+            var gracePeriodStarted = false
+
+            while let result = await group.next() {
+                switch result {
+                case let .connection(connectionInfo):
                     guard let connectionInfo else { continue }
 
                     if currentBestConnection == nil {
                         Logger.networkTracker.debug("NetworkTracker: First working connection found: \(connectionInfo.configuration.publicLogDescription, privacy: .public)")
                         currentBestConnection = connectionInfo
-                        // give the other connections a short time to be found, otherwise cancel early
-                        timeoutController.expire(seconds: NetworkTracker.slowConnectionTimeout)
+                        if connectionInfo.configuration.priority == 0 {
+                            Logger.networkTracker.debug("NetworkTracker: Most prioritized connection \(connectionInfo.configuration.publicLogDescription, privacy: .public) tested successfully")
+                            group.cancelAll()
+                            let bestConnectionDescription = currentBestConnection?.configuration.publicLogDescription ?? "none"
+                            Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionDescription, privacy: .public)")
+                            return currentBestConnection
+                        }
+                        if !gracePeriodStarted {
+                            gracePeriodStarted = true
+                            group.addTask {
+                                try? await Task.sleep(for: .seconds(NetworkTracker.slowConnectionTimeout))
+                                return .gracePeriodExpired
+                            }
+                        }
                     } else if let bestConnection = currentBestConnection, connectionInfo.configuration.priority < bestConnection.configuration.priority {
                         Logger.networkTracker.debug("NetworkTracker: Better connection found: \(connectionInfo.configuration.publicLogDescription, privacy: .public)")
                         currentBestConnection = connectionInfo
@@ -370,8 +396,23 @@ public actor NetworkTracker {
                         Logger.networkTracker.debug("NetworkTracker: Most prioritized connection \(connectionInfo.configuration.publicLogDescription, privacy: .public) tested successfully")
                         // Stop further tasks if we found the highest-priority connection and return it
                         group.cancelAll()
-                        return
+                        let bestConnectionDescription = currentBestConnection?.configuration.publicLogDescription ?? "none"
+                        Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionDescription, privacy: .public)")
+                        return currentBestConnection
                     }
+                case .gracePeriodExpired:
+                    guard currentBestConnection != nil else { continue }
+                    Logger.networkTracker.debug("NetworkTracker: Preferred connection grace period expired")
+                    group.cancelAll()
+                    let bestConnectionDescription = currentBestConnection?.configuration.publicLogDescription ?? "none"
+                    Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionDescription, privacy: .public)")
+                    return currentBestConnection
+                case .networkTimeoutExpired:
+                    Logger.networkTracker.debug("NetworkTracker: Connection search timeout expired")
+                    group.cancelAll()
+                    let bestConnectionDescription = currentBestConnection?.configuration.publicLogDescription ?? "none"
+                    Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionDescription, privacy: .public)")
+                    return currentBestConnection
                 }
             }
 
@@ -497,7 +538,6 @@ public actor NetworkTracker {
         if activeConnection != connection {
             activeConnection = connection
         }
-
     }
 
     private func updateStatus(_ newStatus: NetworkStatus) {

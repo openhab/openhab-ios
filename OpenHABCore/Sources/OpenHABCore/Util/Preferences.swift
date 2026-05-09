@@ -112,26 +112,24 @@ public struct HomePreferences: Codable, Equatable {
 
 @MainActor
 public struct ApplicationPreferences: Codable, Equatable {
-    public var showSearchField = true
-    public var sitemapDiagnosticsLogging = false
-
-    public init(
-        showSearchField: Bool = true,
-        sitemapDiagnosticsLogging: Bool = false
-    ) {
-        self.showSearchField = showSearchField
-        self.sitemapDiagnosticsLogging = sitemapDiagnosticsLogging
-    }
-
     enum CodingKeys: String, CodingKey {
         case showSearchField
         case sitemapDiagnosticsLogging
     }
 
-    nonisolated public init(from decoder: any Decoder) throws {
+    public var showSearchField = true
+    public var sitemapDiagnosticsLogging = false
+
+    public nonisolated init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         showSearchField = try container.decodeIfPresent(Bool.self, forKey: .showSearchField) ?? true
         sitemapDiagnosticsLogging = try container.decodeIfPresent(Bool.self, forKey: .sitemapDiagnosticsLogging) ?? false
+    }
+
+    public init(showSearchField: Bool = true,
+                sitemapDiagnosticsLogging: Bool = false) {
+        self.showSearchField = showSearchField
+        self.sitemapDiagnosticsLogging = sitemapDiagnosticsLogging
     }
 }
 
@@ -152,16 +150,15 @@ private enum PreferencesAccess {
         let preferenceValue = sharedDefaults.object(forKey: key)
         if let preferenceConverted = decoder(preferenceValue) {
             return preferenceConverted
-        } else {
-            if let preferenceValue {
-                Logger.preferences.error("Preference value \(key) was \(String(describing: preferenceValue)) but did not conform to \(T.self). Replace with default value.")
-            } else {
-                Logger.preferences.info("Preference value \(key) was set for the first time. Using default value.")
-            }
-            let fallback = defaultValue
-            sharedDefaults.set(encoder(fallback), forKey: key)
-            return fallback
         }
+        if let preferenceValue {
+            Logger.preferences.error("Preference value \(key) was \(String(describing: preferenceValue)) but did not conform to \(T.self). Replace with default value.")
+        } else {
+            Logger.preferences.info("Preference value \(key) was set for the first time. Using default value.")
+        }
+        let fallback = defaultValue
+        sharedDefaults.set(encoder(fallback), forKey: key)
+        return fallback
     }
 
     @MainActor fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {

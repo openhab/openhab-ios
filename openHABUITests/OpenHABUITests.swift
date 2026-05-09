@@ -14,6 +14,7 @@ import XCTest
 
 class OpenHABUITests: XCTestCase {
     let runWebViewAndSitemap = true // To accelerate testing of settings set to false
+
     override func setUp() async throws {
         try await super.setUp()
 

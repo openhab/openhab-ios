@@ -25,7 +25,7 @@ struct WidgetCommandDispatcherTests {
         }
 
         #expect(received?.itemname == "MyItem")
-        #expect(received?.command == "")
+        #expect(received?.command.isEmpty == true)
     }
 
     @Test("Nil command is still ignored for item name")

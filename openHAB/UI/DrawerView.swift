@@ -41,10 +41,8 @@ enum DrawerFetchResult<Value> {
 
 @MainActor
 enum DrawerFetch {
-    static func sitemaps(
-        sortOrder: SortSitemapsOrder,
-        fetch: () async throws -> [OpenHABSitemap]
-    ) async -> DrawerFetchResult<[OpenHABSitemap]> {
+    static func sitemaps(sortOrder: SortSitemapsOrder,
+                         fetch: () async throws -> [OpenHABSitemap]) async -> DrawerFetchResult<[OpenHABSitemap]> {
         do {
             var sitemaps = try await fetch()
             try Task.checkCancellation()
@@ -281,9 +279,10 @@ struct DrawerView: View {
 
             let sortSitemapsBy = Preferences.shared.currentHomePreferences.sortSitemapsBy
             let sortOrder = SortSitemapsOrder(rawValue: sortSitemapsBy) ?? .label
-            switch await DrawerFetch.sitemaps(sortOrder: sortOrder, fetch: {
+            let sitemapsResult = await DrawerFetch.sitemaps(sortOrder: sortOrder) {
                 try await openAPIService.openHABSitemaps()
-            }) {
+            }
+            switch sitemapsResult {
             case let .value(fetchedSitemaps):
                 sitemaps = fetchedSitemaps
             case .cancelled:
@@ -293,9 +292,10 @@ struct DrawerView: View {
                 sitemaps = []
             }
 
-            switch await DrawerFetch.uiTiles(fetch: {
+            let tilesResult = await DrawerFetch.uiTiles {
                 try await openAPIService.getUITiles()
-            }) {
+            }
+            switch tilesResult {
             case let .value(fetchedUITiles):
                 uiTiles = fetchedUITiles
                 Logger.drawerView.info("Fetched UI tiles successfully")

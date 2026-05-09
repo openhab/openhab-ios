@@ -31,7 +31,7 @@ struct RowViewWithIcon<Content: View>: View {
     }
 
     init(input: any RowWithIconInput,
-         fallbackSymbol: SFSymbol? = .questionmark,
+         fallbackSymbol: SFSymbol? = nil,
          alignment: VerticalAlignment = .center,
          spacing: CGFloat? = nil,
          @ViewBuilder content: @escaping () -> Content) {

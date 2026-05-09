@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [Version 3.2.41, Build 249] - 2026-05-06Z
+
+- Fix connection detection, icon stability, and scroll performance (#1185)
+- atchOS alignment for submenu navigation title concatenated with value (#1183)
+
+## [Version 3.2.40, Build 248] - 2026-05-05Z
+
+- Fix TestFlight upload failing with missing Defaults.properties
+- Show submenu navigation title concatenated with value (#1182)
+- Restore sitemap page context in command source (#1181)
+
 ## [Version 3.2.39, Build 247] - 2026-05-03Z
 
 - Add brightness up/down buttons to colorpicker sitemap row (#1178)

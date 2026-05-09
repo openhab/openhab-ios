@@ -14,6 +14,44 @@ import OpenHABCore
 import Testing
 
 @Suite
+struct WidgetMappingSnapshotDisplayStateTests {
+    @Test
+    func labelOnlyInBracketsDoesNotLeakIntoLabelText() {
+        // When no sitemap label is defined, the server returns only the formatted
+        // value in brackets, e.g. "[Uitgeschakeld]". labelText must be empty so the
+        // value is shown trailing-aligned, not duplicated as "[Uitgeschakeld] Uitgeschakeld".
+        let snapshot = makeSnapshot(label: "[Uitgeschakeld]")
+        let display = snapshot.displayState
+        #expect(display.labelText.isEmpty)
+        #expect(display.labelValue == "Uitgeschakeld")
+    }
+
+    @Test
+    func normalLabelWithValueParsesCorrectly() {
+        let snapshot = makeSnapshot(label: "Kitchen Light [On]")
+        let display = snapshot.displayState
+        #expect(display.labelText == "Kitchen Light")
+        #expect(display.labelValue == "On")
+    }
+
+    @Test
+    func emptyLabelProducesEmptyLabelText() {
+        let snapshot = makeSnapshot(label: "")
+        let display = snapshot.displayState
+        #expect(display.labelText.isEmpty)
+        #expect(display.labelValue == nil)
+    }
+
+    private func makeSnapshot(label: String) -> WidgetMappingSnapshot {
+        let widget = OpenHABWidget()
+        widget.widgetId = "test"
+        widget.type = .text
+        widget.label = label
+        return WidgetMappingSnapshot(widget: widget)
+    }
+}
+
+@Suite
 struct SitemapRowInputBuilderTests {
     @Test
     func incrementalRebuildReusesUnchangedRows() {
@@ -59,44 +97,6 @@ struct SitemapRowInputBuilderTests {
 
         #expect(updated.reusedInputCount == 0)
         #expect(updated.inputs.count == 2)
-    }
-}
-
-@Suite
-struct WidgetMappingSnapshotDisplayStateTests {
-    @Test
-    func labelOnlyInBracketsDoesNotLeakIntoLabelText() {
-        // When no sitemap label is defined, the server returns only the formatted
-        // value in brackets, e.g. "[Uitgeschakeld]". labelText must be empty so the
-        // value is shown trailing-aligned, not duplicated as "[Uitgeschakeld] Uitgeschakeld".
-        let snapshot = makeSnapshot(label: "[Uitgeschakeld]")
-        let display = snapshot.displayState
-        #expect(display.labelText == "")
-        #expect(display.labelValue == "Uitgeschakeld")
-    }
-
-    @Test
-    func normalLabelWithValueParsesCorrectly() {
-        let snapshot = makeSnapshot(label: "Kitchen Light [On]")
-        let display = snapshot.displayState
-        #expect(display.labelText == "Kitchen Light")
-        #expect(display.labelValue == "On")
-    }
-
-    @Test
-    func emptyLabelProducesEmptyLabelText() {
-        let snapshot = makeSnapshot(label: "")
-        let display = snapshot.displayState
-        #expect(display.labelText == "")
-        #expect(display.labelValue == nil)
-    }
-
-    private func makeSnapshot(label: String) -> WidgetMappingSnapshot {
-        let widget = OpenHABWidget()
-        widget.widgetId = "test"
-        widget.type = .text
-        widget.label = label
-        return WidgetMappingSnapshot(widget: widget)
     }
 }
 

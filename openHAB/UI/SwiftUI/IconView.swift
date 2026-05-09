@@ -47,7 +47,6 @@ struct IconInputView: View {
     let fallbackSymbol: SFSymbol?
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     let size: CGSize
     let iconType: IconType = .svg
@@ -67,11 +66,15 @@ struct IconInputView: View {
         guard
             let activeConnection = networkTracker.activeConnection,
             !activeConnection.configuration.url.isEmpty else {
+            recordIconResolutionFailure(
+                reason: networkTracker.activeConnection == nil ? "no-active-connection" : "empty-connection-url",
+                connectionDescription: networkTracker.activeConnection?.configuration.publicLogDescription ?? "none"
+            )
             logger.debug("No active connection to fetch icon")
             return nil
         }
 
-        return Endpoint.icon(
+        guard let endpoint = Endpoint.icon(
             rootUrl: activeConnection.configuration.url,
             version: activeConnection.version,
             icon: input.icon,
@@ -79,7 +82,14 @@ struct IconInputView: View {
             iconType: iconType,
             iconColor: iconColorHex,
             staticIcon: input.staticIcon
-        )?.url
+        )?.url else {
+            recordIconResolutionFailure(
+                reason: "endpoint-url-build-failed",
+                connectionDescription: activeConnection.configuration.publicLogDescription
+            )
+            return nil
+        }
+        return endpoint
     }
 
     var body: some View {
@@ -107,7 +117,7 @@ struct IconInputView: View {
                             recordIconCancellation(url: iconURL)
                             return
                         }
-                        recordIconFailure(url: iconURL)
+                        recordIconFailure(url: iconURL, reason: error.localizedDescription)
                         logger.error("Icon loading failed for icon '\(input.icon, privacy: .public)': \(error.localizedDescription, privacy: .public)")
                         logger.error("Failed URL: \(iconURL.absoluteString, privacy: .public)")
                     }
@@ -126,7 +136,7 @@ struct IconInputView: View {
                     }
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id("\(viewModel.pageId)-\(rowIdentity)-\(colorScheme)")
+                    .id("\(iconURL.absoluteString)-\(colorScheme)")
                     .onAppear {
                         recordIconStart(url: iconURL)
                     }
@@ -148,6 +158,12 @@ struct IconInputView: View {
 
     private func recordIconStart(url: URL) {
         guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconStart(
+            rowIdentity: rowIdentity,
+            icon: input.icon,
+            url: url,
+            cacheKey: url.absoluteString
+        )
         Task {
             await IconLoadDiagnostics.shared.recordStart(url: url, rowIdentity: rowIdentity)
         }
@@ -155,6 +171,12 @@ struct IconInputView: View {
 
     private func recordIconSuccess(url: URL, cacheType: CacheType) {
         guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconSuccess(
+            rowIdentity: rowIdentity,
+            icon: input.icon,
+            url: url,
+            cacheType: cacheType.diagnosticsName
+        )
         Task {
             await IconLoadDiagnostics.shared.recordSuccess(
                 url: url,
@@ -166,15 +188,43 @@ struct IconInputView: View {
 
     private func recordIconCancellation(url: URL) {
         guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconFailure(
+            rowIdentity: rowIdentity,
+            icon: input.icon,
+            url: url,
+            reason: "task-cancelled",
+            cancelled: true
+        )
         Task {
             await IconLoadDiagnostics.shared.recordCancellation(url: url, rowIdentity: rowIdentity)
         }
     }
 
-    private func recordIconFailure(url: URL) {
+    private func recordIconFailure(url: URL, reason: String) {
         guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconFailure(
+            rowIdentity: rowIdentity,
+            icon: input.icon,
+            url: url,
+            reason: reason,
+            cancelled: false
+        )
         Task {
             await IconLoadDiagnostics.shared.recordFailure(url: url, rowIdentity: rowIdentity)
+        }
+    }
+
+    private func recordIconResolutionFailure(reason: String, connectionDescription: String) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconResolutionFailure(
+            rowIdentity: rowIdentity,
+            icon: input.icon,
+            reason: reason,
+            trackerStatus: networkTracker.status.rawValue,
+            connectionDescription: connectionDescription
+        )
+        Task {
+            await IconLoadDiagnostics.shared.recordResolutionFailure(rowIdentity: rowIdentity)
         }
     }
 }
@@ -184,7 +234,6 @@ struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     let size: CGSize
     let iconType: IconType = .svg
@@ -207,11 +256,15 @@ struct IconView: View {
         guard
             let activeConnection = networkTracker.activeConnection,
             !activeConnection.configuration.url.isEmpty else {
+            recordIconResolutionFailure(
+                reason: networkTracker.activeConnection == nil ? "no-active-connection" : "empty-connection-url",
+                connectionDescription: networkTracker.activeConnection?.configuration.publicLogDescription ?? "none"
+            )
             logger.debug("No active connection to fetch icon")
             return nil
         }
 
-        return Endpoint.icon(
+        guard let endpoint = Endpoint.icon(
             rootUrl: activeConnection.configuration.url,
             version: activeConnection.version,
             icon: widget.icon,
@@ -219,7 +272,14 @@ struct IconView: View {
             iconType: iconType,
             iconColor: iconColorHex,
             staticIcon: widget.staticIcon
-        )?.url
+        )?.url else {
+            recordIconResolutionFailure(
+                reason: "endpoint-url-build-failed",
+                connectionDescription: activeConnection.configuration.publicLogDescription
+            )
+            return nil
+        }
+        return endpoint
     }
 
     var body: some View {
@@ -248,7 +308,7 @@ struct IconView: View {
                             recordIconCancellation(url: iconURL)
                             return
                         }
-                        recordIconFailure(url: iconURL)
+                        recordIconFailure(url: iconURL, reason: error.localizedDescription)
                         logger.error("Icon loading failed for icon '\(widget.icon, privacy: .public)': \(error.localizedDescription, privacy: .public)")
                         logger.error("Failed URL: \(iconURL.absoluteString, privacy: .public)")
                     }
@@ -268,7 +328,7 @@ struct IconView: View {
                     }
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id("\(viewModel.pageId)-\(widget.id)-\(colorScheme)")
+                    .id("\(iconURL.absoluteString)-\(colorScheme)")
                     .onAppear {
                         recordIconStart(url: iconURL)
                     }
@@ -285,6 +345,12 @@ struct IconView: View {
 
     private func recordIconStart(url: URL) {
         guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconStart(
+            rowIdentity: widget.id,
+            icon: widget.icon,
+            url: url,
+            cacheKey: url.absoluteString
+        )
         Task {
             await IconLoadDiagnostics.shared.recordStart(url: url, rowIdentity: widget.id)
         }
@@ -292,6 +358,12 @@ struct IconView: View {
 
     private func recordIconSuccess(url: URL, cacheType: CacheType) {
         guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconSuccess(
+            rowIdentity: widget.id,
+            icon: widget.icon,
+            url: url,
+            cacheType: cacheType.diagnosticsName
+        )
         Task {
             await IconLoadDiagnostics.shared.recordSuccess(
                 url: url,
@@ -303,15 +375,43 @@ struct IconView: View {
 
     private func recordIconCancellation(url: URL) {
         guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconFailure(
+            rowIdentity: widget.id,
+            icon: widget.icon,
+            url: url,
+            reason: "task-cancelled",
+            cancelled: true
+        )
         Task {
             await IconLoadDiagnostics.shared.recordCancellation(url: url, rowIdentity: widget.id)
         }
     }
 
-    private func recordIconFailure(url: URL) {
+    private func recordIconFailure(url: URL, reason: String) {
         guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconFailure(
+            rowIdentity: widget.id,
+            icon: widget.icon,
+            url: url,
+            reason: reason,
+            cancelled: false
+        )
         Task {
             await IconLoadDiagnostics.shared.recordFailure(url: url, rowIdentity: widget.id)
+        }
+    }
+
+    private func recordIconResolutionFailure(reason: String, connectionDescription: String) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconResolutionFailure(
+            rowIdentity: widget.id,
+            icon: widget.icon,
+            reason: reason,
+            trackerStatus: networkTracker.status.rawValue,
+            connectionDescription: connectionDescription
+        )
+        Task {
+            await IconLoadDiagnostics.shared.recordResolutionFailure(rowIdentity: widget.id)
         }
     }
 }
@@ -362,5 +462,4 @@ extension IconView {
     widget.icon = "switch"
     widget.label = "Test Switch"
     return IconView(widget: widget, fallbackSymbol: .switch2)
-        .environmentObject(SitemapPageViewModel())
 }

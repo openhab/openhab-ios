@@ -103,6 +103,7 @@ public actor ETagCache {
 
     // MARK: - Persistence
 
+    // swiftlint:disable:next async_without_await
     private func saveETags() async {
         guard let path = persistencePath else {
             Logger.etagCache.debug("No persistence path, skipping save")
