@@ -41,10 +41,8 @@ enum DrawerFetchResult<Value> {
 
 @MainActor
 enum DrawerFetch {
-    static func sitemaps(
-        sortOrder: SortSitemapsOrder,
-        fetch: () async throws -> [OpenHABSitemap]
-    ) async -> DrawerFetchResult<[OpenHABSitemap]> {
+    static func sitemaps(sortOrder: SortSitemapsOrder,
+                         fetch: () async throws -> [OpenHABSitemap]) async -> DrawerFetchResult<[OpenHABSitemap]> {
         do {
             var sitemaps = try await fetch()
             try Task.checkCancellation()
@@ -295,7 +293,7 @@ struct DrawerView: View {
             }
 
             let tilesResult = await DrawerFetch.uiTiles {
-                  try await openAPIService.getUITiles()
+                try await openAPIService.getUITiles()
             }
             switch tilesResult {
             case let .value(fetchedUITiles):

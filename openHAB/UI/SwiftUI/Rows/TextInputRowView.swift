@@ -16,7 +16,6 @@ import os.log
 import SwiftUI
 
 struct InputCommandFormatter {
-
     var decimalSeparator: String = Locale.current.decimalSeparator ?? "."
 
     // MARK: after typing
@@ -32,7 +31,6 @@ struct InputCommandFormatter {
     }
 
     private func normalizedNumberCommand(from value: String) -> String? {
-
         // Must be a valid draft and contain at least one digit
         guard isValidNumberDraft(value),
               value.contains(where: \.isNumber) else { return nil }

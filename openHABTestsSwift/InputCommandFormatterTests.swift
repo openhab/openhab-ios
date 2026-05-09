@@ -235,6 +235,7 @@ struct InputCommandFormatterTests {
         #expect(formatter.command(from: "-.42", hint: .number) == "-0.42")
     }
 }
+
 // MARK: - isValidNumberDraft with comma separator
 
 @Suite
@@ -276,7 +277,6 @@ struct InputCommandFormatterCommaTests {
 
 @Suite
 struct InputCommandFormatterOracleTests {
-
     /// Port of the UIKit `textField(_:shouldChangeCharactersIn:replacementString:)` logic.
     /// Given the old text, the NSRange being replaced, and the replacement string, returns
     /// whether the edit should be accepted.

@@ -645,19 +645,19 @@ extension SitemapPageViewModel {
             longPollDebounceTask = Task { @MainActor [weak self] in
                 try? await Task.sleep(for: .seconds(remaining))
                 guard let self, !Task.isCancelled,
-                      self.activePageHandlingID == runID,
-                      let page = self.pendingLongPollPage else { return }
-                self.pendingLongPollPage = nil
-                self.lastUIUpdateAt = Date()
+                      activePageHandlingID == runID,
+                      let page = pendingLongPollPage else { return }
+                pendingLongPollPage = nil
+                lastUIUpdateAt = Date()
                 SitemapDiagnostics.logLongPollDebounce(
                     action: "deferredApply",
                     elapsedMs: Int((Date().timeIntervalSince(deferredStartedAt) * 1000).rounded()),
                     remainingMs: 0,
                     replacedPendingPage: false,
-                    coalescedUpdates: self.coalescedLongPollUpdateCount
+                    coalescedUpdates: coalescedLongPollUpdateCount
                 )
-                self.coalescedLongPollUpdateCount = 0
-                await self.updateUI(with: page, origin: .longPolling)
+                coalescedLongPollUpdateCount = 0
+                await updateUI(with: page, origin: .longPolling)
             }
         }
     }

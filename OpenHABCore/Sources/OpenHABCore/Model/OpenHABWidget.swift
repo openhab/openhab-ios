@@ -115,7 +115,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var coordinate: CLLocationCoordinate2D {
         item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
-
 }
 
 public extension OpenHABWidget {

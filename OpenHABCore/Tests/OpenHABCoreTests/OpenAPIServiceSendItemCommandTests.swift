@@ -26,7 +26,7 @@ struct OpenAPIServiceSendItemCommandTests {
             #expect(baseURL.absoluteString == "/rest")
             #expect(request.headerFields[.contentType] == "text/plain")
 
-            let bodyString = try await self.encodedBody(from: body)
+            let bodyString = try await encodedBody(from: body)
             #expect(bodyString == "ON")
 
             return (HTTPResponse(status: .ok), nil)
@@ -47,7 +47,7 @@ struct OpenAPIServiceSendItemCommandTests {
             #expect(operationID == "sendItemCommand")
             #expect(request.headerFields[.contentType] == "application/json; charset=utf-8")
 
-            let bodyString = try await self.encodedBody(from: body)
+            let bodyString = try await encodedBody(from: body)
             let json = try JSONDecoder().decode([String: String].self, from: Data(bodyString.utf8))
             #expect(json["value"] == "")
 

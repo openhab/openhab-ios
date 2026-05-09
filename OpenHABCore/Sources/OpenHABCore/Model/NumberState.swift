@@ -12,6 +12,9 @@
 import Foundation
 
 public struct NumberState: CustomStringConvertible, Equatable {
+    // swiftlint:disable:next large_tuple
+    private typealias PlaceholderResult = (argument: FormatArgument, finalSpecifier: Character, specifierIndex: String.Index, usesExplicitIndex: Bool)
+
     private enum FormatArgument {
         case int
         case double
@@ -39,13 +42,12 @@ public struct NumberState: CustomStringConvertible, Equatable {
     /// string substitution (%2$s) passes clean values to downstream devices.
     /// Fractional values are preserved (30.3 is never truncated to 30).
     public var commandString: String {
-        let valueString: String
-        if value.truncatingRemainder(dividingBy: 1) == 0,
-           value >= Double(Int.min),
-           value <= Double(Int.max) {
-            valueString = String(Int(value))
+        let valueString = if value.truncatingRemainder(dividingBy: 1) == 0,
+                             value >= Double(Int.min),
+                             value <= Double(Int.max) {
+            String(Int(value))
         } else {
-            valueString = String(value)
+            String(value)
         }
         if let unit, !unit.isEmpty {
             return "\(valueString) \(unit)"
@@ -53,11 +55,11 @@ public struct NumberState: CustomStringConvertible, Equatable {
         return valueString
     }
 
-    // Access to default memberwise initializer not permitted outside of package
-    public init(value: Double, unit: String? = "", format: String? = "") {
-        self.value = value
-        self.unit = unit
-        self.format = format
+    private var fallbackString: String {
+        if let unit, !unit.isEmpty {
+            return "\(stringValue) \(unit)"
+        }
+        return stringValue
     }
 
     public func toString(locale: Locale?) -> String {
@@ -87,11 +89,53 @@ public struct NumberState: CustomStringConvertible, Equatable {
         return fallbackString
     }
 
-    private var fallbackString: String {
-        if let unit, !unit.isEmpty {
-            return "\(stringValue) \(unit)"
+    private func parsePlaceholder(in format: String, from start: String.Index) -> PlaceholderResult? {
+        var index = start
+
+        while index < format.endIndex, "-+# 0".contains(format[index]) {
+            index = format.index(after: index)
         }
-        return stringValue
+        while index < format.endIndex, format[index].isNumber {
+            index = format.index(after: index)
+        }
+
+        var usesExplicitIndex = false
+        if index < format.endIndex, format[index] == "$" {
+            guard format[start ..< index] == "1" else { return nil }
+            usesExplicitIndex = true
+            index = format.index(after: index)
+            while index < format.endIndex, "-+# 0".contains(format[index]) {
+                index = format.index(after: index)
+            }
+            while index < format.endIndex, format[index].isNumber {
+                index = format.index(after: index)
+            }
+        }
+
+        if index < format.endIndex, format[index] == "." {
+            index = format.index(after: index)
+            guard index < format.endIndex else { return nil }
+            while index < format.endIndex, format[index].isNumber {
+                index = format.index(after: index)
+            }
+        }
+
+        if index < format.endIndex, "hlLqjzt".contains(format[index]) {
+            let prev = format[index]
+            index = format.index(after: index)
+            if index < format.endIndex, (prev == "h" && format[index] == "h") || (prev == "l" && format[index] == "l") {
+                index = format.index(after: index)
+            }
+        }
+
+        guard index < format.endIndex else { return nil }
+        let specifierIndex = index
+        switch format[index] {
+        case "@", "s": return (.string, "@", specifierIndex, usesExplicitIndex)
+        case "d", "i", "u", "o", "x", "X": return (.int, format[index], specifierIndex, usesExplicitIndex)
+        case "f", "F", "e", "E", "g", "G", "a", "A": return (.double, format[index], specifierIndex, usesExplicitIndex)
+        default: return nil
+        }
     }
 
     private func normalizedFormat(_ format: String) -> (format: String, argument: FormatArgument)? {
@@ -108,99 +152,32 @@ public struct NumberState: CustomStringConvertible, Equatable {
                 index = format.index(after: index)
                 continue
             }
-
             let percentIndex = index
             index = format.index(after: index)
-
-            if index == format.endIndex {
-                return nil
-            }
-
+            if index == format.endIndex { return nil }
             if format[index] == "%" {
                 normalized.append("%%")
                 index = format.index(after: index)
                 continue
             }
-
-            let placeholderStart = index
-
-            while index < format.endIndex, "-+# 0".contains(format[index]) {
-                index = format.index(after: index)
-            }
-
-            while index < format.endIndex, format[index].isNumber {
-                index = format.index(after: index)
-            }
-
-            if index < format.endIndex, format[index] == "$" {
-                let digits = format[placeholderStart ..< index]
-                guard digits == "1" else { return nil }
-                usesExplicitArgumentIndex = true
-                index = format.index(after: index)
-            }
-
-            while index < format.endIndex, "-+# 0".contains(format[index]) {
-                index = format.index(after: index)
-            }
-
-            while index < format.endIndex, format[index].isNumber {
-                index = format.index(after: index)
-            }
-
-            if index < format.endIndex, format[index] == "." {
-                index = format.index(after: index)
-                guard index < format.endIndex else { return nil }
-                while index < format.endIndex, format[index].isNumber {
-                    index = format.index(after: index)
-                }
-            }
-
-            if index < format.endIndex, "hlLqjzt".contains(format[index]) {
-                index = format.index(after: index)
-                if index < format.endIndex,
-                   (format[format.index(before: index)] == "h" && format[index] == "h") ||
-                    (format[format.index(before: index)] == "l" && format[index] == "l") {
-                    index = format.index(after: index)
-                }
-            }
-
-            guard index < format.endIndex else { return nil }
-
-            let specifier = format[index]
-            let argument: FormatArgument
-            let finalSpecifier: Character
-            switch specifier {
-            case "@", "s":
-                argument = .string
-                finalSpecifier = "@"
-            case "d", "i", "u", "o", "x", "X":
-                argument = .int
-                finalSpecifier = specifier
-            case "f", "F", "e", "E", "g", "G", "a", "A":
-                argument = .double
-                finalSpecifier = specifier
-            default:
-                return nil
-            }
-
-            if let firstArgument, firstArgument != argument {
-                return nil
-            }
-            firstArgument = argument
+            guard let result = parsePlaceholder(in: format, from: index) else { return nil }
+            if let firstArgument, firstArgument != result.argument { return nil }
+            firstArgument = result.argument
             consumesArgumentCount += 1
-
-            normalized.append(contentsOf: format[percentIndex ..< index])
-            normalized.append(finalSpecifier)
-            index = format.index(after: index)
+            usesExplicitArgumentIndex = usesExplicitArgumentIndex || result.usesExplicitIndex
+            normalized.append(contentsOf: format[percentIndex ..< result.specifierIndex])
+            normalized.append(result.finalSpecifier)
+            index = format.index(after: result.specifierIndex)
         }
 
-        guard let firstArgument else {
-            return nil
-        }
-        guard consumesArgumentCount == 1 || usesExplicitArgumentIndex else {
-            return nil
-        }
-
+        guard let firstArgument, consumesArgumentCount == 1 || usesExplicitArgumentIndex else { return nil }
         return (normalized, firstArgument)
+    }
+
+    // Access to default memberwise initializer not permitted outside of package
+    public init(value: Double, unit: String? = "", format: String? = "") {
+        self.value = value
+        self.unit = unit
+        self.format = format
     }
 }

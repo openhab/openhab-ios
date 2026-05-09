@@ -55,7 +55,7 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
     }
 
     func getItems(query: OpenHABCore.Operations.getItems.Input.Query) async throws -> [OpenHABCore.OpenHABItem] {
-        try await getItems()
+        try getItems()
     }
 
     func getItems() throws -> [OpenHABCore.OpenHABItem] {

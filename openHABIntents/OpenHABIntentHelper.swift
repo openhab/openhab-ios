@@ -22,10 +22,10 @@ public enum OpenHABIntentHelper {
             let homePrefs = Preferences.shared.storedHomes.first { $0.key == homeId }
             if homePrefs != nil {
                 return .success(with: home)
-            } else {
-                return .unsupported() // given home is not found in preferences
             }
-        } else if let item {
+            return .unsupported()
+        }
+        if let item {
             // try to find the home by home-specific item selection
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
             let homeIdsWithMatchingItems = allItems.map(\.key).filter { uuid in
@@ -36,12 +36,10 @@ public enum OpenHABIntentHelper {
                 .map { OpenHABHome(homeId: $0.id, homeName: $0.homeName) }
             if potentialHomes.count == 1 {
                 return .success(with: potentialHomes[0])
-            } else {
-                return .disambiguation(with: potentialHomes)
             }
-        } else {
-            return .needsValue()
+            return .disambiguation(with: potentialHomes)
         }
+        return .needsValue()
     }
 
     static func getHomeOptions() -> INObjectCollection<OpenHABHome> {

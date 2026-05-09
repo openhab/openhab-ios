@@ -123,45 +123,40 @@ enum SitemapDiagnostics {
         Preferences.shared.applicationPreferences.sitemapDiagnosticsLogging
     }
 
-    static func logUpdate(
-        origin: PageUpdateOrigin,
-        widgetCount: Int,
-        rowCount: Int,
-        inputsChanged: Bool,
-        titleChanged: Bool,
-        reusedInputCount: Int,
-        changedRowCount: Int,
-        changedRowKinds: String,
-        analysisMs: Int,
-        buildRowInputsMs: Int,
-        applyStateMs: Int,
-        totalUpdateMs: Int
-    ) {
+    // swiftlint:disable:next function_parameter_count
+    static func logUpdate(origin: PageUpdateOrigin,
+                          widgetCount: Int,
+                          rowCount: Int,
+                          inputsChanged: Bool,
+                          titleChanged: Bool,
+                          reusedInputCount: Int,
+                          changedRowCount: Int,
+                          changedRowKinds: String,
+                          analysisMs: Int,
+                          buildRowInputsMs: Int,
+                          applyStateMs: Int,
+                          totalUpdateMs: Int) {
         guard isEnabled else { return }
         logger.info(
             "update origin=\(origin.rawValue, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) inputsChanged=\(inputsChanged, privacy: .public) titleChanged=\(titleChanged, privacy: .public) reusedInputs=\(reusedInputCount, privacy: .public) changedRows=\(changedRowCount, privacy: .public) changedKinds=\(changedRowKinds, privacy: .public) buildRowInputsMs=\(buildRowInputsMs, privacy: .public) applyStateMs=\(applyStateMs, privacy: .public) analysisMs=\(analysisMs, privacy: .public) totalUpdateMs=\(totalUpdateMs, privacy: .public)"
         )
     }
 
-    static func logLongPoll(
-        requestMs: Int,
-        returnedPage: Bool,
-        status: String,
-        responseGapMs: Int?
-    ) {
+    static func logLongPoll(requestMs: Int,
+                            returnedPage: Bool,
+                            status: String,
+                            responseGapMs: Int?) {
         guard isEnabled else { return }
         logger.info(
             "longPoll requestMs=\(requestMs, privacy: .public) returnedPage=\(returnedPage, privacy: .public) status=\(status, privacy: .public) responseGapMs=\(responseGapMs ?? -1, privacy: .public)"
         )
     }
 
-    static func logLongPollDebounce(
-        action: String,
-        elapsedMs: Int,
-        remainingMs: Int,
-        replacedPendingPage: Bool,
-        coalescedUpdates: Int
-    ) {
+    static func logLongPollDebounce(action: String,
+                                    elapsedMs: Int,
+                                    remainingMs: Int,
+                                    replacedPendingPage: Bool,
+                                    coalescedUpdates: Int) {
         guard isEnabled else { return }
         logger.info(
             "longPollDebounce action=\(action, privacy: .public) elapsedMs=\(elapsedMs, privacy: .public) remainingMs=\(remainingMs, privacy: .public) replacedPendingPage=\(replacedPendingPage, privacy: .public) coalescedUpdates=\(coalescedUpdates, privacy: .public)"
@@ -175,13 +170,11 @@ enum SitemapDiagnostics {
         )
     }
 
-    static func logIconResolutionFailure(
-        rowIdentity: String,
-        icon: String,
-        reason: String,
-        trackerStatus: String,
-        connectionDescription: String
-    ) {
+    static func logIconResolutionFailure(rowIdentity: String,
+                                         icon: String,
+                                         reason: String,
+                                         trackerStatus: String,
+                                         connectionDescription: String) {
         guard isEnabled else { return }
         logger.info(
             "iconResolutionFailure row=\(rowIdentity, privacy: .private(mask: .hash)) icon=\(icon, privacy: .public) reason=\(reason, privacy: .public) trackerStatus=\(trackerStatus, privacy: .public) connection=\(connectionDescription, privacy: .public)"
@@ -220,14 +213,13 @@ enum SitemapDiagnostics {
     }
 
     static func changedRowKinds(from oldInputs: [SitemapRowInput], to newInputs: [SitemapRowInput]) -> String {
-        let changedKinds: [String]
-        if newInputs.count == oldInputs.count {
-            changedKinds = zip(newInputs, oldInputs)
+        let changedKinds: [String] = if newInputs.count == oldInputs.count {
+            zip(newInputs, oldInputs)
                 .compactMap { newInput, oldInput in
                     newInput != oldInput ? rowKind(for: newInput) : nil
                 }
         } else {
-            changedKinds = newInputs.map(rowKind(for:))
+            newInputs.map(rowKind(for:))
         }
 
         guard !changedKinds.isEmpty else { return "none" }

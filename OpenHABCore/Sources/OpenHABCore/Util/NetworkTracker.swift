@@ -538,7 +538,6 @@ public actor NetworkTracker {
         if activeConnection != connection {
             activeConnection = connection
         }
-
     }
 
     private func updateStatus(_ newStatus: NetworkStatus) {
