@@ -236,7 +236,6 @@ public extension [OpenHABWidget] {
     }
 }
 
-
 extension OpenHABWidget {
     convenience init(_ widget: Components.Schemas.WidgetDTO) {
         self.init(

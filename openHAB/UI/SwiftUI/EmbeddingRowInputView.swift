@@ -127,7 +127,7 @@ struct EmbeddingRowInputView: View, Equatable {
     // foreground refresh may render stale data from a cached render.
     @EnvironmentObject private var viewModel: SitemapPageViewModel
 
-    nonisolated static func ==(lhs: Self, rhs: Self) -> Bool {
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.rowInput == rhs.rowInput
     }
 

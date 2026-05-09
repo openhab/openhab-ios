@@ -152,16 +152,15 @@ private enum PreferencesAccess {
         let preferenceValue = sharedDefaults.object(forKey: key)
         if let preferenceConverted = decoder(preferenceValue) {
             return preferenceConverted
-        } else {
-            if let preferenceValue {
-                Logger.preferences.error("Preference value \(key) was \(String(describing: preferenceValue)) but did not conform to \(T.self). Replace with default value.")
-            } else {
-                Logger.preferences.info("Preference value \(key) was set for the first time. Using default value.")
-            }
-            let fallback = defaultValue
-            sharedDefaults.set(encoder(fallback), forKey: key)
-            return fallback
         }
+        if let preferenceValue {
+            Logger.preferences.error("Preference value \(key) was \(String(describing: preferenceValue)) but did not conform to \(T.self). Replace with default value.")
+        } else {
+            Logger.preferences.info("Preference value \(key) was set for the first time. Using default value.")
+        }
+        let fallback = defaultValue
+        sharedDefaults.set(encoder(fallback), forKey: key)
+        return fallback
     }
 
     @MainActor fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {

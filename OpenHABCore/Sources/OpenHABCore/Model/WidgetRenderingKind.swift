@@ -32,4 +32,3 @@ public enum WidgetRenderingKind: Sendable {
     case buttonGrid
     case generic
 }
-

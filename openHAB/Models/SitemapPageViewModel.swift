@@ -124,14 +124,15 @@ class SitemapPageViewModel: ObservableObject {
 
         if !title.isEmpty {
             return title
-        } else if !fallbackTitle.isEmpty {
-            return fallbackTitle.labelValueTitle
-        } else if !defaultSitemapLabel.isEmpty {
-            return defaultSitemapLabel.labelValueTitle
-        } else {
-            // SitemapPageView shows a redacted placeholder title when loading
-            return ""
         }
+        if !fallbackTitle.isEmpty {
+            return fallbackTitle.labelValueTitle
+        }
+        if !defaultSitemapLabel.isEmpty {
+            return defaultSitemapLabel.labelValueTitle
+        }
+        // SitemapPageView shows a redacted placeholder title when loading
+        return ""
     }
 
     var isLinked: Bool {
@@ -893,6 +894,7 @@ extension SitemapPageViewModel {
     }
 
     @MainActor
+    // swiftlint:disable:next async_without_await
     func pushSitemap(name: String, path: String?) async {
         defaultSitemap = name
         defaultSitemapLabel = "" // Clear old label so it gets fetched for the new sitemap
@@ -1005,12 +1007,12 @@ extension SitemapPageViewModel {
 
         if pageNetworkStatus == currentStatus {
             return false
-        } else {
-            pageNetworkStatus = currentStatus
-            return true
         }
+        pageNetworkStatus = currentStatus
+        return true
     }
 
+    // swiftlint:disable:next async_without_await
     private func handleActiveConnection(_ connection: ConnectionInfo) async {
         let previousURL = activeConnectionInfo?.configuration.url
         let newURL = connection.configuration.url
@@ -1035,6 +1037,7 @@ extension SitemapPageViewModel {
         }
     }
 
+    // swiftlint:disable:next async_without_await
     func selectSitemap() async {
         startPageHandling(forceRestart: true, reason: "select-sitemap")
     }

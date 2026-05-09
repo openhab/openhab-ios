@@ -69,6 +69,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
     }
 
     // this is called when clicking a notification while in the background
+    // swiftlint:disable:next async_without_await
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier
@@ -133,6 +134,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
     }
 
     // Action to be performed when the notification message view is tapped
+    // swiftlint:disable:next async_without_await
     func messageViewTapped(action: String?, cloudUserId: String? = nil) async {
         notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
         SwiftMessages.hideAll()

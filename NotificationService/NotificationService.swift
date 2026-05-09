@@ -228,6 +228,7 @@ actor NotificationServiceHandler {
         return (tempFileURL, mimeType)
     }
 
+    // swiftlint:disable:next async_without_await
     func attachFile(localURL: URL, mimeType: String?) async -> UNNotificationAttachment? {
         do {
             let fileManager = FileManager.default

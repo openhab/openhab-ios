@@ -112,7 +112,7 @@ public struct LogsViewer: View {
         var systemInfo = utsname()
         uname(&systemInfo)
         return withUnsafeBytes(of: &systemInfo.machine) { ptr in
-            String(bytes: ptr.prefix(while: { $0 != 0 }), encoding: .utf8) ?? "unknown"
+            String(bytes: ptr.prefix { $0 != 0 }, encoding: .utf8) ?? "unknown"
         }
     }
 }
@@ -133,7 +133,7 @@ private extension OSLogEntryLog.Level {
 
 public extension Logger {
     static func fetch(since date: Date,
-                      predicateFormat: String) async throws -> [String] {
+                      predicateFormat: String) throws -> [String] {
         let store = try OSLogStore(scope: .currentProcessIdentifier)
         let position = store.position(date: date)
         let predicate = NSPredicate(format: predicateFormat)

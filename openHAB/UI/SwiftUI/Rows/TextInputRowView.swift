@@ -16,11 +16,11 @@ import os.log
 import SwiftUI
 
 struct InputCommandFormatter {
-    
+
     var decimalSeparator: String = Locale.current.decimalSeparator ?? "."
-    
+
     // MARK: after typing
-    
+
     func command(from rawText: String, hint: OpenHABWidget.InputHint?) -> String? {
         let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
         switch hint {
@@ -65,7 +65,7 @@ struct InputCommandFormatter {
     }
 
     // MARK: during typing
-    
+
     func filteredDraftInput(from rawText: String, previousText: String, hint: OpenHABWidget.InputHint?) -> String {
         guard hint == .number else { return rawText }
         return isValidNumberDraft(rawText) ? rawText : previousText

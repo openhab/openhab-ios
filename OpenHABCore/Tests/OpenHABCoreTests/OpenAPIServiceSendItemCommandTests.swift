@@ -43,7 +43,7 @@ struct OpenAPIServiceSendItemCommandTests {
 
     @Test("sendItemCommand uses application/json for empty string command")
     func sendItemCommandUsesJSONForEmptyCommand() async throws {
-        let transport = TestClientTransport { request, body, baseURL, operationID in
+        let transport = TestClientTransport { request, body, _, operationID in
             #expect(operationID == "sendItemCommand")
             #expect(request.headerFields[.contentType] == "application/json; charset=utf-8")
 

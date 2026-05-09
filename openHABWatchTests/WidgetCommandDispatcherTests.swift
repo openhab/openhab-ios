@@ -44,7 +44,7 @@ private func makeWidget(widgetId: String, recorder: CommandRecorder) -> OpenHABW
 struct WidgetCommandDispatcherTests {
     @Test("Immediate policy sends command once")
     @MainActor
-    func immediatePolicySendsOnce() async {
+    func immediatePolicySendsOnce() {
         let recorder = CommandRecorder()
         let widget = makeWidget(widgetId: "immediate", recorder: recorder)
         let sender = WidgetCommandDispatcher()
@@ -84,7 +84,7 @@ struct WidgetCommandDispatcherTests {
 
     @Test("Press and release commands dispatch in order")
     @MainActor
-    func pressReleaseDispatchesInOrder() async {
+    func pressReleaseDispatchesInOrder() {
         let recorder = CommandRecorder()
         let widget = makeWidget(widgetId: "press-release", recorder: recorder)
         let sender = WidgetCommandDispatcher()
@@ -97,7 +97,7 @@ struct WidgetCommandDispatcherTests {
 
     @Test("Item update dispatches command and ignores nil state")
     @MainActor
-    func itemUpdateDispatchesAndSkipsNil() async {
+    func itemUpdateDispatchesAndSkipsNil() {
         let recorder = CommandRecorder()
         let widget = makeWidget(widgetId: "item-update", recorder: recorder)
         let sender = WidgetCommandDispatcher()

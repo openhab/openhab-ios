@@ -33,7 +33,7 @@ private struct HSBSelection: Equatable {
     var brightnessGradientColors: [Color] {
         [
             Color(hue: hue, saturation: saturation, brightness: 0),
-            Color(hue: hue, saturation: saturation, brightness: 1),
+            Color(hue: hue, saturation: saturation, brightness: 1)
         ]
     }
 

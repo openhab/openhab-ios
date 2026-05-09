@@ -173,6 +173,7 @@ public actor CertificateStore {
         }
     }
 
+    // swiftlint:disable:next async_without_await
     private func saveTrustedCertificates() async {
         guard let path = persistencePath else {
             // In-memory mode, no persistence
@@ -214,16 +215,19 @@ public actor CertificateStore {
         await saveTrustedCertificates()
     }
 
+    // swiftlint:disable:next async_without_await
     public func certificateData(forDomain domain: String) async -> Data? {
         let data = trustedCertificates[domain]?.data
         Logger.httpClient.debug("Retrieved certificate for domain \(domain): \(data?.count ?? 0) bytes")
         return data
     }
 
+    // swiftlint:disable:next async_without_await
     public func getAllCertificates() async -> [String: CertificateEntry] {
         trustedCertificates
     }
 
+    // swiftlint:disable:next async_without_await
     public func getCertificateInfo(forDomain domain: String) async -> CertificateEntry? {
         trustedCertificates[domain]
     }
@@ -314,9 +318,8 @@ public final class HTTPClient: NSObject, Sendable {
             let (data, _): (Data, URLResponse) = try await doRequest(baseURL: url, type: .data)
             struct CloudUserResponse: Decodable { let userId: String }
             return try? JSONDecoder().decode(CloudUserResponse.self, from: data).userId
-        } else {
-            throw HTTPClientError.couldNotRegister
         }
+        throw HTTPClientError.couldNotRegister
     }
 
     public func notification(url: URL) async throws -> Data {
@@ -393,10 +396,9 @@ public final class HTTPClient: NSObject, Sendable {
             if (400 ... 599).contains(response.statusCode) {
                 Logger.httpClient.error("HTTP error from URL \(url.absoluteString) : \(response.statusCode)")
                 throw HTTPClientError.httpError(response.statusCode)
-            } else {
-                Logger.httpClient.info("Response from URL \(url.absoluteString) : \(response.statusCode)")
-                return (result, response)
             }
+            Logger.httpClient.info("Response from URL \(url.absoluteString) : \(response.statusCode)")
+            return (result, response)
         }
         fatalError()
     }

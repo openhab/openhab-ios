@@ -42,13 +42,13 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
         self.mockServerProperties = mockServerProperties
     }
 
-    func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) async throws {
+    func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) throws {
         if shouldFail {
             throw networkTrackerError
         }
     }
 
-    func updateItemState(itemname: String, with: String, sourcePrefix: String?, deviceId: String?) async throws {
+    func updateItemState(itemname: String, with: String, sourcePrefix: String?, deviceId: String?) throws {
         if shouldFail {
             throw networkTrackerError
         }
@@ -58,28 +58,28 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
         try await getItems()
     }
 
-    func getItems() async throws -> [OpenHABCore.OpenHABItem] {
+    func getItems() throws -> [OpenHABCore.OpenHABItem] {
         if shouldFail {
             throw networkTrackerError
         }
         return []
     }
 
-    func getItemByName(id: String) async throws -> OpenHABCore.OpenHABItem? {
+    func getItemByName(id: String) throws -> OpenHABCore.OpenHABItem? {
         if shouldFail {
             throw networkTrackerError
         }
         return nil
     }
 
-    func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) async throws -> OpenHABCore.OpenHABPage? {
+    func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) throws -> OpenHABCore.OpenHABPage? {
         if shouldFail {
             throw networkTrackerError
         }
         return nil
     }
 
-    func runNow(ruleUID: String, payload: [String: any Sendable]) async throws {
+    func runNow(ruleUID: String, payload: [String: any Sendable]) throws {
         if shouldFail {
             throw networkTrackerError
         }
@@ -96,7 +96,7 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
     }
 
     @discardableResult
-    func getRoot() async throws -> OpenHABServerProperties {
+    func getRoot() throws -> OpenHABServerProperties {
         if shouldFail {
             throw networkTrackerError
         }

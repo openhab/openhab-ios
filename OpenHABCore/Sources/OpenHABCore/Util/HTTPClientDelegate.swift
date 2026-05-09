@@ -51,20 +51,19 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
 
         if challenge.previousFailureCount > 0 {
             return (.cancelAuthenticationChallenge, nil)
-        } else {
-            switch authenticationMethod {
-            case NSURLAuthenticationMethodServerTrust:
-                let result = await handleServerTrust(challenge: challenge)
-                return result
-            case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
-                let result = await handleBasicAuth(challenge: challenge)
-                return result
-            case NSURLAuthenticationMethodClientCertificate:
-                let result = await handleClientCertificateAuth(challenge: challenge)
-                return result
-            default:
-                return (.performDefaultHandling, nil)
-            }
+        }
+        switch authenticationMethod {
+        case NSURLAuthenticationMethodServerTrust:
+            let result = await handleServerTrust(challenge: challenge)
+            return result
+        case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
+            let result = await handleBasicAuth(challenge: challenge)
+            return result
+        case NSURLAuthenticationMethodClientCertificate:
+            let result = await handleClientCertificateAuth(challenge: challenge)
+            return result
+        default:
+            return (.performDefaultHandling, nil)
         }
     }
 
@@ -101,29 +100,28 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
             if CFEqual(previousCertificateData as CFData, certificateData) {
                 Logger.httpClientDelegate.info("Using previously trusted certificate for domain: \(domain)")
                 return (.useCredential, URLCredential(trust: serverTrust))
-            } else {
-                Logger.httpClientDelegate.warning("Certificate mismatch detected for domain: \(domain)")
-                // Certificate mismatch - possible MitM attack
-                NotificationCenter.default.post(
-                    name: .evaluateCertificateMismatch,
-                    object: self,
-                    userInfo: ["summary": certificateSummary as Any, "domain": domain]
-                )
-                let evaluateResult = await waitForEvaluation()
-                Logger.httpClientDelegate.info("User decision for certificate mismatch: \(String(describing: evaluateResult))")
+            }
+            Logger.httpClientDelegate.warning("Certificate mismatch detected for domain: \(domain)")
+            // Certificate mismatch - possible MitM attack
+            NotificationCenter.default.post(
+                name: .evaluateCertificateMismatch,
+                object: self,
+                userInfo: ["summary": certificateSummary as Any, "domain": domain]
+            )
+            let evaluateResult = await waitForEvaluation()
+            Logger.httpClientDelegate.info("User decision for certificate mismatch: \(String(describing: evaluateResult))")
 
-                switch evaluateResult {
-                case .deny:
-                    return (.cancelAuthenticationChallenge, nil)
-                case .permitOnce:
-                    return (.useCredential, URLCredential(trust: serverTrust))
-                case .permitAlways:
-                    await store.storeCertificateData(certificateData as Data, forDomain: domain)
-                    NotificationCenter.default.post(name: .acceptedServerCertificatesChanged, object: self)
-                    return (.useCredential, URLCredential(trust: serverTrust))
-                case .undecided:
-                    return (.cancelAuthenticationChallenge, nil)
-                }
+            switch evaluateResult {
+            case .deny:
+                return (.cancelAuthenticationChallenge, nil)
+            case .permitOnce:
+                return (.useCredential, URLCredential(trust: serverTrust))
+            case .permitAlways:
+                await store.storeCertificateData(certificateData as Data, forDomain: domain)
+                NotificationCenter.default.post(name: .acceptedServerCertificatesChanged, object: self)
+                return (.useCredential, URLCredential(trust: serverTrust))
+            case .undecided:
+                return (.cancelAuthenticationChallenge, nil)
             }
         }
 
@@ -151,11 +149,13 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
         }
     }
 
+    // swiftlint:disable:next async_without_await
     private func handleBasicAuth(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         let credential = URLCredential(user: connectionConfiguration.username, password: connectionConfiguration.password, persistence: .forSession)
         return (.useCredential, credential)
     }
 
+    // swiftlint:disable:next async_without_await
     private func handleClientCertificateAuth(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         let certificateManager = ClientCertificateManager()
         let (disposition, credential) = certificateManager.evaluateTrust(with: challenge)

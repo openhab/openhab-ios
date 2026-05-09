@@ -64,4 +64,3 @@ public struct WidgetDisplayState: Sendable, Equatable {
         self.selectedLabel = selectedLabel
     }
 }
-

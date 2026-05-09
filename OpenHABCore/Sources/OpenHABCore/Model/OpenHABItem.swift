@@ -97,12 +97,10 @@ public extension OpenHABItem {
                 let brightness = CGFloat(state: values[2], divisor: 100)
                 Logger.restAPI.info("hue saturation brightness: \(hue) \(saturation) \(brightness)")
                 return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
-            } else {
-                return .black
             }
-        } else {
             return .black
         }
+        return .black
     }
 
     func stateAsLocation() -> CLLocation? {

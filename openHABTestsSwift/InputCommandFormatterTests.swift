@@ -184,12 +184,12 @@ struct InputCommandFormatterTests {
     func commandFromSignOnlyReturnsNil() {
         #expect(formatter.command(from: "-", hint: .number) == nil)
     }
-    
+
     @Test
     func commandFromCommaReturnsNil() {
         #expect(formatter.command(from: ".", hint: .number) == nil)
     }
-    
+
     @Test
     func commandFromNegativeCommaReturnsNil() {
         #expect(formatter.command(from: "-.", hint: .number) == nil)
@@ -199,7 +199,7 @@ struct InputCommandFormatterTests {
     func commandFromZeroIntegerReturnsNormalized() {
         #expect(formatter.command(from: "0", hint: .number) == "0")
     }
-    
+
     @Test
     func commandFromNegativeZeroIntegerReturnsNormalized() {
         #expect(formatter.command(from: "-0", hint: .number) == "0")
@@ -214,7 +214,7 @@ struct InputCommandFormatterTests {
     func commandFromNegativeIntegerReturnsNormalized() {
         #expect(formatter.command(from: "-42", hint: .number) == "-42")
     }
-    
+
     @Test
     func commandFromIntegerWithCommaReturnsNormalized() {
         #expect(formatter.command(from: "42.", hint: .number) == "42")
@@ -224,7 +224,7 @@ struct InputCommandFormatterTests {
     func commandFromNegativeIntegerWithCommaReturnsNormalized() {
         #expect(formatter.command(from: "-42.", hint: .number) == "-42")
     }
-    
+
     @Test
     func commandFromIntegerWithLeadingCommaReturnsNormalized() {
         #expect(formatter.command(from: ".42", hint: .number) == "0.42")
@@ -276,7 +276,7 @@ struct InputCommandFormatterCommaTests {
 
 @Suite
 struct InputCommandFormatterOracleTests {
-    
+
     /// Port of the UIKit `textField(_:shouldChangeCharactersIn:replacementString:)` logic.
     /// Given the old text, the NSRange being replaced, and the replacement string, returns
     /// whether the edit should be accepted.
@@ -311,7 +311,7 @@ struct InputCommandFormatterOracleTests {
                     )
             ) // old string without replaced range not yet contains decimal separator
     }
-    
+
     @Test(arguments: [".", ","])
     func oracleExhaustiveMultiCharPastes(sep: String) {
         let formatter = InputCommandFormatter(decimalSeparator: sep)
@@ -323,7 +323,7 @@ struct InputCommandFormatterOracleTests {
             "12", "99", "-1", "-", "\(sep)1", "1\(sep)", "1\(sep)2",
             "-\(sep)", "\(sep)\(sep)", "ab", "-1\(sep)2"
         ]
-        
+
         for oldString in validStarts {
             for pos in 0 ... oldString.count {
                 for replLen in 0 ... (oldString.count - pos) {
@@ -334,7 +334,7 @@ struct InputCommandFormatterOracleTests {
                         )
                         let resultString = (oldString as NSString).replacingCharacters(in: range, with: paste)
                         let draftValid = formatter.isValidNumberDraft(resultString)
-                        
+
                         #expect(
                             oracleAccepted == draftValid,
                             "Disagreement: \"\(oldString)\" paste \"\(paste)\" @(\(pos),\(replLen)) → \"\(resultString)\": oracle=\(oracleAccepted), draft=\(draftValid) (sep=\(sep))"
@@ -344,8 +344,7 @@ struct InputCommandFormatterOracleTests {
             }
         }
     }
-    
-    
+
     // MARK: - Oracle-based tests: UIKit shouldChangeCharacters vs isValidNumberDraft
 
     //

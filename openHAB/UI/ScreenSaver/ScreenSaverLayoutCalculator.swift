@@ -118,8 +118,7 @@ enum ScreenSaverLayoutCalculator {
     ) -> (time: UIFont, date: UIFont) {
         if let fontName,
            let timeFont = UIFont(name: fontName, size: timeFontSize),
-           let dateFont = UIFont(name: fontName, size: dateFontSize)
-        {
+           let dateFont = UIFont(name: fontName, size: dateFontSize) {
             return (timeFont, dateFont)
         }
 

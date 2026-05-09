@@ -158,8 +158,8 @@ public struct NumberState: CustomStringConvertible, Equatable {
             if index < format.endIndex, "hlLqjzt".contains(format[index]) {
                 index = format.index(after: index)
                 if index < format.endIndex,
-                   ((format[format.index(before: index)] == "h" && format[index] == "h") ||
-                    (format[format.index(before: index)] == "l" && format[index] == "l")) {
+                   (format[format.index(before: index)] == "h" && format[index] == "h") ||
+                    (format[format.index(before: index)] == "l" && format[index] == "l") {
                     index = format.index(after: index)
                 }
             }

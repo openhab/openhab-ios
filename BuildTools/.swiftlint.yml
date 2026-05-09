@@ -18,6 +18,8 @@ opt_in_rules:
   - computed_accessors_order
   - empty_enum_arguments
   - prefer_zero_over_explicit_init
+  - superfluous_else
+  - async_without_await
 
 analyzer_rules:
   - unused_import
@@ -116,6 +118,10 @@ custom_rules:
 file_name:
   suffix_pattern: "Extension?|\\+.*"
   excluded: ["WatchTypography.swift", "WidgetRowInputs.swift", "SitemapPageViewModel+SupportTypes.swift"]
+
+async_without_await:
+  excluded:
+    - ../openHABIntents
 
 opening_brace:
   ignore_multiline_function_signatures: true

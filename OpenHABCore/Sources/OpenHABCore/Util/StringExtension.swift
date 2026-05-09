@@ -172,7 +172,7 @@ public extension String {
     func removeTrailingSlashes() -> String {
         replacing(/\/+$/, with: "")
     }
-    
+
     // Sub-view gape title optionally concatenated with one space and value if present - to be inline with Nsic UI
     // e.g. "Living Room [21°C]" → "Living Room 21°C"
     var labelValueTitle: String {
@@ -189,9 +189,8 @@ public extension String {
         // Concatenate base + space + value (if present), else just base
         if let v = value, !v.isEmpty {
             return "\(base) \(v)"
-        } else {
-            return base
         }
+        return base
     }
 }
 

@@ -261,12 +261,10 @@ public struct OpenHABImageProcessor: ImageProcessor {
                 // Limit decode size for icon contexts; allow full-size decoding for media contexts.
                 if let image = decodeSVGOnMain(processedData, targetSize: svgMaxSize, preserveAspectRatio: true) {
                     return image
-                } else {
-                    return warningSymbol()
                 }
-            } else {
-                return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
+                return warningSymbol()
             }
+            return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
         }
     }
 
