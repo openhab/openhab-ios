@@ -136,26 +136,6 @@ struct RollershutterRowView: View {
     }
 }
 
-extension View {
-    @ViewBuilder
-    func sensoryHeavyFeedbackIfAvailable(trigger: Bool) -> some View {
-        if #available(iOS 17.0, *) {
-            sensoryFeedback(.impact(weight: .heavy, intensity: 0.9), trigger: trigger)
-        } else {
-            self
-        }
-    }
-
-    @ViewBuilder
-    func sensoryStopFeedbackIfAvailable(trigger: Bool) -> some View {
-        if #available(iOS 17.0, *) {
-            sensoryFeedback(.impact(flexibility: .rigid), trigger: trigger)
-        } else {
-            self
-        }
-    }
-}
-
 #if DEBUG
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[5]

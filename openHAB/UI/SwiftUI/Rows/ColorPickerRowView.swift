@@ -348,6 +348,7 @@ private struct ColorPickerRowContent: View {
     @State private var isEditingColor = false
     @State private var isPresentingColorWheel = false
     @State private var suppressNextColorSync = false
+    @State private var triggerFeedback = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetColorPickerView")
 
@@ -379,6 +380,7 @@ private struct ColorPickerRowContent: View {
                 )
 
                 Button {
+                    triggerFeedback.toggle()
                     isPresentingColorWheel = true
                 } label: {
                     Circle()
@@ -391,6 +393,7 @@ private struct ColorPickerRowContent: View {
                         .shadow(color: .black.opacity(0.15), radius: 2, y: 1)
                 }
                 .buttonStyle(.plain)
+                .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
                 .accessibilityLabel("Choose color")
                 .accessibilityValue(colorAccessibilityValue)
 
