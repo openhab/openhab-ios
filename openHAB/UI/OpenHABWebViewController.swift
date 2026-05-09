@@ -530,6 +530,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         return .allow
     }
 
+    // swiftlint:disable:next async_without_await
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         if let response = navigationResponse.response as? HTTPURLResponse {
             Logger.viewController.info("navigationResponse: \(response.statusCode)")
@@ -680,13 +681,11 @@ extension OpenHABWebViewController: WKNavigationDelegate {
                 }
                 let credential = URLCredential(trust: serverTrust)
                 return (.useCredential, credential)
-            } else {
-                if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
-                    return await onReceiveSessionTaskChallenge(with: challenge)
-                } else {
-                    return await onReceiveSessionChallenge(with: challenge)
-                }
             }
+            if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
+                return await onReceiveSessionTaskChallenge(with: challenge)
+            }
+            return await onReceiveSessionChallenge(with: challenge)
         }
         return (.performDefaultHandling, nil)
     }
@@ -719,6 +718,7 @@ extension OpenHABWebViewController: WKUIDelegate {
         return nil
     }
 
+    // swiftlint:disable:next async_without_await
     func webView(_ webView: WKWebView,
                  decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
                  initiatedBy frame: WKFrameInfo,
