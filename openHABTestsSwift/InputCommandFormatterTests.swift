@@ -165,6 +165,50 @@ struct InputCommandFormatterTests {
         #expect(formatter.numericDraftFromState("hello") == "hello")
     }
 
+    // MARK: - unitSuffixFromState
+
+    @Test
+    func unitSuffixFromIntegerWithUnit() {
+        #expect(formatter.unitSuffixFromState("220 °C") == " °C")
+    }
+
+    @Test
+    func unitSuffixFromDecimalWithUnit() {
+        #expect(formatter.unitSuffixFromState("21.5 km/h") == " km/h")
+    }
+
+    @Test
+    func unitSuffixFromNegativeWithUnit() {
+        #expect(formatter.unitSuffixFromState("-10 °F") == " °F")
+    }
+
+    @Test
+    func unitSuffixFromUnitNoSpace() {
+        #expect(formatter.unitSuffixFromState("220°C") == "°C")
+    }
+
+    @Test
+    func unitSuffixFromPlainNumber() {
+        #expect(formatter.unitSuffixFromState("220") == "")
+    }
+
+    @Test
+    func unitSuffixFromEmptyString() {
+        #expect(formatter.unitSuffixFromState("") == "")
+    }
+
+    // MARK: - command with unit suffix
+
+    @Test
+    func commandIncludesUnitSuffix() {
+        #expect(formatter.command(from: "220", hint: .number, unitSuffix: " °C") == "220 °C")
+    }
+
+    @Test
+    func commandWithoutUnitSuffix() {
+        #expect(formatter.command(from: "220", hint: .number) == "220")
+    }
+
     // MARK: - filteredDraftInput
 
     @Test
@@ -312,6 +356,16 @@ struct InputCommandFormatterCommaTests {
     @Test
     func numericDraftFromDecimalWithUnitCommaLocale() {
         #expect(formatter.numericDraftFromState("21,5 °C") == "21,5")
+    }
+
+    @Test
+    func unitSuffixFromDecimalWithUnitCommaLocale() {
+        #expect(formatter.unitSuffixFromState("21,5 °C") == " °C")
+    }
+
+    @Test
+    func commandIncludesUnitSuffixCommaLocale() {
+        #expect(formatter.command(from: "21,5", hint: .number, unitSuffix: " °C") == "21.5 °C")
     }
 }
 

@@ -21,11 +21,11 @@ struct InputCommandFormatter {
     
     // MARK: after typing
     
-    func command(from rawText: String, hint: OpenHABWidget.InputHint?) -> String? {
+    func command(from rawText: String, hint: OpenHABWidget.InputHint?, unitSuffix: String = "") -> String? {
         let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
         switch hint {
         case .number:
-            return normalizedNumberCommand(from: trimmed)
+            return normalizedNumberCommand(from: trimmed).map { $0 + unitSuffix }
         default:
             return trimmed
         }
@@ -87,6 +87,33 @@ struct InputCommandFormatter {
         return result.isEmpty ? text : result
     }
 
+    // Extracts the unit suffix from a formatted state string, e.g. "220 °C" → " °C", "220" → "".
+    func unitSuffixFromState(_ text: String) -> String {
+        guard !text.isEmpty else { return "" }
+        var i = text.startIndex
+        var seenDecimalSep = false
+        var isFirst = true
+        while i < text.endIndex {
+            let char = text[i]
+            if isFirst {
+                isFirst = false
+                if char == "-" {
+                    i = text.index(after: i)
+                    continue
+                }
+            }
+            if char.isNumber {
+                i = text.index(after: i)
+            } else if String(char) == decimalSeparator, !seenDecimalSep {
+                seenDecimalSep = true
+                i = text.index(after: i)
+            } else {
+                break
+            }
+        }
+        return String(text[i...])
+    }
+
     // MARK: during typing
 
     func filteredDraftInput(from rawText: String, previousText: String, hint: OpenHABWidget.InputHint?) -> String {
@@ -142,12 +169,13 @@ private struct TextInputRowContent: View {
     @State private var inputText = ""
     @State private var draftInputText = ""
     @State private var lastValidDraft = ""
+    @State private var draftUnitSuffix = ""
     @State private var showInputAlert = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")
     private let inputCommandFormatter = InputCommandFormatter()
     private var formattedCommand: String? {
-        inputCommandFormatter.command(from: draftInputText, hint: inputHint)
+        inputCommandFormatter.command(from: draftInputText, hint: inputHint, unitSuffix: draftUnitSuffix)
     }
 
     private var alertMessage: String {
@@ -173,6 +201,7 @@ private struct TextInputRowContent: View {
                     let draft = inputHint == .number ? inputCommandFormatter.numericDraftFromState(inputText) : inputText
                     draftInputText = draft
                     lastValidDraft = draft
+                    draftUnitSuffix = inputHint == .number ? inputCommandFormatter.unitSuffixFromState(inputText) : ""
                     showInputAlert = true
                 } label: {
                     Text(inputText.isEmpty
@@ -190,6 +219,7 @@ private struct TextInputRowContent: View {
                 let draft = inputHint == .number ? inputCommandFormatter.numericDraftFromState(inputText) : inputText
                 draftInputText = draft
                 lastValidDraft = draft
+                draftUnitSuffix = inputHint == .number ? inputCommandFormatter.unitSuffixFromState(inputText) : ""
                 showInputAlert = true
             }
             .alert("Enter new value", isPresented: $showInputAlert) {
