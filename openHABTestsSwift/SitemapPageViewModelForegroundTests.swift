@@ -21,14 +21,16 @@ import Testing
 // or were navigated away from must stay silent.
 @MainActor
 @Suite
-struct SitemapPageViewModelForegroundRefreshTests {
+struct SitemapPageViewModelForegroundTests {
     // lastForegroundRefreshAt advances only when the visibility guard passes, making
     // it the right synchronous observable for these tests — no Task.yield needed.
 
     @Test("refreshOnForeground before markAppeared is a no-op")
     func foregroundRefreshBlockedBeforeAppeared() {
-        let vm = SitemapPageViewModel(pageUrl: "http://openhab.local/rest/sitemaps/default/home",
-                                      title: "Test")
+        let vm = SitemapPageViewModel(
+            pageUrl: "http://openhab.local/rest/sitemaps/default/home",
+            title: "Test"
+        )
         let before = vm.lastForegroundRefreshAt
         vm.refreshOnForeground()
         #expect(vm.lastForegroundRefreshAt == before)
@@ -36,8 +38,10 @@ struct SitemapPageViewModelForegroundRefreshTests {
 
     @Test("refreshOnForeground after stopPageHandling is a no-op")
     func foregroundRefreshBlockedAfterStop() {
-        let vm = SitemapPageViewModel(pageUrl: "http://openhab.local/rest/sitemaps/default/home",
-                                      title: "Test")
+        let vm = SitemapPageViewModel(
+            pageUrl: "http://openhab.local/rest/sitemaps/default/home",
+            title: "Test"
+        )
         vm.markAppeared()
         vm.stopPageHandling()
         let before = vm.lastForegroundRefreshAt
@@ -47,8 +51,10 @@ struct SitemapPageViewModelForegroundRefreshTests {
 
     @Test("refreshOnForeground while visible advances lastForegroundRefreshAt")
     func foregroundRefreshAllowedWhileVisible() {
-        let vm = SitemapPageViewModel(pageUrl: "http://openhab.local/rest/sitemaps/default/home",
-                                      title: "Test")
+        let vm = SitemapPageViewModel(
+            pageUrl: "http://openhab.local/rest/sitemaps/default/home",
+            title: "Test"
+        )
         vm.markAppeared()
         let before = vm.lastForegroundRefreshAt
         vm.refreshOnForeground()

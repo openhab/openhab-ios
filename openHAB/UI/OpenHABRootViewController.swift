@@ -65,20 +65,6 @@ private struct TrackerConnectionIdentity: Equatable {
     let supportsNotifications: Bool
 }
 
-private extension ConnectionConfiguration {
-    var trackerIdentity: TrackerConnectionIdentity {
-        TrackerConnectionIdentity(
-            url: url,
-            username: username,
-            password: password,
-            alwaysSendBasicAuth: alwaysSendBasicAuth,
-            ignoreSSL: ignoreSSL,
-            priority: priority,
-            supportsNotifications: supportsNotifications
-        )
-    }
-}
-
 protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
@@ -306,7 +292,7 @@ class OpenHABRootViewController: UIViewController {
                     return
                 }
                 Logger.viewController.info("OpenHABWebViewController tracker status \(status.rawValue, privacy: .public)")
-                let retryButtonTitle: String = String(localized: "retry", comment: "retry connection")
+                let retryButtonTitle = String(localized: "retry", comment: "retry connection")
                 switch status {
                 case .started:
                     currentView.showPopupMessage(
@@ -334,8 +320,8 @@ class OpenHABRootViewController: UIViewController {
                 case .connected:
                     currentView.hidePopupMessages()
                 case .stopped:
-                    let error: String = String(localized: "Error", comment: "")
-                    let no_network: String = String(localized: "network_not_available", comment: "")
+                    let error = String(localized: "Error", comment: "")
+                    let no_network = String(localized: "network_not_available", comment: "")
                     currentView.showPopupMessage(
                         seconds: -1,
                         title: error,
@@ -1053,6 +1039,20 @@ class OpenHABRootViewController: UIViewController {
         })
 
         present(alert, animated: true)
+    }
+}
+
+private extension ConnectionConfiguration {
+    var trackerIdentity: TrackerConnectionIdentity {
+        TrackerConnectionIdentity(
+            url: url,
+            username: username,
+            password: password,
+            alwaysSendBasicAuth: alwaysSendBasicAuth,
+            ignoreSSL: ignoreSSL,
+            priority: priority,
+            supportsNotifications: supportsNotifications
+        )
     }
 }
 

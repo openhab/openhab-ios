@@ -20,15 +20,15 @@ final class MockClientCertDelegate: ClientCertificateManagerDelegate {
     var receivedErrorMessage: String?
     var receivedErrorCode: OSStatus?
 
-    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool {
+    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) -> Bool {
         shouldImport
     }
 
-    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String? {
+    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) -> String? {
         password
     }
 
-    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async {
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {
         receivedErrorMessage = errMsg
         if let code = Int(errMsg.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()) {
             receivedErrorCode = OSStatus(code)

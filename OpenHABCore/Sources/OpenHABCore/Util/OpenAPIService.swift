@@ -219,6 +219,7 @@ public extension OpenAPIService {
     struct AnyAsyncSequence<Element>: AsyncSequence {
         public struct Iterator: AsyncIteratorProtocol {
             private var _next: () async throws -> Element?
+
             init<S: AsyncSequence>(_ base: S) where S.Element == Element {
                 var it = base.makeAsyncIterator()
                 _next = { try await it.next() }
@@ -228,6 +229,7 @@ public extension OpenAPIService {
         }
 
         public let _make: () -> Iterator
+
         init<S: AsyncSequence>(_ base: S) where S.Element == Element {
             _make = { Iterator(base) }
         }

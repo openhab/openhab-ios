@@ -14,309 +14,6 @@ import Foundation
 import OpenHABCore
 import Testing
 
-@Suite
-struct InputCommandFormatterTests {
-    let formatter = InputCommandFormatter(decimalSeparator: ".")
-
-    // MARK: - isValidNumberDraft with dot separator
-
-    @Test
-    func zeroIsValid() {
-        #expect(formatter.isValidNumberDraft("0"))
-    }
-
-    @Test
-    func emptyStringIsValid() {
-        #expect(formatter.isValidNumberDraft(""))
-    }
-
-    @Test
-    func singleDigitIsValid() {
-        #expect(formatter.isValidNumberDraft("5"))
-    }
-
-    @Test
-    func multipleDigitsAreValid() {
-        #expect(formatter.isValidNumberDraft("123"))
-    }
-
-    @Test
-    func negativeSignAloneIsValid() {
-        #expect(formatter.isValidNumberDraft("-"))
-    }
-
-    @Test
-    func negativeNumberIsValid() {
-        #expect(formatter.isValidNumberDraft("-42"))
-    }
-
-    @Test
-    func decimalNumberIsValid() {
-        #expect(formatter.isValidNumberDraft("3.14"))
-    }
-
-    @Test
-    func trailingDecimalIsValid() {
-        #expect(formatter.isValidNumberDraft("3."))
-    }
-
-    @Test
-    func leadingDecimalIsValid() {
-        #expect(formatter.isValidNumberDraft(".5"))
-    }
-
-    @Test
-    func negativeDecimalIsValid() {
-        #expect(formatter.isValidNumberDraft("-3.14"))
-    }
-
-    @Test
-    func negativeLeadingDecimalIsValid() {
-        #expect(formatter.isValidNumberDraft("-.5"))
-    }
-
-    @Test
-    func negativeTrailingDecimalIsValid() {
-        #expect(formatter.isValidNumberDraft("-3."))
-    }
-
-    @Test
-    func decimalSeparatorAloneIsValid() {
-        #expect(formatter.isValidNumberDraft("."))
-    }
-
-    @Test
-    func negativeDecimalSeparatorAloneIsValid() {
-        #expect(formatter.isValidNumberDraft("-."))
-    }
-
-    // MARK: - isValidNumberDraft rejection cases with dot separator
-
-    @Test
-    func multipleDecimalSeparatorsRejected() {
-        #expect(!formatter.isValidNumberDraft("3.1.4"))
-    }
-
-    @Test
-    func plusSignRejected() {
-        #expect(!formatter.isValidNumberDraft("+5"))
-    }
-
-    @Test
-    func negativeSignInMiddleRejected() {
-        #expect(!formatter.isValidNumberDraft("3-5"))
-    }
-
-    @Test
-    func lettersRejected() {
-        #expect(!formatter.isValidNumberDraft("12a3"))
-    }
-
-    @Test
-    func spacesRejected() {
-        #expect(!formatter.isValidNumberDraft("1 2"))
-    }
-
-    @Test
-    func multipleNegativeSignsRejected() {
-        #expect(!formatter.isValidNumberDraft("--5"))
-    }
-
-    @Test
-    func commaRejectedWhenDotIsSeparator() {
-        #expect(!formatter.isValidNumberDraft("3,14"))
-    }
-
-    // MARK: - numericDraftFromState
-
-    @Test
-    func numericDraftFromIntegerWithUnit() {
-        #expect(formatter.numericDraftFromState("220 °C") == "220")
-    }
-
-    @Test
-    func numericDraftFromDecimalWithUnit() {
-        #expect(formatter.numericDraftFromState("21.5 °C") == "21.5")
-    }
-
-    @Test
-    func numericDraftFromNegativeWithUnit() {
-        #expect(formatter.numericDraftFromState("-10 °C") == "-10")
-    }
-
-    @Test
-    func numericDraftFromUnitNoSpace() {
-        #expect(formatter.numericDraftFromState("220°C") == "220")
-    }
-
-    @Test
-    func numericDraftFromPlainNumber() {
-        #expect(formatter.numericDraftFromState("220") == "220")
-    }
-
-    @Test
-    func numericDraftFromEmptyString() {
-        #expect(formatter.numericDraftFromState("") == "")
-    }
-
-    @Test
-    func numericDraftFromNonNumericTextPassesThrough() {
-        // Non-numeric state (e.g. text input): fall back to original
-        #expect(formatter.numericDraftFromState("hello") == "hello")
-    }
-
-    // MARK: - unitSuffixFromState
-
-    @Test
-    func unitSuffixFromIntegerWithUnit() {
-        #expect(formatter.unitSuffixFromState("220 °C") == " °C")
-    }
-
-    @Test
-    func unitSuffixFromDecimalWithUnit() {
-        #expect(formatter.unitSuffixFromState("21.5 km/h") == " km/h")
-    }
-
-    @Test
-    func unitSuffixFromNegativeWithUnit() {
-        #expect(formatter.unitSuffixFromState("-10 °F") == " °F")
-    }
-
-    @Test
-    func unitSuffixFromUnitNoSpace() {
-        #expect(formatter.unitSuffixFromState("220°C") == "°C")
-    }
-
-    @Test
-    func unitSuffixFromPlainNumber() {
-        #expect(formatter.unitSuffixFromState("220") == "")
-    }
-
-    @Test
-    func unitSuffixFromEmptyString() {
-        #expect(formatter.unitSuffixFromState("") == "")
-    }
-
-    // MARK: - command with unit suffix
-
-    @Test
-    func commandIncludesUnitSuffix() {
-        #expect(formatter.command(from: "220", hint: .number, unitSuffix: " °C") == "220 °C")
-    }
-
-    @Test
-    func commandWithoutUnitSuffix() {
-        #expect(formatter.command(from: "220", hint: .number) == "220")
-    }
-
-    // MARK: - filteredDraftInput
-
-    @Test
-    func nonNumberHintPassesThrough() {
-        let result = formatter.filteredDraftInput(from: "abc!@#", previousText: "", hint: nil)
-        #expect(result == "abc!@#")
-    }
-
-    @Test
-    func numberHintAcceptsValidDraft() {
-        let result = formatter.filteredDraftInput(from: "123", previousText: "", hint: .number)
-        #expect(result == "123")
-    }
-
-    @Test
-    func numberHintRejectsInvalidDraft() {
-        let result = formatter.filteredDraftInput(from: "12a3", previousText: "12", hint: .number)
-        #expect(result == "12")
-    }
-
-    @Test
-    func numberHintAcceptsNegativeSign() {
-        let result = formatter.filteredDraftInput(from: "-", previousText: "", hint: .number)
-        #expect(result == "-")
-    }
-
-    // MARK: - command
-
-    @Test
-    func commandFromEmptyStringForNumberReturnsNil() {
-        #expect(formatter.command(from: "", hint: .number) == nil)
-    }
-
-    @Test
-    func commandFromEmptyStringForTextReturnsEmptyString() {
-        #expect(formatter.command(from: "", hint: nil) == "")
-    }
-
-    @Test
-    func commandFromWhitespaceForNumberReturnsNil() {
-        #expect(formatter.command(from: "   ", hint: .number) == nil)
-    }
-
-    @Test
-    func commandFromWhitespaceForTextReturnsEmptyString() {
-        #expect(formatter.command(from: "   ", hint: nil) == "")
-    }
-
-    @Test
-    func commandFromNonNumberHintReturnsTrimmed() {
-        #expect(formatter.command(from: "  hello  ", hint: nil) == "hello")
-    }
-
-    @Test
-    func commandFromSignOnlyReturnsNil() {
-        #expect(formatter.command(from: "-", hint: .number) == nil)
-    }
-    
-    @Test
-    func commandFromCommaReturnsNil() {
-        #expect(formatter.command(from: ".", hint: .number) == nil)
-    }
-    
-    @Test
-    func commandFromNegativeCommaReturnsNil() {
-        #expect(formatter.command(from: "-.", hint: .number) == nil)
-    }
-
-    @Test
-    func commandFromZeroIntegerReturnsNormalized() {
-        #expect(formatter.command(from: "0", hint: .number) == "0")
-    }
-    
-    @Test
-    func commandFromNegativeZeroIntegerReturnsNormalized() {
-        #expect(formatter.command(from: "-0", hint: .number) == "0")
-    }
-
-    @Test
-    func commandFromIntegerReturnsNormalized() {
-        #expect(formatter.command(from: "42", hint: .number) == "42")
-    }
-
-    @Test
-    func commandFromNegativeIntegerReturnsNormalized() {
-        #expect(formatter.command(from: "-42", hint: .number) == "-42")
-    }
-    
-    @Test
-    func commandFromIntegerWithCommaReturnsNormalized() {
-        #expect(formatter.command(from: "42.", hint: .number) == "42")
-    }
-
-    @Test
-    func commandFromNegativeIntegerWithCommaReturnsNormalized() {
-        #expect(formatter.command(from: "-42.", hint: .number) == "-42")
-    }
-    
-    @Test
-    func commandFromIntegerWithLeadingCommaReturnsNormalized() {
-        #expect(formatter.command(from: ".42", hint: .number) == "0.42")
-    }
-
-    @Test
-    func commandFromNegativeIntegerWithLeadingCommaReturnsNormalized() {
-        #expect(formatter.command(from: "-.42", hint: .number) == "-0.42")
-    }
-}
 // MARK: - isValidNumberDraft with comma separator
 
 @Suite
@@ -373,7 +70,6 @@ struct InputCommandFormatterCommaTests {
 
 @Suite
 struct InputCommandFormatterOracleTests {
-    
     /// Port of the UIKit `textField(_:shouldChangeCharactersIn:replacementString:)` logic.
     /// Given the old text, the NSRange being replaced, and the replacement string, returns
     /// whether the edit should be accepted.
@@ -408,7 +104,7 @@ struct InputCommandFormatterOracleTests {
                     )
             ) // old string without replaced range not yet contains decimal separator
     }
-    
+
     @Test(arguments: [".", ","])
     func oracleExhaustiveMultiCharPastes(sep: String) {
         let formatter = InputCommandFormatter(decimalSeparator: sep)
@@ -420,7 +116,7 @@ struct InputCommandFormatterOracleTests {
             "12", "99", "-1", "-", "\(sep)1", "1\(sep)", "1\(sep)2",
             "-\(sep)", "\(sep)\(sep)", "ab", "-1\(sep)2"
         ]
-        
+
         for oldString in validStarts {
             for pos in 0 ... oldString.count {
                 for replLen in 0 ... (oldString.count - pos) {
@@ -431,7 +127,7 @@ struct InputCommandFormatterOracleTests {
                         )
                         let resultString = (oldString as NSString).replacingCharacters(in: range, with: paste)
                         let draftValid = formatter.isValidNumberDraft(resultString)
-                        
+
                         #expect(
                             oracleAccepted == draftValid,
                             "Disagreement: \"\(oldString)\" paste \"\(paste)\" @(\(pos),\(replLen)) → \"\(resultString)\": oracle=\(oracleAccepted), draft=\(draftValid) (sep=\(sep))"
@@ -441,8 +137,7 @@ struct InputCommandFormatterOracleTests {
             }
         }
     }
-    
-    
+
     // MARK: - Oracle-based tests: UIKit shouldChangeCharacters vs isValidNumberDraft
 
     //
@@ -658,5 +353,309 @@ struct InputCommandFormatterOracleTests {
                 )
             }
         }
+    }
+}
+
+@Suite
+struct InputCommandFormatterTests {
+    let formatter = InputCommandFormatter(decimalSeparator: ".")
+
+    // MARK: - isValidNumberDraft with dot separator
+
+    @Test
+    func zeroIsValid() {
+        #expect(formatter.isValidNumberDraft("0"))
+    }
+
+    @Test
+    func emptyStringIsValid() {
+        #expect(formatter.isValidNumberDraft(""))
+    }
+
+    @Test
+    func singleDigitIsValid() {
+        #expect(formatter.isValidNumberDraft("5"))
+    }
+
+    @Test
+    func multipleDigitsAreValid() {
+        #expect(formatter.isValidNumberDraft("123"))
+    }
+
+    @Test
+    func negativeSignAloneIsValid() {
+        #expect(formatter.isValidNumberDraft("-"))
+    }
+
+    @Test
+    func negativeNumberIsValid() {
+        #expect(formatter.isValidNumberDraft("-42"))
+    }
+
+    @Test
+    func decimalNumberIsValid() {
+        #expect(formatter.isValidNumberDraft("3.14"))
+    }
+
+    @Test
+    func trailingDecimalIsValid() {
+        #expect(formatter.isValidNumberDraft("3."))
+    }
+
+    @Test
+    func leadingDecimalIsValid() {
+        #expect(formatter.isValidNumberDraft(".5"))
+    }
+
+    @Test
+    func negativeDecimalIsValid() {
+        #expect(formatter.isValidNumberDraft("-3.14"))
+    }
+
+    @Test
+    func negativeLeadingDecimalIsValid() {
+        #expect(formatter.isValidNumberDraft("-.5"))
+    }
+
+    @Test
+    func negativeTrailingDecimalIsValid() {
+        #expect(formatter.isValidNumberDraft("-3."))
+    }
+
+    @Test
+    func decimalSeparatorAloneIsValid() {
+        #expect(formatter.isValidNumberDraft("."))
+    }
+
+    @Test
+    func negativeDecimalSeparatorAloneIsValid() {
+        #expect(formatter.isValidNumberDraft("-."))
+    }
+
+    // MARK: - isValidNumberDraft rejection cases with dot separator
+
+    @Test
+    func multipleDecimalSeparatorsRejected() {
+        #expect(!formatter.isValidNumberDraft("3.1.4"))
+    }
+
+    @Test
+    func plusSignRejected() {
+        #expect(!formatter.isValidNumberDraft("+5"))
+    }
+
+    @Test
+    func negativeSignInMiddleRejected() {
+        #expect(!formatter.isValidNumberDraft("3-5"))
+    }
+
+    @Test
+    func lettersRejected() {
+        #expect(!formatter.isValidNumberDraft("12a3"))
+    }
+
+    @Test
+    func spacesRejected() {
+        #expect(!formatter.isValidNumberDraft("1 2"))
+    }
+
+    @Test
+    func multipleNegativeSignsRejected() {
+        #expect(!formatter.isValidNumberDraft("--5"))
+    }
+
+    @Test
+    func commaRejectedWhenDotIsSeparator() {
+        #expect(!formatter.isValidNumberDraft("3,14"))
+    }
+
+    // MARK: - filteredDraftInput
+
+    @Test
+    func nonNumberHintPassesThrough() {
+        let result = formatter.filteredDraftInput(from: "abc!@#", previousText: "", hint: nil)
+        #expect(result == "abc!@#")
+    }
+
+    @Test
+    func numberHintAcceptsValidDraft() {
+        let result = formatter.filteredDraftInput(from: "123", previousText: "", hint: .number)
+        #expect(result == "123")
+    }
+
+    @Test
+    func numberHintRejectsInvalidDraft() {
+        let result = formatter.filteredDraftInput(from: "12a3", previousText: "12", hint: .number)
+        #expect(result == "12")
+    }
+
+    @Test
+    func numberHintAcceptsNegativeSign() {
+        let result = formatter.filteredDraftInput(from: "-", previousText: "", hint: .number)
+        #expect(result == "-")
+    }
+
+    // MARK: - command
+
+    @Test
+    func commandFromEmptyStringForNumberReturnsNil() {
+        #expect(formatter.command(from: "", hint: .number) == nil)
+    }
+
+    @Test
+    func commandFromEmptyStringForTextReturnsEmptyString() {
+        #expect(formatter.command(from: "", hint: nil)?.isEmpty == true)
+    }
+
+    @Test
+    func commandFromWhitespaceForNumberReturnsNil() {
+        #expect(formatter.command(from: "   ", hint: .number) == nil)
+    }
+
+    @Test
+    func commandFromWhitespaceForTextReturnsEmptyString() {
+        #expect(formatter.command(from: "   ", hint: nil)?.isEmpty == true)
+    }
+
+    @Test
+    func commandFromNonNumberHintReturnsTrimmed() {
+        #expect(formatter.command(from: "  hello  ", hint: nil) == "hello")
+    }
+
+    @Test
+    func commandFromSignOnlyReturnsNil() {
+        #expect(formatter.command(from: "-", hint: .number) == nil)
+    }
+
+    @Test
+    func commandFromCommaReturnsNil() {
+        #expect(formatter.command(from: ".", hint: .number) == nil)
+    }
+
+    @Test
+    func commandFromNegativeCommaReturnsNil() {
+        #expect(formatter.command(from: "-.", hint: .number) == nil)
+    }
+
+    @Test
+    func commandFromZeroIntegerReturnsNormalized() {
+        #expect(formatter.command(from: "0", hint: .number) == "0")
+    }
+
+    @Test
+    func commandFromNegativeZeroIntegerReturnsNormalized() {
+        #expect(formatter.command(from: "-0", hint: .number) == "0")
+    }
+
+    @Test
+    func commandFromIntegerReturnsNormalized() {
+        #expect(formatter.command(from: "42", hint: .number) == "42")
+    }
+
+    @Test
+    func commandFromNegativeIntegerReturnsNormalized() {
+        #expect(formatter.command(from: "-42", hint: .number) == "-42")
+    }
+
+    @Test
+    func commandFromIntegerWithCommaReturnsNormalized() {
+        #expect(formatter.command(from: "42.", hint: .number) == "42")
+    }
+
+    @Test
+    func commandFromNegativeIntegerWithCommaReturnsNormalized() {
+        #expect(formatter.command(from: "-42.", hint: .number) == "-42")
+    }
+
+    @Test
+    func commandFromIntegerWithLeadingCommaReturnsNormalized() {
+        #expect(formatter.command(from: ".42", hint: .number) == "0.42")
+    }
+
+    @Test
+    func commandFromNegativeIntegerWithLeadingCommaReturnsNormalized() {
+        #expect(formatter.command(from: "-.42", hint: .number) == "-0.42")
+    }
+
+    // MARK: - numericDraftFromState
+
+    @Test
+    func numericDraftFromIntegerWithUnit() {
+        #expect(formatter.numericDraftFromState("220 °C") == "220")
+    }
+
+    @Test
+    func numericDraftFromDecimalWithUnit() {
+        #expect(formatter.numericDraftFromState("21.5 °C") == "21.5")
+    }
+
+    @Test
+    func numericDraftFromNegativeWithUnit() {
+        #expect(formatter.numericDraftFromState("-10 °C") == "-10")
+    }
+
+    @Test
+    func numericDraftFromUnitNoSpace() {
+        #expect(formatter.numericDraftFromState("220°C") == "220")
+    }
+
+    @Test
+    func numericDraftFromPlainNumber() {
+        #expect(formatter.numericDraftFromState("220") == "220")
+    }
+
+    @Test
+    func numericDraftFromEmptyString() {
+        #expect(formatter.numericDraftFromState("") == "")
+    }
+
+    @Test
+    func numericDraftFromNonNumericTextPassesThrough() {
+        // Non-numeric state (e.g. text input): fall back to original
+        #expect(formatter.numericDraftFromState("hello") == "hello")
+    }
+
+    // MARK: - unitSuffixFromState
+
+    @Test
+    func unitSuffixFromIntegerWithUnit() {
+        #expect(formatter.unitSuffixFromState("220 °C") == " °C")
+    }
+
+    @Test
+    func unitSuffixFromDecimalWithUnit() {
+        #expect(formatter.unitSuffixFromState("21.5 km/h") == " km/h")
+    }
+
+    @Test
+    func unitSuffixFromNegativeWithUnit() {
+        #expect(formatter.unitSuffixFromState("-10 °F") == " °F")
+    }
+
+    @Test
+    func unitSuffixFromUnitNoSpace() {
+        #expect(formatter.unitSuffixFromState("220°C") == "°C")
+    }
+
+    @Test
+    func unitSuffixFromPlainNumber() {
+        #expect(formatter.unitSuffixFromState("220") == "")
+    }
+
+    @Test
+    func unitSuffixFromEmptyString() {
+        #expect(formatter.unitSuffixFromState("") == "")
+    }
+
+    // MARK: - command with unit suffix
+
+    @Test
+    func commandIncludesUnitSuffix() {
+        #expect(formatter.command(from: "220", hint: .number, unitSuffix: " °C") == "220 °C")
+    }
+
+    @Test
+    func commandWithoutUnitSuffix() {
+        #expect(formatter.command(from: "220", hint: .number) == "220")
     }
 }

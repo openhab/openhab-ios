@@ -275,9 +275,8 @@ final class OsLogRewriter: SyntaxRewriter {
         let format = msg.segments.compactMap { segment -> String in
             if let text = segment.as(StringSegmentSyntax.self)?.content.text {
                 return text
-            } else {
-                return ""
             }
+            return ""
         }
         .joined()
 
