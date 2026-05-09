@@ -57,7 +57,7 @@ struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
     var item: String
 
     struct ActionOptionsProvider: DynamicOptionsProvider {
-        func results() async throws -> [String] {
+        func results() throws -> [String] {
             ActionMapper.onOffOptions
         }
     }

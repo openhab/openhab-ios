@@ -30,18 +30,126 @@ public enum OpenHABItemCacheError: Error, LocalizedError {
     }
 }
 
+private enum ItemSearchRanker {
+    static func score(for item: OpenHABItem, searchTerm: String, additionalCandidates: [String] = []) -> Int? {
+        let tokens = normalizedTokens(in: searchTerm)
+        guard !tokens.isEmpty else {
+            return 0
+        }
+
+        let candidates = [item.name, item.label] + additionalCandidates
+        return candidates
+            .enumerated()
+            .compactMap { index, candidate in
+                score(candidate: candidate, tokens: tokens).map { ($0 * 10) + index }
+            }
+            .min()
+    }
+
+    private static func score(candidate: String, tokens: [String]) -> Int? {
+        let normalizedCandidate = normalize(candidate)
+        let joinedTokens = tokens.joined()
+
+        if normalizedCandidate == joinedTokens {
+            return 0
+        }
+
+        if normalizedCandidate.hasPrefix(joinedTokens) {
+            return 10
+        }
+
+        if let wordPrefixScore = wordPrefixScore(candidate: normalizedCandidate, tokens: tokens) {
+            return 20 + wordPrefixScore
+        }
+
+        if let orderedTokenScore = orderedTokenScore(candidate: normalizedCandidate, tokens: tokens) {
+            return 40 + orderedTokenScore
+        }
+
+        if tokens.allSatisfy(normalizedCandidate.contains) {
+            return 80 + tokens.reduce(0) { partialResult, token in
+                partialResult + (normalizedCandidate.distance(from: normalizedCandidate.startIndex, to: normalizedCandidate.range(of: token)?.lowerBound ?? normalizedCandidate.startIndex))
+            }
+        }
+
+        return nil
+    }
+
+    private static func wordPrefixScore(candidate: String, tokens: [String]) -> Int? {
+        let words = candidate
+            .split { !$0.isLetter && !$0.isNumber }
+            .map(String.init)
+        guard !words.isEmpty, words.count >= tokens.count else {
+            return nil
+        }
+
+        var wordIndex = 0
+        var score = 0
+
+        for token in tokens {
+            var matched = false
+
+            while wordIndex < words.count {
+                if words[wordIndex].hasPrefix(token) {
+                    score += wordIndex
+                    matched = true
+                    wordIndex += 1
+                    break
+                }
+                wordIndex += 1
+            }
+
+            guard matched else {
+                return nil
+            }
+        }
+
+        return score
+    }
+
+    private static func orderedTokenScore(candidate: String, tokens: [String]) -> Int? {
+        var searchStartIndex = candidate.startIndex
+        var previousMatchUpperBound = candidate.startIndex
+        var score = 0
+
+        for token in tokens {
+            guard let range = candidate.range(of: token, range: searchStartIndex ..< candidate.endIndex) else {
+                return nil
+            }
+
+            score += candidate.distance(from: previousMatchUpperBound, to: range.lowerBound)
+            previousMatchUpperBound = range.upperBound
+            searchStartIndex = range.upperBound
+        }
+
+        return score
+    }
+
+    private static func normalizedTokens(in searchTerm: String) -> [String] {
+        normalize(searchTerm)
+            .split { !$0.isLetter && !$0.isNumber }
+            .map(String.init)
+    }
+
+    private static func normalize(_ string: String) -> String {
+        string
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
 public actor OpenHABItemCache {
-    public static let instance = OpenHABItemCache()
-
-    private static let networkTimeout: TimeInterval = 5
-    private static let stubsDefaultsKey = "openHABItemStubs"
-    private static let sharedDefaultsSuiteName = "group.org.openhab.app"
-
     private struct ItemStub: Codable {
         let name: String
         let label: String
         let type: String
     }
+
+    public static let instance = OpenHABItemCache()
+
+    private static let networkTimeout: TimeInterval = 5
+    private static let stubsDefaultsKey = "openHABItemStubs"
+    private static let sharedDefaultsSuiteName = "group.org.openhab.app"
 
     private var networkTrackers: [UUID: NetworkTracker] = [:]
 
@@ -236,70 +344,22 @@ public actor OpenHABItemCache {
     }
 }
 
-public extension OpenHABItem {
-    /// Checks if the item matches the specified types filter
-    /// - Parameter types: Optional array of item types to match. If nil, all items match.
-    /// - Returns: True if the item matches the filter, false otherwise
-    func matches(types: [OpenHABItem.ItemType]?) -> Bool {
-        types == nil || (type.flatMap { types?.contains($0) } == true)
-    }
-
-    func searchScore(for searchTerm: String, additionalCandidates: [String] = []) -> Int? {
-        ItemSearchRanker.score(for: self, searchTerm: searchTerm, additionalCandidates: additionalCandidates)
-    }
-}
-
-public extension [OpenHABItem] {
-    func filtered(by searchTerm: String? = nil, for types: [OpenHABItem.ItemType]? = nil) -> [OpenHABItem] {
-        ranked(searchTerm: searchTerm, for: types).map(\.item)
-    }
-
-    func ranked(
-        searchTerm: String? = nil,
-        for types: [OpenHABItem.ItemType]? = nil,
-        additionalCandidates: (OpenHABItem) -> [String] = { _ in [] }
-    ) -> [(item: OpenHABItem, score: Int)] {
-        compactMap { item in
-            guard item.matches(types: types) else {
-                return nil
-            }
-
-            guard let searchTerm, !searchTerm.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                return (item: item, score: 0)
-            }
-
-            guard let score = item.searchScore(for: searchTerm, additionalCandidates: additionalCandidates(item)) else {
-                return nil
-            }
-
-            return (item: item, score: score)
-        }
-        .sorted {
-            if $0.score != $1.score {
-                return $0.score < $1.score
-            }
-
-            return $0.item.name.localizedCaseInsensitiveCompare($1.item.name) == .orderedAscending
-        }
-    }
-}
-
 public extension OpenHABItemCache {
-    func getCachedOrPersistedItem(name: String, home: UUID) async -> OpenHABItem? {
+    func getCachedOrPersistedItem(name: String, home: UUID) -> OpenHABItem? {
         if let item = items[home]?.first(where: { $0.name == name }) {
             return item
         }
         return persistedItem(name: name, home: home)
     }
 
-    func getCachedOrPersistedItems(types: [OpenHABItem.ItemType]?, home: UUID) async -> [OpenHABItem] {
+    func getCachedOrPersistedItems(types: [OpenHABItem.ItemType]?, home: UUID) -> [OpenHABItem] {
         let sourceItems = items[home] ?? persistedItems(home: home)
         return sourceItems
             .filtered(for: types)
             .sorted(by: \.name)
     }
 
-    func getCachedOrPersistedItems(types: [OpenHABItem.ItemType]? = nil, homes: [UUID]) async -> [UUID: [OpenHABItem]] {
+    func getCachedOrPersistedItems(types: [OpenHABItem.ItemType]? = nil, homes: [UUID]) -> [UUID: [OpenHABItem]] {
         var result: [UUID: [OpenHABItem]] = [:]
 
         for homeId in homes {
@@ -313,11 +373,10 @@ public extension OpenHABItemCache {
     }
 
     func searchCachedOrPersistedItems(searchTerm: String, types: [OpenHABItem.ItemType]? = nil, homes: [UUID]? = nil) async -> [UUID: [OpenHABItem]] {
-        let targetHomes: [UUID]
-        if let homes {
-            targetHomes = homes
+        let targetHomes: [UUID] = if let homes {
+            homes
         } else {
-            targetHomes = await Preferences.shared.listStoredHomes()
+            await Preferences.shared.listStoredHomes()
         }
         var result: [UUID: [OpenHABItem]] = [:]
 
@@ -362,105 +421,48 @@ public extension OpenHABItemCache {
     }
 }
 
-private enum ItemSearchRanker {
-    static func score(for item: OpenHABItem, searchTerm: String, additionalCandidates: [String] = []) -> Int? {
-        let tokens = normalizedTokens(in: searchTerm)
-        guard !tokens.isEmpty else {
-            return 0
-        }
-
-        let candidates = [item.name, item.label] + additionalCandidates
-        return candidates.enumerated().compactMap { index, candidate in
-            score(candidate: candidate, tokens: tokens).map { ($0 * 10) + index }
-        }.min()
+public extension OpenHABItem {
+    /// Checks if the item matches the specified types filter
+    /// - Parameter types: Optional array of item types to match. If nil, all items match.
+    /// - Returns: True if the item matches the filter, false otherwise
+    func matches(types: [OpenHABItem.ItemType]?) -> Bool {
+        types == nil || (type.flatMap { types?.contains($0) } == true)
     }
 
-    private static func score(candidate: String, tokens: [String]) -> Int? {
-        let normalizedCandidate = normalize(candidate)
-        let joinedTokens = tokens.joined()
+    func searchScore(for searchTerm: String, additionalCandidates: [String] = []) -> Int? {
+        ItemSearchRanker.score(for: self, searchTerm: searchTerm, additionalCandidates: additionalCandidates)
+    }
+}
 
-        if normalizedCandidate == joinedTokens {
-            return 0
-        }
-
-        if normalizedCandidate.hasPrefix(joinedTokens) {
-            return 10
-        }
-
-        if let wordPrefixScore = wordPrefixScore(candidate: normalizedCandidate, tokens: tokens) {
-            return 20 + wordPrefixScore
-        }
-
-        if let orderedTokenScore = orderedTokenScore(candidate: normalizedCandidate, tokens: tokens) {
-            return 40 + orderedTokenScore
-        }
-
-        if tokens.allSatisfy(normalizedCandidate.contains) {
-            return 80 + tokens.reduce(0) { partialResult, token in
-                partialResult + (normalizedCandidate.distance(from: normalizedCandidate.startIndex, to: normalizedCandidate.range(of: token)?.lowerBound ?? normalizedCandidate.startIndex))
-            }
-        }
-
-        return nil
+public extension [OpenHABItem] {
+    func filtered(by searchTerm: String? = nil, for types: [OpenHABItem.ItemType]? = nil) -> [OpenHABItem] {
+        ranked(searchTerm: searchTerm, for: types).map(\.item)
     }
 
-    private static func wordPrefixScore(candidate: String, tokens: [String]) -> Int? {
-        let words = candidate.split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init)
-        guard !words.isEmpty, words.count >= tokens.count else {
-            return nil
-        }
-
-        var wordIndex = 0
-        var score = 0
-
-        for token in tokens {
-            var matched = false
-
-            while wordIndex < words.count {
-                if words[wordIndex].hasPrefix(token) {
-                    score += wordIndex
-                    matched = true
-                    wordIndex += 1
-                    break
-                }
-                wordIndex += 1
-            }
-
-            guard matched else {
-                return nil
-            }
-        }
-
-        return score
-    }
-
-    private static func orderedTokenScore(candidate: String, tokens: [String]) -> Int? {
-        var searchStartIndex = candidate.startIndex
-        var previousMatchUpperBound = candidate.startIndex
-        var score = 0
-
-        for token in tokens {
-            guard let range = candidate.range(of: token, range: searchStartIndex ..< candidate.endIndex) else {
+    func ranked(searchTerm: String? = nil,
+                for types: [OpenHABItem.ItemType]? = nil,
+                additionalCandidates: (OpenHABItem) -> [String] = { _ in [] }) -> [(item: OpenHABItem, score: Int)] {
+        compactMap { item in
+            guard item.matches(types: types) else {
                 return nil
             }
 
-            score += candidate.distance(from: previousMatchUpperBound, to: range.lowerBound)
-            previousMatchUpperBound = range.upperBound
-            searchStartIndex = range.upperBound
+            guard let searchTerm, !searchTerm.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                return (item: item, score: 0)
+            }
+
+            guard let score = item.searchScore(for: searchTerm, additionalCandidates: additionalCandidates(item)) else {
+                return nil
+            }
+
+            return (item: item, score: score)
         }
+        .sorted {
+            if $0.score != $1.score {
+                return $0.score < $1.score
+            }
 
-        return score
-    }
-
-    private static func normalizedTokens(in searchTerm: String) -> [String] {
-        normalize(searchTerm)
-            .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
-            .map(String.init)
-    }
-
-    private static func normalize(_ string: String) -> String {
-        string
-            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+            return $0.item.name.localizedCaseInsensitiveCompare($1.item.name) == .orderedAscending
+        }
     }
 }

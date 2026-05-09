@@ -216,13 +216,71 @@ struct SetSwitchItemIntentTests {
     }
 }
 
+// MARK: - Item Search Ranking
+
+@Suite("Item search ranking")
+struct ItemSearchRankingTests {
+    @Test func homeNameCanContributeToItemSearch() {
+        let officeSensor = makeItem(name: "TemperatureSensorOffice", type: "Number", label: "Office Sensor")
+
+        let ranked = [officeSensor].ranked(searchTerm: "main temp", for: nil) { item in
+            ["\(item.name) Main Home", "\(item.label) Main Home"]
+        }
+
+        #expect(ranked.map(\.item.name) == ["TemperatureSensorOffice"])
+    }
+}
+
+// MARK: - Error Descriptions
+
+@Suite("Intent error descriptions")
+struct IntentErrorDescriptionTests {
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    @Test func colorItemNotInHomeContainsItemAndHomeName() {
+        let error = ColorValueError.itemNotInHome("Color Light", "My Home")
+        let str = String(localized: error.localizedStringResource)
+        #expect(str.contains("Color Light"))
+        #expect(str.contains("My Home"))
+    }
+
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    @Test func colorInvalidValueContainsValueAndItemName() {
+        let error = ColorValueError.invalidValue("blue,100,100", "Color Light")
+        let str = String(localized: error.localizedStringResource)
+        #expect(str.contains("blue,100,100"))
+        #expect(str.contains("Color Light"))
+    }
+
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    @Test func dimmerInvalidValueContainsValueAndItemName() {
+        let error = DimmerRollerValueError.invalidValue(150, "My Dimmer")
+        let str = String(localized: error.localizedStringResource)
+        #expect(str.contains("150"))
+        #expect(str.contains("My Dimmer"))
+    }
+
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    @Test func locationInvalidLatitudeDescriptionContains90() {
+        let error = LocationValueError.invalidLatitude
+        let str = String(localized: error.localizedStringResource)
+        #expect(str.contains("90"))
+    }
+
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    @Test func locationInvalidLongitudeDescriptionContains180() {
+        let error = LocationValueError.invalidLongitude
+        let str = String(localized: error.localizedStringResource)
+        #expect(str.contains("180"))
+    }
+}
+
 // MARK: - Home Resolution
 
 @Suite("HomeResolver")
 struct HomeResolverTests {
     let homeId = UUID()
 
-    @Test func optionalHomeUsesItemHomeId() throws {
+    @MainActor @Test func optionalHomeUsesItemHomeId() throws {
         let resolved = try HomeResolver.resolvedHomeId(
             selectedHome: nil,
             itemHomeId: homeId,
@@ -294,63 +352,5 @@ struct HomeResolverTests {
                 exactMatchedHomes: { [homeId, otherHomeId] }
             )
         }
-    }
-}
-
-// MARK: - Item Search Ranking
-
-@Suite("Item search ranking")
-struct ItemSearchRankingTests {
-    @Test func homeNameCanContributeToItemSearch() {
-        let officeSensor = makeItem(name: "TemperatureSensorOffice", type: "Number", label: "Office Sensor")
-
-        let ranked = [officeSensor].ranked(searchTerm: "main temp", for: nil) { item in
-            ["\(item.name) Main Home", "\(item.label) Main Home"]
-        }
-
-        #expect(ranked.map(\.item.name) == ["TemperatureSensorOffice"])
-    }
-}
-
-// MARK: - Error Descriptions
-
-@Suite("Intent error descriptions")
-struct IntentErrorDescriptionTests {
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-    @Test func colorItemNotInHomeContainsItemAndHomeName() {
-        let error = ColorValueError.itemNotInHome("Color Light", "My Home")
-        let str = String(localized: error.localizedStringResource)
-        #expect(str.contains("Color Light"))
-        #expect(str.contains("My Home"))
-    }
-
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-    @Test func colorInvalidValueContainsValueAndItemName() {
-        let error = ColorValueError.invalidValue("blue,100,100", "Color Light")
-        let str = String(localized: error.localizedStringResource)
-        #expect(str.contains("blue,100,100"))
-        #expect(str.contains("Color Light"))
-    }
-
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-    @Test func dimmerInvalidValueContainsValueAndItemName() {
-        let error = DimmerRollerValueError.invalidValue(150, "My Dimmer")
-        let str = String(localized: error.localizedStringResource)
-        #expect(str.contains("150"))
-        #expect(str.contains("My Dimmer"))
-    }
-
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-    @Test func locationInvalidLatitudeDescriptionContains90() {
-        let error = LocationValueError.invalidLatitude
-        let str = String(localized: error.localizedStringResource)
-        #expect(str.contains("90"))
-    }
-
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
-    @Test func locationInvalidLongitudeDescriptionContains180() {
-        let error = LocationValueError.invalidLongitude
-        let str = String(localized: error.localizedStringResource)
-        #expect(str.contains("180"))
     }
 }

@@ -21,17 +21,6 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     private static let preferencesKey = "watchPreferences"
 
-    private func isExpectedApplicationContextRequestFailure(_ error: any Error) -> Bool {
-        let nsError = error as NSError
-        guard nsError.domain == WCErrorDomain else { return false }
-
-        let normalizedDescription = nsError.localizedDescription.lowercased()
-        return normalizedDescription.contains("counterpart app not installed")
-            || normalizedDescription.contains("companion app not installed")
-            || normalizedDescription.contains("watch app not installed")
-            || normalizedDescription.contains("not paired")
-    }
-
     @MainActor
     static func updateValuesFromApplicationContext(_ data: Data?) {
         guard let data else {
@@ -57,6 +46,17 @@ class AppMessageService: NSObject, WCSessionDelegate {
         } catch {
             Logger.preferences.error("❌ Failed to decode WatchPreferences: \(error.localizedDescription)")
         }
+    }
+
+    private func isExpectedApplicationContextRequestFailure(_ error: any Error) -> Bool {
+        let nsError = error as NSError
+        guard nsError.domain == WCErrorDomain else { return false }
+
+        let normalizedDescription = nsError.localizedDescription.lowercased()
+        return normalizedDescription.contains("counterpart app not installed")
+            || normalizedDescription.contains("companion app not installed")
+            || normalizedDescription.contains("watch app not installed")
+            || normalizedDescription.contains("not paired")
     }
 
     func requestApplicationContext() {

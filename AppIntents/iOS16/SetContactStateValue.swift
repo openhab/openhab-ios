@@ -41,7 +41,7 @@ struct SetContactStateValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
     }
 
     struct StateOptionsProvider: DynamicOptionsProvider {
-        func results() async throws -> [String] {
+        func results() throws -> [String] {
             ActionMapper.onOffOptions
         }
     }

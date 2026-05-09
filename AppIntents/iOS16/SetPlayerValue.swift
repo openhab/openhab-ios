@@ -53,7 +53,7 @@ struct SetPlayerValue: AppIntent, PredictableIntent {
     var item: String
 
     struct ActionOptionsProvider: DynamicOptionsProvider {
-        func results() async throws -> [String] {
+        func results() throws -> [String] {
             ["Play", "Pause", "Next", "Previous", "Rewind", "Fast Forward"]
         }
     }

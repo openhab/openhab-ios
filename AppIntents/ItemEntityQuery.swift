@@ -17,6 +17,7 @@ import OpenHABCore
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 protocol ItemEntityQuery: EntityStringQuery {
     associatedtype EntityType: ItemEntity
+
     var allowedTypes: [OpenHABItem.ItemType] { get set }
     var selectedHome: Home? { get }
 }
@@ -163,12 +164,10 @@ extension ItemEntityQuery {
         })
     }
 
-    func homeAwareSearchResults(
-        matching string: String,
-        types: [OpenHABItem.ItemType]?,
-        homes: [UUID],
-        homeNames: [UUID: String]
-    ) async -> [UUID: [OpenHABItem]] {
+    func homeAwareSearchResults(matching string: String,
+                                types: [OpenHABItem.ItemType]?,
+                                homes: [UUID],
+                                homeNames: [UUID: String]) async -> [UUID: [OpenHABItem]] {
         let itemsByHome = await OpenHABItemCache.instance.getCachedOrPersistedItems(types: types, homes: homes)
         var result: [UUID: [OpenHABItem]] = [:]
 
