@@ -29,6 +29,11 @@ analyzer_rules:
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
   - todo
+  - contrasted_opening_brace
+  - multiline_parameters_brackets
+  - no_extension_access_modifier
+  - missing_docs
+  - explicit_acl
 
 included:
   - ../
