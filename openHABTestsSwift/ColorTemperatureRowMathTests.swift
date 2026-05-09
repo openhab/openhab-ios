@@ -14,21 +14,21 @@
 import Testing
 
 private enum TestValues {
-    static let oversizedKelvin = 15_000.0
+    static let oversizedKelvin = 15000.0
     static let miredWarmest = 370.0
     static let miredCoolest = 153.0
     static let convertedWarmestKelvin = 2702.7027027027025
     static let convertedCoolestKelvin = 6535.947712418301
     static let miredState = "250"
-    static let convertedStateKelvin = 4_000.0
+    static let convertedStateKelvin = 4000.0
     static let invalidState = "not-a-number"
-    static let clampedServerValue = 6_500.0
-    static let oversizedServerValue = 9_000.0
-    static let minimumRangeKelvin = 1_000.0
-    static let narrowMaximumKelvin = 6_500.0
-    static let degenerateRangeKelvin = 4_000.0
-    static let gradientStartKelvin = 2_000.0
-    static let gradientEndKelvin = 3_000.0
+    static let clampedServerValue = 6500.0
+    static let oversizedServerValue = 9000.0
+    static let minimumRangeKelvin = 1000.0
+    static let narrowMaximumKelvin = 6500.0
+    static let degenerateRangeKelvin = 4000.0
+    static let gradientStartKelvin = 2000.0
+    static let gradientEndKelvin = 3000.0
     static let gradientSteps = 4
     static let gradientCount = 5
     static let tolerance = 0.0001

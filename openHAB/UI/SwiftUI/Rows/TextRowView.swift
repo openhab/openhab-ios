@@ -23,9 +23,9 @@ private struct TextRowContent: View {
             let labelShown = !displayState.labelText.isEmpty
             HStack {
                 if labelShown {
-                Text(displayState.labelText)
-                    .ohTextToken(.rowLabel)
-                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
+                    Text(displayState.labelText)
+                        .ohTextToken(.rowLabel)
+                        .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
 
                     Spacer(minLength: 8)
                 }

@@ -159,7 +159,7 @@ struct ZoneIDStrippingTests {
 
     @Test
     func handlesEmptyString() {
-        #expect(BonjourAddressUtils.stripZoneID(from: "") == "")
+        #expect(BonjourAddressUtils.stripZoneID(from: "").isEmpty)
     }
 }
 
@@ -189,7 +189,7 @@ struct IPv6FormattingTests {
 
     @Test
     func handlesEmptyString() {
-        #expect(BonjourAddressUtils.formatForURL("") == "")
+        #expect(BonjourAddressUtils.formatForURL("").isEmpty)
     }
 }
 

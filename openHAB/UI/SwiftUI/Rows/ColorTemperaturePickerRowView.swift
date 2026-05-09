@@ -16,9 +16,9 @@ import SFSafeSymbols
 import SwiftUI
 
 enum ColorTemperatureRowMath {
-    static let minimumKelvin = 1_000.0
-    static let maximumKelvin = 10_000.0
-    static let warmWhiteKelvin = 2_700.0
+    static let minimumKelvin = 1000.0
+    static let maximumKelvin = 10000.0
+    static let warmWhiteKelvin = 2700.0
     static let minimumGradientSteps = 1
     static let minimumSliderStep = 1.0
     static let minimumValidSpan = 0.0

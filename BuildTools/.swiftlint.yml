@@ -18,6 +18,10 @@ opt_in_rules:
   - computed_accessors_order
   - empty_enum_arguments
   - prefer_zero_over_explicit_init
+  - superfluous_else
+  - async_without_await
+  - let_var_whitespace
+  - empty_string
 
 analyzer_rules:
   - unused_import
@@ -25,6 +29,11 @@ analyzer_rules:
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
   - todo
+  - contrasted_opening_brace
+  - multiline_parameters_brackets
+  - no_extension_access_modifier
+  - missing_docs
+  - explicit_acl
 
 included:
   - ../
@@ -85,8 +94,11 @@ identifier_name:
     - g
     - i
     - k
+    - n
     - r
     - v
+    - x
+    - y
 
 private_outlet:
   allow_private_set: true
@@ -115,7 +127,7 @@ custom_rules:
 
 file_name:
   suffix_pattern: "Extension?|\\+.*"
-  excluded: ["WatchTypography.swift", "WidgetRowInputs.swift", "SitemapPageViewModel+SupportTypes.swift"]
+  excluded: ["WatchTypography.swift", "WidgetRowInputs.swift", "SitemapPageViewModel+SupportTypes.swift", "SnapshotHelper.swift"]
 
 opening_brace:
   ignore_multiline_function_signatures: true

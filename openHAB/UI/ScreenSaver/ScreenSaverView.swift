@@ -179,11 +179,11 @@ struct ScreenSaverView: View {
 
     func isFontAvailable(_ fontName: String) -> Bool {
         #if os(iOS) || os(tvOS) || os(watchOS)
-            return UIFont(name: fontName, size: 12) != nil
+        return UIFont(name: fontName, size: 12) != nil
         #elseif os(macOS)
-            return NSFont(name: fontName, size: 12) != nil
+        return NSFont(name: fontName, size: 12) != nil
         #else
-            return false
+        return false
         #endif
     }
 }

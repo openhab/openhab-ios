@@ -86,11 +86,10 @@ public actor ETagChecker {
             if normalizedNewETag == normalizedCachedETag {
                 Logger.etagChecker.info("ETag unchanged for \(urlString)")
                 return .unchanged
-            } else {
-                Logger.etagChecker.info("ETag changed for \(urlString): \(normalizedCachedETag) -> \(normalizedNewETag)")
-                await cache.storeETag(normalizedNewETag, for: urlString)
-                return .changed
             }
+            Logger.etagChecker.info("ETag changed for \(urlString): \(normalizedCachedETag) -> \(normalizedNewETag)")
+            await cache.storeETag(normalizedNewETag, for: urlString)
+            return .changed
 
         } catch {
             Logger.etagChecker.warning("ETag check failed for \(urlString): \(error.localizedDescription)")

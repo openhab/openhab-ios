@@ -50,9 +50,8 @@ extension LoggingMiddleware: ClientMiddleware {
                 logger.info("🔄 Task was cancelled - URLError code: .cancelled (likely due to navigation)")
                 let emptyResponse = HTTPResponse(status: .noContent, headerFields: [:])
                 return (emptyResponse, nil)
-            } else {
-                throw error
             }
+            throw error
         } catch {
 //            if operationID != "getRoot" {
             log(request, failedWith: error)

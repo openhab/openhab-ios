@@ -12,9 +12,88 @@
 import Foundation
 import OpenHABCore
 
+struct SnapshotRowInputBuildResult: Sendable {
+    let inputs: [SitemapRowInput]
+    let rowIDs: [RowID]
+    let renderKeys: [WidgetRenderKey]
+    let reusedInputCount: Int
+}
+
 struct WidgetLinkedPageSnapshot: Sendable {
     let link: String
     let title: String
+}
+
+enum SitemapRowInputSnapshotBuilder {
+    static func build(pageKey: String, widgets: [WidgetMappingSnapshot]) -> SnapshotRowInputBuildResult {
+        var occurrenceByWidgetID: [String: Int] = [:]
+        var inputs: [SitemapRowInput] = []
+        var rowIDs: [RowID] = []
+        var renderKeys: [WidgetRenderKey] = []
+
+        inputs.reserveCapacity(widgets.count)
+        rowIDs.reserveCapacity(widgets.count)
+        renderKeys.reserveCapacity(widgets.count)
+
+        for widget in widgets {
+            let identityWidgetID = widget.rowIdentityWidgetID()
+            occurrenceByWidgetID[identityWidgetID, default: 0] += 1
+            let occurrence = occurrenceByWidgetID[identityWidgetID]!
+            let rowID = RowID(pageKey: pageKey, widgetId: identityWidgetID, occurrence: occurrence)
+            rowIDs.append(rowID)
+            renderKeys.append(WidgetRenderKey.from(snapshot: widget))
+            inputs.append(SitemapRowInputMapper.map(snapshot: widget, rowID: rowID))
+        }
+
+        return SnapshotRowInputBuildResult(inputs: inputs, rowIDs: rowIDs, renderKeys: renderKeys, reusedInputCount: 0)
+    }
+
+    static func buildIncrementally(pageKey: String,
+                                   widgets: [WidgetMappingSnapshot],
+                                   previousRenderKeys: [WidgetRenderKey],
+                                   previousInputs: [SitemapRowInput],
+                                   previousRowIDs: [RowID]) -> SnapshotRowInputBuildResult {
+        guard widgets.count == previousRenderKeys.count,
+              widgets.count == previousInputs.count,
+              widgets.count == previousRowIDs.count else {
+            return build(pageKey: pageKey, widgets: widgets)
+        }
+
+        var occurrenceByWidgetID: [String: Int] = [:]
+        var inputs: [SitemapRowInput] = []
+        var rowIDs: [RowID] = []
+        var renderKeys: [WidgetRenderKey] = []
+        var reusedInputCount = 0
+
+        inputs.reserveCapacity(widgets.count)
+        rowIDs.reserveCapacity(widgets.count)
+        renderKeys.reserveCapacity(widgets.count)
+
+        for (offset, snapshot) in widgets.enumerated() {
+            let identityWidgetID = snapshot.rowIdentityWidgetID()
+            occurrenceByWidgetID[identityWidgetID, default: 0] += 1
+            let occurrence = occurrenceByWidgetID[identityWidgetID]!
+            let rowID = RowID(pageKey: pageKey, widgetId: identityWidgetID, occurrence: occurrence)
+            rowIDs.append(rowID)
+
+            let currentRenderKey = WidgetRenderKey.from(snapshot: snapshot)
+            renderKeys.append(currentRenderKey)
+
+            if previousRowIDs[offset] == rowID, previousRenderKeys[offset] == currentRenderKey {
+                inputs.append(previousInputs[offset])
+                reusedInputCount += 1
+            } else {
+                inputs.append(SitemapRowInputMapper.map(snapshot: snapshot, rowID: rowID))
+            }
+        }
+
+        return SnapshotRowInputBuildResult(
+            inputs: inputs,
+            rowIDs: rowIDs,
+            renderKeys: renderKeys,
+            reusedInputCount: reusedInputCount
+        )
+    }
 }
 
 struct WidgetMappingSnapshot: Sendable {
@@ -254,85 +333,6 @@ private extension OpenHABWidgetMapping {
             column: column,
             releaseCommand: releaseCommand,
             command: command
-        )
-    }
-}
-
-struct SnapshotRowInputBuildResult: Sendable {
-    let inputs: [SitemapRowInput]
-    let rowIDs: [RowID]
-    let renderKeys: [WidgetRenderKey]
-    let reusedInputCount: Int
-}
-
-enum SitemapRowInputSnapshotBuilder {
-    static func build(pageKey: String, widgets: [WidgetMappingSnapshot]) -> SnapshotRowInputBuildResult {
-        var occurrenceByWidgetID: [String: Int] = [:]
-        var inputs: [SitemapRowInput] = []
-        var rowIDs: [RowID] = []
-        var renderKeys: [WidgetRenderKey] = []
-
-        inputs.reserveCapacity(widgets.count)
-        rowIDs.reserveCapacity(widgets.count)
-        renderKeys.reserveCapacity(widgets.count)
-
-        for widget in widgets {
-            let identityWidgetID = widget.rowIdentityWidgetID()
-            occurrenceByWidgetID[identityWidgetID, default: 0] += 1
-            let occurrence = occurrenceByWidgetID[identityWidgetID]!
-            let rowID = RowID(pageKey: pageKey, widgetId: identityWidgetID, occurrence: occurrence)
-            rowIDs.append(rowID)
-            renderKeys.append(WidgetRenderKey.from(snapshot: widget))
-            inputs.append(SitemapRowInputMapper.map(snapshot: widget, rowID: rowID))
-        }
-
-        return SnapshotRowInputBuildResult(inputs: inputs, rowIDs: rowIDs, renderKeys: renderKeys, reusedInputCount: 0)
-    }
-
-    static func buildIncrementally(pageKey: String,
-                                   widgets: [WidgetMappingSnapshot],
-                                   previousRenderKeys: [WidgetRenderKey],
-                                   previousInputs: [SitemapRowInput],
-                                   previousRowIDs: [RowID]) -> SnapshotRowInputBuildResult {
-        guard widgets.count == previousRenderKeys.count,
-              widgets.count == previousInputs.count,
-              widgets.count == previousRowIDs.count else {
-            return build(pageKey: pageKey, widgets: widgets)
-        }
-
-        var occurrenceByWidgetID: [String: Int] = [:]
-        var inputs: [SitemapRowInput] = []
-        var rowIDs: [RowID] = []
-        var renderKeys: [WidgetRenderKey] = []
-        var reusedInputCount = 0
-
-        inputs.reserveCapacity(widgets.count)
-        rowIDs.reserveCapacity(widgets.count)
-        renderKeys.reserveCapacity(widgets.count)
-
-        for (offset, snapshot) in widgets.enumerated() {
-            let identityWidgetID = snapshot.rowIdentityWidgetID()
-            occurrenceByWidgetID[identityWidgetID, default: 0] += 1
-            let occurrence = occurrenceByWidgetID[identityWidgetID]!
-            let rowID = RowID(pageKey: pageKey, widgetId: identityWidgetID, occurrence: occurrence)
-            rowIDs.append(rowID)
-
-            let currentRenderKey = WidgetRenderKey.from(snapshot: snapshot)
-            renderKeys.append(currentRenderKey)
-
-            if previousRowIDs[offset] == rowID, previousRenderKeys[offset] == currentRenderKey {
-                inputs.append(previousInputs[offset])
-                reusedInputCount += 1
-            } else {
-                inputs.append(SitemapRowInputMapper.map(snapshot: snapshot, rowID: rowID))
-            }
-        }
-
-        return SnapshotRowInputBuildResult(
-            inputs: inputs,
-            rowIDs: rowIDs,
-            renderKeys: renderKeys,
-            reusedInputCount: reusedInputCount
         )
     }
 }

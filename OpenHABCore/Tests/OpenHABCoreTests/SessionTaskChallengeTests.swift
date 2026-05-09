@@ -67,6 +67,37 @@ private func makeMockTracker(activeConnection: ConnectionInfo? = nil, configurat
     return tracker
 }
 
+// MARK: - onReceiveSessionChallenge default case Tests
+
+@Suite("onReceiveSessionChallenge default case")
+struct SessionChallengeDefaultCaseTests {
+    @Test("Cancels challenge when previousFailureCount > 0")
+    func cancelsOnPreviousFailure() async {
+        let challenge = makeChallenge(
+            host: "local.openhab.org",
+            method: NSURLAuthenticationMethodNegotiate,
+            previousFailureCount: 1
+        )
+        let (disposition, credential) = await onReceiveSessionChallenge(with: challenge, networkTracker: NetworkTracker())
+        #expect(disposition == .cancelAuthenticationChallenge)
+        #expect(credential == nil)
+    }
+
+    @Test("Performs default handling without credential lookup")
+    func defaultHandlingWithoutCredentialLookup() async {
+        let connection = ConnectionInfo(configuration: localConfig, version: 1)
+        let tracker = await makeMockTracker(activeConnection: connection, configurations: [localConfig])
+
+        let challenge = makeChallenge(
+            host: "local.openhab.org",
+            method: NSURLAuthenticationMethodNegotiate
+        )
+        let (disposition, credential) = await onReceiveSessionChallenge(with: challenge, networkTracker: tracker)
+        #expect(disposition == .performDefaultHandling)
+        #expect(credential == nil)
+    }
+}
+
 // MARK: - onReceiveSessionTaskChallenge Tests
 
 @Suite("onReceiveSessionTaskChallenge")
@@ -148,36 +179,5 @@ struct SessionTaskChallengeTests {
         let (disposition, credential) = await onReceiveSessionTaskChallenge(with: challenge, networkTracker: tracker)
         #expect(disposition == .useCredential)
         #expect(credential?.user == "remoteuser")
-    }
-}
-
-// MARK: - onReceiveSessionChallenge default case Tests
-
-@Suite("onReceiveSessionChallenge default case")
-struct SessionChallengeDefaultCaseTests {
-    @Test("Cancels challenge when previousFailureCount > 0")
-    func cancelsOnPreviousFailure() async {
-        let challenge = makeChallenge(
-            host: "local.openhab.org",
-            method: NSURLAuthenticationMethodNegotiate,
-            previousFailureCount: 1
-        )
-        let (disposition, credential) = await onReceiveSessionChallenge(with: challenge, networkTracker: NetworkTracker())
-        #expect(disposition == .cancelAuthenticationChallenge)
-        #expect(credential == nil)
-    }
-
-    @Test("Performs default handling without credential lookup")
-    func defaultHandlingWithoutCredentialLookup() async {
-        let connection = ConnectionInfo(configuration: localConfig, version: 1)
-        let tracker = await makeMockTracker(activeConnection: connection, configurations: [localConfig])
-
-        let challenge = makeChallenge(
-            host: "local.openhab.org",
-            method: NSURLAuthenticationMethodNegotiate
-        )
-        let (disposition, credential) = await onReceiveSessionChallenge(with: challenge, networkTracker: tracker)
-        #expect(disposition == .performDefaultHandling)
-        #expect(credential == nil)
     }
 }
