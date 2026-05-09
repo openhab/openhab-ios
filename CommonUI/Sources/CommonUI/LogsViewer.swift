@@ -45,12 +45,20 @@ public struct LogsViewer: View {
             }
         }
         .task {
-            text = await fetchLogs()
+            text = fetchLogs()
             exportURL = makeExportURL(for: text)
         }
     }
 
     public init() {}
+
+    private static func modelIdentifier() -> String {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        return withUnsafeBytes(of: &systemInfo.machine) { ptr in
+            String(bytes: ptr.prefix { $0 != 0 }, encoding: .utf8) ?? "unknown"
+        }
+    }
 
     private func makeExportURL(for text: String) -> URL? {
         let fileName = "openhab-logs-\(Date.now.formatted(.iso8601.year().month().day().time(includingFractionalSeconds: false)))"
@@ -66,7 +74,7 @@ public struct LogsViewer: View {
         }
     }
 
-    private func fetchLogs() async -> String {
+    private func fetchLogs() -> String {
         let calendar = Calendar.current
         guard let dayAgo = calendar.date(
             byAdding: .day,
@@ -82,7 +90,7 @@ public struct LogsViewer: View {
                     "PREFIX": "org.openhab"
                 ])
 
-            let logs = try await Logger.fetch(
+            let logs = try Logger.fetch(
                 since: dayAgo,
                 predicateFormat: predicate.predicateFormat
             )
@@ -106,14 +114,6 @@ public struct LogsViewer: View {
         Generated: \(generated)
         \(String(repeating: "-", count: 60))
         """
-    }
-
-    private static func modelIdentifier() -> String {
-        var systemInfo = utsname()
-        uname(&systemInfo)
-        return withUnsafeBytes(of: &systemInfo.machine) { ptr in
-            String(bytes: ptr.prefix { $0 != 0 }, encoding: .utf8) ?? "unknown"
-        }
     }
 }
 

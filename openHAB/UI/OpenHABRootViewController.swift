@@ -65,20 +65,6 @@ private struct TrackerConnectionIdentity: Equatable {
     let supportsNotifications: Bool
 }
 
-private extension ConnectionConfiguration {
-    var trackerIdentity: TrackerConnectionIdentity {
-        TrackerConnectionIdentity(
-            url: url,
-            username: username,
-            password: password,
-            alwaysSendBasicAuth: alwaysSendBasicAuth,
-            ignoreSSL: ignoreSSL,
-            priority: priority,
-            supportsNotifications: supportsNotifications
-        )
-    }
-}
-
 protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
@@ -1053,6 +1039,20 @@ class OpenHABRootViewController: UIViewController {
         })
 
         present(alert, animated: true)
+    }
+}
+
+private extension ConnectionConfiguration {
+    var trackerIdentity: TrackerConnectionIdentity {
+        TrackerConnectionIdentity(
+            url: url,
+            username: username,
+            password: password,
+            alwaysSendBasicAuth: alwaysSendBasicAuth,
+            ignoreSSL: ignoreSSL,
+            priority: priority,
+            supportsNotifications: supportsNotifications
+        )
     }
 }
 

@@ -72,6 +72,6 @@ struct OpenAPIServiceSendItemCommandTests {
         for try await chunk in body {
             bytes.append(contentsOf: chunk)
         }
-        return String(decoding: bytes, as: UTF8.self)
+        return String(bytes: bytes, encoding: .utf8) ?? ""
     }
 }

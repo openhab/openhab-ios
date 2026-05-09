@@ -87,8 +87,11 @@ identifier_name:
     - g
     - i
     - k
+    - n
     - r
     - v
+    - x
+    - y
 
 private_outlet:
   allow_private_set: true
@@ -117,7 +120,7 @@ custom_rules:
 
 file_name:
   suffix_pattern: "Extension?|\\+.*"
-  excluded: ["WatchTypography.swift", "WidgetRowInputs.swift", "SitemapPageViewModel+SupportTypes.swift"]
+  excluded: ["WatchTypography.swift", "WidgetRowInputs.swift", "SitemapPageViewModel+SupportTypes.swift", "SnapshotHelper.swift"]
 
 opening_brace:
   ignore_multiline_function_signatures: true

@@ -62,6 +62,13 @@ public struct NumberState: CustomStringConvertible, Equatable {
         return stringValue
     }
 
+    // Access to default memberwise initializer not permitted outside of package
+    public init(value: Double, unit: String? = "", format: String? = "") {
+        self.value = value
+        self.unit = unit
+        self.format = format
+    }
+
     public func toString(locale: Locale?) -> String {
         if let format, !format.isEmpty {
             var actualFormat = format
@@ -172,12 +179,5 @@ public struct NumberState: CustomStringConvertible, Equatable {
 
         guard let firstArgument, consumesArgumentCount == 1 || usesExplicitArgumentIndex else { return nil }
         return (normalized, firstArgument)
-    }
-
-    // Access to default memberwise initializer not permitted outside of package
-    public init(value: Double, unit: String? = "", format: String? = "") {
-        self.value = value
-        self.unit = unit
-        self.format = format
     }
 }

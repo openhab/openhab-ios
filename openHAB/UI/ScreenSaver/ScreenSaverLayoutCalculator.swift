@@ -73,6 +73,7 @@ enum ScreenSaverLayoutCalculator {
         )
     }
 
+    // swiftlint:disable:next function_parameter_count
     private static func fittedFontSizes(maximumWidth: CGFloat,
                                         baseTimeFontSize: CGFloat,
                                         baseDateFontSize: CGFloat,

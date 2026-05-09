@@ -21,7 +21,7 @@ import Testing
 // or were navigated away from must stay silent.
 @MainActor
 @Suite
-struct SitemapPageViewModelForegroundRefreshTests {
+struct SitemapPageViewModelForegroundTests {
     // lastForegroundRefreshAt advances only when the visibility guard passes, making
     // it the right synchronous observable for these tests — no Task.yield needed.
 

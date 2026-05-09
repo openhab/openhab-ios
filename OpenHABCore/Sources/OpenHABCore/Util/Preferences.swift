@@ -112,13 +112,13 @@ public struct HomePreferences: Codable, Equatable {
 
 @MainActor
 public struct ApplicationPreferences: Codable, Equatable {
-    public var showSearchField = true
-    public var sitemapDiagnosticsLogging = false
-
     enum CodingKeys: String, CodingKey {
         case showSearchField
         case sitemapDiagnosticsLogging
     }
+
+    public var showSearchField = true
+    public var sitemapDiagnosticsLogging = false
 
     public nonisolated init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

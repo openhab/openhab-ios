@@ -228,9 +228,12 @@ enum SitemapDiagnostics {
             counts[kind, default: 0] += 1
         }
 
-        return counts.keys.sorted().map { kind in
-            "\(kind):\(counts[kind, default: 0])"
-        }.joined(separator: ",")
+        return counts.keys
+            .sorted()
+            .map { kind in
+                "\(kind):\(counts[kind, default: 0])"
+            }
+            .joined(separator: ",")
     }
 
     static func rowKind(for input: SitemapRowInput) -> String {

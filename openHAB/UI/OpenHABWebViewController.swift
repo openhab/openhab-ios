@@ -718,11 +718,12 @@ extension OpenHABWebViewController: WKUIDelegate {
         return nil
     }
 
-    // swiftlint:disable:next async_without_await
+    // swiftlint:disable async_without_await
     func webView(_ webView: WKWebView,
                  decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
                  initiatedBy frame: WKFrameInfo,
                  type: WKMediaCaptureType) async -> WKPermissionDecision {
         Preferences.shared.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
     }
+    // swiftlint:enable async_without_await
 }

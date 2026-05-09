@@ -16,11 +16,11 @@ import SFSafeSymbols
 import SwiftUI
 
 private struct HSBSelection: Equatable {
+    static let `default` = HSBSelection(hue: 0, saturation: 0, brightness: 1)
+
     var hue: Double
     var saturation: Double
     var brightness: Double
-
-    static let `default` = HSBSelection(hue: 0, saturation: 0, brightness: 1)
 
     var color: Color {
         Color(hue: hue, saturation: saturation, brightness: brightness)
@@ -439,6 +439,13 @@ private struct ColorPickerRowContent: View {
         }
     }
 
+    private var colorAccessibilityValue: String {
+        let huePercent = Int((selection.hue * 100).rounded())
+        let saturationPercent = Int((selection.saturation * 100).rounded())
+        let brightnessPercent = Int((selection.brightness * 100).rounded())
+        return "Hue \(huePercent) percent, saturation \(saturationPercent) percent, brightness \(brightnessPercent) percent"
+    }
+
     private func sendColorCommand() {
         if suppressNextColorSync {
             suppressNextColorSync = false
@@ -488,13 +495,6 @@ private struct ColorPickerRowContent: View {
         if !isEditing {
             onSendImmediate(selection.openHABCommand)
         }
-    }
-
-    private var colorAccessibilityValue: String {
-        let huePercent = Int((selection.hue * 100).rounded())
-        let saturationPercent = Int((selection.saturation * 100).rounded())
-        let brightnessPercent = Int((selection.brightness * 100).rounded())
-        return "Hue \(huePercent) percent, saturation \(saturationPercent) percent, brightness \(brightnessPercent) percent"
     }
 
     private func dismissColorWheel() {
