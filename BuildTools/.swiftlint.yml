@@ -20,6 +20,8 @@ opt_in_rules:
   - prefer_zero_over_explicit_init
   - superfluous_else
   - async_without_await
+  - let_var_whitespace
+  - empty_string
 
 analyzer_rules:
   - unused_import

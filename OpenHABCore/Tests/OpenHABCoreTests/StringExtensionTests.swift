@@ -19,9 +19,9 @@ struct StringExtensionTests {
         #expect("example/path//".removeTrailingSlashes() == "example/path")
         #expect("example/path/".removeTrailingSlashes() == "example/path")
         #expect("example/path".removeTrailingSlashes() == "example/path")
-        #expect("/".removeTrailingSlashes() == "")
-        #expect("///".removeTrailingSlashes() == "")
-        #expect("".removeTrailingSlashes() == "")
+        #expect("/".removeTrailingSlashes().isEmpty)
+        #expect("///".removeTrailingSlashes().isEmpty)
+        #expect("".removeTrailingSlashes().isEmpty)
     }
 
     @Test

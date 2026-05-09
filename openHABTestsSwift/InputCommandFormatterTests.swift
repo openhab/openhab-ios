@@ -489,7 +489,7 @@ struct InputCommandFormatterTests {
 
     @Test
     func commandFromEmptyStringForTextReturnsEmptyString() {
-        #expect(formatter.command(from: "", hint: nil) == "")
+        #expect(formatter.command(from: "", hint: nil)?.isEmpty == true)
     }
 
     @Test
@@ -499,7 +499,7 @@ struct InputCommandFormatterTests {
 
     @Test
     func commandFromWhitespaceForTextReturnsEmptyString() {
-        #expect(formatter.command(from: "   ", hint: nil) == "")
+        #expect(formatter.command(from: "   ", hint: nil)?.isEmpty == true)
     }
 
     @Test

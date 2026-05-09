@@ -49,7 +49,7 @@ struct OpenAPIServiceSendItemCommandTests {
 
             let bodyString = try await encodedBody(from: body)
             let json = try JSONDecoder().decode([String: String].self, from: Data(bodyString.utf8))
-            #expect(json["value"] == "")
+            #expect(json["value"]?.isEmpty == true)
 
             return (HTTPResponse(status: .ok), nil)
         }

@@ -52,6 +52,7 @@ public actor EventStream<Event: Sendable> {
     // Multiple items can come in a single message which makes this a little more complicated
     private struct ItemStateChanges: Decodable {
         struct Value: Decodable { let state: String }
+
         let wrapped: [String: Value]
         var first: (String, Value)? { wrapped.first }
 

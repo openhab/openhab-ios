@@ -22,7 +22,7 @@ struct WidgetMappingSnapshotDisplayStateTests {
         // value is shown trailing-aligned, not duplicated as "[Uitgeschakeld] Uitgeschakeld".
         let snapshot = makeSnapshot(label: "[Uitgeschakeld]")
         let display = snapshot.displayState
-        #expect(display.labelText == "")
+        #expect(display.labelText.isEmpty)
         #expect(display.labelValue == "Uitgeschakeld")
     }
 
@@ -38,7 +38,7 @@ struct WidgetMappingSnapshotDisplayStateTests {
     func emptyLabelProducesEmptyLabelText() {
         let snapshot = makeSnapshot(label: "")
         let display = snapshot.displayState
-        #expect(display.labelText == "")
+        #expect(display.labelText.isEmpty)
         #expect(display.labelValue == nil)
     }
 
