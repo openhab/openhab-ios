@@ -66,6 +66,7 @@ public actor ConnectionPool {
     }
 
     @discardableResult
+    // swiftlint:disable:next async_without_await
     func getOrCreateService(for configuration: ConnectionConfiguration) async throws -> any OpenAPIServiceProtocol {
         if let existing = services[configuration] {
             return existing
@@ -537,7 +538,6 @@ public actor NetworkTracker {
         if activeConnection != connection {
             activeConnection = connection
         }
-
     }
 
     private func updateStatus(_ newStatus: NetworkStatus) {

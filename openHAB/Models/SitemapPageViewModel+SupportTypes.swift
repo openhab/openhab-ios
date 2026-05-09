@@ -9,7 +9,48 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Foundation
 import OpenHABCore
+
+enum SitemapPageError: LocalizedError {
+    case noActiveConnection
+    case serviceUnavailable
+    case noData
+
+    var errorDescription: String? {
+        switch self {
+        case .noActiveConnection:
+            "No active connection available."
+        case .serviceUnavailable:
+            "Service unavailable."
+        case .noData:
+            "No page data received."
+        }
+    }
+}
+
+enum CommandLifecycleSummary: Equatable {
+    case idle
+    case sending(count: Int)
+    case failed(count: Int)
+}
+
+enum SitemapInteractionSummary: Equatable {
+    case onlineIdle
+    case connecting
+    case offline
+    case queued(count: Int)
+    case sending(count: Int)
+    case failed(count: Int)
+}
+
+enum RowInteractionState: Equatable {
+    case idle
+    case offline
+    case queued
+    case sending
+    case failed
+}
 
 enum CommandSendOrigin: String {
     case command

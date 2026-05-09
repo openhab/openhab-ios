@@ -193,10 +193,9 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
         if shouldImport {
             await clientCertificateManager!.clientCertificateAccepted(password: nil)
             return true
-        } else {
-            clientCertificateManager!.clientCertificateRejected()
-            return false
         }
+        clientCertificateManager!.clientCertificateRejected()
+        return false
     }
 
     // Ask user for password to decode PKCS#12
@@ -230,6 +229,7 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
     }
 
     // Show alert if certificate import failed
+    // swiftlint:disable:next async_without_await
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async {
         let alertController = UIAlertController(
             title: String(localized: "certificate_import_title", comment: ""),

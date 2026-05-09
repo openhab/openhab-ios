@@ -13,15 +13,15 @@
 import Testing
 
 struct StringExtensionTests {
-    @Test func testRemoveTrailingSlashes() async throws {
+    @Test func testRemoveTrailingSlashes() throws {
         #expect("example/".removeTrailingSlashes() == "example")
         #expect("example//".removeTrailingSlashes() == "example")
         #expect("example/path//".removeTrailingSlashes() == "example/path")
         #expect("example/path/".removeTrailingSlashes() == "example/path")
         #expect("example/path".removeTrailingSlashes() == "example/path")
-        #expect("/".removeTrailingSlashes() == "")
-        #expect("///".removeTrailingSlashes() == "")
-        #expect("".removeTrailingSlashes() == "")
+        #expect("/".removeTrailingSlashes().isEmpty)
+        #expect("///".removeTrailingSlashes().isEmpty)
+        #expect("".removeTrailingSlashes().isEmpty)
     }
 
     @Test
@@ -67,57 +67,57 @@ struct StringExtensionTests {
 
     // MARK: - doubleValue Tests
 
-    @Test func doubleValueWithSimpleInteger() async throws {
+    @Test func doubleValueWithSimpleInteger() throws {
         let result = "42".doubleValue
         #expect(result == 42.0)
     }
 
-    @Test func doubleValueWithDecimal() async throws {
+    @Test func doubleValueWithDecimal() throws {
         let result = "42.5".doubleValue
         #expect(result == 42.5)
     }
 
-    @Test func doubleValueWithNegative() async throws {
+    @Test func doubleValueWithNegative() throws {
         let result = "-42.5".doubleValue
         #expect(result == -42.5)
     }
 
-    @Test func doubleValueWithZero() async throws {
+    @Test func doubleValueWithZero() throws {
         let result = "0".doubleValue
         #expect(result == 0.0)
     }
 
-    @Test func doubleValueWithLeadingZeros() async throws {
+    @Test func doubleValueWithLeadingZeros() throws {
         let result = "00042.5".doubleValue
         #expect(result == 42.5)
     }
 
-    @Test func doubleValueWithVerySmallNumber() async throws {
+    @Test func doubleValueWithVerySmallNumber() throws {
         let result = "0.0001".doubleValue
         #expect(result == 0.0001)
     }
 
-    @Test func doubleValueWithVeryLargeNumber() async throws {
+    @Test func doubleValueWithVeryLargeNumber() throws {
         let result = "123456789.123".doubleValue
         #expect(result == 123_456_789.123)
     }
 
-    @Test func doubleValueWithInvalidString() async throws {
+    @Test func doubleValueWithInvalidString() throws {
         let result = "not a number".doubleValue
         #expect(result.isNaN)
     }
 
-    @Test func doubleValueWithEmptyString() async throws {
+    @Test func doubleValueWithEmptyString() throws {
         let result = "".doubleValue
         #expect(result.isNaN)
     }
 
-    @Test func doubleValueUsesDecimalPoint() async throws {
+    @Test func doubleValueUsesDecimalPoint() throws {
         let result = "42.5".doubleValue
         #expect(result == 42.5)
     }
 
-    @Test func doubleValueIgnoresCommaAsDecimalSeparator() async throws {
+    @Test func doubleValueIgnoresCommaAsDecimalSeparator() throws {
         // Should parse up to the comma, not treat comma as decimal separator
         let result = "42,5".doubleValue
         // Parser stops at comma and returns 42.0, not 42.5
@@ -126,42 +126,42 @@ struct StringExtensionTests {
 
     // MARK: - intValue Tests
 
-    @Test func intValueWithSimpleInteger() async throws {
+    @Test func intValueWithSimpleInteger() throws {
         let result = "42".intValue
         #expect(result == 42)
     }
 
-    @Test func intValueWithNegative() async throws {
+    @Test func intValueWithNegative() throws {
         let result = "-42".intValue
         #expect(result == -42)
     }
 
-    @Test func intValueWithZero() async throws {
+    @Test func intValueWithZero() throws {
         let result = "0".intValue
         #expect(result == 0)
     }
 
-    @Test func intValueWithLeadingZeros() async throws {
+    @Test func intValueWithLeadingZeros() throws {
         let result = "00042".intValue
         #expect(result == 42)
     }
 
-    @Test func intValueWithLargeNumber() async throws {
+    @Test func intValueWithLargeNumber() throws {
         let result = "123456789".intValue
         #expect(result == 123_456_789)
     }
 
-    @Test func intValueWithInvalidString() async throws {
+    @Test func intValueWithInvalidString() throws {
         let result = "not a number".intValue
         #expect(result == Int.max)
     }
 
-    @Test func intValueWithEmptyString() async throws {
+    @Test func intValueWithEmptyString() throws {
         let result = "".intValue
         #expect(result == Int.max)
     }
 
-    @Test func intValueWithDecimalString() async throws {
+    @Test func intValueWithDecimalString() throws {
         // Parser stops at decimal point, returns integer part
         let result = "42.5".intValue
         #expect(result == 42)
@@ -169,117 +169,117 @@ struct StringExtensionTests {
 
     // MARK: - numberValue Tests
 
-    @Test func numberValueWithSimpleInteger() async throws {
+    @Test func numberValueWithSimpleInteger() throws {
         let result = "42".numberValue
         #expect(result?.doubleValue == 42.0)
     }
 
-    @Test func numberValueWithDecimal() async throws {
+    @Test func numberValueWithDecimal() throws {
         let result = "42.5".numberValue
         #expect(result?.doubleValue == 42.5)
     }
 
-    @Test func numberValueWithNegative() async throws {
+    @Test func numberValueWithNegative() throws {
         let result = "-42.5".numberValue
         #expect(result?.doubleValue == -42.5)
     }
 
-    @Test func numberValueWithScientificNotation() async throws {
+    @Test func numberValueWithScientificNotation() throws {
         let result = "1.23E+2".numberValue
         #expect(result?.doubleValue == 123.0)
     }
 
-    @Test func numberValueWithNegativeExponent() async throws {
+    @Test func numberValueWithNegativeExponent() throws {
         let result = "1.23E-2".numberValue
         #expect(result?.doubleValue == 0.0123)
     }
 
-    @Test func numberValueFiltersInvalidCharacters() async throws {
+    @Test func numberValueFiltersInvalidCharacters() throws {
         let result = "42.5abc".numberValue
         #expect(result?.doubleValue == 42.5)
     }
 
-    @Test func numberValueWithExtraWhitespace() async throws {
+    @Test func numberValueWithExtraWhitespace() throws {
         let result = " 42.5 ".numberValue
         #expect(result?.doubleValue == 42.5)
     }
 
-    @Test func numberValueWithInvalidString() async throws {
+    @Test func numberValueWithInvalidString() throws {
         let result = "not a number".numberValue
         #expect(result == nil)
     }
 
-    @Test func numberValueWithEmptyString() async throws {
+    @Test func numberValueWithEmptyString() throws {
         let result = "".numberValue
         #expect(result == nil)
     }
 
-    @Test func numberValueUsesDecimalPoint() async throws {
+    @Test func numberValueUsesDecimalPoint() throws {
         let result = "42.5".numberValue
         #expect(result?.doubleValue == 42.5)
     }
 
-    @Test func numberValueWithZero() async throws {
+    @Test func numberValueWithZero() throws {
         let result = "0".numberValue
         #expect(result?.doubleValue == 0.0)
     }
 
-    @Test func numberValueWithPositiveSign() async throws {
+    @Test func numberValueWithPositiveSign() throws {
         let result = "+42.5".numberValue
         #expect(result?.doubleValue == 42.5)
     }
 
-    @Test func numberValueFiltersLetters() async throws {
+    @Test func numberValueFiltersLetters() throws {
         // Should filter out letters but keep valid number characters
         // "1E2abc3" -> filters to "1E23" -> parses as 1 × 10^23
         let result = "1E2abc3".numberValue
         #expect(result?.doubleValue == 1e+23)
     }
 
-    @Test func numberValueFiltersLettersSimple() async throws {
+    @Test func numberValueFiltersLettersSimple() throws {
         // Simpler case: "42abc.5def" -> filters to "42.5"
         let result = "42abc.5def".numberValue
         #expect(result?.doubleValue == 42.5)
     }
 
-    @Test func numberValueWithUppercaseScientificNotation() async throws {
+    @Test func numberValueWithUppercaseScientificNotation() throws {
         let result = "1.5E+10".numberValue
         #expect(result?.doubleValue == 15_000_000_000.0)
     }
 
-    @Test func numberValueWithScientificNotationNoSign() async throws {
+    @Test func numberValueWithScientificNotationNoSign() throws {
         let result = "1.5E10".numberValue
         #expect(result?.doubleValue == 15_000_000_000.0)
     }
 
-    @Test func numberValueWithVerySmallScientificNumber() async throws {
+    @Test func numberValueWithVerySmallScientificNumber() throws {
         let result = "1.0E-10".numberValue
         #expect(result?.doubleValue == 0.0000000001)
     }
 
-    @Test func numberValueWithZeroExponent() async throws {
+    @Test func numberValueWithZeroExponent() throws {
         let result = "1.5E0".numberValue
         #expect(result?.doubleValue == 1.5)
     }
 
     // MARK: - asDouble Tests
 
-    @Test func asDoubleWithValidNumber() async throws {
+    @Test func asDoubleWithValidNumber() throws {
         let result = "42.5".asDouble
         #expect(result == 42.5)
     }
 
-    @Test func asDoubleWithInvalidString() async throws {
+    @Test func asDoubleWithInvalidString() throws {
         let result = "not a number".asDouble
         #expect(result == 0.0)
     }
 
-    @Test func asDoubleWithEmptyString() async throws {
+    @Test func asDoubleWithEmptyString() throws {
         let result = "".asDouble
         #expect(result == 0.0)
     }
 
-    @Test func asDoubleWithScientificNotation() async throws {
+    @Test func asDoubleWithScientificNotation() throws {
         let result = "1.23E+2".asDouble
         #expect(result == 123.0)
     }

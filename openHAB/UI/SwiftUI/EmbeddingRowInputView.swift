@@ -21,6 +21,9 @@ enum RowBackgroundKind: Equatable {
 enum RowLayoutPolicy {
     static let regularInsets = EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16)
 
+    static let frameBackground = Color(UIColor.ohSystemGroupedBackground)
+    static let regularBackground = Color(UIColor.ohSecondarySystemGroupedBackground)
+
     static func rowInsets(for rowInput: SitemapRowInput) -> EdgeInsets {
         switch rowInput {
         case let .frame(_, input):
@@ -46,9 +49,6 @@ enum RowLayoutPolicy {
             return regularInsets
         }
     }
-
-    static let frameBackground = Color(UIColor.ohSystemGroupedBackground)
-    static let regularBackground = Color(UIColor.ohSecondarySystemGroupedBackground)
 
     static func rowBackground(for rowInput: SitemapRowInput) -> Color {
         backgroundKind(for: rowInput) == .frame ? frameBackground : regularBackground
@@ -127,10 +127,6 @@ struct EmbeddingRowInputView: View, Equatable {
     // foreground refresh may render stale data from a cached render.
     @EnvironmentObject private var viewModel: SitemapPageViewModel
 
-    nonisolated static func ==(lhs: Self, rhs: Self) -> Bool {
-        lhs.rowInput == rhs.rowInput
-    }
-
     var body: some View {
         switch rowInput {
         case let .frame(_, input):
@@ -179,5 +175,9 @@ struct EmbeddingRowInputView: View, Equatable {
             GenericRowView(input: input)
                 .contentShape(Rectangle())
         }
+    }
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.rowInput == rhs.rowInput
     }
 }

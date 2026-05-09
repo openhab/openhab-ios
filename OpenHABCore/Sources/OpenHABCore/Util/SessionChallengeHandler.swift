@@ -26,11 +26,9 @@ private func logSessionChallengeDecision(_ challenge: URLAuthenticationChallenge
     logChallengeDecision(label: "Session challenge", challenge, disposition, reason: reason)
 }
 
-private func credentialForMatchedHost(
-    _ challenge: URLAuthenticationChallenge,
-    networkTracker: NetworkTracker,
-    log: (URLAuthenticationChallenge, URLSession.AuthChallengeDisposition, String) -> Void
-) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+private func credentialForMatchedHost(_ challenge: URLAuthenticationChallenge,
+                                      networkTracker: NetworkTracker,
+                                      log: (URLAuthenticationChallenge, URLSession.AuthChallengeDisposition, String) -> Void) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
     let host = challenge.protectionSpace.host
     guard let matchedConfiguration = await networkTracker.connectionConfiguration(forHost: host) else {
         Logger.sessionChallenge.error("No host match for challenge host=\(host, privacy: .public)")
