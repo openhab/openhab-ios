@@ -281,10 +281,10 @@ struct DrawerView: View {
 
             let sortSitemapsBy = Preferences.shared.currentHomePreferences.sortSitemapsBy
             let sortOrder = SortSitemapsOrder(rawValue: sortSitemapsBy) ?? .label
-            // swiftlint:disable trailing_closure
-            switch await DrawerFetch.sitemaps(sortOrder: sortOrder, fetch: {
+            let sitemapsResult = await DrawerFetch.sitemaps(sortOrder: sortOrder) {
                 try await openAPIService.openHABSitemaps()
-            }) {
+            }
+            switch sitemapsResult {
             case let .value(fetchedSitemaps):
                 sitemaps = fetchedSitemaps
             case .cancelled:
@@ -294,9 +294,10 @@ struct DrawerView: View {
                 sitemaps = []
             }
 
-            switch await DrawerFetch.uiTiles(fetch: {
-                try await openAPIService.getUITiles()
-            }) {
+            let tilesResult = await DrawerFetch.uiTiles {
+                  try await openAPIService.getUITiles()
+            }
+            switch tilesResult {
             case let .value(fetchedUITiles):
                 uiTiles = fetchedUITiles
                 Logger.drawerView.info("Fetched UI tiles successfully")
@@ -306,7 +307,6 @@ struct DrawerView: View {
                 Logger.drawerView.error("Failed to fetch UI tiles: \(error.localizedDescription)")
                 uiTiles = []
             }
-            // swiftlint:enable trailing_closure
 
         } catch is CancellationError {
             return

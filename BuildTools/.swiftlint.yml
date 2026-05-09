@@ -119,10 +119,6 @@ file_name:
   suffix_pattern: "Extension?|\\+.*"
   excluded: ["WatchTypography.swift", "WidgetRowInputs.swift", "SitemapPageViewModel+SupportTypes.swift"]
 
-async_without_await:
-  excluded:
-    - ../openHABIntents
-
 opening_brace:
   ignore_multiline_function_signatures: true
 

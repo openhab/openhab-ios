@@ -1,0 +1,2 @@
+disabled_rules:
+  - async_without_await
