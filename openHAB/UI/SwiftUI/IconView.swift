@@ -27,25 +27,35 @@ import SwiftUI
 @MainActor
 final class IconReloadCoordinator: ObservableObject {
     static let shared = IconReloadCoordinator()
+    static let reloadThreshold: TimeInterval = 60
 
     @Published private(set) var reloadEpoch: Int = 0
 
     private var backgroundedAt: Date?
-    private let reloadThreshold: TimeInterval = 60
 
-    private init() {
+    init(observeNotifications: Bool = true) {
+        guard observeNotifications else { return }
         Task { [weak self] in
             for await _ in NotificationCenter.default.notifications(named: UIApplication.didEnterBackgroundNotification) {
-                self?.backgroundedAt = Date()
+                self?.didEnterBackground()
             }
         }
         Task { [weak self] in
             for await _ in NotificationCenter.default.notifications(named: UIApplication.didBecomeActiveNotification) {
-                guard let self else { return }
-                guard let backgroundedAt, Date().timeIntervalSince(backgroundedAt) > reloadThreshold else { return }
-                self.backgroundedAt = nil
-                reloadEpoch += 1
+                self?.didBecomeActive()
             }
+        }
+    }
+
+    func didEnterBackground(now: Date = Date()) {
+        backgroundedAt = now
+    }
+
+    func didBecomeActive(now: Date = Date()) {
+        guard let backgroundedAt else { return }
+        self.backgroundedAt = nil
+        if now.timeIntervalSince(backgroundedAt) >= Self.reloadThreshold {
+            reloadEpoch += 1
         }
     }
 }
