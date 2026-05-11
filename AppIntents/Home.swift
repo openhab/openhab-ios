@@ -49,10 +49,11 @@ enum HomeResolver {
             return itemHomeId
         }
 
+        let stableId = Home.stableIdentifierComponent(of: selectedHome.id)
         let homeId: UUID
-        if let match = stableIdentifierToLocalUUID.first(where: { $0.0 == selectedHome.id }) {
+        if let match = stableIdentifierToLocalUUID.first(where: { $0.0 == stableId }) {
             homeId = match.1
-        } else if let uuid = UUID(uuidString: selectedHome.id) {
+        } else if let uuid = UUID(uuidString: stableId) {
             homeId = uuid
         } else {
             throw HomeResolutionError.unknownHome
@@ -131,7 +132,8 @@ enum HomeResolver {
                               listStoredHomes: @escaping () async -> [UUID],
                               exactMatchedHomes: @escaping () async -> Set<UUID>) async throws -> UUID {
         if let selectedHome {
-            guard let homeId = await findHomeId(selectedHome.id) else {
+            let stableId = Home.stableIdentifierComponent(of: selectedHome.id)
+            guard let homeId = await findHomeId(stableId) else {
                 throw HomeResolutionError.unknownHome
             }
             return homeId
@@ -159,12 +161,13 @@ struct Home: AppEntity {
         func entities(for identifiers: [Home.ID]) throws -> [Home] {
             let storedHomes = Preferences.shared.storedHomes
             return identifiers.compactMap { identifier in
+                let stableId = Home.stableIdentifierComponent(of: identifier)
                 // Current format: match by stable cross-device identifier
-                if let match = storedHomes.values.first(where: { $0.stableIdentifier == identifier }) {
+                if let match = storedHomes.values.first(where: { $0.stableIdentifier == stableId }) {
                     return Home(homePrefs: match)
                 }
                 // Legacy format: identifier is a device-local UUID string (shortcuts before this fix)
-                if let uuid = UUID(uuidString: identifier), let match = storedHomes[uuid] {
+                if let uuid = UUID(uuidString: stableId), let match = storedHomes[uuid] {
                     return Home(homePrefs: match)
                 }
                 return nil
@@ -202,7 +205,18 @@ struct Home: AppEntity {
 
     @MainActor
     init(homePrefs: HomePreferences) {
-        self.init(id: homePrefs.stableIdentifier, displayString: homePrefs.homeName)
+        // Append the local UUID after "##" to guarantee uniqueness when two homes share the same
+        // stableIdentifier (e.g. same local URL on two different networks). Resolution code strips
+        // the suffix before matching so cross-device Shortcuts syncing still works.
+        self.init(id: "\(homePrefs.stableIdentifier)##\(homePrefs.id.uuidString)", displayString: homePrefs.homeName)
+    }
+
+    /// Extracts the stable-identifier portion from a Home.id.
+    ///
+    /// Current format: `"<stableIdentifier>##<localUUID>"` — returns the prefix.
+    /// Legacy formats (`"<stableIdentifier>"` or a raw UUID string) — returned as-is.
+    static func stableIdentifierComponent(of homeId: ID) -> String {
+        homeId.components(separatedBy: "##").first ?? homeId
     }
 }
 

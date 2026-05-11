@@ -32,11 +32,12 @@ extension ItemEntityQuery {
     @MainActor
     func resolvedSelectedHomeId() -> UUID? {
         guard let home = selectedHome else { return nil }
+        let stableId = Home.stableIdentifierComponent(of: home.id)
         let storedHomes = Preferences.shared.storedHomes
-        if let match = storedHomes.values.first(where: { $0.stableIdentifier == home.id }) {
+        if let match = storedHomes.values.first(where: { $0.stableIdentifier == stableId }) {
             return match.id
         }
-        return UUID(uuidString: home.id)
+        return UUID(uuidString: stableId)
     }
 
     func entityResults(from itemsByHome: [UUID: [OpenHABItem]]) async -> [EntityType] {
