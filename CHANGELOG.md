@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [Version 3.2.42, Build 250] - 2026-05-11Z
+
+- Fix number input locked when state includes unit suffix (e.g. "220 °C") (#1188)
+- Use toggle() instead of negation in AnimatedSecureTextField
+- Add haptic feedback on release for press-release buttons (#1192)
+- Apply SwiftLint opt-in rules autocorrect with async and complexity fixes (#1190)
+- Add haptic feedback to SegmentedRowView, watchOS SegmentRow, and ColorPickerRowView (#1187)
+
 ## [Version 3.2.41, Build 249] - 2026-05-06Z
 
 - Fix connection detection, icon stability, and scroll performance (#1185)
