@@ -90,12 +90,13 @@ struct SettingsView: View {
             }
         }
         .task {
-            if !viewAppearedOnce {
-                viewAppearedOnce = true
-                loadSettings()
-                let activeConfiguration = networkTracker.activeConnection?.configuration ?? settingsLocalConnectionConfiguration
-                await updateSitemaps(activeConfiguration: activeConfiguration)
-            }
+            guard !viewAppearedOnce else { return }
+            viewAppearedOnce = true
+            loadSettings()
+        }
+        .task(id: networkTracker.activeConnection) {
+            guard let activeConnection = networkTracker.activeConnection else { return }
+            await updateSitemaps(activeConfiguration: activeConnection.configuration)
         }
     }
 
