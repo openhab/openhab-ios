@@ -17,6 +17,49 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
+/// Forces KFImage recreation after the app returns from an extended background period.
+///
+/// When iOS evicts Kingfisher's in-memory cache under memory pressure, KFImage instances
+/// whose `.id()` hasn't changed are never recreated and therefore never re-fetch their
+/// images. This coordinator increments `reloadEpoch` after the app has been in the
+/// background for longer than `reloadThreshold`, which is included in each KFImage's
+/// `.id()` so that a fresh load from the Kingfisher disk cache is triggered automatically.
+@MainActor
+final class IconReloadCoordinator: ObservableObject {
+    static let shared = IconReloadCoordinator()
+    static let reloadThreshold: TimeInterval = 60
+
+    @Published private(set) var reloadEpoch: Int = 0
+
+    private var backgroundedAt: Date?
+
+    init(observeNotifications: Bool = true) {
+        guard observeNotifications else { return }
+        Task { [weak self] in
+            for await _ in NotificationCenter.default.notifications(named: UIApplication.didEnterBackgroundNotification) {
+                self?.didEnterBackground()
+            }
+        }
+        Task { [weak self] in
+            for await _ in NotificationCenter.default.notifications(named: UIApplication.didBecomeActiveNotification) {
+                self?.didBecomeActive()
+            }
+        }
+    }
+
+    func didEnterBackground(now: Date = Date()) {
+        backgroundedAt = now
+    }
+
+    func didBecomeActive(now: Date = Date()) {
+        guard let backgroundedAt else { return }
+        self.backgroundedAt = nil
+        if now.timeIntervalSince(backgroundedAt) >= Self.reloadThreshold {
+            reloadEpoch += 1
+        }
+    }
+}
+
 /// Thread-safe actor for tracking cached icon keys
 actor IconCacheTracker {
     static let shared = IconCacheTracker()
@@ -46,6 +89,7 @@ struct IconInputView: View {
     let rowIdentity: String
     let fallbackSymbol: SFSymbol?
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    @ObservedObject private var iconReloader = IconReloadCoordinator.shared
     @Environment(\.colorScheme) private var colorScheme
 
     let size: CGSize
@@ -136,7 +180,7 @@ struct IconInputView: View {
                     }
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id("\(iconURL.absoluteString)-\(colorScheme)")
+                    .id("\(iconURL.absoluteString)-\(colorScheme)-\(iconReloader.reloadEpoch)")
                     .onAppear {
                         recordIconStart(url: iconURL)
                     }
@@ -233,6 +277,7 @@ struct IconInputView: View {
 struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    @ObservedObject private var iconReloader = IconReloadCoordinator.shared
     @Environment(\.colorScheme) private var colorScheme
 
     let size: CGSize
@@ -328,7 +373,7 @@ struct IconView: View {
                     }
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id("\(iconURL.absoluteString)-\(colorScheme)")
+                    .id("\(iconURL.absoluteString)-\(colorScheme)-\(iconReloader.reloadEpoch)")
                     .onAppear {
                         recordIconStart(url: iconURL)
                     }
