@@ -19,7 +19,7 @@ struct AnimatedSecureTextField: View {
     var body: some View {
         HStack(spacing: 4) {
             Button {
-                isSecure = !isSecure
+                isSecure.toggle()
             } label: {
                 Image(systemSymbol: isSecure ? .eyeSlash : .eyeFill)
                     .foregroundStyle(.gray)

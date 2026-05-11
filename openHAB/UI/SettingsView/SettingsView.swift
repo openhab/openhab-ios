@@ -15,6 +15,8 @@ import os
 import SwiftUI
 
 struct SettingsView: View {
+    @StateObject private var networkTracker = MainActorNetworkTracker.shared
+
     @State private var settingsDemomode = false
     @State private var settingsIdleOff = true
     @State private var settingsRealTimeSliders = true
@@ -88,12 +90,13 @@ struct SettingsView: View {
             }
         }
         .task {
-            if !viewAppearedOnce {
-                viewAppearedOnce = true
-                loadSettings()
-                let activeConfiguration = settingsLocalConnectionConfiguration
-                await updateSitemaps(activeConfiguration: activeConfiguration)
-            }
+            guard !viewAppearedOnce else { return }
+            viewAppearedOnce = true
+            loadSettings()
+        }
+        .task(id: networkTracker.activeConnection) {
+            guard let activeConnection = networkTracker.activeConnection else { return }
+            await updateSitemaps(activeConfiguration: activeConnection.configuration)
         }
     }
 
