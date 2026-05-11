@@ -17,7 +17,8 @@ extension URL {
     /// always relative to the MainUI root rather than carrying a proxy-specific prefix.
     func relativeWebViewPath(for absolutePath: String) -> String {
         let basePath = path
-        guard !basePath.isEmpty, basePath != "/", absolutePath.hasPrefix(basePath) else {
+        guard !basePath.isEmpty, basePath != "/",
+              absolutePath == basePath || absolutePath.hasPrefix(basePath + "/") else {
             return absolutePath
         }
         let relative = String(absolutePath.dropFirst(basePath.count))
