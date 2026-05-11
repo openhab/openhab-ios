@@ -82,7 +82,7 @@ struct InputCommandFormatter {
                 break
             }
         }
-        return result.isEmpty ? text : result
+        return result
     }
 
     // Extracts the unit suffix from a formatted state string, e.g. "220 °C" → " °C", "220" → "".
@@ -196,10 +196,10 @@ private struct TextInputRowContent: View {
                 }
 
                 Button {
-                    let draft = inputHint == .number ? inputCommandFormatter.numericDraftFromState(inputText) : inputText
-                    draftInputText = draft
-                    lastValidDraft = draft
-                    draftUnitSuffix = inputHint == .number ? inputCommandFormatter.unitSuffixFromState(inputText) : ""
+                    let numericDraft = inputHint == .number ? inputCommandFormatter.numericDraftFromState(inputText) : inputText
+                    draftInputText = numericDraft
+                    lastValidDraft = numericDraft
+                    draftUnitSuffix = (inputHint == .number && !numericDraft.isEmpty) ? inputCommandFormatter.unitSuffixFromState(inputText) : ""
                     showInputAlert = true
                 } label: {
                     Text(inputText.isEmpty
@@ -214,10 +214,10 @@ private struct TextInputRowContent: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 guard !input.readOnly else { return }
-                let draft = inputHint == .number ? inputCommandFormatter.numericDraftFromState(inputText) : inputText
-                draftInputText = draft
-                lastValidDraft = draft
-                draftUnitSuffix = inputHint == .number ? inputCommandFormatter.unitSuffixFromState(inputText) : ""
+                let numericDraft = inputHint == .number ? inputCommandFormatter.numericDraftFromState(inputText) : inputText
+                draftInputText = numericDraft
+                lastValidDraft = numericDraft
+                draftUnitSuffix = (inputHint == .number && !numericDraft.isEmpty) ? inputCommandFormatter.unitSuffixFromState(inputText) : ""
                 showInputAlert = true
             }
             .alert("Enter new value", isPresented: $showInputAlert) {

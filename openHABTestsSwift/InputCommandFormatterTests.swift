@@ -610,9 +610,19 @@ struct InputCommandFormatterTests {
     }
 
     @Test
-    func numericDraftFromNonNumericTextPassesThrough() {
-        // Non-numeric state (e.g. text input): fall back to original
-        #expect(formatter.numericDraftFromState("hello") == "hello")
+    func numericDraftFromNonNumericStateReturnsEmpty() {
+        // Non-numeric state (NULL, UNDEF, unit-only) → empty so field opens blank
+        #expect(formatter.numericDraftFromState("hello").isEmpty)
+    }
+
+    @Test
+    func numericDraftFromUnitOnlyStateReturnsEmpty() {
+        #expect(formatter.numericDraftFromState("°C").isEmpty)
+    }
+
+    @Test
+    func numericDraftFromNullStateReturnsEmpty() {
+        #expect(formatter.numericDraftFromState("NULL").isEmpty)
     }
 
     // MARK: - unitSuffixFromState
