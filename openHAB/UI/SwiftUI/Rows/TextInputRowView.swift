@@ -20,11 +20,11 @@ struct InputCommandFormatter {
 
     // MARK: after typing
 
-    func command(from rawText: String, hint: OpenHABWidget.InputHint?) -> String? {
+    func command(from rawText: String, hint: OpenHABWidget.InputHint?, unitSuffix: String = "") -> String? {
         let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
         switch hint {
         case .number:
-            return normalizedNumberCommand(from: trimmed)
+            return normalizedNumberCommand(from: trimmed).map { $0 + unitSuffix }
         default:
             return trimmed
         }
@@ -60,6 +60,56 @@ struct InputCommandFormatter {
 
         guard Double(normalized) != nil else { return nil }
         return normalized
+    }
+
+    // MARK: initial draft from server state
+
+    // Extracts the numeric portion from a formatted state string, e.g. "220 °C" → "220".
+    // For non-number inputs the string is returned unchanged.
+    func numericDraftFromState(_ text: String) -> String {
+        guard !text.isEmpty else { return text }
+        var result = ""
+        var seenDecimalSep = false
+        for (index, char) in text.enumerated() {
+            if index == 0, char == "-" {
+                result.append(char)
+            } else if char.isNumber {
+                result.append(char)
+            } else if String(char) == decimalSeparator, !seenDecimalSep {
+                seenDecimalSep = true
+                result.append(char)
+            } else {
+                break
+            }
+        }
+        return result
+    }
+
+    // Extracts the unit suffix from a formatted state string, e.g. "220 °C" → " °C", "220" → "".
+    func unitSuffixFromState(_ text: String) -> String {
+        guard !text.isEmpty else { return "" }
+        var i = text.startIndex
+        var seenDecimalSep = false
+        var isFirst = true
+        while i < text.endIndex {
+            let char = text[i]
+            if isFirst {
+                isFirst = false
+                if char == "-" {
+                    i = text.index(after: i)
+                    continue
+                }
+            }
+            if char.isNumber {
+                i = text.index(after: i)
+            } else if String(char) == decimalSeparator, !seenDecimalSep {
+                seenDecimalSep = true
+                i = text.index(after: i)
+            } else {
+                break
+            }
+        }
+        return String(text[i...])
     }
 
     // MARK: during typing
@@ -117,12 +167,13 @@ private struct TextInputRowContent: View {
     @State private var inputText = ""
     @State private var draftInputText = ""
     @State private var lastValidDraft = ""
+    @State private var draftUnitSuffix = ""
     @State private var showInputAlert = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")
     private let inputCommandFormatter = InputCommandFormatter()
     private var formattedCommand: String? {
-        inputCommandFormatter.command(from: draftInputText, hint: inputHint)
+        inputCommandFormatter.command(from: draftInputText, hint: inputHint, unitSuffix: draftUnitSuffix)
     }
 
     private var alertMessage: String {
@@ -145,8 +196,10 @@ private struct TextInputRowContent: View {
                 }
 
                 Button {
-                    draftInputText = inputText
-                    lastValidDraft = inputText
+                    let numericDraft = inputHint == .number ? inputCommandFormatter.numericDraftFromState(inputText) : inputText
+                    draftInputText = numericDraft
+                    lastValidDraft = numericDraft
+                    draftUnitSuffix = (inputHint == .number && !numericDraft.isEmpty) ? inputCommandFormatter.unitSuffixFromState(inputText) : ""
                     showInputAlert = true
                 } label: {
                     Text(inputText.isEmpty
@@ -161,8 +214,10 @@ private struct TextInputRowContent: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 guard !input.readOnly else { return }
-                draftInputText = inputText
-                lastValidDraft = inputText
+                let numericDraft = inputHint == .number ? inputCommandFormatter.numericDraftFromState(inputText) : inputText
+                draftInputText = numericDraft
+                lastValidDraft = numericDraft
+                draftUnitSuffix = (inputHint == .number && !numericDraft.isEmpty) ? inputCommandFormatter.unitSuffixFromState(inputText) : ""
                 showInputAlert = true
             }
             .alert("Enter new value", isPresented: $showInputAlert) {
