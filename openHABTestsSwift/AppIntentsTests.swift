@@ -291,7 +291,7 @@ struct HomeResolverTests {
         #expect(resolved == homeId)
     }
 
-    @Test func selectedHomeMismatchThrows() throws {
+    @MainActor @Test func selectedHomeMismatchThrows() throws {
         let wrongHome = Home(id: UUID().uuidString, displayString: "Wrong Home")
 
         #expect(throws: ItemStateError.self) {
@@ -304,7 +304,7 @@ struct HomeResolverTests {
         }
     }
 
-    @Test func invalidSelectedHomeIdentifierThrows() throws {
+    @MainActor @Test func invalidSelectedHomeIdentifierThrows() throws {
         let invalidHome = Home(id: "not-a-uuid", displayString: "Broken Home")
 
         #expect(throws: HomeResolutionError.self) {
