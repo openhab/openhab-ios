@@ -310,8 +310,8 @@ private struct SegmentedRowContent: View {
                     }
                     .onEnded { _ in
                         pressedIndex = nil
-                        // Send release command on release
                         if let releaseCommand = mapping.releaseCommand, !releaseCommand.isEmpty {
+                            triggerPressFeedback.toggle()
                             logger.info("Sending release command: \(releaseCommand)")
                             sendCommand(
                                 releaseCommand,
