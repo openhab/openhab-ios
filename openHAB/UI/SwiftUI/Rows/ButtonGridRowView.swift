@@ -111,6 +111,7 @@ private struct ButtonGridButton: View {
         guard isPressed else { return }
         isPressed = false
         if let releaseCommand = button.releaseCommand, !releaseCommand.isEmpty {
+            triggerFeedback.toggle()
             logger.info("Sending release command: \(releaseCommand)")
             onSendCommand(releaseCommand, resolveItemName(), .pressRelease, .release)
         }
