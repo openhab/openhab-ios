@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [Version 3.2.43, Build 251] - 2026-05-12Z
+
+- Fix MainUI default path storing proxy-prefixed URL when using cloud connection (#1195)
+- Reload icons after extended background (#1194)
+- Fix sitemap picker showing empty when connected via cloud (#1193)
+
 ## [Version 3.2.42, Build 250] - 2026-05-11Z
 
 - Fix number input locked when state includes unit suffix (e.g. "220 °C") (#1188)
