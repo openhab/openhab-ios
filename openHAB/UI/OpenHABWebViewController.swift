@@ -482,8 +482,10 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
         Logger.viewController.info("WKScriptMessage \(message.name)")
         if message.name == "pathChanged", let newPath = message.body as? String {
             Logger.viewController.debug("Path changed to: \(newPath)")
+            let proxyURL = activeConnectionInfo?.proxyURL
+            let rootURLString = openHABTrackedRootUrl
             Task { @MainActor in
-                Preferences.shared.currentWebViewPath = newPath
+                Preferences.shared.currentWebViewPath = relativeWebViewPath(newPath, proxyURL: proxyURL, rootURLString: rootURLString)
             }
         }
         if message.name == "mainUi", let callbackName = message.body as? String {
@@ -660,13 +662,11 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         acceptsCommands = true
         // watch for URL changes so we can store the last visited path
         if let webviewURL = webView.url {
-            let url = URL(string: webviewURL.path, relativeTo: URL(string: openHABTrackedRootUrl))
-            if let path = url?.path {
-                let string = openHABTrackedRootUrl
-                Logger.viewController.info("navigation change base: \(string) path: \(path)")
-                Task { @MainActor in
-                    Preferences.shared.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
-                }
+            let relative = relativeWebViewPath(webviewURL.path, proxyURL: activeConnectionInfo?.proxyURL, rootURLString: openHABTrackedRootUrl)
+            let trackedRootUrl = openHABTrackedRootUrl
+            Logger.viewController.info("navigation change base: \(trackedRootUrl, privacy: .public) path: \(relative, privacy: .public)")
+            Task { @MainActor in
+                Preferences.shared.currentWebViewPath = relative.hasSuffix("/") ? relative : relative + "/"
             }
         }
     }
