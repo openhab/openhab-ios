@@ -24,6 +24,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gems-
 
+      - name: Install Simulator Runtimes
+        run: |
+          xcodebuild -downloadPlatform iOS
+          xcodebuild -downloadPlatform watchOS
+
       - name: Install dependencies
         run: |
           bundle config set path 'vendor/bundle'
