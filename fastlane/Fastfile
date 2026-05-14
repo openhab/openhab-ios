@@ -55,9 +55,9 @@ platform :ios do
         run_tests(
             workspace: 'openHAB.xcworkspace',
             scheme: 'openHABTestsSwift',
-            xcargs: '-skipPackagePluginValidation',
+            xcargs: '-skipPackagePluginValidation CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO',
             testplan: 'openHABTests',
-            devices: ['iPhone 17 Pro'],
+            destination: 'platform=macOS,variant=Mac Catalyst',
             clean: true
         )
     end
