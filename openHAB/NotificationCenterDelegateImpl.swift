@@ -60,12 +60,18 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             userInfo: userInfo
         )
 
+        // Use the system banner when there are media attachments so the image is visible.
+        // The didReceive handler will process any on-click action when the user taps.
+        if !notification.request.content.attachments.isEmpty {
+            return [.banner, .sound]
+        }
+
         let message = userInfo["message"] as? String ?? String(localized: "message_not_decoded", comment: "")
         let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
         let cloudUserId = userInfo["userId"] as? String
         await displayNotification(message: message, action: action, cloudUserId: cloudUserId)
 
-        return [] // Modify this if you want to show banners, alerts, etc.
+        return []
     }
 
     // this is called when clicking a notification while in the background
