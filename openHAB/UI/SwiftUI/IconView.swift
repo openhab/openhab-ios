@@ -29,7 +29,7 @@ final class IconReloadCoordinator: ObservableObject {
     static let shared = IconReloadCoordinator()
     static let reloadThreshold: TimeInterval = 60
 
-    @Published private(set) var reloadEpoch: Int = 0
+    @Published private(set) var reloadEpoch = 0
 
     private var backgroundedAt: Date?
 
