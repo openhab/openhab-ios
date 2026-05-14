@@ -29,6 +29,7 @@ private struct SegmentedRowContent: View {
     @State private var optimisticBaseState: String?
     @State private var optimisticWidgetId: String?
     @State private var optimisticStartVersion: Int?
+    @State private var revertTask: Task<Void, Never>?
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
     @State private var triggerSelectionFeedback = false
@@ -331,9 +332,16 @@ private struct SegmentedRowContent: View {
         optimisticBaseState = displayState.effectiveState
         optimisticWidgetId = displayState.widgetId
         optimisticStartVersion = widgetVersion
+        revertTask?.cancel()
+        revertTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1))
+            clearOptimisticSelection()
+        }
     }
 
     private func clearOptimisticSelection() {
+        revertTask?.cancel()
+        revertTask = nil
         optimisticSelectedIndex = nil
         optimisticBaseState = nil
         optimisticWidgetId = nil
