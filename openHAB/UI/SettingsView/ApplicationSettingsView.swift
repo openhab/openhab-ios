@@ -12,7 +12,6 @@
 import OpenHABCore
 import os
 import SwiftUI
-import UIKit
 
 struct ApplicationSettingsView: View {
     @Binding var settingsIdleOff: Bool
@@ -30,7 +29,7 @@ struct ApplicationSettingsView: View {
 
             Toggle("Hide Status Bar", isOn: Binding(
                 get: { Preferences.shared.hideStatusBar },
-                set: { Preferences.shared.hideStatusBar = $0; UIApplication.shared.keyWindowActiveScene?.rootViewController?.setNeedsStatusBarAppearanceUpdate() }
+                set: { Preferences.shared.hideStatusBar = $0 }
             ))
 
             NavigationLink("Client Certificates") {

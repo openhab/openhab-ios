@@ -11,7 +11,6 @@
 
 import OpenHABCore
 import SwiftUI
-import UIKit
 
 struct ScreenSaverSettingsView: View {
     @State private var config = ScreenSaverConfiguration()
@@ -218,9 +217,7 @@ struct ScreenSaverSettingsView: View {
     private var testSection: some View {
         Section {
             Button("Test Screen Saver") {
-                if let keyWindow = UIApplication.shared.keyWindowActiveScene {
-                    ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
-                }
+                ScreenSaverManager.shared.startMonitoring(configuration: config)
                 ScreenSaverManager.shared.presentSaver(configuration: config)
             }
         }
@@ -231,15 +228,6 @@ struct ScreenSaverSettingsView: View {
     }
 }
 
-extension UIApplication {
-    var keyWindowActiveScene: UIWindow? {
-        connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first { $0.activationState == .foregroundActive }?
-            .windows
-            .first { $0.isKeyWindow }
-    }
-}
 
 #Preview {
     NavigationStack {
