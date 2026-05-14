@@ -24,8 +24,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gems-
 
-      - name: Install iOS Simulator Runtime
-        run: xcodebuild -downloadPlatform iOS
+      - name: Install Simulator Runtimes
+        run: |
+          xcodebuild -downloadPlatform iOS
+          xcodebuild -downloadPlatform watchOS
 
       - name: Install dependencies
         run: |
