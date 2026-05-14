@@ -64,7 +64,7 @@ private struct SwitchRowContent: View {
                     // the same state so onChange never fires — revert optimistic state after 1s.
                     revertTask?.cancel()
                     revertTask = Task { @MainActor in
-                        try? await Task.sleep(for: .seconds(1))
+                        do { try await Task.sleep(for: .seconds(1)) } catch { return }
                         localIsOn = nil
                     }
                 }

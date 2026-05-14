@@ -334,7 +334,7 @@ private struct SegmentedRowContent: View {
         optimisticStartVersion = widgetVersion
         revertTask?.cancel()
         revertTask = Task { @MainActor in
-            try? await Task.sleep(for: .seconds(1))
+            do { try await Task.sleep(for: .seconds(1)) } catch { return }
             clearOptimisticSelection()
         }
     }

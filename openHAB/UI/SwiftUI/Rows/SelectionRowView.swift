@@ -85,7 +85,7 @@ private struct SelectionRowContent: View {
                         onSelect(mapping.command)
                         revertTask?.cancel()
                         revertTask = Task { @MainActor in
-                            try? await Task.sleep(for: .seconds(1))
+                            do { try await Task.sleep(for: .seconds(1)) } catch { return }
                             clearOptimisticSelection()
                         }
                     } label: {
