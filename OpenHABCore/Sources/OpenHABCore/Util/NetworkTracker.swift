@@ -512,6 +512,15 @@ public actor NetworkTracker {
         }
     }
 
+    /// Clears the active connection and rediscovers the best available one.
+    /// Use after a transport failure to recover from a stale connection (e.g. network switched while process was suspended).
+    private func revalidateConnection() async {
+        Logger.networkTracker.info("NetworkTracker: Re-evaluating connection after transport failure")
+        setActiveConnection(nil)
+        await failureTracker.resetAll()
+        await attemptConnection()
+    }
+
     /// keep trying to connect when network is not connected, otherwise check if active connection is actually available
     private func handleNetworkChange(isConnected: Bool) async {
         guard status != .stopped else {
@@ -576,20 +585,43 @@ public extension NetworkTracker {
     }
 
     func send(to item: String, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
-        try await service().sendItemCommand(itemname: item, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        do {
+            try await service().sendItemCommand(itemname: item, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        } catch is OpenAPIRuntime.ClientError {
+            // Transport error: the command never reached the server (safe to retry).
+            // The active connection may be stale if the process was suspended during a network switch.
+            await revalidateConnection()
+            try await service().sendItemCommand(itemname: item, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        }
     }
 
     func updateState(item: OpenHABItem, state: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
-        try await service().updateItemState(itemname: item.name, with: state, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        do {
+            try await service().updateItemState(itemname: item.name, with: state, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        } catch is OpenAPIRuntime.ClientError {
+            await revalidateConnection()
+            try await service().updateItemState(itemname: item.name, with: state, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        }
     }
 
     func getStaticItems() async throws -> [OpenHABItem] {
-        let items = try await service().getItems(query: Operations.getItems.Input.Query(staticDataOnly: true))
-        return items.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        do {
+            let items = try await service().getItems(query: Operations.getItems.Input.Query(staticDataOnly: true))
+            return items.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        } catch is OpenAPIRuntime.ClientError {
+            await revalidateConnection()
+            let items = try await service().getItems(query: Operations.getItems.Input.Query(staticDataOnly: true))
+            return items.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        }
     }
 
     func getItemByName(id: String) async throws -> OpenHABItem? {
-        try await service().getItemByName(id: id)
+        do {
+            return try await service().getItemByName(id: id)
+        } catch is OpenAPIRuntime.ClientError {
+            await revalidateConnection()
+            return try await service().getItemByName(id: id)
+        }
     }
 
     func pollDataForPage(sitemapname: String, pageId: String = "", longPolling: Bool = false) async throws -> OpenHABPage? {
