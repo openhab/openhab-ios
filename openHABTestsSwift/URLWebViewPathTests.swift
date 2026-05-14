@@ -13,6 +13,31 @@ import Foundation
 @testable import openHAB
 import Testing
 
+@Suite("relativeWebViewPath(proxyURL:rootURLString:)")
+struct RelativeWebViewPathFunctionTests {
+    @Test func prefersProxyURLWhenPresent() {
+        let proxy = URL(string: "https://host/proxy")!
+        let result = relativeWebViewPath("/proxy/ui", proxyURL: proxy, rootURLString: "https://host")
+        #expect(result == "/ui")
+    }
+
+    @Test func proxyDoesNotMatchSiblingPath() {
+        let proxy = URL(string: "https://host/proxy")!
+        let result = relativeWebViewPath("/proxy2/ui", proxyURL: proxy, rootURLString: "https://host")
+        #expect(result == "/proxy2/ui")
+    }
+
+    @Test func fallsBackToRootURLWhenNoProxy() {
+        let result = relativeWebViewPath("/openhab/ui", proxyURL: nil, rootURLString: "https://host/openhab")
+        #expect(result == "/ui")
+    }
+
+    @Test func rootURLDoesNotMatchSiblingPath() {
+        let result = relativeWebViewPath("/openhab2/ui", proxyURL: nil, rootURLString: "https://host/openhab")
+        #expect(result == "/openhab2/ui")
+    }
+}
+
 @Suite("URL.relativeWebViewPath")
 struct URLWebViewPathTests {
     // MARK: - Exact match
@@ -62,30 +87,5 @@ struct URLWebViewPathTests {
     @Test func unrelatedPath() {
         let url = URL(string: "https://host/openhab")!
         #expect(url.relativeWebViewPath(for: "/other/path") == "/other/path")
-    }
-}
-
-@Suite("relativeWebViewPath(proxyURL:rootURLString:)")
-struct RelativeWebViewPathFunctionTests {
-    @Test func prefersProxyURLWhenPresent() {
-        let proxy = URL(string: "https://host/proxy")!
-        let result = relativeWebViewPath("/proxy/ui", proxyURL: proxy, rootURLString: "https://host")
-        #expect(result == "/ui")
-    }
-
-    @Test func proxyDoesNotMatchSiblingPath() {
-        let proxy = URL(string: "https://host/proxy")!
-        let result = relativeWebViewPath("/proxy2/ui", proxyURL: proxy, rootURLString: "https://host")
-        #expect(result == "/proxy2/ui")
-    }
-
-    @Test func fallsBackToRootURLWhenNoProxy() {
-        let result = relativeWebViewPath("/openhab/ui", proxyURL: nil, rootURLString: "https://host/openhab")
-        #expect(result == "/ui")
-    }
-
-    @Test func rootURLDoesNotMatchSiblingPath() {
-        let result = relativeWebViewPath("/openhab2/ui", proxyURL: nil, rootURLString: "https://host/openhab")
-        #expect(result == "/openhab2/ui")
     }
 }

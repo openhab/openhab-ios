@@ -230,13 +230,19 @@ struct InputRowInput: Sendable, Equatable, RowWithIconInput {
     let inputHintRawValue: String
     let icon: RowIconInput
     let itemName: String?
+    let numberPattern: String?
 
     var inputHint: OpenHABWidget.InputHint {
         OpenHABWidget.InputHint(rawValue: inputHintRawValue)
     }
 
     static func from(widget: OpenHABWidget) -> InputRowInput {
-        InputRowInput(
+        let numberPattern = if let pattern = widget.pattern, !pattern.isEmpty {
+            pattern
+        } else {
+            widget.item?.stateDescription?.numberPattern
+        }
+        return InputRowInput(
             widgetId: widget.widgetId,
             renderingKind: widget.renderingKind,
             displayState: widget.displayState,
@@ -245,7 +251,8 @@ struct InputRowInput: Sendable, Equatable, RowWithIconInput {
             readOnly: widget.readOnly,
             inputHintRawValue: widget.inputHint.rawValue,
             icon: RowIconInput.from(widget: widget),
-            itemName: widget.item?.name
+            itemName: widget.item?.name,
+            numberPattern: numberPattern
         )
     }
 }

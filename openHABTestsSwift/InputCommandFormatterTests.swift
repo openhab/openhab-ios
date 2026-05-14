@@ -356,6 +356,43 @@ struct InputCommandFormatterOracleTests {
     }
 }
 
+// MARK: - localeFormattedValue with comma separator
+
+@Suite
+struct InputCommandFormattedValueCommaTests {
+    let formatter = InputCommandFormatter(decimalSeparator: ",")
+
+    @Test
+    func localeFormattedValueWholeNumber() {
+        #expect(formatter.localeFormattedValue(220.0) == "220")
+    }
+
+    @Test
+    func localeFormattedValueDecimalUsesComma() {
+        #expect(formatter.localeFormattedValue(220.5) == "220,5")
+    }
+
+    @Test
+    func localeFormattedValueNegativeDecimalUsesComma() {
+        #expect(formatter.localeFormattedValue(-3.14) == "-3,14")
+    }
+
+    @Test
+    func serverStateDecimalConvertsToLocaleForCommand() {
+        // Server sends "220.5", we format for editing ("220,5"), user doesn't change it,
+        // command normalizes back to "220.5".
+        let draft = formatter.localeFormattedValue(220.5)
+        #expect(draft == "220,5")
+        #expect(formatter.command(from: draft, hint: .number) == "220.5")
+    }
+
+    @Test
+    func localeFormattedValueSmallDecimalNoExponentNotation() {
+        // String(0.00001) emits "1e-05" in Swift; NumberFormatter must produce fixed-point instead.
+        #expect(formatter.localeFormattedValue(0.00001) == "0,00001")
+    }
+}
+
 @Suite
 struct InputCommandFormatterTests {
     let formatter = InputCommandFormatter(decimalSeparator: ".")
@@ -667,5 +704,33 @@ struct InputCommandFormatterTests {
     @Test
     func commandWithoutUnitSuffix() {
         #expect(formatter.command(from: "220", hint: .number) == "220")
+    }
+
+    // MARK: - localeFormattedValue (dot locale)
+
+    @Test
+    func localeFormattedValueWholeNumber() {
+        #expect(formatter.localeFormattedValue(220.0) == "220")
+    }
+
+    @Test
+    func localeFormattedValueDecimal() {
+        #expect(formatter.localeFormattedValue(220.5) == "220.5")
+    }
+
+    @Test
+    func localeFormattedValueNegativeWhole() {
+        #expect(formatter.localeFormattedValue(-10.0) == "-10")
+    }
+
+    @Test
+    func localeFormattedValueNegativeDecimal() {
+        #expect(formatter.localeFormattedValue(-3.14) == "-3.14")
+    }
+
+    @Test
+    func localeFormattedValueSmallDecimalNoExponentNotation() {
+        // String(0.00001) emits "1e-05" in Swift; NumberFormatter must produce fixed-point instead.
+        #expect(formatter.localeFormattedValue(0.00001) == "0.00001")
     }
 }
