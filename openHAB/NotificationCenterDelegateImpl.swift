@@ -17,8 +17,6 @@ import Kingfisher
 import OpenHABCore
 import os.log
 import SDWebImageSVGCoder
-import SwiftMessages
-import UIKit
 @preconcurrency import UserNotifications
 import WatchConnectivity
 
@@ -93,49 +91,10 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             await audioPlayer.playSound()
         }
 
-        var config = SwiftMessages.Config()
-        config.duration = .seconds(seconds: 5)
-        config.presentationStyle = .bottom
-
-        class MessageTapGestureRecognizer: UITapGestureRecognizer {
-            private let handler: () -> Void
-
-            init(handler: @escaping () -> Void) {
-                self.handler = handler
-                super.init(target: nil, action: nil)
-                addTarget(self, action: #selector(handleTap))
-            }
-
-            @objc private func handleTap() {
-                handler()
-            }
+        let title = String(localized: "notification", comment: "")
+        ToastService.shared.show(title: title, message: message) { [weak self] in
+            self?.notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
         }
-
-        await MainActor.run {
-            SwiftMessages.show(config: config) {
-                let view = MessageView.viewFromNib(layout: .cardView)
-                view.configureTheme(.info)
-                view.configureContent(title: String(localized: "notification", comment: ""), body: message)
-                view.button?.setTitle(String(localized: "dismiss", comment: ""), for: .normal)
-                view.buttonTapHandler = { _ in SwiftMessages.hide() }
-
-                // Use closure-based tap gesture insteae of #selector
-                let tapGesture = MessageTapGestureRecognizer {
-                    Task {
-                        await self.messageViewTapped(action: action, cloudUserId: cloudUserId)
-                    }
-                }
-                view.addGestureRecognizer(tapGesture)
-
-                return view
-            }
-        }
-    }
-
-    // Action to be performed when the notification message view is tapped
-    func messageViewTapped(action: String?, cloudUserId: String? = nil) async {
-        notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
-        SwiftMessages.hideAll()
     }
 
     @MainActor

@@ -17,7 +17,6 @@ import Kingfisher
 import OpenHABCore
 import os.log
 import SDWebImageSVGCoder
-import SwiftMessages
 import UIKit
 @preconcurrency import UserNotifications
 import WatchConnectivity

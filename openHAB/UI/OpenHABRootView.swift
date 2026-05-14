@@ -25,6 +25,7 @@ struct OpenHABRootView: View {
     @StateObject private var crashService = CrashReportService()
     @StateObject private var menuData = MenuDataService()
     @StateObject private var webViewModel = OpenHABWebViewModel()
+    @State private var toastService = ToastService.shared
     @State private var menuPresented = false
     @State private var currentContent: TargetController = .webview
     @State private var currentViewTitle: String = ""
@@ -95,10 +96,20 @@ struct OpenHABRootView: View {
         } message: {
             Text("The app crashed during the previous session. Would you like to send a crash report?")
         }
+        .overlay(alignment: .bottom) {
+            InAppToastBanner(service: toastService)
+        }
         #if DEBUG
         .onAppear {
-            if ProcessInfo.processInfo.environment["UITest"] != nil {
+            let env = ProcessInfo.processInfo.environment
+            if env["UITest"] != nil {
                 Preferences.shared.modifyActiveHome { $0.demomode = true }
+            }
+            if let title = env["UITestToastTitle"],
+               let message = env["UITestToastMessage"] {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    ToastService.shared.show(title: title, message: message)
+                }
             }
         }
         #endif
@@ -368,5 +379,58 @@ struct OpenHABRootView: View {
         config.entersReaderIfAvailable = true
         let svc = SFSafariViewController(url: url, configuration: config)
         UIApplication.shared.firstKeyWindow?.rootViewController?.present(svc, animated: true)
+    }
+}
+
+// MARK: - In-app toast banner
+
+/// Slide-up banner driven by ToastService. Uses frame(maxWidth: .infinity) so
+/// long strings never overflow the screen — unlike AlertToast which applies
+/// fixedSize(horizontal: true) before its maxWidth cap.
+private struct InAppToastBanner: View {
+    let service: ToastService
+
+    var body: some View {
+        Group {
+            if service.isPresented {
+                VStack(alignment: .leading, spacing: 4) {
+                    if !service.title.isEmpty {
+                        Text(service.title)
+                            .font(.headline)
+                            .lineLimit(2)
+                    }
+                    if !service.message.isEmpty {
+                        Text(service.message)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .lineLimit(4)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                .padding([.horizontal, .bottom])
+                .contentShape(RoundedRectangle(cornerRadius: 12))
+                .onTapGesture { dismiss() }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .task { await autoDismiss() }
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.78), value: service.isPresented)
+    }
+
+    private func dismiss() {
+        service.onTap?()
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+            service.isPresented = false
+        }
+    }
+
+    private func autoDismiss() async {
+        try? await Task.sleep(for: .seconds(5))
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+            service.isPresented = false
+        }
     }
 }
