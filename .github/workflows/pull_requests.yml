@@ -24,6 +24,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gems-
 
+      - name: Install iOS Simulator Runtime
+        run: xcodebuild -downloadPlatform iOS
+
       - name: Install dependencies
         run: |
           bundle config set path 'vendor/bundle'
