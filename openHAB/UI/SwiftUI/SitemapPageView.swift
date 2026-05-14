@@ -111,7 +111,7 @@ extension SitemapPageView {
             }
             .padding(.vertical, 6)
             .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-            .listRowBackground(Color(UIColor.ohSecondarySystemGroupedBackground))
+            .listRowBackground(Color(.secondarySystemGroupedBackground))
         }
     }
 }

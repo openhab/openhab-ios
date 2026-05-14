@@ -48,7 +48,7 @@ private struct SegmentedRowContent: View {
                 Spacer(minLength: 8)
                 Text(detailTextLabel)
                     .ohTextToken(.rowValue)
-                    .foregroundStyle(input.valueColor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: input.valueColor))
+                    .foregroundStyle(input.valueColor.isEmpty ? Color(.secondaryLabel) : Color(fromString: input.valueColor))
                     .layoutPriority(1)
                     .monospacedDigit()
             }

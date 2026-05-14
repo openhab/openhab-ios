@@ -125,11 +125,11 @@ struct EmbeddingRowInputView: View {
     @EnvironmentObject private var viewModel: SitemapPageViewModel
 
     private var regularRowBackground: Color {
-        Color(UIColor.ohSecondarySystemGroupedBackground)
+        Color(.secondarySystemGroupedBackground)
     }
 
     private var frameRowBackground: Color {
-        Color(UIColor.ohSystemGroupedBackground)
+        Color(.systemGroupedBackground)
     }
 
     var body: some View {

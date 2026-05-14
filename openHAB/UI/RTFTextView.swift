@@ -35,8 +35,8 @@ struct RTFTextView: UIViewRepresentable {
                     documentAttributes: nil
                 )
                 uiView.attributedText = attributedString
-                uiView.backgroundColor = .ohSystemBackground
-                uiView.textColor = .ohLabel
+                uiView.backgroundColor = .systemBackground
+                uiView.textColor = .label
             } catch {
                 Logger.rtfTextView.error("Failed to load RTF file: \(error.localizedDescription)")
             }

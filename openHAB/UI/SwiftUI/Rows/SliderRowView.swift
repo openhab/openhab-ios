@@ -162,7 +162,7 @@ private struct SliderRowContent: View {
             Text(isEditing ? currentValueText : (state.displayState.labelValue ?? currentValueText))
                 .ohTextToken(.rowValueCallout)
                 .monospacedDigit()
-                .foregroundStyle(state.valueColor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: state.valueColor))
+                .foregroundStyle(state.valueColor.isEmpty ? Color(.secondaryLabel) : Color(fromString: state.valueColor))
         }
         .contentShape(Rectangle())
     }
