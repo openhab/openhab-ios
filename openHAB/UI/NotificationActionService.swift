@@ -197,7 +197,7 @@ class NotificationActionService: ObservableObject {
             case .wake: NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
             }
         case let .idleTimer(enabled):
-            UIApplication.shared.isIdleTimerDisabled = !enabled
+            IdleTimerService.shared.isDisabled = !enabled
         case let .brightness(value):
             UIScreen.main.brightness = value
         case let .tts(text, language, voiceName):

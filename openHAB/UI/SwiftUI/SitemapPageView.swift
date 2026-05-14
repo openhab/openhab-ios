@@ -12,7 +12,6 @@
 import CommonUI
 import OpenHABCore
 import SwiftUI
-import UIKit
 
 struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
@@ -62,7 +61,7 @@ struct SitemapPageView: View {
             viewModel.markAppeared()
             // Disable idle timer if configured in settings
             if Preferences.shared.idleOff {
-                UIApplication.shared.isIdleTimerDisabled = true
+                IdleTimerService.shared.isDisabled = true
                 idleTimerDisabled = true
             }
         }
@@ -70,7 +69,7 @@ struct SitemapPageView: View {
             viewModel.stopPageHandling()
             // Re-enable idle timer when leaving the view
             if idleTimerDisabled {
-                UIApplication.shared.isIdleTimerDisabled = false
+                IdleTimerService.shared.isDisabled = false
             }
         }
         .navigationTitle(viewModel.pageTitle)
