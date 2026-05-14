@@ -12,37 +12,34 @@
 import OpenHABCore
 import os.log
 import SwiftUI
-import UIKit
 
-struct RTFTextView: UIViewRepresentable {
+struct RTFTextView: View {
     let rtfFileName: String
+    @State private var content: AttributedString = AttributedString("")
 
-    func makeUIView(context: Context) -> UITextView {
-        let textView = UITextView()
-        textView.isEditable = false
-        textView.isSelectable = true
-        textView.backgroundColor = UIColor.clear
-        return textView
+    var body: some View {
+        ScrollView {
+            Text(content)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+        }
+        .task { await load() }
     }
 
-    func updateUIView(_ uiView: UITextView, context: Context) {
-        if let url = Bundle.main.url(forResource: rtfFileName, withExtension: "rtf") {
-            do {
-                let attributedString = try NSAttributedString(
-                    url: url,
-
-                    options: [.characterEncoding: String.Encoding.utf8.rawValue],
-                    documentAttributes: nil
-                )
-                uiView.attributedText = attributedString
-                uiView.backgroundColor = .systemBackground
-                uiView.textColor = .label
-            } catch {
-                Logger.rtfTextView.error("Failed to load RTF file: \(error.localizedDescription)")
-            }
-        } else {
-            Logger.rtfTextView.warning("RTF file not found")
+    private func load() async {
+        guard let url = Bundle.main.url(forResource: rtfFileName, withExtension: "rtf"),
+              let ns = try? NSAttributedString(
+                  url: url,
+                  options: [.characterEncoding: String.Encoding.utf8.rawValue],
+                  documentAttributes: nil
+              ),
+              let result = try? AttributedString(ns, including: \.foundation)
+        else {
+            Logger.rtfTextView.warning("RTF file '\(rtfFileName)' not found or could not be parsed")
+            return
         }
+        content = result
     }
 }
 
