@@ -82,11 +82,24 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     private var webView: WKWebView = .init(frame: .zero)
+    private let loadingOverlay = UIView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
         attachWebViewToLayout(webView)
+
+        loadingOverlay.backgroundColor = .systemBackground
+        loadingOverlay.isHidden = true
+        loadingOverlay.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(loadingOverlay)
+        NSLayoutConstraint.activate([
+            loadingOverlay.topAnchor.constraint(equalTo: view.topAnchor),
+            loadingOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            loadingOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            loadingOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+
         activityIndicator = UIActivityIndicatorView()
         activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
@@ -352,12 +365,13 @@ class OpenHABWebViewController: OpenHABViewController {
     func clearExistingPage() {
         Logger.viewController.info("clearExistingPage")
         setHideNavigationBar(shouldHide: false)
-        // clear out existing page while we load.
+        loadingOverlay.isHidden = false
         webView.stopLoading()
         webView.evaluateJavaScript("document.body.remove()")
     }
 
     func pageLoadError(message: String) {
+        loadingOverlay.isHidden = true
         showActivityIndicator(show: true)
         showPopupMessage(seconds: 60, title: String(localized: "Error", comment: ""), message: message, theme: .error)
     }
@@ -437,6 +451,7 @@ class OpenHABWebViewController: OpenHABViewController {
         // support dark mode and avoid white flashing when loading
         webview.isOpaque = false
         webview.backgroundColor = UIColor.clear
+        webview.underPageBackgroundColor = .systemBackground
         if UIDevice.current.userInterfaceIdiom == .pad {
             // since ios 13 Safari sets the user agent to desktop mode on iPads so the view renders correctly with larger screens
             webview.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
@@ -462,7 +477,7 @@ class OpenHABWebViewController: OpenHABViewController {
 
     func attachWebViewToLayout(_ webView: WKWebView) {
         if webView.superview !== view {
-            view.addSubview(webView)
+            view.insertSubview(webView, at: 0)
         }
         webView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -658,6 +673,12 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
         setHideNavigationBar(shouldHide: true)
         showActivityIndicator(show: false)
+        UIView.animate(withDuration: 0.2) {
+            self.loadingOverlay.alpha = 0
+        } completion: { _ in
+            self.loadingOverlay.isHidden = true
+            self.loadingOverlay.alpha = 1
+        }
         hidePopupMessages()
         acceptsCommands = true
         // watch for URL changes so we can store the last visited path

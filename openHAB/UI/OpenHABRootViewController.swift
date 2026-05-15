@@ -519,10 +519,10 @@ class OpenHABRootViewController: UIViewController {
     private func handleDismiss(mode: TargetController) {
         switch mode {
         case .webview:
-            // Handle webview navigation or state update
             Logger.viewController.debug("Dismissed to WebView")
-            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true)
-            switchView(target: .webview)
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .webview)
+            }
         case .settings:
             Logger.viewController.debug("Dismissed to Settings")
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
