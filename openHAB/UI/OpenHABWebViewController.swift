@@ -743,7 +743,6 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
         let nsError = error as NSError
         if nsError.domain == NSURLErrorDomain, nsError.code == NSURLErrorCancelled {
-            Logger.viewController.debug("didFailProvisionalNavigation cancelled - webView.url: \(String(describing: webView.url?.description))")
             return
         }
         setHideNavigationBar(shouldHide: false)
