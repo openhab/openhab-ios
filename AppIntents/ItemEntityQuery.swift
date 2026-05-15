@@ -80,6 +80,8 @@ extension ItemEntityQuery {
     }
 
     func entities(for identifiers: [ItemIdentifier]) async throws -> [EntityType] {
+        await Preferences.prepareForAppExtensionAccess()
+
         var result: [EntityType] = []
 
         for identifier in identifiers {
@@ -96,6 +98,8 @@ extension ItemEntityQuery {
     }
 
     func suggestedEntities() async throws -> [EntityType] {
+        await Preferences.prepareForAppExtensionAccess()
+
         // If the user selected a Home in the intent UI, scope results to that home.
         if let selectedHomeId = await resolvedSelectedHomeId() {
             await OpenHABItemCache.instance.reloadCacheIfNeeded(homes: [selectedHomeId])
@@ -117,6 +121,8 @@ extension ItemEntityQuery {
     }
 
     func entities(matching string: String) async throws -> [EntityType] {
+        await Preferences.prepareForAppExtensionAccess()
+
         let selectedHomeId = await resolvedSelectedHomeId()
         let searchResults: [UUID: [OpenHABItem]]
         if let selectedHomeId {

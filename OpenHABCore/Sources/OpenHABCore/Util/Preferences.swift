@@ -276,6 +276,16 @@ public actor Preferences {
     }
 }
 
+// MARK: App extension access
+
+public extension Preferences {
+    static func prepareForAppExtensionAccess() async {
+        await MainActor.run {
+            _ = Preferences.shared
+        }
+    }
+}
+
 // MARK: Multiple homes
 
 @MainActor

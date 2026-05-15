@@ -54,6 +54,8 @@ struct SetPlayerValueIntent: AppIntent {
     var action: PlayerAction
 
     func perform() async throws -> some IntentResult {
+        await Preferences.prepareForAppExtensionAccess()
+
         let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,
             itemHomeId: itemEntity.homeId,

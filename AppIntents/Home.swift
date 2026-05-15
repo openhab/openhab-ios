@@ -88,7 +88,9 @@ enum HomeResolver {
     static func resolveHomeId(selectedHome: Home?,
                               itemName: String,
                               allowedTypes: [OpenHABItem.ItemType]? = nil) async throws -> UUID {
-        try await resolveHomeId(
+        await Preferences.prepareForAppExtensionAccess()
+
+        return try await resolveHomeId(
             selectedHome: selectedHome,
             itemName: itemName,
             findHomeId: { identifier in

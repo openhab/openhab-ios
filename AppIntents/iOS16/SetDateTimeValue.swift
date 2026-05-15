@@ -31,6 +31,7 @@ enum SetDateTimeValueError: Error, CustomLocalizedStringResourceConvertible {
 struct SetDateTimeValue: AppIntent, PredictableIntent {
     struct DateTimeOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
+            await Preferences.prepareForAppExtensionAccess()
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
             let items = allItems.flatMap(\.value).filter { $0.type == .dateTime }
             return items.map(\.name)
