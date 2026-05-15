@@ -365,6 +365,8 @@ class OpenHABWebViewController: OpenHABViewController {
     func clearExistingPage() {
         Logger.viewController.info("clearExistingPage")
         setHideNavigationBar(shouldHide: false)
+        loadingOverlay.layer.removeAllAnimations()
+        loadingOverlay.alpha = 1
         loadingOverlay.isHidden = false
         webView.stopLoading()
         webView.evaluateJavaScript("document.body.remove()")
