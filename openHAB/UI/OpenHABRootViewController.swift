@@ -520,18 +520,8 @@ class OpenHABRootViewController: UIViewController {
         switch mode {
         case .webview:
             Logger.viewController.debug("Dismissed to WebView")
-            if currentView === webViewController {
-                // Already on MainUI: let the animation play with existing content visible,
-                // then reload after — avoids blanking the view mid-animation.
-                SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
-                    self.webViewController.reloadView()
-                }
-            } else {
-                // Coming from another view: put the webview in place before the animation
-                // so the correct content slides in.
-                switchView(target: .webview)
-                SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true)
-            }
+            switchView(target: .webview)
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true)
         case .settings:
             Logger.viewController.debug("Dismissed to Settings")
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
