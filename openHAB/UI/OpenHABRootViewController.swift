@@ -520,11 +520,13 @@ class OpenHABRootViewController: UIViewController {
         switch mode {
         case .webview:
             Logger.viewController.debug("Dismissed to WebView")
-            let switchingFromOtherView = currentView !== webViewController
-            switchView(target: .webview)
-            if switchingFromOtherView {
+            if currentView !== webViewController {
+                // Coming from another view: put webVC in place before the animation
+                // and reload so the loading overlay covers its blank state
+                switchView(target: .webview)
                 webViewController.reloadView()
             }
+            // Already on webVC: show existing content during animation — no reload
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true)
         case .settings:
             Logger.viewController.debug("Dismissed to Settings")
