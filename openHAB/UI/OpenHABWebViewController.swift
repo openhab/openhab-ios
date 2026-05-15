@@ -35,6 +35,10 @@ class OpenHABWebViewController: OpenHABViewController {
     private var etagCheckerConfigURL: String? // Track which config the checker was created for
     private var lastLoadedURL: String? // Track the last successfully loaded URL from didFinish
 
+    var hasLoadedPage: Bool {
+        !currentTarget.isEmpty
+    }
+
     private var js = """
     (function() {
         // Main UI Callbacks
@@ -113,8 +117,18 @@ class OpenHABWebViewController: OpenHABViewController {
         setHideNavigationBar(shouldHide: hideNavigationBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
         parent?.navigationItem.title = "Main View"
+
+        // On first appearance (no page loaded yet) keep the overlay visible so the blank
+        // WKWebView is never exposed to the user before the page starts loading.
+        if currentTarget.isEmpty {
+            loadingOverlay.layer.removeAllAnimations()
+            loadingOverlay.alpha = 1
+            loadingOverlay.isHidden = false
+        }
+
         MainActorNetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
+            .removeDuplicates()
             .sink { activeConnection in
                 if let activeConnection {
                     let activeConfiguration = activeConnection.configuration
@@ -146,6 +160,14 @@ class OpenHABWebViewController: OpenHABViewController {
         trackerCancellables.removeAll()
 
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
+    }
+
+    func prepareForDisplayTransition() {
+        guard isViewLoaded, !hasLoadedPage else { return }
+        loadingOverlay.layer.removeAllAnimations()
+        loadingOverlay.alpha = 1
+        loadingOverlay.isHidden = false
+        showActivityIndicator(show: true)
     }
 
     func startTracker() {
@@ -719,6 +741,11 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+        let nsError = error as NSError
+        if nsError.domain == NSURLErrorDomain, nsError.code == NSURLErrorCancelled {
+            Logger.viewController.debug("didFailProvisionalNavigation cancelled - webView.url: \(String(describing: webView.url?.description))")
+            return
+        }
         setHideNavigationBar(shouldHide: false)
         reloadView()
     }
