@@ -84,7 +84,7 @@ struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
         let openHABItem = items[0]
 
         do {
-            try await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: String(value))
+            try await OpenHABItemCache.instance.sendCommand(to: openHABItem, home: homeId, command: NumberState(value: value).commandString)
         } catch {
             throw SetNumberValueError.commandFailed(error.localizedDescription)
         }
