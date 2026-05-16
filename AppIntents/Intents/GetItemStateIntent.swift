@@ -46,6 +46,8 @@ struct GetItemStateIntent: AppIntent {
     var itemEntity: GenericItemEntity
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+        await Preferences.prepareForAppExtensionAccess()
+
         // Validate that the item belongs to the selected home
         let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,

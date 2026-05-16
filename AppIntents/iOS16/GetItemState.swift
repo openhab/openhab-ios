@@ -28,6 +28,7 @@ enum GetItemStateError: Error, CustomLocalizedStringResourceConvertible {
 struct GetItemState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct StringOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
+            await Preferences.prepareForAppExtensionAccess()
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
             return allItems.flatMap { $0.value.map(\.name) }
         }

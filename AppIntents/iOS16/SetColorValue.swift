@@ -34,6 +34,7 @@ enum SetColorValueError: Error, CustomLocalizedStringResourceConvertible {
 struct SetColorValue: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     struct StringOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
+            await Preferences.prepareForAppExtensionAccess()
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
             let items = allItems.flatMap(\.value).filter { $0.type == .color }
             return items.map(\.name)

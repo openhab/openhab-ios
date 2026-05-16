@@ -318,8 +318,7 @@ actor NotificationServiceHandler {
         if let tracker = networkTracker {
             return tracker
         }
-        // Ensure Preferences initializes on the MainActor to avoid crashes
-        await MainActor.run { _ = Preferences.shared }
+        await Preferences.prepareForAppExtensionAccess()
 
         let tracker = NetworkTracker(timeout: NotificationServiceHandler.networkTimeout)
         let connections: [ConnectionConfiguration]
@@ -330,9 +329,10 @@ actor NotificationServiceHandler {
             connections = await [instance.localConnectionConfig, instance.remoteConnectionConfig]
         } else {
             Logger.notificationService.info("Using default connection configurations")
+            let currentHomePreferences = await Preferences.shared.currentHomePreferences
             connections = await [
-                Preferences.shared.currentHomePreferences.localConnectionConfig,
-                Preferences.shared.currentHomePreferences.remoteConnectionConfig
+                currentHomePreferences.localConnectionConfig,
+                currentHomePreferences.remoteConnectionConfig
             ]
         }
 

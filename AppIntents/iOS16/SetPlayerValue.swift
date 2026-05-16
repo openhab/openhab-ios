@@ -43,6 +43,7 @@ struct SetPlayerValue: AppIntent, PredictableIntent {
 
     struct ItemOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
+            await Preferences.prepareForAppExtensionAccess()
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
             let items = allItems.flatMap(\.value).filter { $0.type == .player }
             return items.map(\.name)

@@ -160,6 +160,7 @@ public actor OpenHABItemCache {
     private init() {}
 
     public func getAllCachedItems() async -> [UUID: [OpenHABItem]] {
+        await Preferences.prepareForAppExtensionAccess()
         await reloadCacheIfNeeded(homes: Preferences.shared.listStoredHomes())
         return items
     }
@@ -272,6 +273,7 @@ public actor OpenHABItemCache {
 
     public func forceCacheReload() async {
         Logger.itemCache.info("forced cache reload for all homes")
+        await Preferences.prepareForAppExtensionAccess()
         let homes = await Preferences.shared.listStoredHomes()
         // some house keeping
         let networkTrackersToRemove = networkTrackers.filter { !homes.contains($0.key) }
@@ -334,6 +336,7 @@ public actor OpenHABItemCache {
     }
 
     private func assureNetworkTracker(homeId: UUID) async -> NetworkTracker? {
+        await Preferences.prepareForAppExtensionAccess()
         if networkTrackers[homeId] == nil, let homePreferences = await Preferences.shared.storedHomes[homeId] {
             let tracker = NetworkTracker(timeout: OpenHABItemCache.networkTimeout)
             networkTrackers[homeId] = tracker
@@ -373,6 +376,7 @@ public extension OpenHABItemCache {
     }
 
     func searchCachedOrPersistedItems(searchTerm: String, types: [OpenHABItem.ItemType]? = nil, homes: [UUID]? = nil) async -> [UUID: [OpenHABItem]] {
+        await Preferences.prepareForAppExtensionAccess()
         let targetHomes: [UUID] = if let homes {
             homes
         } else {
