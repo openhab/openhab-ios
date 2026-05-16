@@ -119,6 +119,19 @@ class SitemapPageViewModel: ObservableObject {
         }
     }
 
+    init(sitemapName: String, pageUrl: String, title: String, pageId: String) {
+        loadSettings()
+        defaultSitemap = sitemapName
+        isLinkedPage = true
+        startObservers()
+        fallbackTitle = title
+        defaultSitemapLabel = title
+        self.pageId = pageId
+
+        // Set openHABRootUrl from current active connection for charts/images
+        openHABRootUrl = networkTracker.activeConnection?.configuration.url
+    }
+
     /// Initializes the view model with a fixed set of widgets, without loading or polling
     init(pageUrl: String = "", title: String = "Preview Page", pageId: String = "", widgets: [OpenHABWidget]) {
         isLinkedPage = !pageUrl.isEmpty
@@ -779,12 +792,17 @@ extension SitemapPageViewModel {
     }
 
     @MainActor
+    func configureSitemap(name: String, pageId: String?) {
+        defaultSitemap = name
+        defaultSitemapLabel = ""
+        self.pageId = pageId ?? ""
+        error = nil
+    }
+
+    @MainActor
     // swiftlint:disable:next async_without_await
     func pushSitemap(name: String, path: String?) async {
-        defaultSitemap = name
-        defaultSitemapLabel = "" // Clear old label so it gets fetched for the new sitemap
-        pageId = path ?? ""
-        error = nil // Clear any previous errors when switching sitemaps
+        configureSitemap(name: name, pageId: path)
         startPageHandling(forceRestart: true, reason: "push-sitemap")
     }
 
