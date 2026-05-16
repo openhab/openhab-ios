@@ -200,7 +200,6 @@ struct DrawerView: View {
 
     private func menuEntry(image: Image, text: Text, goTo target: TargetController) -> some View {
         Button {
-            dismiss()
             onDismiss(target)
         } label: {
             HStack {
@@ -218,7 +217,6 @@ struct DrawerView: View {
                            goTo target: TargetController,
                            @ViewBuilder label: () -> some View) -> some View {
         Button {
-            dismiss()
             onDismiss(target)
         } label: {
             HStack {
