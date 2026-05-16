@@ -156,6 +156,14 @@ class OpenHABRootViewController: UIViewController {
 
     private var networkStatusButton: UIButton = .init(type: .custom)
 
+    private let transitionCoverView: UIView = {
+        let v = UIView()
+        v.backgroundColor = .systemBackground
+        v.isHidden = true
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
+
     private lazy var webViewController: OpenHABWebViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABWebViewController") as! OpenHABWebViewController
@@ -213,7 +221,20 @@ class OpenHABRootViewController: UIViewController {
         #endif
         // save this so we know if its changed later
         isDemoMode = Preferences.shared.currentHomePreferences.demomode
+
+        view.addSubview(transitionCoverView)
+        NSLayoutConstraint.activate([
+            transitionCoverView.topAnchor.constraint(equalTo: view.topAnchor),
+            transitionCoverView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            transitionCoverView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            transitionCoverView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+
         switchToSavedView()
+        if currentView === webViewController {
+            webViewController.prepareForDisplayTransition()
+        }
+
         setupTracker()
         startSSEListening()
         observeAppForegroundForSideMenu()
@@ -519,12 +540,24 @@ class OpenHABRootViewController: UIViewController {
     private func handleDismiss(mode: TargetController) {
         switch mode {
         case .webview:
-            // Handle webview navigation or state update
-            Logger.viewController.debug("Dismissed to WebView")
-            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true)
-            switchView(target: .webview)
+            let needsSwitch = currentView !== webViewController
+            if needsSwitch {
+                // Cover the root view so the dismiss animation doesn't expose the
+                // old child view (e.g. SitemapView) while the menu slides away.
+                // addView inserts at index 0, so transitionCoverView stays on top.
+                webViewController.prepareForDisplayTransition()
+                view.bringSubviewToFront(transitionCoverView)
+                transitionCoverView.isHidden = false
+                switchView(target: .webview)
+            }
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) { [weak self] in
+                guard let self else { return }
+                if needsSwitch, !webViewController.hasLoadedPage {
+                    webViewController.reloadView()
+                }
+                transitionCoverView.isHidden = true
+            }
         case .settings:
-            Logger.viewController.debug("Dismissed to Settings")
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
                 self.modalDismissed(to: .settings)
             }
@@ -920,7 +953,7 @@ class OpenHABRootViewController: UIViewController {
 
     private func addView(viewController: UIViewController) {
         addChild(viewController)
-        view.insertSubview(viewController.view, belowSubview: networkStatusButton)
+        view.insertSubview(viewController.view, at: 0)
         viewController.view.frame = view.bounds
         viewController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         viewController.didMove(toParent: self)
