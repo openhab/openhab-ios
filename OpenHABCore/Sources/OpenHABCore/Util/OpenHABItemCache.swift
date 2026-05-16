@@ -142,7 +142,7 @@ public actor OpenHABItemCache {
     private struct ItemStub: Codable {
         let name: String
         let label: String
-        let type: String
+        let type: String?
     }
 
     public static let instance = OpenHABItemCache()
@@ -156,8 +156,19 @@ public actor OpenHABItemCache {
     public var items: [UUID: [OpenHABItem]] = [:]
     private let ttl: TimeInterval = 20
     var lastLoad: [UUID: Date] = [:]
+    private var cachedStubs: [String: [ItemStub]]?
 
     private init() {}
+
+    private func loadedStubs() -> [String: [ItemStub]] {
+        if let cached = cachedStubs { return cached }
+        guard let data = UserDefaults(suiteName: Self.sharedDefaultsSuiteName)?.data(forKey: Self.stubsDefaultsKey),
+              let decoded = try? JSONDecoder().decode([String: [ItemStub]].self, from: data) else {
+            return [:]
+        }
+        cachedStubs = decoded
+        return decoded
+    }
 
     public func getAllCachedItems() async -> [UUID: [OpenHABItem]] {
         await Preferences.prepareForAppExtensionAccess()
@@ -216,26 +227,23 @@ public actor OpenHABItemCache {
     private func persistStubs() {
         var allStubs: [String: [ItemStub]] = [:]
         for (homeId, homeItems) in items {
-            allStubs[homeId.uuidString] = homeItems.map { ItemStub(name: $0.name, label: $0.label, type: $0.type?.rawValue ?? "") }
+            allStubs[homeId.uuidString] = homeItems.map { ItemStub(name: $0.name, label: $0.label, type: $0.type?.rawValue) }
         }
         guard let data = try? JSONEncoder().encode(allStubs) else { return }
+        cachedStubs = allStubs
         UserDefaults(suiteName: Self.sharedDefaultsSuiteName)?.set(data, forKey: Self.stubsDefaultsKey)
     }
 
     private func persistedItem(name: String, home: UUID) -> OpenHABItem? {
-        guard let data = UserDefaults(suiteName: Self.sharedDefaultsSuiteName)?.data(forKey: Self.stubsDefaultsKey),
-              let allStubs = try? JSONDecoder().decode([String: [ItemStub]].self, from: data),
-              let stub = allStubs[home.uuidString]?.first(where: { $0.name == name }) else { return nil }
-        return OpenHABItem(name: stub.name, type: stub.type, state: nil, link: "", label: stub.label, groupType: nil, stateDescription: nil, commandDescription: nil, members: [], category: nil, options: nil)
+        guard let stub = loadedStubs()[home.uuidString]?.first(where: { $0.name == name }) else { return nil }
+        return OpenHABItem(name: stub.name, type: stub.type ?? "", state: nil, link: "", label: stub.label, groupType: nil, stateDescription: nil, commandDescription: nil, members: [], category: nil, options: nil)
     }
 
     private func persistedItems(home: UUID) -> [OpenHABItem] {
-        guard let data = UserDefaults(suiteName: Self.sharedDefaultsSuiteName)?.data(forKey: Self.stubsDefaultsKey),
-              let allStubs = try? JSONDecoder().decode([String: [ItemStub]].self, from: data) else { return [] }
-        return (allStubs[home.uuidString] ?? []).map {
+        (loadedStubs()[home.uuidString] ?? []).map {
             OpenHABItem(
                 name: $0.name,
-                type: $0.type,
+                type: $0.type ?? "",
                 state: nil,
                 link: "",
                 label: $0.label,
@@ -291,7 +299,6 @@ public actor OpenHABItemCache {
         itemsList
             .filtered(by: searchTerm, for: types)
             .map(\.name)
-            .sorted()
     }
 
     private func loadNonGroupItemsForHomes(_ homes: [UUID]) async throws -> [UUID: [OpenHABItem]] {
@@ -399,7 +406,6 @@ public extension OpenHABItemCache {
         await reloadCacheIfNeeded(homes: [home])
         return items[home]?
             .filtered(by: searchTerm, for: types)
-            .sorted(by: \.name)
             .map(\.name) ?? []
     }
 

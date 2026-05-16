@@ -67,7 +67,7 @@ struct SetNumberValueIntent: AppIntent {
             try await OpenHABItemCache.instance.sendCommand(
                 to: itemEntity.item,
                 home: homeId,
-                command: String(value)
+                command: NumberState(value: value).commandString
             )
         } catch {
             throw NumberValueError.commandFailed(error.localizedDescription)

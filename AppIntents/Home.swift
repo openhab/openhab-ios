@@ -163,13 +163,27 @@ struct Home: AppEntity {
         func entities(for identifiers: [Home.ID]) throws -> [Home] {
             let storedHomes = Preferences.shared.storedHomes
             return identifiers.compactMap { identifier in
-                let stableId = Home.stableIdentifierComponent(of: identifier)
-                // Current format: match by stable cross-device identifier
-                if let match = storedHomes.values.first(where: { $0.stableIdentifier == stableId }) {
-                    return Home(homePrefs: match)
+                // Current format: "##" is present — prefer exact match (same device, disambiguates
+                // homes that share a stableIdentifier), then fall back to stableIdentifier-only
+                // match so shortcuts synced from another device still resolve.
+                if identifier.contains("##") {
+                    let stableId = Home.stableIdentifierComponent(of: identifier)
+                    if let match = storedHomes.values.first(where: {
+                        "\($0.stableIdentifier)##\($0.id.uuidString)" == identifier
+                    }) {
+                        return Home(homePrefs: match)
+                    }
+                    if let match = storedHomes.values.first(where: { $0.stableIdentifier == stableId }) {
+                        return Home(homePrefs: match)
+                    }
+                    return nil
                 }
                 // Legacy format: identifier is a device-local UUID string (shortcuts before this fix)
-                if let uuid = UUID(uuidString: stableId), let match = storedHomes[uuid] {
+                if let uuid = UUID(uuidString: identifier), let match = storedHomes[uuid] {
+                    return Home(homePrefs: match)
+                }
+                // Legacy format: bare stableIdentifier (no "##" separator)
+                if let match = storedHomes.values.first(where: { $0.stableIdentifier == identifier }) {
                     return Home(homePrefs: match)
                 }
                 return nil
@@ -207,9 +221,10 @@ struct Home: AppEntity {
 
     @MainActor
     init(homePrefs: HomePreferences) {
-        // Append the local UUID after "##" to guarantee uniqueness when two homes share the same
-        // stableIdentifier (e.g. same local URL on two different networks). Resolution code strips
-        // the suffix before matching so cross-device Shortcuts syncing still works.
+        // Append the local UUID after "##" to disambiguate homes that share the same
+        // stableIdentifier (e.g. same local URL on two different networks). Resolution
+        // tries an exact match first, then falls back to stableIdentifier-only so
+        // shortcuts synced from another device still resolve.
         self.init(id: "\(homePrefs.stableIdentifier)##\(homePrefs.id.uuidString)", displayString: homePrefs.homeName)
     }
 
