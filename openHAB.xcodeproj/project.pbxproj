@@ -294,6 +294,7 @@
 		2FD4E2CF2F66F9F700EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				NotificationInteractionUITests.swift,
 				OpenHABUITests.swift,
 				SnapshotHelper.swift,
 				ToastUITests.swift,

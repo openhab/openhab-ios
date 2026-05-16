@@ -61,7 +61,8 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         let message = userInfo["message"] as? String ?? String(localized: "message_not_decoded", comment: "")
         let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
         let cloudUserId = userInfo["userId"] as? String
-        await displayNotification(message: message, action: action, cloudUserId: cloudUserId)
+        let actions = Self.parseActionItems(userInfo["actions"] as? String)
+        await displayNotification(message: message, action: action, cloudUserId: cloudUserId, actions: actions)
 
         return [] // Modify this if you want to show banners, alerts, etc.
     }
@@ -84,7 +85,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         }
     }
 
-    private func displayNotification(message: String, action: String?, cloudUserId: String?) async {
+    private func displayNotification(message: String, action: String?, cloudUserId: String?, actions: [NotificationActionItem] = []) async {
         Logger.notificationCenterDelegateImpl.info("displayNotification \(message)")
 
         Task {
@@ -92,8 +93,27 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         }
 
         let title = String(localized: "notification", comment: "")
-        ToastService.shared.show(title: title, message: message) { [weak self] in
-            self?.notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
+        ToastService.shared.show(
+            title: title,
+            message: message,
+            actions: actions,
+            onTap: { [weak self] in
+                self?.notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
+            },
+            onAction: { [weak self] item in
+                self?.notifyNotificationListeners(action: item.action, cloudUserId: cloudUserId)
+            }
+        )
+    }
+
+    private static func parseActionItems(_ json: String?) -> [NotificationActionItem] {
+        guard let json,
+              let data = json.data(using: .utf8),
+              let raw = try? JSONSerialization.jsonObject(with: data) as? [[String: String]]
+        else { return [] }
+        return raw.compactMap { dict in
+            guard let title = dict["title"], let action = dict["action"] else { return nil }
+            return NotificationActionItem(title: title, action: action)
         }
     }
 

@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Observation
+import OpenHABCore
 import SwiftUI
 
 @MainActor
@@ -20,14 +21,24 @@ final class ToastService {
     var isPresented = false
     var title = ""
     var message = ""
+    var actions: [NotificationActionItem] = []
     var onTap: (() -> Void)?
+    var onAction: ((NotificationActionItem) -> Void)?
 
     private init() {}
 
-    func show(title: String, message: String, onTap: (() -> Void)? = nil) {
+    func show(
+        title: String,
+        message: String,
+        actions: [NotificationActionItem] = [],
+        onTap: (() -> Void)? = nil,
+        onAction: ((NotificationActionItem) -> Void)? = nil
+    ) {
         self.title = title
         self.message = message
+        self.actions = actions
         self.onTap = onTap
+        self.onAction = onAction
         isPresented = true
     }
 }

@@ -107,8 +107,21 @@ struct OpenHABRootView: View {
             }
             if let title = env["UITestToastTitle"],
                let message = env["UITestToastMessage"] {
+                let actions: [NotificationActionItem]
+                if let actionsJSON = env["UITestToastActions"],
+                   let data = actionsJSON.data(using: .utf8),
+                   let items = try? JSONDecoder().decode([NotificationActionItem].self, from: data) {
+                    actions = items
+                } else {
+                    actions = []
+                }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    ToastService.shared.show(title: title, message: message)
+                    ToastService.shared.show(title: title, message: message, actions: actions)
+                }
+            }
+            if env["UITestNotifications"] != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    showNotifications = true
                 }
             }
         }
@@ -384,30 +397,41 @@ struct OpenHABRootView: View {
 
 // MARK: - In-app toast banner
 
-/// Slide-up banner driven by ToastService. Uses frame(maxWidth: .infinity) so
-/// long strings never overflow the screen — unlike AlertToast which applies
-/// fixedSize(horizontal: true) before its maxWidth cap.
+/// Slide-up banner driven by ToastService.
+/// Layout mirrors sitemap input rows: text content on the left, action control
+/// on the right (single action → plain button label; multiple → Menu with chevron).
 private struct InAppToastBanner: View {
     let service: ToastService
 
     var body: some View {
         Group {
             if service.isPresented {
-                VStack(alignment: .leading, spacing: 4) {
-                    if !service.title.isEmpty {
-                        Text(service.title)
-                            .font(.headline)
-                            .lineLimit(2)
+                HStack(alignment: .center, spacing: 12) {
+                    // Left: title + message, takes all available space
+                    VStack(alignment: .leading, spacing: 4) {
+                        if !service.title.isEmpty {
+                            Text(service.title)
+                                .font(.headline)
+                                .lineLimit(2)
+                        }
+                        if !service.message.isEmpty {
+                            Text(service.message)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .lineLimit(4)
+                        }
                     }
-                    if !service.message.isEmpty {
-                        Text(service.message)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .lineLimit(4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    // Right: action control — only when actions are present
+                    if !service.actions.isEmpty {
+                        Divider()
+                        actionControl
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                // fixedSize prevents Divider from expanding to the overlay's proposed screen height
+                .fixedSize(horizontal: false, vertical: true)
                 .padding()
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                 .padding([.horizontal, .bottom])
@@ -418,6 +442,47 @@ private struct InAppToastBanner: View {
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.78), value: service.isPresented)
+    }
+
+    @ViewBuilder
+    private var actionControl: some View {
+        if service.actions.count == 1, let item = service.actions.first {
+            Button {
+                fireAction(item)
+            } label: {
+                Text(item.title)
+                    .font(.subheadline.weight(.medium))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .frame(maxWidth: 120)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.tint)
+        } else {
+            Menu {
+                ForEach(service.actions, id: \.action) { item in
+                    Button(item.title) { fireAction(item) }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text("Actions")
+                        .font(.subheadline.weight(.medium))
+                        .lineLimit(1)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2.weight(.semibold))
+                }
+                .frame(maxWidth: 120)
+                .foregroundStyle(.tint)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func fireAction(_ item: NotificationActionItem) {
+        service.onAction?(item)
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+            service.isPresented = false
+        }
     }
 
     private func dismiss() {
