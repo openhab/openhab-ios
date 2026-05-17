@@ -102,6 +102,24 @@ private enum LayoutHTML {
     </body></html>
     """
 
+    /// Framework7-like page with a position:fixed bottom tab bar.
+    /// Reproduces the regression from the first Bug 2/3 fix attempt: applying
+    /// contentInset.top=44 pushes position:fixed bottom:0 elements 44pt off-screen.
+    static let bottomTabBar = """
+    <!DOCTYPE html><html>
+    <head><meta name='viewport' content='width=device-width,initial-scale=1'>
+    <style>
+    *{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui;height:100vh}
+    .page-content{padding:16px}
+    .tab-bar{position:fixed;bottom:0;left:0;right:0;height:49px;background:#eee;
+             display:flex;align-items:center;justify-content:space-around}
+    </style></head>
+    <body>
+    <div class='page-content'><p>Page content</p></div>
+    <div class='tab-bar'><button aria-label='UITest Tab Bar'>Tab</button></div>
+    </body></html>
+    """
+
     static func base64(_ html: String) -> String { Data(html.utf8).base64EncodedString() }
 }
 
@@ -146,6 +164,17 @@ final class MainUILayoutUITests: XCTestCase {
     // MARK: - Helpers
 
     private var screen: CGRect { app.windows.firstMatch.frame }
+
+    /// Bottom edge of the native menuBar HStack in screen coordinates.
+    /// SwiftUI exposes HStack containers as `.otherElements` in the XCTest AX tree.
+    private var nativeBarBottom: CGFloat {
+        let el = app.otherElements.matching(identifier: "MainMenuBar").firstMatch
+        guard el.waitForExistence(timeout: 4) else {
+            XCTFail("Cannot locate MainMenuBar in AX tree — check accessibilityIdentifier is set on the menuBar HStack")
+            return 100
+        }
+        return el.frame.maxY
+    }
 
     /// Finds a button by its accessibilityIdentifier (not label).
     @discardableResult
@@ -219,17 +248,15 @@ final class MainUILayoutUITests: XCTestCase {
         XCTAssertTrue(webView.waitForExistence(timeout: 8))
 
         let panelHeader = waitForWebLabel("UITest Side Panel Header", type: .staticText)
-        let offsetFromWebviewTop = panelHeader.frame.minY - webView.frame.minY
+        let barBottom = nativeBarBottom
 
         XCTAssertGreaterThanOrEqual(
-            offsetFromWebviewTop, 44,
+            panelHeader.frame.minY, barBottom,
             """
-            BUG 2: Side panel header is at \(offsetFromWebviewTop)pt from the webview top, \
-            inside the 44pt native menuBar area. The panel renders near webview y=0, \
-            covered by the native menuBar (contentInset=.zero / \
-            contentInsetAdjustmentBehavior=.never means position:fixed content doesn't \
-            account for the native bar height). Fix: contentInset.top ≥ 44 or equivalent \
-            so the visible viewport starts below the native bar.
+            BUG 2: Side panel header top (\(panelHeader.frame.minY)pt) is above the \
+            native menuBar bottom (\(barBottom)pt). The panel renders at webview y=0, \
+            covered by the native menuBar. Fix: shrink the webview frame so web content \
+            starts at or below the native bar bottom.
             """
         )
     }
@@ -252,15 +279,46 @@ final class MainUILayoutUITests: XCTestCase {
         XCTAssertTrue(webView.waitForExistence(timeout: 8))
 
         let closeBtn = waitForWebLabel("UITest Close Button", type: .button)
-        let offsetFromWebviewTop = closeBtn.frame.minY - webView.frame.minY
+        let barBottom = nativeBarBottom
 
         XCTAssertGreaterThanOrEqual(
-            offsetFromWebviewTop, 44,
+            closeBtn.frame.minY, barBottom,
             """
-            BUG 3: Equipment close button is at \(offsetFromWebviewTop)pt from the webview top, \
-            inside the 44pt native menuBar area. Same root cause as Bug 2: WKWebView \
-            contentInset=.zero means any web content at page y=0 is covered by the native bar. \
-            Fix must be generic (contentInset.top or global CSS), not specific to this button.
+            BUG 3: Equipment close button top (\(closeBtn.frame.minY)pt) is above the \
+            native menuBar bottom (\(barBottom)pt). Same root cause as Bug 2: web content \
+            at page y=0 is covered by the native bar. Fix must be generic (shrink the \
+            webview frame), not specific to this button.
+            """
+        )
+    }
+
+    // MARK: - Regression: bottom-fixed elements cut off when top inset applied via contentInset
+
+    /// REGRESSION — EXPECTED TO FAIL if contentInset.top is used instead of frame shrink.
+    ///
+    /// Applying `scrollView.contentInset.top = 44` shifts the CSS viewport DOWN so the
+    /// top of content appears below the native bar, but `window.innerHeight` stays equal
+    /// to the FULL WKWebView frame height. As a result, `position:fixed; bottom:0`
+    /// elements (Framework7 tab bar) are pushed 44pt BELOW the visible screen bottom.
+    ///
+    /// The correct fix is `.padding(.top, 44)` on the webview container in SwiftUI so the
+    /// webview FRAME starts 44pt lower — giving `window.innerHeight = frame.height - 44`.
+    func testBottomFixedElementNotCutOffByTopInset() {
+        launchInWebviewMode(html: LayoutHTML.bottomTabBar)
+        let webView = app.webViews.firstMatch
+        XCTAssertTrue(webView.waitForExistence(timeout: 8))
+
+        let tabBarBtn = waitForWebLabel("UITest Tab Bar", type: .button)
+        let overflowBelowWebview = tabBarBtn.frame.maxY - webView.frame.maxY
+
+        XCTAssertLessThanOrEqual(
+            overflowBelowWebview, 2,
+            """
+            REGRESSION: position:fixed bottom:0 element extends \(overflowBelowWebview)pt \
+            below the webview bottom edge. Applying contentInset.top=44 without reducing the \
+            viewport height shifts the entire CSS viewport down — Framework7's bottom tab bar \
+            is pushed off-screen. Fix: use .padding(.top, 44) on the webview container so \
+            window.innerHeight shrinks by 44pt instead of the viewport shifting.
             """
         )
     }

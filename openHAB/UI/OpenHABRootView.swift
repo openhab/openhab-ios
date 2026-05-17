@@ -176,6 +176,7 @@ struct OpenHABRootView: View {
         case .webview:
             ZStack(alignment: .top) {
                 OpenHABWebViewContainer(viewModel: webViewModel)
+                    .padding(.top, 44)
                     .background(.clear)
                 menuBar
             }
@@ -284,6 +285,7 @@ struct OpenHABRootView: View {
             .animation(.spring(response: 0.32, dampingFraction: 0.78), value: menuPresented)
         }
         .frame(height: 44)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("MainMenuBar")
         .overlay {
             if !barTitle.isEmpty {

@@ -106,6 +106,12 @@ class OpenHABWebViewModel: ObservableObject {
             // document.fonts.ready resolves immediately on subsequent calls once fonts are loaded.
             (document.fonts ? document.fonts.ready : Promise.resolve()).then(function() {
                 navbar.style.display = 'none';
+                var navPage = navbar.closest('.page');
+                var pc = (navPage && navPage.querySelector('.page-content'))
+                       || document.querySelector('.view-main .page-current .page-content')
+                       || document.querySelector('.page-current .page-content')
+                       || document.querySelector('.page-content');
+                if (pc) pc.style.paddingTop = '0px';
 
                 var titleEl = navbar.querySelector('.title') || navbar.querySelector('[class*="title"]');
                 var title = titleEl ? titleEl.innerText.trim() : '';
