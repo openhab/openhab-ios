@@ -290,6 +290,17 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                 Preferences.shared.currentWebViewPath = newPath
             }
             if message.name == "mainUi" {
+                // Dict body — JS test probe reports (DEBUG builds only)
+                #if DEBUG
+                if let dict = message.body as? [String: Any],
+                   let type = dict["type"] as? String,
+                   type == "uiTestReport",
+                   let key = dict["key"] as? String,
+                   let value = dict["value"] as? String {
+                    viewModel.recordUITestReport(key: key, value: value)
+                    return
+                }
+                #endif
                 // Dict body — navbar proxy elements
                 if let dict = message.body as? [String: Any],
                    let type = dict["type"] as? String,

@@ -100,6 +100,22 @@ struct OpenHABRootView: View {
             InAppToastBanner(service: toastService)
         }
         #if DEBUG
+        .overlay {
+            ForEach(Array(webViewModel.uiTestReports.keys.sorted()), id: \.self) { key in
+                Text(webViewModel.uiTestReports[key] ?? "")
+                    .accessibilityIdentifier("UITestReport-\(key)")
+                    .frame(width: 0, height: 0)
+                    .opacity(0)
+                    .allowsHitTesting(false)
+            }
+            Text(String(webViewModel.navbarItems.count))
+                .accessibilityIdentifier("UITestReport-navbarItemCount")
+                .frame(width: 0, height: 0)
+                .opacity(0)
+                .allowsHitTesting(false)
+        }
+        #endif
+        #if DEBUG
         .onAppear {
             let env = ProcessInfo.processInfo.environment
             if env["UITest"] != nil {
@@ -122,6 +138,30 @@ struct OpenHABRootView: View {
             if env["UITestNotifications"] != nil {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     showNotifications = true
+                }
+            }
+            if env["UITestWebViewMode"] != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    currentContent = .webview
+                }
+                if let encoded = env["UITestInjectHTML"],
+                   let data = Data(base64Encoded: encoded),
+                   let html = String(data: data, encoding: .utf8) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        webViewModel.loadHTMLString(html)
+                    }
+                }
+            }
+            if let json = env["UITestWebViewNavbarItems"],
+               let data = json.data(using: .utf8),
+               let raw = try? JSONDecoder().decode([[String: String]].self, from: data) {
+                let items = raw.compactMap { d -> WebNavbarItem? in
+                    guard let label = d["label"], let action = d["jsAction"] else { return nil }
+                    return WebNavbarItem(label: label, jsAction: action, iconBase64: nil)
+                }
+                webViewModel.lockUITestContent()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    webViewModel.updateNavbarItems(items)
                 }
             }
         }
@@ -186,6 +226,8 @@ struct OpenHABRootView: View {
                             }
                         }
                         .ohMinimumHitTarget()
+                        .accessibilityLabel(item.label)
+                        .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
                     }
                 } else if isWebviewMode, activeNetworkConnection == nil {
                     HStack(spacing: 4) {
@@ -242,6 +284,7 @@ struct OpenHABRootView: View {
             .animation(.spring(response: 0.32, dampingFraction: 0.78), value: menuPresented)
         }
         .frame(height: 44)
+        .accessibilityIdentifier("MainMenuBar")
         .overlay {
             if !barTitle.isEmpty {
                 Text(barTitle)

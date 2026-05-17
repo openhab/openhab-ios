@@ -38,6 +38,14 @@ class OpenHABWebViewModel: ObservableObject {
 
     @Published var isLoading = false
     @Published private(set) var webView: WKWebView
+    #if DEBUG
+    /// JS probe results keyed by the probe name. Exposed as zero-size accessibility
+    /// labels so UI tests can read DOM measurements without native UI.
+    @Published private(set) var uiTestReports: [String: String] = [:]
+    /// True once a UI test has injected HTML or navbar items — blocks loadWebView
+    /// from overriding injected state with real server content.
+    private var uiTestContentLocked = false
+    #endif
     /// Whether the iOS menu bar (and its hamburger button) should be visible.
     /// Starts true (visible while loading) and is hidden once the openHAB
     /// Main UI signals it has rendered its own native-app exit button via SSE,
@@ -336,6 +344,9 @@ class OpenHABWebViewModel: ObservableObject {
     // MARK: - Loading
 
     func loadWebView(force: Bool = false, path: String? = nil) {
+        #if DEBUG
+        if uiTestContentLocked { return }
+        #endif
         Logger.viewController.info("loadWebView tracked URL: \(self.activeConfig?.url ?? "") forced \(force ? "true" : "false")")
         guard let activeConfig else { return }
         let authStr = "\(activeConfig.username):\(activeConfig.password)"
@@ -464,6 +475,21 @@ class OpenHABWebViewModel: ObservableObject {
         config.userContentController.addUserScript(
             WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         )
+        #if DEBUG
+        let ohUITestJS = """
+        (function(){
+          if(window.ohUITest)return;
+          window.ohUITest={report:function(k,v){
+            if(window.webkit&&window.webkit.messageHandlers.mainUi)
+              window.webkit.messageHandlers.mainUi.postMessage(
+                {type:'uiTestReport',key:String(k),value:String(v)});
+          }};
+        })();
+        """
+        config.userContentController.addUserScript(
+            WKUserScript(source: ohUITestJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        )
+        #endif
         config.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
 
         let newWebView = WKWebView(frame: .zero, configuration: config)
@@ -606,6 +632,13 @@ class OpenHABWebViewModel: ObservableObject {
 
         injectNavbarProxy()
         injectEditorHeightFix()
+        #if DEBUG
+        if let encoded = ProcessInfo.processInfo.environment["UITestInjectJS"],
+           let data = Data(base64Encoded: encoded),
+           let jsSource = String(data: data, encoding: .utf8) {
+            webView.evaluateJavaScript(jsSource, completionHandler: nil)
+        }
+        #endif
     }
 
     private func injectNavbarProxy() {
@@ -623,8 +656,15 @@ class OpenHABWebViewModel: ObservableObject {
     func handleNavigationStart() {
         showMenuBar = true
         isSSEConnected = false
+        #if DEBUG
+        if !uiTestContentLocked {
+            navbarItems = []
+            navbarTitle = ""
+        }
+        #else
         navbarItems = []
         navbarTitle = ""
+        #endif
         // Clear the re-installation guard so the next page gets a fresh proxy.
         webView.evaluateJavaScript("window.__ohNavbarProxyInstalled = undefined;")
     }
@@ -750,6 +790,30 @@ class OpenHABWebViewModel: ObservableObject {
         """
         webView.evaluateJavaScript(editorFixJS)
     }
+
+    // MARK: - Test support
+
+    #if DEBUG
+    func recordUITestReport(key: String, value: String) {
+        uiTestReports[key] = value
+    }
+
+    /// Locks injected test state (HTML or navbar items) so that loadWebView cannot
+    /// override it with real server content for the lifetime of this test run.
+    func lockUITestContent() {
+        uiTestContentLocked = true
+    }
+
+    /// Loads raw HTML into a fully configured webview (scripts injected).
+    /// Used by UI tests via UITestInjectHTML env var — bypasses the server URL so
+    /// tests work without a live openHAB instance.
+    func loadHTMLString(_ html: String) {
+        uiTestContentLocked = true
+        let wv = getOrCreateWebView(for: Preferences.shared.currentHomePreferences.id, isCloudConnection: false)
+        if wv !== webView { webView = wv }
+        wv.loadHTMLString(html, baseURL: nil)
+    }
+    #endif
 
     // MARK: - Authentication
 
