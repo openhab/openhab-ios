@@ -33,12 +33,21 @@ final class UserData: ObservableObject {
     private var lastObservedConnectionURL: String?
 
     private var pageHandlingTask: Task<Void, Never>?
+    private var networkObservationTask: Task<Void, Never>?
+    // nonisolated(unsafe): accessed only from deinit, which is the last operation on the instance.
+    private nonisolated(unsafe) var notificationObservers: [any NSObjectProtocol] = []
     @Published var isPolling = false
 
     @Published var openHABSitemapPage: OpenHABPage?
     var currentClientDelegate: HTTPClientDelegate?
 
     private var cancellables = Set<AnyCancellable>()
+
+    deinit {
+        pageHandlingTask?.cancel()
+        networkObservationTask?.cancel()
+        notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
+    }
 
     init(preview: Bool = false) {
         #if DEBUG
@@ -135,14 +144,19 @@ final class UserData: ObservableObject {
             }
             .store(in: &cancellables)
 
-        Task {
-            await observeNetworkChanges()
+        networkObservationTask = Task { [weak self] in
+            // Obtain the stream without capturing self, so self is not held across suspensions.
+            let stream = await NetworkTracker.shared.activeConnectionStream()
+            for await connection in stream {
+                guard let self else { break }
+                handleConnectionEvent(connection)
+            }
         }
     }
 
     /// Sets up notification observers for certificate validation and changes
     private func setupNotificationObservers() {
-        NotificationCenter.default.addObserver(
+        let evaluateServerTrust = NotificationCenter.default.addObserver(
             forName: .evaluateServerTrust,
             object: nil,
             queue: .main
@@ -158,7 +172,7 @@ final class UserData: ObservableObject {
             }
         }
 
-        NotificationCenter.default.addObserver(
+        let evaluateCertificateMismatch = NotificationCenter.default.addObserver(
             forName: .evaluateCertificateMismatch,
             object: nil,
             queue: .main
@@ -174,7 +188,7 @@ final class UserData: ObservableObject {
             }
         }
 
-        NotificationCenter.default.addObserver(
+        let acceptedCertificatesChanged = NotificationCenter.default.addObserver(
             forName: .acceptedServerCertificatesChanged,
             object: nil,
             queue: nil
@@ -183,61 +197,56 @@ final class UserData: ObservableObject {
                 await NetworkTracker.shared.restartTracking()
             }
         }
+
+        notificationObservers = [evaluateServerTrust, evaluateCertificateMismatch, acceptedCertificatesChanged]
     }
 
-    /// Observes network connection changes and updates state
-    private func observeNetworkChanges() async {
-        let activeConnectionStream = await NetworkTracker.shared.activeConnectionStream()
-        for await activeConnection in activeConnectionStream {
-            guard let activeConnection else {
-                if let lastObservedConnectionURL {
-                    Logger.userData.info("Network connection became unavailable (previous: \(lastObservedConnectionURL, privacy: .public))")
-                    self.lastObservedConnectionURL = nil
-                } else {
-                    Logger.userData.debug("Network connection stream emitted nil (no active connection)")
-                }
-                continue
-            }
-
-            if lastObservedConnectionURL != activeConnection.configuration.url {
-                if let previousConnectionURL = lastObservedConnectionURL {
-                    Logger.userData.info("Network connection changed: \(previousConnectionURL, privacy: .public) -> \(activeConnection.configuration.url, privacy: .public)")
-                } else {
-                    Logger.userData.info("Network connection became available: \(activeConnection.configuration.url, privacy: .public)")
-                }
-                lastObservedConnectionURL = activeConnection.configuration.url
+    /// Handles a single connection-change event. Called once per value emitted by the network stream;
+    /// returns immediately so the task loop can release self between events.
+    private func handleConnectionEvent(_ activeConnection: ConnectionInfo?) {
+        guard let activeConnection else {
+            if let lastObservedConnectionURL {
+                Logger.userData.info("Network connection became unavailable (previous: \(lastObservedConnectionURL, privacy: .public))")
+                self.lastObservedConnectionURL = nil
             } else {
-                Logger.userData.debug("Network connection still active: \(activeConnection.configuration.url, privacy: .public)")
+                Logger.userData.debug("Network connection stream emitted nil (no active connection)")
             }
+            return
+        }
 
-            if !AppSettings.shared.haveReceivedAppContext {
-                AppMessageService.singleton.requestApplicationContext()
-                errorDescription = String(localized: "settings_not_received", comment: "")
-                showAlert = true
-                continue
+        if lastObservedConnectionURL != activeConnection.configuration.url {
+            if let previousConnectionURL = lastObservedConnectionURL {
+                Logger.userData.info("Network connection changed: \(previousConnectionURL, privacy: .public) -> \(activeConnection.configuration.url, privacy: .public)")
+            } else {
+                Logger.userData.info("Network connection became available: \(activeConnection.configuration.url, privacy: .public)")
             }
+            lastObservedConnectionURL = activeConnection.configuration.url
+        } else {
+            Logger.userData.debug("Network connection still active: \(activeConnection.configuration.url, privacy: .public)")
+        }
 
-            AppSettings.shared.openHABRootUrl = activeConnection.configuration.url
-            AppSettings.shared.openHABVersion = activeConnection.version
+        if !AppSettings.shared.haveReceivedAppContext {
+            AppMessageService.singleton.requestApplicationContext()
+            errorDescription = String(localized: "settings_not_received", comment: "")
+            showAlert = true
+            return
+        }
 
-            // Start page handling when network becomes available
-            let sitemapName = AppSettings.shared.sitemapForWatch
-            if !sitemapName.isEmpty {
-                // Check if there's already a running task
-                if let task = pageHandlingTask, !task.isCancelled {
-                    // Task is running, check if it's for the right sitemap
-                    if currentlyLoadingSitemap == sitemapName {
-                        Logger.userData.debug("Page handling task already running for correct sitemap: \(sitemapName)")
-                    } else {
-                        // Running task is for different sitemap, force reload
-                        Logger.userData.debug("Page handling task for wrong sitemap, forcing reload: \(sitemapName)")
-                        startPageHandling(sitemapName: sitemapName, force: true)
-                    }
+        AppSettings.shared.openHABRootUrl = activeConnection.configuration.url
+        AppSettings.shared.openHABVersion = activeConnection.version
+
+        let sitemapName = AppSettings.shared.sitemapForWatch
+        if !sitemapName.isEmpty {
+            if let task = pageHandlingTask, !task.isCancelled {
+                if currentlyLoadingSitemap == sitemapName {
+                    Logger.userData.debug("Page handling task already running for correct sitemap: \(sitemapName)")
                 } else {
-                    // No task running or task is cancelled - start a new one
-                    Logger.userData.debug("Starting page handling for sitemap: \(sitemapName) after network became available")
-                    startPageHandling(sitemapName: sitemapName, force: false)
+                    Logger.userData.debug("Page handling task for wrong sitemap, forcing reload: \(sitemapName)")
+                    startPageHandling(sitemapName: sitemapName, force: true)
                 }
+            } else {
+                Logger.userData.debug("Starting page handling for sitemap: \(sitemapName) after network became available")
+                startPageHandling(sitemapName: sitemapName, force: false)
             }
         }
     }
@@ -279,11 +288,11 @@ final class UserData: ObservableObject {
             let taskSitemapName = sitemapName // Capture the sitemap name for this specific task
             defer {
                 // Only clear references if this task is still the current one
-                Task { @MainActor in
-                    if self.currentlyLoadingSitemap == taskSitemapName {
+                Task { @MainActor [weak self] in
+                    if self?.currentlyLoadingSitemap == taskSitemapName {
                         Logger.userData.debug("Clearing page handling task for: \(taskSitemapName)")
-                        self.pageHandlingTask = nil
-                        self.currentlyLoadingSitemap = nil
+                        self?.pageHandlingTask = nil
+                        self?.currentlyLoadingSitemap = nil
                     }
                 }
             }
@@ -293,7 +302,7 @@ final class UserData: ObservableObject {
 
                 // Always ensure tracking is running before waiting.
                 // startTracking is idempotent for unchanged active configurations.
-                await self.updateNetwork()
+                await updateNetwork()
 
                 var connectionInfo = await NetworkTracker.shared.activeConnection
                 if connectionInfo == nil {
@@ -302,7 +311,7 @@ final class UserData: ObservableObject {
 
                 if connectionInfo == nil {
                     Logger.userData.warning("No active connection on first attempt, restarting network tracking once")
-                    await self.updateNetwork()
+                    await updateNetwork()
                     connectionInfo = await NetworkTracker.shared.waitForActiveConnection()
                 }
 
@@ -374,6 +383,8 @@ final class UserData: ObservableObject {
                         try await Task.sleep(nanoseconds: totalDelay)
                     }
                 }
+            } catch is CancellationError {
+                return
             } catch {
                 await MainActor.run {
                     Logger.userData.error("Page handling failed for sitemap '\(taskSitemapName)': \(error.localizedDescription)")

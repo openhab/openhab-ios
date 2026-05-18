@@ -169,7 +169,7 @@ struct Home: AppEntity {
                 if identifier.contains("##") {
                     let stableId = Home.stableIdentifierComponent(of: identifier)
                     if let match = storedHomes.values.first(where: {
-                        "\($0.stableIdentifier)##\($0.id.uuidString)" == identifier
+                        identifier == "\($0.stableIdentifier)##\($0.id.uuidString)"
                     }) {
                         return Home(homePrefs: match)
                     }

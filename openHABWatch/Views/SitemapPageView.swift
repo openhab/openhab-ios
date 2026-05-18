@@ -56,6 +56,7 @@ struct SitemapPageView: View {
                 }
             } else {
                 pageContent
+                    .onDisappear { viewModel.stopLongPolling() }
             }
         }
     }

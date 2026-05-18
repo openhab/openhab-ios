@@ -51,6 +51,14 @@ public actor OpenAPIService {
     private var url: URL?
     private var longPolling = false
     private var connectionConfiguration: ConnectionConfiguration
+    // Retained for lifecycle control only — URLSessionTransport does not call invalidateAndCancel()
+    // when it deallocates, so without this reference the session's threads and sockets would leak.
+    // Do not remove: deinit relies on this property to tear down the session.
+    private var urlSession: URLSession?
+
+    deinit {
+        urlSession?.invalidateAndCancel()
+    }
 
     /// Creates a new client for OpenAPIService.
     public init(client: any APIProtocol) {
@@ -81,6 +89,7 @@ public actor OpenAPIService {
             config.timeoutIntervalForResource = 10.0
         }
         let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
+        urlSession = session
         let url = URL(string: connectionConfiguration.url) ?? URL(staticString: "about:blank")
         let resolvedURL = OpenAPIService.getServerURL(for: url)
         self.url = resolvedURL
