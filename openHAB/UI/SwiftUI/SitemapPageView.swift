@@ -47,6 +47,7 @@ struct SitemapPageView: View {
                         .listRowInsets(RowLayoutPolicy.rowInsets(for: rowInput))
                         .listRowBackground(RowLayoutPolicy.rowBackground(for: rowInput))
                 }
+                .alignSegmentedButtonAreas()
             }
         }
         .environmentObject(viewModel)
