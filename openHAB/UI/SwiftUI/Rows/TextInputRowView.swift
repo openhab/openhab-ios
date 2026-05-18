@@ -282,7 +282,11 @@ private struct TextInputRowContent: View {
                 : inputCommandFormatter.numericDraftFromState(inputText)
             draftInputText = numericDraft
             lastValidDraft = numericDraft
-            draftUnitSuffix = ""
+            if numberState.value.isFinite, let unit = numberState.unit, !unit.isEmpty {
+                draftUnitSuffix = " \(unit)"
+            } else {
+                draftUnitSuffix = ""
+            }
         } else {
             draftInputText = inputText
             lastValidDraft = inputText
