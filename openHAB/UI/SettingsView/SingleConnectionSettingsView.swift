@@ -12,6 +12,7 @@
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
+import UIKit
 
 struct SpinningSymbol: View {
     @State private var isAnimating = false
@@ -42,6 +43,8 @@ struct SingleConnectionSettingsView: View {
     @State private var connectionTestSuccess: Bool?
 
     @State private var isPresentingDiscoverySheet = false
+
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         Section(header: Text(headerText)) {
@@ -101,6 +104,23 @@ struct SingleConnectionSettingsView: View {
                             .font(.caption2)
                     }
                     .transition(.opacity)
+
+                    if isLocalConnection, !success {
+                        HStack(spacing: 4) {
+                            Image(systemSymbol: .wifiSlash)
+                            Text("Local Network access may be required.")
+                            Button("Open Settings") {
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    openURL(url)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(Color.accentColor)
+                        }
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .transition(.opacity)
+                    }
                 }
             }
 

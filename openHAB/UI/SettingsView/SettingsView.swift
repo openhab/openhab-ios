@@ -35,8 +35,10 @@ struct SettingsView: View {
     @State private var settingsHomeName = ""
     @State private var viewAppearedOnce = false
     @State private var settingsSSECommandItem = ""
+    @State private var showLocalNetworkAlert = false
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         Form {
@@ -75,12 +77,29 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .navigationBarBackButtonHidden(true)
         .navigationTitle("\(settingsHomeName) Settings")
+        .alert("Local Network Access Required", isPresented: $showLocalNetworkAlert) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    openURL(url)
+                }
+                dismiss()
+            }
+            Button("OK") {
+                dismiss()
+            }
+        } message: {
+            Text("To connect to your local openHAB server, please allow Local Network access when prompted. If you previously denied it, enable it in Settings → Privacy & Security → Local Network.")
+        }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button("Save") {
                     saveSettings()
                     NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
-                    dismiss()
+                    if !settingsDemomode, !settingsLocalConnectionConfiguration.url.isEmpty {
+                        showLocalNetworkAlert = true
+                    } else {
+                        dismiss()
+                    }
                 }
             }
             ToolbarItemGroup(placement: .cancellationAction) {
