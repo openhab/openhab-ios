@@ -89,21 +89,10 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
             .appending(path: name)
             .appending(path: path)
 
+        // Load the root sitemap so the back button returns to it, then navigate to the sub-page
+        // within the existing SwiftUI NavigationStack so SwiftUI manages back-navigation.
         await viewModel.pushSitemap(name: name, path: nil)
-
-        let pageViewModel = SitemapPageViewModel(
-            sitemapName: name,
-            pageUrl: pageURL.absoluteString,
-            title: name,
-            pageId: path
-        )
-        let pageViewController = HostingSitemapViewController(viewModel: pageViewModel)
-        if let rootViewController {
-            pageViewController.setRootViewController(rootViewController)
-        }
-
-        navigationController?.popToRootViewController(animated: false)
-        navigationController?.pushViewController(pageViewController, animated: true)
+        viewModel.navigateToLinkedPage(LinkedPageNavigation(pageLink: pageURL.absoluteString, pageTitle: name))
     }
 
     @MainActor
