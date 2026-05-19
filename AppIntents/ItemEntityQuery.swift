@@ -30,27 +30,91 @@ extension ItemEntityQuery {
     }
 
     @MainActor
+    func getHomeIdentifier(for homeId: UUID) -> String {
+        guard let home = Preferences.shared.storedHomes[homeId] else {
+            return homeId.uuidString
+        }
+        return "\(home.stableIdentifier)##\(home.id.uuidString)"
+    }
+
+    @MainActor
     func resolvedSelectedHomeId() -> UUID? {
         guard let home = selectedHome else { return nil }
-        let stableId = Home.stableIdentifierComponent(of: home.id)
         let storedHomes = Preferences.shared.storedHomes
+
+        if home.id.contains("##"),
+           let match = storedHomes.values.first(where: { home.id == "\($0.stableIdentifier)##\($0.id.uuidString)" }) {
+            return match.id
+        }
+
+        if let localId = Home.localIdentifierComponent(of: home.id), storedHomes[localId] != nil {
+            return localId
+        }
+
+        let stableId = Home.stableIdentifierComponent(of: home.id)
         if let match = storedHomes.values.first(where: { $0.stableIdentifier == stableId }) {
             return match.id
         }
-        return UUID(uuidString: stableId)
+        if let uuid = UUID(uuidString: stableId), storedHomes[uuid] != nil {
+            return uuid
+        }
+        return nil
+    }
+
+    @MainActor
+    func resolvedHomeId(for identifier: ItemIdentifier) -> UUID? {
+        let storedHomes = Preferences.shared.storedHomes
+
+        guard let homeIdentifier = identifier.homeIdentifier else {
+            guard let homeId = identifier.homeId, storedHomes[homeId] != nil else {
+                return nil
+            }
+            return homeId
+        }
+
+        if homeIdentifier.contains("##"),
+           let match = storedHomes.values.first(where: { homeIdentifier == "\($0.stableIdentifier)##\($0.id.uuidString)" }) {
+            return match.id
+        }
+
+        if let localId = Home.localIdentifierComponent(of: homeIdentifier), storedHomes[localId] != nil {
+            return localId
+        }
+
+        let stableId = Home.stableIdentifierComponent(of: homeIdentifier)
+        if let match = storedHomes.values.first(where: { $0.stableIdentifier == stableId }) {
+            return match.id
+        }
+        if let legacyId = UUID(uuidString: stableId), storedHomes[legacyId] != nil {
+            return legacyId
+        }
+        return nil
+    }
+
+    func entity(for item: OpenHABItem, homeId: UUID) async -> EntityType {
+        let homeName = await getHomeName(for: homeId)
+        let homeIdentifier = await getHomeIdentifier(for: homeId)
+        return EntityType(
+            id: ItemIdentifier(homeId: homeId, itemName: item.name, homeIdentifier: homeIdentifier),
+            item: item,
+            homeName: homeName
+        )
     }
 
     func entityResults(from itemsByHome: [UUID: [OpenHABItem]]) async -> [EntityType] {
         var result: [EntityType] = []
 
         for (homeId, items) in itemsByHome {
-            let homeName = await getHomeName(for: homeId)
-            result.append(contentsOf: items.map { EntityType($0, homeId: homeId, homeName: homeName) })
+            for item in items {
+                let entity = await entity(for: item, homeId: homeId)
+                result.append(entity)
+            }
         }
 
         return result.sorted {
-            if $0.item.name.localizedCaseInsensitiveCompare($1.item.name) != .orderedSame {
-                return $0.item.name.localizedCaseInsensitiveCompare($1.item.name) == .orderedAscending
+            let nameOrder = $0.item.name.localizedCaseInsensitiveCompare($1.item.name)
+            if nameOrder != .orderedSame {
+                return nameOrder == .orderedAscending
             }
 
             let leftHomeName = $0.homeName ?? ""
@@ -75,8 +139,7 @@ extension ItemEntityQuery {
             return nil
         }
 
-        let homeName = await getHomeName(for: match.0)
-        return EntityType(match.1, homeId: match.0, homeName: homeName)
+        return await entity(for: match.1, homeId: match.0)
     }
 
     func entities(for identifiers: [ItemIdentifier]) async throws -> [EntityType] {
@@ -85,12 +148,16 @@ extension ItemEntityQuery {
         var result: [EntityType] = []
 
         for identifier in identifiers {
+            guard let homeId = await resolvedHomeId(for: identifier) else {
+                continue
+            }
+
             if let item = await OpenHABItemCache.instance.getCachedOrPersistedItem(
                 name: identifier.itemName,
-                home: identifier.homeId
+                home: homeId
             ) {
-                let homeName = await getHomeName(for: identifier.homeId)
-                result.append(EntityType(item, homeId: identifier.homeId, homeName: homeName))
+                let entity = await entity(for: item, homeId: homeId)
+                result.append(entity)
             }
         }
 

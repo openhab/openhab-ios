@@ -41,24 +41,33 @@ enum HomeResolver {
     /// The default empty array skips stable-identifier lookup and falls straight through to the
     /// UUID fallback — this keeps unit tests working without any Preferences setup.
     static func resolvedHomeId(selectedHome: Home?,
-                               itemHomeId: UUID,
+                               itemHomeId: UUID?,
                                itemLabel: String,
                                stableIdentifierToLocalUUID: [(String, UUID)] = [],
                                mismatchError: (String, String) -> some Error) throws -> UUID {
         guard let selectedHome else {
+            guard let itemHomeId else {
+                throw HomeResolutionError.unknownHome
+            }
             return itemHomeId
         }
 
-        let stableId = Home.stableIdentifierComponent(of: selectedHome.id)
         let homeId: UUID
-        if let match = stableIdentifierToLocalUUID.first(where: { $0.0 == stableId }) {
+        if let match = stableIdentifierToLocalUUID.first(where: { $0.0 == selectedHome.id }) {
             homeId = match.1
-        } else if let uuid = UUID(uuidString: stableId) {
+        } else if let match = stableIdentifierToLocalUUID.first(where: { $0.0 == Home.stableIdentifierComponent(of: selectedHome.id) }) {
+            homeId = match.1
+        } else if let uuid = UUID(uuidString: selectedHome.id) {
+            homeId = uuid
+        } else if let uuid = UUID(uuidString: Home.stableIdentifierComponent(of: selectedHome.id)) {
             homeId = uuid
         } else {
             throw HomeResolutionError.unknownHome
         }
 
+        guard let itemHomeId else {
+            throw HomeResolutionError.unknownHome
+        }
         guard homeId == itemHomeId else {
             throw mismatchError(itemLabel, selectedHome.displayString)
         }
@@ -70,10 +79,15 @@ enum HomeResolver {
     /// to the testable sync overload. Intent `perform()` methods call this with `try await`.
     @MainActor
     static func resolvedHomeId(selectedHome: Home?,
-                               itemHomeId: UUID,
+                               itemHomeId: UUID?,
                                itemLabel: String,
                                mismatchError: (String, String) -> some Error) throws -> UUID {
-        let map = Preferences.shared.storedHomes.values.map { ($0.stableIdentifier, $0.id) }
+        let map = Preferences.shared.storedHomes.values.flatMap {
+            [
+                ("\($0.stableIdentifier)##\($0.id.uuidString)", $0.id),
+                ($0.stableIdentifier, $0.id)
+            ]
+        }
         return try resolvedHomeId(
             selectedHome: selectedHome,
             itemHomeId: itemHomeId,
@@ -97,6 +111,13 @@ enum HomeResolver {
                 // All HomePreferences property access must happen on the main actor.
                 await MainActor.run {
                     let storedHomes = Preferences.shared.storedHomes
+                    if identifier.contains("##"),
+                       let match = storedHomes.values.first(where: { identifier == "\($0.stableIdentifier)##\($0.id.uuidString)" }) {
+                        return match.id
+                    }
+                    if let localId = Home.localIdentifierComponent(of: identifier), storedHomes[localId] != nil {
+                        return localId
+                    }
                     if let match = storedHomes.values.first(where: { $0.stableIdentifier == identifier }) {
                         return match.id
                     }
@@ -135,7 +156,12 @@ enum HomeResolver {
                               exactMatchedHomes: @escaping () async -> Set<UUID>) async throws -> UUID {
         if let selectedHome {
             let stableId = Home.stableIdentifierComponent(of: selectedHome.id)
-            guard let homeId = await findHomeId(stableId) else {
+            let homeId = if let exactHomeId = await findHomeId(selectedHome.id) {
+                exactHomeId
+            } else {
+                await findHomeId(stableId)
+            }
+            guard let homeId else {
                 throw HomeResolutionError.unknownHome
             }
             return homeId
@@ -234,6 +260,13 @@ struct Home: AppEntity {
     /// Legacy formats (`"<stableIdentifier>"` or a raw UUID string) — returned as-is.
     static func stableIdentifierComponent(of homeId: ID) -> String {
         homeId.components(separatedBy: "##").first ?? homeId
+    }
+
+    /// Extracts the device-local UUID suffix from a current-format Home.id.
+    static func localIdentifierComponent(of homeId: ID) -> UUID? {
+        let components = homeId.components(separatedBy: "##")
+        guard components.count == 2 else { return nil }
+        return UUID(uuidString: components[1])
     }
 }
 
