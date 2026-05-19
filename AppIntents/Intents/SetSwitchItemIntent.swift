@@ -84,6 +84,6 @@ struct SetSwitchItemIntent: AppIntent {
         // Toggle's optimistic visual flip and showing the wrong colour/text.
         try? await Task.sleep(for: .milliseconds(600))
 
-        return .result(dialog: "Sent \(action) to \(itemEntity.label)")
+        return .result(dialog: "Sent \(action.rawValue) to \(itemEntity.label)")
     }
 }

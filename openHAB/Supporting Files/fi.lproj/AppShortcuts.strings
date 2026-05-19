@@ -1,0 +1,12 @@
+"Set a switch in ${applicationName}" = "Aseta kytkin ${applicationName}-sovelluksessa";
+"Toggle a switch in ${applicationName}" = "Vaihda kytkimen tila ${applicationName}-sovelluksessa";
+"Get item state in ${applicationName}" = "Hae kohteen tila ${applicationName}-sovelluksessa";
+"Set dimmer in ${applicationName}" = "Aseta himmentimen arvo ${applicationName}-sovelluksessa";
+"Set roller shutter in ${applicationName}" = "Aseta rullakaihdin ${applicationName}-sovelluksessa";
+"Set color light in ${applicationName}" = "Aseta värivalaisin ${applicationName}-sovelluksessa";
+"Set number value in ${applicationName}" = "Aseta lukuarvo ${applicationName}-sovelluksessa";
+"Control player in ${applicationName}" = "Ohjaa soitinta ${applicationName}-sovelluksessa";
+"Set text value in ${applicationName}" = "Aseta tekstiarvo ${applicationName}-sovelluksessa";
+"Set date and time in ${applicationName}" = "Aseta päivämäärä ja aika ${applicationName}-sovelluksessa";
+"Set location in ${applicationName}" = "Aseta sijainti ${applicationName}-sovelluksessa";
+"Set contact state in ${applicationName}" = "Aseta kontaktin tila ${applicationName}-sovelluksessa";

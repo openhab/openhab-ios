@@ -1,0 +1,12 @@
+"Set a switch in ${applicationName}" = "Schakelaar instellen in ${applicationName}";
+"Toggle a switch in ${applicationName}" = "Schakelaar omzetten in ${applicationName}";
+"Get item state in ${applicationName}" = "Elementstatus ophalen in ${applicationName}";
+"Set dimmer in ${applicationName}" = "Dimmer instellen in ${applicationName}";
+"Set roller shutter in ${applicationName}" = "Rolluik instellen in ${applicationName}";
+"Set color light in ${applicationName}" = "Kleurlamp instellen in ${applicationName}";
+"Set number value in ${applicationName}" = "Getal instellen in ${applicationName}";
+"Control player in ${applicationName}" = "Speler bedienen in ${applicationName}";
+"Set text value in ${applicationName}" = "Tekstwaarde instellen in ${applicationName}";
+"Set date and time in ${applicationName}" = "Datum en tijd instellen in ${applicationName}";
+"Set location in ${applicationName}" = "Locatie instellen in ${applicationName}";
+"Set contact state in ${applicationName}" = "Contactstatus instellen in ${applicationName}";

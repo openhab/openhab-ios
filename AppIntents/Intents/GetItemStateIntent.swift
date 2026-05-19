@@ -36,7 +36,7 @@ struct GetItemStateIntent: AppIntent {
     }
 
     static let title: LocalizedStringResource = "Get Item State"
-    static let description = IntentDescription("Retrieve the current state of an item")
+    static let description = IntentDescription("Retrieve the current state of an item", resultValueName: "State")
 
     @Parameter(title: "Home")
     var home: Home?

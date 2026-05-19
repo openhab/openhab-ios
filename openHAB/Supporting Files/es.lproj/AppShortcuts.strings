@@ -1,0 +1,12 @@
+"Set a switch in ${applicationName}" = "Configurar un interruptor en ${applicationName}";
+"Toggle a switch in ${applicationName}" = "Alternar un interruptor en ${applicationName}";
+"Get item state in ${applicationName}" = "Obtener el estado del elemento en ${applicationName}";
+"Set dimmer in ${applicationName}" = "Configurar el regulador en ${applicationName}";
+"Set roller shutter in ${applicationName}" = "Configurar la persiana en ${applicationName}";
+"Set color light in ${applicationName}" = "Configurar la luz de color en ${applicationName}";
+"Set number value in ${applicationName}" = "Establecer un valor numérico en ${applicationName}";
+"Control player in ${applicationName}" = "Controlar el reproductor en ${applicationName}";
+"Set text value in ${applicationName}" = "Establecer un valor de texto en ${applicationName}";
+"Set date and time in ${applicationName}" = "Establecer fecha y hora en ${applicationName}";
+"Set location in ${applicationName}" = "Establecer ubicación en ${applicationName}";
+"Set contact state in ${applicationName}" = "Establecer estado de contacto en ${applicationName}";
