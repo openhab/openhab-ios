@@ -43,12 +43,6 @@ final class UserData: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    deinit {
-        pageHandlingTask?.cancel()
-        networkObservationTask?.cancel()
-        notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
-    }
-
     init(preview: Bool = false) {
         #if DEBUG
         if preview {
@@ -514,5 +508,11 @@ final class UserData: ObservableObject {
                 Task { await self?.sendCommand(item, command: command) }
             }
         }
+    }
+
+    deinit {
+        pageHandlingTask?.cancel()
+        networkObservationTask?.cancel()
+        notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 }

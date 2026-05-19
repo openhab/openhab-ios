@@ -56,10 +56,6 @@ public actor OpenAPIService {
     // Do not remove: deinit relies on this property to tear down the session.
     private var urlSession: URLSession?
 
-    deinit {
-        urlSession?.invalidateAndCancel()
-    }
-
     /// Creates a new client for OpenAPIService.
     public init(client: any APIProtocol) {
         self.client = client
@@ -140,6 +136,10 @@ public actor OpenAPIService {
         guard let sourcePrefix, !sourcePrefix.isEmpty else { return base }
         guard let base else { return sourcePrefix }
         return "\(sourcePrefix)=>\(base)"
+    }
+
+    deinit {
+        urlSession?.invalidateAndCancel()
     }
 }
 
