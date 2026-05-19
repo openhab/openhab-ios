@@ -35,6 +35,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published private(set) var trackerStatus: NetworkStatus = .stopped
     @Published private(set) var widgetUpdateVersions: [String: Int] = [:]
     @Published private(set) var rowInputs: [SitemapRowInput] = []
+    @Published var navigationPath: [LinkedPageNavigation] = []
 
     let networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
@@ -796,7 +797,13 @@ extension SitemapPageViewModel {
         defaultSitemap = name
         defaultSitemapLabel = ""
         self.pageId = pageId ?? ""
+        navigationPath = []
         error = nil
+    }
+
+    @MainActor
+    func navigateToLinkedPage(_ nav: LinkedPageNavigation) {
+        navigationPath.append(nav)
     }
 
     @MainActor
