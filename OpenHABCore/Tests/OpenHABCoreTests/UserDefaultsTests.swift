@@ -10,22 +10,13 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import OpenHABCore
-
-import XCTest
+import Testing
 
 @MainActor
-final class UserDefaultsTests: XCTestCase {
-    // Testing the consistency between Preferences and UserDefaults
-    func testConsistency() {
-        // Set Preferences from MainActor
-        let defaultsName: String
-        // Reset UserDefaults
+struct UserDefaultsTests {
+    @Test func consistency() throws {
         let data = UserDefaults(suiteName: "group.org.openhab.app")!
-        do {
-            defaultsName = try XCTUnwrap(Bundle.main.bundleIdentifier)
-        } catch {
-            fatalError()
-        }
+        let defaultsName = try #require(Bundle.main.bundleIdentifier)
         data.removePersistentDomain(forName: defaultsName)
 
         let random: String = UUID().uuidString
@@ -55,16 +46,16 @@ final class UserDefaultsTests: XCTestCase {
 
         Preferences.shared.idleOff = false
 
-        XCTAssertEqual(Preferences.shared.currentHomePreferences.remoteConnectionConfig.username, home.remoteConnectionConfig.username)
-        XCTAssertEqual(Preferences.shared.currentHomePreferences.localConnectionConfig.url, home.localConnectionConfig.url)
-        XCTAssertEqual(Preferences.shared.currentHomePreferences.remoteConnectionConfig.url, home.remoteConnectionConfig.url)
-        XCTAssertEqual(Preferences.shared.currentHomePreferences.remoteConnectionConfig.password, home.remoteConnectionConfig.password)
-        XCTAssertEqual(Preferences.shared.currentHomePreferences.remoteConnectionConfig.ignoreSSL, home.remoteConnectionConfig.ignoreSSL)
-        XCTAssertEqual(Preferences.shared.currentHomePreferences.demomode, home.demomode)
-        XCTAssertEqual(Preferences.shared.idleOff, data.bool(forKey: "idleOff"))
-        XCTAssertEqual(Preferences.shared.currentHomePreferences.iconType, home.iconType)
-        XCTAssertEqual(Preferences.shared.currentHomePreferences.defaultSitemap, home.defaultSitemap)
-        XCTAssertEqual(Preferences.shared.currentHomePreferences.sitemapForWatch, home.sitemapForWatch)
-        XCTAssertEqual(home, try? JSONDecoder().decode(HomePreferences.self, from: data.data(forKey: "currentHomePreferences")!))
+        #expect(Preferences.shared.currentHomePreferences.remoteConnectionConfig.username == home.remoteConnectionConfig.username)
+        #expect(Preferences.shared.currentHomePreferences.localConnectionConfig.url == home.localConnectionConfig.url)
+        #expect(Preferences.shared.currentHomePreferences.remoteConnectionConfig.url == home.remoteConnectionConfig.url)
+        #expect(Preferences.shared.currentHomePreferences.remoteConnectionConfig.password == home.remoteConnectionConfig.password)
+        #expect(Preferences.shared.currentHomePreferences.remoteConnectionConfig.ignoreSSL == home.remoteConnectionConfig.ignoreSSL)
+        #expect(Preferences.shared.currentHomePreferences.demomode == home.demomode)
+        #expect(Preferences.shared.idleOff == data.bool(forKey: "idleOff"))
+        #expect(Preferences.shared.currentHomePreferences.iconType == home.iconType)
+        #expect(Preferences.shared.currentHomePreferences.defaultSitemap == home.defaultSitemap)
+        #expect(Preferences.shared.currentHomePreferences.sitemapForWatch == home.sitemapForWatch)
+        #expect(home == (try? JSONDecoder().decode(HomePreferences.self, from: data.data(forKey: "currentHomePreferences")!)))
     }
 }
