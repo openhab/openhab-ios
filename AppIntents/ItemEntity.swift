@@ -26,7 +26,7 @@ protocol ItemEntity: AppEntity where ID == ItemIdentifier {
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 extension ItemEntity {
-    var homeId: UUID { id.homeId }
+    var homeId: UUID? { id.homeId }
     var itemName: String { id.itemName }
 
     // Convenient access to common item properties
