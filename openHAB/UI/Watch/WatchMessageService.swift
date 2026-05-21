@@ -41,6 +41,10 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
         Logger.preferences.info("WCSession activation completed. State: \(String(describing: activationState)), Error: \(String(describing: error))")
+        guard activationState == .activated else { return }
+        Task { @MainActor in
+            await WatchMessageService.singleton.syncPreferencesToWatch()
+        }
     }
 
     func sessionDidBecomeInactive(_ session: WCSession) {
