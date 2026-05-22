@@ -53,7 +53,7 @@ struct SetPlayerValueIntent: AppIntent {
     @Parameter(title: "Action")
     var action: PlayerAction
 
-    func perform() async throws -> some IntentResult {
+    func perform() async throws -> some IntentResult & ProvidesDialog {
         await Preferences.prepareForAppExtensionAccess()
 
         let homeId = try await HomeResolver.resolvedHomeId(
@@ -73,6 +73,6 @@ struct SetPlayerValueIntent: AppIntent {
             throw PlayerValueError.commandFailed(error.localizedDescription)
         }
 
-        return .result()
+        return .result(dialog: "Sent \(action) to \(itemEntity.label)")
     }
 }

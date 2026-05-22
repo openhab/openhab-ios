@@ -82,11 +82,19 @@ enum HomeResolver {
                                itemHomeId: UUID?,
                                itemLabel: String,
                                mismatchError: (String, String) -> some Error) throws -> UUID {
-        let map = Preferences.shared.storedHomes.values.flatMap {
-            [
-                ("\($0.stableIdentifier)##\($0.id.uuidString)", $0.id),
-                ($0.stableIdentifier, $0.id)
-            ]
+        // Map entries use the storedHomes dict key (not HomePreferences.id) so the resolved UUID
+        // matches the dict key stored in ItemIdentifier.homeId by entities(for:) — both sides of
+        // the guard homeId == itemHomeId check are then the same value.
+        let storedHomes = Preferences.shared.storedHomes
+        // Count occurrences of each stableIdentifier so bare-name entries are only added when
+        // unique — mirrors resolvePreferences(for:in:) which requires a unique stable-id match.
+        let stableIdCounts = storedHomes.values.reduce(into: [String: Int]()) { $0[$1.stableIdentifier, default: 0] += 1 }
+        let map = storedHomes.flatMap { key, prefs -> [(String, UUID)] in
+            var entries: [(String, UUID)] = [("\(prefs.stableIdentifier)##\(prefs.id.uuidString)", key)]
+            if stableIdCounts[prefs.stableIdentifier] == 1 {
+                entries.append((prefs.stableIdentifier, key))
+            }
+            return entries
         }
         return try resolvedHomeId(
             selectedHome: selectedHome,
@@ -108,23 +116,8 @@ enum HomeResolver {
             selectedHome: selectedHome,
             itemName: itemName,
             findHomeId: { identifier in
-                // All HomePreferences property access must happen on the main actor.
                 await MainActor.run {
-                    let storedHomes = Preferences.shared.storedHomes
-                    if identifier.contains("##"),
-                       let match = storedHomes.values.first(where: { identifier == "\($0.stableIdentifier)##\($0.id.uuidString)" }) {
-                        return match.id
-                    }
-                    if let localId = Home.localIdentifierComponent(of: identifier), storedHomes[localId] != nil {
-                        return localId
-                    }
-                    if let match = storedHomes.values.first(where: { $0.stableIdentifier == identifier }) {
-                        return match.id
-                    }
-                    if let uuid = UUID(uuidString: identifier), storedHomes[uuid] != nil {
-                        return uuid
-                    }
-                    return nil
+                    Home.resolveStoredHomeKey(for: identifier, in: Preferences.shared.storedHomes)
                 }
             },
             listStoredHomes: { await Preferences.shared.listStoredHomes() },
@@ -168,6 +161,9 @@ enum HomeResolver {
         }
 
         let storedHomes = await listStoredHomes()
+        guard !storedHomes.isEmpty else {
+            throw HomeResolutionError.unknownHome
+        }
         if storedHomes.count == 1, let onlyHomeId = storedHomes.first {
             return onlyHomeId
         }
@@ -189,30 +185,11 @@ struct Home: AppEntity {
         func entities(for identifiers: [Home.ID]) throws -> [Home] {
             let storedHomes = Preferences.shared.storedHomes
             return identifiers.compactMap { identifier in
-                // Current format: "##" is present — prefer exact match (same device, disambiguates
-                // homes that share a stableIdentifier), then fall back to stableIdentifier-only
-                // match so shortcuts synced from another device still resolve.
-                if identifier.contains("##") {
-                    let stableId = Home.stableIdentifierComponent(of: identifier)
-                    if let match = storedHomes.values.first(where: {
-                        identifier == "\($0.stableIdentifier)##\($0.id.uuidString)"
-                    }) {
-                        return Home(homePrefs: match)
-                    }
-                    if let match = storedHomes.values.first(where: { $0.stableIdentifier == stableId }) {
-                        return Home(homePrefs: match)
-                    }
-                    return nil
-                }
-                // Legacy format: identifier is a device-local UUID string (shortcuts before this fix)
-                if let uuid = UUID(uuidString: identifier), let match = storedHomes[uuid] {
-                    return Home(homePrefs: match)
-                }
-                // Legacy format: bare stableIdentifier (no "##" separator)
-                if let match = storedHomes.values.first(where: { $0.stableIdentifier == identifier }) {
-                    return Home(homePrefs: match)
-                }
-                return nil
+                guard let prefs = Home.resolvePreferences(for: identifier, in: storedHomes) else { return nil }
+                // Return the home with the ORIGINAL identifier so Home.id matches what the
+                // framework stored — prevents cross-device mismatch when the ##UUID suffix
+                // differs between the creating device and the running device.
+                return Home(id: identifier, displayString: prefs.homeName)
             }
         }
 
@@ -268,6 +245,50 @@ struct Home: AppEntity {
         guard components.count == 2 else { return nil }
         return UUID(uuidString: components[1])
     }
+
+    /// Resolves a home identifier string to the `storedHomes` dictionary key for the matching entry.
+    ///
+    /// Unlike `resolvePreferences(for:in:)?.id`, this always returns the canonical dictionary key.
+    /// The key may differ from `HomePreferences.id` when stored data has a key/id mismatch.
+    @MainActor
+    static func resolveStoredHomeKey(for identifier: String, in storedHomes: [UUID: HomePreferences]) -> UUID? {
+        guard let prefs = resolvePreferences(for: identifier, in: storedHomes) else { return nil }
+        return storedHomes.first { $0.value.id == prefs.id }?.key ?? prefs.id
+    }
+
+    @MainActor
+    static func resolvePreferences(for identifier: String, in storedHomes: [UUID: HomePreferences]) -> HomePreferences? {
+        if identifier.contains("##") {
+            // Current format: "stableIdentifier##localUUID"
+            // Exact match: same device, stableIdentifier unchanged since shortcut was created.
+            if let match = storedHomes.values.first(where: { identifier == "\($0.stableIdentifier)##\($0.id.uuidString)" }) {
+                return match
+            }
+            // Local UUID match: same device, stableIdentifier changed (home renamed, URL updated, or
+            // cloudUserId populated after shortcut creation). Falls back to id-field scan for stored
+            // data where the dictionary key and HomePreferences.id differ.
+            if let localId = localIdentifierComponent(of: identifier) {
+                if let match = storedHomes[localId] { return match }
+                if let match = storedHomes.values.first(where: { $0.id == localId }) { return match }
+            }
+            // Stable identifier match: cross-device resolution.
+            // Require a unique match — if two homes share a name the fallback is ambiguous and
+            // a re-pick is safer than silently running against the wrong server.
+            let stableId = stableIdentifierComponent(of: identifier)
+            let stableMatches = storedHomes.values.filter { $0.stableIdentifier == stableId }
+            if stableMatches.count == 1 { return stableMatches.first }
+        } else {
+            // Legacy format (pre-## era): raw UUID string or bare stable identifier.
+            if let uuid = UUID(uuidString: identifier) {
+                if let match = storedHomes[uuid] ?? storedHomes.values.first(where: { $0.id == uuid }) {
+                    return match
+                }
+            }
+            let stableMatches = storedHomes.values.filter { $0.stableIdentifier == identifier }
+            if stableMatches.count == 1 { return stableMatches.first }
+        }
+        return nil
+    }
 }
 
 // MARK: - Stable Cross-Device Identifier
@@ -276,21 +297,11 @@ extension HomePreferences {
     /// A stable identifier that is the same on every device configured for the same openHAB server.
     /// Used as Home.id so that shortcuts synced via iCloud resolve correctly on a second device.
     ///
-    /// Priority:
-    /// 1. cloudUserId — unique per myopenhab.org account
-    /// 2. remote URL — unique for self-hosted cloud servers
-    /// 3. local URL — fallback for local-only setups
-    /// 4. UUID string — last resort (no cross-device benefit, but avoids an empty identifier)
+    /// Uses only homeName so that the identifier is independent of device-specific connection
+    /// config (protocol, port, URL) — these often differ between devices (e.g. http/8080 on one
+    /// device, https/8443 on another), which would break cross-device shortcut resolution.
+    /// Home names are expected to be unique per user; the UUID fallback handles the unnamed case.
     var stableIdentifier: String {
-        if let cloudId = remoteConnectionConfig.cloudUserId, !cloudId.isEmpty {
-            return cloudId
-        }
-        if !remoteConnectionConfig.url.isEmpty {
-            return remoteConnectionConfig.url
-        }
-        if !localConnectionConfig.url.isEmpty {
-            return localConnectionConfig.url
-        }
-        return id.uuidString
+        homeName.isEmpty ? id.uuidString : homeName
     }
 }

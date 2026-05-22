@@ -24,3 +24,13 @@ enum ContactState: String, AppEnum {
         .off: "Off"
     ]
 }
+
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+extension ContactState: CustomLocalizedStringResourceConvertible {
+    var localizedStringResource: LocalizedStringResource {
+        switch self {
+        case .on: "On"
+        case .off: "Off"
+        }
+    }
+}

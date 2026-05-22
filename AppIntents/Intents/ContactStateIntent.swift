@@ -74,6 +74,6 @@ struct ContactStateIntent: AppIntent {
             throw ContactStateError.commandFailed(error.localizedDescription)
         }
 
-        return .result(dialog: "The state of \(itemEntity.label) was set to \(state.rawValue)")
+        return .result(dialog: "The state of \(itemEntity.label) was set to \(state)")
     }
 }

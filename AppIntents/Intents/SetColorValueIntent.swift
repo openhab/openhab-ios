@@ -66,16 +66,15 @@ struct SetColorValueIntent: AppIntent {
             mismatchError: ColorValueError.itemNotInHome
         )
 
-        var colorValue = value
-        let hsb = colorValue.split(separator: ",")
+        let hsb = value.split(separator: ",")
         guard hsb.count == 3,
               let hue = Int(hsb[0]), (0 ... 360).contains(hue),
               let sat = Int(hsb[1]), (0 ... 100).contains(sat),
               let val = Int(hsb[2]), (0 ... 100).contains(val) else {
-            throw ColorValueError.invalidValue(colorValue, itemEntity.label)
+            throw ColorValueError.invalidValue(value, itemEntity.label)
         }
 
-        colorValue = "\(hue),\(sat),\(val)"
+        let colorValue = "\(hue),\(sat),\(val)"
 
         do {
             try await OpenHABItemCache.instance.sendCommand(

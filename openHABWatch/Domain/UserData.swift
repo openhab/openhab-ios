@@ -31,6 +31,10 @@ final class UserData: ObservableObject {
     private var cachedWidgets: [OpenHABWidget] = []
     private var currentlyLoadingSitemap: String?
     private var lastObservedConnectionURL: String?
+    // Incremented each time a new pageHandlingTask is created. The task captures its own
+    // generation at creation time and only clears shared state when the generation still matches,
+    // preventing a completing old task from wiping out a newly started task for the same sitemap.
+    private var taskGeneration = 0
 
     private var pageHandlingTask: Task<Void, Never>?
     private var networkObservationTask: Task<Void, Never>?
@@ -277,17 +281,19 @@ final class UserData: ObservableObject {
             }
         }
         currentlyLoadingSitemap = sitemapName
+        taskGeneration += 1
+        let capturedGeneration = taskGeneration
 
         pageHandlingTask = Task {
-            let taskSitemapName = sitemapName // Capture the sitemap name for this specific task
+            let taskSitemapName = sitemapName
             defer {
-                // Only clear references if this task is still the current one
-                Task { @MainActor [weak self] in
-                    if self?.currentlyLoadingSitemap == taskSitemapName {
-                        Logger.userData.debug("Clearing page handling task for: \(taskSitemapName)")
-                        self?.pageHandlingTask = nil
-                        self?.currentlyLoadingSitemap = nil
-                    }
+                // Use the captured generation rather than sitemap name: a force-refresh of the same
+                // sitemap would set currentlyLoadingSitemap to the same string, so the name check
+                // would incorrectly clear the new task's slot when the old task finishes.
+                if taskGeneration == capturedGeneration {
+                    Logger.userData.debug("Clearing page handling task for: \(taskSitemapName)")
+                    pageHandlingTask = nil
+                    currentlyLoadingSitemap = nil
                 }
             }
 
@@ -511,6 +517,11 @@ final class UserData: ObservableObject {
     }
 
     deinit {
+        // pageHandlingTask strongly captures self, creating a retain cycle that keeps self alive
+        // until the task finishes. For linked-page instances the cycle is broken by stopLongPolling()
+        // (called from .onDisappear), which cancels the task and nils pageHandlingTask; by the time
+        // deinit runs, the task has already completed and pageHandlingTask is nil. The cancel() call
+        // here is therefore a no-op in the normal path but harmless as a safety net.
         pageHandlingTask?.cancel()
         networkObservationTask?.cancel()
         notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }

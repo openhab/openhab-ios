@@ -18,7 +18,7 @@ import OpenHABCore
 protocol ItemEntityQuery: EntityStringQuery {
     associatedtype EntityType: ItemEntity
 
-    var allowedTypes: [OpenHABItem.ItemType] { get set }
+    var allowedTypes: [OpenHABItem.ItemType] { get }
     var selectedHome: Home? { get }
 }
 
@@ -40,55 +40,17 @@ extension ItemEntityQuery {
     @MainActor
     func resolvedSelectedHomeId() -> UUID? {
         guard let home = selectedHome else { return nil }
-        let storedHomes = Preferences.shared.storedHomes
-
-        if home.id.contains("##"),
-           let match = storedHomes.values.first(where: { home.id == "\($0.stableIdentifier)##\($0.id.uuidString)" }) {
-            return match.id
-        }
-
-        if let localId = Home.localIdentifierComponent(of: home.id), storedHomes[localId] != nil {
-            return localId
-        }
-
-        let stableId = Home.stableIdentifierComponent(of: home.id)
-        if let match = storedHomes.values.first(where: { $0.stableIdentifier == stableId }) {
-            return match.id
-        }
-        if let uuid = UUID(uuidString: stableId), storedHomes[uuid] != nil {
-            return uuid
-        }
-        return nil
+        return Home.resolveStoredHomeKey(for: home.id, in: Preferences.shared.storedHomes)
     }
 
     @MainActor
     func resolvedHomeId(for identifier: ItemIdentifier) -> UUID? {
         let storedHomes = Preferences.shared.storedHomes
-
         guard let homeIdentifier = identifier.homeIdentifier else {
-            guard let homeId = identifier.homeId, storedHomes[homeId] != nil else {
-                return nil
-            }
+            guard let homeId = identifier.homeId, storedHomes[homeId] != nil else { return nil }
             return homeId
         }
-
-        if homeIdentifier.contains("##"),
-           let match = storedHomes.values.first(where: { homeIdentifier == "\($0.stableIdentifier)##\($0.id.uuidString)" }) {
-            return match.id
-        }
-
-        if let localId = Home.localIdentifierComponent(of: homeIdentifier), storedHomes[localId] != nil {
-            return localId
-        }
-
-        let stableId = Home.stableIdentifierComponent(of: homeIdentifier)
-        if let match = storedHomes.values.first(where: { $0.stableIdentifier == stableId }) {
-            return match.id
-        }
-        if let legacyId = UUID(uuidString: stableId), storedHomes[legacyId] != nil {
-            return legacyId
-        }
-        return nil
+        return Home.resolveStoredHomeKey(for: homeIdentifier, in: storedHomes)
     }
 
     func entity(for item: OpenHABItem, homeId: UUID) async -> EntityType {
@@ -145,19 +107,34 @@ extension ItemEntityQuery {
     func entities(for identifiers: [ItemIdentifier]) async throws -> [EntityType] {
         await Preferences.prepareForAppExtensionAccess()
 
-        var result: [EntityType] = []
-
+        // Resolve each identifier to its cache key (storedHomes dict key).
+        // The cache key may differ from identifier.homeId when there is a key/id mismatch in
+        // stored data — the cache is always keyed by the dict key, not HomePreferences.id.
+        var resolved: [(identifier: ItemIdentifier, cacheKey: UUID)] = []
         for identifier in identifiers {
-            guard let homeId = await resolvedHomeId(for: identifier) else {
-                continue
+            if let cacheKey = await resolvedHomeId(for: identifier) {
+                resolved.append((identifier, cacheKey))
             }
+        }
 
+        let uniqueCacheKeys = Array(Set(resolved.map(\.cacheKey)))
+        await OpenHABItemCache.instance.reloadCacheIfNeeded(homes: uniqueCacheKeys)
+
+        var result: [EntityType] = []
+        for (identifier, cacheKey) in resolved {
             if let item = await OpenHABItemCache.instance.getCachedOrPersistedItem(
                 name: identifier.itemName,
-                home: homeId
+                home: cacheKey
             ) {
-                let entity = await entity(for: item, homeId: homeId)
-                result.append(entity)
+                let homeName = await getHomeName(for: cacheKey)
+                // Use cacheKey (current-device dict key) as homeId so perform() receives a UUID
+                // that assureNetworkTracker can resolve on this device. Identity matching against
+                // the requested identifier uses Equatable which excludes homeId (see ItemIdentifier).
+                result.append(EntityType(
+                    id: ItemIdentifier(homeId: cacheKey, itemName: item.name, homeIdentifier: identifier.homeIdentifier),
+                    item: item,
+                    homeName: homeName
+                ))
             }
         }
 
@@ -193,6 +170,7 @@ extension ItemEntityQuery {
         let selectedHomeId = await resolvedSelectedHomeId()
         let searchResults: [UUID: [OpenHABItem]]
         if let selectedHomeId {
+            await OpenHABItemCache.instance.reloadCacheIfNeeded(homes: [selectedHomeId])
             searchResults = await OpenHABItemCache.instance.searchCachedOrPersistedItems(
                 searchTerm: string,
                 types: allowedTypes.isEmpty ? nil : allowedTypes,
@@ -200,6 +178,7 @@ extension ItemEntityQuery {
             )
         } else {
             let storedHomes = await Preferences.shared.listStoredHomes()
+            await OpenHABItemCache.instance.reloadCacheIfNeeded(homes: storedHomes)
             let homeNames = await homeNames(for: storedHomes)
             searchResults = await homeAwareSearchResults(
                 matching: string,

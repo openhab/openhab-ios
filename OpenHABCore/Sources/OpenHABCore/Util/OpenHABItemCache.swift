@@ -268,10 +268,14 @@ public actor OpenHABItemCache {
         do {
             let loadedItems = try await loadNonGroupItemsForHomes(homes)
             Logger.itemCache.info("Store loaded items in cache")
-            homes.forEach { items[$0] = loadedItems[$0] }
             let now = Date.now
-            homes.forEach { lastLoad[$0] = now }
-            persistStubs()
+            for (homeId, homeItems) in loadedItems {
+                items[homeId] = homeItems
+                lastLoad[homeId] = now
+            }
+            if !loadedItems.isEmpty {
+                persistStubs()
+            }
             let itemCounts = items.map { ($0.key, $0.value.count) }
             Logger.itemCache.info("Loaded \(itemCounts) items to cache")
         } catch {
@@ -314,7 +318,9 @@ public actor OpenHABItemCache {
                     // TODO: consider the possibility that two local connections might be the same
                     guard let items = await self.loadItems(homeId: homeId) else {
                         Logger.itemCache.error("Item search for home with id \(homeId) failed")
-                        return (id: homeId, items: [] as [OpenHABItem])
+                        // Return nil so the caller leaves this home's cache entry untouched,
+                        // allowing getCachedOrPersistedItems to fall back to persisted stubs.
+                        return nil as (id: UUID, items: [OpenHABItem])?
                     }
                     Logger.itemCache.info("Loaded \(items.count) items for home \(homeId)")
                     return (id: homeId, items: items)
@@ -322,6 +328,7 @@ public actor OpenHABItemCache {
             }
             let homeItemsDictionary: [UUID: [OpenHABItem]] = [:]
             let allHomeItems = try? await group.reduce(into: homeItemsDictionary) { partialResult, nextElement in
+                guard let nextElement else { return } // nil == connection failed; leave cache untouched
                 Logger.itemCache.debug("Found \(nextElement.items.count) items for \(nextElement.id)")
                 partialResult[nextElement.id] = nextElement.items
             }
@@ -343,18 +350,27 @@ public actor OpenHABItemCache {
     }
 
     private func assureNetworkTracker(homeId: UUID) async -> NetworkTracker? {
-        #if os(watchOS)
-        // On watchOS, App Intents run in the watch app process (no extension process exists).
-        // Creating private NetworkTracker instances here would spawn additional NWPathMonitors
-        // and URLSession connections alongside the app's existing NetworkTracker.shared, which
-        // exhausts watchOS's constrained network resources and causes hangs.
+        #if os(watchOS) || os(macOS) || targetEnvironment(macCatalyst)
+        // On watchOS and macOS, App Intents run directly in the main app process (no separate
+        // extension process exists on either platform). NetworkTracker.shared is already connected
+        // there, so creating private per-home NetworkTracker instances would start cold — with no
+        // active connection — causing item loads to fail immediately.
+        //
+        // Limitation: the homeId parameter is ignored, so only the currently active home's
+        // connection is used. Multi-home App Intents are an iOS-only capability.
         return NetworkTracker.shared
         #else
         await Preferences.prepareForAppExtensionAccess()
-        if networkTrackers[homeId] == nil, let homePreferences = await Preferences.shared.storedHomes[homeId] {
-            let tracker = NetworkTracker(timeout: OpenHABItemCache.networkTimeout)
-            networkTrackers[homeId] = tracker
-            await tracker.startTracking(connectionConfigurations: [homePreferences.localConnectionConfig, homePreferences.remoteConnectionConfig])
+        if networkTrackers[homeId] == nil {
+            let storedHomes = await Preferences.shared.storedHomes
+            // Direct key lookup; fall back to matching by HomePreferences.id for stored data where
+            // the dictionary key and the id field differ (can happen after certain migrations).
+            let homePreferences = storedHomes[homeId] ?? storedHomes.values.first { $0.id == homeId }
+            if let homePreferences {
+                let tracker = NetworkTracker(timeout: OpenHABItemCache.networkTimeout)
+                networkTrackers[homeId] = tracker
+                await tracker.startTracking(connectionConfigurations: [homePreferences.localConnectionConfig, homePreferences.remoteConnectionConfig])
+            }
         }
         // TODO: do we need to make sure / wait that the connection is live?
         return networkTrackers[homeId]

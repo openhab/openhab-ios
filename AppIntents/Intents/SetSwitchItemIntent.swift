@@ -53,7 +53,7 @@ struct SetSwitchItemIntent: AppIntent {
     @Parameter(title: "Action")
     var action: SwitchAction
 
-    func perform() async throws -> some IntentResult {
+    func perform() async throws -> some IntentResult & ProvidesDialog {
         await Preferences.prepareForAppExtensionAccess()
 
         // Validate that the item belongs to the selected home
@@ -74,6 +74,6 @@ struct SetSwitchItemIntent: AppIntent {
             throw ControlItemError.commandFailed(error.localizedDescription)
         }
 
-        return .result()
+        return .result(dialog: "Sent \(action) to \(itemEntity.label)")
     }
 }

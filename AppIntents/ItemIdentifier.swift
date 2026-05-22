@@ -13,7 +13,7 @@ import AppIntents
 import Foundation
 import OpenHABCore
 
-struct ItemIdentifier: Hashable, Codable {
+struct ItemIdentifier: Codable {
     private static let currentFormatPrefix = "v2"
 
     let homeId: UUID?
@@ -33,6 +33,31 @@ struct ItemIdentifier: Hashable, Codable {
     }
 }
 
+// homeId is a device-local UUID used only for cache lookups and network-tracker resolution.
+// For v2 identifiers (homeIdentifier != nil), entity identity is homeIdentifier + itemName so the
+// App Intents framework can match shortcuts across devices even when the embedded UUID differs.
+// For legacy identifiers (homeIdentifier == nil), homeId is the only home discriminator available,
+// so it is included in equality — without it, same-named items from different homes would collide.
+extension ItemIdentifier: Equatable {
+    static func == (lhs: ItemIdentifier, rhs: ItemIdentifier) -> Bool {
+        guard lhs.homeIdentifier == nil, rhs.homeIdentifier == nil else {
+            return lhs.homeIdentifier == rhs.homeIdentifier && lhs.itemName == rhs.itemName
+        }
+        return lhs.homeId == rhs.homeId && lhs.itemName == rhs.itemName
+    }
+}
+
+extension ItemIdentifier: Hashable {
+    func hash(into hasher: inout Hasher) {
+        if let homeIdentifier {
+            hasher.combine(homeIdentifier)
+        } else {
+            hasher.combine(homeId)
+        }
+        hasher.combine(itemName)
+    }
+}
+
 extension ItemIdentifier: EntityIdentifierConvertible {
     var entityIdentifierString: String {
         if let homeIdentifier {
@@ -44,8 +69,12 @@ extension ItemIdentifier: EntityIdentifierConvertible {
         }
 
         guard let homeId else {
+            // Both homeId and homeIdentifier are nil — produce a 3-component v2 string with an
+            // empty home segment so currentFormatIdentifier(for:) can round-trip it. Omitting the
+            // home segment produces a 2-component string that currentFormatIdentifier rejects.
             return [
                 Self.currentFormatPrefix,
+                Self.encoded(""),
                 Self.encoded(itemName)
             ].joined(separator: ":")
         }
