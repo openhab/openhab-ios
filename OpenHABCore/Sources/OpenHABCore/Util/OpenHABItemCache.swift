@@ -343,6 +343,13 @@ public actor OpenHABItemCache {
     }
 
     private func assureNetworkTracker(homeId: UUID) async -> NetworkTracker? {
+        #if os(watchOS)
+        // On watchOS, App Intents run in the watch app process (no extension process exists).
+        // Creating private NetworkTracker instances here would spawn additional NWPathMonitors
+        // and URLSession connections alongside the app's existing NetworkTracker.shared, which
+        // exhausts watchOS's constrained network resources and causes hangs.
+        return NetworkTracker.shared
+        #else
         await Preferences.prepareForAppExtensionAccess()
         if networkTrackers[homeId] == nil, let homePreferences = await Preferences.shared.storedHomes[homeId] {
             let tracker = NetworkTracker(timeout: OpenHABItemCache.networkTimeout)
@@ -351,6 +358,7 @@ public actor OpenHABItemCache {
         }
         // TODO: do we need to make sure / wait that the connection is live?
         return networkTrackers[homeId]
+        #endif
     }
 }
 
