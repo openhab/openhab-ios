@@ -31,6 +31,11 @@ private struct ImageRowContent: View {
         let url: URL?
     }
 
+    private struct RegularImageState {
+        let url: URL?
+        let image: KFCrossPlatformImage
+    }
+
     let input: MediaRowInput
     @ObservedObject var viewModel: SitemapPageViewModel
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
@@ -38,6 +43,7 @@ private struct ImageRowContent: View {
     @State private var refreshTimer: Timer?
     @State private var forceRefreshKey = UUID()
     @State private var lastChartImage: KFCrossPlatformImage?
+    @State private var lastRegularImageState: RegularImageState?
     @State private var chartDisplayState: ChartDisplayState?
 
     private let logger = Logger(subsystem: "org.openhab", category: "ImageRowView")
@@ -162,6 +168,25 @@ private struct ImageRowContent: View {
             KFImage(url)
                 .withOpenHABCredentials(for: networkTracker.activeConnection)
                 .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
+                .placeholder {
+                    if let state = lastRegularImageState, state.url == url {
+                        Image(uiImage: state.image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    } else {
+                        Color.gray.opacity(0.1)
+                            .frame(height: 200)
+                            .clipShape(.rect(cornerRadius: 8))
+                    }
+                }
+                .onSuccess { result in
+                    lastRegularImageState = RegularImageState(url: url, image: result.image)
+                }
+                .onFailure { error in
+                    guard !error.isTaskCancelled else { return }
+                    logger.warning("Image fetch failed for \(url?.absoluteString ?? "nil", privacy: .public): \(error.localizedDescription, privacy: .public)")
+                }
+                .fade(duration: 0)
                 .resizable()
                 .cacheMemoryOnly(!shouldCache)
                 .forceRefresh(shouldCache ? false : true)
