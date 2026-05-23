@@ -15,14 +15,14 @@ import Foundation
 @available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 enum ContactState: String, AppEnum {
-    case on = "ON"
-    case off = "OFF"
+    case open = "OPEN"
+    case closed = "CLOSED"
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Contact State")
 
     static let caseDisplayRepresentations: [Self: DisplayRepresentation] = [
-        .on: "On",
-        .off: "Off"
+        .open: "Open",
+        .closed: "Closed"
     ]
 }
 
@@ -31,8 +31,8 @@ enum ContactState: String, AppEnum {
 extension ContactState: CustomLocalizedStringResourceConvertible {
     var localizedStringResource: LocalizedStringResource {
         switch self {
-        case .on: "On"
-        case .off: "Off"
+        case .open: "Open"
+        case .closed: "Closed"
         }
     }
 }

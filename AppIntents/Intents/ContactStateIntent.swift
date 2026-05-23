@@ -66,10 +66,10 @@ struct ContactStateIntent: AppIntent {
         )
 
         do {
-            try await OpenHABItemCache.instance.sendCommand(
-                to: itemEntity.item,
+            try await OpenHABItemCache.instance.sendState(
+                itemEntity.item,
                 home: homeId,
-                command: state.rawValue
+                state: state.rawValue
             )
         } catch {
             throw ContactStateError.commandFailed(error.localizedDescription)
