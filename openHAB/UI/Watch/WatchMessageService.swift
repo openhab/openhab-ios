@@ -74,7 +74,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     @MainActor
     // swiftlint:disable:next async_without_await
     func subscribeToPreferences() async {
-        preferencesSubscription = Preferences.shared.$currentHomePreferences
+        preferencesSubscription = Preferences.shared.currentHomePreferencesPublisher
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { _ in } receiveValue: { homeSettings in
                 Task { @MainActor in
@@ -129,7 +129,9 @@ extension WatchPreferences {
             demoMode: preferences.demomode,
             localConnectionConfiguration: preferences.localConnectionConfig,
             remoteConnectionConfiguration: preferences.remoteConnectionConfig,
-            allHomes: allHomes
+            allHomes: allHomes,
+            localUsername: preferences.localConnectionConfig.username,
+            localPassword: preferences.localConnectionConfig.password
         )
     }
 }

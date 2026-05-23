@@ -289,7 +289,7 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func setupTracker() {
-        let serverInfo = Preferences.shared.$currentHomePreferences
+        let serverInfo = Preferences.shared.currentHomePreferencesPublisher
 
         // Register for certificate trust notifications
         NotificationCenter.default.addObserver(
