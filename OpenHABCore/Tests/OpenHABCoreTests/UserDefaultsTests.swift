@@ -129,14 +129,18 @@ struct HomePreferencesDecodingTests {
         #expect(decoded.homeName == "Custom Home")
         #expect(decoded.demomode == false)
         #expect(decoded.alwaysAllowWebRTC == true)
-        #expect(decoded.localConnectionConfig.username == "localuser")
+        // Credentials are not preserved in the re-encoded JSON (they move to Keychain);
+        // the initial decode reads them as legacy fields, but encode strips them.
+        #expect(decoded.localConnectionConfig.username == "")
         #expect(decoded.localConnectionConfig.supportsNotifications == false)
-        #expect(decoded.remoteConnectionConfig.username == "remoteuser")
+        #expect(decoded.remoteConnectionConfig.username == "")
         #expect(decoded.remoteConnectionConfig.supportsNotifications == true)
         #expect(decoded.sseCommandItem == "MySSEItem")
     }
 }
 
+// .serialized prevents parallel test clones from racing on the shared group.org.openhab.app UserDefaults suite.
+@Suite(.serialized)
 @MainActor
 struct UserDefaultsTests {
     @Test func consistency() throws {
@@ -171,16 +175,21 @@ struct UserDefaultsTests {
 
         Preferences.shared.idleOff = false
 
-        #expect(Preferences.shared.currentHomePreferences.remoteConnectionConfig.username == home.remoteConnectionConfig.username)
+        // Non-credential properties round-trip through UserDefaults
         #expect(Preferences.shared.currentHomePreferences.localConnectionConfig.url == home.localConnectionConfig.url)
         #expect(Preferences.shared.currentHomePreferences.remoteConnectionConfig.url == home.remoteConnectionConfig.url)
-        #expect(Preferences.shared.currentHomePreferences.remoteConnectionConfig.password == home.remoteConnectionConfig.password)
         #expect(Preferences.shared.currentHomePreferences.remoteConnectionConfig.ignoreSSL == home.remoteConnectionConfig.ignoreSSL)
         #expect(Preferences.shared.currentHomePreferences.demomode == home.demomode)
         #expect(Preferences.shared.idleOff == data.bool(forKey: "idleOff"))
         #expect(Preferences.shared.currentHomePreferences.iconType == home.iconType)
         #expect(Preferences.shared.currentHomePreferences.defaultSitemap == home.defaultSitemap)
         #expect(Preferences.shared.currentHomePreferences.sitemapForWatch == home.sitemapForWatch)
-        #expect(home == (try? JSONDecoder().decode(HomePreferences.self, from: data.data(forKey: "currentHomePreferences")!)))
+        // Credentials are stored in Keychain, not in UserDefaults JSON
+        var homeWithoutCredentials = home
+        homeWithoutCredentials.localConnectionConfig.username = ""
+        homeWithoutCredentials.localConnectionConfig.password = ""
+        homeWithoutCredentials.remoteConnectionConfig.username = ""
+        homeWithoutCredentials.remoteConnectionConfig.password = ""
+        #expect(homeWithoutCredentials == (try? JSONDecoder().decode(HomePreferences.self, from: data.data(forKey: "currentHomePreferences")!)))
     }
 }

@@ -37,8 +37,16 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
             // Decode the connection payload
             let prefs = try JSONDecoder().decode(WatchPreferences.self, from: data)
             Logger.preferences.info("📱 Received WatchPreferences - sitemapForWatch: \(prefs.sitemapForWatch), defaultSitemap: \(prefs.defaultSitemap)")
-            AppSettings.shared.localConnectionConfig = prefs.localConnectionConfiguration ?? .localDefault
-            AppSettings.shared.remoteConnectionConfig = prefs.remoteConnectionConfiguration ?? .remoteDefault
+            // Credentials are not embedded in ConnectionConfiguration JSON — inject from top-level fields
+            var localConfig = prefs.localConnectionConfiguration ?? .localDefault
+            localConfig.username = prefs.localUsername
+            localConfig.password = prefs.localPassword
+            AppSettings.shared.localConnectionConfig = localConfig
+
+            var remoteConfig = prefs.remoteConnectionConfiguration ?? .remoteDefault
+            remoteConfig.username = prefs.username
+            remoteConfig.password = prefs.password
+            AppSettings.shared.remoteConnectionConfig = remoteConfig
             AppSettings.shared.sitemapName = prefs.defaultSitemap
             AppSettings.shared.sitemapForWatch = prefs.sitemapForWatch
             AppSettings.shared.sitemapForWatchLabel = prefs.sitemapForWatchLabel
