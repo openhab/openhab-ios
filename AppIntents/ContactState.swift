@@ -12,7 +12,8 @@
 import AppIntents
 import Foundation
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 enum ContactState: String, AppEnum {
     case on = "ON"
     case off = "OFF"
@@ -25,7 +26,8 @@ enum ContactState: String, AppEnum {
     ]
 }
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 extension ContactState: CustomLocalizedStringResourceConvertible {
     var localizedStringResource: LocalizedStringResource {
         switch self {

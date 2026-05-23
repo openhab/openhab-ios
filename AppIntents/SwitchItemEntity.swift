@@ -14,7 +14,8 @@ import OpenHABCore
 
 // MARK: - DimmerItemEntity
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 struct DimmerItemEntity: ItemEntity {
     struct DimmerItemQuery: ItemEntityQuery {
         typealias EntityType = DimmerItemEntity
@@ -47,7 +48,8 @@ struct DimmerItemEntity: ItemEntity {
 
 // MARK: - ColorItemEntity
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 struct ColorItemEntity: ItemEntity {
     struct ColorItemQuery: ItemEntityQuery {
         typealias EntityType = ColorItemEntity
@@ -80,7 +82,8 @@ struct ColorItemEntity: ItemEntity {
 
 // MARK: - NumberItemEntity
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 struct NumberItemEntity: ItemEntity {
     struct NumberItemQuery: ItemEntityQuery {
         typealias EntityType = NumberItemEntity
@@ -113,7 +116,8 @@ struct NumberItemEntity: ItemEntity {
 
 // MARK: - StringItemEntity
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 struct StringItemEntity: ItemEntity {
     struct StringItemQuery: ItemEntityQuery {
         typealias EntityType = StringItemEntity
@@ -146,7 +150,8 @@ struct StringItemEntity: ItemEntity {
 
 // MARK: - ContactItemEntity
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 struct ContactItemEntity: ItemEntity {
     struct ContactItemQuery: ItemEntityQuery {
         typealias EntityType = ContactItemEntity
@@ -179,7 +184,8 @@ struct ContactItemEntity: ItemEntity {
 
 // MARK: - GenericItemEntity (for ItemStateIntent - all types)
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 struct GenericItemEntity: ItemEntity {
     struct GenericItemQuery: ItemEntityQuery {
         typealias EntityType = GenericItemEntity
@@ -212,7 +218,8 @@ struct GenericItemEntity: ItemEntity {
 
 // MARK: - PlayerItemEntity
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 struct PlayerItemEntity: ItemEntity {
     struct PlayerItemQuery: ItemEntityQuery {
         typealias EntityType = PlayerItemEntity
@@ -245,7 +252,8 @@ struct PlayerItemEntity: ItemEntity {
 
 // MARK: - DateTimeItemEntity
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 struct DateTimeItemEntity: ItemEntity {
     struct DateTimeItemQuery: ItemEntityQuery {
         typealias EntityType = DateTimeItemEntity
@@ -278,7 +286,8 @@ struct DateTimeItemEntity: ItemEntity {
 
 // MARK: - LocationItemEntity
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 struct LocationItemEntity: ItemEntity {
     struct LocationItemQuery: ItemEntityQuery {
         typealias EntityType = LocationItemEntity
@@ -311,7 +320,8 @@ struct LocationItemEntity: ItemEntity {
 
 // MARK: - SwitchItemEntity
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 struct SwitchItemEntity: ItemEntity {
     struct SwitchItemQuery: ItemEntityQuery {
         typealias EntityType = SwitchItemEntity

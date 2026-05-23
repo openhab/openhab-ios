@@ -26,7 +26,8 @@ enum PlayerValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(watchOS, unavailable)
+@available(iOS 17.0, macOS 14.0, *)
 struct SetPlayerValueIntent: AppIntent {
     static var openAppWhenRun: Bool { false }
 
