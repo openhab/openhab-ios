@@ -36,100 +36,114 @@ struct HomeSelectionView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        List(homes, id: \.self) { home in
-            let homeName = Preferences.shared.storedHomes[home]?.homeName ?? ""
-            HStack {
-                HStack {
-                    if showEditOptions {
-                        Image(systemSymbol: .pencil)
-                            .foregroundStyle(.blue)
-                    }
-                    Text(homeName)
-                    if Preferences.shared.currentHomePreferences.id == home, !showEditOptions {
-                        Spacer()
-                        Image(systemSymbol: .checkmark)
-                            .foregroundStyle(.blue)
-                    } else if !showEditOptions {
-                        Spacer() // make more of the cell clickable
-                    }
+        List {
+            Section {
+                Label {
+                    Text("For Shortcuts to work across multiple devices, each home must have the same name on every device.")
+                        .font(.subheadline)
+                } icon: {
+                    Image(systemSymbol: .infoCircleFill)
+                        .foregroundStyle(.blue)
                 }
-                .contentShape(.interaction, Rectangle())
-                .onTapGesture {
-                    homeNameForAlert = homeName
-                    homeForAlert = home
-                    newHomeName = homeName
-                    if !showEditOptions {
-                        select(home: home)
-                    } else {
-                        showingRenameHomeAlert.toggle()
-                    }
-                }
-                if showEditOptions {
+            }
+
+            Section {
+                ForEach(homes, id: \.self) { home in
+                    let homeName = Preferences.shared.storedHomes[home]?.homeName ?? ""
                     HStack {
-                        Spacer()
-                        if Preferences.shared.currentHomePreferences.id != home {
-                            Button(action: {
-                                homeNameForAlert = homeName
-                                homeForAlert = home
-                                showingDeleteHomeAlert.toggle()
-                            }, label: {
-                                Image(systemSymbol: .trash)
-                            })
-                        } else {
-                            Image(systemSymbol: .checkmark)
-                                .foregroundStyle(.white)
+                        HStack {
+                            if showEditOptions {
+                                Image(systemSymbol: .pencil)
+                                    .foregroundStyle(.blue)
+                            }
+                            Text(homeName)
+                            if Preferences.shared.currentHomePreferences.id == home, !showEditOptions {
+                                Spacer()
+                                Image(systemSymbol: .checkmark)
+                                    .foregroundStyle(.blue)
+                            } else if !showEditOptions {
+                                Spacer() // make more of the cell clickable
+                            }
+                        }
+                        .contentShape(.interaction, Rectangle())
+                        .onTapGesture {
+                            homeNameForAlert = homeName
+                            homeForAlert = home
+                            newHomeName = homeName
+                            if !showEditOptions {
+                                select(home: home)
+                            } else {
+                                showingRenameHomeAlert.toggle()
+                            }
+                        }
+                        if showEditOptions {
+                            HStack {
+                                Spacer()
+                                if Preferences.shared.currentHomePreferences.id != home {
+                                    Button(action: {
+                                        homeNameForAlert = homeName
+                                        homeForAlert = home
+                                        showingDeleteHomeAlert.toggle()
+                                    }, label: {
+                                        Image(systemSymbol: .trash)
+                                    })
+                                } else {
+                                    Image(systemSymbol: .checkmark)
+                                        .foregroundStyle(.white)
+                                }
+                            }
                         }
                     }
+                    .alert("Enter a new name for the home '\(homeNameForAlert)'", isPresented: $showingRenameHomeAlert, actions: {
+                        TextField("New name", text: $newHomeName)
+                        HStack {
+                            Button("Cancel", role: .cancel) {
+                                showingRenameHomeAlert.toggle()
+                            }
+                            Button("Rename") {
+                                rename(home: homeForAlert)
+                                showingRenameHomeAlert.toggle()
+                            }
+                        }
+                    }, message: {
+                        Text("Warning: Renaming the home might cause external integrations like shortcuts to fail until reconfigured.")
+                    })
+                    .alert("Delete home '\(homeNameForAlert)'?", isPresented: $showingDeleteHomeAlert) {
+                        HStack {
+                            Button("Cancel", role: .cancel) {
+                                showingDeleteHomeAlert.toggle()
+                            }
+                            Button("Delete", role: .destructive) {
+                                delete(home: homeForAlert)
+                                showingDeleteHomeAlert.toggle()
+                            }
+                        }
+                    }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive, action: {
+                            delete(home: home)
+                        }, label: {
+                            HStack {
+                                Text("Delete")
+                                Image(systemSymbol: .trashFill)
+                            }
+                        })
+                        .tint(.red)
+                    }
+                    .swipeActions(edge: .leading) {
+                        Button(action: {
+                            homeNameForAlert = homeName
+                            homeForAlert = home
+                            showingRenameHomeAlert.toggle()
+                        }, label: {
+                            HStack {
+                                Image(systemSymbol: .pencil)
+                                Text("Rename")
+                            }
+                        })
+                        .tint(.blue)
+                    }
                 }
-            }
-            .alert("Enter a new name for the home '\(homeNameForAlert)'", isPresented: $showingRenameHomeAlert, actions: {
-                TextField("New name", text: $newHomeName)
-                HStack {
-                    Button("Cancel", role: .cancel) {
-                        showingRenameHomeAlert.toggle()
-                    }
-                    Button("Rename") {
-                        rename(home: homeForAlert)
-                        showingRenameHomeAlert.toggle()
-                    }
-                }
-            }, message: {
-                Text("Warning: Renaming the home might cause external integrations like shortcuts to fail until reconfigured.")
-            })
-            .alert("Delete home '\(homeNameForAlert)'?", isPresented: $showingDeleteHomeAlert) {
-                HStack {
-                    Button("Cancel", role: .cancel) {
-                        showingDeleteHomeAlert.toggle()
-                    }
-                    Button("Delete", role: .destructive) {
-                        delete(home: homeForAlert)
-                        showingDeleteHomeAlert.toggle()
-                    }
-                }
-            }
-            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                Button(role: .destructive, action: {
-                    delete(home: home)
-                }, label: {
-                    HStack {
-                        Text("Delete")
-                        Image(systemSymbol: .trashFill)
-                    }
-                })
-                .tint(.red)
-            }
-            .swipeActions(edge: .leading) {
-                Button(action: {
-                    homeNameForAlert = homeName
-                    homeForAlert = home
-                    showingRenameHomeAlert.toggle()
-                }, label: {
-                    HStack {
-                        Image(systemSymbol: .pencil)
-                        Text("Rename")
-                    }
-                })
-                .tint(.blue)
             }
         }
         .onAppear(perform: loadHomesList)
@@ -147,7 +161,7 @@ struct HomeSelectionView: View {
             if showEditOptions {
                 ToolbarItemGroup(placement: .primaryAction) {
                     Button(action: {
-                        newHomeName = ""
+                        newHomeName = "Home#\(homes.count + 1)"
                         showingNewHomeAlert.toggle()
                     }, label: {
                         Image(systemSymbol: .plus)

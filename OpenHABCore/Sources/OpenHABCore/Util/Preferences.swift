@@ -102,7 +102,7 @@ public struct HomePreferences: Codable, Equatable {
     public var localConnectionConfig: ConnectionConfiguration = .localDefault
     public var remoteConnectionConfig: ConnectionConfiguration = .remoteDefault
     public var sitemapForWatchLabel = "watch"
-    public var homeName = "Home"
+    public var homeName = "Home#1"
     public var sseCommandItem = ""
 
     fileprivate init(id: UUID) {
