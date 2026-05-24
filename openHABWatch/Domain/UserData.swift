@@ -306,13 +306,13 @@ final class UserData: ObservableObject {
 
                 var connectionInfo = await NetworkTracker.shared.activeConnection
                 if connectionInfo == nil {
-                    connectionInfo = await NetworkTracker.shared.waitForActiveConnection()
+                    connectionInfo = await waitForActiveConnection()
                 }
 
                 if connectionInfo == nil {
-                    Logger.userData.warning("No active connection on first attempt, restarting network tracking once")
+                    Logger.userData.warning("No active connection after 20 s; restarting network tracking once and retrying")
                     await updateNetwork()
-                    connectionInfo = await NetworkTracker.shared.waitForActiveConnection()
+                    connectionInfo = await waitForActiveConnection()
                 }
 
                 guard let connectionInfo else {
@@ -404,6 +404,18 @@ final class UserData: ObservableObject {
                 }
                 // Note: NetworkTracker will automatically handle failover to remote if local fails
             }
+        }
+    }
+
+    private func waitForActiveConnection(timeoutSeconds: Double = 20) async -> ConnectionInfo? {
+        await withTaskGroup(of: ConnectionInfo?.self) { group in
+            group.addTask { await NetworkTracker.shared.waitForActiveConnection() }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
+                return nil
+            }
+            defer { group.cancelAll() }
+            return await group.next() ?? nil
         }
     }
 

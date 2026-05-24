@@ -82,6 +82,12 @@ class AppMessageService: NSObject, WCSessionDelegate {
         DispatchQueue.main.async { () in
             AppMessageService.updateValuesFromApplicationContext(data)
         }
+        // Request fresh preferences now that the session is fully active.
+        // This is the only call site for requestApplicationContext(); the App struct
+        // init must NOT call it because the session may not be activated yet.
+        if activationState == .activated {
+            requestApplicationContext()
+        }
     }
 
     /** Called on the delegate of the receiver. Will be called on startup if an applicationContext is available. */
@@ -118,5 +124,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
         DispatchQueue.main.async { () in
             AppMessageService.updateValuesFromApplicationContext(data)
         }
+        // Must always call replyHandler or the sender's WCSession queue stalls permanently.
+        replyHandler([:])
     }
 }
