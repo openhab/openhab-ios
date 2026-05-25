@@ -2,6 +2,715 @@
 
 ## [Unreleased]
 
+- Refactor HomeSelectionView to reduce compile time and fix active-home swipe
+- Fix HomePreferences decode failures overwriting home names with default
+- committed version bump: 3.2.56 (265)
+- Fix watchOS startup race conditions and WCSession stalls
+- committed version bump: 3.2.55 (264)
+- Fix ContactStateIntent to use updateItemState instead of sendItemCommand
+- Use numbered default home names and add cross-device naming instruction
+- committed version bump: 3.2.54 (263)
+- Remove Shortcuts/App Intents availability from watchOS
+- committed version bump: 3.2.53 (262)
+- Migrate App Intents to stable cross-device entity identifiers
+- committed version bump: 3.2.52 (261)
+- Sync Watch preferences immediately when WCSession activates (#1214)
+- Fix watch hang caused by App Intents spawning extra NetworkTrackers (#1215)
+- committed version bump: 3.2.51 (260)
+- Fix homeId type in ItemEntity extension to match UUID? from ItemIdentifier
+- Fix App Intents home/item resolution for cross-device Shortcut sync
+- Fix image widget flickering during auto-refresh (#1213)
+- Move deinit to end of type declaration
+- Move apn-test.json to scripts/ to avoid Xcode project tracking
+- Fix missing back button when navigating to sitemap sub-page from notification (#1212)
+- Migrate remaining XCTest files to Swift Testing (#1211)
+- committed version bump: 3.2.50 (258)
+- Fix watchOS resource leak causing freeze after extended use
+- Fix Input widget sending wrong value when state description changes unit (#1207)
+- committed version bump: 3.2.49 (257)
+- Fix several code review issues in AppIntents migration (#1205)
+- Fix crash on first Preferences access in extension processes (#1202)
+- Fix notification sitemap sub-page navigation (#842) (#1204)
+- committed version bump: 3.2.48 (256)
+- Fix white flash on MainUI in dark mode (#1203)
+- committed version bump: 3.2.47 (255)
+- Fix image attachments not shown in foreground notifications (#1200)
+- Run unit tests on iPhone simulator instead of Mac Catalyst
+- Remove platform condition from Kingfisher dependency
+- Link Kingfisher on macOS to fix Mac Catalyst test builds
+- Pin Xcode version to ~> 26.4 in CI workflows
+- Pin Xcode version to ~> 26.4 in CI workflows
+- Upgrade fastlane to 2.234.0
+- committed version bump: 3.2.46 (254)
+- Run unit tests on iPhone simulator instead of Mac Catalyst
+- Remove platform condition from Kingfisher dependency
+- committed version bump: 3.2.45 (253)
+- Link Kingfisher on macOS to fix Mac Catalyst test builds
+- Recover from stale connection after network switch in App Intents
+- Run unit tests on Mac Catalyst with code signing disabled
+- Run unit tests on Mac Catalyst with code signing disabled
+- Download iOS and watchOS Simulator Runtimes in build_and_deploy CI
+- Download iOS and watchOS Simulator Runtimes in build_and_deploy CI
+- Fix Input widget number formatting (#1198)
+- Fix notification action category collisions (#1196)
+- committed version bump: 3.2.44 (252)
+- Remove broken renderSVGWithWebKit on native macOS
+- Fix duplicate checkmarks in Home picker when two homes share a stable identifier
+- Fix Swift 6 concurrency errors in HomeResolver tests
+- Apply SwiftLint autocorrect to migrateToAppIntents2 branch
+- Include home name in item search (#1176)
+- Reformat Localizable.xcstrings to Xcode canonical style
+- Fix item entity queries broken by stable Home identifier
+- Use stable cross-device identifier for Home AppEntity (#1163)
+- Infer homes for App Intents and stop localizing home names
+- Improve shortcuts item search and unique home resolution
+- Reduce App Intent background loading
+- Run App Intents without opening the app
+- Small German translation correctons and adjustments
+- Additional German translations
+- Mark App Intents home name as non-translatable
+- Avoid localizing stored App Intents entity names
+- Adjust German App Intents state terminology
+- Persist item stubs to UserDefaults to prevent Shortcuts losing entity selection
+- Fetch live item state in GetItemStateIntent instead of using cached value
+- Remove stale legacy PBXGroup hierarchy for openHAB target
+- Fix App Intents localization tests after string catalog migration
+- Add AppIntents validation tests
+- Remove obsolete openHABIntents SiriKit extension artifacts
+- Reformat Localizable.xcstrings to Xcode style
+- Remove stale build file references from project
+- Migrate AppIntents strings to Localizable.xcstrings
+- Remove duplicate Sources/Resources entries for openHABWatch and openHABTestsSwift
+- Fix intentsLocalizations/intentsPlaceholders tests after App Intents migration
+- Fix build failures caused by duplicate files and stale project references
+- Remove duplicate Sources/Resources entries shadowed by file system sync
+- Fix duplicate MainLaunchScreen.nib in build
+- Fix duplicate Localizable.xcstrings in same target
+- Update Package.resolved after merging openapigen-swiftui
+- Remove stale references to ControlItemIntent.swift and openHABIntentsTests
+- Localisation transition to String Catalog (#1101)
+- Fix unbalanced brace in project.pbxproj from auto-merge
+- improve TextInputRowView legibility and corresponding tests
+- committed version bump: 3.2.11 (215)
+- Fix empty string commands and switch sendItemCommand to JSON payload (#1102)
+- committed version bump: 3.2.10 (214)
+- Remove ASAN configuration from openHABTests test plan
+- Associate openHABTests test plan with openHABTestsSwift scheme
+- Fix script editor scroll truncated on iPhone (issue #1092)
+- Fix optional binding error on non-optional ClientError.underlyingError
+- Decouple OpenAPIRuntime from call sites via OpenAPIErrorInspector
+- Remove SDWebImageSVGCoder direct import from OpenHABSVGTests
+- Fix openHABTestsSwift linker errors for host-app dynamic frameworks
+- Add plain 'Test' configuration to openHABTests test plan
+- Fix StringExtensionTests: add @testable import OpenHABCore
+- Migrate StringExtension to FormatStyle API; add StringExtensionTests
+- Migrate JSONDecoder date strategy to FormatStyle API; add DateFormattingTests
+- Migrate CGFloat(state:divisor:) to FormatStyle API; add tests
+- Use FormatStyle in log and notification views
+- Use FormatStyle for Double.valueText and add tests
+- Use FormatStyle for screen saver date and 12-hour time
+- Fix screensaver layout sizing for large text (#1098)
+- iOS Homes dialogs adjusments (#1099)
+- Replace stale notification categories
+- Fix manage homes back button and nav bar
+- watchOS Rollershutter Stop glyph change (#1097)
+- committed version bump: 3.2.9 (213)
+- Fix notifications back button and nav bar
+- Fix corrupt project.pbxproj entries
+- committed version bump: 3.2.8 (212)
+- iOS & watchOS Rollershutter & Setpoint circled controls (#1096)
+- make DatePickerRowView not send programmatic updates of the date
+- disable linting and format for swiftui auto build
+- Update CHANGELOG with openapigen-swiftui unreleased changes
+- Separate serverValue from currentValue in watch SetpointRow
+- Extract SetpointDisplayFormatter for iOS and watchOS setpoint display
+- iOS & watchOSRollershutter & Setpoint Chevrons convergence (#1094)
+- Display rollershutter value state in iOS and watchOS rows
+- Revmove flow in segmented control row, improved spacing for text views
+- Fix auth challenge host matching and watch icon transient dropout
+- Handle foreground resume from App Switcher without open drawer
+- Remove unnecessary async wrapper and stale connection fallback
+- Improve sitemap foreground refresh and drawer resume handling
+- added flow to some more rows, hide icon if showIcon is false
+- allow multiline labels and improve layout of text or number input rows
+- allow 0 as number input
+- iOS: disable URL cache for sitemap service; fix scene-active launch race
+- Validate number input during typing, improve normalization
+- Recreate number validation function from UIKit sitemap
+- committed version bump: 3.2.7 (210)
+- iOS: refresh on every scene-active transition; fix watchOS backoff overflow
+- committed version bump: 3.2.6 (209)
+- watchOS: remove redundant item.state from WidgetRowView refreshToken
+- chore: ignore Claude Code skills-lock.json and .agents/
+- watchOS: force row recreation on widget state change; update AGENTS.md
+- Migrate remaining regex usage to Swift 6 regex syntax
+- watch: disable sitemap request caching for long-poll service
+- committed version bump: 3.2.5 (208)
+- iOS/watchOS: fix stale widget state on background→foreground (#1075)
+- Handle empty SVG icons without warning fallback
+- Proposal to restrict the hit traget to the area after the Selection row icon and label (#1079)
+- committed version bump: 3.2.4 (206)
+- watchOS: remove PreviewConstants dependency from row previews
+- Segmented Controls layout adjustments for iPads (#1078)
+- iOS: refresh embedded sitemap images when payload changes
+- iOS: keep sitemap long-polling alive across transient failures
+- iOS/watchOS: force page refresh when app returns from background
+- iOS: decode SVG images at full size for media/image widgets
+- iOS: drive chart refresh from widget version; fix cache buster entropy; skip classic number icon
+- iOS: refine chart state management with ChartDisplayState and task-based sync
+- iOS: converge chart rendering to stable, flicker-free architecture
+- iOS: guard chart URL reuse with a display key to prevent stale placeholder
+- iOS: sync chart display URL from viewModel on appear and relevant changes
+- project: restore WatchTypography.swift to openHABWatch build on openapigen-swiftui
+- iOS: add input filtering and validation for text/number input widget
+- committed version bump: 3.2.3 (205)
+- iOS: match UIKit alert style for text/number input rows
+- iOS: fix chart widget identity and image flicker
+- watchOS: remove duplicate decorateWidgetsWithSendCommand introduced by merge
+- project: restore DADC420A PBXBuildFile to correct SDWebImage entry
+- committed version bump: 3.2.2 (204)
+- fastlane: restore project.pbxproj after build to keep git clean
+- committed version bump: 3.2.1 (203)
+- Pre-apply Xcode 26.2 project.pbxproj normalizations and fix SetpointRowView formatting
+- fastlane: clear FL_CHANGELOG after use to reduce summary noise
+- project: pre-apply Xcode 26.2 project.pbxproj normalisations
+- openHAB iOS: fix Release build failures due to #Preview type-checking
+- openHABWatch: fix Release build failures due to #Preview type-checking
+- fastlane: replace get_build_number with xcconfig read
+- fastlane: replace remaining get/update_xcconfig_value calls with plain Ruby
+- fastlane: use absolute path for Version.xcconfig in increment_build
+- fastlane: replace missing get/update_xcconfig_value plugin with plain Ruby
+- ColorTemperaturePickerRowView layout adjustments (#1073)
+- Add merge driver for Version.xcconfig to always keep ours
+- CI: remove push trigger from TestFlight workflow; keep workflow_dispatch only
+- Throttle onDragStateChanged to fire once per drag in CustomSliderView
+- Fix ColorTemperaturePickerRowView: suppress echo sends; guard drag state; clamp/round temperature
+- Fix slider override change notification; reorder SupportTypes; add swiftlint annotation
+- Add Version.xcconfig; fix extension CFBundleVersion; update Fastfile for feature branch versioning
+- CI: trigger TestFlight build on push to openapigen-swiftui
+- Update AGENTS.md: iPhone 17 Pro simulator, SwiftUI-first, Swift Testing notes
+- Fix ColorPickerRowView: suppress echo sends; clamp/round HSB values
+- Add slider override tracking; extract SitemapPageViewModel support types
+- Rename *InputView to *RowView; add offline command queuing
+- Add SitemapInteractionSummary; surface network status in toolbar
+- Retire widget-based row views; add icon/itemName to typed inputs
+- Retire legacy widget paths; replace renderSignature with Equatable synthesis
+- Decouple icon and command dispatch from OpenHABWidget in content views
+- Introduce LinkedPageRowInput and .linked case; migrate media rows to typed inputs
+- Retire BasicWidgetRowInput; add FrameRowInput, TextRowInput; wire GenericRowInputView
+- Migrate remaining row types to typed inputs; complete BasicWidgetRowInput retirement
+- Migrate text, rollershutter, colorPicker, buttonGrid, and input rows to typed pipeline
+- Migrate setpoint and toggle rows to typed input pipeline; refactor slider config
+- Migrate slider, selection, segmented rows to input-driven views
+- Introduce immutable row-input pipeline; drive SitemapPageView list from rowInputs
+- Extract *RowInput structs to WidgetRowInputs.swift; split Slider/Selection into content views
+- Skip copyWidgetProperties when widget is unchanged; reconcile frame children recursively
+- Add minimum hit targets to iOS buttons; replace ad-hoc fonts on watch
+- Add PreviewWidgetFactory implementation and tests to CommonUI
+- Fold WatchTypography into OHTextToken, remove parallel watch type system
+- Move PreviewWidgetFactory to CommonUI, replace per-file preview helpers
+- Refactor: introduce input structs and align optimistic naming
+- Add optimistic selection to SegmentedRowView and SelectionRowView
+- Add openHABWatch test plan and wire into scheme
+- Update project: remove Cells group, Swift 6 for watch tests, random test order
+- Fix command truncation for setpoint/slider with integer display format
+- Replace persistent slider state with ephemeral drag value and version tracking
+- Prefer widget pattern over item stateDescription for slider formatting
+- Add defensive resets for slider widget identity changes and stuck editing
+- Extract SliderRowState and prefer adjustedValue for item-backed sliders
+- Remove legacy UIKit sitemap view controller and cell providers
+- Fix slider yo-yo and stale state by reconciling widget identity
+- Add toolbar search button with on-demand searchable field
+- Move command lifecycle indicator to leading toolbar and hide when idle
+- Add command lifecycle tracking and refactor page handling
+- Add deduplication and staleness guards to page handling
+- Cancel long-polling on view disappear to prevent duplicate tasks
+- Add OHTextToken design system and improve value formatting
+- Refactor SwiftUI views for improved readability
+- Missing return
+- Fix thread safety, command source, and display state consistency
+- Align setpoint value formatting across iOS and watchOS
+- Fix watchOS commands silently failing after long poll
+- Extract WidgetDisplayState for consistent widget rendering
+- Move WidgetCommandDispatcher into OpenHABCore for shared use
+- Provide command source for SwiftUI and watchOS
+- Lint check
+- Add Player, DateTime, and Location item types to iOS Shortcuts
+- Minor cleanup
+- Fix webview authentication in SwiftUI sitemap renderer
+- Move test helpers above test suites for consistency
+- Fix ButtonGrid commands to target parent widget item
+- Fix scroll-to-top on long-poll updates and image flickering
+- Add unit tests for WidgetCommandSender
+- Add dedicated watchOS test target and interactive state token previews
+- Adopt stateToken pattern in SegmentRow and ColorPickerRow
+- Add watchTextStyle modifier and accessibility labels across watchOS views
+- Decouple WatchLabelText and DetailTextLabelView from OpenHABWidget
+- Migrate ColorSelection to WidgetCommandSender with debounce policy
+- Restore WidgetRowViewModel for complex rows and unify stateToken pattern
+- Simplify SliderRow, SetpointRow, and SegmentSelectionView with direct data passing
+- Simplify SwitchRow and SelectionRow with direct data passing
+- Replace IconView with model-driven WatchIconView
+- Simplify stateless rows by removing unnecessary WidgetRowViewModel
+- Fix WidgetCommandSender cleanup and setpoint unit preservation
+- Extract WidgetCommandSender for centralized command dispatch
+- Centralize watchOS typography with WatchTypography and WatchLabelText
+- Add PreviewNavigationContainer and use it across all row previews
+- Extract WidgetRowFactory and decouple previews from UserData
+- Adopt WidgetRowViewModel and clean up watchOS row views
+- Update project
+- Migrate WidgetRowViewModel to Observation framework
+- Sync WidgetRowViewModel for all SegmentRow branches
+- Removing unused code
+- Put up to 2 inline buttons on same row as title on watchOS
+- Fire single-mapping button on release within bounds, not on press
+- Copy sendCommand closure when updating existing widget instances
+- Skip widgets array reassignment when list structure is unchanged
+- Validate touch coordinates to constrain button hit area on watchOS
+- Fix inline button hit area extending beyond visible bounds
+- Constrain inline button hit area with contentShape
+- Add inline buttons for single and press-release mappings on watchOS
+- Use semantic gray colors for better segmented control track contrast
+- Remove duplicate PreviewConstants and decouple skeleton from preview data
+- Default isLoading to true to show skeleton on first render
+- Simplify connection observer and prevent same-URL restart loop
+- Fix connection observer lifecycle and redacted title during loading
+- Fix Task leak, hidden TextField, ignored search pref, and linked-page title
+- Defer non-essential AppDelegate setup and add placeholder title
+- Remove empty setupActiveConnectionObserver stub
+- Reorder ButtonGridRowView declarations and remove lint suppression
+- Move PreviewList to SegmentedRowView as shared internal type
+- Fix crash, bugs, and duplication from PR review
+- Silence linters for CommonUI directory
+- Fix search returning no items for GenericItemEntity
+- Fix single mapping button sending duplicate commands
+- Send single mapping button command on touch down
+- Fix slider jumping by always sending final value and adding step
+- Show selected state on single mapping button
+- Increase spacing between pressRelease buttons
+- Use isNilOrEmpty for singleMappingButton spacer check
+- Update SegmentedRowView layout and add shutter preview
+- Revert "Redo preferences storage with JSON"
+- Style pressRelease buttons individually with spacing
+- Redo preferences storage with JSON
+- Simplify isNilOrEmpty implementation
+- Add isNilOrEmpty extension and use in SegmentedRowView
+- Align single mapping and pressRelease buttons to trailing edge
+- Unify singleMappingButton and pressReleaseButton styling
+- Style pressReleaseButtons to match segmentedButtons
+- Wrap PreviewConstants in DEBUG and fix preview labels
+- Improve slider behavior and show current value while dragging
+- Fix iOS slider external updates and merge watchOS slider rows
+- Fix linter warnings
+- Improve SegmentedRowView previews and add fallback icon support
+- Fix valuecolor parsing in watchOS DetailTextLabelView
+- Minor layout and style cleanups
+- Move TextLabelView to CommonUI for reuse across iOS and watchOS
+- Fix Setpoint buttons on watchOS and improve unit handling
+- Add SelectionRow to watchOS and fix TextRow disclosure indicator
+- Add TextRow to watchOS and remove legacy WidgetTypeEnum
+- SelectionRowView adjustment keep the row visible by separating the visible content from the Menu label, and overlaying a clear hit target
+- Flip switchSupport logic adjust the slider binding to reflect the live widget value when not dragging, and sync the internal state when editing starts.
+- Reworked widget update logic Update logic skips refreshing the widget's type, leading to stale types showing as switches instead of charts; adding type assignment during updates should fix the display inconsistency.
+- Align labelText of SegmentedRowView with other RowViews
+- Partially reverting b8fc979 Improvement on layout of SegmentedRowView to obtain wider segmented buttons
+- Fix for duplicate rows
+- Improving color selection
+- Fix for path and filename for openHABWatch/openHABWatch.entitlements
+- Removing litter
+- Improvement on layout of SegmentedRowView
+- Fix for singleMappingButton
+- Dark mode for charts Alignment with develop
+- Fix for slider appearing
+- Fix regression on watchOS app
+- Refactored the SliderRowView to conditionally wrap the label content in a Button based on the switchSupport property
+- Distinguish colors for light and dark mode
+- Change of colors
+- Fix format string crash with unescaped percent sign
+- Improve SwiftUI views: charts, segmented control animation, and linked pages
+- Replace SelectionRowView sheet with Menu popover
+- Add navigation titles to SelectionView sheet and SitemapPageView
+- Add lineLimit(1) to labelText and labelValue in all row views
+- Fix dark mode icons and improve SegmentedRowView layout
+- Fix icon size, row heights, and background colors in SwiftUI views
+- Replace Picker with button-based segmented control in SegmentedRowView
+- Pass iconColor to OpenHABImageProcessor in SwiftUI IconView
+- Fix valuecolor support and match UIKit styling in SwiftUI views
+- Some improvements for current target iOS 16 foregroundColor() → foregroundStyle() (Watch App)  @ObservedObject Inside ObservableObject Class Redundant MainActor.run in @MainActor Class onTapGesture → Button for Accessibility   for SliderRowView Force Unwraps in Preview Code
+- Implement the press-and-release mappings for switches
+- Replace onTapGesture with Button where appropriate DrawerView and SelectionView Kept on onTapGesture: ScreenSaverView, SliderRowView, and HomeSelectionView
+-  Changes Made:
+- Resolve merge mess in openHAB.xcodeproj/project.pbxproj
+- Improved sspacing Bug fix for updates not working UX improvement : Optimistic response for Switch
+- Increased tolerance from 5s to 30s in #expect(info
+- Renamed to Intents to contain verb
+- Eliminated duplicated logic
+- Removed Dead Code, updated Intents to handle errors
+- Cleanup of forgotten files
+- Cleanup
+- Update copyright headers to 2026 across AppIntents files
+- migration to AppEnum
+- Investigating further on App Intents
+- Migrate App Intents to iOS 17+ with backward compatibility
+- Make Items searchable for iOS 17
+- Intermediary status
+- linting
+- Update Package.resolved
+- Display sitemap labels instead of technical names
+- Reduce logging
+- Fix sitemap row spacing, duplicate toolbar, and transition errors
+- Preparing an app entity
+- Update AppIntents/GetItemState.swift
+- Port functionality to SwiftUI: Search functionality, Title cleanup (removes bracket content), Network status change detection, Improved loading state management
+- Typos
+- Upgrade to fastlane 229.0
+- Address 4 overlooked force unwraps
+- Reworked all App Intent files to use non-optional parameters and removed unnecessary validation checks
+- Remove all legacy openHABIntents components. Safer approach
+- Migrate to App Intents
+- Port mjpeg handling to SwiftUI
+- SegmentedRow: add widget.labelValue, adjust row heigh SelectionRow: Align Picker of style .menu with label EmbeddingRowView: Align row height to UIKit
+- Enable self-signed certificates
+- Cleanup
+- Reduce row spacing in SitemapPageView Move LogsViewer to CommonUI package
+- Unblock after merging develop
+- Cleaning up remainder of watch extension
+- Properly using SF Symbols
+- Set @MainActor on protocol OpenHABViewable
+- Remove double import
+- Fix compiler bugs with Xcode 26
+- Update openHAB/NoIconDisplayableCell.swift
+- Cleaning up ImageView duplication
+- prepare for Xcode 26
+- Safer icon display
+- Presenting Settings with Cancel and Save again Address some overlooked lint remarks
+- Merge develop
+- Created SitemapNavigationView as navigation container SitemapPageView focuses on content rendering Simplified HostingSitemapViewController
+- Revert change InternalImportsByDefault Handle height in Map and Webview
+- Addressing issues brought up by gemini review
+- Improve entry of URL for server
+- Minor change
+- readme update
+- Screenshots for Release (#902)
+- Switch to a home as soon as selected
+- Update README
+- Track path changed in the MainUI SPA
+- Co-pilot feedback
+- implementing some changes suggested by Copilot review
+- Import SFSafeSymbols into ItemSelectionView
+- Import SFSafeSymbols into ItemSelectionView
+- Support for SSE events via openapigen (#901)
+- Some linting
+- test cases for UIColor.hexString
+- Support for SSE events via openapigen (#901)
+- preview compiler requires Logger methods to use string interpolation syntax Included environmentObject for all RowViews where necessary
+- redacted view during loading
+- Handle refresh for images
+- ButtonGridRowView to observe widget with ObservedObject IconView to take full widget only
+- Throttling output for Slider, Color, ColorTemperature
+- SVG view on macOS
+- Reworked hexString
+- Handle readOnly
+- id for buttongrid
+- replace os_log by logger
+- Stabilize IconView display, use id composed out of pageId and widget.id Show current image before new image is loaded Handling of none icon
+- minor evolution
+- Implement IconCacheTracker as actor
+- Upgraded package to Kingfisher > 8.5.0 Improving stability of IconView
+- Small cleanup in OpenHABSitemapViewController
+- testing for more robust icon loading
+- Stable display of icon
+- swiftline remove updateNavigationTitle
+- Stuck on updateNavigationTitle
+- rm sitemap.json
+- Other cases to be handled. Monospaceddigit font for better handling
+- Fix #721
+- Handling of F7 icons and icon color (#890)
+- Extending tests
+- CSS injection as used in android app is ineffective with SDImageSVGCoder. Therefore passing the color information in the call to the iconify api in line with https://iconify.design/docs/api/svg.html
+- Enable f7 icons as for android app. Align with android app
+- Blocking letter q in OpenHABWebViewController.swift
+- staticIcon tests for Endpoint Revisited handling of labelText
+- Make sure webviews rotates
+- [WIP] New features for kiosk mode (#896)
+- Enhances Webview for multiple homes (#900)
+- More stable definition of Endpoint
+- Debugging of IconView Handling of labelSource
+- Provoke change
+- include comments by copilot
+- Handling of sitemap element Chart
+- Handle input hint of type datetime Eliminate a swift 6 error Improve handling of ButtonGrid with stateful
+- Intent adaptations for multiple homes (#897)
+- Change inset for Group sitemap item Eliminate swift 6 warning
+- Haptic feedback on button press Using viewModel.sendCommand instead widget.sendCommand/ passed into via EnvironmentObject
+- Slider enabled for releaseOnly, porting logic of android app
+- Flatten widgets only if not within buttongrid. Push flattening to display widget of type Button More stability for IconView to wait for activeConnection Reworked Clear Image Cache in Settings to show how much will be cleaned
+- Handle buttongrid send in widgets
+- Parse ButtonGrid
+- Handling of switchSupport Making MapRowView zoomable on iOS17+
+- Cleaning up on functionality: Receiving remote updates Aligning with layout of current app
+- addressing some swiftlint warnings
+- Call SelectionView with labelText
+- Integrate CommonUI tests into standard testing
+- Handle dateTime as inputHint with DateTimePicker Introduce Previews SliderRowView reacts on remote changes
+- Port ButtonGrid functionality to iOS app
+- Implementing copilot review suggestions
+- Fix regression
+- Add support for primary and secondary color (#894)
+- Presentable port of OpenHABSitemapViewController to SwiftUI
+- Fix missing back button on linked pages / Different setup for linked pages and root pages
+- Enabled transition to linked pages
+- Port features:  search bar, copy on long press
+- Test for Color Temperature
+- Remove debug data
+- Working subscription to changes
+- Reproduce visualization of UIKit in SwiftUI
+- Refactoring ColorTemperature code
+- First visible slider
+- draft support for Colortemperaturepicker
+- Ported the UIKit tableView:didSelectRowAt functionality to SwiftUI Renaming of row views
+- Introduced new package CommonUI for features shared between watchOS and iOS app
+- Introduced Previews for faster dev IconViews added Backport of setpoint functionality to watchOS app
+- Add ImageView as quick fix
+- Make it testable
+- address linter warnings
+- Porting functionality to SwiftUI
+- ported the functionality from SwitchUITableViewCell to WidgetSwitchView
+- Make it runnable againg
+- Removal of temp edited files
+- In order for OpenHABWidget to become Sendable, all its properties must be Sendable. image of type UImage is not. OpenHABWidget is used in only in NewImageUITableViewCell as a cachedImage. Transfer the functionality thereto. (#877)
+- Migrating from os_log to logger with tool and some handwork (#885)
+- Cleansing for redundant types (#884)
+- Refactor preferences thoroughly for multiple homes support (#882)
+- Revert "[WIP] openapigen multiple cloud support (#881)" (#883)
+- [WIP] openapigen multiple cloud support (#881)
+- push notification registration for all homes (#879)
+- Improve NetworkTracker offline test (#880)
+- Update .swift-version to 5.10
+- Remove redundancy in preferences, update watch when necessary (#878)
+- Enable custom certs again (#873)
+- decode connection settings when loading stored preferences (#875)
+- Revert "Making use of Swift 6 / Still throws warnings but it compiles in Swift 6 mode."
+- Making use of Swift 6 / Still throws warnings but it compiles in Swift 6 mode. Allows to migrate openHABSitemapWidgetEvents to return an opaque AsyncSequence Trying to make testTrackerGoesOfflineOnNetworkLoss less flaky
+- Import OpenHABCore in OpenHABGeneralTests
+- Set SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY to YES and adapted for compiler Set CODE_SIGN_IDENTITY for Development to Automatic for local compilation
+- Multiple homes branch on openapi (#871)
+- only load preferences on first appearance
+- JsonEncode UserDefaultObject before writing it to stored preferences
+- add new preferences to stored set, remove deprecated and app-related ones, create set of stored properties on app start
+- solve errors introduced by rebase
+- remove localizations to satisfy localization tests
+- make whole cell selectable in home selection
+- init state for home selection view correctly
+- improve homeselection home management
+- implement home removal and renaming
+- controls for editing homes list, renaming and deleting entries
+- prevent concurrent access by read and write of settings
+- log preference values and value changes, store preferences correctly
+- view to switch between homes started
+- add option for home selection to drawer menu
+- enable storing multiple sets of preferences
+- extract NetworkObserver and NetworkTrackerViewModel into separate files
+-  Silence swiftlint warning : disabling opening_brace was superfluous, replace class with static in final classes
+- swiftlint call modified
+- Excluding Intent generated files from swiftlint Address some swiftlint comments
+- Update fastlane
+- Update .swiftlint.yml to address error on GitHub Actions
+- Update bundler version in lockfile to 2.6.9
+- Include swiftlint feedback
+- Compile error occurring on GitHub Actions
+- enableUpcomingFeatures for OpenHABCore to prepare for Swift 6
+- enableUpcomingFeatures for OpenHABCore to prepare for Swift 6
+- Pushing on OpenHABItemCache and NetworkTracker
+- Passing the sendable HTTPClientDelegate to address an swift 6 warning Making NWPathMonitoring Sendable
+- Preparing for Swift 6 Extending functionality of NetworkTrackerViewModel and NetworkObserver
+- Approaching Swift 6 compatibility: Down to 51 open warnings Make NetworkStatus Sendable Defining serviceFactory as Sendable closure Decomposing NetworkTracker into NetworkTrackerViewModel as ObservableObject and  NetworkObserver as actor : currently not is use Using @preconcurrency ColorPickerCellDelegate OpenHABWebViewController and VideoUITableviewCell
+- Improving tests
+- Removing OpenAPIServiceDelegate in favor of HTTPClientDelegate with identical features
+- Addressing more swift 6 warnings: HTTPClient  - pulling the conformance with  URLSessionDelegate, URLSessionTaskDelegate into HTTPClientDelegate
+- Moving @MainActor
+- Make tests run again
+- Addressing more swift 6 warnings
+- Make Intent Handler work again
+- Upgrade MapView for deprecated interface Making steady progress on Swift 6 compliance
+- Replace key-path based KVO observation with delegate-based tracking in OpenHABWebViewController  to prepare for Swift 6
+- empty to retrigger tests that are hanging on github
+- No popupMessage anymore on switching network connection
+- Upgrade of firebase-ios-sdk to >=11.0 and DeviceKit to >= 5.0
+- Switched SWIFT_UPCOMING_FEATURE_GLOBAL_ACTOR_ISOLATED_TYPES_USABILITY  to YES.
+- Switched SWIFT_UPCOMING_FEATURE_INTERNAL_IMPORTS_BY_DEFAULT  to YES. Made the necessary changes
+- Upgrading SFSafeSymbols to 6.2, Also OpenHABCoreTests now run with SFSafeSymbols
+- Preparing for Swift 6: Setting SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY, SWIFT_UPCOMING_FEATURE_NONFROZEN_ENUM_EXHAUSTIVITY, SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY to YES Systematic usage of SFSafeSymbols with .swiftlint custom rule Code refactored to align with swiftlint rules
+- Playing around with CTRL + M to refactor long lines Some small code additions
+- Works locally including tests
+- Improve tests
+- Structured concurrency for NWPathMonitor
+- Better error handling in ConnectionSettingsView
+- Port progress on openapigen
+- Avoiding a forced optional
+- Make search work again
+- Cleanup
+- Make it testable again
+- Refactored pushSitemap with URLComponents, uriWithoutTrailingSlashes to ExtensionString
+- Cleanup
+- Swift 6 conformance and clean-up
+- Cleaning up some warnings
+- Intermittent state
+- Update OpenHABCore/Sources/OpenHABCore/Model/OpenHABItem.swift
+-     Migrated requestMediaCapturePermissionFor to its async version / Now called  decideMediaCapturePermissionsFor
+- Address failing tests
+- Address failing tests
+- Migrate OpenHABSitemapViewController to SwiftUI - Introduce SitemapPageView, SitemapPageViewModel, WidgetRow as a first row, Wrapping SitemapPageView in HostingViewController.
+- Fixes WebRTC permissions not working
+-    Make OpenAPIService init throwing
+- No crash when no activeConnection: no forced unwrap
+- Eliminate using AppDelegate.appDelegate.appData - step 2 Delete DataObject protocol.
+- Eliminate using AppDelegate.appDelegate.appData in NotificationsView and OpenHABWebViewController Make NotificationsView run in #Preview
+- Make OpenHABItemCache injectable on all hanlers
+- Migrated all other IntentHandler to async
+- Migrated SetSwitchStateIntentHandler to async
+- swiftformat disable in OpenHABItemCache for redundantSelf
+- Another small patch on OpenHABItemCache
+- Small patch on OpenHABItemCache
+- Reworked OpenHABItemCache
+- Reworked SetSwitchStateIntentHandler
+- Using userNotificationCenter(_:didReceive:) async version, removing print statements
+- Fixes crash, removes redundant call to RootView (#867)
+- Address warnings in NotificationsView:  NSURLErrorDomain Code=-1002 unsupported URL error. - we now have transparency it is caused by icons
+- URL.documentsDirectory instead of NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+- URL.documentsDirectory instead of NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+- Sitemaps were not loading by default
+- Consider previousFailureCount in urlession( didReceive)
+- Showing sitemap label in watch app
+- Sync selection of sitemapForWatch in DrawerView Introduce backoff Attempts in apple Watch
+- Kicked out SDWebImage but kept SDWebImageSVGCoder / Shortens list of dependencies. for the moment keep Kingfisher which is more in line with Swift development
+- Getting previews on watch app to work / show icons
+- Getting previews on watch app to work
+- Move OpenHABImageProcessor with SDWebImageSVGCoder to OpenHABCore Carry over startPageLoading from OpenHABSitemapViewController to UserData in SwiftUI watch app
+- Renamed ObservableOpenHABDataObject into AppSettings
+- Rebuilding the communication between watch and ios app
+- Setting sitemap for watch in Settings and DrawerView
+- Renamed file
+- Patch for NWPathMonitoring in test
+- Expanding testability of NetworkTracker
+- Get rid of SVGKit and replace by SDWebImageSVGCoder
+- Added tests for ServerCertificateManager
+- Reworked ClientCertificateManager
+- Reworked ServerCertificateManager: Replace blocking threads via evaluateResultSemaphore.wait() with async/await Updated delegate to support async
+- Update to Kingfisher >= 8.0.0 Fix error on WidgetCellFactory
+- Use func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) async Migrate away from non-sendable userInfo for notifications
+- Remove usage of lastNotificationInfo for Notifications
+- Clean-up on OpenHABDataObject, VideoUITableViewCell
+- Clean-up on Preferences
+- Migrating OpenHABAccessTokenAdapter from appData to connectionConfiguration Setting .requestModifier  in NetworkTracker
+- Some rework
+- Create Protocols for Widget Handling, Instead of switch-case with all widget types, abstract common behavior into protocols/extensions to reduce the giant cellForRowAt
+- Fix for failed tests Decluttering OpenHABSitemapViewController: moved helpers to separate files, moved extract icon logic to helper WidgetIconRenderer, preparing for using a widget cell provider
+- pageHandlingTask as one task managing the entire lifecycle (initial load and longpolling): Easier to cancel and debug, No more recursion or chaining needed.
+- Make NotificationsView work again and previewable
+- Moved OpenHABNotification to openHABCore, migrated it to struct, moved the decoding to HTTPClient convenience function
+- Centralizing all basicAuthHeader functions Migration of HTTPClient's initializer to init(configuration: ) Migrating watchApp to ConnectionConfiguration
+- Fix for crash when tapping on message.
+- Reducing logging
+- In pollDataForPage convenience function surface the underlying error to pass them down the throw handling / Enable ignore in the case of a cancellation. Nicer connection testing button and feedback
+- Add a test connection button to SingleConnectionSettingsView
+- Bug introduced with migration of WKNavigationDelegate to async corrected.  Apple renamed webView(_, didReceive:, completionHandler:)  to webView(_, respondTo:)
+- Migrating to connectionInfo cont. / Remove openHAPRootUrl ... from OpenHABRootViewController, OpenHABSitemapViewController
+- Regenerated Client.swift with OpenAPIKit version 3.4.2 Reworked DrawerView to remove appData / the environmentobject networktracker is injected now.
+- Handle cancellation errors in LoggingMiddlewar gracefully as they are likely due to navigation Continue adaptation of ConnectionConfiguration also in OpenHABSitemapViewController
+- Make tests work again / adapt to change in getRoot, when loading and saving url in a codable, ensure the string is well formatted
+- Migration to configuration setup for local and remote server Changed path for getRoot  to '/'
+- Migration to configuration setup for local and remote server
+- Adjust myopenhab.org to home.openhab.org moved to OpenAPIService  - correspondingly remove it from NetworkTracker.
+- Properly checking whether hostname has suffix myopenhab.org in AuthorisationMiddleware, HTTPClient In OpenHABRootViewController  transfer of password.
+- Avoid MainActor.run on NotificationsView
+- Avoid loop with AuthAttemptTracker - step 2
+- Avoid loop with AuthAttemptTracker
+- Systematically use .task instead of .onAppear / gives a async context Make use of AuthAttemptTracker in HTTPClient / simplified interface for resetAttempt
+- Migrate OpenHABServerProperties to struct OpenAPIServiceDelegate had a race condition that was addressed with the new actor AuthAttemptTracker
+- Next step in removing UnknownCaseRepresentable
+- Remove UnknownCaseRepresentable because we don't do Decoding anymor / Mapping to openapi is anyway a manual process
+- Migrate OpenHABItemNames getItemNames, reload to return [String] to make the result Sendable Migrate Intent Handlers to changed interface
+- Continue preparation for swift 6 Migrate WebUITableViewCel to async protocol conformance of WKNavigationDelegate,  WKUIDelegate Migrate OpenHABItem, OpenHABOptions, OpenHABStateDescription to struct Prepare OSLogExtension
+- Make all subviews of SettingsView previewable
+- Adding AnimatedSecureTextField for password entry
+- Migrating OpenAPIService back to actor
+- Cleanup for moved files
+- Moved DebugSettingsView in project view
+- Reverting ENABLE_DEBUG_DYLIB to  YES / Otherwise #Preview does not work Refactoring of SettingsView to make it modular
+- Bringing down the number of swift 6 warnings
+- Migrated conformance to UNUserNotificationCenterDelegate to async interfaces
+- Set OpenHABPage and OpenHABSitemap to @unchecked Sendable. Hopefully they are.
+- Migrate WKNavigationDelegate to async interface
+- set  ENABLE_DEBUG_DYLIB = NO; based on the answer here:  https://stackoverflow.com/questions/79133282/empty-dsym-file-detected-dsym-was-created-with-an-executable-with-no-debug-info Privacy safe logging of Endpoint
+- Loading page data into OpenHABSitemapViewController
+- In pollDataForPage changed definition of headers in case NO long-polling openAPIService now a class Changed signature of pollDataForSitemap
+- First catch of LogViewer - No showPopupMessage for timeouts
+- LoggerView for display of logs
+- Use textContentType to hint at field types for username and password / Easier data entry Turning OpenHABCommandDescription, OpenHABCommandOptions into struct / This makes them Sendable
+- Handling of cancellation when switching sitemap Turning OpenHABLink, OpenHABUiTile, OpenHABWidgetMapping into struct / This makes them Sendable Making ConnectionConfiguration, ConnectionInfo Handling of missing sitemap.icon
+- Cancelling asyncOperation to avoid issues when switching sitemaps
+- First step in adopting Swift 6 concurrency features - Switching on feature that don't require code change
+- Get rid of double pushViewController - Merge error?
+- getItemByName as convenience function on NetworkTracker Addressed some swiftlint warnings
+- Clean up on test
+- First test for openAPI generated Client
+- Two convenience functions more in NetworkTracker runNow and send(:String) - convenience now throwing to propagate error. Applying convenience functions in OpenHABRootViewController
+- Request Image only when Avoid warning DEBUG_INFORMATION_FORMAT changed from dwarf to dwarf-with-dsym Changed logger to info for OpenHABSitemapViewController request sent
+- Reworked waitForConnection
+- Extending usage of ConnectionPool Defining convenience functions for OpenHABItemCache and UserDate in NetworkTracker : send, updateState, getItems, pollDataForPage
+- NetworkTracker: Working with a ConnectionPool to avoid initializing OpenAPIService. ConnectionPool designed as actor to ensure thread-safe access and to prevent race conditions
+- Handle myopenhab.org OR alwaysSendBasicAuth
+- Handle different timeouts within OpenAPIService
+- LoggingMiddleware: Don't log errors for operationIDs getRoot and getRootVersion In OpenAPIService define setups for URLSessionConfigurations
+- Remove dependency on Alamofire in MockURLProtocol
+- Remove Alamofire as linked library
+- Purged Alamofire from the project - Removed NetworkActivityIndicatorManager as this was relying on Alamofire Changed the ServerCertificateManager
+- Uses Swift Concurrency instead of Combine Preserves .dropFirst() behavior by skipping the first value manually Stores tasks in activeTasks for proper cleanup Updates UI safely on the main thread
+- Preparing to get rid of Alamofire's NetworkReachabilityManager
+- Removed unused protocol CommItem Initalized NetworkTracker.serverCertificateManager - avoid a force optional unwrapping Removing Alamofire where it is not needed anymore
+- Retired NetworkConnection
+- Generated 'Client.swift' migrate getRoot path template back to // Better convenience function for getRootVersion() Wait for 30s in startRetryTask
+- Revert change on NWPathMonitor because we are still on iOS 16
+- Revert change on NWPathMonitor because we are still on iOS 16
+- Migrate NWPathMonitor to asyncStream version
+- Refactored NetworkTracker to make use of structured concurrency with async/await More Readable & Maintainable     1.    Eliminates reliance on DispatchGroup, DispatchWorkItem, and timers for connection handling.     2.    UI Updates Only on Main Thread – updateActiveConnection runs in @MainActor. / Uses Task.detached(priority:) for Background Execution     3.    Efficient Connection Attempt Logic – Iterates through sorted connection configurations to establish the best connection.     4.    Better Error Handling – Throws meaningful errors and logs failures more clearly.     5.    Improved NWPathMonitor Handling – Reacts to network changes asynchronously without blocking execution.     6.   Removed .store(in: &cancellables) / Now that everything is async/await, there’s no need for Combine publishers.
+- HTTPClient now also takes over functionality of NetworkConnection in NewImageUITableViewCell
+- Make watch compilable again
+- minor touch
+- Migrate to iPhone 16 Pro with iOS 18.1 as simulator
+- Attempt to get tests working again an GitHub
+- Minor touches
+- Migrating VideoUITableViewCell to HTTPClient Removing Alamofire (cont.)
+- HTTPClient to take over all remaining functions from NetworkConnection: register, notification, load HTTPClient to use generic performRequest to avoid Any Removing NetworkConnection - step 2 : Deleting OpenHABLogger, removing test cases
+- Reverted a change on .swiftformat / now tested for GeneratedSource to be exluded.
+- Prepared HTTPClient to take over register and notification from NetworkConnection HTTPClient with doRequest endpoint URL Intermediary step: NotificationsView now calling async version of NetworkConnection.notification, OpenHABRootViewController of NetworkConnection.register OpenHABItemCache now making use of OpenAPIService for sendState and sendCommand
+- Reworked .swiftformat to properly handle ignore Rerun of openapi generator to get Client.swift and Types.swift ignored by swiftformat
+- Eliminate #available(iOS < 16) Eliminate unused parts in NetworkConnection - sitemaps, uiTiles, tracker, page Eliminate usage of NetworkConnection - step 1 in OpenHABItemCache Eliminate unused parts in Endpoint / watchSitemap, tracker, sitemaps, uiTiles Eliminate unused parts in HTTPClient - loadSitemap, doRequest, performRequest
+- Migrating NetworkTracker to OpenAPIService Renamed OpenAPIService function to align with generated function names Migrating UserData in watch to OpenAPIService Removing unnnecessary functions from HTTPClient
+- Migrate 'Sending command' in OpenHABRootViewController to OpenAPIService Renamed openHABSendItemCommand into sendItemCommand
+- - openapi-generator extended to tag rules - Manipulated  openapi.json to generate expected requestBody - In OpenHABRootViewController migrated call to rules/uuid/runnow to OpenAPIService runNow function - Removed migrated parts in HTTPClient - Removed parts migrated to async versions in NotificationService - Migrated NetworkTracker to make use OpenAPIService.getRoot instead of httpClient.getServerProperties
+- Migrating NetworkTracker to OpenAPIService Align init signature for OpenAPIService to HTTPClient
+- NotificationService now using internally async versions of functions Migration of functions in HTTPClient used by NotificatioService clients to async version
+- Address failed test run: Access first element of parseResults.warnings and parseResults.errorsFatal
+- Get rid of extension on URLSessionTask  for authAttemptCount using the outdated objc_getAssociatedObject
+- Eliminated NSError Renamed apiactor into openAPIService, renamed APICActorDelegate into OpenAPIServiceDelegate
+- Regenerated Client and Types with openapi-generato for tags root and systeminfo Prepared OpenHABServerProperties for decoding via OpenAPI: Components.Schemas.RootBean, also added new OpenHABLink class Renamed APIActor in OpenAPIService
+- Updated swift-openapi-runtime to 1.8.0 in local installation and rerun generator
+- Properly showing selected state in SelectionView
+- Properly testing decoding with swift-openapi-generator
+- Merge result
+- Getting rid of ObservableOpenHABSitemapPage for watch
+- Reusing OpenHABWidget for Watch. Allows to remove complexity.
+- Move extensions for models from APIActor.swift to respective files Port api load to DrawerView
+- Changed accessModifier to public - To be changed back to internal when switching to swift 6.0
+- Using logger
+- Subcribe to events and map received events to OpenHABSitemapWidgetEvents In order not to expose decode OpenHABSitemapWidgetEvents manually. Some relaxations required on OpenHABItem
+- Created LoggingMiddleware to be separated from AuthorisationMiddleware update OpenHABWidget with OpenHABSitemapWidgetEvent Update to swift-tools-version 5.10
+- Manually modifying openapi - JerseyResponseBuilderDTO for response to create event subscription, Allowing for X-Atmosphere-Transport for long-polling, SitemapWidgetEvent for server side events Experimenting with SSE consumption Include Client and Types to make it compile on github Shifted logging to dedicated ClientMiddleware Created class OpenHABSitemapWidgetEvent Modified openapi to include sitemapName and pageId in SitemapWidgetEvent Getting server sent events working - establishing a subscription and receiving events , not yet consuming  / Commented out in OpenHABSitemapViewController
+- Got the swift-openapi-generator working on openHAB iOS app: -Properly gets data every 30s -Able to send commands -Making use of structured concurrency, ie async/await, actors -Still a lot to do
+- Conformance with URLSessionDelegate, URLSessionTaskDelegate migrate to async/await
+
 - Fix watchOS startup race conditions and WCSession stalls
 - committed version bump: 3.2.55 (264)
 - Fix ContactStateIntent to use updateItemState instead of sendItemCommand

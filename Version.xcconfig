@@ -6,5 +6,5 @@
 // https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
 
 
-MARKETING_VERSION = 3.2.56
-CURRENT_PROJECT_VERSION = 265
+MARKETING_VERSION = 3.2.57
+CURRENT_PROJECT_VERSION = 266
