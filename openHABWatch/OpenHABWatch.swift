@@ -68,5 +68,4 @@ struct OpenHABWatch: App {
         }
         WKNotificationScene(controller: NotificationController.self, category: "openHABNotification")
     }
-
 }
