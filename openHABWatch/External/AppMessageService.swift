@@ -21,6 +21,9 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     private static let preferencesKey = "watchPreferences"
 
+    // Prevents multiple concurrent sendMessage calls from stalling the WCSession send queue.
+    private var contextRequestInFlight = false
+
     @MainActor
     static func updateValuesFromApplicationContext(_ data: Data?) {
         guard let data else {
@@ -62,17 +65,32 @@ class AppMessageService: NSObject, WCSessionDelegate {
     }
 
     func requestApplicationContext() {
-        WCSession.default.sendMessage(["request": "Preferences"]) { response in
+        // WCSession callbacks and @MainActor callers both use this method. Funnel the
+        // flag check through the main queue so it's always serialized.
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { self.requestApplicationContext() }
+            return
+        }
+        guard !contextRequestInFlight else {
+            Logger.preferences.debug("Context request already in flight, skipping")
+            return
+        }
+        contextRequestInFlight = true
+        WCSession.default.sendMessage(["request": "Preferences"]) { [weak self] response in
             let data = response[AppMessageService.preferencesKey] as? Data
             DispatchQueue.main.async {
+                self?.contextRequestInFlight = false
                 AppMessageService.updateValuesFromApplicationContext(data)
             }
-        } errorHandler: { error in
-            guard !self.isExpectedApplicationContextRequestFailure(error) else {
-                Logger.preferences.debug("Skipping application context request: \(error.localizedDescription)")
-                return
+        } errorHandler: { [weak self] error in
+            DispatchQueue.main.async {
+                self?.contextRequestInFlight = false
+                guard let self, !self.isExpectedApplicationContextRequestFailure(error) else {
+                    Logger.preferences.debug("Skipping application context request: \(error.localizedDescription)")
+                    return
+                }
+                Logger.preferences.error("Error sending message \(error.localizedDescription)")
             }
-            Logger.preferences.error("Error sending message \(error.localizedDescription)")
         }
     }
 

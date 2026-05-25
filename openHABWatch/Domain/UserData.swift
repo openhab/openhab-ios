@@ -72,8 +72,13 @@ final class UserData: ObservableObject {
 
         setupNotificationObservers()
 
-        // Start loading the linked page
-        Task { @MainActor in
+        // Assign to pageHandlingTask so stopLongPolling() can cancel this setup task
+        // before it runs if the view disappears while it is still queued on the main actor
+        // (e.g. rapid navigation). Without this, stopLongPolling() finds pageHandlingTask == nil,
+        // cancels nothing, and the task later starts an uncancellable long-poll that leaks the
+        // UserData instance via a retain cycle.
+        pageHandlingTask = Task { @MainActor [weak self] in
+            guard !Task.isCancelled, let self else { return }
             let sitemapName = AppSettings.shared.sitemapForWatch
             guard !sitemapName.isEmpty else {
                 Logger.userData.error("Cannot load linked page: no sitemap configured")
@@ -82,6 +87,9 @@ final class UserData: ObservableObject {
                 return
             }
             Logger.userData.info("Starting page handling for sitemap: \(sitemapName), pageId: \(extractedPageId)")
+            // Clear pageHandlingTask before calling startPageHandling so it sees nil and
+            // takes the clean "no running task" path rather than cancelling itself.
+            self.pageHandlingTask = nil
             self.startPageHandling(sitemapName: sitemapName, pageId: extractedPageId, force: true)
         }
     }
