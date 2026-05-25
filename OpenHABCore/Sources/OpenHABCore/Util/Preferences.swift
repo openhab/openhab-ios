@@ -108,6 +108,32 @@ public struct HomePreferences: Codable, Equatable {
     fileprivate init(id: UUID) {
         self.id = id
     }
+
+    // Custom decoder so that stored data from older app versions that are missing
+    // fields added later (e.g. alwaysAllowWebRTC, defaultMainUIPath, siteMapForWatchLabel)
+    // still decodes successfully. Without this, synthesized Codable requires every field
+    // to be present and silently falls back to the struct default via `try?` in
+    // UserDefaultObject — resetting homeName to "Home#1" for those users.
+    public nonisolated init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        defaultView = try container.decodeIfPresent(String.self, forKey: .defaultView) ?? "web"
+        demomode = try container.decodeIfPresent(Bool.self, forKey: .demomode) ?? true
+        realTimeSliders = try container.decodeIfPresent(Bool.self, forKey: .realTimeSliders) ?? false
+        iconType = try container.decodeIfPresent(Int.self, forKey: .iconType) ?? 0
+        defaultSitemap = try container.decodeIfPresent(String.self, forKey: .defaultSitemap) ?? "demo"
+        sortSitemapsBy = try container.decodeIfPresent(Int.self, forKey: .sortSitemapsBy) ?? 0
+        defaultMainUIPath = try container.decodeIfPresent(String.self, forKey: .defaultMainUIPath) ?? ""
+        alwaysAllowWebRTC = try container.decodeIfPresent(Bool.self, forKey: .alwaysAllowWebRTC) ?? false
+        sitemapForWatch = try container.decodeIfPresent(String.self, forKey: .sitemapForWatch) ?? "watch"
+        // Role-aware decode: supportsNotifications defaults to false for local, true for remote,
+        // so legacy stored configs written before that field existed keep the correct behavior.
+        localConnectionConfig = try ConnectionConfiguration.decode(from: container, forKey: .localConnectionConfig, defaultNotifications: false) ?? .localDefault
+        remoteConnectionConfig = try ConnectionConfiguration.decode(from: container, forKey: .remoteConnectionConfig, defaultNotifications: true) ?? .remoteDefault
+        sitemapForWatchLabel = try container.decodeIfPresent(String.self, forKey: .sitemapForWatchLabel) ?? "watch"
+        homeName = try container.decodeIfPresent(String.self, forKey: .homeName) ?? "Home#1"
+        sseCommandItem = try container.decodeIfPresent(String.self, forKey: .sseCommandItem) ?? ""
+    }
 }
 
 @MainActor
