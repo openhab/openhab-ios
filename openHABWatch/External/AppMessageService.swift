@@ -16,7 +16,7 @@ import WatchConnectivity
 import WatchKit
 
 // This class handles values that are passed from the ios app.
-class AppMessageService: NSObject, WCSessionDelegate {
+class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
     @MainActor static let singleton = AppMessageService()
 
     private static let preferencesKey = "watchPreferences"
