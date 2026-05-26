@@ -43,9 +43,9 @@ public enum SitemapPageLoader {
     public static func stream(sitemapName: String,
                               pageId: String = "",
                               service: OpenAPIService,
-                              shouldRetry: @escaping @Sendable (Error) -> Bool = { _ in true },
-                              onLongPollError: @escaping @Sendable (Error, _ requestMs: Int, _ willRetry: Bool) -> Void = { _, _, _ in }) -> AsyncThrowingStream<SitemapPageEvent, Error> {
-        AsyncThrowingStream<SitemapPageEvent, Error> { continuation in
+                              shouldRetry: @escaping @Sendable (any Error) -> Bool = { _ in true },
+                              onLongPollError: @escaping @Sendable (any Error, _ requestMs: Int, _ willRetry: Bool) -> Void = { _, _, _ in }) -> AsyncThrowingStream<SitemapPageEvent, any Error> {
+        AsyncThrowingStream<SitemapPageEvent, any Error> { continuation in
             let task = Task {
                 do {
                     // Initial (non-long-poll) fetch — fatal on error. Always yields an event
@@ -105,8 +105,8 @@ public enum SitemapPageLoader {
     /// `ConnectionInfo`. Retries every long-poll error (watchOS behaviour).
     public static func stream(sitemapName: String,
                               pageId: String = "",
-                              connectionInfo: ConnectionInfo) -> AsyncThrowingStream<SitemapPageEvent, Error> {
-        AsyncThrowingStream<SitemapPageEvent, Error> { continuation in
+                              connectionInfo: ConnectionInfo) -> AsyncThrowingStream<SitemapPageEvent, any Error> {
+        AsyncThrowingStream<SitemapPageEvent, any Error> { continuation in
             let task = Task {
                 do {
                     let service = try OpenAPIService(

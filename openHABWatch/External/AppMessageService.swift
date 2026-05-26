@@ -16,15 +16,17 @@ import WatchConnectivity
 import WatchKit
 
 // This class handles values that are passed from the ios app.
-@MainActor
-final class AppMessageService: NSObject, WCSessionDelegate {
-    static let singleton = AppMessageService()
+// @unchecked Sendable: all mutable state (@MainActor contextRequestInFlight) is actor-protected;
+// WCSession delegate callbacks are non-isolated and only schedule Tasks, never mutate directly.
+class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
+    @MainActor static let singleton = AppMessageService()
 
-    private nonisolated static let preferencesKey = "watchPreferences"
+    private static let preferencesKey = "watchPreferences"
 
-    // Prevents multiple concurrent sendMessage calls from stalling the WCSession send queue.
-    private var contextRequestInFlight = false
+    // Accessed only from @MainActor context (requestApplicationContext and its Task completions).
+    @MainActor private var contextRequestInFlight = false
 
+    @MainActor
     static func updateValuesFromApplicationContext(_ data: Data?) {
         guard let data else {
             Logger.preferences.debug("No watch preferences received in applicationContext yet.")
@@ -64,7 +66,7 @@ final class AppMessageService: NSObject, WCSessionDelegate {
         }
     }
 
-    private nonisolated func isExpectedApplicationContextRequestFailure(_ error: any Error) -> Bool {
+    private func isExpectedApplicationContextRequestFailure(_ error: any Error) -> Bool {
         let nsError = error as NSError
         guard nsError.domain == WCErrorDomain,
               let code = WCError.Code(rawValue: nsError.code) else { return false }
@@ -77,12 +79,23 @@ final class AppMessageService: NSObject, WCSessionDelegate {
         }
     }
 
+    @MainActor
     func requestApplicationContext() {
         guard !contextRequestInFlight else {
             Logger.preferences.debug("Context request already in flight, skipping")
             return
         }
         contextRequestInFlight = true
+        // Delegate to a non-@MainActor helper so the WCSession reply handler closure
+        // does NOT inherit @MainActor isolation — Swift 6 would add a runtime isolation
+        // check to the closure if it were defined inside an @MainActor method, causing
+        // a crash when WatchConnectivity calls it from a background queue.
+        sendPreferencesRequest()
+    }
+
+    // Non-@MainActor: WCSession reply/error closures defined here are NOT @MainActor,
+    // so WatchConnectivity can call them from its background queue without a crash.
+    private func sendPreferencesRequest() {
         WCSession.default.sendMessage(["request": "Preferences"]) { [weak self] response in
             let data = response[AppMessageService.preferencesKey] as? Data
             Task { @MainActor [weak self] in
@@ -101,7 +114,7 @@ final class AppMessageService: NSObject, WCSessionDelegate {
         }
     }
 
-    nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
         Logger.preferences.info("activationDidCompleteWith activationState \(activationState.rawValue) error: \(String(describing: error))")
         let data = session.receivedApplicationContext[AppMessageService.preferencesKey] as? Data
         Task { @MainActor [weak self] in
@@ -116,7 +129,7 @@ final class AppMessageService: NSObject, WCSessionDelegate {
     }
 
     /** Called on the delegate of the receiver. Will be called on startup if an applicationContext is available. */
-    nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         Logger.preferences.info("didReceiveApplicationContext \(applicationContext)")
         let data = applicationContext[AppMessageService.preferencesKey] as? Data
         Task { @MainActor in
@@ -125,7 +138,7 @@ final class AppMessageService: NSObject, WCSessionDelegate {
     }
 
     /** Called on the delegate of the receiver. Will be called on startup if the user info finished transferring when the receiver was not running. */
-    nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
         Logger.preferences.info("didReceiveUserInfo \(userInfo)")
         let data = userInfo[AppMessageService.preferencesKey] as? Data
         Task { @MainActor in
@@ -133,7 +146,7 @@ final class AppMessageService: NSObject, WCSessionDelegate {
         }
     }
 
-    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
         Logger.preferences.info("didReceiveMessage some filtered messages: \(filteredMessages)")
         let data = message[AppMessageService.preferencesKey] as? Data
@@ -142,7 +155,7 @@ final class AppMessageService: NSObject, WCSessionDelegate {
         }
     }
 
-    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Swift.Void) {
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Swift.Void) {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username", "defaultSitemap"].contains($0.key) }
         Logger.preferences.info("didReceiveMessage some filtered messages: \(filteredMessages) with reply handler")
         let data = message[AppMessageService.preferencesKey] as? Data
