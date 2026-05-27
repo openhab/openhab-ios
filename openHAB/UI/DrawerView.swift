@@ -82,6 +82,7 @@ enum DrawerFetch {
 // Display the active home name and connection type (Local / Remote)
 struct ConnectionView: View {
     @EnvironmentObject private var networkTracker: MainActorNetworkTracker
+    @ScaledMetric private var iconWidth = 20.0
 
     var body: some View {
         HStack {
@@ -90,7 +91,7 @@ struct ConnectionView: View {
                 Image(systemSymbol: isLocal ? .wifi : .cloudFill)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 20, height: 20)
+                    .frame(width: iconWidth, height: iconWidth)
                 Text(networkTracker.currentHomeName)
                     .font(.footnote)
                     .fontWeight(.medium)
@@ -98,9 +99,10 @@ struct ConnectionView: View {
                 Image(systemSymbol: .exclamationmarkIcloudFill)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 20, height: 20)
+                    .frame(width: iconWidth, height: iconWidth)
                 Text("connecting").font(.footnote)
             }
+            Spacer()
         }
     }
 }
@@ -192,6 +194,7 @@ struct DrawerView: View {
 
             Spacer()
             ConnectionView()
+                .padding(.leading, 16)
                 .padding(.bottom, 5)
         }
         .listStyle(.inset)
