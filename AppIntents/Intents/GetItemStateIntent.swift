@@ -23,7 +23,6 @@ enum ItemStateError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 struct GetItemStateIntent: AppIntent {
     static var openAppWhenRun: Bool { false }
