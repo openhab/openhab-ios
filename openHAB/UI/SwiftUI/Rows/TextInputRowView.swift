@@ -20,11 +20,11 @@ struct InputCommandFormatter {
 
     // MARK: after typing
 
-    func command(from rawText: String, hint: OpenHABWidget.InputHint?) -> String? {
+    func command(from rawText: String, hint: OpenHABWidget.InputHint?, unitSuffix: String = "") -> String? {
         let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
         switch hint {
         case .number:
-            return normalizedNumberCommand(from: trimmed)
+            return normalizedNumberCommand(from: trimmed).map { $0 + unitSuffix }
         default:
             return trimmed
         }
@@ -60,6 +60,74 @@ struct InputCommandFormatter {
 
         guard Double(normalized) != nil else { return nil }
         return normalized
+    }
+
+    // MARK: initial draft from server state
+
+    // Formats a Double (always dot-decimal from the server) using the locale decimal separator.
+    // Whole numbers are rendered without a decimal point (220.0 → "220").
+    // Uses NumberFormatter to avoid Swift's exponent notation for small values (e.g. 1e-05).
+    func localeFormattedValue(_ value: Double) -> String {
+        if value.truncatingRemainder(dividingBy: 1) == 0,
+           value >= Double(Int.min),
+           value <= Double(Int.max) {
+            return String(Int(value))
+        }
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.usesGroupingSeparator = false
+        formatter.decimalSeparator = decimalSeparator
+        formatter.maximumFractionDigits = 15
+        formatter.minimumFractionDigits = 1
+        return formatter.string(from: NSNumber(value: value)) ?? String(value)
+    }
+
+    // Extracts the numeric portion from a formatted state string, e.g. "220 °C" → "220".
+    // For non-number inputs the string is returned unchanged.
+    func numericDraftFromState(_ text: String) -> String {
+        guard !text.isEmpty else { return text }
+        var result = ""
+        var seenDecimalSep = false
+        for (index, char) in text.enumerated() {
+            if index == 0, char == "-" {
+                result.append(char)
+            } else if char.isNumber {
+                result.append(char)
+            } else if String(char) == decimalSeparator, !seenDecimalSep {
+                seenDecimalSep = true
+                result.append(char)
+            } else {
+                break
+            }
+        }
+        return result
+    }
+
+    // Extracts the unit suffix from a formatted state string, e.g. "220 °C" → " °C", "220" → "".
+    func unitSuffixFromState(_ text: String) -> String {
+        guard !text.isEmpty else { return "" }
+        var i = text.startIndex
+        var seenDecimalSep = false
+        var isFirst = true
+        while i < text.endIndex {
+            let char = text[i]
+            if isFirst {
+                isFirst = false
+                if char == "-" {
+                    i = text.index(after: i)
+                    continue
+                }
+            }
+            if char.isNumber {
+                i = text.index(after: i)
+            } else if String(char) == decimalSeparator, !seenDecimalSep {
+                seenDecimalSep = true
+                i = text.index(after: i)
+            } else {
+                break
+            }
+        }
+        return String(text[i...])
     }
 
     // MARK: during typing
@@ -117,17 +185,35 @@ private struct TextInputRowContent: View {
     @State private var inputText = ""
     @State private var draftInputText = ""
     @State private var lastValidDraft = ""
+    @State private var draftUnitSuffix = ""
     @State private var showInputAlert = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")
     private let inputCommandFormatter = InputCommandFormatter()
     private var formattedCommand: String? {
-        inputCommandFormatter.command(from: draftInputText, hint: inputHint)
+        inputCommandFormatter.command(from: draftInputText, hint: inputHint, unitSuffix: draftUnitSuffix)
+    }
+
+    // Display value for number inputs: apply the number pattern with the current locale,
+    // falling back to the server-formatted label value, then the raw state string.
+    private var formattedDisplayText: String {
+        guard inputHint == .number, !inputText.isEmpty else { return inputText }
+        if let pattern = input.numberPattern, !pattern.isEmpty {
+            let numberState = inputText.parseAsNumber(format: pattern)
+            if numberState.value.isFinite {
+                let formatted = numberState.toString(locale: Locale.current)
+                if !formatted.isEmpty { return formatted }
+            }
+        }
+        if let labelValue = input.displayState.labelValue, !labelValue.isEmpty {
+            return labelValue
+        }
+        return inputText
     }
 
     private var alertMessage: String {
         let label = input.displayState.labelText.isEmpty ? "Unknown" : input.displayState.labelText
-        let value = input.displayState.labelValue.flatMap { $0.isEmpty ? nil : $0 } ?? "Unknown"
+        let value = inputText.isEmpty ? "Unknown" : formattedDisplayText
         return "Current value for \"\(label)\" is \"\(value)\"."
     }
 
@@ -145,13 +231,12 @@ private struct TextInputRowContent: View {
                 }
 
                 Button {
-                    draftInputText = inputText
-                    lastValidDraft = inputText
+                    prepareEditDraft()
                     showInputAlert = true
                 } label: {
                     Text(inputText.isEmpty
                         ? "Enter \(inputHint == .number ? "number" : "text")"
-                        : inputText)
+                        : formattedDisplayText)
                         .lineLimit(nil)
                         .foregroundStyle(inputText.isEmpty ? .secondary : (input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor)))
                 }
@@ -161,8 +246,7 @@ private struct TextInputRowContent: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 guard !input.readOnly else { return }
-                draftInputText = inputText
-                lastValidDraft = inputText
+                prepareEditDraft()
                 showInputAlert = true
             }
             .alert("Enter new value", isPresented: $showInputAlert) {
@@ -187,6 +271,26 @@ private struct TextInputRowContent: View {
             .onChange(of: displayState.effectiveState) { newState in
                 inputText = newState
             }
+        }
+    }
+
+    private func prepareEditDraft() {
+        if inputHint == .number, !inputText.isEmpty {
+            let numberState = inputText.parseAsNumber(format: input.numberPattern)
+            let numericDraft = numberState.value.isFinite
+                ? inputCommandFormatter.localeFormattedValue(numberState.value)
+                : inputCommandFormatter.numericDraftFromState(inputText)
+            draftInputText = numericDraft
+            lastValidDraft = numericDraft
+            if numberState.value.isFinite, let unit = numberState.unit, !unit.isEmpty {
+                draftUnitSuffix = " \(unit)"
+            } else {
+                draftUnitSuffix = ""
+            }
+        } else {
+            draftInputText = inputText
+            lastValidDraft = inputText
+            draftUnitSuffix = ""
         }
     }
 

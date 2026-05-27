@@ -10,9 +10,8 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-
 @testable import OpenHABCore
-import XCTest
+import Testing
 
 final class MockClientCertDelegate: ClientCertificateManagerDelegate {
     var shouldImport = true
@@ -42,71 +41,46 @@ final class MockClientCertDelegate: ClientCertificateManagerDelegate {
 // openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=TestCert"
 // openssl pkcs12 -export -out test.p12 -inkey key.pem -in cert.pem -password pass:password
 
-final class ClientCertificateManagerTests: XCTestCase {
-    var manager: ClientCertificateManager!
-    var delegate: MockClientCertDelegate!
+struct ClientCertificateManagerTests {
+    let manager: ClientCertificateManager
+    let delegate: MockClientCertDelegate
 
-    override func setUp() {
-        super.setUp()
+    init() {
         manager = ClientCertificateManager()
         delegate = MockClientCertDelegate()
         manager.delegate = delegate
     }
 
-    override func tearDown() {
-        manager = nil
-        delegate = nil
-        super.tearDown()
-    }
-
-    func testStartImportCertificateReturnsFalseIfDataMissing() async {
+    @Test func startImportCertificateReturnsFalseIfDataMissing() async {
         let result = await manager.startImportClientCertificate(url: URL(fileURLWithPath: "/nonexistent.p12"))
-        XCTAssertFalse(result)
+        #expect(!result)
     }
 
-    func testStartImportCertificateReturnsTrueIfDelegateApproves() async throws {
-        // Use a real P12 file in your test bundle if needed
+    @Test func startImportCertificateReturnsTrueIfDelegateApproves() async throws {
         guard let url = Bundle.module.url(forResource: "test", withExtension: "p12") else {
-            return XCTFail("Test PKCS#12 file not found.")
+            Issue.record("Test PKCS#12 file not found.")
+            return
         }
 
         let result = await manager.startImportClientCertificate(url: url)
-        XCTAssertTrue(result)
+        #expect(result)
     }
 
-//    func testClientCertificateAcceptedSuccessPath() async {
-//        manager.importingRawCert = loadMockPKCS12Data()
-//        delegate.password = "password"
-//
-//        await manager.clientCertificateAccepted(password: "password")
-//        XCTAssertNil(delegate.receivedErrorMessage)
-//    }
-
-    func testPKCS12DecodeReturnsIdentity() {
+    @Test func pKCS12DecodeReturnsIdentity() {
         manager.importingRawCert = loadMockPKCS12Data()
         manager.importingPassword = "password"
 
         let status = manager.decodePKCS12()
-        XCTAssertEqual(status, errSecSuccess)
-        XCTAssertNotNil(manager.importingIdentity)
+        #expect(status == errSecSuccess)
+        #expect(manager.importingIdentity != nil)
     }
 
-//    func testClientCertificateAcceptedFailsAndAlerts() async {
-//        manager.importingRawCert = Data([0x00, 0x01, 0x02]) // invalid cert
-//        await manager.clientCertificateAccepted(password: "badpassword")
-//        XCTAssertNotNil(delegate.receivedErrorMessage)
-//    }
-
-    @MainActor
-    func testClientCertificateAcceptedFailsAndAlerts() async {
+    @Test @MainActor func clientCertificateAcceptedFailsAndAlerts() async {
         manager.importingRawCert = Data([0x00, 0x01, 0x02]) // invalid cert
         await manager.clientCertificateAccepted(password: "badpassword")
-
-        let errorMessage = await MainActor.run { delegate.receivedErrorMessage }
-        XCTAssertNotNil(errorMessage)
+        #expect(delegate.receivedErrorMessage != nil)
     }
 
-    // Helper to load valid PKCS#12 mock
     private func loadMockPKCS12Data() -> Data? {
         guard let url = Bundle.module.url(forResource: "test", withExtension: "p12") else { return nil }
         return try? Data(contentsOf: url)

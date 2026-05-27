@@ -487,7 +487,12 @@ extension SitemapRowInputMapper {
     }
 
     private static func inputRowInput(from snapshot: WidgetMappingSnapshot) -> InputRowInput {
-        InputRowInput(
+        let numberPattern = if let pattern = snapshot.pattern, !pattern.isEmpty {
+            pattern
+        } else {
+            snapshot.item?.stateDescription?.numberPattern
+        }
+        return InputRowInput(
             widgetId: snapshot.widgetId,
             renderingKind: snapshot.renderingKind,
             displayState: snapshot.displayState,
@@ -496,7 +501,8 @@ extension SitemapRowInputMapper {
             readOnly: snapshot.readOnly,
             inputHintRawValue: snapshot.inputHintRawValue,
             icon: rowIconInput(from: snapshot),
-            itemName: snapshot.item?.name
+            itemName: snapshot.item?.name,
+            numberPattern: numberPattern
         )
     }
 

@@ -49,13 +49,13 @@ actor NotificationServiceHandler {
     var cancellables = Set<AnyCancellable>()
     var networkTracker: NetworkTracker?
     var cloudUserId: String?
+    private var notificationCategoryRegistrationTask: Task<Void, Never>?
 
-    func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+    func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) async {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         guard let bestAttemptContent else { return }
 
-        var notificationActions: [UNNotificationAction] = []
         let userInfo = bestAttemptContent.userInfo
 
         Logger.notificationService.info("didReceive userInfo \(userInfo)")
@@ -71,37 +71,10 @@ actor NotificationServiceHandler {
 
         // Check if the user has defined custom actions in the payload
         if let actionsArray = parseActions(userInfo), let category = parseCategory(userInfo) {
-            for actionDict in actionsArray {
-                if let action = actionDict["action"],
-                   let title = actionDict["title"] {
-                    var options: UNNotificationActionOptions = []
-                    // navigate/browser options need to bring the app to the foreground
-                    if action.hasPrefix("ui") || action.hasPrefix("http") || action.hasPrefix("app") {
-                        options = [.foreground]
-                    }
-                    let notificationAction = UNNotificationAction(
-                        identifier: action,
-                        title: title,
-                        options: options
-                    )
-                    notificationActions.append(notificationAction)
-                }
-            }
-            if !notificationActions.isEmpty {
-                Logger.notificationService.info("didReceive registering \(notificationActions) for category \(category)")
-                let notificationCategory =
-                    UNNotificationCategory(
-                        identifier: category,
-                        actions: notificationActions,
-                        intentIdentifiers: [],
-                        options: .customDismissAction
-                    )
-                UNUserNotificationCenter.current().getNotificationCategories { existingCategories in
-                    var updatedCategories = Set(existingCategories.filter { $0.identifier != category })
-                    Logger.notificationService.info("handleNotification adding category \(category)")
-                    updatedCategories.insert(notificationCategory)
-                    UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
-                }
+            if let notificationCategory = makeNotificationCategory(baseCategory: category, actionsArray: actionsArray) {
+                Logger.notificationService.info("didReceive registering \(notificationCategory.actions) for category \(notificationCategory.identifier)")
+                await registerNotificationCategory(notificationCategory, baseCategory: category)
+                bestAttemptContent.categoryIdentifier = notificationCategory.identifier
             }
         }
 
@@ -255,12 +228,97 @@ actor NotificationServiceHandler {
         return nil
     }
 
+    private func notificationActions(from actionsArray: [[String: String]]) -> [UNNotificationAction] {
+        actionsArray.compactMap { actionDict in
+            guard let action = actionDict["action"],
+                  let title = actionDict["title"] else {
+                return nil
+            }
+            var options: UNNotificationActionOptions = []
+            // navigate/browser options need to bring the app to the foreground
+            if action.hasPrefix("ui") || action.hasPrefix("http") || action.hasPrefix("app") {
+                options = [.foreground]
+            }
+            return UNNotificationAction(
+                identifier: action,
+                title: title,
+                options: options
+            )
+        }
+    }
+
+    private func makeNotificationCategory(baseCategory: String, actionsArray: [[String: String]]) -> UNNotificationCategory? {
+        let actions = notificationActions(from: actionsArray)
+        guard !actions.isEmpty else { return nil }
+
+        let categoryIdentifier = notificationCategoryIdentifier(baseCategory: baseCategory, actionsArray: actionsArray)
+        return UNNotificationCategory(
+            identifier: categoryIdentifier,
+            actions: actions,
+            intentIdentifiers: [],
+            options: .customDismissAction
+        )
+    }
+
+    private func notificationCategoryIdentifier(baseCategory: String, actionsArray: [[String: String]]) -> String {
+        "\(baseCategory).\(notificationActionsHash(actionsArray))"
+    }
+
+    private func notificationActionsHash(_ actionsArray: [[String: String]]) -> String {
+        // FNV-1a keeps category identifiers short; collisions are possible but negligible for local notification action sets.
+        var hash: UInt64 = 14_695_981_039_346_656_037
+        for actionDict in actionsArray {
+            combine(actionDict["action"].orEmpty, into: &hash)
+            combine(actionDict["title"].orEmpty, into: &hash)
+        }
+        return String(hash, radix: 16)
+    }
+
+    private func combine(_ value: String, into hash: inout UInt64) {
+        for byte in "\(value.utf8.count):\(value)|".utf8 {
+            hash ^= UInt64(byte)
+            hash &*= 1_099_511_628_211
+        }
+    }
+
+    private func registerNotificationCategory(_ notificationCategory: UNNotificationCategory, baseCategory: String) async {
+        let previousTask = notificationCategoryRegistrationTask
+        let registrationTask = Task {
+            await previousTask?.value
+            await setNotificationCategory(notificationCategory, baseCategory: baseCategory)
+        }
+        notificationCategoryRegistrationTask = registrationTask
+        await registrationTask.value
+    }
+
+    private func setNotificationCategory(_ notificationCategory: UNNotificationCategory, baseCategory: String) async {
+        await withCheckedContinuation { continuation in
+            let notificationCenter = UNUserNotificationCenter.current()
+            notificationCenter.getDeliveredNotifications { deliveredNotifications in
+                let categoryPrefix = "\(baseCategory)."
+                let deliveredCategoryIdentifiers = Set(deliveredNotifications.map(\.request.content.categoryIdentifier))
+                notificationCenter.getNotificationCategories { existingCategories in
+                    let updatedCategories = existingCategories.filter { category in
+                        guard category.identifier != notificationCategory.identifier else { return false }
+                        guard category.identifier != baseCategory else { return false }
+                        guard category.identifier.hasPrefix(categoryPrefix) else { return true }
+                        return deliveredCategoryIdentifiers.contains(category.identifier)
+                    }
+                    var categories = Set(updatedCategories)
+                    Logger.notificationService.info("handleNotification adding category \(notificationCategory.identifier)")
+                    categories.insert(notificationCategory)
+                    notificationCenter.setNotificationCategories(categories)
+                    continuation.resume()
+                }
+            }
+        }
+    }
+
     func networkTracker() async -> NetworkTracker {
         if let tracker = networkTracker {
             return tracker
         }
-        // Ensure Preferences initializes on the MainActor to avoid crashes
-        await MainActor.run { _ = Preferences.shared }
+        await Preferences.prepareForAppExtensionAccess()
 
         let tracker = NetworkTracker(timeout: NotificationServiceHandler.networkTimeout)
         let connections: [ConnectionConfiguration]
@@ -271,9 +329,10 @@ actor NotificationServiceHandler {
             connections = await [instance.localConnectionConfig, instance.remoteConnectionConfig]
         } else {
             Logger.notificationService.info("Using default connection configurations")
+            let currentHomePreferences = await Preferences.shared.currentHomePreferences
             connections = await [
-                Preferences.shared.currentHomePreferences.localConnectionConfig,
-                Preferences.shared.currentHomePreferences.remoteConnectionConfig
+                currentHomePreferences.localConnectionConfig,
+                currentHomePreferences.remoteConnectionConfig
             ]
         }
 

@@ -69,78 +69,6 @@ protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
 
-class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, OpenHABViewable {
-    private let viewModel: SitemapPageViewModel
-
-    private weak var rootViewController: OpenHABRootViewController?
-
-    init() {
-        let viewModel = SitemapPageViewModel()
-        self.viewModel = viewModel
-        super.init(rootView: SitemapNavigationView(viewModel: viewModel) {})
-    }
-
-    @available(*, unavailable)
-    @objc dynamic required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Hide UIKit navigation bar since SwiftUI now handles navigation
-        navigationController?.setNavigationBarHidden(true, animated: false)
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        // Ensure UIKit navigation bar stays hidden when transitioning from other views
-        navigationController?.setNavigationBarHidden(true, animated: animated)
-    }
-
-    func setRootViewController(_ rootViewController: OpenHABRootViewController) {
-        self.rootViewController = rootViewController
-        // Update the closure after initialization
-        rootView = SitemapNavigationView(viewModel: viewModel) { [weak self] in
-            self?.rootViewController?.showSideMenu()
-        }
-    }
-
-    func getSitemapTitle() -> String {
-        viewModel.pageTitle
-    }
-
-    func viewName() -> String { "sitemap" }
-
-    nonisolated func reloadView() {
-        Task { @MainActor in
-            await viewModel.reload()
-        }
-    }
-
-    func pushSitemap(name: String, path: String?) async {
-        // Implement pushing logic into SitemapPageViewModel
-        await viewModel.pushSitemap(name: name, path: path)
-    }
-
-    @MainActor
-    func refreshOnForegroundIfNeeded() {
-        // Avoid restarting the very first page load on initial app activation.
-        guard viewModel.currentPage != nil || !viewModel.isLoading else { return }
-        viewModel.refreshOnForeground()
-    }
-
-    // swiftlint:disable:next  function_parameter_count
-    func showPopupMessage(seconds: Double,
-                          title: String,
-                          message: String,
-                          theme: Theme,
-                          viewTapAction: (() -> Void)?,
-                          buttonTitle: String,
-                          buttonAction: (() -> Void)?) {}
-
-    func hidePopupMessages() {}
-}
-
 // MARK: - Search Controller Delegates
 
 // swiftlint:disable type_body_length
@@ -155,6 +83,14 @@ class OpenHABRootViewController: UIViewController {
     private var apsRegistrationData: [AnyHashable: Any]?
 
     private var networkStatusButton: UIButton = .init(type: .custom)
+
+    private let transitionCoverView: UIView = {
+        let v = UIView()
+        v.backgroundColor = .systemBackground
+        v.isHidden = true
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
 
     private lazy var webViewController: OpenHABWebViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
@@ -213,7 +149,20 @@ class OpenHABRootViewController: UIViewController {
         #endif
         // save this so we know if its changed later
         isDemoMode = Preferences.shared.currentHomePreferences.demomode
+
+        view.addSubview(transitionCoverView)
+        NSLayoutConstraint.activate([
+            transitionCoverView.topAnchor.constraint(equalTo: view.topAnchor),
+            transitionCoverView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            transitionCoverView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            transitionCoverView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+
         switchToSavedView()
+        if currentView === webViewController {
+            webViewController.prepareForDisplayTransition()
+        }
+
         setupTracker()
         startSSEListening()
         observeAppForegroundForSideMenu()
@@ -519,12 +468,24 @@ class OpenHABRootViewController: UIViewController {
     private func handleDismiss(mode: TargetController) {
         switch mode {
         case .webview:
-            // Handle webview navigation or state update
-            Logger.viewController.debug("Dismissed to WebView")
-            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true)
-            switchView(target: .webview)
+            let needsSwitch = currentView !== webViewController
+            if needsSwitch {
+                // Cover the root view so the dismiss animation doesn't expose the
+                // old child view (e.g. SitemapView) while the menu slides away.
+                // addView inserts at index 0, so transitionCoverView stays on top.
+                webViewController.prepareForDisplayTransition()
+                view.bringSubviewToFront(transitionCoverView)
+                transitionCoverView.isHidden = false
+                switchView(target: .webview)
+            }
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) { [weak self] in
+                guard let self else { return }
+                if needsSwitch, !webViewController.hasLoadedPage {
+                    webViewController.reloadView()
+                }
+                transitionCoverView.isHidden = true
+            }
         case .settings:
-            Logger.viewController.debug("Dismissed to Settings")
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
                 self.modalDismissed(to: .settings)
             }
@@ -920,7 +881,7 @@ class OpenHABRootViewController: UIViewController {
 
     private func addView(viewController: UIViewController) {
         addChild(viewController)
-        view.insertSubview(viewController.view, belowSubview: networkStatusButton)
+        view.insertSubview(viewController.view, at: 0)
         viewController.view.frame = view.bounds
         viewController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         viewController.didMove(toParent: self)

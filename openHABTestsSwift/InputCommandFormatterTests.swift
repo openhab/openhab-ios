@@ -49,6 +49,21 @@ struct InputCommandFormatterCommaTests {
     func dotRejectedWhenCommaIsSeparator() {
         #expect(!formatter.isValidNumberDraft("3.14"))
     }
+
+    @Test
+    func numericDraftFromDecimalWithUnitCommaLocale() {
+        #expect(formatter.numericDraftFromState("21,5 °C") == "21,5")
+    }
+
+    @Test
+    func unitSuffixFromDecimalWithUnitCommaLocale() {
+        #expect(formatter.unitSuffixFromState("21,5 °C") == " °C")
+    }
+
+    @Test
+    func commandIncludesUnitSuffixCommaLocale() {
+        #expect(formatter.command(from: "21,5", hint: .number, unitSuffix: " °C") == "21.5 °C")
+    }
 }
 
 // MARK: - UIKit oracle (reference implementation)
@@ -341,6 +356,43 @@ struct InputCommandFormatterOracleTests {
     }
 }
 
+// MARK: - localeFormattedValue with comma separator
+
+@Suite
+struct InputCommandFormattedValueCommaTests {
+    let formatter = InputCommandFormatter(decimalSeparator: ",")
+
+    @Test
+    func localeFormattedValueWholeNumber() {
+        #expect(formatter.localeFormattedValue(220.0) == "220")
+    }
+
+    @Test
+    func localeFormattedValueDecimalUsesComma() {
+        #expect(formatter.localeFormattedValue(220.5) == "220,5")
+    }
+
+    @Test
+    func localeFormattedValueNegativeDecimalUsesComma() {
+        #expect(formatter.localeFormattedValue(-3.14) == "-3,14")
+    }
+
+    @Test
+    func serverStateDecimalConvertsToLocaleForCommand() {
+        // Server sends "220.5", we format for editing ("220,5"), user doesn't change it,
+        // command normalizes back to "220.5".
+        let draft = formatter.localeFormattedValue(220.5)
+        #expect(draft == "220,5")
+        #expect(formatter.command(from: draft, hint: .number) == "220.5")
+    }
+
+    @Test
+    func localeFormattedValueSmallDecimalNoExponentNotation() {
+        // String(0.00001) emits "1e-05" in Swift; NumberFormatter must produce fixed-point instead.
+        #expect(formatter.localeFormattedValue(0.00001) == "0,00001")
+    }
+}
+
 @Suite
 struct InputCommandFormatterTests {
     let formatter = InputCommandFormatter(decimalSeparator: ".")
@@ -560,5 +612,125 @@ struct InputCommandFormatterTests {
     @Test
     func commandFromNegativeIntegerWithLeadingCommaReturnsNormalized() {
         #expect(formatter.command(from: "-.42", hint: .number) == "-0.42")
+    }
+
+    // MARK: - numericDraftFromState
+
+    @Test
+    func numericDraftFromIntegerWithUnit() {
+        #expect(formatter.numericDraftFromState("220 °C") == "220")
+    }
+
+    @Test
+    func numericDraftFromDecimalWithUnit() {
+        #expect(formatter.numericDraftFromState("21.5 °C") == "21.5")
+    }
+
+    @Test
+    func numericDraftFromNegativeWithUnit() {
+        #expect(formatter.numericDraftFromState("-10 °C") == "-10")
+    }
+
+    @Test
+    func numericDraftFromUnitNoSpace() {
+        #expect(formatter.numericDraftFromState("220°C") == "220")
+    }
+
+    @Test
+    func numericDraftFromPlainNumber() {
+        #expect(formatter.numericDraftFromState("220") == "220")
+    }
+
+    @Test
+    func numericDraftFromEmptyString() {
+        #expect(formatter.numericDraftFromState("").isEmpty)
+    }
+
+    @Test
+    func numericDraftFromNonNumericStateReturnsEmpty() {
+        // Non-numeric state (NULL, UNDEF, unit-only) → empty so field opens blank
+        #expect(formatter.numericDraftFromState("hello").isEmpty)
+    }
+
+    @Test
+    func numericDraftFromUnitOnlyStateReturnsEmpty() {
+        #expect(formatter.numericDraftFromState("°C").isEmpty)
+    }
+
+    @Test
+    func numericDraftFromNullStateReturnsEmpty() {
+        #expect(formatter.numericDraftFromState("NULL").isEmpty)
+    }
+
+    // MARK: - unitSuffixFromState
+
+    @Test
+    func unitSuffixFromIntegerWithUnit() {
+        #expect(formatter.unitSuffixFromState("220 °C") == " °C")
+    }
+
+    @Test
+    func unitSuffixFromDecimalWithUnit() {
+        #expect(formatter.unitSuffixFromState("21.5 km/h") == " km/h")
+    }
+
+    @Test
+    func unitSuffixFromNegativeWithUnit() {
+        #expect(formatter.unitSuffixFromState("-10 °F") == " °F")
+    }
+
+    @Test
+    func unitSuffixFromUnitNoSpace() {
+        #expect(formatter.unitSuffixFromState("220°C") == "°C")
+    }
+
+    @Test
+    func unitSuffixFromPlainNumber() {
+        #expect(formatter.unitSuffixFromState("220").isEmpty)
+    }
+
+    @Test
+    func unitSuffixFromEmptyString() {
+        #expect(formatter.unitSuffixFromState("").isEmpty)
+    }
+
+    // MARK: - command with unit suffix
+
+    @Test
+    func commandIncludesUnitSuffix() {
+        #expect(formatter.command(from: "220", hint: .number, unitSuffix: " °C") == "220 °C")
+    }
+
+    @Test
+    func commandWithoutUnitSuffix() {
+        #expect(formatter.command(from: "220", hint: .number) == "220")
+    }
+
+    // MARK: - localeFormattedValue (dot locale)
+
+    @Test
+    func localeFormattedValueWholeNumber() {
+        #expect(formatter.localeFormattedValue(220.0) == "220")
+    }
+
+    @Test
+    func localeFormattedValueDecimal() {
+        #expect(formatter.localeFormattedValue(220.5) == "220.5")
+    }
+
+    @Test
+    func localeFormattedValueNegativeWhole() {
+        #expect(formatter.localeFormattedValue(-10.0) == "-10")
+    }
+
+    @Test
+    func localeFormattedValueNegativeDecimal() {
+        #expect(formatter.localeFormattedValue(-3.14) == "-3.14")
+    }
+
+    @Test
+    func localeFormattedValueSmallDecimalNoExponentNotation() {
+        // String(0.00001) emits "1e-05" in Swift; NumberFormatter must produce fixed-point instead.
+        #expect(formatter.localeFormattedValue(0.00001) == "0.00001")
     }
 }

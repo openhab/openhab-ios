@@ -23,7 +23,7 @@ public enum OHTextToken {
 }
 
 public enum OHAccessibilityToken {
-    public static let minimumHitTarget: CGFloat = 32
+    public static let minimumHitTarget: CGFloat = 44
 }
 
 private struct OHTextTokenModifier: ViewModifier {
