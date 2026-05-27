@@ -138,6 +138,10 @@ public class MainActorNetworkTracker: ObservableObject {
     public static let shared = MainActorNetworkTracker()
     @Published public var activeConnection: ConnectionInfo?
     @Published public var status: NetworkStatus = .stopped
+    /// The active home's display name. Updated whenever the user switches homes.
+    @Published public var currentHomeName = ""
+
+    private var homeNameCancellable: AnyCancellable?
 
     public init(tracker: NetworkTracker = NetworkTracker.shared) {
         Task {
@@ -150,6 +154,10 @@ public class MainActorNetworkTracker: ObservableObject {
                 status = trackerStatus
             }
         }
+        homeNameCancellable = Preferences.shared.currentHomePreferencesPublisher
+            .sink { [weak self] prefs in
+                self?.currentHomeName = prefs.homeName
+            }
     }
 }
 
