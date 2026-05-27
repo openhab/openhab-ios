@@ -512,6 +512,15 @@ public actor NetworkTracker {
         }
     }
 
+    /// Clears the active connection and rediscovers the best available one.
+    /// Use after a transport failure to recover from a stale connection (e.g. network switched while process was suspended).
+    private func revalidateConnection() async {
+        Logger.networkTracker.info("NetworkTracker: Re-evaluating connection after transport failure")
+        setActiveConnection(nil)
+        await failureTracker.resetAll()
+        await attemptConnection()
+    }
+
     /// keep trying to connect when network is not connected, otherwise check if active connection is actually available
     private func handleNetworkChange(isConnected: Bool) async {
         guard status != .stopped else {
@@ -571,25 +580,49 @@ public extension NetworkTracker {
         return service
     }
 
+    // Retries once on ClientError after revalidating the connection.
+    // ClientError indicates a transport failure — the request never reached the server —
+    // which can happen when the active connection is stale after a network switch or
+    // process suspension.
+    private func withClientErrorRetry<T>(_ operation: () async throws -> T) async throws -> T {
+        do {
+            return try await operation()
+        } catch is OpenAPIRuntime.ClientError {
+            await revalidateConnection()
+            return try await operation()
+        }
+    }
+
     func send(to item: OpenHABItem, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
         try await send(to: item.name, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
     }
 
     func send(to item: String, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
-        try await service().sendItemCommand(itemname: item, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        try await withClientErrorRetry {
+            try await service().sendItemCommand(itemname: item, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        }
     }
 
     func updateState(item: OpenHABItem, state: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
-        try await service().updateItemState(itemname: item.name, with: state, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        try await withClientErrorRetry {
+            try await service().updateItemState(itemname: item.name, with: state, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        }
     }
 
     func getStaticItems() async throws -> [OpenHABItem] {
-        let items = try await service().getItems(query: Operations.getItems.Input.Query(staticDataOnly: true))
-        return items.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        try await withClientErrorRetry {
+            // staticDataOnly=true is intentionally omitted: it excludes dynamically-created
+            // items (e.g. Shelly binding channel items), causing them to be missing from the
+            // App Intents item cache and triggering re-prompts in Shortcuts.
+            let items = try await service().getItems(query: Operations.getItems.Input.Query())
+            return items.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        }
     }
 
     func getItemByName(id: String) async throws -> OpenHABItem? {
-        try await service().getItemByName(id: id)
+        try await withClientErrorRetry {
+            try await service().getItemByName(id: id)
+        }
     }
 
     func pollDataForPage(sitemapname: String, pageId: String = "", longPolling: Bool = false) async throws -> OpenHABPage? {

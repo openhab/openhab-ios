@@ -35,6 +35,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published private(set) var trackerStatus: NetworkStatus = .stopped
     @Published private(set) var widgetUpdateVersions: [String: Int] = [:]
     @Published private(set) var rowInputs: [SitemapRowInput] = []
+    @Published var navigationPath: [LinkedPageNavigation] = []
 
     let networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
@@ -117,6 +118,19 @@ class SitemapPageViewModel: ObservableObject {
         } else {
             self.pageId = pageId
         }
+    }
+
+    init(sitemapName: String, pageUrl: String, title: String, pageId: String) {
+        loadSettings()
+        defaultSitemap = sitemapName
+        isLinkedPage = true
+        startObservers()
+        fallbackTitle = title
+        defaultSitemapLabel = title
+        self.pageId = pageId
+
+        // Set openHABRootUrl from current active connection for charts/images
+        openHABRootUrl = networkTracker.activeConnection?.configuration.url
     }
 
     /// Initializes the view model with a fixed set of widgets, without loading or polling
@@ -779,12 +793,23 @@ extension SitemapPageViewModel {
     }
 
     @MainActor
+    func configureSitemap(name: String, pageId: String?) {
+        defaultSitemap = name
+        defaultSitemapLabel = ""
+        self.pageId = pageId ?? ""
+        navigationPath = []
+        error = nil
+    }
+
+    @MainActor
+    func navigateToLinkedPage(_ nav: LinkedPageNavigation) {
+        navigationPath.append(nav)
+    }
+
+    @MainActor
     // swiftlint:disable:next async_without_await
     func pushSitemap(name: String, path: String?) async {
-        defaultSitemap = name
-        defaultSitemapLabel = "" // Clear old label so it gets fetched for the new sitemap
-        pageId = path ?? ""
-        error = nil // Clear any previous errors when switching sitemaps
+        configureSitemap(name: name, pageId: path)
         startPageHandling(forceRestart: true, reason: "push-sitemap")
     }
 

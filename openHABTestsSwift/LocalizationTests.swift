@@ -14,14 +14,81 @@
 import Foundation
 import Testing
 
+private final class BundleLocator: AnyObject {}
+
 struct LocalizationTests {
+    private struct StringCatalog: Decodable {
+        struct Entry: Decodable {
+            let comment: String?
+            let localizations: [String: Localization]?
+            let shouldTranslate: Bool?
+        }
+
+        struct Localization: Decodable {
+            let stringUnit: StringUnit?
+        }
+
+        struct StringUnit: Decodable {
+            let state: String
+            let value: String
+        }
+
+        let sourceLanguage: String
+        let strings: [String: Entry]
+    }
+
     private static var localizations: [String] {
         Bundle.main.localizations.filter { $0 != "Base" }
     }
 
-    private static var intentsBundle: Bundle? {
-        guard let pluginsURL = Bundle.main.builtInPlugInsURL else { return nil }
-        return Bundle(url: pluginsURL.appendingPathComponent("openHABIntents.appex"))
+    private static var stringCatalogURL: URL? {
+        // Primary: bundle resource (avoids #filePath sandbox restrictions in iOS Simulator)
+        if let url = Bundle(for: BundleLocator.self)
+            .url(forResource: "LocalizableTestCatalog", withExtension: "json") {
+            return url
+        }
+        // Fallback: source-relative path
+        let url = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("openHAB/Supporting Files/Localizable.xcstrings")
+        return FileManager.default.fileExists(atPath: url.path) ? url : nil
+    }
+
+    private static var stringCatalog: StringCatalog? {
+        guard let url = stringCatalogURL,
+              let data = try? Data(contentsOf: url) else {
+            return nil
+        }
+
+        return try? JSONDecoder().decode(StringCatalog.self, from: data)
+    }
+
+    private static var appIntentEntries: [String: StringCatalog.Entry] {
+        guard let stringCatalog else {
+            return [:]
+        }
+
+        return stringCatalog.strings.filter { key, entry in
+            key.contains("${") || (entry.comment?.localizedCaseInsensitiveContains("app intent") == true)
+        }
+    }
+
+    private static func sourceValue(for key: String, entry: StringCatalog.Entry, sourceLanguage: String) -> String {
+        entry.localizations?[sourceLanguage]?.stringUnit?.value.nonEmpty ?? key
+    }
+
+    private static func translatedValue(for language: String, entry: StringCatalog.Entry) -> String? {
+        guard let localization = entry.localizations?[language]?.stringUnit else {
+            return nil
+        }
+
+        return localization.state == "translated" ? localization.value.nonEmpty : nil
+    }
+
+    private static func placeholders(in value: String) -> [String] {
+        let regex = #/\$\{([a-z0-9]*)\}/#.ignoresCase()
+        return value.matches(of: regex).map { String($0.0) }
     }
 
     // MARK: - Tests
@@ -43,82 +110,69 @@ struct LocalizationTests {
     }
 
     @Test func intentsLocalizations() {
-        guard let bundle = LocalizationTests.intentsBundle,
-              let path = bundle.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: "en"),
-              let localizableStrings = NSDictionary(contentsOf: path) as? [String: String],
-              !localizableStrings.isEmpty
+        guard let stringCatalog = LocalizationTests.stringCatalog,
+              !LocalizationTests.appIntentEntries.isEmpty
         else {
-            Issue.record("Failed to load Intents.strings.")
+            Issue.record("Failed to load App Intents entries from Localizable.xcstrings.")
             return
         }
 
-        let localizations = bundle.localizations.filter { $0 != "Base" }
+        for (key, entry) in LocalizationTests.appIntentEntries {
+            let sourceValue = LocalizationTests.sourceValue(for: key, entry: entry, sourceLanguage: stringCatalog.sourceLanguage)
+            #expect(sourceValue.isEmpty == false, "Missing source localization for App Intents key '\(key)'.")
 
-        for language in localizations {
-            print("Testing language: '\(language)'.")
+            for language in LocalizationTests.localizations where language != stringCatalog.sourceLanguage {
+                guard let translation = LocalizationTests.translatedValue(for: language, entry: entry) else {
+                    continue
+                }
 
-            for localizableString in localizableStrings {
-                let translation = localizableString.key.localized(for: language, with: "Intents", in: bundle)
-                #expect(translation != nil, "Failed to get translation for key '\(localizableString.key)' in language '\(language)'.")
-                #expect(translation != "__MISSING__", "Missing translation for key '\(localizableString.key)' in language '\(language)'.")
-                #expect(translation?.isEmpty == false, "Translation for key '\(localizableString.key)' in language '\(language)' is empty.")
-                print("Translation: \(localizableString.key) = \(translation ?? "FAILED")")
+                #expect(translation.isEmpty == false, "Translation for key '\(key)' in language '\(language)' is empty.")
+                print("Translation: \(key) [\(language)] = \(translation)")
             }
         }
     }
 
     @Test func intentsPlaceholders() {
-        let regex = #/\$\{([a-z0-9]*)\}/#.ignoresCase()
-
-        guard let bundle = LocalizationTests.intentsBundle,
-              let path = bundle.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: "en"),
-              let placeholderTuples = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ $0.value.contains("${") }),
-              !placeholderTuples.isEmpty
+        guard let stringCatalog = LocalizationTests.stringCatalog
         else {
-            Issue.record("Failed to load Intents.strings.")
+            Issue.record("Failed to load Localizable.xcstrings.")
             return
         }
 
-        let localizations = bundle.localizations.filter { $0 != "Base" }
+        let placeholderEntries = LocalizationTests.appIntentEntries.filter { key, entry in
+            LocalizationTests.sourceValue(for: key, entry: entry, sourceLanguage: stringCatalog.sourceLanguage).contains("${")
+        }
 
-        for language in localizations {
-            print("Testing language: '\(language)'.")
+        guard !placeholderEntries.isEmpty else {
+            Issue.record("Failed to load App Intents placeholder entries from Localizable.xcstrings.")
+            return
+        }
 
-            guard let path = bundle.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: language),
-                  let languageTuples = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ $0.value.contains("${") }),
-                  !languageTuples.isEmpty
-            else {
-                Issue.record("Failed to load Intents.strings for language '\(language)'.")
-                continue
-            }
+        for (key, entry) in placeholderEntries {
+            let sourcePlaceholders = LocalizationTests.placeholders(
+                in: LocalizationTests.sourceValue(for: key, entry: entry, sourceLanguage: stringCatalog.sourceLanguage)
+            )
 
-            #expect(placeholderTuples.count == languageTuples.count, "Number of strings with placeholders in language '\(language)' doesn't match. Translations to check: \(languageTuples.filter { !placeholderTuples.keys.contains($0.key) }).")
+            #expect(sourcePlaceholders.isEmpty == false, "Missing placeholders in source string for key '\(key)'.")
 
-            for placeholderTuple in placeholderTuples {
-                let placeholderString = placeholderTuple.value
-                guard let translation = placeholderTuple.key.localized(for: language, with: "Intents", in: bundle) else {
+            for language in LocalizationTests.localizations where language != stringCatalog.sourceLanguage {
+                guard let translation = LocalizationTests.translatedValue(for: language, entry: entry) else {
                     continue
                 }
 
-                let numberOfOccurrencesInPlaceholder = placeholderString.matches(of: regex).count
-                let numberOfOccurrencesInTranslation = translation.matches(of: regex).count
-                #expect(numberOfOccurrencesInPlaceholder == numberOfOccurrencesInTranslation, "Number of placeholders for key '\(placeholderTuple.key)' in language '\(language)' does not match.")
-
-                let matchesPlaceholder = placeholderString.matches(of: regex).map { String($0.0) }
-                let matchesTranslation = translation.matches(of: regex).map { String($0.0) }
-                #expect(matchesPlaceholder.elementsEqual(matchesTranslation), "Placeholders do not match for key '\(placeholderTuple.key)' in language '\(language)'.")
-                print("Placeholders: \(matchesPlaceholder) == \(matchesTranslation)")
+                let translatedPlaceholders = LocalizationTests.placeholders(in: translation)
+                #expect(
+                    sourcePlaceholders.elementsEqual(translatedPlaceholders),
+                    "Placeholders do not match for key '\(key)' in language '\(language)'."
+                )
+                print("Placeholders: \(sourcePlaceholders) == \(translatedPlaceholders)")
             }
         }
     }
 }
 
 private extension String {
-    func localized(for language: String, with table: String? = nil, in bundle: Bundle = .main) -> String? {
-        guard let path = bundle.path(forResource: language, ofType: "lproj") else {
-            return nil
-        }
-
-        return Bundle(path: path)?.localizedString(forKey: self, value: "__MISSING__", table: table)
+    var nonEmpty: String? {
+        isEmpty ? nil : self
     }
 }

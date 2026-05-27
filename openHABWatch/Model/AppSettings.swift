@@ -12,6 +12,7 @@
 import Combine
 import Foundation
 import OpenHABCore
+import os.log
 import SwiftUI
 
 final class AppSettings: ObservableObject {
@@ -40,9 +41,10 @@ final class AppSettings: ObservableObject {
     @Published var sitemapForWatchLabel: String
     @Published var iconType: IconType
     @Published var haveReceivedAppContext = false
+    @Published var storedHomes: [UUID: HomePreferences] = [:]
 
     init() {
-        let store = UserDefaults(suiteName: "group.openhab.shared")!
+        let store = UserDefaults(suiteName: "group.openhab.shared") ?? UserDefaults.standard
 
         if let data = store.data(forKey: "localConnectionConfig"),
            let decoded = try? JSONDecoder().decode(ConnectionConfiguration.self, from: data) {
@@ -63,6 +65,13 @@ final class AppSettings: ObservableObject {
         sitemapForWatch = store.string(forKey: "sitemapForWatch") ?? ""
         sitemapForWatchLabel = store.string(forKey: "sitemapForWatchLabel") ?? ""
         iconType = IconType(rawValue: store.integer(forKey: "iconType")) ?? .svg
+
+        if let data = store.data(forKey: "watchAllHomes"),
+           let decoded = try? JSONDecoder().decode([String: HomePreferences].self, from: data) {
+            storedHomes = Dictionary(uniqueKeysWithValues: decoded.compactMap { key, value in
+                UUID(uuidString: key).map { ($0, value) }
+            })
+        }
 
         // Observe changes and write back to UserDefaults
         $localConnectionConfig
@@ -121,10 +130,36 @@ final class AppSettings: ObservableObject {
                 store.set(newValue.rawValue, forKey: "iconType")
             }
             .store(in: &cancellables)
+
+        $storedHomes
+            .removeDuplicates()
+            .sink { newValue in
+                Self.persistStoredHomes(newValue)
+            }
+            .store(in: &cancellables)
     }
 
     convenience init(debug: Bool = false, openHABRootUrl: String = "") {
         self.init()
         self.openHABRootUrl = openHABRootUrl
+    }
+
+    /// Writes `storedHomes` to both UserDefaults suites that read it:
+    /// - `group.openhab.shared["watchAllHomes"]` (string-keyed) — read by `AppSettings.init()`
+    /// - `group.org.openhab.app["storedHomes"]` (UUID-keyed) — read by `Preferences.shared` for App Intents
+    static func persistStoredHomes(_ uuidKeyed: [UUID: HomePreferences]) {
+        let stringKeyed = Dictionary(uniqueKeysWithValues: uuidKeyed.map { ($0.key.uuidString, $0.value) })
+        let watchStore = UserDefaults(suiteName: "group.openhab.shared") ?? UserDefaults.standard
+        if let data = try? JSONEncoder().encode(stringKeyed) {
+            watchStore.set(data, forKey: "watchAllHomes")
+        } else {
+            Logger.preferences.error("Failed to persist storedHomes to group.openhab.shared")
+        }
+        let prefsStore = UserDefaults(suiteName: "group.org.openhab.app") ?? UserDefaults.standard
+        if let data = try? JSONEncoder().encode(uuidKeyed) {
+            prefsStore.set(data, forKey: "storedHomes")
+        } else {
+            Logger.preferences.error("Failed to persist storedHomes to group.org.openhab.app")
+        }
     }
 }
