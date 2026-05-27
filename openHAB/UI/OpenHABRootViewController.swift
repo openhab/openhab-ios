@@ -106,6 +106,8 @@ class OpenHABRootViewController: UIViewController {
 
     private var activeConnection: ConnectionInfo?
     private var lastTrackerStartupSettings: TrackerStartupSettings?
+    /// Tracks the active home's id to detect switches and navigate to the new home's default sitemap.
+    private var lastActiveHomeId: UUID?
     private let synthesizer = AVSpeechSynthesizer()
 
     override func viewDidLoad() {
@@ -149,6 +151,8 @@ class OpenHABRootViewController: UIViewController {
         #endif
         // save this so we know if its changed later
         isDemoMode = Preferences.shared.currentHomePreferences.demomode
+        // seed so the first publisher fire is not mistaken for a home switch
+        lastActiveHomeId = Preferences.shared.currentHomePreferences.id
 
         view.addSubview(transitionCoverView)
         NSLayoutConstraint.activate([
@@ -353,6 +357,26 @@ class OpenHABRootViewController: UIViewController {
         serverInfo.debounce(for: .milliseconds(500), scheduler: RunLoop.main) // ensures if multiple values are saved, we get called once
             .sink { [weak self] homeSettings in
                 guard let self else { return }
+
+                // Navigate to the new home's default view when the active home changes.
+                let currentHomeId = homeSettings.id
+                if lastActiveHomeId != currentHomeId {
+                    lastActiveHomeId = currentHomeId
+                    let defaultSitemap = homeSettings.defaultSitemap
+                    let defaultView = homeSettings.defaultView
+                    Logger.viewController.info("Home switched to \(homeSettings.homeName, privacy: .private), navigating to default view")
+                    if defaultView == "sitemap" {
+                        if currentView !== sitemapViewController {
+                            switchView(target: .sitemap(defaultSitemap))
+                        }
+                        Task { @MainActor [weak self] in
+                            await (self?.sitemapViewController as? HostingSitemapViewController)?
+                                .pushSitemap(name: defaultSitemap, path: nil)
+                        }
+                    } else {
+                        switchView(target: .webview)
+                    }
+                }
 
                 let settings = TrackerStartupSettings(homeSettings: homeSettings)
                 guard lastTrackerStartupSettings != settings else {
