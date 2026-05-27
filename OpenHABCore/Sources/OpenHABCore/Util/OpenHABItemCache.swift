@@ -371,9 +371,22 @@ public actor OpenHABItemCache {
             // the dictionary key and the id field differ (can happen after certain migrations).
             let homePreferences = storedHomes[homeId] ?? storedHomes.values.first { $0.id == homeId }
             if let homePreferences {
+                // ConnectionConfiguration JSON omits credentials; inject from the platform Keychain.
+                // On iOS this is the iOS app Keychain; on watchOS the Watch Keychain — both use
+                // CredentialsStore with no kSecAttrAccessGroup, so they target the right store.
+                var local = homePreferences.localConnectionConfig
+                var remote = homePreferences.remoteConnectionConfig
+                if let creds = CredentialsStore.retrieve(homeId: homeId, type: .local) {
+                    local.username = creds.username
+                    local.password = creds.password
+                }
+                if let creds = CredentialsStore.retrieve(homeId: homeId, type: .remote) {
+                    remote.username = creds.username
+                    remote.password = creds.password
+                }
                 let tracker = NetworkTracker(timeout: OpenHABItemCache.networkTimeout)
                 networkTrackers[homeId] = tracker
-                await tracker.startTracking(connectionConfigurations: [homePreferences.localConnectionConfig, homePreferences.remoteConnectionConfig])
+                await tracker.startTracking(connectionConfigurations: [local, remote])
                 // Prime: wait for the first connection attempt to settle before returning.
                 // Without this, sendCommand's own waitForActiveConnection races against the
                 // tracker's initial testConnection calls and can time out prematurely.

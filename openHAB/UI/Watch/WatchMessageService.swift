@@ -92,7 +92,18 @@ class WatchMessageService: NSObject, WCSessionDelegate {
         }
         let settings = homeSettings ?? Preferences.shared.currentHomePreferences
         let storedHomes = Dictionary(uniqueKeysWithValues: Preferences.shared.storedHomes.map { ($0.key.uuidString, $0.value) })
-        let prefs = WatchPreferences(fromPreferences: settings, allHomes: storedHomes)
+        // Build per-home credentials from iOS Keychain so Watch can persist them in its own Keychain.
+        let homeCredentials = Dictionary(uniqueKeysWithValues: Preferences.shared.storedHomes.keys.map { uuid in
+            let local = CredentialsStore.retrieve(homeId: uuid, type: .local)
+            let remote = CredentialsStore.retrieve(homeId: uuid, type: .remote)
+            return (uuid.uuidString, HomeCredentials(
+                localUsername: local?.username ?? "",
+                localPassword: local?.password ?? "",
+                remoteUsername: remote?.username ?? "",
+                remotePassword: remote?.password ?? ""
+            ))
+        })
+        let prefs = WatchPreferences(fromPreferences: settings, allHomes: storedHomes, homeCredentials: homeCredentials)
         let context = prefs.encodedWatchPreferences()
 
         guard getCachedPreferences() != context else {
@@ -114,7 +125,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
 @MainActor
 extension WatchPreferences {
-    init(fromPreferences preferences: HomePreferences, allHomes: [String: HomePreferences]? = nil) {
+    init(fromPreferences preferences: HomePreferences, allHomes: [String: HomePreferences]? = nil, homeCredentials: [String: HomeCredentials]? = nil) {
         self.init(
             localUrl: preferences.localConnectionConfig.url,
             remoteUrl: preferences.remoteConnectionConfig.url,
@@ -131,7 +142,9 @@ extension WatchPreferences {
             remoteConnectionConfiguration: preferences.remoteConnectionConfig,
             allHomes: allHomes,
             localUsername: preferences.localConnectionConfig.username,
-            localPassword: preferences.localConnectionConfig.password
+            localPassword: preferences.localConnectionConfig.password,
+            activeHomeId: preferences.id,
+            homeCredentials: homeCredentials
         )
     }
 }
