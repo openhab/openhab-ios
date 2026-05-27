@@ -165,9 +165,13 @@ public actor NetworkTracker {
     public static let networkTimeout: TimeInterval = 10
     public static let slowConnectionTimeout: TimeInterval = 1
 
-    @Published public private(set) var activeConnection: ConnectionInfo?
+    public private(set) var activeConnection: ConnectionInfo?
+    public private(set) var status: NetworkStatus = .stopped
 
-    @Published public private(set) var status: NetworkStatus = .stopped
+    // Registered observers for activeConnection and status changes.
+    // Each call to activeConnectionStream() / statusStream() gets its own entry.
+    private var activeConnectionContinuations: [UUID: AsyncStream<ConnectionInfo?>.Continuation] = [:]
+    private var statusContinuations: [UUID: AsyncStream<NetworkStatus>.Continuation] = [:]
 
     private var pathMonitor: any NWPathMonitoring
     private var connectionPool: ConnectionPool
@@ -244,17 +248,11 @@ public actor NetworkTracker {
         }
 
         Logger.networkTracker.info("NetworkTracker: waitForActiveConnection")
-        // Utilize for await to listen for changes in $activeConnection
-        // $activeConnection.values is an AsyncSequence, allowing you to iterate over its values asynchronously.
-        // Wait until a non-nil value is received
+        // activeConnectionStream() replays the current value first, so the loop returns
+        // immediately when already connected, and waits for the next change otherwise.
         return try? await withThrowingTimeout(seconds: networkTimeout) { [self] in
             Logger.networkTracker.info("NetworkTracker: Start waiting for active connection connection with timeout")
-            let activeConnections = $activeConnection.values
-            if status == .connected {
-                // return existing conneciton
-                if let current = activeConnection { return current }
-            }
-            for await connection in activeConnections {
+            for await connection in activeConnectionStream() {
                 if let connection {
                     Logger.networkTracker.info("NetworkTracker: active connection received")
                     return connection
@@ -540,12 +538,14 @@ public actor NetworkTracker {
         guard status != .stopped else {
             if activeConnection != nil {
                 activeConnection = nil
+                for cont in activeConnectionContinuations.values { cont.yield(nil) }
             }
             return
         }
 
         if activeConnection != connection {
             activeConnection = connection
+            for cont in activeConnectionContinuations.values { cont.yield(connection) }
         }
     }
 
@@ -553,6 +553,15 @@ public actor NetworkTracker {
         guard status != newStatus else { return } // Prevent redundant updates
         status = newStatus
         Logger.networkTracker.info("NetworkTracker: status updated: \(newStatus.rawValue, privacy: .public)")
+        for cont in statusContinuations.values { cont.yield(newStatus) }
+    }
+
+    private func removeActiveConnectionContinuation(id: UUID) {
+        activeConnectionContinuations.removeValue(forKey: id)
+    }
+
+    private func removeStatusContinuation(id: UUID) {
+        statusContinuations.removeValue(forKey: id)
     }
 }
 
@@ -580,14 +589,17 @@ public extension NetworkTracker {
         return service
     }
 
-    // Retries once on ClientError after revalidating the connection.
-    // ClientError indicates a transport failure — the request never reached the server —
-    // which can happen when the active connection is stale after a network switch or
-    // process suspension.
+    // Retries once after revalidating the connection on two transient failure kinds:
+    //  • ClientError  — transport failure against a stale connection (network switch, suspension)
+    //  • noActiveConnection — all connection tests timed out during a network handoff; the
+    //    tracker recovers shortly after, so one revalidation + retry is enough.
     private func withClientErrorRetry<T>(_ operation: () async throws -> T) async throws -> T {
         do {
             return try await operation()
         } catch is OpenAPIRuntime.ClientError {
+            await revalidateConnection()
+            return try await operation()
+        } catch NetworkTrackerError.noActiveConnection {
             await revalidateConnection()
             return try await operation()
         }
@@ -635,22 +647,30 @@ public extension NetworkTracker {
 }
 
 public extension NetworkTracker {
+    /// Returns an AsyncStream that immediately yields the current activeConnection value,
+    /// then yields every subsequent change. Safe to call from any Swift concurrent context.
     func activeConnectionStream() -> AsyncStream<ConnectionInfo?> {
-        AsyncStream { continuation in
-            let cancellable = self.$activeConnection
-                .sink { continuation.yield($0) }
-
-            continuation.onTermination = { [cancellable] _ in cancellable.cancel() }
+        let id = UUID()
+        let (stream, continuation) = AsyncStream.makeStream(of: ConnectionInfo?.self)
+        activeConnectionContinuations[id] = continuation
+        continuation.yield(activeConnection) // replay current value to new subscriber
+        continuation.onTermination = { [weak self] _ in
+            Task { [weak self] in await self?.removeActiveConnectionContinuation(id: id) }
         }
+        return stream
     }
 
+    /// Returns an AsyncStream that immediately yields the current status value,
+    /// then yields every subsequent change. Safe to call from any Swift concurrent context.
     func statusStream() -> AsyncStream<NetworkStatus> {
-        AsyncStream { continuation in
-            let cancellable = self.$status
-                .sink { continuation.yield($0) }
-
-            continuation.onTermination = { [cancellable] _ in cancellable.cancel() }
+        let id = UUID()
+        let (stream, continuation) = AsyncStream.makeStream(of: NetworkStatus.self)
+        statusContinuations[id] = continuation
+        continuation.yield(status) // replay current value to new subscriber
+        continuation.onTermination = { [weak self] _ in
+            Task { [weak self] in await self?.removeStatusContinuation(id: id) }
         }
+        return stream
     }
 }
 

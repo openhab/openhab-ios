@@ -41,17 +41,12 @@ enum WidgetRowFactory {
                 EquatableView(content: ImageRow(url: URL(string: widget.url), refresh: widget.refresh))
             }
         case .chart:
-            let url = Endpoint.chart(
+            let payload = widget.mediaImageDescriptor.resolveImagePayload(
                 rootUrl: settings.openHABRootUrl,
-                period: widget.period,
-                type: widget.item?.type ?? .none,
-                service: widget.service,
-                name: widget.item?.name,
-                legend: widget.legend,
-                theme: .dark,
-                forceAsItem: widget.forceAsItem
-            ).url
-            EquatableView(content: ImageRow(url: url, refresh: widget.refresh))
+                chartStyle: .dark
+            )
+            let chartURL: URL? = if case let .link(url) = payload { url } else { nil }
+            EquatableView(content: ImageRow(url: chartURL, refresh: widget.refresh))
         case .mapview:
             MapViewRow(widget: widget)
         case .colorPicker:

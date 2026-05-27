@@ -56,6 +56,8 @@ public extension Logger {
 
     static let pageLoader = Logger(subsystem: subsystem, category: "PageLoader")
 
+    static let sitemapPageLoader = Logger(subsystem: subsystem, category: "SitemapPageLoader")
+
     static let preferences = Logger(subsystem: subsystem, category: "Preferences")
 
     static let restAPI = Logger(subsystem: subsystem, category: "RestAPI")

@@ -147,13 +147,11 @@ public actor OpenHABItemCache {
 
     public static let instance = OpenHABItemCache()
 
-    #if os(watchOS)
-    // On watchOS per-home trackers persist for the process lifetime, so only the first intent
-    // invocation per session bears the cold-connect cost. Match NetworkTracker.shared's 10 s.
+    // Per-home trackers are created fresh each session (cold-start cost on first use).
+    // 10 s matches NetworkTracker.shared and is enough to survive a typical cellular
+    // handoff (~7 s in practice) without failing with noActiveConnection.
     private static let networkTimeout: TimeInterval = 10
-    #else
-    private static let networkTimeout: TimeInterval = 5
-    #endif
+
     private static let stubsDefaultsKey = "openHABItemStubs"
     private static let sharedDefaultsSuiteName = "group.org.openhab.app"
 
@@ -376,9 +374,12 @@ public actor OpenHABItemCache {
                 let tracker = NetworkTracker(timeout: OpenHABItemCache.networkTimeout)
                 networkTrackers[homeId] = tracker
                 await tracker.startTracking(connectionConfigurations: [homePreferences.localConnectionConfig, homePreferences.remoteConnectionConfig])
+                // Prime: wait for the first connection attempt to settle before returning.
+                // Without this, sendCommand's own waitForActiveConnection races against the
+                // tracker's initial testConnection calls and can time out prematurely.
+                _ = await tracker.waitForActiveConnection()
             }
         }
-        // TODO: do we need to make sure / wait that the connection is live?
         return networkTrackers[homeId]
         #endif
     }
