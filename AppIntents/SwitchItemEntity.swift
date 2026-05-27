@@ -14,7 +14,6 @@ import OpenHABCore
 
 // MARK: - DimmerItemEntity
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 struct DimmerItemEntity: ItemEntity {
     struct DimmerItemQuery: ItemEntityQuery {
@@ -48,7 +47,6 @@ struct DimmerItemEntity: ItemEntity {
 
 // MARK: - ColorItemEntity
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 struct ColorItemEntity: ItemEntity {
     struct ColorItemQuery: ItemEntityQuery {
@@ -82,7 +80,6 @@ struct ColorItemEntity: ItemEntity {
 
 // MARK: - NumberItemEntity
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 struct NumberItemEntity: ItemEntity {
     struct NumberItemQuery: ItemEntityQuery {
@@ -116,7 +113,6 @@ struct NumberItemEntity: ItemEntity {
 
 // MARK: - StringItemEntity
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 struct StringItemEntity: ItemEntity {
     struct StringItemQuery: ItemEntityQuery {
@@ -150,7 +146,6 @@ struct StringItemEntity: ItemEntity {
 
 // MARK: - ContactItemEntity
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 struct ContactItemEntity: ItemEntity {
     struct ContactItemQuery: ItemEntityQuery {
@@ -184,7 +179,6 @@ struct ContactItemEntity: ItemEntity {
 
 // MARK: - GenericItemEntity (for ItemStateIntent - all types)
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 struct GenericItemEntity: ItemEntity {
     struct GenericItemQuery: ItemEntityQuery {
@@ -218,7 +212,6 @@ struct GenericItemEntity: ItemEntity {
 
 // MARK: - PlayerItemEntity
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 struct PlayerItemEntity: ItemEntity {
     struct PlayerItemQuery: ItemEntityQuery {
@@ -252,7 +245,6 @@ struct PlayerItemEntity: ItemEntity {
 
 // MARK: - DateTimeItemEntity
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 struct DateTimeItemEntity: ItemEntity {
     struct DateTimeItemQuery: ItemEntityQuery {
@@ -286,7 +278,6 @@ struct DateTimeItemEntity: ItemEntity {
 
 // MARK: - LocationItemEntity
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 struct LocationItemEntity: ItemEntity {
     struct LocationItemQuery: ItemEntityQuery {
@@ -320,7 +311,6 @@ struct LocationItemEntity: ItemEntity {
 
 // MARK: - SwitchItemEntity
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 struct SwitchItemEntity: ItemEntity {
     struct SwitchItemQuery: ItemEntityQuery {

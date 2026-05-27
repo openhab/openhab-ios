@@ -42,6 +42,19 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
             AppSettings.shared.sitemapForWatchLabel = prefs.sitemapForWatchLabel
             AppSettings.shared.iconType = IconType(rawValue: prefs.iconType) ?? .svg
             AppSettings.shared.haveReceivedAppContext = true
+            if let allHomes = prefs.allHomes {
+                let uuidKeyedHomes = Dictionary(uniqueKeysWithValues: allHomes.compactMap { key, value in
+                    UUID(uuidString: key).map { ($0, value) }
+                })
+                let previousHomeIds = Set(AppSettings.shared.storedHomes.keys)
+                // Sink in AppSettings.init() persists to both UserDefaults suites.
+                AppSettings.shared.storedHomes = uuidKeyedHomes
+                if previousHomeIds != Set(uuidKeyedHomes.keys) {
+                    Task {
+                        await OpenHABItemCache.instance.forceCacheReload()
+                    }
+                }
+            }
             //                   if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
             //                       // do we need to do anything here?  We load from the shared keychain.
             //                   }

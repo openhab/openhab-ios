@@ -12,7 +12,6 @@
 import AppIntents
 import Foundation
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 enum PlayerAction: String, AppEnum {
     case play = "PLAY"
@@ -34,7 +33,6 @@ enum PlayerAction: String, AppEnum {
     ]
 }
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 extension PlayerAction: CustomLocalizedStringResourceConvertible {
     var localizedStringResource: LocalizedStringResource {

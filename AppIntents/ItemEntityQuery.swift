@@ -14,7 +14,6 @@ import OpenHABCore
 
 // MARK: - Shared Query Protocol
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 protocol ItemEntityQuery: EntityStringQuery {
     associatedtype EntityType: ItemEntity
@@ -23,7 +22,6 @@ protocol ItemEntityQuery: EntityStringQuery {
     var selectedHome: Home? { get }
 }
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 extension ItemEntityQuery {
     @MainActor

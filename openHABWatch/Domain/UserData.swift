@@ -134,12 +134,12 @@ final class UserData: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // Also observe connection config changes - update network when server changes
+        // Observe connection config changes and trigger on initial values (no dropFirst).
+        // This covers cold start (persisted connections fire immediately on subscription)
+        // and config updates (server URL changed on iPhone and synced via WC).
         AppSettings.shared.$localConnectionConfig
             .combineLatest(AppSettings.shared.$remoteConnectionConfig)
-            .dropFirst() // Skip initial values
             .removeDuplicates { lhs, rhs in
-                // Only trigger if actual connection URLs changed
                 lhs.0?.url == rhs.0?.url && lhs.1?.url == rhs.1?.url
             }
             .debounce(for: .seconds(0.5), scheduler: RunLoop.main)

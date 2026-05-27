@@ -147,7 +147,13 @@ public actor OpenHABItemCache {
 
     public static let instance = OpenHABItemCache()
 
+    #if os(watchOS)
+    // On watchOS per-home trackers persist for the process lifetime, so only the first intent
+    // invocation per session bears the cold-connect cost. Match NetworkTracker.shared's 10 s.
+    private static let networkTimeout: TimeInterval = 10
+    #else
     private static let networkTimeout: TimeInterval = 5
+    #endif
     private static let stubsDefaultsKey = "openHABItemStubs"
     private static let sharedDefaultsSuiteName = "group.org.openhab.app"
 
@@ -262,9 +268,10 @@ public actor OpenHABItemCache {
     }
 
     public func reloadCacheIfNeeded(homes: [UUID]) async {
-        let homesNeedingReload = homes.filter { Date.now.timeIntervalSince(lastLoad[$0] ?? Date.distantPast) > ttl }
-        Logger.itemCache.info("Cache reload needed for homes \(homesNeedingReload)")
-        await forceCacheReload(homes: homesNeedingReload)
+        let staleHomes = homes.filter { Date.now.timeIntervalSince(lastLoad[$0] ?? Date.distantPast) > ttl }
+        guard !staleHomes.isEmpty else { return }
+        Logger.itemCache.info("Cache reload needed for homes \(staleHomes)")
+        await forceCacheReload(homes: staleHomes)
     }
 
     public func forceCacheReload(homes: [UUID]) async {
@@ -354,14 +361,9 @@ public actor OpenHABItemCache {
     }
 
     private func assureNetworkTracker(homeId: UUID) async -> NetworkTracker? {
-        #if os(watchOS) || os(macOS) || targetEnvironment(macCatalyst)
-        // On watchOS and macOS, App Intents run directly in the main app process (no separate
-        // extension process exists on either platform). NetworkTracker.shared is already connected
-        // there, so creating private per-home NetworkTracker instances would start cold — with no
-        // active connection — causing item loads to fail immediately.
-        //
-        // Limitation: the homeId parameter is ignored, so only the currently active home's
-        // connection is used. Multi-home App Intents are an iOS-only capability.
+        #if os(macOS) || targetEnvironment(macCatalyst)
+        // On macOS/Catalyst, App Intents run in the main app process and NetworkTracker.shared
+        // is already connected. homeId is ignored; only the currently active home is used.
         return NetworkTracker.shared
         #else
         await Preferences.prepareForAppExtensionAccess()
