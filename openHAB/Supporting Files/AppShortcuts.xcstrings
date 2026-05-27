@@ -524,6 +524,7 @@
       }
     },
     "Set roller shutter in ${applicationName}" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -640,6 +641,7 @@
       }
     },
     "Toggle a switch in ${applicationName}" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
