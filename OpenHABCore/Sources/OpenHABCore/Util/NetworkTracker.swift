@@ -611,7 +611,10 @@ public extension NetworkTracker {
 
     func getStaticItems() async throws -> [OpenHABItem] {
         try await withClientErrorRetry {
-            let items = try await service().getItems(query: Operations.getItems.Input.Query(staticDataOnly: true))
+            // staticDataOnly=true is intentionally omitted: it excludes dynamically-created
+            // items (e.g. Shelly binding channel items), causing them to be missing from the
+            // App Intents item cache and triggering re-prompts in Shortcuts.
+            let items = try await service().getItems(query: Operations.getItems.Input.Query())
             return items.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         }
     }

@@ -225,7 +225,11 @@ public actor OpenHABItemCache {
     }
 
     private func persistStubs() {
-        var allStubs: [String: [ItemStub]] = [:]
+        // Merge into existing stubs so homes not in the current in-memory `items`
+        // (e.g. loaded in a prior process or a different cache reload scope) are preserved.
+        // A full replace would wipe stubs for homes not currently in memory, removing the
+        // fallback for intents that target a home the current process hasn't loaded.
+        var allStubs = loadedStubs()
         for (homeId, homeItems) in items {
             allStubs[homeId.uuidString] = homeItems.map { ItemStub(name: $0.name, label: $0.label, type: $0.type?.rawValue) }
         }
@@ -383,7 +387,13 @@ public extension OpenHABItemCache {
         if let item = items[home]?.first(where: { $0.name == name }) {
             return item
         }
-        return persistedItem(name: name, home: home)
+        let stub = persistedItem(name: name, home: home)
+        if stub == nil {
+            Logger.itemCache.error("Item '\(name)' not found in cache or stubs for home \(home)")
+        } else {
+            Logger.itemCache.info("Item '\(name)' resolved from stubs (no live cache) for home \(home)")
+        }
+        return stub
     }
 
     func getCachedOrPersistedItems(types: [OpenHABItem.ItemType]?, home: UUID) -> [OpenHABItem] {

@@ -82,15 +82,15 @@ final class UserData: ObservableObject {
             let sitemapName = AppSettings.shared.sitemapForWatch
             guard !sitemapName.isEmpty else {
                 Logger.userData.error("Cannot load linked page: no sitemap configured")
-                self.errorDescription = "No sitemap configured"
-                self.showAlert = true
+                errorDescription = "No sitemap configured"
+                showAlert = true
                 return
             }
             Logger.userData.info("Starting page handling for sitemap: \(sitemapName), pageId: \(extractedPageId)")
             // Clear pageHandlingTask before calling startPageHandling so it sees nil and
             // takes the clean "no running task" path rather than cancelling itself.
-            self.pageHandlingTask = nil
-            self.startPageHandling(sitemapName: sitemapName, pageId: extractedPageId, force: true)
+            pageHandlingTask = nil
+            startPageHandling(sitemapName: sitemapName, pageId: extractedPageId, force: true)
         }
     }
 

@@ -88,6 +88,7 @@ private struct HomeRowView: View {
 
 struct HomeSelectionView: View {
     @State private var homes: [UUID] = []
+    @State private var activeHomeId: UUID = Preferences.shared.currentHomePreferences.id
     @State private var showingNewHomeAlert = false
     @State private var newHomeName = ""
     @State private var showEditOptions = false
@@ -116,7 +117,7 @@ struct HomeSelectionView: View {
                     HomeRowView(
                         home: home,
                         homeName: homeName,
-                        isActive: Preferences.shared.currentHomePreferences.id == home,
+                        isActive: activeHomeId == home,
                         showEditOptions: showEditOptions,
                         onSelect: { select(home: home) },
                         onDeleteRequested: {
@@ -194,6 +195,7 @@ struct HomeSelectionView: View {
 
     private func loadHomesList() {
         homes = Preferences.shared.listStoredHomes()
+        activeHomeId = Preferences.shared.currentHomePreferences.id
     }
 
     private func delete(home toDelete: UUID) {
