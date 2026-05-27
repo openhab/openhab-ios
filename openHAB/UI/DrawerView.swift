@@ -111,6 +111,9 @@ struct ConnectionView: View {
         .onReceive(Preferences.shared.currentHomePreferencesPublisher) { prefs in
             homeName = prefs.homeName
         }
+        .onAppear {
+            homeName = Preferences.shared.currentHomePreferences.homeName
+        }
     }
 }
 
