@@ -122,20 +122,34 @@ extension ItemEntityQuery {
 
         var result: [EntityType] = []
         for (identifier, cacheKey) in resolved {
-            if let item = await OpenHABItemCache.instance.getCachedOrPersistedItem(
+            let homeName = await getHomeName(for: cacheKey)
+            // Use the cached/persisted item if available for its label, type, and state.
+            // If not found (cold cache, item not yet indexed), fall back to a skeleton built
+            // from the identifier so perform() can still execute — it only needs item.name.
+            // This avoids Shortcuts re-prompting for the item just because the cache is cold.
+            let item = await OpenHABItemCache.instance.getCachedOrPersistedItem(
                 name: identifier.itemName,
                 home: cacheKey
-            ) {
-                let homeName = await getHomeName(for: cacheKey)
-                // Use cacheKey (current-device dict key) as homeId so perform() receives a UUID
-                // that assureNetworkTracker can resolve on this device. Identity matching against
-                // the requested identifier uses Equatable which excludes homeId (see ItemIdentifier).
-                result.append(EntityType(
-                    id: ItemIdentifier(homeId: cacheKey, itemName: item.name, homeIdentifier: identifier.homeIdentifier),
-                    item: item,
-                    homeName: homeName
-                ))
-            }
+            ) ?? OpenHABItem(
+                name: identifier.itemName,
+                type: "",
+                state: nil,
+                link: "",
+                label: identifier.itemName,
+                groupType: nil,
+                stateDescription: nil,
+                commandDescription: nil,
+                members: [],
+                category: nil,
+                options: nil
+            )
+            // Use cacheKey (current-device dict key) as homeId so perform() receives a UUID
+            // that assureNetworkTracker can resolve on this device.
+            result.append(EntityType(
+                id: ItemIdentifier(homeId: cacheKey, itemName: item.name, homeIdentifier: identifier.homeIdentifier),
+                item: item,
+                homeName: homeName
+            ))
         }
 
         return result
