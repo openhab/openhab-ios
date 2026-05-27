@@ -131,9 +131,9 @@ struct HomePreferencesDecodingTests {
         #expect(decoded.alwaysAllowWebRTC == true)
         // Credentials are not preserved in the re-encoded JSON (they move to Keychain);
         // the initial decode reads them as legacy fields, but encode strips them.
-        #expect(decoded.localConnectionConfig.username == "")
+        #expect(decoded.localConnectionConfig.username.isEmpty)
         #expect(decoded.localConnectionConfig.supportsNotifications == false)
-        #expect(decoded.remoteConnectionConfig.username == "")
+        #expect(decoded.remoteConnectionConfig.username.isEmpty)
         #expect(decoded.remoteConnectionConfig.supportsNotifications == true)
         #expect(decoded.sseCommandItem == "MySSEItem")
     }
