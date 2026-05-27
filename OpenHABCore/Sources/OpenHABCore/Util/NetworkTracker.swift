@@ -580,14 +580,17 @@ public extension NetworkTracker {
         return service
     }
 
-    // Retries once on ClientError after revalidating the connection.
-    // ClientError indicates a transport failure — the request never reached the server —
-    // which can happen when the active connection is stale after a network switch or
-    // process suspension.
+    // Retries once after revalidating the connection on two transient failure kinds:
+    //  • ClientError  — transport failure against a stale connection (network switch, suspension)
+    //  • noActiveConnection — all connection tests timed out during a network handoff; the
+    //    tracker recovers shortly after, so one revalidation + retry is enough.
     private func withClientErrorRetry<T>(_ operation: () async throws -> T) async throws -> T {
         do {
             return try await operation()
         } catch is OpenAPIRuntime.ClientError {
+            await revalidateConnection()
+            return try await operation()
+        } catch NetworkTrackerError.noActiveConnection {
             await revalidateConnection()
             return try await operation()
         }
