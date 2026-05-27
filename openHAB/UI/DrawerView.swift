@@ -79,18 +79,27 @@ enum DrawerFetch {
     }
 }
 
-// Display the connected URL
+// Display the active home name and connection type (Local / Remote)
 struct ConnectionView: View {
     @StateObject private var networkTracker = MainActorNetworkTracker.shared
+    @State private var homeName = Preferences.shared.currentHomePreferences.homeName
 
     var body: some View {
-        HStack {
+        HStack(spacing: 8) {
             if let activeConnection = networkTracker.activeConnection {
-                Image(systemSymbol: .cloudFill)
+                let isLocal = activeConnection.configuration.priority == 0
+                Image(systemSymbol: isLocal ? .wifi : .cloudFill)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 20, height: 20)
-                Text(activeConnection.configuration.url).font(.footnote)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(homeName)
+                        .font(.footnote)
+                        .fontWeight(.medium)
+                    Text(isLocal ? String(localized: "Local") : String(localized: "Remote"))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             } else {
                 Image(systemSymbol: .exclamationmarkIcloudFill)
                     .resizable()
@@ -98,6 +107,9 @@ struct ConnectionView: View {
                     .frame(width: 20, height: 20)
                 Text("connecting").font(.footnote)
             }
+        }
+        .onReceive(Preferences.shared.currentHomePreferencesPublisher) { prefs in
+            homeName = prefs.homeName
         }
     }
 }
