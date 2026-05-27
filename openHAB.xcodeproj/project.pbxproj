@@ -55,6 +55,7 @@
 		DA4BF3592F03098B0082479C /* SetDimmerRollerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3582F03098B0082479C /* SetDimmerRollerValueIntent.swift */; };
 		DA4BF35B2F0309A60082479C /* SetNumberValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35A2F0309A60082479C /* SetNumberValueIntent.swift */; };
 		DA4BF35D2F0309B10082479C /* SetStringValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35C2F0309B10082479C /* SetStringValueIntent.swift */; };
+		772F724744CC8D15A673C246 /* SetActiveHomeIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F77A157AAF1DD5AB45D6BA2 /* SetActiveHomeIntent.swift */; };
 		DA4BF4032F06F5950082479C /* SwitchAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4022F06F5950082479C /* SwitchAction.swift */; };
 		DA4BF4052F06F5CA0082479C /* ContactState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4042F06F5CA0082479C /* ContactState.swift */; };
 		DA4BF4072F0800010082479C /* PlayerAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4062F0800010082479C /* PlayerAction.swift */; };
@@ -230,6 +231,7 @@
 		DA4BF3582F03098B0082479C /* SetDimmerRollerValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDimmerRollerValueIntent.swift; sourceTree = "<group>"; };
 		DA4BF35A2F0309A60082479C /* SetNumberValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetNumberValueIntent.swift; sourceTree = "<group>"; };
 		DA4BF35C2F0309B10082479C /* SetStringValueIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetStringValueIntent.swift; sourceTree = "<group>"; };
+		1F77A157AAF1DD5AB45D6BA2 /* SetActiveHomeIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetActiveHomeIntent.swift; sourceTree = "<group>"; };
 		DA4BF4022F06F5950082479C /* SwitchAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchAction.swift; sourceTree = "<group>"; };
 		DA4BF4042F06F5CA0082479C /* ContactState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactState.swift; sourceTree = "<group>"; };
 		DA4BF4062F0800010082479C /* PlayerAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAction.swift; sourceTree = "<group>"; };
@@ -604,6 +606,7 @@
 				DA4BF3512F0307A40082479C /* GetItemStateIntent.swift */,
 				DAD5E85B2F02C272003215C0 /* SetSwitchItemIntent.swift */,
 				DA4BF35C2F0309B10082479C /* SetStringValueIntent.swift */,
+				1F77A157AAF1DD5AB45D6BA2 /* SetActiveHomeIntent.swift */,
 				DA4BF35A2F0309A60082479C /* SetNumberValueIntent.swift */,
 				DA4BF4082F0800020082479C /* SetPlayerValueIntent.swift */,
 				DA4BF40A2F0800030082479C /* SetDateTimeValueIntent.swift */,
@@ -1211,6 +1214,7 @@
 				DA4BF3592F03098B0082479C /* SetDimmerRollerValueIntent.swift in Sources */,
 				DA4BF35B2F0309A60082479C /* SetNumberValueIntent.swift in Sources */,
 				DA4BF35D2F0309B10082479C /* SetStringValueIntent.swift in Sources */,
+				772F724744CC8D15A673C246 /* SetActiveHomeIntent.swift in Sources */,
 				DA4BF4032F06F5950082479C /* SwitchAction.swift in Sources */,
 				DA4BF4052F06F5CA0082479C /* ContactState.swift in Sources */,
 				DA4BF4072F0800010082479C /* PlayerAction.swift in Sources */,
