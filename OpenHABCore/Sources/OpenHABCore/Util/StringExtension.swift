@@ -155,7 +155,12 @@ public extension String {
     }
 
     func isValidURLByRegex() throws -> Bool {
-        let pattern = #"^(https?://)?(localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d+)?(/[^\s]*)?$"#
+        // Host alternatives:
+        //   localhost
+        //   IPv6 literal in brackets: [::1], [2001:db8::1], [fe80::1%25eth0], etc.
+        //   IPv4: 192.168.1.1
+        //   hostname: example.com, openhab.local
+        let pattern = #"^(https?://)?(localhost|\[[0-9a-fA-F:%]+\]|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d+)?(/[^\s]*)?$"#
 
         let regex = try Regex(pattern).ignoresCase()
 

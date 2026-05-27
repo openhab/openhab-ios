@@ -195,7 +195,7 @@ struct SingleConnectionSettingsView: View {
     private func friendlyMessage(for error: URLError) -> String {
         switch error.code {
         case .badURL:
-            String(localized: "The URL is invalid. Please check the format (e.g., http://192.168.2.1:8080).")
+            String(localized: "The URL is invalid. Please check the format (e.g., http://192.168.2.1:8080 or http://[::1]:8080 for IPv6).")
         case .cannotFindHost:
             String(localized: "Cannot find the server. Is the URL correct?")
         case .cannotConnectToHost:
