@@ -12,7 +12,6 @@
 import AppIntents
 import Foundation
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 enum SwitchAction: String, AppEnum {
     case on = "ON"
@@ -28,7 +27,6 @@ enum SwitchAction: String, AppEnum {
     ]
 }
 
-@available(watchOS, unavailable)
 @available(iOS 17.0, macOS 14.0, *)
 extension SwitchAction: CustomLocalizedStringResourceConvertible {
     var localizedStringResource: LocalizedStringResource {

@@ -7,6 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9F54768418A14674AD9E2FCA /* ContactState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4042F06F5CA0082479C /* ContactState.swift */; };
+		3D3B2898C51F48BAA31210E4 /* ContactStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3552F03095D0082479C /* ContactStateIntent.swift */; };
+		791AFA47B71D4B6995369F3A /* GetItemStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3512F0307A40082479C /* GetItemStateIntent.swift */; };
+		5B292637B6E141DB98BCAA26 /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E772EF435B400F0893C /* Home.swift */; };
+		B2FC662F25B2461887BB67DA /* ItemEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4332F0705580082479C /* ItemEntity.swift */; };
+		3F087E4025E845FFBCBE45E3 /* ItemEntityQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4352F07056F0082479C /* ItemEntityQuery.swift */; };
+		C9DE79C32AF24FFEA0280115 /* ItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD5E85D2F02C3BC003215C0 /* ItemIdentifier.swift */; };
+		0648F50178784F149905E7CF /* PlayerAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4062F0800010082479C /* PlayerAction.swift */; };
+		1E4E7DB36BAC4804AD5E58E5 /* SetColorValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3542F03095D0082479C /* SetColorValueIntent.swift */; };
+		BF0EB6DE70934966B1DC5479 /* SetDateTimeValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF40A2F0800030082479C /* SetDateTimeValueIntent.swift */; };
+		E120F4A14B9942449F25E788 /* SetDimmerRollerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3582F03098B0082479C /* SetDimmerRollerValueIntent.swift */; };
+		CE7A58C0ED3A4A1ABCB20337 /* SetLocationValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF40C2F0800040082479C /* SetLocationValueIntent.swift */; };
+		61A606E5E6AE404584B0B1A0 /* SetNumberValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35A2F0309A60082479C /* SetNumberValueIntent.swift */; };
+		598208789AC44F1D91DD5B17 /* SetPlayerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4082F0800020082479C /* SetPlayerValueIntent.swift */; };
+		1C1CA8C8C8424BAF8018F9BE /* SetStringValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35C2F0309B10082479C /* SetStringValueIntent.swift */; };
+		73F094A3C17641738D6215CD /* SetSwitchItemIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD5E85B2F02C272003215C0 /* SetSwitchItemIntent.swift */; };
+		CF650A22059A4A00823EE656 /* SwitchAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4022F06F5950082479C /* SwitchAction.swift */; };
+		970584BAA2884C8287297BF6 /* SwitchItemEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF58C7A2EF6E99500483AFD /* SwitchItemEntity.swift */; };
 		2F399AC92F54599400F72A30 /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 2F399AC82F54599400F72A30 /* Flow */; };
 		6557AF8F2C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */; };
 		6557AF902C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */; };
@@ -1133,6 +1151,24 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+							9F54768418A14674AD9E2FCA /* ContactState.swift in Sources */,
+				3D3B2898C51F48BAA31210E4 /* ContactStateIntent.swift in Sources */,
+				791AFA47B71D4B6995369F3A /* GetItemStateIntent.swift in Sources */,
+				5B292637B6E141DB98BCAA26 /* Home.swift in Sources */,
+				B2FC662F25B2461887BB67DA /* ItemEntity.swift in Sources */,
+				3F087E4025E845FFBCBE45E3 /* ItemEntityQuery.swift in Sources */,
+				C9DE79C32AF24FFEA0280115 /* ItemIdentifier.swift in Sources */,
+				0648F50178784F149905E7CF /* PlayerAction.swift in Sources */,
+				1E4E7DB36BAC4804AD5E58E5 /* SetColorValueIntent.swift in Sources */,
+				BF0EB6DE70934966B1DC5479 /* SetDateTimeValueIntent.swift in Sources */,
+				E120F4A14B9942449F25E788 /* SetDimmerRollerValueIntent.swift in Sources */,
+				CE7A58C0ED3A4A1ABCB20337 /* SetLocationValueIntent.swift in Sources */,
+				61A606E5E6AE404584B0B1A0 /* SetNumberValueIntent.swift in Sources */,
+				598208789AC44F1D91DD5B17 /* SetPlayerValueIntent.swift in Sources */,
+				1C1CA8C8C8424BAF8018F9BE /* SetStringValueIntent.swift in Sources */,
+				73F094A3C17641738D6215CD /* SetSwitchItemIntent.swift in Sources */,
+				CF650A22059A4A00823EE656 /* SwitchAction.swift in Sources */,
+				970584BAA2884C8287297BF6 /* SwitchItemEntity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

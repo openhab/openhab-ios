@@ -91,7 +91,8 @@ class WatchMessageService: NSObject, WCSessionDelegate {
             return
         }
         let settings = homeSettings ?? Preferences.shared.currentHomePreferences
-        let prefs = WatchPreferences(fromPreferences: settings)
+        let storedHomes = Dictionary(uniqueKeysWithValues: Preferences.shared.storedHomes.map { ($0.key.uuidString, $0.value) })
+        let prefs = WatchPreferences(fromPreferences: settings, allHomes: storedHomes)
         let context = prefs.encodedWatchPreferences()
 
         guard getCachedPreferences() != context else {
@@ -113,7 +114,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
 @MainActor
 extension WatchPreferences {
-    init(fromPreferences preferences: HomePreferences) {
+    init(fromPreferences preferences: HomePreferences, allHomes: [String: HomePreferences]? = nil) {
         self.init(
             localUrl: preferences.localConnectionConfig.url,
             remoteUrl: preferences.remoteConnectionConfig.url,
@@ -127,7 +128,8 @@ extension WatchPreferences {
             iconType: preferences.iconType,
             demoMode: preferences.demomode,
             localConnectionConfiguration: preferences.localConnectionConfig,
-            remoteConnectionConfiguration: preferences.remoteConnectionConfig
+            remoteConnectionConfiguration: preferences.remoteConnectionConfig,
+            allHomes: allHomes
         )
     }
 }
