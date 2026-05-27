@@ -42,7 +42,7 @@ final class AppSettings: ObservableObject {
     @Published var haveReceivedAppContext = false
 
     init() {
-        let store = UserDefaults(suiteName: "group.openhab.shared")!
+        let store = UserDefaults(suiteName: "group.openhab.shared") ?? UserDefaults.standard
 
         if let data = store.data(forKey: "localConnectionConfig"),
            let decoded = try? JSONDecoder().decode(ConnectionConfiguration.self, from: data) {

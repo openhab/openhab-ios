@@ -23,7 +23,7 @@ struct SitemapNavigationView: View {
     let onShowSideMenu: () -> Void
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $viewModel.navigationPath) {
             sitemapContent
                 .navigationDestination(for: LinkedPageNavigation.self) { nav in
                     SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: nav.pageLink, title: nav.pageTitle))

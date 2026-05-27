@@ -68,10 +68,4 @@ struct OpenHABWatch: App {
         }
         WKNotificationScene(controller: NotificationController.self, category: "openHABNotification")
     }
-
-    init() {
-        DispatchQueue.main.async {
-            AppMessageService.singleton.requestApplicationContext()
-        }
-    }
 }

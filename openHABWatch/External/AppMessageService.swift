@@ -16,16 +16,18 @@ import WatchConnectivity
 import WatchKit
 
 // This class handles values that are passed from the ios app.
-class AppMessageService: NSObject, WCSessionDelegate {
+class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
     @MainActor static let singleton = AppMessageService()
 
     private static let preferencesKey = "watchPreferences"
 
+    // Prevents multiple concurrent sendMessage calls from stalling the WCSession send queue.
+    private var contextRequestInFlight = false
+
     @MainActor
     static func updateValuesFromApplicationContext(_ data: Data?) {
         guard let data else {
-            let key = preferencesKey
-            Logger.preferences.warning("⚠️ No \(key) data found in applicationContext.")
+            Logger.preferences.debug("No watch preferences received in applicationContext yet.")
             return
         }
 
@@ -49,14 +51,46 @@ class AppMessageService: NSObject, WCSessionDelegate {
         }
     }
 
+    private func isExpectedApplicationContextRequestFailure(_ error: any Error) -> Bool {
+        let nsError = error as NSError
+        guard nsError.domain == WCErrorDomain,
+              let code = WCError.Code(rawValue: nsError.code) else { return false }
+
+        switch code {
+        case .deviceNotPaired, .companionAppNotInstalled, .notReachable:
+            return true
+        default:
+            return false
+        }
+    }
+
     func requestApplicationContext() {
-        WCSession.default.sendMessage(["request": "Preferences"]) { response in
+        // WCSession callbacks and @MainActor callers both use this method. Funnel the
+        // flag check through the main queue so it's always serialized.
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { self.requestApplicationContext() }
+            return
+        }
+        guard !contextRequestInFlight else {
+            Logger.preferences.debug("Context request already in flight, skipping")
+            return
+        }
+        contextRequestInFlight = true
+        WCSession.default.sendMessage(["request": "Preferences"]) { [weak self] response in
             let data = response[AppMessageService.preferencesKey] as? Data
             DispatchQueue.main.async {
+                self?.contextRequestInFlight = false
                 AppMessageService.updateValuesFromApplicationContext(data)
             }
-        } errorHandler: { error in
-            Logger.preferences.error("Error sending message \(error.localizedDescription)")
+        } errorHandler: { [weak self] error in
+            DispatchQueue.main.async {
+                self?.contextRequestInFlight = false
+                guard let self, !self.isExpectedApplicationContextRequestFailure(error) else {
+                    Logger.preferences.debug("Skipping application context request: \(error.localizedDescription)")
+                    return
+                }
+                Logger.preferences.error("Error sending message \(error.localizedDescription)")
+            }
         }
     }
 
@@ -65,6 +99,12 @@ class AppMessageService: NSObject, WCSessionDelegate {
         let data = session.receivedApplicationContext[AppMessageService.preferencesKey] as? Data
         DispatchQueue.main.async { () in
             AppMessageService.updateValuesFromApplicationContext(data)
+        }
+        // Request fresh preferences now that the session is fully active.
+        // This is the only call site for requestApplicationContext(); the App struct
+        // init must NOT call it because the session may not be activated yet.
+        if activationState == .activated {
+            requestApplicationContext()
         }
     }
 
@@ -102,5 +142,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
         DispatchQueue.main.async { () in
             AppMessageService.updateValuesFromApplicationContext(data)
         }
+        // Must always call replyHandler or the sender's WCSession queue stalls permanently.
+        replyHandler([:])
     }
 }

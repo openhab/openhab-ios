@@ -41,17 +41,19 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
         self.supportsNotifications = supportsNotifications
     }
 
-    // 🔹 Ensure normalization on decoding
+    // 🔹 Ensure normalization on decoding. decodeIfPresent is used for every field
+    // that has a default so that stored data from older versions (missing those fields)
+    // decodes without throwing.
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let rawURL = try container.decode(String.self, forKey: .url) // Decode raw URL
-        url = ConnectionConfiguration.normalizeURL(rawURL) // Normalize it
-        username = try container.decode(String.self, forKey: .username)
-        password = try container.decode(String.self, forKey: .password)
-        alwaysSendBasicAuth = try container.decode(Bool.self, forKey: .alwaysSendBasicAuth)
-        ignoreSSL = try container.decode(Bool.self, forKey: .ignoreSSL)
-        supportsNotifications = try container.decode(Bool.self, forKey: .supportsNotifications)
-        priority = try container.decode(Int.self, forKey: .priority)
+        let rawURL = try container.decode(String.self, forKey: .url)
+        url = ConnectionConfiguration.normalizeURL(rawURL)
+        username = try container.decodeIfPresent(String.self, forKey: .username) ?? ""
+        password = try container.decodeIfPresent(String.self, forKey: .password) ?? ""
+        alwaysSendBasicAuth = try container.decodeIfPresent(Bool.self, forKey: .alwaysSendBasicAuth) ?? false
+        ignoreSSL = try container.decodeIfPresent(Bool.self, forKey: .ignoreSSL) ?? false
+        supportsNotifications = try container.decodeIfPresent(Bool.self, forKey: .supportsNotifications) ?? false
+        priority = try container.decodeIfPresent(Int.self, forKey: .priority) ?? 10
         cloudUserId = try container.decodeIfPresent(String.self, forKey: .cloudUserId)
     }
 
@@ -85,6 +87,30 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
         if let cloudUserId {
             try container.encode(cloudUserId, forKey: .cloudUserId)
         }
+    }
+}
+
+extension ConnectionConfiguration {
+    /// Decodes a `ConnectionConfiguration` from a keyed container with a role-specific default
+    /// for `supportsNotifications`. Use this instead of `decodeIfPresent(_:forKey:)` when the
+    /// caller knows whether the config is local (false) or remote (true), so that old stored data
+    /// written before the field existed doesn't silently disable cloud/push paths.
+    static func decode<K: CodingKey>(from container: KeyedDecodingContainer<K>,
+                                     forKey key: K,
+                                     defaultNotifications: Bool) throws -> ConnectionConfiguration? {
+        guard container.contains(key) else { return nil }
+        let nested = try container.nestedContainer(keyedBy: CodingKeys.self, forKey: key)
+        var config = try ConnectionConfiguration(
+            url: nested.decode(String.self, forKey: .url),
+            username: nested.decodeIfPresent(String.self, forKey: .username) ?? "",
+            password: nested.decodeIfPresent(String.self, forKey: .password) ?? "",
+            alwaysSendBasicAuth: nested.decodeIfPresent(Bool.self, forKey: .alwaysSendBasicAuth) ?? false,
+            ignoreSSL: nested.decodeIfPresent(Bool.self, forKey: .ignoreSSL) ?? false,
+            supportsNotifications: nested.decodeIfPresent(Bool.self, forKey: .supportsNotifications) ?? defaultNotifications,
+            priority: nested.decodeIfPresent(Int.self, forKey: .priority) ?? 10
+        )
+        config.cloudUserId = try nested.decodeIfPresent(String.self, forKey: .cloudUserId)
+        return config
     }
 }
 
