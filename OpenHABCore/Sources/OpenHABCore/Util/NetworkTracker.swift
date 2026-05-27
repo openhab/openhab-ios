@@ -538,14 +538,18 @@ public actor NetworkTracker {
         guard status != .stopped else {
             if activeConnection != nil {
                 activeConnection = nil
-                for cont in activeConnectionContinuations.values { cont.yield(nil) }
+                for cont in activeConnectionContinuations.values {
+                    cont.yield(nil)
+                }
             }
             return
         }
 
         if activeConnection != connection {
             activeConnection = connection
-            for cont in activeConnectionContinuations.values { cont.yield(connection) }
+            for cont in activeConnectionContinuations.values {
+                cont.yield(connection)
+            }
         }
     }
 
@@ -553,7 +557,9 @@ public actor NetworkTracker {
         guard status != newStatus else { return } // Prevent redundant updates
         status = newStatus
         Logger.networkTracker.info("NetworkTracker: status updated: \(newStatus.rawValue, privacy: .public)")
-        for cont in statusContinuations.values { cont.yield(newStatus) }
+        for cont in statusContinuations.values {
+            cont.yield(newStatus)
+        }
     }
 
     private func removeActiveConnectionContinuation(id: UUID) {
