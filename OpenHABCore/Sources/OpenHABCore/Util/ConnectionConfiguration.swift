@@ -17,9 +17,10 @@ public struct ConnectionPayload: Codable {
 }
 
 public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
-    // 🔹 Coding keys for manual encoding/decoding
     private enum CodingKeys: String, CodingKey {
-        case url, username, password, alwaysSendBasicAuth, ignoreSSL, supportsNotifications, priority, cloudUserId
+        case url, alwaysSendBasicAuth, ignoreSSL, supportsNotifications, priority, cloudUserId
+        // Legacy keys — decoded for migration from old JSON, never written
+        case username, password
     }
 
     public var url: String
@@ -41,13 +42,13 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
         self.supportsNotifications = supportsNotifications
     }
 
-    // 🔹 Ensure normalization on decoding. decodeIfPresent is used for every field
-    // that has a default so that stored data from older versions (missing those fields)
-    // decodes without throwing.
+    // decodeIfPresent is used for every field that has a default so that stored data from older
+    // versions (missing those fields) decodes without throwing.
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let rawURL = try container.decode(String.self, forKey: .url)
         url = ConnectionConfiguration.normalizeURL(rawURL)
+        // Legacy fields — read from old JSON during migration, empty string when absent
         username = try container.decodeIfPresent(String.self, forKey: .username) ?? ""
         password = try container.decodeIfPresent(String.self, forKey: .password) ?? ""
         alwaysSendBasicAuth = try container.decodeIfPresent(Bool.self, forKey: .alwaysSendBasicAuth) ?? false
@@ -74,12 +75,10 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
         return newUrl
     }
 
-    // 🔹 Ensure normalization on encoding (optional, since we store it normalized)
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(url, forKey: .url) // Already normalized
-        try container.encode(username, forKey: .username)
-        try container.encode(password, forKey: .password)
+        try container.encode(url, forKey: .url)
+        // username and password intentionally omitted — persisted in Keychain via CredentialsStore
         try container.encode(alwaysSendBasicAuth, forKey: .alwaysSendBasicAuth)
         try container.encode(ignoreSSL, forKey: .ignoreSSL)
         try container.encode(supportsNotifications, forKey: .supportsNotifications)

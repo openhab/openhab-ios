@@ -16,13 +16,15 @@ import WatchConnectivity
 import WatchKit
 
 // This class handles values that are passed from the ios app.
+// @unchecked Sendable: all mutable state (@MainActor contextRequestInFlight) is actor-protected;
+// WCSession delegate callbacks are non-isolated and only schedule Tasks, never mutate directly.
 class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
     @MainActor static let singleton = AppMessageService()
 
     private static let preferencesKey = "watchPreferences"
 
-    // Prevents multiple concurrent sendMessage calls from stalling the WCSession send queue.
-    private var contextRequestInFlight = false
+    // Accessed only from @MainActor context (requestApplicationContext and its Task completions).
+    @MainActor private var contextRequestInFlight = false
 
     @MainActor
     static func updateValuesFromApplicationContext(_ data: Data?) {
@@ -35,8 +37,16 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
             // Decode the connection payload
             let prefs = try JSONDecoder().decode(WatchPreferences.self, from: data)
             Logger.preferences.info("📱 Received WatchPreferences - sitemapForWatch: \(prefs.sitemapForWatch), defaultSitemap: \(prefs.defaultSitemap)")
-            AppSettings.shared.localConnectionConfig = prefs.localConnectionConfiguration ?? .localDefault
-            AppSettings.shared.remoteConnectionConfig = prefs.remoteConnectionConfiguration ?? .remoteDefault
+            // Credentials are not embedded in ConnectionConfiguration JSON — inject from top-level fields
+            var localConfig = prefs.localConnectionConfiguration ?? .localDefault
+            localConfig.username = prefs.localUsername
+            localConfig.password = prefs.localPassword
+            AppSettings.shared.localConnectionConfig = localConfig
+
+            var remoteConfig = prefs.remoteConnectionConfiguration ?? .remoteDefault
+            remoteConfig.username = prefs.username
+            remoteConfig.password = prefs.password
+            AppSettings.shared.remoteConnectionConfig = remoteConfig
             AppSettings.shared.sitemapName = prefs.defaultSitemap
             AppSettings.shared.sitemapForWatch = prefs.sitemapForWatch
             AppSettings.shared.sitemapForWatchLabel = prefs.sitemapForWatchLabel
@@ -77,26 +87,31 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
         }
     }
 
+    @MainActor
     func requestApplicationContext() {
-        // WCSession callbacks and @MainActor callers both use this method. Funnel the
-        // flag check through the main queue so it's always serialized.
-        guard Thread.isMainThread else {
-            DispatchQueue.main.async { self.requestApplicationContext() }
-            return
-        }
         guard !contextRequestInFlight else {
             Logger.preferences.debug("Context request already in flight, skipping")
             return
         }
         contextRequestInFlight = true
+        // Delegate to a non-@MainActor helper so the WCSession reply handler closure
+        // does NOT inherit @MainActor isolation — Swift 6 would add a runtime isolation
+        // check to the closure if it were defined inside an @MainActor method, causing
+        // a crash when WatchConnectivity calls it from a background queue.
+        sendPreferencesRequest()
+    }
+
+    // Non-@MainActor: WCSession reply/error closures defined here are NOT @MainActor,
+    // so WatchConnectivity can call them from its background queue without a crash.
+    private func sendPreferencesRequest() {
         WCSession.default.sendMessage(["request": "Preferences"]) { [weak self] response in
             let data = response[AppMessageService.preferencesKey] as? Data
-            DispatchQueue.main.async {
+            Task { @MainActor [weak self] in
                 self?.contextRequestInFlight = false
                 AppMessageService.updateValuesFromApplicationContext(data)
             }
         } errorHandler: { [weak self] error in
-            DispatchQueue.main.async {
+            Task { @MainActor [weak self] in
                 self?.contextRequestInFlight = false
                 guard let self, !self.isExpectedApplicationContextRequestFailure(error) else {
                     Logger.preferences.debug("Skipping application context request: \(error.localizedDescription)")
@@ -110,14 +125,14 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
         Logger.preferences.info("activationDidCompleteWith activationState \(activationState.rawValue) error: \(String(describing: error))")
         let data = session.receivedApplicationContext[AppMessageService.preferencesKey] as? Data
-        DispatchQueue.main.async { () in
+        Task { @MainActor [weak self] in
             AppMessageService.updateValuesFromApplicationContext(data)
-        }
-        // Request fresh preferences now that the session is fully active.
-        // This is the only call site for requestApplicationContext(); the App struct
-        // init must NOT call it because the session may not be activated yet.
-        if activationState == .activated {
-            requestApplicationContext()
+            // Request fresh preferences now that the session is fully active.
+            // This is the only call site for requestApplicationContext(); the App struct
+            // init must NOT call it because the session may not be activated yet.
+            if activationState == .activated {
+                self?.requestApplicationContext()
+            }
         }
     }
 
@@ -125,7 +140,7 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         Logger.preferences.info("didReceiveApplicationContext \(applicationContext)")
         let data = applicationContext[AppMessageService.preferencesKey] as? Data
-        DispatchQueue.main.async { () in
+        Task { @MainActor in
             AppMessageService.updateValuesFromApplicationContext(data)
         }
     }
@@ -134,7 +149,7 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
         Logger.preferences.info("didReceiveUserInfo \(userInfo)")
         let data = userInfo[AppMessageService.preferencesKey] as? Data
-        DispatchQueue.main.async { () in
+        Task { @MainActor in
             AppMessageService.updateValuesFromApplicationContext(data)
         }
     }
@@ -143,7 +158,7 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
         Logger.preferences.info("didReceiveMessage some filtered messages: \(filteredMessages)")
         let data = message[AppMessageService.preferencesKey] as? Data
-        DispatchQueue.main.async { () in
+        Task { @MainActor in
             AppMessageService.updateValuesFromApplicationContext(data)
         }
     }
@@ -152,7 +167,7 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username", "defaultSitemap"].contains($0.key) }
         Logger.preferences.info("didReceiveMessage some filtered messages: \(filteredMessages) with reply handler")
         let data = message[AppMessageService.preferencesKey] as? Data
-        DispatchQueue.main.async { () in
+        Task { @MainActor in
             AppMessageService.updateValuesFromApplicationContext(data)
         }
         // Must always call replyHandler or the sender's WCSession queue stalls permanently.

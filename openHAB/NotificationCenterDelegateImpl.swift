@@ -22,7 +22,13 @@ import UIKit
 @preconcurrency import UserNotifications
 import WatchConnectivity
 
-actor AudioPlayerActor {
+// AVAudioPlayer must be created, used, and deallocated on the main thread.
+// Using a plain `actor` placed it on a background executor, causing a crash when
+// AVFoundation delivered finishedPlaying: on the main thread while the old player
+// was simultaneously being deallocated on the actor's background thread (mutex contention
+// in AVAudioPlayerCpp::DoAction / disposeQueue). @MainActor pins the entire lifecycle.
+@MainActor
+final class AudioPlayerActor {
     private var player: AVAudioPlayer?
 
     func playSound() {
@@ -96,9 +102,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
     private func displayNotification(message: String, action: String?, cloudUserId: String?) async {
         Logger.notificationCenterDelegateImpl.info("displayNotification \(message)")
 
-        Task {
-            await audioPlayer.playSound()
-        }
+        audioPlayer.playSound()
 
         var config = SwiftMessages.Config()
         config.duration = .seconds(seconds: 5)

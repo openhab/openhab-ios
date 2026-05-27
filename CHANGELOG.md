@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [Version 3.2.59, Build 268] - 2026-05-27Z
+
+- Enable App Intents on watchOS with multi-home support (#1219)
+- Migrate to App Intents (#1022)
+- Sync Watch preferences immediately when WCSession activates (#1214)
+- Fix image widget flickering during auto-refresh (#1213)
+- Migrate remaining XCTest files to Swift Testing (#1211)
+- Fix Input widget sending wrong value when state description changes unit (#1207)
+- Fix white flash on MainUI in dark mode (#1203)
+- Fix image attachments not shown in foreground notifications (#1200)
+- Run unit tests on iPhone simulator instead of Mac Catalyst
+- Remove platform condition from Kingfisher dependency
+- Link Kingfisher on macOS to fix Mac Catalyst test builds
+- Pin Xcode version to ~> 26.4 in CI workflows
+- Run unit tests on Mac Catalyst with code signing disabled
+- Download iOS and watchOS Simulator Runtimes in build_and_deploy CI
+- Fix Input widget number formatting (#1198)
+- Fix notification action category collisions (#1196)
+- Remove broken renderSVGWithWebKit on native macOS
+
 - Fix Swift 6 "Sending self risks data races" in AppMessageService
 - Fix watchOS hang from leaked UserData instances and WCSession queue stalls
 - committed version bump: 3.2.57 (266)

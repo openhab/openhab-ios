@@ -325,91 +325,56 @@ final class UserData: ObservableObject {
 
                 guard let connectionInfo else {
                     Logger.userData.error("No active connection available after timeout")
-                    await MainActor.run {
-                        self.errorDescription = String(localized: "settings_not_received", comment: "")
-                        self.showAlert = true
-                        self.isLoadingSitemap = false
-                    }
+                    errorDescription = String(localized: "settings_not_received", comment: "")
+                    showAlert = true
+                    isLoadingSitemap = false
                     return
                 }
 
                 Logger.userData.debug("Using connection: \(connectionInfo.configuration.url)")
-                let service = try OpenAPIService(connectionConfiguration: connectionInfo.configuration, serviceConfiguration: .longTerm)
+                Logger.userData.debug("Starting page stream for sitemap: \(taskSitemapName)")
 
-                let initialPage = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
-                try Task.checkCancellation()
-
-                await MainActor.run {
-                    self.openHABSitemapPage = initialPage
-                    let newWidgets = initialPage?.widgets ?? []
-                    self.updateWidgets(with: newWidgets)
-                    if !newWidgets.isEmpty {
-                        self.cachedWidgets = newWidgets
+                for try await event in SitemapPageLoader.stream(
+                    sitemapName: sitemapName,
+                    pageId: pageId,
+                    connectionInfo: connectionInfo
+                ) {
+                    try Task.checkCancellation()
+                    // Always clear loading state on the first event, even if the server
+                    // returned no page data on the initial fetch.
+                    isLoadingSitemap = false
+                    let page: OpenHABPage? = switch event {
+                    case let .initialFetch(page): page
+                    case let .longPoll(page, _): page
                     }
-                    self.isLoadingSitemap = false
-                }
-
-                // Long polling loop with backoff
-                var backoffAttempt = 0
-
-                Logger.userData.debug("Starting long polling loop for sitemap: \(taskSitemapName)")
-                while !Task.isCancelled {
-                    do {
-                        let page = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: true)
-                        try Task.checkCancellation()
-
-                        await MainActor.run {
-                            // Only update page object when title changes to avoid
-                            // firing objectWillChange and resetting scroll position
-                            if self.openHABSitemapPage?.title != page?.title {
-                                self.openHABSitemapPage = page
-                            }
-                            let newWidgets = page?.widgets ?? []
-                            self.updateWidgets(with: newWidgets)
-                            if !newWidgets.isEmpty {
-                                self.cachedWidgets = newWidgets
-                            }
-                        }
-
-                        // Reset backoff after success
-                        backoffAttempt = 0
-
-                    } catch is CancellationError {
-                        Logger.userData.debug("Long polling cancelled for sitemap: \(taskSitemapName)")
-                        throw CancellationError()
-                    } catch {
-                        backoffAttempt += 1
-                        // Cap exponential growth before conversion/multiplication to avoid UInt64 overflow.
-                        let retrySeconds = min((UInt64(1) << UInt64(min(backoffAttempt, 5))), 30)
-                        let baseDelay = retrySeconds * 1_000_000_000
-                        let jitterUpperBound = max(1, baseDelay / 2)
-                        let jitter = UInt64.random(in: 0 ..< jitterUpperBound)
-                        let totalDelay = baseDelay + jitter
-
-                        Logger.userData.warning("Polling failed: \(error.localizedDescription) (\(type(of: error))). Retrying in \(Double(totalDelay) / 1_000_000_000.0) seconds.")
-
-                        try await Task.sleep(nanoseconds: totalDelay)
+                    guard let page else { continue }
+                    // Only update page object when title changes to avoid
+                    // firing objectWillChange and resetting scroll position
+                    if openHABSitemapPage?.title != page.title {
+                        openHABSitemapPage = page
+                    }
+                    let newWidgets = page.widgets
+                    updateWidgets(with: newWidgets)
+                    if !newWidgets.isEmpty {
+                        cachedWidgets = newWidgets
                     }
                 }
             } catch is CancellationError {
                 return
             } catch {
-                await MainActor.run {
-                    Logger.userData.error("Page handling failed for sitemap '\(taskSitemapName)': \(error.localizedDescription)")
-                    Logger.userData.error("Error type: \(String(describing: type(of: error)))")
+                Logger.userData.error("Page handling failed for sitemap '\(taskSitemapName)': \(error.localizedDescription)")
 
-                    // Use cached widgets if available instead of clearing completely
-                    if self.cachedWidgets.isEmpty {
-                        Logger.userData.warning("No cached widgets available, showing empty state")
-                        self.widgets = []
-                    } else {
-                        self.widgets = self.cachedWidgets
-                        Logger.userData.info("Using \(self.cachedWidgets.count) cached widgets during connection failure")
-                    }
-                    self.errorDescription = error.localizedDescription
-                    self.showAlert = true
-                    self.isLoadingSitemap = false
+                // Use cached widgets if available instead of clearing completely
+                if cachedWidgets.isEmpty {
+                    Logger.userData.warning("No cached widgets available, showing empty state")
+                    widgets = []
+                } else {
+                    widgets = cachedWidgets
+                    Logger.userData.info("Using \(self.cachedWidgets.count) cached widgets during connection failure")
                 }
+                errorDescription = error.localizedDescription
+                showAlert = true
+                isLoadingSitemap = false
                 // Note: NetworkTracker will automatically handle failover to remote if local fails
             }
         }

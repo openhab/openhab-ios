@@ -11,7 +11,6 @@
 
 @preconcurrency import Combine
 import os.log
-import UIKit
 
 @MainActor
 private let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
@@ -209,9 +208,8 @@ public actor Preferences {
 
     private static let defaultHomeId = UUID()
 
-    /// the currently applied settings set from storedHomes
     @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: defaultHomeId))
-    public private(set) var currentHomePreferences: HomePreferences
+    private var _currentHomePreferences: HomePreferences
 
     @UserDefault("sendCrashReports", defaultValue: false)
     public var sendCrashReports: Bool
@@ -291,6 +289,9 @@ public actor Preferences {
     @UserDefault("didMigrateToMultipleHomes", defaultValue: false)
     private var didMigrateToMultipleHomes: Bool
 
+    @UserDefault("didMigrateCredentialsToKeychain", defaultValue: false)
+    private var didMigrateCredentialsToKeychain: Bool
+
     @MainActor
     private var internalPreferenceChangeOngoing = false
 
@@ -309,6 +310,43 @@ public extension Preferences {
         await MainActor.run {
             _ = Preferences.shared
         }
+    }
+}
+
+// MARK: Credential-injecting accessors
+
+@MainActor
+public extension Preferences {
+    /// The active home preferences with credentials injected from Keychain.
+    var currentHomePreferences: HomePreferences {
+        var prefs = _currentHomePreferences
+        if let creds = CredentialsStore.retrieve(homeId: prefs.id, type: .local) {
+            prefs.localConnectionConfig.username = creds.username
+            prefs.localConnectionConfig.password = creds.password
+        }
+        if let creds = CredentialsStore.retrieve(homeId: prefs.id, type: .remote) {
+            prefs.remoteConnectionConfig.username = creds.username
+            prefs.remoteConnectionConfig.password = creds.password
+        }
+        return prefs
+    }
+
+    /// Publisher of active home preferences changes. Each emitted value has credentials injected from Keychain.
+    var currentHomePreferencesPublisher: AnyPublisher<HomePreferences, Never> {
+        $_currentHomePreferences
+            .map { prefs in
+                var p1 = prefs
+                if let creds = CredentialsStore.retrieve(homeId: p1.id, type: .local) {
+                    p1.localConnectionConfig.username = creds.username
+                    p1.localConnectionConfig.password = creds.password
+                }
+                if let creds = CredentialsStore.retrieve(homeId: p1.id, type: .remote) {
+                    p1.remoteConnectionConfig.username = creds.username
+                    p1.remoteConnectionConfig.password = creds.password
+                }
+                return p1
+            }
+            .eraseToAnyPublisher()
     }
 }
 
@@ -367,6 +405,8 @@ public extension Preferences {
         var stored = storedHomes
         stored.removeValue(forKey: homeId)
         storedHomes = stored
+        CredentialsStore.delete(homeId: homeId, type: .local)
+        CredentialsStore.delete(homeId: homeId, type: .remote)
     }
 
     func switchActiveHome(to homeId: UUID) {
@@ -389,7 +429,7 @@ public extension Preferences {
 
     private func loadHomePreferences(_ preferences: HomePreferences) {
         internalPreferenceChange {
-            currentHomePreferences = preferences
+            _currentHomePreferences = preferences
         }
         storeActiveHome() // store home settings in case they were not yet there
     }
@@ -403,9 +443,22 @@ public extension Preferences {
     }
 
     func modifyActiveHome(modificationFunction: @MainActor (inout HomePreferences) -> Void) {
-        var homePreferences = currentHomePreferences
+        var homePreferences = currentHomePreferences // credentials injected from Keychain
         modificationFunction(&homePreferences)
-        currentHomePreferences = homePreferences
+        // Persist credentials to Keychain before storing the rest to UserDefaults
+        CredentialsStore.store(
+            username: homePreferences.localConnectionConfig.username,
+            password: homePreferences.localConnectionConfig.password,
+            homeId: homePreferences.id,
+            type: .local
+        )
+        CredentialsStore.store(
+            username: homePreferences.remoteConnectionConfig.username,
+            password: homePreferences.remoteConnectionConfig.password,
+            homeId: homePreferences.id,
+            type: .remote
+        )
+        _currentHomePreferences = homePreferences // encodes without credentials
         storeActiveHome()
     }
 
@@ -427,9 +480,18 @@ public extension Preferences {
     }
 
     func storedHome(forCloudUserId id: String) -> HomePreferences? {
-        firstStoredHome { homePreferences in
-            homePreferences.remoteConnectionConfig.cloudUserId == id
-        }?.record
+        guard var home = firstStoredHome(where: { $0.remoteConnectionConfig.cloudUserId == id })?.record else {
+            return nil
+        }
+        if let creds = CredentialsStore.retrieve(homeId: home.id, type: .local) {
+            home.localConnectionConfig.username = creds.username
+            home.localConnectionConfig.password = creds.password
+        }
+        if let creds = CredentialsStore.retrieve(homeId: home.id, type: .remote) {
+            home.remoteConnectionConfig.username = creds.username
+            home.remoteConnectionConfig.password = creds.password
+        }
+        return home
     }
 }
 
@@ -441,6 +503,7 @@ public extension Preferences {
         Preferences.shared.initializeStoredHomes()
         migrateToSharedDefaultsIfRequired()
         migrateToMultipleHomesIfRequired()
+        migrateCredentialsToKeychainIfRequired()
     }
 
     private static func migrateToSharedDefaultsIfRequired() {
@@ -511,6 +574,28 @@ public extension Preferences {
         }
 
         Preferences.shared.didMigrateToMultipleHomes = true
+    }
+
+    private static func migrateCredentialsToKeychainIfRequired() {
+        guard !Preferences.shared.didMigrateCredentialsToKeychain else { return }
+
+        // storedHomes decodes from JSON; init(from:) uses decodeIfPresent so old credentials are still read
+        for (homeId, home) in Preferences.shared.storedHomes {
+            CredentialsStore.store(
+                username: home.localConnectionConfig.username,
+                password: home.localConnectionConfig.password,
+                homeId: homeId,
+                type: .local
+            )
+            CredentialsStore.store(
+                username: home.remoteConnectionConfig.username,
+                password: home.remoteConnectionConfig.password,
+                homeId: homeId,
+                type: .remote
+            )
+        }
+
+        Preferences.shared.didMigrateCredentialsToKeychain = true
     }
 }
 
