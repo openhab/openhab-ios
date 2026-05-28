@@ -80,5 +80,14 @@ struct OpenHABShortcuts: AppShortcutsProvider {
             shortTitle: "Set Contact State",
             systemImageName: "sensor"
         )
+        AppShortcut(
+            intent: SetActiveHomeIntent(),
+            phrases: [
+                "Switch home in \(.applicationName)",
+                "Set active home in \(.applicationName)"
+            ],
+            shortTitle: "Switch Home",
+            systemImageName: "house.and.flag"
+        )
     }
 }
