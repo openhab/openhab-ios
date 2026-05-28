@@ -16,7 +16,6 @@ import Testing
 
 // MARK: - isValidNumberDraft with comma separator
 
-@Suite
 struct InputCommandFormatterCommaTests {
     let formatter = InputCommandFormatter(decimalSeparator: ",")
 
@@ -68,7 +67,6 @@ struct InputCommandFormatterCommaTests {
 
 // MARK: - UIKit oracle (reference implementation)
 
-@Suite
 struct InputCommandFormatterOracleTests {
     /// Port of the UIKit `textField(_:shouldChangeCharactersIn:replacementString:)` logic.
     /// Given the old text, the NSRange being replaced, and the replacement string, returns
@@ -358,7 +356,6 @@ struct InputCommandFormatterOracleTests {
 
 // MARK: - localeFormattedValue with comma separator
 
-@Suite
 struct InputCommandFormattedValueCommaTests {
     let formatter = InputCommandFormatter(decimalSeparator: ",")
 
@@ -393,7 +390,6 @@ struct InputCommandFormattedValueCommaTests {
     }
 }
 
-@Suite
 struct InputCommandFormatterTests {
     let formatter = InputCommandFormatter(decimalSeparator: ".")
 

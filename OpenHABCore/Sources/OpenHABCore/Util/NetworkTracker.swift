@@ -29,7 +29,7 @@ public struct ConnectionInfo: Equatable, Sendable {
     public let version: Int
     public let proxyURL: URL?
 
-    // Explicit public memberwise initializer
+    /// Explicit public memberwise initializer
     public init(configuration: ConnectionConfiguration, version: Int, proxyURL: URL? = nil) {
         self.configuration = configuration
         self.version = version
@@ -51,14 +51,14 @@ public enum NetworkTrackerError: Error, CustomDebugStringConvertible, Sendable {
     }
 }
 
-// Prevent race conditions.
-// Ensure thread-safe dictionary access.
-// Avoid memory corruption errors like unrecognized selector.
+/// Prevent race conditions.
+/// Ensure thread-safe dictionary access.
+/// Avoid memory corruption errors like unrecognized selector.
 public actor ConnectionPool {
     private var services: [ConnectionConfiguration: any OpenAPIServiceProtocol] = [:]
     private let serviceFactory: @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol
 
-    // Initializer allowing the injection of mocked OpenAPIServiceProtocol
+    /// Initializer allowing the injection of mocked OpenAPIServiceProtocol
     init(serviceFactory: @escaping @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol = {
         try OpenAPIService(connectionConfiguration: $0, serviceConfiguration: .shortTerm)
     }) {
@@ -77,7 +77,7 @@ public actor ConnectionPool {
     }
 }
 
-// Ensures a thread safe access to failureCounts dictionary
+/// Ensures a thread safe access to failureCounts dictionary
 public actor ConnectionFailureTracker {
     private var enabled = false
     private var failureCounts: [ConnectionConfiguration: Int] = [:]
@@ -270,7 +270,7 @@ public actor NetworkTracker {
         }
     }
 
-    // like startTracking but with the already configured connections and a fresh approach
+    /// like startTracking but with the already configured connections and a fresh approach
     public func restartTracking() async {
         Logger.networkTracker.debug("Networktracker: restartTracking")
         await failureTracker.resetAll() // just to make sure a few more connection attempts happen if necessary
@@ -280,7 +280,7 @@ public actor NetworkTracker {
         await startTracking(connectionConfigurations: connectionConfigurations)
     }
 
-    // This gets called periodically when we have an active connection to make sure it's still the best choice
+    /// This gets called periodically when we have an active connection to make sure it's still the best choice
     private func checkActiveConnection() async {
         guard status != .stopped else {
             return
@@ -603,10 +603,10 @@ public extension NetworkTracker {
         return service
     }
 
-    // Retries once after revalidating the connection on two transient failure kinds:
-    //  • ClientError  — transport failure against a stale connection (network switch, suspension)
-    //  • noActiveConnection — all connection tests timed out during a network handoff; the
-    //    tracker recovers shortly after, so one revalidation + retry is enough.
+    /// Retries once after revalidating the connection on two transient failure kinds:
+    ///  • ClientError  — transport failure against a stale connection (network switch, suspension)
+    ///  • noActiveConnection — all connection tests timed out during a network handoff; the
+    ///    tracker recovers shortly after, so one revalidation + retry is enough.
     private func withClientErrorRetry<T>(_ operation: () async throws -> T) async throws -> T {
         do {
             return try await operation()

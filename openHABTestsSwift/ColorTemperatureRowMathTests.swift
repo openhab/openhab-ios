@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import openHAB
-
 import Testing
 
 private enum TestValues {
@@ -35,7 +34,6 @@ private enum TestValues {
     static let zero = 0.0
 }
 
-@Suite
 struct ColorTemperatureRowMathTests {
     @Test
     func normalizedRangeUsesFallbackForZeroSpan() {

@@ -147,9 +147,9 @@ public actor OpenHABItemCache {
 
     public static let instance = OpenHABItemCache()
 
-    // Per-home trackers are created fresh each session (cold-start cost on first use).
-    // 10 s matches NetworkTracker.shared and is enough to survive a typical cellular
-    // handoff (~7 s in practice) without failing with noActiveConnection.
+    /// Per-home trackers are created fresh each session (cold-start cost on first use).
+    /// 10 s matches NetworkTracker.shared and is enough to survive a typical cellular
+    /// handoff (~7 s in practice) without failing with noActiveConnection.
     private static let networkTimeout: TimeInterval = 10
 
     private static let stubsDefaultsKey = "openHABItemStubs"

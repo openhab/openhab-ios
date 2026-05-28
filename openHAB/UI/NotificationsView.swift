@@ -111,7 +111,7 @@ protocol NetworkTracking {
     var activeConnection: ConnectionInfo? { get }
 }
 
-struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: ObservableObject {
+struct NotificationsView<Tracker: NetworkTracking & ObservableObject>: View {
     @ObservedObject var networkTracker: Tracker
     @State var notifications: [OpenHABNotification] = []
     let loadNotifications: NotificationLoader

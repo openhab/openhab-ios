@@ -111,7 +111,6 @@ private struct SegmentedRowContent: View {
     }
 
     /// Button-based segmented control with animated selection indicator
-    @ViewBuilder
     private func segmentedButtons(mappings: [OpenHABWidgetMapping],
                                   selectedIndex: Int?,
                                   displayState: WidgetDisplayState,
@@ -154,7 +153,6 @@ private struct SegmentedRowContent: View {
         .fixedSize(horizontal: false, vertical: true)
     }
 
-    @ViewBuilder
     private func pressReleaseButtons(mappings: [OpenHABWidgetMapping]) -> some View {
         HStack(spacing: 8) {
             ForEach(mappings.indices, id: \.self) { index in

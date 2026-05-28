@@ -13,7 +13,6 @@
 import OpenHABCore
 import Testing
 
-@Suite
 struct WidgetMappingSnapshotDisplayStateTests {
     @Test
     func labelOnlyInBracketsDoesNotLeakIntoLabelText() {
@@ -51,7 +50,6 @@ struct WidgetMappingSnapshotDisplayStateTests {
     }
 }
 
-@Suite
 struct SitemapRowInputBuilderTests {
     @Test
     func incrementalRebuildReusesUnchangedRows() {

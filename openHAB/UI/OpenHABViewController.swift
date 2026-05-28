@@ -111,7 +111,7 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
 // MARK: - ServerCertificateManagerDelegate
 
 extension OpenHABViewController: ServerCertificateManagerDelegate {
-    // delegate should ask user for a decision on what to do with invalid certificate
+    /// delegate should ask user for a decision on what to do with invalid certificate
     @MainActor
     func evaluateServerTrust(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult {
         await withCheckedContinuation { continuation in
@@ -133,7 +133,7 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
         }
     }
 
-    // certificate received from openHAB doesn't match our record, ask user for a decision
+    /// certificate received from openHAB doesn't match our record, ask user for a decision
     @MainActor
     func evaluateCertificateMismatch(summary certificateSummary: String?, forDomain domain: String?) async -> OpenHABCore.ServerCertificateManager.EvaluateResult {
         await withCheckedContinuation { continuation in
@@ -168,7 +168,7 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
 
 @MainActor
 extension OpenHABViewController: ClientCertificateManagerDelegate {
-    // Ask user whether to import the certificate
+    /// Ask user whether to import the certificate
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool {
         let shouldImport = await withCheckedContinuation { continuation in
             let alertController = UIAlertController(
@@ -198,7 +198,7 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
         return false
     }
 
-    // Ask user for password to decode PKCS#12
+    /// Ask user for password to decode PKCS#12
     func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String? {
         await withCheckedContinuation { continuation in
             let alertController = UIAlertController(

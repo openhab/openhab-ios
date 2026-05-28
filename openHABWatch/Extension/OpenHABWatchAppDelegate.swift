@@ -12,7 +12,6 @@
 import Kingfisher
 import OpenHABCore
 import os.log
-
 import WatchConnectivity
 import WatchKit
 

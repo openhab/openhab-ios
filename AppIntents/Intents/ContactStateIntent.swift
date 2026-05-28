@@ -28,9 +28,13 @@ enum ContactStateError: Error, CustomLocalizedStringResourceConvertible {
 
 @available(iOS 17.0, macOS 14.0, *)
 struct ContactStateIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.contact] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.contact]
+    }
 
     static var parameterSummary: some ParameterSummary {
         Summary("Set the state of \(\.$itemEntity) to \(\.$state)") {

@@ -24,8 +24,7 @@ public enum PreviewConstants {
         let data = sitemapJson
         do {
             let sitemapPage = try data.decoded(as: Components.Schemas.PageDTO.self)
-            let openHABSitemapPage = OpenHABPage(sitemapPage)
-            return openHABSitemapPage
+            return OpenHABPage(sitemapPage)
         } catch {
             logger.error("Should not throw \(error.localizedDescription)")
             return nil

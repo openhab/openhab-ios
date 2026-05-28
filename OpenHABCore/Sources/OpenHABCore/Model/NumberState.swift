@@ -62,7 +62,7 @@ public struct NumberState: CustomStringConvertible, Equatable {
         return stringValue
     }
 
-    // Access to default memberwise initializer not permitted outside of package
+    /// Access to default memberwise initializer not permitted outside of package
     public init(value: Double, unit: String? = "", format: String? = "") {
         self.value = value
         self.unit = unit

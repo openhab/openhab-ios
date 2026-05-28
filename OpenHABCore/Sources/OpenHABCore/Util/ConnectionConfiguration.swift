@@ -19,7 +19,7 @@ public struct ConnectionPayload: Codable {
 public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
     private enum CodingKeys: String, CodingKey {
         case url, alwaysSendBasicAuth, ignoreSSL, supportsNotifications, priority, cloudUserId
-        // Legacy keys — decoded for migration from old JSON, never written
+        /// Legacy keys — decoded for migration from old JSON, never written
         case username, password
     }
 
@@ -42,8 +42,8 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
         self.supportsNotifications = supportsNotifications
     }
 
-    // decodeIfPresent is used for every field that has a default so that stored data from older
-    // versions (missing those fields) decodes without throwing.
+    /// decodeIfPresent is used for every field that has a default so that stored data from older
+    /// versions (missing those fields) decodes without throwing.
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let rawURL = try container.decode(String.self, forKey: .url)
@@ -58,7 +58,7 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
         cloudUserId = try container.decodeIfPresent(String.self, forKey: .cloudUserId)
     }
 
-    // 🔹 Normalize a URL (removes trailing slashes, trims spaces, redirects openHAB cloud)
+    /// 🔹 Normalize a URL (removes trailing slashes, trims spaces, redirects openHAB cloud)
     private static func normalizeURL(_ url: String) -> String {
         var cleanedURL = url.trimmingCharacters(in: .whitespacesAndNewlines) // Trim whitespace
         cleanedURL = uriWithoutTrailingSlashes(cleanedURL) // Remove trailing slashes
@@ -115,7 +115,9 @@ extension ConnectionConfiguration {
 
 public extension ConnectionConfiguration {
     /// The host component of the connection URL, if parseable.
-    var host: String? { URL(string: url)?.host }
+    var host: String? {
+        URL(string: url)?.host
+    }
 
     /// URL suitable for diagnostics; credentials embedded in the URL are stripped.
     var publicLogURL: String {
@@ -134,7 +136,9 @@ public extension ConnectionConfiguration {
 
     /// Whether this connection is to an openHAB Cloud instance.
     /// Currently determined by the "openHAB Cloud Service" user preference (`supportsNotifications`).
-    var isCloudConnection: Bool { supportsNotifications }
+    var isCloudConnection: Bool {
+        supportsNotifications
+    }
 }
 
 extension ConnectionConfiguration: CustomStringConvertible {

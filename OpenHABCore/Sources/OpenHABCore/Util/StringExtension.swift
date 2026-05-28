@@ -57,8 +57,8 @@ public extension String {
         URL(string: self) == URL(string: self)?.absoluteURL
     }
 
-    // Sub-view gape title optionally concatenated with one space and value if present - to be inline with Nsic UI
-    // e.g. "Living Room [21°C]" → "Living Room 21°C"
+    /// Sub-view gape title optionally concatenated with one space and value if present - to be inline with Nsic UI
+    /// e.g. "Living Room [21°C]" → "Living Room 21°C"
     var labelValueTitle: String {
         // Base text before the first “[”
         let base = components(separatedBy: "[")[0]

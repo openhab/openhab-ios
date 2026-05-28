@@ -17,7 +17,7 @@ protocol RowWithIconInput {
     var icon: RowIconInput { get }
 }
 
-struct RowIconInput: Equatable, Sendable {
+struct RowIconInput: Equatable {
     let icon: String
     let iconColor: String
     let staticIcon: Bool
@@ -220,7 +220,7 @@ struct RollershutterRowInput: Equatable, RowWithIconInput {
     }
 }
 
-struct InputRowInput: Sendable, Equatable, RowWithIconInput {
+struct InputRowInput: Equatable, RowWithIconInput {
     let widgetId: String
     let renderingKind: WidgetRenderingKind
     let displayState: WidgetDisplayState
@@ -258,7 +258,7 @@ struct InputRowInput: Sendable, Equatable, RowWithIconInput {
 }
 
 struct ButtonGridRowInput: Equatable, RowWithIconInput {
-    struct ButtonInput: Equatable, Sendable, Identifiable {
+    struct ButtonInput: Equatable, Identifiable {
         let id: String
         let label: String
         let icon: RowIconInput

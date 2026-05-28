@@ -13,7 +13,6 @@ import OpenHABCore
 import Testing
 import UIKit
 
-@Suite
 struct UIColorTests {
     @Test
     func resolvesNamedColor_exactMatch() {

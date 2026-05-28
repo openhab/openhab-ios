@@ -31,9 +31,9 @@ final class UserData: ObservableObject {
     private var cachedWidgets: [OpenHABWidget] = []
     private var currentlyLoadingSitemap: String?
     private var lastObservedConnectionURL: String?
-    // Incremented each time a new pageHandlingTask is created. The task captures its own
-    // generation at creation time and only clears shared state when the generation still matches,
-    // preventing a completing old task from wiping out a newly started task for the same sitemap.
+    /// Incremented each time a new pageHandlingTask is created. The task captures its own
+    /// generation at creation time and only clears shared state when the generation still matches,
+    /// preventing a completing old task from wiping out a newly started task for the same sitemap.
     private var taskGeneration = 0
 
     private var pageHandlingTask: Task<Void, Never>?
