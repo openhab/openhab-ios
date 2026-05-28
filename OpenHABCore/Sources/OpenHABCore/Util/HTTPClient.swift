@@ -336,7 +336,7 @@ public final class HTTPClient: NSObject, Sendable {
         return codingDatas.map(\.openHABNotification)
     }
 
-    /* 
+    /*
       Initiates a download request to a specified base URL for a specified path and returns the file URL via a completion handler.
 
       - Parameters:
