@@ -137,9 +137,8 @@ enum SitemapDiagnostics {
                           applyStateMs: Int,
                           totalUpdateMs: Int) {
         guard isEnabled else { return }
-        logger.info(
-            "update origin=\(origin.rawValue, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) inputsChanged=\(inputsChanged, privacy: .public) titleChanged=\(titleChanged, privacy: .public) reusedInputs=\(reusedInputCount, privacy: .public) changedRows=\(changedRowCount, privacy: .public) changedKinds=\(changedRowKinds, privacy: .public) buildRowInputsMs=\(buildRowInputsMs, privacy: .public) applyStateMs=\(applyStateMs, privacy: .public) analysisMs=\(analysisMs, privacy: .public) totalUpdateMs=\(totalUpdateMs, privacy: .public)"
-        )
+        // swiftlint:disable:next line_length
+        logger.info("update origin=\(origin.rawValue, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) inputsChanged=\(inputsChanged, privacy: .public) titleChanged=\(titleChanged, privacy: .public) reusedInputs=\(reusedInputCount, privacy: .public) changedRows=\(changedRowCount, privacy: .public) changedKinds=\(changedRowKinds, privacy: .public) buildRowInputsMs=\(buildRowInputsMs, privacy: .public) applyStateMs=\(applyStateMs, privacy: .public) analysisMs=\(analysisMs, privacy: .public) totalUpdateMs=\(totalUpdateMs, privacy: .public)")
     }
 
     static func logLongPoll(requestMs: Int,
@@ -158,16 +157,17 @@ enum SitemapDiagnostics {
                                     replacedPendingPage: Bool,
                                     coalescedUpdates: Int) {
         guard isEnabled else { return }
+        // swiftlint:disable line_length
         logger.info(
             "longPollDebounce action=\(action, privacy: .public) elapsedMs=\(elapsedMs, privacy: .public) remainingMs=\(remainingMs, privacy: .public) replacedPendingPage=\(replacedPendingPage, privacy: .public) coalescedUpdates=\(coalescedUpdates, privacy: .public)"
         )
+        // swiftlint:enable line_length
     }
 
     static func logIconSummary(_ snapshot: IconLoadDiagnosticsSnapshot) {
         guard isEnabled, !snapshot.isEmpty else { return }
-        logger.info(
-            "icons resolutionFailures=\(snapshot.resolutionFailures, privacy: .public) starts=\(snapshot.starts, privacy: .public) successes=\(snapshot.successes, privacy: .public) memoryHits=\(snapshot.memoryHits, privacy: .public) diskHits=\(snapshot.diskHits, privacy: .public) networkLoads=\(snapshot.networkLoads, privacy: .public) cancellations=\(snapshot.cancellations, privacy: .public) failures=\(snapshot.failures, privacy: .public) distinctURLs=\(snapshot.distinctURLs, privacy: .public) distinctRows=\(snapshot.distinctRows, privacy: .public)"
-        )
+        // swiftlint:disable:next line_length
+        logger.info("icons resolutionFailures=\(snapshot.resolutionFailures, privacy: .public) starts=\(snapshot.starts, privacy: .public) successes=\(snapshot.successes, privacy: .public) memoryHits=\(snapshot.memoryHits, privacy: .public) diskHits=\(snapshot.diskHits, privacy: .public) networkLoads=\(snapshot.networkLoads, privacy: .public) cancellations=\(snapshot.cancellations, privacy: .public) failures=\(snapshot.failures, privacy: .public) distinctURLs=\(snapshot.distinctURLs, privacy: .public) distinctRows=\(snapshot.distinctRows, privacy: .public)")
     }
 
     static func logIconResolutionFailure(rowIdentity: String,
@@ -176,9 +176,11 @@ enum SitemapDiagnostics {
                                          trackerStatus: String,
                                          connectionDescription: String) {
         guard isEnabled else { return }
+        // swiftlint:disable line_length
         logger.info(
             "iconResolutionFailure row=\(rowIdentity, privacy: .private(mask: .hash)) icon=\(icon, privacy: .public) reason=\(reason, privacy: .public) trackerStatus=\(trackerStatus, privacy: .public) connection=\(connectionDescription, privacy: .public)"
         )
+        // swiftlint:enable line_length
     }
 
     static func logIconStart(rowIdentity: String, icon: String, url: URL, cacheKey: String) {

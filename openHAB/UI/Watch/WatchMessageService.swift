@@ -15,8 +15,8 @@ import OpenHABCore
 import os.log
 import WatchConnectivity
 
-// This class receives Watch Request for the configuration data like localUrl.
-// The functionality is activated in the AppDelegate.
+/// This class receives Watch Request for the configuration data like localUrl.
+/// The functionality is activated in the AppDelegate.
 class WatchMessageService: NSObject, WCSessionDelegate {
     @MainActor
     static let singleton = WatchMessageService()
@@ -26,8 +26,8 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     private var preferencesSubscription: AnyCancellable?
 
-    // This method gets called when the watch requests the data
-    // ⚠️ This is called off the main thread. Do NOT touch @MainActor stuff.
+    /// This method gets called when the watch requests the data
+    /// ⚠️ This is called off the main thread. Do NOT touch @MainActor stuff.
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         guard message["request"] != nil else { return }
 

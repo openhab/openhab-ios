@@ -14,7 +14,6 @@ import Foundation
 import Testing
 
 @MainActor
-@Suite
 struct IconReloadCoordinatorTests {
     // Each test creates an isolated coordinator instance rather than using the shared
     // singleton, so tests do not interfere with each other.

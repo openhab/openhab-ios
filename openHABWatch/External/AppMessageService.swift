@@ -15,15 +15,15 @@ import os.log
 import WatchConnectivity
 import WatchKit
 
-// This class handles values that are passed from the ios app.
-// @unchecked Sendable: all mutable state (@MainActor contextRequestInFlight) is actor-protected;
-// WCSession delegate callbacks are non-isolated and only schedule Tasks, never mutate directly.
+/// This class handles values that are passed from the ios app.
+/// @unchecked Sendable: all mutable state (@MainActor contextRequestInFlight) is actor-protected;
+/// WCSession delegate callbacks are non-isolated and only schedule Tasks, never mutate directly.
 class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
     @MainActor static let singleton = AppMessageService()
 
     private static let preferencesKey = "watchPreferences"
 
-    // Accessed only from @MainActor context (requestApplicationContext and its Task completions).
+    /// Accessed only from @MainActor context (requestApplicationContext and its Task completions).
     @MainActor private var contextRequestInFlight = false
 
     @MainActor

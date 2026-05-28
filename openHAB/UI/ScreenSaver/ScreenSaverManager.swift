@@ -15,8 +15,13 @@ import SwiftUI
 import UIKit
 
 private class ScreenSaverHostingViewController: UIViewController {
-    override var prefersStatusBarHidden: Bool { true }
-    override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation { .fade }
+    override var prefersStatusBarHidden: Bool {
+        true
+    }
+
+    override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
+        .fade
+    }
 }
 
 @MainActor

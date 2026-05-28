@@ -16,7 +16,7 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-// Timer manager that persists across view updates
+/// Timer manager that persists across view updates
 private class ImageRefreshTimer: ObservableObject {
     @Published var refreshCount = 0
     private var timer: AnyCancellable?
@@ -64,7 +64,7 @@ struct ImageRow: View, Equatable {
     @StateObject private var refreshTimer = ImageRefreshTimer()
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
 
-    // For refreshing images, append a query parameter to bust the cache
+    /// For refreshing images, append a query parameter to bust the cache
     private var displayUrl: URL? {
         guard let url else { return nil }
         guard refresh > 0 else { return url }

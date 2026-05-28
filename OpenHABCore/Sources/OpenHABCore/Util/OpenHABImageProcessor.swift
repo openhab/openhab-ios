@@ -231,7 +231,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
         process(item: .data(data), options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
     }
 
-    // Convert input data/image to target image and return it.
+    /// Convert input data/image to target image and return it.
     public func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         switch item {
         case let .image(image):

@@ -22,7 +22,10 @@ class OpenHABWebViewController: OpenHABViewController {
     private var currentTarget = ""
     private var openHABTrackedRootUrl = ""
     private var activeConnectionInfo: ConnectionInfo?
-    private var activeConfig: ConnectionConfiguration? { activeConnectionInfo?.configuration }
+    private var activeConfig: ConnectionConfiguration? {
+        activeConnectionInfo?.configuration
+    }
+
     private var hideNavigationBar = false
     private var activityIndicator: UIActivityIndicatorView!
     private var sseTimer: Timer?
@@ -348,7 +351,7 @@ class OpenHABWebViewController: OpenHABViewController {
         return url
     }
 
-    // swift really makes you work to construct simple URLs, uhg.....
+    /// swift really makes you work to construct simple URLs, uhg.....
     func appendPathToURL(baseURL: URL, path: String) -> URL? {
         guard var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
             return nil

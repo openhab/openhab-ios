@@ -50,9 +50,9 @@ struct WatchIconView: View {
         )?.url
     }
 
-    // During a transient connection handover activeConnection can briefly be nil.
-    // Hold the last successfully resolved URL and connection for a short grace period
-    // so icons don't flash blank between reconnects, and retained auth carries over.
+    /// During a transient connection handover activeConnection can briefly be nil.
+    /// Hold the last successfully resolved URL and connection for a short grace period
+    /// so icons don't flash blank between reconnects, and retained auth carries over.
     private var displayIconURL: URL? {
         if let url = iconURL { return url }
         guard Date() <= keepLastResolvedIconURLUntil else { return nil }

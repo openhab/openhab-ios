@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import OpenHABCore
-
 import os.signpost
 import Testing
 
@@ -27,8 +26,8 @@ struct JSONParserTests {
         #expect(codingData[0].homepage?.link == "https://192.168.2.63:8444/rest/sitemaps/myHome/myHome")
     }
 
-    // Version 2.1 is without timeout
-    // Contributed by Tobi-1234 in #348
+    /// Version 2.1 is without timeout
+    /// Contributed by Tobi-1234 in #348
     @Test func jSONShortSitemapDecoder() throws {
         let json = """
         [{"name":"Haus","label":"HauptmenÃ¼","link":"http://192.xxxx:8080/rest/sitemaps/Haus","homepage":{"link":"http://192.xxx:8080/rest/sitemaps/Haus/Haus","leaf":false,"widgets":[]}},{"name":"_default","label":"Home","link":"http://192.Xxx:8080/rest/sitemaps/_default","homepage":{"link":"http://192.Xxxx:8080/rest/sitemaps/_default/_default","leaf":false,"widgets":[]}}]
@@ -69,9 +68,11 @@ struct JSONParserTests {
     }
 
     @Test func watchSitemap() throws {
+        // swiftlint:disable line_length
         let json = Data("""
         {"name":"watch","label":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch","homepage":{"id":"watch","title":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch/watch","leaf":false,"timeout":false,"widgets":[{"widgetId":"00","type":"Frame","label":"Ground floor","icon":"frame","mappings":[],"widgets":[{"widgetId":"0000","type":"Switch","label":"Licht Oberlicht","icon":"switch","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch14_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch14_1","label":"Licht Oberlicht","tags":["Lighting"],"groupNames":["G_PresenceSimulation","gLcn"]},"widgets":[]},{"widgetId":"0001","type":"Switch","label":"Licht Keller WC Decke","icon":"colorpicker","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch6_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch6_1","label":"Licht Keller WC Decke","category":"colorpicker","tags":["Lighting"],"groupNames":["gKellerLicht","gLcn"]},"widgets":[]}]}]}}
         """.utf8)
+        // swiftlint:enable line_length
         let codingData = try decoder.decode(Components.Schemas.SitemapDTO.self, from: json)
         #expect(codingData.homepage?.link == "https://192.168.2.15:8444/rest/sitemaps/watch/watch")
     }
