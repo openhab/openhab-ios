@@ -69,12 +69,6 @@ struct OpenHABShortcuts: AppShortcutsProvider {
             systemImageName: "calendar.badge.clock"
         )
         AppShortcut(
-            intent: SetLocationValueIntent(),
-            phrases: ["Set location in \(.applicationName)"],
-            shortTitle: "Set Location",
-            systemImageName: "location"
-        )
-        AppShortcut(
             intent: ContactStateIntent(),
             phrases: ["Set contact state in \(.applicationName)"],
             shortTitle: "Set Contact State",
