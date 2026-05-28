@@ -36,6 +36,8 @@ struct SettingsView: View {
     @State private var viewAppearedOnce = false
     @State private var settingsSSECommandItem = ""
     @State private var showLocalNetworkAlert = false
+    @State private var loadedLocalURL = ""
+    @State private var localTestedOKURL = ""
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
@@ -45,7 +47,8 @@ struct SettingsView: View {
             ConnectionSettingsView(
                 settingsDemomode: $settingsDemomode,
                 localConnectionConfiguration: $settingsLocalConnectionConfiguration,
-                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration
+                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration,
+                localTestedOKURL: $localTestedOKURL
             )
 
             ApplicationSettingsView(
@@ -95,7 +98,10 @@ struct SettingsView: View {
                 Button("Save") {
                     saveSettings()
                     NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
-                    if !settingsDemomode, !settingsLocalConnectionConfiguration.url.isEmpty {
+                    if !settingsDemomode,
+                       !settingsLocalConnectionConfiguration.url.isEmpty,
+                       settingsLocalConnectionConfiguration.url != loadedLocalURL,
+                       settingsLocalConnectionConfiguration.url != localTestedOKURL {
                         showLocalNetworkAlert = true
                     } else {
                         dismiss()
@@ -156,6 +162,7 @@ struct SettingsView: View {
         settingsSitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
         settingsLocalConnectionConfiguration = Preferences.shared.currentHomePreferences.localConnectionConfig
         settingsRemoteConnectionConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
+        loadedLocalURL = Preferences.shared.currentHomePreferences.localConnectionConfig.url
         settingsHomeName = Preferences.shared.currentHomePreferences.homeName
         settingsSSECommandItem = Preferences.shared.currentHomePreferences.sseCommandItem
     }

@@ -37,6 +37,9 @@ struct SingleConnectionSettingsView: View {
 
     @Binding var connectionConfig: ConnectionConfiguration
     var showNotificationToggle: Bool
+    /// Written with the successfully-tested URL when a local connection test passes.
+    /// Callers can compare this against the current URL to skip the Local Network alert.
+    @Binding var testedOKURL: String
 
     @State private var isTestingConnection = false
     @State private var connectionTestMessage: String?
@@ -57,6 +60,10 @@ struct SingleConnectionSettingsView: View {
                         .autocorrectionDisabled(true)
                         .multilineTextAlignment(.trailing)
                         .font(.system(.caption))
+                        .onChange(of: connectionConfig.url) { _ in
+                            connectionTestMessage = nil
+                            connectionTestSuccess = nil
+                        }
                 } label: {
                     HStack {
                         Text("URL")
@@ -180,6 +187,9 @@ struct SingleConnectionSettingsView: View {
             try await testConnection()
             connectionTestMessage = String(localized: "Connection successful")
             connectionTestSuccess = true
+            if isLocalConnection {
+                testedOKURL = connectionConfig.url
+            }
         } catch is CancellationError {
             connectionTestMessage = String(localized: "Cancellation occurred")
             connectionTestSuccess = false
@@ -243,7 +253,7 @@ struct SingleConnectionSettingsView: View {
         var body: some View {
             NavigationStack {
                 Form {
-                    SingleConnectionSettingsView(headerText: String(localized: "Connection Settings for local server"), connectionConfig: $connectionConfig, showNotificationToggle: false)
+                    SingleConnectionSettingsView(headerText: String(localized: "Connection Settings for local server"), isLocalConnection: true, connectionConfig: $connectionConfig, showNotificationToggle: false, testedOKURL: .constant(""))
                 }
             }
         }
