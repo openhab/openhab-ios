@@ -13,7 +13,7 @@ import Foundation
 import Network
 import os.log
 
-// Wrap real NWPathMonitor
+/// Wrap real NWPathMonitor
 final class RealPathMonitor: NWPathMonitoring, Sendable {
     private let monitor: NWPathMonitor
 
@@ -50,8 +50,8 @@ public protocol NWPathMonitoring: AnyObject, Sendable {
 
 // MARK: Extension for version iOS <17
 
-// this line breaks availability checking, since watchos 10 is minimum for the app
-// @available(watchOS, obsoleted: 10.0)
+/// this line breaks availability checking, since watchos 10 is minimum for the app
+/// @available(watchOS, obsoleted: 10.0)
 @available(iOS, obsoleted: 17.0)
 extension NWPathMonitor {
     func paths() -> AsyncStream<NWPath> {

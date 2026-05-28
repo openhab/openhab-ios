@@ -59,7 +59,9 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
         viewModel.pageTitle
     }
 
-    func viewName() -> String { "sitemap" }
+    func viewName() -> String {
+        "sitemap"
+    }
 
     nonisolated func reloadView() {
         Task { @MainActor in

@@ -12,9 +12,9 @@
 @testable import OpenHABCore
 import Testing
 
-// These tests require the openHAB app as the test host so the xctest process inherits
-// the keychain-access-groups entitlement. Without it SecItemAdd returns errSecMissingEntitlement
-// and all store/retrieve tests fail. Configure the test scheme to use openHAB.app as the host.
+/// These tests require the openHAB app as the test host so the xctest process inherits
+/// the keychain-access-groups entitlement. Without it SecItemAdd returns errSecMissingEntitlement
+/// and all store/retrieve tests fail. Configure the test scheme to use openHAB.app as the host.
 @Suite("CredentialsStore Tests", .serialized, .disabled("Requires openHAB.app test host for Keychain entitlement"))
 struct CredentialsStoreTests {
     private let homeId = UUID()

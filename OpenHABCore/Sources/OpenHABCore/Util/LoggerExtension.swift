@@ -12,7 +12,6 @@
 // Inspired by https://www.avanderlee.com/debugging/oslog-unified-logging/
 
 import Foundation
-
 import os.log
 
 public extension Logger {

@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [Version 3.2.60, Build 269] - 2026-05-27Z
+
+- ConnectionView: align icon with list rows, scale with Dynamic Type
+- Fix home switching via Shortcuts not working
+- UserDefaultsTests: use .isEmpty instead of == ""
+- ConnectionView: drive currentHomeName from MainActorNetworkTracker
+- AppIntents: add SetActiveHomeIntent.swift to openHAB target
+- Remove iOS 16 SetActiveHome intent — iOS 17+ only
+- Add App Intent to set the active home via Shortcuts
+- NetworkTracker: expand single-line for-loops for SwiftLint compliance
+- DrawerView: show home name and connection type instead of URL
+- Store connection credentials in Keychain instead of UserDefaults
+- Converge iOS/watchOS sitemap polling on shared SitemapPageLoader (#1218)
+- Fix crash: AVAudioPlayer deallocated on background thread in AudioPlayerActor
+- Fix IPv6 zone ID rejected by URL validation regex
+
 ## [Version 3.2.59, Build 268] - 2026-05-27Z
 
 - Enable App Intents on watchOS with multi-home support (#1219)

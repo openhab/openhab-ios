@@ -113,11 +113,11 @@ struct DatePickerInputRowView: View {
     var body: some View {
         makeDateInputRowContent(
             DateInputRowConfig(
-                input: input) { command in
-                    guard let itemName = input.itemName else { return }
-                    viewModel.sendCommand(command, for: itemName)
-                    // swiftlint:disable:next closure_end_indentation
-                }
+                input: input
+            ) { command in
+                guard let itemName = input.itemName else { return }
+                viewModel.sendCommand(command, for: itemName)
+            }
         )
     }
 }

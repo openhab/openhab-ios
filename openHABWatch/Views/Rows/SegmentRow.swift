@@ -66,7 +66,6 @@ struct SegmentRow: View {
         }
     }
 
-    @ViewBuilder
     private var pressReleaseButtons: some View {
         HStack(spacing: 8) {
             ForEach(viewModel.mappings.indices, id: \.self) { index in
@@ -101,7 +100,6 @@ struct SegmentRow: View {
 
     // MARK: - Shared Components
 
-    @ViewBuilder
     private var iconTitleRow: some View {
         HStack {
             WatchIconView(model: widget.iconRenderModel(), settings: settings)
@@ -119,7 +117,6 @@ struct SegmentRow: View {
 
     // MARK: - Multi-Segment (existing NavigationLink)
 
-    @ViewBuilder
     private var multiSegmentContent: some View {
         HStack {
             HStack {
@@ -178,7 +175,6 @@ struct SegmentRow: View {
 
     // MARK: - Single Mapping func
 
-    @ViewBuilder
     private func singleButton(for mapping: OpenHABWidgetMapping) -> some View {
         inlineButton(label: mapping.label, isPressed: singlePressed)
             .overlay {
@@ -205,7 +201,6 @@ struct SegmentRow: View {
 
     // MARK: - Shared Components
 
-    @ViewBuilder
     private func inlineButton(label: String, isPressed: Bool) -> some View {
         Text(label)
             .watchTextStyle(.control)

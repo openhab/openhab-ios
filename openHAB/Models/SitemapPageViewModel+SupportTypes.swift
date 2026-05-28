@@ -68,7 +68,7 @@ struct QueuedCommand {
 }
 
 // swiftlint:disable:next file_types_order
-struct WidgetRenderKey: Equatable, Sendable {
+struct WidgetRenderKey: Equatable {
     let label: String
     let icon: String
     let state: String
@@ -148,50 +148,9 @@ struct WidgetRenderKey: Equatable, Sendable {
             childWidgets: widget.widgets.map(WidgetRenderKey.from)
         )
     }
-
-    // Keep this manual to avoid slow compile times for a very large synthesized implementation.
-    static func == (lhs: WidgetRenderKey, rhs: WidgetRenderKey) -> Bool {
-        lhs.label == rhs.label &&
-            lhs.icon == rhs.icon &&
-            lhs.state == rhs.state &&
-            lhs.iconColor == rhs.iconColor &&
-            lhs.labelColor == rhs.labelColor &&
-            lhs.valueColor == rhs.valueColor &&
-            lhs.url == rhs.url &&
-            lhs.period == rhs.period &&
-            lhs.service == rhs.service &&
-            lhs.legend == rhs.legend &&
-            lhs.refresh == rhs.refresh &&
-            lhs.height == rhs.height &&
-            lhs.forceAsItem == rhs.forceAsItem &&
-            lhs.visibility == rhs.visibility &&
-            lhs.staticIcon == rhs.staticIcon &&
-            lhs.switchSupport == rhs.switchSupport &&
-            lhs.releaseOnly == rhs.releaseOnly &&
-            lhs.minValue == rhs.minValue &&
-            lhs.maxValue == rhs.maxValue &&
-            lhs.step == rhs.step &&
-            lhs.pattern == rhs.pattern &&
-            lhs.unit == rhs.unit &&
-            lhs.type == rhs.type &&
-            lhs.inputHintRawValue == rhs.inputHintRawValue &&
-            lhs.encoding == rhs.encoding &&
-            lhs.labelSourceRawValue == rhs.labelSourceRawValue &&
-            lhs.yAxisDecimalPattern == rhs.yAxisDecimalPattern &&
-            lhs.row == rhs.row &&
-            lhs.column == rhs.column &&
-            lhs.releaseCommand == rhs.releaseCommand &&
-            lhs.command == rhs.command &&
-            lhs.stateless == rhs.stateless &&
-            lhs.linkedPageLink == rhs.linkedPageLink &&
-            lhs.linkedPageTitle == rhs.linkedPageTitle &&
-            lhs.mappings == rhs.mappings &&
-            lhs.item == rhs.item &&
-            lhs.childWidgets == rhs.childWidgets
-    }
 }
 
-struct WidgetMappingKey: Equatable, Sendable {
+struct WidgetMappingKey: Equatable {
     let command: String
     let label: String
     let row: Int?
@@ -209,7 +168,7 @@ struct WidgetMappingKey: Equatable, Sendable {
     }
 }
 
-struct WidgetItemKey: Equatable, Sendable {
+struct WidgetItemKey: Equatable {
     let name: String
     let state: String?
     let link: String
@@ -234,7 +193,7 @@ struct WidgetItemKey: Equatable, Sendable {
     }
 }
 
-struct WidgetStateDescriptionKey: Equatable, Sendable {
+struct WidgetStateDescriptionKey: Equatable {
     let minimum: Double
     let maximum: Double
     let step: Double
@@ -255,7 +214,7 @@ struct WidgetStateDescriptionKey: Equatable, Sendable {
     }
 }
 
-struct WidgetOptionKey: Equatable, Sendable {
+struct WidgetOptionKey: Equatable {
     let value: String
     let label: String
 
@@ -265,7 +224,7 @@ struct WidgetOptionKey: Equatable, Sendable {
     }
 }
 
-struct WidgetCommandOptionKey: Equatable, Sendable {
+struct WidgetCommandOptionKey: Equatable {
     let command: String
     let label: String?
 

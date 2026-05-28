@@ -64,9 +64,7 @@ enum DrawerFetch {
         }
     }
 
-    static func uiTiles(
-        fetch: () async throws -> [OpenHABUiTile]
-    ) async -> DrawerFetchResult<[OpenHABUiTile]> {
+    static func uiTiles(fetch: () async throws -> [OpenHABUiTile]) async -> DrawerFetchResult<[OpenHABUiTile]> {
         do {
             let uiTiles = try await fetch()
             try Task.checkCancellation()
@@ -79,25 +77,30 @@ enum DrawerFetch {
     }
 }
 
-// Display the connected URL
+/// Display the active home name and connection type (Local / Remote)
 struct ConnectionView: View {
-    @StateObject private var networkTracker = MainActorNetworkTracker.shared
+    @EnvironmentObject private var networkTracker: MainActorNetworkTracker
+    @ScaledMetric private var iconWidth = 20.0
 
     var body: some View {
         HStack {
             if let activeConnection = networkTracker.activeConnection {
-                Image(systemSymbol: .cloudFill)
+                let isLocal = activeConnection.configuration.priority == 0
+                Image(systemSymbol: isLocal ? .wifi : .cloudFill)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 20, height: 20)
-                Text(activeConnection.configuration.url).font(.footnote)
+                    .frame(width: iconWidth, height: iconWidth)
+                Text(networkTracker.currentHomeName)
+                    .font(.footnote)
+                    .fontWeight(.medium)
             } else {
                 Image(systemSymbol: .exclamationmarkIcloudFill)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 20, height: 20)
+                    .frame(width: iconWidth, height: iconWidth)
                 Text("connecting").font(.footnote)
             }
+            Spacer()
         }
     }
 }
@@ -189,6 +192,7 @@ struct DrawerView: View {
 
             Spacer()
             ConnectionView()
+                .padding(.leading, 16)
                 .padding(.bottom, 5)
         }
         .listStyle(.inset)

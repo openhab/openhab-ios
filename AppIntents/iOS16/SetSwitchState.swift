@@ -34,11 +34,11 @@ enum SetSwitchStateError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-// The @available(obsoleted: 17.0) annotation is intentionally absent: CustomIntentMigratedAppIntent
-// requires this struct to be available on iOS 17+ so that stored shortcuts using the legacy
-// SiriKit intent class (intentClassName) are migrated to this App Intent at runtime. Restricting
-// availability to iOS 16 would break that migration path for iOS 17+ users. The duplicate entry
-// in the Shortcuts picker is an accepted trade-off until migration is confirmed complete.
+/// The @available(obsoleted: 17.0) annotation is intentionally absent: CustomIntentMigratedAppIntent
+/// requires this struct to be available on iOS 17+ so that stored shortcuts using the legacy
+/// SiriKit intent class (intentClassName) are migrated to this App Intent at runtime. Restricting
+/// availability to iOS 16 would break that migration path for iOS 17+ users. The duplicate entry
+/// in the Shortcuts picker is an accepted trade-off until migration is confirmed complete.
 struct SetSwitchState: AppIntent, CustomIntentMigratedAppIntent, PredictableIntent {
     // swiftlint:disable type_contents_order
 

@@ -16,9 +16,9 @@ import Testing
 
 @MainActor
 struct HomePreferencesDecodingTests {
-    // Simulates stored data from an older version: only id + homeName + minimal connection
-    // configs (missing supportsNotifications, username, password, and several HomePreferences
-    // fields added later). Verifies that decode succeeds and the stored homeName is preserved.
+    /// Simulates stored data from an older version: only id + homeName + minimal connection
+    /// configs (missing supportsNotifications, username, password, and several HomePreferences
+    /// fields added later). Verifies that decode succeeds and the stored homeName is preserved.
     @Test func legacyPayloadPreservesHomeName() throws {
         let json = """
         {
@@ -53,9 +53,9 @@ struct HomePreferencesDecodingTests {
         #expect(prefs.remoteConnectionConfig.supportsNotifications == true)
     }
 
-    // Verifies that a payload with only the required `id` key decodes successfully and
-    // all other fields fall back to their struct defaults, including homeName == "Home#1"
-    // and remote supportsNotifications == true.
+    /// Verifies that a payload with only the required `id` key decodes successfully and
+    /// all other fields fall back to their struct defaults, including homeName == "Home#1"
+    /// and remote supportsNotifications == true.
     @Test func minimalPayloadUsesDefaults() throws {
         let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
         let prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
@@ -66,8 +66,8 @@ struct HomePreferencesDecodingTests {
         #expect(prefs.remoteConnectionConfig == .remoteDefault)
     }
 
-    // Verifies that an explicit supportsNotifications: false in the remote config JSON is
-    // respected (not silently promoted to true by the role-aware default).
+    /// Verifies that an explicit supportsNotifications: false in the remote config JSON is
+    /// respected (not silently promoted to true by the role-aware default).
     @Test func explicitFalseNotificationsRespected() throws {
         let json = """
         {
@@ -85,7 +85,7 @@ struct HomePreferencesDecodingTests {
         #expect(prefs.remoteConnectionConfig.supportsNotifications == false)
     }
 
-    // Full round-trip: encode a HomePreferences, decode it, verify nothing is lost.
+    /// Full round-trip: encode a HomePreferences, decode it, verify nothing is lost.
     @Test func fullRoundTripPreservesAllFields() throws {
         let encoded = """
         {
@@ -131,20 +131,20 @@ struct HomePreferencesDecodingTests {
         #expect(decoded.alwaysAllowWebRTC == true)
         // Credentials are not preserved in the re-encoded JSON (they move to Keychain);
         // the initial decode reads them as legacy fields, but encode strips them.
-        #expect(decoded.localConnectionConfig.username == "")
+        #expect(decoded.localConnectionConfig.username.isEmpty)
         #expect(decoded.localConnectionConfig.supportsNotifications == false)
-        #expect(decoded.remoteConnectionConfig.username == "")
+        #expect(decoded.remoteConnectionConfig.username.isEmpty)
         #expect(decoded.remoteConnectionConfig.supportsNotifications == true)
         #expect(decoded.sseCommandItem == "MySSEItem")
     }
 }
 
-// .serialized prevents parallel test clones from racing on the shared group.org.openhab.app UserDefaults suite.
+/// .serialized prevents parallel test clones from racing on the shared group.org.openhab.app UserDefaults suite.
 @Suite(.serialized)
 @MainActor
 struct UserDefaultsTests {
     @Test func consistency() throws {
-        let data = UserDefaults(suiteName: "group.org.openhab.app")!
+        let data = try #require(UserDefaults(suiteName: "group.org.openhab.app"))
         let defaultsName = try #require(Bundle.main.bundleIdentifier)
         data.removePersistentDomain(forName: defaultsName)
 
@@ -190,6 +190,6 @@ struct UserDefaultsTests {
         homeWithoutCredentials.localConnectionConfig.password = ""
         homeWithoutCredentials.remoteConnectionConfig.username = ""
         homeWithoutCredentials.remoteConnectionConfig.password = ""
-        #expect(homeWithoutCredentials == (try? JSONDecoder().decode(HomePreferences.self, from: data.data(forKey: "currentHomePreferences")!)))
+        #expect(homeWithoutCredentials == (try? JSONDecoder().decode(HomePreferences.self, from: try #require(data.data(forKey: "currentHomePreferences")))))
     }
 }
