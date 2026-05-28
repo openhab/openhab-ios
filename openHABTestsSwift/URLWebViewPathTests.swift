@@ -15,14 +15,14 @@ import Testing
 
 @Suite("relativeWebViewPath(proxyURL:rootURLString:)")
 struct RelativeWebViewPathFunctionTests {
-    @Test func prefersProxyURLWhenPresent() {
-        let proxy = URL(string: "https://host/proxy")!
+    @Test func prefersProxyURLWhenPresent() throws {
+        let proxy = try #require(URL(string: "https://host/proxy"))
         let result = relativeWebViewPath("/proxy/ui", proxyURL: proxy, rootURLString: "https://host")
         #expect(result == "/ui")
     }
 
-    @Test func proxyDoesNotMatchSiblingPath() {
-        let proxy = URL(string: "https://host/proxy")!
+    @Test func proxyDoesNotMatchSiblingPath() throws {
+        let proxy = try #require(URL(string: "https://host/proxy"))
         let result = relativeWebViewPath("/proxy2/ui", proxyURL: proxy, rootURLString: "https://host")
         #expect(result == "/proxy2/ui")
     }
@@ -42,50 +42,50 @@ struct RelativeWebViewPathFunctionTests {
 struct URLWebViewPathTests {
     // MARK: - Exact match
 
-    @Test func exactBasePath() {
-        let url = URL(string: "https://host/openhab")!
+    @Test func exactBasePath() throws {
+        let url = try #require(URL(string: "https://host/openhab"))
         #expect(url.relativeWebViewPath(for: "/openhab") == "/")
     }
 
     // MARK: - Normal sub-path stripping
 
-    @Test func stripsBasePath() {
-        let url = URL(string: "https://host/openhab")!
+    @Test func stripsBasePath() throws {
+        let url = try #require(URL(string: "https://host/openhab"))
         #expect(url.relativeWebViewPath(for: "/openhab/ui") == "/ui")
     }
 
-    @Test func stripsBasePathWithTrailingSlash() {
-        let url = URL(string: "https://host/openhab")!
+    @Test func stripsBasePathWithTrailingSlash() throws {
+        let url = try #require(URL(string: "https://host/openhab"))
         #expect(url.relativeWebViewPath(for: "/openhab/ui/") == "/ui/")
     }
 
     // MARK: - Sibling-path false-match guard (the bug this fixes)
 
-    @Test func doesNotMatchSiblingWithSamePrefix() {
-        let url = URL(string: "https://host/openhab")!
+    @Test func doesNotMatchSiblingWithSamePrefix() throws {
+        let url = try #require(URL(string: "https://host/openhab"))
         // /openhab2/ui must NOT be treated as a sub-path of /openhab
         #expect(url.relativeWebViewPath(for: "/openhab2/ui") == "/openhab2/ui")
     }
 
-    @Test func doesNotMatchSiblingExactPrefix() {
-        let url = URL(string: "https://host/openhab")!
+    @Test func doesNotMatchSiblingExactPrefix() throws {
+        let url = try #require(URL(string: "https://host/openhab"))
         #expect(url.relativeWebViewPath(for: "/openhab2") == "/openhab2")
     }
 
     // MARK: - Edge cases
 
-    @Test func emptyBasePath() {
-        let url = URL(string: "https://host")!
+    @Test func emptyBasePath() throws {
+        let url = try #require(URL(string: "https://host"))
         #expect(url.relativeWebViewPath(for: "/ui") == "/ui")
     }
 
-    @Test func rootBasePath() {
-        let url = URL(string: "https://host/")!
+    @Test func rootBasePath() throws {
+        let url = try #require(URL(string: "https://host/"))
         #expect(url.relativeWebViewPath(for: "/ui") == "/ui")
     }
 
-    @Test func unrelatedPath() {
-        let url = URL(string: "https://host/openhab")!
+    @Test func unrelatedPath() throws {
+        let url = try #require(URL(string: "https://host/openhab"))
         #expect(url.relativeWebViewPath(for: "/other/path") == "/other/path")
     }
 }

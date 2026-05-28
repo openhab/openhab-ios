@@ -155,7 +155,7 @@ actor NotificationServiceHandler {
         return (localURL, urlResponse.mimeType)
     }
 
-    // Helper function to determine full URL
+    /// Helper function to determine full URL
     private func resolveFullURL(from url: String, baseURL: String) -> URL? {
         if let parsedURL = URL(string: url), parsedURL.scheme != nil {
             return parsedURL

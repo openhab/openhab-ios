@@ -122,7 +122,7 @@ private struct SliderRowContent: View {
             guard dragWidgetId == input.widgetId, let dragStartVersion else {
                 isEditing = false
                 dragValue = nil
-                self.dragStartVersion = nil
+                dragStartVersion = nil
                 dragWidgetId = nil
                 return
             }

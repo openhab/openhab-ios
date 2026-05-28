@@ -1,5 +1,5 @@
 {
-  "originHash" : "668dbf2009df850e4ef082e371adec396e99832c3e3a6ccfdf654b717dc3b002",
+  "originHash" : "ce87d13cdc46b65a26be6c5d8b5ee53a01cd0be7cf67b2a5fcbc83f121924b1f",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -249,8 +249,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftFormatPlugin",
       "state" : {
-        "revision" : "c41997c642ffc937c6e83b23dadbd7e626485cfa",
-        "version" : "0.58.7"
+        "revision" : "c7c81920d715e051306d2172083c14aaec2c1b9d",
+        "version" : "0.61.1"
       }
     },
     {
@@ -258,8 +258,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftLintPlugin.git",
       "state" : {
-        "revision" : "47d1da3a8e30e0ada5543899e8c47f54664073ac",
-        "version" : "0.62.2"
+        "revision" : "3741567a0252090897336f1f39b8490107b49ead",
+        "version" : "0.63.3"
       }
     },
     {

@@ -108,11 +108,11 @@ public struct HomePreferences: Codable, Equatable {
         self.id = id
     }
 
-    // Custom decoder so that stored data from older app versions that are missing
-    // fields added later (e.g. alwaysAllowWebRTC, defaultMainUIPath, siteMapForWatchLabel)
-    // still decodes successfully. Without this, synthesized Codable requires every field
-    // to be present and silently falls back to the struct default via `try?` in
-    // UserDefaultObject — resetting homeName to "Home#1" for those users.
+    /// Custom decoder so that stored data from older app versions that are missing
+    /// fields added later (e.g. alwaysAllowWebRTC, defaultMainUIPath, siteMapForWatchLabel)
+    /// still decodes successfully. Without this, synthesized Codable requires every field
+    /// to be present and silently falls back to the struct default via `try?` in
+    /// UserDefaultObject — resetting homeName to "Home#1" for those users.
     public nonisolated init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(UUID.self, forKey: .id)
@@ -355,12 +355,11 @@ public extension Preferences {
 @MainActor
 public extension Preferences {
     func listStoredHomes() -> [UUID] {
-        let preferenceIds = storedHomes
+        storedHomes
             .sorted { e1, e2 in
                 e1.value.homeName <= e2.value.homeName
             }
             .map(\.key)
-        return preferenceIds
     }
 
     func createAndLoadNewStoredSettings(homeName: String) {
@@ -611,7 +610,7 @@ public extension Preferences {
         getNotificationConnection(of: [homeConfig.remoteConnectionConfig])
     }
 
-    // this will support mutliple connection configs, right now we just pass in the remote config
+    /// this will support mutliple connection configs, right now we just pass in the remote config
     func getNotificationConnection(of connections: [ConnectionConfiguration?]) -> ConnectionConfiguration? {
         connections
             .compactMap(\.self)

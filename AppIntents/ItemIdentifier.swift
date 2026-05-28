@@ -33,11 +33,11 @@ struct ItemIdentifier: Codable {
     }
 }
 
-// homeId is a device-local UUID used only for cache lookups and network-tracker resolution.
-// For v2 identifiers (homeIdentifier != nil), entity identity is homeIdentifier + itemName so the
-// App Intents framework can match shortcuts across devices even when the embedded UUID differs.
-// For legacy identifiers (homeIdentifier == nil), homeId is the only home discriminator available,
-// so it is included in equality — without it, same-named items from different homes would collide.
+/// homeId is a device-local UUID used only for cache lookups and network-tracker resolution.
+/// For v2 identifiers (homeIdentifier != nil), entity identity is homeIdentifier + itemName so the
+/// App Intents framework can match shortcuts across devices even when the embedded UUID differs.
+/// For legacy identifiers (homeIdentifier == nil), homeId is the only home discriminator available,
+/// so it is included in equality — without it, same-named items from different homes would collide.
 extension ItemIdentifier: Equatable {
     static func == (lhs: ItemIdentifier, rhs: ItemIdentifier) -> Bool {
         guard lhs.homeIdentifier == nil, rhs.homeIdentifier == nil else {

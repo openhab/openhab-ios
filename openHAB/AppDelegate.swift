@@ -32,7 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     private let notificationDelegate = NotificationCenterDelegateImpl()
 
-    // Delegate Requests from the Watch to the WatchMessageService
+    /// Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {
         didSet {
             if let session {
@@ -99,7 +99,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         configureImageCoders()
 
-        /// load and start the screensaver
+        // load and start the screensaver
         if let keyWindow = UIApplication.shared.firstKeyWindow {
             var config = ScreenSaverConfiguration()
             config.isEnabled = Preferences.shared.screensaverEnabled
@@ -192,7 +192,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    // This is only informational - on success - DID Register
+    /// This is only informational - on success - DID Register
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         // Do nothing now, we are using FCM
     }

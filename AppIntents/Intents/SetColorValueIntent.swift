@@ -31,9 +31,14 @@ enum ColorValueError: Error, CustomLocalizedStringResourceConvertible {
 
 @available(iOS 17.0, macOS 14.0, *)
 struct SetColorValueIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.color] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.color]
+    }
+
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$value) (HSB)") {
             \.$home

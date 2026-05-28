@@ -9,9 +9,8 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-@testable import openHAB
-
 import Foundation
+@testable import openHAB
 import Testing
 
 private final class BundleLocator: AnyObject {}

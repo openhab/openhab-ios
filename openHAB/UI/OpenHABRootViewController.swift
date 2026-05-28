@@ -94,8 +94,7 @@ class OpenHABRootViewController: UIViewController {
 
     private lazy var webViewController: OpenHABWebViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
-        var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABWebViewController") as! OpenHABWebViewController
-        return viewController
+        return storyboard.instantiateViewController(withIdentifier: "OpenHABWebViewController") as! OpenHABWebViewController
     }()
 
     lazy var sitemapViewController: any (UIViewController & OpenHABViewable) = {
@@ -632,7 +631,8 @@ class OpenHABRootViewController: UIViewController {
                 Preferences.shared.switchActiveHome(to: targetHome.id)
             }
             // if the app was woken from a fully stopped state, network tracking might not be active yet
-            await NetworkTracker.shared.startTracking(connectionConfigurations:
+            await NetworkTracker.shared.startTracking(
+                connectionConfigurations:
                 [
                     Preferences.shared.currentHomePreferences.localConnectionConfig,
                     Preferences.shared.currentHomePreferences.remoteConnectionConfig
@@ -668,7 +668,7 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    // Helper function to safely call the completion handler on the main thread
+    /// Helper function to safely call the completion handler on the main thread
     private func callCompletionHandler(_ completionHandler: (() -> Void)?) {
         if let completionHandler {
             DispatchQueue.main.async {

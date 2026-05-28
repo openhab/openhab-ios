@@ -14,7 +14,6 @@ import OpenHABCore
 import SwiftUI
 import Testing
 
-@Suite
 struct RowLayoutPolicyTests {
     @Test
     func linkedFrameUsesFrameInsetsAndBackground() {

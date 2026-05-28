@@ -64,9 +64,7 @@ enum DrawerFetch {
         }
     }
 
-    static func uiTiles(
-        fetch: () async throws -> [OpenHABUiTile]
-    ) async -> DrawerFetchResult<[OpenHABUiTile]> {
+    static func uiTiles(fetch: () async throws -> [OpenHABUiTile]) async -> DrawerFetchResult<[OpenHABUiTile]> {
         do {
             let uiTiles = try await fetch()
             try Task.checkCancellation()
@@ -79,7 +77,7 @@ enum DrawerFetch {
     }
 }
 
-// Display the active home name and connection type (Local / Remote)
+/// Display the active home name and connection type (Local / Remote)
 struct ConnectionView: View {
     @EnvironmentObject private var networkTracker: MainActorNetworkTracker
     @ScaledMetric private var iconWidth = 20.0

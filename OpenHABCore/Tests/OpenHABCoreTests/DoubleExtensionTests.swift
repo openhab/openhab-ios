@@ -14,7 +14,7 @@ import Testing
 
 struct DoubleExtensionTests {
     @Test
-    func valueTextWithNoDecimalPlaces() throws {
+    func valueTextWithNoDecimalPlaces() {
         let value = 42.0
         let step = 1.0
         let result = value.valueText(step: step)
@@ -22,7 +22,7 @@ struct DoubleExtensionTests {
     }
 
     @Test
-    func valueTextWithOneDecimalPlace() throws {
+    func valueTextWithOneDecimalPlace() {
         let value = 42.5
         let step = 0.1
         let result = value.valueText(step: step)
@@ -30,7 +30,7 @@ struct DoubleExtensionTests {
     }
 
     @Test
-    func valueTextWithTwoDecimalPlaces() throws {
+    func valueTextWithTwoDecimalPlaces() {
         let value = 42.75
         let step = 0.01
         let result = value.valueText(step: step)
@@ -38,7 +38,7 @@ struct DoubleExtensionTests {
     }
 
     @Test
-    func valueTextWithThreeDecimalPlaces() throws {
+    func valueTextWithThreeDecimalPlaces() {
         let value = 3.142
         let step = 0.001
         let result = value.valueText(step: step)
@@ -46,7 +46,7 @@ struct DoubleExtensionTests {
     }
 
     @Test
-    func valueTextRoundsToStepPrecision() throws {
+    func valueTextRoundsToStepPrecision() {
         let value = 3.14159
         let step = 0.01
         let result = value.valueText(step: step)
@@ -54,7 +54,7 @@ struct DoubleExtensionTests {
     }
 
     @Test
-    func valueTextWithZeroValue() throws {
+    func valueTextWithZeroValue() {
         let value = 0.0
         let step = 0.1
         let result = value.valueText(step: step)
@@ -62,7 +62,7 @@ struct DoubleExtensionTests {
     }
 
     @Test
-    func valueTextWithNegativeValue() throws {
+    func valueTextWithNegativeValue() {
         let value = -42.5
         let step = 0.1
         let result = value.valueText(step: step)
@@ -70,7 +70,7 @@ struct DoubleExtensionTests {
     }
 
     @Test
-    func valueTextWithVerySmallStep() throws {
+    func valueTextWithVerySmallStep() {
         let value = 1.23456789
         let step = 0.00001
         let result = value.valueText(step: step)
@@ -78,7 +78,7 @@ struct DoubleExtensionTests {
     }
 
     @Test
-    func valueTextPadsTrailingZeros() throws {
+    func valueTextPadsTrailingZeros() {
         let value = 42.0
         let step = 0.01
         let result = value.valueText(step: step)
@@ -86,7 +86,7 @@ struct DoubleExtensionTests {
     }
 
     @Test
-    func valueTextWithLargeValue() throws {
+    func valueTextWithLargeValue() {
         let value = 12345.67
         let step = 0.1
         let result = value.valueText(step: step)
@@ -94,7 +94,7 @@ struct DoubleExtensionTests {
     }
 
     @Test
-    func valueTextUsesDecimalPoint() throws {
+    func valueTextUsesDecimalPoint() {
         let value = 1234.5
         let step = 0.1
         let result = value.valueText(step: step)
@@ -103,7 +103,7 @@ struct DoubleExtensionTests {
     }
 
     @Test
-    func valueTextNoThousandsSeparator() throws {
+    func valueTextNoThousandsSeparator() {
         let value = 1_000_000.0
         let step = 1.0
         let result = value.valueText(step: step)
