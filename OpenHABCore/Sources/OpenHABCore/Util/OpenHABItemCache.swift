@@ -152,6 +152,7 @@ public actor OpenHABItemCache {
     /// handoff (~7 s in practice) without failing with noActiveConnection.
     private static let networkTimeout: TimeInterval = 10
 
+
     private static let stubsDefaultsKey = "openHABItemStubs"
     private static let sharedDefaultsSuiteName = "group.org.openhab.app"
 
