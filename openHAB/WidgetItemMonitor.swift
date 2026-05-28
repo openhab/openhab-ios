@@ -34,7 +34,9 @@ class WidgetItemMonitor {
         isMonitoring = true
         Logger.widgets.info("Starting widget item monitoring")
 
-        // Start network monitoring for SSE connection
+        // Start network monitoring for SSE connection.
+        // startMonitoringNetwork returns immediately; the monitoring task
+        // lives inside the ItemEventStream actor for its lifetime.
         monitoringTask = Task {
             await ItemEventStream.startMonitoringNetwork()
         }
@@ -124,9 +126,11 @@ class WidgetItemMonitor {
     }
 
     private func reloadWidgets(for itemName: String) {
-        // Reload all switch and sensor widgets
-        // Note: This reloads all widgets of these types, not just the specific item
-        WidgetCenter.shared.reloadTimelines(ofKind: "OpenHABSwitchWidget")
+        // Reload all switch and sensor widgets that may display this item.
+        // Each size is a separate widget kind since iOS 17+.
+        WidgetCenter.shared.reloadTimelines(ofKind: "OpenHABSwitchWidgetSmall")
+        WidgetCenter.shared.reloadTimelines(ofKind: "OpenHABSwitchWidgetMedium")
+        WidgetCenter.shared.reloadTimelines(ofKind: "OpenHABSwitchWidgetLarge")
         WidgetCenter.shared.reloadTimelines(ofKind: "OpenHABSensorWidget")
     }
 }
