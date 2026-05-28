@@ -12,6 +12,7 @@
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
+import UIKit
 
 struct SpinningSymbol: View {
     @State private var isAnimating = false
@@ -36,12 +37,17 @@ struct SingleConnectionSettingsView: View {
 
     @Binding var connectionConfig: ConnectionConfiguration
     var showNotificationToggle: Bool
+    /// Written with the successfully-tested URL when a local connection test passes.
+    /// Callers can compare this against the current URL to skip the Local Network alert.
+    @Binding var testedOKURL: String
 
     @State private var isTestingConnection = false
     @State private var connectionTestMessage: String?
     @State private var connectionTestSuccess: Bool?
 
     @State private var isPresentingDiscoverySheet = false
+
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         Section(header: Text(headerText)) {
@@ -54,6 +60,10 @@ struct SingleConnectionSettingsView: View {
                         .autocorrectionDisabled(true)
                         .multilineTextAlignment(.trailing)
                         .font(.system(.caption))
+                        .onChange(of: connectionConfig.url) { _ in
+                            connectionTestMessage = nil
+                            connectionTestSuccess = nil
+                        }
                 } label: {
                     HStack {
                         Text("URL")
@@ -101,6 +111,23 @@ struct SingleConnectionSettingsView: View {
                             .font(.caption2)
                     }
                     .transition(.opacity)
+
+                    if isLocalConnection, !success {
+                        HStack(spacing: 4) {
+                            Image(systemSymbol: .wifiSlash)
+                            Text("Local Network access may be required.")
+                            Button("Open Settings") {
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    openURL(url)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(Color.accentColor)
+                        }
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .transition(.opacity)
+                    }
                 }
             }
 
@@ -160,6 +187,9 @@ struct SingleConnectionSettingsView: View {
             try await testConnection()
             connectionTestMessage = String(localized: "Connection successful")
             connectionTestSuccess = true
+            if isLocalConnection {
+                testedOKURL = connectionConfig.url
+            }
         } catch is CancellationError {
             connectionTestMessage = String(localized: "Cancellation occurred")
             connectionTestSuccess = false
@@ -223,7 +253,7 @@ struct SingleConnectionSettingsView: View {
         var body: some View {
             NavigationStack {
                 Form {
-                    SingleConnectionSettingsView(headerText: String(localized: "Connection Settings for local server"), connectionConfig: $connectionConfig, showNotificationToggle: false)
+                    SingleConnectionSettingsView(headerText: String(localized: "Connection Settings for local server"), isLocalConnection: true, connectionConfig: $connectionConfig, showNotificationToggle: false, testedOKURL: .constant(""))
                 }
             }
         }
