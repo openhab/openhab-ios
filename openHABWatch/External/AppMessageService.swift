@@ -65,6 +65,20 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
                     }
                 }
             }
+            // Persist all homes' credentials in the Watch Keychain so they survive app restart.
+            // CredentialsStore uses no kSecAttrAccessGroup, so it naturally targets the Watch Keychain.
+            if let homeCredentials = prefs.homeCredentials {
+                for (uuidString, creds) in homeCredentials {
+                    guard let homeId = UUID(uuidString: uuidString) else { continue }
+                    CredentialsStore.store(username: creds.localUsername, password: creds.localPassword, homeId: homeId, type: .local)
+                    CredentialsStore.store(username: creds.remoteUsername, password: creds.remotePassword, homeId: homeId, type: .remote)
+                }
+                Logger.preferences.debug("🔑 Persisted credentials for \(homeCredentials.count) home(s) to Watch Keychain")
+            }
+            // Persist the active home ID so AppSettings can inject credentials on restart.
+            if let activeHomeId = prefs.activeHomeId {
+                AppSettings.shared.activeHomeId = activeHomeId
+            }
             //                   if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
             //                       // do we need to do anything here?  We load from the shared keychain.
             //                   }
