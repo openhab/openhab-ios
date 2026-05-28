@@ -35,6 +35,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published private(set) var trackerStatus: NetworkStatus = .stopped
     @Published private(set) var widgetUpdateVersions: [String: Int] = [:]
     @Published private(set) var rowInputs: [SitemapRowInput] = []
+    @Published var navigationPath: [LinkedPageNavigation] = []
 
     let networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
@@ -64,7 +65,6 @@ class SitemapPageViewModel: ObservableObject {
     var lastForegroundRefreshAt: Date = .distantPast
     private var isPageVisibleForRefresh = false
     private var lastUIUpdateAt: Date = .distantPast
-    private var lastLongPollResponseAt: Date?
     private var coalescedLongPollUpdateCount = 0
     private var pendingLongPollPage: OpenHABPage?
     private var longPollDebounceTask: Task<Void, Never>?
@@ -117,6 +117,19 @@ class SitemapPageViewModel: ObservableObject {
         } else {
             self.pageId = pageId
         }
+    }
+
+    init(sitemapName: String, pageUrl: String, title: String, pageId: String) {
+        loadSettings()
+        defaultSitemap = sitemapName
+        isLinkedPage = true
+        startObservers()
+        fallbackTitle = title
+        defaultSitemapLabel = title
+        self.pageId = pageId
+
+        // Set openHABRootUrl from current active connection for charts/images
+        openHABRootUrl = networkTracker.activeConnection?.configuration.url
     }
 
     /// Initializes the view model with a fixed set of widgets, without loading or polling
@@ -268,7 +281,6 @@ extension SitemapPageViewModel {
         longPollDebounceTask?.cancel()
         longPollDebounceTask = nil
         pendingLongPollPage = nil
-        lastLongPollResponseAt = nil
         coalescedLongPollUpdateCount = 0
         activePageHandlingKey = nil
         activePageHandlingID = nil
@@ -327,7 +339,6 @@ extension SitemapPageViewModel {
         longPollDebounceTask = nil
         pendingLongPollPage = nil
         lastUIUpdateAt = .distantPast
-        lastLongPollResponseAt = nil
         coalescedLongPollUpdateCount = 0
         error = nil // Clear any previous errors when starting a new page handling session
         if preserveCurrentContent, currentPage != nil {
@@ -353,11 +364,9 @@ extension SitemapPageViewModel {
         }
     }
 
-    private func runPageHandling(
-        runID: UUID,
-        recreateService: Bool,
-        pipelineStart: Date
-    ) async {
+    private func runPageHandling(runID: UUID,
+                                 recreateService: Bool,
+                                 pipelineStart: Date) async {
         defer {
             if activePageHandlingID == runID {
                 pageHandlingTask = nil
@@ -376,12 +385,56 @@ extension SitemapPageViewModel {
                 await fetchSitemapLabel()
             }
 
-            try await loadInitialPageForHandling(runID: runID)
-            isLoading = false
-            isUpdating = false
-            let totalDurationMs = Date().timeIntervalSince(pipelineStart) * 1000
-            logger.info("Sitemap pipeline ready in \(Int(totalDurationMs.rounded()), privacy: .public)ms")
-            try await runLongPollingLoop(runID: runID)
+            guard let service = openAPIService else { return }
+
+            var lastResponseAt: Date?
+
+            for try await event in SitemapPageLoader.stream(
+                sitemapName: defaultSitemap,
+                pageId: pageId,
+                service: service,
+                shouldRetry: shouldRetryLongPolling,
+                onLongPollError: { _, requestMs, willRetry in
+                    Task { @MainActor in
+                        SitemapDiagnostics.logLongPoll(
+                            requestMs: requestMs,
+                            returnedPage: false,
+                            status: willRetry ? "retry" : "failed",
+                            responseGapMs: nil
+                        )
+                    }
+                }
+            ) {
+                try Task.checkCancellation()
+                guard activePageHandlingID == runID else {
+                    logger.info("Ignoring stale page result for run \(runID.uuidString, privacy: .public)")
+                    return
+                }
+
+                let responseAt = Date()
+
+                switch event {
+                case let .initialFetch(page):
+                    isLoading = false
+                    isUpdating = false
+                    let totalDurationMs = Date().timeIntervalSince(pipelineStart) * 1000
+                    logger.info("Sitemap pipeline ready in \(Int(totalDurationMs.rounded()), privacy: .public)ms")
+                    if let page {
+                        await updateUI(with: page, origin: .initialPoll)
+                    }
+                case let .longPoll(page, requestMs):
+                    let responseGapMs = lastResponseAt.map { Int((responseAt.timeIntervalSince($0) * 1000).rounded()) }
+                    SitemapDiagnostics.logLongPoll(
+                        requestMs: requestMs,
+                        returnedPage: true,
+                        status: "success",
+                        responseGapMs: responseGapMs
+                    )
+                    scheduleLongPollUIUpdate(page: page, runID: runID)
+                }
+
+                lastResponseAt = responseAt
+            }
         } catch {
             handlePageHandlingError(error)
         }
@@ -424,85 +477,6 @@ extension SitemapPageViewModel {
             openAPIService = try makeSitemapService(for: activeConnection)
             if forceRecreate {
                 logger.info("Recreated OpenAPIService for fresh sitemap polling")
-            }
-        }
-    }
-
-    private func loadInitialPageForHandling(runID: UUID) async throws {
-        let initialPage = try await openAPIService?.pollDataForPage(
-            sitemapname: defaultSitemap,
-            pageId: pageId,
-            longPolling: false
-        )
-
-        try Task.checkCancellation()
-        guard activePageHandlingID == runID else {
-            logger.info("Ignoring stale initial page result for run \(runID.uuidString, privacy: .public)")
-            return
-        }
-
-        if let page = initialPage {
-            await updateUI(with: page, origin: .initialPoll)
-        } else {
-            logger.info("Initial sitemap poll returned no page data")
-        }
-    }
-
-    private func runLongPollingLoop(runID: UUID) async throws {
-        while !Task.isCancelled {
-            let requestStartedAt = Date()
-            do {
-                let page = try await openAPIService?.pollDataForPage(
-                    sitemapname: defaultSitemap,
-                    pageId: pageId,
-                    longPolling: true
-                )
-                let responseAt = Date()
-                let requestMs = Int((responseAt.timeIntervalSince(requestStartedAt) * 1000).rounded())
-                let responseGapMs = lastLongPollResponseAt.map { Int((responseAt.timeIntervalSince($0) * 1000).rounded()) }
-                lastLongPollResponseAt = responseAt
-                try Task.checkCancellation()
-                guard activePageHandlingID == runID else {
-                    SitemapDiagnostics.logLongPoll(
-                        requestMs: requestMs,
-                        returnedPage: page != nil,
-                        status: "stale",
-                        responseGapMs: responseGapMs
-                    )
-                    logger.info("Ignoring stale long-poll result for run \(runID.uuidString, privacy: .public)")
-                    return
-                }
-
-                SitemapDiagnostics.logLongPoll(
-                    requestMs: requestMs,
-                    returnedPage: page != nil,
-                    status: "success",
-                    responseGapMs: responseGapMs
-                )
-                if let page {
-                    scheduleLongPollUIUpdate(page: page, runID: runID)
-                }
-            } catch {
-                let requestMs = Int((Date().timeIntervalSince(requestStartedAt) * 1000).rounded())
-                try Task.checkCancellation()
-                guard shouldRetryLongPolling(after: error) else {
-                    SitemapDiagnostics.logLongPoll(
-                        requestMs: requestMs,
-                        returnedPage: false,
-                        status: "failed",
-                        responseGapMs: nil
-                    )
-                    throw error
-                }
-
-                SitemapDiagnostics.logLongPoll(
-                    requestMs: requestMs,
-                    returnedPage: false,
-                    status: "retry",
-                    responseGapMs: nil
-                )
-                logger.info("Transient long-polling error, retrying: \(error.localizedDescription, privacy: .public)")
-                try? await Task.sleep(nanoseconds: 500_000_000)
             }
         }
     }
@@ -745,7 +719,7 @@ extension SitemapPageViewModel {
         applySnapshotRowInputBuildResult(result, widgets: relevantWidgets)
     }
 
-    private func shouldRetryLongPolling(after error: any Error) -> Bool {
+    private nonisolated func shouldRetryLongPolling(after error: any Error) -> Bool {
         if let urlError = OpenAPIErrorInspector.underlyingURLError(from: error) {
             switch urlError.code {
             case .timedOut, .networkConnectionLost, .cannotConnectToHost, .notConnectedToInternet, .cannotFindHost:
@@ -779,12 +753,23 @@ extension SitemapPageViewModel {
     }
 
     @MainActor
+    func configureSitemap(name: String, pageId: String?) {
+        defaultSitemap = name
+        defaultSitemapLabel = ""
+        self.pageId = pageId ?? ""
+        navigationPath = []
+        error = nil
+    }
+
+    @MainActor
+    func navigateToLinkedPage(_ nav: LinkedPageNavigation) {
+        navigationPath.append(nav)
+    }
+
+    @MainActor
     // swiftlint:disable:next async_without_await
     func pushSitemap(name: String, path: String?) async {
-        defaultSitemap = name
-        defaultSitemapLabel = "" // Clear old label so it gets fetched for the new sitemap
-        pageId = path ?? ""
-        error = nil // Clear any previous errors when switching sitemaps
+        configureSitemap(name: name, pageId: path)
         startPageHandling(forceRestart: true, reason: "push-sitemap")
     }
 

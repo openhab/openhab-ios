@@ -22,7 +22,7 @@ enum CertificateStoreTestError: Error {
 
 @Suite("CertificateStore Tests", .serialized)
 struct CertificateStoreTests {
-    // Helper to load the bundled test certificate data
+    /// Helper to load the bundled test certificate data
     func loadTestCertificateData() throws -> Data {
         guard let certURL = Bundle.module.url(forResource: "test-cert", withExtension: "cer") else {
             throw CertificateStoreTestError.resourceNotFound("test-cert.cer")
@@ -30,12 +30,12 @@ struct CertificateStoreTests {
         return try Data(contentsOf: certURL)
     }
 
-    // Helper to create a fresh in-memory store for isolated testing
+    /// Helper to create a fresh in-memory store for isolated testing
     func makeInMemoryStore() -> CertificateStore {
         CertificateStore(persistencePath: nil)
     }
 
-    // Helper to create a unique temporary path for persistence tests
+    /// Helper to create a unique temporary path for persistence tests
     func makeTempPersistencePath() -> URL {
         let tempDir = FileManager.default.temporaryDirectory
         let uniqueID = UUID().uuidString
@@ -57,7 +57,7 @@ struct CertificateStoreTests {
         let info = await store.getCertificateInfo(forDomain: domain)
         #expect(info != nil)
         #expect(info?.data == data)
-        #expect(info!.dateAccepted.timeIntervalSinceNow > -5) // stored just now
+        #expect(try #require(info?.dateAccepted.timeIntervalSinceNow) > -5) // stored just now
     }
 
     @Test("Overwrite existing certificate updates data and date", .timeLimit(.minutes(1)))
@@ -69,7 +69,7 @@ struct CertificateStoreTests {
         await store.storeCertificateData(first, forDomain: domain)
         let firstInfo = await store.getCertificateInfo(forDomain: domain)
         #expect(firstInfo != nil)
-        let firstDate = firstInfo!.dateAccepted
+        let firstDate = try #require(firstInfo?.dateAccepted)
 
         // Overwrite with new data
         let second = Data([0x0A, 0x0B])
@@ -77,12 +77,12 @@ struct CertificateStoreTests {
 
         let info = await store.getCertificateInfo(forDomain: domain)
         #expect(info != nil)
-        #expect(info!.data == second)
-        #expect(info!.dateAccepted >= firstDate)
+        #expect(info?.data == second)
+        #expect(try #require(info?.dateAccepted) >= firstDate)
     }
 
     @Test("Remove certificate clears entry", .timeLimit(.minutes(1)))
-    func removeClears() async throws {
+    func removeClears() async {
         let domain = "remove-test.openhab.org"
         let store = makeInMemoryStore()
 
@@ -98,7 +98,7 @@ struct CertificateStoreTests {
     }
 
     @Test("Store nil removes certificate", .timeLimit(.minutes(1)))
-    func storeNilRemoves() async throws {
+    func storeNilRemoves() async {
         let domain = "nil-remove-test.openhab.org"
         let store = makeInMemoryStore()
 
@@ -111,7 +111,7 @@ struct CertificateStoreTests {
     }
 
     @Test("Get all certificates returns expected entries", .timeLimit(.minutes(1)))
-    func getAllCertificates() async throws {
+    func getAllCertificates() async {
         let domainA = "list-a-test.openhab.org"
         let domainB = "list-b-test.openhab.org"
         let store = makeInMemoryStore()
@@ -129,7 +129,7 @@ struct CertificateStoreTests {
     }
 
     @Test("Persistence across instances", .timeLimit(.minutes(1)))
-    func persistenceAcrossInstances() async throws {
+    func persistenceAcrossInstances() async {
         let domain = "persistence-test.openhab.org"
         let tempPath = makeTempPersistencePath()
 

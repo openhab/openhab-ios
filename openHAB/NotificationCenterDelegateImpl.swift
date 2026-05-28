@@ -22,7 +22,13 @@ import UIKit
 @preconcurrency import UserNotifications
 import WatchConnectivity
 
-actor AudioPlayerActor {
+/// AVAudioPlayer must be created, used, and deallocated on the main thread.
+/// Using a plain `actor` placed it on a background executor, causing a crash when
+/// AVFoundation delivered finishedPlaying: on the main thread while the old player
+/// was simultaneously being deallocated on the actor's background thread (mutex contention
+/// in AVAudioPlayerCpp::DoAction / disposeQueue). @MainActor pins the entire lifecycle.
+@MainActor
+final class AudioPlayerActor {
     private var player: AVAudioPlayer?
 
     func playSound() {
@@ -49,7 +55,7 @@ actor AudioPlayerActor {
 final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDelegate {
     let audioPlayer = AudioPlayerActor()
 
-    // this is called when a notification comes in while in the foreground
+    /// this is called when a notification comes in while in the foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
         let userInfo = notification.request.content.userInfo
         Logger.notificationCenterDelegateImpl.info("Notification received while app is in foreground: \(userInfo)")
@@ -60,12 +66,18 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             userInfo: userInfo
         )
 
+        // Use the system banner when there are media attachments so the image is visible.
+        // The didReceive handler will process any on-click action when the user taps.
+        if !notification.request.content.attachments.isEmpty {
+            return [.banner, .sound]
+        }
+
         let message = userInfo["message"] as? String ?? String(localized: "message_not_decoded", comment: "")
         let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
         let cloudUserId = userInfo["userId"] as? String
         await displayNotification(message: message, action: action, cloudUserId: cloudUserId)
 
-        return [] // Modify this if you want to show banners, alerts, etc.
+        return []
     }
 
     // this is called when clicking a notification while in the background
@@ -90,9 +102,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
     private func displayNotification(message: String, action: String?, cloudUserId: String?) async {
         Logger.notificationCenterDelegateImpl.info("displayNotification \(message)")
 
-        Task {
-            await audioPlayer.playSound()
-        }
+        audioPlayer.playSound()
 
         var config = SwiftMessages.Config()
         config.duration = .seconds(seconds: 5)
@@ -140,7 +150,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         SwiftMessages.hideAll()
     }
 
-    // ✅ Ensure this runs on the MainActor
+    /// ✅ Ensure this runs on the MainActor
     @MainActor
     func notifyNotificationListeners(action: String?, cloudUserId: String? = nil) {
         // Wake up screen saver immediately on incoming notification interaction

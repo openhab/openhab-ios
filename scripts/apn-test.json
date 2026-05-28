@@ -1,0 +1,11 @@
+{
+     "Simulator Target Bundle": "org.openhab.app",
+     "aps": {
+         "alert": {
+             "title": "Test",
+             "body": "Navigate to sub-page"
+         }
+     },
+     "message": "Navigate to sub-page",
+     "on-click": "ui:/basicui/app?w=1304&sitemap=uicomponents_page_myHome"
+ }

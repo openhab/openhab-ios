@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import OpenHABCore
-
 import Testing
 import UIKit
 
@@ -179,7 +178,7 @@ struct NumberStateTests {
     }
 
     @Test("parseAs conversions")
-    func parseAs() {
+    func parseAs() throws {
         #expect("ON".parseAsBool() == true)
         #expect("4,3,1".parseAsBrightness() == 1)
         #expect("4,31".parseAsBrightness() == nil)
@@ -196,7 +195,7 @@ struct NumberStateTests {
         let col1 = "Uninitialized".parseAsUIColor()
         let col2 = UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
         #expect(col1 != nil)
-        #expect(col1!.equals(col2))
+        #expect(try #require(col1?.equals(col2)))
         #expect("360,100,100".parseAsUIColor() == UIColor(
             hue: CGFloat(state: "360", divisor: 360),
             saturation: CGFloat(state: "100", divisor: 100),

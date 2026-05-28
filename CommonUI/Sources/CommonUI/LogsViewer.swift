@@ -17,8 +17,10 @@ import SwiftUI
 // Thanks to https://useyourloaf.com/blog/fetching-oslog-messages-in-swift/
 
 public struct LogsViewer: View {
-    private static let template = NSPredicate(format:
-        "(subsystem BEGINSWITH $PREFIX)")
+    private static let template = NSPredicate(
+        format:
+        "(subsystem BEGINSWITH $PREFIX)"
+    )
 
     @State private var text = String(localized: "Loading…")
     @State private var exportURL: URL?
@@ -88,7 +90,8 @@ public struct LogsViewer: View {
             let predicate = Self.template.withSubstitutionVariables(
                 [
                     "PREFIX": "org.openhab"
-                ])
+                ]
+            )
 
             let logs = try Logger.fetch(
                 since: dayAgo,

@@ -22,7 +22,10 @@ class OpenHABWebViewController: OpenHABViewController {
     private var currentTarget = ""
     private var openHABTrackedRootUrl = ""
     private var activeConnectionInfo: ConnectionInfo?
-    private var activeConfig: ConnectionConfiguration? { activeConnectionInfo?.configuration }
+    private var activeConfig: ConnectionConfiguration? {
+        activeConnectionInfo?.configuration
+    }
+
     private var hideNavigationBar = false
     private var activityIndicator: UIActivityIndicatorView!
     private var sseTimer: Timer?
@@ -34,6 +37,10 @@ class OpenHABWebViewController: OpenHABViewController {
     private var etagChecker: ETagChecker?
     private var etagCheckerConfigURL: String? // Track which config the checker was created for
     private var lastLoadedURL: String? // Track the last successfully loaded URL from didFinish
+
+    var hasLoadedPage: Bool {
+        !currentTarget.isEmpty
+    }
 
     private var js = """
     (function() {
@@ -82,11 +89,24 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     private var webView: WKWebView = .init(frame: .zero)
+    private let loadingOverlay = UIView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
         attachWebViewToLayout(webView)
+
+        loadingOverlay.backgroundColor = .systemBackground
+        loadingOverlay.isHidden = true
+        loadingOverlay.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(loadingOverlay)
+        NSLayoutConstraint.activate([
+            loadingOverlay.topAnchor.constraint(equalTo: view.topAnchor),
+            loadingOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            loadingOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            loadingOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+
         activityIndicator = UIActivityIndicatorView()
         activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
@@ -100,8 +120,18 @@ class OpenHABWebViewController: OpenHABViewController {
         setHideNavigationBar(shouldHide: hideNavigationBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
         parent?.navigationItem.title = "Main View"
+
+        // On first appearance (no page loaded yet) keep the overlay visible so the blank
+        // WKWebView is never exposed to the user before the page starts loading.
+        if currentTarget.isEmpty {
+            loadingOverlay.layer.removeAllAnimations()
+            loadingOverlay.alpha = 1
+            loadingOverlay.isHidden = false
+        }
+
         MainActorNetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
+            .removeDuplicates()
             .sink { activeConnection in
                 if let activeConnection {
                     let activeConfiguration = activeConnection.configuration
@@ -133,6 +163,14 @@ class OpenHABWebViewController: OpenHABViewController {
         trackerCancellables.removeAll()
 
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
+    }
+
+    func prepareForDisplayTransition() {
+        guard isViewLoaded, !hasLoadedPage else { return }
+        loadingOverlay.layer.removeAllAnimations()
+        loadingOverlay.alpha = 1
+        loadingOverlay.isHidden = false
+        showActivityIndicator(show: true)
     }
 
     func startTracker() {
@@ -313,7 +351,7 @@ class OpenHABWebViewController: OpenHABViewController {
         return url
     }
 
-    // swift really makes you work to construct simple URLs, uhg.....
+    /// swift really makes you work to construct simple URLs, uhg.....
     func appendPathToURL(baseURL: URL, path: String) -> URL? {
         guard var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
             return nil
@@ -352,12 +390,15 @@ class OpenHABWebViewController: OpenHABViewController {
     func clearExistingPage() {
         Logger.viewController.info("clearExistingPage")
         setHideNavigationBar(shouldHide: false)
-        // clear out existing page while we load.
+        loadingOverlay.layer.removeAllAnimations()
+        loadingOverlay.alpha = 1
+        loadingOverlay.isHidden = false
         webView.stopLoading()
         webView.evaluateJavaScript("document.body.remove()")
     }
 
     func pageLoadError(message: String) {
+        loadingOverlay.isHidden = true
         showActivityIndicator(show: true)
         showPopupMessage(seconds: 60, title: String(localized: "Error", comment: ""), message: message, theme: .error)
     }
@@ -437,6 +478,7 @@ class OpenHABWebViewController: OpenHABViewController {
         // support dark mode and avoid white flashing when loading
         webview.isOpaque = false
         webview.backgroundColor = UIColor.clear
+        webview.underPageBackgroundColor = .systemBackground
         if UIDevice.current.userInterfaceIdiom == .pad {
             // since ios 13 Safari sets the user agent to desktop mode on iPads so the view renders correctly with larger screens
             webview.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
@@ -462,7 +504,7 @@ class OpenHABWebViewController: OpenHABViewController {
 
     func attachWebViewToLayout(_ webView: WKWebView) {
         if webView.superview !== view {
-            view.addSubview(webView)
+            view.insertSubview(webView, at: 0)
         }
         webView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -658,6 +700,12 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
         setHideNavigationBar(shouldHide: true)
         showActivityIndicator(show: false)
+        UIView.animate(withDuration: 0.2) {
+            self.loadingOverlay.alpha = 0
+        } completion: { _ in
+            self.loadingOverlay.isHidden = true
+            self.loadingOverlay.alpha = 1
+        }
         hidePopupMessages()
         acceptsCommands = true
         // watch for URL changes so we can store the last visited path
@@ -696,6 +744,10 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+        let nsError = error as NSError
+        if nsError.domain == NSURLErrorDomain, nsError.code == NSURLErrorCancelled {
+            return
+        }
         setHideNavigationBar(shouldHide: false)
         reloadView()
     }

@@ -13,7 +13,6 @@
 import OpenHABCore
 import Testing
 
-@Suite
 struct SitemapRowInputMapperTests {
     @Test
     func linkedPageWidgetsAlwaysMapToLinked() {

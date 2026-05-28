@@ -57,7 +57,6 @@ private struct SelectionRowContent: View {
         }
     }
 
-    @ViewBuilder
     private func rowContent(displayedCommand: String) -> some View {
         RowViewWithIcon(input: input) {
             if !input.displayState.labelText.isEmpty {

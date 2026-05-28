@@ -15,11 +15,11 @@ import Security
 
 @MainActor
 public protocol ClientCertificateManagerDelegate: AnyObject {
-    // delegate should ask user for a decision on whether to import the client certificate into the keychain
+    /// delegate should ask user for a decision on whether to import the client certificate into the keychain
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool
-    // delegate should ask user for a decision on whether to import the client certificate into the keychain
+    /// delegate should ask user for a decision on whether to import the client certificate into the keychain
     func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String?
-    // delegate should alert the user that an error occured importing the certificate
+    /// delegate should alert the user that an error occured importing the certificate
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async
 }
 
@@ -157,8 +157,7 @@ public class ClientCertificateManager {
 
             guard let delegate else { return false }
 
-            let shouldImport = await delegate.askForClientCertificateImport(self)
-            return shouldImport
+            return await delegate.askForClientCertificateImport(self)
         } catch {
             Logger.clientCert.error("Failed to read certificate from URL: \(error.localizedDescription)")
             return false

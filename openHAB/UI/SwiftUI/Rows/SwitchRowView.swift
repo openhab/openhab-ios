@@ -54,11 +54,7 @@ private struct SwitchRowContent: View {
                 set: { newValue in
                     localIsOn = newValue
                     let newState = newValue ? "ON" : "OFF"
-                    if newValue {
-                        logger.info("\("Switch to ON")")
-                    } else {
-                        logger.info("\("Switch to OFF")")
-                    }
+                    logger.info("Switch to \(newState, privacy: .public)")
                     onSendCommand(newState)
                     // If the thing rejects the command (autoupdate=false), the server sends back
                     // the same state so onChange never fires — revert optimistic state after 1s.

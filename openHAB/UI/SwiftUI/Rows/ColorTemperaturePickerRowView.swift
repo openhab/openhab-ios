@@ -276,7 +276,7 @@ private struct ColorTemperaturePickerRowContent: View {
         }
     }
 
-    // Generate gradient colors similar to Android implementation
+    /// Generate gradient colors similar to Android implementation
     private func colorTemperatureGradient(steps: Int = 20) -> [Color] {
         ColorTemperatureRowMath.gradientTemperatures(for: temperatureRange, steps: steps).map { Color(temperature: $0) }
     }

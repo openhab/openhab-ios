@@ -13,7 +13,6 @@
 import Testing
 import WebKit
 
-@Suite
 struct WebRowViewConfigurationTests {
     @MainActor
     @Test

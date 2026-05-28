@@ -11,8 +11,8 @@
 
 import Foundation
 
-// Custom DateFormatter to handle fractional seconds
-// Inspired by https://useyourloaf.com/blog/swift-codable-with-custom-dates/
+/// Custom DateFormatter to handle fractional seconds
+/// Inspired by https://useyourloaf.com/blog/swift-codable-with-custom-dates/
 public extension DateFormatter {
     static let iso8601Full: DateFormatter = {
         let formatter = DateFormatter()

@@ -15,7 +15,6 @@ import OpenAPIRuntime
 import OpenHABCore
 import Testing
 
-@Suite
 struct OpenAPIServiceSendItemCommandTests {
     @Test("sendItemCommand uses text/plain for non-empty commands")
     func sendItemCommandUsesPlainTextForNonEmptyCommand() async throws {

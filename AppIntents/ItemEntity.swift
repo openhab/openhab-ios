@@ -1,0 +1,83 @@
+// Copyright (c) 2010-2026 Contributors to the openHAB project
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information.
+//
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
+//
+// SPDX-License-Identifier: EPL-2.0
+
+import AppIntents
+import OpenHABCore
+
+// MARK: - Shared Protocol for All Item Entities
+
+@available(iOS 17.0, macOS 14.0, *)
+protocol ItemEntity: AppEntity where ID == ItemIdentifier {
+    var id: ItemIdentifier { get set }
+    var item: OpenHABItem { get set }
+    var homeName: String? { get set }
+
+    init(id: ItemIdentifier, item: OpenHABItem, homeName: String?)
+    init(_ openHABItem: OpenHABItem, homeId: UUID, homeName: String?)
+}
+
+@available(iOS 17.0, macOS 14.0, *)
+extension ItemEntity {
+    var homeId: UUID? {
+        id.homeId
+    }
+
+    var itemName: String {
+        id.itemName
+    }
+
+    /// Convenient access to common item properties
+    var label: String {
+        item.label
+    }
+
+    var category: String {
+        item.category
+    }
+
+    var type: OpenHABItem.ItemType? {
+        item.type
+    }
+
+    var state: String? {
+        item.state
+    }
+
+    var link: String {
+        item.link
+    }
+
+    var displayRepresentation: DisplayRepresentation {
+        if let homeName {
+            DisplayRepresentation(
+                title: nonLocalizedDisplayString(label, key: "__app_intents_item_label__"),
+                subtitle: nonLocalizedDisplayString("\(item.name) • \(homeName)", key: "__app_intents_item_subtitle__")
+            )
+        } else {
+            DisplayRepresentation(
+                title: nonLocalizedDisplayString(label, key: "__app_intents_item_label__"),
+                subtitle: nonLocalizedDisplayString(item.name, key: "__app_intents_item_name__")
+            )
+        }
+    }
+
+    init(_ openHABItem: OpenHABItem, homeId: UUID, homeName: String? = nil) {
+        self.init(
+            id: ItemIdentifier(homeId: homeId, itemName: openHABItem.name),
+            item: openHABItem,
+            homeName: homeName
+        )
+    }
+
+    func nonLocalizedDisplayString(_ value: String, key: StaticString) -> LocalizedStringResource {
+        LocalizedStringResource(key, defaultValue: "\(value)")
+    }
+}

@@ -14,7 +14,7 @@ import SwiftParser
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
-// Helper class to recursively remove trivia from all syntax nodes
+/// Helper class to recursively remove trivia from all syntax nodes
 final class TriviaRemover: SyntaxRewriter {
     override func visit(_ token: TokenSyntax) -> TokenSyntax {
         token.with(\.leadingTrivia, []).with(\.trailingTrivia, [])
@@ -105,13 +105,13 @@ final class OsLogRewriter: SyntaxRewriter {
         )
     }
 
-    // Helper function to recursively clean all trivia from a syntax node
+    /// Helper function to recursively clean all trivia from a syntax node
     func cleanAllTrivia(from expr: ExprSyntax) -> ExprSyntax {
         let triviaRemover = TriviaRemover()
         return ExprSyntax(triviaRemover.visit(expr))
     }
 
-    // Helper function to extract indentation from trivia
+    /// Helper function to extract indentation from trivia
     func extractIndentation(from trivia: Trivia) -> Trivia {
         // Look for the last newline and extract spaces/tabs after it
         var indentationPieces: [TriviaPiece] = []
@@ -144,7 +144,7 @@ final class OsLogRewriter: SyntaxRewriter {
         return Trivia(pieces: indentationPieces.reversed())
     }
 
-    // Helper function to detect indentation from the context of the os_log call
+    /// Helper function to detect indentation from the context of the os_log call
     func detectIndentationLevel(_ node: FunctionCallExprSyntax) -> Trivia {
         // First try to extract from the node's own leading trivia
         let directIndentation = extractIndentation(from: node.leadingTrivia)
@@ -157,7 +157,7 @@ final class OsLogRewriter: SyntaxRewriter {
         return findContextualIndentation(node) ?? Trivia.spaces(8) // fallback
     }
 
-    // Helper function to find indentation from parent context
+    /// Helper function to find indentation from parent context
     func findContextualIndentation(_ node: some SyntaxProtocol) -> Trivia? {
         var current: (any SyntaxProtocol)? = node
 
@@ -174,13 +174,13 @@ final class OsLogRewriter: SyntaxRewriter {
         return nil
     }
 
-    // Helper function to extract meaningful indentation (non-empty)
+    /// Helper function to extract meaningful indentation (non-empty)
     func extractMeaningfulIndentation(from trivia: Trivia) -> Trivia? {
         let extracted = extractIndentation(from: trivia)
         return extracted.isEmpty ? nil : extracted
     }
 
-    // Helper function to simplify string interpolations like "\(value)" to just value
+    /// Helper function to simplify string interpolations like "\(value)" to just value
     func simplifyStringInterpolation(_ expr: ExprSyntax) -> ExprSyntax {
         // Check if this is a string literal
         guard let stringLiteral = expr.as(StringLiteralExprSyntax.self) else {
@@ -289,7 +289,7 @@ final class OsLogRewriter: SyntaxRewriter {
     }
 }
 
-// Public API for the library
+/// Public API for the library
 public func rewriteOsLogCalls(in sourceCode: String) throws -> String {
     let syntaxTree = Parser.parse(source: sourceCode)
     let rewriter = OsLogRewriter()

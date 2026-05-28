@@ -56,11 +56,11 @@ struct SitemapPageView: View {
                 }
             } else {
                 pageContent
+                    .onDisappear { viewModel.stopLongPolling() }
             }
         }
     }
 
-    @ViewBuilder
     private var pageContent: some View {
         Group {
             if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {

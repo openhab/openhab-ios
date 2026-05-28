@@ -35,22 +35,24 @@ protocol OpenAPIServiceProtocol: AnyObject, Sendable {
     func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) async throws
     func updateItemState(itemname: String, with: String, sourcePrefix: String?, deviceId: String?) async throws
     func getItems() async throws -> [OpenHABItem]
-    func getItems(
-        query: Operations.getItems.Input.Query
-    ) async throws -> [OpenHABItem]
+    func getItems(query: Operations.getItems.Input.Query) async throws -> [OpenHABItem]
     func getItemByName(id: String) async throws -> OpenHABItem?
     func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) async throws -> OpenHABPage?
     func runNow(ruleUID: String, payload: [String: any Sendable]) async throws
 }
 
-// The generated OpenAPI client is wrapped by this curated API.
-// The library leaks the fact that it uses Swift OpenAPI Generator under the hood in 'openHABSitemapWidgetEvents'.
-// It will require the migration to Swift 6.1 before this can be changed.
+/// The generated OpenAPI client is wrapped by this curated API.
+/// The library leaks the fact that it uses Swift OpenAPI Generator under the hood in 'openHABSitemapWidgetEvents'.
+/// It will require the migration to Swift 6.1 before this can be changed.
 public actor OpenAPIService {
     private var client: any APIProtocol
     private var url: URL?
     private var longPolling = false
     private var connectionConfiguration: ConnectionConfiguration
+    /// Retained for lifecycle control only — URLSessionTransport does not call invalidateAndCancel()
+    /// when it deallocates, so without this reference the session's threads and sockets would leak.
+    /// Do not remove: deinit relies on this property to tear down the session.
+    private var urlSession: URLSession?
 
     /// Creates a new client for OpenAPIService.
     public init(client: any APIProtocol) {
@@ -81,6 +83,7 @@ public actor OpenAPIService {
             config.timeoutIntervalForResource = 10.0
         }
         let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
+        urlSession = session
         let url = URL(string: connectionConfiguration.url) ?? URL(staticString: "about:blank")
         let resolvedURL = OpenAPIService.getServerURL(for: url)
         self.url = resolvedURL
@@ -105,10 +108,9 @@ public actor OpenAPIService {
     }
 
     private func prepareURLSessionConfiguration(longPolling: Bool) -> URLSessionConfiguration {
-        let config = URLSessionConfiguration.default
+        URLSessionConfiguration.default
 //        config.timeoutIntervalForRequest = if longPolling { 35.0 } else { 20.0 }
 //        config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
-        return config
     }
 
     private func sourceComponent(deviceId: String?) -> String? {
@@ -131,6 +133,10 @@ public actor OpenAPIService {
         guard let sourcePrefix, !sourcePrefix.isEmpty else { return base }
         guard let base else { return sourcePrefix }
         return "\(sourcePrefix)=>\(base)"
+    }
+
+    deinit {
+        urlSession?.invalidateAndCancel()
     }
 }
 
@@ -197,7 +203,8 @@ public extension OpenAPIService {
     func runNow(ruleUID: String, payload: [String: any Sendable]) async throws {
         let path = Operations.runRuleNow_1.Input.Path(ruleUID: ruleUID)
         let jsonPayload = try Operations.runRuleNow_1.Input.Body.jsonPayload(
-            additionalProperties: OpenAPIObjectContainer(unvalidatedValue: payload))
+            additionalProperties: OpenAPIObjectContainer(unvalidatedValue: payload)
+        )
         _ = try await client.runRuleNow_1(
             path: path,
             body: .json(jsonPayload)
@@ -225,7 +232,9 @@ public extension OpenAPIService {
                 _next = { try await it.next() }
             }
 
-            public mutating func next() async throws -> Element? { try await _next() }
+            public mutating func next() async throws -> Element? {
+                try await _next()
+            }
         }
 
         public let _make: () -> Iterator
@@ -234,10 +243,12 @@ public extension OpenAPIService {
             _make = { Iterator(base) }
         }
 
-        public func makeAsyncIterator() -> Iterator { _make() }
+        public func makeAsyncIterator() -> Iterator {
+            _make()
+        }
     }
 
-    // Returns subscription id or nil
+    /// Returns subscription id or nil
     func openHABcreateSubscription() async throws -> String? {
         Logger.openAPIService.info("Creating subscription")
         let result = try await client.createSitemapEventSubscription()
@@ -273,7 +284,7 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
-    // Internal function for pollPage
+    /// Internal function for pollPage
     internal func pollDataForPage(path: Operations.pollDataForPage.Input.Path,
                                   query: Operations.pollDataForPage.Input.Query = .init(),
                                   headers: Operations.pollDataForPage.Input.Headers) async throws -> OpenHABPage? {
@@ -311,7 +322,7 @@ public extension OpenAPIService {
         return try await pollDataForPage(path: path, headers: headers)
     }
 
-    // Internal function for pollSitemap
+    /// Internal function for pollSitemap
     internal func pollDataForSitemap(path: Operations.pollDataForSitemap.Input.Path,
                                      query: Operations.pollDataForSitemap.Input.Query = .init(),
                                      headers: Operations.pollDataForSitemap.Input.Headers) async throws -> OpenHABSitemap? {
@@ -321,11 +332,9 @@ public extension OpenAPIService {
     }
 }
 
-// Array of items
+/// Array of items
 public extension OpenAPIService {
-    func getItems(
-        query: Operations.getItems.Input.Query
-    ) async throws -> [OpenHABItem] {
+    func getItems(query: Operations.getItems.Input.Query) async throws -> [OpenHABItem] {
         try await client.getItems(query: query)
             .ok.body.json
             .compactMap(OpenHABItem.init)

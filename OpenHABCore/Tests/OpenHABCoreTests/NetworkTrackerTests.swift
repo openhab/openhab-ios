@@ -12,9 +12,8 @@
 import Combine
 import Foundation
 import Network
-import OSLog
-
 @testable import OpenHABCore
+import OSLog
 import Testing
 import XCTest
 

@@ -10,33 +10,26 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import OpenHABCore
+import Testing
 
-import XCTest
-
-final class ParseAsTests: XCTestCase {
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+struct ParseAsTests {
+    @Test func parseAsBool() {
+        #expect("10,10,0".parseAsBool() == false)
+        #expect("10,10,50".parseAsBool() == true)
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-
-        XCTAssertFalse("10,10,0".parseAsBool())
-        XCTAssertTrue("10,10,50".parseAsBool())
-    }
-
-    func testValidOpenHABURL() throws {
+    @Test func validOpenHABURL() throws {
         try "http://localhost:8080".testAsValidOpenHABURL()
         try "https://localhost:8080".testAsValidOpenHABURL()
         try "192.168.2.10".testAsValidOpenHABURL()
+        // IPv6 literals must be accepted (RFC 2732 bracket notation)
+        try "http://[::1]:8080".testAsValidOpenHABURL()
+        try "http://[::1]:8080/rest".testAsValidOpenHABURL()
+        try "https://[2001:db8::1]".testAsValidOpenHABURL()
+        try "http://[fe80::1%25eth0]:8080".testAsValidOpenHABURL()
     }
 
-    func testInvalidOpenHABURL() {
+    @Test func invalidOpenHABURL() {
         let invalidURLs = [
             "ftp://localhost", // Unsupported scheme
             "http:/localhost", // Malformed
@@ -47,12 +40,11 @@ final class ParseAsTests: XCTestCase {
         ]
 
         for url in invalidURLs {
-            XCTAssertThrowsError(try url.testAsValidOpenHABURL(), "Expected to throw for URL: \(url)") { error in
-                if let urlError = error as? URLError {
-                    XCTAssertEqual(urlError.code, .badURL, "Expected .badURL, got \(urlError.code)")
-                } else {
-                    XCTFail("Unexpected error type: \(error)")
-                }
+            #expect {
+                try url.testAsValidOpenHABURL()
+            } throws: { error in
+                guard let urlError = error as? URLError else { return false }
+                return urlError.code == .badURL
             }
         }
     }

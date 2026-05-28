@@ -12,7 +12,6 @@
 // Inspired by https://www.avanderlee.com/debugging/oslog-unified-logging/
 
 import Foundation
-
 import os.log
 
 public extension Logger {
@@ -55,6 +54,8 @@ public extension Logger {
     static let openHABImageProcessor = Logger(subsystem: subsystem, category: "OpenHABImageProcessor")
 
     static let pageLoader = Logger(subsystem: subsystem, category: "PageLoader")
+
+    static let sitemapPageLoader = Logger(subsystem: subsystem, category: "SitemapPageLoader")
 
     static let preferences = Logger(subsystem: subsystem, category: "Preferences")
 

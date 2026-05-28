@@ -46,6 +46,7 @@ struct SwitchRow: View {
         }
         .padding(.trailing)
         .cornerRadius(5)
+        .disabled(widget.item?.readOnly == true)
         .accessibilityValue(isOn ? "On" : "Off")
         .onChange(of: stateToken) {
             localIsOn = nil

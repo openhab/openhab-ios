@@ -27,9 +27,9 @@ public struct OpenHABNotification: Sendable {
     }
 }
 
-// Decode an instance of OpenHABNotification.CodingData rather than decoding a OpenHABNotificaiton value directly,
-// then convert that into a openHABNotification
-// Inspired by https://www.swiftbysundell.com/basics/codable?rq=codingdata
+/// Decode an instance of OpenHABNotification.CodingData rather than decoding a OpenHABNotificaiton value directly,
+/// then convert that into a openHABNotification
+/// Inspired by https://www.swiftbysundell.com/basics/codable?rq=codingdata
 public extension OpenHABNotification {
     struct CodingData: Decodable {
         private enum CodingKeys: String, CodingKey {
@@ -46,7 +46,7 @@ public extension OpenHABNotification {
     }
 }
 
-// Convenience method to convert a decoded value into a proper OpenHABNotification instance
+/// Convenience method to convert a decoded value into a proper OpenHABNotification instance
 extension OpenHABNotification.CodingData {
     var openHABNotification: OpenHABNotification {
         OpenHABNotification(message: message, created: created, id: id)
