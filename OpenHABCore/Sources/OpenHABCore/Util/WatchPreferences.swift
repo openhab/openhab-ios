@@ -88,26 +88,24 @@ public struct WatchPreferences: Codable {
         homeCredentials = try c.decodeIfPresent([String: HomeCredentials].self, forKey: .homeCredentials)
     }
 
-    public init(
-        localUrl: String,
-        remoteUrl: String,
-        username: String,
-        password: String,
-        alwaysSendCreds: Bool,
-        defaultSitemap: String,
-        ignoreSSL: Bool,
-        sitemapForWatch: String,
-        sitemapForWatchLabel: String,
-        iconType: Int,
-        demoMode: Bool,
-        localConnectionConfiguration: ConnectionConfiguration? = nil,
-        remoteConnectionConfiguration: ConnectionConfiguration? = nil,
-        allHomes: [String: HomePreferences]? = nil,
-        localUsername: String = "",
-        localPassword: String = "",
-        activeHomeId: UUID? = nil,
-        homeCredentials: [String: HomeCredentials]? = nil
-    ) {
+    public init(localUrl: String,
+                remoteUrl: String,
+                username: String,
+                password: String,
+                alwaysSendCreds: Bool,
+                defaultSitemap: String,
+                ignoreSSL: Bool,
+                sitemapForWatch: String,
+                sitemapForWatchLabel: String,
+                iconType: Int,
+                demoMode: Bool,
+                localConnectionConfiguration: ConnectionConfiguration? = nil,
+                remoteConnectionConfiguration: ConnectionConfiguration? = nil,
+                allHomes: [String: HomePreferences]? = nil,
+                localUsername: String = "",
+                localPassword: String = "",
+                activeHomeId: UUID? = nil,
+                homeCredentials: [String: HomeCredentials]? = nil) {
         self.localUrl = localUrl
         self.remoteUrl = remoteUrl
         self.username = username
