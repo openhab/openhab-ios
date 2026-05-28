@@ -15,7 +15,7 @@ import OpenAPIRuntime
 import OpenAPIURLSession
 import OSLog
 
-/* 
+/*
  Example usage:
 
  ```
