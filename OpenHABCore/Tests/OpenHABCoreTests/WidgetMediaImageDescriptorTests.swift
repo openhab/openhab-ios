@@ -13,7 +13,6 @@ import Foundation
 import OpenHABCore
 import Testing
 
-@Suite
 struct WidgetMediaImageDescriptorTests {
     @Test
     func chartDescriptorResolvesToChartLink() {

@@ -117,14 +117,12 @@ struct ScreenSaverSettingsView: View {
         )
     }
 
-    @ViewBuilder
     private var enableSection: some View {
         Section {
             Toggle("Enable Screen Saver", isOn: $config.isEnabled)
         }
     }
 
-    @ViewBuilder
     private var appearanceSection: some View {
         Section("Appearance") {
             Toggle("Show Time", isOn: $config.showsTime)
@@ -140,7 +138,6 @@ struct ScreenSaverSettingsView: View {
         .disabled(!config.isEnabled)
     }
 
-    @ViewBuilder
     private var timingSection: some View {
         Section("Timing") {
             Stepper(value: idleIntervalBinding, in: 5 ... 600, step: 5) {
@@ -154,7 +151,6 @@ struct ScreenSaverSettingsView: View {
         .disabled(!config.isEnabled)
     }
 
-    @ViewBuilder
     private var fontSection: some View {
         Section("Font Size") {
             VStack(alignment: .leading) {
@@ -174,7 +170,6 @@ struct ScreenSaverSettingsView: View {
         .disabled(!config.isEnabled)
     }
 
-    @ViewBuilder
     private var animationSection: some View {
         Section("Animation") {
             VStack(alignment: .leading) {
@@ -187,7 +182,6 @@ struct ScreenSaverSettingsView: View {
         .disabled(!config.isEnabled)
     }
 
-    @ViewBuilder
     private var brightnessSection: some View {
         Section("Brightness") {
             Toggle("Enable Dimming", isOn: $config.enablesAutoDimming)
@@ -214,7 +208,6 @@ struct ScreenSaverSettingsView: View {
         .disabled(!config.isEnabled)
     }
 
-    @ViewBuilder
     private var testSection: some View {
         Section {
             Button("Test Screen Saver") {

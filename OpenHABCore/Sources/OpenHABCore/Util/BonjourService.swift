@@ -31,7 +31,9 @@ public struct DiscoveredServer: Hashable, Sendable {
     public let address: String
     public let port: Int
 
-    public var url: String { "\(scheme)://\(address):\(port)" }
+    public var url: String {
+        "\(scheme)://\(address):\(port)"
+    }
 
     public init(scheme: String, address: String, port: Int) {
         self.scheme = scheme
@@ -42,7 +44,7 @@ public struct DiscoveredServer: Hashable, Sendable {
 
 // MARK: - Address Utilities
 
-enum BonjourAddressUtils: Sendable {
+enum BonjourAddressUtils {
     /// Determines if an address should be filtered out (link-local, loopback, unique local)
     static func shouldFilterAddress(_ address: String) -> Bool {
         address.hasPrefix("fe80:") ||
@@ -101,12 +103,12 @@ public protocol BonjourServiceProtocol: AnyObject, Sendable {
 public final class BonjourService: NSObject, BonjourServiceProtocol, NetServiceBrowserDelegate, NetServiceDelegate, Sendable {
     // MARK: - Types
 
-    private struct SchemePort: Hashable, Sendable {
+    private struct SchemePort: Hashable {
         let scheme: String
         let port: Int
     }
 
-    private struct ServiceAddressKey: Hashable, Sendable {
+    private struct ServiceAddressKey: Hashable {
         let name: String
         let type: String
     }

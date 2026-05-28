@@ -12,7 +12,6 @@
 import OpenHABCore
 import Testing
 
-@Suite
 @MainActor
 struct WidgetCommandDispatcherTests {
     @Test("Empty string command is dispatched for item name")

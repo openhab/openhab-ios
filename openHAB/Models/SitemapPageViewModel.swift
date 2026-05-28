@@ -364,11 +364,9 @@ extension SitemapPageViewModel {
         }
     }
 
-    private func runPageHandling(
-        runID: UUID,
-        recreateService: Bool,
-        pipelineStart: Date
-    ) async {
+    private func runPageHandling(runID: UUID,
+                                 recreateService: Bool,
+                                 pipelineStart: Date) async {
         defer {
             if activePageHandlingID == runID {
                 pageHandlingTask = nil

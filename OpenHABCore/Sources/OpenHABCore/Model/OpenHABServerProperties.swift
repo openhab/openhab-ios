@@ -19,11 +19,6 @@ public struct OpenHABServerProperties: Decodable, Sendable {
         linkUrl(byType: "habpanel")
     }
 
-    init(version: String?, links: [OpenHABLink]) {
-        self.version = version
-        self.links = links
-    }
-
     public func linkUrl(byType type: String?) -> String? {
         if let index = links.firstIndex(where: { $0.type == type }) {
             links[index].url

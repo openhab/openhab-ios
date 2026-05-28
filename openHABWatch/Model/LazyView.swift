@@ -12,7 +12,7 @@
 import Foundation
 import SwiftUI
 
-// https://medium.com/better-programming/swiftui-navigation-links-and-the-common-pitfalls-faced-505cbfd8029b
+/// https://medium.com/better-programming/swiftui-navigation-links-and-the-common-pitfalls-faced-505cbfd8029b
 struct LazyView<Content: View>: View {
     let build: () -> Content
 

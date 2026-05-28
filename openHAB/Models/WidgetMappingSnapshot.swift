@@ -12,6 +12,7 @@
 import Foundation
 import OpenHABCore
 
+// swiftformat:disable:next redundantSendable
 struct SnapshotRowInputBuildResult: Sendable {
     let inputs: [SitemapRowInput]
     let rowIDs: [RowID]
@@ -19,7 +20,7 @@ struct SnapshotRowInputBuildResult: Sendable {
     let reusedInputCount: Int
 }
 
-struct WidgetLinkedPageSnapshot: Sendable {
+struct WidgetLinkedPageSnapshot {
     let link: String
     let title: String
 }
@@ -96,7 +97,7 @@ enum SitemapRowInputSnapshotBuilder {
     }
 }
 
-struct WidgetMappingSnapshot: Sendable {
+struct WidgetMappingSnapshot {
     let widgetId: String
     let label: String
     let icon: String
@@ -255,7 +256,9 @@ extension WidgetMappingSnapshot {
         OpenHABWidget.LabelSource(rawValue: labelSourceRawValue) ?? .unknown
     }
 
-    var hasLinkedPage: Bool { linkedPage != nil }
+    var hasLinkedPage: Bool {
+        linkedPage != nil
+    }
 
     var mediaImageDescriptor: WidgetMediaImageDescriptor {
         let itemPayload: WidgetMediaItemPayloadSnapshot = if let item {

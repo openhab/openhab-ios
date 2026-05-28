@@ -13,7 +13,7 @@ import Foundation
 import Network
 import os.log
 
-// Wrap real NWPathMonitor
+/// Wrap real NWPathMonitor
 final class RealPathMonitor: NWPathMonitoring, Sendable {
     private let monitor: NWPathMonitor
 
@@ -41,3 +41,4 @@ public protocol NWPathMonitoring: AnyObject, Sendable {
     func startMonitoring(handler: @escaping (Bool) async -> Void) async
     func cancel()
 }
+

@@ -61,7 +61,6 @@ struct SitemapPageView: View {
         }
     }
 
-    @ViewBuilder
     private var pageContent: some View {
         Group {
             if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {

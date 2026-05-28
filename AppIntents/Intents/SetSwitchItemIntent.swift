@@ -28,9 +28,13 @@ enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
 
 @available(iOS 17.0, macOS 14.0, *)
 struct SetSwitchItemIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.switchItem] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.switchItem]
+    }
 
     static var parameterSummary: some ParameterSummary {
         Summary("Send \(\.$action) to \(\.$itemEntity)") {
