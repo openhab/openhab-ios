@@ -27,6 +27,7 @@ private struct SwitchRowContent: View {
     let input: ToggleRowInput
     let onSendCommand: (String) -> Void
     @State private var localIsOn: Bool?
+    @State private var revertTask: Task<Void, Never>?
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSwitchView")
 
@@ -55,6 +56,13 @@ private struct SwitchRowContent: View {
                     let newState = newValue ? "ON" : "OFF"
                     logger.info("Switch to \(newState, privacy: .public)")
                     onSendCommand(newState)
+                    // If the thing rejects the command (autoupdate=false), the server sends back
+                    // the same state so onChange never fires — revert optimistic state after 1s.
+                    revertTask?.cancel()
+                    revertTask = Task { @MainActor in
+                        do { try await Task.sleep(for: .seconds(1)) } catch { return }
+                        localIsOn = nil
+                    }
                 }
             ))
             .padding(2)
@@ -63,7 +71,8 @@ private struct SwitchRowContent: View {
         }
         .contentShape(Rectangle())
         .onChange(of: displayState.effectiveState) { _ in
-            // Sync local state when server state changes
+            revertTask?.cancel()
+            revertTask = nil
             localIsOn = nil
         }
     }

@@ -1081,7 +1081,7 @@ private extension SitemapPageViewModel {
     func handleCommandSuccess(for itemname: String, version: Int) {
         guard commandStateVersions[itemname] == version else { return }
         scheduleCommandStateReset(for: itemname, version: version, after: .milliseconds(450))
-        scheduleSliderOverrideResetFallback(for: itemname, version: version, after: .seconds(5))
+        scheduleSliderOverrideResetFallback(for: itemname, version: version, after: .seconds(1))
     }
 
     func handleCommandFailure(for itemname: String, version: Int, errorDescription: String) {

@@ -26,6 +26,7 @@ private struct SelectionRowContent: View {
     @State private var optimisticBaseState: String?
     @State private var optimisticWidgetId: String?
     @State private var optimisticStartVersion: Int?
+    @State private var revertTask: Task<Void, Never>?
 
     var body: some View {
         let displayedCommand = effectiveCommand(displayState: input.displayState)
@@ -81,6 +82,11 @@ private struct SelectionRowContent: View {
                             optimisticStartVersion = widgetVersion
                         }
                         onSelect(mapping.command)
+                        revertTask?.cancel()
+                        revertTask = Task { @MainActor in
+                            do { try await Task.sleep(for: .seconds(1)) } catch { return }
+                            clearOptimisticSelection()
+                        }
                     } label: {
                         if isSelected {
                             Label(mapping.label, systemSymbol: .checkmark)
@@ -162,6 +168,8 @@ private struct SelectionRowContent: View {
     }
 
     private func clearOptimisticSelection() {
+        revertTask?.cancel()
+        revertTask = nil
         optimisticCommand = nil
         optimisticBaseState = nil
         optimisticWidgetId = nil
