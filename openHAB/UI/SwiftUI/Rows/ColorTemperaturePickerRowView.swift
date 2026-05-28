@@ -250,7 +250,7 @@ private struct ColorTemperaturePickerRowContent: View {
         .onAppear {
             selectedTemperature = loadCurrentTemperature(state: displayState.effectiveState)
         }
-        .onChange(of: displayState.effectiveState) { newState in
+        .onChange(of: displayState.effectiveState) { _, newState in
             guard !isDraggingSlider else { return }
             if suppressNextServerSync {
                 suppressNextServerSync = false

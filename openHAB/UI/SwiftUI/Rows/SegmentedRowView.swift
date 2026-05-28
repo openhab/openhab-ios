@@ -89,10 +89,10 @@ private struct SegmentedRowContent: View {
         .onAppear {
             clearOptimisticSelection()
         }
-        .onChange(of: input.widgetId) { _ in
+        .onChange(of: input.widgetId) {
             clearOptimisticSelection()
         }
-        .onChange(of: widgetVersion) { _ in
+        .onChange(of: widgetVersion) {
             guard let optimisticBaseState,
                   optimisticWidgetId == input.widgetId,
                   let optimisticStartVersion,

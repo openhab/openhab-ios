@@ -12,30 +12,15 @@
 import SwiftUI
 
 extension View {
-    @ViewBuilder
     func sensoryHeavyFeedbackIfAvailable(trigger: Bool) -> some View {
-        if #available(iOS 17.0, *) {
-            sensoryFeedback(.impact(weight: .heavy, intensity: 0.9), trigger: trigger)
-        } else {
-            self
-        }
+        sensoryFeedback(.impact(weight: .heavy, intensity: 0.9), trigger: trigger)
     }
 
-    @ViewBuilder
     func sensoryStopFeedbackIfAvailable(trigger: Bool) -> some View {
-        if #available(iOS 17.0, *) {
-            sensoryFeedback(.impact(flexibility: .rigid), trigger: trigger)
-        } else {
-            self
-        }
+        sensoryFeedback(.impact(flexibility: .rigid), trigger: trigger)
     }
 
-    @ViewBuilder
     func sensorySelectionFeedbackIfAvailable(trigger: Bool) -> some View {
-        if #available(iOS 17.0, *) {
-            sensoryFeedback(.selection, trigger: trigger)
-        } else {
-            self
-        }
+        sensoryFeedback(.selection, trigger: trigger)
     }
 }

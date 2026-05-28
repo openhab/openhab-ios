@@ -22,15 +22,9 @@ final class RealPathMonitor: NWPathMonitoring, Sendable {
     }
 
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
-        if #available(iOS 17, watchOS 10, *) {
-            for await path in monitor {
-                Logger.nwPathMonitoring.debug("Path monitor update: \(path.debugDescription)")
-                await handler(path.status == .satisfied || path.status == .requiresConnection)
-            }
-        } else {
-            for await path in monitor.paths() {
-                await handler(path.status == .satisfied || path.status == .requiresConnection)
-            }
+        for await path in monitor {
+            Logger.nwPathMonitoring.debug("Path monitor update: \(path.debugDescription)")
+            await handler(path.status == .satisfied || path.status == .requiresConnection)
         }
     }
 
@@ -46,23 +40,4 @@ public protocol NWPathMonitoring: AnyObject, Sendable {
     /// Calls the handler with `true` when connected, `false` otherwise.
     func startMonitoring(handler: @escaping (Bool) async -> Void) async
     func cancel()
-}
-
-// MARK: Extension for version iOS <17
-
-// this line breaks availability checking, since watchos 10 is minimum for the app
-// @available(watchOS, obsoleted: 10.0)
-@available(iOS, obsoleted: 17.0)
-extension NWPathMonitor {
-    func paths() -> AsyncStream<NWPath> {
-        AsyncStream { continuation in
-            pathUpdateHandler = { path in
-                continuation.yield(path)
-            }
-            continuation.onTermination = { [weak self] _ in
-                self?.cancel()
-            }
-            start(queue: DispatchQueue(label: "NSPathMonitor.paths"))
-        }
-    }
 }

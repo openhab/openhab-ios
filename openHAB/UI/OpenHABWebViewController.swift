@@ -29,8 +29,6 @@ class OpenHABWebViewController: OpenHABViewController {
     private var commandQueue: [String] = []
     private var acceptsCommands = false
     private var views: [UUID: WKWebView] = [:]
-    // TODO: remove myOhViews when we drop iOS 16 support
-    private var myOhViews: [UUID: WKWebView] = [:]
     private var etagChecker: ETagChecker?
     private var etagCheckerConfigURL: String? // Track which config the checker was created for
     private var lastLoadedURL: String? // Track the last successfully loaded URL from didFinish
@@ -228,10 +226,8 @@ class OpenHABWebViewController: OpenHABViewController {
                 request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
             }
 
-            // TODO: remove this check once iOS 16 is dropped
-            let isCloudConnection = activeConfig.isCloudConnection
-            // create new (or resuse existing)
-            let newWebview = webView(for: Preferences.shared.currentHomePreferences.id, isCloudConnection: isCloudConnection)
+            // create new (or reuse existing)
+            let newWebview = webView(for: Preferences.shared.currentHomePreferences.id)
             if newWebview != webView {
                 // Detach old instance
                 webView.stopLoading()
@@ -440,14 +436,7 @@ class OpenHABWebViewController: OpenHABViewController {
         }
     }
 
-    func webView(for id: UUID, isCloudConnection: Bool) -> WKWebView {
-        // TODO: remove all iOS < 17 code when we drop iOS 16 support
-        if #unavailable(iOS 17) {
-            if isCloudConnection, let myExsiting = myOhViews[id] {
-                Logger.viewController.info("Reusing cloud webview for id:\(id.uuidString)")
-                return myExsiting
-            }
-        }
+    func webView(for id: UUID) -> WKWebView {
         if let existing = views[id] {
             Logger.viewController.info("Reusing webview for id:\(id.uuidString)")
             return existing
@@ -460,13 +449,7 @@ class OpenHABWebViewController: OpenHABViewController {
         config.userContentController.add(self, name: "pathChanged")
         config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
 
-        // iOS 17 allows Sandboxed profiles, which is fantastic, iOS 16 does not and agressively caches everything
-        if #available(iOS 17, *) {
-            config.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
-        } else if isCloudConnection {
-            // for cloud connections, create an instance that does not persist or share states (private)
-            config.websiteDataStore = .nonPersistent()
-        }
+        config.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
 
         let webview = WKWebView(frame: .zero, configuration: config)
         webview.navigationDelegate = self
@@ -480,21 +463,13 @@ class OpenHABWebViewController: OpenHABViewController {
             // since ios 13 Safari sets the user agent to desktop mode on iPads so the view renders correctly with larger screens
             webview.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
         }
-        if #available(iOS 16.4, *) {
-            webview.isInspectable = true
-        }
+        webview.isInspectable = true
 
         // Avoid safe-area content insets which can leave a small gap at the bottom on iPad until a reload.
         webview.scrollView.contentInsetAdjustmentBehavior = .never
         webview.scrollView.contentInset = .zero
         webview.scrollView.scrollIndicatorInsets = .zero
 
-        if #unavailable(iOS 17) {
-            if isCloudConnection {
-                myOhViews[id] = webview
-                return webview
-            }
-        }
         views[id] = webview
         return webview
     }

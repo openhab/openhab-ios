@@ -418,11 +418,11 @@ private struct ColorPickerRowContent: View {
         .onAppear {
             applyServerState(displayState.effectiveState)
         }
-        .onChange(of: displayState.effectiveState) { newState in
+        .onChange(of: displayState.effectiveState) { _, newState in
             guard !isEditingColor, !isPresentingColorWheel else { return }
             applyServerState(newState)
         }
-        .onChange(of: selection) { _ in
+        .onChange(of: selection) {
             sendColorCommand()
         }
         .sheet(isPresented: $isPresentingColorWheel) {

@@ -62,7 +62,7 @@ private struct SwitchRowContent: View {
             .disabled(input.readOnly)
         }
         .contentShape(Rectangle())
-        .onChange(of: displayState.effectiveState) { _ in
+        .onChange(of: displayState.effectiveState) {
             // Sync local state when server state changes
             localIsOn = nil
         }

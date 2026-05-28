@@ -103,7 +103,7 @@ private struct VideoRowContent: View {
                 .onDisappear {
                     cleanup()
                 }
-                .onChange(of: input.url) { newValue in
+                .onChange(of: input.url) { _, newValue in
                     if !newValue.isEmpty, let newURL = URL(string: newValue) {
                         setupVideo(url: newURL)
                     } else {

@@ -119,6 +119,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
             ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
         }
+        // Start monitoring items for widget updates after the app is configured.
+        WidgetItemMonitor.shared.startMonitoring()
     }
 
     @MainActor
@@ -273,6 +275,11 @@ extension AppDelegate {
             config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
 
             ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
+        }
+
+        // Clean up stale widget items when app becomes active
+        Task {
+            await WidgetItemMonitor.shared.cleanupStaleItems()
         }
     }
 

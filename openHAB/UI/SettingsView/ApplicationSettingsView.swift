@@ -47,7 +47,7 @@ struct ApplicationSettingsView: View {
                 Text("Command Item \(selectedItemName?.isEmpty == false ? "(\(selectedItemName ?? ""))" : "")")
             }
         }
-        .onChange(of: selectedItemName) { newSelection in
+        .onChange(of: selectedItemName) { _, newSelection in
             handleItemSelectionChange(newSelection)
         }
         .onAppear {
