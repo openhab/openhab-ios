@@ -67,89 +67,6 @@ struct QueuedCommand {
     let version: Int
 }
 
-// swiftlint:disable:next file_types_order
-struct WidgetRenderKey: Equatable {
-    let label: String
-    let icon: String
-    let state: String
-    let iconColor: String
-    let labelColor: String
-    let valueColor: String
-    let url: String
-    let period: String
-    let service: String
-    let legend: Bool?
-    let refresh: Int
-    let height: Double?
-    let forceAsItem: Bool?
-    let visibility: Bool
-    let staticIcon: Bool?
-    let switchSupport: Bool
-    let releaseOnly: Bool?
-    let minValue: Double
-    let maxValue: Double
-    let step: Double
-    let pattern: String?
-    let unit: String?
-    let type: OpenHABWidget.WidgetType
-    let inputHintRawValue: String
-    let encoding: String
-    let labelSourceRawValue: String
-    let yAxisDecimalPattern: String?
-    let row: Int?
-    let column: Int?
-    let releaseCommand: String?
-    let command: String?
-    let stateless: Bool?
-    let linkedPageLink: String?
-    let linkedPageTitle: String?
-    let mappings: [WidgetMappingKey]
-    let item: WidgetItemKey?
-    let childWidgets: [WidgetRenderKey]
-
-    static func from(widget: OpenHABWidget) -> WidgetRenderKey {
-        WidgetRenderKey(
-            label: widget.label,
-            icon: widget.icon,
-            state: widget.state,
-            iconColor: widget.iconColor,
-            labelColor: widget.labelcolor,
-            valueColor: widget.valuecolor,
-            url: widget.url,
-            period: widget.period,
-            service: widget.service,
-            legend: widget.legend,
-            refresh: widget.refresh,
-            height: widget.height,
-            forceAsItem: widget.forceAsItem,
-            visibility: widget.visibility,
-            staticIcon: widget.staticIcon,
-            switchSupport: widget.switchSupport,
-            releaseOnly: widget.releaseOnly,
-            minValue: widget.minValue,
-            maxValue: widget.maxValue,
-            step: widget.step,
-            pattern: widget.pattern,
-            unit: widget.unit,
-            type: widget.type,
-            inputHintRawValue: widget.inputHint.rawValue,
-            encoding: widget.encoding,
-            labelSourceRawValue: widget.labelSource.rawValue,
-            yAxisDecimalPattern: widget.yAxisDecimalPattern,
-            row: widget.row,
-            column: widget.column,
-            releaseCommand: widget.releaseCommand,
-            command: widget.command,
-            stateless: widget.stateless,
-            linkedPageLink: widget.linkedPage?.link,
-            linkedPageTitle: widget.linkedPage?.title,
-            mappings: widget.mappings.map(WidgetMappingKey.init),
-            item: WidgetItemKey.from(item: widget.item),
-            childWidgets: widget.widgets.map(WidgetRenderKey.from)
-        )
-    }
-}
-
 struct WidgetMappingKey: Equatable {
     let command: String
     let label: String
@@ -231,6 +148,89 @@ struct WidgetCommandOptionKey: Equatable {
     init(_ option: OpenHABCommandOptions) {
         command = option.command
         label = option.label
+    }
+}
+
+// swiftformat:disable:next redundantSendable
+struct WidgetRenderKey: Equatable, Sendable {
+    let label: String
+    let icon: String
+    let state: String
+    let iconColor: String
+    let labelColor: String
+    let valueColor: String
+    let url: String
+    let period: String
+    let service: String
+    let legend: Bool?
+    let refresh: Int
+    let height: Double?
+    let forceAsItem: Bool?
+    let visibility: Bool
+    let staticIcon: Bool?
+    let switchSupport: Bool
+    let releaseOnly: Bool?
+    let minValue: Double
+    let maxValue: Double
+    let step: Double
+    let pattern: String?
+    let unit: String?
+    let type: OpenHABWidget.WidgetType
+    let inputHintRawValue: String
+    let encoding: String
+    let labelSourceRawValue: String
+    let yAxisDecimalPattern: String?
+    let row: Int?
+    let column: Int?
+    let releaseCommand: String?
+    let command: String?
+    let stateless: Bool?
+    let linkedPageLink: String?
+    let linkedPageTitle: String?
+    let mappings: [WidgetMappingKey]
+    let item: WidgetItemKey?
+    let childWidgets: [WidgetRenderKey]
+
+    static func from(widget: OpenHABWidget) -> WidgetRenderKey {
+        WidgetRenderKey(
+            label: widget.label,
+            icon: widget.icon,
+            state: widget.state,
+            iconColor: widget.iconColor,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            url: widget.url,
+            period: widget.period,
+            service: widget.service,
+            legend: widget.legend,
+            refresh: widget.refresh,
+            height: widget.height,
+            forceAsItem: widget.forceAsItem,
+            visibility: widget.visibility,
+            staticIcon: widget.staticIcon,
+            switchSupport: widget.switchSupport,
+            releaseOnly: widget.releaseOnly,
+            minValue: widget.minValue,
+            maxValue: widget.maxValue,
+            step: widget.step,
+            pattern: widget.pattern,
+            unit: widget.unit,
+            type: widget.type,
+            inputHintRawValue: widget.inputHint.rawValue,
+            encoding: widget.encoding,
+            labelSourceRawValue: widget.labelSource.rawValue,
+            yAxisDecimalPattern: widget.yAxisDecimalPattern,
+            row: widget.row,
+            column: widget.column,
+            releaseCommand: widget.releaseCommand,
+            command: widget.command,
+            stateless: widget.stateless,
+            linkedPageLink: widget.linkedPage?.link,
+            linkedPageTitle: widget.linkedPage?.title,
+            mappings: widget.mappings.map(WidgetMappingKey.init),
+            item: WidgetItemKey.from(item: widget.item),
+            childWidgets: widget.widgets.map(WidgetRenderKey.from)
+        )
     }
 }
 

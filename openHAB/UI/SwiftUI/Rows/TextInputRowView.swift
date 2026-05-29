@@ -66,20 +66,22 @@ struct InputCommandFormatter {
 
     /// Formats a Double (always dot-decimal from the server) using the locale decimal separator.
     /// Whole numbers are rendered without a decimal point (220.0 → "220").
-    /// Uses NumberFormatter to avoid Swift's exponent notation for small values (e.g. 1e-05).
     func localeFormattedValue(_ value: Double) -> String {
         if value.truncatingRemainder(dividingBy: 1) == 0,
            value >= Double(Int.min),
            value <= Double(Int.max) {
             return String(Int(value))
         }
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.usesGroupingSeparator = false
-        formatter.decimalSeparator = decimalSeparator
-        formatter.maximumFractionDigits = 15
-        formatter.minimumFractionDigits = 1
-        return formatter.string(from: NSNumber(value: value)) ?? String(value)
+        // Use a neutral locale so the output is always dot-decimal, then swap in
+        // the formatter's own decimalSeparator so the result matches the user's locale.
+        let dotDecimal = value.formatted(
+            .number
+                .precision(.fractionLength(1 ... 15))
+                .grouping(.never)
+                .locale(Locale(identifier: "en_US_POSIX"))
+        )
+        guard decimalSeparator != "." else { return dotDecimal }
+        return dotDecimal.replacingOccurrences(of: ".", with: decimalSeparator)
     }
 
     /// Extracts the numeric portion from a formatted state string, e.g. "220 °C" → "220".

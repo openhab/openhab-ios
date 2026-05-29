@@ -67,9 +67,7 @@ struct SetDateTimeValueIntent: AppIntent {
             mismatchError: DateTimeValueError.itemNotInHome
         )
 
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        let command = formatter.string(from: value)
+        let command = value.formatted(Date.ISO8601FormatStyle(timeZone: .gmt))
 
         do {
             try await OpenHABItemCache.instance.sendCommand(

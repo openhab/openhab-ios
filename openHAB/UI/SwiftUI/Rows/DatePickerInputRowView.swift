@@ -79,16 +79,16 @@ private struct DateInputRowContent: View {
             .disabled(input.readOnly)
         }
         .onAppear {
-            let newDate = DateFormatter.iso8601Full.date(from: displayState.effectiveState) ?? Date.now
-            programmaticallySetDate(newDate)
+            let newDate = try? Date(displayState.effectiveState, strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true))
+            programmaticallySetDate(newDate ?? Date.now)
         }
         .onChange(of: displayState.effectiveState) { newState in
             guard !suppressNextServerSync else {
                 suppressNextServerSync = false
                 return
             }
-            let newDate = DateFormatter.iso8601Full.date(from: newState) ?? Date()
-            programmaticallySetDate(newDate)
+            let newDate = try? Date(newState, strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true))
+            programmaticallySetDate(newDate ?? Date())
         }
     }
 
@@ -98,8 +98,7 @@ private struct DateInputRowContent: View {
     }
 
     private func sendDateCommand(_ date: Date) {
-        let formatter = DateFormatter.iso8601Full
-        let command = formatter.string(from: date)
+        let command = date.formatted(Date.ISO8601FormatStyle(includingFractionalSeconds: true, timeZone: .current))
         logger.info("Sending date command: \(command)")
         suppressNextServerSync = true
         onSendCommand(command)
