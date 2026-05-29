@@ -97,7 +97,8 @@ enum SitemapRowInputSnapshotBuilder {
     }
 }
 
-struct WidgetMappingSnapshot {
+// swiftformat:disable:next redundantSendable
+struct WidgetMappingSnapshot: Sendable {
     let widgetId: String
     let label: String
     let icon: String
@@ -502,7 +503,7 @@ extension SitemapRowInputMapper {
             labelColor: snapshot.labelColor,
             valueColor: snapshot.valueColor,
             readOnly: snapshot.readOnly,
-            inputHintRawValue: snapshot.inputHintRawValue,
+            inputHintRawValue: InputRowInput.resolvedInputHintRawValue(snapshot.inputHintRawValue, item: snapshot.item),
             icon: rowIconInput(from: snapshot),
             itemName: snapshot.item?.name,
             numberPattern: numberPattern

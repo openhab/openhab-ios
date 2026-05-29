@@ -72,7 +72,16 @@ struct InputCommandFormatter {
            value <= Double(Int.max) {
             return String(Int(value))
         }
-        return value.formatted(.number.precision(.fractionLength(1 ... 15)).grouping(.never))
+        // Use a neutral locale so the output is always dot-decimal, then swap in
+        // the formatter's own decimalSeparator so the result matches the user's locale.
+        let dotDecimal = value.formatted(
+            .number
+                .precision(.fractionLength(1 ... 15))
+                .grouping(.never)
+                .locale(Locale(identifier: "en_US_POSIX"))
+        )
+        guard decimalSeparator != "." else { return dotDecimal }
+        return dotDecimal.replacingOccurrences(of: ".", with: decimalSeparator)
     }
 
     /// Extracts the numeric portion from a formatted state string, e.g. "220 °C" → "220".
