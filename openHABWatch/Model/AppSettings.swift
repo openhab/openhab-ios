@@ -42,6 +42,8 @@ final class AppSettings: ObservableObject {
     @Published var iconType: IconType
     @Published var haveReceivedAppContext = false
     @Published var storedHomes: [UUID: HomePreferences] = [:]
+    /// UUID of the active home, persisted so credentials can be injected from Watch Keychain on restart.
+    @Published var activeHomeId: UUID?
 
     init() {
         let store = UserDefaults(suiteName: "group.openhab.shared") ?? UserDefaults.standard
@@ -71,6 +73,23 @@ final class AppSettings: ObservableObject {
             storedHomes = Dictionary(uniqueKeysWithValues: decoded.compactMap { key, value in
                 UUID(uuidString: key).map { ($0, value) }
             })
+        }
+
+        // Restore active home ID and inject credentials from Watch Keychain so the main
+        // Watch UI has valid credentials even when the iOS app is not reachable on restart.
+        if let uuidString = store.string(forKey: "activeHomeId"),
+           let homeId = UUID(uuidString: uuidString) {
+            activeHomeId = homeId
+            if let creds = CredentialsStore.retrieve(homeId: homeId, type: .local) {
+                localConnectionConfig?.username = creds.username
+                localConnectionConfig?.password = creds.password
+            }
+            if let creds = CredentialsStore.retrieve(homeId: homeId, type: .remote) {
+                remoteConnectionConfig?.username = creds.username
+                remoteConnectionConfig?.password = creds.password
+            }
+        } else {
+            activeHomeId = nil
         }
 
         // Observe changes and write back to UserDefaults
@@ -135,6 +154,17 @@ final class AppSettings: ObservableObject {
             .removeDuplicates()
             .sink { newValue in
                 Self.persistStoredHomes(newValue)
+            }
+            .store(in: &cancellables)
+
+        $activeHomeId
+            .removeDuplicates()
+            .sink { newValue in
+                if let newValue {
+                    store.set(newValue.uuidString, forKey: "activeHomeId")
+                } else {
+                    store.removeObject(forKey: "activeHomeId")
+                }
             }
             .store(in: &cancellables)
     }
