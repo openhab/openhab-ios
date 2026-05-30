@@ -156,7 +156,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         // Wake up screen saver immediately on incoming notification interaction
         NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
 
-        if let navigationController = AppDelegate.appDelegate.window?.rootViewController as? UINavigationController,
+        if let navigationController = UIApplication.shared.firstKeyWindow?.rootViewController as? UINavigationController,
            let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
             rootViewController.handleNotification(action: action, cloudUserId: cloudUserId)
         }
