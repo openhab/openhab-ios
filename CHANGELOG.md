@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.2.62, Build 271] - 2026-05-30Z
+
+- Fix Shortcuts localization and home entity display (#1227)
+
 ## [Version 3.2.61, Build 270] - 2026-05-29Z
 
 - Migrate DatePickerInputRowView from DateFormatter to FormatStyle API (#1103)
