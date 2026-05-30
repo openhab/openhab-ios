@@ -90,6 +90,51 @@ struct SitemapRowInputMapperTests {
         }
     }
 
+    // MARK: - inputHint inference from item type
+
+    @Test
+    func numberItemWithNoInputHintIsInferredAsNumber() {
+        let widget = makeNumberInputWidget(widgetID: "numInput")
+        let input = InputRowInput.from(widget: widget)
+        #expect(input.inputHint == .number)
+    }
+
+    @Test
+    func numberDimensionItemWithNoInputHintIsInferredAsNumber() {
+        let widget = makeNumberDimensionInputWidget(widgetID: "numDimInput")
+        let input = InputRowInput.from(widget: widget)
+        #expect(input.inputHint == .number)
+    }
+
+    @Test
+    func stringItemWithNoInputHintRemainsUnknown() {
+        let widget = makeTextInputWidget(widgetID: "textInput")
+        widget.inputHint = .unknown
+        let input = InputRowInput.from(widget: widget)
+        #expect(input.inputHint == .unknown)
+    }
+
+    @Test
+    func explicitTextHintOnNumberItemIsNotOverridden() {
+        let widget = makeNumberInputWidget(widgetID: "numInput", inputHint: .text)
+        let input = InputRowInput.from(widget: widget)
+        #expect(input.inputHint == .text)
+    }
+
+    @Test
+    func numberItemHintInferenceConsistentViaSnapshot() {
+        let widget = makeNumberInputWidget(widgetID: "numInput")
+        let fromWidget = InputRowInput.from(widget: widget)
+        let rowID = RowID(pageKey: "testPage", widgetId: widget.widgetId, occurrence: 1)
+        let fromSnapshot = SitemapRowInputMapper.map(snapshot: WidgetMappingSnapshot(widget: widget), rowID: rowID)
+        guard case let .input(_, snapshotInput) = fromSnapshot else {
+            Issue.record("Expected .input row for number input widget")
+            return
+        }
+        #expect(snapshotInput.inputHint == fromWidget.inputHint)
+        #expect(snapshotInput.inputHint == .number)
+    }
+
     @Test
     func videoWidgetUsesItemStateURLBeforeConfiguredURL() {
         let widget = makeVideoWidget(
@@ -207,6 +252,24 @@ private extension SitemapRowInputMapperTests {
         widget.type = .input
         widget.inputHint = .text
         widget.item = makeItem(name: "TextInputItem", type: "String", state: "abc")
+        return widget
+    }
+
+    func makeNumberInputWidget(widgetID: String, inputHint: OpenHABWidget.InputHint = .unknown) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = widgetID
+        widget.type = .input
+        widget.inputHint = inputHint
+        widget.item = makeItem(name: "NumberInputItem", type: "Number", state: "220.5")
+        return widget
+    }
+
+    func makeNumberDimensionInputWidget(widgetID: String) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = widgetID
+        widget.type = .input
+        widget.inputHint = .unknown
+        widget.item = makeItem(name: "NumberDimItem", type: "NumberWithDimension", state: "21.5 °C")
         return widget
     }
 
