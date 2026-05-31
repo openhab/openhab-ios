@@ -14,6 +14,13 @@ import Foundation
 @_exported import MapKit
 import os.log
 
+public enum SitemapWidgetEventApplicationResult: Equatable, Sendable {
+    case applied
+    case unchanged
+    case notFound
+    case requiresPageReload
+}
+
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
     public enum WidgetType: String, Decodable, Sendable {
         case chart = "Chart"
@@ -120,13 +127,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var coordinate: CLLocationCoordinate2D {
         item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
-}
-
-public enum SitemapWidgetEventApplicationResult: Equatable, Sendable {
-    case applied
-    case unchanged
-    case notFound
-    case requiresPageReload
 }
 
 public extension OpenHABWidget {

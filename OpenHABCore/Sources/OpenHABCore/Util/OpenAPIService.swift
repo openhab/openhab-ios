@@ -41,9 +41,9 @@ protocol OpenAPIServiceProtocol: AnyObject, Sendable {
     func runNow(ruleUID: String, payload: [String: any Sendable]) async throws
 }
 
-// The generated OpenAPI client is wrapped by this curated API.
-// The library leaks the fact that it uses Swift OpenAPI Generator under the hood for SSE streams.
-// It will require the migration to Swift 6.1 before this can be changed.
+/// The generated OpenAPI client is wrapped by this curated API.
+/// The library leaks the fact that it uses Swift OpenAPI Generator under the hood for SSE streams.
+/// It will require the migration to Swift 6.1 before this can be changed.
 public actor OpenAPIService {
     private var client: any APIProtocol
     private var url: URL?
@@ -135,13 +135,13 @@ public actor OpenAPIService {
         return "\(sourcePrefix)=>\(base)"
     }
 
-    deinit {
-        urlSession?.invalidateAndCancel()
-    }
-
     private func subscriptionId(from location: String?) -> String? {
         guard let location else { return nil }
         return URL(string: location)?.lastPathComponent
+    }
+
+    deinit {
+        urlSession?.invalidateAndCancel()
     }
 }
 
@@ -283,9 +283,9 @@ public extension OpenAPIService {
         }
     }
 
-    // The app still supports iOS 16+, so keep this type-erased instead of
-    // returning an opaque AsyncSequence. Raw ServerSentEvent access is also
-    // needed for ALIVE, SITEMAP_CHANGED, and widget payloads.
+    /// The app still supports iOS 16+, so keep this type-erased instead of
+    /// returning an opaque AsyncSequence. Raw ServerSentEvent access is also
+    /// needed for ALIVE, SITEMAP_CHANGED, and widget payloads.
     func openHABSitemapWidgetEventsRaw(subscriptionid: String, sitemap: String, pageId: String)
         async throws -> AnyAsyncSequence<ServerSentEvent> {
         let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)

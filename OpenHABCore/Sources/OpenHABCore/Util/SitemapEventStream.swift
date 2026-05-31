@@ -26,8 +26,6 @@ public enum SitemapEventMessage: Sendable {
 }
 
 public actor SitemapEventStream {
-    public init() {}
-
     private struct Target: Equatable {
         let sitemap: String
         let pageId: String
@@ -41,6 +39,8 @@ public actor SitemapEventStream {
     private var isStopped = false
     private var lastEventTime = Date.now
     private let jsonDecoder = JSONDecoder()
+
+    public init() {}
 
     public func stream(sitemap: String, pageId: String) -> AsyncStream<StreamOutput<SitemapEventMessage>> {
         isStopped = false
@@ -74,7 +74,7 @@ public actor SitemapEventStream {
         return stream
     }
 
-    public func stop() async {
+    public func stop() {
         isStopped = true
         currentTarget = nil
         listenTask?.cancel()
