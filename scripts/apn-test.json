@@ -7,5 +7,5 @@
          }
      },
      "message": "Navigate to sub-page",
-     "on-click": "ui:/basicui/app?w=1304&sitemap=uicomponents_page_myHome"
+     "on-click": "ui:/basicui/app?sitemap=uicomponents_testinput"
  }

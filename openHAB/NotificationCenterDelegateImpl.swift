@@ -197,10 +197,15 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         // Wake up screen saver immediately on incoming notification interaction
         NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
 
-        if let navigationController = AppDelegate.appDelegate.window?.rootViewController as? UINavigationController,
-           let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
-            rootViewController.handleNotification(action: action, cloudUserId: cloudUserId)
-        }
+        // Search all windows across all scenes: key-window lookup fails when SwiftMessages owns
+        // the key window (foreground) or the scene is still transitioning (background tap).
+        let rootViewController = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .compactMap { $0.rootViewController as? UINavigationController }
+            .compactMap { $0.viewControllers.first as? OpenHABRootViewController }
+            .first
+        rootViewController?.handleNotification(action: action, cloudUserId: cloudUserId)
     }
 }
 
