@@ -18,6 +18,7 @@ struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
     @State private var idleTimerDisabled = false
     @State private var scrollPosition = ScrollPosition()
+    @State private var showScrollToTop = false
 
     private var isLinkedPage: Bool {
         viewModel.isLinked
@@ -49,8 +50,31 @@ struct SitemapPageView: View {
                         .listRowBackground(RowLayoutPolicy.rowBackground(for: rowInput))
                 }
                 .scrollPosition($scrollPosition)
+                .onScrollGeometryChange(for: Bool.self) { geo in
+                    geo.contentOffset.y > 150
+                } action: { _, isScrolledDown in
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showScrollToTop = isScrolledDown
+                    }
+                }
                 .onChange(of: viewModel.pageId) {
                     scrollPosition.scrollTo(edge: .top)
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    if showScrollToTop {
+                        Button {
+                            withAnimation {
+                                scrollPosition.scrollTo(edge: .top)
+                            }
+                        } label: {
+                            Image(systemName: "arrow.up")
+                                .font(.system(size: 16, weight: .semibold))
+                                .padding(12)
+                                .background(.ultraThinMaterial, in: Circle())
+                        }
+                        .padding([.trailing, .bottom], 16)
+                        .transition(.scale(scale: 0.8).combined(with: .opacity))
+                    }
                 }
             }
         }
