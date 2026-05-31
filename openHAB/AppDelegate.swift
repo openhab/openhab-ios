@@ -26,11 +26,9 @@ import WatchConnectivity
 class AppDelegate: UIResponder, UIApplicationDelegate {
     static var appDelegate: AppDelegate!
 
-    var window: UIWindow?
-
     private var crashlyticsSubscriber: AnyCancellable?
 
-    private let notificationDelegate = NotificationCenterDelegateImpl()
+    let notificationDelegate = NotificationCenterDelegateImpl()
 
     /// Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {
@@ -98,27 +96,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         activateWatchConnectivity()
 
         configureImageCoders()
-
-        // load and start the screensaver
-        if let keyWindow = UIApplication.shared.firstKeyWindow {
-            var config = ScreenSaverConfiguration()
-            config.isEnabled = Preferences.shared.screensaverEnabled
-            config.showsTime = Preferences.shared.screensaverShowsTime
-            config.showsDate = Preferences.shared.screensaverShowsDate
-            config.idleInterval = Preferences.shared.screensaverIdleInterval
-            config.movementInterval = Preferences.shared.screensaverMovementInterval
-            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
-            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
-            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
-            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
-            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
-            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
-            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
-            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
-            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
-
-            ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
-        }
     }
 
     @MainActor
@@ -169,31 +146,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
-    func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
-        // TODO: Pass this parameters to openHABViewController somehow to open specified sitemap/page and send specified command
-        // Probably need to do this in a way compatible to Android app's URL
-        Logger.appDelegate.info("Calling Application Bundle ID: \(options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String ?? "")")
-        Logger.appDelegate.info("URL: \(url.absoluteString)")
-        Logger.appDelegate.info("URL scheme: \(url.scheme ?? "")")
-        Logger.appDelegate.info("URL query: \(url.query ?? "")")
-
-        if url.isFileURL {
-            Logger.appDelegate.info("Loading Certificate")
-            let clientCertificateManager = CertificateManagers.clientCertificateManager
-            Task { @MainActor in
-                await clientCertificateManager.startImportClientCertificate(url: url)
-            }
-            return true
-        }
-
-        // remove the 'openhab' from the url
-        let action = url.absoluteString.split(separator: ":").dropFirst().joined(separator: ":")
-        notificationDelegate.notifyNotificationListeners(action: action)
-        return true
-    }
-
     /// This is only informational - on success - DID Register
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        // TODO: remove before shipping
+        // Logger.appDelegate.info("APNs token: \(deviceToken.map { String(format: "%02x", $0) }.joined())")
         // Do nothing now, we are using FCM
     }
 
@@ -238,47 +194,11 @@ extension Notification.Name {
 }
 
 extension AppDelegate {
-    func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
-        NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-    }
-
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-    }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        if let keyWindow = UIApplication.shared.firstKeyWindow {
-            var config = ScreenSaverConfiguration()
-            config.isEnabled = Preferences.shared.screensaverEnabled
-            config.showsTime = Preferences.shared.screensaverShowsTime
-            config.showsDate = Preferences.shared.screensaverShowsDate
-            config.idleInterval = Preferences.shared.screensaverIdleInterval
-            config.movementInterval = Preferences.shared.screensaverMovementInterval
-            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
-            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
-            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
-            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
-            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
-            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
-            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
-            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
-            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
-
-            ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
-        }
-    }
-
-    func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-    }
+    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {}
 }
 
 extension AppDelegate: MessagingDelegate {
