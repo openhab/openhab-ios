@@ -17,7 +17,10 @@ import SwiftUI
 @MainActor
 private func makeSwitchRowContent(input: ToggleRowInput,
                                   viewModel: SitemapPageViewModel) -> SwitchRowContent {
-    SwitchRowContent(input: input) { command in
+    SwitchRowContent(
+        input: input,
+        interactionState: viewModel.rowInteractionState(for: input.itemName)
+    ) { command in
         guard let itemName = input.itemName else { return }
         viewModel.sendCommand(itemname: itemName, command: command)
     }
@@ -25,6 +28,7 @@ private func makeSwitchRowContent(input: ToggleRowInput,
 
 private struct SwitchRowContent: View {
     let input: ToggleRowInput
+    let interactionState: RowInteractionState
     let onSendCommand: (String) -> Void
     @State private var localIsOn: Bool?
     @State private var revertTask: Task<Void, Never>?
@@ -56,13 +60,10 @@ private struct SwitchRowContent: View {
                     let newState = newValue ? "ON" : "OFF"
                     logger.info("Switch to \(newState, privacy: .public)")
                     onSendCommand(newState)
-                    // If the thing rejects the command (autoupdate=false), the server sends back
-                    // the same state so onChange never fires — revert optimistic state after 1s.
+                    // Revert is driven by interactionState transitions (see onChange below),
+                    // not a fixed tap-time timer. Cancel any prior revert from an earlier command.
                     revertTask?.cancel()
-                    revertTask = Task { @MainActor in
-                        do { try await Task.sleep(for: .seconds(1)) } catch { return }
-                        localIsOn = nil
-                    }
+                    revertTask = nil
                 }
             ))
             .padding(2)
@@ -71,9 +72,30 @@ private struct SwitchRowContent: View {
         }
         .contentShape(Rectangle())
         .onChange(of: displayState.effectiveState) { _ in
+            // Server confirmed the new state — clear optimistic override.
             revertTask?.cancel()
             revertTask = nil
             localIsOn = nil
+        }
+        .onChange(of: interactionState) { newState in
+            switch newState {
+            case .idle:
+                // HTTP command completed. Wait a short window for SSE/long-poll to arrive
+                // before clearing the optimistic state. Items with autoupdate=false never
+                // trigger the effectiveState change above, so the timer is their only revert.
+                guard localIsOn != nil else { return }
+                revertTask?.cancel()
+                revertTask = Task { @MainActor in
+                    do { try await Task.sleep(for: .seconds(1.5)) } catch { return }
+                    localIsOn = nil
+                }
+            case .failed:
+                revertTask?.cancel()
+                revertTask = nil
+                localIsOn = nil
+            case .sending, .queued, .offline:
+                break
+            }
         }
     }
 
