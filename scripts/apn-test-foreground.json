@@ -1,0 +1,5 @@
+{
+    "Simulator Target Bundle": "org.openhab.app",
+    "aps": { "alert": { "title": "openHAB", "body": "Motion detected" } },
+    "message": "Motion detected" 
+}

@@ -148,6 +148,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     /// This is only informational - on success - DID Register
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        // TODO: remove before shipping
+        // Logger.appDelegate.info("APNs token: \(deviceToken.map { String(format: "%02x", $0) }.joined())")
         // Do nothing now, we are using FCM
     }
 
