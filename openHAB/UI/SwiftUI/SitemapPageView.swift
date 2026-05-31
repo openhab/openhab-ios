@@ -17,6 +17,7 @@ import UIKit
 struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
     @State private var idleTimerDisabled = false
+    @State private var scrollPosition = ScrollPosition()
 
     private var isLinkedPage: Bool {
         viewModel.isLinked
@@ -46,6 +47,10 @@ struct SitemapPageView: View {
                         .equatable()
                         .listRowInsets(RowLayoutPolicy.rowInsets(for: rowInput))
                         .listRowBackground(RowLayoutPolicy.rowBackground(for: rowInput))
+                }
+                .scrollPosition($scrollPosition)
+                .onChange(of: viewModel.pageId) {
+                    scrollPosition.scrollTo(edge: .top)
                 }
             }
         }

@@ -142,6 +142,11 @@ struct SitemapNavigationView: View {
             }
             .foregroundStyle(.red)
             .ohTextToken(.secondary)
+            .phaseAnimator([1.0, 0.4]) { content, opacity in
+                content.opacity(opacity)
+            } animation: { _ in
+                .easeInOut(duration: 0.8)
+            }
             .accessibilityLabel("Command failures: \(count)")
         }
     }
