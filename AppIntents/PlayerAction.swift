@@ -12,7 +12,6 @@
 import AppIntents
 import Foundation
 
-@available(iOS 17.0, macOS 14.0, *)
 enum PlayerAction: String, AppEnum {
     case play = "PLAY"
     case pause = "PAUSE"
@@ -33,7 +32,6 @@ enum PlayerAction: String, AppEnum {
     ]
 }
 
-@available(iOS 17.0, macOS 14.0, *)
 extension PlayerAction: CustomLocalizedStringResourceConvertible {
     var localizedStringResource: LocalizedStringResource {
         switch self {

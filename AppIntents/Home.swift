@@ -105,7 +105,7 @@ enum HomeResolver {
         )
     }
 
-    /// Production overload for item-by-name resolution (iOS 16 compat intents).
+    /// Production overload for item-by-name resolution.
     /// Builds a stable-identifier-aware `findHomeId` closure and delegates to the testable overload.
     static func resolveHomeId(selectedHome: Home?,
                               itemName: String,

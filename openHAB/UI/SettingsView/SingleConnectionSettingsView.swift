@@ -17,7 +17,7 @@ struct SpinningSymbol: View {
     @State private var isAnimating = false
 
     var body: some View {
-        Image(systemSymbol: .arrowTriangle2Circlepath)
+        Image(systemSymbol: .arrowTrianglehead2ClockwiseRotate90)
             .rotationEffect(.degrees(isAnimating ? 360 : 0))
             .animation(
                 Animation.linear(duration: 1.0)
@@ -211,22 +211,16 @@ struct SingleConnectionSettingsView: View {
     }
 }
 
-// **TODO Migrate to @Previewable on iOS 17
 #Preview {
-    struct PreviewWrapper: View {
-        @State var connectionConfig = ConnectionConfiguration(
-            url: "https://openhab.local:8443",
-            username: "user",
-            password: "password123"
-        )
+    @Previewable @State var connectionConfig = ConnectionConfiguration(
+        url: "https://openhab.local:8443",
+        username: "user",
+        password: "password123"
+    )
 
-        var body: some View {
-            NavigationStack {
-                Form {
-                    SingleConnectionSettingsView(headerText: String(localized: "Connection Settings for local server"), connectionConfig: $connectionConfig, showNotificationToggle: false)
-                }
-            }
+    NavigationStack {
+        Form {
+            SingleConnectionSettingsView(headerText: String(localized: "Connection Settings for local server"), connectionConfig: $connectionConfig, showNotificationToggle: false)
         }
     }
-    return PreviewWrapper()
 }

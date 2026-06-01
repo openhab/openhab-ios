@@ -31,38 +31,26 @@ struct ConnectionSettingsView: View {
     }
 }
 
-// **TODO Migrate to @Previewable on iOS 17
 #Preview {
-    struct PreviewWrapper: View {
-        @State var demoMode = false
-        @State var localUrl = "https://openhab.local:8443"
-        @State var remoteUrl = "https://myopenhab.org"
-        @State var username = "user"
-        @State var password = "password123"
-        @State var alwaysSendCreds = true
+    @Previewable @State var demoMode = false
+    @Previewable @State var connectionConfig1 = ConnectionConfiguration(
+        url: "https://openhab.local:8443",
+        username: "user",
+        password: "password123"
+    )
+    @Previewable @State var connectionConfig2 = ConnectionConfiguration(
+        url: "http://192.168.2.1",
+        username: "user",
+        password: "password123"
+    )
 
-        @State var connectionConfig1 = ConnectionConfiguration(
-            url: "https://openhab.local:8443",
-            username: "user",
-            password: "password123"
-        )
-        @State var connectionConfig2 = ConnectionConfiguration(
-            url: "http://192.168.2.1",
-            username: "user",
-            password: "password123"
-        )
-
-        var body: some View {
-            NavigationStack {
-                Form {
-                    ConnectionSettingsView(
-                        settingsDemomode: $demoMode,
-                        localConnectionConfiguration: $connectionConfig1,
-                        remoteConnectionConfiguration: $connectionConfig2
-                    )
-                }
-            }
+    NavigationStack {
+        Form {
+            ConnectionSettingsView(
+                settingsDemomode: $demoMode,
+                localConnectionConfiguration: $connectionConfig1,
+                remoteConnectionConfiguration: $connectionConfig2
+            )
         }
     }
-    return PreviewWrapper()
 }

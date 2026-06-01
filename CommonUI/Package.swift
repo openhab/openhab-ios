@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "CommonUI",
-    platforms: [.iOS(.v17), .watchOS(.v10), .macOS(.v14)],
+    platforms: [.iOS(.v18), .watchOS(.v11), .macOS(.v14)],
 
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.

@@ -14,7 +14,6 @@ import OpenHABCore
 
 // MARK: - Shared Query Protocol
 
-@available(iOS 17.0, macOS 14.0, *)
 protocol ItemEntityQuery: EntityStringQuery {
     associatedtype EntityType: ItemEntity
 
@@ -22,7 +21,6 @@ protocol ItemEntityQuery: EntityStringQuery {
     var selectedHome: Home? { get }
 }
 
-@available(iOS 17.0, macOS 14.0, *)
 extension ItemEntityQuery {
     @MainActor
     func getHomeName(for homeId: UUID) -> String? {

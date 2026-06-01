@@ -12,7 +12,6 @@
 import AppIntents
 import OpenHABCore
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 struct SetActiveHomeIntent: AppIntent {
     static var openAppWhenRun: Bool { false }
 

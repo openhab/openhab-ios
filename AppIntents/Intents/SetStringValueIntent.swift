@@ -26,7 +26,6 @@ enum StringValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, *)
 struct SetStringValueIntent: AppIntent {
     static var openAppWhenRun: Bool { false }
 

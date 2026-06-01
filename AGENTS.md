@@ -9,9 +9,9 @@
 - UI tests: `xcodebuild test -workspace openHAB.xcworkspace -scheme openHABUITests`
 
 ## Architecture
-- **Main app**: openHAB/ - UIKit + SwiftUI hybrid iOS app targeting iOS 16+
+- **Main app**: openHAB/ - UIKit + SwiftUI hybrid iOS app targeting iOS 18+
 - **Core library**: OpenHABCore/ - Swift Package with shared business logic, models, API clients
-- **Watch app**: openHABWatch/ - watchOS companion app (watchOS 10+)
+- **Watch app**: openHABWatch/ - watchOS companion app (watchOS 11+)
 - **Extensions**: openHABIntents/ (Siri shortcuts), NotificationService/ (rich notifications)
 - **Tests**: openHABTestsSwift/ (Swift Testing), openHABUITests/ (UI automation). For targeted bug fixes,  run only focused tests by default.
 - **Dependencies**: Kingfisher (image loading), SwiftUI, Firebase, OpenAPI runtime, SFSafeSymbols

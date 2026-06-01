@@ -49,7 +49,6 @@ internal import SFSafeSymbols
 /// - Apple Documentation: https://developer.apple.com/documentation/appintents/app-shortcuts
 /// - PR #742: Original implementation
 /// - PR #1028: Enhanced intent implementations
-@available(iOS 17.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 struct OpenHABAppShortcutsProvider: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         // MARK: - Switch Control - Toggle Action
@@ -77,26 +76,3 @@ struct OpenHABAppShortcutsProvider: AppShortcutsProvider {
     /// Orange matches the openHAB brand color
     static let shortcutTileColor: ShortcutTileColor = .orange
 }
-
-//// MARK: - AppShortcut + SFSymbol Extension
-//
-// @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
-// extension AppShortcut {
-//    /// Creates an app shortcut with a type-safe SF Symbol.
-//    ///
-//    /// - Parameters:
-//    ///   - intent: The intent to run when the shortcut is invoked.
-//    ///   - phrases: The phrases that trigger this shortcut.
-//    ///   - shortTitle: A short title displayed in the Shortcuts app.
-//    ///   - systemImage: The SF Symbol to display for this shortcut.
-//    ///
-//    init<Intent>(intent: Intent, phrases: [AppShortcutPhrase<Intent>], shortTitle: LocalizedStringResource, systemImage: SFSymbol) where Intent : AppIntent {
-//
-//        self.init(
-//            intent: intent,
-//            phrases: phrases,
-//            shortTitle: shortTitle,
-//            systemImageName: systemImage.rawValue
-//        )
-//    }
-// }

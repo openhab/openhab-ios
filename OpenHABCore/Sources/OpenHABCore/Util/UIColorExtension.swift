@@ -33,38 +33,31 @@ public extension UIColor {
     // system colors
     class var ohLabel: UIColor {
         #if os(iOS)
-        if #available(iOS 13.0, *) {
-            return .label
-        }
-        #endif
+        return .label
+        #else
         return .black
+        #endif
     }
 
     class var ohSecondaryLabel: UIColor {
         #if os(iOS)
-        if #available(iOS 13.0, *) {
-            return .secondaryLabel
-        }
-        #endif
+        return .secondaryLabel
+        #else
         return .lightGray
+        #endif
     }
 
     class var ohSystemBackground: UIColor {
         #if os(iOS)
-        if #available(iOS 13.0, *) {
-            return .systemBackground
-        }
-        #endif
+        return .systemBackground
+        #else
         return .white
+        #endif
     }
 
     class var ohSystemGroupedBackground: UIColor {
         #if os(iOS)
-        if #available(iOS 13.0, *) {
-            return .systemGroupedBackground
-        } else {
-            return .groupTableViewBackground
-        }
+        return .systemGroupedBackground
         #elseif os(watchOS)
         return .black
         #else
@@ -74,12 +67,10 @@ public extension UIColor {
 
     class var ohSecondarySystemGroupedBackground: UIColor {
         #if os(iOS)
-        if #available(iOS 13.0, *) {
-            return .secondarySystemGroupedBackground
-        }
-        #endif
-
+        return .secondarySystemGroupedBackground
+        #else
         return .white
+        #endif
     }
 
     // standard colors

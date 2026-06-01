@@ -11,6 +11,7 @@
 
 import CommonUI
 import OpenHABCore
+import SFSafeSymbols
 import SwiftUI
 import UIKit
 
@@ -67,7 +68,7 @@ struct SitemapPageView: View {
                                 scrollPosition.scrollTo(edge: .top)
                             }
                         } label: {
-                            Image(systemName: "arrow.up")
+                            Image(systemSymbol: .arrowUp)
                                 .font(.system(size: 16, weight: .semibold))
                                 .padding(12)
                                 .background(.ultraThinMaterial, in: Circle())

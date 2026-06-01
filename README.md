@@ -18,7 +18,7 @@ This is the IOS native client for openHAB.
 ### openHAB (Current)
 
 This is the primary openHAB app which contains the latest features and is updated regularly. This includes Apple Watch support, enhanced notifications, shortcuts and more.
-Requires at least iOS 16 and openHAB 2.x and later.
+Requires at least iOS 18 and openHAB 2.x and later.
 
 <a href="https://itunes.apple.com/us/app/openhab/id6505005945"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store"></a>
 
@@ -29,7 +29,7 @@ Beta releases are available on [TestFlight](https://testflight.apple.com/join/0u
 
 ### openHAB V1 (Legacy)
 
-This is the legacy app for users on iOS 15 or earlier as well as openHAB system 1.x and later (tested to at least openHAB 4).
+This is the legacy app for users on iOS 17 or earlier as well as openHAB system 1.x and later (tested to at least openHAB 4).
 This app only receives security updates and minor fixes and is not intended for most users. 
 
 <a href="https://itunes.apple.com/us/app/openhab/id492054521?ls=1&mt=8"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store"></a>
@@ -287,7 +287,7 @@ The app supports exposes several actions that let you control your openHAB insta
 If you want to contribute to the iOS application we are here to help you to set up
 development environment. 
 openHAB iOS app is developed using Xcode and the standard iOS SDK from Apple.
-The iOS application is based on the iOS 16 and watchOS 8 SDK and makes uses of several Swift packages.
+The iOS application targets iOS 18 and watchOS 11 and makes uses of several Swift packages.
 
 To start developing you need an [Apple Developer](https://developer.apple.com/devcenter/ios/index.action) account.
 
