@@ -89,12 +89,12 @@ class WidgetItemMonitor {
         let itemNames = await WidgetItemRegistry.shared.getAllItemNames()
 
         guard !itemNames.isEmpty else {
-            await ItemEventStream.trackItems([])
+            await ItemEventStream.setItems([], for: "widget")
             return
         }
 
         Logger.widgets.info("Tracking \(itemNames.count) widget items: \(itemNames.joined(separator: ", "))")
-        await ItemEventStream.trackItems(itemNames)
+        await ItemEventStream.setItems(itemNames, for: "widget")
     }
 
     private func handle(_ message: StreamOutput<StateStreamMessage>) async {
@@ -131,6 +131,8 @@ class WidgetItemMonitor {
         WidgetCenter.shared.reloadTimelines(ofKind: "OpenHABSwitchWidgetSmall")
         WidgetCenter.shared.reloadTimelines(ofKind: "OpenHABSwitchWidgetMedium")
         WidgetCenter.shared.reloadTimelines(ofKind: "OpenHABSwitchWidgetLarge")
-        WidgetCenter.shared.reloadTimelines(ofKind: "OpenHABSensorWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "OpenHABSensorWidgetSmall")
+        WidgetCenter.shared.reloadTimelines(ofKind: "OpenHABSensorWidgetMedium")
+        WidgetCenter.shared.reloadTimelines(ofKind: "OpenHABSensorWidgetLarge")
     }
 }

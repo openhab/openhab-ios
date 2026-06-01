@@ -12,28 +12,70 @@
 import SwiftUI
 import WidgetKit
 
-struct SensorWidgetView: Widget {
-    let kind = "OpenHABSensorWidget"
+// MARK: - Small + accessory widget (1 item)
+
+struct SensorSmallWidget: Widget {
+    let kind = "OpenHABSensorWidgetSmall"
 
     var body: some WidgetConfiguration {
         AppIntentConfiguration(
             kind: kind,
-            intent: SensorConfigurationAppIntent.self,
-            provider: SensorProvider()
+            intent: SensorSmallConfigurationAppIntent.self,
+            provider: SensorSmallProvider()
         ) { entry in
             SensorWidgetEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("openHAB Sensor")
-        .description("Display your openHAB sensor values")
+        .description("Display an openHAB sensor value")
         .supportedFamilies([
             .systemSmall,
-            .systemMedium,
-            .systemLarge,
             .accessoryCircular,
             .accessoryRectangular,
             .accessoryInline
         ])
+        .widgetContentMarginsDisabled()
+    }
+}
+
+// MARK: - Medium widget (2 items)
+
+struct SensorMediumWidget: Widget {
+    let kind = "OpenHABSensorWidgetMedium"
+
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(
+            kind: kind,
+            intent: SensorMediumConfigurationAppIntent.self,
+            provider: SensorMediumProvider()
+        ) { entry in
+            SensorWidgetEntryView(entry: entry)
+                .containerBackground(.fill.tertiary, for: .widget)
+        }
+        .configurationDisplayName("openHAB Sensor")
+        .description("Display two openHAB sensor values")
+        .supportedFamilies([.systemMedium])
+        .widgetContentMarginsDisabled()
+    }
+}
+
+// MARK: - Large widget (4 items)
+
+struct SensorLargeWidget: Widget {
+    let kind = "OpenHABSensorWidgetLarge"
+
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(
+            kind: kind,
+            intent: SensorLargeConfigurationAppIntent.self,
+            provider: SensorLargeProvider()
+        ) { entry in
+            SensorWidgetEntryView(entry: entry)
+                .containerBackground(.fill.tertiary, for: .widget)
+        }
+        .configurationDisplayName("openHAB Sensor")
+        .description("Display up to four openHAB sensor values")
+        .supportedFamilies([.systemLarge])
         .widgetContentMarginsDisabled()
     }
 }

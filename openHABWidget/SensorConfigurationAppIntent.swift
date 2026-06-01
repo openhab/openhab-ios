@@ -12,7 +12,9 @@
 import AppIntents
 import Foundation
 
-struct SensorConfigurationAppIntent: WidgetConfigurationIntent {
+// MARK: - Small / accessory (1 item)
+
+struct SensorSmallConfigurationAppIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Sensor Widget Configuration"
     static let description = IntentDescription("Configure which sensor item to display in the widget.")
 
@@ -20,5 +22,43 @@ struct SensorConfigurationAppIntent: WidgetConfigurationIntent {
     var home: Home?
 
     @Parameter(title: "Sensor Item")
-    var itemEntity: SensorWidgetItemEntity?
+    var item1: SensorWidgetItemEntity?
+}
+
+// MARK: - Medium (2 items)
+
+struct SensorMediumConfigurationAppIntent: WidgetConfigurationIntent {
+    static let title: LocalizedStringResource = "Sensor Widget Configuration"
+    static let description = IntentDescription("Configure which sensor items to display in the widget.")
+
+    @Parameter(title: "Home")
+    var home: Home?
+
+    @Parameter(title: "Sensor Item 1")
+    var item1: SensorMediumWidgetItemEntity?
+
+    @Parameter(title: "Sensor Item 2")
+    var item2: SensorMediumWidgetItemEntity?
+}
+
+// MARK: - Large (4 items)
+
+struct SensorLargeConfigurationAppIntent: WidgetConfigurationIntent {
+    static let title: LocalizedStringResource = "Sensor Widget Configuration"
+    static let description = IntentDescription("Configure which sensor items to display in the widget.")
+
+    @Parameter(title: "Home")
+    var home: Home?
+
+    @Parameter(title: "Sensor Item 1")
+    var item1: SensorLargeWidgetItemEntity?
+
+    @Parameter(title: "Sensor Item 2")
+    var item2: SensorLargeWidgetItemEntity?
+
+    @Parameter(title: "Sensor Item 3")
+    var item3: SensorLargeWidgetItemEntity?
+
+    @Parameter(title: "Sensor Item 4")
+    var item4: SensorLargeWidgetItemEntity?
 }

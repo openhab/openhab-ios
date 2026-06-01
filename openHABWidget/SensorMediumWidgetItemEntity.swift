@@ -12,11 +12,11 @@
 import AppIntents
 import OpenHABCore
 
-struct SensorWidgetItemEntity: ItemEntity {
-    struct SensorWidgetItemQuery: ItemEntityQuery {
-        typealias EntityType = SensorWidgetItemEntity
+struct SensorMediumWidgetItemEntity: ItemEntity {
+    struct SensorMediumWidgetItemQuery: ItemEntityQuery {
+        typealias EntityType = SensorMediumWidgetItemEntity
 
-        @IntentParameterDependency<SensorSmallConfigurationAppIntent>(\.$home)
+        @IntentParameterDependency<SensorMediumConfigurationAppIntent>(\.$home)
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.number, .numberWithDimension, .stringItem]
@@ -26,7 +26,7 @@ struct SensorWidgetItemEntity: ItemEntity {
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Sensor Item")
-    static let defaultQuery = SensorWidgetItemQuery()
+    static let defaultQuery = SensorMediumWidgetItemQuery()
 
     var id: ItemIdentifier
     var item: OpenHABItem

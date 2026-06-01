@@ -404,7 +404,7 @@ class OpenHABRootViewController: UIViewController {
                             localConnectionConfig,
                             remoteConnectionConfig
                         ])
-                        await ItemEventStream.trackItems(sseCommandItem.isEmpty ? [] : [sseCommandItem])
+                        await ItemEventStream.setItems(sseCommandItem.isEmpty ? [] : [sseCommandItem], for: "notification")
                     }
                 }
             }

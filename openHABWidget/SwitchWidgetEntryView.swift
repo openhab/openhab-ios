@@ -229,24 +229,6 @@ private struct UnconfiguredPlaceholder: View {
     }
 }
 
-// MARK: - openHAB icon overlay
-
-private struct OpenHABIconOverlay: View {
-    let size: CGFloat
-    var leadingPadding: CGFloat = 14
-    var topPadding: CGFloat = 14
-
-    var body: some View {
-        Image("openHABIcon")
-            .resizable()
-            .scaledToFit()
-            .frame(width: size, height: size)
-            .opacity(0.5)
-            .padding(.leading, leadingPadding)
-            .padding(.top, topPadding)
-    }
-}
-
 // MARK: - Small Widget (1 item)
 
 struct SwitchSmallWidgetView: View {

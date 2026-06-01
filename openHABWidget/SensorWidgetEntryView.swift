@@ -20,102 +20,184 @@ import WidgetKit
 // MARK: - Timeline Entry
 
 struct SensorEntry: TimelineEntry {
+    struct Slot {
+        let item: OpenHABItem
+        let homeUUID: UUID
+    }
+
     let date: Date
-    let configuration: SensorConfigurationAppIntent
-    let item: OpenHABItem?
-    let homeUUID: UUID?
+    let home: Home?
+    /// Always contains exactly as many elements as the widget size supports (1, 2, or 4).
+    /// nil means the slot is not configured.
+    let slots: [Slot?]
 }
 
-// MARK: - Timeline Provider
+// MARK: - Shared provider logic
 
-struct SensorProvider: AppIntentTimelineProvider {
+private protocol SensorSlotResolvable {
+    var homeId: UUID? { get }
+    var item: OpenHABItem { get }
+}
+
+private func resolveSlot(entity: (any SensorSlotResolvable)?) async -> SensorEntry.Slot? {
+    guard let entity, let homeUUID = entity.homeId else { return nil }
+    await WidgetItemRegistry.shared.registerItem(name: entity.item.name, homeId: homeUUID)
+    let refreshed = await OpenHABItemCache.instance.getItemUncached(name: entity.item.name, home: homeUUID)
+    return SensorEntry.Slot(item: refreshed ?? entity.item, homeUUID: homeUUID)
+}
+
+// MARK: - Sample data
+
+private func sampleItem(name: String, label: String, state: String) -> OpenHABItem {
+    OpenHABItem(
+        name: name, type: "Number:Temperature", state: state, link: "",
+        label: label, groupType: nil, stateDescription: nil,
+        commandDescription: nil, members: [], category: "temperature", options: nil
+    )
+}
+
+private let sampleSlots: [SensorEntry.Slot?] = {
+    let uuid = UUID()
+    return [
+        SensorEntry.Slot(item: sampleItem(name: "LivingRoomTemp", label: "Living Room", state: "22.5 °C"), homeUUID: uuid),
+        SensorEntry.Slot(item: sampleItem(name: "BedroomHumidity", label: "Bedroom Humidity", state: "65 %"), homeUUID: uuid),
+        SensorEntry.Slot(item: sampleItem(name: "OutdoorTemp", label: "Outdoors", state: "18.3 °C"), homeUUID: uuid),
+        SensorEntry.Slot(item: sampleItem(name: "PowerUsage", label: "Power Usage", state: "1.2 kW"), homeUUID: uuid)
+    ]
+}()
+
+// MARK: - Small provider (1 slot)
+
+struct SensorSmallProvider: AppIntentTimelineProvider {
+    typealias Intent = SensorSmallConfigurationAppIntent
+
     func placeholder(in context: Context) -> SensorEntry {
-        // Create a sample sensor item for placeholder
-        let sampleItem = OpenHABItem(
-            name: "LivingRoomTemperature",
-            type: "Number:Temperature",
-            state: "22.5 °C",
-            link: "",
-            label: "Living Room Temperature",
-            groupType: nil,
-            stateDescription: nil,
-            commandDescription: nil,
-            members: [],
-            category: "temperature",
-            options: nil
-        )
-
-        return SensorEntry(
-            date: Date(),
-            configuration: SensorConfigurationAppIntent(),
-            item: sampleItem,
-            homeUUID: nil
-        )
+        SensorEntry(date: Date(), home: nil, slots: [sampleSlots[0]])
     }
 
-    func snapshot(for configuration: SensorConfigurationAppIntent, in context: Context) async -> SensorEntry {
-        // Show placeholder data in widget gallery
-        if context.isPreview {
-            return placeholder(in: context)
-        }
-        return await createEntry(for: configuration)
+    func snapshot(for configuration: Intent, in context: Context) async -> SensorEntry {
+        context.isPreview ? placeholder(in: context) : await createEntry(for: configuration)
     }
 
-    func timeline(for configuration: SensorConfigurationAppIntent, in context: Context) async -> Timeline<SensorEntry> {
+    func timeline(for configuration: Intent, in context: Context) async -> Timeline<SensorEntry> {
         let entry = await createEntry(for: configuration)
-
-        // Refresh every 5 minutes
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 5, to: Date())!
-        return Timeline(entries: [entry], policy: .after(nextUpdate))
+        let next = Calendar.current.date(byAdding: .minute, value: 5, to: Date())!
+        return Timeline(entries: [entry], policy: .after(next))
     }
 
-    private func createEntry(for configuration: SensorConfigurationAppIntent) async -> SensorEntry {
-        guard let itemEntity = configuration.itemEntity else {
-            return SensorEntry(
-                date: Date(),
-                configuration: configuration,
-                item: nil,
-                homeUUID: nil
-            )
-        }
-
-        // Get item from entity
-        let item = itemEntity.item
-        guard let homeUUID = itemEntity.homeId else {
-            return SensorEntry(
-                date: Date(),
-                configuration: configuration,
-                item: item,
-                homeUUID: nil
-            )
-        }
-
-        // Register this item for monitoring in the main app
-        await WidgetItemRegistry.shared.registerItem(name: item.name, homeId: homeUUID)
-
-        // Refresh the item state from cache
-        let refreshedItem = await OpenHABItemCache.instance.getItemUncached(name: item.name, home: homeUUID)
-
-        return SensorEntry(
-            date: Date(),
-            configuration: configuration,
-            item: refreshedItem ?? item,
-            homeUUID: homeUUID
-        )
+    private func createEntry(for configuration: Intent) async -> SensorEntry {
+        let slot = await resolveSlot(entity: configuration.item1 as (any SensorSlotResolvable)?)
+        return SensorEntry(date: Date(), home: configuration.home, slots: [slot])
     }
 }
 
-// MARK: - Small Widget
+// MARK: - Medium provider (2 slots)
+
+struct SensorMediumProvider: AppIntentTimelineProvider {
+    typealias Intent = SensorMediumConfigurationAppIntent
+
+    func placeholder(in context: Context) -> SensorEntry {
+        SensorEntry(date: Date(), home: nil, slots: Array(sampleSlots.prefix(2)))
+    }
+
+    func snapshot(for configuration: Intent, in context: Context) async -> SensorEntry {
+        context.isPreview ? placeholder(in: context) : await createEntry(for: configuration)
+    }
+
+    func timeline(for configuration: Intent, in context: Context) async -> Timeline<SensorEntry> {
+        let entry = await createEntry(for: configuration)
+        let next = Calendar.current.date(byAdding: .minute, value: 5, to: Date())!
+        return Timeline(entries: [entry], policy: .after(next))
+    }
+
+    private func createEntry(for configuration: Intent) async -> SensorEntry {
+        async let s1 = resolveSlot(entity: configuration.item1 as (any SensorSlotResolvable)?)
+        async let s2 = resolveSlot(entity: configuration.item2 as (any SensorSlotResolvable)?)
+        return await SensorEntry(date: Date(), home: configuration.home, slots: [s1, s2])
+    }
+}
+
+// MARK: - Large provider (4 slots)
+
+struct SensorLargeProvider: AppIntentTimelineProvider {
+    typealias Intent = SensorLargeConfigurationAppIntent
+
+    func placeholder(in context: Context) -> SensorEntry {
+        SensorEntry(date: Date(), home: nil, slots: sampleSlots)
+    }
+
+    func snapshot(for configuration: Intent, in context: Context) async -> SensorEntry {
+        context.isPreview ? placeholder(in: context) : await createEntry(for: configuration)
+    }
+
+    func timeline(for configuration: Intent, in context: Context) async -> Timeline<SensorEntry> {
+        let entry = await createEntry(for: configuration)
+        let next = Calendar.current.date(byAdding: .minute, value: 5, to: Date())!
+        return Timeline(entries: [entry], policy: .after(next))
+    }
+
+    private func createEntry(for configuration: Intent) async -> SensorEntry {
+        async let s1 = resolveSlot(entity: configuration.item1 as (any SensorSlotResolvable)?)
+        async let s2 = resolveSlot(entity: configuration.item2 as (any SensorSlotResolvable)?)
+        async let s3 = resolveSlot(entity: configuration.item3 as (any SensorSlotResolvable)?)
+        async let s4 = resolveSlot(entity: configuration.item4 as (any SensorSlotResolvable)?)
+        return await SensorEntry(date: Date(), home: configuration.home, slots: [s1, s2, s3, s4])
+    }
+}
+
+// MARK: - Unconfigured placeholder
+
+private struct UnconfiguredPlaceholder: View {
+    var body: some View {
+        VStack {
+            Image(systemSymbol: .gear)
+                .font(.largeTitle)
+                .foregroundColor(.secondary)
+            Text("Configure Widget")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+    }
+}
+
+// MARK: - Item Row (used in multi-item layouts)
+
+private struct SensorItemRow: View {
+    let slot: SensorEntry.Slot
+
+    var body: some View {
+        let item = slot.item
+        let label = item.label.isEmpty ? item.name : item.label
+        HStack {
+            Text(label)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Text(item.state ?? "—")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+// MARK: - Small Widget (1 item)
 
 struct SensorSmallWidgetView: View {
     let entry: SensorEntry
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            VStack(spacing: 8) {
-                if let item = entry.item {
-                    let itemLabel = item.label.isEmpty ? item.name : item.label
-                    Text(itemLabel)
+            if let slot = entry.slots.compactMap(\.self).first {
+                let item = slot.item
+                let label = item.label.isEmpty ? item.name : item.label
+                VStack(spacing: 8) {
+                    Text(label)
                         .font(.headline)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -123,216 +205,124 @@ struct SensorSmallWidgetView: View {
 
                     Spacer()
 
-                    if let itemState = item.state {
-                        Text(itemState)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.5)
-                            .multilineTextAlignment(.center)
-                    } else {
-                        Text("—")
-                            .font(.title2)
-                            .foregroundColor(.secondary)
-                    }
+                    Text(item.state ?? "—")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.5)
+                        .multilineTextAlignment(.center)
 
                     Spacer()
-                } else {
-                    VStack {
-                        Image(systemSymbol: .gear)
-                            .font(.largeTitle)
-                            .foregroundColor(.secondary)
-                        Text("Configure Widget")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
                 }
+                .frame(maxHeight: .infinity)
+                .padding()
+            } else {
+                UnconfiguredPlaceholder()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding()
             }
-            .frame(maxHeight: .infinity)
-            .padding()
 
-            // Widget indicator icon
-            Image("openHABIcon")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 16, height: 16)
-                .opacity(0.5)
-                .padding(8)
+            OpenHABIconOverlay(size: 16)
         }
     }
 }
 
-// MARK: - Medium Widget
+// MARK: - Medium Widget (2 items)
 
 struct SensorMediumWidgetView: View {
     let entry: SensorEntry
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            HStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 8) {
-                    if let item = entry.item {
-                        let itemLabel = item.label.isEmpty ? item.name : item.label
-                        Text(itemLabel)
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .lineLimit(2)
-                            .padding(.top, 20)
-
-                        Spacer()
-
-                        if let itemState = item.state {
-                            Text(itemState)
-                                .font(.system(size: 36, weight: .bold))
-                                .foregroundColor(.primary)
-                                .lineLimit(2)
-                        } else {
-                            Text("No Data")
-                                .font(.title)
-                                .foregroundColor(.secondary)
-                        }
-
-                        Text(item.type?.rawValue ?? "Sensor")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    } else {
-                        VStack(alignment: .leading) {
-                            Image(systemSymbol: .gear)
-                                .font(.largeTitle)
-                                .foregroundColor(.secondary)
-                            Text("Configure Widget")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+            let filledSlots = entry.slots.compactMap(\.self)
+            if filledSlots.isEmpty {
+                UnconfiguredPlaceholder()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding()
+            } else {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(filledSlots.indices, id: \.self) { index in
+                        SensorItemRow(slot: filledSlots[index])
+                            .padding(.horizontal)
+                            .padding(.vertical, 10)
+                        if index < filledSlots.count - 1 {
+                            Divider()
+                                .padding(.leading)
                         }
                     }
                 }
-
-                Spacer()
+                .frame(maxHeight: .infinity)
+                .padding(.top, 22)
             }
-            .frame(maxHeight: .infinity)
-            .padding()
 
-            // Widget indicator icon
-            Image("openHABIcon")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 18, height: 18)
-                .opacity(0.5)
-                .padding(8)
+            OpenHABIconOverlay(size: 18)
         }
     }
 }
 
-// MARK: - Large Widget
+// MARK: - Large Widget (4 items)
 
 struct SensorLargeWidgetView: View {
     let entry: SensorEntry
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            VStack(alignment: .leading, spacing: 16) {
-                if let item = entry.item {
-                    let itemLabel = item.label.isEmpty ? item.name : item.label
-                    Text(itemLabel)
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .padding(.top, 20)
-
-                    HStack {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Current Value")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-
-                            if let itemState = item.state {
-                                Text(itemState)
-                                    .font(.system(size: 48, weight: .bold))
-                                    .foregroundColor(.primary)
-                                    .lineLimit(2)
-                            } else {
-                                Text("—")
-                                    .font(.system(size: 48))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-
-                        Spacer()
-                    }
-
-                    HStack {
-                        Image(systemSymbol: sensorIcon(for: item.type))
-                            .font(.caption)
-                        Text(item.type?.rawValue ?? "Sensor")
-                            .font(.caption)
-                    }
-                    .foregroundColor(.secondary)
-
-                    Spacer()
-                } else {
-                    VStack(alignment: .center, spacing: 16) {
-                        Image(systemSymbol: .gear)
-                            .font(.system(size: 60))
-                            .foregroundColor(.secondary)
-                        Text("Configure Widget")
-                            .font(.title2)
-                            .foregroundColor(.secondary)
-                        Text("Long press the widget to configure which sensor to display")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            let filledSlots = entry.slots.compactMap(\.self)
+            if filledSlots.isEmpty {
+                VStack(alignment: .center, spacing: 16) {
+                    Image(systemSymbol: .gear)
+                        .font(.system(size: 60))
+                        .foregroundColor(.secondary)
+                    Text("Configure Widget")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                    Text("Long press the widget to configure which sensors to display")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+            } else {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(filledSlots.indices, id: \.self) { index in
+                        SensorItemRow(slot: filledSlots[index])
+                            .padding(.horizontal)
+                            .padding(.vertical, 12)
+                        if index < filledSlots.count - 1 {
+                            Divider()
+                                .padding(.leading)
+                        }
+                    }
+                }
+                .frame(maxHeight: .infinity)
+                .padding(.top, 22)
             }
-            .frame(maxHeight: .infinity)
-            .padding()
 
-            // Widget indicator icon
-            Image("openHABIcon")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 20, height: 20)
-                .opacity(0.5)
-                .padding(12)
-        }
-    }
-
-    private func sensorIcon(for type: OpenHABItem.ItemType?) -> SFSymbol {
-        guard let type else { return .gaugeWithDotsNeedleBottom50percent }
-        switch type {
-        case .number, .numberWithDimension:
-            return .gaugeWithDotsNeedleBottom50percent
-        case .stringItem:
-            return .textQuote
-        default:
-            return .gaugeWithDotsNeedleBottom50percent
+            OpenHABIconOverlay(size: 20)
         }
     }
 }
 
-// MARK: - Accessory Views
+// MARK: - Accessory Views (share small provider / entry)
 
 struct SensorAccessoryCircularView: View {
     let entry: SensorEntry
 
     var body: some View {
-        if let item = entry.item, let itemState = item.state {
-            ZStack {
-                AccessoryWidgetBackground()
+        ZStack {
+            AccessoryWidgetBackground()
+            if let slot = entry.slots.compactMap(\.self).first, let state = slot.item.state {
                 VStack(spacing: 2) {
                     Image(systemSymbol: .gaugeWithDotsNeedleBottom50percent)
                         .font(.caption)
-                    Text(itemState)
+                    Text(state)
                         .font(.caption2)
                         .fontWeight(.bold)
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                 }
-            }
-        } else {
-            ZStack {
-                AccessoryWidgetBackground()
+            } else {
                 Image(systemSymbol: .gear)
                     .font(.title3)
             }
@@ -344,16 +334,16 @@ struct SensorAccessoryRectangularView: View {
     let entry: SensorEntry
 
     var body: some View {
-        if let item = entry.item {
-            let itemLabel = item.label.isEmpty ? item.name : item.label
+        if let slot = entry.slots.compactMap(\.self).first {
+            let item = slot.item
+            let label = item.label.isEmpty ? item.name : item.label
             VStack(alignment: .leading, spacing: 2) {
-                Text(itemLabel)
+                Text(label)
                     .font(.headline)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-
-                if let itemState = item.state {
-                    Text(itemState)
+                if let state = item.state {
+                    Text(state)
                         .font(.body)
                         .fontWeight(.semibold)
                         .lineLimit(1)
@@ -374,12 +364,13 @@ struct SensorAccessoryInlineView: View {
     let entry: SensorEntry
 
     var body: some View {
-        if let item = entry.item {
-            let itemLabel = item.label.isEmpty ? item.name : item.label
-            if let itemState = item.state {
-                Text("\(itemLabel): \(itemState)")
+        if let slot = entry.slots.compactMap(\.self).first {
+            let item = slot.item
+            let label = item.label.isEmpty ? item.name : item.label
+            if let state = item.state {
+                Text("\(label): \(state)")
             } else {
-                Text(itemLabel)
+                Text(label)
             }
         } else {
             Text("Configure Widget")
@@ -387,7 +378,7 @@ struct SensorAccessoryInlineView: View {
     }
 }
 
-// MARK: - Widget View
+// MARK: - Unified Entry View (dispatches by family)
 
 struct SensorWidgetEntryView: View {
     var entry: SensorEntry
@@ -413,27 +404,26 @@ struct SensorWidgetEntryView: View {
     }
 }
 
-// MARK: - Preview
+extension SensorWidgetItemEntity: SensorSlotResolvable {}
+extension SensorMediumWidgetItemEntity: SensorSlotResolvable {}
+extension SensorLargeWidgetItemEntity: SensorSlotResolvable {}
 
-#Preview(as: .systemSmall) {
-    SensorWidgetView()
+// MARK: - Previews
+
+#Preview("Small", as: .systemSmall) {
+    SensorSmallWidget()
 } timeline: {
-    SensorEntry(
-        date: .now,
-        configuration: SensorConfigurationAppIntent(),
-        item: OpenHABItem(
-            name: "LivingRoomTemperature",
-            type: "Number:Temperature",
-            state: "22.5 °C",
-            link: "",
-            label: "Living Room Temperature",
-            groupType: nil,
-            stateDescription: nil,
-            commandDescription: nil,
-            members: [],
-            category: "temperature",
-            options: nil
-        ),
-        homeUUID: nil
-    )
+    SensorEntry(date: .now, home: nil, slots: [sampleSlots[0]])
+}
+
+#Preview("Medium", as: .systemMedium) {
+    SensorMediumWidget()
+} timeline: {
+    SensorEntry(date: .now, home: nil, slots: Array(sampleSlots.prefix(2)))
+}
+
+#Preview("Large", as: .systemLarge) {
+    SensorLargeWidget()
+} timeline: {
+    SensorEntry(date: .now, home: nil, slots: sampleSlots)
 }

@@ -18,6 +18,8 @@ struct OpenHABWidgetBundle: WidgetBundle {
         SwitchSmallWidget()
         SwitchMediumWidget()
         SwitchLargeWidget()
-        SensorWidgetView()
+        SensorSmallWidget()
+        SensorMediumWidget()
+        SensorLargeWidget()
     }
 }

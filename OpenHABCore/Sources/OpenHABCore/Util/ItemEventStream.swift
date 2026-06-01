@@ -64,7 +64,11 @@ public actor EventStream<Event: Sendable> {
         }
     }
 
-    private var trackedItems: Set<String> = []
+    private var trackedItemsByNamespace: [String: Set<String>] = [:]
+    private var trackedItems: Set<String> {
+        trackedItemsByNamespace.values.reduce(into: Set()) { $0.formUnion($1) }
+    }
+
     private var continuations = [UUID: AsyncStream<StreamOutput<Event>>.Continuation]()
     private var listenTask: Task<Void, Never>?
     private var networkMonitoringTask: Task<Void, Never>?
@@ -87,9 +91,15 @@ public actor EventStream<Event: Sendable> {
         }
     }
 
-    public func trackItems(_ items: [String]) async {
-        trackedItems = Set(items)
+    public func setItems(_ items: [String], for namespace: String) async {
+        trackedItemsByNamespace[namespace] = Set(items)
         await sendTrackedItemsIfPossible()
+    }
+
+    /// Sets items for the ``"default"`` namespace. Use ``setItems(_:for:)`` when multiple
+    /// callers need to track independent sets simultaneously.
+    public func trackItems(_ items: [String]) async {
+        await setItems(items, for: "default")
     }
 
     public func startMonitoringNetworkIfNeeded(initialConnection: ConnectionInfo?) {
@@ -259,6 +269,10 @@ public extension ItemEventStream {
     /// `await ItemEventStream.trackItems(["KitchenLight"])`.
     nonisolated static func trackItems(_ items: [String]) async {
         await shared.trackItems(items)
+    }
+
+    nonisolated static func setItems(_ items: [String], for namespace: String) async {
+        await shared.setItems(items, for: namespace)
     }
 
     static func startMonitoringNetwork(initialConnection: ConnectionInfo? = nil) async {
