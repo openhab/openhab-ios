@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+
+
+## [Version 3.2.64, Build 273] - 2026-05-31Z
+
+- Fix optimistic-state revert flicker on slow connections
+
 ## [Version 3.2.63, Build 272] - 2026-05-31Z
 
 - Migrate to UIWindowScene lifecycle (#1229)
