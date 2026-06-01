@@ -72,7 +72,10 @@ enum WebRowViewConfigurationFactory {
         configuration.mediaTypesRequiringUserActionForPlayback = []
         // Share the per-home sandboxed data store with OpenHABWebViewController so the
         // widget web view inherits any cloud session cookies already established there.
-        configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: homeId)
+        // WKWebsiteDataStore(forIdentifier:) requires iOS 17; on iOS 16 the default store is used.
+        if #available(iOS 17, *) {
+            configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: homeId)
+        }
         return configuration
     }
 }

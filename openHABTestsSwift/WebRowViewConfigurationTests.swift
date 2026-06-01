@@ -24,6 +24,7 @@ struct WebRowViewConfigurationTests {
         #expect(configuration.mediaTypesRequiringUserActionForPlayback == [])
     }
 
+    @available(iOS 17, *)
     @MainActor
     @Test
     func webRowConfigurationUsesPerHomeDataStore() {
@@ -33,6 +34,7 @@ struct WebRowViewConfigurationTests {
         #expect(configuration.websiteDataStore.identifier == homeId)
     }
 
+    @available(iOS 17, *)
     @MainActor
     @Test
     func separateHomesGetSeparateDataStores() {
