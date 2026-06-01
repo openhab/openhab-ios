@@ -27,9 +27,13 @@ enum PlayerValueError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 struct SetPlayerValueIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.player] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.player]
+    }
 
     static var parameterSummary: some ParameterSummary {
         Summary("Send \(\.$action) to \(\.$itemEntity)") {

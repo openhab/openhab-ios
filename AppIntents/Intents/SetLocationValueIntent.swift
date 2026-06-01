@@ -33,9 +33,14 @@ enum LocationValueError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 struct SetLocationValueIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.location] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.location]
+    }
+
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$latitude), \(\.$longitude)") {
             \.$home

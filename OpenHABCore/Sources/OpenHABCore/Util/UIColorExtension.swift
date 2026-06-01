@@ -30,7 +30,7 @@ public enum OHInterfaceStyle: Int {
 }
 
 public extension UIColor {
-    // system colors
+    /// system colors
     class var ohLabel: UIColor {
         #if os(iOS)
         return .label
@@ -73,7 +73,7 @@ public extension UIColor {
         #endif
     }
 
-    // standard colors
+    /// standard colors
     class var ohMaroon: UIColor {
         OHInterfaceStyle.current == .light ? UIColor(hex: "#800000") : UIColor(hex: "#800000")
     }

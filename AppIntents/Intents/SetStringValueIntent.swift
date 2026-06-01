@@ -27,9 +27,14 @@ enum StringValueError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 struct SetStringValueIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.stringItem] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.stringItem]
+    }
+
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$value)") {
             \.$home

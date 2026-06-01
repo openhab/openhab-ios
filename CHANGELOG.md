@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+
+
+## [Version 3.2.64, Build 273] - 2026-05-31Z
+
+- Fix optimistic-state revert flicker on slow connections
+
+## [Version 3.2.63, Build 272] - 2026-05-31Z
+
+- Migrate to UIWindowScene lifecycle (#1229)
+
+## [Version 3.2.62, Build 271] - 2026-05-30Z
+
+- Fix Shortcuts localization and home entity display (#1227)
+
+## [Version 3.2.61, Build 270] - 2026-05-29Z
+
+- Migrate DatePickerInputRowView from DateFormatter to FormatStyle API (#1103)
+- Revert optimistic widget state if command is rejected by thing (#1199)
+- Prompt user to grant Local Network access for local connections (#1209)
+- Store Watch credentials in Watch Keychain for restart resilience (#1221)
+- Upgrade SwiftFormatPlugin 0.58.7→0.61.1, SwiftLintPlugin 0.62.2→0.63.3 (#1225)
+
 ## [Version 3.2.60, Build 269] - 2026-05-27Z
 
 - ConnectionView: align icon with list rows, scale with Dynamic Type

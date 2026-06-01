@@ -54,14 +54,11 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
         }
         switch authenticationMethod {
         case NSURLAuthenticationMethodServerTrust:
-            let result = await handleServerTrust(challenge: challenge)
-            return result
+            return await handleServerTrust(challenge: challenge)
         case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
-            let result = await handleBasicAuth(challenge: challenge)
-            return result
+            return await handleBasicAuth(challenge: challenge)
         case NSURLAuthenticationMethodClientCertificate:
-            let result = await handleClientCertificateAuth(challenge: challenge)
-            return result
+            return await handleClientCertificateAuth(challenge: challenge)
         default:
             return (.performDefaultHandling, nil)
         }

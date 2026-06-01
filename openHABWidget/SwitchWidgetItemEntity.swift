@@ -20,7 +20,9 @@ struct SwitchWidgetItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.switchItem]
-        var selectedHome: Home? { intent?.home }
+        var selectedHome: Home? {
+            intent?.home
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Switch Item")

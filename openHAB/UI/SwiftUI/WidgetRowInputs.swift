@@ -17,7 +17,7 @@ protocol RowWithIconInput {
     var icon: RowIconInput { get }
 }
 
-struct RowIconInput: Equatable, Sendable {
+struct RowIconInput: Equatable {
     let icon: String
     let iconColor: String
     let staticIcon: Bool
@@ -220,7 +220,7 @@ struct RollershutterRowInput: Equatable, RowWithIconInput {
     }
 }
 
-struct InputRowInput: Sendable, Equatable, RowWithIconInput {
+struct InputRowInput: Equatable, RowWithIconInput {
     let widgetId: String
     let renderingKind: WidgetRenderingKind
     let displayState: WidgetDisplayState
@@ -236,6 +236,17 @@ struct InputRowInput: Sendable, Equatable, RowWithIconInput {
         OpenHABWidget.InputHint(rawValue: inputHintRawValue)
     }
 
+    /// Resolves the effective input hint raw value. When the widget/server provides no explicit hint
+    /// (`.unknown`), the item type is used to infer `.number` for Number and Number:Dimension items.
+    static func resolvedInputHintRawValue(_ rawValue: String, item: OpenHABItem?) -> String {
+        guard OpenHABWidget.InputHint(rawValue: rawValue) == .unknown else { return rawValue }
+        if item?.isOfTypeOrGroupType(.number) == true ||
+            item?.isOfTypeOrGroupType(.numberWithDimension) == true {
+            return OpenHABWidget.InputHint.number.rawValue
+        }
+        return rawValue
+    }
+
     static func from(widget: OpenHABWidget) -> InputRowInput {
         let numberPattern = if let pattern = widget.pattern, !pattern.isEmpty {
             pattern
@@ -249,7 +260,7 @@ struct InputRowInput: Sendable, Equatable, RowWithIconInput {
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
             readOnly: widget.readOnly,
-            inputHintRawValue: widget.inputHint.rawValue,
+            inputHintRawValue: resolvedInputHintRawValue(widget.inputHint.rawValue, item: widget.item),
             icon: RowIconInput.from(widget: widget),
             itemName: widget.item?.name,
             numberPattern: numberPattern
@@ -258,7 +269,7 @@ struct InputRowInput: Sendable, Equatable, RowWithIconInput {
 }
 
 struct ButtonGridRowInput: Equatable, RowWithIconInput {
-    struct ButtonInput: Equatable, Sendable, Identifiable {
+    struct ButtonInput: Equatable, Identifiable {
         let id: String
         let label: String
         let icon: RowIconInput

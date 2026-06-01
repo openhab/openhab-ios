@@ -20,7 +20,9 @@ struct SensorWidgetItemEntity: ItemEntity {
         var intent
 
         var allowedTypes: [OpenHABItem.ItemType] = [.number, .numberWithDimension, .stringItem]
-        var selectedHome: Home? { intent?.home }
+        var selectedHome: Home? {
+            intent?.home
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Sensor Item")

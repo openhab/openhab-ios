@@ -56,7 +56,7 @@ struct ClientCertificateManagerTests {
         #expect(!result)
     }
 
-    @Test func startImportCertificateReturnsTrueIfDelegateApproves() async throws {
+    @Test func startImportCertificateReturnsTrueIfDelegateApproves() async {
         guard let url = Bundle.module.url(forResource: "test", withExtension: "p12") else {
             Issue.record("Test PKCS#12 file not found.")
             return

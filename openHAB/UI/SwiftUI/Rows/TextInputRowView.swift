@@ -64,26 +64,28 @@ struct InputCommandFormatter {
 
     // MARK: initial draft from server state
 
-    // Formats a Double (always dot-decimal from the server) using the locale decimal separator.
-    // Whole numbers are rendered without a decimal point (220.0 → "220").
-    // Uses NumberFormatter to avoid Swift's exponent notation for small values (e.g. 1e-05).
+    /// Formats a Double (always dot-decimal from the server) using the locale decimal separator.
+    /// Whole numbers are rendered without a decimal point (220.0 → "220").
     func localeFormattedValue(_ value: Double) -> String {
         if value.truncatingRemainder(dividingBy: 1) == 0,
            value >= Double(Int.min),
            value <= Double(Int.max) {
             return String(Int(value))
         }
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.usesGroupingSeparator = false
-        formatter.decimalSeparator = decimalSeparator
-        formatter.maximumFractionDigits = 15
-        formatter.minimumFractionDigits = 1
-        return formatter.string(from: NSNumber(value: value)) ?? String(value)
+        // Use a neutral locale so the output is always dot-decimal, then swap in
+        // the formatter's own decimalSeparator so the result matches the user's locale.
+        let dotDecimal = value.formatted(
+            .number
+                .precision(.fractionLength(1 ... 15))
+                .grouping(.never)
+                .locale(Locale(identifier: "en_US_POSIX"))
+        )
+        guard decimalSeparator != "." else { return dotDecimal }
+        return dotDecimal.replacingOccurrences(of: ".", with: decimalSeparator)
     }
 
-    // Extracts the numeric portion from a formatted state string, e.g. "220 °C" → "220".
-    // For non-number inputs the string is returned unchanged.
+    /// Extracts the numeric portion from a formatted state string, e.g. "220 °C" → "220".
+    /// For non-number inputs the string is returned unchanged.
     func numericDraftFromState(_ text: String) -> String {
         guard !text.isEmpty else { return text }
         var result = ""
@@ -103,7 +105,7 @@ struct InputCommandFormatter {
         return result
     }
 
-    // Extracts the unit suffix from a formatted state string, e.g. "220 °C" → " °C", "220" → "".
+    /// Extracts the unit suffix from a formatted state string, e.g. "220 °C" → " °C", "220" → "".
     func unitSuffixFromState(_ text: String) -> String {
         guard !text.isEmpty else { return "" }
         var i = text.startIndex
@@ -194,8 +196,8 @@ private struct TextInputRowContent: View {
         inputCommandFormatter.command(from: draftInputText, hint: inputHint, unitSuffix: draftUnitSuffix)
     }
 
-    // Display value for number inputs: apply the number pattern with the current locale,
-    // falling back to the server-formatted label value, then the raw state string.
+    /// Display value for number inputs: apply the number pattern with the current locale,
+    /// falling back to the server-formatted label value, then the raw state string.
     private var formattedDisplayText: String {
         guard inputHint == .number, !inputText.isEmpty else { return inputText }
         if let pattern = input.numberPattern, !pattern.isEmpty {
@@ -234,11 +236,13 @@ private struct TextInputRowContent: View {
                     prepareEditDraft()
                     showInputAlert = true
                 } label: {
-                    Text(inputText.isEmpty
-                        ? "Enter \(inputHint == .number ? "number" : "text")"
-                        : formattedDisplayText)
-                        .lineLimit(nil)
-                        .foregroundStyle(inputText.isEmpty ? .secondary : (input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor)))
+                    Text(
+                        inputText.isEmpty
+                            ? "Enter \(inputHint == .number ? "number" : "text")"
+                            : formattedDisplayText
+                    )
+                    .lineLimit(nil)
+                    .foregroundStyle(inputText.isEmpty ? .secondary : (input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor)))
                 }
                 .buttonStyle(.plain)
                 .disabled(input.readOnly)
@@ -324,11 +328,11 @@ struct TextInputRowView: View {
     var body: some View {
         makeTextInputRowContent(
             TextInputRowConfig(
-                input: input) { command in
-                    guard let itemName = input.itemName else { return }
-                    viewModel.sendCommand(command, for: itemName)
-                    // swiftlint:disable:next closure_end_indentation
-                }
+                input: input
+            ) { command in
+                guard let itemName = input.itemName else { return }
+                viewModel.sendCommand(command, for: itemName)
+            }
         )
     }
 }

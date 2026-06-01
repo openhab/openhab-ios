@@ -27,9 +27,14 @@ enum NumberValueError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 struct SetNumberValueIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.number, .numberWithDimension] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.number, .numberWithDimension]
+    }
+
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$value)") {
             \.$home

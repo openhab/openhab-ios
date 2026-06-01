@@ -15,15 +15,15 @@ import os.log
 import WatchConnectivity
 import WatchKit
 
-// This class handles values that are passed from the ios app.
-// @unchecked Sendable: all mutable state (@MainActor contextRequestInFlight) is actor-protected;
-// WCSession delegate callbacks are non-isolated and only schedule Tasks, never mutate directly.
+/// This class handles values that are passed from the ios app.
+/// @unchecked Sendable: all mutable state (@MainActor contextRequestInFlight) is actor-protected;
+/// WCSession delegate callbacks are non-isolated and only schedule Tasks, never mutate directly.
 class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
     @MainActor static let singleton = AppMessageService()
 
     private static let preferencesKey = "watchPreferences"
 
-    // Accessed only from @MainActor context (requestApplicationContext and its Task completions).
+    /// Accessed only from @MainActor context (requestApplicationContext and its Task completions).
     @MainActor private var contextRequestInFlight = false
 
     @MainActor
@@ -64,6 +64,20 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
                         await OpenHABItemCache.instance.forceCacheReload()
                     }
                 }
+            }
+            // Persist all homes' credentials in the Watch Keychain so they survive app restart.
+            // CredentialsStore uses no kSecAttrAccessGroup, so it naturally targets the Watch Keychain.
+            if let homeCredentials = prefs.homeCredentials {
+                for (uuidString, creds) in homeCredentials {
+                    guard let homeId = UUID(uuidString: uuidString) else { continue }
+                    CredentialsStore.store(username: creds.localUsername, password: creds.localPassword, homeId: homeId, type: .local)
+                    CredentialsStore.store(username: creds.remoteUsername, password: creds.remotePassword, homeId: homeId, type: .remote)
+                }
+                Logger.preferences.debug("🔑 Persisted credentials for \(homeCredentials.count) home(s) to Watch Keychain")
+            }
+            // Persist the active home ID so AppSettings can inject credentials on restart.
+            if let activeHomeId = prefs.activeHomeId {
+                AppSettings.shared.activeHomeId = activeHomeId
             }
             //                   if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
             //                       // do we need to do anything here?  We load from the shared keychain.

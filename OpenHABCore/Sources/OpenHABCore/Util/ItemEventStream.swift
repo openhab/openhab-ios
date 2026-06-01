@@ -15,7 +15,7 @@ import OpenAPIRuntime
 import OpenAPIURLSession
 import OSLog
 
-/**
+/*
  Example usage:
 
  ```
@@ -47,14 +47,16 @@ public enum StateStreamMessage: Sendable, Equatable {
 }
 
 public actor EventStream<Event: Sendable> {
-    // Alive and Item State Chnage message structures
+    /// Alive and Item State Chnage message structures
     private struct Alive: Decodable { let type: String; let interval: Int }
-    // Multiple items can come in a single message which makes this a little more complicated
+    /// Multiple items can come in a single message which makes this a little more complicated
     private struct ItemStateChanges: Decodable {
         struct Value: Decodable { let state: String }
 
         let wrapped: [String: Value]
-        var first: (String, Value)? { wrapped.first }
+        var first: (String, Value)? {
+            wrapped.first
+        }
 
         init(from decoder: any Decoder) throws {
             let container = try decoder.singleValueContainer()
@@ -110,7 +112,7 @@ public actor EventStream<Event: Sendable> {
         continuations.removeValue(forKey: id)
     }
 
-    // NetworkManager callback
+    /// NetworkManager callback
     private func updateConnection(_ info: ConnectionInfo?) {
         let newConfig = info?.configuration
 

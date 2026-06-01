@@ -175,8 +175,6 @@ struct SitemapNavigationView: View {
         pageUrl: PreviewConstants.openHABSitemapPage?.link ?? "",
         title: PreviewConstants.openHABSitemapPage?.title ?? "Preview Page"
     )
-    SitemapNavigationView(viewModel: previewViewModel) {
-        print("Show side menu tapped")
-    }
+    SitemapNavigationView(viewModel: previewViewModel) {}
 }
 #endif

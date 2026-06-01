@@ -75,7 +75,6 @@ struct ItemSelectionView: View {
         }
     }
 
-    @ViewBuilder
     private func itemRow(_ item: OpenHABItem) -> some View {
         Button {
             selectedItemName = (selectedItemName == item.name) ? nil : item.name

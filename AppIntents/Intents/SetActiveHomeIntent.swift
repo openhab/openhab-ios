@@ -13,7 +13,9 @@ import AppIntents
 import OpenHABCore
 
 struct SetActiveHomeIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
     static let title: LocalizedStringResource = "Set Active Home"
     static let description = IntentDescription("Switch the active home in the openHAB app")

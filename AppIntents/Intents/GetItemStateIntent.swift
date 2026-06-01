@@ -12,6 +12,36 @@
 import AppIntents
 import OpenHABCore
 
+// MARK: - Item state localization
+
+/// Wraps a raw openHAB state string so that well-known binary states
+/// (ON/OFF, OPEN/CLOSED, player commands) are displayed in the user's
+/// language inside Shortcuts dialogs, while numeric or custom states
+/// pass through unchanged.
+@available(iOS 17.0, macOS 14.0, *)
+private struct LocalizedItemState: CustomLocalizedStringResourceConvertible {
+    let rawValue: String
+
+    var localizedStringResource: LocalizedStringResource {
+        let upper = rawValue.uppercased()
+        if let action = SwitchAction(rawValue: upper) {
+            return action.localizedStringResource
+        }
+        if let contact = ContactState(rawValue: upper) {
+            return contact.localizedStringResource
+        }
+        if let player = PlayerAction(rawValue: upper) {
+            return player.localizedStringResource
+        }
+        // Numeric states, HSB color values, temperatures, etc.: pass through as-is.
+        // The static key is intentionally absent from the strings catalog so the
+        // defaultValue (the raw state) is always used.
+        return LocalizedStringResource("__item_state_passthrough__", defaultValue: "\(rawValue)")
+    }
+}
+
+// MARK: -
+
 enum ItemStateError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
 
@@ -24,7 +54,9 @@ enum ItemStateError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 struct GetItemStateIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
     static var parameterSummary: some ParameterSummary {
         Summary("Get \(\.$itemEntity) State") {
@@ -57,10 +89,11 @@ struct GetItemStateIntent: AppIntent {
 
         let freshItem = await OpenHABItemCache.instance.getItemUncached(name: itemEntity.itemName, home: homeId)
         let state = freshItem?.state ?? itemEntity.item.state ?? "Unknown state"
+        let stateDisplay = LocalizedItemState(rawValue: state)
 
         return .result(
             value: state,
-            dialog: "The state of \(itemEntity.label) is \(state)"
+            dialog: "The state of \(itemEntity.label) is \(stateDisplay)"
         )
     }
 }

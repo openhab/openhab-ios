@@ -30,9 +30,14 @@ enum DimmerRollerValueError: Error, CustomLocalizedStringResourceConvertible {
 }
 
 struct SetDimmerRollerValueIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.dimmer, .rollershutter] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.dimmer, .rollershutter]
+    }
+
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$value)") {
             \.$home

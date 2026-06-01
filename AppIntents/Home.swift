@@ -185,11 +185,23 @@ struct Home: AppEntity {
         func entities(for identifiers: [Home.ID]) throws -> [Home] {
             let storedHomes = Preferences.shared.storedHomes
             return identifiers.compactMap { identifier in
-                guard let prefs = Home.resolvePreferences(for: identifier, in: storedHomes) else { return nil }
-                // Return the home with the ORIGINAL identifier so Home.id matches what the
-                // framework stored — prevents cross-device mismatch when the ##UUID suffix
-                // differs between the creating device and the running device.
-                return Home(id: identifier, displayString: prefs.homeName)
+                if let prefs = Home.resolvePreferences(for: identifier, in: storedHomes) {
+                    // Return the home with the ORIGINAL identifier so Home.id matches what the
+                    // framework stored — prevents cross-device mismatch when the ##UUID suffix
+                    // differs between the creating device and the running device.
+                    return Home(id: identifier, displayString: prefs.homeName)
+                }
+                // The home can't be resolved on this device (e.g. shortcut synced from another
+                // device before the user has added the same home here, or app reinstalled).
+                // The stableIdentifier component of the ID encodes the home name when the home
+                // was given one, so we can still render the correct label in the Shortcuts
+                // action card. Running the shortcut will still fail with "Unknown home" — the
+                // user will then be prompted to reconfigure — but at least they can see which
+                // home was originally configured rather than seeing the generic type placeholder.
+                // If the stableId looks like a UUID the home was unnamed; drop it (no name to show).
+                let stableId = Home.stableIdentifierComponent(of: identifier)
+                guard UUID(uuidString: stableId) == nil else { return nil }
+                return Home(id: identifier, displayString: stableId)
             }
         }
 

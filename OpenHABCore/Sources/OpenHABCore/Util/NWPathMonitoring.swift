@@ -13,7 +13,7 @@ import Foundation
 import Network
 import os.log
 
-// Wrap real NWPathMonitor
+/// Wrap real NWPathMonitor
 final class RealPathMonitor: NWPathMonitoring, Sendable {
     private let monitor: NWPathMonitor
 

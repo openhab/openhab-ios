@@ -19,6 +19,7 @@ import SwiftUI
 private struct SegmentedRowContent: View {
     let input: SegmentedRowInput
     let widgetVersion: Int
+    let interactionState: RowInteractionState
     let fallbackSymbol: SFSymbol?
     let sendCommand: (String, WidgetCommandPolicy, WidgetCommandPhase) -> Void
 
@@ -29,6 +30,7 @@ private struct SegmentedRowContent: View {
     @State private var optimisticBaseState: String?
     @State private var optimisticWidgetId: String?
     @State private var optimisticStartVersion: Int?
+    @State private var revertTask: Task<Void, Never>?
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
     @State private var triggerSelectionFeedback = false
@@ -106,12 +108,29 @@ private struct SegmentedRowContent: View {
                 self.optimisticStartVersion = widgetVersion
             }
         }
+        .onChange(of: interactionState) { _, newState in
+            switch newState {
+            case .idle:
+                // HTTP command completed. Wait for SSE/long-poll to deliver the new state.
+                // Items with autoupdate=false never trigger the widgetVersion path above,
+                // so this timer is their only revert.
+                guard optimisticWidgetId != nil else { return }
+                revertTask?.cancel()
+                revertTask = Task { @MainActor in
+                    do { try await Task.sleep(for: .seconds(1.5)) } catch { return }
+                    clearOptimisticSelection()
+                }
+            case .failed:
+                clearOptimisticSelection()
+            case .sending, .queued, .offline:
+                break
+            }
+        }
         .sensorySelectionFeedbackIfAvailable(trigger: triggerSelectionFeedback)
         .sensoryHeavyFeedbackIfAvailable(trigger: triggerPressFeedback)
     }
 
     /// Button-based segmented control with animated selection indicator
-    @ViewBuilder
     private func segmentedButtons(mappings: [OpenHABWidgetMapping],
                                   selectedIndex: Int?,
                                   displayState: WidgetDisplayState,
@@ -154,7 +173,6 @@ private struct SegmentedRowContent: View {
         .fixedSize(horizontal: false, vertical: true)
     }
 
-    @ViewBuilder
     private func pressReleaseButtons(mappings: [OpenHABWidgetMapping]) -> some View {
         HStack(spacing: 8) {
             ForEach(mappings.indices, id: \.self) { index in
@@ -331,9 +349,14 @@ private struct SegmentedRowContent: View {
         optimisticBaseState = displayState.effectiveState
         optimisticWidgetId = displayState.widgetId
         optimisticStartVersion = widgetVersion
+        revertTask?.cancel()
+        revertTask = nil
+        // Revert is driven by interactionState transitions (see onChange), not a tap-time timer.
     }
 
     private func clearOptimisticSelection() {
+        revertTask?.cancel()
+        revertTask = nil
         optimisticSelectedIndex = nil
         optimisticBaseState = nil
         optimisticWidgetId = nil
@@ -352,6 +375,7 @@ struct SegmentedRowView: View {
         SegmentedRowContent(
             input: input,
             widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+            interactionState: viewModel.rowInteractionState(for: input.itemName),
             fallbackSymbol: fallbackSymbol
         ) { command, policy, phase in
             guard let itemName = input.itemName else { return }

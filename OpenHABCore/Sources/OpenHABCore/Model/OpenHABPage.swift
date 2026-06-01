@@ -53,7 +53,7 @@ public class OpenHABPage: NSObject, @unchecked Sendable {
 
 public extension OpenHABPage {
     func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABPage {
-        let filteredOpenHABSitemapPage = try OpenHABPage(
+        try OpenHABPage(
             pageId: pageId,
             title: title,
             link: link,
@@ -61,7 +61,6 @@ public extension OpenHABPage {
             widgets: widgets.filter(isIncluded),
             icon: icon
         )
-        return filteredOpenHABSitemapPage
     }
 }
 

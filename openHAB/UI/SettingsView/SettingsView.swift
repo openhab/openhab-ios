@@ -35,15 +35,20 @@ struct SettingsView: View {
     @State private var settingsHomeName = ""
     @State private var viewAppearedOnce = false
     @State private var settingsSSECommandItem = ""
+    @State private var showLocalNetworkAlert = false
+    @State private var loadedLocalURL = ""
+    @State private var localTestedOKURL = ""
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         Form {
             ConnectionSettingsView(
                 settingsDemomode: $settingsDemomode,
                 localConnectionConfiguration: $settingsLocalConnectionConfiguration,
-                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration
+                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration,
+                localTestedOKURL: $localTestedOKURL
             )
 
             ApplicationSettingsView(
@@ -75,12 +80,32 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .navigationBarBackButtonHidden(true)
         .navigationTitle("\(settingsHomeName) Settings")
+        .alert("Local Network Access Required", isPresented: $showLocalNetworkAlert) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    openURL(url)
+                }
+                dismiss()
+            }
+            Button("OK") {
+                dismiss()
+            }
+        } message: {
+            Text("To connect to your local openHAB server, please allow Local Network access when prompted. If you previously denied it, enable it in Settings → Privacy & Security → Local Network.")
+        }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button("Save") {
                     saveSettings()
                     NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
-                    dismiss()
+                    if !settingsDemomode,
+                       !settingsLocalConnectionConfiguration.url.isEmpty,
+                       settingsLocalConnectionConfiguration.url != loadedLocalURL,
+                       settingsLocalConnectionConfiguration.url != localTestedOKURL {
+                        showLocalNetworkAlert = true
+                    } else {
+                        dismiss()
+                    }
                 }
             }
             ToolbarItemGroup(placement: .cancellationAction) {
@@ -137,6 +162,7 @@ struct SettingsView: View {
         settingsSitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
         settingsLocalConnectionConfiguration = Preferences.shared.currentHomePreferences.localConnectionConfig
         settingsRemoteConnectionConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
+        loadedLocalURL = Preferences.shared.currentHomePreferences.localConnectionConfig.url
         settingsHomeName = Preferences.shared.currentHomePreferences.homeName
         settingsSSECommandItem = Preferences.shared.currentHomePreferences.sseCommandItem
     }

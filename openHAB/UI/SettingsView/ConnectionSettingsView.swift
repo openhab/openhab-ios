@@ -17,6 +17,9 @@ struct ConnectionSettingsView: View {
     @Binding var settingsDemomode: Bool
     @Binding var localConnectionConfiguration: ConnectionConfiguration
     @Binding var remoteConnectionConfiguration: ConnectionConfiguration
+    @Binding var localTestedOKURL: String
+
+    @State private var remoteTestedOKURL = ""
 
     var body: some View {
         Toggle("Demo Mode", isOn: $settingsDemomode)
@@ -24,8 +27,8 @@ struct ConnectionSettingsView: View {
 
         if !settingsDemomode {
             Group {
-                SingleConnectionSettingsView(headerText: String(localized: "Local server"), isLocalConnection: true, connectionConfig: $localConnectionConfiguration, showNotificationToggle: false)
-                SingleConnectionSettingsView(headerText: String(localized: "Remote server"), connectionConfig: $remoteConnectionConfiguration, showNotificationToggle: true)
+                SingleConnectionSettingsView(headerText: String(localized: "Local server"), isLocalConnection: true, connectionConfig: $localConnectionConfiguration, showNotificationToggle: false, testedOKURL: $localTestedOKURL)
+                SingleConnectionSettingsView(headerText: String(localized: "Remote server"), connectionConfig: $remoteConnectionConfiguration, showNotificationToggle: true, testedOKURL: $remoteTestedOKURL)
             }
         }
     }
@@ -49,7 +52,8 @@ struct ConnectionSettingsView: View {
             ConnectionSettingsView(
                 settingsDemomode: $demoMode,
                 localConnectionConfiguration: $connectionConfig1,
-                remoteConnectionConfiguration: $connectionConfig2
+                remoteConnectionConfiguration: $connectionConfig2,
+                localTestedOKURL: .constant("")
             )
         }
     }

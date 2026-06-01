@@ -29,7 +29,7 @@ public actor ETagChecker {
         cache = ETagCache.shared
     }
 
-    // Internal initializer for testing - allows cache injection
+    /// Internal initializer for testing - allows cache injection
     init(httpClient: HTTPClient, cache: ETagCache) {
         self.httpClient = httpClient
         self.cache = cache
