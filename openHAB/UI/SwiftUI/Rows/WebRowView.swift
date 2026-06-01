@@ -15,10 +15,10 @@ import os.log
 import SwiftUI
 import WebKit
 
-// Resolves a widget URL string against the active openHAB root URL.
-// Absolute URLs (scheme + host present) are returned unchanged.
-// Server-relative paths (e.g. "/static/foo.html") are resolved against rootUrlString.
-// Returns nil when the string is empty or a relative path cannot be resolved.
+/// Resolves a widget URL string against the active openHAB root URL.
+/// Absolute URLs (scheme + host present) are returned unchanged.
+/// Server-relative paths (e.g. "/static/foo.html") are resolved against rootUrlString.
+/// Returns nil when the string is empty or a relative path cannot be resolved.
 func webViewResolvedURL(urlString: String, rootUrlString: String) -> URL? {
     guard !urlString.isEmpty else { return nil }
     if let url = URL(string: urlString), url.scheme != nil, url.host != nil {
@@ -70,9 +70,12 @@ enum WebRowViewConfigurationFactory {
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
         configuration.mediaTypesRequiringUserActionForPlayback = []
-        // Share the per-home sandboxed data store with OpenHABWebViewController so the
-        // widget web view inherits any cloud session cookies already established there.
-        // WKWebsiteDataStore(forIdentifier:) requires iOS 17; on iOS 16 the default store is used.
+        // iOS 17+: use the per-home sandboxed store shared with OpenHABWebViewController,
+        // so the widget inherits cloud session cookies already established by Basic UI.
+        // iOS 16: WKWebsiteDataStore(forIdentifier:) is unavailable; the WebKit default
+        // shared store is used instead. Cookie sharing with OpenHABWebViewController's
+        // nonpersistent cloud store is not possible on iOS 16 — Basic Auth challenge
+        // handling covers authentication for that case.
         if #available(iOS 17, *) {
             configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: homeId)
         }

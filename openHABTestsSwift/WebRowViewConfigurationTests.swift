@@ -13,40 +13,6 @@
 import Testing
 import WebKit
 
-@Suite("WebRowViewConfigurationFactory")
-struct WebRowViewConfigurationTests {
-    @MainActor
-    @Test
-    func webRowConfigurationAllowsInlineMutedAutoplay() {
-        let configuration = WebRowViewConfigurationFactory.make(homeId: UUID())
-
-        #expect(configuration.allowsInlineMediaPlayback)
-        #expect(configuration.mediaTypesRequiringUserActionForPlayback == [])
-    }
-
-    @available(iOS 17, *)
-    @MainActor
-    @Test
-    func webRowConfigurationUsesPerHomeDataStore() {
-        let homeId = UUID()
-        let configuration = WebRowViewConfigurationFactory.make(homeId: homeId)
-
-        #expect(configuration.websiteDataStore.identifier == homeId)
-    }
-
-    @available(iOS 17, *)
-    @MainActor
-    @Test
-    func separateHomesGetSeparateDataStores() {
-        let idA = UUID()
-        let idB = UUID()
-        let configA = WebRowViewConfigurationFactory.make(homeId: idA)
-        let configB = WebRowViewConfigurationFactory.make(homeId: idB)
-
-        #expect(configA.websiteDataStore.identifier != configB.websiteDataStore.identifier)
-    }
-}
-
 @Suite("webViewResolvedURL")
 struct WebRowViewURLResolutionTests {
     @Test func relativePathResolvedAgainstLocalRootURL() {
@@ -84,5 +50,39 @@ struct WebRowViewURLResolutionTests {
     @Test func relativePathWithEmptyRootReturnsNil() {
         let url = webViewResolvedURL(urlString: "/static/foo.html", rootUrlString: "")
         #expect(url == nil)
+    }
+}
+
+@Suite("WebRowViewConfigurationFactory")
+struct WebRowViewConfigurationTests {
+    @MainActor
+    @Test
+    func webRowConfigurationAllowsInlineMutedAutoplay() {
+        let configuration = WebRowViewConfigurationFactory.make(homeId: UUID())
+
+        #expect(configuration.allowsInlineMediaPlayback)
+        #expect(configuration.mediaTypesRequiringUserActionForPlayback == [])
+    }
+
+    @available(iOS 17, *)
+    @MainActor
+    @Test
+    func webRowConfigurationUsesPerHomeDataStore() {
+        let homeId = UUID()
+        let configuration = WebRowViewConfigurationFactory.make(homeId: homeId)
+
+        #expect(configuration.websiteDataStore.identifier == homeId)
+    }
+
+    @available(iOS 17, *)
+    @MainActor
+    @Test
+    func separateHomesGetSeparateDataStores() {
+        let idA = UUID()
+        let idB = UUID()
+        let configA = WebRowViewConfigurationFactory.make(homeId: idA)
+        let configB = WebRowViewConfigurationFactory.make(homeId: idB)
+
+        #expect(configA.websiteDataStore.identifier != configB.websiteDataStore.identifier)
     }
 }
