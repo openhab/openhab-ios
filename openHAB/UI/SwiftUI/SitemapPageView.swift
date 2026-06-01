@@ -55,7 +55,7 @@ struct SitemapPageView: View {
                     geo.contentOffset.y > 150
                 } action: { _, isScrolledDown in
                     withAnimation(.easeInOut(duration: 0.2)) {
-                        showScrollToTop = isScrolledDown
+                        showScrollToTop = Preferences.shared.hideStatusBar && isScrolledDown
                     }
                 }
                 .onChange(of: viewModel.pageId) {
