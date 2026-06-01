@@ -13,13 +13,74 @@
 import Testing
 import WebKit
 
+@Suite("WebRowViewConfigurationFactory")
 struct WebRowViewConfigurationTests {
     @MainActor
     @Test
     func webRowConfigurationAllowsInlineMutedAutoplay() {
-        let configuration = WebRowViewConfigurationFactory.make()
+        let configuration = WebRowViewConfigurationFactory.make(homeId: UUID())
 
         #expect(configuration.allowsInlineMediaPlayback)
         #expect(configuration.mediaTypesRequiringUserActionForPlayback == [])
+    }
+
+    @MainActor
+    @Test
+    func webRowConfigurationUsesPerHomeDataStore() {
+        let homeId = UUID()
+        let configuration = WebRowViewConfigurationFactory.make(homeId: homeId)
+
+        #expect(configuration.websiteDataStore.identifier == homeId)
+    }
+
+    @MainActor
+    @Test
+    func separateHomesGetSeparateDataStores() {
+        let idA = UUID()
+        let idB = UUID()
+        let configA = WebRowViewConfigurationFactory.make(homeId: idA)
+        let configB = WebRowViewConfigurationFactory.make(homeId: idB)
+
+        #expect(configA.websiteDataStore.identifier != configB.websiteDataStore.identifier)
+    }
+}
+
+@Suite("webViewResolvedURL")
+struct WebRowViewURLResolutionTests {
+    @Test func relativePathResolvedAgainstLocalRootURL() {
+        let url = webViewResolvedURL(urlString: "/static/foo.html", rootUrlString: "https://openhab.local:8443")
+        #expect(url?.absoluteString == "https://openhab.local:8443/static/foo.html")
+    }
+
+    @Test func relativePathWithQueryResolvedAgainstRootURL() {
+        let url = webViewResolvedURL(urlString: "/static/foo.html?x=1", rootUrlString: "https://openhab.local:8443")
+        #expect(url?.absoluteString == "https://openhab.local:8443/static/foo.html?x=1")
+    }
+
+    @Test func absoluteURLIgnoresRootURL() {
+        let url = webViewResolvedURL(urlString: "https://example.com/widget.html", rootUrlString: "https://openhab.local:8443")
+        #expect(url?.absoluteString == "https://example.com/widget.html")
+    }
+
+    @Test func relativePathResolvedAgainstCloudRootURL() {
+        let url = webViewResolvedURL(urlString: "/static/foo.html", rootUrlString: "https://home.myopenhab.org")
+        #expect(url?.absoluteString == "https://home.myopenhab.org/static/foo.html")
+    }
+
+    @Test func rootURLChangeFromLocalToCloud() {
+        let local = webViewResolvedURL(urlString: "/static/foo.html", rootUrlString: "https://openhab.local:8443")
+        let cloud = webViewResolvedURL(urlString: "/static/foo.html", rootUrlString: "https://home.myopenhab.org")
+        #expect(local?.absoluteString == "https://openhab.local:8443/static/foo.html")
+        #expect(cloud?.absoluteString == "https://home.myopenhab.org/static/foo.html")
+    }
+
+    @Test func emptyURLStringReturnsNil() {
+        let url = webViewResolvedURL(urlString: "", rootUrlString: "https://openhab.local:8443")
+        #expect(url == nil)
+    }
+
+    @Test func relativePathWithEmptyRootReturnsNil() {
+        let url = webViewResolvedURL(urlString: "/static/foo.html", rootUrlString: "")
+        #expect(url == nil)
     }
 }

@@ -15,6 +15,19 @@ import os.log
 import SwiftUI
 import WebKit
 
+// Resolves a widget URL string against the active openHAB root URL.
+// Absolute URLs (scheme + host present) are returned unchanged.
+// Server-relative paths (e.g. "/static/foo.html") are resolved against rootUrlString.
+// Returns nil when the string is empty or a relative path cannot be resolved.
+func webViewResolvedURL(urlString: String, rootUrlString: String) -> URL? {
+    guard !urlString.isEmpty else { return nil }
+    if let url = URL(string: urlString), url.scheme != nil, url.host != nil {
+        return url
+    }
+    guard !rootUrlString.isEmpty, let base = URL(string: rootUrlString) else { return nil }
+    return URL(string: urlString, relativeTo: base)?.absoluteURL
+}
+
 private struct WebRowConfig {
     let input: MediaRowInput
 }
@@ -53,10 +66,13 @@ private struct WebContainerContent: View {
 
 @MainActor
 enum WebRowViewConfigurationFactory {
-    static func make() -> WKWebViewConfiguration {
+    static func make(homeId: UUID) -> WKWebViewConfiguration {
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
         configuration.mediaTypesRequiringUserActionForPlayback = []
+        // Share the per-home sandboxed data store with OpenHABWebViewController so the
+        // widget web view inherits any cloud session cookies already established there.
+        configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: homeId)
         return configuration
     }
 }
@@ -75,6 +91,7 @@ struct WidgetWebViewContainerView: View {
 
 struct WebRowView: UIViewRepresentable {
     class Coordinator: NSObject, WKNavigationDelegate {
+        var lastLoadedURL: URL?
         private let logger = Logger(subsystem: "org.openhab", category: "WebRowViewCoordinator")
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
@@ -94,25 +111,20 @@ struct WebRowView: UIViewRepresentable {
     let rootUrlString: String
 
     private var webURL: URL? {
-        guard !urlString.isEmpty else { return nil }
-        if let url = URL(string: urlString), url.scheme != nil, url.host != nil {
-            return url
-        }
-        guard !rootUrlString.isEmpty, let base = URL(string: rootUrlString) else { return nil }
-        return URL(string: urlString, relativeTo: base)?.absoluteURL
+        webViewResolvedURL(urlString: urlString, rootUrlString: rootUrlString)
     }
 
     func makeUIView(context: Context) -> WKWebView {
-        let webView = WKWebView(frame: .zero, configuration: WebRowViewConfigurationFactory.make())
+        let homeId = Preferences.shared.currentHomePreferences.id
+        let webView = WKWebView(frame: .zero, configuration: WebRowViewConfigurationFactory.make(homeId: homeId))
         webView.navigationDelegate = context.coordinator
         return webView
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
-        if let webURL {
-            let request = URLRequest(url: webURL)
-            webView.load(request)
-        }
+        guard let webURL, webURL != context.coordinator.lastLoadedURL else { return }
+        context.coordinator.lastLoadedURL = webURL
+        webView.load(URLRequest(url: webURL))
     }
 
     func makeCoordinator() -> Coordinator {
