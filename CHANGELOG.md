@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.2.66, Build 275] - 2026-06-01Z
+
+- Fix Webview widget URLs and auth for cloud connections (#1230)
+
 
 
 ## [Version 3.2.64, Build 273] - 2026-05-31Z
