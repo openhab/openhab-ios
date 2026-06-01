@@ -46,12 +46,12 @@ public struct OpenHABNotification: Identifiable, Hashable, Sendable {
     public let created: Date?
     public let v: Int
 
-    // A convenient view-facing title (falls back to message)
+    /// A convenient view-facing title (falls back to message)
     public var title: String {
         payload?.title?.isEmpty == false ? payload!.title! : (message ?? "")
     }
 
-    // Prefer root message, fall back to payload.message
+    /// Prefer root message, fall back to payload.message
     public init(id: String,
                 message: String?,
                 icon: String? = nil,

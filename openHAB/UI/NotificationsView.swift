@@ -24,7 +24,7 @@ struct NotificationRow: View {
     @State var connection: ConnectionInfo
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12)  {
+        HStack(alignment: .top, spacing: 12) {
             KFImage(iconUrl)
                 .withOpenHABCredentials(for: connection)
                 .placeholder {
