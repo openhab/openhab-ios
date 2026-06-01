@@ -19,6 +19,7 @@ import SwiftUI
 private struct SegmentedRowContent: View {
     let input: SegmentedRowInput
     let widgetVersion: Int
+    let interactionState: RowInteractionState
     let fallbackSymbol: SFSymbol?
     let sendCommand: (String, WidgetCommandPolicy, WidgetCommandPhase) -> Void
 
@@ -105,6 +106,24 @@ private struct SegmentedRowContent: View {
                 clearOptimisticSelection()
             } else {
                 self.optimisticStartVersion = widgetVersion
+            }
+        }
+        .onChange(of: interactionState) { newState in
+            switch newState {
+            case .idle:
+                // HTTP command completed. Wait for SSE/long-poll to deliver the new state.
+                // Items with autoupdate=false never trigger the widgetVersion path above,
+                // so this timer is their only revert.
+                guard optimisticWidgetId != nil else { return }
+                revertTask?.cancel()
+                revertTask = Task { @MainActor in
+                    do { try await Task.sleep(for: .seconds(1.5)) } catch { return }
+                    clearOptimisticSelection()
+                }
+            case .failed:
+                clearOptimisticSelection()
+            case .sending, .queued, .offline:
+                break
             }
         }
         .sensorySelectionFeedbackIfAvailable(trigger: triggerSelectionFeedback)
@@ -331,10 +350,8 @@ private struct SegmentedRowContent: View {
         optimisticWidgetId = displayState.widgetId
         optimisticStartVersion = widgetVersion
         revertTask?.cancel()
-        revertTask = Task { @MainActor in
-            do { try await Task.sleep(for: .seconds(1)) } catch { return }
-            clearOptimisticSelection()
-        }
+        revertTask = nil
+        // Revert is driven by interactionState transitions (see onChange), not a tap-time timer.
     }
 
     private func clearOptimisticSelection() {
@@ -358,6 +375,7 @@ struct SegmentedRowView: View {
         SegmentedRowContent(
             input: input,
             widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+            interactionState: viewModel.rowInteractionState(for: input.itemName),
             fallbackSymbol: fallbackSymbol
         ) { command, policy, phase in
             guard let itemName = input.itemName else { return }
