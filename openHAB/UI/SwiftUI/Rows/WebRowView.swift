@@ -26,6 +26,7 @@ private func makeWebContainerContent(_ config: WebRowConfig) -> WebContainerCont
 
 private struct WebContainerContent: View {
     let input: MediaRowInput
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         let displayState = input.displayState
@@ -37,7 +38,7 @@ private struct WebContainerContent: View {
                     .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
-            WebRowView(urlString: input.url)
+            WebRowView(urlString: input.url, rootUrlString: viewModel.openHABRootUrl ?? "")
                 .frame(height: input.preferredRowHeight.map { CGFloat($0) })
                 .clipShape(.rect(cornerRadius: 8))
 
@@ -82,15 +83,23 @@ struct WebRowView: UIViewRepresentable {
 
         func webView(_ webView: WKWebView,
                      respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-            await onReceiveSessionChallenge(with: challenge)
+            if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
+                return await onReceiveSessionTaskChallenge(with: challenge)
+            }
+            return await onReceiveSessionChallenge(with: challenge)
         }
     }
 
     let urlString: String
+    let rootUrlString: String
 
     private var webURL: URL? {
         guard !urlString.isEmpty else { return nil }
-        return URL(string: urlString)
+        if let url = URL(string: urlString), url.scheme != nil, url.host != nil {
+            return url
+        }
+        guard !rootUrlString.isEmpty, let base = URL(string: rootUrlString) else { return nil }
+        return URL(string: urlString, relativeTo: base)?.absoluteURL
     }
 
     func makeUIView(context: Context) -> WKWebView {
