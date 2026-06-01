@@ -145,6 +145,15 @@ struct SensorLargeProvider: AppIntentTimelineProvider {
     }
 }
 
+// MARK: - State formatting
+
+private func formattedState(for item: OpenHABItem) -> String {
+    guard let state = item.state else { return "—" }
+    guard let pattern = item.stateDescription?.numberPattern, !pattern.isEmpty else { return state }
+    let formatted = state.parseAsNumber(format: pattern).toString(locale: .current)
+    return formatted.isEmpty ? state : formatted
+}
+
 // MARK: - Unconfigured placeholder
 
 private struct UnconfiguredPlaceholder: View {
@@ -176,7 +185,7 @@ private struct SensorItemRow: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Text(item.state ?? "—")
+            Text(formattedState(for: item))
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .lineLimit(1)
@@ -205,7 +214,7 @@ struct SensorSmallWidgetView: View {
 
                     Spacer()
 
-                    Text(item.state ?? "—")
+                    Text(formattedState(for: item))
                         .font(.title2)
                         .fontWeight(.bold)
                         .lineLimit(2)
@@ -312,11 +321,11 @@ struct SensorAccessoryCircularView: View {
     var body: some View {
         ZStack {
             AccessoryWidgetBackground()
-            if let slot = entry.slots.compactMap(\.self).first, let state = slot.item.state {
+            if let slot = entry.slots.compactMap(\.self).first, slot.item.state != nil {
                 VStack(spacing: 2) {
                     Image(systemSymbol: .gaugeWithDotsNeedleBottom50percent)
                         .font(.caption)
-                    Text(state)
+                    Text(formattedState(for: slot.item))
                         .font(.caption2)
                         .fontWeight(.bold)
                         .lineLimit(1)
@@ -342,8 +351,8 @@ struct SensorAccessoryRectangularView: View {
                     .font(.headline)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                if let state = item.state {
-                    Text(state)
+                if item.state != nil {
+                    Text(formattedState(for: item))
                         .font(.body)
                         .fontWeight(.semibold)
                         .lineLimit(1)
@@ -367,8 +376,8 @@ struct SensorAccessoryInlineView: View {
         if let slot = entry.slots.compactMap(\.self).first {
             let item = slot.item
             let label = item.label.isEmpty ? item.name : item.label
-            if let state = item.state {
-                Text("\(label): \(state)")
+            if item.state != nil {
+                Text("\(label): \(formattedState(for: item))")
             } else {
                 Text(label)
             }
