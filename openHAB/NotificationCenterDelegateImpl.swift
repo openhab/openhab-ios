@@ -153,7 +153,8 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
                 let fetcher = OpenHABImageFetcher()
                 iconImage = try await fetcher.image(
                     from: url,
-                    targetSize: CGSize(width: 24, height: 24)
+                    targetSize: CGSize(width: 24, height: 24),
+                    extraOptions: [.requestModifier(OpenHABAccessTokenAdapter(connectionConfiguration: activeConnection.configuration))]
                 )
             } catch {
                 Logger.notificationCenterDelegateImpl.error("Image load failed: \(error)")
