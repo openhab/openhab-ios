@@ -46,9 +46,11 @@ public struct OpenHABNotification: Identifiable, Hashable, Sendable {
     public let created: Date?
     public let v: Int
 
-    /// A convenient view-facing title (falls back to message)
+    /// A convenient view-facing display string: payload title → root message → payload message
     public var title: String {
-        payload?.title?.isEmpty == false ? payload!.title! : (message ?? "")
+        if let payloadTitle = payload?.title, !payloadTitle.isEmpty { return payloadTitle }
+        if let msg = message, !msg.isEmpty { return msg }
+        return payload?.message ?? ""
     }
 
     /// Prefer root message, fall back to payload.message
@@ -142,7 +144,7 @@ extension OpenHABNotification.CodingData {
                     userId: $0.userId
                 )
             },
-            created: created ?? Date(),
+            created: created,
             v: v
         )
     }

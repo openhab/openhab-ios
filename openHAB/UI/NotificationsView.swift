@@ -20,8 +20,8 @@ import SwiftUI
 typealias NotificationLoader = () async -> [OpenHABNotification]
 
 struct NotificationRow: View {
-    @State var notification: OpenHABNotification
-    @State var connection: ConnectionInfo
+    let notification: OpenHABNotification
+    let connection: ConnectionInfo
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -38,7 +38,7 @@ struct NotificationRow: View {
                 .id(iconUrl?.absoluteString ?? "")
             VStack(alignment: .leading) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(notification.message ?? "")
+                    Text(notification.title.isEmpty ? String(localized: "message_not_decoded", comment: "") : notification.title)
                         .font(.body)
                     if let timeStamp = notification.created {
                         Text(dateString(from: timeStamp))
@@ -153,6 +153,11 @@ struct NotificationsView<Tracker: NetworkTracking & ObservableObject>: View {
         }
         .task {
             await notifications = loadNotifications()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openHABDidReceiveNotification)) { _ in
+            Task {
+                notifications = await loadNotifications()
+            }
         }
     }
 }

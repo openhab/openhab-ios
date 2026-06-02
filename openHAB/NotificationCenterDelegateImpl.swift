@@ -11,8 +11,6 @@
 
 import AVFoundation
 import Combine
-import Firebase
-import FirebaseMessaging
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -91,6 +89,10 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             userInfo: userInfo
         )
 
+        guard !payload.isHideNotification else {
+            return []
+        }
+
         // Use the system banner when there are media attachments so the image is visible.
         // The didReceive handler will process any on-click action when the user taps.
         if !notification.request.content.attachments.isEmpty {
@@ -145,8 +147,8 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         }
 
         var iconImage = UIImage(systemSymbol: .exclamationmark)
-        if let rootUrl = MainActorNetworkTracker.shared.activeConnection?.configuration.url,
-           let url = Endpoint.icon(rootUrl: rootUrl, version: 2, icon: payload.icon, state: nil, iconType: .svg, iconColor: "", staticIcon: false)?.url {
+        if let activeConnection = MainActorNetworkTracker.shared.activeConnection,
+           let url = Endpoint.icon(rootUrl: activeConnection.configuration.url, version: activeConnection.version, icon: payload.icon, state: nil, iconType: .svg, iconColor: "", staticIcon: false)?.url {
             do {
                 let fetcher = OpenHABImageFetcher()
                 iconImage = try await fetcher.image(
@@ -164,7 +166,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
                 view.configureTheme(.info)
                 view.configureContent(
                     title: String(localized: "notification", comment: ""),
-                    body: payload.message.orEmpty,
+                    body: payload.displayMessage,
                     iconImage: iconImage
                 )
                 view.button?.setTitle(String(localized: "dismiss", comment: ""), for: .normal)
