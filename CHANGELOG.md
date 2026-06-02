@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.2.67, Build 276] - 2026-06-02Z
+
+- Notification handling (#1226)
+
 ## [Version 3.2.66, Build 275] - 2026-06-01Z
 
 - Fix Webview widget URLs and auth for cloud connections (#1230)
