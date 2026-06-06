@@ -36,7 +36,7 @@ struct SetDimmerRollerValue: AppIntent, CustomIntentMigratedAppIntent, Predictab
         func results() async throws -> [String] {
             await Preferences.prepareForAppExtensionAccess()
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
-            let items = allItems.flatMap(\.value).filter { $0.type == .dimmer || $0.type == .rollershutter }
+            let items = allItems.flatMap(\.value).filter { $0.isOfTypeOrGroupType(.dimmer) || $0.isOfTypeOrGroupType(.rollershutter) }
             return items.map(\.name)
         }
     }

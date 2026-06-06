@@ -8743,7 +8743,6 @@
       }
     },
     "message_not_decoded" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

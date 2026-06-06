@@ -143,6 +143,7 @@ public actor OpenHABItemCache {
         let name: String
         let label: String
         let type: String?
+        let groupType: String?
     }
 
     public static let instance = OpenHABItemCache()
@@ -235,7 +236,7 @@ public actor OpenHABItemCache {
         // fallback for intents that target a home the current process hasn't loaded.
         var allStubs = loadedStubs()
         for (homeId, homeItems) in items {
-            allStubs[homeId.uuidString] = homeItems.map { ItemStub(name: $0.name, label: $0.label, type: $0.type?.rawValue) }
+            allStubs[homeId.uuidString] = homeItems.map { ItemStub(name: $0.name, label: $0.label, type: $0.type?.rawValue, groupType: $0.groupType?.rawValue) }
         }
         guard let data = try? JSONEncoder().encode(allStubs) else { return }
         cachedStubs = allStubs
@@ -244,7 +245,7 @@ public actor OpenHABItemCache {
 
     private func persistedItem(name: String, home: UUID) -> OpenHABItem? {
         guard let stub = loadedStubs()[home.uuidString]?.first(where: { $0.name == name }) else { return nil }
-        return OpenHABItem(name: stub.name, type: stub.type ?? "", state: nil, link: "", label: stub.label, groupType: nil, stateDescription: nil, commandDescription: nil, members: [], category: nil, options: nil)
+        return OpenHABItem(name: stub.name, type: stub.type ?? "", state: nil, link: "", label: stub.label, groupType: stub.groupType, stateDescription: nil, commandDescription: nil, members: [], category: nil, options: nil)
     }
 
     private func persistedItems(home: UUID) -> [OpenHABItem] {
@@ -255,7 +256,7 @@ public actor OpenHABItemCache {
                 state: nil,
                 link: "",
                 label: $0.label,
-                groupType: nil,
+                groupType: $0.groupType,
                 stateDescription: nil,
                 commandDescription: nil,
                 members: [],
@@ -275,7 +276,7 @@ public actor OpenHABItemCache {
     public func forceCacheReload(homes: [UUID]) async {
         Logger.itemCache.info("force cache reload for homes: \(homes)")
         do {
-            let loadedItems = try await loadNonGroupItemsForHomes(homes)
+            let loadedItems = try await loadItemsForHomes(homes)
             Logger.itemCache.info("Store loaded items in cache")
             let now = Date.now
             for (homeId, homeItems) in loadedItems {
@@ -312,11 +313,6 @@ public actor OpenHABItemCache {
         itemsList
             .filtered(by: searchTerm, for: types)
             .map(\.name)
-    }
-
-    private func loadNonGroupItemsForHomes(_ homes: [UUID]) async throws -> [UUID: [OpenHABItem]] {
-        let allItemsArray = try await loadItemsForHomes(homes).map { (uuid, items) in (uuid, items.filter { $0.type != .group }) }
-        return Dictionary(uniqueKeysWithValues: allItemsArray)
     }
 
     private func loadItemsForHomes(_ homes: [UUID]) async throws -> [UUID: [OpenHABItem]] {
@@ -486,7 +482,8 @@ public extension OpenHABItem {
     /// - Parameter types: Optional array of item types to match. If nil, all items match.
     /// - Returns: True if the item matches the filter, false otherwise
     func matches(types: [OpenHABItem.ItemType]?) -> Bool {
-        types == nil || (type.flatMap { types?.contains($0) } == true)
+        guard let types else { return true }
+        return types.contains { isOfTypeOrGroupType($0) }
     }
 
     func searchScore(for searchTerm: String, additionalCandidates: [String] = []) -> Int? {

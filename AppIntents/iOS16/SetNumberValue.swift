@@ -33,7 +33,7 @@ struct SetNumberValue: AppIntent, CustomIntentMigratedAppIntent, PredictableInte
         func results() async throws -> [String] {
             await Preferences.prepareForAppExtensionAccess()
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
-            let items = allItems.flatMap(\.value).filter { $0.type == .number || $0.type == .numberWithDimension }
+            let items = allItems.flatMap(\.value).filter { $0.isOfTypeOrGroupType(.number) || $0.isOfTypeOrGroupType(.numberWithDimension) }
             return items.map(\.name)
         }
     }
