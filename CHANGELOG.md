@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [Version 3.2.69, Build 278] - 2026-06-07Z
+
+- Expose displayState in Get Item State Shortcuts intent (#1235)
+- Replace deprecated ClockKit complications with WidgetKit (#1030) (#1234)
+- Include group items in Shortcuts intent pickers (#1232)
+
+- update code sign settings for OpenHABWatchComplications
+- Replace deprecated ClockKit complications with WidgetKit (#1030)
+- Include group items in Shortcuts intent pickers (#1232)
+
 ## [Version 3.2.67, Build 276] - 2026-06-02Z
 
 - Notification handling (#1226)
