@@ -53,12 +53,11 @@ struct OpenHABComplicationEntryView: View {
             Image(.ohComplicationIcon)
                 .resizable()
                 .scaledToFit()
-                .padding(12)
         case .accessoryCorner:
             Image(.ohComplicationCorner)
                 .resizable()
                 .scaledToFit()
-                .padding(7)
+                .padding(4)
         default:
             EmptyView()
         }
