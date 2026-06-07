@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+- update code sign settings for OpenHABWatchComplications
+- Replace deprecated ClockKit complications with WidgetKit (#1030)
+- Include group items in Shortcuts intent pickers (#1232)
+
 ## [Version 3.2.67, Build 276] - 2026-06-02Z
 
 - Notification handling (#1226)
