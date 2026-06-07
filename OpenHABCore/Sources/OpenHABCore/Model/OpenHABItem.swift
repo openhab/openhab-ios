@@ -35,6 +35,7 @@ public struct OpenHABItem: Sendable {
     public var groupType: ItemType?
     public var name = ""
     public var state: String?
+    public var transformedState: String?
     public var link = ""
     public var label = ""
     public var stateDescription: OpenHABStateDescription?
@@ -53,7 +54,7 @@ public struct OpenHABItem: Sendable {
             isOfTypeOrGroupType(ItemType.player)
     }
 
-    public init(name: String, type: String, state: String?, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?, commandDescription: OpenHABCommandDescription?, members: [OpenHABItem], category: String?, options: [OpenHABOptions]?) {
+    public init(name: String, type: String, state: String?, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?, commandDescription: OpenHABCommandDescription?, members: [OpenHABItem], category: String?, options: [OpenHABOptions]?, transformedState: String? = nil) {
         self.name = name
         self.type = type.toItemType()
         if let state, state == "NULL" || state == "UNDEF" || state.caseInsensitiveCompare("undefined") == .orderedSame {
@@ -61,6 +62,7 @@ public struct OpenHABItem: Sendable {
         } else {
             self.state = state
         }
+        self.transformedState = transformedState.flatMap { $0.isEmpty ? nil : $0 }
         self.link = link
         self.label = label.orEmpty
         self.groupType = groupType?.toItemType()
@@ -152,7 +154,8 @@ extension OpenHABItem {
                 commandDescription: OpenHABCommandDescription(item.commandDescription),
                 members: [],
                 category: item.category,
-                options: []
+                options: [],
+                transformedState: item.transformedState
             )
         } else {
             return nil
