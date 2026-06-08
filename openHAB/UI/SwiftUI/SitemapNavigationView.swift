@@ -15,9 +15,7 @@ import SFSafeSymbols
 import SwiftUI
 
 struct SitemapNavigationView: View {
-    @Environment(\.scenePhase) private var scenePhase
     @StateObject var viewModel = SitemapPageViewModel()
-    @State private var hasSeenActivePhase = false
     @State private var isSearchPresented = false
     @FocusState private var isLegacySearchFocused: Bool
     let onShowSideMenu: () -> Void
@@ -28,19 +26,6 @@ struct SitemapNavigationView: View {
                 .navigationDestination(for: LinkedPageNavigation.self) { nav in
                     SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: nav.pageLink, title: nav.pageTitle))
                 }
-        }
-        .onChange(of: scenePhase) { newPhase in
-            switch newPhase {
-            case .active:
-                // Skip only the first activation to avoid racing the initial .task startup.
-                guard hasSeenActivePhase else {
-                    hasSeenActivePhase = true
-                    return
-                }
-                viewModel.refreshOnForeground()
-            default:
-                break
-            }
         }
     }
 
