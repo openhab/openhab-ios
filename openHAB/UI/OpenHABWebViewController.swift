@@ -37,6 +37,8 @@ class OpenHABWebViewController: OpenHABViewController {
     private var etagChecker: ETagChecker?
     private var etagCheckerConfigURL: String? // Track which config the checker was created for
     private var lastLoadedURL: String? // Track the last successfully loaded URL from didFinish
+    private var isConfirmingExternalURL = false
+    private var externalURLCooldownUntil: Date?
 
     var hasLoadedPage: Bool {
         !currentTarget.isEmpty
@@ -81,6 +83,28 @@ class OpenHABWebViewController: OpenHABViewController {
 
         // Notify initial path on load
         notifyPathChange();
+    })();
+
+    // Intercept anchor clicks to custom URL schemes in capture phase so that
+    // event.preventDefault() fires before the browser initiates the navigation.
+    // event.isTrusted filters out programmatic .click() / dispatchEvent() calls.
+    // The message handler still shows a native confirmation because the bridge is
+    // accessible to all page scripts, not only this injected one.
+    (function() {
+        const nativeSchemes = ['http', 'https', 'about', 'blob', 'data', 'javascript', ''];
+        function isCustomScheme(url) {
+            const m = /^([a-z][a-z0-9+\\-.]*):/.exec((url || '').toLowerCase());
+            return m != null && !nativeSchemes.includes(m[1]);
+        }
+        document.addEventListener('click', function(e) {
+            if (!e.isTrusted) return;
+            let el = e.target;
+            while (el && el.tagName !== 'A') el = el.parentElement;
+            if (el && el.href && isCustomScheme(el.href)) {
+                e.preventDefault();
+                window.webkit.messageHandlers.externalURL.postMessage(el.href);
+            }
+        }, true);
     })();
     """
 
@@ -461,6 +485,7 @@ class OpenHABWebViewController: OpenHABViewController {
         // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
         config.userContentController.add(self, name: "mainUi")
         config.userContentController.add(self, name: "pathChanged")
+        config.userContentController.add(self, name: "externalURL")
         config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
 
         // iOS 17 allows Sandboxed profiles, which is fantastic, iOS 16 does not and agressively caches everything
@@ -559,6 +584,16 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
             default: break
             }
         }
+        if message.name == "externalURL",
+           let urlString = message.body as? String,
+           let url = URL(string: urlString),
+           !url.isNativeWebURL {
+            Task { @MainActor in
+                if await confirmOpenURL(url) {
+                    await UIApplication.shared.open(url)
+                }
+            }
+        }
     }
 }
 
@@ -567,16 +602,46 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         guard let url = navigationAction.request.url else { return .allow }
         Logger.viewController.info("decidePolicyFor - url: \(url.absoluteString)")
 
-        let scheme = url.scheme?.lowercased() ?? ""
-        // WKWebView can natively load these schemes; everything else is a custom URL scheme
-        // (shortcuts://, tel://, mailto://, etc.) that must be handed to the system.
-        let isNativeWebScheme = scheme.isEmpty || ["http", "https", "about", "blob", "data"].contains(scheme)
-
-        if navigationAction.navigationType == .linkActivated || !isNativeWebScheme {
+        if !url.isNativeWebURL {
+            // The injected JS anchor interceptor calls preventDefault() for real user taps,
+            // so those arrive via the externalURL message handler rather than this delegate.
+            // All custom-scheme navigations that reach here require an explicit native
+            // confirmation; navigationType is not a trustworthy user-gesture signal.
+            if await confirmOpenURL(url) {
+                await UIApplication.shared.open(url)
+            }
+            return .cancel
+        }
+        if navigationAction.navigationType == .linkActivated {
             await UIApplication.shared.open(url)
             return .cancel
         }
         return .allow
+    }
+
+    private func confirmOpenURL(_ url: URL) async -> Bool {
+        let now = Date()
+        guard !isConfirmingExternalURL,
+              presentedViewController == nil,
+              viewIfLoaded?.window != nil,
+              externalURLCooldownUntil.map({ now >= $0 }) ?? true else {
+            return false
+        }
+        isConfirmingExternalURL = true
+        defer { isConfirmingExternalURL = false }
+
+        let confirmed = await withCheckedContinuation { continuation in
+            let alert = UIAlertController(title: url.absoluteString, message: nil, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: String(localized: "Cancel"), style: .cancel) { _ in
+                continuation.resume(returning: false)
+            })
+            alert.addAction(UIAlertAction(title: String(localized: "Open"), style: .default) { _ in
+                continuation.resume(returning: true)
+            })
+            present(alert, animated: true)
+        }
+        externalURLCooldownUntil = Date(timeIntervalSinceNow: 3)
+        return confirmed
     }
 
     // swiftlint:disable:next async_without_await
@@ -755,6 +820,13 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         }
         setHideNavigationBar(shouldHide: false)
         reloadView()
+    }
+}
+
+private extension URL {
+    var isNativeWebURL: Bool {
+        guard let scheme = scheme?.lowercased() else { return true }
+        return ["http", "https", "about", "blob", "data", "javascript"].contains(scheme)
     }
 }
 
