@@ -67,6 +67,7 @@ class SitemapPageViewModel: ObservableObject {
     private var lastUIUpdateAt: Date = .distantPast
     private var coalescedLongPollUpdateCount = 0
     private var pendingLongPollPage: OpenHABPage?
+    private var pendingLinkedPageNavigation: LinkedPageNavigation?
     private var longPollDebounceTask: Task<Void, Never>?
     private var foregroundObserverTask: Task<Void, Never>?
     private var rowInputRebuildTask: Task<Void, Never>?
@@ -553,6 +554,15 @@ extension SitemapPageViewModel {
         injectSendCommand(for: newWidgets)
         currentPage = page
 
+        // Apply a pending linked-page navigation on the first non-nil page update, regardless
+        // of origin. Checking only .initialPoll was insufficient because the loader emits
+        // .initialFetch(nil) when the server returns no page, skipping updateUI entirely;
+        // the next update arrives as .longPolling and the destination was never consumed.
+        if let nav = pendingLinkedPageNavigation {
+            pendingLinkedPageNavigation = nil
+            navigationPath.append(nav)
+        }
+
         // Phase 2: slider override sync
         _ = clearSyncedSliderOverrides(using: newWidgets)
         let firstApplyMs = Int((Date().timeIntervalSince(applyStartedAt) * 1000).rounded())
@@ -758,6 +768,7 @@ extension SitemapPageViewModel {
         defaultSitemapLabel = ""
         self.pageId = pageId ?? ""
         navigationPath = []
+        pendingLinkedPageNavigation = nil
         error = nil
     }
 
@@ -768,8 +779,9 @@ extension SitemapPageViewModel {
 
     @MainActor
     // swiftlint:disable:next async_without_await
-    func pushSitemap(name: String, path: String?) async {
+    func pushSitemap(name: String, path: String?, pendingNavigation: LinkedPageNavigation? = nil) async {
         configureSitemap(name: name, pageId: path)
+        pendingLinkedPageNavigation = pendingNavigation
         startPageHandling(forceRestart: true, reason: "push-sitemap")
     }
 
