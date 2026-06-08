@@ -324,7 +324,6 @@ extension SitemapPageViewModel {
             return
         }
 
-        let pipelineStart = Date()
         let requestedKey = "\(defaultSitemap)|\(pageId)"
         if !forceRestart,
            let activeTask = pageHandlingTask,
@@ -358,15 +357,24 @@ extension SitemapPageViewModel {
         pageHandlingTask = Task {
             await runPageHandling(
                 runID: runID,
-                recreateService: recreateService,
-                pipelineStart: pipelineStart
+                reason: reason,
+                recreateService: recreateService
             )
         }
     }
 
     private func runPageHandling(runID: UUID,
-                                 recreateService: Bool,
-                                 pipelineStart: Date) async {
+                                 reason: String,
+                                 recreateService: Bool) async {
+        let pipelineStartedAt = Date()
+        var diagnostics = SitemapInitialLoadMeasurement(
+            reason: reason,
+            isLinkedPage: isLinkedPage,
+            hasCurrentPage: currentPage != nil,
+            connectionWasReady: networkTracker.activeConnection != nil,
+            pipelineStartedAt: pipelineStartedAt
+        )
+
         defer {
             if activePageHandlingID == runID {
                 pageHandlingTask = nil
@@ -375,19 +383,47 @@ extension SitemapPageViewModel {
         }
 
         do {
-            guard await ensureSitemapAvailableForHandling() else { return }
+            guard await ensureSitemapAvailableForHandling() else {
+                diagnostics.log(
+                    status: "failed",
+                    page: currentPage,
+                    rowCount: rowInputs.count,
+                    errorDescription: "No sitemap available"
+                )
+                return
+            }
 
-            guard let activeConnection = await waitForConnectionForHandling() else { return }
+            diagnostics.beginConnectionSelection()
+            guard let activeConnection = await waitForConnectionForHandling() else {
+                diagnostics.log(
+                    status: "failed",
+                    page: currentPage,
+                    rowCount: rowInputs.count,
+                    errorDescription: "No active connection"
+                )
+                return
+            }
 
+            diagnostics.beginServiceSetup(connection: activeConnection.configuration)
             try setupServiceIfNeeded(activeConnection: activeConnection, forceRecreate: recreateService)
 
             if defaultSitemapLabel.isEmpty {
+                diagnostics.beginLabelFetch()
                 await fetchSitemapLabel()
             }
 
-            guard let service = openAPIService else { return }
+            guard let service = openAPIService else {
+                diagnostics.log(
+                    status: "failed",
+                    page: currentPage,
+                    rowCount: rowInputs.count,
+                    errorDescription: "Sitemap service unavailable"
+                )
+                return
+            }
 
             var lastResponseAt: Date?
+            diagnostics.beginInitialRequest()
 
             for try await event in SitemapPageLoader.stream(
                 sitemapName: defaultSitemap,
@@ -417,11 +453,16 @@ extension SitemapPageViewModel {
                 case let .initialFetch(page):
                     isLoading = false
                     isUpdating = false
-                    let totalDurationMs = Date().timeIntervalSince(pipelineStart) * 1000
-                    logger.info("Sitemap pipeline ready in \(Int(totalDurationMs.rounded()), privacy: .public)ms")
+                    diagnostics.beginUIPreparation()
                     if let page {
                         await updateUI(with: page, origin: .initialPoll)
                     }
+                    diagnostics.log(
+                        status: page == nil ? "empty" : "success",
+                        page: page,
+                        rowCount: rowInputs.count
+                    )
+                    logger.info("Sitemap pipeline initial load completed")
                 case let .longPoll(page, requestMs):
                     let responseGapMs = lastResponseAt.map { Int((responseAt.timeIntervalSince($0) * 1000).rounded()) }
                     SitemapDiagnostics.logLongPoll(
@@ -436,6 +477,12 @@ extension SitemapPageViewModel {
                 lastResponseAt = responseAt
             }
         } catch {
+            diagnostics.log(
+                status: error is CancellationError ? "cancelled" : "failed",
+                page: currentPage,
+                rowCount: rowInputs.count,
+                errorDescription: error.localizedDescription
+            )
             handlePageHandlingError(error)
         }
     }

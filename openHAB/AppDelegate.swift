@@ -58,6 +58,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UserDefaults.standard.register(defaults: appDefaults)
 
         Preferences.migratePreferences()
+        SitemapDiagnostics.markProcessLaunch(source: launchSource(launchOptions))
 
         // Firebase must be configured before the storyboard loads its root view controller,
         // because OpenHABRootViewController.viewDidLoad calls Crashlytics before the deferred
@@ -77,6 +78,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         return true
+    }
+
+    private func launchSource(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> String {
+        guard let launchOptions, !launchOptions.isEmpty else { return "user" }
+        if launchOptions[.remoteNotification] != nil {
+            return "remoteNotification"
+        }
+        if launchOptions[.url] != nil {
+            return "url"
+        }
+        if launchOptions[.location] != nil {
+            return "location"
+        }
+        return "other"
     }
 
     /// Setup that can be deferred until after the UI appears
