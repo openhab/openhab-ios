@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.2.70, Build 279] - 2026-06-08Z
+
+- watchOS Complications size and legacy icon removal fix (#1236)
+
 ## [Version 3.2.69, Build 278] - 2026-06-07Z
 
 - Expose displayState in Get Item State Shortcuts intent (#1235)
