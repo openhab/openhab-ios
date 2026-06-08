@@ -16,7 +16,12 @@ import UIKit
 
 struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
+    @Environment(\.scenePhase) private var scenePhase
     @State private var idleTimerDisabled = false
+    // Sub-pages are created while the app is already active, so the first .active transition they
+    // observe is a genuine return from background — don't skip it. Root pages start false to skip
+    // the launch-time .active that races the initial .task startup.
+    @State private var hasSeenActivePhase: Bool
 
     private var isLinkedPage: Bool {
         viewModel.isLinked
@@ -75,6 +80,15 @@ struct SitemapPageView: View {
                 UIApplication.shared.isIdleTimerDisabled = false
             }
         }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                guard hasSeenActivePhase else {
+                    hasSeenActivePhase = true
+                    return
+                }
+                viewModel.refreshOnForeground()
+            }
+        }
         .navigationTitle(viewModel.pageTitle)
         .navigationBarTitleDisplayMode(.large)
         .alert("Error", isPresented: Binding(
@@ -92,6 +106,7 @@ struct SitemapPageView: View {
 
     init(viewModel: SitemapPageViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        _hasSeenActivePhase = State(initialValue: viewModel.isLinked)
     }
 }
 
