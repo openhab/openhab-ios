@@ -18,9 +18,9 @@ struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
     @Environment(\.scenePhase) private var scenePhase
     @State private var idleTimerDisabled = false
-    // Sub-pages are created while the app is already active, so the first .active transition they
-    // observe is a genuine return from background — don't skip it. Root pages start false to skip
-    // the launch-time .active that races the initial .task startup.
+    /// Sub-pages are created while the app is already active, so the first .active transition they
+    /// observe is a genuine return from background — don't skip it. Root pages start false to skip
+    /// the launch-time .active that races the initial .task startup.
     @State private var hasSeenActivePhase: Bool
 
     private var isLinkedPage: Bool {
