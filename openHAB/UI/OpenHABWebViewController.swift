@@ -567,9 +567,14 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         guard let url = navigationAction.request.url else { return .allow }
         Logger.viewController.info("decidePolicyFor - url: \(url.absoluteString)")
 
-        if navigationAction.navigationType == .linkActivated {
+        let scheme = url.scheme?.lowercased() ?? ""
+        // WKWebView can natively load these schemes; everything else is a custom URL scheme
+        // (shortcuts://, tel://, mailto://, etc.) that must be handed to the system.
+        let isNativeWebScheme = scheme.isEmpty || ["http", "https", "about", "blob", "data"].contains(scheme)
+
+        if navigationAction.navigationType == .linkActivated || !isNativeWebScheme {
             await UIApplication.shared.open(url)
-            return .cancel // Stop in WebView
+            return .cancel
         }
         return .allow
     }
