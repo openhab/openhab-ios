@@ -270,6 +270,9 @@ class OpenHABWebViewController: OpenHABViewController {
                 webView = newWebview
                 attachWebViewToLayout(newWebview)
             }
+            // Reset fullscreen state so a new page must explicitly re-request it.
+            // Without this, navigating away from a goFullscreen page keeps the bar hidden.
+            setHideNavigationBar(shouldHide: false)
             Logger.viewController.info("Loading URL: \(modifiedUrl)")
             webView.load(request)
         }
@@ -659,6 +662,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation?) {
         Logger.viewController.info("didStartProvisionalNavigation - webView.url: \(String(describing: webView.url?.description))")
+        setHideNavigationBar(shouldHide: false)
         showActivityIndicator(show: true)
     }
 
@@ -768,7 +772,6 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         // Track the successfully loaded URL for ETag comparison
         lastLoadedURL = webView.url?.absoluteString
 
-        setHideNavigationBar(shouldHide: true)
         showActivityIndicator(show: false)
         UIView.animate(withDuration: 0.2) {
             self.loadingOverlay.alpha = 0
