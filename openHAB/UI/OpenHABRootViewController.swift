@@ -180,6 +180,13 @@ class OpenHABRootViewController: UIViewController {
             switchToSavedView()
             isDemoMode = Preferences.shared.currentHomePreferences.demomode
         }
+        // Restore correct nav bar state when returning from pushed screens (e.g. notifications, home
+        // selection). Those screens call setNavigationBarHidden(false) before pushing; popping back
+        // lands here but does not re-hide the bar, causing the UIKit hamburger and the SwiftUI one
+        // inside SitemapNavigationView to appear simultaneously.
+        if currentView === sitemapViewController {
+            navigationController?.setNavigationBarHidden(true, animated: animated)
+        }
         ImageDownloader.default.authenticationChallengeResponder = self
     }
 
