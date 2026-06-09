@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [Version 3.2.71, Build 280] - 2026-06-09Z
+
+- swiftlinted
+- Add sitemap startup diagnostics (#1242)
+- fix: defer sub-page navigation until root sitemap poll completes (#842) (#1241)
+- fix: only hide navigation bar on explicit goFullscreen signal (#1017) (#1240)
+- fix: open custom URL schemes from webview via system handler (#1239)
+- fix: refresh sub-page items when app returns to foreground (#1238)
+- Re-post notification on action failure so user can retry (#984) (#1233)
+- fix: hide UIKit nav bar on sitemap when returning from pushed screens (#1237)
+
 ## [Version 3.2.70, Build 279] - 2026-06-08Z
 
 - watchOS Complications size and legacy icon removal fix (#1236)
