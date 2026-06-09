@@ -44,11 +44,14 @@ private struct LocalizedItemState: CustomLocalizedStringResourceConvertible {
 
 enum ItemStateError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
+    case itemNotFound(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
         case let .itemNotInHome(itemName, homeName):
             "Item '\(itemName)' is not in home '\(homeName)'"
+        case let .itemNotFound(itemName):
+            "Item '\(itemName)' not found"
         }
     }
 }
@@ -88,8 +91,9 @@ struct GetItemStateIntent: AppIntent {
             mismatchError: ItemStateError.itemNotInHome
         )
 
-        let freshItem = await OpenHABItemCache.instance.getItemUncached(name: itemEntity.itemName, home: homeId)
-        let item = freshItem ?? itemEntity.item
+        guard let item = await OpenHABItemCache.instance.getItemUncached(name: itemEntity.itemName, home: homeId) else {
+            throw ItemStateError.itemNotFound(itemEntity.itemName)
+        }
         let rawState = item.state ?? "Unknown state"
 
         // Prefer the server-formatted state, then fall back to local number formatting,
