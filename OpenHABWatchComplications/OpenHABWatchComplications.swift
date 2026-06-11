@@ -66,7 +66,9 @@ struct OpenHABComplicationEntryView: View {
 }
 
 struct OpenHABWatchComplications: Widget {
-    let kind = "OpenHABWatchComplications"
+    // Changed kind identifier from "OpenHABWatchComplications" to force watchOS
+    // to treat this as a new complication, eliminating the cached ClockKit entry (issue #1030)
+    let kind = "OpenHABWatchComplications_v2"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: OpenHABWatchComplicationsProvider()) { entry in
