@@ -25,7 +25,7 @@ struct WidgetRowView: View {
 
     var body: some View {
         if let linkedPage = widget.linkedPage {
-            NavigationLink(value: linkedPage) {
+            NavigationLink(value: SitemapLinkedPage(link: linkedPage.link, title: linkedPage.title, pageId: linkedPage.pageId)) {
                 WidgetRowFactory.make(widget: widget, settings: settings)
                     .id(refreshToken)
             }
@@ -49,7 +49,7 @@ struct SitemapPageView: View {
             if isRoot {
                 NavigationStack {
                     pageContent
-                        .navigationDestination(for: OpenHABPage.self) { linkedPage in
+                        .navigationDestination(for: SitemapLinkedPage.self) { linkedPage in
                             SitemapPageView(viewModel: UserData(linkedPage: linkedPage), isRoot: false)
                                 .environmentObject(settings)
                         }
@@ -63,7 +63,7 @@ struct SitemapPageView: View {
 
     private var pageContent: some View {
         Group {
-            if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {
+            if viewModel.isLoading, viewModel.widgets.isEmpty {
                 VStack {
                     Spacer()
                     ProgressView("Loading sitemap…")
@@ -79,7 +79,7 @@ struct SitemapPageView: View {
                                 .id(widget.widgetId)
                         }
 
-                        if viewModel.isLoadingSitemap {
+                        if viewModel.isLoading {
                             HStack {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .secondary))
@@ -95,7 +95,7 @@ struct SitemapPageView: View {
                     .padding(.vertical, 2)
                 }
                 .scrollPosition(id: $scrollPosition, anchor: .top)
-                .navigationBarTitle(viewModel.openHABSitemapPage?.title.labelValueTitle ?? "Sitemap")
+                .navigationBarTitle(viewModel.currentPage?.title.labelValueTitle ?? "Sitemap")
             } else {
                 VStack {
                     Spacer()

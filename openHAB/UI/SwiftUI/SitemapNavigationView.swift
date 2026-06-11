@@ -23,8 +23,8 @@ struct SitemapNavigationView: View {
     var body: some View {
         NavigationStack(path: $viewModel.navigationPath) {
             sitemapContent
-                .navigationDestination(for: LinkedPageNavigation.self) { nav in
-                    SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: nav.pageLink, title: nav.pageTitle))
+                .navigationDestination(for: SitemapLinkedPage.self) { nav in
+                    SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: nav.link, title: nav.title, pageId: nav.pageId))
                 }
         }
     }

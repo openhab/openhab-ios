@@ -187,6 +187,7 @@ struct WidgetRenderKey: Equatable, Sendable {
     let stateless: Bool?
     let linkedPageLink: String?
     let linkedPageTitle: String?
+    let linkedPageId: String?
     let mappings: [WidgetMappingKey]
     let item: WidgetItemKey?
     let childWidgets: [WidgetRenderKey]
@@ -227,6 +228,7 @@ struct WidgetRenderKey: Equatable, Sendable {
             stateless: widget.stateless,
             linkedPageLink: widget.linkedPage?.link,
             linkedPageTitle: widget.linkedPage?.title,
+            linkedPageId: widget.linkedPage?.pageId,
             mappings: widget.mappings.map(WidgetMappingKey.init),
             item: WidgetItemKey.from(item: widget.item),
             childWidgets: widget.widgets.map(WidgetRenderKey.from)
@@ -271,6 +273,7 @@ extension WidgetRenderKey {
             stateless: snapshot.stateless,
             linkedPageLink: snapshot.linkedPage?.link,
             linkedPageTitle: snapshot.linkedPage?.title,
+            linkedPageId: snapshot.linkedPage?.pageId,
             mappings: snapshot.mappings.map(WidgetMappingKey.init),
             item: WidgetItemKey.from(item: snapshot.item),
             childWidgets: snapshot.widgets.map(WidgetRenderKey.from)

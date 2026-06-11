@@ -361,6 +361,7 @@ struct LinkedPageRowInput: Equatable, RowWithIconInput {
     let icon: RowIconInput
     let linkedPageLink: String
     let linkedPageTitle: String
+    let linkedPageId: String
     let isFrame: Bool
 
     static func from(widget: OpenHABWidget) -> LinkedPageRowInput? {
@@ -373,6 +374,7 @@ struct LinkedPageRowInput: Equatable, RowWithIconInput {
             icon: RowIconInput.from(widget: widget),
             linkedPageLink: linkedPage.link,
             linkedPageTitle: linkedPage.title,
+            linkedPageId: linkedPage.pageId,
             isFrame: widget.type == .frame
         )
     }

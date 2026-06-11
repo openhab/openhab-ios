@@ -24,14 +24,6 @@ struct RowID: Hashable {
     }
 }
 
-/// Navigation value pushed onto the NavigationStack when a linked-page row is tapped.
-/// Declared here so both EmbeddingRowInputView (producer) and SitemapNavigationView
-/// (navigationDestination handler) can reference it without a shared module dependency.
-struct LinkedPageNavigation: Hashable {
-    let pageLink: String
-    let pageTitle: String
-}
-
 /// Draft immutable row union for a list-driven SwiftUI pipeline.
 /// Each row case carries a dedicated typed input.
 enum SitemapRowInput: Identifiable, Equatable {

@@ -84,6 +84,24 @@ struct SitemapRowInputBuilderTests {
     }
 
     @Test
+    func incrementalRebuildDetectsLinkedPageIdChange() {
+        let widget = makeLinkedPageWidget(widgetID: "linked-1", pageId: "page-a")
+        let pageKey = "default|home"
+
+        let initial = buildInitial(pageKey: pageKey, widgets: [widget])
+
+        widget.linkedPage?.pageId = "page-b"
+        let updated = buildIncrementally(pageKey: pageKey, widgets: [widget], previous: initial)
+
+        #expect(updated.reusedInputCount == 0)
+        guard case let .linked(_, input) = updated.inputs[0] else {
+            Issue.record("Expected a linked row input")
+            return
+        }
+        #expect(input.linkedPageId == "page-b")
+    }
+
+    @Test
     func incrementalRebuildFallsBackWhenCountsChange() {
         let widget = makeTextWidget(widgetID: "text-1", label: "Kitchen")
         let pageKey = "default|home"
@@ -138,6 +156,21 @@ private extension SitemapRowInputBuilderTests {
         widget.label = label
         widget.row = 1
         widget.column = 1
+        return widget
+    }
+
+    func makeLinkedPageWidget(widgetID: String, pageId: String) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = widgetID
+        widget.type = .group
+        widget.linkedPage = OpenHABPage(
+            pageId: pageId,
+            title: "Page \(pageId)",
+            link: "http://example.com/rest/sitemaps/s/\(pageId)",
+            leaf: false,
+            widgets: [],
+            icon: ""
+        )
         return widget
     }
 }

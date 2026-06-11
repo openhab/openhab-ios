@@ -18,16 +18,13 @@ import UIKit
 private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "org.openhab.app", category: "SitemapPageViewModel")
 
 @MainActor
-class SitemapPageViewModel: ObservableObject {
-    @Published var currentPage: OpenHABPage?
+class SitemapPageViewModel: SitemapPageViewModelBase {
     @Published var searchText = "" {
         didSet {
             rebuildRowInputs()
         }
     }
 
-    @Published var error: (any LocalizedError)?
-    @Published var isLoading = true
     @Published var isUpdating = false
     @Published var openHABRootUrl: String?
     @Published var showSearchField = false
@@ -35,12 +32,11 @@ class SitemapPageViewModel: ObservableObject {
     @Published private(set) var trackerStatus: NetworkStatus = .stopped
     @Published private(set) var widgetUpdateVersions: [String: Int] = [:]
     @Published private(set) var rowInputs: [SitemapRowInput] = []
-    @Published var navigationPath: [LinkedPageNavigation] = []
+    @Published var navigationPath: [SitemapLinkedPage] = []
 
     let networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
     private var activeConnectionInfo: ConnectionInfo?
-    private var pageHandlingTask: Task<Void, Never>?
     private var foregroundRefreshTask: Task<Void, Never>?
     private var connectionObserverTask: Task<Void, Never>?
     private var networkStatusObserverTask: Task<Void, Never>?
@@ -52,7 +48,6 @@ class SitemapPageViewModel: ObservableObject {
     private var isLinkedPage = false
     private var pageNetworkStatus: NetworkStatus?
     private var pageNetworkStatusAvailable = false
-    private var activePageHandlingKey: String?
     private var activePageHandlingID: UUID?
     private var commandStateResetTasks: [String: Task<Void, Never>] = [:]
     private var commandStateVersions: [String: Int] = [:]
@@ -67,7 +62,7 @@ class SitemapPageViewModel: ObservableObject {
     private var lastUIUpdateAt: Date = .distantPast
     private var coalescedLongPollUpdateCount = 0
     private var pendingLongPollPage: OpenHABPage?
-    private var pendingLinkedPageNavigation: LinkedPageNavigation?
+    private var pendingSitemapLinkedPage: SitemapLinkedPage?
     private var longPollDebounceTask: Task<Void, Never>?
     private var foregroundObserverTask: Task<Void, Never>?
     private var rowInputRebuildTask: Task<Void, Never>?
@@ -92,12 +87,14 @@ class SitemapPageViewModel: ObservableObject {
         isLinkedPage
     }
 
-    init() {
+    override init() {
+        super.init()
         loadSettings()
         startObservers()
     }
 
     init(pageUrl: String, title: String, pageId: String = "") {
+        super.init()
         loadSettings()
         isLinkedPage = true
         startObservers()
@@ -121,6 +118,7 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     init(sitemapName: String, pageUrl: String, title: String, pageId: String) {
+        super.init()
         loadSettings()
         defaultSitemap = sitemapName
         isLinkedPage = true
@@ -135,6 +133,7 @@ class SitemapPageViewModel: ObservableObject {
 
     /// Initializes the view model with a fixed set of widgets, without loading or polling
     init(pageUrl: String = "", title: String = "Preview Page", pageId: String = "", widgets: [OpenHABWidget]) {
+        super.init()
         isLinkedPage = !pageUrl.isEmpty
         fallbackTitle = title
         self.pageId = pageId
@@ -234,7 +233,6 @@ class SitemapPageViewModel: ObservableObject {
         connectionObserverTask?.cancel()
         networkStatusObserverTask?.cancel()
         foregroundObserverTask?.cancel()
-        pageHandlingTask?.cancel()
         foregroundRefreshTask?.cancel()
         longPollDebounceTask?.cancel()
         commandStateResetTasks.values.forEach { $0.cancel() }
@@ -283,7 +281,7 @@ extension SitemapPageViewModel {
         longPollDebounceTask = nil
         pendingLongPollPage = nil
         coalescedLongPollUpdateCount = 0
-        activePageHandlingKey = nil
+        currentHandlingKey = nil
         activePageHandlingID = nil
     }
 
@@ -329,7 +327,7 @@ extension SitemapPageViewModel {
         if !forceRestart,
            let activeTask = pageHandlingTask,
            !activeTask.isCancelled,
-           activePageHandlingKey == requestedKey {
+           currentHandlingKey == requestedKey {
             logger.info("Skipping duplicate page handling start for \(requestedKey, privacy: .public), reason: \(reason, privacy: .public)")
             return
         }
@@ -351,7 +349,7 @@ extension SitemapPageViewModel {
 
         let runID = UUID()
         activePageHandlingID = runID
-        activePageHandlingKey = requestedKey
+        currentHandlingKey = requestedKey
 
         logger.info("🚀 Starting page load and long polling flow (reason: \(reason, privacy: .public), run: \(runID.uuidString, privacy: .public), key: \(requestedKey, privacy: .public))")
 
@@ -430,7 +428,7 @@ extension SitemapPageViewModel {
                 sitemapName: defaultSitemap,
                 pageId: pageId,
                 service: service,
-                shouldRetry: shouldRetryLongPolling,
+                shouldRetry: Self.shouldRetryPolling,
                 onLongPollError: { _, requestMs, willRetry in
                     Task { @MainActor in
                         SitemapDiagnostics.logLongPoll(
@@ -605,8 +603,8 @@ extension SitemapPageViewModel {
         // of origin. Checking only .initialPoll was insufficient because the loader emits
         // .initialFetch(nil) when the server returns no page, skipping updateUI entirely;
         // the next update arrives as .longPolling and the destination was never consumed.
-        if let nav = pendingLinkedPageNavigation {
-            pendingLinkedPageNavigation = nil
+        if let nav = pendingSitemapLinkedPage {
+            pendingSitemapLinkedPage = nil
             navigationPath.append(nav)
         }
 
@@ -776,28 +774,6 @@ extension SitemapPageViewModel {
         applySnapshotRowInputBuildResult(result, widgets: relevantWidgets)
     }
 
-    private nonisolated func shouldRetryLongPolling(after error: any Error) -> Bool {
-        if let urlError = OpenAPIErrorInspector.underlyingURLError(from: error) {
-            switch urlError.code {
-            case .timedOut, .networkConnectionLost, .cannotConnectToHost, .notConnectedToInternet, .cannotFindHost:
-                return true
-            default:
-                break
-            }
-        }
-
-        if let openAPIError = error as? OpenAPIServiceError {
-            switch openAPIError {
-            case let .undocumented(statusCode, _):
-                return statusCode == 408 || statusCode == 499 || statusCode == 502 || statusCode == 503 || statusCode == 504
-            case .badRequest, .notFound, .noRootURL, .unAuthorized:
-                break
-            }
-        }
-
-        return false
-    }
-
     private func injectSendCommand(for widgets: [OpenHABWidget]) {
         for widget in widgets {
             widget.sendCommand = { [weak self] item, command in
@@ -815,20 +791,20 @@ extension SitemapPageViewModel {
         defaultSitemapLabel = ""
         self.pageId = pageId ?? ""
         navigationPath = []
-        pendingLinkedPageNavigation = nil
+        pendingSitemapLinkedPage = nil
         error = nil
     }
 
     @MainActor
-    func navigateToLinkedPage(_ nav: LinkedPageNavigation) {
+    func navigateToLinkedPage(_ nav: SitemapLinkedPage) {
         navigationPath.append(nav)
     }
 
     @MainActor
     // swiftlint:disable:next async_without_await
-    func pushSitemap(name: String, path: String?, pendingNavigation: LinkedPageNavigation? = nil) async {
+    func pushSitemap(name: String, path: String?, pendingNavigation: SitemapLinkedPage? = nil) async {
         configureSitemap(name: name, pageId: path)
-        pendingLinkedPageNavigation = pendingNavigation
+        pendingSitemapLinkedPage = pendingNavigation
         startPageHandling(forceRestart: true, reason: "push-sitemap")
     }
 
