@@ -494,9 +494,13 @@ class OpenHABWebViewController: OpenHABViewController {
         // iOS 17 allows Sandboxed profiles, which is fantastic, iOS 16 does not and agressively caches everything
         if #available(iOS 17, *) {
             config.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
+            Logger.viewController.info("Created MainUI webview dataStore=persistent identifier=\(id.uuidString, privacy: .private)")
         } else if isCloudConnection {
             // for cloud connections, create an instance that does not persist or share states (private)
             config.websiteDataStore = .nonPersistent()
+            Logger.viewController.info("Created MainUI webview dataStore=nonPersistent cloud=true")
+        } else {
+            Logger.viewController.info("Created MainUI webview dataStore=default cloud=false")
         }
 
         let webview = WKWebView(frame: .zero, configuration: config)
@@ -603,7 +607,11 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
 extension OpenHABWebViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
         guard let url = navigationAction.request.url else { return .allow }
-        Logger.viewController.info("decidePolicyFor - url: \(url.absoluteString)")
+        Logger.viewController.info("""
+        Navigation action type=\(navigationAction.navigationType.logDescription, privacy: .public) \
+        mainFrame=\(navigationAction.targetFrame?.isMainFrame ?? false, privacy: .public) \
+        url=\(url.absoluteString, privacy: .private)
+        """)
 
         if !url.isNativeWebURL {
             // The injected JS anchor interceptor calls preventDefault() for real user taps,
@@ -611,7 +619,10 @@ extension OpenHABWebViewController: WKNavigationDelegate {
             // All custom-scheme navigations that reach here require an explicit native
             // confirmation; navigationType is not a trustworthy user-gesture signal.
             if await confirmOpenURL(url) {
+                Logger.viewController.info("Navigation decision=open-system customScheme=\(url.scheme ?? "", privacy: .public)")
                 await UIApplication.shared.open(url)
+            } else {
+                Logger.viewController.info("Navigation decision=cancel customScheme=\(url.scheme ?? "", privacy: .public)")
             }
             return .cancel
         }
@@ -625,9 +636,19 @@ extension OpenHABWebViewController: WKNavigationDelegate {
                 activeConnectionInfo?.proxyURL?.webOrigin
             ]
             if !activeOrigins.contains(urlOrigin) {
+                Logger.viewController.info("""
+                Navigation decision=open-system reason=external-origin \
+                requestedOrigin=\(urlOrigin ?? "nil", privacy: .public) \
+                configuredOrigin=\(activeOrigins[0] ?? "nil", privacy: .public) \
+                proxyOrigin=\(activeOrigins[1] ?? "nil", privacy: .public)
+                """)
                 await UIApplication.shared.open(url)
                 return .cancel
             }
+            Logger.viewController.info("""
+            Navigation decision=allow reason=active-origin \
+            requestedOrigin=\(urlOrigin ?? "nil", privacy: .public)
+            """)
         }
         return .allow
     }
@@ -660,7 +681,12 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     // swiftlint:disable:next async_without_await
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         if let response = navigationResponse.response as? HTTPURLResponse {
-            Logger.viewController.info("navigationResponse: \(response.statusCode)")
+            Logger.viewController.info("""
+            Navigation response status=\(response.statusCode, privacy: .public) \
+            mainFrame=\(navigationResponse.isForMainFrame, privacy: .public) \
+            mime=\(response.mimeType ?? "unknown", privacy: .public) \
+            url=\(response.url?.absoluteString ?? "nil", privacy: .private)
+            """)
 
             if response.statusCode >= 400 {
                 pageLoadError(message: "\(response.statusCode)")
@@ -677,7 +703,13 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {
-        Logger.viewController.error("didFail - webView.url: \(String(describing: webView.url?.description))")
+        let nsError = error as NSError
+        Logger.viewController.error("""
+        Navigation failed domain=\(nsError.domain, privacy: .public) code=\(nsError.code, privacy: .public) \
+        url=\(webView.url?.absoluteString ?? "nil", privacy: .private) \
+        failingURL=\(nsError.userInfo[NSURLErrorFailingURLStringErrorKey] as? String ?? "nil", privacy: .private) \
+        message=\(error.localizedDescription, privacy: .private)
+        """)
 
         setHideNavigationBar(shouldHide: false)
         if let urlError = error as? URLError, urlError.code == .cancelled {
@@ -803,9 +835,15 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        Logger.viewController.info("respondTo challenge host=\(challenge.protectionSpace.host, privacy: .public) method=\(challenge.protectionSpace.authenticationMethod, privacy: .public)")
+        let expectedHost = modifyUrl(orig: URL(string: openHABTrackedRootUrl))?.host
+        Logger.viewController.info("""
+        Authentication challenge host=\(challenge.protectionSpace.host, privacy: .public) \
+        expectedHost=\(expectedHost ?? "nil", privacy: .public) \
+        method=\(challenge.protectionSpace.authenticationMethod, privacy: .public) \
+        previousFailures=\(challenge.previousFailureCount, privacy: .public)
+        """)
 
-        if let url = modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
+        if challenge.protectionSpace.host == expectedHost {
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
                 guard let serverTrust = challenge.protectionSpace.serverTrust else {
                     return (.performDefaultHandling, nil)
@@ -818,6 +856,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
             }
             return await onReceiveSessionChallenge(with: challenge)
         }
+        Logger.viewController.info("Authentication challenge decision=default reason=host-mismatch")
         return (.performDefaultHandling, nil)
     }
 
@@ -829,8 +868,16 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
         let nsError = error as NSError
         if nsError.domain == NSURLErrorDomain, nsError.code == NSURLErrorCancelled {
+            Logger.viewController.debug("Provisional navigation cancelled")
             return
         }
+        Logger.viewController.error("""
+        Provisional navigation failed domain=\(nsError.domain, privacy: .public) \
+        code=\(nsError.code, privacy: .public) \
+        url=\(webView.url?.absoluteString ?? "nil", privacy: .private) \
+        failingURL=\(nsError.userInfo[NSURLErrorFailingURLStringErrorKey] as? String ?? "nil", privacy: .private) \
+        message=\(error.localizedDescription, privacy: .private)
+        """)
         setHideNavigationBar(shouldHide: false)
         reloadView()
     }
@@ -848,6 +895,20 @@ private extension URL {
         let defaultPort = scheme == "https" ? 443 : scheme == "http" ? 80 : nil
         let portSuffix = (port != nil && port != defaultPort) ? ":\(port!)" : ""
         return "\(scheme)://\(host)\(portSuffix)"
+    }
+}
+
+private extension WKNavigationType {
+    var logDescription: String {
+        switch self {
+        case .linkActivated: "linkActivated"
+        case .formSubmitted: "formSubmitted"
+        case .backForward: "backForward"
+        case .reload: "reload"
+        case .formResubmitted: "formResubmitted"
+        case .other: "other"
+        @unknown default: "unknown-\(rawValue)"
+        }
     }
 }
 

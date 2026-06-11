@@ -66,6 +66,8 @@ private struct WebContainerContent: View {
 
 @MainActor
 enum WebRowViewConfigurationFactory {
+    private static let logger = Logger(subsystem: "org.openhab", category: "WebRowViewConfiguration")
+
     static func make(homeId: UUID) -> WKWebViewConfiguration {
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
@@ -77,7 +79,15 @@ enum WebRowViewConfigurationFactory {
         // WebContent process assignment remains at WebKit's discretion.
         // Basic Auth challenge handling covers widget authentication.
         if #available(iOS 17, *) {
-            configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: widgetStoreID(for: homeId))
+            let storeID = widgetStoreID(for: homeId)
+            configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: storeID)
+            logger.info("""
+            Created widget webview dataStore=persistent \
+            homeId=\(homeId.uuidString, privacy: .private) \
+            identifier=\(storeID.uuidString, privacy: .private)
+            """)
+        } else {
+            logger.info("Created widget webview dataStore=default")
         }
         return configuration
     }
@@ -121,11 +131,45 @@ struct WebRowView: UIViewRepresentable {
         private let logger = Logger(subsystem: "org.openhab", category: "WebRowViewCoordinator")
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
-            logger.debug("WebView failed to load: \(error.localizedDescription)")
+            let nsError = error as NSError
+            logger.error("""
+            Widget webview provisional navigation failed \
+            domain=\(nsError.domain, privacy: .public) code=\(nsError.code, privacy: .public) \
+            url=\(webView.url?.absoluteString ?? "nil", privacy: .private) \
+            failingURL=\(nsError.userInfo[NSURLErrorFailingURLStringErrorKey] as? String ?? "nil", privacy: .private) \
+            message=\(error.localizedDescription, privacy: .private)
+            """)
         }
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            logger.info("Widget webview finished url=\(webView.url?.absoluteString ?? "nil", privacy: .private)")
+        }
+
+        // swiftlint:disable async_without_await
+        func webView(_ webView: WKWebView,
+                     decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
+            guard let response = navigationResponse.response as? HTTPURLResponse else {
+                return .allow
+            }
+            logger.info("""
+            Widget webview response status=\(response.statusCode, privacy: .public) \
+            mime=\(response.mimeType ?? "unknown", privacy: .public) \
+            mainFrame=\(navigationResponse.isForMainFrame, privacy: .public) \
+            url=\(response.url?.absoluteString ?? "nil", privacy: .private)
+            """)
+            return .allow
+        }
+
+        // swiftlint:enable async_without_await
 
         func webView(_ webView: WKWebView,
                      respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+            logger.info("""
+            Widget webview authentication challenge \
+            host=\(challenge.protectionSpace.host, privacy: .public) \
+            method=\(challenge.protectionSpace.authenticationMethod, privacy: .public) \
+            previousFailures=\(challenge.previousFailureCount, privacy: .public)
+            """)
             if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
                 return await onReceiveSessionTaskChallenge(with: challenge)
             }
@@ -150,6 +194,9 @@ struct WebRowView: UIViewRepresentable {
     func updateUIView(_ webView: WKWebView, context: Context) {
         guard let webURL, webURL != context.coordinator.lastLoadedURL else { return }
         context.coordinator.lastLoadedURL = webURL
+        Logger(subsystem: "org.openhab", category: "WebRowView").info(
+            "Widget webview loading url=\(webURL.absoluteString, privacy: .private)"
+        )
         webView.load(URLRequest(url: webURL))
     }
 
