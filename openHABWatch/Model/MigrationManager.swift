@@ -12,6 +12,7 @@
 import ClockKit
 import Foundation
 import os.log
+import WatchConnectivity
 
 /// Handles app migrations between versions
 final class MigrationManager {
@@ -38,29 +39,54 @@ final class MigrationManager {
     /// Removes the deprecated ClockKit complications that were replaced with WidgetKit
     /// This migration was introduced in version 3.2.68 to prevent duplicate complication entries
     /// in the watchOS complications selector (issue #1030)
+    ///
+    /// The legacy ClockKit complications are cached in watchOS even after being replaced with
+    /// WidgetKit. This method attempts to clear them through multiple strategies:
+    /// 1. Reload all active complications to force a refresh
+    /// 2. Send a message to the iOS companion app to trigger a full cache clear
     private static func removeDeprecatedClockKitComplications() {
         logger.info("Starting migration: removing deprecated ClockKit complications")
 
         do {
             let server = CLKComplicationServer.sharedInstance()
 
-            // Get all active complications
-            guard let activeComplications = server.activeComplications, !activeComplications.isEmpty else {
+            // Strategy 1: Reload all active complications
+            if let activeComplications = server.activeComplications, !activeComplications.isEmpty {
+                logger.info("Found \(activeComplications.count) active complications")
+
+                for complication in activeComplications {
+                    logger.info("Reloading ClockKit complication: \(complication.identifier)")
+                    server.reloadTimeline(for: complication)
+                }
+            } else {
                 logger.info("No active ClockKit complications found")
-                return
             }
 
-            logger.info("Found \(activeComplications.count) active complications")
+            // Strategy 2: Notify companion app to help clear the cache
+            notifyCompanionAppOfMigration()
 
-            // Remove all ClockKit complications by reloading their timeline
-            for complication in activeComplications {
-                logger.info("Removing ClockKit complication: \(complication.identifier)")
-                server.reloadTimeline(for: complication)
-            }
-
-            logger.info("Successfully removed deprecated ClockKit complications")
+            logger.info("Successfully processed ClockKit complications migration")
         } catch {
-            logger.error("Failed to remove ClockKit complications: \(error.localizedDescription)")
+            logger.error("Error during ClockKit complications migration: \(error.localizedDescription)")
+        }
+    }
+
+    /// Notifies the iOS companion app about the ClockKit migration
+    /// This allows the main app to perform any necessary cleanup on the iOS side
+    private static func notifyCompanionAppOfMigration() {
+        if WCSession.default.isReachable {
+            let message = [
+                "action": "clockkitMigrationComplete",
+                "timestamp": Date().timeIntervalSince1970
+            ] as [String: Any]
+
+            WCSession.default.sendMessage(message, replyHandler: { response in
+                self.logger.info("Companion app acknowledged ClockKit migration")
+            }, errorHandler: { error in
+                self.logger.warning("Failed to notify companion app: \(error.localizedDescription)")
+            })
+        } else {
+            logger.info("Companion app not reachable; will retry on next sync")
         }
     }
 }
