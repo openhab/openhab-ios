@@ -27,13 +27,27 @@ final class MigrationManager {
         let userDefaults = UserDefaults(suiteName: "group.openhab.shared") ?? UserDefaults.standard
         let lastMigrationVersion = userDefaults.integer(forKey: migrationVersionKey)
 
+        logger.info("Migration check: lastVersion=\(lastMigrationVersion), currentVersion=\(self.currentMigrationVersion)")
+
         // Migration 1: Remove deprecated ClockKit complications (3.2.68+)
         if lastMigrationVersion < 1 {
+            logger.info("Running migration 1: ClockKit complications removal")
             removeDeprecatedClockKitComplications()
+        } else {
+            logger.info("Migration 1 already completed, skipping")
         }
 
         // Update migration version
         userDefaults.set(currentMigrationVersion, forKey: migrationVersionKey)
+        logger.info("Migration version updated to \(currentMigrationVersion)")
+    }
+
+    /// Resets the migration state - useful for testing
+    /// Call this once to allow migrations to run again
+    static func resetMigrationState() {
+        let userDefaults = UserDefaults(suiteName: "group.openhab.shared") ?? UserDefaults.standard
+        userDefaults.removeObject(forKey: migrationVersionKey)
+        logger.info("Migration state reset - migrations will run on next app launch")
     }
 
     /// Removes the deprecated ClockKit complications that were replaced with WidgetKit
