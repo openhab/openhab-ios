@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [Version 3.2.72, Build 281] - 2026-06-11Z
+
+- fix: isolate WebRowView data store from MainUI and fix linkActivated origin check (#1244)
+- fix: throw on uncached fetch failure in GetItemStateIntent (#1243)
+
 ## [Version 3.2.71, Build 280] - 2026-06-09Z
 
 - swiftlinted
