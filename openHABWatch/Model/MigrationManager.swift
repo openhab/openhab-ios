@@ -45,9 +45,7 @@ final class MigrationManager {
             let server = CLKComplicationServer.sharedInstance()
 
             // Get all active complications
-            let activeComplications = server.activeComplications
-
-            guard !activeComplications.isEmpty else {
+            guard let activeComplications = server.activeComplications, !activeComplications.isEmpty else {
                 logger.info("No active ClockKit complications found")
                 return
             }
