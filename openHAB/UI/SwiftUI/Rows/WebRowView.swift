@@ -70,16 +70,36 @@ enum WebRowViewConfigurationFactory {
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
         configuration.mediaTypesRequiringUserActionForPlayback = []
-        // iOS 17+: use the per-home sandboxed store shared with OpenHABWebViewController,
-        // so the widget inherits cloud session cookies already established by Basic UI.
-        // iOS 16: WKWebsiteDataStore(forIdentifier:) is unavailable; the WebKit default
-        // shared store is used instead. Cookie sharing with OpenHABWebViewController's
-        // nonpersistent cloud store is not possible on iOS 16 — Basic Auth challenge
-        // handling covers authentication for that case.
+        // iOS 17+: use a per-home sandboxed store derived from homeId but distinct from
+        // the store used by OpenHABWebViewController (which uses homeId directly).
+        // Separate identifiers give independent cookie and HTTP-cache storage for widget
+        // pages, preventing a widget from serving stale or mismatched assets to MainUI.
+        // WebContent process assignment remains at WebKit's discretion.
+        // Basic Auth challenge handling covers widget authentication.
         if #available(iOS 17, *) {
-            configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: homeId)
+            configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: widgetStoreID(for: homeId))
         }
         return configuration
+    }
+
+    /// Derives a store ID that is per-home but distinct from every possible `homeId`.
+    /// XOR with a fixed non-zero mask is bijective (different inputs → different outputs)
+    /// and guarantees `widgetStoreID(x) ≠ x` for all x, regardless of UUID version.
+    static func widgetStoreID(for homeId: UUID) -> UUID {
+        // Mask bytes spell "WebRowViewStore!" in ASCII.
+        let mask: uuid_t = (
+            0x57, 0x65, 0x62, 0x52, 0x6F, 0x77, 0x56, 0x69,
+            0x65, 0x77, 0x53, 0x74, 0x6F, 0x72, 0x65, 0x21
+        )
+        var bytes = homeId.uuid
+        withUnsafeMutableBytes(of: &bytes) { dst in
+            withUnsafeBytes(of: mask) { src in
+                for i in dst.indices {
+                    dst[i] ^= src[i]
+                }
+            }
+        }
+        return UUID(uuid: bytes)
     }
 }
 

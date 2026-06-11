@@ -616,8 +616,18 @@ extension OpenHABWebViewController: WKNavigationDelegate {
             return .cancel
         }
         if navigationAction.navigationType == .linkActivated {
-            await UIApplication.shared.open(url)
-            return .cancel
+            // Only leave the app for genuinely external links. Same-origin links
+            // (matching the active server's or proxy URL's full origin) are
+            // SPA-internal navigations that must stay in the WKWebView.
+            let urlOrigin = url.webOrigin
+            let activeOrigins: [String?] = [
+                activeConfig.flatMap { URL(string: $0.url)?.webOrigin },
+                activeConnectionInfo?.proxyURL?.webOrigin
+            ]
+            if !activeOrigins.contains(urlOrigin) {
+                await UIApplication.shared.open(url)
+                return .cancel
+            }
         }
         return .allow
     }
@@ -793,7 +803,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        Logger.viewController.info("Challenge.protectionSpace.authenticationMethod: \(String(describing: challenge.protectionSpace.authenticationMethod))")
+        Logger.viewController.info("respondTo challenge host=\(challenge.protectionSpace.host, privacy: .public) method=\(challenge.protectionSpace.authenticationMethod, privacy: .public)")
 
         if let url = modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
@@ -830,6 +840,14 @@ private extension URL {
     var isNativeWebURL: Bool {
         guard let scheme = scheme?.lowercased() else { return true }
         return ["http", "https", "about", "blob", "data", "javascript"].contains(scheme)
+    }
+
+    /// RFC 6454 origin: scheme + host + port, with default ports (80/443) omitted.
+    var webOrigin: String? {
+        guard let scheme = scheme?.lowercased(), let host else { return nil }
+        let defaultPort = scheme == "https" ? 443 : scheme == "http" ? 80 : nil
+        let portSuffix = (port != nil && port != defaultPort) ? ":\(port!)" : ""
+        return "\(scheme)://\(host)\(portSuffix)"
     }
 }
 
