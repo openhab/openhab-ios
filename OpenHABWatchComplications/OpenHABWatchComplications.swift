@@ -43,7 +43,7 @@ struct OpenHABComplicationEntryView: View {
             .containerBackground(for: .widget) {
                 AccessoryWidgetBackground()
             }
-            .accessibilityLabel("openHAB")
+            .accessibilityLabel("openHAB App")
     }
 
     @ViewBuilder
