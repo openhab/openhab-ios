@@ -327,7 +327,7 @@ public final class HTTPClient: NSObject, Sendable {
         return data
     }
 
-    public func notification(urlString: String) async throws -> [OpenHABNotification] {
+    public func notifications(urlString: String) async throws -> [OpenHABNotification] {
         guard let url = Endpoint.notification(prefsURL: urlString).url else { throw HTTPClientError.couldNotLoadNotification }
         let data = try await notification(url: url)
 

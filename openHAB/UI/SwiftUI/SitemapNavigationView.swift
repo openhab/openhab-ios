@@ -15,10 +15,9 @@ import SFSafeSymbols
 import SwiftUI
 
 struct SitemapNavigationView: View {
-    @Environment(\.scenePhase) private var scenePhase
     @StateObject var viewModel = SitemapPageViewModel()
-    @State private var hasSeenActivePhase = false
     @State private var isSearchPresented = false
+    @FocusState private var isLegacySearchFocused: Bool
     let onShowSideMenu: () -> Void
 
     var body: some View {
@@ -27,19 +26,6 @@ struct SitemapNavigationView: View {
                 .navigationDestination(for: LinkedPageNavigation.self) { nav in
                     SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: nav.pageLink, title: nav.pageTitle))
                 }
-        }
-        .onChange(of: scenePhase) { _, newPhase in
-            switch newPhase {
-            case .active:
-                // Skip only the first activation to avoid racing the initial .task startup.
-                guard hasSeenActivePhase else {
-                    hasSeenActivePhase = true
-                    return
-                }
-                viewModel.refreshOnForeground()
-            default:
-                break
-            }
         }
     }
 
@@ -58,13 +44,24 @@ struct SitemapNavigationView: View {
                 }
                 if viewModel.showSearchField {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button {
-                            isSearchPresented = true
-                        } label: {
-                            Image(systemSymbol: .magnifyingglass)
+                        if #available(iOS 17.0, *) {
+                            Button {
+                                isSearchPresented = true
+                            } label: {
+                                Image(systemSymbol: .magnifyingglass)
+                            }
+                            .ohMinimumHitTarget()
+                            .accessibilityLabel("Search")
+                        } else {
+                            Button {
+                                isSearchPresented = true
+                                isLegacySearchFocused = true
+                            } label: {
+                                Image(systemSymbol: .magnifyingglass)
+                            }
+                            .ohMinimumHitTarget()
+                            .accessibilityLabel("Search")
                         }
-                        .ohMinimumHitTarget()
-                        .accessibilityLabel("Search")
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -78,19 +75,73 @@ struct SitemapNavigationView: View {
                 }
             }
 
-        if viewModel.showSearchField, isSearchPresented {
-            page
-                .searchable(
-                    text: $viewModel.searchText,
-                    isPresented: $isSearchPresented,
-                    placement: .navigationBarDrawer(displayMode: .always),
-                    prompt: Text(String(localized: "search_items", comment: ""))
-                )
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
+        if viewModel.showSearchField {
+            if #available(iOS 17.0, *) {
+                if isSearchPresented {
+                    page
+                        .searchable(
+                            text: $viewModel.searchText,
+                            isPresented: $isSearchPresented,
+                            placement: .navigationBarDrawer(displayMode: .always),
+                            prompt: Text(String(localized: "search_items", comment: ""))
+                        )
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                } else {
+                    page
+                }
+            } else {
+                page
+                    .safeAreaInset(edge: .bottom) {
+                        if isSearchPresented {
+                            legacySearchBar
+                        }
+                    }
+            }
         } else {
             page
         }
+    }
+
+    private var legacySearchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemSymbol: .magnifyingglass)
+                .foregroundStyle(.secondary)
+                .ohTextToken(.secondary)
+
+            TextField(String(localized: "search_items", comment: ""), text: $viewModel.searchText)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .focused($isLegacySearchFocused)
+                .ohTextToken(.secondary)
+
+            if !viewModel.searchText.isEmpty {
+                Button {
+                    viewModel.searchText = ""
+                } label: {
+                    Image(systemSymbol: .xmarkCircleFill)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+
+            Button {
+                isSearchPresented = false
+                isLegacySearchFocused = false
+            } label: {
+                Image(systemSymbol: .xmark)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            Color(.secondarySystemBackground).opacity(0.6),
+            in: RoundedRectangle(cornerRadius: 10)
+        )
+        .padding(.horizontal, 12)
+        .padding(.bottom, 6)
     }
 
     @ViewBuilder
@@ -142,11 +193,6 @@ struct SitemapNavigationView: View {
             }
             .foregroundStyle(.red)
             .ohTextToken(.secondary)
-            .phaseAnimator([1.0, 0.4]) { content, opacity in
-                content.opacity(opacity)
-            } animation: { _ in
-                .easeInOut(duration: 0.8)
-            }
             .accessibilityLabel("Command failures: \(count)")
         }
     }

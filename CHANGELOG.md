@@ -2,6 +2,44 @@
 
 ## [Unreleased]
 
+## [Version 3.2.72, Build 281] - 2026-06-11Z
+
+- fix: isolate WebRowView data store from MainUI and fix linkActivated origin check (#1244)
+- fix: throw on uncached fetch failure in GetItemStateIntent (#1243)
+
+## [Version 3.2.71, Build 280] - 2026-06-09Z
+
+- swiftlinted
+- Add sitemap startup diagnostics (#1242)
+- fix: defer sub-page navigation until root sitemap poll completes (#842) (#1241)
+- fix: only hide navigation bar on explicit goFullscreen signal (#1017) (#1240)
+- fix: open custom URL schemes from webview via system handler (#1239)
+- fix: refresh sub-page items when app returns to foreground (#1238)
+- Re-post notification on action failure so user can retry (#984) (#1233)
+- fix: hide UIKit nav bar on sitemap when returning from pushed screens (#1237)
+
+## [Version 3.2.70, Build 279] - 2026-06-08Z
+
+- watchOS Complications size and legacy icon removal fix (#1236)
+
+## [Version 3.2.69, Build 278] - 2026-06-07Z
+
+- Expose displayState in Get Item State Shortcuts intent (#1235)
+- Replace deprecated ClockKit complications with WidgetKit (#1030) (#1234)
+- Include group items in Shortcuts intent pickers (#1232)
+
+- update code sign settings for OpenHABWatchComplications
+- Replace deprecated ClockKit complications with WidgetKit (#1030)
+- Include group items in Shortcuts intent pickers (#1232)
+
+## [Version 3.2.67, Build 276] - 2026-06-02Z
+
+- Notification handling (#1226)
+
+## [Version 3.2.66, Build 275] - 2026-06-01Z
+
+- Fix Webview widget URLs and auth for cloud connections (#1230)
+
 
 
 ## [Version 3.2.64, Build 273] - 2026-05-31Z

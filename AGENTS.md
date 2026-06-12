@@ -38,3 +38,4 @@
 
 ## git
 - Always use git commit with -s -S 
+- If using XcodeBuildMCP, use the installed XcodeBuildMCP skill before calling XcodeBuildMCP tools.

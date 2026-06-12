@@ -35,6 +35,8 @@ class OpenHABWebViewController: OpenHABViewController {
     private var etagChecker: ETagChecker?
     private var etagCheckerConfigURL: String? // Track which config the checker was created for
     private var lastLoadedURL: String? // Track the last successfully loaded URL from didFinish
+    private var isConfirmingExternalURL = false
+    private var externalURLCooldownUntil: Date?
 
     var hasLoadedPage: Bool {
         !currentTarget.isEmpty
@@ -79,6 +81,28 @@ class OpenHABWebViewController: OpenHABViewController {
 
         // Notify initial path on load
         notifyPathChange();
+    })();
+
+    // Intercept anchor clicks to custom URL schemes in capture phase so that
+    // event.preventDefault() fires before the browser initiates the navigation.
+    // event.isTrusted filters out programmatic .click() / dispatchEvent() calls.
+    // The message handler still shows a native confirmation because the bridge is
+    // accessible to all page scripts, not only this injected one.
+    (function() {
+        const nativeSchemes = ['http', 'https', 'about', 'blob', 'data', 'javascript', ''];
+        function isCustomScheme(url) {
+            const m = /^([a-z][a-z0-9+\\-.]*):/.exec((url || '').toLowerCase());
+            return m != null && !nativeSchemes.includes(m[1]);
+        }
+        document.addEventListener('click', function(e) {
+            if (!e.isTrusted) return;
+            let el = e.target;
+            while (el && el.tagName !== 'A') el = el.parentElement;
+            if (el && el.href && isCustomScheme(el.href)) {
+                e.preventDefault();
+                window.webkit.messageHandlers.externalURL.postMessage(el.href);
+            }
+        }, true);
     })();
     """
 
@@ -242,6 +266,9 @@ class OpenHABWebViewController: OpenHABViewController {
                 webView = newWebview
                 attachWebViewToLayout(newWebview)
             }
+            // Reset fullscreen state so a new page must explicitly re-request it.
+            // Without this, navigating away from a goFullscreen page keeps the bar hidden.
+            setHideNavigationBar(shouldHide: false)
             Logger.viewController.info("Loading URL: \(modifiedUrl)")
             webView.load(request)
         }
@@ -450,6 +477,7 @@ class OpenHABWebViewController: OpenHABViewController {
         // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
         config.userContentController.add(self, name: "mainUi")
         config.userContentController.add(self, name: "pathChanged")
+        config.userContentController.add(self, name: "externalURL")
         config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
 
         config.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
@@ -534,6 +562,16 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
             default: break
             }
         }
+        if message.name == "externalURL",
+           let urlString = message.body as? String,
+           let url = URL(string: urlString),
+           !url.isNativeWebURL {
+            Task { @MainActor in
+                if await confirmOpenURL(url) {
+                    await UIApplication.shared.open(url)
+                }
+            }
+        }
     }
 }
 
@@ -542,11 +580,56 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         guard let url = navigationAction.request.url else { return .allow }
         Logger.viewController.info("decidePolicyFor - url: \(url.absoluteString)")
 
+        if !url.isNativeWebURL {
+            // The injected JS anchor interceptor calls preventDefault() for real user taps,
+            // so those arrive via the externalURL message handler rather than this delegate.
+            // All custom-scheme navigations that reach here require an explicit native
+            // confirmation; navigationType is not a trustworthy user-gesture signal.
+            if await confirmOpenURL(url) {
+                await UIApplication.shared.open(url)
+            }
+            return .cancel
+        }
         if navigationAction.navigationType == .linkActivated {
-            await UIApplication.shared.open(url)
-            return .cancel // Stop in WebView
+            // Only leave the app for genuinely external links. Same-origin links
+            // (matching the active server's or proxy URL's full origin) are
+            // SPA-internal navigations that must stay in the WKWebView.
+            let urlOrigin = url.webOrigin
+            let activeOrigins: [String?] = [
+                activeConfig.flatMap { URL(string: $0.url)?.webOrigin },
+                activeConnectionInfo?.proxyURL?.webOrigin
+            ]
+            if !activeOrigins.contains(urlOrigin) {
+                await UIApplication.shared.open(url)
+                return .cancel
+            }
         }
         return .allow
+    }
+
+    private func confirmOpenURL(_ url: URL) async -> Bool {
+        let now = Date()
+        guard !isConfirmingExternalURL,
+              presentedViewController == nil,
+              viewIfLoaded?.window != nil,
+              externalURLCooldownUntil.map({ now >= $0 }) ?? true else {
+            return false
+        }
+        isConfirmingExternalURL = true
+        defer { isConfirmingExternalURL = false }
+
+        let confirmed = await withCheckedContinuation { continuation in
+            let alert = UIAlertController(title: url.absoluteString, message: nil, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: String(localized: "Cancel"), style: .cancel) { _ in
+                continuation.resume(returning: false)
+            })
+            alert.addAction(UIAlertAction(title: String(localized: "Open"), style: .default) { _ in
+                continuation.resume(returning: true)
+            })
+            present(alert, animated: true)
+        }
+        externalURLCooldownUntil = Date(timeIntervalSinceNow: 3)
+        return confirmed
     }
 
     // swiftlint:disable:next async_without_await
@@ -564,6 +647,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation?) {
         Logger.viewController.info("didStartProvisionalNavigation - webView.url: \(String(describing: webView.url?.description))")
+        setHideNavigationBar(shouldHide: false)
         showActivityIndicator(show: true)
     }
 
@@ -673,7 +757,6 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         // Track the successfully loaded URL for ETag comparison
         lastLoadedURL = webView.url?.absoluteString
 
-        setHideNavigationBar(shouldHide: true)
         showActivityIndicator(show: false)
         UIView.animate(withDuration: 0.2) {
             self.loadingOverlay.alpha = 0
@@ -695,7 +778,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        Logger.viewController.info("Challenge.protectionSpace.authenticationMethod: \(String(describing: challenge.protectionSpace.authenticationMethod))")
+        Logger.viewController.info("respondTo challenge host=\(challenge.protectionSpace.host, privacy: .public) method=\(challenge.protectionSpace.authenticationMethod, privacy: .public)")
 
         if let url = modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
@@ -725,6 +808,21 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         }
         setHideNavigationBar(shouldHide: false)
         reloadView()
+    }
+}
+
+private extension URL {
+    var isNativeWebURL: Bool {
+        guard let scheme = scheme?.lowercased() else { return true }
+        return ["http", "https", "about", "blob", "data", "javascript"].contains(scheme)
+    }
+
+    /// RFC 6454 origin: scheme + host + port, with default ports (80/443) omitted.
+    var webOrigin: String? {
+        guard let scheme = scheme?.lowercased(), let host else { return nil }
+        let defaultPort = scheme == "https" ? 443 : scheme == "http" ? 80 : nil
+        let portSuffix = (port != nil && port != defaultPort) ? ":\(port!)" : ""
+        return "\(scheme)://\(host)\(portSuffix)"
     }
 }
 

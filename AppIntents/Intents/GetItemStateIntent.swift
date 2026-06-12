@@ -44,11 +44,14 @@ private struct LocalizedItemState: CustomLocalizedStringResourceConvertible {
 
 enum ItemStateError: Error, CustomLocalizedStringResourceConvertible {
     case itemNotInHome(String, String)
+    case itemNotFound(String)
 
     var localizedStringResource: LocalizedStringResource {
         switch self {
         case let .itemNotInHome(itemName, homeName):
             "Item '\(itemName)' is not in home '\(homeName)'"
+        case let .itemNotFound(itemName):
+            "Item '\(itemName)' not found"
         }
     }
 }
@@ -87,12 +90,26 @@ struct GetItemStateIntent: AppIntent {
             mismatchError: ItemStateError.itemNotInHome
         )
 
-        let freshItem = await OpenHABItemCache.instance.getItemUncached(name: itemEntity.itemName, home: homeId)
-        let state = freshItem?.state ?? itemEntity.item.state ?? "Unknown state"
-        let stateDisplay = LocalizedItemState(rawValue: state)
+        guard let item = await OpenHABItemCache.instance.getItemUncached(name: itemEntity.itemName, home: homeId) else {
+            throw ItemStateError.itemNotFound(itemEntity.itemName)
+        }
+        let rawState = item.state ?? "Unknown state"
+
+        // Prefer the server-formatted state, then fall back to local number formatting,
+        // then fall back to the raw state string.
+        let displayState: String = if let transformed = item.transformedState, !transformed.isEmpty {
+            transformed
+        } else if let pattern = item.stateDescription?.numberPattern,
+                  Double(rawState.components(separatedBy: " ").first ?? "") != nil {
+            rawState.parseAsNumber(format: pattern).toString(locale: .current)
+        } else {
+            rawState
+        }
+
+        let stateDisplay = LocalizedItemState(rawValue: displayState)
 
         return .result(
-            value: state,
+            value: displayState,
             dialog: "The state of \(itemEntity.label) is \(stateDisplay)"
         )
     }

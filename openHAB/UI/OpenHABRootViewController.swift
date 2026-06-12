@@ -22,6 +22,7 @@ import SideMenu
 import SwiftMessages
 import SwiftUI
 import UIKit
+import UserNotifications
 
 enum TargetController {
     case webview
@@ -179,6 +180,13 @@ class OpenHABRootViewController: UIViewController {
         if isDemoMode != Preferences.shared.currentHomePreferences.demomode {
             switchToSavedView()
             isDemoMode = Preferences.shared.currentHomePreferences.demomode
+        }
+        // Restore correct nav bar state when returning from pushed screens (e.g. notifications, home
+        // selection). Those screens call setNavigationBarHidden(false) before pushing; popping back
+        // lands here but does not re-hide the bar, causing the UIKit hamburger and the SwiftUI one
+        // inside SitemapNavigationView to appear simultaneously.
+        if currentView === sitemapViewController {
+            navigationController?.setNavigationBarHidden(true, animated: animated)
         }
         ImageDownloader.default.authenticationChallengeResponder = self
     }
@@ -618,7 +626,7 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    func handleNotification(action: String?, cloudUserId: String?) {
+    func handleNotification(action: String?, cloudUserId: String?, notification: UNNotification? = nil) {
         guard let action else { return }
 
         Logger.viewController.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
@@ -639,11 +647,11 @@ class OpenHABRootViewController: UIViewController {
                 ]
             )
             _ = await NetworkTracker.shared.waitForActiveConnection()
-            handleNotificationInternal(action)
+            handleNotificationInternal(action, notification: notification)
         }
     }
 
-    private func handleNotificationInternal(_ action: String?) {
+    private func handleNotificationInternal(_ action: String?, notification: UNNotification? = nil) {
         Logger.viewController.info("handleNotificationInternal: \(action ?? "<none>")")
 
         guard let action else { return }
@@ -654,13 +662,13 @@ class OpenHABRootViewController: UIViewController {
         case "ui":
             uiCommandAction(cmd)
         case "command":
-            sendCommandAction(cmd)
+            sendCommandAction(cmd, notification: notification)
         case "http":
             httpCommandAction(action)
         case "app":
             appCommandAction(cmd)
         case "rule":
-            ruleCommandAction(cmd)
+            ruleCommandAction(cmd, notification: notification)
         case "device":
             deviceAction(cmd)
         default:
@@ -724,7 +732,7 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    private func sendCommandAction(_ action: String) {
+    private func sendCommandAction(_ action: String, notification: UNNotification? = nil) {
         let components = action.split(separator: ":")
         guard components.count == 2 else {
             return
@@ -739,8 +747,10 @@ class OpenHABRootViewController: UIViewController {
                 try await NetworkTracker.shared.send(to: itemName, command: itemCommand, deviceId: deviceId)
             } catch NetworkTrackerError.noActiveConnection {
                 displayErrorNotification("Could not find server")
+                repostNotification(notification)
             } catch {
                 displayErrorNotification("Failed to establish a connection: \(error.localizedDescription)")
+                repostNotification(notification)
                 Logger.viewController.error("Could not send data \(error.localizedDescription)")
             }
         }
@@ -752,12 +762,23 @@ class OpenHABRootViewController: UIViewController {
         content.body = message
         content.sound = UNNotificationSound.default
 
-        // Create the request
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-
         // Schedule the request with the notification center
         // no error handler because it only printed and tended to crash in swift6
-        UNUserNotificationCenter.current().add(request)
+        UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
+    }
+
+    private func repostNotification(_ notification: UNNotification?) {
+        guard let notification else { return }
+        let original = notification.request.content
+        let content = UNMutableNotificationContent()
+        content.title = original.title
+        content.subtitle = original.subtitle
+        content.body = original.body
+        content.sound = original.sound
+        content.categoryIdentifier = original.categoryIdentifier
+        content.userInfo = original.userInfo
+        content.badge = original.badge
+        UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: notification.request.identifier, content: content, trigger: nil))
     }
 
     private func httpCommandAction(_ command: String) {
@@ -837,7 +858,7 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    private func ruleCommandAction(_ command: String) {
+    private func ruleCommandAction(_ command: String, notification: UNNotification? = nil) {
         let components = command.split(separator: ":", maxSplits: 2)
 
         guard !components.isEmpty else {
@@ -866,9 +887,11 @@ class OpenHABRootViewController: UIViewController {
                 Logger.viewController.info("Request succeeded")
             } catch let error as NetworkTrackerError {
                 displayErrorNotification("\(error.localizedDescription)")
+                repostNotification(notification)
             } catch {
                 Logger.viewController.error("Could not send data \(error.localizedDescription)")
                 displayErrorNotification("Request to server failed: \(error.localizedDescription)")
+                repostNotification(notification)
             }
         }
     }

@@ -91,10 +91,12 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
             .appending(path: name)
             .appending(path: path)
 
-        // Load the root sitemap so the back button returns to it, then navigate to the sub-page
-        // within the existing SwiftUI NavigationStack so SwiftUI manages back-navigation.
-        await viewModel.pushSitemap(name: name, path: nil)
-        viewModel.navigateToLinkedPage(LinkedPageNavigation(pageLink: pageURL.absoluteString, pageTitle: name))
+        // Load the root sitemap so the back button returns to it, then navigate to the sub-page.
+        // The navigation is deferred until the initial root page poll completes so that it fires
+        // after SwiftUI's NavigationStack is in a stable rendered state. This avoids the cold-start
+        // race where navigateToLinkedPage was called before the NavigationStack existed.
+        let nav = LinkedPageNavigation(pageLink: pageURL.absoluteString, pageTitle: name)
+        await viewModel.pushSitemap(name: name, path: nil, pendingNavigation: nav)
     }
 
     @MainActor

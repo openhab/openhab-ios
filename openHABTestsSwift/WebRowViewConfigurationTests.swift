@@ -67,11 +67,27 @@ struct WebRowViewConfigurationTests {
     @available(iOS 17, *)
     @MainActor
     @Test
-    func webRowConfigurationUsesPerHomeDataStore() {
+    func webRowConfigurationUsesPerHomeDerivedDataStore() {
         let homeId = UUID()
         let configuration = WebRowViewConfigurationFactory.make(homeId: homeId)
+        let expectedStoreID = WebRowViewConfigurationFactory.widgetStoreID(for: homeId)
 
-        #expect(configuration.websiteDataStore.identifier == homeId)
+        #expect(configuration.websiteDataStore.identifier == expectedStoreID)
+    }
+
+    @available(iOS 17, *)
+    @MainActor
+    @Test
+    func widgetStoreIsIsolatedFromMainUIStore() {
+        // Verify for a range of UUIDs including one whose version nibble is already "5"
+        // to exercise the XOR path rather than a nibble-replacement assumption.
+        let v4Home = UUID()
+        let v5Home = UUID(uuidString: v4Home.uuidString.replacingCharacters(
+            in: v4Home.uuidString.index(v4Home.uuidString.startIndex, offsetBy: 14) ... v4Home.uuidString.index(v4Home.uuidString.startIndex, offsetBy: 14),
+            with: "5"
+        ))!
+        #expect(WebRowViewConfigurationFactory.widgetStoreID(for: v4Home) != v4Home)
+        #expect(WebRowViewConfigurationFactory.widgetStoreID(for: v5Home) != v5Home)
     }
 
     @available(iOS 17, *)

@@ -11,16 +11,37 @@
 
 import AVFoundation
 import Combine
-import Firebase
-import FirebaseMessaging
 import Kingfisher
 import OpenHABCore
 import os.log
 import SDWebImageSVGCoder
+import SFSafeSymbols
 import SwiftMessages
 import UIKit
 @preconcurrency import UserNotifications
 import WatchConnectivity
+
+@MainActor
+struct OpenHABImageFetcher {
+    private let logger = Logger(subsystem: "org.openhab", category: "ImageFetcher")
+
+    func image(from url: URL,
+               targetSize: CGSize? = nil,
+               extraOptions: KingfisherOptionsInfo = []) async throws -> UIImage {
+        let processor = OpenHABImageProcessor()
+
+        var options: KingfisherOptionsInfo = [
+            .processor(processor)
+        ]
+
+        options.append(contentsOf: extraOptions)
+
+        let result = try await KingfisherManager.shared.retrieveImage(with: url, options: options)
+
+        logger.debug("Fetched image \(result.image.size.debugDescription, privacy: .public) from \(url.absoluteString, privacy: .public)")
+        return result.image
+    }
+}
 
 /// AVAudioPlayer must be created, used, and deallocated on the main thread.
 /// Using a plain `actor` placed it on a background executor, causing a crash when
@@ -60,11 +81,17 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         let userInfo = notification.request.content.userInfo
         Logger.notificationCenterDelegateImpl.info("Notification received while app is in foreground: \(userInfo)")
 
+        let payload = PushNotificationPayload(userInfo: userInfo)
+
         NotificationCenter.default.post(
             name: .openHABDidReceiveNotification,
-            object: nil,
+            object: payload,
             userInfo: userInfo
         )
+
+        guard !payload.isHideNotification else {
+            return []
+        }
 
         // Use the system banner when there are media attachments so the image is visible.
         // The didReceive handler will process any on-click action when the user taps.
@@ -72,10 +99,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             return [.banner, .sound]
         }
 
-        let message = userInfo["message"] as? String ?? String(localized: "message_not_decoded", comment: "")
-        let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-        let cloudUserId = userInfo["userId"] as? String
-        await displayNotification(message: message, action: action, cloudUserId: cloudUserId)
+        await displayNotification(payload: payload)
 
         return []
     }
@@ -95,12 +119,14 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
             let cloudUserId = userInfo["userId"] as? String
 
-            notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
+            // Pass the original notification so action handlers can re-post it on failure,
+            // allowing the user to retry without waiting for a new notification.
+            notifyNotificationListeners(action: action, cloudUserId: cloudUserId, notification: response.notification)
         }
     }
 
-    private func displayNotification(message: String, action: String?, cloudUserId: String?) async {
-        Logger.notificationCenterDelegateImpl.info("displayNotification \(message)")
+    private func displayNotification(payload: PushNotificationPayload) async {
+        Logger.notificationCenterDelegateImpl.info("displayNotification \(payload.message ?? "")")
 
         audioPlayer.playSound()
 
@@ -122,18 +148,38 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             }
         }
 
+        var iconImage = UIImage(systemSymbol: .exclamationmark)
+        if let activeConnection = MainActorNetworkTracker.shared.activeConnection,
+           let url = Endpoint.icon(rootUrl: activeConnection.configuration.url, version: activeConnection.version, icon: payload.icon, state: nil, iconType: .svg, iconColor: "", staticIcon: false)?.url {
+            do {
+                let fetcher = OpenHABImageFetcher()
+                iconImage = try await fetcher.image(
+                    from: url,
+                    targetSize: CGSize(width: 24, height: 24),
+                    extraOptions: [.requestModifier(OpenHABAccessTokenAdapter(connectionConfiguration: activeConnection.configuration))]
+                )
+            } catch {
+                Logger.notificationCenterDelegateImpl.error("Image load failed: \(error)")
+            }
+        }
+
         await MainActor.run {
             SwiftMessages.show(config: config) {
                 let view = MessageView.viewFromNib(layout: .cardView)
                 view.configureTheme(.info)
-                view.configureContent(title: String(localized: "notification", comment: ""), body: message)
+                view.configureContent(
+                    title: String(localized: "notification", comment: ""),
+                    body: payload.displayMessage,
+                    iconImage: iconImage
+                )
                 view.button?.setTitle(String(localized: "dismiss", comment: ""), for: .normal)
+                view.configureIcon(withSize: CGSize(width: 24, height: 24), contentMode: .scaleAspectFit)
                 view.buttonTapHandler = { _ in SwiftMessages.hide() }
 
-                // Use closure-based tap gesture insteae of #selector
+                // Use closure-based tap gesture instead of #selector
                 let tapGesture = MessageTapGestureRecognizer {
                     Task {
-                        await self.messageViewTapped(action: action, cloudUserId: cloudUserId)
+                        await self.messageViewTapped(action: payload.action, cloudUserId: payload.cloudUserId)
                     }
                 }
                 view.addGestureRecognizer(tapGesture)
@@ -152,7 +198,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
 
     /// ✅ Ensure this runs on the MainActor
     @MainActor
-    func notifyNotificationListeners(action: String?, cloudUserId: String? = nil) {
+    func notifyNotificationListeners(action: String?, cloudUserId: String? = nil, notification: UNNotification? = nil) {
         // Wake up screen saver immediately on incoming notification interaction
         NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
 
@@ -164,7 +210,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             .compactMap { $0.rootViewController as? UINavigationController }
             .compactMap { $0.viewControllers.first as? OpenHABRootViewController }
             .first
-        rootViewController?.handleNotification(action: action, cloudUserId: cloudUserId)
+        rootViewController?.handleNotification(action: action, cloudUserId: cloudUserId, notification: notification)
     }
 }
 
