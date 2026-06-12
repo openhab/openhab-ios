@@ -72,7 +72,7 @@ struct OpenHABWatchComplications: Widget {
         StaticConfiguration(kind: kind, provider: OpenHABWatchComplicationsProvider()) { entry in
             OpenHABComplicationEntryView(entry: entry)
         }
-        .configurationDisplayName("openHAB")
+        .configurationDisplayName("openHAB App")
         .description("Open the openHAB app.")
         .supportedFamilies([
             .accessoryCircular,
