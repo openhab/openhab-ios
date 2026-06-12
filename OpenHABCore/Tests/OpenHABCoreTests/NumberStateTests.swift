@@ -194,8 +194,8 @@ struct NumberStateTests {
 
         let col1 = "Uninitialized".parseAsUIColor()
         let col2 = UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
-        #expect(col1 != nil)
-        #expect(try #require(col1?.equals(col2)))
+        let unwrappedCol1 = try #require(col1)
+        #expect(unwrappedCol1.equals(col2))
         #expect("360,100,100".parseAsUIColor() == UIColor(
             hue: CGFloat(state: "360", divisor: 360),
             saturation: CGFloat(state: "100", divisor: 100),
