@@ -218,6 +218,7 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
+    // Will need swift 6.0 SE-0421 and iOS 18 to return an opaque sequence without the type eraser AnyAsyncSequence<Element>
     /// Type-erased async sequence wrapper.
     ///
     /// This type is marked `@unchecked Sendable` when `Element: Sendable` because:
