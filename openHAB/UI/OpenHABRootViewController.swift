@@ -466,6 +466,12 @@ class OpenHABRootViewController: UIViewController {
         // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
         SideMenuManager.default.addPanGestureToPresent(toView: navigationController!.navigationBar)
         SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: navigationController!.view, forMenu: .right)
+
+        // Block UIKit's edge-swipe-to-pop gesture when we're at the navigation root so that
+        // SwiftUI's NavigationStack can handle its own swipe-back gesture for sitemap hierarchy.
+        // When Notifications or HomeSelection are pushed onto the UIKit stack (count > 1),
+        // the gesture is allowed through so UIKit pop still works for those screens.
+        navigationController!.interactivePopGestureRecognizer?.delegate = self
     }
 
     private func openTileURL(_ urlString: String) {
@@ -1113,6 +1119,17 @@ extension OpenHABRootViewController: ModalHandler {
                 navigationController?.pushViewController(hostingController, animated: true)
             }
         }
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+
+extension OpenHABRootViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard gestureRecognizer === navigationController?.interactivePopGestureRecognizer else {
+            return true
+        }
+        return (navigationController?.viewControllers.count ?? 0) > 1
     }
 }
 
