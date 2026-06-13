@@ -1052,7 +1052,11 @@ class OpenHABRootViewController: UIViewController {
             delegate.completeEvaluation(.deny)
         })
 
-        present(alert, animated: true)
+        var presenter: UIViewController = self
+        while let presented = presenter.presentedViewController {
+            presenter = presented
+        }
+        presenter.present(alert, animated: true)
     }
 }
 
@@ -1101,7 +1105,7 @@ extension OpenHABRootViewController: ModalHandler {
                 switchView(target: to)
                 await (sitemapViewController as? HostingSitemapViewController)?.pushSitemap(name: sitemapName, path: nil)
             case .settings:
-                let hostingController = UIHostingController(rootView: NavigationView { SettingsView() })
+                let hostingController = UIHostingController(rootView: NavigationStack { SettingsView() })
                 present(hostingController, animated: true)
             case .notifications:
                 let hostingController = UIHostingController(rootView: NotificationsView())

@@ -91,6 +91,7 @@ struct ServerCertificatesView: View {
             }
         }
         .navigationTitle("Accepted Server Certificates")
+        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.loadCertificates()
         }

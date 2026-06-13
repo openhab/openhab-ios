@@ -159,8 +159,8 @@ public extension String {
         //   localhost
         //   IPv6 literal in brackets: [::1], [2001:db8::1], [fe80::1%25eth0], etc.
         //   IPv4: 192.168.1.1
-        //   hostname: example.com, openhab.local
-        let pattern = #"^(https?://)?(localhost|\[[^\]]+\]|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d+)?(/[^\s]*)?$"#
+        //   hostname: example.com, openhab.local, openhab (single-label, resolved by local DNS)
+        let pattern = #"^(https?://)?(localhost|\[[^\]]+\]|(\d{1,3}\.){3}\d{1,3}|[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)(:\d+)?(/[^\s]*)?$"#
 
         let regex = try Regex(pattern).ignoresCase()
 
