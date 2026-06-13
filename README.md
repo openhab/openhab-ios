@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="Logo" src="openHAB/Images.xcassets/AppIcon.appiconset/Icon.png" width="100">
+    <img alt="Logo" src="openHAB/Images/Images.xcassets/launchImage.imageset/launchImage.png" width="100">
     <br>
     <b>openHAB client for iOS</b>
 </p>
