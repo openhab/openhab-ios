@@ -22,6 +22,9 @@ struct ParseAsTests {
         try "http://localhost:8080".testAsValidOpenHABURL()
         try "https://localhost:8080".testAsValidOpenHABURL()
         try "192.168.2.10".testAsValidOpenHABURL()
+        // Single-label hostnames resolved by local DNS
+        try "http://openhab:8080".testAsValidOpenHABURL()
+        try "http://homeserver".testAsValidOpenHABURL()
         // IPv6 literals must be accepted (RFC 2732 bracket notation)
         try "http://[::1]:8080".testAsValidOpenHABURL()
         try "http://[::1]:8080/rest".testAsValidOpenHABURL()

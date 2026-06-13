@@ -43,6 +43,7 @@ struct SingleConnectionSettingsView: View {
 
     @State private var isTestingConnection = false
     @State private var connectionTestMessage: String?
+    @State private var connectionTestDetail: String?
     @State private var connectionTestSuccess: Bool?
 
     @State private var isPresentingDiscoverySheet = false
@@ -62,6 +63,7 @@ struct SingleConnectionSettingsView: View {
                         .font(.system(.caption))
                         .onChange(of: connectionConfig.url) {
                             connectionTestMessage = nil
+                            connectionTestDetail = nil
                             connectionTestSuccess = nil
                         }
                 } label: {
@@ -111,6 +113,14 @@ struct SingleConnectionSettingsView: View {
                             .font(.caption2)
                     }
                     .transition(.opacity)
+
+                    if let detail = connectionTestDetail, !success {
+                        Text(detail)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .monospaced()
+                            .transition(.opacity)
+                    }
 
                     if isLocalConnection, !success {
                         HStack(spacing: 4) {
@@ -181,6 +191,7 @@ struct SingleConnectionSettingsView: View {
     private func handleTestConnection() async {
         isTestingConnection = true
         connectionTestMessage = nil
+        connectionTestDetail = nil
         connectionTestSuccess = nil
 
         do {
@@ -199,14 +210,19 @@ struct SingleConnectionSettingsView: View {
         } catch {
             if let urlError = OpenAPIErrorInspector.underlyingURLError(from: error) {
                 connectionTestMessage = friendlyMessage(for: urlError)
+                connectionTestDetail = debugDetail(for: urlError)
             } else if let message = OpenAPIErrorInspector.underlyingErrorDescription(from: error) {
                 connectionTestMessage = message
+                connectionTestDetail = String(describing: error)
             } else if let openAPIError = error as? OpenAPIServiceError {
                 connectionTestMessage = openAPIError.localizedDescription
+                connectionTestDetail = String(describing: openAPIError)
             } else if let urlError = error as? URLError {
                 connectionTestMessage = friendlyMessage(for: urlError)
+                connectionTestDetail = debugDetail(for: urlError)
             } else {
                 connectionTestMessage = "Unexpected error: \(error.localizedDescription)"
+                connectionTestDetail = String(describing: error)
             }
             connectionTestSuccess = false
         }
@@ -219,6 +235,10 @@ struct SingleConnectionSettingsView: View {
 
         let connection = try OpenAPIService(connectionConfiguration: connectionConfig, serviceConfiguration: .shortTerm)
         try await connection.getRootVersion()
+    }
+
+    private func debugDetail(for error: URLError) -> String {
+        "\(String(describing: error.code)) (\(error.errorCode))"
     }
 
     private func friendlyMessage(for error: URLError) -> String {
