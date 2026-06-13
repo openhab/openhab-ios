@@ -119,9 +119,10 @@ class OpenHABWebViewController: OpenHABViewController {
         super.viewDidLoad()
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
         attachWebViewToLayout(webView)
+        webView.allowsBackForwardNavigationGestures = true
 
         loadingOverlay.backgroundColor = .systemBackground
-        loadingOverlay.isHidden = true
+        loadingOverlay.isHidden = false
         loadingOverlay.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(loadingOverlay)
         NSLayoutConstraint.activate([
@@ -516,6 +517,8 @@ class OpenHABWebViewController: OpenHABViewController {
         if #available(iOS 16.4, *) {
             webview.isInspectable = true
         }
+
+        webview.allowsBackForwardNavigationGestures = true
 
         // Avoid safe-area content insets which can leave a small gap at the bottom on iPad until a reload.
         webview.scrollView.contentInsetAdjustmentBehavior = .never

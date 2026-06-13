@@ -143,6 +143,7 @@ struct WebRowView: UIViewRepresentable {
     func makeUIView(context: Context) -> WKWebView {
         let homeId = Preferences.shared.currentHomePreferences.id
         let webView = WKWebView(frame: .zero, configuration: WebRowViewConfigurationFactory.make(homeId: homeId))
+        webView.allowsBackForwardNavigationGestures = true
         webView.navigationDelegate = context.coordinator
         return webView
     }
