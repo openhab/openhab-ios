@@ -5548,6 +5548,14 @@
         "responses": {
           "201": {
             "description": "Subscription created.",
+            "headers": {
+              "Location": {
+                "description": "Newly created sitemap event subscription",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "200": {
             "description": "OK",
