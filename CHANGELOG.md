@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [Version 3.2.73, Build 282] - 2026-06-13Z
+
+- fix: allow single-label hostnames, show cert dialog over Settings sheet, fix cert list layout (#1247)
+- Renaming new WidgetKit watchOS complication entry for differentation (#1246)
+
 ## [Version 3.2.72, Build 281] - 2026-06-11Z
 
 - fix: isolate WebRowView data store from MainUI and fix linkActivated origin check (#1244)

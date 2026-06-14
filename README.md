@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="Logo" src="openHAB/Images.xcassets/AppIcon.appiconset/Icon.png" width="100">
+    <img alt="Logo" src="openHAB/Images/Images.xcassets/launchImage.imageset/launchImage.png" width="100">
     <br>
     <b>openHAB client for iOS</b>
 </p>
@@ -257,17 +257,20 @@ Also see [Action Syntax](#action-syntax) for more information on actions that ca
 
 ## Shortcuts
 
-The app supports exposes several actions that let you control your openHAB installation from the Shortcuts app.
+The app exposes several actions that let you control your openHAB installation from the Shortcuts app.
+
+All actions accept an optional **Home** parameter. When omitted the active home is used; when set it overrides the home for that step, which is useful in multi-home shortcuts.
 
 **Supported actions**
 
 - **Get Item State** – Retrieves the current state of any item.
   - Returns the item’s state text so it can be used by later steps in a shortcut.
 
-- **Set Switch State** – Sends an `ON` or `OFF` command to a Switch item.
-  - Action – `ON` / `OFF`
+- **Set Switch State** – Sends a command to a Switch item.
+  - Action – `On` / `Off` / `Toggle`
+  - `Toggle` flips the current state without needing to know it in advance.
 
-- **Set Dimmer or Roller Shutter Value** – Sends an integer value (0-100) to Dimmer or Rollershutter items.
+- **Set Dimmer or Roller Shutter Value** – Sends an integer value (0–100) to Dimmer or Rollershutter items.
   - Value – 0 … 100
 
 - **Set Number Item Value** – Writes a decimal value to any Number item.
@@ -277,10 +280,23 @@ The app supports exposes several actions that let you control your openHAB insta
   - Value – text
 
 - **Set Color Item Value** – Sends a color command in HSB format `Hue,Saturation,Brightness` (e.g. `240,100,100` for blue) to a Color item.
-  - Value – HSB string
+  - Value – HSB string (hue 0–360, saturation 0–100, brightness 0–100)
 
-- **Set Contact Item State** – Sets a Contact item to `OPEN` or `CLOSED` (contacts are typically read-only however).
-  - State – `OPEN` / `CLOSED`
+- **Set Contact Item State** – Sets a Contact item to `Open` or `Closed` (contacts are typically read-only however).
+  - State – `Open` / `Closed`
+
+- **Set Player Control Value** – Sends a transport command to a Player item.
+  - Action – `Play` / `Pause` / `Next` / `Previous` / `Rewind` / `Fast Forward`
+
+- **Set DateTime Control Value** – Sets the date and time of a DateTime item using the system date/time picker.
+  - Value – date and time
+
+- **Set Location Control Value** – Sends a GPS coordinate to a Location item.
+  - Latitude – decimal degrees (−90 … 90)
+  - Longitude – decimal degrees (−180 … 180)
+
+- **Set Active Home** – Switches the active home in the app, equivalent to selecting a home from the side menu.
+  - Home – home name
 
 ## Setting up development environment
 

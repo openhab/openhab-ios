@@ -10000,8 +10000,29 @@ public enum Operations {
         }
         @frozen public enum Output: Sendable, Hashable {
             public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/sitemaps/events/subscribe/POST/responses/201/headers`.
+                public struct Headers: Sendable, Hashable {
+                    /// Newly created sitemap event subscription
+                    ///
+                    /// - Remark: Generated from `#/paths/sitemaps/events/subscribe/POST/responses/201/headers/Location`.
+                    public var Location: Swift.String?
+                    /// Creates a new `Headers`.
+                    ///
+                    /// - Parameters:
+                    ///   - Location: Newly created sitemap event subscription
+                    public init(Location: Swift.String? = nil) {
+                        self.Location = Location
+                    }
+                }
+                /// Received HTTP response headers
+                public var headers: Operations.createSitemapEventSubscription.Output.Created.Headers
                 /// Creates a new `Created`.
-                public init() {}
+                ///
+                /// - Parameters:
+                ///   - headers: Received HTTP response headers
+                public init(headers: Operations.createSitemapEventSubscription.Output.Created.Headers = .init()) {
+                    self.headers = headers
+                }
             }
             /// Subscription created.
             ///
@@ -10009,14 +10030,6 @@ public enum Operations {
             ///
             /// HTTP response code: `201 created`.
             case created(Operations.createSitemapEventSubscription.Output.Created)
-            /// Subscription created.
-            ///
-            /// - Remark: Generated from `#/paths//sitemaps/events/subscribe/post(createSitemapEventSubscription)/responses/201`.
-            ///
-            /// HTTP response code: `201 created`.
-            public static var created: Self {
-                .created(.init())
-            }
             /// The associated value of the enum case if `self` is `.created`.
             ///
             /// - Throws: An error if `self` is not `.created`.
