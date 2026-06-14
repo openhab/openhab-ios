@@ -103,7 +103,9 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
     }
 
     // swiftlint:disable async_without_await
-    func openHABcreateSubscription() async throws -> String? { nil }
+    func openHABcreateSubscription() async throws -> String? {
+        nil
+    }
 
     func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String, pageId: String)
         async throws -> any AsyncSequence<SitemapEventMessage, any Error> & Sendable {
