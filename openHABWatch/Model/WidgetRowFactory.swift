@@ -35,10 +35,18 @@ enum WidgetRowFactory {
         case .text:
             TextRow(widget: widget, hasLinkedPage: widget.linkedPage != nil)
         case .image:
-            if widget.item != nil {
-                ImageRawRow(widget: widget)
-            } else {
-                EquatableView(content: ImageRow(url: URL(string: widget.url), refresh: widget.refresh))
+            let payload = widget.mediaImageDescriptor.resolveImagePayload(rootUrl: settings.openHABRootUrl)
+            switch payload {
+            case let .embedded(data):
+                if let image = UIImage(data: data) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                }
+            case let .link(url):
+                EquatableView(content: ImageRow(url: url, refresh: widget.refresh))
+            case .empty:
+                EquatableView(content: ImageRow(url: nil, refresh: widget.refresh))
             }
         case .chart:
             let payload = widget.mediaImageDescriptor.resolveImagePayload(
