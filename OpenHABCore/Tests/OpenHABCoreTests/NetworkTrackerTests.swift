@@ -101,6 +101,17 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
         }
         return mockServerProperties
     }
+
+    func openHABcreateSubscription() async throws -> String? { nil }
+
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String, pageId: String)
+        async throws -> any AsyncSequence<SitemapEventMessage, any Error> & Sendable {
+        AsyncStream<SitemapEventMessage> { $0.finish() }
+    }
+
+    func openHABEvents(topics: String?) async throws -> any AsyncSequence<OpenHABEvent, any Error> & Sendable {
+        AsyncStream<OpenHABEvent> { $0.finish() }
+    }
 }
 
 actor PathMonitor {
