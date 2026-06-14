@@ -84,9 +84,9 @@ public struct WidgetMediaImageDescriptor: Sendable, Equatable {
             case let .embedded(data):
                 return .embedded(data: data)
             case let .link(link):
-                return .link(url: URL(string: link))
+                return .link(url: resolveURL(link, against: rootUrl))
             case .empty:
-                guard let imageURL = URL(string: url) else {
+                guard let imageURL = resolveURL(url, against: rootUrl) else {
                     Logger.restAPI.error("Invalid image URL: \(url)")
                     return .empty
                 }
@@ -127,6 +127,14 @@ public extension OpenHABWidget {
             itemPayload: itemPayload
         )
     }
+}
+
+private func resolveURL(_ urlString: String, against rootUrl: String) -> URL? {
+    guard !urlString.isEmpty else { return nil }
+    let base = URL(string: rootUrl)
+    guard let resolved = URL(string: urlString, relativeTo: base)?.absoluteURL,
+          resolved.scheme != nil else { return nil }
+    return resolved
 }
 
 private extension OpenHABWidget.WidgetType {
