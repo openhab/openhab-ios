@@ -129,6 +129,8 @@ public extension OpenHABWidget {
     }
 }
 
+/// Resolves urlString against rootUrl so that server-relative paths like
+/// /proxy?siteid=...&widgetId=... become absolute URLs Kingfisher can fetch.
 private func resolveURL(_ urlString: String, against rootUrl: String) -> URL? {
     guard !urlString.isEmpty else { return nil }
     let base = URL(string: rootUrl)
