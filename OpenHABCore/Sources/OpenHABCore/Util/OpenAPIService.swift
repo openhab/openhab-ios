@@ -219,6 +219,37 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
+    private static func parseSitemapEvent(_ sse: ServerSentEvent) -> SitemapEventMessage? {
+        if let event = sse.event?.lowercased(), event == "alive" {
+            Logger.openAPIService.debug("Sitemap SSE alive event")
+            return .alive
+        }
+        guard let raw = sse.data else { return nil }
+        Logger.openAPIService.debug("Sitemap SSE raw event: \(raw, privacy: .public)")
+        let data = Data(raw.utf8)
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let type = json["TYPE"] as? String {
+            switch type {
+            case "ALIVE":
+                return .alive
+            case "SITEMAP_CHANGED":
+                Logger.openAPIService.info("Sitemap SSE SITEMAP_CHANGED event")
+                return .sitemapChanged(
+                    sitemap: json["sitemapName"] as? String,
+                    pageId: json["pageId"] as? String
+                )
+            default:
+                break
+            }
+        }
+        if let decoded = try? JSONDecoder().decode(Components.Schemas.SitemapWidgetEvent.self, from: data),
+           let event = OpenHABSitemapWidgetEvent(decoded) {
+            Logger.openAPIService.debug("Sitemap SSE widget event decoded: \(event.widgetId.orEmpty, privacy: .public)")
+            return .widget(event)
+        }
+        return .unknown(raw: raw)
+    }
+
     /// Returns subscription id or nil
     func openHABcreateSubscription() async throws -> String? {
         Logger.openAPIService.info("Creating subscription")
@@ -251,37 +282,6 @@ public extension OpenAPIService {
             Logger.openAPIService.warning("Sitemap SSE subscription returned unexpected response")
             throw URLError(.badServerResponse)
         }
-    }
-
-    private static func parseSitemapEvent(_ sse: ServerSentEvent) -> SitemapEventMessage? {
-        if let event = sse.event?.lowercased(), event == "alive" {
-            Logger.openAPIService.debug("Sitemap SSE alive event")
-            return .alive
-        }
-        guard let raw = sse.data else { return nil }
-        Logger.openAPIService.debug("Sitemap SSE raw event: \(raw, privacy: .public)")
-        let data = Data(raw.utf8)
-        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let type = json["TYPE"] as? String {
-            switch type {
-            case "ALIVE":
-                return .alive
-            case "SITEMAP_CHANGED":
-                Logger.openAPIService.info("Sitemap SSE SITEMAP_CHANGED event")
-                return .sitemapChanged(
-                    sitemap: json["sitemapName"] as? String,
-                    pageId: json["pageId"] as? String
-                )
-            default:
-                break
-            }
-        }
-        if let decoded = try? JSONDecoder().decode(Components.Schemas.SitemapWidgetEvent.self, from: data),
-           let event = OpenHABSitemapWidgetEvent(decoded) {
-            Logger.openAPIService.debug("Sitemap SSE widget event decoded: \(event.widgetId.orEmpty, privacy: .public)")
-            return .widget(event)
-        }
-        return .unknown(raw: raw)
     }
 
     func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String, pageId: String)
