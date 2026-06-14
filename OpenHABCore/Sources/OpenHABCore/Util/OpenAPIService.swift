@@ -29,7 +29,7 @@ public enum OpenAPIServiceConfiguration {
     case longTerm
 }
 
-protocol OpenAPIServiceProtocol: AnyObject, Sendable {
+public protocol OpenAPIServiceProtocol: AnyObject, Sendable {
     func getRootVersion() async throws -> Int
     @discardableResult func getRoot() async throws -> OpenHABServerProperties
     func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) async throws
@@ -39,11 +39,12 @@ protocol OpenAPIServiceProtocol: AnyObject, Sendable {
     func getItemByName(id: String) async throws -> OpenHABItem?
     func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) async throws -> OpenHABPage?
     func runNow(ruleUID: String, payload: [String: any Sendable]) async throws
+    func openHABcreateSubscription() async throws -> String?
+    func openHABSitemapWidgetEventsRaw(subscriptionid: String, sitemap: String, pageId: String) async throws -> any AsyncSequence<ServerSentEvent, any Error> & Sendable
+    func openHABEvents(topics: String?) async throws -> any AsyncSequence<OpenHABEvent, any Error> & Sendable
 }
 
 /// The generated OpenAPI client is wrapped by this curated API.
-/// The library leaks the fact that it uses Swift OpenAPI Generator under the hood for SSE streams.
-/// It will require the migration to Swift 6.1 before this can be changed.
 public actor OpenAPIService {
     private var client: any APIProtocol
     private var url: URL?
@@ -218,38 +219,6 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
-    // Will need swift 6.0 SE-0421 and iOS 18 to return an opaque sequence without the type eraser AnyAsyncSequence<Element>
-    /// Type-erased async sequence wrapper.
-    ///
-    /// This type is marked `@unchecked Sendable` when `Element: Sendable` because:
-    /// - The wrapped iterator closure captures a mutable iterator, which isn't inherently Sendable
-    /// - However, the iterator is only accessed sequentially via `next()` calls
-    /// - The element type constraint ensures values crossing actor boundaries are safe
-    struct AnyAsyncSequence<Element: Sendable>: AsyncSequence {
-        public struct Iterator: AsyncIteratorProtocol {
-            private var _next: () async throws -> Element?
-
-            init<S: AsyncSequence>(_ base: S) where S.Element == Element {
-                var it = base.makeAsyncIterator()
-                _next = { try await it.next() }
-            }
-
-            public mutating func next() async throws -> Element? {
-                try await _next()
-            }
-        }
-
-        public let _make: () -> Iterator
-
-        init<S: AsyncSequence>(_ base: S) where S.Element == Element {
-            _make = { Iterator(base) }
-        }
-
-        public func makeAsyncIterator() -> Iterator {
-            _make()
-        }
-    }
-
     /// Returns subscription id or nil
     func openHABcreateSubscription() async throws -> String? {
         Logger.openAPIService.info("Creating subscription")
@@ -284,32 +253,25 @@ public extension OpenAPIService {
         }
     }
 
-    /// The app still supports iOS 16+, so keep this type-erased instead of
-    /// returning an opaque AsyncSequence. Raw ServerSentEvent access is also
-    /// needed for ALIVE, SITEMAP_CHANGED, and widget payloads.
     func openHABSitemapWidgetEventsRaw(subscriptionid: String, sitemap: String, pageId: String)
-        async throws -> AnyAsyncSequence<ServerSentEvent> {
+        async throws -> any AsyncSequence<ServerSentEvent, any Error> & Sendable {
         let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
         let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: pageId)
 
-        let seq = try await client.getSitemapEvents_1(path: path, query: query)
+        return try await client.getSitemapEvents_1(path: path, query: query)
             .ok.body.text_event_hyphen_stream
             .asDecodedServerSentEvents()
-
-        return AnyAsyncSequence(seq)
     }
 
     func openHABEvents(topics: String? = nil)
-        async throws -> AnyAsyncSequence<OpenHABEvent> {
+        async throws -> any AsyncSequence<OpenHABEvent, any Error> & Sendable {
         let query: Operations.getEvents.Input.Query =
             (topics == nil) ? .init() : .init(topics: topics)
 
-        let seq = try await client.getEvents(query: query)
+        return try await client.getEvents(query: query)
             .ok.body.text_event_hyphen_stream
             .asDecodedServerSentEventsWithJSONData(of: OpenHABEvent.self)
             .compactMap(\.data)
-
-        return AnyAsyncSequence(seq)
     }
 }
 
@@ -415,5 +377,3 @@ public extension OpenAPIService {
 }
 
 extension OpenAPIService: OpenAPIServiceProtocol {}
-
-extension OpenAPIService.AnyAsyncSequence: @unchecked Sendable {}

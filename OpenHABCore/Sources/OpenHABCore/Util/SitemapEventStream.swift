@@ -39,8 +39,13 @@ public actor SitemapEventStream {
     private var isStopped = false
     private var lastEventTime = Date.now
     private let jsonDecoder = JSONDecoder()
+    private let makeService: @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol
 
-    public init() {}
+    public init(makeService: @escaping @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol = {
+        try OpenAPIService(connectionConfiguration: $0)
+    }) {
+        self.makeService = makeService
+    }
 
     public func stream(sitemap: String, pageId: String) -> AsyncStream<StreamOutput<SitemapEventMessage>> {
         isStopped = false
@@ -144,7 +149,7 @@ public actor SitemapEventStream {
 
         while !Task.isCancelled {
             do {
-                let service = try OpenAPIService(connectionConfiguration: config)
+                let service = try makeService(config)
                 guard let subscriptionId = try await service.openHABcreateSubscription() else {
                     throw SitemapSseError.unsupported
                 }
