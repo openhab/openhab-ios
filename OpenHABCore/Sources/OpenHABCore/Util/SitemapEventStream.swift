@@ -10,8 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-import HTTPTypes
-import OpenAPIRuntime
 import OSLog
 
 public enum SitemapSseError: Error, Equatable {
@@ -38,7 +36,6 @@ public actor SitemapEventStream {
     private var currentTarget: Target?
     private var isStopped = false
     private var lastEventTime = Date.now
-    private let jsonDecoder = JSONDecoder()
     private let makeService: @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol
 
     public init(makeService: @escaping @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol = {
@@ -155,7 +152,7 @@ public actor SitemapEventStream {
                 }
                 Logger.restAPI.info("Sitemap SSE subscription created: \(subscriptionId, privacy: .public)")
 
-                let eventStream = try await service.openHABSitemapWidgetEventsRaw(
+                let eventStream = try await service.openHABSitemapWidgetEvents(
                     subscriptionid: subscriptionId,
                     sitemap: target.sitemap,
                     pageId: target.pageId
@@ -175,11 +172,9 @@ public actor SitemapEventStream {
                 }
                 defer { watchdog.cancel() }
 
-                for try await sse in eventStream {
+                for try await message in eventStream {
                     lastEventTime = .now
-                    if let message = parse(sse) {
-                        broadcast(.event(message))
-                    }
+                    broadcast(.event(message))
                 }
 
                 // Stream ended unexpectedly; trigger reconnect.
@@ -187,7 +182,7 @@ public actor SitemapEventStream {
             } catch is CancellationError {
                 return
             } catch {
-                broadcast(.disconnected(mapError(error)))
+                broadcast(.disconnected(error))
                 Logger.restAPI.error("Sitemap SSE error: \(error.localizedDescription, privacy: .public) – retrying in \(backoff, privacy: .public)s")
                 try? await Task.sleep(for: .seconds(backoff))
                 backoff = min(backoff * 2, maxBackoff)
@@ -206,51 +201,5 @@ public actor SitemapEventStream {
 
     private func broadcast(_ msg: StreamOutput<SitemapEventMessage>) {
         continuations.values.forEach { $0.yield(msg) }
-    }
-
-    private func parse(_ sse: ServerSentEvent) -> SitemapEventMessage? {
-        if let event = sse.event?.lowercased(), event == "alive" {
-            Logger.restAPI.debug("Sitemap SSE alive event")
-            return .alive
-        }
-
-        guard let raw = sse.data else { return nil }
-        Logger.restAPI.debug("Sitemap SSE raw event: \(raw, privacy: .public)")
-        let data = Data(raw.utf8)
-        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let type = json["TYPE"] as? String {
-            switch type {
-            case "ALIVE":
-                Logger.restAPI.debug("Sitemap SSE ALIVE event (TYPE)")
-                return .alive
-            case "SITEMAP_CHANGED":
-                Logger.restAPI.info("Sitemap SSE SITEMAP_CHANGED event")
-                return .sitemapChanged(
-                    sitemap: json["sitemapName"] as? String,
-                    pageId: json["pageId"] as? String
-                )
-            default:
-                break
-            }
-        }
-
-        if let decoded = try? jsonDecoder.decode(Components.Schemas.SitemapWidgetEvent.self, from: data),
-           let event = OpenHABSitemapWidgetEvent(decoded) {
-            Logger.restAPI.debug("Sitemap SSE widget event decoded: \(event.widgetId.orEmpty, privacy: .public)")
-            return .widget(event)
-        }
-
-        return .unknown(raw: raw)
-    }
-
-    private func mapError(_ error: any Error) -> any Error {
-        if let error = error as? SitemapSseError {
-            return error
-        }
-        if let clientError = error as? OpenAPIRuntime.ClientError,
-           clientError.response?.status.code == 404 {
-            return SitemapSseError.unsupported
-        }
-        return error
     }
 }

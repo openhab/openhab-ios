@@ -40,7 +40,7 @@ public protocol OpenAPIServiceProtocol: AnyObject, Sendable {
     func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) async throws -> OpenHABPage?
     func runNow(ruleUID: String, payload: [String: any Sendable]) async throws
     func openHABcreateSubscription() async throws -> String?
-    func openHABSitemapWidgetEventsRaw(subscriptionid: String, sitemap: String, pageId: String) async throws -> any AsyncSequence<ServerSentEvent, any Error> & Sendable
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String, pageId: String) async throws -> any AsyncSequence<SitemapEventMessage, any Error> & Sendable
     func openHABEvents(topics: String?) async throws -> any AsyncSequence<OpenHABEvent, any Error> & Sendable
 }
 
@@ -253,14 +253,49 @@ public extension OpenAPIService {
         }
     }
 
-    func openHABSitemapWidgetEventsRaw(subscriptionid: String, sitemap: String, pageId: String)
-        async throws -> any AsyncSequence<ServerSentEvent, any Error> & Sendable {
+    private static func parseSitemapEvent(_ sse: ServerSentEvent) -> SitemapEventMessage? {
+        if let event = sse.event?.lowercased(), event == "alive" {
+            Logger.openAPIService.debug("Sitemap SSE alive event")
+            return .alive
+        }
+        guard let raw = sse.data else { return nil }
+        Logger.openAPIService.debug("Sitemap SSE raw event: \(raw, privacy: .public)")
+        let data = Data(raw.utf8)
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let type = json["TYPE"] as? String {
+            switch type {
+            case "ALIVE":
+                return .alive
+            case "SITEMAP_CHANGED":
+                Logger.openAPIService.info("Sitemap SSE SITEMAP_CHANGED event")
+                return .sitemapChanged(
+                    sitemap: json["sitemapName"] as? String,
+                    pageId: json["pageId"] as? String
+                )
+            default:
+                break
+            }
+        }
+        if let decoded = try? JSONDecoder().decode(Components.Schemas.SitemapWidgetEvent.self, from: data),
+           let event = OpenHABSitemapWidgetEvent(decoded) {
+            Logger.openAPIService.debug("Sitemap SSE widget event decoded: \(event.widgetId.orEmpty, privacy: .public)")
+            return .widget(event)
+        }
+        return .unknown(raw: raw)
+    }
+
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String, pageId: String)
+        async throws -> any AsyncSequence<SitemapEventMessage, any Error> & Sendable {
         let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
         let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: pageId)
-
-        return try await client.getSitemapEvents_1(path: path, query: query)
-            .ok.body.text_event_hyphen_stream
-            .asDecodedServerSentEvents()
+        do {
+            return try await client.getSitemapEvents_1(path: path, query: query)
+                .ok.body.text_event_hyphen_stream
+                .asDecodedServerSentEvents()
+                .compactMap { @Sendable sse in Self.parseSitemapEvent(sse) }
+        } catch let clientError as ClientError where clientError.response?.status.code == 404 {
+            throw SitemapSseError.unsupported
+        }
     }
 
     func openHABEvents(topics: String? = nil)
