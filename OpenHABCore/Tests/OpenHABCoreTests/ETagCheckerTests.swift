@@ -184,8 +184,8 @@ struct ETagCheckerTests {
         }
     }
 
-    @Test("Returns changed when no ETag header present")
-    func changedWhenNoETagHeader() async throws {
+    @Test("Returns noETagSupport when no ETag header present")
+    func noETagSupportWhenNoETagHeader() async throws {
         MockURLProtocol.reset()
 
         let testURL = try #require(URL(string: "https://example.com/no-etag"))
@@ -199,8 +199,8 @@ struct ETagCheckerTests {
 
         let result = await checker.checkIfChanged(url: testURL)
 
-        guard case .changed = result else {
-            Issue.record("Expected .changed (no ETag), got \(result)")
+        guard case .noETagSupport = result else {
+            Issue.record("Expected .noETagSupport, got \(result)")
             return
         }
     }

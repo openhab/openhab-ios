@@ -16,7 +16,8 @@ import os.log
 public enum ETagCheckResult: Sendable {
     case unchanged // Content hasn't changed, skip reloading and depend on the webview's cache
     case changed // Content has changed, reload
-    case failed(any Error) // Check failed, reload
+    case noETagSupport // Server returned no ETag header; caller decides whether to reload
+    case failed(any Error) // Network or protocol error; caller decides whether to reload
 }
 
 /// Service for checking if remote content has changed using HTTP ETags
@@ -68,7 +69,7 @@ public actor ETagChecker {
 
             guard let newETag else {
                 Logger.etagChecker.debug("No ETag header in response for \(urlString)")
-                return .changed // Server doesn't support ETags, always reload
+                return .noETagSupport
             }
 
             let normalizedNewETag = normalizeETag(newETag)

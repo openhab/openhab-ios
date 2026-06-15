@@ -37,6 +37,12 @@ class OpenHABWebViewController: OpenHABViewController {
     private var etagChecker: ETagChecker?
     private var etagCheckerConfigURL: String? // Track which config the checker was created for
     private var lastLoadedURL: String? // Track the last successfully loaded URL from didFinish
+    // Keyed on the WKNavigation returned by webView.load so overlapping loads and external
+    // (SPA-triggered) navigations each resolve their own identity independently.
+    // Promoted to loadedTarget/loadedHomeID in didFinish; removed in all failure callbacks.
+    private var pendingNavigations: [WKNavigation: (target: String, homeID: UUID)] = [:]
+    private var loadedTarget: String? // promoted from pendingNavigations in didFinish
+    private var loadedHomeID: UUID? // promoted from pendingNavigations in didFinish
     private var isConfirmingExternalURL = false
     private var externalURLCooldownUntil: Date?
 
@@ -232,12 +238,12 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     @MainActor
-    private func performLoadWebView(newTarget: String, path: String?, force: Bool) async {
+    private func performLoadWebView(newTarget: String, path: String? = nil, urlOverride: URL? = nil, force: Bool) async {
         guard let activeConfig else { return }
         currentTarget = newTarget
         let url = URL(string: activeConfig.url)
 
-        if let modifiedUrl = modifyUrl(orig: url, path: path) {
+        if let modifiedUrl = urlOverride ?? modifyUrl(orig: url, path: path) {
             acceptsCommands = false
             var request = URLRequest(url: modifiedUrl)
 
@@ -260,6 +266,12 @@ class OpenHABWebViewController: OpenHABViewController {
             // create new (or resuse existing)
             let newWebview = webView(for: Preferences.shared.currentHomePreferences.id, isCloudConnection: isCloudConnection)
             if newWebview != webView {
+                // Drop all pending navigation entries before removing the delegate.
+                // stopLoading() cancels in-flight navigations, but with no delegate the
+                // cancellation callbacks never arrive, leaving stale entries in the map.
+                // Every entry currently in the map belongs to this webview; the new load
+                // below will insert its own fresh entry.
+                pendingNavigations.removeAll()
                 // Detach old instance
                 webView.stopLoading()
                 webView.navigationDelegate = nil
@@ -274,7 +286,10 @@ class OpenHABWebViewController: OpenHABViewController {
             // Without this, navigating away from a goFullscreen page keeps the bar hidden.
             setHideNavigationBar(shouldHide: false)
             Logger.viewController.info("Loading URL: \(modifiedUrl)")
-            webView.load(request)
+            // Key the identity on the WKNavigation object so each load's callbacks operate
+            // on their own entry; overlapping loads and non-performLoadWebView navigations
+            // (SPA full-page loads, reloads) never touch each other's pending state.
+            if let nav = webView.load(request) { pendingNavigations[nav] = (target: newTarget, homeID: Preferences.shared.currentHomePreferences.id) }
         }
     }
 
@@ -291,10 +306,8 @@ class OpenHABWebViewController: OpenHABViewController {
         // Create checker if needed (lazy initialization) or if config changed
         let configKey = "\(activeConfig.url):\(activeConfig.username)"
         if etagChecker == nil || etagCheckerConfigURL != configKey {
-            let httpClient = HTTPClient(baseURL: nil, connectionConfiguration: activeConfig)
-            etagChecker = ETagChecker(httpClient: httpClient)
+            etagChecker = ETagChecker(httpClient: HTTPClient(baseURL: nil, connectionConfiguration: activeConfig))
             etagCheckerConfigURL = configKey
-            Logger.viewController.debug("Created new ETagChecker for config: \(configKey)")
         }
 
         guard let checker = etagChecker else {
@@ -302,35 +315,100 @@ class OpenHABWebViewController: OpenHABViewController {
             return
         }
 
-        // Check if content changed
-        let result = await checker.checkIfChanged(url: fullURL)
+        // Check against the canonical server root, not the configured default SPA path.
+        // The default path is a frontend route served by the same index.html; checking it
+        // risks a URL that returns no ETag, redirects differently, or has a route-specific
+        // ETag that changes independently of the actual app bundle.
+        let canonicalURL = activeConnectionInfo?.proxyURL ?? url
+
+        // Snapshot both the full ConnectionInfo and home ID before the async check.
+        // configKey omits proxy URL so local/cloud transitions with the same URL/username
+        // would pass a key-string guard. etagCheckerConfigURL only updates when a new checker
+        // is created, so it misses changes that occur while a request is in flight.
+        // Snapshotting the home ID separately covers same-connection home switches where the
+        // network tracker hasn't published a new ConnectionInfo yet.
+        let snapshotConnectionInfo = activeConnectionInfo
+        let snapshotHomeID = Preferences.shared.currentHomePreferences.id
+
+        let result = await checker.checkIfChanged(url: canonicalURL)
+
+        // Discard stale results. Full ConnectionInfo equality (which includes proxyURL) covers
+        // proxy transitions that share the same configured URL/username. Home ID equality
+        // covers home switches before the network tracker publishes the new connection.
+        guard activeConnectionInfo == snapshotConnectionInfo,
+              Preferences.shared.currentHomePreferences.id == snapshotHomeID else {
+            Logger.viewController.info("ETag check result discarded: connection or home changed during check")
+            return
+        }
+
+        // webView.url reflects pushState SPA navigation; lastLoadedURL is only updated on
+        // full-page didFinish. Prefer the live URL so we don't miss mid-session navigation.
+        let displayedURL = webView.url?.absoluteString ?? lastLoadedURL
+
+        // Normalized target origin, shared across all switch cases.
+        let normalizedCanonical = normalizeURLForComparison(canonicalURL.absoluteString, includeBasePath: false)
+
+        /// Returns true when the origin, loaded config, and loaded home all match the target.
+        /// Uses loadedTarget/loadedHomeID (promoted in didFinish only) so a failed or
+        /// in-progress navigation never causes a stale page to be incorrectly preserved.
+        func isCurrentContent(_ urlString: String?) -> Bool {
+            guard let n = normalizedCanonical,
+                  let o = normalizeURLForComparison(urlString, includeBasePath: false) else { return false }
+            return o == n && loadedTarget == newTarget && loadedHomeID == Preferences.shared.currentHomePreferences.id
+        }
 
         switch result {
         case .unchanged:
-            // When ETag is unchanged, the base resource (HTML/JS) hasn't changed
-            // Compare base URLs (origin) only, since paths are handled by client-side routing
-            let normalizedTarget = normalizeURLForComparison(fullURL.absoluteString, includeBasePath: false)
-            let normalizedLoaded = normalizeURLForComparison(lastLoadedURL, includeBasePath: false)
+            // When ETag is unchanged, the base resource (HTML/JS) hasn't changed.
+            // Compare origins only — paths are handled by client-side routing.
+            Logger.viewController.debug("ETag unchanged: loaded=\(normalizeURLForComparison(displayedURL, includeBasePath: false) ?? "nil") target=\(normalizedCanonical ?? "nil")")
 
-            Logger.viewController.debug("ETag unchanged - comparing base URLs: loaded=\(normalizedLoaded ?? "nil") vs target=\(normalizedTarget ?? "nil")")
-
-            if let normalizedTarget, let normalizedLoaded, normalizedLoaded == normalizedTarget {
-                Logger.viewController.info("ETag unchanged and same base URL, skipping load")
+            if isCurrentContent(displayedURL) {
+                Logger.viewController.info("ETag unchanged, same config and home — skipping load")
                 currentTarget = newTarget
                 showActivityIndicator(show: false)
-                // Don't load - same server, same content version, already displayed
             } else {
-                Logger.viewController.info("ETag unchanged but different base URL, loading \(fullURL.absoluteString)")
+                Logger.viewController.info("ETag unchanged but config/home changed, loading \(fullURL.absoluteString)")
                 await performLoadWebView(newTarget: newTarget, path: path, force: false)
             }
 
         case .changed:
-            Logger.viewController.info("ETag changed, loading \(fullURL.absoluteString)")
-            await performLoadWebView(newTarget: newTarget, path: path, force: false)
+            // Reload at the user's current SPA position to preserve navigation state.
+            // Only when the webview is showing content for the active config and home;
+            // after any configuration change the displayed URL must not be reused.
+            if let currentURL = webView.url, isCurrentContent(currentURL.absoluteString) {
+                Logger.viewController.info("ETag changed, reloading at current position: \(currentURL.absoluteString)")
+                await performLoadWebView(newTarget: newTarget, urlOverride: currentURL, force: false)
+            } else {
+                Logger.viewController.info("ETag changed, loading \(fullURL.absoluteString)")
+                await performLoadWebView(newTarget: newTarget, path: path, force: false)
+            }
+
+        case .noETagSupport:
+            // Server returned no ETag — we can't determine whether content changed.
+            // Preserve content already in the webview for the active config/home rather than
+            // forcing a reload on every foreground activation.
+            if isCurrentContent(displayedURL) {
+                Logger.viewController.info("ETag not supported by server, active config displayed — preserving page")
+                currentTarget = newTarget
+                showActivityIndicator(show: false)
+            } else {
+                Logger.viewController.info("ETag not supported by server, loading \(fullURL.absoluteString)")
+                await performLoadWebView(newTarget: newTarget, path: path, force: false)
+            }
 
         case let .failed(error):
-            Logger.viewController.info("ETag check failed: \(error.localizedDescription), loading anyway")
-            await performLoadWebView(newTarget: newTarget, path: path, force: false)
+            // Treat transient failures as "assume unchanged" when the active config/home
+            // content is displayed. Reloading on every failure resets the user's SPA
+            // position and is disruptive when the server is temporarily unreachable.
+            if isCurrentContent(displayedURL) {
+                Logger.viewController.info("ETag check failed, active config displayed — preserving page: \(error.localizedDescription)")
+                currentTarget = newTarget
+                showActivityIndicator(show: false)
+            } else {
+                Logger.viewController.info("ETag check failed, loading \(fullURL.absoluteString): \(error.localizedDescription)")
+                await performLoadWebView(newTarget: newTarget, path: path, force: false)
+            }
         }
     }
 
@@ -679,6 +757,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {
         Logger.viewController.error("didFail - webView.url: \(String(describing: webView.url?.description))")
 
+        if let navigation { pendingNavigations.removeValue(forKey: navigation) }
         setHideNavigationBar(shouldHide: false)
         if let urlError = error as? URLError, urlError.code == .cancelled {
             return // Ignore cancelled requests
@@ -781,6 +860,13 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
         // Track the successfully loaded URL for ETag comparison
         lastLoadedURL = webView.url?.absoluteString
+        // Promote this navigation's identity to loaded state. Only updates when the navigation
+        // was initiated by performLoadWebView; SPA-triggered or external full-page navigations
+        // are not in pendingNavigations and leave loadedTarget/loadedHomeID unchanged.
+        if let identity = pendingNavigations.removeValue(forKey: navigation) {
+            loadedTarget = identity.target
+            loadedHomeID = identity.homeID
+        }
 
         showActivityIndicator(show: false)
         UIView.animate(withDuration: 0.2) {
@@ -827,6 +913,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+        pendingNavigations.removeValue(forKey: navigation)
         let nsError = error as NSError
         if nsError.domain == NSURLErrorDomain, nsError.code == NSURLErrorCancelled {
             return
