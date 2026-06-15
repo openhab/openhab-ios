@@ -60,6 +60,7 @@ struct ToolbarMenu: View {
     @Binding var isPresented: Bool
     @ObservedObject var menuData: MenuDataService
     @State var scrollViewContentSize: Double = 0
+    @State private var isTilesExpanded: Bool = true
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
@@ -159,15 +160,40 @@ struct ToolbarMenu: View {
                     if menuData.isLoading {
                         loadingRow(label: String(localized: "Tiles"))
                     } else if !menuData.uiTiles.isEmpty {
-                        sectionHeader(String(localized: "Tiles"))
-                        ForEach(menuData.uiTiles, id: \.url) { tile in
-                            menuRow(
-                                icon: AnyView(ImageView(url: tile.imageUrl).aspectRatio(contentMode: .fit)),
-                                label: tile.name
-                            ) {
-                                select(.tile(tile.url))
+                        // Collapsible Tiles header with disclosure chevron
+                        Button {
+                            isTilesExpanded.toggle()
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemSymbol: isTilesExpanded ? .chevronDown : .chevronRight)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 10)
+                                Text(String(localized: "Tiles"))
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.secondary)
+                                    .textCase(.uppercase)
+                                Spacer(minLength: 0)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.top, 10)
+                            .padding(.bottom, 2)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+
+                        if isTilesExpanded {
+                            ForEach(menuData.uiTiles, id: \.url) { tile in
+                                menuRow(
+                                    icon: AnyView(ImageView(url: tile.imageUrl).aspectRatio(contentMode: .fit)),
+                                    label: tile.name
+                                ) {
+                                    select(.tile(tile.url))
+                                }
                             }
                         }
+
                         Divider().padding(.horizontal, 12)
                     }
 
@@ -335,4 +361,3 @@ struct ToolbarMenu: View {
         onSelect(target)
     }
 }
-
