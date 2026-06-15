@@ -60,7 +60,10 @@ struct ToolbarMenu: View {
     @Binding var isPresented: Bool
     @ObservedObject var menuData: MenuDataService
     @State var scrollViewContentSize: Double = 0
-    @State private var isTilesExpanded: Bool = true
+    @AppStorage("ToolbarMenu.isTilesExpanded") private var isTilesExpanded: Bool = true
+    @AppStorage("ToolbarMenu.isMainUIExpanded") private var isMainUIExpanded: Bool = true
+    @AppStorage("ToolbarMenu.isSitemapsExpanded") private var isSitemapsExpanded: Bool = true
+    @AppStorage("ToolbarMenu.isSystemExpanded") private var isSystemExpanded: Bool = true
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
@@ -117,23 +120,46 @@ struct ToolbarMenu: View {
             let scrollView = ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     // Main UI: Home + sidebar pages
-                    sectionHeader(String(localized: "Main UI"))
-                    menuRow(
-                        icon: AnyView(Image("openHABIcon").resizable()),
-                        label: String(localized: "Home"),
-                        accessibilityId: "Home"
-                    ) {
-                        select(.webview)
+                    Button {
+                        isMainUIExpanded.toggle()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemSymbol: isMainUIExpanded ? .chevronDown : .chevronRight)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .frame(width: 10)
+                            Text(String(localized: "Main UI"))
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.secondary)
+                                .textCase(.uppercase)
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 10)
+                        .padding(.bottom, 2)
+                        .contentShape(Rectangle())
                     }
-                    if menuData.isLoading {
-                        loadingRow(label: String(localized: "Pages"))
-                    } else {
-                        ForEach(menuData.uiPages, id: \.uid) { page in
-                            menuRow(
-                                icon: AnyView(pageIcon(for: page)),
-                                label: page.label
-                            ) {
-                                select(.tile(page.url))
+                    .buttonStyle(.plain)
+
+                    if isMainUIExpanded {
+                        menuRow(
+                            icon: AnyView(Image("openHABIcon").resizable()),
+                            label: String(localized: "Home"),
+                            accessibilityId: "Home"
+                        ) {
+                            select(.webview)
+                        }
+                        if menuData.isLoading {
+                            loadingRow(label: String(localized: "Pages"))
+                        } else {
+                            ForEach(menuData.uiPages, id: \.uid) { page in
+                                menuRow(
+                                    icon: AnyView(pageIcon(for: page)),
+                                    label: page.label
+                                ) {
+                                    select(.tile(page.url))
+                                }
                             }
                         }
                     }
@@ -144,15 +170,39 @@ struct ToolbarMenu: View {
                     if menuData.isLoading {
                         loadingRow(label: String(localized: "Sitemaps"))
                     } else if !menuData.sitemaps.isEmpty {
-                        sectionHeader(String(localized: "Sitemaps"))
-                        ForEach(menuData.sitemaps, id: \.name) { sitemap in
-                            menuRow(
-                                icon: AnyView(sitemapIcon(for: sitemap)),
-                                label: sitemap.label
-                            ) {
-                                select(.sitemap(sitemap.name))
+                        Button {
+                            isSitemapsExpanded.toggle()
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemSymbol: isSitemapsExpanded ? .chevronDown : .chevronRight)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 10)
+                                Text(String(localized: "Sitemaps"))
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.secondary)
+                                    .textCase(.uppercase)
+                                Spacer(minLength: 0)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.top, 10)
+                            .padding(.bottom, 2)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+
+                        if isSitemapsExpanded {
+                            ForEach(menuData.sitemaps, id: \.name) { sitemap in
+                                menuRow(
+                                    icon: AnyView(sitemapIcon(for: sitemap)),
+                                    label: sitemap.label
+                                ) {
+                                    select(.sitemap(sitemap.name))
+                                }
                             }
                         }
+
                         Divider().padding(.horizontal, 12)
                     }
 
@@ -198,12 +248,35 @@ struct ToolbarMenu: View {
                     }
 
                     // System
-                    sectionHeader(String(localized: "System"))
-                    if Preferences.shared.getNotificationConnection() != nil,
-                       !Preferences.shared.currentHomePreferences.demomode {
-                        systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
+                    Button {
+                        isSystemExpanded.toggle()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemSymbol: isSystemExpanded ? .chevronDown : .chevronRight)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .frame(width: 10)
+                            Text(String(localized: "System"))
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.secondary)
+                                .textCase(.uppercase)
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 10)
+                        .padding(.bottom, 2)
+                        .contentShape(Rectangle())
                     }
-                    systemRow(symbol: .house, label: String(localized: "Manage Homes")) { select(.homeSelection) }
+                    .buttonStyle(.plain)
+
+                    if isSystemExpanded {
+                        if Preferences.shared.getNotificationConnection() != nil,
+                           !Preferences.shared.currentHomePreferences.demomode {
+                            systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
+                        }
+                        systemRow(symbol: .house, label: String(localized: "Manage Homes")) { select(.homeSelection) }
+                    }
                 }
             }
                 .frame(maxHeight: scrollViewContentSize > 0 ? min(scrollViewContentSize, height) : height)
@@ -361,3 +434,4 @@ struct ToolbarMenu: View {
         onSelect(target)
     }
 }
+
