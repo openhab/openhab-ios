@@ -333,7 +333,6 @@
 		DFB2622A18830A3600D3244D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		DFB2622C18830A3600D3244D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		DFB2622E18830A3600D3244D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		DFB2624C18830A3600D3244D /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		DFE10413197415F900D94943 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		E1AA00042F5D000100000001 /* ScreenSaverLayoutCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverLayoutCalculatorTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -814,7 +813,6 @@
 				2FD4E1E62F66EF4800EBB340 /* NotificationService */,
 				DA8B15522F3BB74B007753FD /* openHABWatchTests */,
 				3A5DAEE62F1FD8D300CFA482 /* OpenHABWatchComplications */,
-				2F2150892F75C2FC001BA057 /* Watch */,
 				DFB2622818830A3600D3244D /* Products */,
 				DFB2622918830A3600D3244D /* Frameworks */,
 				2FD4E1E22F66EF0200EBB340 /* fastlane */,
@@ -850,7 +848,6 @@
 				DFB2622A18830A3600D3244D /* Foundation.framework */,
 				DFE10413197415F900D94943 /* Security.framework */,
 				DFB2622E18830A3600D3244D /* UIKit.framework */,
-				DFB2624C18830A3600D3244D /* XCTest.framework */,
 				3A0115E82F1E6A4400234D4B /* WidgetKit.framework */,
 				3A0115EA2F1E6A4400234D4B /* SwiftUI.framework */,
 				964901D665A05573A8E2E7B2 /* iOS */,

@@ -192,7 +192,7 @@ struct NumberStateTests {
         #expect("24.4 °F".parseAsNumber() == NumberState(value: 24.4, unit: "°F", format: nil))
         #expect("24.4 °F".parseAsNumber(format: "%.f") == NumberState(value: 24.4, unit: "°F", format: "%.f"))
 
-        let col1 = "Uninitialized".parseAsUIColor()
+        let col1 = try #require("Uninitialized".parseAsUIColor())
         let col2 = UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
         let unwrappedCol1 = try #require(col1)
         #expect(unwrappedCol1.equals(col2))

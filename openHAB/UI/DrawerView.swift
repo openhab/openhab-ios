@@ -192,8 +192,11 @@ struct DrawerView: View {
 
             Spacer()
             ConnectionView()
+                .contentShape(Rectangle())
                 .padding(.leading, 16)
                 .padding(.bottom, 5)
+                .onTapGesture { onDismiss(.settings) }
+                .onLongPressGesture { onDismiss(.homeSelection) }
         }
         .listStyle(.inset)
         .task(id: networkTracker.activeConnection) {
