@@ -165,7 +165,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1224F78D228A89FC00750965 /* WatchMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchMessageService.swift; sourceTree = "<group>"; };
 		3A0115E82F1E6A4400234D4B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		3A0115EA2F1E6A4400234D4B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		3A5DAEE32F1FD8D300CFA482 /* OpenHABWatchComplicationsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OpenHABWatchComplicationsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -406,14 +405,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2F2150892F75C2FC001BA057 /* Watch */ = {
-			isa = PBXGroup;
-			children = (
-				1224F78D228A89FC00750965 /* WatchMessageService.swift */,
-			);
-			name = Watch;
-			sourceTree = "<group>";
-		};
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
@@ -433,7 +424,6 @@
 				2FD4E1E62F66EF4800EBB340 /* NotificationService */,
 				DA8B15522F3BB74B007753FD /* openHABWatchTests */,
 				3A5DAEE62F1FD8D300CFA482 /* OpenHABWatchComplications */,
-				2F2150892F75C2FC001BA057 /* Watch */,
 				DFB2622818830A3600D3244D /* Products */,
 				DFB2622918830A3600D3244D /* Frameworks */,
 				2FD4E1E22F66EF0200EBB340 /* fastlane */,
