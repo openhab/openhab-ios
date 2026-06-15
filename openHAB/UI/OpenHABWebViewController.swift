@@ -302,8 +302,10 @@ class OpenHABWebViewController: OpenHABViewController {
             return
         }
 
+        let etagCheckURL = activeConnectionInfo?.proxyURL ?? url
+
         // Check if content changed
-        let result = await checker.checkIfChanged(url: fullURL)
+        let result = await checker.checkIfChanged(url: etagCheckURL)
 
         switch result {
         case .unchanged:
