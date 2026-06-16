@@ -197,6 +197,7 @@ struct SingleConnectionSettingsView: View {
                 }
             }
             .contentShape(Rectangle())
+            .onTapGesture { passwordFocused = true }
 
             Toggle("Always send credentials", isOn: $connectionConfig.alwaysSendBasicAuth)
                 .font(.caption)
