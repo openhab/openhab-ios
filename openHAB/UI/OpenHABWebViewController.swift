@@ -352,16 +352,17 @@ class OpenHABWebViewController: OpenHABViewController {
         /// Uses loadedTarget/loadedHomeID (promoted in didFinish only) so a failed or
         /// in-progress navigation never causes a stale page to be incorrectly preserved.
         func isCurrentContent(_ urlString: String?) -> Bool {
-            guard let n = normalizedCanonical,
-                  let o = normalizeURLForComparison(urlString, includeBasePath: false) else { return false }
-            return o == n && loadedTarget == newTarget && loadedHomeID == Preferences.shared.currentHomePreferences.id
+            guard let normalizedCanonical,
+                  let normalizedURL = normalizeURLForComparison(urlString, includeBasePath: false) else { return false }
+            return normalizedURL == normalizedCanonical && loadedTarget == newTarget && loadedHomeID == Preferences.shared.currentHomePreferences.id
         }
 
         switch result {
         case .unchanged:
             // When ETag is unchanged, the base resource (HTML/JS) hasn't changed.
             // Compare origins only — paths are handled by client-side routing.
-            Logger.viewController.debug("ETag unchanged: loaded=\(normalizeURLForComparison(displayedURL, includeBasePath: false) ?? "nil") target=\(normalizedCanonical ?? "nil")")
+            // swiftformat:disable:next redundantSelf
+            Logger.viewController.debug("ETag unchanged: loaded=\(self.normalizeURLForComparison(displayedURL, includeBasePath: false) ?? "nil") target=\(normalizedCanonical ?? "nil")")
 
             if isCurrentContent(displayedURL) {
                 Logger.viewController.info("ETag unchanged, same config and home — skipping load")
