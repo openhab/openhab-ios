@@ -32,6 +32,11 @@ struct SpinningSymbol: View {
 }
 
 struct SingleConnectionSettingsView: View {
+    enum Field: Hashable {
+        case url
+        case username
+    }
+
     var headerText: String
     var isLocalConnection = false
 
@@ -48,6 +53,9 @@ struct SingleConnectionSettingsView: View {
 
     @State private var isPresentingDiscoverySheet = false
 
+    @FocusState private var focusedField: Field?
+    @FocusState private var passwordFocused: Bool
+
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -61,6 +69,7 @@ struct SingleConnectionSettingsView: View {
                         .autocorrectionDisabled(true)
                         .multilineTextAlignment(.trailing)
                         .font(.system(.caption))
+                        .focused($focusedField, equals: .url)
                         .onChange(of: connectionConfig.url) { _ in
                             connectionTestMessage = nil
                             connectionTestDetail = nil
@@ -99,6 +108,10 @@ struct SingleConnectionSettingsView: View {
                     if connectionConfig.url.isEmpty {
                         Text("Enter URL of remote server")
                     }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    focusedField = .url
                 }
                 .sheet(isPresented: $isPresentingDiscoverySheet) {
                     BonjourDiscoverySheet(isPresented: $isPresentingDiscoverySheet, connectionConfig: $connectionConfig)
@@ -141,36 +154,49 @@ struct SingleConnectionSettingsView: View {
                 }
             }
 
-            LabeledContent {
-                TextField(
-                    "Foo",
-                    text: $connectionConfig.username
-                )
-                .textContentType(.username) // Associates with AutoFill
-                .fixedSize()
-                .textInputAutocapitalization(.never)
-                .disableAutocorrection(true)
-                .font(.system(.caption))
-            } label: {
-                Text("Username")
+            VStack(alignment: .leading) {
+                LabeledContent {
+                    TextField(
+                        "Foo",
+                        text: $connectionConfig.username
+                    )
+                    .textContentType(.username) // Associates with AutoFill
+                    .multilineTextAlignment(.trailing)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
+                    .focused($focusedField, equals: .username)
+                } label: {
+                    Text("Username")
+                }
                 if connectionConfig.username.isEmpty {
                     Text("Enter username for server, if required")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                focusedField = .username
             }
 
-            LabeledContent {
-                AnimatedSecureTextField(text: $connectionConfig.password, titleKey: String(localized: "Password"))
-                    .fixedSize()
-                    .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true) //   or  .autocorrectionDisabled(true) ??
-                    .font(.system(.caption))
-                    .textContentType(.password) // Associates with AutoFill
-            } label: {
-                Text("Password")
+            VStack(alignment: .leading) {
+                LabeledContent {
+                    AnimatedSecureTextField(text: $connectionConfig.password, titleKey: "Password", isFocused: $passwordFocused)
+                        .textInputAutocapitalization(.never)
+                        .disableAutocorrection(true)
+                        .textContentType(.password) // Associates with AutoFill
+                } label: {
+                    Text("Password")
+                        .onTapGesture { passwordFocused = true }
+                }
                 if connectionConfig.password.isEmpty {
                     Text("Enter password for server")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .onTapGesture { passwordFocused = true }
                 }
             }
+            .contentShape(Rectangle())
 
             Toggle("Always send credentials", isOn: $connectionConfig.alwaysSendBasicAuth)
                 .font(.caption)
