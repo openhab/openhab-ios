@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [Version 3.2.75, Build 284] - 2026-06-16Z
+
+- Fix WebUI Reload Issue (#1259)
+- l10n: complete German translations for 13 untranslated keys (#1258)
+- fix: make settings credential fields focusable and fix localization (#1257)
+
 ## [Version 3.2.74, Build 283] - 2026-06-16Z
 
 - fix: render Image/Chart/Video widgets as media even when linkedPage is present (#1256)
