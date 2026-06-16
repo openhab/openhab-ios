@@ -5839,44 +5839,44 @@
         },
         "es" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Introduce la contraseña del servidor"
           }
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Anna palvelimen salasana"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Entrez le mot de passe du serveur"
           }
         },
         "it" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Inserisci la password del server"
           }
         },
         "nb" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Skriv inn passord for server"
           }
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Voer wachtwoord voor server in"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Введите пароль для сервера"
           }
         }
       }
@@ -6016,44 +6016,44 @@
         },
         "es" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Introduce el nombre de usuario del servidor, si es necesario"
           }
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Anna palvelimen käyttäjänimi tarvittaessa"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Entrez le nom d'utilisateur du serveur, si requis"
           }
         },
         "it" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Inserisci il nome utente del server, se richiesto"
           }
         },
         "nb" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Skriv inn brukernavn for server, om nødvendig"
           }
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Voer gebruikersnaam voor server in, indien vereist"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Введите имя пользователя для сервера, если требуется"
           }
         }
       }
@@ -10721,8 +10721,8 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Salasana"
           }
         },
         "fr" : {
@@ -10733,14 +10733,14 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Password"
           }
         },
         "nb" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Passord"
           }
         },
         "nl" : {
@@ -10751,8 +10751,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+            "state" : "translated",
+            "value" : "Пароль"
           }
         }
       }
