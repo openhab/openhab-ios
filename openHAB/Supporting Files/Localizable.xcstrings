@@ -141,6 +141,12 @@
             "state": "translated",
             "value": "%@"
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
         }
       }
     },
@@ -191,8 +197,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "/overview/"
           }
         },
         "ru": {
@@ -212,6 +218,12 @@
           }
         },
         "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        },
+        "nl": {
           "stringUnit": {
             "state": "translated",
             "value": "%@"
@@ -267,8 +279,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%@ Instellingen"
           }
         },
         "ru": {
@@ -326,8 +338,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%@ waarde"
           }
         },
         "ru": {
@@ -385,8 +397,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lld"
           }
         },
         "ru": {
@@ -444,8 +456,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lldK"
           }
         },
         "ru": {
@@ -503,8 +515,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "24-uurs klok"
           }
         },
         "ru": {
@@ -620,8 +632,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Geaccepteerde servercertificaten"
           }
         },
         "ru": {
@@ -855,8 +867,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Toegevoegd: %@"
           }
         },
         "ru": {
@@ -973,8 +985,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "WebRTC altijd toestaan"
           }
         },
         "ru": {
@@ -1032,8 +1044,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Inloggegevens altijd verzenden"
           }
         },
         "ru": {
@@ -1209,8 +1221,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Animatie"
           }
         },
         "ru": {
@@ -1268,8 +1280,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "App-versie"
           }
         },
         "ru": {
@@ -1854,8 +1866,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Annulering opgetreden"
           }
         },
         "ru": {
@@ -1912,8 +1924,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kaarslicht"
           }
         },
         "ru": {
@@ -1971,8 +1983,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kan geen verbinding maken met de server. Is deze online?"
           }
         },
         "ru": {
@@ -2030,8 +2042,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kan de server niet vinden. Is de URL correct?"
           }
         },
         "ru": {
@@ -2322,8 +2334,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Afbeeldingscache controleren & wissen"
           }
         },
         "ru": {
@@ -2348,6 +2360,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choisir une couleur"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleur kiezen"
           }
         }
       }
@@ -2458,8 +2476,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Webcache wissen"
           }
         },
         "ru": {
@@ -2635,8 +2653,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Clientcertificaten"
           }
         },
         "ru": {
@@ -2892,6 +2910,12 @@
             "state": "translated",
             "value": "Élément couleur"
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleur-item"
+          }
         }
       }
     },
@@ -2909,6 +2933,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Roue des couleurs"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleurwiel"
           }
         }
       }
@@ -2960,8 +2990,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Opdracht mislukt: %@"
           }
         },
         "ru": {
@@ -3019,8 +3049,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Opdrachtfouten: %lld"
           }
         },
         "ru": {
@@ -3078,8 +3108,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Opdracht-item %@"
           }
         },
         "ru": {
@@ -3431,8 +3461,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Verbinding geslaagd"
           }
         },
         "ru": {
@@ -3457,6 +3487,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Élément de contact"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contact-item"
           }
         }
       }
@@ -3508,8 +3544,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Contactstatus"
           }
         },
         "ru": {
@@ -3567,8 +3603,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Koel daglicht"
           }
         },
         "ru": {
@@ -3626,8 +3662,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Koel wit"
           }
         },
         "ru": {
@@ -3803,8 +3839,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Crashrapportage"
           }
         },
         "ru": {
@@ -4095,8 +4131,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Datum en tijd"
           }
         },
         "ru": {
@@ -4121,6 +4157,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Élément DateHeure"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DateTime-item"
           }
         }
       }
@@ -4172,8 +4214,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Daglicht"
           }
         },
         "ru": {
@@ -4349,8 +4391,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%@ verlagen"
           }
         },
         "ru": {
@@ -4408,8 +4450,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Standaardpad"
           }
         },
         "ru": {
@@ -4526,8 +4568,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Huis '%@' verwijderen?"
           }
         },
         "ru": {
@@ -4585,8 +4627,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Demomodus"
           }
         },
         "ru": {
@@ -4730,6 +4772,12 @@
             "state": "translated",
             "value": "Élément gradateur/volet"
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dimmer/Roller-item"
+          }
         }
       }
     },
@@ -4780,8 +4828,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Time-out bij inactiviteit uitschakelen"
           }
         },
         "ru": {
@@ -4987,6 +5035,12 @@
             "state": "translated",
             "value": "Recherche des serveurs openHAB…"
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "openHAB-servers worden ontdekt…"
+          }
         }
       }
     },
@@ -5063,6 +5117,12 @@
             "state": "translated",
             "value": "Terminé"
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gereed"
+          }
         }
       }
     },
@@ -5080,6 +5140,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Faire glisser pour modifier la teinte et la saturation"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep om tint en verzadiging te wijzigen"
           }
         }
       }
@@ -5249,8 +5315,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Dimmen inschakelen"
           }
         },
         "ru": {
@@ -5308,8 +5374,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Schermbeveiliging inschakelen"
           }
         },
         "ru": {
@@ -5367,8 +5433,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Voer een naam in voor het nieuwe huis"
           }
         },
         "ru": {
@@ -5426,8 +5492,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Voer een nieuwe naam in voor het huis '%@'"
           }
         },
         "ru": {
@@ -5485,8 +5551,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nieuwe waarde invoeren"
           }
         },
         "ru": {
@@ -5603,8 +5669,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tekst invoeren"
           }
         },
         "ru": {
@@ -5662,8 +5728,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "URL van externe server invoeren"
           }
         },
         "ru": {
@@ -5839,8 +5905,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Vervaagtijd: %@ s"
           }
         },
         "ru": {
@@ -5898,8 +5964,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Vooruitspoelen"
           }
         },
         "ru": {
@@ -6075,8 +6141,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Foo"
           }
         },
         "ru": {
@@ -6158,6 +6224,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Obtenir l'état de ${itemEntity}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status van ${itemEntity} ophalen"
           }
         }
       }
@@ -6327,8 +6399,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Statusbalk verbergen"
           }
         },
         "ru": {
@@ -6445,8 +6517,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pictogramtype"
           }
         },
         "ru": {
@@ -6563,8 +6635,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Inactiviteitsinterval: %lld s"
           }
         },
         "ru": {
@@ -6622,8 +6694,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "SSL-certificaten negeren"
           }
         },
         "ru": {
@@ -6740,8 +6812,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Afbeeldingscache"
           }
         },
         "ru": {
@@ -6858,8 +6930,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%@ verhogen"
           }
         },
         "ru": {
@@ -7212,8 +7284,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Item '%@' staat niet in huis '%@'"
           }
         },
         "ru": {
@@ -7238,6 +7310,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Élément '%@' introuvable"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Item '%@' niet gevonden"
           }
         }
       }
@@ -7407,8 +7485,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Breedtegraad"
           }
         },
         "ru": {
@@ -7466,8 +7544,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Breedtegraad moet tussen -90 en 90 liggen"
           }
         },
         "ru": {
@@ -7643,8 +7721,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Items worden geladen…"
           }
         },
         "ru": {
@@ -7702,8 +7780,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sitemap wordt geladen…"
           }
         },
         "ru": {
@@ -7788,6 +7866,12 @@
             "state": "translated",
             "value": "L'accès au réseau local peut être requis."
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toegang tot lokaal netwerk kan vereist zijn."
+          }
         }
       }
     },
@@ -7805,6 +7889,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Accès au réseau local requis"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toegang tot lokaal netwerk vereist"
           }
         }
       }
@@ -7856,8 +7946,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lokale server"
           }
         },
         "ru": {
@@ -8000,6 +8090,12 @@
             "state": "translated",
             "value": "Élément de localisation"
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locatie-item"
+          }
         }
       }
     },
@@ -8109,8 +8205,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lengtegraad"
           }
         },
         "ru": {
@@ -8168,8 +8264,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lengtegraad moet tussen -180 en 180 liggen"
           }
         },
         "ru": {
@@ -8227,8 +8323,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Verlaagt met %@"
           }
         },
         "ru": {
@@ -8403,8 +8499,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Huizen beheren"
           }
         },
         "ru": {
@@ -8520,8 +8616,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Bewegingsinterval: %lld s"
           }
         },
         "ru": {
@@ -8638,8 +8734,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Naam voor nieuw huis"
           }
         },
         "ru": {
@@ -8755,8 +8851,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nieuwe naam"
           }
         },
         "ru": {
@@ -8814,8 +8910,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Volgende"
           }
         },
         "ru": {
@@ -8873,8 +8969,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Geen geaccepteerde servercertificaten"
           }
         },
         "ru": {
@@ -8931,8 +9027,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Geen afbeeldings-URL"
           }
         },
         "ru": {
@@ -8990,8 +9086,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Geen sitemaps beschikbaar"
           }
         },
         "ru": {
@@ -9049,8 +9145,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Geen video-URL"
           }
         },
         "ru": {
@@ -9108,8 +9204,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Geen widgets beschikbaar."
           }
         },
         "ru": {
@@ -9226,8 +9322,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Geen verbinding, opnieuw verbinden"
           }
         },
         "ru": {
@@ -9486,6 +9582,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Élément numérique"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numeriek item"
           }
         }
       }
@@ -10068,8 +10170,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Eenmalig"
           }
         },
         "ru": {
@@ -10208,6 +10310,12 @@
             "state": "translated",
             "value": "Ouvrir les réglages"
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instellingen openen"
+          }
         }
       }
     },
@@ -10258,8 +10366,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "openHAB Cloud-dienst"
           }
         },
         "ru": {
@@ -10493,8 +10601,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pauzeren"
           }
         },
         "ru": {
@@ -10552,8 +10660,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Afspelen"
           }
         },
         "ru": {
@@ -10611,8 +10719,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Speleractie"
           }
         },
         "ru": {
@@ -10637,6 +10745,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Élément lecteur"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speler-item"
           }
         }
       }
@@ -10806,8 +10920,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Voorbeeldstatus"
           }
         },
         "ru": {
@@ -10865,8 +10979,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Vorige"
           }
         },
         "ru": {
@@ -10982,8 +11096,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Opdrachten in wachtrij: %lld"
           }
         },
         "ru": {
@@ -11041,8 +11155,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Verhoogt met %@"
           }
         },
         "ru": {
@@ -11159,8 +11273,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Realtime schuifregelaars"
           }
         },
         "ru": {
@@ -11218,8 +11332,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Externe server"
           }
         },
         "ru": {
@@ -11454,8 +11568,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Vorige helderheid herstellen bij activering"
           }
         },
         "ru": {
@@ -11631,8 +11745,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Terugspoelen"
           }
         },
         "ru": {
@@ -11867,8 +11981,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Schermbeveiligingsinstellingen"
           }
         },
         "ru": {
@@ -11985,8 +12099,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Zoeken naar een item"
           }
         },
         "ru": {
@@ -12156,8 +12270,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kleur selecteren"
           }
         },
         "ru": {
@@ -12240,6 +12354,12 @@
             "state": "translated",
             "value": "Envoyer ${action} à ${itemEntity}"
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${action} verzenden naar ${itemEntity}"
+          }
         }
       }
     },
@@ -12290,8 +12410,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Een spelersopdracht verzenden zoals afspelen, pauzeren, volgende of vorige"
           }
         },
         "ru": {
@@ -12348,8 +12468,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Opdrachten verzenden: %lld"
           }
         },
         "ru": {
@@ -12467,8 +12587,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Locatie %lf, %lf verzonden naar %@"
           }
         },
         "ru": {
@@ -12585,8 +12705,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Datum %@ verzonden naar %@"
           }
         },
         "ru": {
@@ -12787,6 +12907,12 @@
             "state": "translated",
             "value": "Définir ${itemEntity} à ${latitude}, ${longitude}"
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${itemEntity} instellen op ${latitude}, ${longitude}"
+          }
         }
       }
     },
@@ -12803,6 +12929,12 @@
             "state": "translated",
             "value": "Définir ${itemEntity} sur ${value}"
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${itemEntity} instellen op ${value}"
+          }
         }
       }
     },
@@ -12818,6 +12950,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Définir ${itemEntity} sur ${value} (TSL)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${itemEntity} instellen op ${value} (HSB)"
           }
         }
       }
@@ -13093,8 +13231,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "DateTime-regelaarswaarde instellen"
           }
         },
         "ru": {
@@ -13211,8 +13349,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Locatieregelaarswaarde instellen"
           }
         },
         "ru": {
@@ -13329,8 +13467,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Spelerregelaarswaarde instellen"
           }
         },
         "ru": {
@@ -13565,8 +13703,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "De datum en tijd instellen van een DateTime-regelaarselement"
           }
         },
         "ru": {
@@ -13742,8 +13880,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "De breedte- en lengtegraad instellen van een locatieregelaarselement"
           }
         },
         "ru": {
@@ -13766,6 +13904,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Définir l'état de ${itemEntity} sur ${state}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De status van ${itemEntity} instellen op ${state}"
           }
         }
       }
@@ -13876,8 +14020,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "De status van een schakelaar op aan of uit zetten, of de status omschakelen"
           }
         },
         "ru": {
@@ -13994,8 +14138,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Waarde instellen"
           }
         },
         "ru": {
@@ -14170,8 +14314,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Datum weergeven"
           }
         },
         "ru": {
@@ -14229,8 +14373,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Zoekveld weergeven"
           }
         },
         "ru": {
@@ -14288,8 +14432,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Seconden weergeven"
           }
         },
         "ru": {
@@ -14347,8 +14491,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tijd weergeven"
           }
         },
         "ru": {
@@ -14523,8 +14667,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sitemap"
           }
         },
         "ru": {
@@ -14549,6 +14693,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Journalisation des diagnostics du plan du site"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sitemap-diagnoselogboek"
           }
         }
       }
@@ -14600,8 +14750,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sitemap voor Apple Watch"
           }
         },
         "ru": {
@@ -14717,8 +14867,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sitemaps"
           }
         },
         "ru": {
@@ -14776,8 +14926,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Grootte: %llu MB"
           }
         },
         "ru": {
@@ -14835,8 +14985,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Zacht wit"
           }
         },
         "ru": {
@@ -14894,8 +15044,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sitemaps sorteren op"
           }
         },
         "ru": {
@@ -15012,8 +15162,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "SSL-fout. De verbinding kon niet veilig worden opgezet."
           }
         },
         "ru": {
@@ -15331,6 +15481,12 @@
             "state": "translated",
             "value": "Élément texte"
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekst-item"
+          }
         }
       }
     },
@@ -15440,8 +15596,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Schakelaaractie"
           }
         },
         "ru": {
@@ -15466,6 +15622,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Élément interrupteur"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schakelaar-item"
           }
         }
       }
@@ -15689,8 +15851,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Verbinding testen"
           }
         },
         "ru": {
@@ -15748,8 +15910,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Schermbeveiliging testen"
           }
         },
         "ru": {
@@ -15807,8 +15969,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "De verbinding is verlopen. Probeer het later opnieuw."
           }
         },
         "ru": {
@@ -15952,6 +16114,12 @@
             "state": "translated",
             "value": "L'URL est invalide. Veuillez vérifier le format (p. ex., http://192.168.2.1:8080 ou http://[::1]:8080 pour IPv6)."
           }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De URL is ongeldig. Controleer het formaat (bijv. http://192.168.2.1:8080 of http://[::1]:8080 voor IPv6)."
+          }
         }
       }
     },
@@ -16002,8 +16170,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tegels"
           }
         },
         "ru": {
@@ -16061,8 +16229,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Timing"
           }
         },
         "ru": {
@@ -16087,6 +16255,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pour vous connecter à votre serveur openHAB local, veuillez autoriser l'accès au réseau local lorsque vous y êtes invité. Si vous l'avez précédemment refusé, activez-le dans Réglages → Confidentialité et sécurité → Réseau local."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Om verbinding te maken met uw lokale openHAB-server, sta toegang tot het lokale netwerk toe wanneer hierom wordt gevraagd. Als u dit eerder heeft geweigerd, schakel het in via Instellingen → Privacy en beveiliging → Lokaal netwerk."
           }
         }
       }
@@ -16198,8 +16372,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Omschakelen"
           }
         },
         "ru": {
@@ -16375,8 +16549,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Onverwachte fout: %@"
           }
         },
         "ru": {
@@ -16958,8 +17132,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Zeer koel"
           }
         },
         "ru": {
@@ -17017,8 +17191,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Zeer warm"
           }
         },
         "ru": {
@@ -17076,8 +17250,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Warm wit"
           }
         },
         "ru": {
@@ -17193,8 +17367,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Waarschuwing: Het hernoemen van het huis kan ertoe leiden dat externe integraties zoals snelkoppelingen mislukken totdat ze opnieuw zijn geconfigureerd."
           }
         },
         "ru": {
@@ -17252,8 +17426,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "U lijkt offline te zijn. Controleer uw internetverbinding."
           }
         },
         "ru": {
@@ -17310,8 +17484,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Klokgrootte: %@"
           }
         },
         "ru": {
@@ -17369,8 +17543,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Dimniveau: %@"
           }
         },
         "ru": {
@@ -17428,8 +17602,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Relatieve datum: %@"
           }
         },
         "ru": {
@@ -17487,8 +17661,8 @@
         },
         "nl": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Helderheid herstellen: %@"
           }
         },
         "ru": {
