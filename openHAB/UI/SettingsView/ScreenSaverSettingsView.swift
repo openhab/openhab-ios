@@ -154,14 +154,14 @@ struct ScreenSaverSettingsView: View {
     private var fontSection: some View {
         Section("Font Size") {
             VStack(alignment: .leading) {
-                Text("Clock Size: \(Int(config.timeFontSizeRatio * 100)) %")
+                Text("Clock Size: \(Double(config.timeFontSizeRatio).formatted(.percent.precision(.fractionLength(0))))")
                     .font(.caption)
                     .monospacedDigit()
                 Slider(value: timeFontSizeBinding, in: 0.05 ... 0.4, step: 0.01)
             }
 
             VStack(alignment: .leading) {
-                Text("Relative Date: \(Int(config.dateFontRelativeSize * 100)) %")
+                Text("Relative Date: \(Double(config.dateFontRelativeSize).formatted(.percent.precision(.fractionLength(0))))")
                     .font(.caption)
                     .monospacedDigit()
                 Slider(value: dateFontSizeBinding, in: 0.1 ... 1.0, step: 0.05)
@@ -187,7 +187,7 @@ struct ScreenSaverSettingsView: View {
             Toggle("Enable Dimming", isOn: $config.enablesAutoDimming)
 
             VStack(alignment: .leading) {
-                Text("Dim Level: \(Int(config.dimLevel * 100)) %")
+                Text("Dim Level: \(Double(config.dimLevel).formatted(.percent.precision(.fractionLength(0))))")
                     .font(.caption)
                     .monospacedDigit()
                 Slider(value: dimLevelBinding, in: 0 ... 100, step: 1)
@@ -198,7 +198,7 @@ struct ScreenSaverSettingsView: View {
                 .disabled(!config.enablesAutoDimming)
 
             VStack(alignment: .leading) {
-                Text("Restore Brightness: \(Int(config.wakeBrightnessLevel * 100)) %")
+                Text("Restore Brightness: \(Double(config.wakeBrightnessLevel).formatted(.percent.precision(.fractionLength(0))))")
                     .font(.caption)
                     .monospacedDigit()
                 Slider(value: wakeBrightnessBinding, in: 0 ... 100, step: 1)

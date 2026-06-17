@@ -183,7 +183,7 @@ private struct BrightnessSliderView: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            Text("\(Int((selection.brightness * 100).rounded())) %")
+            Text(verbatim: selection.brightness.formatted(.percent.precision(.fractionLength(0))))
                 .ohTextToken(.secondary)
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
