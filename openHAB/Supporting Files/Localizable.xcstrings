@@ -4032,7 +4032,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "En activant le rapport de d'erreurs, vous acceptez que les informations relatives à l'appareil et à son utilisation soient collectées et partagées avec Crashlytics (une entreprise Google). Pour plus d'informations, consultez notre politique de confidentialité."
+            "value": "En activant le rapport de d’erreurs, tu acceptes que les informations relatives à l’appareil et à son utilisation soient collectées et partagées avec Crashlytics (une entreprise Google). Pour plus d’informations, consulte notre politique de confidentialité."
           }
         },
         "it": {
@@ -15412,7 +15412,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le certificat SSL présenté par %1$@ pour %2$@ n'est pas valide. Voulez-vous continuer ?"
+            "value": "Le certificat SSL présenté par %1$@ pour %2$@ n’est pas valide. Veux-tu continuer ?"
           }
         },
         "it": {
@@ -15470,7 +15470,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le certificat SSL présenté par %1$@ pour %2$@ ne correspond pas à l'enregistrement. Voulez-vous continuer ?"
+            "value": "Le certificat SSL présenté par %1$@ pour %2$@ ne correspond pas à l’enregistrement. Veux-tu continuer ?"
           }
         },
         "it": {
@@ -16268,7 +16268,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die URL ist ungültig. Bitte überprüfen Sie das Format (z.B. http://192.168.2.1:8080 oder http://[::1]:8080 für IPv6)."
+            "value": "Die URL ist ungültig. Bitte überprüfe das Format (z.B. http://192.168.2.1:8080 oder http://[::1]:8080 für IPv6)."
           }
         },
         "fr": {
@@ -16416,13 +16416,13 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Um eine Verbindung zu Ihrem lokalen openHAB-Server herzustellen, erlauben Sie bitte den Zugriff auf das lokale Netzwerk, wenn Sie dazu aufgefordert werden. Wenn Sie es zuvor abgelehnt haben, aktivieren Sie es unter Einstellungen → Datenschutz & Sicherheit → Lokales Netzwerk."
+            "value": "Um eine Verbindung zu deinem lokalen openHAB-Server herzustellen, erlauben bitte den Zugriff auf das lokale Netzwerk, wenn du dazu aufgefordert wirst. Wenn du es zuvor abgelehnt hast, aktiviere es unter Einstellungen → Datenschutz & Sicherheit → Lokales Netzwerk."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour vous connecter à votre serveur openHAB local, veuillez autoriser l'accès au réseau local lorsque vous y êtes invité. Si vous l'avez précédemment refusé, activez-le dans Réglages → Confidentialité et sécurité → Réseau local."
+            "value": "Pour te connecter à ton serveur openHAB local, autorise l’accès au réseau local lorsque tu y es invité. Si tu l’as précédemment refusé, active-le dans Réglages → Confidentialité et sécurité → Réseau local."
           }
         },
         "nl": {
@@ -17583,7 +17583,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vous semblez être hors ligne. Vérifiez votre connexion Internet."
+            "value": "Tu sembles être hors ligne. Vérifie ta connexion Internet."
           }
         },
         "it": {
