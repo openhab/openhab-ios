@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+## [Version 3.2.75, Build 284] - 2026-06-16Z
+
+- Fix WebUI Reload Issue (#1259)
+- l10n: complete German translations for 13 untranslated keys (#1258)
+- fix: make settings credential fields focusable and fix localization (#1257)
+
+## [Version 3.2.74, Build 283] - 2026-06-16Z
+
+- fix: render Image/Chart/Video widgets as media even when linkedPage is present (#1256)
+- Bump crowdin/github-action from 2.16.2 to 2.16.3 (#1252)
+- Bump maierj/fastlane-action from 3.1.0 to 3.2.0 (#1253)
+- chore: remove stale XCTest.framework PBXFileReference entry
+- chore: remove stale WatchMessageService PBXGroup entry
+- fix: resolve ambiguous #require macro on Bool? in NumberStateTests
+- feat: tap ConnectionView to open Settings, long press for Manage Homes
+- fix: resolve relative image widget URLs against server root URL (#1251)
+- chore: convert AppIntents group to file-system-synchronized group
+- chore: remove stale PBXGroup entries superseded by file-system-synchronized groups
+- fix: expose Location header on createSitemapEventSubscription 201 response (#1250)
+- docs: document all Shortcuts actions including Toggle, Player, DateTime, Location and Set Active Home
+- docs: update README logo image path
+
 ## [Version 3.2.73, Build 282] - 2026-06-13Z
 
 - fix: allow single-label hostnames, show cert dialog over Settings sheet, fix cert list layout (#1247)

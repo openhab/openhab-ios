@@ -12,7 +12,7 @@
 import CommonUI
 import OpenHABCore
 import os.log
-import SFSafeSymbols
+internal import SFSafeSymbols
 import SwiftUI
 
 struct SetpointRow: View {
