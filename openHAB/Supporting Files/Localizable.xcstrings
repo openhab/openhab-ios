@@ -83,8 +83,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": " - "
           }
         },
         "fr": {
@@ -101,8 +101,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": " - "
           }
         },
         "nl": {
@@ -113,8 +113,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": " - "
           }
         }
       }
@@ -153,6 +153,30 @@
             "state": "translated",
             "value": "%@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
         }
       }
     },
@@ -173,14 +197,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "/overview/"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "/overview/"
           }
         },
         "fr": {
@@ -197,8 +221,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "/overview/"
           }
         },
         "nl": {
@@ -209,8 +233,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "/overview/"
           }
         }
       }
@@ -240,6 +264,30 @@
             "state": "translated",
             "value": "%@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
         }
       },
       "comment": "A label that shows the percentage of brightness. The value is rounded to the nearest whole number."
@@ -261,14 +309,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ajustes de %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%@-asetukset"
           }
         },
         "fr": {
@@ -285,8 +333,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%@-innstillinger"
           }
         },
         "nl": {
@@ -297,8 +345,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Настройки %@"
           }
         }
       }
@@ -320,14 +368,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Valor de %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%@-arvo"
           }
         },
         "fr": {
@@ -344,8 +392,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%@-verdi"
           }
         },
         "nl": {
@@ -356,8 +404,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Значение %@"
           }
         }
       }
@@ -379,14 +427,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lld"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lld"
           }
         },
         "fr": {
@@ -403,8 +451,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lld"
           }
         },
         "nl": {
@@ -415,8 +463,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lld"
           }
         }
       }
@@ -438,14 +486,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lldK"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lldK"
           }
         },
         "fr": {
@@ -462,8 +510,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lldK"
           }
         },
         "nl": {
@@ -474,8 +522,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lldK"
           }
         }
       }
@@ -497,14 +545,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Reloj de 24 horas"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "24 tunnin kello"
           }
         },
         "fr": {
@@ -521,8 +569,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "24-timers klokke"
           }
         },
         "nl": {
@@ -533,8 +581,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "24-часовые часы"
           }
         }
       }
@@ -614,14 +662,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Certificados de servidor aceptados"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Hyväksytyt palvelinvarmenteet"
           }
         },
         "fr": {
@@ -638,8 +686,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Godkjente serversertifikater"
           }
         },
         "nl": {
@@ -650,8 +698,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Принятые сертификаты сервера"
           }
         }
       }
@@ -679,8 +727,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Toiminto"
           }
         },
         "fr": {
@@ -709,8 +757,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Действие"
           }
         }
       }
@@ -849,14 +897,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Añadido: %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lisätty: %@"
           }
         },
         "fr": {
@@ -873,8 +921,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lagt til: %@"
           }
         },
         "nl": {
@@ -885,8 +933,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Добавлено: %@"
           }
         }
       }
@@ -914,8 +962,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aina"
           }
         },
         "fr": {
@@ -932,8 +980,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Alltid"
           }
         },
         "nl": {
@@ -944,8 +992,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Всегда"
           }
         }
       }
@@ -967,14 +1015,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Permitir WebRTC siempre"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Salli WebRTC aina"
           }
         },
         "fr": {
@@ -991,8 +1039,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tillat alltid WebRTC"
           }
         },
         "nl": {
@@ -1003,8 +1051,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Всегда разрешать WebRTC"
           }
         }
       }
@@ -1026,14 +1074,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Enviar credenciales siempre"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lähetä tunnistetiedot aina"
           }
         },
         "fr": {
@@ -1050,8 +1098,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Send alltid legitimasjon"
           }
         },
         "nl": {
@@ -1062,8 +1110,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Всегда отправлять учётные данные"
           }
         }
       }
@@ -1203,14 +1251,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Animación"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Animaatio"
           }
         },
         "fr": {
@@ -1227,8 +1275,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Animasjon"
           }
         },
         "nl": {
@@ -1239,8 +1287,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Анимация"
           }
         }
       }
@@ -1262,14 +1310,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Versión de la aplicación"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sovelluksen versio"
           }
         },
         "fr": {
@@ -1286,8 +1334,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "App-versjon"
           }
         },
         "nl": {
@@ -1298,8 +1346,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Версия приложения"
           }
         }
       }
@@ -1386,8 +1434,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ulkoasu"
           }
         },
         "fr": {
@@ -1404,8 +1452,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Utseende"
           }
         },
         "nl": {
@@ -1416,8 +1464,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Внешний вид"
           }
         }
       }
@@ -1503,8 +1551,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Takaisin"
           }
         },
         "fr": {
@@ -1521,8 +1569,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tilbake"
           }
         },
         "nl": {
@@ -1533,8 +1581,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Назад"
           }
         }
       }
@@ -1620,8 +1668,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kirkkaus"
           }
         },
         "fr": {
@@ -1638,8 +1686,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lysstyrke"
           }
         },
         "nl": {
@@ -1650,8 +1698,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Яркость"
           }
         }
       }
@@ -1795,8 +1843,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Peruuta"
           }
         },
         "fr": {
@@ -1813,8 +1861,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Avbryt"
           }
         },
         "nl": {
@@ -1825,8 +1873,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Отмена"
           }
         }
       }
@@ -1848,14 +1896,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Se produjo una cancelación"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Peruutus tapahtui"
           }
         },
         "fr": {
@@ -1872,8 +1920,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Avbrudd inntraff"
           }
         },
         "nl": {
@@ -1884,8 +1932,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Произошла отмена"
           }
         }
       }
@@ -1906,14 +1954,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Luz de vela"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kynttilänvalo"
           }
         },
         "fr": {
@@ -1930,8 +1978,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Stearinlys"
           }
         },
         "nl": {
@@ -1942,8 +1990,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Свет свечи"
           }
         }
       }
@@ -1965,14 +2013,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "No se puede conectar al servidor. ¿Está en línea?"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Yhteyden muodostaminen palvelimeen epäonnistui. Onko se verkossa?"
           }
         },
         "fr": {
@@ -1989,8 +2037,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kan ikke koble til serveren. Er den online?"
           }
         },
         "nl": {
@@ -2001,8 +2049,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Не удаётся подключиться к серверу. Он в сети?"
           }
         }
       }
@@ -2024,14 +2072,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "No se puede encontrar el servidor. ¿Es correcta la URL?"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Palvelinta ei löydy. Onko URL oikein?"
           }
         },
         "fr": {
@@ -2048,8 +2096,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kan ikke finne serveren. Er URL-en riktig?"
           }
         },
         "nl": {
@@ -2060,8 +2108,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Не удаётся найти сервер. URL верный?"
           }
         }
       }
@@ -2316,14 +2364,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Comprobar y limpiar caché de imágenes"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tarkista ja tyhjennä kuvavälimuisti"
           }
         },
         "fr": {
@@ -2340,8 +2388,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sjekk og tøm bildebuffer"
           }
         },
         "nl": {
@@ -2352,8 +2400,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Проверить и очистить кэш изображений"
           }
         }
       }
@@ -2385,6 +2433,30 @@
             "state": "translated",
             "value": "Scegli colore"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir color"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valitse väri"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Velg farge"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать цвет"
+          }
         }
       }
     },
@@ -2411,8 +2483,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tyhjennä"
           }
         },
         "fr": {
@@ -2429,8 +2501,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tøm"
           }
         },
         "nl": {
@@ -2441,8 +2513,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Очистить"
           }
         }
       }
@@ -2464,14 +2536,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Limpiar caché web"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tyhjennä verkkovälimuisti"
           }
         },
         "fr": {
@@ -2488,8 +2560,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tøm nettbuffer"
           }
         },
         "nl": {
@@ -2500,8 +2572,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Очистить веб-кэш"
           }
         }
       }
@@ -2641,14 +2713,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Certificados de cliente"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Asiakasvarmenteet"
           }
         },
         "fr": {
@@ -2665,8 +2737,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Klientsertifikater"
           }
         },
         "nl": {
@@ -2677,8 +2749,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Клиентские сертификаты"
           }
         }
       }
@@ -2848,8 +2920,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Закрыто"
           }
         }
       }
@@ -2877,8 +2949,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Väri"
           }
         },
         "fr": {
@@ -2895,8 +2967,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Farge"
           }
         },
         "nl": {
@@ -2907,8 +2979,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Цвет"
           }
         }
       }
@@ -2940,6 +3012,30 @@
             "state": "translated",
             "value": "Elemento colore"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento de color"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Värielementti"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fargeelement"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Элемент цвета"
+          }
         }
       }
     },
@@ -2970,6 +3066,30 @@
             "state": "translated",
             "value": "Ruota dei colori"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rueda de colores"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Väriympyrä"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fargehjul"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цветовой круг"
+          }
         }
       }
     },
@@ -2990,14 +3110,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Comando fallido: %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Komento epäonnistui: %@"
           }
         },
         "fr": {
@@ -3014,8 +3134,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kommando mislyktes: %@"
           }
         },
         "nl": {
@@ -3026,8 +3146,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Команда не выполнена: %@"
           }
         }
       }
@@ -3049,14 +3169,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Errores de comando: %lld"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Komentoviat: %lld"
           }
         },
         "fr": {
@@ -3073,8 +3193,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kommandofeil: %lld"
           }
         },
         "nl": {
@@ -3085,8 +3205,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Сбоев команд: %lld"
           }
         }
       }
@@ -3108,14 +3228,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Elemento de comando %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Komentoelementti %@"
           }
         },
         "fr": {
@@ -3132,8 +3252,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kommandoelement %@"
           }
         },
         "nl": {
@@ -3144,8 +3264,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Элемент команды %@"
           }
         }
       }
@@ -3231,8 +3351,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Yhdistetään"
           }
         },
         "fr": {
@@ -3249,8 +3369,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kobler til"
           }
         },
         "nl": {
@@ -3261,8 +3381,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Подключение"
           }
         }
       }
@@ -3461,14 +3581,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Conexión exitosa"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Yhteys muodostettu"
           }
         },
         "fr": {
@@ -3485,8 +3605,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tilkobling vellykket"
           }
         },
         "nl": {
@@ -3497,8 +3617,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Соединение установлено"
           }
         }
       }
@@ -3530,6 +3650,30 @@
             "state": "translated",
             "value": "Elemento contatto"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento de contacto"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontaktielementti"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontaktelement"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Элемент контакта"
+          }
         }
       }
     },
@@ -3550,14 +3694,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Estado de contacto"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kontaktin tila"
           }
         },
         "fr": {
@@ -3574,8 +3718,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kontaktstatus"
           }
         },
         "nl": {
@@ -3586,8 +3730,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Состояние контакта"
           }
         }
       }
@@ -3609,14 +3753,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Luz diurna fría"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Viileä päivänvalo"
           }
         },
         "fr": {
@@ -3633,8 +3777,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kjølig dagslys"
           }
         },
         "nl": {
@@ -3645,8 +3789,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Холодный дневной свет"
           }
         }
       }
@@ -3668,14 +3812,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Blanco frío"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Viileä valkoinen"
           }
         },
         "fr": {
@@ -3692,8 +3836,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kjølig hvit"
           }
         },
         "nl": {
@@ -3704,8 +3848,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Холодный белый"
           }
         }
       }
@@ -3733,8 +3877,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kopioi"
           }
         },
         "fr": {
@@ -3751,8 +3895,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kopier"
           }
         },
         "nl": {
@@ -3763,8 +3907,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Копировать"
           }
         }
       }
@@ -3845,14 +3989,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Informe de fallos"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kaatumisraportointi"
           }
         },
         "fr": {
@@ -3869,8 +4013,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Krasjirapportering"
           }
         },
         "nl": {
@@ -3881,8 +4025,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Отчёты о сбоях"
           }
         }
       }
@@ -4084,8 +4228,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Luo"
           }
         },
         "fr": {
@@ -4102,8 +4246,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Opprett"
           }
         },
         "nl": {
@@ -4114,8 +4258,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Создать"
           }
         }
       }
@@ -4137,14 +4281,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Fecha y hora"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Päivämäärä ja aika"
           }
         },
         "fr": {
@@ -4161,8 +4305,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Dato og tid"
           }
         },
         "nl": {
@@ -4173,8 +4317,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Дата и время"
           }
         }
       }
@@ -4206,6 +4350,30 @@
             "state": "translated",
             "value": "Elemento DateTime"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento DateTime"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DateTime-elementti"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DateTime-element"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Элемент DateTime"
+          }
         }
       }
     },
@@ -4226,14 +4394,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Luz diurna"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Päivänvalo"
           }
         },
         "fr": {
@@ -4250,8 +4418,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Dagslys"
           }
         },
         "nl": {
@@ -4262,8 +4430,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Дневной свет"
           }
         }
       }
@@ -4403,14 +4571,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Disminuir %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pienennä %@"
           }
         },
         "fr": {
@@ -4427,8 +4595,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Reduser %@"
           }
         },
         "nl": {
@@ -4439,8 +4607,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Уменьшить %@"
           }
         }
       }
@@ -4462,14 +4630,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ruta predeterminada"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Oletuspolku"
           }
         },
         "fr": {
@@ -4486,8 +4654,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Standard sti"
           }
         },
         "nl": {
@@ -4498,8 +4666,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Путь по умолчанию"
           }
         }
       }
@@ -4527,8 +4695,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Poista"
           }
         },
         "fr": {
@@ -4545,8 +4713,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Slett"
           }
         },
         "nl": {
@@ -4557,8 +4725,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Удалить"
           }
         }
       }
@@ -4580,14 +4748,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "¿Eliminar hogar ‘%@’?"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Poistetaanko koti ‘%@’?"
           }
         },
         "fr": {
@@ -4604,8 +4772,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Slette hjem ‘%@’?"
           }
         },
         "nl": {
@@ -4616,8 +4784,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Удалить дом «%@»?"
           }
         }
       }
@@ -4639,14 +4807,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Modo demo"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Esittelytila"
           }
         },
         "fr": {
@@ -4663,8 +4831,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Demomodus"
           }
         },
         "nl": {
@@ -4675,8 +4843,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Демо-режим"
           }
         }
       }
@@ -4763,8 +4931,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Hylkää"
           }
         },
         "fr": {
@@ -4781,8 +4949,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Avslå"
           }
         },
         "nl": {
@@ -4793,8 +4961,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Отклонить"
           }
         }
       }
@@ -4826,6 +4994,30 @@
             "state": "translated",
             "value": "Elemento dimmer/tapparella"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento atenuador/persianas"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Himmennin-/rullaverhoelementti"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dimmer-/rullegardinelement"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Элемент диммера/рольставни"
+          }
         }
       }
     },
@@ -4846,14 +5038,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Desactivar tiempo de espera en reposo"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Poista käytöstä lepoajan aikakatkaisu"
           }
         },
         "fr": {
@@ -4870,8 +5062,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Deaktiver tidsavbrudd ved inaktivitet"
           }
         },
         "nl": {
@@ -4882,8 +5074,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Отключить тайм-аут простоя"
           }
         }
       }
@@ -5095,6 +5287,30 @@
             "state": "translated",
             "value": "Ricerca server openHAB in corso…"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descubriendo servidores openHAB…"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etsitään openHAB-palvelimia…"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finner openHAB-servere…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обнаружение серверов openHAB…"
+          }
         }
       }
     },
@@ -5183,6 +5399,30 @@
             "state": "translated",
             "value": "Fine"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hecho"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valmis"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ferdig"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово"
+          }
         }
       }
     },
@@ -5213,6 +5453,30 @@
             "state": "translated",
             "value": "Trascina per modificare tonalità e saturazione"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrastrar para cambiar el tono y la saturación"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vedä muuttaaksesi värisävyä ja kylläisyyttä"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dra for å endre fargetone og metning"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетащите для изменения оттенка и насыщенности"
+          }
         }
       }
     },
@@ -5239,8 +5503,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "tyhjä"
           }
         },
         "fr": {
@@ -5257,8 +5521,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "tom"
           }
         },
         "nl": {
@@ -5269,8 +5533,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "пусто"
           }
         }
       }
@@ -5351,14 +5615,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Activar atenuación"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ota himmennys käyttöön"
           }
         },
         "fr": {
@@ -5375,8 +5639,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aktiver dimming"
           }
         },
         "nl": {
@@ -5387,8 +5651,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Включить затемнение"
           }
         }
       }
@@ -5410,14 +5674,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Activar salvapantallas"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ota näytönsäästäjä käyttöön"
           }
         },
         "fr": {
@@ -5434,8 +5698,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aktiver skjermsparer"
           }
         },
         "nl": {
@@ -5446,8 +5710,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Включить заставку экрана"
           }
         }
       }
@@ -5469,14 +5733,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Introducir un nombre para el nuevo hogar"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Syötä nimi uudelle kodille"
           }
         },
         "fr": {
@@ -5493,8 +5757,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Angi et navn for det nye hjemmet"
           }
         },
         "nl": {
@@ -5505,8 +5769,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Введите имя для нового дома"
           }
         }
       }
@@ -5528,14 +5792,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Introducir un nuevo nombre para el hogar ‘%@’"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Syötä uusi nimi kodille ‘%@’"
           }
         },
         "fr": {
@@ -5552,8 +5816,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Angi et nytt navn for hjemmet ‘%@’"
           }
         },
         "nl": {
@@ -5564,8 +5828,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Введите новое имя для дома «%@»"
           }
         }
       }
@@ -5587,14 +5851,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Introducir nuevo valor"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Syötä uusi arvo"
           }
         },
         "fr": {
@@ -5611,8 +5875,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Angi ny verdi"
           }
         },
         "nl": {
@@ -5623,8 +5887,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Введите новое значение"
           }
         }
       }
@@ -5705,14 +5969,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Introducir texto"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Syötä teksti"
           }
         },
         "fr": {
@@ -5729,8 +5993,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Angi tekst"
           }
         },
         "nl": {
@@ -5741,8 +6005,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Введите текст"
           }
         }
       }
@@ -5764,14 +6028,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Introducir URL del servidor remoto"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Syötä etäpalvelimen URL"
           }
         },
         "fr": {
@@ -5788,8 +6052,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Angi URL til fjernserver"
           }
         },
         "nl": {
@@ -5800,8 +6064,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Введите URL удалённого сервера"
           }
         }
       }
@@ -5888,8 +6152,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Virhe"
           }
         },
         "fr": {
@@ -5906,8 +6170,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Feil"
           }
         },
         "nl": {
@@ -5918,8 +6182,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ошибка"
           }
         }
       }
@@ -5941,14 +6205,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Duración del fundido: %@ s"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Häivytyksen kesto: %@ s"
           }
         },
         "fr": {
@@ -5965,8 +6229,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Falming varighet: %@ s"
           }
         },
         "nl": {
@@ -5977,8 +6241,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Длительность затухания: %@ с"
           }
         }
       }
@@ -6000,14 +6264,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Avance rápido"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pikakelaus eteenpäin"
           }
         },
         "fr": {
@@ -6024,8 +6288,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Spol frem"
           }
         },
         "nl": {
@@ -6036,8 +6300,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Перемотка вперёд"
           }
         }
       }
@@ -6065,8 +6329,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Fontti"
           }
         },
         "fr": {
@@ -6083,8 +6347,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Skrift"
           }
         },
         "nl": {
@@ -6095,8 +6359,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Шрифт"
           }
         }
       }
@@ -6124,8 +6388,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Fonttikoko"
           }
         },
         "fr": {
@@ -6142,8 +6406,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Skriftstørrelse"
           }
         },
         "nl": {
@@ -6154,8 +6418,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Размер шрифта"
           }
         }
       }
@@ -6177,14 +6441,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Foo"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Foo"
           }
         },
         "fr": {
@@ -6201,8 +6465,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Foo"
           }
         },
         "nl": {
@@ -6213,8 +6477,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Foo"
           }
         }
       }
@@ -6303,6 +6567,30 @@
             "state": "translated",
             "value": "Ottieni lo stato di ${itemEntity}"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obtener estado de ${itemEntity}"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hae ${itemEntity}-tila"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hent status for ${itemEntity}"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Получить состояние ${itemEntity}"
+          }
         }
       }
     },
@@ -6329,8 +6617,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Hae elementin tila"
           }
         },
         "fr": {
@@ -6359,8 +6647,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Получить состояние элемента"
           }
         }
       }
@@ -6441,14 +6729,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ocultar barra de estado"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Piilota tilapalkki"
           }
         },
         "fr": {
@@ -6465,8 +6753,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Skjul statuslinje"
           }
         },
         "nl": {
@@ -6477,8 +6765,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Скрыть строку состояния"
           }
         }
       }
@@ -6506,8 +6794,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Koti"
           }
         },
         "fr": {
@@ -6524,8 +6812,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Hjem"
           }
         },
         "nl": {
@@ -6536,8 +6824,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Дом"
           }
         }
       }
@@ -6559,14 +6847,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tipo de icono"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kuvaketyyppi"
           }
         },
         "fr": {
@@ -6583,8 +6871,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ikonstil"
           }
         },
         "nl": {
@@ -6595,8 +6883,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Тип значка"
           }
         }
       }
@@ -6677,14 +6965,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Intervalo de reposo: %lld s"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lepoväli: %lld s"
           }
         },
         "fr": {
@@ -6701,8 +6989,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Inaktivitetsintervall: %lld s"
           }
         },
         "nl": {
@@ -6713,8 +7001,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Интервал простоя: %lld с"
           }
         }
       }
@@ -6736,14 +7024,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ignorar certificados SSL"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ohita SSL-varmenteet"
           }
         },
         "fr": {
@@ -6760,8 +7048,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ignorer SSL-sertifikater"
           }
         },
         "nl": {
@@ -6772,8 +7060,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Игнорировать SSL-сертификаты"
           }
         }
       }
@@ -6854,14 +7142,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Caché de imágenes"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kuvavälimuisti"
           }
         },
         "fr": {
@@ -6878,8 +7166,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Bildebuffer"
           }
         },
         "nl": {
@@ -6890,8 +7178,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Кэш изображений"
           }
         }
       }
@@ -6919,8 +7207,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tuo"
           }
         },
         "fr": {
@@ -6937,8 +7225,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Importer"
           }
         },
         "nl": {
@@ -6949,8 +7237,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Импорт"
           }
         }
       }
@@ -6972,14 +7260,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aumentar %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Suurenna %@"
           }
         },
         "fr": {
@@ -6996,8 +7284,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Øk %@"
           }
         },
         "nl": {
@@ -7008,8 +7296,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Увеличить %@"
           }
         }
       }
@@ -7096,8 +7384,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Virheellinen arvo %lld kohteelle %@ (0–100)"
           }
         },
         "fr": {
@@ -7126,8 +7414,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Недопустимое значение %lld для %@ (0–100)"
           }
         }
       }
@@ -7155,8 +7443,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Virheellinen arvo: %@ kohteelle %@ täytyy olla HSB (0–360, 0–100, 0–100)"
           }
         },
         "fr": {
@@ -7185,8 +7473,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Недопустимое значение: %@ для %@ должно быть HSB (0–360, 0–100, 0–100)"
           }
         }
       }
@@ -7273,8 +7561,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Elementti"
           }
         },
         "fr": {
@@ -7303,8 +7591,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Элемент"
           }
         }
       }
@@ -7326,14 +7614,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "El elemento ‘%@’ no está en el hogar ‘%@’"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Elementti ‘%@’ ei ole kodissa ‘%@’"
           }
         },
         "fr": {
@@ -7350,8 +7638,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Element ‘%@’ er ikke i hjemmet ‘%@’"
           }
         },
         "nl": {
@@ -7362,8 +7650,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Элемент «%@» не входит в дом «%@»"
           }
         }
       }
@@ -7395,6 +7683,30 @@
             "state": "translated",
             "value": "Elemento '%@' non trovato"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento ‘%@’ no encontrado"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elementtiä ‘%@’ ei löydy"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Element ‘%@’ ikke funnet"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Элемент «%@» не найден"
+          }
         }
       }
     },
@@ -7421,8 +7733,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Elementit"
           }
         },
         "fr": {
@@ -7439,8 +7751,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Elementer"
           }
         },
         "nl": {
@@ -7451,8 +7763,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Элементы"
           }
         }
       }
@@ -7480,8 +7792,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Etiketti"
           }
         },
         "fr": {
@@ -7498,8 +7810,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Etikett"
           }
         },
         "nl": {
@@ -7510,8 +7822,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Метка"
           }
         }
       }
@@ -7533,14 +7845,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Latitud"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Leveysaste"
           }
         },
         "fr": {
@@ -7557,8 +7869,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Breddegrad"
           }
         },
         "nl": {
@@ -7569,8 +7881,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Широта"
           }
         }
       }
@@ -7592,14 +7904,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "La latitud debe estar entre -90 y 90"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Leveysasteen on oltava välillä −90 ja 90"
           }
         },
         "fr": {
@@ -7616,8 +7928,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Breddegraden må være mellom -90 og 90"
           }
         },
         "nl": {
@@ -7628,8 +7940,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Широта должна быть от -90 до 90"
           }
         }
       }
@@ -7716,8 +8028,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Oikeudelliset tiedot"
           }
         },
         "fr": {
@@ -7734,8 +8046,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Juridisk"
           }
         },
         "nl": {
@@ -7746,8 +8058,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Юридическая информация"
           }
         }
       }
@@ -7769,14 +8081,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Cargando elementos…"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ladataan elementtejä…"
           }
         },
         "fr": {
@@ -7793,8 +8105,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Laster elementer…"
           }
         },
         "nl": {
@@ -7805,8 +8117,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Загрузка элементов…"
           }
         }
       }
@@ -7828,14 +8140,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Cargando mapa del sitio…"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ladataan sivukarttaa…"
           }
         },
         "fr": {
@@ -7852,8 +8164,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Laster nettstedskart…"
           }
         },
         "nl": {
@@ -7864,8 +8176,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Загрузка карты сайта…"
           }
         }
       }
@@ -7956,6 +8268,30 @@
             "state": "translated",
             "value": "Potrebbe essere necessario l'accesso alla rete locale."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es posible que se requiera acceso a la red local."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lähiverkon käyttöoikeus voi olla tarpeen."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilgang til lokalt nettverk kan være nødvendig."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Может потребоваться доступ к локальной сети."
+          }
         }
       }
     },
@@ -7986,6 +8322,30 @@
             "state": "translated",
             "value": "Accesso alla rete locale richiesto"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se requiere acceso a la red local"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lähiverkon käyttöoikeus vaaditaan"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilgang til lokalt nettverk kreves"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Требуется доступ к локальной сети"
+          }
         }
       }
     },
@@ -8006,14 +8366,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Servidor local"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Paikallinen palvelin"
           }
         },
         "fr": {
@@ -8030,8 +8390,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lokal server"
           }
         },
         "nl": {
@@ -8042,8 +8402,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Локальный сервер"
           }
         }
       }
@@ -8129,8 +8489,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sijainti"
           }
         },
         "fr": {
@@ -8147,8 +8507,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Plassering"
           }
         },
         "nl": {
@@ -8159,8 +8519,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Местоположение"
           }
         }
       }
@@ -8192,6 +8552,30 @@
             "state": "translated",
             "value": "Elemento posizione"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento de ubicación"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sijaintielementti"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plasseringselement"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Элемент местоположения"
+          }
         }
       }
     },
@@ -8218,8 +8602,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lokit"
           }
         },
         "fr": {
@@ -8236,8 +8620,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Logger"
           }
         },
         "nl": {
@@ -8248,8 +8632,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Журналы"
           }
         }
       }
@@ -8271,14 +8655,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Longitud"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pituusaste"
           }
         },
         "fr": {
@@ -8295,8 +8679,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lengdegrad"
           }
         },
         "nl": {
@@ -8307,8 +8691,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Долгота"
           }
         }
       }
@@ -8330,14 +8714,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "La longitud debe estar entre -180 y 180"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pituusasteen on oltava välillä −180 ja 180"
           }
         },
         "fr": {
@@ -8354,8 +8738,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lengdegraden må være mellom -180 og 180"
           }
         },
         "nl": {
@@ -8366,8 +8750,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Долгота должна быть от -180 до 180"
           }
         }
       }
@@ -8389,14 +8773,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Baja %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Laskee %@"
           }
         },
         "fr": {
@@ -8413,8 +8797,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Senker med %@"
           }
         },
         "nl": {
@@ -8425,8 +8809,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Снижает на %@"
           }
         }
       }
@@ -8454,8 +8838,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pää"
           }
         },
         "fr": {
@@ -8472,8 +8856,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Hoved"
           }
         },
         "nl": {
@@ -8484,8 +8868,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Главная"
           }
         }
       }
@@ -8565,14 +8949,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Gestionar hogares"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Hallitse koteja"
           }
         },
         "fr": {
@@ -8589,8 +8973,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Administrer hjem"
           }
         },
         "nl": {
@@ -8601,8 +8985,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Управление домами"
           }
         }
       }
@@ -8682,14 +9066,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Intervalo de movimiento: %lld s"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Liikeväli: %lld s"
           }
         },
         "fr": {
@@ -8706,8 +9090,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Bevegelsesintervall: %lld s"
           }
         },
         "nl": {
@@ -8718,8 +9102,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Интервал движения: %lld с"
           }
         }
       }
@@ -8747,8 +9131,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nimi"
           }
         },
         "fr": {
@@ -8765,8 +9149,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Navn"
           }
         },
         "nl": {
@@ -8777,8 +9161,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Имя"
           }
         }
       }
@@ -8800,14 +9184,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nombre para el nuevo hogar"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nimi uudelle kodille"
           }
         },
         "fr": {
@@ -8824,8 +9208,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Navn for nytt hjem"
           }
         },
         "nl": {
@@ -8836,8 +9220,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Имя для нового дома"
           }
         }
       }
@@ -8917,14 +9301,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nuevo nombre"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Uusi nimi"
           }
         },
         "fr": {
@@ -8941,8 +9325,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nytt navn"
           }
         },
         "nl": {
@@ -8953,8 +9337,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Новое имя"
           }
         }
       }
@@ -8976,14 +9360,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Siguiente"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Seuraava"
           }
         },
         "fr": {
@@ -9000,8 +9384,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Neste"
           }
         },
         "nl": {
@@ -9012,8 +9396,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Следующий"
           }
         }
       }
@@ -9035,14 +9419,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "No hay certificados de servidor aceptados"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ei hyväksyttyjä palvelinvarmenteita"
           }
         },
         "fr": {
@@ -9059,8 +9443,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ingen godkjente serversertifikater"
           }
         },
         "nl": {
@@ -9071,8 +9455,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Нет принятых сертификатов сервера"
           }
         }
       }
@@ -9093,14 +9477,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sin URL de imagen"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ei kuvan URL-osoitetta"
           }
         },
         "fr": {
@@ -9117,8 +9501,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ingen bilde-URL"
           }
         },
         "nl": {
@@ -9129,8 +9513,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Нет URL изображения"
           }
         }
       }
@@ -9152,14 +9536,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "No hay mapas del sitio disponibles"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ei sivukarttoja saatavilla"
           }
         },
         "fr": {
@@ -9176,8 +9560,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ingen nettstedskart tilgjengelig"
           }
         },
         "nl": {
@@ -9188,8 +9572,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Нет доступных карт сайта"
           }
         }
       }
@@ -9211,14 +9595,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sin URL de vídeo"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ei videon URL-osoitetta"
           }
         },
         "fr": {
@@ -9235,8 +9619,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ingen video-URL"
           }
         },
         "nl": {
@@ -9247,8 +9631,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Нет URL видео"
           }
         }
       }
@@ -9270,14 +9654,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "No hay widgets disponibles."
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ei widgettejä saatavilla."
           }
         },
         "fr": {
@@ -9294,8 +9678,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ingen widgeter tilgjengelig."
           }
         },
         "nl": {
@@ -9306,8 +9690,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Нет доступных виджетов."
           }
         }
       }
@@ -9388,14 +9772,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sin conexión, reintentando…"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ei yhteyttä, yritetään uudelleen…"
           }
         },
         "fr": {
@@ -9412,8 +9796,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ingen tilkobling, kobler til igjen…"
           }
         },
         "nl": {
@@ -9424,8 +9808,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Нет подключения, повторное подключение…"
           }
         }
       }
@@ -9628,8 +10012,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ilmoitukset"
           }
         },
         "fr": {
@@ -9646,8 +10030,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Varsler"
           }
         },
         "nl": {
@@ -9658,8 +10042,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Уведомления"
           }
         }
       }
@@ -9691,6 +10075,30 @@
             "state": "translated",
             "value": "Elemento numerico"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento numérico"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numeraalielementti"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tallselement"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Числовой элемент"
+          }
         }
       }
     },
@@ -9717,8 +10125,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "pois"
           }
         },
         "fr": {
@@ -9735,8 +10143,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "av"
           }
         },
         "nl": {
@@ -9747,8 +10155,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "выкл."
           }
         }
       }
@@ -9776,8 +10184,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pois"
           }
         },
         "fr": {
@@ -9794,8 +10202,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Av"
           }
         },
         "nl": {
@@ -9806,8 +10214,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Выкл."
           }
         }
       }
@@ -9835,8 +10243,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Offline"
           }
         },
         "fr": {
@@ -9853,8 +10261,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Frakoblet"
           }
         },
         "nl": {
@@ -9865,8 +10273,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Не в сети"
           }
         }
       }
@@ -10071,8 +10479,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "OK"
           }
         },
         "fr": {
@@ -10089,8 +10497,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "OK"
           }
         },
         "nl": {
@@ -10101,8 +10509,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "ОК"
           }
         }
       }
@@ -10130,8 +10538,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "päällä"
           }
         },
         "fr": {
@@ -10148,8 +10556,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "på"
           }
         },
         "nl": {
@@ -10160,8 +10568,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "вкл."
           }
         }
       }
@@ -10183,14 +10591,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Encendido"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Päällä"
           }
         },
         "fr": {
@@ -10207,8 +10615,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "På"
           }
         },
         "nl": {
@@ -10219,8 +10627,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Вкл."
           }
         }
       }
@@ -10242,14 +10650,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Una vez"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kerran"
           }
         },
         "fr": {
@@ -10266,8 +10674,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Én gang"
           }
         },
         "nl": {
@@ -10278,8 +10686,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Один раз"
           }
         }
       }
@@ -10391,8 +10799,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Открыто"
           }
         }
       }
@@ -10424,6 +10832,30 @@
             "state": "translated",
             "value": "Apri Impostazioni"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir ajustes"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avaa asetukset"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åpne innstillinger"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть настройки"
+          }
         }
       }
     },
@@ -10444,14 +10876,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Servicio en la nube openHAB"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "openHAB-pilvipalvelu"
           }
         },
         "fr": {
@@ -10468,8 +10900,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "openHAB-skytjeneste"
           }
         },
         "nl": {
@@ -10480,8 +10912,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Облачный сервис openHAB"
           }
         }
       }
@@ -10679,14 +11111,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pausa"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tauko"
           }
         },
         "fr": {
@@ -10703,8 +11135,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pause"
           }
         },
         "nl": {
@@ -10715,8 +11147,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Пауза"
           }
         }
       }
@@ -10738,14 +11170,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Reproducir"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Toista"
           }
         },
         "fr": {
@@ -10762,8 +11194,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Spill av"
           }
         },
         "nl": {
@@ -10774,8 +11206,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Воспроизвести"
           }
         }
       }
@@ -10797,14 +11229,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Acción del reproductor"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Soittimen toiminto"
           }
         },
         "fr": {
@@ -10821,8 +11253,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Spillerhandling"
           }
         },
         "nl": {
@@ -10833,8 +11265,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Действие плеера"
           }
         }
       }
@@ -10865,6 +11297,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Elemento player"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento reproductor"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soitinelementti"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spillerelement"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Элемент плеера"
           }
         }
       }
@@ -10951,8 +11407,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Asetukset"
           }
         },
         "fr": {
@@ -10969,8 +11425,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Innstillinger"
           }
         },
         "nl": {
@@ -10981,8 +11437,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Настройки"
           }
         }
       }
@@ -11004,14 +11460,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Estado de vista previa"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Esikatselutila"
           }
         },
         "fr": {
@@ -11028,8 +11484,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Forhåndsvisningstilstand"
           }
         },
         "nl": {
@@ -11040,8 +11496,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Состояние предварительного просмотра"
           }
         }
       }
@@ -11063,14 +11519,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Anterior"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Edellinen"
           }
         },
         "fr": {
@@ -11087,8 +11543,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Forrige"
           }
         },
         "nl": {
@@ -11099,8 +11555,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Предыдущий"
           }
         }
       }
@@ -11180,14 +11636,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Comandos en cola: %lld"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Jonossa olevat komennot: %lld"
           }
         },
         "fr": {
@@ -11204,8 +11660,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kommandoer i kø: %lld"
           }
         },
         "nl": {
@@ -11216,8 +11672,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Команды в очереди: %lld"
           }
         }
       }
@@ -11239,14 +11695,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sube %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nostaa %@"
           }
         },
         "fr": {
@@ -11263,8 +11719,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Øker med %@"
           }
         },
         "nl": {
@@ -11275,8 +11731,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Повышает на %@"
           }
         }
       }
@@ -11357,14 +11813,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Controles deslizantes en tiempo real"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Reaaliaikaiset liukusäätimet"
           }
         },
         "fr": {
@@ -11381,8 +11837,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sanntidsskyvere"
           }
         },
         "nl": {
@@ -11393,8 +11849,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Слайдеры реального времени"
           }
         }
       }
@@ -11416,14 +11872,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Servidor remoto"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Etäpalvelin"
           }
         },
         "fr": {
@@ -11440,8 +11896,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Fjernserver"
           }
         },
         "nl": {
@@ -11452,8 +11908,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Удалённый сервер"
           }
         }
       }
@@ -11599,8 +12055,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nimeä uudelleen"
           }
         },
         "fr": {
@@ -11617,8 +12073,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Gi nytt navn"
           }
         },
         "nl": {
@@ -11629,8 +12085,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Переименовать"
           }
         }
       }
@@ -11652,14 +12108,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Restaurar brillo anterior al despertar"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Palauta aiempi kirkkaus herätessä"
           }
         },
         "fr": {
@@ -11676,8 +12132,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Gjenopprett tidligere lysstyrke ved vekking"
           }
         },
         "nl": {
@@ -11688,8 +12144,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Восстановить предыдущую яркость при пробуждении"
           }
         }
       }
@@ -11717,8 +12173,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Hae elementin nykyinen tila"
           }
         },
         "fr": {
@@ -11747,8 +12203,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Получить текущее состояние элемента"
           }
         }
       }
@@ -11829,14 +12285,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Rebobinar"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kelaa taaksepäin"
           }
         },
         "fr": {
@@ -11853,8 +12309,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Spol tilbake"
           }
         },
         "nl": {
@@ -11865,8 +12321,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Перемотка назад"
           }
         }
       }
@@ -11953,8 +12409,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tallenna"
           }
         },
         "fr": {
@@ -11971,8 +12427,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lagre"
           }
         },
         "nl": {
@@ -11983,8 +12439,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Сохранить"
           }
         }
       }
@@ -12012,8 +12468,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Näytönsäästäjä"
           }
         },
         "fr": {
@@ -12030,8 +12486,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Skjermsparer"
           }
         },
         "nl": {
@@ -12042,8 +12498,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Заставка экрана"
           }
         }
       }
@@ -12065,14 +12521,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ajustes del salvapantallas"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Näytönsäästäjän asetukset"
           }
         },
         "fr": {
@@ -12089,8 +12545,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Skjermsparer-innstillinger"
           }
         },
         "nl": {
@@ -12101,8 +12557,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Настройки заставки"
           }
         }
       }
@@ -12130,8 +12586,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Haku"
           }
         },
         "fr": {
@@ -12148,8 +12604,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Søk"
           }
         },
         "nl": {
@@ -12160,8 +12616,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Поиск"
           }
         }
       }
@@ -12183,14 +12639,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Buscar un elemento"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Etsi elementtiä"
           }
         },
         "fr": {
@@ -12207,8 +12663,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Søk etter et element"
           }
         },
         "nl": {
@@ -12219,8 +12675,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Найти элемент"
           }
         }
       }
@@ -12354,14 +12810,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Seleccionar color"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Valitse väri"
           }
         },
         "fr": {
@@ -12378,8 +12834,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Velg farge"
           }
         },
         "nl": {
@@ -12390,8 +12846,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Выбрать цвет"
           }
         }
       }
@@ -12480,6 +12936,30 @@
             "state": "translated",
             "value": "Invia ${action} a ${itemEntity}"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enviar ${action} a ${itemEntity}"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lähetä ${action} kohteeseen ${itemEntity}"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send ${action} til ${itemEntity}"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправить ${action} в ${itemEntity}"
+          }
         }
       }
     },
@@ -12500,14 +12980,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Enviar un comando al reproductor como reproducir, pausar, siguiente o anterior"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lähetä soittimelle komento, kuten toista, tauko, seuraava tai edellinen"
           }
         },
         "fr": {
@@ -12524,8 +13004,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Send en spillerkommando som spill av, pause, neste eller forrige"
           }
         },
         "nl": {
@@ -12536,8 +13016,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Отправить команду плееру: воспроизвести, пауза, следующий или предыдущий"
           }
         }
       }
@@ -12558,14 +13038,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Enviando comandos: %lld"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lähetetään komentoja: %lld"
           }
         },
         "fr": {
@@ -12582,8 +13062,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sender kommandoer: %lld"
           }
         },
         "nl": {
@@ -12594,8 +13074,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Отправка команд: %lld"
           }
         }
       }
@@ -12624,8 +13104,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%1$@ lähetetty kohteeseen %2$@"
           }
         },
         "fr": {
@@ -12654,8 +13134,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%1$@ отправлено в %2$@"
           }
         }
       }
@@ -12677,14 +13157,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ubicación %lf, %lf enviada a %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sijainti %lf, %lf lähetetty kohteeseen %@"
           }
         },
         "fr": {
@@ -12701,8 +13181,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Plassering %lf, %lf sendt til %@"
           }
         },
         "nl": {
@@ -12713,8 +13193,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Местоположение %lf, %lf отправлено в %@"
           }
         }
       }
@@ -12742,8 +13222,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Väriarvo %@ lähetetty kohteeseen %@"
           }
         },
         "fr": {
@@ -12772,8 +13252,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Значение цвета %@ отправлено в %@"
           }
         }
       }
@@ -12795,14 +13275,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Fecha %@ enviada a %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Päivämäärä %@ lähetetty kohteeseen %@"
           }
         },
         "fr": {
@@ -12819,8 +13299,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Dato %@ sendt til %@"
           }
         },
         "nl": {
@@ -12831,8 +13311,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Дата %@ отправлена в %@"
           }
         }
       }
@@ -12860,8 +13340,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Luku %lf lähetetty kohteeseen %@"
           }
         },
         "fr": {
@@ -12890,8 +13370,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Число %lf отправлено в %@"
           }
         }
       }
@@ -12919,8 +13399,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Merkkijono %@ lähetetty kohteeseen %@"
           }
         },
         "fr": {
@@ -12949,8 +13429,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Строка %@ отправлена в %@"
           }
         }
       }
@@ -12978,8 +13458,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Arvo %lld lähetetty kohteeseen %@"
           }
         },
         "fr": {
@@ -13008,8 +13488,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Значение %lld отправлено в %@"
           }
         }
       }
@@ -13039,6 +13519,30 @@
             "state": "translated",
             "value": "Imposta ${itemEntity} su ${latitude}, ${longitude}"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Establecer ${itemEntity} en ${latitude}, ${longitude}"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aseta ${itemEntity} arvoon ${latitude}, ${longitude}"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sett ${itemEntity} til ${latitude}, ${longitude}"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Установить ${itemEntity} в ${latitude}, ${longitude}"
+          }
         }
       }
     },
@@ -13067,6 +13571,30 @@
             "state": "translated",
             "value": "Imposta ${itemEntity} su ${value}"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Establecer ${itemEntity} en ${value}"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aseta ${itemEntity} arvoon ${value}"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sett ${itemEntity} til ${value}"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Установить ${itemEntity} в ${value}"
+          }
         }
       }
     },
@@ -13094,6 +13622,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Imposta ${itemEntity} su ${value} (HSB)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Establecer ${itemEntity} en ${value} (HSB)"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aseta ${itemEntity} arvoon ${value} (HSB)"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sett ${itemEntity} til ${value} (HSB)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Установить ${itemEntity} в ${value} (HSB)"
           }
         }
       }
@@ -13227,8 +13779,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta värisäätimen arvo"
           }
         },
         "fr": {
@@ -13257,8 +13809,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить значение элемента управления цветом"
           }
         }
       }
@@ -13286,8 +13838,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta kontaktin tilanarvo"
           }
         },
         "fr": {
@@ -13316,8 +13868,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить значение состояния контакта"
           }
         }
       }
@@ -13339,14 +13891,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Establecer valor del control DateTime"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta DateTime-säätimen arvo"
           }
         },
         "fr": {
@@ -13363,8 +13915,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Angi DateTime-kontrollverdi"
           }
         },
         "nl": {
@@ -13375,8 +13927,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить значение элемента управления DateTime"
           }
         }
       }
@@ -13404,8 +13956,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta himmentimen tai rullaverkon arvo"
           }
         },
         "fr": {
@@ -13434,8 +13986,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить значение диммера или рольставни"
           }
         }
       }
@@ -13457,14 +14009,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Establecer valor del control de ubicación"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta sijaintisäätimen arvo"
           }
         },
         "fr": {
@@ -13481,8 +14033,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Angi plasseringskontrollverdi"
           }
         },
         "nl": {
@@ -13493,8 +14045,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить значение элемента управления местоположением"
           }
         }
       }
@@ -13522,8 +14074,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta numerosäätimen arvo"
           }
         },
         "fr": {
@@ -13552,8 +14104,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить числовое значение элемента управления"
           }
         }
       }
@@ -13575,14 +14127,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Establecer valor del control del reproductor"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta soittimen säätimen arvo"
           }
         },
         "fr": {
@@ -13599,8 +14151,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Angi spillerkontrollverdi"
           }
         },
         "nl": {
@@ -13611,8 +14163,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить значение элемента управления плеером"
           }
         }
       }
@@ -13640,8 +14192,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta merkkijonosäätimen arvo"
           }
         },
         "fr": {
@@ -13670,8 +14222,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить строковое значение элемента управления"
           }
         }
       }
@@ -13699,8 +14251,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta kytkimen tila"
           }
         },
         "fr": {
@@ -13729,8 +14281,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить состояние переключателя"
           }
         }
       }
@@ -13758,8 +14310,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta värielementin väri"
           }
         },
         "fr": {
@@ -13788,8 +14340,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить цвет элемента управления цветом"
           }
         }
       }
@@ -13811,14 +14363,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Establecer la fecha y hora de un elemento de control DateTime"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta DateTime-elementin päivämäärä ja aika"
           }
         },
         "fr": {
@@ -13835,8 +14387,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Angi dato og tid for et DateTime-kontrollelement"
           }
         },
         "nl": {
@@ -13847,8 +14399,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить дату и время элемента DateTime"
           }
         }
       }
@@ -13876,8 +14428,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta numeroelementin desimaaliarvo"
           }
         },
         "fr": {
@@ -13906,8 +14458,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить десятичное значение числового элемента"
           }
         }
       }
@@ -13935,8 +14487,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta himmentimen tai rullaverkon kokonaislukuarvo"
           }
         },
         "fr": {
@@ -13965,8 +14517,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить целочисленное значение диммера или рольставни"
           }
         }
       }
@@ -13988,14 +14540,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Establecer la latitud y longitud de un elemento de control de ubicación"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta sijaintielementin leveys- ja pituusaste"
           }
         },
         "fr": {
@@ -14012,8 +14564,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Angi bredde- og lengdegrad for et plasseringskontrollelement"
           }
         },
         "nl": {
@@ -14024,8 +14576,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить широту и долготу элемента местоположения"
           }
         }
       }
@@ -14055,6 +14607,30 @@
             "state": "translated",
             "value": "Imposta lo stato di ${itemEntity} su ${state}"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Establecer el estado de ${itemEntity} en ${state}"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aseta ${itemEntity}-tila arvoon ${state}"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angi status for ${itemEntity} til ${state}"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Установить состояние ${itemEntity} в ${state}"
+          }
         }
       }
     },
@@ -14081,8 +14657,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta kontaktin tilaksi auki tai kiinni"
           }
         },
         "fr": {
@@ -14111,8 +14687,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить состояние контакта: открыт или закрыт"
           }
         }
       }
@@ -14134,14 +14710,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Establecer el estado de un interruptor en encendido o apagado, o alternar su estado"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta kytkimen tilaksi päällä tai pois tai vaihda sen tilaa"
           }
         },
         "fr": {
@@ -14158,8 +14734,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Angi brytertilstanden til på eller av, eller bytt tilstand"
           }
         },
         "nl": {
@@ -14170,8 +14746,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить состояние переключателя вкл. или выкл., или переключить его состояние"
           }
         }
       }
@@ -14199,8 +14775,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta merkkijonoelementin merkkijono"
           }
         },
         "fr": {
@@ -14229,8 +14805,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить строку строкового элемента"
           }
         }
       }
@@ -14252,14 +14828,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Establecer valor"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aseta arvo"
           }
         },
         "fr": {
@@ -14276,8 +14852,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Angi verdi"
           }
         },
         "nl": {
@@ -14288,8 +14864,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Установить значение"
           }
         }
       }
@@ -14375,8 +14951,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "needs_review",
-            "value": "Settings not yet received from phone."
+            "state": "translated",
+            "value": "Asetuksia ei ole vielä vastaanotettu iPhonelta."
           }
         },
         "fr": {
@@ -14405,8 +14981,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "needs_review",
-            "value": "Settings not yet received from phone."
+            "state": "translated",
+            "value": "Настройки ещё не получены с iPhone."
           }
         }
       }
@@ -14428,14 +15004,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mostrar fecha"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Näytä päivämäärä"
           }
         },
         "fr": {
@@ -14452,8 +15028,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Vis dato"
           }
         },
         "nl": {
@@ -14464,8 +15040,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Показать дату"
           }
         }
       }
@@ -14487,14 +15063,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mostrar campo de búsqueda"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Näytä hakukenttä"
           }
         },
         "fr": {
@@ -14511,8 +15087,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Vis søkefelt"
           }
         },
         "nl": {
@@ -14523,8 +15099,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Показать поле поиска"
           }
         }
       }
@@ -14546,14 +15122,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mostrar segundos"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Näytä sekunnit"
           }
         },
         "fr": {
@@ -14570,8 +15146,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Vis sekunder"
           }
         },
         "nl": {
@@ -14582,8 +15158,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Показать секунды"
           }
         }
       }
@@ -14605,14 +15181,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mostrar hora"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Näytä aika"
           }
         },
         "fr": {
@@ -14629,8 +15205,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Vis tid"
           }
         },
         "nl": {
@@ -14641,8 +15217,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Показать время"
           }
         }
       }
@@ -14781,14 +15357,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mapa del sitio"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sivukartta"
           }
         },
         "fr": {
@@ -14805,8 +15381,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nettstedskart"
           }
         },
         "nl": {
@@ -14817,8 +15393,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Карта сайта"
           }
         }
       }
@@ -14850,6 +15426,30 @@
             "state": "translated",
             "value": "Registrazione diagnostica sitemap"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registro de diagnóstico del mapa del sitio"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sivukartan diagnostiikkaloki"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnoslogging for nettstedskart"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Журналирование диагностики карты сайта"
+          }
         }
       }
     },
@@ -14870,14 +15470,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mapa del sitio para Apple Watch"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Apple Watch -sivukartta"
           }
         },
         "fr": {
@@ -14894,8 +15494,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nettstedskart for Apple Watch"
           }
         },
         "nl": {
@@ -14906,8 +15506,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Карта сайта для Apple Watch"
           }
         }
       }
@@ -14987,14 +15587,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mapas del sitio"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sivukartat"
           }
         },
         "fr": {
@@ -15011,8 +15611,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nettstedskart"
           }
         },
         "nl": {
@@ -15023,8 +15623,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Карты сайта"
           }
         }
       }
@@ -15046,14 +15646,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tamaño: %llu MB"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Koko: %llu Mt"
           }
         },
         "fr": {
@@ -15070,8 +15670,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Størrelse: %llu MB"
           }
         },
         "nl": {
@@ -15082,8 +15682,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Размер: %llu МБ"
           }
         }
       }
@@ -15105,14 +15705,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Blanco suave"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pehmeä valkoinen"
           }
         },
         "fr": {
@@ -15129,8 +15729,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Myk hvit"
           }
         },
         "nl": {
@@ -15141,8 +15741,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Мягкий белый"
           }
         }
       }
@@ -15164,14 +15764,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ordenar mapas del sitio por"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lajittele sivukartat"
           }
         },
         "fr": {
@@ -15188,8 +15788,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sorter nettstedskart etter"
           }
         },
         "nl": {
@@ -15200,8 +15800,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Сортировать карты сайта по"
           }
         }
       }
@@ -15282,14 +15882,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Error SSL. No se pudo establecer la conexión de forma segura."
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "SSL-virhe. Yhteyttä ei voitu muodostaa turvallisesti."
           }
         },
         "fr": {
@@ -15306,8 +15906,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "SSL-feil. Tilkoblingen kunne ikke opprettes sikkert."
           }
         },
         "nl": {
@@ -15318,8 +15918,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ошибка SSL. Не удалось установить безопасное соединение."
           }
         }
       }
@@ -15580,8 +16180,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tila"
           }
         },
         "fr": {
@@ -15598,8 +16198,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tilstand"
           }
         },
         "nl": {
@@ -15610,8 +16210,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Состояние"
           }
         }
       }
@@ -15642,6 +16242,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Elemento stringa"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento de texto"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Merkkijonoelementti"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekststrengselement"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Строковый элемент"
           }
         }
       }
@@ -15722,14 +16346,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Acción del interruptor"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kytkimen toiminto"
           }
         },
         "fr": {
@@ -15746,8 +16370,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Bryterhandling"
           }
         },
         "nl": {
@@ -15758,8 +16382,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Действие переключателя"
           }
         }
       }
@@ -15790,6 +16414,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Elemento interruttore"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento interruptor"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kytkinelementti"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bryterelement"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Элемент переключателя"
           }
         }
       }
@@ -15930,8 +16578,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Järjestelmä"
           }
         },
         "fr": {
@@ -15948,8 +16596,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "System"
           }
         },
         "nl": {
@@ -15960,8 +16608,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Система"
           }
         }
       }
@@ -15983,14 +16631,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Probar conexión"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Testaa yhteys"
           }
         },
         "fr": {
@@ -16007,8 +16655,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Test tilkobling"
           }
         },
         "nl": {
@@ -16019,8 +16667,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Проверить соединение"
           }
         }
       }
@@ -16042,14 +16690,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Probar salvapantallas"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Testaa näytönsäästäjä"
           }
         },
         "fr": {
@@ -16066,8 +16714,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Test skjermsparer"
           }
         },
         "nl": {
@@ -16078,8 +16726,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Проверить заставку"
           }
         }
       }
@@ -16101,14 +16749,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "La conexión ha agotado el tiempo de espera. Inténtelo de nuevo más tarde."
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Yhteys aikakatkaistiin. Yritä myöhemmin uudelleen."
           }
         },
         "fr": {
@@ -16125,8 +16773,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tilkoblingen ble tidsavbrutt. Prøv igjen senere."
           }
         },
         "nl": {
@@ -16137,8 +16785,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Время соединения истекло. Повторите попытку позже."
           }
         }
       }
@@ -16166,8 +16814,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kohteen %@ tila on %@"
           }
         },
         "fr": {
@@ -16196,8 +16844,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Состояние %@ равно %@"
           }
         }
       }
@@ -16225,8 +16873,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kohteen %@ tilaksi asetettiin %@"
           }
         },
         "fr": {
@@ -16255,8 +16903,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Состояние %@ установлено в %@"
           }
         }
       }
@@ -16288,6 +16936,30 @@
             "state": "translated",
             "value": "L'URL non è valido. Controlla il formato (es. http://192.168.2.1:8080 o http://[::1]:8080 per IPv6)."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La URL no es válida. Compruebe el formato (p. ej., http://192.168.2.1:8080 o http://[::1]:8080 para IPv6)."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL on virheellinen. Tarkista muoto (esim. http://192.168.2.1:8080 tai http://[::1]:8080 IPv6:lle)."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL-en er ugyldig. Sjekk formatet (f.eks. http://192.168.2.1:8080 eller http://[::1]:8080 for IPv6)."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL недействителен. Проверьте формат (например, http://192.168.2.1:8080 или http://[::1]:8080 для IPv6)."
+          }
         }
       }
     },
@@ -16308,14 +16980,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mosaicos"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ruudut"
           }
         },
         "fr": {
@@ -16332,8 +17004,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Fliser"
           }
         },
         "nl": {
@@ -16344,8 +17016,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Плитки"
           }
         }
       }
@@ -16367,14 +17039,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Temporización"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ajoitus"
           }
         },
         "fr": {
@@ -16391,8 +17063,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Timing"
           }
         },
         "nl": {
@@ -16403,8 +17075,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Синхронизация"
           }
         }
       }
@@ -16435,6 +17107,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Per connetterti al tuo server openHAB locale, consenti l'accesso alla rete locale quando richiesto. Se in precedenza hai negato l'accesso, abilitalo in Impostazioni → Privacy e sicurezza → Rete locale."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para conectarse a su servidor openHAB local, permita el acceso a la red local cuando se le solicite. Si lo denegó anteriormente, actívelo en Ajustes → Privacidad y seguridad → Red local."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muodosta yhteys paikalliseen openHAB-palvelimeen sallimalla lähiverkkoyhteys pyydettäessä. Jos olet aiemmin kieltänyt sen, ota se käyttöön kohdassa Asetukset → Tietosuoja ja turvallisuus → Lähiverkko."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For å koble til din lokale openHAB-server, vennligst tillat tilgang til lokalt nettverk når du blir bedt om det. Hvis du tidligere nektet det, aktiver det i Innstillinger → Personvern og sikkerhet → Lokalt nettverk."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для подключения к локальному серверу openHAB разрешите доступ к локальной сети при появлении запроса. Если вы ранее отказали, включите его в Настройки → Конфиденциальность и безопасность → Локальная сеть."
           }
         }
       }
@@ -16493,8 +17189,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "переключить"
           }
         }
       }
@@ -16516,14 +17212,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Alternar"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Vaihda"
           }
         },
         "fr": {
@@ -16540,8 +17236,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Bytt"
           }
         },
         "nl": {
@@ -16552,8 +17248,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Переключить"
           }
         }
       }
@@ -16693,14 +17389,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Error inesperado: %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Odottamaton virhe: %@"
           }
         },
         "fr": {
@@ -16717,8 +17413,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Uventet feil: %@"
           }
         },
         "nl": {
@@ -16729,8 +17425,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Непредвиденная ошибка: %@"
           }
         }
       }
@@ -16871,8 +17567,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Päivitetään…"
           }
         },
         "fr": {
@@ -16889,8 +17585,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Oppdaterer…"
           }
         },
         "nl": {
@@ -16901,8 +17597,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Обновление…"
           }
         }
       }
@@ -16930,8 +17626,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "URL"
           }
         },
         "fr": {
@@ -16948,8 +17644,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "URL"
           }
         },
         "nl": {
@@ -16960,8 +17656,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "URL"
           }
         }
       }
@@ -17106,8 +17802,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Käyttäjänimi"
           }
         },
         "fr": {
@@ -17124,8 +17820,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Brukernavn"
           }
         },
         "nl": {
@@ -17136,8 +17832,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Имя пользователя"
           }
         }
       }
@@ -17165,8 +17861,8 @@
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Arvo"
           }
         },
         "fr": {
@@ -17195,8 +17891,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Значение"
           }
         }
       }
@@ -17276,14 +17972,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Muy frío"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Hyvin viileä"
           }
         },
         "fr": {
@@ -17300,8 +17996,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Svært kjølig"
           }
         },
         "nl": {
@@ -17312,8 +18008,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Очень холодный"
           }
         }
       }
@@ -17335,14 +18031,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Muy cálido"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Hyvin lämmin"
           }
         },
         "fr": {
@@ -17359,8 +18055,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Svært varm"
           }
         },
         "nl": {
@@ -17371,8 +18067,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Очень тёплый"
           }
         }
       }
@@ -17394,14 +18090,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Blanco cálido"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lämmin valkoinen"
           }
         },
         "fr": {
@@ -17418,8 +18114,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Varm hvit"
           }
         },
         "nl": {
@@ -17430,8 +18126,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Тёплый белый"
           }
         }
       }
@@ -17511,14 +18207,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Advertencia: Cambiar el nombre del hogar puede hacer que las integraciones externas, como los atajos, fallen hasta que se reconfiguren."
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Varoitus: Kodin uudelleennimeäminen voi aiheuttaa ulkoisten integraatioiden, kuten pikakomentojen, epäonnistumisen, kunnes ne on uudelleenmääritetty."
           }
         },
         "fr": {
@@ -17535,8 +18231,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Advarsel: Å gi hjemmet nytt navn kan føre til at eksterne integrasjoner som snarveier mislykkes inntil de er rekonfigurert."
           }
         },
         "nl": {
@@ -17547,8 +18243,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Предупреждение: переименование дома может привести к сбою внешних интеграций, таких как ярлыки, до их перенастройки."
           }
         }
       }
@@ -17570,14 +18266,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Parece que estás sin conexión. Comprueba tu conexión a internet."
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Näyttää siltä, että olet offline. Tarkista internet-yhteytesi."
           }
         },
         "fr": {
@@ -17594,8 +18290,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Du ser ut til å være frakoblet. Sjekk internettilkoblingen din."
           }
         },
         "nl": {
@@ -17606,8 +18302,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Похоже, вы не в сети. Проверьте подключение к интернету."
           }
         }
       }
@@ -17628,14 +18324,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tamaño del reloj: %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Kellon koko: %@"
           }
         },
         "fr": {
@@ -17652,8 +18348,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Klokkestørrelse: %@"
           }
         },
         "nl": {
@@ -17664,8 +18360,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Размер часов: %@"
           }
         }
       },
@@ -17687,14 +18383,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nivel de atenuación: %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Himmennystaso: %@"
           }
         },
         "fr": {
@@ -17711,8 +18407,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Dimmenivå: %@"
           }
         },
         "nl": {
@@ -17723,8 +18419,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Уровень затемнения: %@"
           }
         }
       },
@@ -17746,14 +18442,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Fecha relativa: %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Suhteellinen päivämäärä: %@"
           }
         },
         "fr": {
@@ -17770,8 +18466,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Relativ dato: %@"
           }
         },
         "nl": {
@@ -17782,8 +18478,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Относительная дата: %@"
           }
         }
       },
@@ -17805,14 +18501,14 @@
         },
         "es": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Restaurar brillo: %@"
           }
         },
         "fi": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Palauta kirkkaus: %@"
           }
         },
         "fr": {
@@ -17829,8 +18525,8 @@
         },
         "nb": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Gjenopprett lysstyrke: %@"
           }
         },
         "nl": {
@@ -17841,8 +18537,8 @@
         },
         "ru": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Восстановить яркость: %@"
           }
         }
       },
