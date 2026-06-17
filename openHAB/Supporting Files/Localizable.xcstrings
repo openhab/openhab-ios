@@ -135,6 +135,12 @@
             "state": "translated",
             "value": "%@"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
         }
       }
     },
@@ -167,8 +173,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "/overview/"
           }
         },
         "it": {
@@ -200,6 +206,12 @@
     "%@": {
       "localizations": {
         "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        },
+        "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "%@"
@@ -237,8 +249,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Paramètres %@"
           }
         },
         "it": {
@@ -296,8 +308,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Valeur %@"
           }
         },
         "it": {
@@ -355,8 +367,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lld"
           }
         },
         "it": {
@@ -414,8 +426,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lldK"
           }
         },
         "it": {
@@ -473,8 +485,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Horloge 24 heures"
           }
         },
         "it": {
@@ -590,8 +602,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Certificats serveur acceptés"
           }
         },
         "it": {
@@ -825,8 +837,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ajouté : %@"
           }
         },
         "it": {
@@ -943,8 +955,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Toujours autoriser WebRTC"
           }
         },
         "it": {
@@ -1002,8 +1014,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Toujours envoyer les identifiants"
           }
         },
         "it": {
@@ -1179,8 +1191,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Animation"
           }
         },
         "it": {
@@ -1238,8 +1250,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Version de l'application"
           }
         },
         "it": {
@@ -1824,8 +1836,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Annulation survenue"
           }
         },
         "it": {
@@ -1882,8 +1894,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lumière de bougie"
           }
         },
         "it": {
@@ -1941,8 +1953,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Impossible de se connecter au serveur. Est-il en ligne ?"
           }
         },
         "it": {
@@ -2000,8 +2012,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Impossible de trouver le serveur. L'URL est-elle correcte ?"
           }
         },
         "it": {
@@ -2292,8 +2304,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Vérifier et vider le cache d'images"
           }
         },
         "it": {
@@ -2330,6 +2342,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Farbe wählen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir une couleur"
           }
         }
       }
@@ -2422,8 +2440,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Vider le cache web"
           }
         },
         "it": {
@@ -2599,8 +2617,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Certificats client"
           }
         },
         "it": {
@@ -2868,6 +2886,12 @@
             "state": "translated",
             "value": "Farb-Item"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élément couleur"
+          }
         }
       }
     },
@@ -2879,6 +2903,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Farbrad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roue des couleurs"
           }
         }
       }
@@ -2912,8 +2942,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Commande échouée : %@"
           }
         },
         "it": {
@@ -2971,8 +3001,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Échecs de commande : %lld"
           }
         },
         "it": {
@@ -3030,8 +3060,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Élément de commande %@"
           }
         },
         "it": {
@@ -3383,8 +3413,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Connexion réussie"
           }
         },
         "it": {
@@ -3422,6 +3452,12 @@
             "state": "translated",
             "value": "Kontakt-Item"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élément de contact"
+          }
         }
       }
     },
@@ -3454,8 +3490,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "État du contact"
           }
         },
         "it": {
@@ -3513,8 +3549,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lumière du jour froide"
           }
         },
         "it": {
@@ -3572,8 +3608,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Blanc froid"
           }
         },
         "it": {
@@ -3749,8 +3785,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Rapport de plantage"
           }
         },
         "it": {
@@ -4041,8 +4077,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Date et heure"
           }
         },
         "it": {
@@ -4080,6 +4116,12 @@
             "state": "translated",
             "value": "DateTime-Item"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élément DateHeure"
+          }
         }
       }
     },
@@ -4112,8 +4154,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lumière du jour"
           }
         },
         "it": {
@@ -4289,8 +4331,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Diminuer %@"
           }
         },
         "it": {
@@ -4348,8 +4390,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Chemin par défaut"
           }
         },
         "it": {
@@ -4466,8 +4508,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Supprimer la maison '%@' ?"
           }
         },
         "it": {
@@ -4525,8 +4567,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mode démo"
           }
         },
         "it": {
@@ -4682,6 +4724,12 @@
             "state": "translated",
             "value": "Dimmer/Roller-Item"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élément gradateur/volet"
+          }
         }
       }
     },
@@ -4714,8 +4762,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Désactiver le délai d'inactivité"
           }
         },
         "it": {
@@ -5009,6 +5057,12 @@
             "state": "translated",
             "value": "Fertig"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminé"
+          }
         }
       }
     },
@@ -5020,6 +5074,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ziehen, um Farbton und Sättigung zu ändern"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faire glisser pour modifier la teinte et la saturation"
           }
         }
       }
@@ -5171,8 +5231,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Activer la gradation"
           }
         },
         "it": {
@@ -5230,8 +5290,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Activer l'économiseur d'écran"
           }
         },
         "it": {
@@ -5289,8 +5349,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Saisissez un nom pour la nouvelle maison"
           }
         },
         "it": {
@@ -5348,8 +5408,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Saisissez un nouveau nom pour la maison '%@'"
           }
         },
         "it": {
@@ -5407,8 +5467,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Saisir une nouvelle valeur"
           }
         },
         "it": {
@@ -5525,8 +5585,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Saisir du texte"
           }
         },
         "it": {
@@ -5584,8 +5644,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Saisir l'URL du serveur distant"
           }
         },
         "it": {
@@ -5761,8 +5821,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Durée de fondu : %@ s"
           }
         },
         "it": {
@@ -5820,8 +5880,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Avance rapide"
           }
         },
         "it": {
@@ -5997,8 +6057,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Foo"
           }
         },
         "it": {
@@ -6092,6 +6152,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "${itemEntity}-Status erhalten"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obtenir l'état de ${itemEntity}"
           }
         }
       }
@@ -6243,8 +6309,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Masquer la barre d'état"
           }
         },
         "it": {
@@ -6361,8 +6427,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Type d'icône"
           }
         },
         "it": {
@@ -6479,8 +6545,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Intervalle d'inactivité : %lld s"
           }
         },
         "it": {
@@ -6538,8 +6604,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ignorer les certificats SSL"
           }
         },
         "it": {
@@ -6656,8 +6722,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Cache d'images"
           }
         },
         "it": {
@@ -6774,8 +6840,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Augmenter %@"
           }
         },
         "it": {
@@ -7128,8 +7194,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "L'élément '%@' n'est pas dans la maison '%@'"
           }
         },
         "it": {
@@ -7166,6 +7232,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Element '%@' nicht gefunden"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élément '%@' introuvable"
           }
         }
       }
@@ -7317,8 +7389,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Latitude"
           }
         },
         "it": {
@@ -7376,8 +7448,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "La latitude doit être comprise entre -90 et 90"
           }
         },
         "it": {
@@ -7553,8 +7625,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Chargement des éléments…"
           }
         },
         "it": {
@@ -7612,8 +7684,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Chargement du plan du site…"
           }
         },
         "it": {
@@ -7710,6 +7782,12 @@
             "state": "translated",
             "value": "Möglicherweise ist der Zugriff auf das lokale Netzwerk erforderlich."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'accès au réseau local peut être requis."
+          }
         }
       }
     },
@@ -7721,6 +7799,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zugriff auf lokales Netzwerk erforderlich"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accès au réseau local requis"
           }
         }
       }
@@ -7754,8 +7838,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Serveur local"
           }
         },
         "it": {
@@ -7910,6 +7994,12 @@
             "state": "translated",
             "value": "Standort-Item"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élément de localisation"
+          }
         }
       }
     },
@@ -8001,8 +8091,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Longitude"
           }
         },
         "it": {
@@ -8060,8 +8150,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "La longitude doit être comprise entre -180 et 180"
           }
         },
         "it": {
@@ -8119,8 +8209,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Abaisse de %@"
           }
         },
         "it": {
@@ -8295,8 +8385,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Gérer les maisons"
           }
         },
         "it": {
@@ -8412,8 +8502,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Intervalle de déplacement : %lld s"
           }
         },
         "it": {
@@ -8530,8 +8620,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nom de la nouvelle maison"
           }
         },
         "it": {
@@ -8647,8 +8737,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nouveau nom"
           }
         },
         "it": {
@@ -8706,8 +8796,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Suivant"
           }
         },
         "it": {
@@ -8765,8 +8855,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aucun certificat serveur accepté"
           }
         },
         "it": {
@@ -8823,8 +8913,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aucune URL d'image"
           }
         },
         "it": {
@@ -8882,8 +8972,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aucun plan du site disponible"
           }
         },
         "it": {
@@ -8941,8 +9031,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aucune URL vidéo"
           }
         },
         "it": {
@@ -9000,8 +9090,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aucun widget disponible."
           }
         },
         "it": {
@@ -9118,8 +9208,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pas de connexion, reconnexion en cours"
           }
         },
         "it": {
@@ -9390,6 +9480,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Numerisches-Item"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élément numérique"
           }
         }
       }
@@ -9954,8 +10050,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Une fois"
           }
         },
         "it": {
@@ -10106,6 +10202,12 @@
             "state": "translated",
             "value": "Einstellungen öffnen"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir les réglages"
+          }
         }
       }
     },
@@ -10138,8 +10240,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Service openHAB Cloud"
           }
         },
         "it": {
@@ -10373,8 +10475,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pause"
           }
         },
         "it": {
@@ -10432,8 +10534,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Lire"
           }
         },
         "it": {
@@ -10491,8 +10593,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Action du lecteur"
           }
         },
         "it": {
@@ -10529,6 +10631,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Player-Item"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élément lecteur"
           }
         }
       }
@@ -10680,8 +10788,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "État d'aperçu"
           }
         },
         "it": {
@@ -10739,8 +10847,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Précédent"
           }
         },
         "it": {
@@ -10856,8 +10964,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Commandes en attente : %lld"
           }
         },
         "it": {
@@ -10915,8 +11023,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Monte de %@"
           }
         },
         "it": {
@@ -11033,8 +11141,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Curseurs en temps réel"
           }
         },
         "it": {
@@ -11092,8 +11200,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Serveur distant"
           }
         },
         "it": {
@@ -11328,8 +11436,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Restaurer la luminosité précédente au réveil"
           }
         },
         "it": {
@@ -11505,8 +11613,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Retour arrière"
           }
         },
         "it": {
@@ -11741,8 +11849,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Paramètres de l'économiseur d'écran"
           }
         },
         "it": {
@@ -11859,8 +11967,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Rechercher un élément"
           }
         },
         "it": {
@@ -12030,8 +12138,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sélectionner une couleur"
           }
         },
         "it": {
@@ -12126,6 +12234,12 @@
             "state": "translated",
             "value": "${action} an ${itemEntity} senden"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer ${action} à ${itemEntity}"
+          }
         }
       }
     },
@@ -12158,8 +12272,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Envoyer une commande au lecteur telle que lire, pause, suivant ou précédent"
           }
         },
         "it": {
@@ -12216,8 +12330,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Envoi de commandes : %lld"
           }
         },
         "it": {
@@ -12335,8 +12449,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Emplacement %lf, %lf envoyé à %@"
           }
         },
         "it": {
@@ -12453,8 +12567,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Date %@ envoyée à %@"
           }
         },
         "it": {
@@ -12667,6 +12781,12 @@
             "state": "translated",
             "value": "Standort ${itemEntity} auf ${latitude}, ${longitude} setzen"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Définir ${itemEntity} à ${latitude}, ${longitude}"
+          }
         }
       }
     },
@@ -12677,6 +12797,12 @@
             "state": "translated",
             "value": "${itemEntity} auf ${value} setzen"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Définir ${itemEntity} sur ${value}"
+          }
         }
       }
     },
@@ -12686,6 +12812,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "${itemEntity} auf ${value} (HSB) setzen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Définir ${itemEntity} sur ${value} (TSL)"
           }
         }
       }
@@ -12943,8 +13075,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Définir la valeur du contrôle DateHeure"
           }
         },
         "it": {
@@ -13061,8 +13193,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Définir la valeur du contrôle de localisation"
           }
         },
         "it": {
@@ -13179,8 +13311,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Définir la valeur du contrôle du lecteur"
           }
         },
         "it": {
@@ -13415,8 +13547,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Définir la date et l'heure d'un élément de contrôle DateHeure"
           }
         },
         "it": {
@@ -13592,8 +13724,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Définir la latitude et la longitude d'un élément de contrôle de localisation"
           }
         },
         "it": {
@@ -13628,6 +13760,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Den Status von ${itemEntity} auf ${state} setzen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Définir l'état de ${itemEntity} sur ${state}"
           }
         }
       }
@@ -13720,8 +13858,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Définir l'état d'un interrupteur sur activé ou désactivé, ou basculer son état"
           }
         },
         "it": {
@@ -13838,8 +13976,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Définir la valeur"
           }
         },
         "it": {
@@ -14014,8 +14152,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Afficher la date"
           }
         },
         "it": {
@@ -14073,8 +14211,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Afficher le champ de recherche"
           }
         },
         "it": {
@@ -14132,8 +14270,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Afficher les secondes"
           }
         },
         "it": {
@@ -14191,8 +14329,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Afficher l'heure"
           }
         },
         "it": {
@@ -14367,8 +14505,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Plan du site"
           }
         },
         "it": {
@@ -14406,6 +14544,12 @@
             "state": "translated",
             "value": "Sitemap-Diagnoseprotokollierung"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journalisation des diagnostics du plan du site"
+          }
         }
       }
     },
@@ -14438,8 +14582,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Plan du site pour Apple Watch"
           }
         },
         "it": {
@@ -14555,8 +14699,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Plans du site"
           }
         },
         "it": {
@@ -14614,8 +14758,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Taille : %llu Mo"
           }
         },
         "it": {
@@ -14673,8 +14817,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Blanc doux"
           }
         },
         "it": {
@@ -14732,8 +14876,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Trier les plans du site par"
           }
         },
         "it": {
@@ -14850,8 +14994,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Erreur SSL. La connexion n'a pas pu être établie de manière sécurisée."
           }
         },
         "it": {
@@ -15181,6 +15325,12 @@
             "state": "translated",
             "value": "String-Item"
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élément texte"
+          }
         }
       }
     },
@@ -15272,8 +15422,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Action d'interrupteur"
           }
         },
         "it": {
@@ -15310,6 +15460,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Switch-Item"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élément interrupteur"
           }
         }
       }
@@ -15515,8 +15671,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tester la connexion"
           }
         },
         "it": {
@@ -15574,8 +15730,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tester l'économiseur d'écran"
           }
         },
         "it": {
@@ -15633,8 +15789,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "La connexion a expiré. Réessayez plus tard."
           }
         },
         "it": {
@@ -15790,6 +15946,12 @@
             "state": "translated",
             "value": "Die URL ist ungültig. Bitte überprüfen Sie das Format (z.B. http://192.168.2.1:8080 oder http://[::1]:8080 für IPv6)."
           }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'URL est invalide. Veuillez vérifier le format (p. ex., http://192.168.2.1:8080 ou http://[::1]:8080 pour IPv6)."
+          }
         }
       }
     },
@@ -15822,8 +15984,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tuiles"
           }
         },
         "it": {
@@ -15881,8 +16043,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Minutage"
           }
         },
         "it": {
@@ -15919,6 +16081,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Um eine Verbindung zu Ihrem lokalen openHAB-Server herzustellen, erlauben Sie bitte den Zugriff auf das lokale Netzwerk, wenn Sie dazu aufgefordert werden. Wenn Sie es zuvor abgelehnt haben, aktivieren Sie es unter Einstellungen → Datenschutz & Sicherheit → Lokales Netzwerk."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour vous connecter à votre serveur openHAB local, veuillez autoriser l'accès au réseau local lorsque vous y êtes invité. Si vous l'avez précédemment refusé, activez-le dans Réglages → Confidentialité et sécurité → Réseau local."
           }
         }
       }
@@ -16012,8 +16180,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Basculer"
           }
         },
         "it": {
@@ -16189,8 +16357,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Erreur inattendue : %@"
           }
         },
         "it": {
@@ -16772,8 +16940,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Très froid"
           }
         },
         "it": {
@@ -16831,8 +16999,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Très chaud"
           }
         },
         "it": {
@@ -16890,8 +17058,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Blanc chaud"
           }
         },
         "it": {
@@ -17007,8 +17175,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Attention : renommer la maison peut entraîner l'échec des intégrations externes telles que les raccourcis jusqu'à leur reconfiguration."
           }
         },
         "it": {
@@ -17066,8 +17234,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Vous semblez être hors ligne. Vérifiez votre connexion Internet."
           }
         },
         "it": {
@@ -17124,8 +17292,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Taille de l'horloge : %@"
           }
         },
         "it": {
@@ -17183,8 +17351,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Niveau de gradation : %@"
           }
         },
         "it": {
@@ -17242,8 +17410,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Date relative : %@"
           }
         },
         "it": {
@@ -17301,8 +17469,8 @@
         },
         "fr": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Restaurer la luminosité : %@"
           }
         },
         "it": {
