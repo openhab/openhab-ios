@@ -147,6 +147,12 @@
             "state": "translated",
             "value": "%@"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
         }
       }
     },
@@ -185,8 +191,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "/overview/"
           }
         },
         "nb": {
@@ -224,6 +230,12 @@
           }
         },
         "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        },
+        "it": {
           "stringUnit": {
             "state": "translated",
             "value": "%@"
@@ -267,8 +279,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Impostazioni %@"
           }
         },
         "nb": {
@@ -326,8 +338,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Valore %@"
           }
         },
         "nb": {
@@ -385,8 +397,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lld"
           }
         },
         "nb": {
@@ -444,8 +456,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "%lldK"
           }
         },
         "nb": {
@@ -503,8 +515,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Orologio 24 ore"
           }
         },
         "nb": {
@@ -620,8 +632,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Certificati server accettati"
           }
         },
         "nb": {
@@ -855,8 +867,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aggiunto: %@"
           }
         },
         "nb": {
@@ -973,8 +985,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Consenti sempre WebRTC"
           }
         },
         "nb": {
@@ -1032,8 +1044,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Invia sempre le credenziali"
           }
         },
         "nb": {
@@ -1209,8 +1221,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Animazione"
           }
         },
         "nb": {
@@ -1268,8 +1280,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Versione app"
           }
         },
         "nb": {
@@ -1854,8 +1866,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Annullamento eseguito"
           }
         },
         "nb": {
@@ -1912,8 +1924,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Luce di candela"
           }
         },
         "nb": {
@@ -1971,8 +1983,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Impossibile connettersi al server. È online?"
           }
         },
         "nb": {
@@ -2030,8 +2042,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Impossibile trovare il server. L'URL è corretto?"
           }
         },
         "nb": {
@@ -2322,8 +2334,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Controlla e svuota la cache immagini"
           }
         },
         "nb": {
@@ -2366,6 +2378,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kleur kiezen"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scegli colore"
           }
         }
       }
@@ -2464,8 +2482,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Svuota cache web"
           }
         },
         "nb": {
@@ -2641,8 +2659,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Certificati client"
           }
         },
         "nb": {
@@ -2916,6 +2934,12 @@
             "state": "translated",
             "value": "Kleur-item"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento colore"
+          }
         }
       }
     },
@@ -2939,6 +2963,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kleurwiel"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ruota dei colori"
           }
         }
       }
@@ -2978,8 +3008,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Comando non riuscito: %@"
           }
         },
         "nb": {
@@ -3037,8 +3067,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Errori di comando: %lld"
           }
         },
         "nb": {
@@ -3096,8 +3126,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Elemento comando %@"
           }
         },
         "nb": {
@@ -3449,8 +3479,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Connessione riuscita"
           }
         },
         "nb": {
@@ -3494,6 +3524,12 @@
             "state": "translated",
             "value": "Contact-item"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento contatto"
+          }
         }
       }
     },
@@ -3532,8 +3568,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Stato contatto"
           }
         },
         "nb": {
@@ -3591,8 +3627,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Luce del giorno fredda"
           }
         },
         "nb": {
@@ -3650,8 +3686,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Bianco freddo"
           }
         },
         "nb": {
@@ -3827,8 +3863,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Segnalazione arresti anomali"
           }
         },
         "nb": {
@@ -4119,8 +4155,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Data e ora"
           }
         },
         "nb": {
@@ -4164,6 +4200,12 @@
             "state": "translated",
             "value": "DateTime-item"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento DateTime"
+          }
         }
       }
     },
@@ -4202,8 +4244,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Luce del giorno"
           }
         },
         "nb": {
@@ -4379,8 +4421,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Diminuisci %@"
           }
         },
         "nb": {
@@ -4438,8 +4480,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Percorso predefinito"
           }
         },
         "nb": {
@@ -4556,8 +4598,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Eliminare la casa '%@'?"
           }
         },
         "nb": {
@@ -4615,8 +4657,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Modalità demo"
           }
         },
         "nb": {
@@ -4778,6 +4820,12 @@
             "state": "translated",
             "value": "Dimmer/Roller-item"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento dimmer/tapparella"
+          }
         }
       }
     },
@@ -4816,8 +4864,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Disabilita timeout inattività"
           }
         },
         "nb": {
@@ -5041,6 +5089,12 @@
             "state": "translated",
             "value": "openHAB-servers worden ontdekt…"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ricerca server openHAB in corso…"
+          }
         }
       }
     },
@@ -5123,6 +5177,12 @@
             "state": "translated",
             "value": "Gereed"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fine"
+          }
         }
       }
     },
@@ -5146,6 +5206,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sleep om tint en verzadiging te wijzigen"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trascina per modificare tonalità e saturazione"
           }
         }
       }
@@ -5303,8 +5369,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Abilita dimmeraggio"
           }
         },
         "nb": {
@@ -5362,8 +5428,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Abilita salvaschermo"
           }
         },
         "nb": {
@@ -5421,8 +5487,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Inserisci un nome per la nuova casa"
           }
         },
         "nb": {
@@ -5480,8 +5546,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Inserisci un nuovo nome per la casa '%@'"
           }
         },
         "nb": {
@@ -5539,8 +5605,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Inserisci nuovo valore"
           }
         },
         "nb": {
@@ -5657,8 +5723,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Inserisci testo"
           }
         },
         "nb": {
@@ -5716,8 +5782,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Inserisci URL del server remoto"
           }
         },
         "nb": {
@@ -5893,8 +5959,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Durata dissolvenza: %@ s"
           }
         },
         "nb": {
@@ -5952,8 +6018,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Avanzamento rapido"
           }
         },
         "nb": {
@@ -6129,8 +6195,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Foo"
           }
         },
         "nb": {
@@ -6230,6 +6296,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Status van ${itemEntity} ophalen"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ottieni lo stato di ${itemEntity}"
           }
         }
       }
@@ -6387,8 +6459,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nascondi barra di stato"
           }
         },
         "nb": {
@@ -6505,8 +6577,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Tipo icona"
           }
         },
         "nb": {
@@ -6623,8 +6695,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Intervallo inattività: %lld s"
           }
         },
         "nb": {
@@ -6682,8 +6754,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ignora certificati SSL"
           }
         },
         "nb": {
@@ -6800,8 +6872,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Cache immagini"
           }
         },
         "nb": {
@@ -6918,8 +6990,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aumenta %@"
           }
         },
         "nb": {
@@ -7272,8 +7344,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "L'elemento '%@' non si trova nella casa '%@'"
           }
         },
         "nb": {
@@ -7316,6 +7388,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Item '%@' niet gevonden"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento '%@' non trovato"
           }
         }
       }
@@ -7473,8 +7551,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Latitudine"
           }
         },
         "nb": {
@@ -7532,8 +7610,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "La latitudine deve essere compresa tra -90 e 90"
           }
         },
         "nb": {
@@ -7709,8 +7787,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Caricamento elementi…"
           }
         },
         "nb": {
@@ -7768,8 +7846,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Caricamento sitemap…"
           }
         },
         "nb": {
@@ -7872,6 +7950,12 @@
             "state": "translated",
             "value": "Toegang tot lokaal netwerk kan vereist zijn."
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Potrebbe essere necessario l'accesso alla rete locale."
+          }
         }
       }
     },
@@ -7895,6 +7979,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Toegang tot lokaal netwerk vereist"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accesso alla rete locale richiesto"
           }
         }
       }
@@ -7934,8 +8024,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Server locale"
           }
         },
         "nb": {
@@ -8096,6 +8186,12 @@
             "state": "translated",
             "value": "Locatie-item"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento posizione"
+          }
         }
       }
     },
@@ -8193,8 +8289,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Longitudine"
           }
         },
         "nb": {
@@ -8252,8 +8348,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "La longitudine deve essere compresa tra -180 e 180"
           }
         },
         "nb": {
@@ -8311,8 +8407,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Abbassa di %@"
           }
         },
         "nb": {
@@ -8487,8 +8583,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Gestisci case"
           }
         },
         "nb": {
@@ -8604,8 +8700,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Intervallo di movimento: %lld s"
           }
         },
         "nb": {
@@ -8722,8 +8818,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nome per la nuova casa"
           }
         },
         "nb": {
@@ -8839,8 +8935,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nuovo nome"
           }
         },
         "nb": {
@@ -8898,8 +8994,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Successivo"
           }
         },
         "nb": {
@@ -8957,8 +9053,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nessun certificato server accettato"
           }
         },
         "nb": {
@@ -9015,8 +9111,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nessun URL immagine"
           }
         },
         "nb": {
@@ -9074,8 +9170,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nessuna sitemap disponibile"
           }
         },
         "nb": {
@@ -9133,8 +9229,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nessun URL video"
           }
         },
         "nb": {
@@ -9192,8 +9288,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nessun widget disponibile."
           }
         },
         "nb": {
@@ -9310,8 +9406,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Nessuna connessione, riconnessione in corso"
           }
         },
         "nb": {
@@ -9588,6 +9684,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Numeriek item"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento numerico"
           }
         }
       }
@@ -10158,8 +10260,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Una volta"
           }
         },
         "nb": {
@@ -10316,6 +10418,12 @@
             "state": "translated",
             "value": "Instellingen openen"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apri Impostazioni"
+          }
         }
       }
     },
@@ -10354,8 +10462,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Servizio openHAB Cloud"
           }
         },
         "nb": {
@@ -10589,8 +10697,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Pausa"
           }
         },
         "nb": {
@@ -10648,8 +10756,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Riproduci"
           }
         },
         "nb": {
@@ -10707,8 +10815,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Azione player"
           }
         },
         "nb": {
@@ -10751,6 +10859,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Speler-item"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento player"
           }
         }
       }
@@ -10908,8 +11022,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Stato anteprima"
           }
         },
         "nb": {
@@ -10967,8 +11081,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Precedente"
           }
         },
         "nb": {
@@ -11084,8 +11198,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Comandi in coda: %lld"
           }
         },
         "nb": {
@@ -11143,8 +11257,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Aumenta di %@"
           }
         },
         "nb": {
@@ -11261,8 +11375,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Cursori in tempo reale"
           }
         },
         "nb": {
@@ -11320,8 +11434,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Server remoto"
           }
         },
         "nb": {
@@ -11556,8 +11670,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ripristina luminosità precedente alla riattivazione"
           }
         },
         "nb": {
@@ -11733,8 +11847,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Riavvolgi"
           }
         },
         "nb": {
@@ -11969,8 +12083,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Impostazioni salvaschermo"
           }
         },
         "nb": {
@@ -12087,8 +12201,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Cerca un elemento"
           }
         },
         "nb": {
@@ -12258,8 +12372,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Seleziona colore"
           }
         },
         "nb": {
@@ -12360,6 +12474,12 @@
             "state": "translated",
             "value": "${action} verzenden naar ${itemEntity}"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invia ${action} a ${itemEntity}"
+          }
         }
       }
     },
@@ -12398,8 +12518,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Invia un comando al player come riproduci, pausa, successivo o precedente"
           }
         },
         "nb": {
@@ -12456,8 +12576,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Invio comandi: %lld"
           }
         },
         "nb": {
@@ -12575,8 +12695,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Posizione %lf, %lf inviata a %@"
           }
         },
         "nb": {
@@ -12693,8 +12813,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Data %@ inviata a %@"
           }
         },
         "nb": {
@@ -12913,6 +13033,12 @@
             "state": "translated",
             "value": "${itemEntity} instellen op ${latitude}, ${longitude}"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imposta ${itemEntity} su ${latitude}, ${longitude}"
+          }
         }
       }
     },
@@ -12935,6 +13061,12 @@
             "state": "translated",
             "value": "${itemEntity} instellen op ${value}"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imposta ${itemEntity} su ${value}"
+          }
         }
       }
     },
@@ -12956,6 +13088,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "${itemEntity} instellen op ${value} (HSB)"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imposta ${itemEntity} su ${value} (HSB)"
           }
         }
       }
@@ -13219,8 +13357,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Imposta valore controllo DateTime"
           }
         },
         "nb": {
@@ -13337,8 +13475,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Imposta valore controllo posizione"
           }
         },
         "nb": {
@@ -13455,8 +13593,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Imposta valore controllo player"
           }
         },
         "nb": {
@@ -13691,8 +13829,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Imposta la data e l'ora di un elemento di controllo DateTime"
           }
         },
         "nb": {
@@ -13868,8 +14006,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Imposta la latitudine e la longitudine di un elemento di controllo posizione"
           }
         },
         "nb": {
@@ -13910,6 +14048,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "De status van ${itemEntity} instellen op ${state}"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imposta lo stato di ${itemEntity} su ${state}"
           }
         }
       }
@@ -14008,8 +14152,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Imposta lo stato di un interruttore su acceso o spento, o attiva/disattiva il suo stato"
           }
         },
         "nb": {
@@ -14126,8 +14270,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Imposta valore"
           }
         },
         "nb": {
@@ -14302,8 +14446,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mostra data"
           }
         },
         "nb": {
@@ -14361,8 +14505,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mostra campo di ricerca"
           }
         },
         "nb": {
@@ -14420,8 +14564,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mostra secondi"
           }
         },
         "nb": {
@@ -14479,8 +14623,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Mostra ora"
           }
         },
         "nb": {
@@ -14655,8 +14799,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sitemap"
           }
         },
         "nb": {
@@ -14700,6 +14844,12 @@
             "state": "translated",
             "value": "Sitemap-diagnoselogboek"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrazione diagnostica sitemap"
+          }
         }
       }
     },
@@ -14738,8 +14888,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sitemap per Apple Watch"
           }
         },
         "nb": {
@@ -14855,8 +15005,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sitemap"
           }
         },
         "nb": {
@@ -14914,8 +15064,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Dimensione: %llu MB"
           }
         },
         "nb": {
@@ -14973,8 +15123,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Bianco morbido"
           }
         },
         "nb": {
@@ -15032,8 +15182,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ordina sitemap per"
           }
         },
         "nb": {
@@ -15150,8 +15300,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Errore SSL. Impossibile stabilire la connessione in modo sicuro."
           }
         },
         "nb": {
@@ -15487,6 +15637,12 @@
             "state": "translated",
             "value": "Tekst-item"
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento stringa"
+          }
         }
       }
     },
@@ -15584,8 +15740,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Azione interruttore"
           }
         },
         "nb": {
@@ -15628,6 +15784,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Schakelaar-item"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento interruttore"
           }
         }
       }
@@ -15839,8 +16001,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Testa connessione"
           }
         },
         "nb": {
@@ -15898,8 +16060,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Testa salvaschermo"
           }
         },
         "nb": {
@@ -15957,8 +16119,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "La connessione è scaduta. Riprova più tardi."
           }
         },
         "nb": {
@@ -16120,6 +16282,12 @@
             "state": "translated",
             "value": "De URL is ongeldig. Controleer het formaat (bijv. http://192.168.2.1:8080 of http://[::1]:8080 voor IPv6)."
           }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'URL non è valido. Controlla il formato (es. http://192.168.2.1:8080 o http://[::1]:8080 per IPv6)."
+          }
         }
       }
     },
@@ -16158,8 +16326,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Riquadri"
           }
         },
         "nb": {
@@ -16217,8 +16385,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Temporizzazione"
           }
         },
         "nb": {
@@ -16261,6 +16429,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Om verbinding te maken met uw lokale openHAB-server, sta toegang tot het lokale netwerk toe wanneer hierom wordt gevraagd. Als u dit eerder heeft geweigerd, schakel het in via Instellingen → Privacy en beveiliging → Lokaal netwerk."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per connetterti al tuo server openHAB locale, consenti l'accesso alla rete locale quando richiesto. Se in precedenza hai negato l'accesso, abilitalo in Impostazioni → Privacy e sicurezza → Rete locale."
           }
         }
       }
@@ -16360,8 +16534,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Attiva/Disattiva"
           }
         },
         "nb": {
@@ -16537,8 +16711,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Errore imprevisto: %@"
           }
         },
         "nb": {
@@ -17120,8 +17294,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Molto freddo"
           }
         },
         "nb": {
@@ -17179,8 +17353,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Molto caldo"
           }
         },
         "nb": {
@@ -17238,8 +17412,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Bianco caldo"
           }
         },
         "nb": {
@@ -17355,8 +17529,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Attenzione: rinominare la casa potrebbe causare il malfunzionamento delle integrazioni esterne come i comandi rapidi fino alla loro riconfigurazione."
           }
         },
         "nb": {
@@ -17414,8 +17588,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Sembra che tu sia offline. Controlla la connessione a Internet."
           }
         },
         "nb": {
@@ -17472,8 +17646,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Dimensione orologio: %@"
           }
         },
         "nb": {
@@ -17531,8 +17705,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Livello dimmeraggio: %@"
           }
         },
         "nb": {
@@ -17590,8 +17764,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Data relativa: %@"
           }
         },
         "nb": {
@@ -17649,8 +17823,8 @@
         },
         "it": {
           "stringUnit": {
-            "state": "new",
-            "value": ""
+            "state": "translated",
+            "value": "Ripristina luminosità: %@"
           }
         },
         "nb": {
