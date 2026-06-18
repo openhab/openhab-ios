@@ -38,6 +38,8 @@ final class ScreenSaverManager: NSObject {
 
     private var previousBrightness: CGFloat?
 
+    private var lastActivity: Date?
+
     override private init() {
         super.init()
         NotificationCenter.default.addObserver(self, selector: #selector(handleDisableNotification), name: .disableScreenSaver, object: nil)
@@ -48,7 +50,6 @@ final class ScreenSaverManager: NSObject {
     func startMonitoring(window: UIWindow, configuration: ScreenSaverConfiguration = ScreenSaverConfiguration()) {
         self.configuration = configuration
         self.window = window
-        attachGestureRecognizers(to: window)
         resetIdleTimer()
     }
 
@@ -63,21 +64,22 @@ final class ScreenSaverManager: NSObject {
         }
     }
 
-    private func attachGestureRecognizers(to window: UIWindow) {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(userInteracted))
-        tap.cancelsTouchesInView = false
-        tap.delaysTouchesEnded = false
-        tap.delegate = self
-        window.addGestureRecognizer(tap)
+    /// Resets the idle timer on user touches, forwarded from `ActivityTrackingApplication`.
+    func noteUserActivity() {
+        guard configuration.isEnabled else { return }
 
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(userInteracted))
-        pan.cancelsTouchesInView = false
-        pan.delegate = self
-        window.addGestureRecognizer(pan)
-    }
+        if overlayWindow != nil {
+            dismissSaverIfNeeded()
+            resetIdleTimer()
+            lastActivity = Date()
+            return
+        }
 
-    @objc private func userInteracted() {
-        dismissSaverIfNeeded()
+        // Throttle: continuous gestures fire many touches per second.
+        if let last = lastActivity, Date().timeIntervalSince(last) < 1.0 {
+            return
+        }
+        lastActivity = Date()
         resetIdleTimer()
     }
 
@@ -210,10 +212,4 @@ extension Notification.Name {
     static let disableScreenSaver = Notification.Name("disableScreenSaver")
     static let wakeScreenSaver = Notification.Name("wakeScreenSaver")
     static let activateScreenSaver = Notification.Name("activateScreenSaver")
-}
-
-extension ScreenSaverManager: UIGestureRecognizerDelegate {
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        true
-    }
 }

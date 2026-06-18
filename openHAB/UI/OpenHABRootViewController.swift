@@ -511,7 +511,8 @@ class OpenHABRootViewController: UIViewController {
             }
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) { [weak self] in
                 guard let self else { return }
-                if needsSwitch, !webViewController.hasLoadedPage {
+                // Re-tapping Home while already on it reloads.
+                if !needsSwitch || !webViewController.hasLoadedPage {
                     webViewController.reloadView()
                 }
                 transitionCoverView.isHidden = true
