@@ -16,7 +16,7 @@ import SwiftUI
 
 struct RollershutterRow: View {
     let widget: OpenHABWidget
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
     @State private var commandSender = WidgetCommandDispatcher()
 
     var body: some View {

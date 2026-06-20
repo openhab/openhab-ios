@@ -15,7 +15,7 @@ import SwiftUI
 
 struct GenericRow: View {
     let widget: OpenHABWidget
-    @ObservedObject var settings = AppSettings.shared
+    let settings = AppSettings.shared
 
     var body: some View {
         HStack {

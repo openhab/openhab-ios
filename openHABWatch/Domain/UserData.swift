@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import CommonUI
 import Foundation
 import OpenHABCore
@@ -17,15 +16,16 @@ import os.log
 import SwiftUI
 
 @MainActor
-final class UserData: ObservableObject {
+@Observable
+final class UserData {
     static let shared = UserData()
 
-    @Published var widgets: [OpenHABWidget] = []
-    @Published var showAlert = false
-    @Published var errorDescription = ""
-    @Published var showCertificateAlert = false
-    @Published var certificateErrorDescription = ""
-    @Published var isLoadingSitemap = false
+    var widgets: [OpenHABWidget] = []
+    var showAlert = false
+    var errorDescription = ""
+    var showCertificateAlert = false
+    var certificateErrorDescription = ""
+    var isLoadingSitemap = false
 
     // Cache last successful widgets to prevent empty state during reconnections
     private var cachedWidgets: [OpenHABWidget] = []
@@ -36,16 +36,17 @@ final class UserData: ObservableObject {
     /// preventing a completing old task from wiping out a newly started task for the same sitemap.
     private var taskGeneration = 0
 
-    private var pageHandlingTask: Task<Void, Never>?
-    private var networkObservationTask: Task<Void, Never>?
-    // nonisolated(unsafe): accessed only from deinit, which is the last operation on the instance.
+    // nonisolated(unsafe): these are cancelled only from deinit, which is the last operation on the instance.
+    private nonisolated(unsafe) var pageHandlingTask: Task<Void, Never>?
+    private nonisolated(unsafe) var networkObservationTask: Task<Void, Never>?
+    private nonisolated(unsafe) var haveContextObservationTask: Task<Void, Never>?
+    private nonisolated(unsafe) var sitemapObservationTask: Task<Void, Never>?
+    private nonisolated(unsafe) var connectionConfigObservationTask: Task<Void, Never>?
     private nonisolated(unsafe) var notificationObservers: [any NSObjectProtocol] = []
-    @Published var isPolling = false
+    var isPolling = false
 
-    @Published var openHABSitemapPage: OpenHABPage?
+    var openHABSitemapPage: OpenHABPage?
     var currentClientDelegate: HTTPClientDelegate?
-
-    private var cancellables = Set<AnyCancellable>()
 
     init(preview: Bool = false) {
         #if DEBUG
@@ -96,59 +97,9 @@ final class UserData: ObservableObject {
 
     init() {
         setupNotificationObservers()
-
-        AppSettings.shared.$haveReceivedAppContext
-            .removeDuplicates()
-            .filter { $0 == true }
-            .sink { [weak self] _ in
-                Task {
-                    await self?.updateNetwork()
-                }
-            }
-            .store(in: &cancellables)
-
-        // Observe sitemap changes - reload the sitemap when it changes
-        // Note: We don't use .dropFirst() here because we need to catch the initial value
-        // when the app context is first received from the iOS app on real devices
-        AppSettings.shared.$sitemapForWatch
-            .removeDuplicates()
-            .debounce(for: .seconds(0.3), scheduler: RunLoop.main)
-            .sink { [weak self] newValue in
-                guard !newValue.isEmpty else {
-                    Logger.userData.debug("Sitemap observer: empty sitemap, ignoring")
-                    return
-                }
-                Logger.userData.debug("Sitemap observer fired: \(newValue)")
-                Task { @MainActor in
-                    guard let self else { return }
-
-                    // Only force restart if the sitemap name actually changed
-                    let isDifferentSitemap = self.currentlyLoadingSitemap != newValue
-                    Logger.userData.debug("Sitemap change detected - current: \(self.currentlyLoadingSitemap ?? "nil"), new: \(newValue), force: \(isDifferentSitemap)")
-
-                    // Note: We don't check for active connection here because NetworkTracker
-                    // can report false negatives (especially during long-polling on real devices).
-                    // The observeNetworkChanges() function will handle retrying when network becomes available.
-                    self.startPageHandling(sitemapName: newValue, force: isDifferentSitemap)
-                }
-            }
-            .store(in: &cancellables)
-
-        // Observe connection config changes and trigger on initial values (no dropFirst).
-        // This covers cold start (persisted connections fire immediately on subscription)
-        // and config updates (server URL changed on iPhone and synced via WC).
-        AppSettings.shared.$localConnectionConfig
-            .combineLatest(AppSettings.shared.$remoteConnectionConfig)
-            .removeDuplicates { lhs, rhs in
-                lhs.0?.url == rhs.0?.url && lhs.1?.url == rhs.1?.url
-            }
-            .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
-            .sink { [weak self] _, _ in
-                Task { @MainActor in
-                    await self?.updateNetwork()
-                }
-            }
-            .store(in: &cancellables)
+        observeHaveReceivedAppContext()
+        observeSitemapForWatch()
+        observeConnectionConfigs()
 
         networkObservationTask = Task { [weak self] in
             // Obtain the stream without capturing self, so self is not held across suspensions.
@@ -157,6 +108,119 @@ final class UserData: ObservableObject {
                 guard let self else { break }
                 handleConnectionEvent(connection)
             }
+        }
+    }
+
+    // Replicates the old $haveReceivedAppContext.filter { $0 }.sink behavior.
+    // Fires immediately if the value is already true, then watches for transitions to true.
+    private func observeHaveReceivedAppContext() {
+        haveContextObservationTask = Task { @MainActor [weak self] in
+            if AppSettings.shared.haveReceivedAppContext {
+                await self?.updateNetwork()
+            }
+            var previous = AppSettings.shared.haveReceivedAppContext
+            while !Task.isCancelled {
+                await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                    withObservationTracking {
+                        _ = AppSettings.shared.haveReceivedAppContext
+                    } onChange: {
+                        continuation.resume()
+                    }
+                }
+                guard let self else { break }
+                let current = AppSettings.shared.haveReceivedAppContext
+                if current, !previous {
+                    await updateNetwork()
+                }
+                previous = current
+            }
+        }
+    }
+
+    // True debounce equivalent of $sitemapForWatch.removeDuplicates().debounce(0.3).sink.
+    // Triggers on the initial value (no dropFirst) to start page handling on cold start.
+    // Each detected change cancels the pending timer and starts a fresh 300ms one, so only
+    // the final change in a rapid burst triggers startPageHandling.
+    private func observeSitemapForWatch() {
+        sitemapObservationTask = Task { @MainActor [weak self] in
+            let initial = AppSettings.shared.sitemapForWatch
+            var previous = initial
+            var debounceTask: Task<Void, Never>?
+            if !initial.isEmpty {
+                debounceTask = Task { @MainActor [weak self] in
+                    try? await Task.sleep(for: .milliseconds(300))
+                    guard !Task.isCancelled, let self else { return }
+                    let force = currentlyLoadingSitemap != initial
+                    Logger.userData.debug("Sitemap observer initial (debounced): \(initial), force: \(force)")
+                    startPageHandling(sitemapName: initial, force: force)
+                }
+            }
+            while !Task.isCancelled {
+                await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                    withObservationTracking {
+                        _ = AppSettings.shared.sitemapForWatch
+                    } onChange: {
+                        continuation.resume()
+                    }
+                }
+                guard let self, !Task.isCancelled else { break }
+                let current = AppSettings.shared.sitemapForWatch
+                guard current != previous else { continue }
+                previous = current
+                debounceTask?.cancel()
+                debounceTask = Task { @MainActor [weak self] in
+                    try? await Task.sleep(for: .milliseconds(300))
+                    guard !Task.isCancelled, let self else { return }
+                    guard !current.isEmpty else {
+                        Logger.userData.debug("Sitemap observer: empty sitemap, ignoring")
+                        return
+                    }
+                    Logger.userData.debug("Sitemap observer fired: \(current)")
+                    let isDifferentSitemap = currentlyLoadingSitemap != current
+                    Logger.userData.debug("Sitemap change detected - current: \(self.currentlyLoadingSitemap ?? "nil"), new: \(current), force: \(isDifferentSitemap)")
+                    startPageHandling(sitemapName: current, force: isDifferentSitemap)
+                }
+            }
+            debounceTask?.cancel()
+        }
+    }
+
+    // True debounce equivalent of $localConnectionConfig.combineLatest($remoteConnectionConfig)
+    // .removeDuplicates{url}.debounce(0.5).sink.
+    // Triggers on initial values (no dropFirst) to cover cold start.
+    // Each detected URL change cancels the pending timer and starts a fresh 500ms one.
+    private func observeConnectionConfigs() {
+        connectionConfigObservationTask = Task { @MainActor [weak self] in
+            var prevLocalURL = AppSettings.shared.localConnectionConfig?.url
+            var prevRemoteURL = AppSettings.shared.remoteConnectionConfig?.url
+            var debounceTask: Task<Void, Never>? = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .milliseconds(500))
+                guard !Task.isCancelled, let self else { return }
+                await updateNetwork()
+            }
+            while !Task.isCancelled {
+                await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                    withObservationTracking {
+                        _ = AppSettings.shared.localConnectionConfig
+                        _ = AppSettings.shared.remoteConnectionConfig
+                    } onChange: {
+                        continuation.resume()
+                    }
+                }
+                guard let self, !Task.isCancelled else { break }
+                let localURL = AppSettings.shared.localConnectionConfig?.url
+                let remoteURL = AppSettings.shared.remoteConnectionConfig?.url
+                guard localURL != prevLocalURL || remoteURL != prevRemoteURL else { continue }
+                prevLocalURL = localURL
+                prevRemoteURL = remoteURL
+                debounceTask?.cancel()
+                debounceTask = Task { @MainActor [weak self] in
+                    try? await Task.sleep(for: .milliseconds(500))
+                    guard !Task.isCancelled, let self else { return }
+                    await updateNetwork()
+                }
+            }
+            debounceTask?.cancel()
         }
     }
 
@@ -483,8 +547,8 @@ final class UserData: ObservableObject {
             : widgets
         decorateWidgetsWithSendCommand(allWidgets)
 
-        // Only reassign the @Published array when the list structure actually
-        // changed (widgets added, removed, or reordered). This avoids a full
+        // Only reassign the array when the list structure actually changed
+        // (widgets added, removed, or reordered). This avoids a full
         // ScrollView rebuild that resets the scroll position.
         if structureChanged {
             widgets = allWidgets
@@ -509,6 +573,9 @@ final class UserData: ObservableObject {
         // here is therefore a no-op in the normal path but harmless as a safety net.
         pageHandlingTask?.cancel()
         networkObservationTask?.cancel()
+        haveContextObservationTask?.cancel()
+        sitemapObservationTask?.cancel()
+        connectionConfigObservationTask?.cancel()
         notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 }

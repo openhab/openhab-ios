@@ -46,7 +46,7 @@ struct CompactLabeledContentStyle: LabeledContentStyle {
 }
 
 struct PreferencesSwiftUIView: View {
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
 
     var applicationVersionNumber: String = {
         let appBuildString = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
@@ -83,5 +83,5 @@ extension View {
 
 #Preview {
     PreferencesSwiftUIView()
-        .environmentObject(AppSettings())
+        .environment(AppSettings())
 }
