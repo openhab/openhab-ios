@@ -36,13 +36,14 @@ final class UserData {
     /// preventing a completing old task from wiping out a newly started task for the same sitemap.
     private var taskGeneration = 0
 
-    // nonisolated(unsafe): these are cancelled only from deinit, which is the last operation on the instance.
-    private nonisolated(unsafe) var pageHandlingTask: Task<Void, Never>?
-    private nonisolated(unsafe) var networkObservationTask: Task<Void, Never>?
-    private nonisolated(unsafe) var haveContextObservationTask: Task<Void, Never>?
-    private nonisolated(unsafe) var sitemapObservationTask: Task<Void, Never>?
-    private nonisolated(unsafe) var connectionConfigObservationTask: Task<Void, Never>?
-    private nonisolated(unsafe) var notificationObservers: [any NSObjectProtocol] = []
+    // @ObservationIgnored prevents the @Observable macro from generating @MainActor-isolated
+    // backing storage, keeping these as plain stored properties that deinit can cancel.
+    @ObservationIgnored private nonisolated(unsafe) var pageHandlingTask: Task<Void, Never>?
+    @ObservationIgnored private nonisolated(unsafe) var networkObservationTask: Task<Void, Never>?
+    @ObservationIgnored private nonisolated(unsafe) var haveContextObservationTask: Task<Void, Never>?
+    @ObservationIgnored private nonisolated(unsafe) var sitemapObservationTask: Task<Void, Never>?
+    @ObservationIgnored private nonisolated(unsafe) var connectionConfigObservationTask: Task<Void, Never>?
+    @ObservationIgnored private nonisolated(unsafe) var notificationObservers: [any NSObjectProtocol] = []
     var isPolling = false
 
     var openHABSitemapPage: OpenHABPage?
