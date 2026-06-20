@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.2.77, Build 286] - 2026-06-20Z
+
+- Fix Home re-tap reload and screensaver idle reset (#1266)
+
 ## [Version 3.2.76, Build 285] - 2026-06-19Z
 
 - l10n: switch German and French translations to informal address (du/tu)
