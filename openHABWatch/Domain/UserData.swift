@@ -180,9 +180,9 @@ final class UserData {
                         return
                     }
                     Logger.userData.debug("Sitemap observer fired: \(current)")
-                    let isDifferentSitemap = currentlyLoadingSitemap != current
-                    Logger.userData.debug("Sitemap change detected - current: \(currentlyLoadingSitemap ?? "nil"), new: \(current), force: \(isDifferentSitemap)")
-                    startPageHandling(sitemapName: current, force: isDifferentSitemap)
+                    let isDifferentSitemap = self.currentlyLoadingSitemap != current
+                    Logger.userData.debug("Sitemap change detected - current: \(self.currentlyLoadingSitemap ?? "nil"), new: \(current), force: \(isDifferentSitemap)")
+                    self.startPageHandling(sitemapName: current, force: isDifferentSitemap)
                 }
             }
             debounceTask?.cancel()
@@ -361,13 +361,12 @@ final class UserData {
         let capturedGeneration = taskGeneration
 
         pageHandlingTask = Task {
-            let taskSitemapName = sitemapName
             defer {
                 // Use the captured generation rather than sitemap name: a force-refresh of the same
                 // sitemap would set currentlyLoadingSitemap to the same string, so the name check
                 // would incorrectly clear the new task's slot when the old task finishes.
                 if taskGeneration == capturedGeneration {
-                    Logger.userData.debug("Clearing page handling task for: \(taskSitemapName)")
+                    Logger.userData.debug("Clearing page handling task for: \(sitemapName)")
                     pageHandlingTask = nil
                     currentlyLoadingSitemap = nil
                 }
@@ -400,7 +399,7 @@ final class UserData {
                 }
 
                 Logger.userData.debug("Using connection: \(connectionInfo.configuration.url)")
-                Logger.userData.debug("Starting page stream for sitemap: \(taskSitemapName)")
+                Logger.userData.debug("Starting page stream for sitemap: \(sitemapName)")
 
                 for try await event in SitemapPageLoader.stream(
                     sitemapName: sitemapName,
@@ -430,7 +429,7 @@ final class UserData {
             } catch is CancellationError {
                 return
             } catch {
-                Logger.userData.error("Page handling failed for sitemap '\(taskSitemapName)': \(error.localizedDescription)")
+                Logger.userData.error("Page handling failed for sitemap '\(sitemapName)': \(error.localizedDescription)")
 
                 // Use cached widgets if available instead of clearing completely
                 if cachedWidgets.isEmpty {
