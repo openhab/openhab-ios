@@ -154,9 +154,9 @@ final class UserData {
                 debounceTask = Task { @MainActor [weak self] in
                     try? await Task.sleep(for: .milliseconds(300))
                     guard !Task.isCancelled, let self else { return }
-                    let force = self.currentlyLoadingSitemap != initial
+                    let force = currentlyLoadingSitemap != initial
                     Logger.userData.debug("Sitemap observer initial (debounced): \(initial), force: \(force)")
-                    self.startPageHandling(sitemapName: initial, force: force)
+                    startPageHandling(sitemapName: initial, force: force)
                 }
             }
             while !Task.isCancelled {
@@ -179,10 +179,10 @@ final class UserData {
                         Logger.userData.debug("Sitemap observer: empty sitemap, ignoring")
                         return
                     }
-                    Logger.userData.debug("Sitemap observer fired: \(current)")
-                    let isDifferentSitemap = self.currentlyLoadingSitemap != current
-                    Logger.userData.debug("Sitemap change detected - current: \(self.currentlyLoadingSitemap ?? "nil"), new: \(current), force: \(isDifferentSitemap)")
-                    self.startPageHandling(sitemapName: current, force: isDifferentSitemap)
+                    let isDifferentSitemap = currentlyLoadingSitemap != current
+                    let currentlySitemap = currentlyLoadingSitemap ?? "nil"
+                    Logger.userData.debug("Sitemap change detected - current: \(currentlySitemap), new: \(current), force: \(isDifferentSitemap)")
+                    startPageHandling(sitemapName: current, force: isDifferentSitemap)
                 }
             }
             debounceTask?.cancel()
