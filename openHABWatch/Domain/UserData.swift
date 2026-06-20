@@ -115,8 +115,8 @@ final class UserData {
         }
     }
 
-    // Replicates the old $haveReceivedAppContext.filter { $0 }.sink behavior.
-    // Fires immediately if the value is already true, then watches for transitions to true.
+    /// Replicates the old $haveReceivedAppContext.filter { $0 }.sink behavior.
+    /// Fires immediately if the value is already true, then watches for transitions to true.
     private func observeHaveReceivedAppContext() {
         haveContextObservationTask = Task { @MainActor [weak self] in
             if AppSettings.shared.haveReceivedAppContext {
@@ -141,10 +141,10 @@ final class UserData {
         }
     }
 
-    // True debounce equivalent of $sitemapForWatch.removeDuplicates().debounce(0.3).sink.
-    // Triggers on the initial value (no dropFirst) to start page handling on cold start.
-    // Each detected change cancels the pending timer and starts a fresh 300ms one, so only
-    // the final change in a rapid burst triggers startPageHandling.
+    /// True debounce equivalent of $sitemapForWatch.removeDuplicates().debounce(0.3).sink.
+    /// Triggers on the initial value (no dropFirst) to start page handling on cold start.
+    /// Each detected change cancels the pending timer and starts a fresh 300ms one, so only
+    /// the final change in a rapid burst triggers startPageHandling.
     private func observeSitemapForWatch() {
         sitemapObservationTask = Task { @MainActor [weak self] in
             let initial = AppSettings.shared.sitemapForWatch
@@ -154,9 +154,9 @@ final class UserData {
                 debounceTask = Task { @MainActor [weak self] in
                     try? await Task.sleep(for: .milliseconds(300))
                     guard !Task.isCancelled, let self else { return }
-                    let force = currentlyLoadingSitemap != initial
+                    let force = self.currentlyLoadingSitemap != initial
                     Logger.userData.debug("Sitemap observer initial (debounced): \(initial), force: \(force)")
-                    startPageHandling(sitemapName: initial, force: force)
+                    self.startPageHandling(sitemapName: initial, force: force)
                 }
             }
             while !Task.isCancelled {
@@ -181,7 +181,7 @@ final class UserData {
                     }
                     Logger.userData.debug("Sitemap observer fired: \(current)")
                     let isDifferentSitemap = currentlyLoadingSitemap != current
-                    Logger.userData.debug("Sitemap change detected - current: \(self.currentlyLoadingSitemap ?? "nil"), new: \(current), force: \(isDifferentSitemap)")
+                    Logger.userData.debug("Sitemap change detected - current: \(currentlyLoadingSitemap ?? "nil"), new: \(current), force: \(isDifferentSitemap)")
                     startPageHandling(sitemapName: current, force: isDifferentSitemap)
                 }
             }
@@ -189,10 +189,10 @@ final class UserData {
         }
     }
 
-    // True debounce equivalent of $localConnectionConfig.combineLatest($remoteConnectionConfig)
-    // .removeDuplicates{url}.debounce(0.5).sink.
-    // Triggers on initial values (no dropFirst) to cover cold start.
-    // Each detected URL change cancels the pending timer and starts a fresh 500ms one.
+    /// True debounce equivalent of $localConnectionConfig.combineLatest($remoteConnectionConfig)
+    /// .removeDuplicates{url}.debounce(0.5).sink.
+    /// Triggers on initial values (no dropFirst) to cover cold start.
+    /// Each detected URL change cancels the pending timer and starts a fresh 500ms one.
     private func observeConnectionConfigs() {
         connectionConfigObservationTask = Task { @MainActor [weak self] in
             var prevLocalURL = AppSettings.shared.localConnectionConfig?.url
