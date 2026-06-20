@@ -43,6 +43,9 @@ final class UserData {
     @ObservationIgnored private nonisolated(unsafe) var haveContextObservationTask: Task<Void, Never>?
     @ObservationIgnored private nonisolated(unsafe) var sitemapObservationTask: Task<Void, Never>?
     @ObservationIgnored private nonisolated(unsafe) var connectionConfigObservationTask: Task<Void, Never>?
+    // nonisolated(unsafe): [any NSObjectProtocol] is not Sendable; without this the compiler
+    // rejects the deinit removeObserver call, yet also warns that the annotation has no effect —
+    // a known Swift diagnostics contradiction; the annotation IS required for deinit access.
     @ObservationIgnored private nonisolated(unsafe) var notificationObservers: [any NSObjectProtocol] = []
     var isPolling = false
 
