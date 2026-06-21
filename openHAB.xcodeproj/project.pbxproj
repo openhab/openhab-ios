@@ -219,7 +219,6 @@
 /* Begin PBXFileReference section */
 		06A8490213945021806A13D1 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/SwiftUI.framework; sourceTree = DEVELOPER_DIR; };
 		0F298FB19C2A149258FE7CC6 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/WidgetKit.framework; sourceTree = DEVELOPER_DIR; };
-		1224F78D228A89FC00750965 /* WatchMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchMessageService.swift; sourceTree = "<group>"; };
 		16CFF4D57F6DF603FF1C1B9D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		1F77A157AAF1DD5AB45D6BA2 /* SetActiveHomeIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetActiveHomeIntent.swift; sourceTree = "<group>"; };
 		2F399AB92F5357E900F72A30 /* InputCommandFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputCommandFormatterTests.swift; sourceTree = "<group>"; };
@@ -559,14 +558,6 @@
 			name = External;
 			path = openHABWatch/External;
 			sourceTree = SOURCE_ROOT;
-		};
-		2F2150892F75C2FC001BA057 /* Watch */ = {
-			isa = PBXGroup;
-			children = (
-				1224F78D228A89FC00750965 /* WatchMessageService.swift */,
-			);
-			name = Watch;
-			sourceTree = "<group>";
 		};
 		6571444F2C1E438700C8A1F3 /* NotificationService */ = {
 			isa = PBXGroup;
