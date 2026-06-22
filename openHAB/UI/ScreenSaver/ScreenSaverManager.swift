@@ -38,6 +38,10 @@ final class ScreenSaverManager: NSObject {
 
     private var previousBrightness: CGFloat?
 
+    private var screen: UIScreen? {
+        window?.windowScene?.screen
+    }
+
     private var lastActivity: Date?
 
     override private init() {
@@ -108,7 +112,7 @@ final class ScreenSaverManager: NSObject {
             overlay = UIWindow(windowScene: scene)
             overlay.frame = scene.coordinateSpace.bounds
         } else {
-            overlay = UIWindow(frame: UIScreen.main.bounds)
+            overlay = UIWindow(frame: (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.screen.bounds ?? .zero)
         }
         overlay.windowLevel = .alert + 1 // ensure above status bar
         overlay.backgroundColor = .clear
@@ -153,7 +157,7 @@ final class ScreenSaverManager: NSObject {
                 restoreBrightnessIfNeeded()
             } else {
                 let target = min(max(configuration.wakeBrightnessLevel, 0.0), 1.0)
-                UIScreen.main.brightness = target
+                screen?.brightness = target
             }
         }
         // Animate dismissal for the overlay window
@@ -168,15 +172,15 @@ final class ScreenSaverManager: NSObject {
 
     private func applyDimming() {
         guard configuration.enablesAutoDimming else { return }
-        previousBrightness = UIScreen.main.brightness
+        previousBrightness = screen?.brightness
         var target = configuration.dimLevel
         target = min(max(target, 0.0), 1.0)
-        UIScreen.main.brightness = target
+        screen?.brightness = target
     }
 
     private func restoreBrightnessIfNeeded() {
         guard let original = previousBrightness else { return }
-        UIScreen.main.brightness = original
+        screen?.brightness = original
         previousBrightness = nil
     }
 

@@ -832,7 +832,7 @@ class OpenHABRootViewController: UIViewController {
         case "brightness":
             if let value = Double(arg1) {
                 let target = min(max(value, 0.0), 1.0)
-                UIScreen.main.brightness = target
+                (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.screen.brightness = target
             }
         case "tts":
             func normalizeVoiceName(from input: String) -> String {
