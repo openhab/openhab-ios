@@ -150,6 +150,12 @@ platform :ios do
         )
 
         update_code_signing_settings(
+            targets: 'openHABWidgetExtension',
+            profile_name: 'match AppStore org.openhab.app.openHABWidget',
+            build_configurations: ["Release"]
+        )
+
+        update_code_signing_settings(
             targets: 'OpenHABWatchComplicationsExtension',
             profile_name: 'match AppStore org.openhab.app.watchkitapp.OpenHABWatchComplications',
             build_configurations: ["Release"]
