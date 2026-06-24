@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [Version 3.2.77, Build 286] - 2026-06-20Z
+
+- Fix Home re-tap reload and screensaver idle reset (#1266)
+
+## [Version 3.2.76, Build 285] - 2026-06-19Z
+
+- l10n: switch German and French translations to informal address (du/tu)
+- l10n: complete Italian translations for 165 untranslated keys (#1262)
+- l10n: complete Dutch translations for 165 untranslated keys (#1261)
+- l10n: complete FR translations (#1260)
+- fix: format percentages with FormatStyle to resolve localization warnings (#1264)
+- chore: remove 11 stale localization keys (#1263)
+
 ## [Version 3.2.75, Build 284] - 2026-06-16Z
 
 - Fix WebUI Reload Issue (#1259)
