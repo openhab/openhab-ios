@@ -20,15 +20,6 @@
       }
     },
     {
-      "identity" : "devicekit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/devicekit/DeviceKit.git",
-      "state" : {
-        "revision" : "581df61650bc457ec00373a592a84be3e7468eb1",
-        "version" : "5.7.0"
-      }
-    },
-    {
       "identity" : "firebase-ios-sdk",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/firebase/firebase-ios-sdk.git",
