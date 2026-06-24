@@ -511,7 +511,8 @@ class OpenHABRootViewController: UIViewController {
             }
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) { [weak self] in
                 guard let self else { return }
-                if needsSwitch, !webViewController.hasLoadedPage {
+                // Re-tapping Home while already on it reloads.
+                if !needsSwitch || !webViewController.hasLoadedPage {
                     webViewController.reloadView()
                 }
                 transitionCoverView.isHidden = true
@@ -831,7 +832,7 @@ class OpenHABRootViewController: UIViewController {
         case "brightness":
             if let value = Double(arg1) {
                 let target = min(max(value, 0.0), 1.0)
-                UIScreen.main.brightness = target
+                view.window?.windowScene?.screen.brightness = target
             }
         case "tts":
             func normalizeVoiceName(from input: String) -> String {
