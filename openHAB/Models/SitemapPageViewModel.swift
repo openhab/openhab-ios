@@ -376,6 +376,7 @@ extension SitemapPageViewModel {
             pipelineStartedAt: pipelineStartedAt
         )
 
+
         defer {
             if activePageHandlingID == runID {
                 pageHandlingTask = nil

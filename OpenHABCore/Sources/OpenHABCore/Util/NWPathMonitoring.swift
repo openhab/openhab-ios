@@ -41,3 +41,4 @@ public protocol NWPathMonitoring: AnyObject, Sendable {
     func startMonitoring(handler: @escaping (Bool) async -> Void) async
     func cancel()
 }
+

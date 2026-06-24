@@ -71,6 +71,7 @@ public struct OpenHABNotification: Identifiable, Hashable, Sendable {
     }
 }
 
+
 /// Decode an instance of OpenHABNotification.CodingData rather than decoding a OpenHABNotificaiton value directly,
 /// then convert that into a openHABNotification
 /// Inspired by https://www.swiftbysundell.com/basics/codable?rq=codingdata
