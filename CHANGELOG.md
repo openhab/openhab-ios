@@ -2,6 +2,32 @@
 
 ## [Unreleased]
 
+- fix: add provisioning profile for openHABWidgetExtension
+- fix: replace UIScreen.main with scene-based screen access (iOS 27 crash) (#1269)
+- Bump minor version number to 3.3.1
+- chore(deps): bump actions/checkout from 6 to 7 (#1268)
+- chore: remove Crowdin workflow and clean up Package.resolved
+- chore: remove unused DeviceKit dependency
+- l10n: add Spanish, Finnish, Norwegian, and Russian translations
+- l10n: switch German and French translations to informal address (du/tu)
+- chore: remove 5 stale localization keys on feature branch
+- l10n: add Spanish, Finnish, Norwegian, and Russian translations
+- l10n: translate 2 new widget keys into all 9 languages
+- chore: update openHABWidgetExtension scheme with askForAppToLaunch
+- fix: restore project.pbxproj corrupted by bad 3-way merge of pbxproj
+- chore: add shared schemes for openHABWidgetExtension and OpenHABWatchComplicationsExtension
+- build: raise macOS minimum to 15 for AsyncSequence.Failure support
+- chore: bump openHABTestsSwift deployment target to iOS 18.0
+- Merge develop + fix build warnings; add iOS home screen widgets with item display
+- Sensor widget: format state values using stateDescription numberPattern
+- Sensor widget: support 1/2/4 items per small/medium/large size
+- Make ScrollToTop overlay button conditional (#1231)
+- Bump minimum deployment targets to iOS 18 / watchOS 11
+- Use iOS 18 onScrollGeometryChange in SitemapPageView
+- Use iOS 17 animation and scroll APIs
+- ItemEventStream: backport SSE watchdog and self-contained network monitor
+- openHABWidget: add interactive switch and sensor widgets
+
 ## [Version 3.2.77, Build 286] - 2026-06-20Z
 
 - Fix Home re-tap reload and screensaver idle reset (#1266)
