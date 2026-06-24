@@ -39,6 +39,7 @@ class OpenHABWebViewController: OpenHABViewController {
     private var lastLoadedURL: String? // Track the last successfully loaded URL from didFinish
     private var isConfirmingExternalURL = false
     private var externalURLCooldownUntil: Date?
+    private weak var webHistoryBackGesture: UIScreenEdgePanGestureRecognizer?
 
     var hasLoadedPage: Bool {
         !currentTarget.isEmpty
@@ -119,9 +120,10 @@ class OpenHABWebViewController: OpenHABViewController {
         super.viewDidLoad()
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
         attachWebViewToLayout(webView)
+        configureWebHistoryGestures(for: webView)
 
         loadingOverlay.backgroundColor = .systemBackground
-        loadingOverlay.isHidden = true
+        loadingOverlay.isHidden = false
         loadingOverlay.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(loadingOverlay)
         NSLayoutConstraint.activate([
@@ -517,6 +519,8 @@ class OpenHABWebViewController: OpenHABViewController {
             webview.isInspectable = true
         }
 
+        configureWebHistoryGestures(for: webview)
+
         // Avoid safe-area content insets which can leave a small gap at the bottom on iPad until a reload.
         webview.scrollView.contentInsetAdjustmentBehavior = .never
         webview.scrollView.contentInset = .zero
@@ -545,6 +549,56 @@ class OpenHABWebViewController: OpenHABViewController {
         ])
         view.setNeedsLayout()
         view.layoutIfNeeded()
+    }
+}
+
+extension OpenHABWebViewController: UIGestureRecognizerDelegate {
+    private func configureWebHistoryGestures(for webView: WKWebView) {
+        webView.allowsBackForwardNavigationGestures = false
+
+        guard webHistoryBackGesture?.view !== webView else {
+            return
+        }
+
+        if let webHistoryBackGesture {
+            webHistoryBackGesture.view?.removeGestureRecognizer(webHistoryBackGesture)
+        }
+
+        let backGesture = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(handleWebHistoryEdgePan(_:)))
+        backGesture.edges = .left
+        backGesture.delegate = self
+        webView.addGestureRecognizer(backGesture)
+        webHistoryBackGesture = backGesture
+    }
+
+    @objc private func handleWebHistoryEdgePan(_ gesture: UIScreenEdgePanGestureRecognizer) {
+        guard gesture.state == .ended else { return }
+
+        let translation = gesture.translation(in: webView)
+        let velocity = gesture.velocity(in: webView)
+        let hasIntent = abs(translation.x) > 35 || abs(velocity.x) > 250
+        guard hasIntent else { return }
+
+        guard gesture.edges == .left,
+              translation.x > 0 || velocity.x > 0 else { return }
+
+        navigateWebHistory(
+            direction: "back",
+            script: "if (window.history.length > 1) { window.history.back(); true; } else { false; }"
+        )
+    }
+
+    private func navigateWebHistory(direction: String, script: String) {
+        webView.evaluateJavaScript(script) { _, error in
+            if let error {
+                Logger.viewController.error("web history \(direction, privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
+            }
+        }
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        gestureRecognizer === webHistoryBackGesture
     }
 }
 
@@ -838,21 +892,6 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 }
 
-private extension URL {
-    var isNativeWebURL: Bool {
-        guard let scheme = scheme?.lowercased() else { return true }
-        return ["http", "https", "about", "blob", "data", "javascript"].contains(scheme)
-    }
-
-    /// RFC 6454 origin: scheme + host + port, with default ports (80/443) omitted.
-    var webOrigin: String? {
-        guard let scheme = scheme?.lowercased(), let host else { return nil }
-        let defaultPort = scheme == "https" ? 443 : scheme == "http" ? 80 : nil
-        let portSuffix = (port != nil && port != defaultPort) ? ":\(port!)" : ""
-        return "\(scheme)://\(host)\(portSuffix)"
-    }
-}
-
 extension OpenHABWebViewController: WKUIDelegate {
     func webView(_ webView: WKWebView,
                  createWebViewWith configuration: WKWebViewConfiguration,
@@ -878,4 +917,19 @@ extension OpenHABWebViewController: WKUIDelegate {
         Preferences.shared.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
     }
     // swiftlint:enable async_without_await
+}
+
+private extension URL {
+    var isNativeWebURL: Bool {
+        guard let scheme = scheme?.lowercased() else { return true }
+        return ["http", "https", "about", "blob", "data", "javascript"].contains(scheme)
+    }
+
+    /// RFC 6454 origin: scheme + host + port, with default ports (80/443) omitted.
+    var webOrigin: String? {
+        guard let scheme = scheme?.lowercased(), let host else { return nil }
+        let defaultPort = scheme == "https" ? 443 : scheme == "http" ? 80 : nil
+        let portSuffix = (port != nil && port != defaultPort) ? ":\(port!)" : ""
+        return "\(scheme)://\(host)\(portSuffix)"
+    }
 }
