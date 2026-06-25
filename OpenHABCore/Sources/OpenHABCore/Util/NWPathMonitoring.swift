@@ -22,15 +22,14 @@ final class RealPathMonitor: NWPathMonitoring, Sendable {
     }
 
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
-        if #available(iOS 17, watchOS 10, *) {
-            for await path in monitor {
-                Logger.nwPathMonitoring.debug("Path monitor update: \(path.debugDescription)")
-                await handler(path.status == .satisfied || path.status == .requiresConnection)
-            }
-        } else {
-            for await path in monitor.paths() {
-                await handler(path.status == .satisfied || path.status == .requiresConnection)
-            }
+        // Use the manual paths() wrapper on all OS versions.
+        // NWPathMonitor's native iOS 17 AsyncSequence conformance (makeAsyncStream()) has a
+        // re-entrancy bug: startLocked() holds the monitor's os_unfair_lock and calls
+        // AsyncStream.Continuation.finish(), whose onTermination callback tries to re-acquire
+        // the same lock → os_unfair_lock_recursive_abort (crash seen on iOS 17.7.11).
+        for await path in monitor.paths() {
+            Logger.nwPathMonitoring.debug("Path monitor update: \(path.debugDescription)")
+            await handler(path.status == .satisfied || path.status == .requiresConnection)
         }
     }
 
@@ -48,11 +47,8 @@ public protocol NWPathMonitoring: AnyObject, Sendable {
     func cancel()
 }
 
-// MARK: Extension for version iOS <17
+// MARK: - NWPathMonitor AsyncStream wrapper
 
-/// this line breaks availability checking, since watchos 10 is minimum for the app
-/// @available(watchOS, obsoleted: 10.0)
-@available(iOS, obsoleted: 17.0)
 extension NWPathMonitor {
     func paths() -> AsyncStream<NWPath> {
         AsyncStream { continuation in
