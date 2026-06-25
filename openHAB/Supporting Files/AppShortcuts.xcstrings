@@ -176,6 +176,7 @@
       }
     },
     "Set active home in ${applicationName}" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

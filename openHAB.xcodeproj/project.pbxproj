@@ -18,12 +18,6 @@
 		3D3B2898C51F48BAA31210E4 /* ContactStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3552F03095D0082479C /* ContactStateIntent.swift */; };
 		3F087E4025E845FFBCBE45E3 /* ItemEntityQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4352F07056F0082479C /* ItemEntityQuery.swift */; };
 		5111C4CC62E66D2FFA5C92EB /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06A8490213945021806A13D1 /* SwiftUI.framework */; };
-		0648F50178784F149905E7CF /* PlayerAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4062F0800010082479C /* PlayerAction.swift */; };
-		1C1CA8C8C8424BAF8018F9BE /* SetStringValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35C2F0309B10082479C /* SetStringValueIntent.swift */; };
-		1E4E7DB36BAC4804AD5E58E5 /* SetColorValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3542F03095D0082479C /* SetColorValueIntent.swift */; };
-		2F399AC92F54599400F72A30 /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 2F399AC82F54599400F72A30 /* Flow */; };
-		3D3B2898C51F48BAA31210E4 /* ContactStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3552F03095D0082479C /* ContactStateIntent.swift */; };
-		3F087E4025E845FFBCBE45E3 /* ItemEntityQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4352F07056F0082479C /* ItemEntityQuery.swift */; };
 		598208789AC44F1D91DD5B17 /* SetPlayerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4082F0800020082479C /* SetPlayerValueIntent.swift */; };
 		5B292637B6E141DB98BCAA26 /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E772EF435B400F0893C /* Home.swift */; };
 		61A606E5E6AE404584B0B1A0 /* SetNumberValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35A2F0309A60082479C /* SetNumberValueIntent.swift */; };
@@ -53,13 +47,29 @@
 		BF0EB6DE70934966B1DC5479 /* SetDateTimeValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF40A2F0800030082479C /* SetDateTimeValueIntent.swift */; };
 		C314F9C9CB55D0AA25E4BB0A /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F298FB19C2A149258FE7CC6 /* WidgetKit.framework */; };
 		C380A8DFA36E43D49400A87E /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = 1F9D3602163D4BEBB384DDEE /* SFSafeSymbols */; };
-		970584BAA2884C8287297BF6 /* SwitchItemEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF58C7A2EF6E99500483AFD /* SwitchItemEntity.swift */; };
-		9F54768418A14674AD9E2FCA /* ContactState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4042F06F5CA0082479C /* ContactState.swift */; };
-		B2FC662F25B2461887BB67DA /* ItemEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4332F0705580082479C /* ItemEntity.swift */; };
-		BF0EB6DE70934966B1DC5479 /* SetDateTimeValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF40A2F0800030082479C /* SetDateTimeValueIntent.swift */; };
 		C9DE79C32AF24FFEA0280115 /* ItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD5E85D2F02C3BC003215C0 /* ItemIdentifier.swift */; };
 		CE7A58C0ED3A4A1ABCB20337 /* SetLocationValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF40C2F0800040082479C /* SetLocationValueIntent.swift */; };
 		CF650A22059A4A00823EE656 /* SwitchAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4022F06F5950082479C /* SwitchAction.swift */; };
+		DA03B5BC2FEC5EE80069A276 /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA448E772EF435B400F0893C /* Home.swift */; };
+		DA03B5BD2FEC5EE80069A276 /* GetItemStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3512F0307A40082479C /* GetItemStateIntent.swift */; };
+		DA03B5BE2FEC5EE80069A276 /* SetColorValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3542F03095D0082479C /* SetColorValueIntent.swift */; };
+		DA03B5BF2FEC5EE80069A276 /* ContactStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3552F03095D0082479C /* ContactStateIntent.swift */; };
+		DA03B5C02FEC5EE80069A276 /* SetDimmerRollerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3582F03098B0082479C /* SetDimmerRollerValueIntent.swift */; };
+		DA03B5C12FEC5EE80069A276 /* SetNumberValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35A2F0309A60082479C /* SetNumberValueIntent.swift */; };
+		DA03B5C22FEC5EE80069A276 /* SetStringValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF35C2F0309B10082479C /* SetStringValueIntent.swift */; };
+		DA03B5C32FEC5EE80069A276 /* SetActiveHomeIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F77A157AAF1DD5AB45D6BA2 /* SetActiveHomeIntent.swift */; };
+		DA03B5C42FEC5EE80069A276 /* SwitchAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4022F06F5950082479C /* SwitchAction.swift */; };
+		DA03B5C52FEC5EE80069A276 /* ContactState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4042F06F5CA0082479C /* ContactState.swift */; };
+		DA03B5C62FEC5EE80069A276 /* PlayerAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4062F0800010082479C /* PlayerAction.swift */; };
+		DA03B5C72FEC5EE80069A276 /* SetPlayerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4082F0800020082479C /* SetPlayerValueIntent.swift */; };
+		DA03B5C82FEC5EE80069A276 /* SetDateTimeValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF40A2F0800030082479C /* SetDateTimeValueIntent.swift */; };
+		DA03B5C92FEC5EE80069A276 /* SetLocationValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF40C2F0800040082479C /* SetLocationValueIntent.swift */; };
+		DA03B5CA2FEC5EE80069A276 /* ItemEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4332F0705580082479C /* ItemEntity.swift */; };
+		DA03B5CB2FEC5EE80069A276 /* ItemEntityQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF4352F07056F0082479C /* ItemEntityQuery.swift */; };
+		DA03B5CC2FEC5EE80069A276 /* SetSwitchItemIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD5E85B2F02C272003215C0 /* SetSwitchItemIntent.swift */; };
+		DA03B5CD2FEC5EE80069A276 /* ItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD5E85D2F02C3BC003215C0 /* ItemIdentifier.swift */; };
+		DA03B5CE2FEC5EE80069A276 /* SwitchItemEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF58C7A2EF6E99500483AFD /* SwitchItemEntity.swift */; };
+		DA03B5CF2FEC66AA0069A276 /* OpenHABShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA78C91F2FBBA8A700A92C6E /* OpenHABShortcuts.swift */; };
 		DA10161B2DC7BAE500552D14 /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = DA10161A2DC7BAE500552D14 /* SFSafeSymbols */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA2C4FD52B4F573300D1C533 /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DA2C4FD42B4F573300D1C533 /* SDWebImageSVGCoder */; };
@@ -98,7 +108,6 @@
 		DFE10414197415F900D94943 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFE10413197415F900D94943 /* Security.framework */; };
 		E120F4A14B9942449F25E788 /* SetDimmerRollerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3582F03098B0082479C /* SetDimmerRollerValueIntent.swift */; };
 		EE6B566C271031A1EB5780D2 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 2247FFEA7206BFFC71AB02C4 /* OpenHABCore */; };
-		E120F4A14B9942449F25E788 /* SetDimmerRollerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3582F03098B0082479C /* SetDimmerRollerValueIntent.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -227,7 +236,6 @@
 /* Begin PBXFileReference section */
 		06A8490213945021806A13D1 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/SwiftUI.framework; sourceTree = DEVELOPER_DIR; };
 		0F298FB19C2A149258FE7CC6 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/WidgetKit.framework; sourceTree = DEVELOPER_DIR; };
-		1224F78D228A89FC00750965 /* WatchMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchMessageService.swift; sourceTree = "<group>"; };
 		16CFF4D57F6DF603FF1C1B9D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		1F77A157AAF1DD5AB45D6BA2 /* SetActiveHomeIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetActiveHomeIntent.swift; sourceTree = "<group>"; };
 		2F399AB92F5357E900F72A30 /* InputCommandFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputCommandFormatterTests.swift; sourceTree = "<group>"; };
@@ -351,6 +359,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				OpenHABAppShortcutsProvider.swift,
+				OpenHABShortcuts.swift,
 			);
 			target = 6116C7DDD25EE245FE191A47 /* openHABWidgetExtension */;
 		};
@@ -565,14 +574,6 @@
 			path = openHABWatch/External;
 			sourceTree = SOURCE_ROOT;
 		};
-		2F2150892F75C2FC001BA057 /* Watch */ = {
-			isa = PBXGroup;
-			children = (
-				1224F78D228A89FC00750965 /* WatchMessageService.swift */,
-			);
-			name = Watch;
-			sourceTree = "<group>";
-		};
 		6571444F2C1E438700C8A1F3 /* NotificationService */ = {
 			isa = PBXGroup;
 			children = (
@@ -679,7 +680,6 @@
 			isa = PBXGroup;
 			children = (
 				DA4BF3652F0419F30082479C /* Intents */,
-				DA4BF3532F0307D30082479C /* iOS16 */,
 				DAD5E85D2F02C3BC003215C0 /* ItemIdentifier.swift */,
 				DA4BF4042F06F5CA0082479C /* ContactState.swift */,
 				DAF58C7A2EF6E99500483AFD /* SwitchItemEntity.swift */,
@@ -1393,25 +1393,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA448E852EF435B400F0893C /* Home.swift in Sources */,
-				DA4BF3522F0307A40082479C /* GetItemStateIntent.swift in Sources */,
-				DA4BF3562F03095D0082479C /* SetColorValueIntent.swift in Sources */,
-				DA4BF3572F03095D0082479C /* ContactStateIntent.swift in Sources */,
-				DA4BF3592F03098B0082479C /* SetDimmerRollerValueIntent.swift in Sources */,
-				DA4BF35B2F0309A60082479C /* SetNumberValueIntent.swift in Sources */,
-				DA4BF35D2F0309B10082479C /* SetStringValueIntent.swift in Sources */,
-				772F724744CC8D15A673C246 /* SetActiveHomeIntent.swift in Sources */,
-				DA4BF4032F06F5950082479C /* SwitchAction.swift in Sources */,
-				DA4BF4052F06F5CA0082479C /* ContactState.swift in Sources */,
-				DA4BF4072F0800010082479C /* PlayerAction.swift in Sources */,
-				DA4BF4092F0800020082479C /* SetPlayerValueIntent.swift in Sources */,
-				DA4BF40B2F0800030082479C /* SetDateTimeValueIntent.swift in Sources */,
-				DA4BF40D2F0800040082479C /* SetLocationValueIntent.swift in Sources */,
-				DA4BF4342F0705580082479C /* ItemEntity.swift in Sources */,
-				DA4BF4362F07056F0082479C /* ItemEntityQuery.swift in Sources */,
-				DAD5E85C2F02C272003215C0 /* SetSwitchItemIntent.swift in Sources */,
-				DAD5E85E2F02C3C6003215C0 /* ItemIdentifier.swift in Sources */,
-				DAF58C7B2EF6E99500483AFD /* SwitchItemEntity.swift in Sources */,
+				DA03B5BC2FEC5EE80069A276 /* Home.swift in Sources */,
+				DA03B5BD2FEC5EE80069A276 /* GetItemStateIntent.swift in Sources */,
+				DA03B5BE2FEC5EE80069A276 /* SetColorValueIntent.swift in Sources */,
+				DA03B5BF2FEC5EE80069A276 /* ContactStateIntent.swift in Sources */,
+				DA03B5C02FEC5EE80069A276 /* SetDimmerRollerValueIntent.swift in Sources */,
+				DA03B5C12FEC5EE80069A276 /* SetNumberValueIntent.swift in Sources */,
+				DA03B5C22FEC5EE80069A276 /* SetStringValueIntent.swift in Sources */,
+				DA03B5C32FEC5EE80069A276 /* SetActiveHomeIntent.swift in Sources */,
+				DA03B5C42FEC5EE80069A276 /* SwitchAction.swift in Sources */,
+				DA03B5C52FEC5EE80069A276 /* ContactState.swift in Sources */,
+				DA03B5C62FEC5EE80069A276 /* PlayerAction.swift in Sources */,
+				DA03B5C72FEC5EE80069A276 /* SetPlayerValueIntent.swift in Sources */,
+				DA03B5C82FEC5EE80069A276 /* SetDateTimeValueIntent.swift in Sources */,
+				DA03B5C92FEC5EE80069A276 /* SetLocationValueIntent.swift in Sources */,
+				DA03B5CA2FEC5EE80069A276 /* ItemEntity.swift in Sources */,
+				DA03B5CB2FEC5EE80069A276 /* ItemEntityQuery.swift in Sources */,
+				DA03B5CC2FEC5EE80069A276 /* SetSwitchItemIntent.swift in Sources */,
+				DA03B5CD2FEC5EE80069A276 /* ItemIdentifier.swift in Sources */,
+				DA03B5CE2FEC5EE80069A276 /* SwitchItemEntity.swift in Sources */,
+				DA03B5CF2FEC66AA0069A276 /* OpenHABShortcuts.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1419,26 +1420,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA448E852EF435B400F0893C /* Home.swift in Sources */,
-				DA4BF3522F0307A40082479C /* GetItemStateIntent.swift in Sources */,
-				DA4BF3562F03095D0082479C /* SetColorValueIntent.swift in Sources */,
-				DA4BF3572F03095D0082479C /* ContactStateIntent.swift in Sources */,
-				DA4BF3592F03098B0082479C /* SetDimmerRollerValueIntent.swift in Sources */,
-				DA4BF35B2F0309A60082479C /* SetNumberValueIntent.swift in Sources */,
-				DA4BF35D2F0309B10082479C /* SetStringValueIntent.swift in Sources */,
-				772F724744CC8D15A673C246 /* SetActiveHomeIntent.swift in Sources */,
-				DA4BF4032F06F5950082479C /* SwitchAction.swift in Sources */,
-				DA4BF4052F06F5CA0082479C /* ContactState.swift in Sources */,
-				DA78C9202FBBA8A700A92C6E /* OpenHABShortcuts.swift in Sources */,
-				DA4BF4072F0800010082479C /* PlayerAction.swift in Sources */,
-				DA4BF4092F0800020082479C /* SetPlayerValueIntent.swift in Sources */,
-				DA4BF40B2F0800030082479C /* SetDateTimeValueIntent.swift in Sources */,
-				DA4BF40D2F0800040082479C /* SetLocationValueIntent.swift in Sources */,
-				DA4BF4342F0705580082479C /* ItemEntity.swift in Sources */,
-				DA4BF4362F07056F0082479C /* ItemEntityQuery.swift in Sources */,
-				DAD5E85C2F02C272003215C0 /* SetSwitchItemIntent.swift in Sources */,
-				DAD5E85E2F02C3C6003215C0 /* ItemIdentifier.swift in Sources */,
-				DAF58C7B2EF6E99500483AFD /* SwitchItemEntity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

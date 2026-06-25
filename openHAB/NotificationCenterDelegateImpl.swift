@@ -43,7 +43,6 @@ struct OpenHABImageFetcher {
     }
 }
 
-
 /// AVAudioPlayer must be created, used, and deallocated on the main thread.
 /// Using a plain `actor` placed it on a background executor, causing a crash when
 /// AVFoundation delivered finishedPlaying: on the main thread while the old player

@@ -177,30 +177,6 @@
             "state" : "translated",
             "value" : "%@"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@"
-          }
         }
       }
     },
@@ -312,30 +288,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@"
           }
         }
       }
@@ -2529,30 +2481,6 @@
             "state" : "translated",
             "value" : "Выбрать цвет"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elegir color"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Valitse väri"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Velg farge"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Выбрать цвет"
-          }
         }
       }
     },
@@ -3191,30 +3119,6 @@
             "state" : "translated",
             "value" : "Элемент цвета"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elemento de color"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Värielementti"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fargeelement"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Элемент цвета"
-          }
         }
       }
     },
@@ -3268,30 +3172,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Цветовой круг"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rueda de colores"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Väriympyrä"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fargehjul"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Цветовой круг"
           }
         }
       }
@@ -3876,30 +3756,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Элемент контакта"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elemento de contacto"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kontaktielementti"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kontaktelement"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Элемент контакта"
           }
         }
       }
@@ -4605,30 +4461,6 @@
             "state" : "translated",
             "value" : "Элемент DateTime"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elemento DateTime"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DateTime-elementti"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DateTime-element"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Элемент DateTime"
-          }
         }
       }
     },
@@ -5278,30 +5110,6 @@
             "state" : "translated",
             "value" : "Уровень затемнения: %@"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elemento atenuador/persianas"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Himmennin-/rullaverhoelementti"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dimmer-/rullegardinelement"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Элемент диммера/рольставни"
-          }
         }
       }
     },
@@ -5601,30 +5409,6 @@
             "state" : "translated",
             "value" : "Discovering openHAB"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Descubriendo servidores openHAB…"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Etsitään openHAB-palvelimia…"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Finner openHAB-servere…"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Обнаружение серверов openHAB…"
-          }
         }
       }
     },
@@ -5740,30 +5524,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dismiss"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Arrastrar para cambiar el tono y la saturación"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vedä muuttaaksesi värisävyä ja kylläisyyttä"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dra for å endre fargetone og metning"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Перетащите для изменения оттенка и насыщенности"
           }
         }
       }
@@ -5993,6 +5753,10 @@
           }
         }
       }
+    },
+    "Enable" : {
+      "comment" : "Display name for the \"Enable\" action.",
+      "isCommentAutoGenerated" : true
     },
     "Enable Dimming" : {
       "comment" : "A toggle that enables or disables automatic brightness dimming.",
@@ -6883,30 +6647,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Foo"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Obtener estado de ${itemEntity}"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hae ${itemEntity}-tila"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hent status for ${itemEntity}"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Получить состояние ${itemEntity}"
           }
         }
       }
@@ -8617,30 +8357,6 @@
             "state" : "translated",
             "value" : "Загрузка карты сайта…"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Se requiere acceso a la red local"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lähiverkon käyttöoikeus vaaditaan"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tilgang til lokalt nettverk kreves"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Требуется доступ к локальной сети"
-          }
         }
       }
     },
@@ -8866,30 +8582,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Локальный сервер"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elemento de ubicación"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sijaintielementti"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plasseringselement"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Элемент местоположения"
           }
         }
       }
@@ -10417,30 +10109,6 @@
             "state" : "translated",
             "value" : "Notification"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elemento numérico"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Numeraalielementti"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tallselement"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Числовой элемент"
-          }
         }
       }
     },
@@ -11198,30 +10866,6 @@
             "state" : "translated",
             "value" : "Открыто"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abrir ajustes"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Avaa asetukset"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Åpne innstillinger"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Открыть настройки"
-          }
         }
       }
     },
@@ -11691,30 +11335,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Действие плеера"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elemento reproductor"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Soitinelementti"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spillerelement"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Элемент плеера"
           }
         }
       }
@@ -13376,30 +12996,6 @@
             "state" : "translated",
             "value" : "Выберите дом для '%@'"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enviar ${action} a ${itemEntity}"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lähetä ${action} kohteeseen ${itemEntity}"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Send ${action} til ${itemEntity}"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Отправить ${action} в ${itemEntity}"
-          }
         }
       }
     },
@@ -13983,30 +13579,6 @@
             "state" : "translated",
             "value" : "Число %lf отправлено в %@"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Establecer ${itemEntity} en ${value}"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aseta ${itemEntity} arvoon ${value}"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sett ${itemEntity} til ${value}"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Установить ${itemEntity} в ${value}"
-          }
         }
       }
     },
@@ -14065,30 +13637,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Строка %@ отправлена в %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Establecer ${itemEntity} en ${value} (HSB)"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aseta ${itemEntity} arvoon ${value} (HSB)"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sett ${itemEntity} til ${value} (HSB)"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Установить ${itemEntity} в ${value} (HSB)"
           }
         }
       }
@@ -14541,7 +14089,7 @@
       }
     },
     "Set Date & Time" : {
-      "comment" : "Short title for a shortcut that allows the user to set a date and time.",
+      "comment" : "Short title for the shortcut to set a date and time.",
       "isCommentAutoGenerated" : true
     },
     "Set DateTime Control Value" : {
@@ -14666,10 +14214,6 @@
         }
       }
     },
-    "Set Location" : {
-      "comment" : "Short title for the shortcut to set a location.",
-      "isCommentAutoGenerated" : true
-    },
     "Set Location Control Value" : {
       "comment" : "Title of the Set Location Control Value app intent.",
       "localizations" : {
@@ -14730,7 +14274,7 @@
       }
     },
     "Set Number" : {
-      "comment" : "Short title for the shortcut to set a number value.",
+      "comment" : "Text displayed in a shortcut for setting a number value.",
       "isCommentAutoGenerated" : true
     },
     "Set Number Control Value" : {
@@ -14911,7 +14455,7 @@
       }
     },
     "Set Switch" : {
-      "comment" : "Short title for the shortcut to set a switch.",
+      "comment" : "Short title for a shortcut that allows the user to set a switch.",
       "isCommentAutoGenerated" : true
     },
     "Set Switch State" : {
@@ -14974,7 +14518,7 @@
       }
     },
     "Set Text" : {
-      "comment" : "Short title for the shortcut to set a string value.",
+      "comment" : "Text displayed in a shortcut for setting a string value.",
       "isCommentAutoGenerated" : true
     },
     "Set the color of a color control item" : {
@@ -15091,30 +14635,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Установить дату и время элемента DateTime"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Establecer el estado de ${itemEntity} en ${state}"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aseta ${itemEntity}-tila arvoon ${state}"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Angi status for ${itemEntity} til ${state}"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Установить состояние ${itemEntity} в ${state}"
           }
         }
       }
@@ -15933,30 +15453,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Показать время"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Registro de diagnóstico del mapa del sitio"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sivukartan diagnostiikkaloki"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Diagnoslogging for nettstedskart"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Журналирование диагностики карты сайта"
           }
         }
       }
@@ -16800,30 +16296,6 @@
             "state" : "translated",
             "value" : "SSL Certificate presented by %1$@ for %2$@ is invalid. Do you want to proceed?"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elemento de texto"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Merkkijonoelementti"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tekststrengselement"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Строковый элемент"
-          }
         }
       }
     },
@@ -17190,7 +16662,7 @@
       }
     },
     "Switch Home" : {
-      "comment" : "Short title for the shortcut to switch the active home.",
+      "comment" : "Shortcut title for switching between homes.",
       "isCommentAutoGenerated" : true
     },
     "Switch Item" : {
@@ -17483,30 +16955,6 @@
             "state" : "translated",
             "value" : "Проверить соединение"
           }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La URL no es válida. Compruebe el formato (p. ej., http://192.168.2.1:8080 o http://[::1]:8080 para IPv6)."
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "URL on virheellinen. Tarkista muoto (esim. http://192.168.2.1:8080 tai http://[::1]:8080 IPv6:lle)."
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "URL-en er ugyldig. Sjekk formatet (f.eks. http://192.168.2.1:8080 eller http://[::1]:8080 for IPv6)."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "URL недействителен. Проверьте формат (например, http://192.168.2.1:8080 или http://[::1]:8080 для IPv6)."
-          }
         }
       }
     },
@@ -17683,30 +17131,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Состояние %@ равно %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Para conectarse a su servidor openHAB local, permita el acceso a la red local cuando se le solicite. Si lo denegó anteriormente, actívelo en Ajustes → Privacidad y seguridad → Red local."
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Muodosta yhteys paikalliseen openHAB-palvelimeen sallimalla lähiverkkoyhteys pyydettäessä. Jos olet aiemmin kieltänyt sen, ota se käyttöön kohdassa Asetukset → Tietosuoja ja turvallisuus → Lähiverkko."
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "For å koble til din lokale openHAB-server, vennligst tillat tilgang til lokalt nettverk når du blir bedt om det. Hvis du tidligere nektet det, aktiver det i Innstillinger → Personvern og sikkerhet → Lokalt nettverk."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Для подключения к локальному серверу openHAB разрешите доступ к локальной сети при появлении запроса. Если вы ранее отказали, включите его в Настройки → Конфиденциальность и безопасность → Локальная сеть."
           }
         }
       }
@@ -18054,6 +17478,18 @@
           }
         }
       }
+    },
+    "Triggered" : {
+      "comment" : "Display name for the contact state \"OPEN\".",
+      "isCommentAutoGenerated" : true
+    },
+    "Turn off" : {
+      "comment" : "Turn off action.",
+      "isCommentAutoGenerated" : true
+    },
+    "Turn on" : {
+      "comment" : "Turn on action.",
+      "isCommentAutoGenerated" : true
     },
     "unable_to_add_certificate" : {
       "extractionState" : "manual",
