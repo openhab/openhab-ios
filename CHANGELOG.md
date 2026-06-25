@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [Version 3.3.2, Build 288] - 2026-06-25Z
+
+- fix: avoid NWPathMonitor makeAsyncStream() recursive lock crash on iOS 17 (#1270)
+- fix: replace UIScreen.main with scene-based screen access (iOS 27 crash) (#1269)
+- Bump minor version number to 3.3.1
+- chore(deps): bump actions/checkout from 6 to 7 (#1268)
+- chore: remove Crowdin workflow and clean up Package.resolved
+- chore: remove unused DeviceKit dependency
+
 ## [Version 3.2.77, Build 286] - 2026-06-20Z
 
 - Fix Home re-tap reload and screensaver idle reset (#1266)
