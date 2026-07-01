@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import AVFoundation
+import AudioToolbox
 import Combine
 import Kingfisher
 import OpenHABCore
@@ -43,32 +43,33 @@ struct OpenHABImageFetcher {
     }
 }
 
-/// AVAudioPlayer must be created, used, and deallocated on the main thread.
-/// Using a plain `actor` placed it on a background executor, causing a crash when
-/// AVFoundation delivered finishedPlaying: on the main thread while the old player
-/// was simultaneously being deallocated on the actor's background thread (mutex contention
-/// in AVAudioPlayerCpp::DoAction / disposeQueue). @MainActor pins the entire lifecycle.
+/// Plays the in-app notification ping using AudioServicesPlaySystemSound, which routes
+/// through the system sound path and natively respects the ringer/silent switch without
+/// touching the shared AVAudioSession. This avoids the .playback-vs-.ambient category
+/// race that affected concurrent video-widget audio.
 @MainActor
 final class AudioPlayerActor {
-    private var player: AVAudioPlayer?
+    private var soundID: SystemSoundID = 0
 
-    func playSound() {
-        guard let soundPath = Bundle.main.url(forResource: "ping", withExtension: "wav") else {
-            return
-        }
-
-        do {
-            let newPlayer = try AVAudioPlayer(contentsOf: soundPath)
-            newPlayer.numberOfLoops = 0
-            newPlayer.play()
-            player = newPlayer
-        } catch {
-            Logger.notificationCenterDelegateImpl.info("Failed to play sound \(error.localizedDescription)")
+    init() {
+        if let url = Bundle.main.url(forResource: "ping", withExtension: "wav") {
+            AudioServicesCreateSystemSoundID(url as CFURL, &soundID)
         }
     }
 
+    deinit {
+        if soundID != 0 {
+            AudioServicesDisposeSystemSoundID(soundID)
+        }
+    }
+
+    func playSound() {
+        guard soundID != 0 else { return }
+        AudioServicesPlaySystemSound(soundID)
+    }
+
     func stopSound() {
-        player?.stop()
+        // System sounds cannot be stopped mid-play; the ping is short enough that this is fine.
     }
 }
 
