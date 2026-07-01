@@ -360,14 +360,29 @@ struct SwitchAccessoryCircularView: View {
         ZStack {
             AccessoryWidgetBackground()
             if let slot = entry.slots.compactMap(\.self).first {
-                VStack(spacing: 2) {
-                    Image(systemSymbol: .switch2)
-                        .font(.caption)
-                    Text(slot.item.state ?? "?")
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
+                if let home = entry.home {
+                    Button(intent: createToggleIntent(item: slot.item, homeUUID: slot.homeUUID, home: home)) {
+                        VStack(spacing: 2) {
+                            Image(systemSymbol: .switch2)
+                                .font(.caption)
+                            Text(slot.item.state ?? "?")
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    VStack(spacing: 2) {
+                        Image(systemSymbol: .switch2)
+                            .font(.caption)
+                        Text(slot.item.state ?? "?")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
+                    }
                 }
             } else {
                 Image(systemSymbol: .gear)
@@ -383,20 +398,42 @@ struct SwitchAccessoryRectangularView: View {
     var body: some View {
         if let slot = entry.slots.compactMap(\.self).first {
             let label = slot.item.label.isEmpty ? slot.item.name : slot.item.label
-            VStack(alignment: .leading, spacing: 2) {
-                Text(label)
-                    .font(.headline)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                if let stateText = slot.item.state {
-                    Text(stateText)
-                        .font(.body)
-                        .fontWeight(.semibold)
+            if let home = entry.home {
+                Button(intent: createToggleIntent(item: slot.item, homeUUID: slot.homeUUID, home: home)) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(label)
+                            .font(.headline)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        if let stateText = slot.item.state {
+                            Text(stateText)
+                                .font(.body)
+                                .fontWeight(.semibold)
+                                .lineLimit(1)
+                        } else {
+                            Text("No State")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+            } else {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(label)
+                        .font(.headline)
                         .lineLimit(1)
-                } else {
-                    Text("No State")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .minimumScaleFactor(0.7)
+                    if let stateText = slot.item.state {
+                        Text(stateText)
+                            .font(.body)
+                            .fontWeight(.semibold)
+                            .lineLimit(1)
+                    } else {
+                        Text("No State")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
         } else {
@@ -412,10 +449,21 @@ struct SwitchAccessoryInlineView: View {
     var body: some View {
         if let slot = entry.slots.compactMap(\.self).first {
             let label = slot.item.label.isEmpty ? slot.item.name : slot.item.label
-            if let stateText = slot.item.state {
-                Text("\(label): \(stateText)")
+            if let home = entry.home {
+                Button(intent: createToggleIntent(item: slot.item, homeUUID: slot.homeUUID, home: home)) {
+                    if let stateText = slot.item.state {
+                        Text("\(label): \(stateText)")
+                    } else {
+                        Text(label)
+                    }
+                }
+                .buttonStyle(.plain)
             } else {
-                Text(label)
+                if let stateText = slot.item.state {
+                    Text("\(label): \(stateText)")
+                } else {
+                    Text(label)
+                }
             }
         } else {
             Text("Configure Widget")
