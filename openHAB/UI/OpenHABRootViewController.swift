@@ -113,6 +113,7 @@ class OpenHABRootViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         Logger.viewController.info("OpenHABRootViewController viewDidLoad")
+        edgesForExtendedLayout = []
         setupSideMenu()
         addConnectionStatusIndication()
 
@@ -899,32 +900,20 @@ class OpenHABRootViewController: UIViewController {
 
     func showSideMenu() {
         Logger.viewController.info("OpenHABRootViewController showSideMenu")
-        if let menu = SideMenuManager.default.rightMenuNavigationController {
-            // don't try and push an already visible menu less you crash the app
-            dismiss(animated: false) {
-                var topMostViewController: UIViewController? =
-                    UIApplication.shared.connectedScenes.flatMap { ($0 as? UIWindowScene)?.windows ?? [] }.last { $0.isKeyWindow }?.rootViewController
+        guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
+        guard menu.presentingViewController == nil else { return }
 
-                while let presentedViewController = topMostViewController?.presentedViewController {
-                    topMostViewController = presentedViewController
-                }
-
-                guard let presenter = topMostViewController else {
-                    // swiftformat:disable:next redundantSelf
-                    Logger.viewController.error("No valid view controller found to present side menu")
-                    return
-                }
-
-                // Avoid trying to present the menu on itself
-                if presenter == menu {
-                    // swiftformat:disable:next redundantSelf
-                    Logger.viewController.error("Cannot present side menu on itself")
-                    return
-                }
-
-                presenter.present(menu, animated: true)
-            }
+        var presenter: UIViewController = self
+        while let presentedViewController = presenter.presentedViewController {
+            presenter = presentedViewController
         }
+
+        guard presenter !== menu else {
+            Logger.viewController.error("Cannot present side menu on itself")
+            return
+        }
+
+        presenter.present(menu, animated: true)
     }
 
     private func addView(viewController: UIViewController) {
