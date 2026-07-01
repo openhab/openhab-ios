@@ -16,18 +16,11 @@ import SwiftUI
 // MARK: - Shared Icon Overlay
 
 struct OpenHABIconOverlay: View {
-    let size: CGFloat
-    var leadingPadding: CGFloat = 14
-    var topPadding: CGFloat = 14
-
     var body: some View {
         Image("openHABIcon")
             .resizable()
             .scaledToFit()
-            .frame(width: size, height: size)
-            .opacity(0.5)
-            .padding(.leading, leadingPadding)
-            .padding(.top, topPadding)
+            .opacity(0.1)
     }
 }
 
