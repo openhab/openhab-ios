@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [Version 3.3.4, Build 290] - 2026-07-01Z
+
+- fix(uitests): restore snapshot navigation for current demo.openhab.org sitemap structure (#1271)
+- fix: use edgesForExtendedLayout to anchor webview below navigation bar (#1276)
+
 ## [Version 3.3.3, Build 289] - 2026-07-01Z
 
 - chore(deps): bump actions/cache from 5 to 6 (#1273)
