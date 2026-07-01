@@ -12,10 +12,10 @@
 import Kingfisher
 import OpenHABCore
 
-public extension KFImage {
+public extension KFImageProtocol {
     /// Applies the openHAB Basic Auth request modifier when a connection is available.
     /// When `connection` is nil no modifier is attached and the image loads unauthenticated.
-    func withOpenHABCredentials(for connection: ConnectionInfo?) -> KFImage {
+    func withOpenHABCredentials(for connection: ConnectionInfo?) -> Self {
         guard let connection else { return self }
         return requestModifier(OpenHABAccessTokenAdapter(connectionConfiguration: connection.configuration))
     }

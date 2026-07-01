@@ -165,36 +165,67 @@ private struct ImageRowContent: View {
                 .frame(maxHeight: 300)
                 .clipShape(.rect(cornerRadius: 8))
         case let .link(url):
-            KFImage(url)
-                .withOpenHABCredentials(for: networkTracker.activeConnection)
-                .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
-                .placeholder {
-                    if let state = lastRegularImageState, state.url == url {
-                        Image(uiImage: state.image)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                    } else {
-                        Color.gray.opacity(0.1)
-                            .frame(height: 200)
-                            .clipShape(.rect(cornerRadius: 8))
+            if url?.pathExtension.lowercased() == "gif" {
+                KFAnimatedImage(url)
+                    .withOpenHABCredentials(for: networkTracker.activeConnection)
+                    .configure { $0.contentMode = .scaleAspectFit }
+                    .placeholder {
+                        if let state = lastRegularImageState, state.url == url {
+                            Image(uiImage: state.image)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } else {
+                            Color.gray.opacity(0.1)
+                                .frame(height: 200)
+                                .clipShape(.rect(cornerRadius: 8))
+                        }
                     }
-                }
-                .onSuccess { result in
-                    lastRegularImageState = RegularImageState(url: url, image: result.image)
-                }
-                .onFailure { error in
-                    guard !error.isTaskCancelled else { return }
-                    logger.warning("Image fetch failed for \(url?.absoluteString ?? "nil", privacy: .public): \(error.localizedDescription, privacy: .public)")
-                }
-                .fade(duration: 0)
-                .resizable()
-                .cacheMemoryOnly(!shouldCache)
-                .forceRefresh(shouldCache ? false : true)
-                .cacheOriginalImage(!shouldCache ? false : true)
-                .id(shouldCache ? url?.absoluteString : "\(url?.absoluteString ?? "")-\(forceRefreshKey)")
-                .aspectRatio(contentMode: .fit)
-                .frame(maxHeight: 300)
-                .clipShape(.rect(cornerRadius: 8))
+                    .onSuccess { result in
+                        lastRegularImageState = RegularImageState(url: url, image: result.image)
+                    }
+                    .onFailure { error in
+                        guard !error.isTaskCancelled else { return }
+                        logger.warning("Image fetch failed for \(url?.absoluteString ?? "nil", privacy: .public): \(error.localizedDescription, privacy: .public)")
+                    }
+                    .fade(duration: 0)
+                    .cacheMemoryOnly(!shouldCache)
+                    .forceRefresh(shouldCache ? false : true)
+                    .cacheOriginalImage(!shouldCache ? false : true)
+                    .id(shouldCache ? url?.absoluteString : "\(url?.absoluteString ?? "")-\(forceRefreshKey)")
+                    .frame(maxHeight: 300)
+                    .clipShape(.rect(cornerRadius: 8))
+            } else {
+                KFImage(url)
+                    .withOpenHABCredentials(for: networkTracker.activeConnection)
+                    .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
+                    .placeholder {
+                        if let state = lastRegularImageState, state.url == url {
+                            Image(uiImage: state.image)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } else {
+                            Color.gray.opacity(0.1)
+                                .frame(height: 200)
+                                .clipShape(.rect(cornerRadius: 8))
+                        }
+                    }
+                    .onSuccess { result in
+                        lastRegularImageState = RegularImageState(url: url, image: result.image)
+                    }
+                    .onFailure { error in
+                        guard !error.isTaskCancelled else { return }
+                        logger.warning("Image fetch failed for \(url?.absoluteString ?? "nil", privacy: .public): \(error.localizedDescription, privacy: .public)")
+                    }
+                    .fade(duration: 0)
+                    .resizable()
+                    .cacheMemoryOnly(!shouldCache)
+                    .forceRefresh(shouldCache ? false : true)
+                    .cacheOriginalImage(!shouldCache ? false : true)
+                    .id(shouldCache ? url?.absoluteString : "\(url?.absoluteString ?? "")-\(forceRefreshKey)")
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxHeight: 300)
+                    .clipShape(.rect(cornerRadius: 8))
+            }
         case .empty:
             Rectangle()
                 .fill(Color.gray.opacity(0.3))
