@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [Version 3.3.3, Build 289] - 2026-07-01Z
+
+- chore(deps): bump actions/cache from 5 to 6 (#1273)
+- chore(deps): bump faraday from 1.10.5 to 1.10.6 (#1274)
+- fix: position webview below navigation bar to prevent BasicUI back button from being hidden
+
 ## [Version 3.3.2, Build 288] - 2026-06-25Z
 
 - fix: avoid NWPathMonitor makeAsyncStream() recursive lock crash on iOS 17 (#1270)
