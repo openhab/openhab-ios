@@ -2,6 +2,41 @@
 
 ## [Unreleased]
 
+- fix: animate GIFs in the Image sitemap widget (#1280)
+- Widget adjustments (#1279)
+- fix: lock screen widgets now send commands on tap
+- fix: notification ping now respects the ringer/silent switch (#1278)
+- fix: add OpenHABShortcuts.swift to app target to resolve AppShortcuts.xcstrings phrase warnings
+- committed version bump: 3.4.1 (287)
+- fix: add provisioning profile for openHABWidgetExtension
+- l10n: add Spanish, Finnish, Norwegian, and Russian translations
+- l10n: switch German and French translations to informal address (du/tu)
+- chore: remove 5 stale localization keys on feature branch
+- l10n: add Spanish, Finnish, Norwegian, and Russian translations
+- l10n: translate 2 new widget keys into all 9 languages
+- chore: update openHABWidgetExtension scheme with askForAppToLaunch
+- fix: restore project.pbxproj corrupted by bad 3-way merge of pbxproj
+- chore: add shared schemes for openHABWidgetExtension and OpenHABWatchComplicationsExtension
+- build: raise macOS minimum to 15 for AsyncSequence.Failure support
+- chore: bump openHABTestsSwift deployment target to iOS 18.0
+- Merge develop + fix build warnings; add iOS home screen widgets with item display
+- Sensor widget: format state values using stateDescription numberPattern
+- Sensor widget: support 1/2/4 items per small/medium/large size
+- Make ScrollToTop overlay button conditional (#1231)
+- Bump minimum deployment targets to iOS 18 / watchOS 11
+- Use iOS 18 onScrollGeometryChange in SitemapPageView
+- Use iOS 17 animation and scroll APIs
+- Replace SetLocationValueIntent with SetActiveHomeIntent in AppShortcutsProvider
+- Register SetActiveHomeIntent with AppShortcutsProvider
+- Linting and AppIntents SSE warnings fixes
+- Bump deployment targets to iOS 17.0 / watchOS 10.0
+- Convert AppShortcuts.strings to AppShortcuts.xcstrings String Catalog
+- Fix AppIntentsMetadataProcessor synonym warnings in AppEnum cases
+- Add AppShortcutsProvider and fix intent dialog gaps
+- Upgrade SwiftFormatPlugin 0.58.7→0.61.1, SwiftLintPlugin 0.62.2→0.63.3 (#1225)
+- ItemEventStream: backport SSE watchdog and self-contained network monitor
+- openHABWidget: add interactive switch and sensor widgets
+
 - fix: add provisioning profile for openHABWidgetExtension
 - fix: replace UIScreen.main with scene-based screen access (iOS 27 crash) (#1269)
 - Bump minor version number to 3.3.1
