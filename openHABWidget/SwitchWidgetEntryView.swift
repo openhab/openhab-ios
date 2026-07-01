@@ -194,9 +194,10 @@ private struct SwitchItemRow: View {
             Text(label)
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .lineLimit(2)
+                .layoutPriority(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
             if let home {
                 Toggle(isOn: isOn, intent: createToggleIntent(item: item, homeUUID: slot.homeUUID, home: home)) {}
                     .toggleStyle(PowerButtonToggleStyle(diameter: 36, showStateLabel: false))
@@ -236,12 +237,16 @@ struct SwitchSmallWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
+            OpenHABIconOverlay()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(10)
+
             if let slot = entry.slots.compactMap(\.self).first {
                 let label = slot.item.label.isEmpty ? slot.item.name : slot.item.label
                 VStack(spacing: 8) {
                     Text(label)
                         .font(.headline)
-                        .lineLimit(1)
+                        .lineLimit(3)
                         .minimumScaleFactor(0.7)
                         .padding(.top, 20)
                     Spacer()
@@ -268,8 +273,6 @@ struct SwitchSmallWidgetView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding()
             }
-
-            OpenHABIconOverlay(size: 16)
         }
     }
 }
@@ -281,6 +284,10 @@ struct SwitchMediumWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
+            OpenHABIconOverlay()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(10)
+
             let filledSlots = Array(entry.slots.compactMap(\.self))
             if filledSlots.isEmpty {
                 UnconfiguredPlaceholder()
@@ -299,10 +306,7 @@ struct SwitchMediumWidgetView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
-                .padding(.top, 22)
             }
-
-            OpenHABIconOverlay(size: 18)
         }
     }
 }
@@ -314,6 +318,10 @@ struct SwitchLargeWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
+            OpenHABIconOverlay()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(14)
+
             let filledSlots = Array(entry.slots.compactMap(\.self))
             if filledSlots.isEmpty {
                 VStack(alignment: .center, spacing: 16) {
@@ -343,10 +351,7 @@ struct SwitchLargeWidgetView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
-                .padding(.top, 22)
             }
-
-            OpenHABIconOverlay(size: 20)
         }
     }
 }

@@ -182,9 +182,10 @@ private struct SensorItemRow: View {
             Text(label)
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .lineLimit(2)
+                .layoutPriority(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
             Text(formattedState(for: item))
                 .font(.subheadline)
                 .fontWeight(.semibold)
@@ -202,16 +203,19 @@ struct SensorSmallWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
+            OpenHABIconOverlay()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(10)
+
             if let slot = entry.slots.compactMap(\.self).first {
                 let item = slot.item
                 let label = item.label.isEmpty ? item.name : item.label
                 VStack(spacing: 8) {
                     Text(label)
                         .font(.headline)
-                        .lineLimit(1)
+                        .lineLimit(3)
                         .minimumScaleFactor(0.7)
                         .padding(.top, 20)
-
                     Spacer()
 
                     Text(formattedState(for: item))
@@ -230,8 +234,6 @@ struct SensorSmallWidgetView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding()
             }
-
-            OpenHABIconOverlay(size: 16)
         }
     }
 }
@@ -243,6 +245,10 @@ struct SensorMediumWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
+            OpenHABIconOverlay()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(10)
+
             let filledSlots = entry.slots.compactMap(\.self)
             if filledSlots.isEmpty {
                 UnconfiguredPlaceholder()
@@ -253,7 +259,7 @@ struct SensorMediumWidgetView: View {
                     ForEach(filledSlots.indices, id: \.self) { index in
                         SensorItemRow(slot: filledSlots[index])
                             .padding(.horizontal)
-                            .padding(.vertical, 10)
+                            .padding(.vertical, 12)
                         if index < filledSlots.count - 1 {
                             Divider()
                                 .padding(.leading)
@@ -261,10 +267,7 @@ struct SensorMediumWidgetView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
-                .padding(.top, 22)
             }
-
-            OpenHABIconOverlay(size: 18)
         }
     }
 }
@@ -276,6 +279,10 @@ struct SensorLargeWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
+            OpenHABIconOverlay()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(14)
+
             let filledSlots = entry.slots.compactMap(\.self)
             if filledSlots.isEmpty {
                 VStack(alignment: .center, spacing: 16) {
@@ -305,10 +312,7 @@ struct SensorLargeWidgetView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
-                .padding(.top, 22)
             }
-
-            OpenHABIconOverlay(size: 20)
         }
     }
 }
