@@ -28,6 +28,16 @@
 - ItemEventStream: backport SSE watchdog and self-contained network monitor
 - openHABWidget: add interactive switch and sensor widgets
 
+## [Version 3.3.3, Build 289] - 2026-07-01Z
+
+- chore(deps): bump actions/cache from 5 to 6 (#1273)
+- chore(deps): bump faraday from 1.10.5 to 1.10.6 (#1274)
+- fix: position webview below navigation bar to prevent BasicUI back button from being hidden
+
+## [Version 3.3.2, Build 288] - 2026-06-25Z
+
+- fix: avoid NWPathMonitor makeAsyncStream() recursive lock crash on iOS 17 (#1270)
+
 ## [Version 3.2.77, Build 286] - 2026-06-20Z
 
 - Fix Home re-tap reload and screensaver idle reset (#1266)

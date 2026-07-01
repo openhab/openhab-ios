@@ -22,7 +22,12 @@ final class RealPathMonitor: NWPathMonitoring, Sendable {
     }
 
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
-        for await path in monitor {
+        // Use the manual paths() wrapper on all OS versions.
+        // NWPathMonitor's native iOS 17 AsyncSequence conformance (makeAsyncStream()) has a
+        // re-entrancy bug: startLocked() holds the monitor's os_unfair_lock and calls
+        // AsyncStream.Continuation.finish(), whose onTermination callback tries to re-acquire
+        // the same lock → os_unfair_lock_recursive_abort (crash seen on iOS 17.7.11).
+        for await path in monitor.paths() {
             Logger.nwPathMonitoring.debug("Path monitor update: \(path.debugDescription)")
             await handler(path.status == .satisfied || path.status == .requiresConnection)
         }
@@ -40,4 +45,20 @@ public protocol NWPathMonitoring: AnyObject, Sendable {
     /// Calls the handler with `true` when connected, `false` otherwise.
     func startMonitoring(handler: @escaping (Bool) async -> Void) async
     func cancel()
+}
+
+// MARK: - NWPathMonitor AsyncStream wrapper
+
+extension NWPathMonitor {
+    func paths() -> AsyncStream<NWPath> {
+        AsyncStream { continuation in
+            pathUpdateHandler = { path in
+                continuation.yield(path)
+            }
+            continuation.onTermination = { [weak self] _ in
+                self?.cancel()
+            }
+            start(queue: DispatchQueue(label: "NSPathMonitor.paths"))
+        }
+    }
 }
