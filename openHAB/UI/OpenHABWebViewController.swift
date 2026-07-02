@@ -120,6 +120,7 @@ class OpenHABWebViewController: OpenHABViewController {
 
         loadingOverlay.backgroundColor = .systemBackground
         loadingOverlay.isHidden = true
+        loadingOverlay.isUserInteractionEnabled = false
         loadingOverlay.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(loadingOverlay)
         NSLayoutConstraint.activate([
@@ -132,6 +133,7 @@ class OpenHABWebViewController: OpenHABViewController {
         activityIndicator = UIActivityIndicatorView()
         activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
+        activityIndicator.isUserInteractionEnabled = false
         activityIndicator.style = UIActivityIndicatorView.Style.large
 
         view.addSubview(activityIndicator)
@@ -513,7 +515,7 @@ class OpenHABWebViewController: OpenHABViewController {
         }
         webView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            webView.topAnchor.constraint(equalTo: view.topAnchor),
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
