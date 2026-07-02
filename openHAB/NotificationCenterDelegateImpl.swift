@@ -57,12 +57,6 @@ final class AudioPlayerActor {
         }
     }
 
-    deinit {
-        if soundID != 0 {
-            AudioServicesDisposeSystemSoundID(soundID)
-        }
-    }
-
     func playSound() {
         guard soundID != 0 else { return }
         AudioServicesPlaySystemSound(soundID)
@@ -70,6 +64,12 @@ final class AudioPlayerActor {
 
     func stopSound() {
         // System sounds cannot be stopped mid-play; the ping is short enough that this is fine.
+    }
+
+    deinit {
+        if soundID != 0 {
+            AudioServicesDisposeSystemSoundID(soundID)
+        }
     }
 }
 
