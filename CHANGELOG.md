@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.3.5, Build 291] - 2026-07-02Z
+
+- Allow speech recognition. (#1281)
+
 ## [Version 3.3.4, Build 290] - 2026-07-01Z
 
 - fix(uitests): restore snapshot navigation for current demo.openhab.org sitemap structure (#1271)
