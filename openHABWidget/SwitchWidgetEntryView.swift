@@ -236,7 +236,7 @@ struct SwitchSmallWidgetView: View {
     let entry: SwitchEntry
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack(alignment: .center) {
             OpenHABIconOverlay()
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 .padding(10)
