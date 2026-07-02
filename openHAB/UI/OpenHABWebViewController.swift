@@ -122,6 +122,7 @@ class OpenHABWebViewController: OpenHABViewController {
 
         loadingOverlay.backgroundColor = .systemBackground
         loadingOverlay.isHidden = true
+        loadingOverlay.isUserInteractionEnabled = false
         loadingOverlay.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(loadingOverlay)
         NSLayoutConstraint.activate([
@@ -134,6 +135,7 @@ class OpenHABWebViewController: OpenHABViewController {
         activityIndicator = UIActivityIndicatorView()
         activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
+        activityIndicator.isUserInteractionEnabled = false
         activityIndicator.style = UIActivityIndicatorView.Style.large
 
         view.addSubview(activityIndicator)
