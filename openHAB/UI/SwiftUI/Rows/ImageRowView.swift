@@ -45,6 +45,7 @@ private struct ImageRowContent: View {
     @State private var lastChartImage: KFCrossPlatformImage?
     @State private var lastRegularImageState: RegularImageState?
     @State private var chartDisplayState: ChartDisplayState?
+    @State private var animatedGIFSourceURL: URL?
 
     private let logger = Logger(subsystem: "org.openhab", category: "ImageRowView")
 
@@ -107,6 +108,9 @@ private struct ImageRowContent: View {
         .onChange(of: input.refresh) {
             setupRefreshTimer()
         }
+        .onChange(of: input.url) {
+            animatedGIFSourceURL = nil
+        }
     }
 
     @ViewBuilder
@@ -157,15 +161,23 @@ private struct ImageRowContent: View {
                 "\(input.widgetId)-\(forceRefreshKey)"
             }
             let provider = RawImageDataProvider(data: data, cacheKey: cacheKey)
-            KFImage(source: .provider(provider))
-                .withOpenHABCredentials(for: networkTracker.activeConnection)
-                .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(maxHeight: 300)
-                .clipShape(.rect(cornerRadius: 8))
+            if isGIFMagic(data) {
+                KFAnimatedImage(source: .provider(provider))
+                    .withOpenHABCredentials(for: networkTracker.activeConnection)
+                    .configure { $0.contentMode = .scaleAspectFit }
+                    .frame(maxHeight: 300)
+                    .clipShape(.rect(cornerRadius: 8))
+            } else {
+                KFImage(source: .provider(provider))
+                    .withOpenHABCredentials(for: networkTracker.activeConnection)
+                    .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxHeight: 300)
+                    .clipShape(.rect(cornerRadius: 8))
+            }
         case let .link(url):
-            if url?.pathExtension.lowercased() == "gif" {
+            if animatedGIFSourceURL == url {
                 KFAnimatedImage(url)
                     .withOpenHABCredentials(for: networkTracker.activeConnection)
                     .configure { $0.contentMode = .scaleAspectFit }
@@ -211,6 +223,10 @@ private struct ImageRowContent: View {
                     }
                     .onSuccess { result in
                         lastRegularImageState = RegularImageState(url: url, image: result.image)
+                        if isGIF(result) {
+                            logger.debug("GIF detected for \(url?.absoluteString ?? "nil", privacy: .public)")
+                            animatedGIFSourceURL = url
+                        }
                     }
                     .onFailure { error in
                         guard !error.isTaskCancelled else { return }
@@ -236,6 +252,17 @@ private struct ImageRowContent: View {
                 )
                 .clipShape(.rect(cornerRadius: 8))
         }
+    }
+
+    private func isGIFMagic(_ data: Data) -> Bool {
+        data.count >= 3 && data[0] == 0x47 && data[1] == 0x49 && data[2] == 0x46 // "GIF"
+    }
+
+    private func isGIF(_ result: RetrieveImageResult) -> Bool {
+        if let frameCount = result.image.kf.imageFrameCount, frameCount > 1 {
+            return true
+        }
+        return result.data().map(isGIFMagic) ?? false
     }
 
     private func setupRefreshTimer() {
