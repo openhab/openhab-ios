@@ -32,7 +32,7 @@ struct SetSwitchItemIntent: AppIntent {
     }
 
     static var allowedItemTypes: [OpenHABItem.ItemType] {
-        [.switchItem]
+        [.switchItem, .dimmer]
     }
 
     static var parameterSummary: some ParameterSummary {
