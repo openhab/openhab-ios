@@ -34,3 +34,6 @@ BonjourDiscoveryTool/.swiftpm
 BonjourDiscoveryTool/bonjour-discovery
 
 .xcodebuildmcp/
+
+# Local developer signing overrides (created by scripts/setup-dev-signing.sh)
+openHAB.xcodeproj/project.pbxproj.bak
