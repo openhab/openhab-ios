@@ -25,7 +25,6 @@ Requires at least iOS 16 and openHAB 2.x and later.
 There are 2 [TestFlight](https://testflight.apple.com) tester groups: 
 
 **Stable Betas** – for those who want to help validate upcoming releases before they reach the App Store - are available on [TestFlight Stable Beta](https://testflight.apple.com/join/0uFYONeF).
-https://testflight.apple.com/join/0uFYONeF
 
 **Feature Preview** – for people who enjoy testing new functionality early, even if it’s still under active development:
 [TestFlight Feature Preview](https://testflight.apple.com/join/fxEXH1qV).
