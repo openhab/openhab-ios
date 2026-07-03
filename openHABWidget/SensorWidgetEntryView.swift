@@ -332,8 +332,9 @@ struct SensorAccessoryCircularView: View {
                     Text(formattedState(for: slot.item))
                         .font(.caption2)
                         .fontWeight(.bold)
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .minimumScaleFactor(0.5)
+                        .multilineTextAlignment(.center)
                 }
             } else {
                 Image(systemSymbol: .gear)
@@ -353,7 +354,7 @@ struct SensorAccessoryRectangularView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .font(.headline)
-                    .lineLimit(1)
+                    .lineLimit(2)
                     .minimumScaleFactor(0.7)
                 if item.state != nil {
                     Text(formattedState(for: item))
