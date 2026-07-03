@@ -427,7 +427,7 @@ struct SwitchAccessoryRectangularView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(label)
                         .font(.headline)
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .minimumScaleFactor(0.7)
                     if let stateText = slot.item.state {
                         Text(stateText)
