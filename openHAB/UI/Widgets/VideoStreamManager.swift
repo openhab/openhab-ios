@@ -23,12 +23,10 @@ final class VideoStreamManager {
 
     private init() {}
 
-    func getOrCreateStream(
-        for url: URL,
-        onFrame: @escaping @MainActor (UIImage) -> Void,
-        onFirstFrame: ((CGFloat) -> Void)?,
-        onError: ((any Error) -> Void)?
-    ) -> SimpleMJPEGPlayer {
+    func getOrCreateStream(for url: URL,
+                           onFrame: @escaping @MainActor (UIImage) -> Void,
+                           onFirstFrame: ((CGFloat) -> Void)?,
+                           onError: ((any Error) -> Void)?) -> SimpleMJPEGPlayer {
         let key = url.absoluteString
 
         if let existingPlayer = activeStreams[key] {
