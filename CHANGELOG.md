@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [Version 3.3.6, Build 295] - 2026-07-03Z
+
+- refactor: remove UIImageView polling timer from MJPEG video stream (#1284)
+- Fix duplicate link for Stable Betas section
+- Correct typo in Stable Beta section of README
+- Fix TestFlight reference in README
+- Update README with TestFlight group information (#1285)
+
 ## [Version 3.3.5, Build 291] - 2026-07-02Z
 
 - Allow speech recognition. (#1281)
