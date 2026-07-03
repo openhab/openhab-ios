@@ -36,6 +36,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published private(set) var widgetUpdateVersions: [String: Int] = [:]
     @Published private(set) var rowInputs: [SitemapRowInput] = []
     @Published var navigationPath: [LinkedPageNavigation] = []
+    private(set) var rowInputLayoutVersion = 0
 
     let networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
@@ -686,10 +687,16 @@ extension SitemapPageViewModel {
             index[rowID] = widget
         }
 
+        let rowInputLayoutChanged = SitemapRowLayoutIdentity.makeIdentities(from: result.inputs) !=
+            SitemapRowLayoutIdentity.makeIdentities(from: rowInputs)
+
         rowWidgetIndex = index
         previousBuildRenderKeys = result.renderKeys
         previousBuildRowIDs = result.rowIDs
         if result.inputs != rowInputs {
+            if rowInputLayoutChanged {
+                rowInputLayoutVersion += 1
+            }
             rowInputs = result.inputs
         }
     }
