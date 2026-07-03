@@ -525,3 +525,21 @@ extension SwitchLargeWidgetItemEntity: SwitchSlotResolvable {}
 } timeline: {
     SwitchEntry(date: .now, home: nil, slots: sampleSlots)
 }
+
+#Preview("Accessory Circular", as: .accessoryCircular) {
+    SwitchSmallWidget()
+} timeline: {
+    SwitchEntry(date: .now, home: nil, slots: [sampleSlots[0]])
+}
+
+#Preview("Accessory Rectangular", as: .accessoryRectangular) {
+    SwitchSmallWidget()
+} timeline: {
+    SwitchEntry(date: .now, home: nil, slots: [sampleSlots[0]])
+}
+
+#Preview("Accessory Inline", as: .accessoryInline) {
+    SwitchSmallWidget()
+} timeline: {
+    SwitchEntry(date: .now, home: nil, slots: [sampleSlots[0]])
+}

@@ -440,3 +440,21 @@ extension SensorLargeWidgetItemEntity: SensorSlotResolvable {}
 } timeline: {
     SensorEntry(date: .now, home: nil, slots: sampleSlots)
 }
+
+#Preview("Accessory Circular", as: .accessoryCircular) {
+    SensorSmallWidget()
+} timeline: {
+    SensorEntry(date: .now, home: nil, slots: [sampleSlots[0]])
+}
+
+#Preview("Accessory Rectangular", as: .accessoryRectangular) {
+    SensorSmallWidget()
+} timeline: {
+    SensorEntry(date: .now, home: nil, slots: [sampleSlots[0]])
+}
+
+#Preview("Accessory Inline", as: .accessoryInline) {
+    SensorSmallWidget()
+} timeline: {
+    SensorEntry(date: .now, home: nil, slots: [sampleSlots[0]])
+}
