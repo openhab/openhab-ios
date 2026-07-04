@@ -28,6 +28,7 @@
 		657144962C30A16700C8A1F3 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 657144952C30A16700C8A1F3 /* OpenHABCore */; };
 		73F094A3C17641738D6215CD /* SetSwitchItemIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD5E85B2F02C272003215C0 /* SetSwitchItemIntent.swift */; };
 		791AFA47B71D4B6995369F3A /* GetItemStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4BF3512F0307A40082479C /* GetItemStateIntent.swift */; };
+		856AA30C33F548E58EA00F6C /* CarPlay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F572C79726447B8B9C40B49 /* CarPlay.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		934E592528F16EBA00162004 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 934E592428F16EBA00162004 /* OpenHABCore */; };
 		934E592728F16EBA00162004 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 934E592628F16EBA00162004 /* Kingfisher */; };
 		937E4471270B36D000A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4470270B36D000A98C26 /* OpenHABCore */; };
@@ -229,6 +230,7 @@
 		657144502C1E438700C8A1F3 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		657144522C1E438700C8A1F3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		657144972C30A3E300C8A1F3 /* NotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationService.entitlements; sourceTree = "<group>"; };
+		6F572C79726447B8B9C40B49 /* CarPlay.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CarPlay.framework; path = System/Library/Frameworks/CarPlay.framework; sourceTree = SDKROOT; };
 		933D7F0422E7015000621A03 /* openHABUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		933D7F0622E7015000621A03 /* OpenHABUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABUITests.swift; sourceTree = "<group>"; };
 		933D7F0822E7015100621A03 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -515,6 +517,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				856AA30C33F548E58EA00F6C /* CarPlay.framework in Frameworks */,
 				6557AF922C039D140094D0C8 /* FirebaseMessaging in Frameworks */,
 				DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */,
 				DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */,
@@ -724,6 +727,7 @@
 			isa = PBXGroup;
 			children = (
 				032C4C3A922FABCBEB20EAA3 /* AppIntents */,
+				6F572C79726447B8B9C40B49 /* CarPlay.framework */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
