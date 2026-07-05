@@ -162,6 +162,11 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             .prefix(carPlayMaxItems)
             .map { makeItem(for: $0, service: service) }
 
+        guard !items.isEmpty else {
+            interfaceController?.setRootTemplate(placeholderTemplate(), animated: false, completion: nil)
+            return
+        }
+
         let section = CPListSection(items: Array(items))
         let template = CPListTemplate(title: "openHAB", sections: [section])
         interfaceController?.setRootTemplate(template, animated: false, completion: nil)
