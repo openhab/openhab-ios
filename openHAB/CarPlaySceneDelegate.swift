@@ -19,6 +19,7 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
     private var interfaceController: CPInterfaceController?
     private var streamTask: Task<Void, Never>?
     private var preferencesTask: Task<Void, Never>?
+    private let sitemapEventStream = SitemapEventStream()
 
     func templateApplicationScene(_ templateApplicationScene: CPTemplateApplicationScene,
                                   didConnect interfaceController: CPInterfaceController) {
@@ -35,6 +36,7 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         streamTask = nil
         preferencesTask?.cancel()
         preferencesTask = nil
+        Task { await sitemapEventStream.stop() }
         self.interfaceController = nil
         Logger.carPlay.info("CarPlay scene disconnected")
     }
@@ -43,9 +45,7 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
 
     private func startStreaming() {
         streamTask?.cancel()
-        streamTask = Task { [weak self] in
-            await self?.runStream()
-        }
+        streamTask = Task { [weak self] in await self?.runStream() }
     }
 
     private func startObservingPreferences() {
@@ -76,16 +76,80 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         }
         do {
             let service = try OpenAPIService(connectionConfiguration: connection.configuration)
-            for try await event in SitemapPageLoader.stream(sitemapName: sitemapName, service: service) {
-                guard !Task.isCancelled else { break }
-                let page: OpenHABPage? = switch event {
-                case let .initialFetch(page): page
-                case let .longPoll(page, _): page
-                }
-                if let page { updateTemplate(page: page, service: service) }
+
+            // Initial fetch to populate the template and learn the pageId
+            guard let page = try await service.pollDataForPage(
+                sitemapname: sitemapName, pageId: "", longPolling: false
+            ) else { return }
+            updateTemplate(page: page, service: service)
+
+            // Prefer SSE; fall back to long-poll on older servers
+            let serverProps = try? await service.getRoot()
+            if serverProps?.hasSseSupport() == true {
+                await runSSE(page: page, sitemapName: sitemapName, connection: connection, service: service)
+            } else {
+                await runLongPoll(sitemapName: sitemapName, pageId: page.pageId, service: service)
             }
         } catch {
             Logger.carPlay.error("CarPlay stream error: \(error)")
+        }
+    }
+
+    @MainActor
+    private func runSSE(page: OpenHABPage, sitemapName: String, connection: ConnectionInfo, service: OpenAPIService) async {
+        await sitemapEventStream.startMonitoringNetworkIfNeeded(initialConnection: connection)
+        let pageId = page.pageId.isEmpty ? sitemapName : page.pageId
+        let stream = await sitemapEventStream.stream(sitemap: sitemapName, pageId: pageId)
+        Logger.carPlay.info("CarPlay SSE starting for \(sitemapName)/\(pageId)")
+
+        for await msg in stream {
+            guard !Task.isCancelled else { break }
+            switch msg {
+            case .connected:
+                Logger.carPlay.info("CarPlay SSE connected")
+            case let .disconnected(error):
+                if let error { Logger.carPlay.warning("CarPlay SSE disconnected: \(error)") }
+            case let .event(message):
+                handleSseMessage(message, page: page, service: service)
+            }
+        }
+    }
+
+    @MainActor
+    private func handleSseMessage(_ message: SitemapEventMessage, page: OpenHABPage, service: OpenAPIService) {
+        switch message {
+        case .alive:
+            break
+        case .sitemapChanged:
+            Logger.carPlay.info("CarPlay SSE: sitemap changed, reloading")
+            startStreaming()
+        case let .widget(event):
+            switch page.apply(event: event) {
+            case .applied:
+                updateTemplate(page: page, service: service)
+            case .requiresPageReload, .notFound:
+                Logger.carPlay.info("CarPlay SSE: widget requires reload")
+                startStreaming()
+            case .unchanged:
+                break
+            }
+        case let .unknown(raw):
+            Logger.carPlay.debug("CarPlay SSE unknown: \(raw)")
+        }
+    }
+
+    @MainActor
+    private func runLongPoll(sitemapName: String, pageId: String, service: OpenAPIService) async {
+        Logger.carPlay.info("CarPlay using long-poll for \(sitemapName)")
+        do {
+            for try await event in SitemapPageLoader.stream(sitemapName: sitemapName, pageId: pageId, service: service) {
+                guard !Task.isCancelled else { break }
+                if case let .longPoll(page, _) = event {
+                    updateTemplate(page: page, service: service)
+                }
+            }
+        } catch {
+            Logger.carPlay.error("CarPlay long-poll error: \(error)")
         }
     }
 
