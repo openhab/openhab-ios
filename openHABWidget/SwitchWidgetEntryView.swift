@@ -237,9 +237,10 @@ struct SwitchSmallWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .center) {
-            OpenHABIconOverlay()
+            OpenHABIconWatermark()
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                .padding(10)
+                .padding(11)
+                .offset(x: 0.5, y: 0.5)
 
             if let slot = entry.slots.compactMap(\.self).first {
                 let label = slot.item.label.isEmpty ? slot.item.name : slot.item.label
@@ -284,9 +285,10 @@ struct SwitchMediumWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            OpenHABIconOverlay()
+            OpenHABIconWatermark()
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                .padding(10)
+                .padding(11)
+                .offset(x: 0.5, y: 0.5)
 
             let filledSlots = Array(entry.slots.compactMap(\.self))
             if filledSlots.isEmpty {
@@ -318,9 +320,10 @@ struct SwitchLargeWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            OpenHABIconOverlay()
+            OpenHABIconWatermark()
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                .padding(14)
+                .padding(15)
+                .offset(x: 0.5, y: 0.5)
 
             let filledSlots = Array(entry.slots.compactMap(\.self))
             if filledSlots.isEmpty {

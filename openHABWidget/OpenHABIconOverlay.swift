@@ -15,7 +15,7 @@ import SwiftUI
 
 // MARK: - Shared Icon Overlay
 
-struct OpenHABIconOverlay: View {
+struct OpenHABIconWatermark: View {
     var body: some View {
         Image("openHABIcon")
             .resizable()
