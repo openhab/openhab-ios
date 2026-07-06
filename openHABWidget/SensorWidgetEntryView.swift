@@ -182,9 +182,10 @@ private struct SensorItemRow: View {
             Text(label)
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .lineLimit(2)
+                .layoutPriority(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
             Text(formattedState(for: item))
                 .font(.subheadline)
                 .fontWeight(.semibold)
@@ -201,17 +202,21 @@ struct SensorSmallWidgetView: View {
     let entry: SensorEntry
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack(alignment: .center) {
+            OpenHABIconWatermark()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(11)
+                .offset(x: 0.5, y: 0.5)
+
             if let slot = entry.slots.compactMap(\.self).first {
                 let item = slot.item
                 let label = item.label.isEmpty ? item.name : item.label
                 VStack(spacing: 8) {
                     Text(label)
                         .font(.headline)
-                        .lineLimit(1)
+                        .lineLimit(3)
                         .minimumScaleFactor(0.7)
                         .padding(.top, 20)
-
                     Spacer()
 
                     Text(formattedState(for: item))
@@ -230,8 +235,6 @@ struct SensorSmallWidgetView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding()
             }
-
-            OpenHABIconOverlay(size: 16)
         }
     }
 }
@@ -243,6 +246,11 @@ struct SensorMediumWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
+            OpenHABIconWatermark()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(11)
+                .offset(x: 0.5, y: 0.5)
+
             let filledSlots = entry.slots.compactMap(\.self)
             if filledSlots.isEmpty {
                 UnconfiguredPlaceholder()
@@ -253,7 +261,7 @@ struct SensorMediumWidgetView: View {
                     ForEach(filledSlots.indices, id: \.self) { index in
                         SensorItemRow(slot: filledSlots[index])
                             .padding(.horizontal)
-                            .padding(.vertical, 10)
+                            .padding(.vertical, 12)
                         if index < filledSlots.count - 1 {
                             Divider()
                                 .padding(.leading)
@@ -261,10 +269,7 @@ struct SensorMediumWidgetView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
-                .padding(.top, 22)
             }
-
-            OpenHABIconOverlay(size: 18)
         }
     }
 }
@@ -276,6 +281,11 @@ struct SensorLargeWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
+            OpenHABIconWatermark()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(15)
+                .offset(x: 0.5, y: 0.5)
+
             let filledSlots = entry.slots.compactMap(\.self)
             if filledSlots.isEmpty {
                 VStack(alignment: .center, spacing: 16) {
@@ -305,10 +315,7 @@ struct SensorLargeWidgetView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
-                .padding(.top, 22)
             }
-
-            OpenHABIconOverlay(size: 20)
         }
     }
 }
@@ -328,8 +335,9 @@ struct SensorAccessoryCircularView: View {
                     Text(formattedState(for: slot.item))
                         .font(.caption2)
                         .fontWeight(.bold)
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .minimumScaleFactor(0.5)
+                        .multilineTextAlignment(.center)
                 }
             } else {
                 Image(systemSymbol: .gear)
@@ -349,7 +357,7 @@ struct SensorAccessoryRectangularView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .font(.headline)
-                    .lineLimit(1)
+                    .lineLimit(2)
                     .minimumScaleFactor(0.7)
                 if item.state != nil {
                     Text(formattedState(for: item))
@@ -435,4 +443,22 @@ extension SensorLargeWidgetItemEntity: SensorSlotResolvable {}
     SensorLargeWidget()
 } timeline: {
     SensorEntry(date: .now, home: nil, slots: sampleSlots)
+}
+
+#Preview("Accessory Circular", as: .accessoryCircular) {
+    SensorSmallWidget()
+} timeline: {
+    SensorEntry(date: .now, home: nil, slots: [sampleSlots[0]])
+}
+
+#Preview("Accessory Rectangular", as: .accessoryRectangular) {
+    SensorSmallWidget()
+} timeline: {
+    SensorEntry(date: .now, home: nil, slots: [sampleSlots[0]])
+}
+
+#Preview("Accessory Inline", as: .accessoryInline) {
+    SensorSmallWidget()
+} timeline: {
+    SensorEntry(date: .now, home: nil, slots: [sampleSlots[0]])
 }

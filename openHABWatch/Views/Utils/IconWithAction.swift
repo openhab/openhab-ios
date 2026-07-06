@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import SFSafeSymbols
+internal import SFSafeSymbols
 import SwiftUI
 
 struct IconWithAction: View {

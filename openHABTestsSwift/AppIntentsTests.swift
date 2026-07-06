@@ -184,6 +184,12 @@ struct SetLocationValueIntentTests {
 struct SetSwitchItemIntentTests {
     let homeId = UUID()
 
+    @Test func queryAllowedTypesIncludesSwitchAndDimmer() {
+        let query = SwitchItemEntity.SwitchItemQuery()
+        #expect(query.allowedTypes.contains(.switchItem))
+        #expect(query.allowedTypes.contains(.dimmer))
+    }
+
     @Test func homeMismatchThrowsItemNotInHome() async {
         let wrongHome = Home(id: UUID().uuidString, displayString: "Wrong Home")
         let entity = SwitchItemEntity(makeItem(type: "Switch", label: "My Switch"), homeId: homeId)

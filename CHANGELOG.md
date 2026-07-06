@@ -2,6 +2,160 @@
 
 ## [Unreleased]
 
+- Allow for two lines label and value for iOS Lock Screen Accessories (#1286)
+- Swiftlinting
+- chore: apply linter fixes
+- feat: add accessory widget previews for Switch and Sensor widgets
+- refactor: remove UIImageView polling timer from MJPEG video stream
+- committed version bump: 3.4.5 (294)
+- Fix small widget content to be cntered
+- committed version bump: 3.4.4 (293)
+- committed version bump: 3.4.3 (292)
+- fix: sync allowedItemTypes with query and add regression test
+- feat: make Dimmer items selectable in Set Switch State intent
+- chore: apply linter fixes
+- fix: detect GIF images by magic bytes in ImageRowView
+- committed version bump: 3.4.2 (290)
+- fix: animate GIFs in the Image sitemap widget (#1280)
+- Widget adjustments (#1279)
+- fix: lock screen widgets now send commands on tap
+- fix: notification ping now respects the ringer/silent switch (#1278)
+- fix: add OpenHABShortcuts.swift to app target to resolve AppShortcuts.xcstrings phrase warnings
+- committed version bump: 3.4.1 (287)
+- fix: add provisioning profile for openHABWidgetExtension
+- l10n: add Spanish, Finnish, Norwegian, and Russian translations
+- l10n: switch German and French translations to informal address (du/tu)
+- chore: remove 5 stale localization keys on feature branch
+- l10n: add Spanish, Finnish, Norwegian, and Russian translations
+- l10n: translate 2 new widget keys into all 9 languages
+- chore: update openHABWidgetExtension scheme with askForAppToLaunch
+- fix: restore project.pbxproj corrupted by bad 3-way merge of pbxproj
+- chore: add shared schemes for openHABWidgetExtension and OpenHABWatchComplicationsExtension
+- build: raise macOS minimum to 15 for AsyncSequence.Failure support
+- chore: bump openHABTestsSwift deployment target to iOS 18.0
+- Merge develop + fix build warnings; add iOS home screen widgets with item display
+- Sensor widget: format state values using stateDescription numberPattern
+- Sensor widget: support 1/2/4 items per small/medium/large size
+- Make ScrollToTop overlay button conditional (#1231)
+- Bump minimum deployment targets to iOS 18 / watchOS 11
+- Use iOS 18 onScrollGeometryChange in SitemapPageView
+- Use iOS 17 animation and scroll APIs
+- Replace SetLocationValueIntent with SetActiveHomeIntent in AppShortcutsProvider
+- Register SetActiveHomeIntent with AppShortcutsProvider
+- Linting and AppIntents SSE warnings fixes
+- Bump deployment targets to iOS 17.0 / watchOS 10.0
+- Convert AppShortcuts.strings to AppShortcuts.xcstrings String Catalog
+- Fix AppIntentsMetadataProcessor synonym warnings in AppEnum cases
+- Add AppShortcutsProvider and fix intent dialog gaps
+- Upgrade SwiftFormatPlugin 0.58.7→0.61.1, SwiftLintPlugin 0.62.2→0.63.3 (#1225)
+- ItemEventStream: backport SSE watchdog and self-contained network monitor
+- openHABWidget: add interactive switch and sensor widgets
+
+- Fix small widget content to be cntered
+- committed version bump: 3.4.4 (293)
+- committed version bump: 3.4.3 (292)
+- fix: sync allowedItemTypes with query and add regression test
+- feat: make Dimmer items selectable in Set Switch State intent
+- chore: apply linter fixes
+- fix: detect GIF images by magic bytes in ImageRowView
+- committed version bump: 3.4.2 (290)
+- fix: animate GIFs in the Image sitemap widget (#1280)
+- Widget adjustments (#1279)
+- fix: lock screen widgets now send commands on tap
+- fix: notification ping now respects the ringer/silent switch (#1278)
+- fix: add OpenHABShortcuts.swift to app target to resolve AppShortcuts.xcstrings phrase warnings
+- committed version bump: 3.4.1 (287)
+- fix: add provisioning profile for openHABWidgetExtension
+- l10n: add Spanish, Finnish, Norwegian, and Russian translations
+- l10n: switch German and French translations to informal address (du/tu)
+- chore: remove 5 stale localization keys on feature branch
+- l10n: add Spanish, Finnish, Norwegian, and Russian translations
+- l10n: translate 2 new widget keys into all 9 languages
+- chore: update openHABWidgetExtension scheme with askForAppToLaunch
+- fix: restore project.pbxproj corrupted by bad 3-way merge of pbxproj
+- chore: add shared schemes for openHABWidgetExtension and OpenHABWatchComplicationsExtension
+- build: raise macOS minimum to 15 for AsyncSequence.Failure support
+- chore: bump openHABTestsSwift deployment target to iOS 18.0
+- Merge develop + fix build warnings; add iOS home screen widgets with item display
+- Sensor widget: format state values using stateDescription numberPattern
+- Sensor widget: support 1/2/4 items per small/medium/large size
+- Make ScrollToTop overlay button conditional (#1231)
+- Bump minimum deployment targets to iOS 18 / watchOS 11
+- Use iOS 18 onScrollGeometryChange in SitemapPageView
+- Use iOS 17 animation and scroll APIs
+- Replace SetLocationValueIntent with SetActiveHomeIntent in AppShortcutsProvider
+- Register SetActiveHomeIntent with AppShortcutsProvider
+- Linting and AppIntents SSE warnings fixes
+- Bump deployment targets to iOS 17.0 / watchOS 10.0
+- Convert AppShortcuts.strings to AppShortcuts.xcstrings String Catalog
+- Fix AppIntentsMetadataProcessor synonym warnings in AppEnum cases
+- Add AppShortcutsProvider and fix intent dialog gaps
+- Upgrade SwiftFormatPlugin 0.58.7→0.61.1, SwiftLintPlugin 0.62.2→0.63.3 (#1225)
+- ItemEventStream: backport SSE watchdog and self-contained network monitor
+- openHABWidget: add interactive switch and sensor widgets
+
+## [Version 3.3.6, Build 295] - 2026-07-03Z
+
+- refactor: remove UIImageView polling timer from MJPEG video stream (#1284)
+- Fix duplicate link for Stable Betas section
+- Correct typo in Stable Beta section of README
+- Fix TestFlight reference in README
+- Update README with TestFlight group information (#1285)
+
+## [Version 3.3.5, Build 291] - 2026-07-02Z
+
+- Allow speech recognition. (#1281)
+
+## [Version 3.3.4, Build 290] - 2026-07-01Z
+
+- fix(uitests): restore snapshot navigation for current demo.openhab.org sitemap structure (#1271)
+- fix: use edgesForExtendedLayout to anchor webview below navigation bar (#1276)
+
+## [Version 3.3.3, Build 289] - 2026-07-01Z
+
+- chore(deps): bump actions/cache from 5 to 6 (#1273)
+- chore(deps): bump faraday from 1.10.5 to 1.10.6 (#1274)
+- fix: position webview below navigation bar to prevent BasicUI back button from being hidden
+
+## [Version 3.3.2, Build 288] - 2026-06-25Z
+
+- fix: avoid NWPathMonitor makeAsyncStream() recursive lock crash on iOS 17 (#1270)
+
+## [Version 3.2.77, Build 286] - 2026-06-20Z
+
+- Fix Home re-tap reload and screensaver idle reset (#1266)
+
+## [Version 3.2.76, Build 285] - 2026-06-19Z
+
+- l10n: switch German and French translations to informal address (du/tu)
+- l10n: complete Italian translations for 165 untranslated keys (#1262)
+- l10n: complete Dutch translations for 165 untranslated keys (#1261)
+- l10n: complete FR translations (#1260)
+- fix: format percentages with FormatStyle to resolve localization warnings (#1264)
+- chore: remove 11 stale localization keys (#1263)
+
+## [Version 3.2.75, Build 284] - 2026-06-16Z
+
+- Fix WebUI Reload Issue (#1259)
+- l10n: complete German translations for 13 untranslated keys (#1258)
+- fix: make settings credential fields focusable and fix localization (#1257)
+
+## [Version 3.2.74, Build 283] - 2026-06-16Z
+
+- fix: render Image/Chart/Video widgets as media even when linkedPage is present (#1256)
+- Bump crowdin/github-action from 2.16.2 to 2.16.3 (#1252)
+- Bump maierj/fastlane-action from 3.1.0 to 3.2.0 (#1253)
+- chore: remove stale XCTest.framework PBXFileReference entry
+- chore: remove stale WatchMessageService PBXGroup entry
+- fix: resolve ambiguous #require macro on Bool? in NumberStateTests
+- feat: tap ConnectionView to open Settings, long press for Manage Homes
+- fix: resolve relative image widget URLs against server root URL (#1251)
+- chore: convert AppIntents group to file-system-synchronized group
+- chore: remove stale PBXGroup entries superseded by file-system-synchronized groups
+- fix: expose Location header on createSitemapEventSubscription 201 response (#1250)
+- docs: document all Shortcuts actions including Toggle, Player, DateTime, Location and Set Active Home
+- docs: update README logo image path
+
 ## [Version 3.2.73, Build 282] - 2026-06-13Z
 
 - fix: allow single-label hostnames, show cert dialog over Settings sheet, fix cert list layout (#1247)

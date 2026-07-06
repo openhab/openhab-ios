@@ -20,9 +20,9 @@ enum SwitchAction: String, AppEnum {
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Switch Action")
 
     static let caseDisplayRepresentations: [Self: DisplayRepresentation] = [
-        .on: "On",
-        .off: "Off",
-        .toggle: "Toggle"
+        .on: DisplayRepresentation(title: "On", synonyms: ["Turn on", "Switch on", "Enable"]),
+        .off: DisplayRepresentation(title: "Off", synonyms: ["Turn off", "Switch off", "Disable"]),
+        .toggle: DisplayRepresentation(title: "Toggle", synonyms: ["Flip", "Switch", "Change"])
     ]
 }
 

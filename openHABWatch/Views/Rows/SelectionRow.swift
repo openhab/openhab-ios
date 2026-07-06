@@ -11,7 +11,7 @@
 
 import CommonUI
 import OpenHABCore
-import SFSafeSymbols
+internal import SFSafeSymbols
 import SwiftUI
 
 /// Selection list view for picking from available options

@@ -309,7 +309,7 @@ struct SwitchItemEntity: ItemEntity {
         @IntentParameterDependency<SetSwitchItemIntent>(\.$home)
         var intent
 
-        var allowedTypes: [OpenHABItem.ItemType] = [.switchItem]
+        var allowedTypes: [OpenHABItem.ItemType] = [.switchItem, .dimmer]
         var selectedHome: Home? {
             guard let intent else {
                 return nil
@@ -318,7 +318,7 @@ struct SwitchItemEntity: ItemEntity {
         }
     }
 
-    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Switch Item")
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Switch or Dimmer Item")
     static let defaultQuery = SwitchItemQuery()
 
     var id: ItemIdentifier

@@ -194,9 +194,10 @@ private struct SwitchItemRow: View {
             Text(label)
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .lineLimit(2)
+                .layoutPriority(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
             if let home {
                 Toggle(isOn: isOn, intent: createToggleIntent(item: item, homeUUID: slot.homeUUID, home: home)) {}
                     .toggleStyle(PowerButtonToggleStyle(diameter: 36, showStateLabel: false))
@@ -235,13 +236,18 @@ struct SwitchSmallWidgetView: View {
     let entry: SwitchEntry
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack(alignment: .center) {
+            OpenHABIconWatermark()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(11)
+                .offset(x: 0.5, y: 0.5)
+
             if let slot = entry.slots.compactMap(\.self).first {
                 let label = slot.item.label.isEmpty ? slot.item.name : slot.item.label
                 VStack(spacing: 8) {
                     Text(label)
                         .font(.headline)
-                        .lineLimit(1)
+                        .lineLimit(3)
                         .minimumScaleFactor(0.7)
                         .padding(.top, 20)
                     Spacer()
@@ -268,8 +274,6 @@ struct SwitchSmallWidgetView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding()
             }
-
-            OpenHABIconOverlay(size: 16)
         }
     }
 }
@@ -281,6 +285,11 @@ struct SwitchMediumWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
+            OpenHABIconWatermark()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(11)
+                .offset(x: 0.5, y: 0.5)
+
             let filledSlots = Array(entry.slots.compactMap(\.self))
             if filledSlots.isEmpty {
                 UnconfiguredPlaceholder()
@@ -299,10 +308,7 @@ struct SwitchMediumWidgetView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
-                .padding(.top, 22)
             }
-
-            OpenHABIconOverlay(size: 18)
         }
     }
 }
@@ -314,6 +320,11 @@ struct SwitchLargeWidgetView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
+            OpenHABIconWatermark()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .padding(15)
+                .offset(x: 0.5, y: 0.5)
+
             let filledSlots = Array(entry.slots.compactMap(\.self))
             if filledSlots.isEmpty {
                 VStack(alignment: .center, spacing: 16) {
@@ -343,10 +354,7 @@ struct SwitchLargeWidgetView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
-                .padding(.top, 22)
             }
-
-            OpenHABIconOverlay(size: 20)
         }
     }
 }
@@ -360,14 +368,29 @@ struct SwitchAccessoryCircularView: View {
         ZStack {
             AccessoryWidgetBackground()
             if let slot = entry.slots.compactMap(\.self).first {
-                VStack(spacing: 2) {
-                    Image(systemSymbol: .switch2)
-                        .font(.caption)
-                    Text(slot.item.state ?? "?")
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
+                if let home = entry.home {
+                    Button(intent: createToggleIntent(item: slot.item, homeUUID: slot.homeUUID, home: home)) {
+                        VStack(spacing: 2) {
+                            Image(systemSymbol: .switch2)
+                                .font(.caption)
+                            Text(slot.item.state ?? "?")
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    VStack(spacing: 2) {
+                        Image(systemSymbol: .switch2)
+                            .font(.caption)
+                        Text(slot.item.state ?? "?")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
+                    }
                 }
             } else {
                 Image(systemSymbol: .gear)
@@ -383,20 +406,42 @@ struct SwitchAccessoryRectangularView: View {
     var body: some View {
         if let slot = entry.slots.compactMap(\.self).first {
             let label = slot.item.label.isEmpty ? slot.item.name : slot.item.label
-            VStack(alignment: .leading, spacing: 2) {
-                Text(label)
-                    .font(.headline)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                if let stateText = slot.item.state {
-                    Text(stateText)
-                        .font(.body)
-                        .fontWeight(.semibold)
-                        .lineLimit(1)
-                } else {
-                    Text("No State")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+            if let home = entry.home {
+                Button(intent: createToggleIntent(item: slot.item, homeUUID: slot.homeUUID, home: home)) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(label)
+                            .font(.headline)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        if let stateText = slot.item.state {
+                            Text(stateText)
+                                .font(.body)
+                                .fontWeight(.semibold)
+                                .lineLimit(1)
+                        } else {
+                            Text("No State")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+            } else {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(label)
+                        .font(.headline)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
+                    if let stateText = slot.item.state {
+                        Text(stateText)
+                            .font(.body)
+                            .fontWeight(.semibold)
+                            .lineLimit(1)
+                    } else {
+                        Text("No State")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
         } else {
@@ -412,10 +457,21 @@ struct SwitchAccessoryInlineView: View {
     var body: some View {
         if let slot = entry.slots.compactMap(\.self).first {
             let label = slot.item.label.isEmpty ? slot.item.name : slot.item.label
-            if let stateText = slot.item.state {
-                Text("\(label): \(stateText)")
+            if let home = entry.home {
+                Button(intent: createToggleIntent(item: slot.item, homeUUID: slot.homeUUID, home: home)) {
+                    if let stateText = slot.item.state {
+                        Text("\(label): \(stateText)")
+                    } else {
+                        Text(label)
+                    }
+                }
+                .buttonStyle(.plain)
             } else {
-                Text(label)
+                if let stateText = slot.item.state {
+                    Text("\(label): \(stateText)")
+                } else {
+                    Text(label)
+                }
             }
         } else {
             Text("Configure Widget")
@@ -471,4 +527,22 @@ extension SwitchLargeWidgetItemEntity: SwitchSlotResolvable {}
     SwitchLargeWidget()
 } timeline: {
     SwitchEntry(date: .now, home: nil, slots: sampleSlots)
+}
+
+#Preview("Accessory Circular", as: .accessoryCircular) {
+    SwitchSmallWidget()
+} timeline: {
+    SwitchEntry(date: .now, home: nil, slots: [sampleSlots[0]])
+}
+
+#Preview("Accessory Rectangular", as: .accessoryRectangular) {
+    SwitchSmallWidget()
+} timeline: {
+    SwitchEntry(date: .now, home: nil, slots: [sampleSlots[0]])
+}
+
+#Preview("Accessory Inline", as: .accessoryInline) {
+    SwitchSmallWidget()
+} timeline: {
+    SwitchEntry(date: .now, home: nil, slots: [sampleSlots[0]])
 }

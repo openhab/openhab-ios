@@ -175,6 +175,53 @@ struct SitemapRowInputMapperTests {
 
         #expect(input.url == "http://default.example.invalid/video.m3u8")
     }
+
+    @Test
+    func mediaWidgetsWithLinkedPageStillMapToMedia() {
+        let mediaWidgets: [OpenHABWidget] = [
+            makeImageWidget(widgetID: "image"),
+            makeChartWidget(widgetID: "chart"),
+            makeVideoWidget(widgetID: "video", url: "http://example.invalid/v.m3u8", itemState: "OFF")
+        ]
+
+        for (index, widget) in mediaWidgets.enumerated() {
+            widget.linkedPage = makeLinkedPage()
+            let rowID = RowID(pageKey: "testPage", widgetId: widget.widgetId, occurrence: index + 1)
+
+            let widgetMapped = SitemapRowInputMapper.map(widget: widget, rowID: rowID)
+            let snapshotMapped = SitemapRowInputMapper.map(snapshot: WidgetMappingSnapshot(widget: widget), rowID: rowID)
+
+            guard case .media = widgetMapped else {
+                #expect(Bool(false), "Expected .media for linked \(widget.widgetId), got \(widgetMapped)")
+                continue
+            }
+            guard case .media = snapshotMapped else {
+                #expect(Bool(false), "Expected .media for linked snapshot \(widget.widgetId), got \(snapshotMapped)")
+                continue
+            }
+        }
+    }
+
+    @Test
+    func imageWidgetWithEmbeddedJPEGAndLinkedPageShowsEmbeddedData() {
+        // swiftlint:disable:next line_length
+        let jpegBase64 = "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AKwAB/9k="
+        let widget = makeImageWidget(widgetID: "imgWithLinked")
+        widget.item = makeItem(name: "CameraSnapshot", type: "Image", state: "data:image/jpeg;base64,\(jpegBase64)")
+        widget.linkedPage = makeLinkedPage()
+        let rowID = RowID(pageKey: "testPage", widgetId: widget.widgetId, occurrence: 1)
+
+        let mapped = SitemapRowInputMapper.map(snapshot: WidgetMappingSnapshot(widget: widget), rowID: rowID)
+
+        guard case let .media(_, mediaInput) = mapped else {
+            #expect(Bool(false), "Expected .media row for image widget with linked page")
+            return
+        }
+        guard case .embedded = mediaInput.imageDescriptor.resolveImagePayload(rootUrl: "http://server.invalid") else {
+            #expect(Bool(false), "Expected .embedded payload for Image item with base64 JPEG state")
+            return
+        }
+    }
 }
 
 private extension SitemapRowInputMapperTests {
@@ -319,6 +366,22 @@ private extension SitemapRowInputMapperTests {
         widget.type = .video
         widget.url = url
         widget.item = makeItem(name: "VideoItem", type: "String", state: itemState)
+        return widget
+    }
+
+    func makeImageWidget(widgetID: String) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = widgetID
+        widget.type = .image
+        widget.url = "http://example.invalid/proxy?widgetId=\(widgetID)"
+        return widget
+    }
+
+    func makeChartWidget(widgetID: String) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = widgetID
+        widget.type = .chart
+        widget.item = makeItem(name: "ChartItem", type: "Number", state: "42")
         return widget
     }
 }

@@ -40,6 +40,12 @@ struct NotificationRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(notification.title.isEmpty ? String(localized: "message_not_decoded", comment: "") : notification.title)
                         .font(.body)
+                    if let subtitle = notification.subtitle {
+                        Text(subtitle)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(3)
+                    }
                     if let timeStamp = notification.created {
                         Text(dateString(from: timeStamp))
                             .font(.caption)
