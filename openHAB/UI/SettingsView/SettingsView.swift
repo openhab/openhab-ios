@@ -28,7 +28,6 @@ struct SettingsView: View {
     @State private var settingsDefaultMainUIPath = ""
     @State private var settingsAlwaysAllowWebRTC = true
     @State private var settingsSitemapForWatch = ""
-    @State private var settingsSitemapForCarPlay = ""
 
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
@@ -68,7 +67,6 @@ struct SettingsView: View {
                 settingsIconType: $settingsIconType,
                 settingsSortSitemapsBy: $settingsSortSitemapsBy,
                 settingsSitemapForWatch: $settingsSitemapForWatch,
-                settingsSitemapForCarPlay: $settingsSitemapForCarPlay,
                 sitemaps: $sitemaps
             )
 
@@ -162,7 +160,6 @@ struct SettingsView: View {
         settingsDefaultMainUIPath = Preferences.shared.currentHomePreferences.defaultMainUIPath
         settingsAlwaysAllowWebRTC = Preferences.shared.currentHomePreferences.alwaysAllowWebRTC
         settingsSitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
-        settingsSitemapForCarPlay = Preferences.shared.currentHomePreferences.sitemapForCarPlay
         settingsLocalConnectionConfiguration = Preferences.shared.currentHomePreferences.localConnectionConfig
         settingsRemoteConnectionConfiguration = Preferences.shared.currentHomePreferences.remoteConnectionConfig
         loadedLocalURL = Preferences.shared.currentHomePreferences.localConnectionConfig.url
@@ -180,7 +177,6 @@ struct SettingsView: View {
             homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
             homePreferences.sitemapForWatch = settingsSitemapForWatch
             homePreferences.sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
-            homePreferences.sitemapForCarPlay = settingsSitemapForCarPlay
             homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration
             homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
             homePreferences.sseCommandItem = settingsSSECommandItem

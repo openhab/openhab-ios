@@ -120,7 +120,6 @@ struct DrawerView: View {
     @ScaledMetric var iconWidth = 20.0
 
     @State private var sitemapForWatch: String?
-    @State private var sitemapForCarPlay: String?
 
     var mainSection: some View {
         Section(header: Text("Main")) {
@@ -153,27 +152,19 @@ struct DrawerView: View {
     var sitemapsSection: some View {
         Section(header: Text("Sitemaps")) {
             ForEach(sitemaps, id: \.name) { sitemap in
-                HStack {
-                    sitemapIcon(for: sitemap)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: iconWidth, height: iconWidth)
-                    Text(sitemap.label)
-                    Spacer()
-                    let isWatch = sitemap.name == sitemapForWatch
-                    let isCar = sitemap.name == sitemapForCarPlay
-                    if isWatch { Image(systemSymbol: .applewatchWatchface) }
-                    if isCar {
-                        if #available(iOS 16.1, *) {
-                            Image(systemSymbol: .steeringwheel)
-                        } else {
-                            Image(systemSymbol: .car)
+                menuEntry(
+                    image: sitemapIcon(for: sitemap),
+                    goTo: .sitemap(sitemap.name)
+                ) {
+                    HStack {
+                        Text(sitemap.label)
+                        if sitemap.name == sitemapForWatch {
+                            Spacer()
+                            Image(systemSymbol: .applewatchWatchface)
                         }
                     }
                 }
-                .contentShape(Rectangle())
                 .onTapGesture(count: 2) { toggleWatchSitemap(sitemap) }
-                .onTapGesture { onDismiss(.sitemap(sitemap.name)) }
-                .onLongPressGesture { toggleCarPlaySitemap(sitemap) }
             }
         }
     }
@@ -211,7 +202,6 @@ struct DrawerView: View {
         .task(id: networkTracker.activeConnection) {
             await updateSitemapsAndUITiles(activeConnection: networkTracker.activeConnection)
             sitemapForWatch = Preferences.shared.currentHomePreferences.sitemapForWatch
-            sitemapForCarPlay = Preferences.shared.currentHomePreferences.sitemapForCarPlay
         }
     }
 
@@ -282,18 +272,6 @@ struct DrawerView: View {
                 sitemapForWatch = sitemap.name
                 prefs.sitemapForWatch = sitemap.name
                 prefs.sitemapForWatchLabel = sitemap.label
-            }
-        }
-    }
-
-    func toggleCarPlaySitemap(_ sitemap: OpenHABSitemap) {
-        Preferences.shared.modifyActiveHome { prefs in
-            if sitemap.name == sitemapForCarPlay {
-                sitemapForCarPlay = nil
-                prefs.sitemapForCarPlay = ""
-            } else {
-                sitemapForCarPlay = sitemap.name
-                prefs.sitemapForCarPlay = sitemap.name
             }
         }
     }

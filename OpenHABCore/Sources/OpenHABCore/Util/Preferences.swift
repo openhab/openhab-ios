@@ -103,7 +103,6 @@ public struct HomePreferences: Codable, Equatable {
     public var sitemapForWatchLabel = "watch"
     public var homeName = "Home#1"
     public var sseCommandItem = ""
-    public var sitemapForCarPlay = ""
 
     fileprivate init(id: UUID) {
         self.id = id
@@ -133,7 +132,6 @@ public struct HomePreferences: Codable, Equatable {
         sitemapForWatchLabel = try container.decodeIfPresent(String.self, forKey: .sitemapForWatchLabel) ?? "watch"
         homeName = try container.decodeIfPresent(String.self, forKey: .homeName) ?? "Home#1"
         sseCommandItem = try container.decodeIfPresent(String.self, forKey: .sseCommandItem) ?? ""
-        sitemapForCarPlay = try container.decodeIfPresent(String.self, forKey: .sitemapForCarPlay) ?? ""
     }
 }
 

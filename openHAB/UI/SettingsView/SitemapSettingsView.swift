@@ -20,7 +20,6 @@ struct SitemapSettingsView: View {
     @Binding var settingsIconType: IconType
     @Binding var settingsSortSitemapsBy: SortSitemapsOrder
     @Binding var settingsSitemapForWatch: String
-    @Binding var settingsSitemapForCarPlay: String
     @Binding var sitemaps: [OpenHABSitemap]
 
     @State private var showingCacheAlert = false
@@ -34,7 +33,6 @@ struct SitemapSettingsView: View {
             iconTypePicker
             sortOrderPicker
             watchSitemapPicker
-            carPlaySitemapPicker
         }
     }
 
@@ -104,18 +102,6 @@ struct SitemapSettingsView: View {
         .disabled(sitemaps.isEmpty)
     }
 
-    private var carPlaySitemapPicker: some View {
-        Picker("Sitemap for CarPlay", selection: $settingsSitemapForCarPlay) {
-            Text("None").tag("")
-            if !sitemaps.isEmpty {
-                ForEach(sitemaps, id: \.name) { sitemap in
-                    Text(sitemap.label).tag(sitemap.name)
-                }
-            }
-        }
-        .disabled(sitemaps.isEmpty)
-    }
-
     @ViewBuilder
     private func cacheAlertActions(_ result: Result<UInt, KingfisherError>) -> some View {
         switch result {
@@ -156,7 +142,6 @@ struct SitemapSettingsView: View {
         @State var iconType: IconType = .svg
         @State var sortSitemapsBy: SortSitemapsOrder = .label
         @State var sitemapForWatch = "Home"
-        @State var sitemapForCarPlay = ""
         @State var sitemaps: [OpenHABSitemap] = [
             OpenHABSitemap(
                 name: "home",
@@ -182,7 +167,6 @@ struct SitemapSettingsView: View {
                         settingsIconType: $iconType,
                         settingsSortSitemapsBy: $sortSitemapsBy,
                         settingsSitemapForWatch: $sitemapForWatch,
-                        settingsSitemapForCarPlay: $sitemapForCarPlay,
                         sitemaps: $sitemaps
                     )
                 }

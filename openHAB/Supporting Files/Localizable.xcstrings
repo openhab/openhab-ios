@@ -2134,29 +2134,6 @@
         }
       }
     },
-    "carplay_not_configured" : {
-      "comment" : "CarPlay root list placeholder shown before a CarPlay favorites page is set up.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No CarPlay favorites configured"
-          }
-        }
-      }
-    },
-    "carplay_not_configured_detail" : {
-      "comment" : "CarPlay root list placeholder detail text shown before a CarPlay favorites page is set up.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set up a CarPlay sitemap page in Settings"
-          }
-        }
-      }
-    },
     "certficate_exists" : {
       "extractionState" : "manual",
       "localizations" : {
