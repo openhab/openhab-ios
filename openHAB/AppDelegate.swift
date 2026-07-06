@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AVFoundation
+import CarPlay
 import Combine
 import Firebase
 import FirebaseMessaging
@@ -233,7 +234,12 @@ extension Notification.Name {
 
 extension AppDelegate {
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        switch connectingSceneSession.role {
+        case .carTemplateApplication:
+            UISceneConfiguration(name: "CarPlay Configuration", sessionRole: connectingSceneSession.role)
+        default:
+            UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        }
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {}
