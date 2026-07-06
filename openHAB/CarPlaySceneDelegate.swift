@@ -10,9 +10,9 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import CarPlay
-import Kingfisher
 import OpenHABCore
 import os.log
+import SFSafeSymbols
 
 private var carPlayMaxItems: Int {
     Int(CPGridTemplateMaximumItems)
@@ -23,7 +23,6 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
     private var streamTask: Task<Void, Never>?
     private var preferencesTask: Task<Void, Never>?
     private let sitemapEventStream = SitemapEventStream()
-    private var currentConnection: ConnectionInfo?
     private var currentGridTemplate: CPGridTemplate?
 
     func templateApplicationScene(_ templateApplicationScene: CPTemplateApplicationScene,
@@ -43,7 +42,6 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         preferencesTask = nil
         Task { await sitemapEventStream.stop() }
         self.interfaceController = nil
-        currentConnection = nil
         currentGridTemplate = nil
         Logger.carPlay.info("CarPlay scene disconnected")
     }
@@ -76,7 +74,6 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             Logger.carPlay.warning("CarPlay: no active connection")
             return
         }
-        currentConnection = connection
         let sitemapName = Preferences.shared.currentHomePreferences.sitemapForCarPlay
         guard !sitemapName.isEmpty else {
             Logger.carPlay.info("CarPlay: no sitemap configured")
@@ -178,55 +175,30 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         }
 
         let title = page.title.isEmpty ? "openHAB" : "openHAB – \(page.title)"
-        let template: CPGridTemplate
+        let buttons = widgets.map { makeGridButton(for: $0, service: service) }
 
         if let existing = currentGridTemplate {
-            // Update in place — avoids full-screen replacement flash
             existing.updateTitle(title)
-            template = existing
+            existing.updateGridButtons(buttons)
         } else {
-            let buttons = widgets.map { makeGridButton(for: $0, service: service, image: placeholderButtonImage()) }
-            template = CPGridTemplate(title: title, gridButtons: buttons)
+            let template = CPGridTemplate(title: title, gridButtons: buttons)
             currentGridTemplate = template
             interfaceController?.setRootTemplate(template, animated: false, completion: nil)
         }
-
-        guard let connection = currentConnection else { return }
-        Task { [weak self] in
-            await self?.fetchAndUpdateIcons(widgets: widgets, service: service, template: template, connection: connection)
-        }
     }
 
-    @MainActor
-    private func fetchAndUpdateIcons(widgets: [OpenHABWidget],
-                                     service: OpenAPIService,
-                                     template: CPGridTemplate,
-                                     connection: ConnectionInfo) async {
-        var updatedButtons: [CPGridButton] = []
-        for widget in widgets {
-            let image = await fetchIcon(for: widget, connection: connection) ?? placeholderButtonImage()
-            updatedButtons.append(makeGridButton(for: widget, service: service, image: image))
+    private func sfSymbol(for widget: OpenHABWidget) -> UIImage {
+        let isOn = widget.displayState.isOn
+        let symbolName: SFSymbol = switch widget.icon.lowercased() {
+        case "power", "poweroutlet", "poweroutlet_eu":
+            isOn ? .powerCircleFill : .powerCircle
+        case "lamp", "light", "lightbulb":
+            isOn ? .lightbulbFill : .lightbulb
+        default:
+            isOn ? .circleFill : .circle
         }
-        guard template === currentGridTemplate else { return }
-        template.updateGridButtons(updatedButtons)
-    }
-
-    private func fetchIcon(for widget: OpenHABWidget, connection: ConnectionInfo) async -> UIImage? {
-        guard let url = Endpoint.icon(
-            rootUrl: connection.configuration.url,
-            version: connection.version,
-            icon: widget.icon,
-            state: widget.item?.state,
-            iconType: .png,
-            iconColor: widget.iconColor,
-            staticIcon: widget.staticIcon
-        )?.url else { return nil }
-
-        let options: KingfisherOptionsInfo = [
-            .processor(OpenHABImageProcessor()),
-            .requestModifier(OpenHABAccessTokenAdapter(connectionConfiguration: connection.configuration))
-        ]
-        return try? await KingfisherManager.shared.retrieveImage(with: url, options: options).image
+        return UIImage(systemSymbol: symbolName)
+            .withRenderingMode(.alwaysTemplate)
     }
 
     private func isCarPlayCompatible(_ widget: OpenHABWidget) -> Bool {
@@ -236,8 +208,9 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         }
     }
 
-    private func makeGridButton(for widget: OpenHABWidget, service: OpenAPIService, image: UIImage) -> CPGridButton {
+    private func makeGridButton(for widget: OpenHABWidget, service: OpenAPIService) -> CPGridButton {
         let ds = widget.displayState
+        let image = sfSymbol(for: widget)
         return CPGridButton(titleVariants: [ds.labelText], image: image) { [weak self] _ in
             guard let self else { return }
             switch widget.type {

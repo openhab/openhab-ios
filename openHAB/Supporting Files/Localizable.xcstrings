@@ -2083,6 +2083,7 @@
     },
     "carplay_not_configured_detail" : {
       "comment" : "CarPlay root list placeholder detail text shown before a CarPlay favorites page is set up.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
