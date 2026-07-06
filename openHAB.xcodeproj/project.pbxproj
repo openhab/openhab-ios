@@ -1155,15 +1155,6 @@
 				nl,
 				ru,
 				nb,
-				"en 2",
-				"de 2",
-				"es 2",
-				"fi 2",
-				"fr 2",
-				"it 2",
-				"nb 2",
-				"nl 2",
-				"ru 2",
 			);
 			mainGroup = DFB2621E18830A3600D3244D;
 			packageReferences = (
