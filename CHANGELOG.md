@@ -2,6 +2,66 @@
 
 ## [Unreleased]
 
+- fix: remove 7 stale localization keys with no source references
+- fix: remove stale %lld %% localization keys for screensaver percentage labels
+- Make Circular Accessory Switch icon state aware (#1291)
+- committed version bump: 3.4.7 (297)
+- Migrate sitemap page updates from long-polling to SSE (#1168)
+- Small Widget background watermark alignment adjustments (#1289)
+- fix: show message body below title in notification list
+- fix: add Localizable.xcstrings to widget extension target membership
+- fix: remove duplicate knownRegions from project.pbxproj
+- committed version bump: 3.4.6 (296)
+- Allow for two lines label and value for iOS Lock Screen Accessories (#1286)
+- Swiftlinting
+- chore: apply linter fixes
+- feat: add accessory widget previews for Switch and Sensor widgets
+- feat: wide-display sitemap grid and full-width media rows
+- refactor: remove UIImageView polling timer from MJPEG video stream
+- committed version bump: 3.4.5 (294)
+- Fix small widget content to be cntered
+- committed version bump: 3.4.4 (293)
+- committed version bump: 3.4.3 (292)
+- fix: sync allowedItemTypes with query and add regression test
+- feat: make Dimmer items selectable in Set Switch State intent
+- chore: apply linter fixes
+- fix: detect GIF images by magic bytes in ImageRowView
+- committed version bump: 3.4.2 (290)
+- fix: animate GIFs in the Image sitemap widget (#1280)
+- Widget adjustments (#1279)
+- fix: lock screen widgets now send commands on tap
+- fix: notification ping now respects the ringer/silent switch (#1278)
+- fix: add OpenHABShortcuts.swift to app target to resolve AppShortcuts.xcstrings phrase warnings
+- committed version bump: 3.4.1 (287)
+- fix: add provisioning profile for openHABWidgetExtension
+- l10n: add Spanish, Finnish, Norwegian, and Russian translations
+- l10n: switch German and French translations to informal address (du/tu)
+- chore: remove 5 stale localization keys on feature branch
+- l10n: add Spanish, Finnish, Norwegian, and Russian translations
+- l10n: translate 2 new widget keys into all 9 languages
+- chore: update openHABWidgetExtension scheme with askForAppToLaunch
+- fix: restore project.pbxproj corrupted by bad 3-way merge of pbxproj
+- chore: add shared schemes for openHABWidgetExtension and OpenHABWatchComplicationsExtension
+- build: raise macOS minimum to 15 for AsyncSequence.Failure support
+- chore: bump openHABTestsSwift deployment target to iOS 18.0
+- Merge develop + fix build warnings; add iOS home screen widgets with item display
+- Sensor widget: format state values using stateDescription numberPattern
+- Sensor widget: support 1/2/4 items per small/medium/large size
+- Make ScrollToTop overlay button conditional (#1231)
+- Bump minimum deployment targets to iOS 18 / watchOS 11
+- Use iOS 18 onScrollGeometryChange in SitemapPageView
+- Use iOS 17 animation and scroll APIs
+- Replace SetLocationValueIntent with SetActiveHomeIntent in AppShortcutsProvider
+- Register SetActiveHomeIntent with AppShortcutsProvider
+- Linting and AppIntents SSE warnings fixes
+- Bump deployment targets to iOS 17.0 / watchOS 10.0
+- Convert AppShortcuts.strings to AppShortcuts.xcstrings String Catalog
+- Fix AppIntentsMetadataProcessor synonym warnings in AppEnum cases
+- Add AppShortcutsProvider and fix intent dialog gaps
+- Upgrade SwiftFormatPlugin 0.58.7→0.61.1, SwiftLintPlugin 0.62.2→0.63.3 (#1225)
+- ItemEventStream: backport SSE watchdog and self-contained network monitor
+- openHABWidget: add interactive switch and sensor widgets
+
 - Migrate sitemap page updates from long-polling to SSE (#1168)
 - Small Widget background watermark alignment adjustments (#1289)
 - fix: show message body below title in notification list
