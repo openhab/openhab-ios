@@ -14,6 +14,13 @@ import Foundation
 @_exported import MapKit
 import os.log
 
+public enum SitemapWidgetEventApplicationResult: Equatable, Sendable {
+    case applied
+    case unchanged
+    case notFound
+    case requiresPageReload
+}
+
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
     public enum WidgetType: String, Decodable, Sendable {
         case chart = "Chart"
@@ -238,6 +245,50 @@ public extension [OpenHABWidget] {
                 flatten(widget.widgets)
             }
         }
+    }
+}
+
+public extension OpenHABWidget {
+    @discardableResult
+    func apply(event: OpenHABSitemapWidgetEvent) -> SitemapWidgetEventApplicationResult {
+        guard let eventWidgetId = event.widgetId else { return .notFound }
+
+        if widgetId == eventWidgetId {
+            guard event.descriptionChanged != true else {
+                return .requiresPageReload
+            }
+            // reloadIcon arrives on virtually every SSE event but carries no
+            // displayable payload of its own — skip the rebuild if nothing else changed.
+            guard event.label != nil || event.icon != nil || event.state != nil
+                || event.enrichedItem != nil || event.labelcolor != nil
+                || event.valuecolor != nil || event.iconcolor != nil
+                || event.visibility != nil || event.labelSource != nil
+            else { return .unchanged }
+            if let label = event.label { self.label = label }
+            if let icon = event.icon { self.icon = icon }
+            if let labelcolor = event.labelcolor { self.labelcolor = labelcolor }
+            if let valuecolor = event.valuecolor { self.valuecolor = valuecolor }
+            if let iconcolor = event.iconcolor { iconColor = iconcolor }
+            if let visibility = event.visibility { self.visibility = visibility }
+            if let state = event.state {
+                self.state = state
+            } else if let itemState = event.enrichedItem?.state {
+                state = itemState
+            }
+            if let item = event.enrichedItem { self.item = item }
+            if let labelSource = event.labelSource {
+                self.labelSource = OpenHABWidget.LabelSource(rawValue: labelSource) ?? .unknown
+            }
+            return .applied
+        }
+
+        for widget in widgets {
+            let result = widget.apply(event: event)
+            if result != .notFound {
+                return result
+            }
+        }
+        return .notFound
     }
 }
 

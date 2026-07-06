@@ -112,7 +112,7 @@ final class ScreenSaverManager: NSObject {
             overlay = UIWindow(windowScene: scene)
             overlay.frame = scene.coordinateSpace.bounds
         } else {
-            overlay = UIWindow(frame: (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.screen.bounds ?? .zero)
+            overlay = UIWindow(frame: UIScreen.main.bounds)
         }
         overlay.windowLevel = .alert + 1 // ensure above status bar
         overlay.backgroundColor = .clear

@@ -193,14 +193,15 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func startSSEListening() {
-        Task {
-            await ItemEventStream.startMonitoringNetwork()
-        }
         Logger.viewController.debug("Starting SSE")
         streamTask = Task { [weak self] in
             guard let self else { return }
+            await ItemEventStream.startMonitoringNetwork(
+                initialConnection: NetworkTracker.shared.activeConnection
+            )
             for await msg in await ItemEventStream.shared.stream() {
-                await MainActor.run { self.handleSSEMessage(msg) }
+                guard !Task.isCancelled else { break }
+                handleSSEMessage(msg)
             }
         }
     }
