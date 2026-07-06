@@ -368,11 +368,13 @@ struct SwitchAccessoryCircularView: View {
         ZStack {
             AccessoryWidgetBackground()
             if let slot = entry.slots.compactMap(\.self).first {
+                let isOn = slot.item.state == "ON"
                 if let home = entry.home {
                     Button(intent: createToggleIntent(item: slot.item, homeUUID: slot.homeUUID, home: home)) {
                         VStack(spacing: 2) {
-                            Image(systemSymbol: .switch2)
-                                .font(.caption)
+                            let symbol: SFSymbol = isOn ? .powerCircleFill : .powerCircle
+                            Image(systemSymbol: symbol)
+                                .font(.callout)
                             Text(slot.item.state ?? "?")
                                 .font(.caption2)
                                 .fontWeight(.bold)
@@ -383,8 +385,9 @@ struct SwitchAccessoryCircularView: View {
                     .buttonStyle(.plain)
                 } else {
                     VStack(spacing: 2) {
-                        Image(systemSymbol: .switch2)
-                            .font(.caption)
+                        let symbol: SFSymbol = isOn ? .powerCircleFill : .powerCircle
+                        Image(systemSymbol: symbol)
+                            .font(.callout)
                         Text(slot.item.state ?? "?")
                             .font(.caption2)
                             .fontWeight(.bold)
