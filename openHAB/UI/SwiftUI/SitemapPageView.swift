@@ -18,9 +18,11 @@ import UIKit
 struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var idleTimerDisabled = false
     @State private var scrollPosition = ScrollPosition()
     @State private var showScrollToTop = false
+    @State private var gridLayoutCache = SitemapGridLayoutCache()
     /// Sub-pages are created while the app is already active, so the first .active transition they
     /// observe is a genuine return from background — don't skip it. Root pages start false to skip
     /// the launch-time .active that races the initial .task startup.
@@ -49,11 +51,8 @@ struct SitemapPageView: View {
                     }
                 }
             } else {
-                List(viewModel.rowInputs) { rowInput in
-                    EmbeddingRowInputView(rowInput: rowInput)
-                        .equatable()
-                        .listRowInsets(RowLayoutPolicy.rowInsets(for: rowInput))
-                        .listRowBackground(RowLayoutPolicy.rowBackground(for: rowInput))
+                GeometryReader { proxy in
+                    pageContent(width: proxy.size.width)
                 }
                 .scrollPosition($scrollPosition)
                 .onScrollGeometryChange(for: Bool.self) { geo in
@@ -161,6 +160,128 @@ extension SitemapPageView {
             .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
             .listRowBackground(Color(UIColor.ohSecondarySystemGroupedBackground))
         }
+    }
+
+    private var listContent: some View {
+        List(viewModel.rowInputs) { rowInput in
+            rowContent(rowInput)
+                .listRowInsets(RowLayoutPolicy.rowInsets(for: rowInput))
+                .listRowBackground(RowLayoutPolicy.rowBackground(for: rowInput))
+        }
+    }
+
+    private func pageContent(width: CGFloat) -> some View {
+        let columnCount = SitemapPresentationPolicy.columnCount(
+            for: width,
+            horizontalSizeClass: horizontalSizeClass
+        )
+
+        return Group {
+            if width <= 0 {
+                Color.clear
+            } else if columnCount > 1 {
+                gridContent(columnCount: columnCount)
+            } else {
+                listContent
+            }
+        }
+    }
+
+    private func gridContent(columnCount: Int) -> some View {
+        let rowInputs = viewModel.rowInputs
+        let layout = gridLayoutCache.layout(
+            for: rowInputs,
+            version: viewModel.rowInputLayoutVersion
+        )
+
+        return ScrollView {
+            LazyVStack(alignment: .leading, spacing: SitemapPresentationPolicy.gridSpacing) {
+                ForEach(layout.sections) { section in
+                    if let headerIndex = section.headerIndex,
+                       let header = rowInputs[safe: headerIndex] {
+                        gridFrameRow(header)
+                    }
+
+                    ForEach(section.groups) { group in
+                        switch group.content {
+                        case let .regular(rowIndices):
+                            LazyVGrid(
+                                columns: SitemapPresentationPolicy.columns(count: columnCount),
+                                alignment: .leading,
+                                spacing: SitemapPresentationPolicy.gridSpacing
+                            ) {
+                                ForEach(rowIndices, id: \.self) { rowIndex in
+                                    if let rowInput = rowInputs[safe: rowIndex] {
+                                        gridCell(rowInput)
+                                    }
+                                }
+                            }
+                        case let .fullWidth(rowIndex):
+                            if let rowInput = rowInputs[safe: rowIndex] {
+                                gridFullWidthCell(rowInput)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, SitemapPresentationPolicy.gridHorizontalPadding)
+            .padding(.vertical, SitemapPresentationPolicy.gridVerticalPadding)
+        }
+        .background(Color(UIColor.ohSystemGroupedBackground))
+    }
+
+    private func gridFrameRow(_ rowInput: SitemapRowInput) -> some View {
+        rowContent(rowInput)
+            .padding(RowLayoutPolicy.rowInsets(for: rowInput))
+            .frame(maxWidth: .infinity, alignment: .center)
+            .background(RowLayoutPolicy.rowBackground(for: rowInput))
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(Color(UIColor.separator).opacity(0.5))
+                    .frame(height: SitemapPresentationPolicy.gridFrameSeparatorHeight)
+            }
+    }
+
+    private func gridFullWidthCell(_ rowInput: SitemapRowInput) -> some View {
+        rowContent(rowInput)
+            .padding(RowLayoutPolicy.rowInsets(for: rowInput))
+            .padding(.trailing, rowInput.showsGridNavigationAffordance ? 12 : 0)
+            .frame(maxWidth: .infinity, minHeight: 32, alignment: .center)
+            .background(RowLayoutPolicy.rowBackground(for: rowInput))
+            .overlay(alignment: .trailing) {
+                if rowInput.showsGridNavigationAffordance {
+                    Image(systemSymbol: .chevronRight)
+                        .foregroundStyle(.tertiary)
+                        .ohTextToken(.secondary)
+                        .padding(.trailing, 10)
+                }
+            }
+    }
+
+    private func gridCell(_ rowInput: SitemapRowInput) -> some View {
+        rowContent(rowInput)
+            .padding(RowLayoutPolicy.rowInsets(for: rowInput))
+            .padding(.trailing, rowInput.showsGridNavigationAffordance ? 12 : 0)
+            .frame(
+                maxWidth: .infinity,
+                minHeight: 32,
+                alignment: .center
+            )
+            .frame(height: SitemapPresentationPolicy.cellHeight(for: rowInput), alignment: .center)
+            .background(RowLayoutPolicy.rowBackground(for: rowInput))
+            .overlay(alignment: .trailing) {
+                if rowInput.showsGridNavigationAffordance {
+                    Image(systemSymbol: .chevronRight)
+                        .foregroundStyle(.tertiary)
+                        .ohTextToken(.secondary)
+                        .padding(.trailing, 10)
+                }
+            }
+    }
+
+    private func rowContent(_ rowInput: SitemapRowInput) -> some View {
+        EmbeddingRowInputView(rowInput: rowInput)
+            .equatable()
     }
 }
 

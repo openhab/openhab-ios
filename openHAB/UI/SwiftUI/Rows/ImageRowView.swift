@@ -46,6 +46,7 @@ private struct ImageRowContent: View {
     @State private var lastRegularImageState: RegularImageState?
     @State private var chartDisplayState: ChartDisplayState?
     @State private var animatedGIFSourceURL: URL?
+    @State private var embeddedGIFAspectRatio: CGFloat = 16.0 / 9.0
 
     private let logger = Logger(subsystem: "org.openhab", category: "ImageRowView")
 
@@ -147,7 +148,7 @@ private struct ImageRowContent: View {
             .resizable()
             .id(effectiveChartURL?.absoluteString ?? currentChartKey)
             .aspectRatio(contentMode: .fit)
-            .frame(maxHeight: 300)
+            .frame(maxWidth: .infinity)
             .clipShape(.rect(cornerRadius: 8))
     }
 
@@ -165,7 +166,11 @@ private struct ImageRowContent: View {
                 KFAnimatedImage(source: .provider(provider))
                     .withOpenHABCredentials(for: networkTracker.activeConnection)
                     .configure { $0.contentMode = .scaleAspectFit }
-                    .frame(maxHeight: 300)
+                    .onSuccess { result in
+                        let size = result.image.size
+                        if size.height > 0 { embeddedGIFAspectRatio = size.width / size.height }
+                    }
+                    .animatedGIFFrame(aspectRatio: embeddedGIFAspectRatio)
                     .clipShape(.rect(cornerRadius: 8))
             } else {
                 KFImage(source: .provider(provider))
@@ -173,7 +178,7 @@ private struct ImageRowContent: View {
                     .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(maxHeight: 300)
+                    .frame(maxWidth: .infinity)
                     .clipShape(.rect(cornerRadius: 8))
             }
         case let .link(url):
@@ -204,7 +209,7 @@ private struct ImageRowContent: View {
                     .forceRefresh(shouldCache ? false : true)
                     .cacheOriginalImage(!shouldCache ? false : true)
                     .id(shouldCache ? url?.absoluteString : "\(url?.absoluteString ?? "")-\(forceRefreshKey)")
-                    .frame(maxHeight: 300)
+                    .animatedGIFFrame(aspectRatio: aspectRatio(forGIFAt: url))
                     .clipShape(.rect(cornerRadius: 8))
             } else {
                 KFImage(url)
@@ -239,7 +244,7 @@ private struct ImageRowContent: View {
                     .cacheOriginalImage(!shouldCache ? false : true)
                     .id(shouldCache ? url?.absoluteString : "\(url?.absoluteString ?? "")-\(forceRefreshKey)")
                     .aspectRatio(contentMode: .fit)
-                    .frame(maxHeight: 300)
+                    .frame(maxWidth: .infinity)
                     .clipShape(.rect(cornerRadius: 8))
             }
         case .empty:
@@ -252,6 +257,13 @@ private struct ImageRowContent: View {
                 )
                 .clipShape(.rect(cornerRadius: 8))
         }
+    }
+
+    private func aspectRatio(forGIFAt url: URL?) -> CGFloat {
+        guard let state = lastRegularImageState, state.url == url, state.image.size.height > 0 else {
+            return 16.0 / 9.0
+        }
+        return state.image.size.width / state.image.size.height
     }
 
     private func isGIFMagic(_ data: Data) -> Bool {
@@ -319,6 +331,25 @@ private struct ImageRowContent: View {
     }
 }
 
+private struct AnimatedGIFFrameModifier: ViewModifier {
+    let aspectRatio: CGFloat
+    @State private var availableWidth: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .frame(
+                width: availableWidth > 0 ? availableWidth : nil,
+                height: availableWidth > 0 ? availableWidth / aspectRatio : nil
+            )
+            .contentMargins(.horizontal, 0, for: .scrollContent)
+            .frame(maxWidth: .infinity)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { newWidth in
+                guard newWidth > 0 else { return }
+                availableWidth = newWidth
+            }
+    }
+}
+
 struct ImageRowView: View {
     let input: MediaRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
@@ -330,5 +361,11 @@ struct ImageRowView: View {
                 viewModel: viewModel
             )
         )
+    }
+}
+
+private extension View {
+    func animatedGIFFrame(aspectRatio: CGFloat) -> some View {
+        modifier(AnimatedGIFFrameModifier(aspectRatio: aspectRatio))
     }
 }

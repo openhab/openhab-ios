@@ -33,6 +33,8 @@ enum RowLayoutPolicy {
                 return frameInsets(hasLabel: !input.displayState.labelText.isEmpty)
             }
             return regularInsets
+        case .media:
+            return regularInsets
         case .text,
              .slider,
              .selection,
@@ -42,7 +44,6 @@ enum RowLayoutPolicy {
              .toggle,
              .input,
              .colorPicker,
-             .media,
              .colorTemperature,
              .buttonGrid,
              .generic:
