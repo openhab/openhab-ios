@@ -411,6 +411,13 @@
 			);
 			target = 6116C7DDD25EE245FE191A47 /* openHABWidgetExtension */;
 		};
+		DAB9BC8B2FFC158B00F25A53 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Supporting Files/Localizable.xcstrings",
+			);
+			target = 6116C7DDD25EE245FE191A47 /* openHABWidgetExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -422,7 +429,7 @@
 		2FD4E2CD2F66F9F600EBB340 /* openHABUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2FD4E2CF2F66F9F700EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = openHABUITests; sourceTree = "<group>"; };
 		2FD4E2E02F66F9FE00EBB340 /* openHABTestsSwift */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2FD4E2F02F66F9FE00EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = openHABTestsSwift; sourceTree = "<group>"; };
 		2FD4E2F42F66FA2900EBB340 /* TestPlans */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2FD4E2F62F66FA2900EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = TestPlans; sourceTree = "<group>"; };
-		2FD4E52B2F670BA500EBB340 /* openHAB */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2FD4E58D2F670BA500EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 2FD4E58E2F670BA600EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = openHAB; sourceTree = "<group>"; };
+		2FD4E52B2F670BA500EBB340 /* openHAB */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2FD4E58D2F670BA500EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, DAB9BC8B2FFC158B00F25A53 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 2FD4E58E2F670BA600EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = openHAB; sourceTree = "<group>"; };
 		3A5DAEE62F1FD8D300CFA482 /* OpenHABWatchComplications */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3A5DAEF32F1FD8D300CFA482 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = OpenHABWatchComplications; sourceTree = "<group>"; };
 		D41D0290EB2365F7E247EC0A /* openHABWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4D140F69148E28C6B524B346 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = openHABWidget; sourceTree = "<group>"; };
 		DA8B15522F3BB74B007753FD /* openHABWatchTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = openHABWatchTests; sourceTree = "<group>"; };
