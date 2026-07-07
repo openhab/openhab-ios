@@ -249,6 +249,9 @@ struct SwitchSmallWidgetView: View {
                         .font(.headline)
                         .lineLimit(3)
                         .minimumScaleFactor(0.7)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .layoutPriority(1)
                         .padding(.top, 20)
                     Spacer()
                     if let home = entry.home {
@@ -256,7 +259,7 @@ struct SwitchSmallWidgetView: View {
                             isOn: slot.item.state == "ON",
                             intent: createToggleIntent(item: slot.item, homeUUID: slot.homeUUID, home: home)
                         ) {}
-                            .toggleStyle(PowerButtonToggleStyle(diameter: 44))
+                            .toggleStyle(PowerButtonToggleStyle(diameter: 44, showStateLabel: false))
                     } else {
                         let isOn = slot.item.state == "ON"
                         Image(systemSymbol: .power)
@@ -394,6 +397,7 @@ struct SwitchAccessoryCircularView: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
                     }
+                    .offset(y: -1)
                 }
             } else {
                 Image(systemSymbol: .gear)
