@@ -216,6 +216,9 @@ struct SensorSmallWidgetView: View {
                         .font(.headline)
                         .lineLimit(3)
                         .minimumScaleFactor(0.7)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .layoutPriority(1)
                         .padding(.top, 20)
                     Spacer()
 
@@ -225,6 +228,7 @@ struct SensorSmallWidgetView: View {
                         .lineLimit(2)
                         .minimumScaleFactor(0.5)
                         .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     Spacer()
                 }
@@ -307,7 +311,7 @@ struct SensorLargeWidgetView: View {
                     ForEach(filledSlots.indices, id: \.self) { index in
                         SensorItemRow(slot: filledSlots[index])
                             .padding(.horizontal)
-                            .padding(.vertical, 12)
+                            .padding(.vertical, 18)
                         if index < filledSlots.count - 1 {
                             Divider()
                                 .padding(.leading)
@@ -339,6 +343,7 @@ struct SensorAccessoryCircularView: View {
                         .minimumScaleFactor(0.5)
                         .multilineTextAlignment(.center)
                 }
+                .offset(y: -1)
             } else {
                 Image(systemSymbol: .gear)
                     .font(.title3)
