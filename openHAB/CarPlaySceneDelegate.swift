@@ -70,6 +70,11 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
 
     @MainActor
     private func runStream() async {
+        let prefs = Preferences.shared.currentHomePreferences
+        await NetworkTracker.shared.startTracking(connectionConfigurations: [
+            prefs.localConnectionConfig,
+            prefs.remoteConnectionConfig
+        ])
         guard let connection = await NetworkTracker.shared.waitForActiveConnection() else {
             Logger.carPlay.warning("CarPlay: no active connection")
             return
@@ -77,6 +82,10 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         let sitemapName = Preferences.shared.currentHomePreferences.sitemapForCarPlay
         guard !sitemapName.isEmpty else {
             Logger.carPlay.info("CarPlay: no sitemap configured")
+            interfaceController?.setRootTemplate(
+                placeholderTemplate(message: String(localized: "carplay_not_configured_detail")),
+                animated: false, completion: nil
+            )
             return
         }
         do {
@@ -188,7 +197,10 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
     }
 
     private func sfSymbol(for widget: OpenHABWidget) -> UIImage {
+        let targetSize = carPlayGridButtonImageSize()
+        let pointSize = min(targetSize.width, targetSize.height)
         let isOn = widget.displayState.isOn
+
         let symbolName: SFSymbol = switch widget.icon.lowercased() {
         case "power", "poweroutlet", "poweroutlet_eu":
             isOn ? .powerCircleFill : .powerCircle
@@ -197,8 +209,13 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         default:
             isOn ? .circleFill : .circle
         }
+
+        let config = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .regular)
+
         return UIImage(systemSymbol: symbolName)
+            .applyingSymbolConfiguration(config)?
             .withRenderingMode(.alwaysTemplate)
+            ?? UIImage(systemSymbol: symbolName).withRenderingMode(.alwaysTemplate)
     }
 
     private func isCarPlayCompatible(_ widget: OpenHABWidget) -> Bool {
@@ -206,6 +223,15 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         case .switchWidget, .button, .selection: true
         default: false
         }
+    }
+
+    private func carPlayGridButtonImageSize() -> CGSize {
+        if #available(iOS 26.0, *) {
+            return CPGridTemplate.maximumGridButtonImageSize
+        }
+
+        // Conservative fallback for older CarPlay systems.
+        return CGSize(width: 80, height: 80)
     }
 
     private func makeGridButton(for widget: OpenHABWidget, service: OpenAPIService) -> CPGridButton {
@@ -259,9 +285,10 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             ?? UIImage()
     }
 
-    private func placeholderTemplate() -> CPGridTemplate {
+    private func placeholderTemplate(message: String? = nil) -> CPGridTemplate {
+        let label = message ?? String(localized: "carplay_not_configured")
         let button = CPGridButton(
-            titleVariants: [String(localized: "carplay_not_configured")],
+            titleVariants: [label],
             image: placeholderButtonImage()
         ) { _ in }
         return CPGridTemplate(title: "openHAB", gridButtons: [button])
