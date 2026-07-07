@@ -219,7 +219,9 @@ struct Home: AppEntity {
         }
     }
 
-    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Home")
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(
+        name: LocalizedStringResource("Home", defaultValue: "Home")
+    )
 
     static let defaultQuery = HomeQuery()
 
