@@ -2259,7 +2259,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = "openHAB/Supporting Files/openHAB.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "openHAB/Supporting Files/openHAB-CarPlay.entitlements";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_DEBUG_DYLIB = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -2303,7 +2303,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = "openHAB/Supporting Files/openHAB.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "openHAB/Supporting Files/openHAB-CarPlay.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
 				ENABLE_APP_SANDBOX = YES;
