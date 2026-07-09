@@ -300,6 +300,54 @@
             "state": "translated",
             "value": "%1$@ • %2$@"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ • %2$@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ • %2$@"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ • %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ • %2$@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ • %2$@"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ • %2$@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ • %2$@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ • %2$@"
+          }
         }
       }
     },
@@ -11779,6 +11827,30 @@
             "state": "translated",
             "value": "Numeriek item"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elemento numérico"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numerinen kohde"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numerisk element"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Числовой элемент"
+          }
         }
       }
     },
@@ -21055,6 +21127,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Om verbinding te maken met uw lokale openHAB-server, sta toegang tot het lokale netwerk toe wanneer hierom wordt gevraagd. Als u dit eerder heeft geweigerd, schakel het in via Instellingen → Privacy en beveiliging → Lokaal netwerk."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para conectarte a tu servidor openHAB local, permite el acceso a la Red local cuando se te solicite. Si anteriormente lo denegaste, actívalo en Configuración → Privacidad y seguridad → Red local."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yhdistääksesi paikalliseen openHAB-palvelimeesi, salli lähiverkon käyttö pyydettäessä. Jos aiemmin kieltäydyit, ota se käyttöön kohdasta Asetukset → Yksityisyys ja turvallisuus → Paikallinen verkko."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For å koble til den lokale openHAB-serveren din, tillat tilgang til lokalt nettverk når du blir bedt om det. Hvis du tidligere nektet det, aktiver det under Innstillinger → Personvern og sikkerhet → Lokalt nettverk."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чтобы подключиться к локальному серверу openHAB, разрешите доступ к локальной сети при появлении запроса. Если вы ранее отказали в доступе, включите его в разделе Настройки → Конфиденциальность и безопасность → Локальная сеть."
           }
         }
       }
