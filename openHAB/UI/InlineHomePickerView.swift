@@ -30,97 +30,63 @@ struct InlineHomePickerView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            List {
-                ForEach(homes, id: \.self) { home in
-                    let homeName = Preferences.shared.storedHomes[home]?.homeName ?? ""
-                    let isActive = Preferences.shared.currentHomePreferences.id == home
-                    HStack(spacing: 8) {
-                        if showEditMode {
-                            Button(action: {
-                                homeNameForAlert = homeName
-                                homeForAlert = home
-                                newHomeName = homeName
-                                showingRenameAlert = true
-                            }, label: {
-                                Image(systemSymbol: .pencil).foregroundStyle(.blue)
-                            })
-                            .buttonStyle(.plain)
-                        }
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(homeName).font(.subheadline).fontWeight(.medium)
-                            Text(summaryText(for: home))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            guard !showEditMode else { return }
-                            selectHome(home)
-                        }
-                        if showEditMode {
-                            if isActive {
-                                Image(systemSymbol: .checkmark).foregroundStyle(.blue)
-                            } else {
-                                Button(action: {
-                                    homeNameForAlert = homeName
-                                    homeForAlert = home
-                                    showingDeleteAlert = true
-                                }, label: {
-                                    Image(systemSymbol: .trash).foregroundStyle(.red)
-                                })
-                                .buttonStyle(.plain)
-                            }
-                        } else {
-                            if isActive {
-                                Image(systemSymbol: .checkmark)
-                                    .foregroundStyle(.blue)
-                                    .padding(.trailing, 4)
-                            }
-                            Button(action: {
-                                homeForSettings = home
-                            }, label: {
-                                Image(systemSymbol: .gear).foregroundStyle(.secondary)
-                            })
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(action: {
-                            homeNameForAlert = homeName
-                            homeForAlert = home
-                            showingDeleteAlert = true
-                        }, label: {
-                            HStack {
-                                Text("Delete")
-                                Image(systemSymbol: .trashFill)
-                            }
-                        })
-                        .tint(.red)
-                    }
-                    .swipeActions(edge: .leading) {
+            ForEach(homes, id: \.self) { home in
+                let homeName = Preferences.shared.storedHomes[home]?.homeName ?? ""
+                let isActive = Preferences.shared.currentHomePreferences.id == home
+                HStack(spacing: 8) {
+                    if showEditMode {
                         Button(action: {
                             homeNameForAlert = homeName
                             homeForAlert = home
                             newHomeName = homeName
                             showingRenameAlert = true
                         }, label: {
-                            HStack {
-                                Image(systemSymbol: .pencil)
-                                Text("Rename")
-                            }
+                            Image(systemSymbol: .pencil).foregroundStyle(.blue)
                         })
-                        .tint(.blue)
+                        .buttonStyle(.plain)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(homeName).font(.subheadline).fontWeight(.medium)
+                        Text(summaryText(for: home))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        guard !showEditMode else { return }
+                        selectHome(home)
+                    }
+                    if showEditMode {
+                        if isActive {
+                            Image(systemSymbol: .checkmark).foregroundStyle(.blue)
+                        } else {
+                            Button(action: {
+                                homeNameForAlert = homeName
+                                homeForAlert = home
+                                showingDeleteAlert = true
+                            }, label: {
+                                Image(systemSymbol: .trash).foregroundStyle(.red)
+                            })
+                            .buttonStyle(.plain)
+                        }
+                    } else {
+                        if isActive {
+                            Image(systemSymbol: .checkmark)
+                                .foregroundStyle(.blue)
+                                .padding(.trailing, 4)
+                        }
+                        Button(action: {
+                            homeForSettings = home
+                        }, label: {
+                            Image(systemSymbol: .gear).foregroundStyle(.secondary)
+                        })
+                        .buttonStyle(.plain)
                     }
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
             }
-            .listStyle(.plain)
-            .scrollDisabled(true)
-            .frame(height: max(CGFloat(homes.count) * 66, 1))
 
             Divider().padding(.horizontal, 12)
 

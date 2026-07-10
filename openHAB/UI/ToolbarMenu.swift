@@ -74,7 +74,7 @@ struct ToolbarMenu: View {
             overlayContent(proxy: proxy)
         }
         .onChange(of: isPresented) { _, newValue in
-            if !newValue { isHomeExpanded = false }
+            if !newValue { withAnimation(.easeInOut(duration: 0.2)) { isHomeExpanded = false } }
         }
     }
 
@@ -125,12 +125,15 @@ struct ToolbarMenu: View {
                     homeHeader
                     Divider()
                     if isHomeExpanded {
-                        InlineHomePickerView(isMenuPresented: $isPresented)
-                        Divider().padding(.horizontal, 12)
+                        VStack(spacing: 0) {
+                            InlineHomePickerView(isMenuPresented: $isPresented)
+                            Divider().padding(.horizontal, 12)
+                        }
+                        .transition(.opacity)
                     }
                     // Main UI: Home + sidebar pages
                     Button {
-                        isMainUIExpanded.toggle()
+                        withAnimation(.easeInOut(duration: 0.25)) { isMainUIExpanded.toggle() }
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemSymbol: isMainUIExpanded ? .chevronDown : .chevronRight)
@@ -152,25 +155,28 @@ struct ToolbarMenu: View {
                     .buttonStyle(.plain)
 
                     if isMainUIExpanded {
-                        menuRow(
-                            icon: AnyView(Image("openHABIcon").resizable()),
-                            label: String(localized: "Home"),
-                            accessibilityId: "Home"
-                        ) {
-                            select(.webview)
-                        }
-                        if menuData.isLoading {
-                            loadingRow(label: String(localized: "Pages"))
-                        } else {
-                            ForEach(menuData.uiPages, id: \.uid) { page in
-                                menuRow(
-                                    icon: AnyView(pageIcon(for: page)),
-                                    label: page.label
-                                ) {
-                                    select(.tile(page.url))
+                        VStack(spacing: 0) {
+                            menuRow(
+                                icon: AnyView(Image("openHABIcon").resizable()),
+                                label: String(localized: "Home"),
+                                accessibilityId: "Home"
+                            ) {
+                                select(.webview)
+                            }
+                            if menuData.isLoading {
+                                loadingRow(label: String(localized: "Pages"))
+                            } else {
+                                ForEach(menuData.uiPages, id: \.uid) { page in
+                                    menuRow(
+                                        icon: AnyView(pageIcon(for: page)),
+                                        label: page.label
+                                    ) {
+                                        select(.tile(page.url))
+                                    }
                                 }
                             }
                         }
+                        .transition(.opacity)
                     }
 
                     Divider().padding(.horizontal, 12)
@@ -180,7 +186,7 @@ struct ToolbarMenu: View {
                         loadingRow(label: String(localized: "Sitemaps"))
                     } else if !menuData.sitemaps.isEmpty {
                         Button {
-                            isSitemapsExpanded.toggle()
+                            withAnimation(.easeInOut(duration: 0.25)) { isSitemapsExpanded.toggle() }
                         } label: {
                             HStack(spacing: 8) {
                                 Image(systemSymbol: isSitemapsExpanded ? .chevronDown : .chevronRight)
@@ -202,14 +208,17 @@ struct ToolbarMenu: View {
                         .buttonStyle(.plain)
 
                         if isSitemapsExpanded {
-                            ForEach(menuData.sitemaps, id: \.name) { sitemap in
-                                menuRow(
-                                    icon: AnyView(sitemapIcon(for: sitemap)),
-                                    label: sitemap.label
-                                ) {
-                                    select(.sitemap(sitemap.name))
+                            VStack(spacing: 0) {
+                                ForEach(menuData.sitemaps, id: \.name) { sitemap in
+                                    menuRow(
+                                        icon: AnyView(sitemapIcon(for: sitemap)),
+                                        label: sitemap.label
+                                    ) {
+                                        select(.sitemap(sitemap.name))
+                                    }
                                 }
                             }
+                            .transition(.opacity)
                         }
 
                         Divider().padding(.horizontal, 12)
@@ -221,7 +230,7 @@ struct ToolbarMenu: View {
                     } else if !menuData.uiTiles.isEmpty {
                         // Collapsible Tiles header with disclosure chevron
                         Button {
-                            isTilesExpanded.toggle()
+                            withAnimation(.easeInOut(duration: 0.25)) { isTilesExpanded.toggle() }
                         } label: {
                             HStack(spacing: 8) {
                                 Image(systemSymbol: isTilesExpanded ? .chevronDown : .chevronRight)
@@ -243,14 +252,17 @@ struct ToolbarMenu: View {
                         .buttonStyle(.plain)
 
                         if isTilesExpanded {
-                            ForEach(menuData.uiTiles, id: \.url) { tile in
-                                menuRow(
-                                    icon: AnyView(ImageView(url: tile.imageUrl).aspectRatio(contentMode: .fit)),
-                                    label: tile.name
-                                ) {
-                                    select(.tile(tile.url))
+                            VStack(spacing: 0) {
+                                ForEach(menuData.uiTiles, id: \.url) { tile in
+                                    menuRow(
+                                        icon: AnyView(ImageView(url: tile.imageUrl).aspectRatio(contentMode: .fit)),
+                                        label: tile.name
+                                    ) {
+                                        select(.tile(tile.url))
+                                    }
                                 }
                             }
+                            .transition(.opacity)
                         }
 
                         Divider().padding(.horizontal, 12)
@@ -258,7 +270,7 @@ struct ToolbarMenu: View {
 
                     // System
                     Button {
-                        isSystemExpanded.toggle()
+                        withAnimation(.easeInOut(duration: 0.25)) { isSystemExpanded.toggle() }
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemSymbol: isSystemExpanded ? .chevronDown : .chevronRight)
@@ -280,10 +292,13 @@ struct ToolbarMenu: View {
                     .buttonStyle(.plain)
 
                     if isSystemExpanded {
-                        if Preferences.shared.getNotificationConnection() != nil,
-                           !Preferences.shared.currentHomePreferences.demomode {
-                            systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
+                        VStack(spacing: 0) {
+                            if Preferences.shared.getNotificationConnection() != nil,
+                               !Preferences.shared.currentHomePreferences.demomode {
+                                systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
+                            }
                         }
+                        .transition(.opacity)
                     }
                 }
             }
@@ -306,9 +321,9 @@ struct ToolbarMenu: View {
     // MARK: - Home header
 
     private var homeHeader: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            HStack(spacing: 0) {
-                Button(action: { isHomeExpanded.toggle() }, label: {
+        HStack(alignment: .center, spacing: 0) {
+            Button(action: { withAnimation(.easeInOut(duration: 0.25)) { isHomeExpanded.toggle() } }, label: {
+                VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 8) {
                         Image(systemSymbol: isHomeExpanded ? .chevronDown : .chevronRight)
                             .font(.caption)
@@ -322,23 +337,22 @@ struct ToolbarMenu: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
-                    .contentShape(Rectangle())
-                })
-                .buttonStyle(.plain)
-                Spacer(minLength: 8)
-                Button(action: {
-                    menuData.refresh()
-                    onReload?()
-                    isPresented = false
-                }, label: {
-                    Image(systemSymbol: .arrowClockwise)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                })
-                .buttonStyle(.plain)
-            }
-            ConnectionView()
-                .padding(.leading, 18)
+                    ConnectionView()
+                        .padding(.leading, 18)
+                }
+                .contentShape(Rectangle())
+            })
+            .buttonStyle(.plain)
+            Spacer(minLength: 8)
+            Button(action: {
+                menuData.refresh()
+                onReload?()
+                isPresented = false
+            }, label: {
+                Image(systemSymbol: .arrowClockwise)
+                    .foregroundStyle(.secondary)
+            })
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
