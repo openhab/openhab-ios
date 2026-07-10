@@ -243,7 +243,7 @@ struct HomeSelectionView: View {
 
 // MARK: - Summary
 
-private struct HomeSummaryView: View {
+struct HomeSummaryView: View {
     let homeId: UUID
 
     private var homePrefs: HomePreferences? {

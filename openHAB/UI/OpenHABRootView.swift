@@ -31,7 +31,6 @@ struct OpenHABRootView: View {
     @State private var currentViewTitle: String = ""
     @State private var activeNetworkConnection: ConnectionInfo? = MainActorNetworkTracker.shared.activeConnection
     @State private var showNotifications = false
-    @State private var showHomeSelection = false
     @State private var isDemoMode = false
     @State private var sitemapResetID = UUID()
 
@@ -73,9 +72,6 @@ struct OpenHABRootView: View {
         }
         .sheet(isPresented: $showNotifications) {
             NavigationView { NotificationsView() }
-        }
-        .sheet(isPresented: $showHomeSelection) {
-            NavigationView { HomeSelectionView() }
         }
         .alert(
             networkService.certificateAlert?.title ?? "",
@@ -189,7 +185,7 @@ struct OpenHABRootView: View {
                 menuBar
                 OpenHABWebViewContainer(viewModel: webViewModel)
             }
-        case .notifications, .homeSelection, .browser:
+        case .notifications, .browser:
             preconditionFailure("Modal/transient targets must never become currentContent")
         }
     }
@@ -377,8 +373,6 @@ struct OpenHABRootView: View {
             switchContent(to: .sitemap(name))
         case .notifications:
             showNotifications = true
-        case .homeSelection:
-            showHomeSelection = true
         case let .tile(urlString):
             currentViewTitle = menuData.label(forURL: urlString)
             switchToTile(urlString)

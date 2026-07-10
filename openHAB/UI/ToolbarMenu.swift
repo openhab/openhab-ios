@@ -24,7 +24,6 @@ enum TargetController: Equatable {
     case notifications
     case browser(String)
     case tile(String)
-    case homeSelection
 }
 
 // MARK: - Connection status indicator
@@ -64,6 +63,7 @@ struct ToolbarMenu: View {
     @AppStorage("ToolbarMenu.isMainUIExpanded") private var isMainUIExpanded: Bool = true
     @AppStorage("ToolbarMenu.isSitemapsExpanded") private var isSitemapsExpanded: Bool = true
     @AppStorage("ToolbarMenu.isSystemExpanded") private var isSystemExpanded: Bool = true
+    @State private var isHomeExpanded = false
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
@@ -72,6 +72,9 @@ struct ToolbarMenu: View {
     var body: some View {
         GeometryReader { proxy in
             overlayContent(proxy: proxy)
+        }
+        .onChange(of: isPresented) { _, newValue in
+            if !newValue { isHomeExpanded = false }
         }
     }
 
@@ -116,9 +119,15 @@ struct ToolbarMenu: View {
     // MARK: - Menu content
 
     private func menuContent(height: CGFloat) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(spacing: 0) {
             let scrollView = ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
+                    homeHeader
+                    Divider()
+                    if isHomeExpanded {
+                        InlineHomePickerView(isMenuPresented: $isPresented)
+                        Divider().padding(.horizontal, 12)
+                    }
                     // Main UI: Home + sidebar pages
                     Button {
                         isMainUIExpanded.toggle()
@@ -275,7 +284,6 @@ struct ToolbarMenu: View {
                            !Preferences.shared.currentHomePreferences.demomode {
                             systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
                         }
-                        systemRow(symbol: .house, label: String(localized: "Manage Homes")) { select(.homeSelection) }
                     }
                 }
             }
@@ -291,42 +299,49 @@ struct ToolbarMenu: View {
                 scrollView
             }
             
-            Divider().padding(.horizontal, 12)
-
-            // Connection status footer — always visible
-            connectionFooter
         }
         .frame(width: 280)
     }
 
-    // MARK: - Connection footer
+    // MARK: - Home header
 
-    private var connectionFooter: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                let homeName = Preferences.shared.currentHomePreferences.homeName
-                if !homeName.isEmpty {
-                    Text(homeName)
+    private var homeHeader: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 0) {
+                Button(action: { isHomeExpanded.toggle() }, label: {
+                    HStack(spacing: 8) {
+                        Image(systemSymbol: isHomeExpanded ? .chevronDown : .chevronRight)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 10)
+                        let homeName = Preferences.shared.currentHomePreferences.homeName
+                        if !homeName.isEmpty {
+                            Text(homeName)
+                                .font(.footnote)
+                                .fontWeight(.semibold)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    .contentShape(Rectangle())
+                })
+                .buttonStyle(.plain)
+                Spacer(minLength: 8)
+                Button(action: {
+                    menuData.refresh()
+                    onReload?()
+                    isPresented = false
+                }, label: {
+                    Image(systemSymbol: .arrowClockwise)
                         .font(.footnote)
-                        .fontWeight(.medium)
-                        .lineLimit(1)
-                }
-                ConnectionView()
+                        .foregroundStyle(.secondary)
+                })
+                .buttonStyle(.plain)
             }
-            Spacer()
-            Button {
-                menuData.refresh()
-                onReload?()
-                isPresented = false
-            } label: {
-                Image(systemSymbol: .arrowClockwise)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.plain)
+            ConnectionView()
+                .padding(.leading, 18)
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .padding(.vertical, 10)
     }
 
     // MARK: - Loading row
