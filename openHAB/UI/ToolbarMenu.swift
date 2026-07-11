@@ -64,6 +64,9 @@ struct ToolbarMenu: View {
 
     @ScaledMetric private var iconWidth = 20.0
 
+    /// Shared curve so the section content and the container height animate in sync.
+    private static let sectionAnimation: Animation = .easeInOut(duration: 0.25)
+
     var body: some View {
         GeometryReader { proxy in
             overlayContent(proxy: proxy)
@@ -181,7 +184,7 @@ struct ToolbarMenu: View {
         VStack(spacing: 0) {
             let scrollView = ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    homeHeader
+                    homeHeader()
                     Divider()
                     if isHomeExpanded {
                         homesMenu()
@@ -226,11 +229,26 @@ struct ToolbarMenu: View {
             }
                 .frame(maxHeight: scrollViewContentSize > 0 ? min(scrollViewContentSize, height) : height)
             .scrollBounceBehavior(.basedOnSize)
+            // Host the animation on the sections' shared parent so a change in any
+            // one flag also animates the *repositioning* of the sibling sections
+            // below it — each section's own `.animation` only covers its own subtree.
+            .animation(Self.sectionAnimation, value: isHomeExpanded)
+            .animation(Self.sectionAnimation, value: isMainUIExpanded)
+            .animation(Self.sectionAnimation, value: isSitemapsExpanded)
+            .animation(Self.sectionAnimation, value: isTilesExpanded)
+            .animation(Self.sectionAnimation, value: isSystemExpanded)
 
             if #available(iOS 18.0, *) {
                 scrollView.onScrollGeometryChange(for: Double.self, of: { $0.contentSize.height
-                }) { oldValue, newValue in
-                    scrollViewContentSize = newValue
+                }) { _, newValue in
+                    // Animate the container growing/shrinking so it tracks the section
+                    // content instead of snapping. Skip the first measurement (0 → N),
+                    // which would otherwise shrink the menu from full height on open.
+                    if scrollViewContentSize == 0 {
+                        scrollViewContentSize = newValue
+                    } else {
+                        withAnimation(Self.sectionAnimation) { scrollViewContentSize = newValue }
+                    }
                 }
             } else {
                 scrollView
@@ -242,7 +260,8 @@ struct ToolbarMenu: View {
 
     // MARK: - Home header
 
-    private var homeHeader: some View {
+    @ViewBuilder
+    private func homeHeader() -> some View {
         HStack(alignment: .center, spacing: 0) {
             Button(action: { withAnimation { isHomeExpanded.toggle() } }, label: {
                 VStack(alignment: .leading, spacing: 3) {
@@ -344,7 +363,7 @@ struct ToolbarMenu: View {
             // `@AppStorage`-backed, so their view invalidation arrives via
             // UserDefaults observation, outside any `withAnimation` transaction.
             // Diffing the resolved value here animates regardless of the trigger.
-            .animation(.easeInOut(duration: 0.25), value: isExpanded.wrappedValue)
+            .animation(Self.sectionAnimation, value: isExpanded.wrappedValue)
         }
     }
 

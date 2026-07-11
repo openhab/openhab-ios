@@ -12,6 +12,7 @@
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
+import Flow
 
 struct InlineHomePickerView: View {
     @Binding var isMenuPresented: Bool
@@ -47,11 +48,15 @@ struct InlineHomePickerView: View {
                     }
                     VStack(alignment: .leading, spacing: 2) {
                         Text(homeName).font(.subheadline).fontWeight(.medium)
-                        Text(summaryText(for: home))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(nil)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        VStack(alignment: .leading, spacing: 0) {
+                            ForEach(Array(summaryText(for: home).enumerated()), id: \.offset) { _, text in
+                                text
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(nil)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
@@ -180,25 +185,36 @@ struct InlineHomePickerView: View {
         )
     }
 
-    private func summaryText(for homeId: UUID) -> String {
-        guard let prefs = Preferences.shared.storedHomes[homeId] else { return "" }
-        var parts: [String] = []
+    private func summaryText(for homeId: UUID) -> [Text] {
+        
+        guard let prefs = Preferences.shared.storedHomes[homeId] else {
+            return [Text("")]
+        }
+        
+        guard !prefs.demomode else {
+            return [Text("Demo")]
+        }
+        
+        var parts: [Text] = []
+        
         let localHost = prefs.localConnectionConfig.url.isEmpty
             ? String(localized: "Not set")
-            : (URL(string: prefs.localConnectionConfig.url)?.host ?? prefs.localConnectionConfig.url)
-        parts.append("Local: \(localHost)")
-        let remoteHost = prefs.remoteConnectionConfig.url.isEmpty
-            ? String(localized: "Not set")
-            : (URL(string: prefs.remoteConnectionConfig.url)?.host ?? prefs.remoteConnectionConfig.url)
-        parts.append("Remote: \(remoteHost)")
-        let hasCredentials = !prefs.localConnectionConfig.username.isEmpty
-            || !prefs.remoteConnectionConfig.username.isEmpty
-        if !hasCredentials { parts.append(String(localized: "No credentials")) }
+            : prefs.localConnectionConfig.url
+        let localCredentialsSymbol = prefs.localConnectionConfig.username.isEmpty
+            ? Image(systemName: "lock.slash") : Image(systemName: "lock")
+        parts.append(Text("\(Image(systemName: "wifi")): \(localHost) \(localCredentialsSymbol)"))
+        
+        let remoteURL = prefs.remoteConnectionConfig.url.isEmpty
+            ? "Not set"
+            : prefs.remoteConnectionConfig.url
+        let remoteCredentialsSymbol = prefs.remoteConnectionConfig.username.isEmpty
+        ? Image(systemName: "lock.slash") : Image(systemName: "lock")
+        parts.append(Text("\(Image(systemName: "cloud.fill")): \(remoteURL) \(remoteCredentialsSymbol)"))
+        
         if prefs.localConnectionConfig.ignoreSSL || prefs.remoteConnectionConfig.ignoreSSL {
-            parts.append("SSL off")
+            parts.append(Text("SSL off"))
         }
-        if prefs.demomode { parts.append("Demo") }
-        return parts.joined(separator: " · ")
+        return parts
     }
 
     private func selectHome(_ home: UUID) {
