@@ -842,7 +842,7 @@ class OpenHABRootViewController: UIViewController {
                     .components(separatedBy: CharacterSet.alphanumerics.inverted)
                     .joined()
             }
-            Logger.viewController.debug("Attempting to speak text \(arg1)")
+            Logger.viewController.debug("Attempting to speak text \(arg1, privacy: .private)")
             let utterance = AVSpeechUtterance(string: arg1)
             if cmdParts.count > 3 {
                 Logger.viewController.debug("Filtering voice \(cmdParts[2]) \(cmdParts[3])")
@@ -862,7 +862,7 @@ class OpenHABRootViewController: UIViewController {
             synthesizer = AVSpeechSynthesizer()
             do {
                 let audioSession = AVAudioSession.sharedInstance()
-                try audioSession.setCategory(.playback, mode: .default, options: .mixWithOthers)
+                try audioSession.setCategory(audioSession.category, mode: audioSession.mode, options: audioSession.categoryOptions.union(.mixWithOthers))
                 try audioSession.setActive(true)
             } catch {
                 Logger.viewController.warning("Failed to configure audio session for TTS: \(error.localizedDescription)")
