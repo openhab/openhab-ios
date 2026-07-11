@@ -108,7 +108,7 @@ class OpenHABRootViewController: UIViewController {
     private var lastTrackerStartupSettings: TrackerStartupSettings?
     /// Tracks the active home's id to detect switches and navigate to the new home's default sitemap.
     private var lastActiveHomeId: UUID?
-    private let synthesizer = AVSpeechSynthesizer()
+    private var synthesizer = AVSpeechSynthesizer()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -842,7 +842,7 @@ class OpenHABRootViewController: UIViewController {
                     .components(separatedBy: CharacterSet.alphanumerics.inverted)
                     .joined()
             }
-
+            Logger.viewController.debug("Attempting to speak text \(arg1, privacy: .private)")
             let utterance = AVSpeechUtterance(string: arg1)
             if cmdParts.count > 3 {
                 Logger.viewController.debug("Filtering voice \(cmdParts[2]) \(cmdParts[3])")
@@ -853,6 +853,19 @@ class OpenHABRootViewController: UIViewController {
                 }
             } else if cmdParts.count > 2 {
                 utterance.voice = AVSpeechSynthesisVoice(language: String(cmdParts[2]))
+            }
+            // Reset synthesizer to recover from audio interruptions
+            // (e.g. WebRTC audio in a WKWebView stealing the session).
+            // Use .mixWithOthers so TTS coexists with WebRTC instead of
+            // fighting for exclusive audio session control.
+            synthesizer.stopSpeaking(at: .immediate)
+            synthesizer = AVSpeechSynthesizer()
+            do {
+                let audioSession = AVAudioSession.sharedInstance()
+                try audioSession.setCategory(audioSession.category, mode: audioSession.mode, options: audioSession.categoryOptions.union(.mixWithOthers))
+                try audioSession.setActive(true)
+            } catch {
+                Logger.viewController.warning("Failed to configure audio session for TTS: \(error.localizedDescription)")
             }
             synthesizer.speak(utterance)
         default:
