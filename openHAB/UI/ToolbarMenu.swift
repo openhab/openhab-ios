@@ -37,18 +37,13 @@ struct ConnectionView: View {
         HStack {
             if let activeConnection = networkTracker.activeConnection {
                 Image(systemSymbol: .cloudFill)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 20, height: 20)
-                Text(activeConnection.configuration.url).font(.footnote)
+                Text(activeConnection.configuration.url)
             } else {
                 Image(systemSymbol: .exclamationmarkIcloudFill)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 20, height: 20)
-                Text("connecting").font(.footnote)
+                Text("connecting")
             }
         }
+        .font(.footnote)
     }
 }
 
@@ -118,6 +113,70 @@ struct ToolbarMenu: View {
 
     // MARK: - Menu content
 
+    @ViewBuilder
+    private func tilesMenu() -> some View {
+        ForEach(menuData.uiTiles, id: \.url) { tile in
+            menuRow(
+                icon: AnyView(ImageView(url: tile.imageUrl).aspectRatio(contentMode: .fit)),
+                label: tile.name
+            ) {
+                select(.tile(tile.url))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func systemMenu() -> some View {
+        if Preferences.shared.getNotificationConnection() != nil,
+           !Preferences.shared.currentHomePreferences.demomode {
+            systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
+        }
+    }
+
+    @ViewBuilder
+    private func sitemapsMenu() -> some View {
+        ForEach(menuData.sitemaps, id: \.name) { sitemap in
+            menuRow(
+                icon: AnyView(sitemapIcon(for: sitemap)),
+                label: sitemap.label
+            ) {
+                select(.sitemap(sitemap.name))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func mainUIMenu() -> some View {
+        menuRow(
+            icon: AnyView(Image("openHABIcon").resizable()),
+            label: String(localized: "Home"),
+            accessibilityId: "Home"
+        ) {
+            select(.webview)
+        }
+        if menuData.isLoading {
+            loadingRow(label: String(localized: "Pages"))
+        } else {
+            ForEach(menuData.uiPages, id: \.uid) { page in
+                menuRow(
+                    icon: AnyView(pageIcon(for: page)),
+                    label: page.label
+                ) {
+                    select(.tile(page.url))
+                }
+            }
+        }
+    }
+    
+    fileprivate func homesMenu() -> some View {
+        return VStack(alignment: .leading, spacing: 0) {
+            InlineHomePickerView(isMenuPresented: $isPresented)
+            Divider().padding(.horizontal, 12)
+        }
+        .transition(.blurReplace(.downUp))
+
+    }
+    
     private func menuContent(height: CGFloat) -> some View {
         VStack(spacing: 0) {
             let scrollView = ScrollView {
@@ -125,180 +184,43 @@ struct ToolbarMenu: View {
                     homeHeader
                     Divider()
                     if isHomeExpanded {
-                        VStack(spacing: 0) {
-                            InlineHomePickerView(isMenuPresented: $isPresented)
-                            Divider().padding(.horizontal, 12)
-                        }
-                        .transition(.opacity)
+                        homesMenu()
                     }
                     // Main UI: Home + sidebar pages
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.25)) { isMainUIExpanded.toggle() }
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemSymbol: isMainUIExpanded ? .chevronDown : .chevronRight)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .frame(width: 10)
-                            Text(String(localized: "Main UI"))
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.secondary)
-                                .textCase(.uppercase)
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 10)
-                        .padding(.bottom, 2)
-                        .contentShape(Rectangle())
+                    collapsibleSection(
+                        title: "Main UI",
+                        isExpanded: $isMainUIExpanded
+                    ) {
+                        mainUIMenu()
                     }
-                    .buttonStyle(.plain)
-
-                    if isMainUIExpanded {
-                        VStack(spacing: 0) {
-                            menuRow(
-                                icon: AnyView(Image("openHABIcon").resizable()),
-                                label: String(localized: "Home"),
-                                accessibilityId: "Home"
-                            ) {
-                                select(.webview)
-                            }
-                            if menuData.isLoading {
-                                loadingRow(label: String(localized: "Pages"))
-                            } else {
-                                ForEach(menuData.uiPages, id: \.uid) { page in
-                                    menuRow(
-                                        icon: AnyView(pageIcon(for: page)),
-                                        label: page.label
-                                    ) {
-                                        select(.tile(page.url))
-                                    }
-                                }
-                            }
-                        }
-                        .transition(.opacity)
-                    }
-
-                    Divider().padding(.horizontal, 12)
 
                     // Sitemaps
-                    if menuData.isLoading {
-                        loadingRow(label: String(localized: "Sitemaps"))
-                    } else if !menuData.sitemaps.isEmpty {
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.25)) { isSitemapsExpanded.toggle() }
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemSymbol: isSitemapsExpanded ? .chevronDown : .chevronRight)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .frame(width: 10)
-                                Text(String(localized: "Sitemaps"))
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                    .foregroundStyle(.secondary)
-                                    .textCase(.uppercase)
-                                Spacer(minLength: 0)
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.top, 10)
-                            .padding(.bottom, 2)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-
-                        if isSitemapsExpanded {
-                            VStack(spacing: 0) {
-                                ForEach(menuData.sitemaps, id: \.name) { sitemap in
-                                    menuRow(
-                                        icon: AnyView(sitemapIcon(for: sitemap)),
-                                        label: sitemap.label
-                                    ) {
-                                        select(.sitemap(sitemap.name))
-                                    }
-                                }
-                            }
-                            .transition(.opacity)
-                        }
-
-                        Divider().padding(.horizontal, 12)
+                    collapsibleSection(
+                        title: "Sitemaps",
+                        isExpanded: $isSitemapsExpanded,
+                        isLoading: menuData.isLoading,
+                        isEmpty: menuData.sitemaps.isEmpty
+                    ) {
+                        sitemapsMenu()
                     }
 
                     // Tiles
-                    if menuData.isLoading {
-                        loadingRow(label: String(localized: "Tiles"))
-                    } else if !menuData.uiTiles.isEmpty {
-                        // Collapsible Tiles header with disclosure chevron
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.25)) { isTilesExpanded.toggle() }
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemSymbol: isTilesExpanded ? .chevronDown : .chevronRight)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .frame(width: 10)
-                                Text(String(localized: "Tiles"))
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                    .foregroundStyle(.secondary)
-                                    .textCase(.uppercase)
-                                Spacer(minLength: 0)
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.top, 10)
-                            .padding(.bottom, 2)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-
-                        if isTilesExpanded {
-                            VStack(spacing: 0) {
-                                ForEach(menuData.uiTiles, id: \.url) { tile in
-                                    menuRow(
-                                        icon: AnyView(ImageView(url: tile.imageUrl).aspectRatio(contentMode: .fit)),
-                                        label: tile.name
-                                    ) {
-                                        select(.tile(tile.url))
-                                    }
-                                }
-                            }
-                            .transition(.opacity)
-                        }
-
-                        Divider().padding(.horizontal, 12)
+                    collapsibleSection(
+                        title: "Tiles",
+                        isExpanded: $isTilesExpanded,
+                        isLoading: menuData.isLoading,
+                        isEmpty: menuData.uiTiles.isEmpty
+                    ) {
+                        tilesMenu()
                     }
 
                     // System
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.25)) { isSystemExpanded.toggle() }
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemSymbol: isSystemExpanded ? .chevronDown : .chevronRight)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .frame(width: 10)
-                            Text(String(localized: "System"))
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.secondary)
-                                .textCase(.uppercase)
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 10)
-                        .padding(.bottom, 2)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-
-                    if isSystemExpanded {
-                        VStack(spacing: 0) {
-                            if Preferences.shared.getNotificationConnection() != nil,
-                               !Preferences.shared.currentHomePreferences.demomode {
-                                systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
-                            }
-                        }
-                        .transition(.opacity)
+                    collapsibleSection(
+                        title: "System",
+                        isExpanded: $isSystemExpanded,
+                        showDivider: false
+                    ) {
+                        systemMenu()
                     }
                 }
             }
@@ -322,7 +244,7 @@ struct ToolbarMenu: View {
 
     private var homeHeader: some View {
         HStack(alignment: .center, spacing: 0) {
-            Button(action: { withAnimation(.easeInOut(duration: 0.25)) { isHomeExpanded.toggle() } }, label: {
+            Button(action: { withAnimation { isHomeExpanded.toggle() } }, label: {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 8) {
                         Image(systemSymbol: isHomeExpanded ? .chevronDown : .chevronRight)
@@ -373,6 +295,83 @@ struct ToolbarMenu: View {
         .padding(.horizontal, 16)
         .padding(.top, 10)
         .padding(.bottom, 6)
+    }
+
+    // MARK: - Collapsible section
+
+    /// A collapsible menu section: an optional loading/empty guard, a toggle
+    /// header with a disclosure chevron, the expanded `content`, and an optional
+    /// trailing divider.
+    ///
+    /// - Parameters:
+    ///   - title: Localization key for the section label shown (uppercased) in the header.
+    ///   - isExpanded: Binding to the section's persisted expansion flag.
+    ///   - isLoading: When `true`, a `loadingRow` replaces the section.
+    ///   - isEmpty: When `true` (and not loading), the section is hidden entirely.
+    ///   - showDivider: Whether to append a trailing divider below the content.
+    ///   - content: The section body, shown only while expanded.
+    @ViewBuilder
+    private func collapsibleSection(
+        title: String.LocalizationValue,
+        isExpanded: Binding<Bool>,
+        isLoading: Bool = false,
+        isEmpty: Bool = false,
+        showDivider: Bool = true,
+        @ViewBuilder content: () -> some View
+    ) -> some View {
+        let localizedTitle = String(localized: title)
+        if isLoading {
+            loadingRow(label: localizedTitle)
+        } else if !isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                sectionToggleHeader(title: localizedTitle, isExpanded: isExpanded)
+
+                if isExpanded.wrappedValue {
+                    // Wrap in a single container so the transition has one stable
+                    // identity to animate — a bare ViewBuilder group (TupleView /
+                    // ForEach) is layout-transparent and won't transition.
+                    VStack(alignment: .leading, spacing: 0) {
+                        content()
+                    }
+                    .transition(.blurReplace(.downUp))
+                }
+
+                if showDivider {
+                    Divider().padding(.horizontal, 12)
+                }
+            }
+            // Value-based animation (not `withAnimation`): the expansion flags are
+            // `@AppStorage`-backed, so their view invalidation arrives via
+            // UserDefaults observation, outside any `withAnimation` transaction.
+            // Diffing the resolved value here animates regardless of the trigger.
+            .animation(.easeInOut(duration: 0.25), value: isExpanded.wrappedValue)
+        }
+    }
+
+    /// Toggle header shared by every collapsible section: a disclosure chevron
+    /// followed by the uppercased section title, driving `isExpanded`.
+    private func sectionToggleHeader(title: String, isExpanded: Binding<Bool>) -> some View {
+        Button {
+            isExpanded.wrappedValue.toggle()
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemSymbol: isExpanded.wrappedValue ? .chevronDown : .chevronRight)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 10)
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 10)
+            .padding(.bottom, 2)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Row helpers

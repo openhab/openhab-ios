@@ -50,6 +50,8 @@ struct InlineHomePickerView: View {
                         Text(summaryText(for: home))
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                            .lineLimit(nil)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
