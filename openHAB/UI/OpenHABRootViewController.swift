@@ -108,7 +108,7 @@ class OpenHABRootViewController: UIViewController {
     private var lastTrackerStartupSettings: TrackerStartupSettings?
     /// Tracks the active home's id to detect switches and navigate to the new home's default sitemap.
     private var lastActiveHomeId: UUID?
-    private let synthesizer = AVSpeechSynthesizer()
+    private var synthesizer = AVSpeechSynthesizer()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -842,7 +842,7 @@ class OpenHABRootViewController: UIViewController {
                     .components(separatedBy: CharacterSet.alphanumerics.inverted)
                     .joined()
             }
-
+            Logger.viewController.debug("Ateempting to speak text \(arg1)")
             let utterance = AVSpeechUtterance(string: arg1)
             if cmdParts.count > 3 {
                 Logger.viewController.debug("Filtering voice \(cmdParts[2]) \(cmdParts[3])")
@@ -853,6 +853,18 @@ class OpenHABRootViewController: UIViewController {
                 }
             } else if cmdParts.count > 2 {
                 utterance.voice = AVSpeechSynthesisVoice(language: String(cmdParts[2]))
+            }
+            // Reset synthesizer and reclaim audio session to recover from
+            // interruptions (e.g. WebRTC audio stealing the session).
+            synthesizer.stopSpeaking(at: .immediate)
+            synthesizer = AVSpeechSynthesizer()
+            synthesizer.delegate = self
+            do {
+                let audioSession = AVAudioSession.sharedInstance()
+                try audioSession.setCategory(.playback, mode: .default, options: [])
+                try audioSession.setActive(true)
+            } catch {
+                Logger.viewController.warning("Failed to configure audio session for TTS: \(error.localizedDescription)")
             }
             synthesizer.speak(utterance)
         default:
@@ -1111,6 +1123,26 @@ extension OpenHABRootViewController: ModalHandler {
 }
 
 // MARK: Kingfisher authentication with URLCredential
+
+// MARK: - AVSpeechSynthesizerDelegate
+
+extension OpenHABRootViewController: AVSpeechSynthesizerDelegate {
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        deactivateTTSAudioSession()
+    }
+
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        deactivateTTSAudioSession()
+    }
+
+    private nonisolated func deactivateTTSAudioSession() {
+        do {
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+            Logger.viewController.warning("Failed to deactivate audio session after TTS: \(error.localizedDescription)")
+        }
+    }
+}
 
 extension OpenHABRootViewController: AuthenticationChallengeResponsible {
     func downloader(_ downloader: ImageDownloader,
