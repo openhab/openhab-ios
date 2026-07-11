@@ -132,7 +132,7 @@ enum NotificationCommandParser {
     // MARK: - Rule
 
     static func parseRuleCommand(_ command: String) -> NotificationCommand? {
-        let components = command.split(separator: ":", maxSplits: 2)
+        let components = command.split(separator: ":", maxSplits: 1)
         guard !components.isEmpty else { return nil }
 
         let uuid = String(components[0])

@@ -31,7 +31,7 @@ enum TargetController: Equatable {
 struct ConnectionView: View {
     static let cornerRadius: CGFloat = 14
     
-    @StateObject private var networkTracker = MainActorNetworkTracker.shared
+    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
 
     var body: some View {
         HStack {
@@ -53,7 +53,7 @@ struct ConnectionView: View {
 struct ToolbarMenu: View {
     @Binding var isPresented: Bool
     @ObservedObject var menuData: MenuDataService
-    @State var scrollViewContentSize: Double = 0
+    @State private var scrollViewContentSize: Double = 0
     // Section expansion is stored per home in `HomePreferences`. These `@State`
     // flags mirror the active home for immediate UI updates and are loaded from
     // (and written back to) that home whenever the menu opens or a section toggles.
@@ -145,7 +145,7 @@ struct ToolbarMenu: View {
         } else {
             menu
                 .background(.regularMaterial)
-                .cornerRadius(ConnectionView.cornerRadius)
+                .clipShape(.rect(cornerRadius: ConnectionView.cornerRadius))
         }
     }
 
@@ -461,17 +461,6 @@ struct ToolbarMenu: View {
             label: label,
             action: action
         )
-    }
-
-    private func sectionHeader(_ title: String) -> some View {
-        Text(title)
-            .font(.caption)
-            .fontWeight(.semibold)
-            .foregroundStyle(.secondary)
-            .textCase(.uppercase)
-            .padding(.horizontal, 16)
-            .padding(.top, 10)
-            .padding(.bottom, 2)
     }
 
     private func pageIcon(for page: OpenHABUIPage) -> some View {

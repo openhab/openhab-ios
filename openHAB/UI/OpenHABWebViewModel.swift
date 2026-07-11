@@ -78,6 +78,7 @@ class OpenHABWebViewModel: ObservableObject {
     private var activeConfig: ConnectionConfiguration? { activeConnectionInfo?.configuration }
     private var sseTimer: Timer?
     private var views: [UUID: WKWebView] = [:]
+    private var viewAccessOrder: [UUID] = []
     private var etagChecker: ETagChecker?
     private var etagCheckerConfigURL: String?
     private var trackerCancellables = Set<AnyCancellable>()
@@ -322,7 +323,6 @@ class OpenHABWebViewModel: ObservableObject {
 
     private func observeNetworkChanges() {
         MainActorNetworkTracker.shared.$activeConnection
-            .receive(on: DispatchQueue.main)
             .sink { [weak self] activeConnection in
                 guard let self, let activeConnection else { return }
                 let activeConfiguration = activeConnection.configuration
@@ -395,7 +395,8 @@ class OpenHABWebViewModel: ObservableObject {
         }
 
         let isCloudConnection = activeConfig.isCloudConnection
-        let newWebview = getOrCreateWebView(for: Preferences.shared.currentHomePreferences.id, isCloudConnection: isCloudConnection)
+        let homeId = Preferences.shared.currentHomePreferences.id
+        let newWebview = getOrCreateWebView(for: homeId, isCloudConnection: isCloudConnection)
         if newWebview !== webView {
             webView.stopLoading()
             webView.navigationDelegate = nil
@@ -471,6 +472,8 @@ class OpenHABWebViewModel: ObservableObject {
     private func getOrCreateWebView(for id: UUID, isCloudConnection: Bool) -> WKWebView {
         if let existing = views[id] {
             Logger.viewController.info("Reusing webview for id:\(id.uuidString)")
+            viewAccessOrder.removeAll { $0 == id }
+            viewAccessOrder.append(id)
             return existing
         }
 
@@ -504,7 +507,9 @@ class OpenHABWebViewModel: ObservableObject {
         newWebView.backgroundColor = UIColor.clear
         newWebView.scrollView.backgroundColor = UIColor.clear
         if UIDevice.current.userInterfaceIdiom == .pad {
-            newWebView.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+            let sysVer = UIDevice.current.systemVersion
+            let sysVerUA = sysVer.replacingOccurrences(of: ".", with: "_")
+            newWebView.customUserAgent = "Mozilla/5.0 (iPad; CPU OS \(sysVerUA) like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/\(sysVer) Mobile/15E148 Safari/604.1"
         }
         newWebView.isInspectable = true
         newWebView.scrollView.contentInsetAdjustmentBehavior = .never
@@ -512,6 +517,12 @@ class OpenHABWebViewModel: ObservableObject {
         newWebView.scrollView.scrollIndicatorInsets = .zero
 
         views[id] = newWebView
+        viewAccessOrder.append(id)
+        while viewAccessOrder.count > 2 {
+            let evicted = viewAccessOrder.removeFirst()
+            views.removeValue(forKey: evicted)
+            Logger.viewController.info("Evicted webview cache entry for id:\(evicted.uuidString)")
+        }
         return newWebView
     }
 
@@ -593,6 +604,7 @@ class OpenHABWebViewModel: ObservableObject {
 
     func reloadView() {
         currentTarget = ""
+        commandQueue = []
         webView.stopLoading()
         webView.evaluateJavaScript("document.body.remove()")
         loadWebView(force: true)
@@ -602,6 +614,8 @@ class OpenHABWebViewModel: ObservableObject {
     /// Use this before a home switch so the previous home's content
     /// disappears instantly, before the new connection is established.
     func clearView() {
+        acceptsCommands = false
+        commandQueue = []
         webView.stopLoading()
         webView.load(URLRequest(url: URL(string: "about:blank")!))
         isLoading = true

@@ -26,7 +26,6 @@ class MenuDataService: ObservableObject {
 
     init() {
         MainActorNetworkTracker.shared.$activeConnection
-            .receive(on: DispatchQueue.main)
             .sink { [weak self] activeConnection in
                 self?.clearAll()
                 Task { [weak self] in
@@ -107,21 +106,10 @@ class MenuDataService: ObservableObject {
         }
     }
 
-    /// Filters out `_default` sitemap when others exist, and sorts per user preference.
-    /// This is a pure function for testability.
+    /// Filters out `_default` sitemap when others exist, then sorts per user preference.
     static func filterAndSortSitemaps(_ sitemaps: [OpenHABSitemap]) -> [OpenHABSitemap] {
-        var result = sitemaps
-        if result.last?.name == "_default", result.count > 1 {
-            result = Array(result.dropLast())
-        }
-        let sortSitemapsBy = Preferences.shared.currentHomePreferences.sortSitemapsBy
-        switch SortSitemapsOrder(rawValue: sortSitemapsBy) ?? .label {
-        case .label:
-            result.sort { $0.label < $1.label }
-        case .name:
-            result.sort { $0.name < $1.name }
-        }
-        return result
+        let sortBy = SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label
+        return filterAndSortSitemaps(sitemaps, sortBy: sortBy)
     }
 
     /// Filters and sorts sitemaps with an explicit sort order. Pure function for testing.

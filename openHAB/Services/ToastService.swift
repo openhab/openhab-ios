@@ -24,6 +24,7 @@ final class ToastService {
     var actions: [NotificationActionItem] = []
     var onTap: (() -> Void)?
     var onAction: ((NotificationActionItem) -> Void)?
+    private(set) var showCount = 0
 
     private init() {}
 
@@ -39,6 +40,7 @@ final class ToastService {
         self.actions = actions
         self.onTap = onTap
         self.onAction = onAction
+        showCount &+= 1
         isPresented = true
     }
 }

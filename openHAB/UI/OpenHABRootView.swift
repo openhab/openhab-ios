@@ -25,13 +25,11 @@ struct OpenHABRootView: View {
     @StateObject private var crashService = CrashReportService()
     @StateObject private var menuData = MenuDataService()
     @StateObject private var webViewModel = OpenHABWebViewModel()
-    @State private var toastService = ToastService.shared
     @State private var menuPresented = false
     @State private var currentContent: TargetController = .webview
     @State private var currentViewTitle: String = ""
     @State private var activeNetworkConnection: ConnectionInfo? = MainActorNetworkTracker.shared.activeConnection
     @State private var showNotifications = false
-    @State private var isDemoMode = false
     @State private var sitemapResetID = UUID()
 
     var body: some View {
@@ -47,72 +45,7 @@ struct OpenHABRootView: View {
             )
         }
         .onAppear {
-            ImageDownloader.default.authenticationChallengeResponder = networkService
-            isDemoMode = Preferences.shared.currentHomePreferences.demomode
-            switchToSavedView()
-            setupExitToApp()
-        }
-        .onReceive(notificationService.$navigationCommand.compactMap { $0 }) { command in
-            handleNavigationCommand(command)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
-            menuData.refresh()
-            webViewModel.reloadView()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
-            webViewModel.clearView()
-            menuData.clearAll()
-            currentContent = .webview
-            switchToSavedView()
-        }
-        .task {
-            for await connection in MainActorNetworkTracker.shared.$activeConnection.values {
-                activeNetworkConnection = connection
-            }
-        }
-        .sheet(isPresented: $showNotifications) {
-            NavigationView { NotificationsView() }
-        }
-        .alert(
-            networkService.certificateAlert?.title ?? "",
-            isPresented: Binding(
-                get: { networkService.certificateAlert != nil },
-                set: { if !$0 { networkService.certificateAlert = nil } }
-            )
-        ) {
-            Button("Always") { networkService.certificateAlertAction(.permitAlways) }
-            Button("Once") { networkService.certificateAlertAction(.permitOnce) }
-            Button("Deny", role: .cancel) { networkService.certificateAlertAction(.deny) }
-        } message: {
-            Text(networkService.certificateAlert?.message ?? "")
-        }
-        .alert("Crash Report", isPresented: $crashService.crashReportAlert) {
-            Button("Send") { crashService.enableCrashReporting() }
-            Button("Don't Send", role: .cancel) { crashService.deleteCrashReports() }
-        } message: {
-            Text("The app crashed during the previous session. Would you like to send a crash report?")
-        }
-        .overlay(alignment: .bottom) {
-            InAppToastBanner(service: toastService)
-        }
-        #if DEBUG
-        .overlay {
-            ForEach(Array(webViewModel.uiTestReports.keys.sorted()), id: \.self) { key in
-                Text(webViewModel.uiTestReports[key] ?? "")
-                    .accessibilityIdentifier("UITestReport-\(key)")
-                    .frame(width: 0, height: 0)
-                    .opacity(0)
-                    .allowsHitTesting(false)
-            }
-            Text(String(webViewModel.navbarItems.count))
-                .accessibilityIdentifier("UITestReport-navbarItemCount")
-                .frame(width: 0, height: 0)
-                .opacity(0)
-                .allowsHitTesting(false)
-        }
-        #endif
-        #if DEBUG
-        .onAppear {
+            #if DEBUG
             let env = ProcessInfo.processInfo.environment
             if env["UITest"] != nil {
                 Preferences.shared.modifyActiveHome { $0.demomode = true }
@@ -160,6 +93,68 @@ struct OpenHABRootView: View {
                     webViewModel.updateNavbarItems(items)
                 }
             }
+            #endif
+            ImageDownloader.default.authenticationChallengeResponder = networkService
+            switchToSavedView()
+            setupExitToApp()
+        }
+        .onReceive(notificationService.$navigationCommand.compactMap { $0 }) { command in
+            handleNavigationCommand(command)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
+            menuData.refresh()
+            webViewModel.reloadView()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
+            webViewModel.clearView()
+            menuData.clearAll()
+            currentContent = .webview
+            switchToSavedView()
+        }
+        .task {
+            for await connection in MainActorNetworkTracker.shared.$activeConnection.values {
+                activeNetworkConnection = connection
+            }
+        }
+        .sheet(isPresented: $showNotifications) {
+            NavigationView { NotificationsView() }
+        }
+        .alert(
+            networkService.certificateAlert?.title ?? "",
+            isPresented: Binding(
+                get: { networkService.certificateAlert != nil },
+                set: { if !$0 { networkService.certificateAlert = nil } }
+            )
+        ) {
+            Button("Always") { networkService.certificateAlertAction(.permitAlways) }
+            Button("Once") { networkService.certificateAlertAction(.permitOnce) }
+            Button("Deny", role: .cancel) { networkService.certificateAlertAction(.deny) }
+        } message: {
+            Text(networkService.certificateAlert?.message ?? "")
+        }
+        .alert("Crash Report", isPresented: $crashService.crashReportAlert) {
+            Button("Send") { crashService.enableCrashReporting() }
+            Button("Don't Send", role: .cancel) { crashService.deleteCrashReports() }
+        } message: {
+            Text("The app crashed during the previous session. Would you like to send a crash report?")
+        }
+        .overlay(alignment: .bottom) {
+            InAppToastBanner(service: ToastService.shared)
+        }
+        #if DEBUG
+        .overlay {
+            ForEach(Array(webViewModel.uiTestReports.keys.sorted()), id: \.self) { key in
+                Text(webViewModel.uiTestReports[key] ?? "")
+                    .accessibilityIdentifier("UITestReport-\(key)")
+                    .frame(width: 0, height: 0)
+                    .opacity(0)
+                    .allowsHitTesting(false)
+            }
+            Text(String(webViewModel.navbarItems.count))
+                .accessibilityIdentifier("UITestReport-navbarItemCount")
+                .frame(width: 0, height: 0)
+                .opacity(0)
+                .allowsHitTesting(false)
         }
         #endif
     }
@@ -415,7 +410,7 @@ struct OpenHABRootView: View {
     private func switchToTile(_ urlString: String) {
         guard !urlString.isEmpty else { return }
         let resolvedUrl: URL?
-        if urlString.hasPrefix("http") || urlString.hasPrefix("https") {
+        if urlString.hasPrefix("http") {
             resolvedUrl = URL(string: urlString)
         } else {
             guard let rootUrl = MainActorNetworkTracker.shared.activeConnection?.configuration.url else { return }
@@ -477,7 +472,7 @@ private struct InAppToastBanner: View {
                 .contentShape(RoundedRectangle(cornerRadius: 12))
                 .onTapGesture { dismiss() }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
-                .task { await autoDismiss() }
+                .task(id: service.showCount) { await autoDismiss() }
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.78), value: service.isPresented)
