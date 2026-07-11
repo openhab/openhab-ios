@@ -104,6 +104,13 @@ public struct HomePreferences: Codable, Equatable {
     public var sitemapForWatchLabel = "watch"
     public var homeName = "Home"
     public var sseCommandItem = ""
+    // Toolbar menu section expansion, per home. Optional so that decoding data
+    // stored before these fields existed yields `nil` (treated as expanded)
+    // instead of throwing `keyNotFound` and discarding the whole home.
+    public var isMainUIExpanded: Bool?
+    public var isSitemapsExpanded: Bool?
+    public var isTilesExpanded: Bool?
+    public var isSystemExpanded: Bool?
 
     fileprivate init(id: UUID) {
         self.id = id

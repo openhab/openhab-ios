@@ -54,10 +54,13 @@ struct ToolbarMenu: View {
     @Binding var isPresented: Bool
     @ObservedObject var menuData: MenuDataService
     @State var scrollViewContentSize: Double = 0
-    @AppStorage("ToolbarMenu.isTilesExpanded") private var isTilesExpanded: Bool = true
-    @AppStorage("ToolbarMenu.isMainUIExpanded") private var isMainUIExpanded: Bool = true
-    @AppStorage("ToolbarMenu.isSitemapsExpanded") private var isSitemapsExpanded: Bool = true
-    @AppStorage("ToolbarMenu.isSystemExpanded") private var isSystemExpanded: Bool = true
+    // Section expansion is stored per home in `HomePreferences`. These `@State`
+    // flags mirror the active home for immediate UI updates and are loaded from
+    // (and written back to) that home whenever the menu opens or a section toggles.
+    @State private var isTilesExpanded = true
+    @State private var isMainUIExpanded = true
+    @State private var isSitemapsExpanded = true
+    @State private var isSystemExpanded = true
     @State private var isHomeExpanded = false
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
@@ -71,9 +74,41 @@ struct ToolbarMenu: View {
         GeometryReader { proxy in
             overlayContent(proxy: proxy)
         }
+        .onAppear { loadExpansionState() }
         .onChange(of: isPresented) { _, newValue in
-            if !newValue { withAnimation(.easeInOut(duration: 0.2)) { isHomeExpanded = false } }
+            if newValue {
+                // Re-read in case the active home changed while the menu was closed.
+                loadExpansionState()
+            } else {
+                withAnimation(.easeInOut(duration: 0.2)) { isHomeExpanded = false }
+            }
         }
+    }
+
+    /// Mirrors the active home's persisted section-expansion flags into local
+    /// `@State`, defaulting to expanded when a home has no stored value yet.
+    private func loadExpansionState() {
+        let prefs = Preferences.shared.currentHomePreferences
+        isMainUIExpanded = prefs.isMainUIExpanded ?? true
+        isSitemapsExpanded = prefs.isSitemapsExpanded ?? true
+        isTilesExpanded = prefs.isTilesExpanded ?? true
+        isSystemExpanded = prefs.isSystemExpanded ?? true
+    }
+
+    /// A binding that updates the local `@State` mirror for an immediate UI
+    /// response and writes the new value through to the active home so the
+    /// choice persists per home and across restarts.
+    private func expansionBinding(
+        _ state: Binding<Bool>,
+        persistTo keyPath: WritableKeyPath<HomePreferences, Bool?>
+    ) -> Binding<Bool> {
+        Binding(
+            get: { state.wrappedValue },
+            set: { newValue in
+                state.wrappedValue = newValue
+                Preferences.shared.modifyActiveHome { $0[keyPath: keyPath] = newValue }
+            }
+        )
     }
 
     private func overlayContent(proxy: GeometryProxy) -> some View {
@@ -192,7 +227,7 @@ struct ToolbarMenu: View {
                     // Main UI: Home + sidebar pages
                     collapsibleSection(
                         title: "Main UI",
-                        isExpanded: $isMainUIExpanded
+                        isExpanded: expansionBinding($isMainUIExpanded, persistTo: \.isMainUIExpanded)
                     ) {
                         mainUIMenu()
                     }
@@ -200,7 +235,7 @@ struct ToolbarMenu: View {
                     // Sitemaps
                     collapsibleSection(
                         title: "Sitemaps",
-                        isExpanded: $isSitemapsExpanded,
+                        isExpanded: expansionBinding($isSitemapsExpanded, persistTo: \.isSitemapsExpanded),
                         isLoading: menuData.isLoading,
                         isEmpty: menuData.sitemaps.isEmpty
                     ) {
@@ -210,7 +245,7 @@ struct ToolbarMenu: View {
                     // Tiles
                     collapsibleSection(
                         title: "Tiles",
-                        isExpanded: $isTilesExpanded,
+                        isExpanded: expansionBinding($isTilesExpanded, persistTo: \.isTilesExpanded),
                         isLoading: menuData.isLoading,
                         isEmpty: menuData.uiTiles.isEmpty
                     ) {
@@ -220,7 +255,7 @@ struct ToolbarMenu: View {
                     // System
                     collapsibleSection(
                         title: "System",
-                        isExpanded: $isSystemExpanded,
+                        isExpanded: expansionBinding($isSystemExpanded, persistTo: \.isSystemExpanded),
                         showDivider: false
                     ) {
                         systemMenu()
@@ -359,10 +394,9 @@ struct ToolbarMenu: View {
                     Divider().padding(.horizontal, 12)
                 }
             }
-            // Value-based animation (not `withAnimation`): the expansion flags are
-            // `@AppStorage`-backed, so their view invalidation arrives via
-            // UserDefaults observation, outside any `withAnimation` transaction.
-            // Diffing the resolved value here animates regardless of the trigger.
+            // Value-based animation (not `withAnimation`): the section toggle
+            // mutates the flag outside any `withAnimation` transaction. Diffing
+            // the resolved value here animates the change regardless of trigger.
             .animation(Self.sectionAnimation, value: isExpanded.wrappedValue)
         }
     }
