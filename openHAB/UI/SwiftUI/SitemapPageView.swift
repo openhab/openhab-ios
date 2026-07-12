@@ -121,8 +121,8 @@ struct SitemapPageView: View {
         .navigationTitle(viewModel.pageTitle)
         .navigationBarTitleDisplayMode(.large)
         .alert("Error", isPresented: Binding(
-            get: { viewModel.error != nil },
-            set: { if !$0 { viewModel.error = nil } }
+            get: { viewModel.error != nil && !(viewModel.error is SitemapPageError) },
+            set: { if !$0 { Task { @MainActor in viewModel.error = nil } } }
         ), actions: {
             Button("OK", role: .cancel) {}
         }, message: {

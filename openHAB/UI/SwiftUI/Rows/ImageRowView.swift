@@ -13,6 +13,7 @@ import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
+import SFSafeSymbols
 import SwiftUI
 
 private struct ImageRowConfig {
@@ -47,6 +48,7 @@ private struct ImageRowContent: View {
     @State private var chartDisplayState: ChartDisplayState?
     @State private var animatedGIFSourceURL: URL?
     @State private var embeddedGIFAspectRatio: CGFloat = 16.0 / 9.0
+    @State private var imageLoadError: KingfisherError?
 
     private let logger = Logger(subsystem: "org.openhab", category: "ImageRowView")
 
@@ -111,6 +113,7 @@ private struct ImageRowContent: View {
         }
         .onChange(of: input.url) {
             animatedGIFSourceURL = nil
+            imageLoadError = nil
         }
     }
 
@@ -162,6 +165,8 @@ private struct ImageRowContent: View {
                 "\(input.widgetId)-\(forceRefreshKey)"
             }
             let provider = RawImageDataProvider(data: data, cacheKey: cacheKey)
+            // swiftlint:disable:next redundant_discardable_let
+            let _ = logger.info("ImageRow embedded: \(data.count, privacy: .public) bytes, isGIF=\(isGIFMagic(data), privacy: .public)")
             if isGIFMagic(data) {
                 KFAnimatedImage(source: .provider(provider))
                     .withOpenHABCredentials(for: networkTracker.activeConnection)
@@ -182,7 +187,9 @@ private struct ImageRowContent: View {
                     .clipShape(.rect(cornerRadius: 8))
             }
         case let .link(url):
-            if animatedGIFSourceURL == url {
+            if let error = imageLoadError {
+                imageErrorView(for: error)
+            } else if animatedGIFSourceURL == url {
                 KFAnimatedImage(url)
                     .withOpenHABCredentials(for: networkTracker.activeConnection)
                     .configure { $0.contentMode = .scaleAspectFit }
@@ -198,11 +205,13 @@ private struct ImageRowContent: View {
                         }
                     }
                     .onSuccess { result in
+                        imageLoadError = nil
                         lastRegularImageState = RegularImageState(url: url, image: result.image)
                     }
                     .onFailure { error in
                         guard !error.isTaskCancelled else { return }
                         logger.warning("Image fetch failed for \(url?.absoluteString ?? "nil", privacy: .public): \(error.localizedDescription, privacy: .public)")
+                        imageLoadError = error
                     }
                     .fade(duration: 0)
                     .cacheMemoryOnly(!shouldCache)
@@ -227,6 +236,8 @@ private struct ImageRowContent: View {
                         }
                     }
                     .onSuccess { result in
+                        imageLoadError = nil
+                        logger.info("Image fetch successful for \(url?.absoluteString ?? "nil", privacy: .public)")
                         lastRegularImageState = RegularImageState(url: url, image: result.image)
                         if isGIF(result) {
                             logger.debug("GIF detected for \(url?.absoluteString ?? "nil", privacy: .public)")
@@ -236,6 +247,7 @@ private struct ImageRowContent: View {
                     .onFailure { error in
                         guard !error.isTaskCancelled else { return }
                         logger.warning("Image fetch failed for \(url?.absoluteString ?? "nil", privacy: .public): \(error.localizedDescription, privacy: .public)")
+                        imageLoadError = error
                     }
                     .fade(duration: 0)
                     .resizable()
@@ -275,6 +287,37 @@ private struct ImageRowContent: View {
             return true
         }
         return result.data().map(isGIFMagic) ?? false
+    }
+
+    private func imageErrorView(for error: KingfisherError) -> some View {
+        VStack(spacing: 8) {
+            Image(systemSymbol: .exclamationmarkTriangle)
+                .font(.title2)
+                .foregroundStyle(.secondary)
+            Text(describeImageError(error))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+        }
+        .frame(maxWidth: .infinity, minHeight: 80)
+        .padding(.vertical, 12)
+        .background(Color.secondary.opacity(0.08))
+        .clipShape(.rect(cornerRadius: 8))
+    }
+
+    private func describeImageError(_ error: KingfisherError) -> String {
+        if case let .responseError(reason) = error,
+           case let .invalidHTTPStatusCode(response) = reason {
+            switch response.statusCode {
+            case 401: return "Authentication required (HTTP 401)"
+            case 403: return "Access denied (HTTP 403)"
+            case 404: return "Image not found (HTTP 404)"
+            case 500...: return "Server error (HTTP \(response.statusCode))"
+            default: return "HTTP error \(response.statusCode)"
+            }
+        }
+        return error.localizedDescription
     }
 
     private func setupRefreshTimer() {
