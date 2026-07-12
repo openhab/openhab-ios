@@ -220,7 +220,7 @@ struct SensorSmallWidgetView: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .layoutPriority(1)
                         .padding(.top, 20)
-                    Spacer()
+                    Spacer(minLength: 2)
 
                     Text(formattedState(for: item))
                         .font(.title2)

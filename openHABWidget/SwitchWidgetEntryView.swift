@@ -253,7 +253,7 @@ struct SwitchSmallWidgetView: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .layoutPriority(1)
                         .padding(.top, 20)
-                    Spacer()
+                    Spacer(minLength: 2)
                     if let home = entry.home {
                         Toggle(
                             isOn: slot.item.state == "ON",
@@ -269,6 +269,7 @@ struct SwitchSmallWidgetView: View {
                             .background(isOn ? Color.green : Color(uiColor: .systemFill))
                             .clipShape(Circle())
                     }
+                    Spacer()
                 }
                 .frame(maxHeight: .infinity)
                 .padding()
