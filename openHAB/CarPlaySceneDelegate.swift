@@ -21,9 +21,13 @@ private var carPlayMaxItems: Int {
 final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
     private var interfaceController: CPInterfaceController?
     private var streamTask: Task<Void, Never>?
+    private var refreshTask: Task<Void, Never>?
     private var preferencesTask: Task<Void, Never>?
     private let sitemapEventStream = SitemapEventStream()
     private var currentGridTemplate: CPGridTemplate?
+    // Retained across SSE restarts so page refreshes don't need a full stream teardown.
+    private var currentPage: OpenHABPage?
+    private var currentService: OpenAPIService?
 
     func templateApplicationScene(_ templateApplicationScene: CPTemplateApplicationScene,
                                   didConnect interfaceController: CPInterfaceController) {
@@ -38,11 +42,15 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
                                   didDisconnectInterfaceController interfaceController: CPInterfaceController) {
         streamTask?.cancel()
         streamTask = nil
+        refreshTask?.cancel()
+        refreshTask = nil
         preferencesTask?.cancel()
         preferencesTask = nil
         Task { await sitemapEventStream.stop() }
         self.interfaceController = nil
         currentGridTemplate = nil
+        currentPage = nil
+        currentService = nil
         Logger.carPlay.info("CarPlay scene disconnected")
     }
 
@@ -63,6 +71,7 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
                 let newSitemap = Preferences.shared.currentHomePreferences.sitemapForCarPlay
                 guard newSitemap != lastSitemap else { continue }
                 lastSitemap = newSitemap
+                // Sitemap selection changed — full restart needed (different page/subscription).
                 startStreaming()
             }
         }
@@ -90,17 +99,17 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         }
         do {
             let service = try OpenAPIService(connectionConfiguration: connection.configuration)
+            currentService = service
 
-            // Initial fetch to populate the template and learn the pageId
             guard let page = try await service.pollDataForPage(
                 sitemapname: sitemapName, pageId: "", longPolling: false
             ) else { return }
+            currentPage = page
             updateTemplate(page: page, service: service)
 
-            // Prefer SSE; fall back to long-poll on older servers
             let serverProps = try? await service.getRoot()
             if serverProps?.hasSseSupport() == true {
-                await runSSE(page: page, sitemapName: sitemapName, connection: connection, service: service)
+                await runSSE(sitemapName: sitemapName, connection: connection)
             } else {
                 await runLongPoll(sitemapName: sitemapName, pageId: page.pageId, service: service)
             }
@@ -110,45 +119,79 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
     }
 
     @MainActor
-    private func runSSE(page: OpenHABPage, sitemapName: String, connection: ConnectionInfo, service: OpenAPIService) async {
+    private func runSSE(sitemapName: String, connection: ConnectionInfo) async {
         await sitemapEventStream.startMonitoringNetworkIfNeeded(initialConnection: connection)
-        let pageId = page.pageId.isEmpty ? sitemapName : page.pageId
+        let pageId = currentPage.map { $0.pageId.isEmpty ? sitemapName : $0.pageId } ?? sitemapName
         let stream = await sitemapEventStream.stream(sitemap: sitemapName, pageId: pageId)
         Logger.carPlay.info("CarPlay SSE starting for \(sitemapName)/\(pageId)")
+
+        // Refresh on reconnect so structural changes missed during a disconnect are caught.
+        var needsRefreshOnReconnect = false
 
         for await msg in stream {
             guard !Task.isCancelled else { break }
             switch msg {
             case .connected:
                 Logger.carPlay.info("CarPlay SSE connected")
+                if needsRefreshOnReconnect {
+                    needsRefreshOnReconnect = false
+                    schedulePageRefresh(sitemapName: sitemapName)
+                }
             case let .disconnected(error):
+                needsRefreshOnReconnect = true
                 if let error { Logger.carPlay.warning("CarPlay SSE disconnected: \(error)") }
             case let .event(message):
-                handleSseMessage(message, page: page, service: service)
+                handleSseMessage(message, sitemapName: sitemapName)
             }
         }
     }
 
     @MainActor
-    private func handleSseMessage(_ message: SitemapEventMessage, page: OpenHABPage, service: OpenAPIService) {
+    private func handleSseMessage(_ message: SitemapEventMessage, sitemapName: String) {
         switch message {
         case .alive:
             break
         case .sitemapChanged:
-            Logger.carPlay.info("CarPlay SSE: sitemap changed, reloading")
-            startStreaming()
+            Logger.carPlay.info("CarPlay SSE: sitemap changed, refreshing page")
+            // Refresh page content only — do not restart the SSE stream.
+            schedulePageRefresh(sitemapName: sitemapName)
         case let .widget(event):
+            guard let page = currentPage, let service = currentService else { return }
             switch page.apply(event: event) {
             case .applied:
                 updateTemplate(page: page, service: service)
             case .requiresPageReload, .notFound:
-                Logger.carPlay.info("CarPlay SSE: widget requires reload")
-                startStreaming()
+                Logger.carPlay.info("CarPlay SSE: widget \(event.widgetId ?? "") requires reload")
+                schedulePageRefresh(sitemapName: sitemapName)
             case .unchanged:
                 break
             }
         case let .unknown(raw):
             Logger.carPlay.debug("CarPlay SSE unknown: \(raw)")
+        }
+    }
+
+    /// Refreshes `currentPage` from the server and updates the template without restarting the SSE stream.
+    /// Cancels any in-flight refresh so rapid events coalesce into a single fetch.
+    private func schedulePageRefresh(sitemapName: String) {
+        refreshTask?.cancel()
+        refreshTask = Task { [weak self] in
+            guard let self, !Task.isCancelled else { return }
+            await refreshPage(sitemapName: sitemapName)
+        }
+    }
+
+    @MainActor
+    private func refreshPage(sitemapName: String) async {
+        guard let service = currentService else { return }
+        do {
+            guard let page = try await service.pollDataForPage(
+                sitemapname: sitemapName, pageId: "", longPolling: false
+            ) else { return }
+            currentPage = page
+            updateTemplate(page: page, service: service)
+        } catch {
+            Logger.carPlay.error("CarPlay page refresh error: \(error)")
         }
     }
 
@@ -159,6 +202,7 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             for try await event in SitemapPageLoader.stream(sitemapName: sitemapName, pageId: pageId, service: service) {
                 guard !Task.isCancelled else { break }
                 if case let .longPoll(page, _) = event {
+                    currentPage = page
                     updateTemplate(page: page, service: service)
                 }
             }
