@@ -19,24 +19,10 @@ final class SimpleMJPEGPlayer {
     private var streamTask: URLSessionDataTask?
     private var httpClient: HTTPClient?
     private var delegate: SimpleMJPEGStreamDelegate?
-    private var imageView: UIImageView
 
+    var onFrame: (@MainActor (UIImage) -> Void)?
     var onFirstFrame: ((CGFloat) -> Void)?
     var onError: ((any Error) -> Void)?
-
-    init(imageView: UIImageView) {
-        self.imageView = imageView
-    }
-
-    func updateImageView(_ newImageView: UIImageView, onFirstFrame: ((CGFloat) -> Void)? = nil, onError: ((any Error) -> Void)? = nil) {
-        imageView = newImageView
-        if let onFirstFrame {
-            self.onFirstFrame = onFirstFrame
-        }
-        if let onError {
-            self.onError = onError
-        }
-    }
 
     func play(url: URL) {
         stop()
@@ -50,11 +36,9 @@ final class SimpleMJPEGPlayer {
             connectionConfiguration: config,
             onFrame: { [weak self] image, isFirst in
                 guard let self else { return }
-                imageView.image = image
-
+                onFrame?(image)
                 if isFirst {
-                    let aspectRatio = image.size.width / image.size.height
-                    onFirstFrame?(aspectRatio)
+                    onFirstFrame?(image.size.width / image.size.height)
                 }
             },
             onError: { [weak self] error in
@@ -77,7 +61,13 @@ final class SimpleMJPEGPlayer {
         streamTask = nil
         httpClient = nil
         delegate = nil
-        // Don't clear the image view when stopping - this allows sharing between cells
-        // The VideoStreamManager will handle proper cleanup
+    }
+
+    func updateCallbacks(onFrame: (@MainActor (UIImage) -> Void)?,
+                         onFirstFrame: ((CGFloat) -> Void)?,
+                         onError: ((any Error) -> Void)?) {
+        if let onFrame { self.onFrame = onFrame }
+        if let onFirstFrame { self.onFirstFrame = onFirstFrame }
+        if let onError { self.onError = onError }
     }
 }

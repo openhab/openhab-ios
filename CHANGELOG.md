@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [Version 3.3.7, Build 301] - 2026-07-13Z
+
+- chore: update legal.rtf — remove stale deps, add current packages, improve formatting
+- Fix speech concurency issue (#1294)
+- chore(deps): bump excon from 0.112.0 to 1.5.0 (#1293)
+- Swiftlinting
+
+## [Version 3.3.6, Build 295] - 2026-07-03Z
+
+- refactor: remove UIImageView polling timer from MJPEG video stream (#1284)
+- Fix duplicate link for Stable Betas section
+- Correct typo in Stable Beta section of README
+- Fix TestFlight reference in README
+- Update README with TestFlight group information (#1285)
+
 ## [Version 3.3.5, Build 291] - 2026-07-02Z
 
 - Allow speech recognition. (#1281)
