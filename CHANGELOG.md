@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [Version 3.3.7, Build 301] - 2026-07-13Z
+
+- chore: update legal.rtf — remove stale deps, add current packages, improve formatting
+- Fix speech concurency issue (#1294)
+- chore(deps): bump excon from 0.112.0 to 1.5.0 (#1293)
+- Swiftlinting
+
 ## [Version 3.3.6, Build 295] - 2026-07-03Z
 
 - refactor: remove UIImageView polling timer from MJPEG video stream (#1284)
