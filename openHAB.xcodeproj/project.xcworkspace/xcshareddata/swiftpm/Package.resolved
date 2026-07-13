@@ -1,5 +1,5 @@
 {
-  "originHash" : "5d09299cca05d481ff6456cdbd90914f268a8a34e524c80fef53066ee94ce606",
+  "originHash" : "6a0dbe66704e542f2c43f6f9ff3e1a2ae7244ffe448c8d1a8779c162f17fe8eb",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -17,15 +17,6 @@
       "state" : {
         "revision" : "61b85103a1aeed8218f17c794687781505fbbef5",
         "version" : "11.2.0"
-      }
-    },
-    {
-      "identity" : "devicekit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/devicekit/DeviceKit.git",
-      "state" : {
-        "revision" : "581df61650bc457ec00373a592a84be3e7468eb1",
-        "version" : "5.7.0"
       }
     },
     {
@@ -249,8 +240,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftFormatPlugin",
       "state" : {
-        "revision" : "c41997c642ffc937c6e83b23dadbd7e626485cfa",
-        "version" : "0.58.7"
+        "revision" : "c7c81920d715e051306d2172083c14aaec2c1b9d",
+        "version" : "0.61.1"
       }
     },
     {
@@ -258,8 +249,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftLintPlugin.git",
       "state" : {
-        "revision" : "47d1da3a8e30e0ada5543899e8c47f54664073ac",
-        "version" : "0.62.2"
+        "revision" : "3741567a0252090897336f1f39b8490107b49ead",
+        "version" : "0.63.3"
       }
     },
     {

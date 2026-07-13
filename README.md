@@ -22,8 +22,12 @@ Requires at least iOS 16 and openHAB 2.x and later.
 
 <a href="https://itunes.apple.com/us/app/openhab/id6505005945"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store"></a>
 
+There are 2 [TestFlight](https://testflight.apple.com) tester groups: 
 
-Beta releases are available on [TestFlight](https://testflight.apple.com/join/0uFYONeF).
+**Stable Betas** – for those who want to help validate upcoming releases before they reach the App Store - are available on [TestFlight Stable Beta](https://testflight.apple.com/join/0uFYONeF).
+
+**Feature Preview** – for people who enjoy testing new functionality early, even if it’s still under active development:
+[TestFlight Feature Preview](https://testflight.apple.com/join/fxEXH1qV).
 
 <a href="https://testflight.apple.com/join/0uFYONeF"><img src="https://developer.apple.com/assets/elements/icons/testflight/testflight-128x128_2x.png" width="100" alt="Download on TestFlight"></a>
 

@@ -77,6 +77,10 @@
 	<string>openHAB needs access to your local network to connect with the openHAB server.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>openHAB needs access to your microphone.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>openHAB needs access for speech recognition.</string>
+	<key>NSPrincipalClass</key>
+	<string>$(PRODUCT_MODULE_NAME).ActivityTrackingApplication</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>OpenHABGetItemStateIntent</string>

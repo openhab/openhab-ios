@@ -23,27 +23,28 @@ final class VideoStreamManager {
 
     private init() {}
 
-    func getOrCreateStream(for url: URL, imageView: UIImageView, onFirstFrame: ((CGFloat) -> Void)?, onError: ((any Error) -> Void)?) -> SimpleMJPEGPlayer {
+    func getOrCreateStream(for url: URL,
+                           onFrame: @escaping @MainActor (UIImage) -> Void,
+                           onFirstFrame: ((CGFloat) -> Void)?,
+                           onError: ((any Error) -> Void)?) -> SimpleMJPEGPlayer {
         let key = url.absoluteString
 
         if let existingPlayer = activeStreams[key] {
-            // Update the image view target for existing stream
-            existingPlayer.updateImageView(imageView, onFirstFrame: onFirstFrame, onError: onError)
+            existingPlayer.updateCallbacks(onFrame: onFrame, onFirstFrame: onFirstFrame, onError: onError)
             streamReferenceCounts[key] = (streamReferenceCounts[key] ?? 0) + 1
             // swiftformat:disable:next redundantSelf
             Logger.widgets.debug("Reusing existing stream for URL: \(key), refs: \(self.streamReferenceCounts[key] ?? 0)")
             return existingPlayer
         }
 
-        // Create new stream
-        let player = SimpleMJPEGPlayer(imageView: imageView)
+        let player = SimpleMJPEGPlayer()
+        player.onFrame = onFrame
         player.onFirstFrame = onFirstFrame
         player.onError = onError
 
         activeStreams[key] = player
         streamReferenceCounts[key] = 1
 
-        // Start playing the stream
         player.play(url: url)
 
         Logger.widgets.debug("Created new stream for URL: \(key)")
@@ -64,7 +65,6 @@ final class VideoStreamManager {
         Logger.widgets.debug("Released stream reference for URL: \(key), remaining refs: \(newCount)")
 
         if newCount <= 0 {
-            // No more references, clean up the stream
             if let player = activeStreams[key] {
                 player.stop()
                 Logger.widgets.debug("Stopped and removed stream for URL: \(key)")

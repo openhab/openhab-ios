@@ -344,7 +344,9 @@ private extension OpenHABWidgetMapping {
 
 extension SitemapRowInputMapper {
     static func map(snapshot: WidgetMappingSnapshot, rowID: RowID) -> SitemapRowInput {
-        if let input = linkedPageRowInput(from: snapshot) {
+        let kind = snapshot.renderingKind
+        let isMediaKind = kind == .image || kind == .chart || kind == .video || kind == .webview || kind == .mapview
+        if !isMediaKind, let input = linkedPageRowInput(from: snapshot) {
             return .linked(rowID, input)
         }
 
@@ -619,7 +621,9 @@ extension SitemapRowInputMapper {
             labelSourceRawValue: snapshot.labelSourceRawValue,
             preferredRowHeight: snapshot.preferredRowHeight,
             coordinateLatitude: hasValidCoordinate ? coordinate?.latitude : nil,
-            coordinateLongitude: hasValidCoordinate ? coordinate?.longitude : nil
+            coordinateLongitude: hasValidCoordinate ? coordinate?.longitude : nil,
+            linkedPageLink: snapshot.linkedPage?.link,
+            linkedPageTitle: snapshot.linkedPage?.title
         )
     }
 

@@ -443,6 +443,8 @@ struct MediaRowInput: Equatable {
     let preferredRowHeight: Double?
     let coordinateLatitude: Double?
     let coordinateLongitude: Double?
+    let linkedPageLink: String?
+    let linkedPageTitle: String?
 
     static func from(widget: OpenHABWidget) -> MediaRowInput {
         let coordinate = widget.coordinate
@@ -464,7 +466,9 @@ struct MediaRowInput: Equatable {
             labelSourceRawValue: widget.labelSource.rawValue,
             preferredRowHeight: WidgetMappingSnapshot.preferredRowHeight(type: widget.type, label: widget.label, height: widget.height),
             coordinateLatitude: hasValidCoordinate ? coordinate.latitude : nil,
-            coordinateLongitude: hasValidCoordinate ? coordinate.longitude : nil
+            coordinateLongitude: hasValidCoordinate ? coordinate.longitude : nil,
+            linkedPageLink: widget.linkedPage?.link,
+            linkedPageTitle: widget.linkedPage?.title
         )
     }
 

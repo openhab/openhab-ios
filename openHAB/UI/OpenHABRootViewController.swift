@@ -108,11 +108,12 @@ class OpenHABRootViewController: UIViewController {
     private var lastTrackerStartupSettings: TrackerStartupSettings?
     /// Tracks the active home's id to detect switches and navigate to the new home's default sitemap.
     private var lastActiveHomeId: UUID?
-    private let synthesizer = AVSpeechSynthesizer()
+    private var synthesizer = AVSpeechSynthesizer()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         Logger.viewController.info("OpenHABRootViewController viewDidLoad")
+        edgesForExtendedLayout = []
         setupSideMenu()
         addConnectionStatusIndication()
 
@@ -511,7 +512,8 @@ class OpenHABRootViewController: UIViewController {
             }
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) { [weak self] in
                 guard let self else { return }
-                if needsSwitch, !webViewController.hasLoadedPage {
+                // Re-tapping Home while already on it reloads.
+                if !needsSwitch || !webViewController.hasLoadedPage {
                     webViewController.reloadView()
                 }
                 transitionCoverView.isHidden = true
@@ -831,7 +833,7 @@ class OpenHABRootViewController: UIViewController {
         case "brightness":
             if let value = Double(arg1) {
                 let target = min(max(value, 0.0), 1.0)
-                UIScreen.main.brightness = target
+                view.window?.windowScene?.screen.brightness = target
             }
         case "tts":
             func normalizeVoiceName(from input: String) -> String {
@@ -840,7 +842,7 @@ class OpenHABRootViewController: UIViewController {
                     .components(separatedBy: CharacterSet.alphanumerics.inverted)
                     .joined()
             }
-
+            Logger.viewController.debug("Attempting to speak text \(arg1, privacy: .private)")
             let utterance = AVSpeechUtterance(string: arg1)
             if cmdParts.count > 3 {
                 Logger.viewController.debug("Filtering voice \(cmdParts[2]) \(cmdParts[3])")
@@ -851,6 +853,19 @@ class OpenHABRootViewController: UIViewController {
                 }
             } else if cmdParts.count > 2 {
                 utterance.voice = AVSpeechSynthesisVoice(language: String(cmdParts[2]))
+            }
+            // Reset synthesizer to recover from audio interruptions
+            // (e.g. WebRTC audio in a WKWebView stealing the session).
+            // Use .mixWithOthers so TTS coexists with WebRTC instead of
+            // fighting for exclusive audio session control.
+            synthesizer.stopSpeaking(at: .immediate)
+            synthesizer = AVSpeechSynthesizer()
+            do {
+                let audioSession = AVAudioSession.sharedInstance()
+                try audioSession.setCategory(audioSession.category, mode: audioSession.mode, options: audioSession.categoryOptions.union(.mixWithOthers))
+                try audioSession.setActive(true)
+            } catch {
+                Logger.viewController.warning("Failed to configure audio session for TTS: \(error.localizedDescription)")
             }
             synthesizer.speak(utterance)
         default:
@@ -898,32 +913,20 @@ class OpenHABRootViewController: UIViewController {
 
     func showSideMenu() {
         Logger.viewController.info("OpenHABRootViewController showSideMenu")
-        if let menu = SideMenuManager.default.rightMenuNavigationController {
-            // don't try and push an already visible menu less you crash the app
-            dismiss(animated: false) {
-                var topMostViewController: UIViewController? =
-                    UIApplication.shared.connectedScenes.flatMap { ($0 as? UIWindowScene)?.windows ?? [] }.last { $0.isKeyWindow }?.rootViewController
+        guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
+        guard menu.presentingViewController == nil else { return }
 
-                while let presentedViewController = topMostViewController?.presentedViewController {
-                    topMostViewController = presentedViewController
-                }
-
-                guard let presenter = topMostViewController else {
-                    // swiftformat:disable:next redundantSelf
-                    Logger.viewController.error("No valid view controller found to present side menu")
-                    return
-                }
-
-                // Avoid trying to present the menu on itself
-                if presenter == menu {
-                    // swiftformat:disable:next redundantSelf
-                    Logger.viewController.error("Cannot present side menu on itself")
-                    return
-                }
-
-                presenter.present(menu, animated: true)
-            }
+        var presenter: UIViewController = self
+        while let presentedViewController = presenter.presentedViewController {
+            presenter = presentedViewController
         }
+
+        guard presenter !== menu else {
+            Logger.viewController.error("Cannot present side menu on itself")
+            return
+        }
+
+        presenter.present(menu, animated: true)
     }
 
     private func addView(viewController: UIViewController) {
