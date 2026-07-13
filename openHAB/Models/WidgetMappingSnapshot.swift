@@ -623,7 +623,8 @@ extension SitemapRowInputMapper {
             coordinateLatitude: hasValidCoordinate ? coordinate?.latitude : nil,
             coordinateLongitude: hasValidCoordinate ? coordinate?.longitude : nil,
             linkedPageLink: snapshot.linkedPage?.link,
-            linkedPageTitle: snapshot.linkedPage?.title
+            linkedPageTitle: snapshot.linkedPage?.title,
+            linkedPageId: snapshot.linkedPage?.pageId
         )
     }
 

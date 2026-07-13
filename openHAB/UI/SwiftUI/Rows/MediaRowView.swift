@@ -27,8 +27,8 @@ struct MediaRowView: View {
 
     var body: some View {
         let content = mediaContent
-        if let link = input.linkedPageLink {
-            NavigationLink(value: LinkedPageNavigation(pageLink: link, pageTitle: input.linkedPageTitle ?? "")) {
+        if let link = input.linkedPageLink, let pageId = input.linkedPageId {
+            NavigationLink(value: SitemapLinkedPage(link: link, title: input.linkedPageTitle ?? "", pageId: pageId)) {
                 content
             }
             .buttonStyle(.plain)
