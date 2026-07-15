@@ -101,7 +101,10 @@ public extension View {
         modifier(OHTextTokenModifier(token: token))
     }
 
-    /// Applies the standard minimum tappable target used across row controls.
+    /// Applies the standard minimum tappable target to compact interactive controls.
+    ///
+    /// Use this on small buttons, text pills, or custom gesture targets embedded in
+    /// rows. Full-width controls and rows with their own hit area do not need it.
     func ohMinimumHitTarget(_ minHeight: CGFloat = OHAccessibilityToken.minimumHitTarget) -> some View {
         frame(minHeight: minHeight)
     }
