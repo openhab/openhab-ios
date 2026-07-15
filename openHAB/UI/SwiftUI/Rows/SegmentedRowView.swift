@@ -169,7 +169,6 @@ private struct SegmentedRowContent: View {
             RoundedRectangle(cornerRadius: 7)
                 .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
         )
-        .ohMinimumHitTarget()
         .fixedSize(horizontal: false, vertical: true)
     }
 
@@ -202,45 +201,53 @@ private struct SegmentedRowContent: View {
             .frame(minWidth: 50)
             .foregroundStyle(.primary)
             .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(
-                        (singlePressed || isSelected)
-                            ? (colorScheme == .dark ? Color(uiColor: .systemGray2) : Color(uiColor: .systemBackground))
-                            : Color.clear
-                    )
-            )
-            .ohMinimumHitTarget()
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { _ in
-                        if singlePressed == false {
-                            singlePressed = true
-                            triggerSelectionFeedback.toggle()
-                            startOptimisticSelection(
-                                command: mapping.command,
-                                displayState: displayState,
-                                mappings: mappings,
-                                widgetVersion: widgetVersion
-                            )
-                            logger.info("Segment mapping pressed, command: \(mapping.command)")
-                            sendCommand(mapping.command, .immediate, .change)
-                        }
-                    }
-                    .onEnded { _ in
-                        singlePressed = false
-                    }
-            )
-            .background(
                 RoundedRectangle(cornerRadius: 7)
-                    .fill(Color(uiColor: colorScheme == .dark ? .systemGray4 : .systemGray5))
+                    .fill(
+                        isSelected
+                            ? Color(uiColor: colorScheme == .dark ? .systemGray2 : .systemBackground)
+                            : Color(uiColor: colorScheme == .dark ? .systemGray4 : .systemGray5)
+                    )
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 7)
-                    .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
+                    .stroke(
+                        (isSelected ? Color.secondary.opacity(0.8) : Color.secondary.opacity(0.3)),
+                        lineWidth: 0.5
+                    )
             )
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if !isSelected {
+                    // Toggle ON
+                    triggerSelectionFeedback.toggle()
+                    startOptimisticSelection(
+                        command: mapping.command,
+                        displayState: displayState,
+                        mappings: mappings,
+                        widgetVersion: widgetVersion
+                    )
+                    logger.info("Single mapping toggle ON, command: \(mapping.command)")
+                    sendCommand(mapping.command, .immediate, .change)
+                } else {
+                    // Toggle OFF
+                    let offCommand: String = {
+                        if let rc = mapping.releaseCommand, !rc.isEmpty { return rc }
+                        // Default to OFF if no explicit releaseCommand is provided
+                        return "OFF"
+                    }()
+                    triggerSelectionFeedback.toggle()
+                    // Clear optimistic selection to reflect OFF state locally until server echoes
+                    optimisticSelectedIndex = nil
+                    optimisticBaseState = displayState.effectiveState
+                    optimisticWidgetId = displayState.widgetId
+                    optimisticStartVersion = widgetVersion
+                    revertTask?.cancel()
+                    revertTask = nil
+                    logger.info("Single mapping toggle OFF, command: \(offCommand)")
+                    sendCommand(offCommand, .immediate, .change)
+                }
+            }
             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
-            .animation(.easeInOut(duration: 0.1), value: singlePressed)
     }
 
     // MARK: - Helper Methods
@@ -309,7 +316,6 @@ private struct SegmentedRowContent: View {
                 RoundedRectangle(cornerRadius: 7)
                     .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
             )
-            .ohMinimumHitTarget()
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)

@@ -57,7 +57,6 @@ private struct SetpointRowContent: View {
                         .foregroundStyle(currentValue <= displayState.minValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
-                .ohMinimumHitTarget()
                 .disabled(currentValue <= displayState.minValue)
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
                 .disabled(input.readOnly)
@@ -76,7 +75,6 @@ private struct SetpointRowContent: View {
                         .foregroundStyle(currentValue >= displayState.maxValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
-                .ohMinimumHitTarget()
                 .disabled(currentValue >= displayState.maxValue)
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
                 .disabled(input.readOnly)
