@@ -658,6 +658,7 @@ class OpenHABRootViewController: UIViewController {
 
         guard let action else { return }
         let actionParts = action.split(separator: ":")
+        guard !actionParts.isEmpty else { return }
         let cmd = actionParts.dropFirst().joined(separator: ":")
 
         switch actionParts[0] {
@@ -836,6 +837,10 @@ class OpenHABRootViewController: UIViewController {
                 view.window?.windowScene?.screen.brightness = target
             }
         case "tts":
+            guard !arg1.isEmpty else {
+                Logger.viewController.warning("device:tts received with empty text, ignoring")
+                return
+            }
             func normalizeVoiceName(from input: String) -> String {
                 input
                     .lowercased()
