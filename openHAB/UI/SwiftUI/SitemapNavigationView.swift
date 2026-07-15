@@ -50,7 +50,6 @@ struct SitemapNavigationView: View {
                             } label: {
                                 Image(systemSymbol: .magnifyingglass)
                             }
-                            .ohMinimumHitTarget()
                             .accessibilityLabel("Search")
                         } else {
                             Button {
@@ -59,7 +58,6 @@ struct SitemapNavigationView: View {
                             } label: {
                                 Image(systemSymbol: .magnifyingglass)
                             }
-                            .ohMinimumHitTarget()
                             .accessibilityLabel("Search")
                         }
                     }
@@ -71,7 +69,6 @@ struct SitemapNavigationView: View {
                         Image(systemSymbol: .line3Horizontal)
                             .font(.title)
                     }
-                    .ohMinimumHitTarget()
                 }
             }
 

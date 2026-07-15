@@ -169,7 +169,6 @@ private struct SegmentedRowContent: View {
             RoundedRectangle(cornerRadius: 7)
                 .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
         )
-        .ohMinimumHitTarget()
         .fixedSize(horizontal: false, vertical: true)
     }
 
@@ -216,7 +215,6 @@ private struct SegmentedRowContent: View {
                         lineWidth: 0.5
                     )
             )
-            .ohMinimumHitTarget()
             .contentShape(Rectangle())
             .onTapGesture {
                 if !isSelected {
@@ -318,7 +316,6 @@ private struct SegmentedRowContent: View {
                 RoundedRectangle(cornerRadius: 7)
                     .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
             )
-            .ohMinimumHitTarget()
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
