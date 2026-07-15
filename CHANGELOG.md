@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [Version 3.3.8, Build 304] - 2026-07-15Z
+
+- Remove ohMinimumHitTarget() to reinstate consistent sitemap row heights (#1298) (#1299)
+- fix: guard against empty string in device:tts and empty action parts (#1295)
+- singleMappingButton toggle button fix (#1297)
+
 ## [Version 3.3.7, Build 301] - 2026-07-13Z
 
 - chore: update legal.rtf — remove stale deps, add current packages, improve formatting
