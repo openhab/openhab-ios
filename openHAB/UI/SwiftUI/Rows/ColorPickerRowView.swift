@@ -296,7 +296,6 @@ private struct BrightnessButton: View {
         Image(systemSymbol: symbol)
             .font(.title2)
             .foregroundStyle(Color(UIColor.systemBlue))
-            .ohMinimumHitTarget()
             .contentShape(Rectangle())
             .accessibilityLabel(accessibilityLabel)
             .accessibilityAddTraits(.isButton)
