@@ -183,14 +183,12 @@ private struct SensorItemRow: View {
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .lineLimit(2)
-                .layoutPriority(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
             Text(formattedState(for: item))
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .lineLimit(1)
-                .minimumScaleFactor(0.8)
                 .foregroundStyle(.secondary)
         }
     }
