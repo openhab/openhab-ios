@@ -329,12 +329,15 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             ?? UIImage()
     }
 
-    private func placeholderTemplate(message: String? = nil) -> CPGridTemplate {
-        let label = message ?? String(localized: "carplay_not_configured")
-        let button = CPGridButton(
-            titleVariants: [label],
-            image: placeholderButtonImage()
-        ) { _ in }
-        return CPGridTemplate(title: "openHAB", gridButtons: [button])
+    private func placeholderTemplate(message: String? = nil) -> CPTemplate {
+        guard let message else {
+            let button = CPGridButton(
+                titleVariants: [String(localized: "carplay_not_configured")],
+                image: placeholderButtonImage()
+            ) { _ in }
+            return CPGridTemplate(title: "openHAB", gridButtons: [button])
+        }
+        let item = CPInformationItem(title: nil, detail: message)
+        return CPInformationTemplate(title: "openHAB", layout: .leading, items: [item], actions: [])
     }
 }
