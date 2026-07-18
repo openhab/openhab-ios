@@ -236,13 +236,25 @@ public extension OpenHABWidget {
     }
 }
 
+/// Associated-object key for parentWidgetId — avoids changing OpenHABWidget's stored-property
+/// layout, which would corrupt Combine's @Published field scan under concurrent test execution.
+private nonisolated(unsafe) var parentWidgetIdKey: UInt8 = 0
+
+public extension OpenHABWidget {
+    var parentWidgetId: String? {
+        get { objc_getAssociatedObject(self, &parentWidgetIdKey) as? String }
+        set { objc_setAssociatedObject(self, &parentWidgetIdKey, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC) }
+    }
+}
+
 ///  Recursive parsing of nested widget structure
 public extension [OpenHABWidget] {
-    mutating func flatten(_ widgets: [Element]) {
+    mutating func flatten(_ widgets: [Element], parentWidgetId: String? = nil) {
         for widget in widgets {
+            widget.parentWidgetId = parentWidgetId
             append(widget)
             if widget.type != .buttongrid {
-                flatten(widget.widgets)
+                flatten(widget.widgets, parentWidgetId: widget.widgetId)
             }
         }
     }
