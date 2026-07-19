@@ -245,12 +245,16 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         let pointSize = min(targetSize.width, targetSize.height)
         let isOn = widget.displayState.isOn
 
-        let symbolName: SFSymbol = switch widget.icon.lowercased() {
-        case "power", "poweroutlet", "poweroutlet_eu":
+        let icon = widget.icon.lowercased()
+        let symbolName: SFSymbol = if icon.contains("power") {
             isOn ? .powerCircleFill : .powerCircle
-        case "lamp", "light", "lightbulb":
+        } else if icon.contains("lamp") || icon.contains("light") || icon.contains("bulb") {
             isOn ? .lightbulbFill : .lightbulb
-        default:
+        } else if icon.contains("lock") || icon.contains("security") || icon.contains("alarm") {
+            isOn ? .lockFill : .lockOpen
+        } else if icon.contains("home") || icon.contains("house") {
+            isOn ? .houseFill : .house
+        } else {
             isOn ? .circleFill : .circle
         }
 
