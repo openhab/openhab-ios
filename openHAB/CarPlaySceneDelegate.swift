@@ -263,10 +263,9 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
     }
 
     private func isCarPlayCompatible(_ widget: OpenHABWidget) -> Bool {
-        switch widget.type {
-        case .switchWidget, .button, .selection: true
-        default: false
-        }
+        guard widget.type == .switchWidget, widget.item != nil else { return false }
+        return widget.mappings.isEmpty ||
+            (widget.mappings.count == 1 && widget.mappings[0].hasPressReleaseBehavior)
     }
 
     private func carPlayGridButtonImageSize() -> CGSize {
@@ -281,45 +280,30 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
     private func makeGridButton(for widget: OpenHABWidget, service: OpenAPIService) -> CPGridButton {
         let ds = widget.displayState
         let image = sfSymbol(for: widget)
-        return CPGridButton(titleVariants: [ds.labelText], image: image) { [weak self] _ in
-            guard let self else { return }
-            switch widget.type {
-            case .switchWidget where !ds.mappings.isEmpty, .selection:
-                pushMappingList(title: ds.labelText, mappings: ds.mappings, widget: widget, service: service)
-            case .switchWidget:
-                Task {
-                    guard let name = widget.item?.name else { return }
+        return CPGridButton(titleVariants: [ds.labelText], image: image) { _ in
+            Task {
+                guard let name = widget.item?.name else { return }
+                // Resolve press/release source: single mapping takes precedence over widget-level fields
+                let pressCommand: String?
+                let releaseCommand: String?
+                if let mapping = widget.mappings.first, mapping.hasPressReleaseBehavior {
+                    pressCommand = mapping.command.isEmpty ? nil : mapping.command
+                    releaseCommand = mapping.releaseCommand
+                } else {
+                    pressCommand = widget.releaseOnly != true ? widget.command : nil
+                    releaseCommand = widget.releaseCommand
+                }
+                if let pressCommand {
+                    try? await service.sendItemCommand(itemname: name, command: pressCommand)
+                    try? await Task.sleep(for: .milliseconds(500))
+                }
+                if let releaseCommand {
+                    try? await service.sendItemCommand(itemname: name, command: releaseCommand)
+                } else {
                     try? await service.sendItemCommand(itemname: name, command: ds.isOn ? "OFF" : "ON")
                 }
-            case .button:
-                Task {
-                    guard let name = widget.item?.name, let command = widget.command else { return }
-                    try? await service.sendItemCommand(itemname: name, command: command)
-                }
-            default:
-                break
             }
         }
-    }
-
-    private func pushMappingList(title: String,
-                                 mappings: [OpenHABWidgetMapping],
-                                 widget: OpenHABWidget,
-                                 service: OpenAPIService) {
-        let items = mappings.map { mapping -> CPListItem in
-            let item = CPListItem(text: mapping.label, detailText: nil)
-            item.handler = { [weak self] _, done in
-                Task {
-                    guard let name = widget.item?.name else { return }
-                    try? await service.sendItemCommand(itemname: name, command: mapping.command)
-                }
-                self?.interfaceController?.popTemplate(animated: true, completion: nil)
-                done()
-            }
-            return item
-        }
-        let template = CPListTemplate(title: title, sections: [CPListSection(items: items)])
-        interfaceController?.pushTemplate(template, animated: true, completion: nil)
     }
 
     private func placeholderButtonImage() -> UIImage {
