@@ -2347,8 +2347,8 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Keine CarPlay-Favoriten konfiguriert"
+            "state" : "translated",
+            "value" : "Keine CarPlay-kompatiblen Switch-Elemente konfiguriert."
           }
         },
         "en" : {
@@ -2359,44 +2359,44 @@
         },
         "es" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "No hay favoritos de CarPlay configurados"
+            "state" : "translated",
+            "value" : "No hay elementos Switch compatibles con CarPlay configurados."
           }
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CarPlay-suosikkeja ei ole määritetty"
+            "state" : "translated",
+            "value" : "CarPlay-yhteensopivia Switch-kohteita ei ole määritetty."
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Aucun favori CarPlay configuré"
+            "state" : "translated",
+            "value" : "Aucun élément Switch compatible CarPlay configuré."
           }
         },
         "it" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Nessun preferito CarPlay configurato"
+            "state" : "translated",
+            "value" : "Nessun elemento Switch compatibile con CarPlay configurato."
           }
         },
         "nb" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Ingen CarPlay-favoritter er konfigurert"
+            "state" : "translated",
+            "value" : "Ingen CarPlay-kompatible Switch-elementer er konfigurert."
           }
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Geen CarPlay-favorieten geconfigureerd"
+            "state" : "translated",
+            "value" : "Geen CarPlay-compatibele Switch-items geconfigureerd."
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Избранное CarPlay не настроено"
+            "state" : "translated",
+            "value" : "Нет настроенных Switch-элементов, совместимых с CarPlay."
           }
         }
       }
@@ -2407,8 +2407,8 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CarPlay-Sitemapseite in den Einstellungen einrichten"
+            "state" : "translated",
+            "value" : "CarPlay-Sitemapseite in den iOS-App-Einstellungen einrichten"
           }
         },
         "en" : {
@@ -2419,44 +2419,44 @@
         },
         "es" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Configura una página de mapa del sitio de CarPlay en Ajustes"
+            "state" : "translated",
+            "value" : "Configura una página de sitemap de CarPlay en los ajustes de la app de iOS"
           }
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Määritä CarPlay-sivustokarttasivu Asetuksissa"
+            "state" : "translated",
+            "value" : "Määritä CarPlay-sivustokarttasivu iOS-sovelluksen asetuksissa"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Configurez une page de plan de site CarPlay dans les réglages"
+            "state" : "translated",
+            "value" : "Configurez une page de plan de site CarPlay dans les réglages de l'app iOS"
           }
         },
         "it" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Configura una pagina sitemap CarPlay nelle Impostazioni"
+            "state" : "translated",
+            "value" : "Configura una pagina sitemap CarPlay nelle impostazioni dell'app iOS"
           }
         },
         "nb" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Konfigurer en CarPlay-nettstedskartside i Innstillinger"
+            "state" : "translated",
+            "value" : "Konfigurer en CarPlay-nettstedskartside i iOS-app-innstillingene"
           }
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Stel een CarPlay-sitemappagina in via Instellingen"
+            "state" : "translated",
+            "value" : "Stel een CarPlay-sitemappagina in via de iOS-app-instellingen"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Настройте страницу карты сайта CarPlay в Настройках"
+            "state" : "translated",
+            "value" : "Настройте страницу карты сайта CarPlay в настройках приложения iOS"
           }
         }
       }
@@ -11746,7 +11746,57 @@
     },
     "None" : {
       "comment" : "A label for the \"Sitemap for CarPlay\" picker.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguna"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ei mitään"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessuna"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет"
+          }
+        }
+      }
     },
     "notification" : {
       "localizations" : {
@@ -18686,7 +18736,57 @@
     },
     "Sitemap for CarPlay" : {
       "comment" : "A label for selecting a sitemap to be used for CarPlay.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sitemap für CarPlay"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sitemap para CarPlay"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CarPlay-sivustokartta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sitemap pour CarPlay"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sitemap per CarPlay"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nettstedskart for CarPlay"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sitemap voor CarPlay"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карта сайта для CarPlay"
+          }
+        }
+      }
     },
     "sitemap_settings" : {
       "localizations" : {
