@@ -248,6 +248,8 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         let icon = widget.icon.lowercased()
         let symbolName: SFSymbol = if icon.contains("power") {
             isOn ? .powerCircleFill : .powerCircle
+        } else if icon.contains("garage") {
+            isOn ? .doorGarageDoubleBayOpen : .doorGarageDoubleBayClosed
         } else if icon.contains("lamp") || icon.contains("light") || icon.contains("bulb") {
             isOn ? .lightbulbFill : .lightbulb
         } else if icon.contains("lock") || icon.contains("security") || icon.contains("alarm") {
