@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Foundation
 import SFSafeSymbols
 
 /// Maps openHAB classic icon names to SF Symbols.
@@ -110,18 +111,18 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
         isOn ? .flameFill : .flame
     case "flow", "flowpipe", "pump":
         isOn ? .arrowUpCircleFill : .arrowUpCircle
-    case "lowbattery":
-        .battery0percent                                         // no fill
+//    case "lowbattery":
+//        .battery0percent                                         // no fill
     case "motion":
         isOn ? .sensorTagRadiowavesForwardFill : .sensorTagRadiowavesForward
     case "oil":
         isOn ? .oilcanFill : .oilcan
-    case "pressure":
-        .barometer                                               // no fill
+//    case "pressure":
+//        .barometer                                               // no fill
     case "price":
         isOn ? .dollarsignCircleFill : .dollarsignCircle
     case "qualityofservice", "network":
-        isOn ? .wifiCircleFill : .wifiCircle                    // wifi has no fill
+        isOn ? .wifiCircleFill : .wifiCircle
     case "smoke":
         isOn ? .smokeFill : .smoke
     case "soundvolume":
@@ -140,12 +141,12 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
         .sliderHorizontal3                                       // no fill
     case "switch":
         isOn ? .lightswitchOnFill : .lightswitchOffFill
-    case "text":
-        isOn ? .docTextFill : .docText
+//    case "text":
+//        isOn ? .docTextFill : .docText
 
     // ── Control ───────────────────────────────────────────────────────────────
     case "heating":
-        if #available(iOS 26.0, *) {
+        if #available(iOS 26.0, watchOS 26.0, macOS 26.0, *) {
             isOn ? .heatWavesCircleFill : .heatWavesCircle
         } else {
             isOn ? .flameFill : .flame
