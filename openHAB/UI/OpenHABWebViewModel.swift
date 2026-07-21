@@ -324,7 +324,17 @@ class OpenHABWebViewModel: ObservableObject {
     private func observeNetworkChanges() {
         MainActorNetworkTracker.shared.$activeConnection
             .sink { [weak self] activeConnection in
-                guard let self, let activeConnection else { return }
+                guard let self else { return }
+                // A nil connection means the newly selected home is unreachable, or an
+                // established connection was lost. Dropping the connection here keeps the
+                // already-blanked webview blank and lets the menu bar surface its offline
+                // indicator, rather than leaving the previous home's page and navbar visible.
+                guard let activeConnection else {
+                    self.activeConnectionInfo = nil
+                    self.openHABTrackedRootUrl = ""
+                    self.handleDisconnectedState()
+                    return
+                }
                 let activeConfiguration = activeConnection.configuration
                 Logger.viewController.info("OpenHABWebView openHAB URL = \(activeConfiguration.url)")
                 self.openHABTrackedRootUrl = activeConfiguration.url
@@ -554,6 +564,26 @@ class OpenHABWebViewModel: ObservableObject {
         }
     }
 
+    /// Resets connection-derived UI so no navbar items, title or SSE flag from a
+    /// previously working home linger over the blank/offline view. The native menu bar
+    /// is shown so the connection-status indicator remains visible while disconnected.
+    private func handleDisconnectedState() {
+        acceptsCommands = false
+        commandQueue = []
+        isSSEConnected = false
+        isLoading = false
+        showMenuBar = true
+        #if DEBUG
+        if !uiTestContentLocked {
+            navbarItems = []
+            navbarTitle = ""
+        }
+        #else
+        navbarItems = []
+        navbarTitle = ""
+        #endif
+    }
+
     // MARK: - SSE connection state
 
     func handleSSEConnected(_ connected: Bool) {
@@ -621,6 +651,20 @@ class OpenHABWebViewModel: ObservableObject {
         isLoading = true
         isSSEConnected = false
         showMenuBar = true
+
+        // Invalidating the active connection is what prevents a switch from briefly showing
+        // the previous home. During a switch the reload path runs before NetworkTracker has
+        // restarted: switchToSavedView calls switchContent(.webview), and because the content
+        // is already .webview it takes the "same content, reload" branch. At that moment
+        // activeConfig still points at the previous home, so its URL would load into the new
+        // home's webview. With the connection cleared, loadWebView's `guard let activeConfig`
+        // short-circuits until the network sink delivers the new home's connection, which then
+        // drives the correct load. lastLoadedURL is cleared too so the ETag comparison cannot
+        // treat the new load as an unchanged origin and skip it.
+        activeConnectionInfo = nil
+        openHABTrackedRootUrl = ""
+        currentTarget = ""
+        lastLoadedURL = nil
     }
 
     // MARK: - JS evaluation
