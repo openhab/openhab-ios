@@ -21,9 +21,7 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
     let icon = iconName.lowercased()
         .replacingOccurrences(of: #"_?\d+$"#, with: "", options: .regularExpression)
 
-    // swiftlint:disable:next cyclomatic_complexity
     return switch icon {
-
     // ── Places ────────────────────────────────────────────────────────────────
     case "attic":
         isOn ? .houseFill : .house
@@ -34,7 +32,7 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
     case "cellar", "pantry":
         isOn ? .archiveboxFill : .archivebox
     case "corridor":
-        isOn ? .doorLeftHandOpen : .doorLeftHandClosed           // no fill
+        isOn ? .doorLeftHandOpen : .doorLeftHandClosed // no fill
     case "firstfloor":
         isOn ? ._1CircleFill : ._1Circle
     case "garage", "garage_detached", "garage_detached_selected":
@@ -49,22 +47,21 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
         isOn ? .briefcaseFill : .briefcase
     case "terrace":
         isOn ? .sunMaxFill : .sunMax
-
     // ── Things ────────────────────────────────────────────────────────────────
     case "battery", "batterylevel":
-        isOn ? .battery100percent : .battery0percent             // no fill
+        isOn ? .battery100percent : .battery0percent // no fill
     case "blinds", "rollershutter":
-        isOn ? .blindsVerticalOpen : .blindsVerticalClosed       // no fill
+        isOn ? .blindsVerticalOpen : .blindsVerticalClosed // no fill
     case "camera":
         isOn ? .cameraFill : .camera
     case "door":
-        isOn ? .doorLeftHandOpen : .doorLeftHandClosed           // no fill
+        isOn ? .doorLeftHandOpen : .doorLeftHandClosed // no fill
     case "frontdoor":
-        isOn ? .doorFrenchOpen : .doorFrenchClosed               // no fill
+        isOn ? .doorFrenchOpen : .doorFrenchClosed // no fill
     case "garagedoor":
         isOn ? .doorGarageDoubleBayOpen : .doorGarageDoubleBayClosed // no fill
     case "lawnmower":
-        isOn ? .leafFill : .leaf                                 // no lawnmower SF symbol
+        isOn ? .leafFill : .leaf // no lawnmower SF symbol
     case "lock", "security":
         isOn ? .lockFill : .lockOpen
     case "poweroutlet", "poweroutlet_au", "poweroutlet_eu", "poweroutlet_uk", "poweroutlet_us":
@@ -80,8 +77,7 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
     case "whitegood", "washingmachine":
         isOn ? .washerFill : .washer
     case "window":
-        isOn ? .windowVerticalOpen : .windowVerticalClosed       // no fill
-
+        isOn ? .windowVerticalOpen : .windowVerticalClosed // no fill
     // ── Weather ───────────────────────────────────────────────────────────────
     case "humidity":
         isOn ? .humidityFill : .humidity
@@ -90,16 +86,15 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
     case "rain":
         isOn ? .cloudRainFill : .cloudRain
     case "snow":
-        isOn ? .cloudSnowFill : .cloudSnow                       // snowflake has no fill
+        isOn ? .cloudSnowFill : .cloudSnow // snowflake has no fill
     case "sun":
         isOn ? .sunMaxFill : .sunMax
     case "sun_clouds":
         isOn ? .cloudSunFill : .cloudSun
-    case "temperature":
-        .thermometerMedium                                       // no fill
-    case "wind":
-        .wind                                                    // no fill
-
+//    case "temperature":
+//        .thermometerMedium // no fill
+//    case "wind":
+//        .wind // no fill
     // ── Properties ───────────────────────────────────────────────────────────
     case "carbondioxide":
         isOn ? .smokeFill : .smoke
@@ -131,19 +126,17 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
         isOn ? .clockFill : .clock
     case "water", "cistern", "faucet", "niveau", "sewerage", "softener":
         isOn ? .dropFill : .drop
-
     // ── Channels / Widgets ───────────────────────────────────────────────────
     case "colorpicker", "colorwheel":
         isOn ? .paintpaletteFill : .paintpalette
     case "group":
         isOn ? .rectangle3GroupFill : .rectangle3Group
     case "slider":
-        .sliderHorizontal3                                       // no fill
+        .sliderHorizontal3 // no fill
     case "switch":
         isOn ? .lightswitchOnFill : .lightswitchOffFill
 //    case "text":
 //        isOn ? .docTextFill : .docText
-
     // ── Control ───────────────────────────────────────────────────────────────
     case "heating":
         if #available(iOS 26.0, watchOS 26.0, macOS 26.0, *) {
@@ -157,7 +150,6 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
         isOn ? .gamecontrollerFill : .gamecontroller
     case "zoom":
         isOn ? .magnifyingglassCircleFill : .magnifyingglassCircle
-
     // ── Purpose ───────────────────────────────────────────────────────────────
     case "alarm":
         isOn ? .alarmFill : .alarm
@@ -167,14 +159,13 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
         isOn ? .sensorTagRadiowavesForwardFill : .sensorTagRadiowavesForward
     case "vacation":
         isOn ? .suitcaseFill : .suitcase
-
     // ── Other ─────────────────────────────────────────────────────────────────
     case "baby", "boy", "girl", "man", "woman", "contact":
         isOn ? .personFill : .person
     case "bluetooth":
-        isOn ? .waveformCircleFill : .waveformCircle            // no bluetooth SF symbol
+        isOn ? .waveformCircleFill : .waveformCircle // no bluetooth SF symbol
     case "calendar":
-        isOn ? .calendarCircleFill : .calendarCircle            // calendar has no fill
+        isOn ? .calendarCircleFill : .calendarCircle
     case "chart", "pie":
         isOn ? .chartBarFill : .chartBar
     case "cinema", "video":
@@ -191,8 +182,8 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
         isOn ? .fanCeilingFill : .fanCeiling
     case "house":
         isOn ? .houseFill : .house
-    case "incline":
-        .chartLineUptrendXyaxis                                  // no fill
+//    case "incline":
+//        .chartLineUptrendXyaxis // no fill
     case "input":
         isOn ? .trayAndArrowDownFill : .trayAndArrowDown
     case "keyring":
@@ -200,7 +191,7 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
     case "lightbulb":
         isOn ? .lightbulbFill : .lightbulb
     case "line":
-        .minus                                                   // no fill
+        .minus // no fill
     case "microphone":
         isOn ? .microphoneFill : .microphone
     case "none":
@@ -217,8 +208,8 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
         isOn ? .powerCircleFill : .powerCircle
     case "radiator":
         isOn ? .heaterVerticalFill : .heaterVertical
-    case "returnpipe":
-        .arrowUturnBackward                                      // no fill
+//    case "returnpipe":
+//        .arrowUturnBackward // no fill
     case "settings":
         isOn ? .gearshapeFill : .gearshape
     case "shield":
@@ -247,7 +238,6 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
         isOn ? .toiletFill : .toilet
     case "wardrobe":
         isOn ? .tshirtFill : .tshirt
-
     // ── Keyword fallback for user-defined icon names ──────────────────────────
     default:
         if icon.contains("power") || icon.contains("switch") {
