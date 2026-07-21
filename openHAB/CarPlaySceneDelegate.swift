@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import CarPlay
+import CommonUI
 import OpenHABCore
 import os.log
 import SFSafeSymbols
@@ -243,25 +244,8 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
     private func sfSymbol(for widget: OpenHABWidget) -> UIImage {
         let targetSize = carPlayGridButtonImageSize()
         let pointSize = min(targetSize.width, targetSize.height)
-        let isOn = widget.displayState.isOn
-
-        let icon = widget.icon.lowercased()
-        let symbolName: SFSymbol = if icon.contains("power") {
-            isOn ? .powerCircleFill : .powerCircle
-        } else if icon.contains("garage") {
-            isOn ? .doorGarageDoubleBayOpen : .doorGarageDoubleBayClosed
-        } else if icon.contains("lamp") || icon.contains("light") || icon.contains("bulb") {
-            isOn ? .lightbulbFill : .lightbulb
-        } else if icon.contains("lock") || icon.contains("security") || icon.contains("alarm") {
-            isOn ? .lockFill : .lockOpen
-        } else if icon.contains("home") || icon.contains("house") {
-            isOn ? .houseFill : .house
-        } else {
-            isOn ? .circleFill : .circle
-        }
-
+        let symbolName = openHABSFSymbol(for: widget.icon, isOn: widget.displayState.isOn)
         let config = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .regular)
-
         return UIImage(systemSymbol: symbolName)
             .applyingSymbolConfiguration(config)?
             .withRenderingMode(.alwaysTemplate)
