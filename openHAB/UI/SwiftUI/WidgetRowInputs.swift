@@ -539,7 +539,18 @@ struct SliderRowInput: Equatable, RowWithIconInput {
     }
 
     var sliderRange: ClosedRange<Double> {
-        displayState.minValue ... displayState.maxValue
+        let lo = displayState.minValue
+        let hi = displayState.maxValue
+        // Slider requires hi > lo strictly; guard against degenerate server configs.
+        guard hi > lo else { return lo ... (lo + max(step, 1)) }
+        return lo ... hi
+    }
+
+    var safeStep: Double {
+        // Slider requires step > 0 and step <= range width.
+        let range = sliderRange
+        let width = range.upperBound - range.lowerBound
+        return min(max(step, 1e-10), width)
     }
 
     static func from(widget: OpenHABWidget) -> SliderRowInput {

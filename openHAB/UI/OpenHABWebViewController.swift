@@ -37,6 +37,7 @@ class OpenHABWebViewController: OpenHABViewController {
     private var etagChecker: ETagChecker?
     private var etagCheckerConfigURL: String? // Track which config the checker was created for
     private var lastLoadedURL: String? // Track the last successfully loaded URL from didFinish
+    private var webViewLayoutConstraints: [NSLayoutConstraint] = []
     private var isConfirmingExternalURL = false
     private var externalURLCooldownUntil: Date?
 
@@ -539,12 +540,14 @@ class OpenHABWebViewController: OpenHABViewController {
             view.insertSubview(webView, at: 0)
         }
         webView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
+        NSLayoutConstraint.deactivate(webViewLayoutConstraints)
+        webViewLayoutConstraints = [
             webView.topAnchor.constraint(equalTo: view.topAnchor),
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
+        ]
+        NSLayoutConstraint.activate(webViewLayoutConstraints)
         view.setNeedsLayout()
         view.layoutIfNeeded()
     }
