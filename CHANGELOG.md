@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.3.10, Build 310] - 2026-07-24Z
+
+- fix: guard against three crash scenarios from degenerate server data
+
 
 
 ## [Version 3.3.8, Build 304] - 2026-07-15Z
