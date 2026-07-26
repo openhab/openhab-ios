@@ -41,7 +41,7 @@ struct OpenHABRootView: View {
                 isPresented: $menuPresented,
                 menuData: menuData,
                 onSelect: { target in handleMenuSelection(target) },
-                onReload: { webViewModel.reloadView() }
+                onReload: { reloadCurrentContent() }
             )
         }
         .onAppear {
@@ -106,10 +106,12 @@ struct OpenHABRootView: View {
             webViewModel.reloadView()
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
-            webViewModel.clearView()
             menuData.clearAll()
-            currentContent = .webview
             switchToSavedView()
+            // Reconcile the web view with the new home: loads if the active connection
+            // already belongs to it (e.g. between two demo homes), otherwise blanks and
+            // waits for the tracker to connect the new home.
+            webViewModel.syncActiveConnection()
         }
         .task {
             for await connection in MainActorNetworkTracker.shared.$activeConnection.values {
@@ -164,7 +166,7 @@ struct OpenHABRootView: View {
     @ViewBuilder
     private var contentView: some View {
         switch currentContent {
-        case .webview:
+        case .webview, .mainUIPage:
             ZStack(alignment: .top) {
                 OpenHABWebViewContainer(viewModel: webViewModel)
                     .padding(.top, 44)
@@ -188,8 +190,10 @@ struct OpenHABRootView: View {
     @ViewBuilder
     private var menuBar: some View {
         let isWebviewMode: Bool = {
-            if case .webview = currentContent { return true }
-            return false
+            switch currentContent {
+            case .webview, .mainUIPage: return true
+            default: return false
+            }
         }()
 
         let barTitle: String = {
@@ -226,7 +230,7 @@ struct OpenHABRootView: View {
                         Image(systemSymbol: .wifiExclamationmark)
                         Text("Offline")
                             .ohTextToken(.secondary)
-                        Button { webViewModel.reloadView() } label: {
+                        Button { reloadCurrentContent() } label: {
                             Image(systemSymbol: .arrowClockwise)
                         }
                     }
@@ -296,16 +300,14 @@ struct OpenHABRootView: View {
     }
 
     private func switchToSavedView() {
-        if Preferences.shared.currentHomePreferences.demomode {
-            switchContent(to: .sitemap("demo"))
+        // Select the surface for the current home. Demo homes follow their defaultView like
+        // any other home. The web view's actual load is driven by syncActiveConnection, so
+        // here we only choose which content is shown.
+        let prefs = Preferences.shared.currentHomePreferences
+        if prefs.defaultView == "sitemap" {
+            switchContent(to: .sitemap(prefs.defaultSitemap))
         } else {
-            let defaultView = Preferences.shared.currentHomePreferences.defaultView
-            let defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
-            if defaultView == "sitemap" {
-                switchContent(to: .sitemap(defaultSitemap))
-            } else {
-                switchContent(to: .webview)
-            }
+            currentContent = .webview
         }
     }
 
@@ -361,8 +363,9 @@ struct OpenHABRootView: View {
     private func handleMenuSelection(_ target: TargetController) {
         switch target {
         case .webview:
-            currentViewTitle = ""
-            switchContent(to: .webview)
+            showMainUI(path: nil)
+        case let .mainUIPage(path):
+            showMainUI(path: path)
         case let .sitemap(name):
             Preferences.shared.modifyActiveHome { $0.defaultSitemap = name }
             switchContent(to: .sitemap(name))
@@ -378,20 +381,65 @@ struct OpenHABRootView: View {
         }
     }
 
+    /// Shows the MainUI web surface at `path` (nil = the MainUI root). When the SPA is
+    /// already live it routes client-side through the page's own Framework7 router, so
+    /// no full page load happens and in-app state is preserved; otherwise it loads the
+    /// URL at that path and Framework7 routes to it on startup. The chosen destination
+    /// is recorded as `currentContent` so a later reload returns here rather than to an
+    /// arbitrary route the user reached inside the SPA.
+    private func showMainUI(path: String?) {
+        currentContent = path.map(TargetController.mainUIPage) ?? .webview
+        if webViewModel.isMainUIReady {
+            webViewModel.navigateCommand("navigate:\(path ?? "/")")
+        } else {
+            webViewModel.loadWebView(force: false, path: path)
+        }
+        persistDefaultViewIfNeeded("web")
+    }
+
+    private var isMainUIShown: Bool {
+        switch currentContent {
+        case .webview, .mainUIPage: return true
+        default: return false
+        }
+    }
+
+    /// Persists the home's default view only when it actually changes, avoiding a
+    /// redundant preferences write (which would otherwise restart network tracking).
+    private func persistDefaultViewIfNeeded(_ viewName: String) {
+        guard !Preferences.shared.currentHomePreferences.demomode else { return }
+        guard Preferences.shared.currentHomePreferences.defaultView != viewName else { return }
+        Preferences.shared.modifyActiveHome { $0.defaultView = viewName }
+    }
+
+    /// Reloads the destination currently selected in the menu — never the arbitrary
+    /// route the user may have reached inside the SPA — so a reload always lands
+    /// somewhere the menu can navigate away from.
+    private func reloadCurrentContent() {
+        switch currentContent {
+        case .webview:
+            webViewModel.loadWebView(force: true, path: nil)
+        case let .mainUIPage(path):
+            webViewModel.loadWebView(force: true, path: path)
+        case let .tile(urlString):
+            if let url = URL(string: urlString) { webViewModel.reloadTile(url) }
+        case .sitemap:
+            sitemapResetID = UUID()
+        case .notifications, .browser:
+            break
+        }
+    }
+
     // MARK: - Navigation command handling
 
     private func handleNavigationCommand(_ command: NavigationCommand) {
         switch command {
         case let .switchToWebView(path):
-            if currentContent != .webview {
-                switchContent(to: .webview)
-            }
-            if let path {
-                if path.starts(with: "/") {
-                    webViewModel.loadWebView(force: true, path: path)
-                } else {
-                    webViewModel.navigateCommand(path)
-                }
+            if let path, path.starts(with: "/") {
+                showMainUI(path: path)
+            } else {
+                if !isMainUIShown { showMainUI(path: nil) }
+                if let path { webViewModel.navigateCommand(path) }
             }
         case let .switchToSitemap(name, _):
             switchContent(to: .sitemap(name))

@@ -115,6 +115,14 @@ public struct HomePreferences: Codable, Equatable {
     fileprivate init(id: UUID) {
         self.id = id
     }
+
+    /// The connection configurations the network tracker uses for this home: the shared
+    /// demo connection in demo mode, otherwise the local and remote connections. Two demo
+    /// homes therefore resolve to the same set, which is why the tracker does not
+    /// re-publish when switching between them.
+    public var trackedConnections: [ConnectionConfiguration] {
+        demomode ? [.demo] : [localConnectionConfig, remoteConnectionConfig]
+    }
 }
 
 @MainActor
@@ -544,5 +552,14 @@ public extension ConnectionConfiguration {
         ignoreSSL: false,
         supportsNotifications: true,
         priority: 1
+    )
+
+    /// The single connection every demo home is tracked against, regardless of its
+    /// stored local/remote configuration.
+    static let demo = ConnectionConfiguration(
+        url: "https://demo.openhab.org",
+        username: "",
+        password: "",
+        priority: 0
     )
 }

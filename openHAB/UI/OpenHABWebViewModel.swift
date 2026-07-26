@@ -323,25 +323,36 @@ class OpenHABWebViewModel: ObservableObject {
 
     private func observeNetworkChanges() {
         MainActorNetworkTracker.shared.$activeConnection
-            .sink { [weak self] activeConnection in
-                guard let self else { return }
-                // A nil connection means the newly selected home is unreachable, or an
-                // established connection was lost. Dropping the connection here keeps the
-                // already-blanked webview blank and lets the menu bar surface its offline
-                // indicator, rather than leaving the previous home's page and navbar visible.
-                guard let activeConnection else {
-                    self.activeConnectionInfo = nil
-                    self.openHABTrackedRootUrl = ""
-                    self.handleDisconnectedState()
-                    return
-                }
-                let activeConfiguration = activeConnection.configuration
-                Logger.viewController.info("OpenHABWebView openHAB URL = \(activeConfiguration.url)")
-                self.openHABTrackedRootUrl = activeConfiguration.url
-                self.activeConnectionInfo = activeConnection
-                self.loadWebView(force: false)
+            .sink { [weak self] connection in
+                // Use the value the publisher delivers, not a re-read of
+                // MainActorNetworkTracker.activeConnection: @Published notifies in willSet,
+                // so the stored property still holds the previous value inside this closure.
+                self?.syncActiveConnection(with: connection)
             }
             .store(in: &trackerCancellables)
+    }
+
+    /// Reconciles the web view with the current active connection. Safe to call outside a
+    /// publisher callback — e.g. on a home switch — where the stored value is up to date.
+    func syncActiveConnection() {
+        syncActiveConnection(with: MainActorNetworkTracker.shared.activeConnection)
+    }
+
+    /// Loads when `connection` belongs to the current home; otherwise blanks the view and
+    /// waits for a valid connection. Reconciling on "does the active connection belong to
+    /// the current home" is the single rule behind both a changed connection (network sink)
+    /// and a changed home (home switch): a switch to a home whose connection is already
+    /// active (e.g. between two demo homes) loads immediately, while a switch whose
+    /// connection isn't active yet blanks without ever showing the previous home.
+    private func syncActiveConnection(with connection: ConnectionInfo?) {
+        let home = Preferences.shared.currentHomePreferences
+        guard let connection, home.trackedConnections.contains(connection.configuration) else {
+            clearView()
+            return
+        }
+        openHABTrackedRootUrl = connection.configuration.url
+        activeConnectionInfo = connection
+        loadWebView(force: false)
     }
 
     private func observeAppLifecycle() {
@@ -412,6 +423,7 @@ class OpenHABWebViewModel: ObservableObject {
             webView.navigationDelegate = nil
             webView.uiDelegate = nil
             webView = newWebview
+        } else {
         }
 
         Logger.viewController.info("Loading URL: \(modifiedUrl)")
@@ -458,12 +470,18 @@ class OpenHABWebViewModel: ObservableObject {
             let normalizedLoaded = WebViewURLHelper.normalizeForComparison(lastLoadedURL, includeBasePath: false)
             Logger.viewController.debug("ETag unchanged - comparing base URLs: loaded=\(normalizedLoaded ?? "nil") vs target=\(normalizedTarget ?? "nil")")
 
-            if let normalizedTarget, let normalizedLoaded, normalizedLoaded == normalizedTarget {
-                Logger.viewController.info("ETag unchanged and same base URL, skipping load")
+            // Skipping the load is only safe when the origin is unchanged AND the web view
+            // already shown is the current home's instance. Two homes can share an origin
+            // (e.g. two demo homes both on demo.openhab.org) while using different per-home
+            // web views, so an origin-only match would wrongly skip the swap and leave the
+            // previous home's (or a blank) web view visible.
+            let currentHomeWebViewShown = views[Preferences.shared.currentHomePreferences.id] === webView
+            if let normalizedTarget, let normalizedLoaded, normalizedLoaded == normalizedTarget, currentHomeWebViewShown {
+                Logger.viewController.info("ETag unchanged and current home's web view already shown, skipping load")
                 currentTarget = newTarget
                 isLoading = false
             } else {
-                Logger.viewController.info("ETag unchanged but different base URL, loading \(fullURL.absoluteString)")
+                Logger.viewController.info("ETag unchanged but reload needed (different origin or web view), loading \(fullURL.absoluteString)")
                 await performLoadWebView(newTarget: newTarget, path: path, force: false)
             }
 
@@ -538,6 +556,11 @@ class OpenHABWebViewModel: ObservableObject {
 
     // MARK: - Navigation commands
 
+    /// True once the MainUI SPA is live in the current web view and can accept
+    /// client-side navigation via `window.MainUI.handleCommand`. Mirrors the state
+    /// that gates command execution vs. queuing.
+    var isMainUIReady: Bool { acceptsCommands }
+
     func navigateCommand(_ command: String) {
         if acceptsCommands {
             navigateCommandInternal(command)
@@ -562,26 +585,6 @@ class OpenHABWebViewModel: ObservableObject {
             let command = commandQueue.removeFirst()
             navigateCommandInternal(command)
         }
-    }
-
-    /// Resets connection-derived UI so no navbar items, title or SSE flag from a
-    /// previously working home linger over the blank/offline view. The native menu bar
-    /// is shown so the connection-status indicator remains visible while disconnected.
-    private func handleDisconnectedState() {
-        acceptsCommands = false
-        commandQueue = []
-        isSSEConnected = false
-        isLoading = false
-        showMenuBar = true
-        #if DEBUG
-        if !uiTestContentLocked {
-            navbarItems = []
-            navbarTitle = ""
-        }
-        #else
-        navbarItems = []
-        navbarTitle = ""
-        #endif
     }
 
     // MARK: - SSE connection state
@@ -630,6 +633,15 @@ class OpenHABWebViewModel: ObservableObject {
         webView.load(URLRequest(url: url))
     }
 
+    /// Reloads a tile URL bypassing HTTP caches, so the reload action fetches fresh
+    /// content rather than redisplaying the cached page.
+    func reloadTile(_ url: URL) {
+        isLoading = true
+        var request = URLRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        webView.load(request)
+    }
+
     // MARK: - Reload
 
     func reloadView() {
@@ -640,31 +652,28 @@ class OpenHABWebViewModel: ObservableObject {
         loadWebView(force: true)
     }
 
-    /// Blanks the webview immediately by loading `about:blank`.
-    /// Use this before a home switch so the previous home's content
-    /// disappears instantly, before the new connection is established.
+    /// Blanks the web view and resets all connection-derived state. Used whenever there is
+    /// no active connection for the current home, so the previous home's page and navbar
+    /// never linger and the menu bar shows its offline/connecting indicator instead.
     func clearView() {
         acceptsCommands = false
         commandQueue = []
-        webView.stopLoading()
-        webView.load(URLRequest(url: URL(string: "about:blank")!))
-        isLoading = true
-        isSSEConnected = false
-        showMenuBar = true
-
-        // Invalidating the active connection is what prevents a switch from briefly showing
-        // the previous home. During a switch the reload path runs before NetworkTracker has
-        // restarted: switchToSavedView calls switchContent(.webview), and because the content
-        // is already .webview it takes the "same content, reload" branch. At that moment
-        // activeConfig still points at the previous home, so its URL would load into the new
-        // home's webview. With the connection cleared, loadWebView's `guard let activeConfig`
-        // short-circuits until the network sink delivers the new home's connection, which then
-        // drives the correct load. lastLoadedURL is cleared too so the ETag comparison cannot
-        // treat the new load as an unchanged origin and skip it.
         activeConnectionInfo = nil
         openHABTrackedRootUrl = ""
-        currentTarget = ""
-        lastLoadedURL = nil
+        webView.stopLoading()
+        webView.load(URLRequest(url: URL(string: "about:blank")!))
+        isLoading = false
+        isSSEConnected = false
+        showMenuBar = true
+        #if DEBUG
+        if !uiTestContentLocked {
+            navbarItems = []
+            navbarTitle = ""
+        }
+        #else
+        navbarItems = []
+        navbarTitle = ""
+        #endif
     }
 
     // MARK: - JS evaluation
@@ -682,6 +691,11 @@ class OpenHABWebViewModel: ObservableObject {
     // MARK: - didFinish helpers
 
     func handleDidFinish() {
+        // lastLoadedURL is shared across all per-home webviews and reflects whichever
+        // navigation finishes last, so a late finish from a previous home (or from
+        // clearView's about:blank) can land here after a switch and feed the next ETag
+        // comparison.
+        let finished = webView.url?.absoluteString ?? "nil"
         lastLoadedURL = webView.url?.absoluteString
         isLoading = false
         acceptsCommands = true

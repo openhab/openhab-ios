@@ -98,16 +98,10 @@ class NetworkConnectionService: ObservableObject {
                 let demomode = homeSettings.demomode
                 let sseCommandItem = homeSettings.sseCommandItem
 
+
                 Task {
                     if demomode {
-                        await NetworkTracker.shared.startTracking(connectionConfigurations: [
-                            ConnectionConfiguration(
-                                url: "https://demo.openhab.org",
-                                username: "",
-                                password: "",
-                                priority: 0
-                            )
-                        ])
+                        await NetworkTracker.shared.startTracking(connectionConfigurations: [.demo])
                     } else {
                         await NetworkTracker.shared.startTracking(connectionConfigurations: [
                             localConnectionConfig,

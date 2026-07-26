@@ -20,6 +20,10 @@ import SwiftUI
 
 enum TargetController: Equatable {
     case webview
+    /// A MainUI SPA page identified by its client-side route (e.g. `/page/{uid}`).
+    /// Rendered in the same web view as `.webview`; kept distinct so a reload
+    /// returns to this page rather than the MainUI root.
+    case mainUIPage(String)
     case sitemap(String)
     case notifications
     case browser(String)
@@ -200,7 +204,7 @@ struct ToolbarMenu: View {
                     icon: AnyView(pageIcon(for: page)),
                     label: page.label
                 ) {
-                    select(.tile(page.url))
+                    select(.mainUIPage("/page/\(page.uid)"))
                 }
             }
         }
