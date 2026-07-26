@@ -357,6 +357,23 @@ public extension OpenAPIService {
             .ok.body.json
         return OpenHABSitemap(result)
     }
+
+    /// Poll a whole sitemap in one request, including the widgets of every linked page.
+    /// `pollDataForPage` returns linked pages as stubs without their children, so callers
+    /// that need the full tree — rather than one page at a time — must use this.
+    /// - Note: heavier than `pollDataForPage`; prefer that when one page is enough.
+    /// - Parameters:
+    ///   - sitemapname: name of sitemap
+    ///   - longPolling: set to true for long-polling
+    func pollDataForSitemap(sitemapname: String, longPolling: Bool = false) async throws -> OpenHABSitemap? {
+        var headers = Operations.pollDataForSitemap.Input.Headers()
+        if longPolling {
+            Logger.openAPIService.info("Setting header X-Atmosphere-Transport to long-polling")
+            headers.X_hyphen_Atmosphere_hyphen_Transport = "long-polling"
+        }
+        let path = Operations.pollDataForSitemap.Input.Path(sitemapname: sitemapname)
+        return try await pollDataForSitemap(path: path, headers: headers)
+    }
 }
 
 /// Array of items

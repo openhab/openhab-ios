@@ -91,10 +91,10 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
         isOn ? .sunMaxFill : .sunMax
     case "sun_clouds":
         isOn ? .cloudSunFill : .cloudSun
-//    case "temperature":
-//        .thermometerMedium // no fill
-//    case "wind":
-//        .wind // no fill
+    case "temperature":
+        .thermometerMedium // no fill
+    case "wind":
+        .wind // no fill
     // ── Properties ───────────────────────────────────────────────────────────
     case "carbondioxide":
         isOn ? .smokeFill : .smoke
@@ -136,7 +136,8 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
     case "switch":
         isOn ? .lightswitchOnFill : .lightswitchOffFill
 //    case "text":
-//        isOn ? .docTextFill : .docText
+//        isOn ? .docTextFill : .docText  // deprecated in iOS 18; openHAB's generic
+//                                        // placeholder is handled by the caller instead
     // ── Control ───────────────────────────────────────────────────────────────
     case "heating":
         if #available(iOS 26.0, watchOS 26.0, macOS 26.0, *) {
