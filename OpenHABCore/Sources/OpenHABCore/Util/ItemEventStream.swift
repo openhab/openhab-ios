@@ -212,8 +212,8 @@ public extension ItemEventStream {
     }
 
     static func startMonitoringNetwork() async {
-        for await conn in await NetworkTracker.shared.activeConnectionStream() {
-            await shared.updateConnection(conn)
+        for await state in await NetworkTracker.shared.stateStream() {
+            await shared.updateConnection(state.activeConnection)
         }
     }
 }

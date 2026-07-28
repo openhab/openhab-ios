@@ -171,8 +171,16 @@ struct OpenHABRootView: View {
                 OpenHABWebViewContainer(viewModel: webViewModel)
                     .padding(.top, 44)
                     .background(.clear)
+                // Placeholder while a home is first loading. Sits above the (transparent)
+                // web view but below the menu bar, so the menu stays reachable and the user
+                // can switch homes even while connecting.
+                if !webViewModel.hasLoadedContent {
+                    ConnectingPlaceholder()
+                        .transition(.opacity)
+                }
                 menuBar
             }
+            .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
             .onAppear { webViewModel.triggerAppMenuProbe() }
         case let .sitemap(name):
             SitemapNavigationView(onShowSideMenu: { menuPresented = true })
@@ -474,6 +482,99 @@ struct OpenHABRootView: View {
         config.entersReaderIfAvailable = true
         let svc = SFSafariViewController(url: url, configuration: config)
         UIApplication.shared.firstKeyWindow?.rootViewController?.present(svc, animated: true)
+    }
+}
+
+// MARK: - Connecting placeholder
+
+/// Shown centered over the (transparent) web view while a home is first loading. While the
+/// tracker is still trying, the openHAB mark gently breathes above a spinner. Once an attempt
+/// has failed it switches to a warning: a countdown to the next retry, or — when the tracker
+/// has given up — a static "cannot connect" message. On an adaptive background so the blank
+/// page reads as intentional in both light and dark mode.
+private struct ConnectingPlaceholder: View {
+    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+
+    private enum Phase: Equatable {
+        case connecting
+        case retrying(Date)
+        case failed
+        case noNetwork
+    }
+
+    private var phase: Phase {
+        if !networkTracker.isNetworkAvailable {
+            return .noNetwork
+        }
+        if let retry = networkTracker.nextRetryDate, retry.timeIntervalSinceNow > 0 {
+            return .retrying(retry)
+        }
+        if networkTracker.status == .stopped {
+            return .failed
+        }
+        return .connecting
+    }
+
+    var body: some View {
+        ZStack {
+            Color(.systemBackground)
+                .ignoresSafeArea()
+            VStack(spacing: 18) {
+                switch phase {
+                case .connecting:
+                    PulsingLogo()
+                    label(spinner: true) { Text("Connecting…") }
+                case let .retrying(date):
+                    statusIcon(.exclamationmarkTriangle)
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        let remaining = max(0, Int(date.timeIntervalSince(context.date).rounded(.up)))
+                        label(spinner: false) { Text("Cannot connect — retrying in \(remaining)s") }
+                    }
+                case .failed:
+                    statusIcon(.exclamationmarkTriangle)
+                    label(spinner: false) { Text("Cannot connect to the server") }
+                case .noNetwork:
+                    statusIcon(.wifiSlash)
+                    label(spinner: false) { Text("No network connection") }
+                }
+            }
+            .animation(.easeInOut(duration: 0.25), value: phase)
+        }
+    }
+
+    private func statusIcon(_ symbol: SFSymbol) -> some View {
+        Image(systemSymbol: symbol)
+            .font(.system(size: 52))
+            .symbolRenderingMode(.hierarchical)
+            .foregroundStyle(.secondary)
+    }
+
+    private func label(spinner: Bool, @ViewBuilder text: () -> some View) -> some View {
+        HStack(spacing: 8) {
+            if spinner {
+                ProgressView().controlSize(.small)
+            }
+            text()
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// The openHAB mark breathing (opacity + scale). Extracted so that each time the connecting
+/// phase reappears a fresh instance restarts the repeating animation from its `onAppear`.
+private struct PulsingLogo: View {
+    @State private var animating = false
+
+    var body: some View {
+        Image("openHABIcon")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 72, height: 72)
+            .opacity(animating ? 1.0 : 0.55)
+            .scaleEffect(animating ? 1.0 : 0.94)
+            .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: animating)
+            .onAppear { animating = true }
     }
 }
 

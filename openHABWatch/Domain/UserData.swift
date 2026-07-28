@@ -187,8 +187,8 @@ final class UserData: ObservableObject {
 
     /// Observes network connection changes and updates state
     private func observeNetworkChanges() async {
-        let activeConnectionStream = await NetworkTracker.shared.activeConnectionStream()
-        for await activeConnection in activeConnectionStream {
+        for await state in await NetworkTracker.shared.stateStream() {
+            let activeConnection = state.activeConnection
             guard let activeConnection else {
                 if let lastObservedConnectionURL {
                     Logger.userData.info("Network connection became unavailable (previous: \(lastObservedConnectionURL, privacy: .public))")

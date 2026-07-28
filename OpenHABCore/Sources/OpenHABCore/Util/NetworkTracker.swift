@@ -37,6 +37,24 @@ public struct ConnectionInfo: Equatable, Sendable {
     }
 }
 
+/// A snapshot of the network tracker's observable state, delivered as a single value so
+/// consumers observe one coherent update rather than reconciling several parallel streams.
+public struct NetworkState: Equatable, Sendable {
+    public let activeConnection: ConnectionInfo?
+    public let status: NetworkStatus
+    /// When another connection attempt is scheduled, the time it will fire; `nil` otherwise.
+    public let nextRetryDate: Date?
+    /// Whether the device currently has a usable network path.
+    public let isNetworkAvailable: Bool
+
+    public init(activeConnection: ConnectionInfo?, status: NetworkStatus, nextRetryDate: Date?, isNetworkAvailable: Bool) {
+        self.activeConnection = activeConnection
+        self.status = status
+        self.nextRetryDate = nextRetryDate
+        self.isNetworkAvailable = isNetworkAvailable
+    }
+}
+
 public enum NetworkTrackerError: Error, CustomDebugStringConvertible, Sendable {
     case serviceUnavailable
     case invalidServerVersion
@@ -137,16 +155,16 @@ public class MainActorNetworkTracker: ObservableObject {
     public static let shared = MainActorNetworkTracker()
     @Published public var activeConnection: ConnectionInfo?
     @Published public var status: NetworkStatus = .stopped
+    @Published public var nextRetryDate: Date?
+    @Published public var isNetworkAvailable = true
 
     public init(tracker: NetworkTracker = NetworkTracker.shared) {
         Task {
-            for await connection in await tracker.activeConnectionStream() {
-                activeConnection = connection
-            }
-        }
-        Task {
-            for await trackerStatus in await tracker.statusStream() {
-                status = trackerStatus
+            for await state in await tracker.stateStream() {
+                activeConnection = state.activeConnection
+                status = state.status
+                nextRetryDate = state.nextRetryDate
+                isNetworkAvailable = state.isNetworkAvailable
             }
         }
     }
@@ -167,6 +185,16 @@ public actor NetworkTracker {
     @Published public private(set) var activeConnection: ConnectionInfo?
 
     @Published public private(set) var status: NetworkStatus = .stopped
+
+    /// When a connection attempt has failed and another attempt is scheduled, the wall-clock
+    /// time that retry will fire; `nil` while connecting/connected or once tracking has given
+    /// up. Lets the UI count down to the next attempt.
+    @Published public private(set) var nextRetryDate: Date?
+
+    /// Whether the device currently has a usable network path. `false` means retries are
+    /// abandoned until the network returns; lets the UI distinguish "no network" from
+    /// "server unreachable".
+    @Published public private(set) var isNetworkAvailable = true
 
     private var pathMonitor: any NWPathMonitoring
     private var connectionPool: ConnectionPool
@@ -229,6 +257,7 @@ public actor NetworkTracker {
     public func stopTracking() async {
         retryTask?.cancel()
         retryTask = nil
+        nextRetryDate = nil
         pathMonitor.cancel()
         setActiveConnection(nil)
         await failureTracker.resetAll()
@@ -280,7 +309,9 @@ public actor NetworkTracker {
         }
 
         guard let activeConnection else {
-            // No active connection, proceed with the normal connection attempt
+            // No active connection, proceed with the normal connection attempt. This runs only
+            // on a meaningful network change (the path monitor filters out quality-only noise),
+            // so attempting now — and letting it reschedule the backoff — is appropriate.
             Logger.networkTracker.info("NetworkTracker: No active connection, attempting to reconnect...")
             await attemptConnection(silent: true)
             return
@@ -323,6 +354,7 @@ public actor NetworkTracker {
     private func makeBestConnectionActive() async {
         if let bestConnection = await findBestConnection() {
             Logger.networkTracker.info("NetworkTracker: Best connection url: \(bestConnection.configuration.url) user: \(bestConnection.configuration.username, privacy: .private)")
+            nextRetryDate = nil
             setActiveConnection(bestConnection)
             updateStatus(.connected)
         } else {
@@ -454,21 +486,26 @@ public actor NetworkTracker {
         retryTask?.cancel()
         // prevent all non-retry failures from being recorded
         await failureTracker.setEnabled(false)
+        let failureCount = await failureTracker.maxFailureCount()
+        let backoffMultiplier = UInt64(failureCount)
+        let safeBackoff = min(backoffMultiplier, 10) // 2^10 = 1024
+        let delay = min(initialRetryInterval * (1 << safeBackoff), 300)
+        Logger.networkTracker.info("NetworkTracker: Retrying connection in \(delay) seconds based on failure count of \(failureCount).")
+        // Publish the retry deadline so the UI can count down to it.
+        nextRetryDate = Date().addingTimeInterval(TimeInterval(delay))
         retryTask = Task { [weak self] in
-            guard let self else { return }
-            let failureCount = await failureTracker.maxFailureCount()
-            let backoffMultiplier = UInt64(failureCount)
-            let safeBackoff = min(backoffMultiplier, 10) // 2^10 = 1024
-            let delay = min(initialRetryInterval * (1 << safeBackoff), 300)
-            Logger.networkTracker.info("NetworkTracker: Retrying connection in \(delay) seconds based on failure count of \(failureCount).")
             try? await Task.sleep(for: .seconds(delay))
-            guard !Task.isCancelled else {
-                return
-            }
-            // allow recording of failures due to this task
-            await failureTracker.setEnabled(true)
-            await attemptConnection()
+            guard !Task.isCancelled else { return }
+            await self?.beginScheduledRetry()
         }
+    }
+
+    /// Runs when a scheduled retry fires: clears the retry deadline and re-attempts,
+    /// allowing failures from this attempt to be recorded again.
+    private func beginScheduledRetry() async {
+        nextRetryDate = nil
+        await failureTracker.setEnabled(true)
+        await attemptConnection()
     }
 
     /// keep trying to connect when network is not connected, otherwise check if active connection is actually available
@@ -478,12 +515,17 @@ public actor NetworkTracker {
         }
 
         Logger.networkTracker.info("NetworkTracker: Networkmonitor status: \(isConnected ? "connected" : "disconnected")")
-        await checkActiveConnection()
+        isNetworkAvailable = isConnected
 
-        if activeConnection == nil {
-            // don´t retry until we have a network connection again
+        // Network is down: abandon the backoff retry — there is no point hammering a dead
+        // interface, and the next network-up event will drive a fresh attempt.
+        guard isConnected else {
             retryTask?.cancel()
+            nextRetryDate = nil
+            return
         }
+
+        await checkActiveConnection()
     }
 
     private func setActiveConnection(_ connection: ConnectionInfo?) {
@@ -562,18 +604,13 @@ public extension NetworkTracker {
 }
 
 public extension NetworkTracker {
-    func activeConnectionStream() -> AsyncStream<ConnectionInfo?> {
+    /// A single stream combining active connection, status and the retry deadline, so a
+    /// consumer receives one coherent `NetworkState` per change instead of interleaving
+    /// several streams.
+    func stateStream() -> AsyncStream<NetworkState> {
         AsyncStream { continuation in
-            let cancellable = self.$activeConnection
-                .sink { continuation.yield($0) }
-
-            continuation.onTermination = { [cancellable] _ in cancellable.cancel() }
-        }
-    }
-
-    func statusStream() -> AsyncStream<NetworkStatus> {
-        AsyncStream { continuation in
-            let cancellable = self.$status
+            let cancellable = Publishers.CombineLatest4($activeConnection, $status, $nextRetryDate, $isNetworkAvailable)
+                .map { NetworkState(activeConnection: $0, status: $1, nextRetryDate: $2, isNetworkAvailable: $3) }
                 .sink { continuation.yield($0) }
 
             continuation.onTermination = { [cancellable] _ in cancellable.cancel() }

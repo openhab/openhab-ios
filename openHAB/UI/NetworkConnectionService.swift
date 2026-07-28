@@ -98,7 +98,6 @@ class NetworkConnectionService: ObservableObject {
                 let demomode = homeSettings.demomode
                 let sseCommandItem = homeSettings.sseCommandItem
 
-
                 Task {
                     if demomode {
                         await NetworkTracker.shared.startTracking(connectionConfigurations: [.demo])

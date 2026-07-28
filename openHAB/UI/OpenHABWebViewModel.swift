@@ -61,6 +61,9 @@ class OpenHABWebViewModel: ObservableObject {
     /// Title text proxied from the MainUI web navbar. Empty until the JS
     /// proxy posts the first `navbarElements` message.
     @Published private(set) var navbarTitle: String = ""
+    /// True once a real page (not the blank placeholder) has finished loading.
+    /// Drives the "Connecting…" placeholder shown while a home is first loading.
+    @Published private(set) var hasLoadedContent = false
 
     // MARK: - Internal state (used by Coordinator)
 
@@ -664,6 +667,7 @@ class OpenHABWebViewModel: ObservableObject {
         webView.load(URLRequest(url: URL(string: "about:blank")!))
         isLoading = false
         isSSEConnected = false
+        hasLoadedContent = false
         showMenuBar = true
         #if DEBUG
         if !uiTestContentLocked {
@@ -691,14 +695,14 @@ class OpenHABWebViewModel: ObservableObject {
     // MARK: - didFinish helpers
 
     func handleDidFinish() {
-        // lastLoadedURL is shared across all per-home webviews and reflects whichever
-        // navigation finishes last, so a late finish from a previous home (or from
-        // clearView's about:blank) can land here after a switch and feed the next ETag
-        // comparison.
-        let finished = webView.url?.absoluteString ?? "nil"
         lastLoadedURL = webView.url?.absoluteString
         isLoading = false
         acceptsCommands = true
+        // A finished navigation to anything other than the blank placeholder means real
+        // content is now on screen, so the "Connecting…" placeholder can be dismissed.
+        if let url = webView.url?.absoluteString, !url.hasPrefix("about:") {
+            hasLoadedContent = true
+        }
 
         if let webviewURL = webView.url {
             let url = URL(string: webviewURL.path, relativeTo: URL(string: openHABTrackedRootUrl))

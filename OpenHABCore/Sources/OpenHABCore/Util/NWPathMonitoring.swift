@@ -22,14 +22,38 @@ final class RealPathMonitor: NWPathMonitoring, Sendable {
     }
 
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
+        var lastSignature: PathSignature?
         for await path in monitor {
+            let signature = PathSignature(path)
+            // Ignore link-quality-only updates (LQM flaps): NWPathMonitor fires frequently as
+            // signal strength changes, but those don't affect whether/how the server can be
+            // reached. Only forward changes to connectivity or the set of available interfaces,
+            // so a scheduled reconnection backoff isn't restarted by network noise.
+            guard signature != lastSignature else {
+                Logger.nwPathMonitoring.debug("Path update ignored (quality-only change): \(path.debugDescription)")
+                continue
+            }
+            lastSignature = signature
             Logger.nwPathMonitoring.debug("Path monitor update: \(path.debugDescription)")
-            await handler(path.status == .satisfied || path.status == .requiresConnection)
+            await handler(signature.isConnected)
         }
     }
 
     func cancel() {
         monitor.cancel()
+    }
+}
+
+/// The reachability-relevant fingerprint of an `NWPath`: its connectivity and the set of
+/// available interface types. Deliberately excludes link quality, which flaps frequently
+/// without changing whether or how the network can be reached.
+private struct PathSignature: Equatable {
+    let isConnected: Bool
+    let interfaces: Set<NWInterface.InterfaceType>
+
+    init(_ path: NWPath) {
+        isConnected = path.status == .satisfied || path.status == .requiresConnection
+        interfaces = Set(path.availableInterfaces.map(\.type))
     }
 }
 
