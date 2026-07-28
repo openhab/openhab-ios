@@ -177,10 +177,18 @@ struct ToolbarMenu: View {
 
     @ViewBuilder
     private func sitemapsMenu() -> some View {
+        // `sitemapNameLabelDisplayMode` chooses which field(s) to show; when it is `.both`,
+        // the sort order decides which one is the title. The list itself is
+        // already ordered by `MenuDataService`.
+        let prefs = Preferences.shared.currentHomePreferences
+        let order = SortSitemapsOrder(rawValue: prefs.sortSitemapsBy) ?? .label
+        let mode = prefs.sitemapNameLabelDisplayMode
         ForEach(menuData.sitemaps, id: \.name) { sitemap in
-            menuRow(
+            menuDetailRow(
                 icon: AnyView(sitemapIcon(for: sitemap)),
-                label: sitemap.label
+                title: mode.titleText(for: sitemap, sortedBy: order),
+                detail: mode.detailText(for: sitemap, sortedBy: order),
+                accessibilityId: sitemap.name
             ) {
                 select(.sitemap(sitemap.name))
             }
@@ -457,6 +465,40 @@ struct ToolbarMenu: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier(accessibilityId ?? label)
+    }
+
+    /// A two-line variant of `menuRow`: an icon beside a primary `title` with an
+    /// optional secondary `detail` below it, mirroring the home-picker rows. The
+    /// `detail` line is omitted entirely when empty so equal name/label collapses
+    /// to a single line.
+    private func menuDetailRow(
+        icon: AnyView,
+        title: String,
+        detail: String,
+        accessibilityId: String? = nil,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                icon
+                    .frame(width: iconWidth, height: iconWidth)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .lineLimit(1)
+                    if !detail.isEmpty {
+                        Text(detail)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityId ?? title)
     }
 
     private func systemRow(symbol: SFSymbol, label: String, action: @escaping () -> Void) -> some View {

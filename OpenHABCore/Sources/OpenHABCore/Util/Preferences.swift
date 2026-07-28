@@ -96,6 +96,19 @@ public struct HomePreferences: Codable, Equatable {
     public var iconType = 0
     public var defaultSitemap = "demo"
     public var sortSitemapsBy = 0
+    // Backing store for `sitemapNameLabelDisplayMode`. Optional on purpose: synthesized
+    // `Codable` throws `keyNotFound` for a missing *non-optional* key (even one
+    // with a default), which would discard the whole home. Optional decodes a
+    // missing key as `nil`. Never read this directly — use `sitemapNameLabelDisplayMode`.
+    private var sitemapNameLabelDisplayModeStorage: SitemapNameLabelDisplayMode?
+
+    /// Which sitemap field(s) to show in menus and pickers. Resolves to the
+    /// default (`.label`) when unset — both for fresh installs and for homes saved
+    /// before this setting existed — so callers never have to handle `nil`.
+    public var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode {
+        get { SitemapNameLabelDisplayMode.resolved(sitemapNameLabelDisplayModeStorage) }
+        set { sitemapNameLabelDisplayModeStorage = newValue }
+    }
     public var defaultMainUIPath = ""
     public var alwaysAllowWebRTC = false
     public var sitemapForWatch = "watch"

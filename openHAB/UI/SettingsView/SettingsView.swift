@@ -31,6 +31,7 @@ struct SettingsView: View {
     @State private var settingsSitemapDiagnosticsLogging = false
     @State private var settingsIconType: IconType = .svg
     @State private var settingsSortSitemapsBy: SortSitemapsOrder = .label
+    @State private var settingsSitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode = .label
     @State private var settingsDefaultMainUIPath = ""
     @State private var settingsAlwaysAllowWebRTC = true
     @State private var settingsSitemapForWatch = ""
@@ -56,6 +57,7 @@ struct SettingsView: View {
         var sendCrashReports: Bool
         var iconType: IconType
         var sortSitemapsBy: SortSitemapsOrder
+        var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode
         var defaultMainUIPath: String
         var alwaysAllowWebRTC: Bool
         var sitemapForWatch: String
@@ -73,6 +75,7 @@ struct SettingsView: View {
             sendCrashReports: settingsSendCrashReports,
             iconType: settingsIconType,
             sortSitemapsBy: settingsSortSitemapsBy,
+            sitemapNameLabelDisplayMode: settingsSitemapNameLabelDisplayMode,
             defaultMainUIPath: settingsDefaultMainUIPath,
             alwaysAllowWebRTC: settingsAlwaysAllowWebRTC,
             sitemapForWatch: settingsSitemapForWatch,
@@ -105,6 +108,7 @@ struct SettingsView: View {
                 settingsShowSearchField: $settingsShowSearchField,
                 settingsIconType: $settingsIconType,
                 settingsSortSitemapsBy: $settingsSortSitemapsBy,
+                settingsSitemapNameLabelDisplayMode: $settingsSitemapNameLabelDisplayMode,
                 settingsSitemapForWatch: $settingsSitemapForWatch,
                 sitemaps: $sitemaps
             )
@@ -146,6 +150,7 @@ struct SettingsView: View {
             let dm = settingsDemomode, io = settingsIdleOff, rts = settingsRealTimeSliders
             let ssf = settingsShowSearchField, scr = settingsSendCrashReports
             let it = settingsIconType, ssb = settingsSortSitemapsBy
+            let sdm = settingsSitemapNameLabelDisplayMode
             let dmu = settingsDefaultMainUIPath, aawrtc = settingsAlwaysAllowWebRTC
             let sfw = settingsSitemapForWatch
             let sfwLabel = sitemaps.first { $0.name == sfw }?.label ?? "unknown"
@@ -161,6 +166,7 @@ struct SettingsView: View {
                     prefs.realTimeSliders = rts
                     prefs.iconType = it.rawValue
                     prefs.sortSitemapsBy = ssb.rawValue
+                    prefs.sitemapNameLabelDisplayMode = sdm
                     prefs.defaultMainUIPath = dmu
                     prefs.alwaysAllowWebRTC = aawrtc
                     prefs.sitemapForWatch = sfw
@@ -234,6 +240,7 @@ struct SettingsView: View {
         settingsSendCrashReports = Preferences.shared.sendCrashReports
         settingsIconType = IconType(rawValue: homePrefs.iconType) ?? .svg
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: homePrefs.sortSitemapsBy) ?? .label
+        settingsSitemapNameLabelDisplayMode = homePrefs.sitemapNameLabelDisplayMode
         settingsDefaultMainUIPath = homePrefs.defaultMainUIPath
         settingsAlwaysAllowWebRTC = homePrefs.alwaysAllowWebRTC
         settingsSitemapForWatch = homePrefs.sitemapForWatch
@@ -251,6 +258,7 @@ struct SettingsView: View {
         settingsSendCrashReports = snapshot.sendCrashReports
         settingsIconType = snapshot.iconType
         settingsSortSitemapsBy = snapshot.sortSitemapsBy
+        settingsSitemapNameLabelDisplayMode = snapshot.sitemapNameLabelDisplayMode
         settingsDefaultMainUIPath = snapshot.defaultMainUIPath
         settingsAlwaysAllowWebRTC = snapshot.alwaysAllowWebRTC
         settingsSitemapForWatch = snapshot.sitemapForWatch
@@ -267,6 +275,7 @@ struct SettingsView: View {
             homePreferences.realTimeSliders = settingsRealTimeSliders
             homePreferences.iconType = settingsIconType.rawValue
             homePreferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
+            homePreferences.sitemapNameLabelDisplayMode = settingsSitemapNameLabelDisplayMode
             homePreferences.defaultMainUIPath = settingsDefaultMainUIPath
             homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
             homePreferences.sitemapForWatch = settingsSitemapForWatch

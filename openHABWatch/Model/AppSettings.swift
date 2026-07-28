@@ -26,6 +26,8 @@ final class AppSettings: ObservableObject {
     @Published var sitemapForWatch: String
     @Published var sitemapForWatchLabel: String
     @Published var iconType: IconType
+    @Published var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode
+    @Published var sortSitemapsBy: SortSitemapsOrder
     @Published var haveReceivedAppContext = false
 
     init() {
@@ -50,6 +52,8 @@ final class AppSettings: ObservableObject {
         sitemapForWatch = store.string(forKey: "sitemapForWatch") ?? ""
         sitemapForWatchLabel = store.string(forKey: "sitemapForWatchLabel") ?? ""
         iconType = IconType(rawValue: store.integer(forKey: "iconType")) ?? .svg
+        sitemapNameLabelDisplayMode = (store.object(forKey: "sitemapNameLabelDisplayMode") as? Int).flatMap(SitemapNameLabelDisplayMode.init(rawValue:)) ?? .label
+        sortSitemapsBy = SortSitemapsOrder(rawValue: store.integer(forKey: "sortSitemapsBy")) ?? .label
 
         // Observe changes and write back to UserDefaults
         $localConnectionConfig
@@ -106,6 +110,20 @@ final class AppSettings: ObservableObject {
             .removeDuplicates()
             .sink { newValue in
                 store.set(newValue.rawValue, forKey: "iconType")
+            }
+            .store(in: &cancellables)
+
+        $sitemapNameLabelDisplayMode
+            .removeDuplicates()
+            .sink { newValue in
+                store.set(newValue.rawValue, forKey: "sitemapNameLabelDisplayMode")
+            }
+            .store(in: &cancellables)
+
+        $sortSitemapsBy
+            .removeDuplicates()
+            .sink { newValue in
+                store.set(newValue.rawValue, forKey: "sortSitemapsBy")
             }
             .store(in: &cancellables)
     }

@@ -24,10 +24,14 @@ public struct WatchPreferences: Codable {
     public var sitemapForWatchLabel: String
     public var iconType: Int
     public var demoMode: Bool
+    // Optional so a payload from a mismatched app version still decodes; the
+    // watch resolves them to defaults (`.name` / `.label`) when absent.
+    public var sitemapNameLabelDisplayMode: Int?
+    public var sortSitemapsBy: Int?
     public var localConnectionConfiguration: ConnectionConfiguration?
     public var remoteConnectionConfiguration: ConnectionConfiguration?
 
-    public init(localUrl: String, remoteUrl: String, username: String, password: String, alwaysSendCreds: Bool, defaultSitemap: String, ignoreSSL: Bool, sitemapForWatch: String, sitemapForWatchLabel: String, iconType: Int, demoMode: Bool, localConnectionConfiguration: ConnectionConfiguration? = nil, remoteConnectionConfiguration: ConnectionConfiguration? = nil) {
+    public init(localUrl: String, remoteUrl: String, username: String, password: String, alwaysSendCreds: Bool, defaultSitemap: String, ignoreSSL: Bool, sitemapForWatch: String, sitemapForWatchLabel: String, iconType: Int, demoMode: Bool, sitemapNameLabelDisplayMode: Int? = nil, sortSitemapsBy: Int? = nil, localConnectionConfiguration: ConnectionConfiguration? = nil, remoteConnectionConfiguration: ConnectionConfiguration? = nil) {
         self.localUrl = localUrl
         self.remoteUrl = remoteUrl
         self.username = username
@@ -39,6 +43,8 @@ public struct WatchPreferences: Codable {
         self.sitemapForWatchLabel = sitemapForWatchLabel
         self.iconType = iconType
         self.demoMode = demoMode
+        self.sitemapNameLabelDisplayMode = sitemapNameLabelDisplayMode
+        self.sortSitemapsBy = sortSitemapsBy
         self.localConnectionConfiguration = localConnectionConfiguration
         self.remoteConnectionConfiguration = remoteConnectionConfiguration
     }

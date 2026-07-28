@@ -184,11 +184,12 @@ final class NetworkTrackerTests: XCTestCase {
         )
 
         // Create stream first to ensure Combine sink is attached before tracking starts
-        let statusStream = await networkTracker.statusStream()
+        let stateStream = await networkTracker.stateStream()
 
         let statusTask = Task {
             var receivedFirstValue = false
-            for await status in statusStream {
+            for await state in stateStream {
+                let status = state.status
                 if !receivedFirstValue {
                     receivedFirstValue = true
                     streamIterating.fulfill()

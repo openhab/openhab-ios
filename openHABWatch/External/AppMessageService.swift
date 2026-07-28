@@ -49,6 +49,8 @@ class AppMessageService: NSObject, WCSessionDelegate {
             AppSettings.shared.sitemapForWatch = prefs.sitemapForWatch
             AppSettings.shared.sitemapForWatchLabel = prefs.sitemapForWatchLabel
             AppSettings.shared.iconType = IconType(rawValue: prefs.iconType) ?? .svg
+            AppSettings.shared.sitemapNameLabelDisplayMode = prefs.sitemapNameLabelDisplayMode.flatMap(SitemapNameLabelDisplayMode.init(rawValue:)) ?? .label
+            AppSettings.shared.sortSitemapsBy = prefs.sortSitemapsBy.flatMap(SortSitemapsOrder.init(rawValue:)) ?? .label
             AppSettings.shared.haveReceivedAppContext = true
             //                   if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
             //                       // do we need to do anything here?  We load from the shared keychain.
