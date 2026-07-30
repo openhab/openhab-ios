@@ -162,13 +162,7 @@ struct DrawerView: View {
                     let isWatch = sitemap.name == sitemapForWatch
                     let isCar = sitemap.name == sitemapForCarPlay
                     if isWatch { Image(systemSymbol: .applewatchWatchface) }
-                    if isCar {
-                        if #available(iOS 16.1, *) {
-                            Image(systemSymbol: .steeringwheel)
-                        } else {
-                            Image(systemSymbol: .car)
-                        }
-                    }
+                    if isCar { Image(systemSymbol: .steeringwheel) }
                 }
                 .contentShape(Rectangle())
                 .onTapGesture(count: 2) { toggleWatchSitemap(sitemap) }
