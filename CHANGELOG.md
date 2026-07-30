@@ -3,8 +3,6 @@
 ## [Unreleased]
 
 - fix: make entire grid cell tappable for linked-page rows
-- committed version bump: 3.3.10 (310)
-- fix: guard against three crash scenarios from degenerate server data
 - committed version bump: 3.4.15 (309)
 - l10n: translate and review CarPlay strings for all supported languages
 - Add Garage Door icon to CarPlay icons (#1304)
@@ -455,6 +453,10 @@
 - singleMappingButton toggle button fix (#1297)
 - singleMappingButton toggle button fix (#1296)
 - committed version bump: 3.4.10 (302)
+
+## [Version 3.3.10, Build 310] - 2026-07-24Z
+
+- fix: guard against three crash scenarios from degenerate server data
 
 ## [Version 3.3.8, Build 304] - 2026-07-15Z
 

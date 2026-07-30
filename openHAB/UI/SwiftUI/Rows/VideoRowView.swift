@@ -173,9 +173,9 @@ private struct VideoRowContent: View {
                 switch item.status {
                 case .readyToPlay:
                     isLoading = false
-                    if item.presentationSize != .zero {
-                        let newAspectRatio = item.presentationSize.width / item.presentationSize.height
-                        aspectRatio = newAspectRatio
+                    let size = item.presentationSize
+                    if size.height > 0 {
+                        aspectRatio = size.width / size.height
                     }
                     // Auto-play when ready
                     player?.play()
