@@ -91,9 +91,10 @@ private struct LinkedPageRowInputView: View {
     var body: some View {
         NavigationLink(value: LinkedPageNavigation(pageLink: input.linkedPageLink, pageTitle: input.linkedPageTitle)) {
             LinkedPageRowContent(input: input)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+                .background(Color.clear)
         }
-        .contentShape(Rectangle())
         .buttonStyle(.plain)
     }
 }
