@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.3.11, Build 313] - 2026-08-01Z
+
+- chore(deps): bump json from 2.19.5 to 2.19.9 (#1307)
+
 ## [Version 3.3.10, Build 310] - 2026-07-24Z
 
 - fix: guard against three crash scenarios from degenerate server data
