@@ -95,7 +95,7 @@ class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, 
         // The navigation is deferred until the initial root page poll completes so that it fires
         // after SwiftUI's NavigationStack is in a stable rendered state. This avoids the cold-start
         // race where navigateToLinkedPage was called before the NavigationStack existed.
-        let nav = LinkedPageNavigation(pageLink: pageURL.absoluteString, pageTitle: name)
+        let nav = SitemapLinkedPage(link: pageURL.absoluteString, title: name, pageId: path)
         await viewModel.pushSitemap(name: name, path: nil, pendingNavigation: nav)
     }
 

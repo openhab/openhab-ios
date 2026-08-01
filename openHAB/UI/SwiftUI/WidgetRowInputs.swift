@@ -361,6 +361,7 @@ struct LinkedPageRowInput: Equatable, RowWithIconInput {
     let icon: RowIconInput
     let linkedPageLink: String
     let linkedPageTitle: String
+    let linkedPageId: String
     let isFrame: Bool
 
     static func from(widget: OpenHABWidget) -> LinkedPageRowInput? {
@@ -373,6 +374,7 @@ struct LinkedPageRowInput: Equatable, RowWithIconInput {
             icon: RowIconInput.from(widget: widget),
             linkedPageLink: linkedPage.link,
             linkedPageTitle: linkedPage.title,
+            linkedPageId: linkedPage.pageId,
             isFrame: widget.type == .frame
         )
     }
@@ -443,6 +445,7 @@ struct MediaRowInput: Equatable {
     let coordinateLongitude: Double?
     let linkedPageLink: String?
     let linkedPageTitle: String?
+    let linkedPageId: String?
 
     static func from(widget: OpenHABWidget) -> MediaRowInput {
         let coordinate = widget.coordinate
@@ -466,7 +469,8 @@ struct MediaRowInput: Equatable {
             coordinateLatitude: hasValidCoordinate ? coordinate.latitude : nil,
             coordinateLongitude: hasValidCoordinate ? coordinate.longitude : nil,
             linkedPageLink: widget.linkedPage?.link,
-            linkedPageTitle: widget.linkedPage?.title
+            linkedPageTitle: widget.linkedPage?.title,
+            linkedPageId: widget.linkedPage?.pageId
         )
     }
 

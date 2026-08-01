@@ -17,7 +17,7 @@ import os.log
 import SwiftUI
 
 @MainActor
-final class UserData: ObservableObject {
+final class UserData: SitemapPageViewModelBase {
     static let shared = UserData()
 
     @Published var widgets: [OpenHABWidget] = []
@@ -25,36 +25,30 @@ final class UserData: ObservableObject {
     @Published var errorDescription = ""
     @Published var showCertificateAlert = false
     @Published var certificateErrorDescription = ""
-    @Published var isLoadingSitemap = false
 
     // Cache last successful widgets to prevent empty state during reconnections
     private var cachedWidgets: [OpenHABWidget] = []
-    private var currentlyLoadingSitemap: String?
     private var lastObservedConnectionURL: String?
-    /// Incremented each time a new pageHandlingTask is created. The task captures its own
-    /// generation at creation time and only clears shared state when the generation still matches,
-    /// preventing a completing old task from wiping out a newly started task for the same sitemap.
-    private var taskGeneration = 0
 
-    private var pageHandlingTask: Task<Void, Never>?
     private var networkObservationTask: Task<Void, Never>?
     // nonisolated(unsafe): accessed only from deinit, which is the last operation on the instance.
     private nonisolated(unsafe) var notificationObservers: [any NSObjectProtocol] = []
     @Published var isPolling = false
 
-    @Published var openHABSitemapPage: OpenHABPage?
     var currentClientDelegate: HTTPClientDelegate?
 
     private var cancellables = Set<AnyCancellable>()
 
     init(preview: Bool = false) {
+        // Not an override — signature differs from SitemapPageViewModelBase.init()
+        super.init()
         #if DEBUG
         if preview {
             let data = PreviewConstants.sitemapJson
             do {
                 let sitemapPage = try data.decoded(as: Components.Schemas.PageDTO.self)
-                openHABSitemapPage = OpenHABPage(sitemapPage)
-                widgets = openHABSitemapPage?.widgets ?? []
+                currentPage = OpenHABPage(sitemapPage)
+                widgets = currentPage?.widgets ?? []
                 decorateWidgetsWithSendCommand(widgets)
             } catch {
                 Logger.userData.error("Should not throw \(error.localizedDescription)")
@@ -64,20 +58,18 @@ final class UserData: ObservableObject {
     }
 
     /// Initializes UserData for a linked page navigation
-    init(linkedPage: OpenHABPage) {
-        // Use the pageId directly from the linkedPage object
+    init(linkedPage: SitemapLinkedPage) {
+        super.init()
         let extractedPageId = linkedPage.pageId
 
         Logger.userData.info("Initializing UserData for linked page: '\(linkedPage.title)' with pageId: '\(extractedPageId)', link: '\(linkedPage.link)'")
 
         setupNotificationObservers()
 
-        // Assign to pageHandlingTask so stopLongPolling() can cancel this setup task
-        // before it runs if the view disappears while it is still queued on the main actor
-        // (e.g. rapid navigation). Without this, stopLongPolling() finds pageHandlingTask == nil,
-        // cancels nothing, and the task later starts an uncancellable long-poll that leaks the
-        // UserData instance via a retain cycle.
-        pageHandlingTask = Task { @MainActor [weak self] in
+        // Register a setup task so stopLongPolling() can cancel it if the view disappears
+        // before the task body runs (rapid navigation). runNewHandlingTask stores it in
+        // pageHandlingTask; startPageHandling below will replace it with the real polling task.
+        runNewHandlingTask(key: "_setup|\(extractedPageId)", force: true) { [weak self] in
             guard !Task.isCancelled, let self else { return }
             let sitemapName = AppSettings.shared.sitemapForWatch
             guard !sitemapName.isEmpty else {
@@ -87,14 +79,12 @@ final class UserData: ObservableObject {
                 return
             }
             Logger.userData.info("Starting page handling for sitemap: \(sitemapName), pageId: \(extractedPageId)")
-            // Clear pageHandlingTask before calling startPageHandling so it sees nil and
-            // takes the clean "no running task" path rather than cancelling itself.
-            pageHandlingTask = nil
             startPageHandling(sitemapName: sitemapName, pageId: extractedPageId, force: true)
         }
     }
 
-    init() {
+    override init() {
+        super.init()
         setupNotificationObservers()
 
         AppSettings.shared.$haveReceivedAppContext
@@ -123,8 +113,8 @@ final class UserData: ObservableObject {
                     guard let self else { return }
 
                     // Only force restart if the sitemap name actually changed
-                    let isDifferentSitemap = self.currentlyLoadingSitemap != newValue
-                    Logger.userData.debug("Sitemap change detected - current: \(self.currentlyLoadingSitemap ?? "nil"), new: \(newValue), force: \(isDifferentSitemap)")
+                    let isDifferentSitemap = self.currentHandlingKey != "\(newValue)|"
+                    Logger.userData.debug("Sitemap change detected - current: \(self.currentHandlingKey ?? "nil"), new: \(newValue), force: \(isDifferentSitemap)")
 
                     // Note: We don't check for active connection here because NetworkTracker
                     // can report false negatives (especially during long-polling on real devices).
@@ -244,7 +234,7 @@ final class UserData: ObservableObject {
         let sitemapName = AppSettings.shared.sitemapForWatch
         if !sitemapName.isEmpty {
             if let task = pageHandlingTask, !task.isCancelled {
-                if currentlyLoadingSitemap == sitemapName {
+                if currentHandlingKey == "\(sitemapName)|" {
                     Logger.userData.debug("Page handling task already running for correct sitemap: \(sitemapName)")
                 } else {
                     Logger.userData.debug("Page handling task for wrong sitemap, forcing reload: \(sitemapName)")
@@ -273,41 +263,11 @@ final class UserData: ObservableObject {
     func startPageHandling(sitemapName: String, pageId: String = "", force: Bool = false) {
         Logger.userData.debug("startPageHandling called - sitemap: \(sitemapName), pageId: \(pageId), force: \(force)")
 
-        // Handle concurrent loads based on force parameter
-        if let task = pageHandlingTask, !task.isCancelled {
-            if currentlyLoadingSitemap == sitemapName {
-                if force {
-                    Logger.userData.debug("Cancelling existing task for same sitemap (force=true)")
-                    task.cancel()
-                } else {
-                    Logger.userData.debug("Same sitemap already loading and force=false, skipping")
-                    return
-                }
-            } else {
-                Logger.userData.debug("Cancelling existing task for different sitemap")
-                task.cancel()
-            }
-        }
-        currentlyLoadingSitemap = sitemapName
-        taskGeneration += 1
-        let capturedGeneration = taskGeneration
-
-        pageHandlingTask = Task {
-            let taskSitemapName = sitemapName
-            defer {
-                // Use the captured generation rather than sitemap name: a force-refresh of the same
-                // sitemap would set currentlyLoadingSitemap to the same string, so the name check
-                // would incorrectly clear the new task's slot when the old task finishes.
-                if taskGeneration == capturedGeneration {
-                    Logger.userData.debug("Clearing page handling task for: \(taskSitemapName)")
-                    pageHandlingTask = nil
-                    currentlyLoadingSitemap = nil
-                }
-            }
+        runNewHandlingTask(key: "\(sitemapName)|\(pageId)", force: force) { [weak self] in
+            guard let self else { return }
+            isLoading = true
 
             do {
-                isLoadingSitemap = true
-
                 // Always ensure tracking is running before waiting.
                 // startTracking is idempotent for unchanged active configurations.
                 await updateNetwork()
@@ -327,54 +287,30 @@ final class UserData: ObservableObject {
                     Logger.userData.error("No active connection available after timeout")
                     errorDescription = String(localized: "settings_not_received", comment: "")
                     showAlert = true
-                    isLoadingSitemap = false
+                    isLoading = false
                     return
                 }
 
                 Logger.userData.debug("Using connection: \(connectionInfo.configuration.url)")
-                Logger.userData.debug("Starting page stream for sitemap: \(taskSitemapName)")
-
-                for try await event in SitemapPageLoader.stream(
-                    sitemapName: sitemapName,
-                    pageId: pageId,
-                    connectionInfo: connectionInfo
-                ) {
-                    try Task.checkCancellation()
-                    // Always clear loading state on the first event, even if the server
-                    // returned no page data on the initial fetch.
-                    isLoadingSitemap = false
-                    let page: OpenHABPage? = switch event {
-                    case let .initialFetch(page): page
-                    case let .longPoll(page, _): page
-                    }
-                    guard let page else { continue }
-                    // Only update page object when title changes to avoid
-                    // firing objectWillChange and resetting scroll position
-                    if openHABSitemapPage?.title != page.title {
-                        openHABSitemapPage = page
-                    }
-                    let newWidgets = page.widgets
-                    updateWidgets(with: newWidgets)
-                    if !newWidgets.isEmpty {
-                        cachedWidgets = newWidgets
-                    }
-                }
+                Logger.userData.debug("Starting page stream for sitemap: \(sitemapName)")
+                try await runStreamLoop(sitemapName: sitemapName, pageId: pageId, connectionInfo: connectionInfo)
             } catch is CancellationError {
                 return
             } catch {
-                Logger.userData.error("Page handling failed for sitemap '\(taskSitemapName)': \(error.localizedDescription)")
+                Logger.userData.error("Page handling failed for sitemap '\(sitemapName)': \(error.localizedDescription)")
 
                 // Use cached widgets if available instead of clearing completely
                 if cachedWidgets.isEmpty {
                     Logger.userData.warning("No cached widgets available, showing empty state")
                     widgets = []
                 } else {
+                    let count = cachedWidgets.count
                     widgets = cachedWidgets
-                    Logger.userData.info("Using \(self.cachedWidgets.count) cached widgets during connection failure")
+                    Logger.userData.info("Using \(count) cached widgets during connection failure")
                 }
                 errorDescription = error.localizedDescription
                 showAlert = true
-                isLoadingSitemap = false
+                isLoading = false
                 // Note: NetworkTracker will automatically handle failover to remote if local fails
             }
         }
@@ -393,16 +329,14 @@ final class UserData: ObservableObject {
     }
 
     func stopLongPolling() {
-        pageHandlingTask?.cancel()
-        pageHandlingTask = nil
+        stopHandling()
         isPolling = false
-        isLoadingSitemap = false
     }
 
     func sendCommand(_ item: OpenHABItem?, command: String?) async {
         guard let item, let command else { return }
         let sitemapName = AppSettings.shared.sitemapForWatch
-        let pageId = openHABSitemapPage?.pageId ?? ""
+        let pageId = currentPage?.pageId ?? ""
         let sourcePrefix = (!sitemapName.isEmpty && !pageId.isEmpty) ? "org.openhab.ui.basic$\(sitemapName):\(pageId)" : nil
         do {
             try await NetworkTracker.shared.send(to: item, command: command, sourcePrefix: sourcePrefix, deviceId: AppSettings.deviceId)
@@ -417,6 +351,15 @@ final class UserData: ObservableObject {
 
         showAlert = false
         startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch, force: force)
+    }
+
+    override func handlePageUpdate(_ page: OpenHABPage, event: SitemapPageEvent) {
+        super.handlePageUpdate(page, event: event)
+        let newWidgets = page.widgets
+        updateWidgets(with: newWidgets)
+        if !newWidgets.isEmpty {
+            cachedWidgets = newWidgets
+        }
     }
 
     /// Updates existing widget instances instead of replacing them to preserve @ObservedObject references
@@ -502,12 +445,6 @@ final class UserData: ObservableObject {
     }
 
     deinit {
-        // pageHandlingTask strongly captures self, creating a retain cycle that keeps self alive
-        // until the task finishes. For linked-page instances the cycle is broken by stopLongPolling()
-        // (called from .onDisappear), which cancels the task and nils pageHandlingTask; by the time
-        // deinit runs, the task has already completed and pageHandlingTask is nil. The cancel() call
-        // here is therefore a no-op in the normal path but harmless as a safety net.
-        pageHandlingTask?.cancel()
         networkObservationTask?.cancel()
         notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
     }

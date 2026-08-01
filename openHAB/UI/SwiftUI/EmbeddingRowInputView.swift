@@ -88,7 +88,7 @@ private struct LinkedPageRowInputView: View {
     let input: LinkedPageRowInput
 
     var body: some View {
-        NavigationLink(value: LinkedPageNavigation(pageLink: input.linkedPageLink, pageTitle: input.linkedPageTitle)) {
+        NavigationLink(value: SitemapLinkedPage(link: input.linkedPageLink, title: input.linkedPageTitle, pageId: input.linkedPageId)) {
             LinkedPageRowContent(input: input)
         }
         .buttonStyle(.plain)

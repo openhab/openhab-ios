@@ -100,34 +100,4 @@ public enum SitemapPageLoader {
             continuation.onTermination = { _ in task.cancel() }
         }
     }
-
-    /// Convenience overload that creates its own `OpenAPIService` from a
-    /// `ConnectionInfo`. Retries every long-poll error (watchOS behaviour).
-    public static func stream(sitemapName: String,
-                              pageId: String = "",
-                              connectionInfo: ConnectionInfo) -> AsyncThrowingStream<SitemapPageEvent, any Error> {
-        AsyncThrowingStream<SitemapPageEvent, any Error> { continuation in
-            let task = Task {
-                do {
-                    let service = try OpenAPIService(
-                        connectionConfiguration: connectionInfo.configuration,
-                        serviceConfiguration: .longTerm
-                    )
-                    for try await event in SitemapPageLoader.stream(
-                        sitemapName: sitemapName,
-                        pageId: pageId,
-                        service: service
-                    ) {
-                        continuation.yield(event)
-                    }
-                    continuation.finish()
-                } catch is CancellationError {
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
-            continuation.onTermination = { _ in task.cancel() }
-        }
-    }
 }

@@ -23,6 +23,7 @@ struct SnapshotRowInputBuildResult: Sendable {
 struct WidgetLinkedPageSnapshot {
     let link: String
     let title: String
+    let pageId: String
 }
 
 enum SitemapRowInputSnapshotBuilder {
@@ -160,7 +161,7 @@ struct WidgetMappingSnapshot: Sendable {
         encoding = widget.encoding
         item = widget.item
         linkedPage = widget.linkedPage.map {
-            WidgetLinkedPageSnapshot(link: $0.link, title: $0.title)
+            WidgetLinkedPageSnapshot(link: $0.link, title: $0.title, pageId: $0.pageId)
         }
         mappings = widget.mappings
         widgets = widget.widgets.map { WidgetMappingSnapshot(widget: $0) }
@@ -571,6 +572,7 @@ extension SitemapRowInputMapper {
             icon: rowIconInput(from: snapshot),
             linkedPageLink: linkedPage.link,
             linkedPageTitle: linkedPage.title,
+            linkedPageId: linkedPage.pageId,
             isFrame: snapshot.widgetType == .frame
         )
     }
@@ -621,7 +623,8 @@ extension SitemapRowInputMapper {
             coordinateLatitude: hasValidCoordinate ? coordinate?.latitude : nil,
             coordinateLongitude: hasValidCoordinate ? coordinate?.longitude : nil,
             linkedPageLink: snapshot.linkedPage?.link,
-            linkedPageTitle: snapshot.linkedPage?.title
+            linkedPageTitle: snapshot.linkedPage?.title,
+            linkedPageId: snapshot.linkedPage?.pageId
         )
     }
 
