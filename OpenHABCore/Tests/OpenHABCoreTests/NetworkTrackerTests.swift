@@ -224,47 +224,132 @@ final class NetworkTrackerTests: XCTestCase {
         statusTask.cancel()
     }
 
-//    @MainActor
-//    func testTrackerGoesOfflineOnNetworkLoss() async {
-//        let statusSinkAttached = XCTestExpectation(description: "Combine sink attached")
-//        let becameNotConnected = XCTestExpectation(description: "Status becomes .notConnected")
-//        let monitorStarted = XCTestExpectation(description: "Path monitor started")
-//
-//        let mockMonitor = MockPathMonitor { monitorStarted.fulfill() } // ⬅️ Hold on to this
-//        let tracker = NetworkTracker(
-//            monitor: mockMonitor,
-//            connectionPool: ConnectionPool { _ in MockOpenAPIService() },
-//            failureTracker: ConnectionFailureTracker()
-//        )
-//
-//        var cancellables = Set<AnyCancellable>()
-//
-//        tracker.$status
-//            .handleEvents { _ in
-//                statusSinkAttached.fulfill()
-//            } receiveRequest: { _ in
-//            }
-//            .dropFirst()
-//            .sink { status in
-//                if status == .notConnected {
-//                    becameNotConnected.fulfill()
-//                }
-//            }
-//            .store(in: &cancellables)
-//
-//        // Start tracking first to initialize properly
-//        await tracker.startTracking(connectionConfigurations: [
-//            ConnectionConfiguration(url: "http://mock", username: "", password: "", priority: 0)
-//        ])
-//
-//        // 🚦 Wait until Combine and monitoring are ready before triggering anything
-//        await fulfillment(of: [statusSinkAttached, monitorStarted], timeout: 2.0)
-//
-//        // Simulate loss of network
-//        mockMonitor.simulateConnection(isConnected: false) // ✅ use directly
-//
-//        await fulfillment(of: [becameNotConnected], timeout: 4.0)
-//    }
+    // MARK: - connecting / retry / availability (hardening) coverage
+
+    private func makeTracker(service: MockOpenAPIService) -> NetworkTracker {
+        NetworkTracker(
+            monitor: MockPathMonitor(),
+            connectionPool: ConnectionPool { _ in service },
+            failureTracker: ConnectionFailureTracker()
+        )
+    }
+
+    private var mockConfig: ConnectionConfiguration {
+        ConnectionConfiguration(url: "http://mock", username: "", password: "", priority: 0)
+    }
+
+    /// The connect flow must surface the transient `.connecting` state before `.connected`.
+    func testTrackerEmitsConnectingBeforeConnected() async {
+        let sawConnecting = XCTestExpectation(description: "Status becomes .connecting")
+        let connectedAfterConnecting = XCTestExpectation(description: "Status becomes .connected after .connecting")
+
+        let tracker = makeTracker(service: MockOpenAPIService(returnedVersion: 8))
+        let stateStream = await tracker.stateStream()
+
+        let task = Task {
+            var connectingSeen = false
+            for await state in stateStream {
+                if state.status == .connecting, !connectingSeen {
+                    connectingSeen = true
+                    sawConnecting.fulfill()
+                }
+                if state.status == .connected {
+                    if connectingSeen { connectedAfterConnecting.fulfill() }
+                    break
+                }
+            }
+        }
+
+        await tracker.startTracking(connectionConfigurations: [mockConfig])
+        await fulfillment(of: [sawConnecting, connectedAfterConnecting], timeout: 2.0)
+        task.cancel()
+        await tracker.stopTracking()
+    }
+
+    /// A failed connection must publish a `nextRetryDate` so the UI can count down to the retry.
+    func testTrackerPublishesRetryDeadlineWhenConnectionFails() async {
+        let retryScheduled = XCTestExpectation(description: "nextRetryDate published")
+
+        let tracker = makeTracker(service: MockOpenAPIService(returnedVersion: 8, shouldFail: true))
+        let stateStream = await tracker.stateStream()
+
+        let task = Task {
+            for await state in stateStream where state.nextRetryDate != nil {
+                retryScheduled.fulfill()
+                break
+            }
+        }
+
+        await tracker.startTracking(connectionConfigurations: [mockConfig])
+        await fulfillment(of: [retryScheduled], timeout: 3.0)
+        task.cancel()
+        await tracker.stopTracking()
+    }
+
+    /// `stopTracking()` must reset to `.stopped` and clear the active connection and retry deadline.
+    func testStopTrackingResetsToStoppedAndClearsState() async {
+        let connected = XCTestExpectation(description: "Status becomes .connected")
+
+        let tracker = makeTracker(service: MockOpenAPIService(returnedVersion: 8))
+        let stateStream = await tracker.stateStream()
+
+        let task = Task {
+            for await state in stateStream where state.status == .connected {
+                connected.fulfill()
+                break
+            }
+        }
+
+        await tracker.startTracking(connectionConfigurations: [mockConfig])
+        await fulfillment(of: [connected], timeout: 2.0)
+        task.cancel()
+
+        await tracker.stopTracking()
+
+        let status = await tracker.status
+        let activeConnection = await tracker.activeConnection
+        let nextRetryDate = await tracker.nextRetryDate
+        XCTAssertEqual(status, .stopped)
+        XCTAssertNil(activeConnection)
+        XCTAssertNil(nextRetryDate)
+    }
+
+    /// A network-down event must mark the network unavailable and abandon the pending retry.
+    func testNetworkLossMarksUnavailableAndAbandonsRetry() async {
+        let retryScheduled = XCTestExpectation(description: "nextRetryDate published")
+        retryScheduled.assertForOverFulfill = false
+        let networkUnavailable = XCTestExpectation(description: "isNetworkAvailable false and retry cleared")
+
+        let mockMonitor = MockPathMonitor()
+        let tracker = NetworkTracker(
+            monitor: mockMonitor,
+            connectionPool: ConnectionPool { _ in MockOpenAPIService(returnedVersion: 8, shouldFail: true) },
+            failureTracker: ConnectionFailureTracker()
+        )
+        let stateStream = await tracker.stateStream()
+
+        let task = Task {
+            for await state in stateStream {
+                if state.nextRetryDate != nil { retryScheduled.fulfill() }
+                if !state.isNetworkAvailable, state.nextRetryDate == nil {
+                    networkUnavailable.fulfill()
+                    break
+                }
+            }
+        }
+
+        await tracker.startTracking(connectionConfigurations: [mockConfig])
+        // The failing connection schedules a retry (sets nextRetryDate).
+        await fulfillment(of: [retryScheduled], timeout: 3.0)
+
+        // Once the path monitor is active, a network-down event must abandon that retry.
+        await mockMonitor.waitForMonitoringToStart()
+        await mockMonitor.simulateConnection(isConnected: false)
+
+        await fulfillment(of: [networkUnavailable], timeout: 3.0)
+        task.cancel()
+        await tracker.stopTracking()
+    }
 }
 
 // MARK: - connectionConfiguration(forHost:) Tests
