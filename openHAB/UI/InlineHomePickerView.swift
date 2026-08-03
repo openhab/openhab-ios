@@ -168,6 +168,9 @@ struct InlineHomePickerView: View {
                     homes = Preferences.shared.listStoredHomes()
                     homeForSettings = Preferences.shared.currentHomePreferences.id
                 }
+            },
+            message: {
+                Text("For Shortcuts to work across multiple devices, each home must have the same name on every device.")
             }
         )
         .sheet(

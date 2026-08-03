@@ -38,12 +38,6 @@ struct HomeSelectionView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        // TODO: DEVELOP MERGE (#1022) — develop showed a header banner ("For Shortcuts to work across
-        // multiple devices, each home must have the same name on every device") in a dedicated home
-        // management screen that no longer exists. Instead, surface this guidance at the point the home
-        // name is entered/edited: add a `message:` to the rename and create-home name-entry alerts here
-        // (showingRenameHomeAlert / add-home alert) and the equivalents in InlineHomePickerView. Use a
-        // localized string so it lands in Localizable.xcstrings.
         List(homes, id: \.self) { home in
             let homeName = Preferences.shared.storedHomes[home]?.homeName ?? ""
             HStack {
@@ -184,6 +178,8 @@ struct HomeSelectionView: View {
                                 showingNewHomeAlert.toggle()
                             }
                         }
+                    } message: {
+                        Text("For Shortcuts to work across multiple devices, each home must have the same name on every device.")
                     }
                     Button(action: {
                         showEditOptions.toggle()
