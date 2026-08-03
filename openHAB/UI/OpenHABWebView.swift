@@ -102,11 +102,13 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             Logger.viewController.info("WKScriptMessage \(message.name)")
             if message.name == "pathChanged", let newPath = message.body as? String {
                 Logger.viewController.debug("Path changed to: \(newPath)")
-                // TODO: DEVELOP MERGE (0610edea, #1195): with a cloud/proxy connection this stores a
-                // proxy-prefixed path as the MainUI default. develop strips the proxy/root prefix via
-                // `relativeWebViewPath(newPath, proxyURL:, rootURLString:)` before saving. A
-                // `relativeWebViewPath` helper already exists on this branch but is not called here.
-                Preferences.shared.currentWebViewPath = newPath
+                let connection = MainActorNetworkTracker.shared.activeConnection
+                let savedPath = relativeWebViewPath(
+                    newPath,
+                    proxyURL: connection?.proxyURL,
+                    rootURLString: connection?.configuration.url ?? ""
+                )
+                Preferences.shared.currentWebViewPath = savedPath
             }
             if message.name == "mainUi" {
                 // Dict body — JS test probe reports (DEBUG builds only)
