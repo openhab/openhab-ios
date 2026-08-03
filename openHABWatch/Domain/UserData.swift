@@ -152,13 +152,9 @@ final class UserData: ObservableObject {
 
         networkObservationTask = Task { [weak self] in
             // Obtain the stream without capturing self, so self is not held across suspensions.
-            // TODO: DEVELOP MERGE (stateStream compromise): develop consumed a dedicated
-            // `activeConnectionStream()`, but we kept our Combine-based NetworkTracker whose only
-            // stream is the combined `stateStream()`. We adapt by reading just `state.activeConnection`
-            // and ignoring status/retry/network fields — so this loop re-runs on every NetworkState
-            // change, not only when the active connection changes. handleConnectionEvent already
-            // no-ops on an unchanged URL, so behavior is correct but slightly chattier. Revisit if
-            // NetworkTracker is migrated off Combine to per-field AsyncStreams (see NetworkTracker TODO).
+            // stateStream() is now a pure AsyncStream (no Combine). The loop re-runs on every
+            // NetworkState change, not only when activeConnection changes, but handleConnectionEvent
+            // no-ops on an unchanged URL so behavior is correct.
             let stream = await NetworkTracker.shared.stateStream()
             for await state in stream {
                 guard let self else { break }
