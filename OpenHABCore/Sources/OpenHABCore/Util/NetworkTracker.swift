@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-@preconcurrency import Combine
+import Combine
 import Foundation
 import Network
 import OpenAPIRuntime
@@ -182,19 +182,21 @@ public actor NetworkTracker {
     public static let networkTimeout: TimeInterval = 10
     public static let slowConnectionTimeout: TimeInterval = 1
 
-    @Published public private(set) var activeConnection: ConnectionInfo?
-
-    @Published public private(set) var status: NetworkStatus = .stopped
+    public private(set) var activeConnection: ConnectionInfo?
+    public private(set) var status: NetworkStatus = .stopped
 
     /// When a connection attempt has failed and another attempt is scheduled, the wall-clock
     /// time that retry will fire; `nil` while connecting/connected or once tracking has given
     /// up. Lets the UI count down to the next attempt.
-    @Published public private(set) var nextRetryDate: Date?
+    public private(set) var nextRetryDate: Date?
 
     /// Whether the device currently has a usable network path. `false` means retries are
     /// abandoned until the network returns; lets the UI distinguish "no network" from
     /// "server unreachable".
-    @Published public private(set) var isNetworkAvailable = true
+    public private(set) var isNetworkAvailable = true
+
+    // Registered observers: each call to stateStream() gets its own continuation entry.
+    private var stateContinuations: [UUID: AsyncStream<NetworkState>.Continuation] = [:]
 
     private var pathMonitor: any NWPathMonitoring
     private var connectionPool: ConnectionPool
@@ -272,18 +274,12 @@ public actor NetworkTracker {
         }
 
         Logger.networkTracker.info("NetworkTracker: waitForActiveConnection")
-        // Utilize for await to listen for changes in $activeConnection
-        // $activeConnection.values is an AsyncSequence, allowing you to iterate over its values asynchronously.
-        // Wait until a non-nil value is received
+        // stateStream() replays the current state immediately, so the loop returns
+        // right away when already connected and waits for the next change otherwise.
         return try? await withThrowingTimeout(seconds: networkTimeout) { [self] in
             Logger.networkTracker.info("NetworkTracker: Start waiting for active connection connection with timeout")
-            let activeConnections = $activeConnection.values
-            if status == .connected {
-                // return existing conneciton
-                if let current = activeConnection { return current }
-            }
-            for await connection in activeConnections {
-                if let connection {
+            for await state in stateStream() {
+                if let connection = state.activeConnection {
                     Logger.networkTracker.info("NetworkTracker: active connection received")
                     return connection
                 }
@@ -493,6 +489,7 @@ public actor NetworkTracker {
         Logger.networkTracker.info("NetworkTracker: Retrying connection in \(delay) seconds based on failure count of \(failureCount).")
         // Publish the retry deadline so the UI can count down to it.
         nextRetryDate = Date().addingTimeInterval(TimeInterval(delay))
+        yieldCurrentState()
         retryTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(delay))
             guard !Task.isCancelled else { return }
@@ -504,6 +501,7 @@ public actor NetworkTracker {
     /// allowing failures from this attempt to be recorded again.
     private func beginScheduledRetry() async {
         nextRetryDate = nil
+        yieldCurrentState()
         await failureTracker.setEnabled(true)
         await attemptConnection()
     }
@@ -525,12 +523,14 @@ public actor NetworkTracker {
 
         Logger.networkTracker.info("NetworkTracker: Networkmonitor status: \(isConnected ? "connected" : "disconnected")")
         isNetworkAvailable = isConnected
+        yieldCurrentState()
 
         // Network is down: abandon the backoff retry — there is no point hammering a dead
         // interface, and the next network-up event will drive a fresh attempt.
         guard isConnected else {
             retryTask?.cancel()
             nextRetryDate = nil
+            yieldCurrentState()
             return
         }
 
@@ -541,20 +541,31 @@ public actor NetworkTracker {
         guard status != .stopped else {
             if activeConnection != nil {
                 activeConnection = nil
+                yieldCurrentState()
             }
             return
         }
 
         if activeConnection != connection {
             activeConnection = connection
+            yieldCurrentState()
         }
-
     }
 
     private func updateStatus(_ newStatus: NetworkStatus) {
         guard status != newStatus else { return } // Prevent redundant updates
         status = newStatus
         Logger.networkTracker.info("NetworkTracker: status updated: \(newStatus.rawValue)")
+        yieldCurrentState()
+    }
+
+    private func yieldCurrentState() {
+        let state = NetworkState(activeConnection: activeConnection, status: status, nextRetryDate: nextRetryDate, isNetworkAvailable: isNetworkAvailable)
+        for cont in stateContinuations.values { cont.yield(state) }
+    }
+
+    private func removeStateContinuation(id: UUID) {
+        stateContinuations.removeValue(forKey: id)
     }
 }
 
@@ -643,22 +654,18 @@ public extension NetworkTracker {
     /// A single stream combining active connection, status and the retry deadline, so a
     /// consumer receives one coherent `NetworkState` per change instead of interleaving
     /// several streams.
-    // TODO: Combine → concurrency migration. This bridges Combine into an AsyncStream:
-    // `CombineLatest4` observes the actor's `@Published` properties (which exist ONLY to feed this
-    // publisher — `@Published` on an actor is an unusual bridge). Per the project guideline (avoid
-    // Combine, prefer async/await), reimplement without Combine: keep an internal set of
-    // `AsyncStream<NetworkState>.Continuation`s (as develop's NetworkTracker did for its per-property
-    // streams) and `yield` a fresh coherent NetworkState from setActiveConnection/updateStatus/
-    // scheduleRetry/handleNetworkChange whenever any field changes. That also lets the properties drop
-    // `@Published`. Consumers already use `for await`, so the call site is unaffected.
+    /// Returns an AsyncStream that immediately yields the current NetworkState,
+    /// then yields a fresh coherent snapshot on every subsequent change.
+    /// Safe to call from any Swift concurrent context.
     func stateStream() -> AsyncStream<NetworkState> {
-        AsyncStream { continuation in
-            let cancellable = Publishers.CombineLatest4($activeConnection, $status, $nextRetryDate, $isNetworkAvailable)
-                .map { NetworkState(activeConnection: $0, status: $1, nextRetryDate: $2, isNetworkAvailable: $3) }
-                .sink { continuation.yield($0) }
-
-            continuation.onTermination = { [cancellable] _ in cancellable.cancel() }
+        let id = UUID()
+        let (stream, continuation) = AsyncStream.makeStream(of: NetworkState.self)
+        stateContinuations[id] = continuation
+        continuation.yield(NetworkState(activeConnection: activeConnection, status: status, nextRetryDate: nextRetryDate, isNetworkAvailable: isNetworkAvailable))
+        continuation.onTermination = { [weak self] _ in
+            Task { [weak self] in await self?.removeStateContinuation(id: id) }
         }
+        return stream
     }
 }
 
