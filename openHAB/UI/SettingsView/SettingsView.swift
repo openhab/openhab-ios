@@ -14,18 +14,8 @@ import OpenHABCore
 import os
 import SwiftUI
 
-// TODO: DEVELOP MERGE — this file kept our per-home editing / dirty-tracking version, which diverged
-// entirely from develop's SettingsView. Two develop bug fixes were NOT ported and should be re-applied
-// on top of this structure:
-//   • #1209 (c2ac26fa) "Prompt user to grant Local Network access for local connections": on Save,
-//     when a non-demo local URL changed and wasn't successfully tested, develop set a
-//     `showLocalNetworkAlert` and presented an alert prompting the user to grant iOS Local Network
-//     permission before dismissing. Without it, local connections can silently fail on iOS 14+.
-//   • #1193 (f7fab664) "Fix sitemap picker showing empty when connected via cloud": develop drove the
-//     sitemap list from MainActorNetworkTracker's active connection (including proxyURL) so the picker
-//     populates over a cloud/proxy connection instead of appearing empty.
-// See `git show c2ac26fa` / `git show f7fab664` for the exact patches.
 struct SettingsView: View {
+    @StateObject private var networkTracker = MainActorNetworkTracker.shared
     /// When non-nil, the view edits the specified stored home instead of the active home.
     var homeId: UUID?
 
@@ -53,12 +43,16 @@ struct SettingsView: View {
     @State private var settingsHomeName = ""
     @State private var viewAppearedOnce = false
     @State private var settingsSSECommandItem = ""
+    @State private var showLocalNetworkAlert = false
+    @State private var loadedLocalURL = ""
+    @State private var localTestedOKURL = ""
 
     @State private var initialSnapshot: SettingsSnapshot?
     @State private var isDirty = false
     @State private var savedExplicitly = false
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
 
     struct SettingsSnapshot: Equatable {
         var demomode: Bool
@@ -102,9 +96,7 @@ struct SettingsView: View {
                 settingsDemomode: $settingsDemomode,
                 localConnectionConfiguration: $settingsLocalConnectionConfiguration,
                 remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration,
-                // TODO: DEVELOP MERGE (#1209) — inert binding; wire this to real state and the
-                // Local Network access prompt when porting #1209 (see the file-level TODO above).
-                localTestedOKURL: .constant("")
+                localTestedOKURL: $localTestedOKURL
             )
 
             ApplicationSettingsView(
@@ -136,6 +128,19 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .navigationTitle("\(settingsHomeName) Settings")
+        .alert("Local Network Access Required", isPresented: $showLocalNetworkAlert) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    openURL(url)
+                }
+                dismiss()
+            }
+            Button("OK") {
+                dismiss()
+            }
+        } message: {
+            Text("To connect to your local openHAB server, please allow Local Network access when prompted. If you previously denied it, enable it in Settings → Privacy & Security → Local Network.")
+        }
         .toolbar {
             if isDirty {
                 ToolbarItem(placement: .confirmationAction) {
@@ -143,7 +148,14 @@ struct SettingsView: View {
                         savedExplicitly = true
                         saveSettings()
                         NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
-                        dismiss()
+                        if !settingsDemomode,
+                           !settingsLocalConnectionConfiguration.url.isEmpty,
+                           settingsLocalConnectionConfiguration.url != loadedLocalURL,
+                           settingsLocalConnectionConfiguration.url != localTestedOKURL {
+                            showLocalNetworkAlert = true
+                        } else {
+                            dismiss()
+                        }
                     } label: {
                         Image(systemName: "checkmark")
                     }
@@ -203,16 +215,17 @@ struct SettingsView: View {
             isDirty = newSnapshot != initialSnapshot
         }
         .task {
-            if !viewAppearedOnce {
-                viewAppearedOnce = true
-                loadSettings()
-                initialSnapshot = currentSnapshot
-                if let initialValues {
-                    applySnapshot(initialValues)
-                }
-                let activeConfiguration = settingsLocalConnectionConfiguration
-                await updateSitemaps(activeConfiguration: activeConfiguration)
+            guard !viewAppearedOnce else { return }
+            viewAppearedOnce = true
+            loadSettings()
+            initialSnapshot = currentSnapshot
+            if let initialValues {
+                applySnapshot(initialValues)
             }
+        }
+        .task(id: networkTracker.activeConnection) {
+            guard let activeConnection = networkTracker.activeConnection else { return }
+            await updateSitemaps(activeConfiguration: activeConnection.configuration)
         }
     }
 
@@ -260,6 +273,7 @@ struct SettingsView: View {
         settingsSitemapForWatch = homePrefs.sitemapForWatch
         settingsLocalConnectionConfiguration = homePrefs.localConnectionConfig
         settingsRemoteConnectionConfiguration = homePrefs.remoteConnectionConfig
+        loadedLocalURL = homePrefs.localConnectionConfig.url
         settingsHomeName = homePrefs.homeName
         settingsSSECommandItem = homePrefs.sseCommandItem
     }
