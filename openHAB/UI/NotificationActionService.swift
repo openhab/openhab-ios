@@ -29,7 +29,7 @@ class NotificationActionService: ObservableObject {
 
     // MARK: - Private state
 
-    private let synthesizer = AVSpeechSynthesizer()
+    private var synthesizer = AVSpeechSynthesizer()
     private var streamTask: Task<Void, Never>?
 
     init() {
@@ -83,13 +83,14 @@ class NotificationActionService: ObservableObject {
         ) { [weak self] notification in
             let action = notification.userInfo?["action"] as? String
             let cloudUserId = notification.userInfo?["cloudUserId"] as? String
+            let originalNotification = notification.userInfo?["notification"] as? UNNotification
             Task { @MainActor in
-                self?.handleNotification(action: action, cloudUserId: cloudUserId)
+                self?.handleNotification(action: action, cloudUserId: cloudUserId, notification: originalNotification)
             }
         }
     }
 
-    func handleNotification(action: String?, cloudUserId: String?) {
+    func handleNotification(action: String?, cloudUserId: String?, notification: UNNotification? = nil) {
         guard let action else { return }
 
         Logger.viewController.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
@@ -109,25 +110,25 @@ class NotificationActionService: ObservableObject {
                 ]
             )
             _ = await NetworkTracker.shared.waitForActiveConnection()
-            handleNotificationInternal(action)
+            handleNotificationInternal(action, notification: notification)
         }
     }
 
-    private func handleNotificationInternal(_ action: String?) {
+    private func handleNotificationInternal(_ action: String?, notification: UNNotification? = nil) {
         guard let parsed = NotificationCommandParser.parse(action) else { return }
 
         switch parsed {
         case let .ui(target):
             handleUICommand(target)
         case let .sendCommand(item, command):
-            sendItemCommand(item: item, command: command)
+            sendItemCommand(item: item, command: command, notification: notification)
         case let .http(url):
             openInSafari(url: url)
         case let .app(url):
             Logger.viewController.info("appCommandAction opening \(url.absoluteString)")
             UIApplication.shared.open(url)
         case let .rule(uuid, properties):
-            executeRule(uuid: uuid, properties: properties)
+            executeRule(uuid: uuid, properties: properties, notification: notification)
         case let .device(deviceCmd):
             handleDeviceCommand(deviceCmd)
         }
@@ -144,7 +145,7 @@ class NotificationActionService: ObservableObject {
         }
     }
 
-    private func sendItemCommand(item: String, command: String) {
+    private func sendItemCommand(item: String, command: String, notification: UNNotification? = nil) {
         let deviceId = UIDevice.current.identifierForVendor?.uuidString
         Task {
             do {
@@ -152,11 +153,10 @@ class NotificationActionService: ObservableObject {
                 try await NetworkTracker.shared.send(to: item, command: command, deviceId: deviceId)
             } catch NetworkTrackerError.noActiveConnection {
                 displayErrorNotification("Could not find server")
-                // TODO: DEVELOP MERGE (da54c81c, #984/#1233): on send failure, re-post the
-                // original UNNotification (thread the `notification`/category through) so the
-                // user can retry the action. Same applies to executeRule below.
+                repostNotification(notification)
             } catch {
                 displayErrorNotification("Failed to establish a connection: \(error.localizedDescription)")
+                repostNotification(notification)
                 Logger.viewController.error("Could not send data \(error.localizedDescription)")
             }
         }
@@ -171,12 +171,30 @@ class NotificationActionService: ObservableObject {
         UNUserNotificationCenter.current().add(request)
     }
 
+    // Re-posts the original notification so the user can retry the action after a failure.
+    // iOS removes a notification from the notification center as soon as any action button
+    // is tapped; re-posting it restores both the message and the action buttons.
+    private func repostNotification(_ notification: UNNotification?) {
+        guard let notification else { return }
+        let original = notification.request.content
+        let content = UNMutableNotificationContent()
+        content.title = original.title
+        content.subtitle = original.subtitle
+        content.body = original.body
+        content.sound = original.sound
+        content.categoryIdentifier = original.categoryIdentifier
+        content.userInfo = original.userInfo
+        content.badge = original.badge
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
+    }
+
     private func openInSafari(url: URL) {
         let vc = SFSafariViewController(url: url)
         UIApplication.shared.firstKeyWindow?.rootViewController?.present(vc, animated: true)
     }
 
-    private func executeRule(uuid: String, properties: [String: String]) {
+    private func executeRule(uuid: String, properties: [String: String], notification: UNNotification? = nil) {
         Task {
             do {
                 Logger.viewController.info("Executing rule \(uuid)")
@@ -184,9 +202,11 @@ class NotificationActionService: ObservableObject {
                 Logger.viewController.info("Request succeeded")
             } catch let error as NetworkTrackerError {
                 displayErrorNotification("\(error.localizedDescription)")
+                repostNotification(notification)
             } catch {
                 Logger.viewController.error("Could not send data \(error.localizedDescription)")
                 displayErrorNotification("Request to server failed: \(error.localizedDescription)")
+                repostNotification(notification)
             }
         }
     }
@@ -202,14 +222,13 @@ class NotificationActionService: ObservableObject {
         case let .idleTimer(enabled):
             IdleTimerService.shared.isDisabled = !enabled
         case let .brightness(value):
-            // TODO: DEVELOP MERGE (8504a598, #1269): `UIScreen.main` crashes on iOS 27.
-            // develop switched to scene-based access: `view.window?.windowScene?.screen.brightness`.
-            // Route brightness through a view/scene-aware path here (ScreenSaverManager already
-            // uses `window?.windowScene?.screen`).
-            UIScreen.main.brightness = value
+            UIApplication.shared.firstKeyWindow?.windowScene?.screen.brightness = value
         case let .tts(text, language, voiceName):
-            // TODO: DEVELOP MERGE (9887a6e7, #1295): guard against empty TTS text —
-            // `guard !text.isEmpty else { return }` (log & ignore) before building the utterance.
+            guard !text.isEmpty else {
+                Logger.viewController.debug("TTS command received empty text — ignoring")
+                return
+            }
+            Logger.viewController.debug("Attempting to speak text \(text, privacy: .private)")
             let utterance = AVSpeechUtterance(string: text)
             if let language, let voiceName {
                 func normalizeVoiceName(from input: String) -> String {
@@ -224,10 +243,19 @@ class NotificationActionService: ObservableObject {
             } else if let language {
                 utterance.voice = AVSpeechSynthesisVoice(language: language)
             }
-            // TODO: DEVELOP MERGE (519d6d16, #1294): fix speech concurrency — recover from audio
-            // interruptions (e.g. WebRTC in the WKWebView stealing the session). develop makes
-            // `synthesizer` a `var`, calls `stopSpeaking(at: .immediate)`, recreates the synthesizer,
-            // and activates AVAudioSession with `.mixWithOthers` before speaking.
+            // Reset synthesizer to recover from audio interruptions
+            // (e.g. WebRTC audio in a WKWebView stealing the session).
+            // Use .mixWithOthers so TTS coexists with WebRTC instead of
+            // fighting for exclusive audio session control.
+            synthesizer.stopSpeaking(at: .immediate)
+            synthesizer = AVSpeechSynthesizer()
+            do {
+                let audioSession = AVAudioSession.sharedInstance()
+                try audioSession.setCategory(audioSession.category, mode: audioSession.mode, options: audioSession.categoryOptions.union(.mixWithOthers))
+                try audioSession.setActive(true)
+            } catch {
+                Logger.viewController.warning("Failed to configure audio session for TTS: \(error.localizedDescription)")
+            }
             synthesizer.speak(utterance)
         }
     }

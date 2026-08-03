@@ -89,7 +89,9 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
             let cloudUserId = userInfo["userId"] as? String
 
-            notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
+            // Pass the original notification so action handlers can re-post it on failure,
+            // allowing the user to retry without waiting for a new notification.
+            notifyNotificationListeners(action: action, cloudUserId: cloudUserId, notification: response.notification)
         }
     }
 
@@ -126,17 +128,18 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
     }
 
     @MainActor
-    func notifyNotificationListeners(action: String?, cloudUserId: String? = nil) {
+    func notifyNotificationListeners(action: String?, cloudUserId: String? = nil, notification: UNNotification? = nil) {
         // Wake up screen saver immediately on incoming notification interaction
         NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
 
-        // Post notification for AppServicesViewModel (or legacy OpenHABRootViewController) to handle
+        // Post notification for NotificationActionService to handle
         NotificationCenter.default.post(
             name: .openHABHandleNotificationAction,
             object: nil,
             userInfo: [
                 "action": action as Any,
-                "cloudUserId": cloudUserId as Any
+                "cloudUserId": cloudUserId as Any,
+                "notification": notification as Any
             ]
         )
     }
