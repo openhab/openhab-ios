@@ -231,15 +231,17 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         /// Rewrites `url` to use the active connection's origin when the URL's host+port
         /// matches any configured home server connection.  Returns `nil` if no match is found,
         /// meaning the link should be opened externally.
-        // TODO: DEVELOP MERGE (ec0d0957, #1244): verify same-origin matching uses the full RFC 6454
-        // origin (scheme + host + port, default ports omitted) and also compares against the active
-        // connection's proxyURL. develop added a `URL.webOrigin` helper; the current host+port check
-        // in WebViewURLHelper may misclassify links across http/https or via the proxy.
         private func rewriteToActiveConnection(_ url: URL) -> URL? {
-            guard let activeUrl = MainActorNetworkTracker.shared.activeConnection?.configuration.url else {
+            guard let activeConnection = MainActorNetworkTracker.shared.activeConnection else {
                 return nil
             }
+            let activeUrl = activeConnection.configuration.url
             var knownURLStrings = [activeUrl]
+            // Include the proxy URL so cloud-proxied links are recognised as in-app navigations
+            // and rewritten to the active connection, matching develop commit ec0d0957 (#1244).
+            if let proxyURLString = activeConnection.proxyURL?.absoluteString {
+                knownURLStrings.append(proxyURLString)
+            }
             for home in Preferences.shared.storedHomes.values {
                 knownURLStrings.append(home.localConnectionConfig.url)
                 knownURLStrings.append(home.remoteConnectionConfig.url)
@@ -367,6 +369,15 @@ private extension URL {
     var isNativeWebURL: Bool {
         guard let scheme = scheme?.lowercased() else { return true }
         return ["http", "https", "about", "blob", "data", "javascript"].contains(scheme)
+    }
+
+    /// RFC 6454 origin: scheme + host + port, with default ports (80/443) omitted.
+    /// Added in develop commit ec0d0957 (#1244).
+    var webOrigin: String? {
+        guard let scheme = scheme?.lowercased(), let host else { return nil }
+        let defaultPort = scheme == "https" ? 443 : scheme == "http" ? 80 : nil
+        let portSuffix = (port != nil && port != defaultPort) ? ":\(port!)" : ""
+        return "\(scheme)://\(host)\(portSuffix)"
     }
 }
 
