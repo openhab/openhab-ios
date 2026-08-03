@@ -42,6 +42,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         let viewModel: OpenHABWebViewModel
         weak var hostController: WebViewHostController?
         private weak var currentWebView: WKWebView?
+        private var webViewLayoutConstraints: [NSLayoutConstraint] = []
         private var cancellable: AnyCancellable?
 
         init(viewModel: OpenHABWebViewModel) {
@@ -79,16 +80,14 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             
             hostView.addSubview(webView)
             webView.translatesAutoresizingMaskIntoConstraints = false
-            // TODO: DEVELOP MERGE (cf74a950): if this runs more than once (webView swap on
-            // home/server change), deactivate the previously activated constraints before
-            // activating new ones to avoid conflicting-constraint crashes. develop tracks them
-            // in a `webViewLayoutConstraints` array and calls `NSLayoutConstraint.deactivate` first.
-            NSLayoutConstraint.activate([
+            NSLayoutConstraint.deactivate(webViewLayoutConstraints)
+            webViewLayoutConstraints = [
                 webView.topAnchor.constraint(equalTo: hostView.topAnchor),
                 webView.bottomAnchor.constraint(equalTo: hostView.bottomAnchor),
                 webView.leadingAnchor.constraint(equalTo: hostView.leadingAnchor),
                 webView.trailingAnchor.constraint(equalTo: hostView.trailingAnchor)
-            ])
+            ]
+            NSLayoutConstraint.activate(webViewLayoutConstraints)
         }
 
         // MARK: - WKScriptMessageHandler
