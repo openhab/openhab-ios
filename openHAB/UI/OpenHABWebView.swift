@@ -43,7 +43,35 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         weak var hostController: WebViewHostController?
         private weak var currentWebView: WKWebView?
         private var webViewLayoutConstraints: [NSLayoutConstraint] = []
+        private var isConfirmingExternalURL = false
+        private var externalURLCooldownUntil: Date?
         private var cancellable: AnyCancellable?
+
+        // Capture-phase click interceptor matching develop commit 12b8608c.
+        // e.isTrusted filters programmatic .click() / dispatchEvent() calls so only
+        // real user gestures reach the message handler.
+        private static let externalURLInterceptorScript = WKUserScript(
+            source: """
+            (function() {
+                const nativeSchemes = ['http', 'https', 'about', 'blob', 'data', 'javascript', ''];
+                function isCustomScheme(url) {
+                    const m = /^([a-z][a-z0-9+\\-.]*):/.exec((url || '').toLowerCase());
+                    return m != null && !nativeSchemes.includes(m[1]);
+                }
+                document.addEventListener('click', function(e) {
+                    if (!e.isTrusted) return;
+                    let el = e.target;
+                    while (el && el.tagName !== 'A') el = el.parentElement;
+                    if (el && el.href && isCustomScheme(el.href)) {
+                        e.preventDefault();
+                        window.webkit.messageHandlers.externalURL.postMessage(el.href);
+                    }
+                }, true);
+            })();
+            """,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: true
+        )
 
         init(viewModel: OpenHABWebViewModel) {
             self.viewModel = viewModel
@@ -66,6 +94,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                 old.uiDelegate = nil
                 old.configuration.userContentController.removeScriptMessageHandler(forName: "mainUi")
                 old.configuration.userContentController.removeScriptMessageHandler(forName: "pathChanged")
+                old.configuration.userContentController.removeScriptMessageHandler(forName: "externalURL")
                 old.removeFromSuperview()
             }
 
@@ -74,8 +103,11 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             // Remove any existing handlers (a previous coordinator may have registered them)
             webView.configuration.userContentController.removeScriptMessageHandler(forName: "mainUi")
             webView.configuration.userContentController.removeScriptMessageHandler(forName: "pathChanged")
+            webView.configuration.userContentController.removeScriptMessageHandler(forName: "externalURL")
             webView.configuration.userContentController.add(self, name: "mainUi")
             webView.configuration.userContentController.add(self, name: "pathChanged")
+            webView.configuration.userContentController.add(self, name: "externalURL")
+            webView.configuration.userContentController.addUserScript(Self.externalURLInterceptorScript)
             currentWebView = webView
             
             hostView.addSubview(webView)
@@ -100,6 +132,18 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
 
         private func handleScriptMessage(_ message: WKScriptMessage) {
             Logger.viewController.info("WKScriptMessage \(message.name)")
+            if message.name == "externalURL",
+               let urlString = message.body as? String,
+               let url = URL(string: urlString),
+               !url.isNativeWebURL {
+                Logger.viewController.info("externalURL bridge: \(urlString)")
+                Task {
+                    if await self.confirmOpenURL(url) {
+                        await UIApplication.shared.open(url)
+                    }
+                }
+                return
+            }
             if message.name == "pathChanged", let newPath = message.body as? String {
                 Logger.viewController.debug("Path changed to: \(newPath)")
                 let connection = MainActorNetworkTracker.shared.activeConnection
@@ -164,11 +208,14 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
             guard let url = navigationAction.request.url else { return .allow }
             Logger.viewController.info("decidePolicyFor - url: \(url.absoluteString)")
-            // TODO: DEVELOP MERGE (12b8608c, #1239): custom URL schemes (e.g. `shortcuts://`) opened
-            // from within the webview are not handled. develop injects a capture-phase JS click
-            // interceptor that posts non-native-scheme anchor hrefs to an `externalURL` message
-            // handler, then shows a native confirmation and calls `UIApplication.shared.open`
-            // (with a cooldown guard). Only `.linkActivated` http/https is handled below.
+            if !url.isNativeWebURL {
+                // JS-triggered custom-scheme navigations (e.g. window.location = 'shortcuts://...')
+                // arrive here; anchor taps are caught by the injected JS handler first.
+                if await confirmOpenURL(url) {
+                    await UIApplication.shared.open(url)
+                }
+                return .cancel
+            }
             if navigationAction.navigationType == .linkActivated {
                 if let rewritten = rewriteToActiveConnection(url) {
                     Logger.viewController.info("decidePolicyFor - loading in-app (rewritten): \(rewritten.absoluteString)")
@@ -281,6 +328,45 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                      type: WKMediaCaptureType) async -> WKPermissionDecision {
             Preferences.shared.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
         }
+
+        // MARK: - External URL confirmation
+
+        // Shows a native confirmation alert before opening a custom URL scheme, matching
+        // develop commit 12b8608c. Guards against re-entrancy, missing window, and script
+        // spam (3-second cooldown after each resolution).
+        private func confirmOpenURL(_ url: URL) async -> Bool {
+            let now = Date()
+            guard !isConfirmingExternalURL,
+                  hostController?.presentedViewController == nil,
+                  hostController?.viewIfLoaded?.window != nil,
+                  externalURLCooldownUntil.map({ now >= $0 }) ?? true else {
+                return false
+            }
+            guard let hostController else { return false }
+            isConfirmingExternalURL = true
+            defer { isConfirmingExternalURL = false }
+
+            let confirmed = await withCheckedContinuation { continuation in
+                let alert = UIAlertController(title: url.absoluteString, message: nil, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: String(localized: "Cancel"), style: .cancel) { _ in
+                    continuation.resume(returning: false)
+                })
+                alert.addAction(UIAlertAction(title: String(localized: "Open"), style: .default) { _ in
+                    continuation.resume(returning: true)
+                })
+                hostController.present(alert, animated: true)
+            }
+            externalURLCooldownUntil = Date(timeIntervalSinceNow: 3)
+            return confirmed
+        }
+    }
+}
+
+private extension URL {
+    /// Returns true for schemes that WKWebView can load natively, matching develop commit 12b8608c.
+    var isNativeWebURL: Bool {
+        guard let scheme = scheme?.lowercased() else { return true }
+        return ["http", "https", "about", "blob", "data", "javascript"].contains(scheme)
     }
 }
 
