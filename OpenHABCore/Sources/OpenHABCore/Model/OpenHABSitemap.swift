@@ -11,8 +11,8 @@
 
 import Foundation
 
-// The OpenHAB REST API returns either a value (eg. String, Int, Double...) or false (not null).
-// Inspired by https://stackoverflow.com/questions/52836448/decodable-value-string-or-bool
+/// The OpenHAB REST API returns either a value (eg. String, Int, Double...) or false (not null).
+/// Inspired by https://stackoverflow.com/questions/52836448/decodable-value-string-or-bool
 public struct ValueOrFalse<T: Decodable>: Decodable {
     let value: T?
 

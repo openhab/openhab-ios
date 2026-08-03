@@ -152,6 +152,9 @@ class NotificationActionService: ObservableObject {
                 try await NetworkTracker.shared.send(to: item, command: command, deviceId: deviceId)
             } catch NetworkTrackerError.noActiveConnection {
                 displayErrorNotification("Could not find server")
+                // TODO: DEVELOP MERGE (da54c81c, #984/#1233): on send failure, re-post the
+                // original UNNotification (thread the `notification`/category through) so the
+                // user can retry the action. Same applies to executeRule below.
             } catch {
                 displayErrorNotification("Failed to establish a connection: \(error.localizedDescription)")
                 Logger.viewController.error("Could not send data \(error.localizedDescription)")
@@ -199,8 +202,14 @@ class NotificationActionService: ObservableObject {
         case let .idleTimer(enabled):
             IdleTimerService.shared.isDisabled = !enabled
         case let .brightness(value):
+            // TODO: DEVELOP MERGE (8504a598, #1269): `UIScreen.main` crashes on iOS 27.
+            // develop switched to scene-based access: `view.window?.windowScene?.screen.brightness`.
+            // Route brightness through a view/scene-aware path here (ScreenSaverManager already
+            // uses `window?.windowScene?.screen`).
             UIScreen.main.brightness = value
         case let .tts(text, language, voiceName):
+            // TODO: DEVELOP MERGE (9887a6e7, #1295): guard against empty TTS text —
+            // `guard !text.isEmpty else { return }` (log & ignore) before building the utterance.
             let utterance = AVSpeechUtterance(string: text)
             if let language, let voiceName {
                 func normalizeVoiceName(from input: String) -> String {
@@ -215,6 +224,10 @@ class NotificationActionService: ObservableObject {
             } else if let language {
                 utterance.voice = AVSpeechSynthesisVoice(language: language)
             }
+            // TODO: DEVELOP MERGE (519d6d16, #1294): fix speech concurrency — recover from audio
+            // interruptions (e.g. WebRTC in the WKWebView stealing the session). develop makes
+            // `synthesizer` a `var`, calls `stopSpeaking(at: .immediate)`, recreates the synthesizer,
+            // and activates AVAudioSession with `.mixWithOthers` before speaking.
             synthesizer.speak(utterance)
         }
     }

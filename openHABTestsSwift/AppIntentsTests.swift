@@ -216,84 +216,18 @@ struct SetSwitchItemIntentTests {
     }
 }
 
-// MARK: - Home Resolution
+// MARK: - Item Search Ranking
 
-@Suite("HomeResolver")
-struct HomeResolverTests {
-    let homeId = UUID()
+@Suite("Item search ranking")
+struct ItemSearchRankingTests {
+    @Test func homeNameCanContributeToItemSearch() {
+        let officeSensor = makeItem(name: "TemperatureSensorOffice", type: "Number", label: "Office Sensor")
 
-    @Test func optionalHomeUsesItemHomeId() throws {
-        let resolved = try HomeResolver.resolvedHomeId(
-            selectedHome: nil,
-            itemHomeId: homeId,
-            itemLabel: "Test Item",
-            mismatchError: ItemStateError.itemNotInHome
-        )
-
-        #expect(resolved == homeId)
-    }
-
-    @Test func selectedHomeMismatchThrows() throws {
-        let wrongHome = Home(id: UUID().uuidString, displayString: "Wrong Home")
-
-        #expect(throws: ItemStateError.self) {
-            try HomeResolver.resolvedHomeId(
-                selectedHome: wrongHome,
-                itemHomeId: homeId,
-                itemLabel: "Test Item",
-                mismatchError: ItemStateError.itemNotInHome
-            )
+        let ranked = [officeSensor].ranked(searchTerm: "main temp", for: nil) { item in
+            ["\(item.name) Main Home", "\(item.label) Main Home"]
         }
-    }
 
-    @Test func invalidSelectedHomeIdentifierThrows() throws {
-        let invalidHome = Home(id: "not-a-uuid", displayString: "Broken Home")
-
-        #expect(throws: HomeResolutionError.self) {
-            try HomeResolver.resolvedHomeId(
-                selectedHome: invalidHome,
-                itemHomeId: homeId,
-                itemLabel: "Test Item",
-                mismatchError: ItemStateError.itemNotInHome
-            )
-        }
-    }
-
-    @Test func singleStoredHomeBecomesDefault() async throws {
-        let resolved = try await HomeResolver.resolveHomeId(
-            selectedHome: nil,
-            itemName: "TestItem",
-            listStoredHomes: { [homeId] },
-            exactMatchedHomes: { [] }
-        )
-
-        #expect(resolved == homeId)
-    }
-
-    @Test func uniqueExactMatchChoosesHome() async throws {
-        let otherHomeId = UUID()
-
-        let resolved = try await HomeResolver.resolveHomeId(
-            selectedHome: nil,
-            itemName: "TestItem",
-            listStoredHomes: { [homeId, otherHomeId] },
-            exactMatchedHomes: { [otherHomeId] }
-        )
-
-        #expect(resolved == otherHomeId)
-    }
-
-    @Test func ambiguousHomesRequireSelection() async {
-        let otherHomeId = UUID()
-
-        await #expect(throws: HomeResolutionError.self) {
-            try await HomeResolver.resolveHomeId(
-                selectedHome: nil,
-                itemName: "TestItem",
-                listStoredHomes: { [homeId, otherHomeId] },
-                exactMatchedHomes: { [homeId, otherHomeId] }
-            )
-        }
+        #expect(ranked.map(\.item.name) == ["TemperatureSensorOffice"])
     }
 }
 
@@ -337,5 +271,179 @@ struct IntentErrorDescriptionTests {
         let error = LocationValueError.invalidLongitude
         let str = String(localized: error.localizedStringResource)
         #expect(str.contains("180"))
+    }
+}
+
+// MARK: - Home Resolution
+
+@Suite("ItemIdentifier")
+struct ItemIdentifierTests {
+    @Test func legacyIdentifierStillParses() throws {
+        let homeId = UUID()
+        let parsed = try #require(ItemIdentifier.entityIdentifier(for: "\(homeId.uuidString):TestItem"))
+
+        #expect(parsed.homeId == homeId)
+        #expect(parsed.itemName == "TestItem")
+        #expect(parsed.homeIdentifier == nil)
+    }
+
+    @Test func currentIdentifierCarriesStableHomeIdentifierAndItemName() throws {
+        let homeId = UUID()
+        let homeIdentifier = "https://example.org:8443##\(homeId.uuidString)"
+        let identifier = ItemIdentifier(
+            homeId: homeId,
+            itemName: "Switch:Kitchen",
+            homeIdentifier: homeIdentifier
+        )
+
+        let parsed = try #require(ItemIdentifier.entityIdentifier(for: identifier.entityIdentifierString))
+
+        #expect(parsed.homeId == homeId)
+        #expect(parsed.itemName == "Switch:Kitchen")
+        #expect(parsed.homeIdentifier == homeIdentifier)
+    }
+
+    @Test func currentIdentifierWithoutLocalHomeIdLeavesHomeIdUnresolved() throws {
+        let homeIdentifier = "https://example.org:8443"
+        let identifier = ItemIdentifier(unresolvedHomeIdentifier: homeIdentifier, itemName: "Switch:Kitchen")
+
+        let parsed = try #require(ItemIdentifier.entityIdentifier(for: identifier.entityIdentifierString))
+
+        #expect(parsed.homeId == nil)
+        #expect(parsed.itemName == "Switch:Kitchen")
+        #expect(parsed.homeIdentifier == homeIdentifier)
+    }
+}
+
+@Suite("HomeResolver")
+struct HomeResolverTests {
+    let homeId = UUID()
+
+    @MainActor @Test func optionalHomeUsesItemHomeId() throws {
+        let resolved = try HomeResolver.resolvedHomeId(
+            selectedHome: nil,
+            itemHomeId: homeId,
+            itemLabel: "Test Item",
+            mismatchError: ItemStateError.itemNotInHome
+        )
+
+        #expect(resolved == homeId)
+    }
+
+    @MainActor @Test func selectedHomeMismatchThrows() throws {
+        let wrongHome = Home(id: UUID().uuidString, displayString: "Wrong Home")
+
+        #expect(throws: ItemStateError.self) {
+            try HomeResolver.resolvedHomeId(
+                selectedHome: wrongHome,
+                itemHomeId: homeId,
+                itemLabel: "Test Item",
+                mismatchError: ItemStateError.itemNotInHome
+            )
+        }
+    }
+
+    @MainActor @Test func selectedHomeWithLocalSuffixUsesLocalHomeIdBeforeStableIdentifier() throws {
+        let selectedHome = Home(id: "https://example.org##\(homeId.uuidString)", displayString: "Selected Home")
+        let otherHomeId = UUID()
+
+        let resolved = try HomeResolver.resolvedHomeId(
+            selectedHome: selectedHome,
+            itemHomeId: homeId,
+            itemLabel: "Test Item",
+            stableIdentifierToLocalUUID: [
+                (selectedHome.id, homeId),
+                ("https://example.org", otherHomeId)
+            ],
+            mismatchError: ItemStateError.itemNotInHome
+        )
+
+        #expect(resolved == homeId)
+    }
+
+    @MainActor @Test func nilItemHomeIdThrowsUnknownHome() throws {
+        let selectedHome = Home(id: homeId.uuidString, displayString: "Selected Home")
+
+        #expect(throws: HomeResolutionError.self) {
+            try HomeResolver.resolvedHomeId(
+                selectedHome: selectedHome,
+                itemHomeId: nil,
+                itemLabel: "Test Item",
+                mismatchError: ItemStateError.itemNotInHome
+            )
+        }
+    }
+
+    @MainActor @Test func invalidSelectedHomeIdentifierThrows() throws {
+        let invalidHome = Home(id: "not-a-uuid", displayString: "Broken Home")
+
+        #expect(throws: HomeResolutionError.self) {
+            try HomeResolver.resolvedHomeId(
+                selectedHome: invalidHome,
+                itemHomeId: homeId,
+                itemLabel: "Test Item",
+                mismatchError: ItemStateError.itemNotInHome
+            )
+        }
+    }
+
+    @Test func selectedHomeResolutionTriesExactIdentifierBeforeStableIdentifier() async throws {
+        let otherHomeId = UUID()
+        let selectedHome = Home(id: "https://example.org##\(homeId.uuidString)", displayString: "Selected Home")
+
+        let resolved = try await HomeResolver.resolveHomeId(
+            selectedHome: selectedHome,
+            itemName: "TestItem",
+            findHomeId: { identifier in
+                if identifier == selectedHome.id {
+                    return homeId
+                }
+                if identifier == "https://example.org" {
+                    return otherHomeId
+                }
+                return nil
+            },
+            listStoredHomes: { [homeId, otherHomeId] },
+            exactMatchedHomes: { [] }
+        )
+
+        #expect(resolved == homeId)
+    }
+
+    @Test func singleStoredHomeBecomesDefault() async throws {
+        let resolved = try await HomeResolver.resolveHomeId(
+            selectedHome: nil,
+            itemName: "TestItem",
+            listStoredHomes: { [homeId] },
+            exactMatchedHomes: { [] }
+        )
+
+        #expect(resolved == homeId)
+    }
+
+    @Test func uniqueExactMatchChoosesHome() async throws {
+        let otherHomeId = UUID()
+
+        let resolved = try await HomeResolver.resolveHomeId(
+            selectedHome: nil,
+            itemName: "TestItem",
+            listStoredHomes: { [homeId, otherHomeId] },
+            exactMatchedHomes: { [otherHomeId] }
+        )
+
+        #expect(resolved == otherHomeId)
+    }
+
+    @Test func ambiguousHomesRequireSelection() async {
+        let otherHomeId = UUID()
+
+        await #expect(throws: HomeResolutionError.self) {
+            try await HomeResolver.resolveHomeId(
+                selectedHome: nil,
+                itemName: "TestItem",
+                listStoredHomes: { [homeId, otherHomeId] },
+                exactMatchedHomes: { [homeId, otherHomeId] }
+            )
+        }
     }
 }

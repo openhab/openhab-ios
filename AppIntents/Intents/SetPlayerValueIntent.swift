@@ -26,11 +26,15 @@ enum PlayerValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SetPlayerValueIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.player] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.player]
+    }
 
     static var parameterSummary: some ParameterSummary {
         Summary("Send \(\.$action) to \(\.$itemEntity)") {
@@ -53,7 +57,9 @@ struct SetPlayerValueIntent: AppIntent {
     @Parameter(title: "Action")
     var action: PlayerAction
 
-    func perform() async throws -> some IntentResult {
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        await Preferences.prepareForAppExtensionAccess()
+
         let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,
             itemHomeId: itemEntity.homeId,
@@ -71,6 +77,6 @@ struct SetPlayerValueIntent: AppIntent {
             throw PlayerValueError.commandFailed(error.localizedDescription)
         }
 
-        return .result()
+        return .result(dialog: "Sent \(action) to \(itemEntity.label)")
     }
 }

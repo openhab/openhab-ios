@@ -22,7 +22,9 @@ public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible, 
     case png
     case svg
 
-    public var id: Self { self }
+    public var id: Self {
+        self
+    }
 
     public var description: String {
         switch self {
@@ -139,9 +141,8 @@ public extension Endpoint {
         var components = URLComponents(string: baseURL)
         components?.path = path
         components?.queryItems = queryItems
-        let url = components?.url
+        return components?.url
 //        Logger.endpoint.debug("URL: \(url?.absoluteString ?? "", privacy: .private)")
-        return url
     }
 
     static func appleRegistration(prefsURL: String,

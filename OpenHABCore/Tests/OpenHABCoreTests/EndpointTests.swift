@@ -106,7 +106,7 @@ struct EndpointTests {
     }
 
     @Test
-    func emptyIconReturnsNilEndpoint() throws {
+    func emptyIconReturnsNilEndpoint() {
         let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 3,
@@ -233,7 +233,7 @@ struct EndpointTests {
     }
 
     @Test
-    func classicNumberIconReturnsNil() throws {
+    func classicNumberIconReturnsNil() {
         let result = Endpoint.icon(
             rootUrl: "https://example.org",
             version: 4,
@@ -251,8 +251,8 @@ struct EndpointTests {
 //                "oh:classic:light" to "icon/light?format=PNG&anyFormat=true&iconset=classic",
 //                "oh:custom:light" to "icon/light?format=PNG&anyFormat=true&iconset=custom"
 
-    // Test no state is transmitted
-    // Test baseURL
+    /// Test no state is transmitted
+    /// Test baseURL
     @Test
     func materialIcon1() throws {
         let result = Endpoint.icon(

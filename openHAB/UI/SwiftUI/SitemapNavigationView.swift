@@ -123,7 +123,6 @@ struct SitemapNavigationView: View {
                         } label: {
                             Image(systemSymbol: .magnifyingglass)
                         }
-                        .ohMinimumHitTarget()
                         .accessibilityLabel("Search")
                     }
                 }

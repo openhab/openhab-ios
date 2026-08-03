@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import OpenHABCore
-
 import Testing
 import UIKit
 
@@ -34,14 +33,18 @@ struct NumberStateTests {
         #expect(NumberState(value: 100.4, unit: "°C", format: "%.1f / %.1f %unit%").toString(locale: Locale(identifier: "de")) == "100.4 °C")
     }
 
-    @Test("commandString preserves full precision regardless of display format")
+    @Test("commandString preserves fractional values but strips .0 from whole numbers")
     func commandString() {
+        // Fractional values must not be truncated by display format
         #expect(NumberState(value: 30.3, format: "%d").commandString == "30.3")
         #expect(NumberState(value: 30.3, unit: "°C", format: "%d %unit%").commandString == "30.3 °C")
         #expect(NumberState(value: 30.3, unit: "°C", format: "%.1f %unit%").commandString == "30.3 °C")
-        #expect(NumberState(value: 30.0, format: "%d").commandString == "30.0")
         #expect(NumberState(value: 30.3, unit: nil, format: "%d").commandString == "30.3")
         #expect(NumberState(value: 30.3, unit: "", format: "%d").commandString == "30.3")
+        // Whole numbers must be sent without decimal suffix so HTTP binding %2$s passes clean values
+        #expect(NumberState(value: 30.0, format: "%d").commandString == "30")
+        #expect(NumberState(value: 36.0, format: "%d").commandString == "36")
+        #expect(NumberState(value: 100.0, unit: "°C", format: "%d %unit%").commandString == "100 °C")
     }
 
     @Test("setpoint formatter prefers server label when idle")
@@ -175,7 +178,7 @@ struct NumberStateTests {
     }
 
     @Test("parseAs conversions")
-    func parseAs() {
+    func parseAs() throws {
         #expect("ON".parseAsBool() == true)
         #expect("4,3,1".parseAsBrightness() == 1)
         #expect("4,31".parseAsBrightness() == nil)
@@ -189,10 +192,9 @@ struct NumberStateTests {
         #expect("24.4 °F".parseAsNumber() == NumberState(value: 24.4, unit: "°F", format: nil))
         #expect("24.4 °F".parseAsNumber(format: "%.f") == NumberState(value: 24.4, unit: "°F", format: "%.f"))
 
-        let col1 = "Uninitialized".parseAsUIColor()
+        let col1 = try #require("Uninitialized".parseAsUIColor())
         let col2 = UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
-        #expect(col1 != nil)
-        #expect(col1!.equals(col2))
+        #expect(col1.equals(col2))
         #expect("360,100,100".parseAsUIColor() == UIColor(
             hue: CGFloat(state: "360", divisor: 360),
             saturation: CGFloat(state: "100", divisor: 100),

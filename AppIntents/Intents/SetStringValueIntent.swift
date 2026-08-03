@@ -26,11 +26,16 @@ enum StringValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SetStringValueIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.stringItem] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.stringItem]
+    }
+
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$value)") {
             \.$home
@@ -53,6 +58,8 @@ struct SetStringValueIntent: AppIntent {
     var value: String
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        await Preferences.prepareForAppExtensionAccess()
+
         // Validate that the item belongs to the selected home
         let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,

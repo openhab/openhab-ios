@@ -159,6 +159,16 @@ final class MockPathMonitor: NWPathMonitoring, @unchecked Sendable {
     }
 }
 
+// TODO: DEVELOP MERGE — this file kept our stateStream()-based tests over develop's statusStream()
+// versions (see NetworkTracker: we kept our Combine stateStream architecture). Two develop test
+// scenarios are NOT covered here and should be ported (re-expressed against `stateStream()`):
+//   • testFallbackConnectionBecomesActiveBeforePreferredConnectionTimesOut — a fallback connection
+//     must become active before the preferred connection's attempt times out.
+//   • testTrackerGoesOfflineOnNetworkLoss — was commented out on develop; decide whether to finish it
+//     (our testNetworkLossMarksUnavailableAndAbandonsRetry partially covers the network-loss path).
+// Also: if the develop `withClientErrorRetry`/`revalidateConnection` resilience is later ported into
+// NetworkTracker (see the TODO there), add tests that a transient ClientError/noActiveConnection
+// triggers one revalidate-and-retry.
 @MainActor
 final class NetworkTrackerTests: XCTestCase {
     func testTrackerSetsConnectedStatusOnNetworkUp() async {

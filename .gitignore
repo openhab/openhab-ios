@@ -32,3 +32,5 @@ skills-lock.json
 BonjourDiscoveryTool/.build
 BonjourDiscoveryTool/.swiftpm
 BonjourDiscoveryTool/bonjour-discovery
+
+.xcodebuildmcp/

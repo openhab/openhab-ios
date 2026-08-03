@@ -56,11 +56,11 @@ struct SitemapPageView: View {
                 }
             } else {
                 pageContent
+                    .onDisappear { viewModel.stopLongPolling() }
             }
         }
     }
 
-    @ViewBuilder
     private var pageContent: some View {
         Group {
             if viewModel.isLoadingSitemap, viewModel.widgets.isEmpty {
@@ -95,7 +95,7 @@ struct SitemapPageView: View {
                     .padding(.vertical, 2)
                 }
                 .scrollPosition(id: $scrollPosition, anchor: .top)
-                .navigationBarTitle(viewModel.openHABSitemapPage?.title ?? "Sitemap")
+                .navigationBarTitle(viewModel.openHABSitemapPage?.title.labelValueTitle ?? "Sitemap")
             } else {
                 VStack {
                     Spacer()

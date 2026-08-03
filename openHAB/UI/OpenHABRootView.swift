@@ -229,7 +229,6 @@ struct OpenHABRootView: View {
                                 Text(item.label)
                             }
                         }
-                        .ohMinimumHitTarget()
                         .accessibilityLabel(item.label)
                         .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
                     }
@@ -266,7 +265,6 @@ struct OpenHABRootView: View {
                             .font(.title)
                     }
                     .buttonStyle(.glass)
-                    .ohMinimumHitTarget()
                     .accessibilityIdentifier("HamburgerButton")
                     .accessibilityLabel("Menu")
                     .padding(.trailing)
@@ -277,7 +275,6 @@ struct OpenHABRootView: View {
                         Image(systemSymbol: .line3Horizontal)
                             .font(.title)
                     }
-                    .ohMinimumHitTarget()
                     .accessibilityIdentifier("HamburgerButton")
                     .accessibilityLabel("Menu")
                     .padding(.trailing)

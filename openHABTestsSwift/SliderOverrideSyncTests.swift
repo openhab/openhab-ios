@@ -14,7 +14,6 @@ import OpenHABCore
 import Testing
 
 @MainActor
-@Suite
 struct SliderOverrideSyncTests {
     @Test
     func clearsSliderOverrideWhenServerCatchesUp() {

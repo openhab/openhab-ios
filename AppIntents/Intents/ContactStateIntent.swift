@@ -26,11 +26,15 @@ enum ContactStateError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct ContactStateIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.contact] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.contact]
+    }
 
     static var parameterSummary: some ParameterSummary {
         Summary("Set the state of \(\.$itemEntity) to \(\.$state)") {
@@ -54,6 +58,8 @@ struct ContactStateIntent: AppIntent {
     var state: ContactState
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        await Preferences.prepareForAppExtensionAccess()
+
         // Validate that the item belongs to the selected home
         let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,
@@ -63,15 +69,15 @@ struct ContactStateIntent: AppIntent {
         )
 
         do {
-            try await OpenHABItemCache.instance.sendCommand(
-                to: itemEntity.item,
+            try await OpenHABItemCache.instance.sendState(
+                itemEntity.item,
                 home: homeId,
-                command: state.rawValue
+                state: state.rawValue
             )
         } catch {
             throw ContactStateError.commandFailed(error.localizedDescription)
         }
 
-        return .result(dialog: "The state of \(itemEntity.label) was set to \(state.rawValue)")
+        return .result(dialog: "The state of \(itemEntity.label) was set to \(state)")
     }
 }

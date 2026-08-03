@@ -13,28 +13,378 @@ import Foundation
 import OpenHABCore
 import os.log
 
+struct IconLoadDiagnosticsSnapshot {
+    let resolutionFailures: Int
+    let starts: Int
+    let successes: Int
+    let memoryHits: Int
+    let diskHits: Int
+    let networkLoads: Int
+    let cancellations: Int
+    let failures: Int
+    let distinctURLs: Int
+    let distinctRows: Int
+
+    var isEmpty: Bool {
+        resolutionFailures == 0 &&
+            starts == 0 &&
+            successes == 0 &&
+            memoryHits == 0 &&
+            diskHits == 0 &&
+            networkLoads == 0 &&
+            cancellations == 0 &&
+            failures == 0
+    }
+}
+
+actor IconLoadDiagnostics {
+    static let shared = IconLoadDiagnostics()
+
+    private var starts = 0
+    private var resolutionFailures = 0
+    private var successes = 0
+    private var memoryHits = 0
+    private var diskHits = 0
+    private var networkLoads = 0
+    private var cancellations = 0
+    private var failures = 0
+    private var distinctURLs: Set<String> = []
+    private var distinctRows: Set<String> = []
+
+    func recordResolutionFailure(rowIdentity: String) {
+        resolutionFailures += 1
+        distinctRows.insert(rowIdentity)
+    }
+
+    func recordStart(url: URL, rowIdentity: String) {
+        starts += 1
+        distinctURLs.insert(url.absoluteString)
+        distinctRows.insert(rowIdentity)
+    }
+
+    func recordSuccess(url: URL, rowIdentity: String, cacheType: String) {
+        successes += 1
+        distinctURLs.insert(url.absoluteString)
+        distinctRows.insert(rowIdentity)
+        switch cacheType {
+        case "memory":
+            memoryHits += 1
+        case "disk":
+            diskHits += 1
+        default:
+            networkLoads += 1
+        }
+    }
+
+    func recordCancellation(url: URL, rowIdentity: String) {
+        cancellations += 1
+        distinctURLs.insert(url.absoluteString)
+        distinctRows.insert(rowIdentity)
+    }
+
+    func recordFailure(url: URL, rowIdentity: String) {
+        failures += 1
+        distinctURLs.insert(url.absoluteString)
+        distinctRows.insert(rowIdentity)
+    }
+
+    func snapshotAndReset() -> IconLoadDiagnosticsSnapshot {
+        let snapshot = IconLoadDiagnosticsSnapshot(
+            resolutionFailures: resolutionFailures,
+            starts: starts,
+            successes: successes,
+            memoryHits: memoryHits,
+            diskHits: diskHits,
+            networkLoads: networkLoads,
+            cancellations: cancellations,
+            failures: failures,
+            distinctURLs: distinctURLs.count,
+            distinctRows: distinctRows.count
+        )
+        resolutionFailures = 0
+        starts = 0
+        successes = 0
+        memoryHits = 0
+        diskHits = 0
+        networkLoads = 0
+        cancellations = 0
+        failures = 0
+        distinctURLs.removeAll(keepingCapacity: true)
+        distinctRows.removeAll(keepingCapacity: true)
+        return snapshot
+    }
+}
+
+@MainActor
+struct SitemapInitialLoadMeasurement {
+    private let pipelineStartedAt: Date
+    private let context: String
+    private let processAgeMs: Int
+    private let connectionWasReady: Bool
+    private var stage = "sitemapDiscovery"
+    private var stageStartedAt: Date
+    private var connection: ConnectionConfiguration?
+    private var discoveryMs = 0
+    private var connectionWaitMs = 0
+    private var serviceSetupMs = 0
+    private var labelFetchMs = 0
+    private var initialRequestStartedAt: Date?
+    private var initialRequestMs = 0
+    private var uiPreparationMs = 0
+    private var didLog = false
+
+    private var currentInitialRequestMs: Int {
+        initialRequestStartedAt.map { elapsedMs(since: $0) } ?? initialRequestMs
+    }
+
+    init(reason: String,
+         isLinkedPage: Bool,
+         hasCurrentPage: Bool,
+         connectionWasReady: Bool,
+         pipelineStartedAt: Date) {
+        context = SitemapDiagnostics.initialLoadContext(
+            reason: reason,
+            isLinkedPage: isLinkedPage,
+            hasCurrentPage: hasCurrentPage
+        )
+        processAgeMs = SitemapDiagnostics.processAgeMs
+        self.connectionWasReady = connectionWasReady
+        self.pipelineStartedAt = pipelineStartedAt
+        stageStartedAt = pipelineStartedAt
+    }
+
+    mutating func beginConnectionSelection() {
+        transition(to: "connectionSelection")
+    }
+
+    mutating func beginServiceSetup(connection: ConnectionConfiguration) {
+        self.connection = connection
+        transition(to: "serviceSetup")
+    }
+
+    mutating func beginLabelFetch() {
+        transition(to: "sitemapLabel")
+    }
+
+    mutating func beginInitialRequest() {
+        transition(to: "initialRequest")
+        initialRequestStartedAt = stageStartedAt
+    }
+
+    mutating func beginUIPreparation() {
+        transition(to: "uiPreparation")
+    }
+
+    mutating func log(status: String,
+                      page: OpenHABPage?,
+                      rowCount: Int,
+                      errorDescription: String = "") {
+        // The stream can later be cancelled after its initial fetch already logged success.
+        guard !didLog else { return }
+        didLog = true
+        finishCurrentStage()
+        SitemapDiagnostics.logInitialLoad(
+            context: context,
+            status: status,
+            stage: status == "success" || status == "empty" ? "complete" : stage,
+            processAgeMs: processAgeMs,
+            connectionWasReady: connectionWasReady,
+            connection: connection,
+            discoveryMs: discoveryMs,
+            connectionWaitMs: connectionWaitMs,
+            serviceSetupMs: serviceSetupMs,
+            labelFetchMs: labelFetchMs,
+            initialRequestMs: currentInitialRequestMs,
+            uiPreparationMs: uiPreparationMs,
+            totalMs: elapsedMs(since: pipelineStartedAt),
+            widgetCount: page?.widgets.count ?? 0,
+            rowCount: rowCount,
+            errorDescription: errorDescription
+        )
+    }
+
+    private mutating func transition(to nextStage: String) {
+        finishCurrentStage()
+        stage = nextStage
+        stageStartedAt = Date()
+    }
+
+    private mutating func finishCurrentStage() {
+        let duration = elapsedMs(since: stageStartedAt)
+        switch stage {
+        case "sitemapDiscovery":
+            discoveryMs = duration
+        case "connectionSelection":
+            connectionWaitMs = duration
+        case "serviceSetup":
+            serviceSetupMs = duration
+        case "sitemapLabel":
+            labelFetchMs = duration
+        case "initialRequest":
+            initialRequestMs = duration
+            initialRequestStartedAt = nil
+        case "uiPreparation":
+            uiPreparationMs = duration
+        default:
+            break
+        }
+    }
+
+    private func elapsedMs(since start: Date) -> Int {
+        Int((Date().timeIntervalSince(start) * 1000).rounded())
+    }
+}
+
 @MainActor
 enum SitemapDiagnostics {
     private static let logger = Logger(subsystem: "org.openhab", category: "SitemapDiagnostics")
+    private static let processStartedAt = ProcessInfo.processInfo.systemUptime
 
     static var isEnabled: Bool {
         Preferences.shared.applicationPreferences.sitemapDiagnosticsLogging
     }
 
-    static func logUpdate(
-        origin: PageUpdateOrigin,
-        widgetCount: Int,
-        rowCount: Int,
-        inputsChanged: Bool,
-        titleChanged: Bool,
-        reusedInputCount: Int,
-        changedRowCount: Int,
-        changedRowKinds: String,
-        analysisMs: Int
-    ) {
+    static var processAgeMs: Int {
+        Int(((ProcessInfo.processInfo.systemUptime - processStartedAt) * 1000).rounded())
+    }
+
+    static func markProcessLaunch(source: String) {
+        guard isEnabled else { return }
+        logger.info("processLaunch source=\(source, privacy: .public)")
+    }
+
+    static func initialLoadContext(reason: String,
+                                   isLinkedPage: Bool,
+                                   hasCurrentPage: Bool) -> String {
+        if reason == "scene-became-active" {
+            return "foregroundResume"
+        }
+        if !isLinkedPage,
+           !hasCurrentPage,
+           reason == "manual" || reason == "connection-changed" {
+            return "coldStart"
+        }
+        if isLinkedPage {
+            return "linkedPage"
+        }
+        return reason
+    }
+
+    // swiftlint:disable:next function_parameter_count
+    static func logInitialLoad(context: String,
+                               status: String,
+                               stage: String,
+                               processAgeMs: Int,
+                               connectionWasReady: Bool,
+                               connection: ConnectionConfiguration?,
+                               discoveryMs: Int,
+                               connectionWaitMs: Int,
+                               serviceSetupMs: Int,
+                               labelFetchMs: Int,
+                               initialRequestMs: Int,
+                               uiPreparationMs: Int,
+                               totalMs: Int,
+                               widgetCount: Int,
+                               rowCount: Int,
+                               errorDescription: String = "") {
+        guard isEnabled else { return }
+        let connectionKind = connection.map(connectionKind(for:)) ?? "none"
+        let connectionDescription = connection?.publicLogDescription ?? "none"
+        // swiftlint:disable line_length
+        logger.info(
+            "initialLoad context=\(context, privacy: .public) status=\(status, privacy: .public) stage=\(stage, privacy: .public) processAgeMs=\(processAgeMs, privacy: .public) connectionWasReady=\(connectionWasReady, privacy: .public) connectionKind=\(connectionKind, privacy: .public) connection=\(connectionDescription, privacy: .public) discoveryMs=\(discoveryMs, privacy: .public) connectionWaitMs=\(connectionWaitMs, privacy: .public) serviceSetupMs=\(serviceSetupMs, privacy: .public) labelFetchMs=\(labelFetchMs, privacy: .public) initialRequestMs=\(initialRequestMs, privacy: .public) uiPreparationMs=\(uiPreparationMs, privacy: .public) totalMs=\(totalMs, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) error=\(errorDescription, privacy: .public)"
+        )
+        // swiftlint:enable line_length
+    }
+
+    static func connectionKind(for configuration: ConnectionConfiguration) -> String {
+        if configuration.isCloudConnection {
+            return "cloud"
+        }
+        if configuration.priority == 0 {
+            return "local"
+        }
+        return "remote"
+    }
+
+    // swiftlint:disable:next function_parameter_count
+    static func logUpdate(origin: PageUpdateOrigin,
+                          widgetCount: Int,
+                          rowCount: Int,
+                          inputsChanged: Bool,
+                          titleChanged: Bool,
+                          reusedInputCount: Int,
+                          changedRowCount: Int,
+                          changedRowKinds: String,
+                          analysisMs: Int,
+                          buildRowInputsMs: Int,
+                          applyStateMs: Int,
+                          totalUpdateMs: Int) {
+        guard isEnabled else { return }
+        // swiftlint:disable:next line_length
+        logger.info("update origin=\(origin.rawValue, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) inputsChanged=\(inputsChanged, privacy: .public) titleChanged=\(titleChanged, privacy: .public) reusedInputs=\(reusedInputCount, privacy: .public) changedRows=\(changedRowCount, privacy: .public) changedKinds=\(changedRowKinds, privacy: .public) buildRowInputsMs=\(buildRowInputsMs, privacy: .public) applyStateMs=\(applyStateMs, privacy: .public) analysisMs=\(analysisMs, privacy: .public) totalUpdateMs=\(totalUpdateMs, privacy: .public)")
+    }
+
+    static func logLongPoll(requestMs: Int,
+                            returnedPage: Bool,
+                            status: String,
+                            responseGapMs: Int?) {
         guard isEnabled else { return }
         logger.info(
-            "update origin=\(origin.rawValue, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) inputsChanged=\(inputsChanged, privacy: .public) titleChanged=\(titleChanged, privacy: .public) reusedInputs=\(reusedInputCount, privacy: .public) changedRows=\(changedRowCount, privacy: .public) changedKinds=\(changedRowKinds, privacy: .public) analysisMs=\(analysisMs, privacy: .public)"
+            "longPoll requestMs=\(requestMs, privacy: .public) returnedPage=\(returnedPage, privacy: .public) status=\(status, privacy: .public) responseGapMs=\(responseGapMs ?? -1, privacy: .public)"
+        )
+    }
+
+    static func logLongPollDebounce(action: String,
+                                    elapsedMs: Int,
+                                    remainingMs: Int,
+                                    replacedPendingPage: Bool,
+                                    coalescedUpdates: Int) {
+        guard isEnabled else { return }
+        // swiftlint:disable line_length
+        logger.info(
+            "longPollDebounce action=\(action, privacy: .public) elapsedMs=\(elapsedMs, privacy: .public) remainingMs=\(remainingMs, privacy: .public) replacedPendingPage=\(replacedPendingPage, privacy: .public) coalescedUpdates=\(coalescedUpdates, privacy: .public)"
+        )
+        // swiftlint:enable line_length
+    }
+
+    static func logIconSummary(_ snapshot: IconLoadDiagnosticsSnapshot) {
+        guard isEnabled, !snapshot.isEmpty else { return }
+        // swiftlint:disable:next line_length
+        logger.info("icons resolutionFailures=\(snapshot.resolutionFailures, privacy: .public) starts=\(snapshot.starts, privacy: .public) successes=\(snapshot.successes, privacy: .public) memoryHits=\(snapshot.memoryHits, privacy: .public) diskHits=\(snapshot.diskHits, privacy: .public) networkLoads=\(snapshot.networkLoads, privacy: .public) cancellations=\(snapshot.cancellations, privacy: .public) failures=\(snapshot.failures, privacy: .public) distinctURLs=\(snapshot.distinctURLs, privacy: .public) distinctRows=\(snapshot.distinctRows, privacy: .public)")
+    }
+
+    static func logIconResolutionFailure(rowIdentity: String,
+                                         icon: String,
+                                         reason: String,
+                                         trackerStatus: String,
+                                         connectionDescription: String) {
+        guard isEnabled else { return }
+        // swiftlint:disable line_length
+        logger.info(
+            "iconResolutionFailure row=\(rowIdentity, privacy: .private(mask: .hash)) icon=\(icon, privacy: .public) reason=\(reason, privacy: .public) trackerStatus=\(trackerStatus, privacy: .public) connection=\(connectionDescription, privacy: .public)"
+        )
+        // swiftlint:enable line_length
+    }
+
+    static func logIconStart(rowIdentity: String, icon: String, url: URL, cacheKey: String) {
+        guard isEnabled else { return }
+        logger.debug(
+            "iconStart row=\(rowIdentity, privacy: .private(mask: .hash)) icon=\(icon, privacy: .public) url=\(url.absoluteString, privacy: .public) cacheKey=\(cacheKey, privacy: .public)"
+        )
+    }
+
+    static func logIconSuccess(rowIdentity: String, icon: String, url: URL, cacheType: String) {
+        guard isEnabled else { return }
+        logger.info(
+            "iconSuccess row=\(rowIdentity, privacy: .private(mask: .hash)) icon=\(icon, privacy: .public) url=\(url.absoluteString, privacy: .public) cacheType=\(cacheType, privacy: .public)"
+        )
+    }
+
+    static func logIconFailure(rowIdentity: String, icon: String, url: URL, reason: String, cancelled: Bool) {
+        guard isEnabled else { return }
+        logger.info(
+            "iconFailure row=\(rowIdentity, privacy: .private(mask: .hash)) icon=\(icon, privacy: .public) url=\(url.absoluteString, privacy: .public) cancelled=\(cancelled, privacy: .public) reason=\(reason, privacy: .public)"
         )
     }
 
@@ -49,14 +399,13 @@ enum SitemapDiagnostics {
     }
 
     static func changedRowKinds(from oldInputs: [SitemapRowInput], to newInputs: [SitemapRowInput]) -> String {
-        let changedKinds: [String]
-        if newInputs.count == oldInputs.count {
-            changedKinds = zip(newInputs, oldInputs)
+        let changedKinds: [String] = if newInputs.count == oldInputs.count {
+            zip(newInputs, oldInputs)
                 .compactMap { newInput, oldInput in
                     newInput != oldInput ? rowKind(for: newInput) : nil
                 }
         } else {
-            changedKinds = newInputs.map(rowKind(for:))
+            newInputs.map(rowKind(for:))
         }
 
         guard !changedKinds.isEmpty else { return "none" }
@@ -65,9 +414,12 @@ enum SitemapDiagnostics {
             counts[kind, default: 0] += 1
         }
 
-        return counts.keys.sorted().map { kind in
-            "\(kind):\(counts[kind, default: 0])"
-        }.joined(separator: ",")
+        return counts.keys
+            .sorted()
+            .map { kind in
+                "\(kind):\(counts[kind, default: 0])"
+            }
+            .joined(separator: ",")
     }
 
     static func rowKind(for input: SitemapRowInput) -> String {

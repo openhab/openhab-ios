@@ -577,6 +577,13 @@ public extension NetworkTracker {
         try await send(to: item.name, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
     }
 
+    // TODO: DEVELOP MERGE (NetworkTracker resilience): develop wrapped send/updateState/pollDataForPage/
+    // runNow in a `withClientErrorRetry` helper that, on `OpenAPIRuntime.ClientError` or
+    // `NetworkTrackerError.noActiveConnection`, calls `revalidateConnection()` (setActiveConnection(nil)
+    // + failureTracker.resetAll() + attemptConnection) and retries the operation once — recovering from
+    // a stale connection after a network switch / process suspension. Not ported here to avoid changing
+    // the send path during active work; port `revalidateConnection` + `withClientErrorRetry` if that
+    // handoff resilience is still wanted.
     func send(to item: String, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
         try await service().sendItemCommand(itemname: item, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
     }
@@ -607,6 +614,14 @@ public extension NetworkTracker {
     /// A single stream combining active connection, status and the retry deadline, so a
     /// consumer receives one coherent `NetworkState` per change instead of interleaving
     /// several streams.
+    // TODO: Combine → concurrency migration. This bridges Combine into an AsyncStream:
+    // `CombineLatest4` observes the actor's `@Published` properties (which exist ONLY to feed this
+    // publisher — `@Published` on an actor is an unusual bridge). Per the project guideline (avoid
+    // Combine, prefer async/await), reimplement without Combine: keep an internal set of
+    // `AsyncStream<NetworkState>.Continuation`s (as develop's NetworkTracker did for its per-property
+    // streams) and `yield` a fresh coherent NetworkState from setActiveConnection/updateStatus/
+    // scheduleRetry/handleNetworkChange whenever any field changes. That also lets the properties drop
+    // `@Published`. Consumers already use `for await`, so the call site is unaffected.
     func stateStream() -> AsyncStream<NetworkState> {
         AsyncStream { continuation in
             let cancellable = Publishers.CombineLatest4($activeConnection, $status, $nextRetryDate, $isNetworkAvailable)

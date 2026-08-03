@@ -9,7 +9,48 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Foundation
 import OpenHABCore
+
+enum SitemapPageError: LocalizedError {
+    case noActiveConnection
+    case serviceUnavailable
+    case noData
+
+    var errorDescription: String? {
+        switch self {
+        case .noActiveConnection:
+            "No active connection available."
+        case .serviceUnavailable:
+            "Service unavailable."
+        case .noData:
+            "No page data received."
+        }
+    }
+}
+
+enum CommandLifecycleSummary: Equatable {
+    case idle
+    case sending(count: Int)
+    case failed(count: Int)
+}
+
+enum SitemapInteractionSummary: Equatable {
+    case onlineIdle
+    case connecting
+    case offline
+    case queued(count: Int)
+    case sending(count: Int)
+    case failed(count: Int)
+}
+
+enum RowInteractionState: Equatable {
+    case idle
+    case offline
+    case queued
+    case sending
+    case failed
+}
 
 enum CommandSendOrigin: String {
     case command
@@ -26,7 +67,91 @@ struct QueuedCommand {
     let version: Int
 }
 
-// swiftlint:disable:next file_types_order
+struct WidgetMappingKey: Equatable {
+    let command: String
+    let label: String
+    let row: Int?
+    let column: Int?
+    let icon: String?
+    let releaseCommand: String?
+
+    init(_ mapping: OpenHABWidgetMapping) {
+        command = mapping.command
+        label = mapping.label
+        row = mapping.row
+        column = mapping.column
+        icon = mapping.icon
+        releaseCommand = mapping.releaseCommand
+    }
+}
+
+struct WidgetItemKey: Equatable {
+    let name: String
+    let state: String?
+    let link: String
+    let label: String
+    let type: OpenHABItem.ItemType?
+    let groupType: OpenHABItem.ItemType?
+    let stateDescription: WidgetStateDescriptionKey?
+    let commandOptions: [WidgetCommandOptionKey]
+
+    static func from(item: OpenHABItem?) -> WidgetItemKey? {
+        guard let item else { return nil }
+        return WidgetItemKey(
+            name: item.name,
+            state: item.state,
+            link: item.link,
+            label: item.label,
+            type: item.type,
+            groupType: item.groupType,
+            stateDescription: WidgetStateDescriptionKey.from(stateDescription: item.stateDescription),
+            commandOptions: item.commandDescription?.commandOptions.map(WidgetCommandOptionKey.init) ?? []
+        )
+    }
+}
+
+struct WidgetStateDescriptionKey: Equatable {
+    let minimum: Double
+    let maximum: Double
+    let step: Double
+    let readOnly: Bool
+    let numberPattern: String?
+    let options: [WidgetOptionKey]
+
+    static func from(stateDescription: OpenHABStateDescription?) -> WidgetStateDescriptionKey? {
+        guard let stateDescription else { return nil }
+        return WidgetStateDescriptionKey(
+            minimum: stateDescription.minimum,
+            maximum: stateDescription.maximum,
+            step: stateDescription.step,
+            readOnly: stateDescription.readOnly,
+            numberPattern: stateDescription.numberPattern,
+            options: stateDescription.options.map(WidgetOptionKey.init)
+        )
+    }
+}
+
+struct WidgetOptionKey: Equatable {
+    let value: String
+    let label: String
+
+    init(_ option: OpenHABOptions) {
+        value = option.value
+        label = option.label
+    }
+}
+
+struct WidgetCommandOptionKey: Equatable {
+    let command: String
+    let label: String?
+
+    init(_ option: OpenHABCommandOptions) {
+        command = option.command
+        label = option.label
+    }
+}
+
+// swiftformat:disable:next redundantSendable
 struct WidgetRenderKey: Equatable, Sendable {
     let label: String
     let icon: String
@@ -106,131 +231,6 @@ struct WidgetRenderKey: Equatable, Sendable {
             item: WidgetItemKey.from(item: widget.item),
             childWidgets: widget.widgets.map(WidgetRenderKey.from)
         )
-    }
-
-    // Keep this manual to avoid slow compile times for a very large synthesized implementation.
-    static func == (lhs: WidgetRenderKey, rhs: WidgetRenderKey) -> Bool {
-        lhs.label == rhs.label &&
-            lhs.icon == rhs.icon &&
-            lhs.state == rhs.state &&
-            lhs.iconColor == rhs.iconColor &&
-            lhs.labelColor == rhs.labelColor &&
-            lhs.valueColor == rhs.valueColor &&
-            lhs.url == rhs.url &&
-            lhs.period == rhs.period &&
-            lhs.service == rhs.service &&
-            lhs.legend == rhs.legend &&
-            lhs.refresh == rhs.refresh &&
-            lhs.height == rhs.height &&
-            lhs.forceAsItem == rhs.forceAsItem &&
-            lhs.visibility == rhs.visibility &&
-            lhs.staticIcon == rhs.staticIcon &&
-            lhs.switchSupport == rhs.switchSupport &&
-            lhs.releaseOnly == rhs.releaseOnly &&
-            lhs.minValue == rhs.minValue &&
-            lhs.maxValue == rhs.maxValue &&
-            lhs.step == rhs.step &&
-            lhs.pattern == rhs.pattern &&
-            lhs.unit == rhs.unit &&
-            lhs.type == rhs.type &&
-            lhs.inputHintRawValue == rhs.inputHintRawValue &&
-            lhs.encoding == rhs.encoding &&
-            lhs.labelSourceRawValue == rhs.labelSourceRawValue &&
-            lhs.yAxisDecimalPattern == rhs.yAxisDecimalPattern &&
-            lhs.row == rhs.row &&
-            lhs.column == rhs.column &&
-            lhs.releaseCommand == rhs.releaseCommand &&
-            lhs.command == rhs.command &&
-            lhs.stateless == rhs.stateless &&
-            lhs.linkedPageLink == rhs.linkedPageLink &&
-            lhs.linkedPageTitle == rhs.linkedPageTitle &&
-            lhs.mappings == rhs.mappings &&
-            lhs.item == rhs.item &&
-            lhs.childWidgets == rhs.childWidgets
-    }
-}
-
-struct WidgetMappingKey: Equatable, Sendable {
-    let command: String
-    let label: String
-    let row: Int?
-    let column: Int?
-    let icon: String?
-    let releaseCommand: String?
-
-    init(_ mapping: OpenHABWidgetMapping) {
-        command = mapping.command
-        label = mapping.label
-        row = mapping.row
-        column = mapping.column
-        icon = mapping.icon
-        releaseCommand = mapping.releaseCommand
-    }
-}
-
-struct WidgetItemKey: Equatable, Sendable {
-    let name: String
-    let state: String?
-    let link: String
-    let label: String
-    let type: OpenHABItem.ItemType?
-    let groupType: OpenHABItem.ItemType?
-    let stateDescription: WidgetStateDescriptionKey?
-    let commandOptions: [WidgetCommandOptionKey]
-
-    static func from(item: OpenHABItem?) -> WidgetItemKey? {
-        guard let item else { return nil }
-        return WidgetItemKey(
-            name: item.name,
-            state: item.state,
-            link: item.link,
-            label: item.label,
-            type: item.type,
-            groupType: item.groupType,
-            stateDescription: WidgetStateDescriptionKey.from(stateDescription: item.stateDescription),
-            commandOptions: item.commandDescription?.commandOptions.map(WidgetCommandOptionKey.init) ?? []
-        )
-    }
-}
-
-struct WidgetStateDescriptionKey: Equatable, Sendable {
-    let minimum: Double
-    let maximum: Double
-    let step: Double
-    let readOnly: Bool
-    let numberPattern: String?
-    let options: [WidgetOptionKey]
-
-    static func from(stateDescription: OpenHABStateDescription?) -> WidgetStateDescriptionKey? {
-        guard let stateDescription else { return nil }
-        return WidgetStateDescriptionKey(
-            minimum: stateDescription.minimum,
-            maximum: stateDescription.maximum,
-            step: stateDescription.step,
-            readOnly: stateDescription.readOnly,
-            numberPattern: stateDescription.numberPattern,
-            options: stateDescription.options.map(WidgetOptionKey.init)
-        )
-    }
-}
-
-struct WidgetOptionKey: Equatable, Sendable {
-    let value: String
-    let label: String
-
-    init(_ option: OpenHABOptions) {
-        value = option.value
-        label = option.label
-    }
-}
-
-struct WidgetCommandOptionKey: Equatable, Sendable {
-    let command: String
-    let label: String?
-
-    init(_ option: OpenHABCommandOptions) {
-        command = option.command
-        label = option.label
     }
 }
 

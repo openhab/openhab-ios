@@ -38,13 +38,11 @@ struct ScreenSaverTextLayout {
 enum ScreenSaverLayoutCalculator {
     static let edgeMargin: CGFloat = 20
 
-    static func layout(
-        containerSize: CGSize,
-        configuration: ScreenSaverConfiguration,
-        dateText: String?,
-        timeText: String?,
-        fontName: String?
-    ) -> ScreenSaverTextLayout {
+    static func layout(containerSize: CGSize,
+                       configuration: ScreenSaverConfiguration,
+                       dateText: String?,
+                       timeText: String?,
+                       fontName: String?) -> ScreenSaverTextLayout {
         let shortSide = min(containerSize.width, containerSize.height)
         let baseTimeFontSize = max(shortSide * configuration.timeFontSizeRatio, 48)
         let baseDateFontSize = baseTimeFontSize * configuration.dateFontRelativeSize
@@ -75,14 +73,13 @@ enum ScreenSaverLayoutCalculator {
         )
     }
 
-    private static func fittedFontSizes(
-        maximumWidth: CGFloat,
-        baseTimeFontSize: CGFloat,
-        baseDateFontSize: CGFloat,
-        dateText: String?,
-        timeText: String?,
-        fontName: String?
-    ) -> (time: CGFloat, date: CGFloat) {
+    // swiftlint:disable:next function_parameter_count
+    private static func fittedFontSizes(maximumWidth: CGFloat,
+                                        baseTimeFontSize: CGFloat,
+                                        baseDateFontSize: CGFloat,
+                                        dateText: String?,
+                                        timeText: String?,
+                                        fontName: String?) -> (time: CGFloat, date: CGFloat) {
         var timeFontSize = baseTimeFontSize
         var dateFontSize = baseDateFontSize
 
@@ -111,15 +108,12 @@ enum ScreenSaverLayoutCalculator {
         return (timeFontSize, dateFontSize)
     }
 
-    private static func fonts(
-        timeFontSize: CGFloat,
-        dateFontSize: CGFloat,
-        fontName: String?
-    ) -> (time: UIFont, date: UIFont) {
+    private static func fonts(timeFontSize: CGFloat,
+                              dateFontSize: CGFloat,
+                              fontName: String?) -> (time: UIFont, date: UIFont) {
         if let fontName,
            let timeFont = UIFont(name: fontName, size: timeFontSize),
-           let dateFont = UIFont(name: fontName, size: dateFontSize)
-        {
+           let dateFont = UIFont(name: fontName, size: dateFontSize) {
             return (timeFont, dateFont)
         }
 
@@ -129,24 +123,20 @@ enum ScreenSaverLayoutCalculator {
         )
     }
 
-    private static func measuredWidth(
-        dateText: String?,
-        timeText: String?,
-        dateFont: UIFont,
-        timeFont: UIFont
-    ) -> CGFloat {
+    private static func measuredWidth(dateText: String?,
+                                      timeText: String?,
+                                      dateFont: UIFont,
+                                      timeFont: UIFont) -> CGFloat {
         max(
             lineWidth(dateText, font: dateFont),
             lineWidth(timeText, font: timeFont)
         )
     }
 
-    private static func measuredSize(
-        dateText: String?,
-        timeText: String?,
-        dateFont: UIFont,
-        timeFont: UIFont
-    ) -> CGSize {
+    private static func measuredSize(dateText: String?,
+                                     timeText: String?,
+                                     dateFont: UIFont,
+                                     timeFont: UIFont) -> CGSize {
         let width = measuredWidth(
             dateText: dateText,
             timeText: timeText,

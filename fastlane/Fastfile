@@ -55,9 +55,9 @@ platform :ios do
         run_tests(
             workspace: 'openHAB.xcworkspace',
             scheme: 'openHABTestsSwift',
-            xcargs: '-skipPackagePluginValidation',
+            xcargs: '-skipPackagePluginValidation CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO',
             testplan: 'openHABTests',
-            devices: ['iPhone 17 Pro (26.2)'],
+            devices: ['iPhone 17 Pro (26.4)'],
             clean: true
         )
     end
@@ -146,6 +146,12 @@ platform :ios do
         update_code_signing_settings(
             targets: 'NotificationService',
             profile_name: 'match AppStore org.openhab.app.NotificationService',
+            build_configurations: ["Release"]
+        )
+
+        update_code_signing_settings(
+            targets: 'OpenHABWatchComplicationsExtension',
+            profile_name: 'match AppStore org.openhab.app.watchkitapp.OpenHABWatchComplications',
             build_configurations: ["Release"]
         )
 

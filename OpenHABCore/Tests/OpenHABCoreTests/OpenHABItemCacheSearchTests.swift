@@ -43,6 +43,17 @@ struct OpenHABItemCacheSearchTests {
         #expect(ranked.map(\.item.name) == ["KitchenSwitch"])
     }
 
+    @Test
+    func rankedSearchMatchesAdditionalCandidates() {
+        let officeSensor = makeItem(name: "TemperatureSensorOffice", label: "Office Sensor", type: "Number")
+
+        let ranked = [officeSensor].ranked(searchTerm: "main temp", for: nil) { item in
+            ["\(item.name) Main Home", "\(item.label) Main Home"]
+        }
+
+        #expect(ranked.map(\.item.name) == ["TemperatureSensorOffice"])
+    }
+
     private func makeItem(name: String, label: String, type: String = "Switch") -> OpenHABItem {
         OpenHABItem(
             name: name,

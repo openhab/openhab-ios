@@ -18,6 +18,7 @@ import SwiftUI
 private struct SelectionRowContent: View {
     let input: SelectionRowInput
     let widgetVersion: Int
+    let interactionState: RowInteractionState
     let onSelect: (String) -> Void
 
     private let logger = Logger(subsystem: "org.openhab", category: "SelectionRowView")
@@ -26,6 +27,7 @@ private struct SelectionRowContent: View {
     @State private var optimisticBaseState: String?
     @State private var optimisticWidgetId: String?
     @State private var optimisticStartVersion: Int?
+    @State private var revertTask: Task<Void, Never>?
 
     var body: some View {
         let displayedCommand = effectiveCommand(displayState: input.displayState)
@@ -54,9 +56,23 @@ private struct SelectionRowContent: View {
                 self.optimisticStartVersion = widgetVersion
             }
         }
+        .onChange(of: interactionState) { newState in
+            switch newState {
+            case .idle:
+                guard optimisticWidgetId != nil else { return }
+                revertTask?.cancel()
+                revertTask = Task { @MainActor in
+                    do { try await Task.sleep(for: .seconds(1.5)) } catch { return }
+                    clearOptimisticSelection()
+                }
+            case .failed:
+                clearOptimisticSelection()
+            case .sending, .queued, .offline:
+                break
+            }
+        }
     }
 
-    @ViewBuilder
     private func rowContent(displayedCommand: String) -> some View {
         RowViewWithIcon(input: input) {
             if !input.displayState.labelText.isEmpty {
@@ -82,6 +98,9 @@ private struct SelectionRowContent: View {
                             optimisticStartVersion = widgetVersion
                         }
                         onSelect(mapping.command)
+                        // Revert is driven by interactionState transitions (see onChange), not a tap-time timer.
+                        revertTask?.cancel()
+                        revertTask = nil
                     } label: {
                         if isSelected {
                             Label(mapping.label, systemSymbol: .checkmark)
@@ -163,6 +182,8 @@ private struct SelectionRowContent: View {
     }
 
     private func clearOptimisticSelection() {
+        revertTask?.cancel()
+        revertTask = nil
         optimisticCommand = nil
         optimisticBaseState = nil
         optimisticWidgetId = nil
@@ -178,7 +199,8 @@ struct SelectionRowView: View {
     var body: some View {
         SelectionRowContent(
             input: input,
-            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId)
+            widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
+            interactionState: viewModel.rowInteractionState(for: input.itemName)
         ) { command in
             guard let itemName = input.itemName else { return }
             viewModel.sendCommand(command, for: itemName)

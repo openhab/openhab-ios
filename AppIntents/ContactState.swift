@@ -12,15 +12,25 @@
 import AppIntents
 import Foundation
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 enum ContactState: String, AppEnum {
-    case on = "ON"
-    case off = "OFF"
+    case open = "OPEN"
+    case closed = "CLOSED"
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Contact State")
 
     static let caseDisplayRepresentations: [Self: DisplayRepresentation] = [
-        .on: "On",
-        .off: "Off"
+        .open: "Open",
+        .closed: "Closed"
     ]
+}
+
+@available(iOS 17.0, macOS 14.0, *)
+extension ContactState: CustomLocalizedStringResourceConvertible {
+    var localizedStringResource: LocalizedStringResource {
+        switch self {
+        case .open: "Open"
+        case .closed: "Closed"
+        }
+    }
 }

@@ -14,6 +14,17 @@ import OpenHABCore
 import os
 import SwiftUI
 
+// TODO: DEVELOP MERGE — this file kept our per-home editing / dirty-tracking version, which diverged
+// entirely from develop's SettingsView. Two develop bug fixes were NOT ported and should be re-applied
+// on top of this structure:
+//   • #1209 (c2ac26fa) "Prompt user to grant Local Network access for local connections": on Save,
+//     when a non-demo local URL changed and wasn't successfully tested, develop set a
+//     `showLocalNetworkAlert` and presented an alert prompting the user to grant iOS Local Network
+//     permission before dismissing. Without it, local connections can silently fail on iOS 14+.
+//   • #1193 (f7fab664) "Fix sitemap picker showing empty when connected via cloud": develop drove the
+//     sitemap list from MainActorNetworkTracker's active connection (including proxyURL) so the picker
+//     populates over a cloud/proxy connection instead of appearing empty.
+// See `git show c2ac26fa` / `git show f7fab664` for the exact patches.
 struct SettingsView: View {
     /// When non-nil, the view edits the specified stored home instead of the active home.
     var homeId: UUID?
@@ -90,7 +101,10 @@ struct SettingsView: View {
             ConnectionSettingsView(
                 settingsDemomode: $settingsDemomode,
                 localConnectionConfiguration: $settingsLocalConnectionConfiguration,
-                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration
+                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration,
+                // TODO: DEVELOP MERGE (#1209) — inert binding; wire this to real state and the
+                // Local Network access prompt when porting #1209 (see the file-level TODO above).
+                localTestedOKURL: .constant("")
             )
 
             ApplicationSettingsView(

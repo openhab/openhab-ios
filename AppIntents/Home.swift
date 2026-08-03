@@ -13,28 +13,167 @@ import AppIntents
 import Foundation
 import OpenHABCore
 
-// MARK: - Stable Cross-Device Identifier
+// MARK: - Errors
 
-extension HomePreferences {
-    /// A stable identifier that is the same on every device configured for the same openHAB server.
-    /// Used as Home.id so that shortcuts synced via iCloud resolve correctly on a second device.
+enum HomeResolutionError: Error, CustomLocalizedStringResourceConvertible {
+    case unknownHome
+    case ambiguousHomeSelection(String)
+
+    var localizedStringResource: LocalizedStringResource {
+        switch self {
+        case .unknownHome:
+            "Unknown home"
+        case let .ambiguousHomeSelection(itemName):
+            "Select a home for '\(itemName)'"
+        }
+    }
+}
+
+// MARK: - HomeResolver
+
+enum HomeResolver {
+    /// Validates that `selectedHome` matches `itemHomeId` and returns the resolved local UUID.
     ///
-    /// Priority:
-    /// 1. cloudUserId — unique per myopenhab.org account
-    /// 2. remote URL — unique for self-hosted cloud servers
-    /// 3. local URL — fallback for local-only setups
-    /// 4. UUID string — last resort (no cross-device benefit, but avoids an empty identifier)
-    var stableIdentifier: String {
-        if let cloudId = remoteConnectionConfig.cloudUserId, !cloudId.isEmpty {
-            return cloudId
+    /// Resolution order:
+    /// 1. Match `selectedHome.id` against entries in `stableIdentifierToLocalUUID`.
+    /// 2. Fall back to treating `selectedHome.id` as a legacy device-local UUID string.
+    ///
+    /// The default empty array skips stable-identifier lookup and falls straight through to the
+    /// UUID fallback — this keeps unit tests working without any Preferences setup.
+    static func resolvedHomeId(selectedHome: Home?,
+                               itemHomeId: UUID?,
+                               itemLabel: String,
+                               stableIdentifierToLocalUUID: [(String, UUID)] = [],
+                               mismatchError: (String, String) -> some Error) throws -> UUID {
+        guard let selectedHome else {
+            guard let itemHomeId else {
+                throw HomeResolutionError.unknownHome
+            }
+            return itemHomeId
         }
-        if !remoteConnectionConfig.url.isEmpty {
-            return remoteConnectionConfig.url
+
+        let homeId: UUID
+        if let match = stableIdentifierToLocalUUID.first(where: { $0.0 == selectedHome.id }) {
+            homeId = match.1
+        } else if let match = stableIdentifierToLocalUUID.first(where: { $0.0 == Home.stableIdentifierComponent(of: selectedHome.id) }) {
+            homeId = match.1
+        } else if let uuid = UUID(uuidString: selectedHome.id) {
+            homeId = uuid
+        } else if let uuid = UUID(uuidString: Home.stableIdentifierComponent(of: selectedHome.id)) {
+            homeId = uuid
+        } else {
+            throw HomeResolutionError.unknownHome
         }
-        if !localConnectionConfig.url.isEmpty {
-            return localConnectionConfig.url
+
+        guard let itemHomeId else {
+            throw HomeResolutionError.unknownHome
         }
-        return id.uuidString
+        guard homeId == itemHomeId else {
+            throw mismatchError(itemLabel, selectedHome.displayString)
+        }
+
+        return homeId
+    }
+
+    /// Production overload — builds the stable-identifier map on the main actor before delegating
+    /// to the testable sync overload. Intent `perform()` methods call this with `try await`.
+    @MainActor
+    static func resolvedHomeId(selectedHome: Home?,
+                               itemHomeId: UUID?,
+                               itemLabel: String,
+                               mismatchError: (String, String) -> some Error) throws -> UUID {
+        // Map entries use the storedHomes dict key (not HomePreferences.id) so the resolved UUID
+        // matches the dict key stored in ItemIdentifier.homeId by entities(for:) — both sides of
+        // the guard homeId == itemHomeId check are then the same value.
+        let storedHomes = Preferences.shared.storedHomes
+        // Count occurrences of each stableIdentifier so bare-name entries are only added when
+        // unique — mirrors resolvePreferences(for:in:) which requires a unique stable-id match.
+        let stableIdCounts = storedHomes.values.reduce(into: [String: Int]()) { $0[$1.stableIdentifier, default: 0] += 1 }
+        let map = storedHomes.flatMap { key, prefs -> [(String, UUID)] in
+            var entries: [(String, UUID)] = [("\(prefs.stableIdentifier)##\(prefs.id.uuidString)", key)]
+            if stableIdCounts[prefs.stableIdentifier] == 1 {
+                entries.append((prefs.stableIdentifier, key))
+            }
+            return entries
+        }
+        return try resolvedHomeId(
+            selectedHome: selectedHome,
+            itemHomeId: itemHomeId,
+            itemLabel: itemLabel,
+            stableIdentifierToLocalUUID: map,
+            mismatchError: mismatchError
+        )
+    }
+
+    /// Production overload for item-by-name resolution (iOS 16 compat intents).
+    /// Builds a stable-identifier-aware `findHomeId` closure and delegates to the testable overload.
+    static func resolveHomeId(selectedHome: Home?,
+                              itemName: String,
+                              allowedTypes: [OpenHABItem.ItemType]? = nil) async throws -> UUID {
+        await Preferences.prepareForAppExtensionAccess()
+
+        return try await resolveHomeId(
+            selectedHome: selectedHome,
+            itemName: itemName,
+            findHomeId: { identifier in
+                await MainActor.run {
+                    Home.resolveStoredHomeKey(for: identifier, in: Preferences.shared.storedHomes)
+                }
+            },
+            listStoredHomes: { await Preferences.shared.listStoredHomes() },
+            exactMatchedHomes: {
+                let searchResults = await OpenHABItemCache.instance.searchCachedOrPersistedItems(
+                    searchTerm: itemName,
+                    types: allowedTypes
+                )
+                let normalizedItemName = itemName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+                return Set(searchResults.flatMap { homeId, items in
+                    items.compactMap { item in
+                        item.name.localizedCaseInsensitiveCompare(normalizedItemName) == .orderedSame ? homeId : nil
+                    }
+                })
+            }
+        )
+    }
+
+    /// Testable overload. All parameters are injected via closures so unit tests can provide
+    /// mock implementations.
+    ///
+    /// `findHomeId` defaults to UUID-string parsing so existing tests that only exercise the
+    /// `selectedHome: nil` path compile and run without modification.
+    static func resolveHomeId(selectedHome: Home?,
+                              itemName: String,
+                              findHomeId: @escaping (String) async -> UUID? = { UUID(uuidString: $0) },
+                              listStoredHomes: @escaping () async -> [UUID],
+                              exactMatchedHomes: @escaping () async -> Set<UUID>) async throws -> UUID {
+        if let selectedHome {
+            let stableId = Home.stableIdentifierComponent(of: selectedHome.id)
+            let homeId = if let exactHomeId = await findHomeId(selectedHome.id) {
+                exactHomeId
+            } else {
+                await findHomeId(stableId)
+            }
+            guard let homeId else {
+                throw HomeResolutionError.unknownHome
+            }
+            return homeId
+        }
+
+        let storedHomes = await listStoredHomes()
+        guard !storedHomes.isEmpty else {
+            throw HomeResolutionError.unknownHome
+        }
+        if storedHomes.count == 1, let onlyHomeId = storedHomes.first {
+            return onlyHomeId
+        }
+
+        let matchedHomes = await exactMatchedHomes()
+        if matchedHomes.count == 1, let matchedHomeId = matchedHomes.first {
+            return matchedHomeId
+        }
+
+        throw HomeResolutionError.ambiguousHomeSelection(itemName)
     }
 }
 
@@ -43,23 +182,31 @@ extension HomePreferences {
 struct Home: AppEntity {
     struct HomeQuery: EntityQuery {
         @MainActor
-        func entities(for identifiers: [Home.ID]) async throws -> [Home] {
+        func entities(for identifiers: [Home.ID]) throws -> [Home] {
             let storedHomes = Preferences.shared.storedHomes
             return identifiers.compactMap { identifier in
-                // Current format: match by stable cross-device identifier
-                if let match = storedHomes.values.first(where: { $0.stableIdentifier == identifier }) {
-                    return Home(homePrefs: match)
+                if let prefs = Home.resolvePreferences(for: identifier, in: storedHomes) {
+                    // Return the home with the ORIGINAL identifier so Home.id matches what the
+                    // framework stored — prevents cross-device mismatch when the ##UUID suffix
+                    // differs between the creating device and the running device.
+                    return Home(id: identifier, displayString: prefs.homeName)
                 }
-                // Legacy format: identifier is a device-local UUID string (shortcuts before this fix)
-                if let uuid = UUID(uuidString: identifier), let match = storedHomes[uuid] {
-                    return Home(homePrefs: match)
-                }
-                return nil
+                // The home can't be resolved on this device (e.g. shortcut synced from another
+                // device before the user has added the same home here, or app reinstalled).
+                // The stableIdentifier component of the ID encodes the home name when the home
+                // was given one, so we can still render the correct label in the Shortcuts
+                // action card. Running the shortcut will still fail with "Unknown home" — the
+                // user will then be prompted to reconfigure — but at least they can see which
+                // home was originally configured rather than seeing the generic type placeholder.
+                // If the stableId looks like a UUID the home was unnamed; drop it (no name to show).
+                let stableId = Home.stableIdentifierComponent(of: identifier)
+                guard UUID(uuidString: stableId) == nil else { return nil }
+                return Home(id: identifier, displayString: stableId)
             }
         }
 
         @MainActor
-        func suggestedEntities() async throws -> [Home] {
+        func suggestedEntities() throws -> [Home] {
             Preferences.shared.storedHomes.values
                 .sorted {
                     let nameOrder = $0.homeName.localizedCaseInsensitiveCompare($1.homeName)
@@ -89,152 +236,84 @@ struct Home: AppEntity {
 
     @MainActor
     init(homePrefs: HomePreferences) {
-        self.init(id: homePrefs.stableIdentifier, displayString: homePrefs.homeName)
+        // Append the local UUID after "##" to disambiguate homes that share the same
+        // stableIdentifier (e.g. same local URL on two different networks). Resolution
+        // tries an exact match first, then falls back to stableIdentifier-only so
+        // shortcuts synced from another device still resolve.
+        self.init(id: "\(homePrefs.stableIdentifier)##\(homePrefs.id.uuidString)", displayString: homePrefs.homeName)
     }
-}
 
-// MARK: - Errors
-
-enum HomeResolutionError: Error, CustomLocalizedStringResourceConvertible {
-    case unknownHome
-    case ambiguousHomeSelection(String)
-
-    var localizedStringResource: LocalizedStringResource {
-        switch self {
-        case .unknownHome:
-            "Unknown home"
-        case let .ambiguousHomeSelection(itemName):
-            "Select a home for '\(itemName)'"
-        }
-    }
-}
-
-// MARK: - HomeResolver
-
-enum HomeResolver {
-    /// Validates that `selectedHome` matches `itemHomeId` and returns the resolved local UUID.
+    /// Extracts the stable-identifier portion from a Home.id.
     ///
-    /// Resolution order:
-    /// 1. Match `selectedHome.id` against entries in `stableIdentifierToLocalUUID`.
-    /// 2. Fall back to treating `selectedHome.id` as a legacy device-local UUID string.
-    ///
-    /// The default empty array skips stable-identifier lookup and falls straight through to the
-    /// UUID fallback — this keeps unit tests working without any Preferences setup.
-    static func resolvedHomeId<E: Error>(
-        selectedHome: Home?,
-        itemHomeId: UUID,
-        itemLabel: String,
-        stableIdentifierToLocalUUID: [(String, UUID)] = [],
-        mismatchError: (String, String) -> E
-    ) throws -> UUID {
-        guard let selectedHome else {
-            return itemHomeId
-        }
-
-        let homeId: UUID
-        if let match = stableIdentifierToLocalUUID.first(where: { $0.0 == selectedHome.id }) {
-            homeId = match.1
-        } else if let uuid = UUID(uuidString: selectedHome.id) {
-            homeId = uuid
-        } else {
-            throw HomeResolutionError.unknownHome
-        }
-
-        guard homeId == itemHomeId else {
-            throw mismatchError(itemLabel, selectedHome.displayString)
-        }
-
-        return homeId
+    /// Current format: `"<stableIdentifier>##<localUUID>"` — returns the prefix.
+    /// Legacy formats (`"<stableIdentifier>"` or a raw UUID string) — returned as-is.
+    static func stableIdentifierComponent(of homeId: ID) -> String {
+        homeId.components(separatedBy: "##").first ?? homeId
     }
 
-    /// Production overload — builds the stable-identifier map on the main actor before delegating
-    /// to the testable sync overload. Intent `perform()` methods call this with `try await`.
+    /// Extracts the device-local UUID suffix from a current-format Home.id.
+    static func localIdentifierComponent(of homeId: ID) -> UUID? {
+        let components = homeId.components(separatedBy: "##")
+        guard components.count == 2 else { return nil }
+        return UUID(uuidString: components[1])
+    }
+
+    /// Resolves a home identifier string to the `storedHomes` dictionary key for the matching entry.
+    ///
+    /// Unlike `resolvePreferences(for:in:)?.id`, this always returns the canonical dictionary key.
+    /// The key may differ from `HomePreferences.id` when stored data has a key/id mismatch.
     @MainActor
-    static func resolvedHomeId<E: Error>(
-        selectedHome: Home?,
-        itemHomeId: UUID,
-        itemLabel: String,
-        mismatchError: (String, String) -> E
-    ) async throws -> UUID {
-        let map = Preferences.shared.storedHomes.values.map { ($0.stableIdentifier, $0.id) }
-        return try resolvedHomeId(
-            selectedHome: selectedHome,
-            itemHomeId: itemHomeId,
-            itemLabel: itemLabel,
-            stableIdentifierToLocalUUID: map,
-            mismatchError: mismatchError
-        )
+    static func resolveStoredHomeKey(for identifier: String, in storedHomes: [UUID: HomePreferences]) -> UUID? {
+        guard let prefs = resolvePreferences(for: identifier, in: storedHomes) else { return nil }
+        return storedHomes.first { $0.value.id == prefs.id }?.key ?? prefs.id
     }
 
-    /// Production overload for item-by-name resolution (iOS 16 compat intents).
-    /// Builds a stable-identifier-aware `findHomeId` closure and delegates to the testable overload.
-    static func resolveHomeId(
-        selectedHome: Home?,
-        itemName: String,
-        allowedTypes: [OpenHABItem.ItemType]? = nil
-    ) async throws -> UUID {
-        try await resolveHomeId(
-            selectedHome: selectedHome,
-            itemName: itemName,
-            findHomeId: { identifier in
-                // All HomePreferences property access must happen on the main actor.
-                await MainActor.run {
-                    let storedHomes = Preferences.shared.storedHomes
-                    if let match = storedHomes.values.first(where: { $0.stableIdentifier == identifier }) {
-                        return match.id
-                    }
-                    if let uuid = UUID(uuidString: identifier), storedHomes[uuid] != nil {
-                        return uuid
-                    }
-                    return nil
+    @MainActor
+    static func resolvePreferences(for identifier: String, in storedHomes: [UUID: HomePreferences]) -> HomePreferences? {
+        if identifier.contains("##") {
+            // Current format: "stableIdentifier##localUUID"
+            // Exact match: same device, stableIdentifier unchanged since shortcut was created.
+            if let match = storedHomes.values.first(where: { identifier == "\($0.stableIdentifier)##\($0.id.uuidString)" }) {
+                return match
+            }
+            // Local UUID match: same device, stableIdentifier changed (home renamed, URL updated, or
+            // cloudUserId populated after shortcut creation). Falls back to id-field scan for stored
+            // data where the dictionary key and HomePreferences.id differ.
+            if let localId = localIdentifierComponent(of: identifier) {
+                if let match = storedHomes[localId] { return match }
+                if let match = storedHomes.values.first(where: { $0.id == localId }) { return match }
+            }
+            // Stable identifier match: cross-device resolution.
+            // Require a unique match — if two homes share a name the fallback is ambiguous and
+            // a re-pick is safer than silently running against the wrong server.
+            let stableId = stableIdentifierComponent(of: identifier)
+            let stableMatches = storedHomes.values.filter { $0.stableIdentifier == stableId }
+            if stableMatches.count == 1 { return stableMatches.first }
+        } else {
+            // Legacy format (pre-## era): raw UUID string or bare stable identifier.
+            if let uuid = UUID(uuidString: identifier) {
+                if let match = storedHomes[uuid] ?? storedHomes.values.first(where: { $0.id == uuid }) {
+                    return match
                 }
-            },
-            listStoredHomes: { await Preferences.shared.listStoredHomes() },
-            exactMatchedHomes: {
-                let searchResults = await OpenHABItemCache.instance.searchCachedOrPersistedItems(
-                    searchTerm: itemName,
-                    types: allowedTypes
-                )
-                let normalizedItemName = itemName.trimmingCharacters(in: .whitespacesAndNewlines)
-
-                return Set(searchResults.flatMap { homeId, items in
-                    items.compactMap { item in
-                        item.name.localizedCaseInsensitiveCompare(normalizedItemName) == .orderedSame ? homeId : nil
-                    }
-                })
             }
-        )
+            let stableMatches = storedHomes.values.filter { $0.stableIdentifier == identifier }
+            if stableMatches.count == 1 { return stableMatches.first }
+        }
+        return nil
     }
+}
 
-    /// Testable overload. All parameters are injected via closures so unit tests can provide
-    /// mock implementations.
+// MARK: - Stable Cross-Device Identifier
+
+extension HomePreferences {
+    /// A stable identifier that is the same on every device configured for the same openHAB server.
+    /// Used as Home.id so that shortcuts synced via iCloud resolve correctly on a second device.
     ///
-    /// `findHomeId` defaults to UUID-string parsing so existing tests that only exercise the
-    /// `selectedHome: nil` path compile and run without modification.
-    static func resolveHomeId(
-        selectedHome: Home?,
-        itemName: String,
-        findHomeId: @escaping (String) async -> UUID? = { UUID(uuidString: $0) },
-        listStoredHomes: @escaping () async -> [UUID],
-        exactMatchedHomes: @escaping () async -> Set<UUID>
-    ) async throws -> UUID {
-        if let selectedHome {
-            guard let homeId = await findHomeId(selectedHome.id) else {
-                throw HomeResolutionError.unknownHome
-            }
-            return homeId
-        }
-
-        let storedHomes = await listStoredHomes()
-        if storedHomes.count == 1, let onlyHomeId = storedHomes.first {
-            return onlyHomeId
-        }
-
-        let matchedHomes = await exactMatchedHomes()
-        if matchedHomes.count == 1, let matchedHomeId = matchedHomes.first {
-            return matchedHomeId
-        }
-
-        throw HomeResolutionError.ambiguousHomeSelection(itemName)
+    /// Uses only homeName so that the identifier is independent of device-specific connection
+    /// config (protocol, port, URL) — these often differ between devices (e.g. http/8080 on one
+    /// device, https/8443 on another), which would break cross-device shortcut resolution.
+    /// Home names are expected to be unique per user; the UUID fallback handles the unnamed case.
+    var stableIdentifier: String {
+        homeName.isEmpty ? id.uuidString : homeName
     }
 }

@@ -12,12 +12,12 @@ jobs:
     steps:
       - uses: maxim-lobanov/setup-xcode@v1.7.0
         with:
-          xcode-version: '26.2'
+          xcode-version: '~> 26.4'
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Cache Ruby gems
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: vendor/bundle
           key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
@@ -34,6 +34,6 @@ jobs:
           LANG: en_US.UTF-8
           LC_ALL: en_US.UTF-8
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 60
-        uses: maierj/fastlane-action@v3.1.0
+        uses: maierj/fastlane-action@v3.2.0
         with:
           lane: unittests

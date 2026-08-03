@@ -15,8 +15,8 @@ import OpenHABCore
 import os.log
 import WatchConnectivity
 
-// This class receives Watch Request for the configuration data like localUrl.
-// The functionality is activated in the AppDelegate.
+/// This class receives Watch Request for the configuration data like localUrl.
+/// The functionality is activated in the AppDelegate.
 class WatchMessageService: NSObject, WCSessionDelegate {
     @MainActor
     static let singleton = WatchMessageService()
@@ -26,8 +26,8 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     private var preferencesSubscription: AnyCancellable?
 
-    // This method gets called when the watch requests the data
-    // ⚠️ This is called off the main thread. Do NOT touch @MainActor stuff.
+    /// This method gets called when the watch requests the data
+    /// ⚠️ This is called off the main thread. Do NOT touch @MainActor stuff.
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         guard message["request"] != nil else { return }
 
@@ -41,6 +41,10 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
         Logger.preferences.info("WCSession activation completed. State: \(String(describing: activationState)), Error: \(String(describing: error))")
+        guard activationState == .activated else { return }
+        Task { @MainActor in
+            await WatchMessageService.singleton.syncPreferencesToWatch()
+        }
     }
 
     func sessionDidBecomeInactive(_ session: WCSession) {
@@ -68,8 +72,9 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     // MARK: - Sync Preferences
 
     @MainActor
+    // swiftlint:disable:next async_without_await
     func subscribeToPreferences() async {
-        preferencesSubscription = Preferences.shared.$currentHomePreferences
+        preferencesSubscription = Preferences.shared.currentHomePreferencesPublisher
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { _ in } receiveValue: { homeSettings in
                 Task { @MainActor in
@@ -79,13 +84,26 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     }
 
     @MainActor
+    // swiftlint:disable:next async_without_await
     func syncPreferencesToWatch(_ homeSettings: HomePreferences? = nil) async {
         guard WCSession.default.activationState == .activated else {
             Logger.preferences.warning("WCSession not activated; skipping sync.")
             return
         }
         let settings = homeSettings ?? Preferences.shared.currentHomePreferences
-        let prefs = WatchPreferences(fromPreferences: settings)
+        let storedHomes = Dictionary(uniqueKeysWithValues: Preferences.shared.storedHomes.map { ($0.key.uuidString, $0.value) })
+        // Build per-home credentials from iOS Keychain so Watch can persist them in its own Keychain.
+        let homeCredentials = Dictionary(uniqueKeysWithValues: Preferences.shared.storedHomes.keys.map { uuid in
+            let local = CredentialsStore.retrieve(homeId: uuid, type: .local)
+            let remote = CredentialsStore.retrieve(homeId: uuid, type: .remote)
+            return (uuid.uuidString, HomeCredentials(
+                localUsername: local?.username ?? "",
+                localPassword: local?.password ?? "",
+                remoteUsername: remote?.username ?? "",
+                remotePassword: remote?.password ?? ""
+            ))
+        })
+        let prefs = WatchPreferences(fromPreferences: settings, allHomes: storedHomes, homeCredentials: homeCredentials)
         let context = prefs.encodedWatchPreferences()
 
         guard getCachedPreferences() != context else {
@@ -107,7 +125,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
 @MainActor
 extension WatchPreferences {
-    init(fromPreferences preferences: HomePreferences) {
+    init(fromPreferences preferences: HomePreferences, allHomes: [String: HomePreferences]? = nil, homeCredentials: [String: HomeCredentials]? = nil) {
         self.init(
             localUrl: preferences.localConnectionConfig.url,
             remoteUrl: preferences.remoteConnectionConfig.url,
@@ -123,7 +141,12 @@ extension WatchPreferences {
             sitemapNameLabelDisplayMode: preferences.sitemapNameLabelDisplayMode.rawValue,
             sortSitemapsBy: preferences.sortSitemapsBy,
             localConnectionConfiguration: preferences.localConnectionConfig,
-            remoteConnectionConfiguration: preferences.remoteConnectionConfig
+            remoteConnectionConfiguration: preferences.remoteConnectionConfig,
+            allHomes: allHomes,
+            localUsername: preferences.localConnectionConfig.username,
+            localPassword: preferences.localConnectionConfig.password,
+            activeHomeId: preferences.id,
+            homeCredentials: homeCredentials
         )
     }
 }

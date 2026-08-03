@@ -26,11 +26,15 @@ enum ControlItemError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SetSwitchItemIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.switchItem] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.switchItem]
+    }
 
     static var parameterSummary: some ParameterSummary {
         Summary("Send \(\.$action) to \(\.$itemEntity)") {
@@ -53,7 +57,9 @@ struct SetSwitchItemIntent: AppIntent {
     @Parameter(title: "Action")
     var action: SwitchAction
 
-    func perform() async throws -> some IntentResult {
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        await Preferences.prepareForAppExtensionAccess()
+
         // Validate that the item belongs to the selected home
         let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,
@@ -72,6 +78,6 @@ struct SetSwitchItemIntent: AppIntent {
             throw ControlItemError.commandFailed(error.localizedDescription)
         }
 
-        return .result()
+        return .result(dialog: "Sent \(action) to \(itemEntity.label)")
     }
 }

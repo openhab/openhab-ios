@@ -26,11 +26,16 @@ enum NumberValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SetNumberValueIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.number, .numberWithDimension] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.number, .numberWithDimension]
+    }
+
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$value)") {
             \.$home
@@ -53,6 +58,8 @@ struct SetNumberValueIntent: AppIntent {
     var value: Double
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        await Preferences.prepareForAppExtensionAccess()
+
         // Validate that the item belongs to the selected home
         let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,
@@ -65,7 +72,7 @@ struct SetNumberValueIntent: AppIntent {
             try await OpenHABItemCache.instance.sendCommand(
                 to: itemEntity.item,
                 home: homeId,
-                command: String(value)
+                command: NumberState(value: value).commandString
             )
         } catch {
             throw NumberValueError.commandFailed(error.localizedDescription)

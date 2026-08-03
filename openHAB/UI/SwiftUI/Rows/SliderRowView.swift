@@ -80,7 +80,7 @@ private struct SliderRowContent: View {
                 labelContent(state: input)
             }
 
-            Slider(value: sliderBinding(state: input), in: input.sliderRange, step: input.step) { editing in
+            Slider(value: sliderBinding(state: input), in: input.sliderRange, step: input.safeStep) { editing in
                 isEditing = editing
                 if editing {
                     dragWidgetId = input.widgetId
@@ -122,7 +122,7 @@ private struct SliderRowContent: View {
             guard dragWidgetId == input.widgetId, let dragStartVersion else {
                 isEditing = false
                 dragValue = nil
-                self.dragStartVersion = nil
+                dragStartVersion = nil
                 dragWidgetId = nil
                 return
             }

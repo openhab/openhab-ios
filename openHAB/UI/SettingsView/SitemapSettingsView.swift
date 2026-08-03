@@ -38,21 +38,18 @@ struct SitemapSettingsView: View {
         }
     }
 
-    @ViewBuilder
     private var realtimeSliderToggle: some View {
         Toggle(isOn: $settingsRealTimeSliders) {
             Text("Real-time Sliders")
         }
     }
 
-    @ViewBuilder
     private var searchFieldToggle: some View {
         Toggle(isOn: $settingsShowSearchField) {
             Text("Show Search Field")
         }
     }
 
-    @ViewBuilder
     private var cacheButton: some View {
         Button {
             KingfisherManager.shared.cache.calculateDiskStorageSize { result in
@@ -74,7 +71,6 @@ struct SitemapSettingsView: View {
         )
     }
 
-    @ViewBuilder
     private var iconTypePicker: some View {
         Picker(selection: $settingsIconType) {
             ForEach(IconType.allCases, id: \.self) { icontype in
@@ -107,7 +103,6 @@ struct SitemapSettingsView: View {
         }
     }
 
-    @ViewBuilder
     private var watchSitemapPicker: some View {
         Picker("Sitemap for Apple Watch", selection: $settingsSitemapForWatch) {
             if sitemaps.isEmpty {

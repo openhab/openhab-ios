@@ -131,18 +131,20 @@ struct NotificationsViewPreview: View {
         return NotificationsView(networkTracker: mockTracker, notifications: []) {
             [
                 OpenHABNotification(
-                    message: "Preview Notification 1",
-                    created: .now,
-                    icon: "sun",
                     id: UUID().uuidString,
+                    message: "Preview Notification 1",
+                    icon: "sun",
                     onClickAction: "ui:/overview",
-                    actions: [NotificationActionItem(title: "Open", action: "ui:/overview")]
+                    actions: [NotificationActionItem(title: "Open", action: "ui:/overview")],
+                    created: .now,
+                    v: 0
                 ),
                 OpenHABNotification(
+                    id: UUID().uuidString,
                     message: "Preview Notification 2",
-                    created: .now.addingTimeInterval(-3600),
                     icon: "moon",
-                    id: UUID().uuidString
+                    created: .now.addingTimeInterval(-3600),
+                    v: 0
                 )
             ]
         }
@@ -209,12 +211,13 @@ extension NotificationsView where Tracker == MainActorNetworkTracker {
             loadNotifications = {
                 [
                     OpenHABNotification(
-                        message: "UITest Front Door Alert",
                         id: "uitest-1",
+                        message: "UITest Front Door Alert",
                         onClickAction: "ui:/overview",
-                        actions: [NotificationActionItem(title: "Open Camera", action: "ui:/overview")]
+                        actions: [NotificationActionItem(title: "Open Camera", action: "ui:/overview")],
+                        v: 0
                     ),
-                    OpenHABNotification(message: "UITest Regular Info", id: "uitest-2")
+                    OpenHABNotification(id: "uitest-2", message: "UITest Regular Info", v: 0)
                 ]
             }
             return
@@ -235,7 +238,7 @@ extension NotificationsView where Tracker == MainActorNetworkTracker {
                 }
 
                 let client = HTTPClient(connectionConfiguration: config)
-                return try await client.notification(urlString: config.url)
+                return try await client.notifications(urlString: config.url)
             } catch {
                 Logger.notificationService.error("Failed to load notifications: \(error.localizedDescription, privacy: .public)")
                 return []

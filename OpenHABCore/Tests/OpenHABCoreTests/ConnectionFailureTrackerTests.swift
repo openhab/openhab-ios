@@ -10,32 +10,31 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-
 @testable import OpenHABCore
-import XCTest
+import Testing
 
-final class ConnectionFailureTrackerTests: XCTestCase {
-    func testShouldAttemptLogic() async {
+struct ConnectionFailureTrackerTests {
+    @Test func shouldAttemptLogic() async {
         let tracker = ConnectionFailureTracker()
         await tracker.setEnabled(true)
         let config = ConnectionConfiguration(url: "http://test", username: "", password: "", priority: 1)
 
         var result = await tracker.shouldAttempt(config)
-        XCTAssertTrue(result)
+        #expect(result)
 
         await tracker.recordFailure(config)
         await tracker.recordFailure(config)
         await tracker.recordFailure(config)
 
         result = await tracker.shouldAttempt(config)
-        XCTAssertFalse(result)
+        #expect(!result)
 
         await tracker.reset(config)
         result = await tracker.shouldAttempt(config)
-        XCTAssertTrue(result)
+        #expect(result)
     }
 
-    func testMaxFailureCount() async {
+    @Test func maxFailureCount() async {
         let tracker = ConnectionFailureTracker()
         await tracker.setEnabled(true)
         let config1 = ConnectionConfiguration(url: "http://a", username: "", password: "", priority: 0)
@@ -46,6 +45,6 @@ final class ConnectionFailureTrackerTests: XCTestCase {
         await tracker.recordFailure(config2)
 
         let max = await tracker.maxFailureCount()
-        XCTAssertEqual(max, 2)
+        #expect(max == 2)
     }
 }

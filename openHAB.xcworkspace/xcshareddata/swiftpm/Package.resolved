@@ -1,5 +1,5 @@
 {
-  "originHash" : "a9ff72f572026a0a16c399bfd22db73ebe5481909ac623b76d2692bcad1264da",
+  "originHash" : "c14af7c4f3cc9ecce2947f3ab878b2adc676acdefff91ab479e3696ecda269ec",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -35,15 +35,6 @@
       "state" : {
         "revision" : "85560b48b0ff099ad83fe53d67df3c67fbc2b7a6",
         "version" : "12.10.0"
-      }
-    },
-    {
-      "identity" : "flexcolorpicker",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/RastislavMirek/FlexColorPicker.git",
-      "state" : {
-        "revision" : "72a5c2c5e28074e6c5f13efe3c98eb780ae2f906",
-        "version" : "1.4.4"
       }
     },
     {
@@ -240,8 +231,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftFormatPlugin",
       "state" : {
-        "revision" : "c41997c642ffc937c6e83b23dadbd7e626485cfa",
-        "version" : "0.58.7"
+        "revision" : "c7c81920d715e051306d2172083c14aaec2c1b9d",
+        "version" : "0.61.1"
       }
     },
     {
@@ -249,8 +240,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftLintPlugin.git",
       "state" : {
-        "revision" : "47d1da3a8e30e0ada5543899e8c47f54664073ac",
-        "version" : "0.62.2"
+        "revision" : "3741567a0252090897336f1f39b8490107b49ead",
+        "version" : "0.63.3"
       }
     },
     {

@@ -90,7 +90,15 @@ class NetworkConnectionService: ObservableObject {
             }
         }
 
-        Preferences.shared.$currentHomePreferences
+        // TODO: DEVELOP MERGE (regression) — sitemap list sometimes fails to reload on home switch.
+        // This subscription drives startTracking → activeConnection change → MenuDataService reload.
+        // Pre-merge this used `$currentHomePreferences` (raw stored value); develop's Preferences refactor
+        // required switching to `currentHomePreferencesPublisher`, which additionally injects Keychain
+        // credentials via `.map`. Emission timing looks equivalent ($_currentHomePreferences), but the
+        // 500 ms debounce + credential-injecting map is the prime suspect for the intermittent missed
+        // reload. Investigate whether an emission is being coalesced/dropped or whether the new
+        // connection compares equal so `$activeConnection` doesn't re-emit. Deferred for later.
+        Preferences.shared.currentHomePreferencesPublisher
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { homeSettings in
                 let localConnectionConfig = homeSettings.localConnectionConfig

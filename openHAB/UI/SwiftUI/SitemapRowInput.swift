@@ -14,7 +14,7 @@ import OpenHABCore
 
 /// Stable identity for a row snapshot.
 /// Occurrence disambiguates repeated widget IDs in one page payload.
-struct RowID: Hashable, Sendable {
+struct RowID: Hashable {
     let pageKey: String
     let widgetId: String
     let occurrence: Int
@@ -24,9 +24,17 @@ struct RowID: Hashable, Sendable {
     }
 }
 
+/// Navigation value pushed onto the NavigationStack when a linked-page row is tapped.
+/// Declared here so both EmbeddingRowInputView (producer) and SitemapNavigationView
+/// (navigationDestination handler) can reference it without a shared module dependency.
+struct LinkedPageNavigation: Hashable {
+    let pageLink: String
+    let pageTitle: String
+}
+
 /// Draft immutable row union for a list-driven SwiftUI pipeline.
 /// Each row case carries a dedicated typed input.
-enum SitemapRowInput: Identifiable, Equatable, Sendable {
+enum SitemapRowInput: Identifiable, Equatable {
     case frame(RowID, FrameRowInput)
     case linked(RowID, LinkedPageRowInput)
     case text(RowID, TextRowInput)

@@ -30,28 +30,153 @@ public enum OpenHABItemCacheError: Error, LocalizedError {
     }
 }
 
+private enum ItemSearchRanker {
+    static func score(for item: OpenHABItem, searchTerm: String, additionalCandidates: [String] = []) -> Int? {
+        let tokens = normalizedTokens(in: searchTerm)
+        guard !tokens.isEmpty else {
+            return 0
+        }
+
+        let candidates = [item.name, item.label] + additionalCandidates
+        return candidates
+            .enumerated()
+            .compactMap { index, candidate in
+                score(candidate: candidate, tokens: tokens).map { ($0 * 10) + index }
+            }
+            .min()
+    }
+
+    private static func score(candidate: String, tokens: [String]) -> Int? {
+        let normalizedCandidate = normalize(candidate)
+        let joinedTokens = tokens.joined()
+
+        if normalizedCandidate == joinedTokens {
+            return 0
+        }
+
+        if normalizedCandidate.hasPrefix(joinedTokens) {
+            return 10
+        }
+
+        if let wordPrefixScore = wordPrefixScore(candidate: normalizedCandidate, tokens: tokens) {
+            return 20 + wordPrefixScore
+        }
+
+        if let orderedTokenScore = orderedTokenScore(candidate: normalizedCandidate, tokens: tokens) {
+            return 40 + orderedTokenScore
+        }
+
+        if tokens.allSatisfy(normalizedCandidate.contains) {
+            return 80 + tokens.reduce(0) { partialResult, token in
+                partialResult + (normalizedCandidate.distance(from: normalizedCandidate.startIndex, to: normalizedCandidate.range(of: token)?.lowerBound ?? normalizedCandidate.startIndex))
+            }
+        }
+
+        return nil
+    }
+
+    private static func wordPrefixScore(candidate: String, tokens: [String]) -> Int? {
+        let words = candidate
+            .split { !$0.isLetter && !$0.isNumber }
+            .map(String.init)
+        guard !words.isEmpty, words.count >= tokens.count else {
+            return nil
+        }
+
+        var wordIndex = 0
+        var score = 0
+
+        for token in tokens {
+            var matched = false
+
+            while wordIndex < words.count {
+                if words[wordIndex].hasPrefix(token) {
+                    score += wordIndex
+                    matched = true
+                    wordIndex += 1
+                    break
+                }
+                wordIndex += 1
+            }
+
+            guard matched else {
+                return nil
+            }
+        }
+
+        return score
+    }
+
+    private static func orderedTokenScore(candidate: String, tokens: [String]) -> Int? {
+        var searchStartIndex = candidate.startIndex
+        var previousMatchUpperBound = candidate.startIndex
+        var score = 0
+
+        for token in tokens {
+            guard let range = candidate.range(of: token, range: searchStartIndex ..< candidate.endIndex) else {
+                return nil
+            }
+
+            score += candidate.distance(from: previousMatchUpperBound, to: range.lowerBound)
+            previousMatchUpperBound = range.upperBound
+            searchStartIndex = range.upperBound
+        }
+
+        return score
+    }
+
+    private static func normalizedTokens(in searchTerm: String) -> [String] {
+        normalize(searchTerm)
+            .split { !$0.isLetter && !$0.isNumber }
+            .map(String.init)
+    }
+
+    private static func normalize(_ string: String) -> String {
+        string
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
 public actor OpenHABItemCache {
-    public static let instance = OpenHABItemCache()
-
-    private static let networkTimeout: TimeInterval = 5
-    private static let stubsDefaultsKey = "openHABItemStubs"
-    private static let sharedDefaultsSuiteName = "group.org.openhab.app"
-
     private struct ItemStub: Codable {
         let name: String
         let label: String
-        let type: String
+        let type: String?
+        let groupType: String?
     }
+
+    public static let instance = OpenHABItemCache()
+
+    /// Per-home trackers are created fresh each session (cold-start cost on first use).
+    /// 10 s matches NetworkTracker.shared and is enough to survive a typical cellular
+    /// handoff (~7 s in practice) without failing with noActiveConnection.
+    private static let networkTimeout: TimeInterval = 10
+
+    private static let stubsDefaultsKey = "openHABItemStubs"
+    private static let sharedDefaultsSuiteName = "group.org.openhab.app"
 
     private var networkTrackers: [UUID: NetworkTracker] = [:]
 
     public var items: [UUID: [OpenHABItem]] = [:]
     private let ttl: TimeInterval = 20
     var lastLoad: [UUID: Date] = [:]
+    private var cachedStubs: [String: [ItemStub]]?
 
     private init() {}
 
+    private func loadedStubs() -> [String: [ItemStub]] {
+        if let cached = cachedStubs { return cached }
+        guard let data = UserDefaults(suiteName: Self.sharedDefaultsSuiteName)?.data(forKey: Self.stubsDefaultsKey),
+              let decoded = try? JSONDecoder().decode([String: [ItemStub]].self, from: data) else {
+            return [:]
+        }
+        cachedStubs = decoded
+        return decoded
+    }
+
     public func getAllCachedItems() async -> [UUID: [OpenHABItem]] {
+        await Preferences.prepareForAppExtensionAccess()
         await reloadCacheIfNeeded(homes: Preferences.shared.listStoredHomes())
         return items
     }
@@ -105,32 +230,33 @@ public actor OpenHABItemCache {
     }
 
     private func persistStubs() {
-        var allStubs: [String: [ItemStub]] = [:]
+        // Merge into existing stubs so homes not in the current in-memory `items`
+        // (e.g. loaded in a prior process or a different cache reload scope) are preserved.
+        // A full replace would wipe stubs for homes not currently in memory, removing the
+        // fallback for intents that target a home the current process hasn't loaded.
+        var allStubs = loadedStubs()
         for (homeId, homeItems) in items {
-            allStubs[homeId.uuidString] = homeItems.map { ItemStub(name: $0.name, label: $0.label, type: $0.type?.rawValue ?? "") }
+            allStubs[homeId.uuidString] = homeItems.map { ItemStub(name: $0.name, label: $0.label, type: $0.type?.rawValue, groupType: $0.groupType?.rawValue) }
         }
         guard let data = try? JSONEncoder().encode(allStubs) else { return }
+        cachedStubs = allStubs
         UserDefaults(suiteName: Self.sharedDefaultsSuiteName)?.set(data, forKey: Self.stubsDefaultsKey)
     }
 
     private func persistedItem(name: String, home: UUID) -> OpenHABItem? {
-        guard let data = UserDefaults(suiteName: Self.sharedDefaultsSuiteName)?.data(forKey: Self.stubsDefaultsKey),
-              let allStubs = try? JSONDecoder().decode([String: [ItemStub]].self, from: data),
-              let stub = allStubs[home.uuidString]?.first(where: { $0.name == name }) else { return nil }
-        return OpenHABItem(name: stub.name, type: stub.type, state: nil, link: "", label: stub.label, groupType: nil, stateDescription: nil, commandDescription: nil, members: [], category: nil, options: nil)
+        guard let stub = loadedStubs()[home.uuidString]?.first(where: { $0.name == name }) else { return nil }
+        return OpenHABItem(name: stub.name, type: stub.type ?? "", state: nil, link: "", label: stub.label, groupType: stub.groupType, stateDescription: nil, commandDescription: nil, members: [], category: nil, options: nil)
     }
 
     private func persistedItems(home: UUID) -> [OpenHABItem] {
-        guard let data = UserDefaults(suiteName: Self.sharedDefaultsSuiteName)?.data(forKey: Self.stubsDefaultsKey),
-              let allStubs = try? JSONDecoder().decode([String: [ItemStub]].self, from: data) else { return [] }
-        return (allStubs[home.uuidString] ?? []).map {
+        (loadedStubs()[home.uuidString] ?? []).map {
             OpenHABItem(
                 name: $0.name,
-                type: $0.type,
+                type: $0.type ?? "",
                 state: nil,
                 link: "",
                 label: $0.label,
-                groupType: nil,
+                groupType: $0.groupType,
                 stateDescription: nil,
                 commandDescription: nil,
                 members: [],
@@ -141,20 +267,25 @@ public actor OpenHABItemCache {
     }
 
     public func reloadCacheIfNeeded(homes: [UUID]) async {
-        let homesNeedingReload = homes.filter { Date.now.timeIntervalSince(lastLoad[$0] ?? Date.distantPast) > ttl }
-        Logger.itemCache.info("Cache reload needed for homes \(homesNeedingReload)")
-        await forceCacheReload(homes: homesNeedingReload)
+        let staleHomes = homes.filter { Date.now.timeIntervalSince(lastLoad[$0] ?? Date.distantPast) > ttl }
+        guard !staleHomes.isEmpty else { return }
+        Logger.itemCache.info("Cache reload needed for homes \(staleHomes)")
+        await forceCacheReload(homes: staleHomes)
     }
 
     public func forceCacheReload(homes: [UUID]) async {
         Logger.itemCache.info("force cache reload for homes: \(homes)")
         do {
-            let loadedItems = try await loadNonGroupItemsForHomes(homes)
+            let loadedItems = try await loadItemsForHomes(homes)
             Logger.itemCache.info("Store loaded items in cache")
-            homes.forEach { items[$0] = loadedItems[$0] }
             let now = Date.now
-            homes.forEach { lastLoad[$0] = now }
-            persistStubs()
+            for (homeId, homeItems) in loadedItems {
+                items[homeId] = homeItems
+                lastLoad[homeId] = now
+            }
+            if !loadedItems.isEmpty {
+                persistStubs()
+            }
             let itemCounts = items.map { ($0.key, $0.value.count) }
             Logger.itemCache.info("Loaded \(itemCounts) items to cache")
         } catch {
@@ -164,6 +295,7 @@ public actor OpenHABItemCache {
 
     public func forceCacheReload() async {
         Logger.itemCache.info("forced cache reload for all homes")
+        await Preferences.prepareForAppExtensionAccess()
         let homes = await Preferences.shared.listStoredHomes()
         // some house keeping
         let networkTrackersToRemove = networkTrackers.filter { !homes.contains($0.key) }
@@ -181,12 +313,6 @@ public actor OpenHABItemCache {
         itemsList
             .filtered(by: searchTerm, for: types)
             .map(\.name)
-            .sorted()
-    }
-
-    private func loadNonGroupItemsForHomes(_ homes: [UUID]) async throws -> [UUID: [OpenHABItem]] {
-        let allItemsArray = try await loadItemsForHomes(homes).map { (uuid, items) in (uuid, items.filter { $0.type != .group }) }
-        return Dictionary(uniqueKeysWithValues: allItemsArray)
     }
 
     private func loadItemsForHomes(_ homes: [UUID]) async throws -> [UUID: [OpenHABItem]] {
@@ -197,7 +323,9 @@ public actor OpenHABItemCache {
                     // TODO: consider the possibility that two local connections might be the same
                     guard let items = await self.loadItems(homeId: homeId) else {
                         Logger.itemCache.error("Item search for home with id \(homeId) failed")
-                        return (id: homeId, items: [] as [OpenHABItem])
+                        // Return nil so the caller leaves this home's cache entry untouched,
+                        // allowing getCachedOrPersistedItems to fall back to persisted stubs.
+                        return nil as (id: UUID, items: [OpenHABItem])?
                     }
                     Logger.itemCache.info("Loaded \(items.count) items for home \(homeId)")
                     return (id: homeId, items: items)
@@ -205,6 +333,7 @@ public actor OpenHABItemCache {
             }
             let homeItemsDictionary: [UUID: [OpenHABItem]] = [:]
             let allHomeItems = try? await group.reduce(into: homeItemsDictionary) { partialResult, nextElement in
+                guard let nextElement else { return } // nil == connection failed; leave cache untouched
                 Logger.itemCache.debug("Found \(nextElement.items.count) items for \(nextElement.id)")
                 partialResult[nextElement.id] = nextElement.items
             }
@@ -226,76 +355,67 @@ public actor OpenHABItemCache {
     }
 
     private func assureNetworkTracker(homeId: UUID) async -> NetworkTracker? {
-        if networkTrackers[homeId] == nil, let homePreferences = await Preferences.shared.storedHomes[homeId] {
-            let tracker = NetworkTracker(timeout: OpenHABItemCache.networkTimeout)
-            networkTrackers[homeId] = tracker
-            await tracker.startTracking(connectionConfigurations: [homePreferences.localConnectionConfig, homePreferences.remoteConnectionConfig])
+        #if os(macOS) || targetEnvironment(macCatalyst)
+        // On macOS/Catalyst, App Intents run in the main app process and NetworkTracker.shared
+        // is already connected. homeId is ignored; only the currently active home is used.
+        return NetworkTracker.shared
+        #else
+        await Preferences.prepareForAppExtensionAccess()
+        if networkTrackers[homeId] == nil {
+            let storedHomes = await Preferences.shared.storedHomes
+            // Direct key lookup; fall back to matching by HomePreferences.id for stored data where
+            // the dictionary key and the id field differ (can happen after certain migrations).
+            let homePreferences = storedHomes[homeId] ?? storedHomes.values.first { $0.id == homeId }
+            if let homePreferences {
+                // ConnectionConfiguration JSON omits credentials; inject from the platform Keychain.
+                // On iOS this is the iOS app Keychain; on watchOS the Watch Keychain — both use
+                // CredentialsStore with no kSecAttrAccessGroup, so they target the right store.
+                var local = homePreferences.localConnectionConfig
+                var remote = homePreferences.remoteConnectionConfig
+                if let creds = CredentialsStore.retrieve(homeId: homeId, type: .local) {
+                    local.username = creds.username
+                    local.password = creds.password
+                }
+                if let creds = CredentialsStore.retrieve(homeId: homeId, type: .remote) {
+                    remote.username = creds.username
+                    remote.password = creds.password
+                }
+                let tracker = NetworkTracker(timeout: OpenHABItemCache.networkTimeout)
+                networkTrackers[homeId] = tracker
+                await tracker.startTracking(connectionConfigurations: [local, remote])
+                // Prime: wait for the first connection attempt to settle before returning.
+                // Without this, sendCommand's own waitForActiveConnection races against the
+                // tracker's initial testConnection calls and can time out prematurely.
+                _ = await tracker.waitForActiveConnection()
+            }
         }
-        // TODO: do we need to make sure / wait that the connection is live?
         return networkTrackers[homeId]
-    }
-}
-
-public extension OpenHABItem {
-    /// Checks if the item matches the specified types filter
-    /// - Parameter types: Optional array of item types to match. If nil, all items match.
-    /// - Returns: True if the item matches the filter, false otherwise
-    func matches(types: [OpenHABItem.ItemType]?) -> Bool {
-        types == nil || (type.flatMap { types?.contains($0) } == true)
-    }
-
-    func searchScore(for searchTerm: String) -> Int? {
-        ItemSearchRanker.score(for: self, searchTerm: searchTerm)
-    }
-}
-
-public extension [OpenHABItem] {
-    func filtered(by searchTerm: String? = nil, for types: [OpenHABItem.ItemType]? = nil) -> [OpenHABItem] {
-        ranked(searchTerm: searchTerm, for: types).map(\.item)
-    }
-
-    func ranked(searchTerm: String? = nil, for types: [OpenHABItem.ItemType]? = nil) -> [(item: OpenHABItem, score: Int)] {
-        compactMap { item in
-            guard item.matches(types: types) else {
-                return nil
-            }
-
-            guard let searchTerm, !searchTerm.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                return (item: item, score: 0)
-            }
-
-            guard let score = item.searchScore(for: searchTerm) else {
-                return nil
-            }
-
-            return (item: item, score: score)
-        }
-        .sorted {
-            if $0.score != $1.score {
-                return $0.score < $1.score
-            }
-
-            return $0.item.name.localizedCaseInsensitiveCompare($1.item.name) == .orderedAscending
-        }
+        #endif
     }
 }
 
 public extension OpenHABItemCache {
-    func getCachedOrPersistedItem(name: String, home: UUID) async -> OpenHABItem? {
+    func getCachedOrPersistedItem(name: String, home: UUID) -> OpenHABItem? {
         if let item = items[home]?.first(where: { $0.name == name }) {
             return item
         }
-        return persistedItem(name: name, home: home)
+        let stub = persistedItem(name: name, home: home)
+        if stub == nil {
+            Logger.itemCache.error("Item '\(name)' not found in cache or stubs for home \(home)")
+        } else {
+            Logger.itemCache.info("Item '\(name)' resolved from stubs (no live cache) for home \(home)")
+        }
+        return stub
     }
 
-    func getCachedOrPersistedItems(types: [OpenHABItem.ItemType]?, home: UUID) async -> [OpenHABItem] {
+    func getCachedOrPersistedItems(types: [OpenHABItem.ItemType]?, home: UUID) -> [OpenHABItem] {
         let sourceItems = items[home] ?? persistedItems(home: home)
         return sourceItems
             .filtered(for: types)
             .sorted(by: \.name)
     }
 
-    func getCachedOrPersistedItems(types: [OpenHABItem.ItemType]? = nil, homes: [UUID]) async -> [UUID: [OpenHABItem]] {
+    func getCachedOrPersistedItems(types: [OpenHABItem.ItemType]? = nil, homes: [UUID]) -> [UUID: [OpenHABItem]] {
         var result: [UUID: [OpenHABItem]] = [:]
 
         for homeId in homes {
@@ -309,11 +429,11 @@ public extension OpenHABItemCache {
     }
 
     func searchCachedOrPersistedItems(searchTerm: String, types: [OpenHABItem.ItemType]? = nil, homes: [UUID]? = nil) async -> [UUID: [OpenHABItem]] {
-        let targetHomes: [UUID]
-        if let homes {
-            targetHomes = homes
+        await Preferences.prepareForAppExtensionAccess()
+        let targetHomes: [UUID] = if let homes {
+            homes
         } else {
-            targetHomes = await Preferences.shared.listStoredHomes()
+            await Preferences.shared.listStoredHomes()
         }
         var result: [UUID: [OpenHABItem]] = [:]
 
@@ -332,7 +452,6 @@ public extension OpenHABItemCache {
         await reloadCacheIfNeeded(homes: [home])
         return items[home]?
             .filtered(by: searchTerm, for: types)
-            .sorted(by: \.name)
             .map(\.name) ?? []
     }
 
@@ -358,105 +477,49 @@ public extension OpenHABItemCache {
     }
 }
 
-private enum ItemSearchRanker {
-    static func score(for item: OpenHABItem, searchTerm: String) -> Int? {
-        let tokens = normalizedTokens(in: searchTerm)
-        guard !tokens.isEmpty else {
-            return 0
-        }
-
-        let candidates = [item.name, item.label]
-        return candidates.enumerated().compactMap { index, candidate in
-            score(candidate: candidate, tokens: tokens).map { ($0 * 10) + index }
-        }.min()
+public extension OpenHABItem {
+    /// Checks if the item matches the specified types filter
+    /// - Parameter types: Optional array of item types to match. If nil, all items match.
+    /// - Returns: True if the item matches the filter, false otherwise
+    func matches(types: [OpenHABItem.ItemType]?) -> Bool {
+        guard let types else { return true }
+        return types.contains { isOfTypeOrGroupType($0) }
     }
 
-    private static func score(candidate: String, tokens: [String]) -> Int? {
-        let normalizedCandidate = normalize(candidate)
-        let joinedTokens = tokens.joined()
+    func searchScore(for searchTerm: String, additionalCandidates: [String] = []) -> Int? {
+        ItemSearchRanker.score(for: self, searchTerm: searchTerm, additionalCandidates: additionalCandidates)
+    }
+}
 
-        if normalizedCandidate == joinedTokens {
-            return 0
-        }
-
-        if normalizedCandidate.hasPrefix(joinedTokens) {
-            return 10
-        }
-
-        if let wordPrefixScore = wordPrefixScore(candidate: normalizedCandidate, tokens: tokens) {
-            return 20 + wordPrefixScore
-        }
-
-        if let orderedTokenScore = orderedTokenScore(candidate: normalizedCandidate, tokens: tokens) {
-            return 40 + orderedTokenScore
-        }
-
-        if tokens.allSatisfy(normalizedCandidate.contains) {
-            return 80 + tokens.reduce(0) { partialResult, token in
-                partialResult + (normalizedCandidate.distance(from: normalizedCandidate.startIndex, to: normalizedCandidate.range(of: token)?.lowerBound ?? normalizedCandidate.startIndex))
-            }
-        }
-
-        return nil
+public extension [OpenHABItem] {
+    func filtered(by searchTerm: String? = nil, for types: [OpenHABItem.ItemType]? = nil) -> [OpenHABItem] {
+        ranked(searchTerm: searchTerm, for: types).map(\.item)
     }
 
-    private static func wordPrefixScore(candidate: String, tokens: [String]) -> Int? {
-        let words = candidate.split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init)
-        guard !words.isEmpty, words.count >= tokens.count else {
-            return nil
-        }
-
-        var wordIndex = 0
-        var score = 0
-
-        for token in tokens {
-            var matched = false
-
-            while wordIndex < words.count {
-                if words[wordIndex].hasPrefix(token) {
-                    score += wordIndex
-                    matched = true
-                    wordIndex += 1
-                    break
-                }
-                wordIndex += 1
-            }
-
-            guard matched else {
-                return nil
-            }
-        }
-
-        return score
-    }
-
-    private static func orderedTokenScore(candidate: String, tokens: [String]) -> Int? {
-        var searchStartIndex = candidate.startIndex
-        var previousMatchUpperBound = candidate.startIndex
-        var score = 0
-
-        for token in tokens {
-            guard let range = candidate.range(of: token, range: searchStartIndex ..< candidate.endIndex) else {
+    func ranked(searchTerm: String? = nil,
+                for types: [OpenHABItem.ItemType]? = nil,
+                additionalCandidates: (OpenHABItem) -> [String] = { _ in [] }) -> [(item: OpenHABItem, score: Int)] {
+        compactMap { item in
+            guard item.matches(types: types) else {
                 return nil
             }
 
-            score += candidate.distance(from: previousMatchUpperBound, to: range.lowerBound)
-            previousMatchUpperBound = range.upperBound
-            searchStartIndex = range.upperBound
+            guard let searchTerm, !searchTerm.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                return (item: item, score: 0)
+            }
+
+            guard let score = item.searchScore(for: searchTerm, additionalCandidates: additionalCandidates(item)) else {
+                return nil
+            }
+
+            return (item: item, score: score)
         }
+        .sorted {
+            if $0.score != $1.score {
+                return $0.score < $1.score
+            }
 
-        return score
-    }
-
-    private static func normalizedTokens(in searchTerm: String) -> [String] {
-        normalize(searchTerm)
-            .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
-            .map(String.init)
-    }
-
-    private static func normalize(_ string: String) -> String {
-        string
-            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+            return $0.item.name.localizedCaseInsensitiveCompare($1.item.name) == .orderedAscending
+        }
     }
 }

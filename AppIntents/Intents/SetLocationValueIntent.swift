@@ -32,11 +32,16 @@ enum LocationValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SetLocationValueIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.location] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.location]
+    }
+
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$latitude), \(\.$longitude)") {
             \.$home
@@ -62,6 +67,8 @@ struct SetLocationValueIntent: AppIntent {
     var longitude: Double
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        await Preferences.prepareForAppExtensionAccess()
+
         let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,
             itemHomeId: itemEntity.homeId,

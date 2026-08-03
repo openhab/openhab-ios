@@ -45,3 +45,4 @@ To replicate the MCP server setup, see **[docs/MCP_SETUP.md](docs/MCP_SETUP.md)*
 
 ## git
 - Always use git commit with -s (signed-off-by)
+- If using XcodeBuildMCP, use the installed XcodeBuildMCP skill before calling XcodeBuildMCP tools.

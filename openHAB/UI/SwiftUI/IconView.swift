@@ -17,6 +17,49 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
+/// Forces KFImage recreation after the app returns from an extended background period.
+///
+/// When iOS evicts Kingfisher's in-memory cache under memory pressure, KFImage instances
+/// whose `.id()` hasn't changed are never recreated and therefore never re-fetch their
+/// images. This coordinator increments `reloadEpoch` after the app has been in the
+/// background for longer than `reloadThreshold`, which is included in each KFImage's
+/// `.id()` so that a fresh load from the Kingfisher disk cache is triggered automatically.
+@MainActor
+final class IconReloadCoordinator: ObservableObject {
+    static let shared = IconReloadCoordinator()
+    static let reloadThreshold: TimeInterval = 60
+
+    @Published private(set) var reloadEpoch = 0
+
+    private var backgroundedAt: Date?
+
+    init(observeNotifications: Bool = true) {
+        guard observeNotifications else { return }
+        Task { [weak self] in
+            for await _ in NotificationCenter.default.notifications(named: UIApplication.didEnterBackgroundNotification) {
+                self?.didEnterBackground()
+            }
+        }
+        Task { [weak self] in
+            for await _ in NotificationCenter.default.notifications(named: UIApplication.didBecomeActiveNotification) {
+                self?.didBecomeActive()
+            }
+        }
+    }
+
+    func didEnterBackground(now: Date = Date()) {
+        backgroundedAt = now
+    }
+
+    func didBecomeActive(now: Date = Date()) {
+        guard let backgroundedAt else { return }
+        self.backgroundedAt = nil
+        if now.timeIntervalSince(backgroundedAt) >= Self.reloadThreshold {
+            reloadEpoch += 1
+        }
+    }
+}
+
 /// Thread-safe actor for tracking cached icon keys
 actor IconCacheTracker {
     static let shared = IconCacheTracker()
@@ -46,8 +89,8 @@ struct IconInputView: View {
     let rowIdentity: String
     let fallbackSymbol: SFSymbol?
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    @ObservedObject private var iconReloader = IconReloadCoordinator.shared
     @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     let size: CGSize
     let iconType: IconType = .svg
@@ -67,11 +110,15 @@ struct IconInputView: View {
         guard
             let activeConnection = networkTracker.activeConnection,
             !activeConnection.configuration.url.isEmpty else {
+            recordIconResolutionFailure(
+                reason: networkTracker.activeConnection == nil ? "no-active-connection" : "empty-connection-url",
+                connectionDescription: networkTracker.activeConnection?.configuration.publicLogDescription ?? "none"
+            )
             logger.debug("No active connection to fetch icon")
             return nil
         }
 
-        return Endpoint.icon(
+        guard let endpoint = Endpoint.icon(
             rootUrl: activeConnection.configuration.url,
             version: activeConnection.version,
             icon: input.icon,
@@ -79,7 +126,14 @@ struct IconInputView: View {
             iconType: iconType,
             iconColor: iconColorHex,
             staticIcon: input.staticIcon
-        )?.url
+        )?.url else {
+            recordIconResolutionFailure(
+                reason: "endpoint-url-build-failed",
+                connectionDescription: activeConnection.configuration.publicLogDescription
+            )
+            return nil
+        }
+        return endpoint
     }
 
     var body: some View {
@@ -103,12 +157,17 @@ struct IconInputView: View {
                     .resizable()
                     .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
                     .onFailure { error in
-                        guard !error.isTaskCancelled else { return }
+                        guard !error.isTaskCancelled else {
+                            recordIconCancellation(url: iconURL)
+                            return
+                        }
+                        recordIconFailure(url: iconURL, reason: error.localizedDescription)
                         logger.error("Icon loading failed for icon '\(input.icon, privacy: .public)': \(error.localizedDescription, privacy: .public)")
                         logger.error("Failed URL: \(iconURL.absoluteString, privacy: .public)")
                     }
                     .onSuccess { result in
                         currentImage = result.image
+                        recordIconSuccess(url: iconURL, cacheType: result.cacheType)
                         if result.cacheType != .none {
                             let cacheKey = iconURL.absoluteString
                             Task {
@@ -121,7 +180,10 @@ struct IconInputView: View {
                     }
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id("\(viewModel.pageId)-\(rowIdentity)-\(colorScheme)")
+                    .id("\(iconURL.absoluteString)-\(colorScheme)-\(iconReloader.reloadEpoch)")
+                    .onAppear {
+                        recordIconStart(url: iconURL)
+                    }
             }
         }
     }
@@ -137,14 +199,86 @@ struct IconInputView: View {
         guard url.host != "api.iconify.design" else { return nil }
         return iconColorHex
     }
+
+    private func recordIconStart(url: URL) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconStart(
+            rowIdentity: rowIdentity,
+            icon: input.icon,
+            url: url,
+            cacheKey: url.absoluteString
+        )
+        Task {
+            await IconLoadDiagnostics.shared.recordStart(url: url, rowIdentity: rowIdentity)
+        }
+    }
+
+    private func recordIconSuccess(url: URL, cacheType: CacheType) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconSuccess(
+            rowIdentity: rowIdentity,
+            icon: input.icon,
+            url: url,
+            cacheType: cacheType.diagnosticsName
+        )
+        Task {
+            await IconLoadDiagnostics.shared.recordSuccess(
+                url: url,
+                rowIdentity: rowIdentity,
+                cacheType: cacheType.diagnosticsName
+            )
+        }
+    }
+
+    private func recordIconCancellation(url: URL) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconFailure(
+            rowIdentity: rowIdentity,
+            icon: input.icon,
+            url: url,
+            reason: "task-cancelled",
+            cancelled: true
+        )
+        Task {
+            await IconLoadDiagnostics.shared.recordCancellation(url: url, rowIdentity: rowIdentity)
+        }
+    }
+
+    private func recordIconFailure(url: URL, reason: String) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconFailure(
+            rowIdentity: rowIdentity,
+            icon: input.icon,
+            url: url,
+            reason: reason,
+            cancelled: false
+        )
+        Task {
+            await IconLoadDiagnostics.shared.recordFailure(url: url, rowIdentity: rowIdentity)
+        }
+    }
+
+    private func recordIconResolutionFailure(reason: String, connectionDescription: String) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconResolutionFailure(
+            rowIdentity: rowIdentity,
+            icon: input.icon,
+            reason: reason,
+            trackerStatus: networkTracker.status.rawValue,
+            connectionDescription: connectionDescription
+        )
+        Task {
+            await IconLoadDiagnostics.shared.recordResolutionFailure(rowIdentity: rowIdentity)
+        }
+    }
 }
 
 /// A SwiftUI view that displays widget icons with openHAB-specific styling and caching
 struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    @ObservedObject private var iconReloader = IconReloadCoordinator.shared
     @Environment(\.colorScheme) private var colorScheme
-    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     let size: CGSize
     let iconType: IconType = .svg
@@ -167,11 +301,15 @@ struct IconView: View {
         guard
             let activeConnection = networkTracker.activeConnection,
             !activeConnection.configuration.url.isEmpty else {
+            recordIconResolutionFailure(
+                reason: networkTracker.activeConnection == nil ? "no-active-connection" : "empty-connection-url",
+                connectionDescription: networkTracker.activeConnection?.configuration.publicLogDescription ?? "none"
+            )
             logger.debug("No active connection to fetch icon")
             return nil
         }
 
-        return Endpoint.icon(
+        guard let endpoint = Endpoint.icon(
             rootUrl: activeConnection.configuration.url,
             version: activeConnection.version,
             icon: widget.icon,
@@ -179,7 +317,14 @@ struct IconView: View {
             iconType: iconType,
             iconColor: iconColorHex,
             staticIcon: widget.staticIcon
-        )?.url
+        )?.url else {
+            recordIconResolutionFailure(
+                reason: "endpoint-url-build-failed",
+                connectionDescription: activeConnection.configuration.publicLogDescription
+            )
+            return nil
+        }
+        return endpoint
     }
 
     var body: some View {
@@ -204,12 +349,17 @@ struct IconView: View {
                     .resizable()
                     .setProcessor(OpenHABImageProcessor(iconColor: processorIconColor(for: iconURL)))
                     .onFailure { error in
-                        guard !error.isTaskCancelled else { return }
+                        guard !error.isTaskCancelled else {
+                            recordIconCancellation(url: iconURL)
+                            return
+                        }
+                        recordIconFailure(url: iconURL, reason: error.localizedDescription)
                         logger.error("Icon loading failed for icon '\(widget.icon, privacy: .public)': \(error.localizedDescription, privacy: .public)")
                         logger.error("Failed URL: \(iconURL.absoluteString, privacy: .public)")
                     }
                     .onSuccess { result in
                         currentImage = result.image
+                        recordIconSuccess(url: iconURL, cacheType: result.cacheType)
                         if result.cacheType != .none {
                             let cacheKey = iconURL.absoluteString
                             Task {
@@ -223,7 +373,10 @@ struct IconView: View {
                     }
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id("\(viewModel.pageId)-\(widget.id)-\(colorScheme)")
+                    .id("\(iconURL.absoluteString)-\(colorScheme)-\(iconReloader.reloadEpoch)")
+                    .onAppear {
+                        recordIconStart(url: iconURL)
+                    }
             }
         }
     }
@@ -234,9 +387,94 @@ struct IconView: View {
         guard url.host != "api.iconify.design" else { return nil }
         return iconColorHex
     }
+
+    private func recordIconStart(url: URL) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconStart(
+            rowIdentity: widget.id,
+            icon: widget.icon,
+            url: url,
+            cacheKey: url.absoluteString
+        )
+        Task {
+            await IconLoadDiagnostics.shared.recordStart(url: url, rowIdentity: widget.id)
+        }
+    }
+
+    private func recordIconSuccess(url: URL, cacheType: CacheType) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconSuccess(
+            rowIdentity: widget.id,
+            icon: widget.icon,
+            url: url,
+            cacheType: cacheType.diagnosticsName
+        )
+        Task {
+            await IconLoadDiagnostics.shared.recordSuccess(
+                url: url,
+                rowIdentity: widget.id,
+                cacheType: cacheType.diagnosticsName
+            )
+        }
+    }
+
+    private func recordIconCancellation(url: URL) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconFailure(
+            rowIdentity: widget.id,
+            icon: widget.icon,
+            url: url,
+            reason: "task-cancelled",
+            cancelled: true
+        )
+        Task {
+            await IconLoadDiagnostics.shared.recordCancellation(url: url, rowIdentity: widget.id)
+        }
+    }
+
+    private func recordIconFailure(url: URL, reason: String) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconFailure(
+            rowIdentity: widget.id,
+            icon: widget.icon,
+            url: url,
+            reason: reason,
+            cancelled: false
+        )
+        Task {
+            await IconLoadDiagnostics.shared.recordFailure(url: url, rowIdentity: widget.id)
+        }
+    }
+
+    private func recordIconResolutionFailure(reason: String, connectionDescription: String) {
+        guard SitemapDiagnostics.isEnabled else { return }
+        SitemapDiagnostics.logIconResolutionFailure(
+            rowIdentity: widget.id,
+            icon: widget.icon,
+            reason: reason,
+            trackerStatus: networkTracker.status.rawValue,
+            connectionDescription: connectionDescription
+        )
+        Task {
+            await IconLoadDiagnostics.shared.recordResolutionFailure(rowIdentity: widget.id)
+        }
+    }
 }
 
 // MARK: - Convenience Extensions
+
+private extension CacheType {
+    var diagnosticsName: String {
+        switch self {
+        case .memory:
+            "memory"
+        case .disk:
+            "disk"
+        case .none:
+            "none"
+        }
+    }
+}
 
 extension IconView {
     /// Creates a widget icon view with standard size (32x32, matching UIKit cells)
@@ -269,5 +507,4 @@ extension IconView {
     widget.icon = "switch"
     widget.label = "Test Switch"
     return IconView(widget: widget, fallbackSymbol: .switch2)
-        .environmentObject(SitemapPageViewModel())
 }

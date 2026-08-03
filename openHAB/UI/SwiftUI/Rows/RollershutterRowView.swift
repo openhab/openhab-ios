@@ -82,7 +82,6 @@ private struct RollershutterRowContent: View {
                         .foregroundStyle(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
-                .ohMinimumHitTarget()
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerDownFeedback)
 
                 Button {
@@ -95,7 +94,6 @@ private struct RollershutterRowContent: View {
                         .foregroundStyle(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
-                .ohMinimumHitTarget()
                 .sensoryStopFeedbackIfAvailable(trigger: triggerStopFeedback)
 
                 Button {
@@ -108,7 +106,6 @@ private struct RollershutterRowContent: View {
                         .foregroundStyle(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
-                .ohMinimumHitTarget()
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerUpFeedback)
             }
             .padding(.trailing, -2)
@@ -133,26 +130,6 @@ struct RollershutterRowView: View {
                 triggerDownFeedback: $triggerDownFeedback
             )
         )
-    }
-}
-
-extension View {
-    @ViewBuilder
-    func sensoryHeavyFeedbackIfAvailable(trigger: Bool) -> some View {
-        if #available(iOS 17.0, *) {
-            sensoryFeedback(.impact(weight: .heavy, intensity: 0.9), trigger: trigger)
-        } else {
-            self
-        }
-    }
-
-    @ViewBuilder
-    func sensoryStopFeedbackIfAvailable(trigger: Bool) -> some View {
-        if #available(iOS 17.0, *) {
-            sensoryFeedback(.impact(flexibility: .rigid), trigger: trigger)
-        } else {
-            self
-        }
     }
 }
 

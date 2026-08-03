@@ -13,7 +13,6 @@
 import OpenHABCore
 import Testing
 
-@Suite
 struct SitemapRowInputMapperTests {
     @Test
     func linkedPageWidgetsAlwaysMapToLinked() {
@@ -75,7 +74,12 @@ struct SitemapRowInputMapperTests {
             makeColorPickerWidget(widgetID: "colorPicker"),
             makeButtonGridWidget(widgetID: "buttonGrid"),
             makeTextWidget(widgetID: "text"),
-            makeFrameWidget(widgetID: "frame")
+            makeFrameWidget(widgetID: "frame"),
+            makeVideoWidget(
+                widgetID: "video",
+                url: "http://default.example.invalid/video.m3u8",
+                itemState: "http://camera.example.invalid/live.m3u8"
+            )
         ]
 
         for (index, widget) in widgets.enumerated() {
@@ -84,6 +88,51 @@ struct SitemapRowInputMapperTests {
             let snapshotMapped = SitemapRowInputMapper.map(snapshot: WidgetMappingSnapshot(widget: widget), rowID: rowID)
             #expect(snapshotMapped == mapped)
         }
+    }
+
+    // MARK: - inputHint inference from item type
+
+    @Test
+    func numberItemWithNoInputHintIsInferredAsNumber() {
+        let widget = makeNumberInputWidget(widgetID: "numInput")
+        let input = InputRowInput.from(widget: widget)
+        #expect(input.inputHint == .number)
+    }
+
+    @Test
+    func numberDimensionItemWithNoInputHintIsInferredAsNumber() {
+        let widget = makeNumberDimensionInputWidget(widgetID: "numDimInput")
+        let input = InputRowInput.from(widget: widget)
+        #expect(input.inputHint == .number)
+    }
+
+    @Test
+    func stringItemWithNoInputHintRemainsUnknown() {
+        let widget = makeTextInputWidget(widgetID: "textInput")
+        widget.inputHint = .unknown
+        let input = InputRowInput.from(widget: widget)
+        #expect(input.inputHint == .unknown)
+    }
+
+    @Test
+    func explicitTextHintOnNumberItemIsNotOverridden() {
+        let widget = makeNumberInputWidget(widgetID: "numInput", inputHint: .text)
+        let input = InputRowInput.from(widget: widget)
+        #expect(input.inputHint == .text)
+    }
+
+    @Test
+    func numberItemHintInferenceConsistentViaSnapshot() {
+        let widget = makeNumberInputWidget(widgetID: "numInput")
+        let fromWidget = InputRowInput.from(widget: widget)
+        let rowID = RowID(pageKey: "testPage", widgetId: widget.widgetId, occurrence: 1)
+        let fromSnapshot = SitemapRowInputMapper.map(snapshot: WidgetMappingSnapshot(widget: widget), rowID: rowID)
+        guard case let .input(_, snapshotInput) = fromSnapshot else {
+            Issue.record("Expected .input row for number input widget")
+            return
+        }
+        #expect(snapshotInput.inputHint == fromWidget.inputHint)
+        #expect(snapshotInput.inputHint == .number)
     }
 
     @Test
@@ -99,6 +148,23 @@ struct SitemapRowInputMapperTests {
     }
 
     @Test
+    func videoSnapshotUsesItemStateURLBeforeConfiguredURL() {
+        let widget = makeVideoWidget(
+            widgetID: "video",
+            url: "dummy",
+            itemState: "http://camera.example.invalid/live.m3u8"
+        )
+        let rowID = RowID(pageKey: "testPage", widgetId: widget.widgetId, occurrence: 1)
+        let input = SitemapRowInputMapper.map(snapshot: WidgetMappingSnapshot(widget: widget), rowID: rowID)
+
+        guard case let .media(_, mediaInput) = input else {
+            Issue.record("Expected media row input")
+            return
+        }
+        #expect(mediaInput.url == "http://camera.example.invalid/live.m3u8")
+    }
+
+    @Test
     func videoWidgetFallsBackToConfiguredURLWhenItemStateIsNotURL() {
         let widget = makeVideoWidget(
             widgetID: "video",
@@ -108,6 +174,53 @@ struct SitemapRowInputMapperTests {
         let input = MediaRowInput.from(widget: widget)
 
         #expect(input.url == "http://default.example.invalid/video.m3u8")
+    }
+
+    @Test
+    func mediaWidgetsWithLinkedPageStillMapToMedia() {
+        let mediaWidgets: [OpenHABWidget] = [
+            makeImageWidget(widgetID: "image"),
+            makeChartWidget(widgetID: "chart"),
+            makeVideoWidget(widgetID: "video", url: "http://example.invalid/v.m3u8", itemState: "OFF")
+        ]
+
+        for (index, widget) in mediaWidgets.enumerated() {
+            widget.linkedPage = makeLinkedPage()
+            let rowID = RowID(pageKey: "testPage", widgetId: widget.widgetId, occurrence: index + 1)
+
+            let widgetMapped = SitemapRowInputMapper.map(widget: widget, rowID: rowID)
+            let snapshotMapped = SitemapRowInputMapper.map(snapshot: WidgetMappingSnapshot(widget: widget), rowID: rowID)
+
+            guard case .media = widgetMapped else {
+                #expect(Bool(false), "Expected .media for linked \(widget.widgetId), got \(widgetMapped)")
+                continue
+            }
+            guard case .media = snapshotMapped else {
+                #expect(Bool(false), "Expected .media for linked snapshot \(widget.widgetId), got \(snapshotMapped)")
+                continue
+            }
+        }
+    }
+
+    @Test
+    func imageWidgetWithEmbeddedJPEGAndLinkedPageShowsEmbeddedData() {
+        // swiftlint:disable:next line_length
+        let jpegBase64 = "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AKwAB/9k="
+        let widget = makeImageWidget(widgetID: "imgWithLinked")
+        widget.item = makeItem(name: "CameraSnapshot", type: "Image", state: "data:image/jpeg;base64,\(jpegBase64)")
+        widget.linkedPage = makeLinkedPage()
+        let rowID = RowID(pageKey: "testPage", widgetId: widget.widgetId, occurrence: 1)
+
+        let mapped = SitemapRowInputMapper.map(snapshot: WidgetMappingSnapshot(widget: widget), rowID: rowID)
+
+        guard case let .media(_, mediaInput) = mapped else {
+            #expect(Bool(false), "Expected .media row for image widget with linked page")
+            return
+        }
+        guard case .embedded = mediaInput.imageDescriptor.resolveImagePayload(rootUrl: "http://server.invalid") else {
+            #expect(Bool(false), "Expected .embedded payload for Image item with base64 JPEG state")
+            return
+        }
     }
 }
 
@@ -189,6 +302,24 @@ private extension SitemapRowInputMapperTests {
         return widget
     }
 
+    func makeNumberInputWidget(widgetID: String, inputHint: OpenHABWidget.InputHint = .unknown) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = widgetID
+        widget.type = .input
+        widget.inputHint = inputHint
+        widget.item = makeItem(name: "NumberInputItem", type: "Number", state: "220.5")
+        return widget
+    }
+
+    func makeNumberDimensionInputWidget(widgetID: String) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = widgetID
+        widget.type = .input
+        widget.inputHint = .unknown
+        widget.item = makeItem(name: "NumberDimItem", type: "NumberWithDimension", state: "21.5 °C")
+        return widget
+    }
+
     func makeDateInputWidget(widgetID: String) -> OpenHABWidget {
         let widget = OpenHABWidget()
         widget.widgetId = widgetID
@@ -235,6 +366,22 @@ private extension SitemapRowInputMapperTests {
         widget.type = .video
         widget.url = url
         widget.item = makeItem(name: "VideoItem", type: "String", state: itemState)
+        return widget
+    }
+
+    func makeImageWidget(widgetID: String) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = widgetID
+        widget.type = .image
+        widget.url = "http://example.invalid/proxy?widgetId=\(widgetID)"
+        return widget
+    }
+
+    func makeChartWidget(widgetID: String) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = widgetID
+        widget.type = .chart
+        widget.item = makeItem(name: "ChartItem", type: "Number", state: "42")
         return widget
     }
 }

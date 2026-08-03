@@ -14,11 +14,11 @@ import os.log
 
 @MainActor
 public protocol ServerCertificateManagerDelegate: AnyObject, Sendable {
-    // delegate should ask user for a decision on what to do with invalid certificate
+    /// delegate should ask user for a decision on what to do with invalid certificate
     func evaluateServerTrust(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult
-    // certificate received from openHAB doesn't match our record, ask user for a decision
+    /// certificate received from openHAB doesn't match our record, ask user for a decision
     func evaluateCertificateMismatch(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult
-    // notify delegate that the certificagtes that a user is willing to trust has changed
+    /// notify delegate that the certificagtes that a user is willing to trust has changed
     func acceptedServerCertificatesChanged() async
 }
 
@@ -28,7 +28,7 @@ enum ServerCertificateManagerError: Error {
 
 @MainActor
 public final class ServerCertificateManager {
-    // Handle the different responses of the user
+    /// Handle the different responses of the user
     public enum EvaluateResult: Sendable {
         case undecided
         case deny
@@ -37,10 +37,10 @@ public final class ServerCertificateManager {
     }
 
     public weak var delegate: (any ServerCertificateManagerDelegate)?
-    // ignoreSSL is a synonym for allowInvalidCertificates, ignoreCertificates
+    /// ignoreSSL is a synonym for allowInvalidCertificates, ignoreCertificates
     public var ignoreSSL = false
 
-    // Init a ServerCertificateManager and set ignore certificates setting
+    /// Init a ServerCertificateManager and set ignore certificates setting
     public init(ignoreSSL: Bool = false) {
         self.ignoreSSL = ignoreSSL
         Logger.serverCert.info("Initializing cert manager, delegating to CertificateStore")
@@ -78,8 +78,8 @@ public final class ServerCertificateManager {
         return result
     }
 
-    // Evaluates trust received during SSL negotiation and checks it against known ones,
-    // against policy setting to ignore certificate errors and so on.
+    /// Evaluates trust received during SSL negotiation and checks it against known ones,
+    /// against policy setting to ignore certificate errors and so on.
     public func evaluate(_ serverTrust: SecTrust, forHost domain: String) async throws {
         let evaluateResult = wrapperSecTrustEvaluate(serverTrust: serverTrust)
 

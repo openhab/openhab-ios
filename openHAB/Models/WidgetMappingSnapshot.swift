@@ -12,11 +12,92 @@
 import Foundation
 import OpenHABCore
 
-struct WidgetLinkedPageSnapshot: Sendable {
+// swiftformat:disable:next redundantSendable
+struct SnapshotRowInputBuildResult: Sendable {
+    let inputs: [SitemapRowInput]
+    let rowIDs: [RowID]
+    let renderKeys: [WidgetRenderKey]
+    let reusedInputCount: Int
+}
+
+struct WidgetLinkedPageSnapshot {
     let link: String
     let title: String
 }
 
+enum SitemapRowInputSnapshotBuilder {
+    static func build(pageKey: String, widgets: [WidgetMappingSnapshot]) -> SnapshotRowInputBuildResult {
+        var occurrenceByWidgetID: [String: Int] = [:]
+        var inputs: [SitemapRowInput] = []
+        var rowIDs: [RowID] = []
+        var renderKeys: [WidgetRenderKey] = []
+
+        inputs.reserveCapacity(widgets.count)
+        rowIDs.reserveCapacity(widgets.count)
+        renderKeys.reserveCapacity(widgets.count)
+
+        for widget in widgets {
+            let identityWidgetID = widget.rowIdentityWidgetID()
+            occurrenceByWidgetID[identityWidgetID, default: 0] += 1
+            let occurrence = occurrenceByWidgetID[identityWidgetID]!
+            let rowID = RowID(pageKey: pageKey, widgetId: identityWidgetID, occurrence: occurrence)
+            rowIDs.append(rowID)
+            renderKeys.append(WidgetRenderKey.from(snapshot: widget))
+            inputs.append(SitemapRowInputMapper.map(snapshot: widget, rowID: rowID))
+        }
+
+        return SnapshotRowInputBuildResult(inputs: inputs, rowIDs: rowIDs, renderKeys: renderKeys, reusedInputCount: 0)
+    }
+
+    static func buildIncrementally(pageKey: String,
+                                   widgets: [WidgetMappingSnapshot],
+                                   previousRenderKeys: [WidgetRenderKey],
+                                   previousInputs: [SitemapRowInput],
+                                   previousRowIDs: [RowID]) -> SnapshotRowInputBuildResult {
+        guard widgets.count == previousRenderKeys.count,
+              widgets.count == previousInputs.count,
+              widgets.count == previousRowIDs.count else {
+            return build(pageKey: pageKey, widgets: widgets)
+        }
+
+        var occurrenceByWidgetID: [String: Int] = [:]
+        var inputs: [SitemapRowInput] = []
+        var rowIDs: [RowID] = []
+        var renderKeys: [WidgetRenderKey] = []
+        var reusedInputCount = 0
+
+        inputs.reserveCapacity(widgets.count)
+        rowIDs.reserveCapacity(widgets.count)
+        renderKeys.reserveCapacity(widgets.count)
+
+        for (offset, snapshot) in widgets.enumerated() {
+            let identityWidgetID = snapshot.rowIdentityWidgetID()
+            occurrenceByWidgetID[identityWidgetID, default: 0] += 1
+            let occurrence = occurrenceByWidgetID[identityWidgetID]!
+            let rowID = RowID(pageKey: pageKey, widgetId: identityWidgetID, occurrence: occurrence)
+            rowIDs.append(rowID)
+
+            let currentRenderKey = WidgetRenderKey.from(snapshot: snapshot)
+            renderKeys.append(currentRenderKey)
+
+            if previousRowIDs[offset] == rowID, previousRenderKeys[offset] == currentRenderKey {
+                inputs.append(previousInputs[offset])
+                reusedInputCount += 1
+            } else {
+                inputs.append(SitemapRowInputMapper.map(snapshot: snapshot, rowID: rowID))
+            }
+        }
+
+        return SnapshotRowInputBuildResult(
+            inputs: inputs,
+            rowIDs: rowIDs,
+            renderKeys: renderKeys,
+            reusedInputCount: reusedInputCount
+        )
+    }
+}
+
+// swiftformat:disable:next redundantSendable
 struct WidgetMappingSnapshot: Sendable {
     let widgetId: String
     let label: String
@@ -176,7 +257,9 @@ extension WidgetMappingSnapshot {
         OpenHABWidget.LabelSource(rawValue: labelSourceRawValue) ?? .unknown
     }
 
-    var hasLinkedPage: Bool { linkedPage != nil }
+    var hasLinkedPage: Bool {
+        linkedPage != nil
+    }
 
     var mediaImageDescriptor: WidgetMediaImageDescriptor {
         let itemPayload: WidgetMediaItemPayloadSnapshot = if let item {
@@ -258,88 +341,11 @@ private extension OpenHABWidgetMapping {
     }
 }
 
-struct SnapshotRowInputBuildResult: Sendable {
-    let inputs: [SitemapRowInput]
-    let rowIDs: [RowID]
-    let renderKeys: [WidgetRenderKey]
-    let reusedInputCount: Int
-}
-
-enum SitemapRowInputSnapshotBuilder {
-    static func build(pageKey: String, widgets: [WidgetMappingSnapshot]) -> SnapshotRowInputBuildResult {
-        var occurrenceByWidgetID: [String: Int] = [:]
-        var inputs: [SitemapRowInput] = []
-        var rowIDs: [RowID] = []
-        var renderKeys: [WidgetRenderKey] = []
-
-        inputs.reserveCapacity(widgets.count)
-        rowIDs.reserveCapacity(widgets.count)
-        renderKeys.reserveCapacity(widgets.count)
-
-        for widget in widgets {
-            let identityWidgetID = widget.rowIdentityWidgetID()
-            occurrenceByWidgetID[identityWidgetID, default: 0] += 1
-            let occurrence = occurrenceByWidgetID[identityWidgetID]!
-            let rowID = RowID(pageKey: pageKey, widgetId: identityWidgetID, occurrence: occurrence)
-            rowIDs.append(rowID)
-            renderKeys.append(WidgetRenderKey.from(snapshot: widget))
-            inputs.append(SitemapRowInputMapper.map(snapshot: widget, rowID: rowID))
-        }
-
-        return SnapshotRowInputBuildResult(inputs: inputs, rowIDs: rowIDs, renderKeys: renderKeys, reusedInputCount: 0)
-    }
-
-    static func buildIncrementally(pageKey: String,
-                                   widgets: [WidgetMappingSnapshot],
-                                   previousRenderKeys: [WidgetRenderKey],
-                                   previousInputs: [SitemapRowInput],
-                                   previousRowIDs: [RowID]) -> SnapshotRowInputBuildResult {
-        guard widgets.count == previousRenderKeys.count,
-              widgets.count == previousInputs.count,
-              widgets.count == previousRowIDs.count else {
-            return build(pageKey: pageKey, widgets: widgets)
-        }
-
-        var occurrenceByWidgetID: [String: Int] = [:]
-        var inputs: [SitemapRowInput] = []
-        var rowIDs: [RowID] = []
-        var renderKeys: [WidgetRenderKey] = []
-        var reusedInputCount = 0
-
-        inputs.reserveCapacity(widgets.count)
-        rowIDs.reserveCapacity(widgets.count)
-        renderKeys.reserveCapacity(widgets.count)
-
-        for (offset, snapshot) in widgets.enumerated() {
-            let identityWidgetID = snapshot.rowIdentityWidgetID()
-            occurrenceByWidgetID[identityWidgetID, default: 0] += 1
-            let occurrence = occurrenceByWidgetID[identityWidgetID]!
-            let rowID = RowID(pageKey: pageKey, widgetId: identityWidgetID, occurrence: occurrence)
-            rowIDs.append(rowID)
-
-            let currentRenderKey = WidgetRenderKey.from(snapshot: snapshot)
-            renderKeys.append(currentRenderKey)
-
-            if previousRowIDs[offset] == rowID, previousRenderKeys[offset] == currentRenderKey {
-                inputs.append(previousInputs[offset])
-                reusedInputCount += 1
-            } else {
-                inputs.append(SitemapRowInputMapper.map(snapshot: snapshot, rowID: rowID))
-            }
-        }
-
-        return SnapshotRowInputBuildResult(
-            inputs: inputs,
-            rowIDs: rowIDs,
-            renderKeys: renderKeys,
-            reusedInputCount: reusedInputCount
-        )
-    }
-}
-
 extension SitemapRowInputMapper {
     static func map(snapshot: WidgetMappingSnapshot, rowID: RowID) -> SitemapRowInput {
-        if let input = linkedPageRowInput(from: snapshot) {
+        let kind = snapshot.renderingKind
+        let isMediaKind = kind == .image || kind == .chart || kind == .video || kind == .webview || kind == .mapview
+        if !isMediaKind, let input = linkedPageRowInput(from: snapshot) {
             return .linked(rowID, input)
         }
 
@@ -487,16 +493,22 @@ extension SitemapRowInputMapper {
     }
 
     private static func inputRowInput(from snapshot: WidgetMappingSnapshot) -> InputRowInput {
-        InputRowInput(
+        let numberPattern = if let pattern = snapshot.pattern, !pattern.isEmpty {
+            pattern
+        } else {
+            snapshot.item?.stateDescription?.numberPattern
+        }
+        return InputRowInput(
             widgetId: snapshot.widgetId,
             renderingKind: snapshot.renderingKind,
             displayState: snapshot.displayState,
             labelColor: snapshot.labelColor,
             valueColor: snapshot.valueColor,
             readOnly: snapshot.readOnly,
-            inputHintRawValue: snapshot.inputHintRawValue,
+            inputHintRawValue: InputRowInput.resolvedInputHintRawValue(snapshot.inputHintRawValue, item: snapshot.item),
             icon: rowIconInput(from: snapshot),
-            itemName: snapshot.item?.name
+            itemName: snapshot.item?.name,
+            numberPattern: numberPattern
         )
     }
 
@@ -591,6 +603,7 @@ extension SitemapRowInputMapper {
         let hasValidCoordinate = coordinate.map {
             (-90.0 ... 90.0).contains($0.latitude) && (-180.0 ... 180.0).contains($0.longitude)
         } ?? false
+        let url = effectiveMediaURL(for: snapshot)
 
         return MediaRowInput(
             widgetId: snapshot.widgetId,
@@ -601,13 +614,33 @@ extension SitemapRowInputMapper {
             valueColor: snapshot.valueColor,
             readOnly: snapshot.readOnly,
             refresh: snapshot.refresh,
-            url: snapshot.url,
+            url: url,
             encoding: snapshot.encoding,
             labelSourceRawValue: snapshot.labelSourceRawValue,
             preferredRowHeight: snapshot.preferredRowHeight,
             coordinateLatitude: hasValidCoordinate ? coordinate?.latitude : nil,
-            coordinateLongitude: hasValidCoordinate ? coordinate?.longitude : nil
+            coordinateLongitude: hasValidCoordinate ? coordinate?.longitude : nil,
+            linkedPageLink: snapshot.linkedPage?.link,
+            linkedPageTitle: snapshot.linkedPage?.title
         )
+    }
+
+    private static func effectiveMediaURL(for snapshot: WidgetMappingSnapshot) -> String {
+        guard snapshot.renderingKind == .video,
+              let itemState = snapshot.item?.state?.trimmingCharacters(in: .whitespacesAndNewlines),
+              isAbsoluteURL(itemState) else {
+            return snapshot.url
+        }
+
+        return itemState
+    }
+
+    private static func isAbsoluteURL(_ value: String) -> Bool {
+        guard let url = URL(string: value),
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return false
+        }
+        return components.scheme != nil && (components.host != nil || components.path.hasPrefix("/"))
     }
 
     private static func textRowInput(from snapshot: WidgetMappingSnapshot) -> TextRowInput {

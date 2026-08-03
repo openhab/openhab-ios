@@ -12,10 +12,24 @@
 import Combine
 import Foundation
 import OpenHABCore
+import os.log
 import SwiftUI
 
 final class AppSettings: ObservableObject {
     @MainActor static let shared = AppSettings()
+
+    /// Stable per-install identifier, analogous to UIDevice.identifierForVendor on iOS.
+    static var deviceId: String {
+        let key = "watchDeviceId"
+        let store = UserDefaults.standard
+        if let existing = store.string(forKey: key) {
+            return existing
+        }
+        let new = UUID().uuidString
+        store.set(new, forKey: key)
+        return new
+    }
+
     var openHABVersion = 2
     var cancellables = Set<AnyCancellable>()
 
@@ -29,9 +43,12 @@ final class AppSettings: ObservableObject {
     @Published var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode
     @Published var sortSitemapsBy: SortSitemapsOrder
     @Published var haveReceivedAppContext = false
+    @Published var storedHomes: [UUID: HomePreferences] = [:]
+    /// UUID of the active home, persisted so credentials can be injected from Watch Keychain on restart.
+    @Published var activeHomeId: UUID?
 
     init() {
-        let store = UserDefaults(suiteName: "group.openhab.shared")!
+        let store = UserDefaults(suiteName: "group.openhab.shared") ?? UserDefaults.standard
 
         if let data = store.data(forKey: "localConnectionConfig"),
            let decoded = try? JSONDecoder().decode(ConnectionConfiguration.self, from: data) {
@@ -54,6 +71,30 @@ final class AppSettings: ObservableObject {
         iconType = IconType(rawValue: store.integer(forKey: "iconType")) ?? .svg
         sitemapNameLabelDisplayMode = (store.object(forKey: "sitemapNameLabelDisplayMode") as? Int).flatMap(SitemapNameLabelDisplayMode.init(rawValue:)) ?? .label
         sortSitemapsBy = SortSitemapsOrder(rawValue: store.integer(forKey: "sortSitemapsBy")) ?? .label
+
+        if let data = store.data(forKey: "watchAllHomes"),
+           let decoded = try? JSONDecoder().decode([String: HomePreferences].self, from: data) {
+            storedHomes = Dictionary(uniqueKeysWithValues: decoded.compactMap { key, value in
+                UUID(uuidString: key).map { ($0, value) }
+            })
+        }
+
+        // Restore active home ID and inject credentials from Watch Keychain so the main
+        // Watch UI has valid credentials even when the iOS app is not reachable on restart.
+        if let uuidString = store.string(forKey: "activeHomeId"),
+           let homeId = UUID(uuidString: uuidString) {
+            activeHomeId = homeId
+            if let creds = CredentialsStore.retrieve(homeId: homeId, type: .local) {
+                localConnectionConfig?.username = creds.username
+                localConnectionConfig?.password = creds.password
+            }
+            if let creds = CredentialsStore.retrieve(homeId: homeId, type: .remote) {
+                remoteConnectionConfig?.username = creds.username
+                remoteConnectionConfig?.password = creds.password
+            }
+        } else {
+            activeHomeId = nil
+        }
 
         // Observe changes and write back to UserDefaults
         $localConnectionConfig
@@ -126,10 +167,47 @@ final class AppSettings: ObservableObject {
                 store.set(newValue.rawValue, forKey: "sortSitemapsBy")
             }
             .store(in: &cancellables)
+
+        $storedHomes
+            .removeDuplicates()
+            .sink { newValue in
+                Self.persistStoredHomes(newValue)
+            }
+            .store(in: &cancellables)
+
+        $activeHomeId
+            .removeDuplicates()
+            .sink { newValue in
+                if let newValue {
+                    store.set(newValue.uuidString, forKey: "activeHomeId")
+                } else {
+                    store.removeObject(forKey: "activeHomeId")
+                }
+            }
+            .store(in: &cancellables)
     }
 
     convenience init(debug: Bool = false, openHABRootUrl: String = "") {
         self.init()
         self.openHABRootUrl = openHABRootUrl
+    }
+
+    /// Writes `storedHomes` to both UserDefaults suites that read it:
+    /// - `group.openhab.shared["watchAllHomes"]` (string-keyed) — read by `AppSettings.init()`
+    /// - `group.org.openhab.app["storedHomes"]` (UUID-keyed) — read by `Preferences.shared` for App Intents
+    static func persistStoredHomes(_ uuidKeyed: [UUID: HomePreferences]) {
+        let stringKeyed = Dictionary(uniqueKeysWithValues: uuidKeyed.map { ($0.key.uuidString, $0.value) })
+        let watchStore = UserDefaults(suiteName: "group.openhab.shared") ?? UserDefaults.standard
+        if let data = try? JSONEncoder().encode(stringKeyed) {
+            watchStore.set(data, forKey: "watchAllHomes")
+        } else {
+            Logger.preferences.error("Failed to persist storedHomes to group.openhab.shared")
+        }
+        let prefsStore = UserDefaults(suiteName: "group.org.openhab.app") ?? UserDefaults.standard
+        if let data = try? JSONEncoder().encode(uuidKeyed) {
+            prefsStore.set(data, forKey: "storedHomes")
+        } else {
+            Logger.preferences.error("Failed to persist storedHomes to group.org.openhab.app")
+        }
     }
 }

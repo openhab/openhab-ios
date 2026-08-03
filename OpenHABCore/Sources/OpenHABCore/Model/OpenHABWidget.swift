@@ -109,17 +109,21 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var stateless: Bool?
     public var yAxisDecimalPattern: String?
 
-    public var widgetType: WidgetType { type }
-    public var hasLinkedPage: Bool { linkedPage != nil }
+    public var widgetType: WidgetType {
+        type
+    }
+
+    public var hasLinkedPage: Bool {
+        linkedPage != nil
+    }
 
     public var coordinate: CLLocationCoordinate2D {
         item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
-
 }
 
 public extension OpenHABWidget {
-    // This is an ugly initializer
+    /// This is an ugly initializer
     convenience init(widgetId: String,
                      label: String,
                      icon: String,
@@ -220,11 +224,12 @@ public extension OpenHABWidget {
     }
 
     convenience init(icon: String, iconColor: String? = nil) {
+        // swiftlint:disable:next line_length
         self.init(widgetId: "\(UUID())", label: "", icon: icon, type: .unknown, url: nil, period: nil, minValue: nil, maxValue: nil, step: nil, refresh: nil, height: nil, isLeaf: nil, iconColor: iconColor, labelColor: nil, valueColor: nil, service: nil, state: nil, text: nil, legend: nil, inputHint: nil, encoding: nil, item: nil, linkedPage: nil, mappings: [], widgets: [], visibility: nil, switchSupport: nil, forceAsItem: nil, labelSource: .unknown, releaseOnly: nil)
     }
 }
 
-//  Recursive parsing of nested widget structure
+///  Recursive parsing of nested widget structure
 public extension [OpenHABWidget] {
     mutating func flatten(_ widgets: [Element]) {
         for widget in widgets {
@@ -235,7 +240,6 @@ public extension [OpenHABWidget] {
         }
     }
 }
-
 
 extension OpenHABWidget {
     convenience init(_ widget: Components.Schemas.WidgetDTO) {

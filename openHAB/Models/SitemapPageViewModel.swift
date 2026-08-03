@@ -16,46 +16,6 @@ import SwiftUI
 
 private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "org.openhab.app", category: "SitemapPageViewModel")
 
-enum SitemapPageError: LocalizedError {
-    case noActiveConnection
-    case serviceUnavailable
-    case noData
-
-    var errorDescription: String? {
-        switch self {
-        case .noActiveConnection:
-            "No active connection available."
-        case .serviceUnavailable:
-            "Service unavailable."
-        case .noData:
-            "No page data received."
-        }
-    }
-}
-
-enum CommandLifecycleSummary: Equatable {
-    case idle
-    case sending(count: Int)
-    case failed(count: Int)
-}
-
-enum SitemapInteractionSummary: Equatable {
-    case onlineIdle
-    case connecting
-    case offline
-    case queued(count: Int)
-    case sending(count: Int)
-    case failed(count: Int)
-}
-
-enum RowInteractionState: Equatable {
-    case idle
-    case offline
-    case queued
-    case sending
-    case failed
-}
-
 @MainActor
 class SitemapPageViewModel: ObservableObject {
     @Published var currentPage: OpenHABPage?
@@ -74,6 +34,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published private(set) var trackerStatus: NetworkStatus = .stopped
     @Published private(set) var widgetUpdateVersions: [String: Int] = [:]
     @Published private(set) var rowInputs: [SitemapRowInput] = []
+    @Published var navigationPath: [LinkedPageNavigation] = []
 
     let networkTracker = MainActorNetworkTracker.shared
     private var openAPIService: OpenAPIService?
@@ -103,84 +64,31 @@ class SitemapPageViewModel: ObservableObject {
     var lastForegroundRefreshAt: Date = .distantPast
     private var isPageVisibleForRefresh = false
     private var lastUIUpdateAt: Date = .distantPast
+    private var coalescedLongPollUpdateCount = 0
     private var pendingLongPollPage: OpenHABPage?
+    private var pendingLinkedPageNavigation: LinkedPageNavigation?
     private var longPollDebounceTask: Task<Void, Never>?
     private var foregroundObserverTask: Task<Void, Never>?
     private var rowInputRebuildTask: Task<Void, Never>?
 
-    var relevantWidgets: [OpenHABWidget] {
-        let widgets = currentPage?.widgets ?? []
-        guard !searchText.isEmpty else { return widgets }
-        return widgets.filter {
-            $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
-        }
-    }
-
     var pageTitle: String {
-        // Strip bracket content from title (e.g., "Living Room[2]" becomes "Living Room")
-        let title = currentPage?.title.components(separatedBy: "[")[0].trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let title = currentPage?.title.labelValueTitle ?? ""
+
         if !title.isEmpty {
             return title
-        } else if !fallbackTitle.isEmpty {
-            return fallbackTitle
-        } else if !defaultSitemapLabel.isEmpty {
-            return defaultSitemapLabel
-        } else {
-            // Return empty — SitemapPageView shows a redacted placeholder title when loading
-            return ""
         }
+        if !fallbackTitle.isEmpty {
+            return fallbackTitle.labelValueTitle
+        }
+        if !defaultSitemapLabel.isEmpty {
+            return defaultSitemapLabel.labelValueTitle
+        }
+        // SitemapPageView shows a redacted placeholder title when loading
+        return ""
     }
 
     var isLinked: Bool {
         isLinkedPage
-    }
-
-    var commandLifecycleSummary: CommandLifecycleSummary {
-        let failedCount = commandStates.values.reduce(into: 0) { result, state in
-            if case .failed = state {
-                result += 1
-            }
-        }
-        if failedCount > 0 {
-            return .failed(count: failedCount)
-        }
-
-        let sendingCount = commandStates.values.reduce(into: 0) { result, state in
-            if case .sending = state {
-                result += 1
-            }
-        }
-        if sendingCount > 0 {
-            return .sending(count: sendingCount)
-        }
-        return .idle
-    }
-
-    var sitemapInteractionSummary: SitemapInteractionSummary {
-        if case let .failed(count) = commandLifecycleSummary {
-            return .failed(count: count)
-        }
-
-        let queuedCount = commandStates.values.reduce(into: 0) { result, state in
-            if case .queued = state {
-                result += 1
-            }
-        }
-        if queuedCount > 0 {
-            return .queued(count: queuedCount)
-        }
-
-        switch trackerStatus {
-        case .connected:
-            if case let .sending(count) = commandLifecycleSummary {
-                return .sending(count: count)
-            }
-            return .onlineIdle
-        case .started, .connecting:
-            return .connecting
-        case .stopped:
-            return .offline
-        }
     }
 
     init() {
@@ -211,6 +119,19 @@ class SitemapPageViewModel: ObservableObject {
         }
     }
 
+    init(sitemapName: String, pageUrl: String, title: String, pageId: String) {
+        loadSettings()
+        defaultSitemap = sitemapName
+        isLinkedPage = true
+        startObservers()
+        fallbackTitle = title
+        defaultSitemapLabel = title
+        self.pageId = pageId
+
+        // Set openHABRootUrl from current active connection for charts/images
+        openHABRootUrl = networkTracker.activeConnection?.configuration.url
+    }
+
     /// Initializes the view model with a fixed set of widgets, without loading or polling
     init(pageUrl: String = "", title: String = "Preview Page", pageId: String = "", widgets: [OpenHABWidget]) {
         isLinkedPage = !pageUrl.isEmpty
@@ -225,25 +146,6 @@ class SitemapPageViewModel: ObservableObject {
             icon: ""
         )
         rebuildRowInputs()
-    }
-
-    func rowInteractionState(for itemname: String?) -> RowInteractionState {
-        guard let itemname, !itemname.isEmpty else { return .idle }
-
-        if let lifecycleState = commandStates[itemname] {
-            switch lifecycleState {
-            case .queued:
-                return .queued
-            case .sending:
-                return .sending
-            case .failed:
-                return .failed
-            case .idle:
-                break
-            }
-        }
-
-        return trackerStatus == .connected ? .idle : .offline
     }
 
     private func startObservers() {
@@ -344,6 +246,23 @@ class SitemapPageViewModel: ObservableObject {
 
 @MainActor
 extension SitemapPageViewModel {
+    private static func buildRowInputs(pageKey: String,
+                                       widgets: [OpenHABWidget],
+                                       previousRenderKeys: [WidgetRenderKey] = [],
+                                       previousInputs: [SitemapRowInput] = [],
+                                       previousRowIDs: [RowID] = []) async -> SnapshotRowInputBuildResult {
+        let snapshots = widgets.map { WidgetMappingSnapshot(widget: $0) }
+        return await Task.detached(priority: .userInitiated) {
+            SitemapRowInputSnapshotBuilder.buildIncrementally(
+                pageKey: pageKey,
+                widgets: snapshots,
+                previousRenderKeys: previousRenderKeys,
+                previousInputs: previousInputs,
+                previousRowIDs: previousRowIDs
+            )
+        }.value
+    }
+
     func loadSettings() {
         defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
         showSearchField = Preferences.shared.applicationPreferences.showSearchField
@@ -362,6 +281,7 @@ extension SitemapPageViewModel {
         longPollDebounceTask?.cancel()
         longPollDebounceTask = nil
         pendingLongPollPage = nil
+        coalescedLongPollUpdateCount = 0
         activePageHandlingKey = nil
         activePageHandlingID = nil
     }
@@ -404,7 +324,6 @@ extension SitemapPageViewModel {
             return
         }
 
-        let pipelineStart = Date()
         let requestedKey = "\(defaultSitemap)|\(pageId)"
         if !forceRestart,
            let activeTask = pageHandlingTask,
@@ -419,6 +338,7 @@ extension SitemapPageViewModel {
         longPollDebounceTask = nil
         pendingLongPollPage = nil
         lastUIUpdateAt = .distantPast
+        coalescedLongPollUpdateCount = 0
         error = nil // Clear any previous errors when starting a new page handling session
         if preserveCurrentContent, currentPage != nil {
             isLoading = false
@@ -437,17 +357,24 @@ extension SitemapPageViewModel {
         pageHandlingTask = Task {
             await runPageHandling(
                 runID: runID,
-                recreateService: recreateService,
-                pipelineStart: pipelineStart
+                reason: reason,
+                recreateService: recreateService
             )
         }
     }
 
-    private func runPageHandling(
-        runID: UUID,
-        recreateService: Bool,
-        pipelineStart: Date
-    ) async {
+    private func runPageHandling(runID: UUID,
+                                 reason: String,
+                                 recreateService: Bool) async {
+        let pipelineStartedAt = Date()
+        var diagnostics = SitemapInitialLoadMeasurement(
+            reason: reason,
+            isLinkedPage: isLinkedPage,
+            hasCurrentPage: currentPage != nil,
+            connectionWasReady: networkTracker.activeConnection != nil,
+            pipelineStartedAt: pipelineStartedAt
+        )
+
         defer {
             if activePageHandlingID == runID {
                 pageHandlingTask = nil
@@ -456,23 +383,106 @@ extension SitemapPageViewModel {
         }
 
         do {
-            guard await ensureSitemapAvailableForHandling() else { return }
+            guard await ensureSitemapAvailableForHandling() else {
+                diagnostics.log(
+                    status: "failed",
+                    page: currentPage,
+                    rowCount: rowInputs.count,
+                    errorDescription: "No sitemap available"
+                )
+                return
+            }
 
-            guard let activeConnection = await waitForConnectionForHandling() else { return }
+            diagnostics.beginConnectionSelection()
+            guard let activeConnection = await waitForConnectionForHandling() else {
+                diagnostics.log(
+                    status: "failed",
+                    page: currentPage,
+                    rowCount: rowInputs.count,
+                    errorDescription: "No active connection"
+                )
+                return
+            }
 
+            diagnostics.beginServiceSetup(connection: activeConnection.configuration)
             try setupServiceIfNeeded(activeConnection: activeConnection, forceRecreate: recreateService)
 
             if defaultSitemapLabel.isEmpty {
+                diagnostics.beginLabelFetch()
                 await fetchSitemapLabel()
             }
 
-            try await loadInitialPageForHandling(runID: runID)
-            isLoading = false
-            isUpdating = false
-            let totalDurationMs = Date().timeIntervalSince(pipelineStart) * 1000
-            logger.info("Sitemap pipeline ready in \(Int(totalDurationMs.rounded()), privacy: .public)ms")
-            try await runLongPollingLoop(runID: runID)
+            guard let service = openAPIService else {
+                diagnostics.log(
+                    status: "failed",
+                    page: currentPage,
+                    rowCount: rowInputs.count,
+                    errorDescription: "Sitemap service unavailable"
+                )
+                return
+            }
+
+            var lastResponseAt: Date?
+            diagnostics.beginInitialRequest()
+
+            for try await event in SitemapPageLoader.stream(
+                sitemapName: defaultSitemap,
+                pageId: pageId,
+                service: service,
+                shouldRetry: shouldRetryLongPolling,
+                onLongPollError: { _, requestMs, willRetry in
+                    Task { @MainActor in
+                        SitemapDiagnostics.logLongPoll(
+                            requestMs: requestMs,
+                            returnedPage: false,
+                            status: willRetry ? "retry" : "failed",
+                            responseGapMs: nil
+                        )
+                    }
+                }
+            ) {
+                try Task.checkCancellation()
+                guard activePageHandlingID == runID else {
+                    logger.info("Ignoring stale page result for run \(runID.uuidString, privacy: .public)")
+                    return
+                }
+
+                let responseAt = Date()
+
+                switch event {
+                case let .initialFetch(page):
+                    isLoading = false
+                    isUpdating = false
+                    diagnostics.beginUIPreparation()
+                    if let page {
+                        await updateUI(with: page, origin: .initialPoll)
+                    }
+                    diagnostics.log(
+                        status: page == nil ? "empty" : "success",
+                        page: page,
+                        rowCount: rowInputs.count
+                    )
+                    logger.info("Sitemap pipeline initial load completed")
+                case let .longPoll(page, requestMs):
+                    let responseGapMs = lastResponseAt.map { Int((responseAt.timeIntervalSince($0) * 1000).rounded()) }
+                    SitemapDiagnostics.logLongPoll(
+                        requestMs: requestMs,
+                        returnedPage: true,
+                        status: "success",
+                        responseGapMs: responseGapMs
+                    )
+                    scheduleLongPollUIUpdate(page: page, runID: runID)
+                }
+
+                lastResponseAt = responseAt
+            }
         } catch {
+            diagnostics.log(
+                status: error is CancellationError ? "cancelled" : "failed",
+                page: currentPage,
+                rowCount: rowInputs.count,
+                errorDescription: error.localizedDescription
+            )
             handlePageHandlingError(error)
         }
     }
@@ -518,55 +528,6 @@ extension SitemapPageViewModel {
         }
     }
 
-    private func loadInitialPageForHandling(runID: UUID) async throws {
-        let initialPage = try await openAPIService?.pollDataForPage(
-            sitemapname: defaultSitemap,
-            pageId: pageId,
-            longPolling: false
-        )
-
-        try Task.checkCancellation()
-        guard activePageHandlingID == runID else {
-            logger.info("Ignoring stale initial page result for run \(runID.uuidString, privacy: .public)")
-            return
-        }
-
-        if let page = initialPage {
-            await updateUI(with: page, origin: .initialPoll)
-        } else {
-            logger.info("Initial sitemap poll returned no page data")
-        }
-    }
-
-    private func runLongPollingLoop(runID: UUID) async throws {
-        while !Task.isCancelled {
-            do {
-                let page = try await openAPIService?.pollDataForPage(
-                    sitemapname: defaultSitemap,
-                    pageId: pageId,
-                    longPolling: true
-                )
-                try Task.checkCancellation()
-                guard activePageHandlingID == runID else {
-                    logger.info("Ignoring stale long-poll result for run \(runID.uuidString, privacy: .public)")
-                    return
-                }
-
-                if let page {
-                    scheduleLongPollUIUpdate(page: page, runID: runID)
-                }
-            } catch {
-                try Task.checkCancellation()
-                guard shouldRetryLongPolling(after: error) else {
-                    throw error
-                }
-
-                logger.info("Transient long-polling error, retrying: \(error.localizedDescription, privacy: .public)")
-                try? await Task.sleep(nanoseconds: 500_000_000)
-            }
-        }
-    }
-
     private func scheduleLongPollUIUpdate(page: OpenHABPage, runID: UUID) {
         let minInterval: TimeInterval = 0.25
         let elapsed = Date().timeIntervalSince(lastUIUpdateAt)
@@ -577,29 +538,56 @@ extension SitemapPageViewModel {
             longPollDebounceTask = nil
             pendingLongPollPage = nil
             lastUIUpdateAt = Date()
+            SitemapDiagnostics.logLongPollDebounce(
+                action: "immediate",
+                elapsedMs: Int((elapsed * 1000).rounded()),
+                remainingMs: 0,
+                replacedPendingPage: false,
+                coalescedUpdates: coalescedLongPollUpdateCount
+            )
+            coalescedLongPollUpdateCount = 0
             Task { @MainActor [weak self] in
                 await self?.updateUI(with: page, origin: .longPolling)
             }
         } else {
             // Within burst window — store latest page and (re)schedule a deferred apply.
             // Earlier pending page is discarded; the newest server state always wins.
+            let replacedPendingPage = pendingLongPollPage != nil
+            coalescedLongPollUpdateCount += 1
             pendingLongPollPage = page
             longPollDebounceTask?.cancel()
             let remaining = minInterval - elapsed
+            SitemapDiagnostics.logLongPollDebounce(
+                action: "scheduled",
+                elapsedMs: Int((elapsed * 1000).rounded()),
+                remainingMs: Int((remaining * 1000).rounded()),
+                replacedPendingPage: replacedPendingPage,
+                coalescedUpdates: coalescedLongPollUpdateCount
+            )
+            let deferredStartedAt = Date()
             longPollDebounceTask = Task { @MainActor [weak self] in
                 try? await Task.sleep(for: .seconds(remaining))
                 guard let self, !Task.isCancelled,
-                      self.activePageHandlingID == runID,
-                      let page = self.pendingLongPollPage else { return }
-                self.pendingLongPollPage = nil
-                self.lastUIUpdateAt = Date()
-                await self.updateUI(with: page, origin: .longPolling)
+                      activePageHandlingID == runID,
+                      let page = pendingLongPollPage else { return }
+                pendingLongPollPage = nil
+                lastUIUpdateAt = Date()
+                SitemapDiagnostics.logLongPollDebounce(
+                    action: "deferredApply",
+                    elapsedMs: Int((Date().timeIntervalSince(deferredStartedAt) * 1000).rounded()),
+                    remainingMs: 0,
+                    replacedPendingPage: false,
+                    coalescedUpdates: coalescedLongPollUpdateCount
+                )
+                coalescedLongPollUpdateCount = 0
+                await updateUI(with: page, origin: .longPolling)
             }
         }
     }
 
     @MainActor
     private func updateUI(with page: OpenHABPage, origin: PageUpdateOrigin) async {
+        let updateStartedAt = Date()
         logger.debug("Incoming sitemap update origin=\(origin.rawValue, privacy: .public), widgets=\(page.widgets.count)")
         let titleChanged = currentPage == nil || currentPage?.title != page.title
         let oldInputs = rowInputs
@@ -608,11 +596,22 @@ extension SitemapPageViewModel {
         // Phase 1: apply new page directly — no reconcile needed.
         // The new architecture (SitemapRowInput value types + WidgetRenderKey change detection)
         // does not rely on widget object identity.
+        let applyStartedAt = Date()
         injectSendCommand(for: newWidgets)
         currentPage = page
 
+        // Apply a pending linked-page navigation on the first non-nil page update, regardless
+        // of origin. Checking only .initialPoll was insufficient because the loader emits
+        // .initialFetch(nil) when the server returns no page, skipping updateUI entirely;
+        // the next update arrives as .longPolling and the destination was never consumed.
+        if let nav = pendingLinkedPageNavigation {
+            pendingLinkedPageNavigation = nil
+            navigationPath.append(nav)
+        }
+
         // Phase 2: slider override sync
         _ = clearSyncedSliderOverrides(using: newWidgets)
+        let firstApplyMs = Int((Date().timeIntervalSince(applyStartedAt) * 1000).rounded())
 
         // Phase 3: row input rebuild (incremental — reuses inputs for unchanged rows)
         let pageKey = "\(defaultSitemap)|\(pageId)"
@@ -622,6 +621,7 @@ extension SitemapPageViewModel {
         let prevInputs = rowInputs
         rowInputRebuildTask?.cancel()
         rowInputRebuildTask = nil
+        let buildStartedAt = Date()
         let rowInputBuildResult = await SitemapPageViewModel.buildRowInputs(
             pageKey: pageKey,
             widgets: visibleWidgets,
@@ -629,7 +629,10 @@ extension SitemapPageViewModel {
             previousInputs: prevInputs,
             previousRowIDs: prevRowIDs
         )
+        let buildRowInputsMs = Int((Date().timeIntervalSince(buildStartedAt) * 1000).rounded())
+        let snapshotApplyStartedAt = Date()
         applySnapshotRowInputBuildResult(rowInputBuildResult, widgets: visibleWidgets)
+        let snapshotApplyMs = Int((Date().timeIntervalSince(snapshotApplyStartedAt) * 1000).rounded())
 
         let inputsChanged = rowInputs != oldInputs
 
@@ -665,8 +668,13 @@ extension SitemapPageViewModel {
                 reusedInputCount: rowInputBuildResult.reusedInputCount,
                 changedRowCount: changedRowCount,
                 changedRowKinds: changedRowKinds,
-                analysisMs: analysisMs
+                analysisMs: analysisMs,
+                buildRowInputsMs: buildRowInputsMs,
+                applyStateMs: firstApplyMs + snapshotApplyMs,
+                totalUpdateMs: Int((Date().timeIntervalSince(updateStartedAt) * 1000).rounded())
             )
+            let iconSnapshot = await IconLoadDiagnostics.shared.snapshotAndReset()
+            SitemapDiagnostics.logIconSummary(iconSnapshot)
         }
     }
 
@@ -683,23 +691,6 @@ extension SitemapPageViewModel {
         if result.inputs != rowInputs {
             rowInputs = result.inputs
         }
-    }
-
-    private static func buildRowInputs(pageKey: String,
-                                       widgets: [OpenHABWidget],
-                                       previousRenderKeys: [WidgetRenderKey] = [],
-                                       previousInputs: [SitemapRowInput] = [],
-                                       previousRowIDs: [RowID] = []) async -> SnapshotRowInputBuildResult {
-        let snapshots = widgets.map { WidgetMappingSnapshot(widget: $0) }
-        return await Task.detached(priority: .userInitiated) {
-            SitemapRowInputSnapshotBuilder.buildIncrementally(
-                pageKey: pageKey,
-                widgets: snapshots,
-                previousRenderKeys: previousRenderKeys,
-                previousInputs: previousInputs,
-                previousRowIDs: previousRowIDs
-            )
-        }.value
     }
 
     private func trackWidgetUpdates(in widgets: [OpenHABWidget]) {
@@ -784,7 +775,7 @@ extension SitemapPageViewModel {
         applySnapshotRowInputBuildResult(result, widgets: relevantWidgets)
     }
 
-    private func shouldRetryLongPolling(after error: any Error) -> Bool {
+    private nonisolated func shouldRetryLongPolling(after error: any Error) -> Bool {
         if let urlError = OpenAPIErrorInspector.underlyingURLError(from: error) {
             switch urlError.code {
             case .timedOut, .networkConnectionLost, .cannotConnectToHost, .notConnectedToInternet, .cannotFindHost:
@@ -818,11 +809,25 @@ extension SitemapPageViewModel {
     }
 
     @MainActor
-    func pushSitemap(name: String, path: String?) async {
+    func configureSitemap(name: String, pageId: String?) {
         defaultSitemap = name
-        defaultSitemapLabel = "" // Clear old label so it gets fetched for the new sitemap
-        pageId = path ?? ""
-        error = nil // Clear any previous errors when switching sitemaps
+        defaultSitemapLabel = ""
+        self.pageId = pageId ?? ""
+        navigationPath = []
+        pendingLinkedPageNavigation = nil
+        error = nil
+    }
+
+    @MainActor
+    func navigateToLinkedPage(_ nav: LinkedPageNavigation) {
+        navigationPath.append(nav)
+    }
+
+    @MainActor
+    // swiftlint:disable:next async_without_await
+    func pushSitemap(name: String, path: String?, pendingNavigation: LinkedPageNavigation? = nil) async {
+        configureSitemap(name: name, pageId: path)
+        pendingLinkedPageNavigation = pendingNavigation
         startPageHandling(forceRestart: true, reason: "push-sitemap")
     }
 
@@ -839,13 +844,13 @@ extension SitemapPageViewModel {
             if let sitemap = sitemaps.first(where: { $0.name == defaultSitemap }) {
                 defaultSitemapLabel = sitemap.label
                 // swiftformat:disable:next redundantSelf
-                logger.info("Found label '\(self.defaultSitemapLabel)' for sitemap '\(self.defaultSitemap)'")
+                logger.info("Found label '\(self.defaultSitemapLabel, privacy: .public)' for sitemap '\(self.defaultSitemap, privacy: .public)'")
             } else {
                 // swiftformat:disable:next redundantSelf
-                logger.warning("Could not find sitemap '\(self.defaultSitemap)' in available sitemaps")
+                logger.warning("Could not find sitemap '\(self.defaultSitemap, privacy: .public)' in available sitemaps")
             }
         } catch {
-            logger.warning("Failed to fetch sitemap label: \(error)")
+            logger.warning("Failed to fetch sitemap label: \(error.localizedDescription, privacy: .public)")
             // Don't set error here as this is not critical - we can continue without the label
         }
     }
@@ -869,7 +874,7 @@ extension SitemapPageViewModel {
                 defaultSitemap = filteredSitemaps[0].name
                 defaultSitemapLabel = filteredSitemaps[0].label
                 // swiftformat:disable:next redundantSelf
-                logger.info("Auto-selected single sitemap: \(self.defaultSitemap)")
+                logger.info("Auto-selected single sitemap: \(self.defaultSitemap, privacy: .public)")
 
                 // Save as default for future launches
                 Preferences.shared.modifyActiveHome { homePreferences in
@@ -880,7 +885,7 @@ extension SitemapPageViewModel {
                 defaultSitemap = filteredSitemaps[0].name
                 defaultSitemapLabel = filteredSitemaps[0].label
                 // swiftformat:disable:next redundantSelf
-                logger.info("Auto-selected first sitemap from \(filteredSitemaps.count) available: \(self.defaultSitemap)")
+                logger.info("Auto-selected first sitemap from \(filteredSitemaps.count, privacy: .public) available: \(self.defaultSitemap, privacy: .public)")
 
                 // Save as default for future launches
                 Preferences.shared.modifyActiveHome { homePreferences in
@@ -891,7 +896,7 @@ extension SitemapPageViewModel {
                 error = SitemapPageError.serviceUnavailable
             }
         } catch {
-            logger.error("Failed to discover sitemaps: \(error)")
+            logger.error("Failed to discover sitemaps: \(error.localizedDescription, privacy: .public)")
             self.error = error as? any LocalizedError ?? SitemapPageError.serviceUnavailable
         }
     }
@@ -899,7 +904,7 @@ extension SitemapPageViewModel {
     func handleActiveConnectionChange(_ activeConnection: ConnectionInfo?) {
         guard let activeConnection else { return }
 
-        logger.info("SitemapPageViewModel tracker URL \(activeConnection.configuration.url)")
+        logger.info("SitemapPageViewModel tracker connection \(activeConnection.configuration.publicLogDescription, privacy: .public)")
 
         // Skip if already connected to this URL — avoids restarting long-polling
         // when the NetworkTracker re-evaluates to the same connection
@@ -930,12 +935,12 @@ extension SitemapPageViewModel {
 
         if pageNetworkStatus == currentStatus {
             return false
-        } else {
-            pageNetworkStatus = currentStatus
-            return true
         }
+        pageNetworkStatus = currentStatus
+        return true
     }
 
+    // swiftlint:disable:next async_without_await
     private func handleActiveConnection(_ connection: ConnectionInfo) async {
         let previousURL = activeConnectionInfo?.configuration.url
         let newURL = connection.configuration.url
@@ -960,6 +965,7 @@ extension SitemapPageViewModel {
         }
     }
 
+    // swiftlint:disable:next async_without_await
     func selectSitemap() async {
         startPageHandling(forceRestart: true, reason: "select-sitemap")
     }
@@ -1050,19 +1056,20 @@ extension SitemapPageViewModel {
     private func sendCommandNow(itemname: String, command: String, version: Int) {
         setCommandState(.sending, for: itemname)
         let deviceId = UIDevice.current.identifierForVendor?.uuidString
+        let sourcePrefix = pageId.isEmpty ? nil : "org.openhab.ui.basic$\(defaultSitemap):\(pageId)"
         Task { [weak self] in
             guard let self else { return }
             do {
                 try await openAPIService?.sendItemCommand(
                     itemname: itemname,
                     command: command,
-                    sourcePrefix: nil,
+                    sourcePrefix: sourcePrefix,
                     deviceId: deviceId
                 )
-                logger.info("Successfully sent command \(command) to \(itemname)")
+                logger.info("Successfully sent command \(command, privacy: .private(mask: .hash)) to \(itemname, privacy: .public)")
                 handleCommandSuccess(for: itemname, version: version)
             } catch {
-                logger.info("Failed to send command\(command) to \(itemname): \(error.localizedDescription)")
+                logger.info("Failed to send command \(command, privacy: .private(mask: .hash)) to \(itemname, privacy: .public): \(error.localizedDescription, privacy: .public)")
                 handleCommandFailure(for: itemname, version: version, errorDescription: error.localizedDescription)
             }
         }
@@ -1111,77 +1118,6 @@ extension SitemapPageViewModel {
 
 @MainActor
 private extension SitemapPageViewModel {
-    func handlePageHandlingError(_ error: any Error) {
-        if error is CancellationError {
-            logger.info("🔁 pageHandlingTask was cancelled")
-            isLoading = false
-            isUpdating = false
-            return
-        }
-
-        if let decodingError = error as? DecodingError {
-            guard !Task.isCancelled else {
-                logger.info("Task cancelled, ignoring DecodingError")
-                isLoading = false
-                isUpdating = false
-                return
-            }
-            logger.error("Decoding error: \(decodingError.localizedDescription)")
-            self.error = SitemapPageError.serviceUnavailable
-            isLoading = false
-            isUpdating = false
-            return
-        }
-
-        if let urlError = OpenAPIErrorInspector.underlyingURLError(from: error) {
-            if urlError.code == .cancelled {
-                logger.info("Task cancelled (URLError: cancelled)")
-            } else if urlError.code == .timedOut {
-                logger.info("Task timed out (URLError: timedOut)")
-            } else if !Task.isCancelled {
-                logger.error("ClientError: \(urlError.localizedDescription)")
-                self.error = SitemapPageError.serviceUnavailable
-            } else {
-                logger.info("Task cancelled, ignoring ClientError")
-            }
-            isLoading = false
-            isUpdating = false
-            return
-        }
-
-        if let clientErrorDescription = OpenAPIErrorInspector.clientErrorDescription(from: error) {
-            guard !Task.isCancelled else {
-                logger.info("Task cancelled, ignoring ClientError")
-                isLoading = false
-                isUpdating = false
-                return
-            }
-            logger.error("ClientError: \(clientErrorDescription)")
-            self.error = SitemapPageError.serviceUnavailable
-            isLoading = false
-            isUpdating = false
-            return
-        }
-
-        if let openAPIError = error as? OpenAPIServiceError {
-            logger.error("OpenAPIServiceError: \(openAPIError.localizedDescription)")
-            isLoading = false
-            isUpdating = false
-            return
-        }
-
-        guard !Task.isCancelled else {
-            logger.info("Task cancelled, ignoring error")
-            isLoading = false
-            isUpdating = false
-            return
-        }
-        logger.error("❌ Unhandled pageHandlingTask error: \(error.localizedDescription)")
-        self.error = SitemapPageError.serviceUnavailable
-        isLoading = false
-        isUpdating = false
-    }
-
     func nextCommandVersion(for itemname: String) -> Int {
         let newVersion = (commandStateVersions[itemname] ?? 0) + 1
         commandStateVersions[itemname] = newVersion
@@ -1203,7 +1139,7 @@ private extension SitemapPageViewModel {
     func handleCommandSuccess(for itemname: String, version: Int) {
         guard commandStateVersions[itemname] == version else { return }
         scheduleCommandStateReset(for: itemname, version: version, after: .milliseconds(450))
-        scheduleSliderOverrideResetFallback(for: itemname, version: version, after: .seconds(5))
+        scheduleSliderOverrideResetFallback(for: itemname, version: version, after: .seconds(1))
     }
 
     func handleCommandFailure(for itemname: String, version: Int, errorDescription: String) {
@@ -1238,18 +1174,5 @@ private extension SitemapPageViewModel {
         sliderOverrideResetTasks[itemname] = nil
         objectWillChange.send()
         sliderValueOverrides.removeValue(forKey: itemname)
-    }
-}
-
-extension Published.Publisher where Output: Sendable {
-    func stream() -> AsyncStream<Output> {
-        AsyncStream { continuation in
-            let cancellable = self.sink { value in
-                continuation.yield(value)
-            }
-            continuation.onTermination = { _ in
-                cancellable.cancel()
-            }
-        }
     }
 }

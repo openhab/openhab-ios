@@ -83,7 +83,6 @@ struct SitemapPageView: View {
                         Image(systemName: "line.3.horizontal")
                             .font(.title)
                     }
-                    .ohMinimumHitTarget()
                 }
             }
         }

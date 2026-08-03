@@ -79,6 +79,10 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             
             hostView.addSubview(webView)
             webView.translatesAutoresizingMaskIntoConstraints = false
+            // TODO: DEVELOP MERGE (cf74a950): if this runs more than once (webView swap on
+            // home/server change), deactivate the previously activated constraints before
+            // activating new ones to avoid conflicting-constraint crashes. develop tracks them
+            // in a `webViewLayoutConstraints` array and calls `NSLayoutConstraint.deactivate` first.
             NSLayoutConstraint.activate([
                 webView.topAnchor.constraint(equalTo: hostView.topAnchor),
                 webView.bottomAnchor.constraint(equalTo: hostView.bottomAnchor),
@@ -99,6 +103,10 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             Logger.viewController.info("WKScriptMessage \(message.name)")
             if message.name == "pathChanged", let newPath = message.body as? String {
                 Logger.viewController.debug("Path changed to: \(newPath)")
+                // TODO: DEVELOP MERGE (0610edea, #1195): with a cloud/proxy connection this stores a
+                // proxy-prefixed path as the MainUI default. develop strips the proxy/root prefix via
+                // `relativeWebViewPath(newPath, proxyURL:, rootURLString:)` before saving. A
+                // `relativeWebViewPath` helper already exists on this branch but is not called here.
                 Preferences.shared.currentWebViewPath = newPath
             }
             if message.name == "mainUi" {
@@ -155,6 +163,11 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
             guard let url = navigationAction.request.url else { return .allow }
             Logger.viewController.info("decidePolicyFor - url: \(url.absoluteString)")
+            // TODO: DEVELOP MERGE (12b8608c, #1239): custom URL schemes (e.g. `shortcuts://`) opened
+            // from within the webview are not handled. develop injects a capture-phase JS click
+            // interceptor that posts non-native-scheme anchor hrefs to an `externalURL` message
+            // handler, then shows a native confirmation and calls `UIApplication.shared.open`
+            // (with a cooldown guard). Only `.linkActivated` http/https is handled below.
             if navigationAction.navigationType == .linkActivated {
                 if let rewritten = rewriteToActiveConnection(url) {
                     Logger.viewController.info("decidePolicyFor - loading in-app (rewritten): \(rewritten.absoluteString)")
@@ -170,6 +183,10 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         /// Rewrites `url` to use the active connection's origin when the URL's host+port
         /// matches any configured home server connection.  Returns `nil` if no match is found,
         /// meaning the link should be opened externally.
+        // TODO: DEVELOP MERGE (ec0d0957, #1244): verify same-origin matching uses the full RFC 6454
+        // origin (scheme + host + port, default ports omitted) and also compares against the active
+        // connection's proxyURL. develop added a `URL.webOrigin` helper; the current host+port check
+        // in WebViewURLHelper may misclassify links across http/https or via the proxy.
         private func rewriteToActiveConnection(_ url: URL) -> URL? {
             guard let activeUrl = MainActorNetworkTracker.shared.activeConnection?.configuration.url else {
                 return nil

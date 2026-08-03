@@ -12,7 +12,7 @@
 import AppIntents
 import Foundation
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 enum PlayerAction: String, AppEnum {
     case play = "PLAY"
     case pause = "PAUSE"
@@ -31,4 +31,18 @@ enum PlayerAction: String, AppEnum {
         .rewind: "Rewind",
         .fastforward: "Fast Forward"
     ]
+}
+
+@available(iOS 17.0, macOS 14.0, *)
+extension PlayerAction: CustomLocalizedStringResourceConvertible {
+    var localizedStringResource: LocalizedStringResource {
+        switch self {
+        case .play: "Play"
+        case .pause: "Pause"
+        case .next: "Next"
+        case .previous: "Previous"
+        case .rewind: "Rewind"
+        case .fastforward: "Fast Forward"
+        }
+    }
 }

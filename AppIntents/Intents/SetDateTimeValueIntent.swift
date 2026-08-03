@@ -26,11 +26,16 @@ enum DateTimeValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SetDateTimeValueIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.dateTime] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.dateTime]
+    }
+
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$value)") {
             \.$home
@@ -53,6 +58,8 @@ struct SetDateTimeValueIntent: AppIntent {
     var value: Date
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        await Preferences.prepareForAppExtensionAccess()
+
         let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,
             itemHomeId: itemEntity.homeId,
@@ -60,9 +67,7 @@ struct SetDateTimeValueIntent: AppIntent {
             mismatchError: DateTimeValueError.itemNotInHome
         )
 
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        let command = formatter.string(from: value)
+        let command = value.formatted(Date.ISO8601FormatStyle(timeZone: .gmt))
 
         do {
             try await OpenHABItemCache.instance.sendCommand(

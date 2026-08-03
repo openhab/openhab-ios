@@ -29,11 +29,16 @@ enum ColorValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SetColorValueIntent: AppIntent {
-    static var openAppWhenRun: Bool { false }
+    static var openAppWhenRun: Bool {
+        false
+    }
 
-    static var allowedItemTypes: [OpenHABItem.ItemType] { [.color] }
+    static var allowedItemTypes: [OpenHABItem.ItemType] {
+        [.color]
+    }
+
     static var parameterSummary: some ParameterSummary {
         Summary("Set \(\.$itemEntity) to \(\.$value) (HSB)") {
             \.$home
@@ -56,6 +61,8 @@ struct SetColorValueIntent: AppIntent {
     var value: String
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        await Preferences.prepareForAppExtensionAccess()
+
         // Validate that the item belongs to the selected home
         let homeId = try await HomeResolver.resolvedHomeId(
             selectedHome: home,
@@ -64,16 +71,15 @@ struct SetColorValueIntent: AppIntent {
             mismatchError: ColorValueError.itemNotInHome
         )
 
-        var colorValue = value
-        let hsb = colorValue.split(separator: ",")
+        let hsb = value.split(separator: ",")
         guard hsb.count == 3,
               let hue = Int(hsb[0]), (0 ... 360).contains(hue),
               let sat = Int(hsb[1]), (0 ... 100).contains(sat),
               let val = Int(hsb[2]), (0 ... 100).contains(val) else {
-            throw ColorValueError.invalidValue(colorValue, itemEntity.label)
+            throw ColorValueError.invalidValue(value, itemEntity.label)
         }
 
-        colorValue = "\(hue),\(sat),\(val)"
+        let colorValue = "\(hue),\(sat),\(val)"
 
         do {
             try await OpenHABItemCache.instance.sendCommand(

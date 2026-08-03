@@ -23,7 +23,6 @@ struct ImageView: View {
 
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
 
-    @ViewBuilder
     var body: some View {
         if !url.isEmpty {
             switch url {

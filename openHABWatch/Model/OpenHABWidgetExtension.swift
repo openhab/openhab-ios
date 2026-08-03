@@ -35,8 +35,6 @@ extension OpenHABWidget {
         if linkedPage != nil {
             Image(systemSymbol: .chevronRight)
                 .foregroundStyle(.secondary)
-        } else {
-            EmptyView()
         }
     }
 }

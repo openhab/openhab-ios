@@ -57,6 +57,26 @@ public extension String {
         URL(string: self) == URL(string: self)?.absoluteURL
     }
 
+    /// Sub-view gape title optionally concatenated with one space and value if present - to be inline with Nsic UI
+    /// e.g. "Living Room [21°C]" → "Living Room 21°C"
+    var labelValueTitle: String {
+        // Base text before the first “[”
+        let base = components(separatedBy: "[")[0]
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Extract first bracket content (without the brackets)
+        let value: String? = {
+            guard let match = self.firstMatch(of: /\[(.*?)\]/.dotMatchesNewlines()) else { return nil }
+            return String(match.1)
+        }()
+
+        // Concatenate base + space + value (if present), else just base
+        if let v = value, !v.isEmpty {
+            return "\(base) \(v)"
+        }
+        return base
+    }
+
     internal func toItemType() -> OpenHABItem.ItemType? {
         var typeString: String = self
         // Earlier OH2 versions returned e.g. 'Switch' as 'SwitchItem'
@@ -135,7 +155,12 @@ public extension String {
     }
 
     func isValidURLByRegex() throws -> Bool {
-        let pattern = #"^(https?://)?(localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d+)?(/[^\s]*)?$"#
+        // Host alternatives:
+        //   localhost
+        //   IPv6 literal in brackets: [::1], [2001:db8::1], [fe80::1%25eth0], etc.
+        //   IPv4: 192.168.1.1
+        //   hostname: example.com, openhab.local, openhab (single-label, resolved by local DNS)
+        let pattern = #"^(https?://)?(localhost|\[[^\]]+\]|(\d{1,3}\.){3}\d{1,3}|[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)(:\d+)?(/[^\s]*)?$"#
 
         let regex = try Regex(pattern).ignoresCase()
 
@@ -185,7 +210,7 @@ public extension String? {
     }
 
     var isNilOrEmpty: Bool {
-        self == nil || self == ""
+        self == nil || self!.isEmpty
     }
 }
 

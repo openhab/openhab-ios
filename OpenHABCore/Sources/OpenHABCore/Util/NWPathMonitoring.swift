@@ -13,7 +13,7 @@ import Foundation
 import Network
 import os.log
 
-// Wrap real NWPathMonitor
+/// Wrap real NWPathMonitor
 final class RealPathMonitor: NWPathMonitoring, Sendable {
     private let monitor: NWPathMonitor
 
@@ -23,7 +23,12 @@ final class RealPathMonitor: NWPathMonitoring, Sendable {
 
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
         var lastSignature: PathSignature?
-        for await path in monitor {
+        // Use the manual paths() wrapper on all OS versions.
+        // NWPathMonitor's native iOS 17 AsyncSequence conformance (makeAsyncStream()) has a
+        // re-entrancy bug: startLocked() holds the monitor's os_unfair_lock and calls
+        // AsyncStream.Continuation.finish(), whose onTermination callback tries to re-acquire
+        // the same lock → os_unfair_lock_recursive_abort (crash seen on iOS 17.7.11).
+        for await path in monitor.paths() {
             let signature = PathSignature(path)
             // Ignore link-quality-only updates (LQM flaps): NWPathMonitor fires frequently as
             // signal strength changes, but those don't affect whether/how the server can be
@@ -66,3 +71,18 @@ public protocol NWPathMonitoring: AnyObject, Sendable {
     func cancel()
 }
 
+// MARK: - NWPathMonitor AsyncStream wrapper
+
+extension NWPathMonitor {
+    func paths() -> AsyncStream<NWPath> {
+        AsyncStream { continuation in
+            pathUpdateHandler = { path in
+                continuation.yield(path)
+            }
+            continuation.onTermination = { [weak self] _ in
+                self?.cancel()
+            }
+            start(queue: DispatchQueue(label: "NSPathMonitor.paths"))
+        }
+    }
+}

@@ -50,7 +50,7 @@ private struct DateInputRowContent: View {
         default: [.date, .hourAndMinute]
         }
     }
-    
+
     var body: some View {
         let displayState = input.displayState
         RowViewWithIcon(input: input) {
@@ -79,27 +79,26 @@ private struct DateInputRowContent: View {
             .disabled(input.readOnly)
         }
         .onAppear {
-            let newDate = DateFormatter.iso8601Full.date(from: displayState.effectiveState) ?? Date.now
-            programmaticallySetDate(newDate)
+            let newDate = try? Date(displayState.effectiveState, strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true))
+            programmaticallySetDate(newDate ?? Date.now)
         }
         .onChange(of: displayState.effectiveState) { newState in
             guard !suppressNextServerSync else {
                 suppressNextServerSync = false
                 return
             }
-            let newDate = DateFormatter.iso8601Full.date(from: newState) ?? Date()
-            programmaticallySetDate(newDate)
+            let newDate = try? Date(newState, strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true))
+            programmaticallySetDate(newDate ?? Date())
         }
     }
-    
+
     private func programmaticallySetDate(_ newDate: Date) {
         suppressSendingNewValue = selectedDate != newDate
         selectedDate = newDate
     }
 
     private func sendDateCommand(_ date: Date) {
-        let formatter = DateFormatter.iso8601Full
-        let command = formatter.string(from: date)
+        let command = date.formatted(Date.ISO8601FormatStyle(includingFractionalSeconds: true, timeZone: .current))
         logger.info("Sending date command: \(command)")
         suppressNextServerSync = true
         onSendCommand(command)
@@ -113,11 +112,11 @@ struct DatePickerInputRowView: View {
     var body: some View {
         makeDateInputRowContent(
             DateInputRowConfig(
-                input: input) { command in
-                    guard let itemName = input.itemName else { return }
-                    viewModel.sendCommand(command, for: itemName)
-                    // swiftlint:disable:next closure_end_indentation
-                }
+                input: input
+            ) { command in
+                guard let itemName = input.itemName else { return }
+                viewModel.sendCommand(command, for: itemName)
+            }
         )
     }
 }

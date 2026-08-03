@@ -17,7 +17,7 @@ protocol RowWithIconInput {
     var icon: RowIconInput { get }
 }
 
-struct RowIconInput: Equatable, Sendable {
+struct RowIconInput: Equatable {
     let icon: String
     let iconColor: String
     let staticIcon: Bool
@@ -220,7 +220,7 @@ struct RollershutterRowInput: Equatable, RowWithIconInput {
     }
 }
 
-struct InputRowInput: Sendable, Equatable, RowWithIconInput {
+struct InputRowInput: Equatable, RowWithIconInput {
     let widgetId: String
     let renderingKind: WidgetRenderingKind
     let displayState: WidgetDisplayState
@@ -230,28 +230,46 @@ struct InputRowInput: Sendable, Equatable, RowWithIconInput {
     let inputHintRawValue: String
     let icon: RowIconInput
     let itemName: String?
+    let numberPattern: String?
 
     var inputHint: OpenHABWidget.InputHint {
         OpenHABWidget.InputHint(rawValue: inputHintRawValue)
     }
 
+    /// Resolves the effective input hint raw value. When the widget/server provides no explicit hint
+    /// (`.unknown`), the item type is used to infer `.number` for Number and Number:Dimension items.
+    static func resolvedInputHintRawValue(_ rawValue: String, item: OpenHABItem?) -> String {
+        guard OpenHABWidget.InputHint(rawValue: rawValue) == .unknown else { return rawValue }
+        if item?.isOfTypeOrGroupType(.number) == true ||
+            item?.isOfTypeOrGroupType(.numberWithDimension) == true {
+            return OpenHABWidget.InputHint.number.rawValue
+        }
+        return rawValue
+    }
+
     static func from(widget: OpenHABWidget) -> InputRowInput {
-        InputRowInput(
+        let numberPattern = if let pattern = widget.pattern, !pattern.isEmpty {
+            pattern
+        } else {
+            widget.item?.stateDescription?.numberPattern
+        }
+        return InputRowInput(
             widgetId: widget.widgetId,
             renderingKind: widget.renderingKind,
             displayState: widget.displayState,
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
             readOnly: widget.readOnly,
-            inputHintRawValue: widget.inputHint.rawValue,
+            inputHintRawValue: resolvedInputHintRawValue(widget.inputHint.rawValue, item: widget.item),
             icon: RowIconInput.from(widget: widget),
-            itemName: widget.item?.name
+            itemName: widget.item?.name,
+            numberPattern: numberPattern
         )
     }
 }
 
 struct ButtonGridRowInput: Equatable, RowWithIconInput {
-    struct ButtonInput: Equatable, Sendable, Identifiable {
+    struct ButtonInput: Equatable, Identifiable {
         let id: String
         let label: String
         let icon: RowIconInput
@@ -423,6 +441,8 @@ struct MediaRowInput: Equatable {
     let preferredRowHeight: Double?
     let coordinateLatitude: Double?
     let coordinateLongitude: Double?
+    let linkedPageLink: String?
+    let linkedPageTitle: String?
 
     static func from(widget: OpenHABWidget) -> MediaRowInput {
         let coordinate = widget.coordinate
@@ -444,7 +464,9 @@ struct MediaRowInput: Equatable {
             labelSourceRawValue: widget.labelSource.rawValue,
             preferredRowHeight: WidgetMappingSnapshot.preferredRowHeight(type: widget.type, label: widget.label, height: widget.height),
             coordinateLatitude: hasValidCoordinate ? coordinate.latitude : nil,
-            coordinateLongitude: hasValidCoordinate ? coordinate.longitude : nil
+            coordinateLongitude: hasValidCoordinate ? coordinate.longitude : nil,
+            linkedPageLink: widget.linkedPage?.link,
+            linkedPageTitle: widget.linkedPage?.title
         )
     }
 
@@ -517,7 +539,18 @@ struct SliderRowInput: Equatable, RowWithIconInput {
     }
 
     var sliderRange: ClosedRange<Double> {
-        displayState.minValue ... displayState.maxValue
+        let lo = displayState.minValue
+        let hi = displayState.maxValue
+        // Slider requires hi > lo strictly; guard against degenerate server configs.
+        guard hi > lo else { return lo ... (lo + max(step, 1)) }
+        return lo ... hi
+    }
+
+    var safeStep: Double {
+        // Slider requires step > 0 and step <= range width.
+        let range = sliderRange
+        let width = range.upperBound - range.lowerBound
+        return min(max(step, 1e-10), width)
     }
 
     static func from(widget: OpenHABWidget) -> SliderRowInput {

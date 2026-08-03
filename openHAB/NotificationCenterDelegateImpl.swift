@@ -58,6 +58,14 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             userInfo: userInfo
         )
 
+        // TODO: DEVELOP MERGE (#1226): develop introduced OpenHABCore.PushNotificationPayload
+        // (parses message/action/actions/media-attachment-url/tag/reference-id/type from userInfo) and,
+        // in its delegate, (a) suppressed `type == "hideNotification"` pushes and (b) returned the
+        // SYSTEM banner ([.banner, .sound]) when the notification has media attachments so the image
+        // shows. This kept our ToastService-based flow instead. Consider adopting PushNotificationPayload
+        // here (it's currently unused) and porting the isHideNotification suppression + media-banner
+        // handling; our ToastService has no image support, so media notifications currently show as a
+        // plain toast. Our manual parse below already covers on-click + actions (APNs actions).
         let message = userInfo["message"] as? String ?? String(localized: "message_not_decoded", comment: "")
         let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
         let cloudUserId = userInfo["userId"] as? String

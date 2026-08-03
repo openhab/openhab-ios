@@ -12,20 +12,19 @@
 import Foundation
 
 public enum SetpointDisplayFormatter {
-    // Use a stable dot-decimal locale for platforms that intentionally avoid
-    // locale-aware formatting until all number controls are migrated together.
+    /// Use a stable dot-decimal locale for platforms that intentionally avoid
+    /// locale-aware formatting until all number controls are migrated together.
     public static let dotDecimalLocale = Locale(identifier: "en_US_POSIX")
 
-    public static func text(
-        labelValue: String?,
-        localValue: Double?,
-        serverValue: Double,
-        minValue: Double,
-        step: Double,
-        unit: String?,
-        numberPattern: String?,
-        locale: Locale
-    ) -> String {
+    // swiftlint:disable:next function_parameter_count
+    public static func text(labelValue: String?,
+                            localValue: Double?,
+                            serverValue: Double,
+                            minValue: Double,
+                            step: Double,
+                            unit: String?,
+                            numberPattern: String?,
+                            locale: Locale) -> String {
         if localValue == nil, let labelValue, !labelValue.isEmpty {
             return labelValue
         }

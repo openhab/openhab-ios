@@ -16,7 +16,7 @@ import UIKit
 struct UIColorExtensionTests {
     // MARK: - semanticColorToHex() Tests
 
-    @Test func semanticColorToHex_RegularRGBColors() async throws {
+    @Test func semanticColorToHex_RegularRGBColors() {
         // Test regular RGB colors created from hex values
         let redColor = UIColor(hex: "#FF0000")
         #expect(redColor.semanticColorToHex() == "#FF0000")
@@ -31,7 +31,7 @@ struct UIColorExtensionTests {
         #expect(customColor.semanticColorToHex() == "#A1B2C3")
     }
 
-    @Test func semanticColorToHex_GrayscaleColors() async throws {
+    @Test func semanticColorToHex_GrayscaleColors() {
         // Test grayscale colors (black, white, gray)
         let blackColor = UIColor.black
         #expect(blackColor.semanticColorToHex() == "#000000")
@@ -45,7 +45,7 @@ struct UIColorExtensionTests {
         #expect(grayHex?.hasPrefix("#") == true)
     }
 
-    @Test func semanticColorToHex_SemanticOHColors() async throws {
+    @Test func semanticColorToHex_SemanticOHColors() {
         // Test openHAB semantic colors
         let ohBlackColor = UIColor.ohBlack
         let ohBlackHex = ohBlackColor.semanticColorToHex()
@@ -67,7 +67,7 @@ struct UIColorExtensionTests {
         #expect(ohBlueColor.semanticColorToHex() == "#0000FF")
     }
 
-    @Test func semanticColorToHex_StandardColors() async throws {
+    @Test func semanticColorToHex_StandardColors() {
         // Test standard UIColor colors
         let redColor = UIColor.red
         let redHex = redColor.semanticColorToHex()
@@ -90,7 +90,7 @@ struct UIColorExtensionTests {
         #expect(yellowHex?.hasPrefix("#") == true)
     }
 
-    @Test func semanticColorToHex_CustomRGBColors() async throws {
+    @Test func semanticColorToHex_CustomRGBColors() {
         // Test colors created with custom RGB values
         let customColor1 = UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
         let hex1 = customColor1.semanticColorToHex()
@@ -111,7 +111,7 @@ struct UIColorExtensionTests {
         #expect(customColor4.semanticColorToHex() == "#FFFFFF")
     }
 
-    @Test func semanticColorToHex_AllOHNamedColors() async throws {
+    @Test func semanticColorToHex_AllOHNamedColors() {
         // Test all openHAB named colors to ensure they convert successfully
         let colors: [(UIColor, String)] = [
             (.ohMaroon, "#800000"),
@@ -137,7 +137,7 @@ struct UIColorExtensionTests {
         }
     }
 
-    @Test func semanticColorToHex_EdgeCases() async throws {
+    @Test func semanticColorToHex_EdgeCases() {
         // Test edge case colors with transparency
         let transparentColor = UIColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 0.5)
         let transparentHex = transparentColor.semanticColorToHex()
@@ -156,7 +156,7 @@ struct UIColorExtensionTests {
         #expect(clearHex != nil)
     }
 
-    @Test func semanticColorToHex_HexFormat() async throws {
+    @Test func semanticColorToHex_HexFormat() {
         // Verify that all returned hex strings start with '#'
         let testColors = [
             UIColor.black,
@@ -177,7 +177,7 @@ struct UIColorExtensionTests {
 
     // MARK: - toHex() Tests
 
-    @Test func toHex_BasicColors() async throws {
+    @Test func toHex_BasicColors() {
         let redColor = UIColor(hex: "#FF0000")
         #expect(redColor.toHex() == "FF0000")
 
@@ -188,7 +188,7 @@ struct UIColorExtensionTests {
         #expect(blueColor.toHex() == "0000FF")
     }
 
-    @Test func toHex_WithAlpha() async throws {
+    @Test func toHex_WithAlpha() {
         let color = UIColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 0.5)
         let hexWithAlpha = color.toHex(alpha: true)
         #expect(hexWithAlpha != nil)
@@ -197,7 +197,7 @@ struct UIColorExtensionTests {
 
     // MARK: - init(hex:) Tests
 
-    @Test func initFromHex_ValidHexStrings() async throws {
+    @Test func initFromHex_ValidHexStrings() {
         let color1 = UIColor(hex: "#FF0000")
         #expect(color1.toHex() == "FF0000")
 
@@ -208,7 +208,7 @@ struct UIColorExtensionTests {
         #expect(color3.toHex() == "0000FF")
     }
 
-    @Test func initFromHex_InvalidHexStrings() async throws {
+    @Test func initFromHex_InvalidHexStrings() {
         // Test that invalid hex strings fall back to gray
         let invalidColor1 = UIColor(hex: "ABC")
         #expect(invalidColor1.toHex() == UIColor.gray.toHex())
@@ -219,7 +219,7 @@ struct UIColorExtensionTests {
 
     // MARK: - init(fromString:) Tests
 
-    @Test func initFromString_NamedColors() async throws {
+    @Test func initFromString_NamedColors() {
         let redColor = UIColor(fromString: "red")
         #expect(redColor.semanticColorToHex() == "#FF0000")
 
@@ -230,7 +230,7 @@ struct UIColorExtensionTests {
         #expect(maroonColor.semanticColorToHex() == "#800000")
     }
 
-    @Test func initFromString_HexStrings() async throws {
+    @Test func initFromString_HexStrings() {
         let color1 = UIColor(fromString: "#FF0000")
         #expect(color1.semanticColorToHex() == "#FF0000")
 
@@ -238,7 +238,7 @@ struct UIColorExtensionTests {
         #expect(color2.semanticColorToHex() == "#00FF00")
     }
 
-    @Test func initFromString_CaseInsensitive() async throws {
+    @Test func initFromString_CaseInsensitive() {
         let color1 = UIColor(fromString: "RED")
         let color2 = UIColor(fromString: "red")
         let color3 = UIColor(fromString: "Red")
@@ -247,7 +247,7 @@ struct UIColorExtensionTests {
         #expect(color2.semanticColorToHex() == color3.semanticColorToHex())
     }
 
-    @Test func initFromString_WhitespaceHandling() async throws {
+    @Test func initFromString_WhitespaceHandling() {
         let color1 = UIColor(fromString: "  red  ")
         #expect(color1.semanticColorToHex() == "#FF0000")
 
@@ -255,7 +255,7 @@ struct UIColorExtensionTests {
         #expect(color2.semanticColorToHex() == "#FF0000")
     }
 
-    @Test func initFromString_InvalidString() async throws {
+    @Test func initFromString_InvalidString() {
         // Test that short invalid strings fall back to gray
         let shortInvalidColor = UIColor(fromString: "xyz")
         #expect(shortInvalidColor.toHex() == UIColor.gray.toHex())
