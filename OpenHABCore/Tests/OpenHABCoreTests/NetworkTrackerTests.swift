@@ -12,6 +12,7 @@
 import Combine
 import Foundation
 import Network
+import OpenAPIRuntime
 import OSLog
 
 @testable import OpenHABCore
@@ -30,14 +31,28 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
     var shouldFail = false
     var returnedVersion = 123
     var mockServerProperties = OpenHABServerProperties(version: "", links: [])
+    var rootVersionDelay: Duration?
+    var sendCommandCallCount: Int = 0
+    var clientErrorsBeforeSuccess: Int = 0
 
-    init(returnedVersion: Int = 123, shouldFail: Bool = false, mockServerProperties: OpenHABServerProperties = .init(version: "", links: [])) {
+    init(returnedVersion: Int = 123, shouldFail: Bool = false, mockServerProperties: OpenHABServerProperties = .init(version: "", links: []), rootVersionDelay: Duration? = nil, clientErrorsBeforeSuccess: Int = 0) {
         self.returnedVersion = returnedVersion
         self.shouldFail = shouldFail
         self.mockServerProperties = mockServerProperties
+        self.rootVersionDelay = rootVersionDelay
+        self.clientErrorsBeforeSuccess = clientErrorsBeforeSuccess
     }
 
     func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) async throws {
+        sendCommandCallCount += 1
+        if sendCommandCallCount <= clientErrorsBeforeSuccess {
+            throw OpenAPIRuntime.ClientError(
+                operationID: "sendItemCommand",
+                operationInput: "" as any Sendable,
+                causeDescription: "simulated transport failure",
+                underlyingError: networkTrackerError
+            )
+        }
         if shouldFail {
             throw networkTrackerError
         }
@@ -81,6 +96,9 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
     }
 
     func getRootVersion() async throws -> Int {
+        if let delay = rootVersionDelay {
+            try await Task.sleep(for: delay)
+        }
         if shouldFail {
             throw networkTrackerError
         }
@@ -159,16 +177,6 @@ final class MockPathMonitor: NWPathMonitoring, @unchecked Sendable {
     }
 }
 
-// TODO: DEVELOP MERGE — this file kept our stateStream()-based tests over develop's statusStream()
-// versions (see NetworkTracker: we kept our Combine stateStream architecture). Two develop test
-// scenarios are NOT covered here and should be ported (re-expressed against `stateStream()`):
-//   • testFallbackConnectionBecomesActiveBeforePreferredConnectionTimesOut — a fallback connection
-//     must become active before the preferred connection's attempt times out.
-//   • testTrackerGoesOfflineOnNetworkLoss — was commented out on develop; decide whether to finish it
-//     (our testNetworkLossMarksUnavailableAndAbandonsRetry partially covers the network-loss path).
-// Also: if the develop `withClientErrorRetry`/`revalidateConnection` resilience is later ported into
-// NetworkTracker (see the TODO there), add tests that a transient ClientError/noActiveConnection
-// triggers one revalidate-and-retry.
 @MainActor
 final class NetworkTrackerTests: XCTestCase {
     func testTrackerSetsConnectedStatusOnNetworkUp() async {
@@ -359,6 +367,83 @@ final class NetworkTrackerTests: XCTestCase {
         await fulfillment(of: [networkUnavailable], timeout: 3.0)
         task.cancel()
         await tracker.stopTracking()
+    }
+
+    /// When a preferred connection is slow, the fallback must become active before the preferred times out.
+    /// Ported from develop commit 06f0bf1c, re-expressed against stateStream() instead of statusStream().
+    func testFallbackConnectionBecomesActiveBeforePreferredConnectionTimesOut() async {
+        let fallbackBecameActive = XCTestExpectation(description: "Fallback connection is active")
+
+        let preferredConfig = ConnectionConfiguration(url: "http://preferred", username: "", password: "", priority: 0)
+        let fallbackConfig = ConnectionConfiguration(url: "http://fallback", username: "", password: "", priority: 10)
+
+        let slowService = MockOpenAPIService(returnedVersion: 8, rootVersionDelay: .seconds(5))
+        let fastService = MockOpenAPIService(returnedVersion: 8)
+
+        let pool = ConnectionPool { config in
+            config.url == "http://preferred" ? slowService : fastService
+        }
+        let mockMonitor = MockPathMonitor()
+        let tracker = NetworkTracker(
+            monitor: mockMonitor,
+            connectionPool: pool,
+            failureTracker: ConnectionFailureTracker()
+        )
+        let stateStream = await tracker.stateStream()
+
+        let task = Task {
+            for await state in stateStream {
+                if state.activeConnection?.configuration.url == "http://fallback" {
+                    fallbackBecameActive.fulfill()
+                    break
+                }
+            }
+        }
+
+        let monitoringTask = Task { await mockMonitor.waitForMonitoringToStart() }
+        await tracker.startTracking(connectionConfigurations: [preferredConfig, fallbackConfig])
+        await monitoringTask.value
+        await mockMonitor.simulateConnection(isConnected: true)
+
+        // Fallback must win before the 5-second preferred delay expires.
+        await fulfillment(of: [fallbackBecameActive], timeout: 3.0)
+        task.cancel()
+        await tracker.stopTracking()
+    }
+
+    /// A transient ClientError must trigger revalidateConnection() and one retry; the overall call succeeds.
+    /// Covers the withClientErrorRetry/revalidateConnection resilience ported in develop commit 9de4e7f0.
+    func testClientErrorTriggersRevalidateAndRetry() async throws {
+        let connected = XCTestExpectation(description: "Status becomes .connected")
+
+        let service = MockOpenAPIService(returnedVersion: 8, clientErrorsBeforeSuccess: 1)
+        let mockMonitor = MockPathMonitor()
+        let tracker = NetworkTracker(
+            monitor: mockMonitor,
+            connectionPool: ConnectionPool { _ in service },
+            failureTracker: ConnectionFailureTracker()
+        )
+        let stateStream = await tracker.stateStream()
+
+        let task = Task {
+            for await state in stateStream where state.status == .connected {
+                connected.fulfill()
+                break
+            }
+        }
+
+        let monitoringTask = Task { await mockMonitor.waitForMonitoringToStart() }
+        await tracker.startTracking(connectionConfigurations: [mockConfig])
+        await monitoringTask.value
+        await mockMonitor.simulateConnection(isConnected: true)
+        await fulfillment(of: [connected], timeout: 2.0)
+        task.cancel()
+
+        // First sendItemCommand throws ClientError → revalidateConnection() → retry succeeds.
+        try await tracker.send(to: "TestItem", command: "ON", deviceId: nil)
+
+        let callCount = await service.sendCommandCallCount
+        XCTAssertEqual(callCount, 2, "Expected 1 failed attempt + 1 successful retry")
     }
 }
 
