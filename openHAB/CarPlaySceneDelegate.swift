@@ -242,14 +242,58 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
     }
 
     private func sfSymbol(for widget: OpenHABWidget) -> UIImage {
-        let targetSize = carPlayGridButtonImageSize()
-        let pointSize = min(targetSize.width, targetSize.height)
-        let symbolName = openHABSFSymbol(for: widget.icon, isOn: widget.displayState.isOn)
-        let config = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .regular)
-        return UIImage(systemSymbol: symbolName)
+        // Determine the CarPlay grid button box and choose a comfortable symbol point size
+        let box = carPlayGridButtonImageSize()
+        let pointSize = min(box.width, box.height) * 0.8
+
+        // Build the configured SF Symbol image (vector-backed), template rendering
+        let symbol = openHABSFSymbol(for: widget.icon, isOn: widget.displayState.isOn)
+        let config = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .regular, scale: .medium)
+        let baseImage = UIImage(systemSymbol: symbol)
             .applyingSymbolConfiguration(config)?
             .withRenderingMode(.alwaysTemplate)
-            ?? UIImage(systemSymbol: symbolName).withRenderingMode(.alwaysTemplate)
+            ?? UIImage(systemSymbol: symbol).withRenderingMode(.alwaysTemplate)
+
+        // Render into a square canvas using aspect-fit to avoid any stretching
+        return renderSymbolImage(baseImage, pointSize: pointSize, boxSize: box)
+    }
+
+    /// Renders a symbol-configured UIImage into a square canvas sized for CarPlay grid buttons,
+    /// preserving aspect ratio (aspect-fit)
+    private func renderSymbolImage(_ image: UIImage, pointSize: CGFloat, boxSize: CGSize) -> UIImage {
+        // Ensure a square canvas based on the smaller dimension of CarPlay's suggested size
+        let side = min(boxSize.width, boxSize.height)
+        let canvasSize = CGSize(width: side, height: side)
+
+        let drawRect = CGRect(x: 0, y: 0, width: side, height: side)
+
+        // Determine the size the image should be drawn at to preserve its aspect ratio inside drawRect
+        let imgSize = image.size
+        var target = drawRect
+        if imgSize.width > 0, imgSize.height > 0 {
+            let imgAspect = imgSize.width / imgSize.height
+            let boxAspect = drawRect.width / drawRect.height
+            if imgAspect > boxAspect {
+                // Image is wider: fit width, adjust height
+                let height = drawRect.width / imgAspect
+                target = CGRect(x: drawRect.minX, y: drawRect.midY - height / 2, width: drawRect.width, height: height)
+            } else {
+                // Image is taller: fit height, adjust width
+                let width = drawRect.height * imgAspect
+                target = CGRect(x: drawRect.midX - width / 2, y: drawRect.minY, width: width, height: drawRect.height)
+            }
+        }
+
+        // Render with correct scale
+        let format = UIGraphicsImageRendererFormat.default()
+        format.opaque = false
+        format.scale = UIScreen.main.scale
+        let renderer = UIGraphicsImageRenderer(size: canvasSize, format: format)
+        let rendered = renderer.image { _ in
+            // Fill nothing; keep transparent background so CarPlay can tint the template image
+            image.draw(in: target, blendMode: .normal, alpha: 1.0)
+        }
+        return rendered.withRenderingMode(.alwaysTemplate)
     }
 
     private func isCarPlayCompatible(_ widget: OpenHABWidget) -> Bool {
