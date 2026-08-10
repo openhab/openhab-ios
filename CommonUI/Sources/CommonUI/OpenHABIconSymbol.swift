@@ -36,7 +36,7 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
     case "firstfloor":
         isOn ? ._1CircleFill : ._1Circle
     case "garage", "garage_detached", "garage_detached_selected":
-        isOn ? .doorGarageDoubleBayOpen : .doorGarageDoubleBayClosed // no fill
+        isOn ? .doorGarageOpen : .doorGarageClosed // no fill
     case "garden", "greenhouse":
         isOn ? .leafFill : .leaf
     case "groundfloor":
@@ -59,7 +59,7 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
     case "frontdoor":
         isOn ? .doorFrenchOpen : .doorFrenchClosed // no fill
     case "garagedoor":
-        isOn ? .doorGarageDoubleBayOpen : .doorGarageDoubleBayClosed // no fill
+        isOn ? .doorGarageOpen : .doorGarageClosed // no fill
     case "lawnmower":
         isOn ? .leafFill : .leaf // no lawnmower SF symbol
     case "lock", "security":
@@ -243,7 +243,7 @@ public func openHABSFSymbol(for iconName: String, isOn: Bool) -> SFSymbol {
         if icon.contains("power") || icon.contains("switch") {
             isOn ? .powerCircleFill : .powerCircle
         } else if icon.contains("garage") {
-            isOn ? .doorGarageDoubleBayOpen : .doorGarageDoubleBayClosed
+            isOn ? .doorGarageOpen : .doorGarageClosed
         } else if icon.contains("lamp") || icon.contains("light") || icon.contains("bulb") {
             isOn ? .lightbulbFill : .lightbulb
         } else if icon.contains("lock") || icon.contains("alarm") || icon.contains("security") {
