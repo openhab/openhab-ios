@@ -30,35 +30,27 @@ struct OpenHABJSONParserTests {
         #expect(codingData[0].message == "Light Küche was changed")
     }
 
-    func testNotificationDecodesOnClickAction() {
+    @Test func notificationDecodesOnClickAction() throws {
         let json = Data("""
         [{"_id":"abc123","message":"Door opened","__v":0,"created":"2024-01-01T00:00:00.000Z","on-click":"ui:/overview"}]
         """.utf8)
 
-        do {
-            let codingData = try decoder.decode([OpenHABNotification.CodingData].self, from: json)
-            let notification = codingData[0].openHABNotification
-            XCTAssertEqual(notification.onClickAction, "ui:/overview", "on-click action must be decoded")
-        } catch {
-            XCTFail("should not throw \(error)")
-        }
+        let codingData = try decoder.decode([OpenHABNotification.CodingData].self, from: json)
+        let notification = codingData[0].openHABNotification
+        #expect(notification.onClickAction == "ui:/overview")
     }
 
-    func testNotificationDecodesActionsJSONString() {
+    @Test func notificationDecodesActionsJSONString() throws {
         let actionsJSON = #"[{\"title\":\"Open\",\"action\":\"ui:/overview\"},{\"title\":\"Dismiss\",\"action\":\"\"}]"#
         let json = Data("""
         [{"_id":"abc456","message":"Motion detected","__v":0,"created":"2024-01-01T00:00:00.000Z","actions":"\(actionsJSON)"}]
         """.utf8)
 
-        do {
-            let codingData = try decoder.decode([OpenHABNotification.CodingData].self, from: json)
-            let notification = codingData[0].openHABNotification
-            XCTAssertEqual(notification.actions.count, 2, "Both action items must be decoded")
-            XCTAssertEqual(notification.actions[0].title, "Open")
-            XCTAssertEqual(notification.actions[0].action, "ui:/overview")
-            XCTAssertEqual(notification.actions[1].title, "Dismiss")
-        } catch {
-            XCTFail("should not throw \(error)")
-        }
+        let codingData = try decoder.decode([OpenHABNotification.CodingData].self, from: json)
+        let notification = codingData[0].openHABNotification
+        #expect(notification.actions.count == 2)
+        #expect(notification.actions[0].title == "Open")
+        #expect(notification.actions[0].action == "ui:/overview")
+        #expect(notification.actions[1].title == "Dismiss")
     }
 }
