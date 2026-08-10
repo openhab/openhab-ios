@@ -322,13 +322,9 @@ struct ToolbarMenu: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .frame(width: 10)
-                        let homeName = Preferences.shared.currentHomePreferences.homeName
-                        if !homeName.isEmpty {
-                            Text(homeName)
-                                .font(.footnote)
-                                .fontWeight(.semibold)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
+                        Text("Home")
+                            .font(.footnote)
+                            .fontWeight(.semibold)
                     }
                     ConnectionView()
                         .padding(.leading, 18)
