@@ -38,18 +38,18 @@ struct ConnectionView: View {
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
 
     var body: some View {
-        // TODO: DEVELOP MERGE (cb327522 / 5cdd5ff1 / 0a1d5cca): the old DrawerView ConnectionView
-        // showed the home name + connection type (Local/Remote) driven by MainActorNetworkTracker's
-        // `currentHomeName`, not the raw URL, and supported tap-to-open-Settings /
-        // long-press-to-Manage-Homes. This SwiftUI version still shows the raw URL. Decide whether to
-        // port these behaviors (home switching now lives in InlineHomePickerView / the toolbar menu).
         HStack {
             if let activeConnection = networkTracker.activeConnection {
-                Image(systemSymbol: .cloudFill)
-                Text(activeConnection.configuration.url)
+                let homePrefs = Preferences.shared.currentHomePreferences
+                let isLocal = activeConnection.configuration.url == homePrefs.localConnectionConfig.url
+                Image(systemSymbol: isLocal ? .wifi : .cloudFill)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(homePrefs.homeName).fontWeight(.medium)
+                    Text(isLocal ? "Local" : "Remote").foregroundStyle(.secondary)
+                }
             } else {
                 Image(systemSymbol: .exclamationmarkIcloudFill)
-                Text("connecting")
+                Text("Connecting…")
             }
         }
         .font(.footnote)
