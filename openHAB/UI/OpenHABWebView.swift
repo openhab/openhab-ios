@@ -173,7 +173,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                    let rawItems = dict["items"] as? [[String: String]] {
                     let items = rawItems.compactMap { raw -> WebNavbarItem? in
                         guard let label = raw["label"], let action = raw["action"] else { return nil }
-                        return WebNavbarItem(label: label, jsAction: action, iconBase64: raw["icon"])
+                        return WebNavbarItem(label: label, jsAction: action, iconBase64: raw["icon"], isBack: raw["isBack"] == "true")
                     }
                     let title = dict["title"] as? String ?? ""
                     viewModel.updateNavbarItems(items, title: title)

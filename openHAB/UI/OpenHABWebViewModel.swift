@@ -24,6 +24,9 @@ struct WebNavbarItem: Identifiable {
     /// Base64-encoded PNG of the icon rendered from the web navbar element.
     /// Nil if capture failed; fall back to `label` text in that case.
     let iconBase64: String?
+    /// True when the JS identified this item as a back-navigation button,
+    /// either via the standard F7 `.back` class or the oh-nav-content chevron icon.
+    let isBack: Bool
 
     var iconImage: UIImage? {
         guard let b64 = iconBase64,
@@ -109,13 +112,29 @@ class OpenHABWebViewModel: ObservableObject {
             // Wait for web fonts (Framework7 Icons) to be ready before canvas rendering.
             // document.fonts.ready resolves immediately on subsequent calls once fonts are loaded.
             (document.fonts ? document.fonts.ready : Promise.resolve()).then(function() {
-                navbar.style.display = 'none';
                 var navPage = navbar.closest('.page');
                 var pc = (navPage && navPage.querySelector('.page-content'))
                        || document.querySelector('.view-main .page-current .page-content')
                        || document.querySelector('.page-current .page-content')
                        || document.querySelector('.page-content');
-                if (pc) pc.style.paddingTop = '0px';
+                // Preserve any subnavbar (e.g. a search box). Framework7 positions the
+                // subnavbar absolutely with a negative bottom offset below the navbar, so
+                // collapsing the navbar height to zero shifts the subnavbar up to the top
+                // while keeping it visible and interactive inside the web view.
+                var subnavbar = navbar.querySelector('.subnavbar');
+                if (subnavbar) {
+                    navbar.querySelectorAll(
+                        '.navbar-inner > .left, .navbar-inner > .title,' +
+                        '.navbar-inner > .right, .navbar-inner > .nav-title'
+                    ).forEach(function(el) { el.style.display = 'none'; });
+                    navbar.style.setProperty('height', '0px', 'important');
+                    navbar.style.setProperty('min-height', '0px', 'important');
+                    navbar.style.overflow = 'visible';
+                    if (pc) pc.style.paddingTop = (subnavbar.offsetHeight || 44) + 'px';
+                } else {
+                    navbar.style.display = 'none';
+                    if (pc) pc.style.paddingTop = '0px';
+                }
 
                 var titleEl = navbar.querySelector('.title') || navbar.querySelector('[class*="title"]');
                 var title = titleEl ? titleEl.innerText.trim() : '';
@@ -155,12 +174,25 @@ class OpenHABWebViewModel: ObservableObject {
                     // Skip the in-app exit-to-app button (F7 icon: square_arrow_right).
                     var iconChild = el.querySelector('i.icon, .icon');
                     if (inRight && iconChild && iconChild.innerText.trim() === 'square_arrow_right') return;
+                    // Detect back buttons using two strategies:
+                    // 1. Standard F7: element has class 'back'.
+                    // 2. openHAB oh-nav-content style: a left-region button whose F7 icon
+                    //    is chevron_left (iOS) or arrow_left_md (MD). These use a Vue click
+                    //    handler (@click="back" → f7router.back()) instead of the F7 .back
+                    //    class, so the class check alone is insufficient.
+                    var f7Icon = el.querySelector('.f7-icons');
+                    var iconText = f7Icon ? (f7Icon.textContent || '').trim() : '';
+                    var isBack = el.classList.contains('back') ||
+                        (!inRight && (iconText === 'chevron_left' || iconText === 'arrow_left_md'));
                     var label = (el.getAttribute('aria-label')
                         || el.getAttribute('title')
                         || el.innerText || '').trim();
-                    if (!label) return;
-                    // Back links: use history.back() — clicking the hidden element
-                    // is ignored by F7. All other buttons: tag and click.
+                    // Include back buttons even without a text label; give them a
+                    // fallback label so the native button has an accessibility string.
+                    if (!label && !isBack) return;
+                    if (!label) label = 'Back';
+                    // Back links: use history.back() for standard F7 .back class.
+                    // oh-nav-content style backs use a Vue click handler — proxy the click.
                     var action;
                     if (el.classList.contains('back')) {
                         action = 'window.history.back()';
@@ -169,7 +201,8 @@ class OpenHABWebViewModel: ObservableObject {
                         action = '(function(){var el=document.querySelector("[data-oh-proxy=\\'' + idx + '\\']");if(el)el.click();})()';
                     }
                     var item = { label: label, action: action };
-                    var b64 = el.querySelector('.f7-icons') ? iconBase64(el) : null;
+                    if (isBack) item.isBack = 'true';
+                    var b64 = f7Icon ? iconBase64(el) : null;
                     if (b64) item.icon = b64;
                     items.push(item);
                 });

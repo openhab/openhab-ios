@@ -87,7 +87,7 @@ struct OpenHABRootView: View {
                let raw = try? JSONDecoder().decode([[String: String]].self, from: data) {
                 let items = raw.compactMap { d -> WebNavbarItem? in
                     guard let label = d["label"], let action = d["jsAction"] else { return nil }
-                    return WebNavbarItem(label: label, jsAction: action, iconBase64: nil)
+                    return WebNavbarItem(label: label, jsAction: action, iconBase64: nil, isBack: false)
                 }
                 webViewModel.lockUITestContent()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
@@ -216,56 +216,23 @@ struct OpenHABRootView: View {
             // or connection-status indicator as fallback.
             Group {
                 if isWebviewMode, !webViewModel.navbarItems.isEmpty {
-                    if webViewModel.navbarItems.count == 1, let item = webViewModel.navbarItems.first {
-                        Button {
-                            webViewModel.evaluateJS(item.jsAction)
-                        } label: {
-                            if let uiImg = item.iconImage {
-                                Image(uiImage: uiImg)
-                                    .renderingMode(.template)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 28, height: 28)
-                            } else {
-                                Text(item.label)
-                            }
+                    let backItem = webViewModel.navbarItems.first { $0.isBack }
+                    let otherItems = webViewModel.navbarItems.filter { !$0.isBack }
+                    HStack(spacing: 4) {
+                        // Back button is always shown directly in the bar when present.
+                        if let backItem {
+                            navbarProxyButton(backItem)
                         }
-                        .accessibilityLabel(item.label)
-                        .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
-                    } else {
-                        Button {
-                            navbarActionsPresented = true
-                        } label: {
-                            Image(systemName: "ellipsis.circle")
-                                .font(.title2)
-                        }
-                        .accessibilityLabel("Actions")
-                        .accessibilityIdentifier("NavbarActionsMenu")
-                        .popover(isPresented: $navbarActionsPresented) {
-                            HStack(spacing: 20) {
-                                ForEach(webViewModel.navbarItems) { item in
-                                    Button {
-                                        webViewModel.evaluateJS(item.jsAction)
-                                        navbarActionsPresented = false
-                                    } label: {
-                                        if let uiImg = item.iconImage {
-                                            Image(uiImage: uiImg)
-                                                .renderingMode(.template)
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: 28, height: 28)
-                                        } else {
-                                            Text(item.label)
-                                        }
-                                    }
-                                    .accessibilityLabel(item.label)
-                                    .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
-                                }
+                        // When a back button is present, remaining items always go in a
+                        // popover — even a single item, which may be text-only and too wide
+                        // to sit next to the back button and the hamburger.
+                        // Without a back button, a single item is shown directly.
+                        if !otherItems.isEmpty {
+                            if backItem != nil || otherItems.count > 1 {
+                                navbarActionsButton(otherItems)
+                            } else if let single = otherItems.first {
+                                navbarProxyButton(single)
                             }
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 16)
-                            .presentationDetents([.height(72)])
-                            .presentationCompactAdaptation(.popover)
                         }
                     }
                 } else if isWebviewMode, activeNetworkConnection == nil {
@@ -338,6 +305,65 @@ struct OpenHABRootView: View {
                 : AnyShapeStyle(Color(.systemBackground)),
             ignoresSafeAreaEdges: .top
         )
+    }
+
+    // MARK: - Navbar proxy helpers
+
+    @ViewBuilder
+    private func navbarProxyButton(_ item: WebNavbarItem) -> some View {
+        Button {
+            webViewModel.evaluateJS(item.jsAction)
+        } label: {
+            if let uiImg = item.iconImage {
+                Image(uiImage: uiImg)
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 28, height: 28)
+            } else {
+                Text(item.label)
+            }
+        }
+        .accessibilityLabel(item.label)
+        .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
+    }
+
+    @ViewBuilder
+    private func navbarActionsButton(_ items: [WebNavbarItem]) -> some View {
+        Button {
+            navbarActionsPresented = true
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .font(.title2)
+        }
+        .accessibilityLabel("Actions")
+        .accessibilityIdentifier("NavbarActionsMenu")
+        .popover(isPresented: $navbarActionsPresented) {
+            HStack(spacing: 20) {
+                ForEach(items) { item in
+                    Button {
+                        webViewModel.evaluateJS(item.jsAction)
+                        navbarActionsPresented = false
+                    } label: {
+                        if let uiImg = item.iconImage {
+                            Image(uiImage: uiImg)
+                                .renderingMode(.template)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 28, height: 28)
+                        } else {
+                            Text(item.label)
+                        }
+                    }
+                    .accessibilityLabel(item.label)
+                    .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .presentationDetents([.height(72)])
+            .presentationCompactAdaptation(.popover)
+        }
     }
 
     private func switchToSavedView() {
