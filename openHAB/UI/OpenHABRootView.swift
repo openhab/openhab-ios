@@ -26,6 +26,7 @@ struct OpenHABRootView: View {
     @StateObject private var menuData = MenuDataService()
     @StateObject private var webViewModel = OpenHABWebViewModel()
     @State private var menuPresented = false
+    @State private var navbarActionsPresented = false
     @State private var currentContent: TargetController = .webview
     @State private var currentViewTitle: String = ""
     @State private var activeNetworkConnection: ConnectionInfo? = MainActorNetworkTracker.shared.activeConnection
@@ -215,7 +216,7 @@ struct OpenHABRootView: View {
             // or connection-status indicator as fallback.
             Group {
                 if isWebviewMode, !webViewModel.navbarItems.isEmpty {
-                    ForEach(webViewModel.navbarItems) { item in
+                    if webViewModel.navbarItems.count == 1, let item = webViewModel.navbarItems.first {
                         Button {
                             webViewModel.evaluateJS(item.jsAction)
                         } label: {
@@ -231,6 +232,41 @@ struct OpenHABRootView: View {
                         }
                         .accessibilityLabel(item.label)
                         .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
+                    } else {
+                        Button {
+                            navbarActionsPresented = true
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                                .font(.title2)
+                        }
+                        .accessibilityLabel("Actions")
+                        .accessibilityIdentifier("NavbarActionsMenu")
+                        .popover(isPresented: $navbarActionsPresented) {
+                            HStack(spacing: 20) {
+                                ForEach(webViewModel.navbarItems) { item in
+                                    Button {
+                                        webViewModel.evaluateJS(item.jsAction)
+                                        navbarActionsPresented = false
+                                    } label: {
+                                        if let uiImg = item.iconImage {
+                                            Image(uiImage: uiImg)
+                                                .renderingMode(.template)
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 28, height: 28)
+                                        } else {
+                                            Text(item.label)
+                                        }
+                                    }
+                                    .accessibilityLabel(item.label)
+                                    .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 16)
+                            .presentationDetents([.height(72)])
+                            .presentationCompactAdaptation(.popover)
+                        }
                     }
                 } else if isWebviewMode, activeNetworkConnection == nil {
                     HStack(spacing: 4) {
