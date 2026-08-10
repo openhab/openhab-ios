@@ -52,27 +52,28 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         let userInfo = notification.request.content.userInfo
         Logger.notificationCenterDelegateImpl.info("Notification received while app is in foreground: \(userInfo)")
 
+        let payload = PushNotificationPayload(userInfo: userInfo)
+
         NotificationCenter.default.post(
             name: .openHABDidReceiveNotification,
-            object: nil,
+            object: payload,
             userInfo: userInfo
         )
 
-        // TODO: DEVELOP MERGE (#1226): develop introduced OpenHABCore.PushNotificationPayload
-        // (parses message/action/actions/media-attachment-url/tag/reference-id/type from userInfo) and,
-        // in its delegate, (a) suppressed `type == "hideNotification"` pushes and (b) returned the
-        // SYSTEM banner ([.banner, .sound]) when the notification has media attachments so the image
-        // shows. This kept our ToastService-based flow instead. Consider adopting PushNotificationPayload
-        // here (it's currently unused) and porting the isHideNotification suppression + media-banner
-        // handling; our ToastService has no image support, so media notifications currently show as a
-        // plain toast. Our manual parse below already covers on-click + actions (APNs actions).
-        let message = userInfo["message"] as? String ?? String(localized: "message_not_decoded", comment: "")
-        let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-        let cloudUserId = userInfo["userId"] as? String
-        let actions = Self.parseActionItems(userInfo["actions"] as? String)
-        await displayNotification(message: message, action: action, cloudUserId: cloudUserId, actions: actions)
+        // Suppress silent control messages — they carry no user-visible content (develop ab7278f9 #1226)
+        guard !payload.isHideNotification else { return [] }
 
-        return [] // Modify this if you want to show banners, alerts, etc.
+        // Return system banner when media attachments are present so the image is visible.
+        // Checks content.attachments (fetched by the notification service extension) rather than
+        // the raw URL field, matching develop ab7278f9 #1226.
+        if !notification.request.content.attachments.isEmpty {
+            return [.banner, .sound]
+        }
+
+        let actions = payload.actions?.map { NotificationActionItem(title: $0.title, action: $0.action) } ?? []
+        await displayNotification(message: payload.displayMessage, action: payload.action, cloudUserId: payload.cloudUserId, actions: actions)
+
+        return []
     }
 
     // this is called when clicking a notification while in the background
