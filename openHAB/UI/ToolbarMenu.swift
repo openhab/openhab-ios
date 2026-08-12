@@ -71,6 +71,7 @@ struct ToolbarMenu: View {
     @State private var isSitemapsExpanded = true
     @State private var isSystemExpanded = true
     @State private var isHomeExpanded = false
+    @State private var showAppSettings = false
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
@@ -90,6 +91,11 @@ struct ToolbarMenu: View {
                 loadExpansionState()
             } else {
                 withAnimation(.easeInOut(duration: 0.2)) { isHomeExpanded = false }
+            }
+        }
+        .sheet(isPresented: $showAppSettings) {
+            NavigationStack {
+                AppSettingsView()
             }
         }
     }
@@ -177,6 +183,10 @@ struct ToolbarMenu: View {
         if Preferences.shared.getNotificationConnection() != nil,
            !Preferences.shared.currentHomePreferences.demomode {
             systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
+        }
+        systemRow(symbol: .gear, label: String(localized: "App Settings")) {
+            isPresented = false
+            showAppSettings = true
         }
     }
 
@@ -269,9 +279,9 @@ struct ToolbarMenu: View {
                         tilesMenu()
                     }
 
-                    // System
+                    // System & App
                     collapsibleSection(
-                        title: "System",
+                        title: "System & App",
                         isExpanded: expansionBinding($isSystemExpanded, persistTo: \.isSystemExpanded),
                         showDivider: false
                     ) {

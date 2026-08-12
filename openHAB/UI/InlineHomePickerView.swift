@@ -181,7 +181,7 @@ struct InlineHomePickerView: View {
             content: {
                 if let target = homeForSettings {
                     NavigationStack {
-                        SettingsView(homeId: target)
+                        HomeSettingsView(homeId: target)
                     }
                 }
             }

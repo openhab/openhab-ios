@@ -9,12 +9,11 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import FirebaseCrashlytics
 import OpenHABCore
 import os
 import SwiftUI
 
-struct SettingsView: View {
+struct HomeSettingsView: View {
     @StateObject private var networkTracker = MainActorNetworkTracker.shared
     /// When non-nil, the view edits the specified stored home instead of the active home.
     var homeId: UUID?
@@ -25,11 +24,7 @@ struct SettingsView: View {
     var initialValues: SettingsSnapshot?
 
     @State private var settingsDemomode = false
-    @State private var settingsIdleOff = true
     @State private var settingsRealTimeSliders = true
-    @State private var settingsShowSearchField = true
-    @State private var settingsSendCrashReports = false
-    @State private var settingsSitemapDiagnosticsLogging = false
     @State private var settingsIconType: IconType = .svg
     @State private var settingsSortSitemapsBy: SortSitemapsOrder = .label
     @State private var settingsSitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode = .label
@@ -50,16 +45,16 @@ struct SettingsView: View {
     @State private var initialSnapshot: SettingsSnapshot?
     @State private var isDirty = false
     @State private var savedExplicitly = false
+    @State private var selectedSSEItemName: String?
+    @State private var showAppSettings = false
+    @State private var showCommandItemInfo = false
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
     struct SettingsSnapshot: Equatable {
         var demomode: Bool
-        var idleOff: Bool
         var realTimeSliders: Bool
-        var showSearchField: Bool
-        var sendCrashReports: Bool
         var iconType: IconType
         var sortSitemapsBy: SortSitemapsOrder
         var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode
@@ -74,10 +69,7 @@ struct SettingsView: View {
     private var currentSnapshot: SettingsSnapshot {
         SettingsSnapshot(
             demomode: settingsDemomode,
-            idleOff: settingsIdleOff,
             realTimeSliders: settingsRealTimeSliders,
-            showSearchField: settingsShowSearchField,
-            sendCrashReports: settingsSendCrashReports,
             iconType: settingsIconType,
             sortSitemapsBy: settingsSortSitemapsBy,
             sitemapNameLabelDisplayMode: settingsSitemapNameLabelDisplayMode,
@@ -99,10 +91,29 @@ struct SettingsView: View {
                 localTestedOKURL: $localTestedOKURL
             )
 
-            ApplicationSettingsView(
-                settingsIdleOff: $settingsIdleOff,
-                settingsSSECommandItem: $settingsSSECommandItem
-            )
+            Section(footer: Text(String(localized: "command_item_footer"))) {
+                NavigationLink {
+                    ItemSelectionView(selectedItemName: $selectedSSEItemName)
+                } label: {
+                    HStack {
+                        Text("Command Item \(selectedSSEItemName?.isEmpty == false ? "(\(selectedSSEItemName ?? ""))" : "")")
+                        Spacer()
+                        Button {
+                            showCommandItemInfo = true
+                        } label: {
+                            Image(systemName: "questionmark.circle")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .onChange(of: selectedSSEItemName) { newSelection in
+                settingsSSECommandItem = newSelection ?? ""
+            }
+            .onAppear {
+                selectedSSEItemName = settingsSSECommandItem
+            }
 
             MainUISettingsView(
                 settingsAlwaysAllowWebRTC: $settingsAlwaysAllowWebRTC,
@@ -111,7 +122,6 @@ struct SettingsView: View {
 
             SitemapSettingsView(
                 settingsRealTimeSliders: $settingsRealTimeSliders,
-                settingsShowSearchField: $settingsShowSearchField,
                 settingsIconType: $settingsIconType,
                 settingsSortSitemapsBy: $settingsSortSitemapsBy,
                 settingsSitemapNameLabelDisplayMode: $settingsSitemapNameLabelDisplayMode,
@@ -119,12 +129,15 @@ struct SettingsView: View {
                 sitemaps: $sitemaps
             )
 
-            DebugSettingsView(
-                settingsSendCrashReports: $settingsSendCrashReports,
-                settingsSitemapDiagnosticsLogging: $settingsSitemapDiagnosticsLogging
-            )
-
-            AboutSettingsView()
+            Section {
+                Button {
+                    showAppSettings = true
+                } label: {
+                    NavigationLink("App Settings", destination: EmptyView())
+                }
+                .foregroundStyle(isDirty ? Color.secondary : Color(uiColor: .label))
+                .disabled(isDirty)
+            }
         }
         .formStyle(.grouped)
         .navigationTitle("\(settingsHomeName) Settings")
@@ -173,8 +186,7 @@ struct SettingsView: View {
         .onDisappear {
             guard isDirty, !savedExplicitly else { return }
             // Sheet was swiped away with unsaved changes — capture values and notify parent
-            let dm = settingsDemomode, io = settingsIdleOff, rts = settingsRealTimeSliders
-            let ssf = settingsShowSearchField, scr = settingsSendCrashReports
+            let dm = settingsDemomode, rts = settingsRealTimeSliders
             let it = settingsIconType, ssb = settingsSortSitemapsBy
             let sdm = settingsSitemapNameLabelDisplayMode
             let dmu = settingsDefaultMainUIPath, aawrtc = settingsAlwaysAllowWebRTC
@@ -184,7 +196,6 @@ struct SettingsView: View {
             let rcc = settingsRemoteConnectionConfiguration
             let sseCI = settingsSSECommandItem
             let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
-            let isActiveHome = homeId == nil || homeId == Preferences.shared.currentHomePreferences.id
             let snapshot = currentSnapshot
             onDismissedDirty?(snapshot) {
                 Preferences.shared.modifyStoredHome(targetId) { @MainActor prefs in
@@ -200,13 +211,6 @@ struct SettingsView: View {
                     prefs.localConnectionConfig = lcc
                     prefs.remoteConnectionConfig = rcc
                     prefs.sseCommandItem = sseCI
-                }
-                if isActiveHome {
-                    Preferences.shared.idleOff = io
-                    Preferences.shared.sendCrashReports = scr
-                    Preferences.shared.modifyApplicationPreferences { @MainActor prefs in
-                        prefs.showSearchField = ssf
-                    }
                 }
                 NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
             }
@@ -226,6 +230,15 @@ struct SettingsView: View {
         .task(id: networkTracker.activeConnection) {
             guard let activeConnection = networkTracker.activeConnection else { return }
             await updateSitemaps(activeConfiguration: activeConnection.configuration)
+        }
+        .sheet(isPresented: $showAppSettings) {
+            NavigationStack {
+                AppSettingsView()
+            }
+        }
+        .sheet(isPresented: $showCommandItemInfo) {
+            CommandItemInfoSheet()
+                .presentationDetents([.medium, .large])
         }
     }
 
@@ -260,11 +273,7 @@ struct SettingsView: View {
             homePrefs = Preferences.shared.currentHomePreferences
         }
         settingsDemomode = homePrefs.demomode
-        settingsIdleOff = Preferences.shared.idleOff
         settingsRealTimeSliders = homePrefs.realTimeSliders
-        settingsShowSearchField = Preferences.shared.applicationPreferences.showSearchField
-        settingsSitemapDiagnosticsLogging = Preferences.shared.applicationPreferences.sitemapDiagnosticsLogging
-        settingsSendCrashReports = Preferences.shared.sendCrashReports
         settingsIconType = IconType(rawValue: homePrefs.iconType) ?? .svg
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: homePrefs.sortSitemapsBy) ?? .label
         settingsSitemapNameLabelDisplayMode = homePrefs.sitemapNameLabelDisplayMode
@@ -280,10 +289,7 @@ struct SettingsView: View {
 
     private func applySnapshot(_ snapshot: SettingsSnapshot) {
         settingsDemomode = snapshot.demomode
-        settingsIdleOff = snapshot.idleOff
         settingsRealTimeSliders = snapshot.realTimeSliders
-        settingsShowSearchField = snapshot.showSearchField
-        settingsSendCrashReports = snapshot.sendCrashReports
         settingsIconType = snapshot.iconType
         settingsSortSitemapsBy = snapshot.sortSitemapsBy
         settingsSitemapNameLabelDisplayMode = snapshot.sitemapNameLabelDisplayMode
@@ -312,12 +318,28 @@ struct SettingsView: View {
             homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
             homePreferences.sseCommandItem = settingsSSECommandItem
         }
-        Preferences.shared.idleOff = settingsIdleOff
-        Preferences.shared.sendCrashReports = settingsSendCrashReports
+    }
+}
 
-        Preferences.shared.modifyApplicationPreferences { @MainActor applicationPreferences in
-            applicationPreferences.showSearchField = settingsShowSearchField
-            applicationPreferences.sitemapDiagnosticsLogging = settingsSitemapDiagnosticsLogging
+private struct CommandItemInfoSheet: View {
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Command Item")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                Text(String(localized: "command_item_info_body"))
+                    .font(.body)
+                Button {
+                    openURL(URL(string: "https://www.openhab.org/addons/integrations/openhabcloud/")!)
+                } label: {
+                    Label(String(localized: "command_item_docs_link"), systemImage: "arrow.up.right.square")
+                }
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
@@ -333,6 +355,6 @@ extension UIApplication {
 
 #Preview {
     NavigationStack {
-        SettingsView()
+        HomeSettingsView()
     }
 }

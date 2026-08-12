@@ -16,7 +16,6 @@ import SwiftUI
 
 struct SitemapSettingsView: View {
     @Binding var settingsRealTimeSliders: Bool
-    @Binding var settingsShowSearchField: Bool
     @Binding var settingsIconType: IconType
     @Binding var settingsSortSitemapsBy: SortSitemapsOrder
     @Binding var settingsSitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode
@@ -29,7 +28,6 @@ struct SitemapSettingsView: View {
     var body: some View {
         Section(header: Text(LocalizedStringKey("sitemap_settings"))) {
             realtimeSliderToggle
-            searchFieldToggle
             cacheButton
             iconTypePicker
             displayModePicker
@@ -41,12 +39,6 @@ struct SitemapSettingsView: View {
     private var realtimeSliderToggle: some View {
         Toggle(isOn: $settingsRealTimeSliders) {
             Text("Real-time Sliders")
-        }
-    }
-
-    private var searchFieldToggle: some View {
-        Toggle(isOn: $settingsShowSearchField) {
-            Text("Show Search Field")
         }
     }
 
@@ -161,7 +153,6 @@ struct SitemapSettingsView: View {
 #Preview {
     struct PreviewWrapper: View {
         @State var realTimeSliders = true
-        @State var showSearchField = true
         @State var iconType: IconType = .svg
         @State var sortSitemapsBy: SortSitemapsOrder = .label
         @State var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode = .label
@@ -187,7 +178,6 @@ struct SitemapSettingsView: View {
                 Form {
                     SitemapSettingsView(
                         settingsRealTimeSliders: $realTimeSliders,
-                        settingsShowSearchField: $showSearchField,
                         settingsIconType: $iconType,
                         settingsSortSitemapsBy: $sortSitemapsBy,
                         settingsSitemapNameLabelDisplayMode: $sitemapNameLabelDisplayMode,
