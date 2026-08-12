@@ -39,13 +39,16 @@ public struct ConnectionInfo: Equatable, Sendable {
 
 /// A snapshot of the network tracker's observable state, delivered as a single value so
 /// consumers observe one coherent update rather than reconciling several parallel streams.
-public struct NetworkState: Equatable, Sendable {
+public struct NetworkState: Equatable, Sendable, CustomStringConvertible {
+    
     public let activeConnection: ConnectionInfo?
     public let status: NetworkStatus
     /// When another connection attempt is scheduled, the time it will fire; `nil` otherwise.
     public let nextRetryDate: Date?
     /// Whether the device currently has a usable network path.
     public let isNetworkAvailable: Bool
+    
+    public var description: String { "status: \(status.rawValue), activeConnection: \(activeConnection?.configuration.description ?? "nil"), next retry: \(nextRetryDate?.description ?? "nil"), network available: \(isNetworkAvailable ? "yes" : "no")" }
 
     public init(activeConnection: ConnectionInfo?, status: NetworkStatus, nextRetryDate: Date?, isNetworkAvailable: Bool) {
         self.activeConnection = activeConnection
@@ -84,6 +87,7 @@ public actor ConnectionPool {
     }
 
     @discardableResult
+    // swiftlint:disable:next async_without_await
     func getOrCreateService(for configuration: ConnectionConfiguration) async throws -> any OpenAPIServiceProtocol {
         if let existing = services[configuration] {
             return existing
@@ -315,7 +319,7 @@ public actor NetworkTracker {
 
         // Check if the active connection is reachable
         await makeBestConnectionActive()
-        Logger.networkTracker.debug("NetworkTracker: Active connection was reevaluated to be: \(activeConnection.configuration.url)")
+        Logger.networkTracker.debug("NetworkTracker: Active connection was reevaluated to be: \(activeConnection.configuration.publicLogDescription, privacy: .public)")
     }
 
     private func attemptConnection(silent: Bool = false) async {
@@ -349,7 +353,7 @@ public actor NetworkTracker {
 
     private func makeBestConnectionActive() async {
         if let bestConnection = await findBestConnection() {
-            Logger.networkTracker.info("NetworkTracker: Best connection url: \(bestConnection.configuration.url) user: \(bestConnection.configuration.username, privacy: .private)")
+            Logger.networkTracker.info("NetworkTracker: Best connection \(bestConnection.configuration.publicLogDescription, privacy: .public)")
             nextRetryDate = nil
             setActiveConnection(bestConnection)
             updateStatus(.connected)
@@ -368,42 +372,96 @@ public actor NetworkTracker {
     /// Search for available connections among connectionConfigurations
     /// When the first one was found, we wait a small grace period if there is a preferred one that also works
     private func findBestConnection() async -> ConnectionInfo? {
-        await withTaskGroup(of: ConnectionInfo?.self, returning: ConnectionInfo?.self) { group in
+        enum ConnectionSearchResult: Sendable {
+            case connection(ConnectionInfo?)
+            case gracePeriodExpired
+            case networkTimeoutExpired
+        }
+
+        return await withTaskGroup(of: ConnectionSearchResult.self, returning: ConnectionInfo?.self) { group in
             let sortedConfigs = connectionConfigurations.sorted { $0.priority < $1.priority }
 
             for config in sortedConfigs {
                 _ = group.addTaskUnlessCancelled {
                     let connection = await self.testConnection(configuration: config)
-                    return connection
+                    return .connection(connection)
                 }
             }
 
-            var currentBestConnection: ConnectionInfo?
+            group.addTask {
+                try? await Task.sleep(for: .seconds(self.networkTimeout))
+                return .networkTimeoutExpired
+            }
 
-            try? await withThrowingTimeout(seconds: networkTimeout) { timeoutController in
-                for await connectionInfo in group {
-                    guard let connectionInfo else { continue }
+            var currentBestConnection: ConnectionInfo?
+            var gracePeriodStarted = false
+            var pendingConnectionCount = sortedConfigs.count
+
+            while let result = await group.next() {
+                switch result {
+                case let .connection(connectionInfo):
+                    guard let connectionInfo else {
+                        pendingConnectionCount -= 1
+                        // All connections failed with no candidate found — cancel the timeout sentinel
+                        // and return immediately rather than waiting up to networkTimeout seconds.
+                        if pendingConnectionCount == 0, currentBestConnection == nil {
+                            group.cancelAll()
+                            return nil
+                        }
+                        continue
+                    }
 
                     if currentBestConnection == nil {
-                        Logger.networkTracker.debug("NetworkTracker: First working connection found: \(connectionInfo.configuration.url)")
+                        Logger.networkTracker.debug("NetworkTracker: First working connection found: \(connectionInfo.configuration.publicLogDescription, privacy: .public)")
                         currentBestConnection = connectionInfo
-                        // give the other connections a short time to be found, otherwise cancel early
-                        timeoutController.expire(seconds: NetworkTracker.slowConnectionTimeout)
+                        if connectionInfo.configuration.priority == 0 {
+                            Logger.networkTracker.debug("NetworkTracker: Most prioritized connection \(connectionInfo.configuration.publicLogDescription, privacy: .public) tested successfully")
+                            group.cancelAll()
+                            Logger.networkTracker.debug("NetworkTracker: Best connection: \(connectionInfo.configuration.publicLogDescription, privacy: .public)")
+                            return currentBestConnection
+                        }
+                        if !gracePeriodStarted {
+                            gracePeriodStarted = true
+                            // Grace window: give remaining connections a short time to respond.
+                            // Adding this as a child task ensures group.cancelAll() propagates into
+                            // slow connections when the window fires
+                            group.addTask {
+                                try? await Task.sleep(for: .seconds(NetworkTracker.slowConnectionTimeout))
+                                return .gracePeriodExpired
+                            }
+                        }
                     } else if let bestConnection = currentBestConnection, connectionInfo.configuration.priority < bestConnection.configuration.priority {
-                        Logger.networkTracker.debug("NetworkTracker: Better connection found: \(connectionInfo.configuration.url)")
+                        Logger.networkTracker.debug("NetworkTracker: Better connection found: \(connectionInfo.configuration.publicLogDescription, privacy: .public)")
                         currentBestConnection = connectionInfo
                     }
 
                     if currentBestConnection?.configuration.priority == 0 {
-                        Logger.networkTracker.debug("NetworkTracker: Most prioritized connection with url: \(connectionInfo.configuration.url) and user: \(connectionInfo.configuration.username, privacy: .private) tested successfully")
+                        Logger.networkTracker.debug("NetworkTracker: Most prioritized connection \(connectionInfo.configuration.publicLogDescription, privacy: .public) tested successfully")
                         // Stop further tasks if we found the highest-priority connection and return it
                         group.cancelAll()
-                        return
+                        let bestConnectionUrl = currentBestConnection?.configuration.publicLogDescription ?? "none"
+                        Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionUrl)")
+                        return currentBestConnection
                     }
+
+                case .gracePeriodExpired:
+                    guard currentBestConnection != nil else { continue }
+                    Logger.networkTracker.debug("NetworkTracker: Preferred connection grace period expired")
+                    group.cancelAll()
+                    let bestConnectionUrl = currentBestConnection?.configuration.publicLogDescription ?? "none"
+                    Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionUrl)")
+                    return currentBestConnection
+
+                case .networkTimeoutExpired:
+                    Logger.networkTracker.debug("NetworkTracker: Connection search timeout expired")
+                    group.cancelAll()
+                    let bestConnectionUrl = currentBestConnection?.configuration.publicLogDescription ?? "none"
+                    Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionUrl)")
+                    return currentBestConnection
                 }
             }
 
-            let bestConnectionUrl = currentBestConnection?.configuration.url ?? "none"
+            let bestConnectionUrl = currentBestConnection?.configuration.publicLogDescription ?? "none"
             Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionUrl)")
             return currentBestConnection
         }
@@ -439,25 +497,25 @@ public actor NetworkTracker {
         let reevaluating = activeConnection != nil
         // attempt the other possibly frequently failed connection, too, when reevaluating best connection
         if !(reevaluating || shouldTry) {
-            Logger.networkTracker.info("NetworkTracker: Skipping \(configuration.url) due to repeated failures.")
+            Logger.networkTracker.info("NetworkTracker: Skipping \(configuration.publicLogDescription, privacy: .public) due to repeated failures.")
             return nil
         }
 
         do {
-            Logger.networkTracker.info("NetworkTracker: testConnection for url: \(configuration.url) user: \(configuration.username, privacy: .private)")
+            Logger.networkTracker.info("NetworkTracker: testConnection for \(configuration.publicLogDescription, privacy: .public)")
             let connection = try await connectionPool.getOrCreateService(for: configuration)
             let version = try await connection.getRootVersion()
             let proxyURL = await fetchProxyURL(for: configuration)
             let connectionInfo = ConnectionInfo(configuration: configuration, version: version, proxyURL: proxyURL)
 
             await failureTracker.reset(configuration) // Reset on success
-            Logger.networkTracker.info("NetworkTracker: testConnection successful for \(configuration.url)")
+            Logger.networkTracker.info("NetworkTracker: testConnection successful for \(configuration.publicLogDescription, privacy: .public), version: \(version, privacy: .public)")
             return connectionInfo
         } catch is CancellationError {
-            Logger.networkTracker.debug("NetworkTracker: Cancelled connection attempt to \(configuration.url)")
+            Logger.networkTracker.debug("NetworkTracker: Cancelled connection attempt to \(configuration.publicLogDescription, privacy: .public)")
         } catch NetworkTrackerError.invalidServerVersion {
             await failureTracker.recordFailure(configuration)
-            Logger.networkTracker.info("NetworkTracker: testConnection error - Invalid server version from \(configuration.url)")
+            Logger.networkTracker.info("NetworkTracker: testConnection error - Invalid server version from \(configuration.publicLogDescription, privacy: .public)")
         } catch let error as OpenAPIServiceError {
             await failureTracker.recordFailure(configuration)
             switch error {
@@ -467,11 +525,11 @@ public actor NetworkTracker {
             }
         } catch let openAPIError as OpenAPIRuntime.ClientError {
             await failureTracker.recordFailure(configuration)
-            Logger.networkTracker.info("Networktracker: testConnection error - OpenAPIRuntime.RuntimeError encountered for \(configuration.url)")
+            Logger.networkTracker.info("Networktracker: testConnection error - OpenAPIRuntime.RuntimeError encountered for \(configuration.publicLogDescription, privacy: .public)")
             Logger.networkTracker.debug("OpenAPIRuntime.RuntimeError is \(openAPIError)")
         } catch {
             await failureTracker.recordFailure(configuration)
-            Logger.networkTracker.info("NetworkTracker: testConnection error - Failed to connect to \(configuration.url) \(error.localizedDescription)")
+            Logger.networkTracker.info("NetworkTracker: testConnection error - Failed to connect to \(configuration.publicLogDescription, privacy: .public) \(error.localizedDescription)")
         }
 
         return nil
@@ -561,6 +619,7 @@ public actor NetworkTracker {
 
     private func yieldCurrentState() {
         let state = NetworkState(activeConnection: activeConnection, status: status, nextRetryDate: nextRetryDate, isNetworkAvailable: isNetworkAvailable)
+        Logger.networkTracker.debug("NetworkTracker: yielding state \(state)")
         for cont in stateContinuations.values { cont.yield(state) }
     }
 

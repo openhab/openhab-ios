@@ -405,7 +405,7 @@ final class NetworkTrackerTests: XCTestCase {
         await monitoringTask.value
         await mockMonitor.simulateConnection(isConnected: true)
 
-        // Fallback must win before the 5-second preferred delay expires.
+        // Fallback must win within the grace window (1s) plus some headroom — well before the 5-second preferred delay.
         await fulfillment(of: [fallbackBecameActive], timeout: 3.0)
         task.cancel()
         await tracker.stopTracking()
