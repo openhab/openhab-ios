@@ -373,6 +373,8 @@ struct OpenHABRootView: View {
         let prefs = Preferences.shared.currentHomePreferences
         if prefs.defaultView == "sitemap" {
             switchContent(to: .sitemap(prefs.defaultSitemap))
+        } else if !prefs.defaultMainUIPath.isEmpty {
+            currentContent = .mainUIPage(prefs.defaultMainUIPath)
         } else {
             currentContent = .webview
         }
@@ -462,6 +464,9 @@ struct OpenHABRootView: View {
             webViewModel.loadWebView(force: false, path: path)
         }
         persistDefaultViewIfNeeded("web")
+        if !Preferences.shared.currentHomePreferences.demomode {
+            Preferences.shared.modifyActiveHome { $0.defaultMainUIPath = path ?? "" }
+        }
     }
 
     private var isMainUIShown: Bool {
