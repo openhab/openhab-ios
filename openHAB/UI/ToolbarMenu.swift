@@ -43,10 +43,7 @@ struct ConnectionView: View {
                 let homePrefs = Preferences.shared.currentHomePreferences
                 let isLocal = activeConnection.configuration.url == homePrefs.localConnectionConfig.url
                 Image(systemSymbol: isLocal ? .wifi : .cloudFill)
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(homePrefs.homeName).fontWeight(.medium)
-                    Text(isLocal ? "Local" : "Remote").foregroundStyle(.secondary)
-                }
+                Text(homePrefs.homeName).fontWeight(.medium)
             } else {
                 Image(systemSymbol: .exclamationmarkIcloudFill)
                 Text("Connecting…")
@@ -332,7 +329,7 @@ struct ToolbarMenu: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .frame(width: 10)
-                        Text("Home")
+                        Text("Homes")
                             .font(.footnote)
                             .fontWeight(.semibold)
                     }
