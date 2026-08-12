@@ -333,7 +333,7 @@ private struct CommandItemInfoSheet: View {
                 Text(String(localized: "command_item_info_body"))
                     .font(.body)
                 Button {
-                    openURL(URL(string: "https://www.openhab.org/addons/integrations/openhabcloud/")!)
+                    openURL(URL(string: "https://www.openhab.org/addons/integrations/openhabcloud/#action-syntax")!)
                 } label: {
                     Label(String(localized: "command_item_docs_link"), systemImage: "arrow.up.right.square")
                 }
