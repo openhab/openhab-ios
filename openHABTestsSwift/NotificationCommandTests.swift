@@ -71,6 +71,12 @@ struct NotificationCommandTests {
         #expect(result == nil)
     }
 
+    @Test("Preserves colons inside the command value")
+    func sendCommandWithColonInValue() {
+        let result = NotificationCommandParser.parse("command:MyDateTimeItem:2024-01-01T10:15:30")
+        #expect(result == .sendCommand(item: "MyDateTimeItem", command: "2024-01-01T10:15:30"))
+    }
+
     // MARK: - HTTP commands
 
     @Test("Parses HTTP URL")
@@ -198,6 +204,18 @@ struct NotificationCommandTests {
     func deviceTTSWithVoice() {
         let result = NotificationCommandParser.parse("device:tts:hello:en-US:Samantha")
         #expect(result == .device(.tts(text: "hello", language: "en-US", voiceName: "Samantha")))
+    }
+
+    @Test("Preserves colon inside TTS text with no language/voice")
+    func deviceTTSTextWithColonNoLanguage() {
+        let result = NotificationCommandParser.parse("device:tts:the time is 10:30")
+        #expect(result == .device(.tts(text: "the time is 10:30", language: nil, voiceName: nil)))
+    }
+
+    @Test("Preserves colon inside TTS text while still extracting language and voice")
+    func deviceTTSTextWithColonAndLanguageVoice() {
+        let result = NotificationCommandParser.parse("device:tts:meeting at 10:30, please join:en:Alex")
+        #expect(result == .device(.tts(text: "meeting at 10:30, please join", language: "en", voiceName: "Alex")))
     }
 
     @Test("Returns nil for unknown device command")
