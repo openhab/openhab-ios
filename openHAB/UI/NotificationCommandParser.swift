@@ -102,7 +102,9 @@ enum NotificationCommandParser {
     // MARK: - Send Command
 
     static func parseSendCommand(_ action: String) -> NotificationCommand? {
-        let components = action.split(separator: ":")
+        // maxSplits: 1 so a colon inside the command value itself (e.g. a DateTime
+        // like "2024-01-01T10:15:30") is preserved instead of truncating it.
+        let components = action.split(separator: ":", maxSplits: 1)
         guard components.count == 2 else { return nil }
         return .sendCommand(item: String(components[0]), command: String(components[1]))
     }
@@ -155,10 +157,13 @@ enum NotificationCommandParser {
     // MARK: - Device
 
     static func parseDeviceCommand(_ action: String) -> NotificationCommand? {
-        let cmdParts = action.split(separator: ":")
+        // maxSplits: 1 so only the command name is split off here; commands with
+        // free-form payloads (tts) do their own splitting to handle embedded colons.
+        let cmdParts = action.split(separator: ":", maxSplits: 1)
         guard !cmdParts.isEmpty else { return nil }
         let command = cmdParts[0].lowercased()
-        let arg1 = cmdParts.count > 1 ? String(cmdParts[1]).lowercased() : ""
+        let remainder = cmdParts.count > 1 ? String(cmdParts[1]) : ""
+        let arg1 = remainder.lowercased()
 
         switch command {
         case "screensaver":
@@ -175,11 +180,43 @@ enum NotificationCommandParser {
             let clamped = min(max(value, 0.0), 1.0)
             return .device(.brightness(clamped))
         case "tts":
-            let language: String? = cmdParts.count > 2 ? String(cmdParts[2]) : nil
-            let voiceName: String? = cmdParts.count > 3 ? String(cmdParts[3]) : nil
-            return .device(.tts(text: arg1, language: language, voiceName: voiceName))
+            // Keep original casing here — language tags ("en-US") and voice names
+            // ("Samantha") are case-sensitive; only the text itself is lowercased.
+            return parseTTSCommand(remainder)
         default:
             return nil
         }
+    }
+
+    /// Parses a `tts` payload of the form `text[:language[:voiceName]]`.
+    ///
+    /// The text is a free-form prefix, not the last field, so it may itself contain
+    /// colons (e.g. "It's 10:30"). A trailing segment is only consumed as language/voice
+    /// when it looks like a real BCP-47 language tag (e.g. "en", "en-US") — otherwise the
+    /// whole payload is treated as text. This can't fully disambiguate every case (text
+    /// that happens to end in something tag-shaped), but it fixes the common case where
+    /// text with an embedded colon was previously truncated.
+    private static func parseTTSCommand(_ payload: String) -> NotificationCommand? {
+        var parts = payload.split(separator: ":", omittingEmptySubsequences: false).map(String.init)
+        guard !parts.isEmpty else { return nil }
+
+        var language: String?
+        var voiceName: String?
+
+        if parts.count > 2, isLikelyLanguageTag(parts[parts.count - 2]) {
+            voiceName = parts.removeLast()
+            language = parts.removeLast()
+        } else if parts.count > 1, isLikelyLanguageTag(parts[parts.count - 1]) {
+            language = parts.removeLast()
+        }
+
+        let text = parts.joined(separator: ":").lowercased()
+        guard !text.isEmpty else { return nil }
+        return .device(.tts(text: text, language: language, voiceName: voiceName))
+    }
+
+    private static func isLikelyLanguageTag(_ value: String) -> Bool {
+        let pattern = "^[a-z]{2,3}(-[a-z0-9]{2,8}){0,2}$"
+        return value.range(of: pattern, options: [.regularExpression, .caseInsensitive]) != nil
     }
 }
