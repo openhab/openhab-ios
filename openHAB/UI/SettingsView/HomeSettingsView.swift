@@ -267,7 +267,7 @@ struct HomeSettingsView: View {
         Logger.settingsView.debug("Loading Settings")
         #endif
         let homePrefs: HomePreferences
-        if let homeId, let stored = Preferences.shared.storedHomes[homeId] {
+        if let homeId, let stored = Preferences.shared.storedHomeWithCredentials(forId: homeId) {
             homePrefs = stored
         } else {
             homePrefs = Preferences.shared.currentHomePreferences

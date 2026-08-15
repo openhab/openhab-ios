@@ -190,7 +190,7 @@ struct InlineHomePickerView: View {
 
     private func summaryText(for homeId: UUID) -> [Text] {
         
-        guard let prefs = Preferences.shared.storedHomes[homeId] else {
+        guard let prefs = Preferences.shared.storedHomeWithCredentials(forId: homeId) else {
             return [Text("")]
         }
         

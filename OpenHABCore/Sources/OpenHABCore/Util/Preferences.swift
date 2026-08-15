@@ -366,6 +366,21 @@ public extension Preferences {
         return prefs
     }
 
+    /// Returns a stored home's preferences with credentials injected from Keychain, or nil if not found.
+    /// Mirrors what `currentHomePreferences` does for the active home, but works for any stored home UUID.
+    func storedHomeWithCredentials(forId homeId: UUID) -> HomePreferences? {
+        guard var home = storedHomes[homeId] else { return nil }
+        if let creds = CredentialsStore.retrieve(homeId: homeId, type: .local) {
+            home.localConnectionConfig.username = creds.username
+            home.localConnectionConfig.password = creds.password
+        }
+        if let creds = CredentialsStore.retrieve(homeId: homeId, type: .remote) {
+            home.remoteConnectionConfig.username = creds.username
+            home.remoteConnectionConfig.password = creds.password
+        }
+        return home
+    }
+
     /// Publisher of active home preferences changes. Each emitted value has credentials injected from Keychain.
     var currentHomePreferencesPublisher: AnyPublisher<HomePreferences, Never> {
         $_currentHomePreferences
@@ -511,6 +526,19 @@ public extension Preferences {
             var stored = storedHomes
             guard stored[homeId] != nil else { return }
             modificationFunction(&stored[homeId]!)
+            let home = stored[homeId]!
+            CredentialsStore.store(
+                username: home.localConnectionConfig.username,
+                password: home.localConnectionConfig.password,
+                homeId: homeId,
+                type: .local
+            )
+            CredentialsStore.store(
+                username: home.remoteConnectionConfig.username,
+                password: home.remoteConnectionConfig.password,
+                homeId: homeId,
+                type: .remote
+            )
             storedHomes = stored
         }
     }

@@ -249,7 +249,7 @@ struct HomeSummaryView: View {
     let homeId: UUID
 
     private var homePrefs: HomePreferences? {
-        Preferences.shared.storedHomes[homeId]
+        Preferences.shared.storedHomeWithCredentials(forId: homeId)
     }
 
     var body: some View {
