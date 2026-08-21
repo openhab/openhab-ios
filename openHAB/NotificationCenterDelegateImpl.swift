@@ -105,9 +105,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
     private func displayNotification(message: String, action: String?, cloudUserId: String?, actions: [NotificationActionItem] = []) async {
         Logger.notificationCenterDelegateImpl.info("displayNotification \(message)")
 
-        Task {
-            await audioPlayer.playSound()
-        }
+        audioPlayer.playSound()
 
         let title = String(localized: "notification", comment: "")
         ToastService.shared.show(
