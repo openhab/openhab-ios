@@ -31,6 +31,49 @@ public enum OHInterfaceStyle: Int {
 }
 
 public extension UIColor {
+    /// system colors
+    class var ohLabel: UIColor {
+        #if os(iOS)
+        return .label
+        #else
+        return .black
+        #endif
+    }
+
+    class var ohSecondaryLabel: UIColor {
+        #if os(iOS)
+        return .secondaryLabel
+        #else
+        return .lightGray
+        #endif
+    }
+
+    class var ohSystemBackground: UIColor {
+        #if os(iOS)
+        return .systemBackground
+        #else
+        return .white
+        #endif
+    }
+
+    class var ohSystemGroupedBackground: UIColor {
+        #if os(iOS)
+        return .systemGroupedBackground
+        #elseif os(watchOS)
+        return .black
+        #else
+        return .white
+        #endif
+    }
+
+    class var ohSecondarySystemGroupedBackground: UIColor {
+        #if os(iOS)
+        return .secondarySystemGroupedBackground
+        #else
+        return .white
+        #endif
+    }
+
     // standard colors
     class var ohMaroon: UIColor {
         OHInterfaceStyle.current == .light ? UIColor(hex: "#800000") : UIColor(hex: "#800000")
