@@ -14,7 +14,6 @@ import OpenHABCore
 
 // MARK: - Shared Protocol for All Item Entities
 
-@available(iOS 17.0, macOS 14.0, *)
 protocol ItemEntity: AppEntity where ID == ItemIdentifier {
     var id: ItemIdentifier { get set }
     var item: OpenHABItem { get set }
@@ -24,7 +23,6 @@ protocol ItemEntity: AppEntity where ID == ItemIdentifier {
     init(_ openHABItem: OpenHABItem, homeId: UUID, homeName: String?)
 }
 
-@available(iOS 17.0, macOS 14.0, *)
 extension ItemEntity {
     var homeId: UUID? {
         id.homeId
