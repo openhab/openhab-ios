@@ -36,3 +36,16 @@ extension OpenHABServerProperties {
         )
     }
 }
+
+public extension OpenHABServerProperties {
+    var majorVersion: Int? {
+        guard let version else { return nil }
+        let trimmed = version.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = trimmed.split(separator: ".")
+        return Int(parts.first ?? "")
+    }
+
+    func hasSseSupport() -> Bool {
+        (majorVersion ?? 0) >= 3
+    }
+}

@@ -30,7 +30,7 @@ struct DimmerItemEntity: ItemEntity {
         }
     }
 
-    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Dimmer/Roller Item")
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Dimmer or Roller Item")
     static let defaultQuery = DimmerItemQuery()
 
     var id: ItemIdentifier
@@ -318,7 +318,7 @@ struct SwitchItemEntity: ItemEntity {
         }
     }
 
-    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Switch Item")
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Switch or Dimmer Item")
     static let defaultQuery = SwitchItemQuery()
 
     var id: ItemIdentifier

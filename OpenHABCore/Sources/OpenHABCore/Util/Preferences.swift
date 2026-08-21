@@ -123,6 +123,7 @@ public struct HomePreferences: Codable, Equatable {
     public var isSitemapsExpanded: Bool?
     public var isTilesExpanded: Bool?
     public var isSystemExpanded: Bool?
+    public var sitemapForCarPlay = ""
 
     fileprivate init(id: UUID) {
         self.id = id
@@ -167,6 +168,7 @@ public struct HomePreferences: Codable, Equatable {
         isSitemapsExpanded = try container.decodeIfPresent(Bool.self, forKey: .isSitemapsExpanded)
         isTilesExpanded = try container.decodeIfPresent(Bool.self, forKey: .isTilesExpanded)
         isSystemExpanded = try container.decodeIfPresent(Bool.self, forKey: .isSystemExpanded)
+        sitemapForCarPlay = try container.decodeIfPresent(String.self, forKey: .sitemapForCarPlay) ?? ""
     }
 }
 

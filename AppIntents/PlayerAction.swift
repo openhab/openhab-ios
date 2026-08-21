@@ -23,12 +23,12 @@ enum PlayerAction: String, AppEnum {
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Player Action")
 
     static let caseDisplayRepresentations: [Self: DisplayRepresentation] = [
-        .play: "Play",
-        .pause: "Pause",
-        .next: "Next",
-        .previous: "Previous",
-        .rewind: "Rewind",
-        .fastforward: "Fast Forward"
+        .play: DisplayRepresentation(title: "Play", synonyms: ["Start", "Resume", "Begin"]),
+        .pause: DisplayRepresentation(title: "Pause", synonyms: ["Stop", "Hold", "Suspend"]),
+        .next: DisplayRepresentation(title: "Next", synonyms: ["Skip", "Skip forward", "Next track"]),
+        .previous: DisplayRepresentation(title: "Previous", synonyms: ["Back", "Skip back", "Previous track"]),
+        .rewind: DisplayRepresentation(title: "Rewind", synonyms: ["Rewind back", "Go backward", "Replay"]),
+        .fastforward: DisplayRepresentation(title: "Fast Forward", synonyms: ["Speed up", "Skip ahead", "FF"])
     ]
 }
 

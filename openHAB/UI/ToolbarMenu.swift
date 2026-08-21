@@ -70,6 +70,7 @@ struct ToolbarMenu: View {
     @State private var isHomeExpanded = false
     @State private var showAppSettings = false
     @State private var sitemapForWatch: String?
+    @State private var sitemapForCarPlay: String?
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
@@ -107,6 +108,7 @@ struct ToolbarMenu: View {
         isTilesExpanded = prefs.isTilesExpanded ?? true
         isSystemExpanded = prefs.isSystemExpanded ?? true
         sitemapForWatch = prefs.sitemapForWatch
+        sitemapForCarPlay = prefs.sitemapForCarPlay
     }
 
     /// Toggles `sitemap` as the one sent to the paired Apple Watch, persisting the
@@ -122,6 +124,20 @@ struct ToolbarMenu: View {
                 sitemapForWatch = sitemap.name
                 prefs.sitemapForWatch = sitemap.name
                 prefs.sitemapForWatchLabel = sitemap.label
+            }
+        }
+    }
+
+    /// Toggles `sitemap` as the one shown in CarPlay, persisting the choice to the
+    /// active home, or clearing it if the same sitemap is long-pressed again.
+    private func toggleCarPlaySitemap(_ sitemap: OpenHABSitemap) {
+        Preferences.shared.modifyActiveHome { prefs in
+            if sitemap.name == sitemapForCarPlay {
+                sitemapForCarPlay = nil
+                prefs.sitemapForCarPlay = ""
+            } else {
+                sitemapForCarPlay = sitemap.name
+                prefs.sitemapForCarPlay = sitemap.name
             }
         }
     }
@@ -215,18 +231,28 @@ struct ToolbarMenu: View {
         let order = SortSitemapsOrder(rawValue: prefs.sortSitemapsBy) ?? .label
         let mode = prefs.sitemapNameLabelDisplayMode
         ForEach(menuData.sitemaps, id: \.name) { sitemap in
+            let isWatch = sitemap.name == sitemapForWatch
+            let isCarPlay = sitemap.name == sitemapForCarPlay
             menuDetailRow(
                 icon: AnyView(sitemapIcon(for: sitemap)),
                 title: mode.titleText(for: sitemap, sortedBy: order),
                 detail: mode.detailText(for: sitemap, sortedBy: order),
                 accessibilityId: sitemap.name,
-                trailing: sitemap.name == sitemapForWatch
-                    ? AnyView(Image(systemSymbol: .applewatchWatchface))
+                trailing: (isWatch || isCarPlay)
+                    ? AnyView(
+                        HStack(spacing: 4) {
+                            if isWatch { Image(systemSymbol: .applewatchWatchface) }
+                            if isCarPlay { Image(systemSymbol: .steeringwheel) }
+                        }
+                    )
                     : nil
-            ) {
-                select(.sitemap(sitemap.name))
-            }
+            )
+            // All three gestures are on this same view so SwiftUI can disambiguate the
+            // single- vs double-tap count correctly (it can't across separate modifier
+            // layers, e.g. one inside menuDetailRow and one attached by the caller).
             .onTapGesture(count: 2) { toggleWatchSitemap(sitemap) }
+            .onTapGesture { select(.sitemap(sitemap.name)) }
+            .onLongPressGesture { toggleCarPlaySitemap(sitemap) }
         }
     }
 
@@ -502,39 +528,41 @@ struct ToolbarMenu: View {
     /// optional secondary `detail` below it, mirroring the home-picker rows. The
     /// `detail` line is omitted entirely when empty so equal name/label collapses
     /// to a single line.
+    /// Not Button-based: sitemapsMenu() layers a double-tap (watch) and long-press (CarPlay)
+    /// gesture on top of the single-tap select action, and a Button's own gesture recognizer
+    /// wins the touch immediately — firing select() before a second tap can be recognized as
+    /// a double-tap. A plain view lets SwiftUI's .onTapGesture/.onTapGesture(count: 2) pair
+    /// disambiguate correctly, the way DrawerView's original implementation did.
     private func menuDetailRow(
         icon: AnyView,
         title: String,
         detail: String,
         accessibilityId: String? = nil,
-        trailing: AnyView? = nil,
-        action: @escaping () -> Void
+        trailing: AnyView? = nil
     ) -> some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                icon
-                    .frame(width: iconWidth, height: iconWidth)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
+        HStack(spacing: 10) {
+            icon
+                .frame(width: iconWidth, height: iconWidth)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .lineLimit(1)
+                if !detail.isEmpty {
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
-                    if !detail.isEmpty {
-                        Text(detail)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-                }
-                if let trailing {
-                    Spacer()
-                    trailing
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .contentShape(Rectangle())
+            if let trailing {
+                Spacer()
+                trailing
+            }
         }
-        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
         .accessibilityIdentifier(accessibilityId ?? title)
+        .accessibilityAddTraits(.isButton)
     }
 
     private func systemRow(symbol: SFSymbol, label: String, action: @escaping () -> Void) -> some View {

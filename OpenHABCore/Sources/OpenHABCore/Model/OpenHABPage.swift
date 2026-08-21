@@ -52,19 +52,6 @@ public class OpenHABPage: NSObject, @unchecked Sendable {
 }
 
 public extension OpenHABPage {
-    func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABPage {
-        try OpenHABPage(
-            pageId: pageId,
-            title: title,
-            link: link,
-            leaf: leaf,
-            widgets: widgets.filter(isIncluded),
-            icon: icon
-        )
-    }
-}
-
-public extension OpenHABPage {
     convenience init?(_ page: Components.Schemas.PageDTO?) {
         if let page {
             self.init(
@@ -78,5 +65,27 @@ public extension OpenHABPage {
         } else {
             return nil
         }
+    }
+
+    func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABPage {
+        try OpenHABPage(
+            pageId: pageId,
+            title: title,
+            link: link,
+            leaf: leaf,
+            widgets: widgets.filter(isIncluded),
+            icon: icon
+        )
+    }
+
+    @discardableResult
+    func apply(event: OpenHABSitemapWidgetEvent) -> SitemapWidgetEventApplicationResult {
+        for widget in widgets {
+            let result = widget.apply(event: event)
+            if result != .notFound {
+                return result
+            }
+        }
+        return .notFound
     }
 }

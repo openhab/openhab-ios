@@ -70,12 +70,10 @@ enum WebRowViewConfigurationFactory {
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
         configuration.mediaTypesRequiringUserActionForPlayback = []
-        // iOS 17+: use a per-home sandboxed store derived from homeId but distinct from
-        // the store used by OpenHABWebViewController (which uses homeId directly).
-        // Separate identifiers give independent cookie and HTTP-cache storage for widget
-        // pages, preventing a widget from serving stale or mismatched assets to MainUI.
-        // WebContent process assignment remains at WebKit's discretion.
-        // Basic Auth challenge handling covers widget authentication.
+        // Use a per-home sandboxed store derived from homeId but distinct from the store
+        // used by OpenHABWebViewController (which uses homeId directly). Separate identifiers
+        // give independent cookie and HTTP-cache storage for widget pages, preventing a widget
+        // from serving stale or mismatched assets to MainUI.
         configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: widgetStoreID(for: homeId))
         return configuration
     }
