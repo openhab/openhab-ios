@@ -18,7 +18,7 @@ struct SpinningSymbol: View {
     @State private var isAnimating = false
 
     var body: some View {
-        Image(systemSymbol: .arrowTriangle2Circlepath)
+        Image(systemSymbol: .arrowTrianglehead2ClockwiseRotate90)
             .rotationEffect(.degrees(isAnimating ? 360 : 0))
             .animation(
                 Animation.linear(duration: 1.0)
@@ -70,7 +70,7 @@ struct SingleConnectionSettingsView: View {
                         .multilineTextAlignment(.trailing)
                         .font(.system(.caption))
                         .focused($focusedField, equals: .url)
-                        .onChange(of: connectionConfig.url) { _ in
+                        .onChange(of: connectionConfig.url) {
                             connectionTestMessage = nil
                             connectionTestDetail = nil
                             connectionTestSuccess = nil

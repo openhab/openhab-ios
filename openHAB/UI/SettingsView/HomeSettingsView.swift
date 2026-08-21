@@ -112,7 +112,7 @@ struct HomeSettingsView: View {
                     }
                 }
             }
-            .onChange(of: selectedSSEItemName) { newSelection in
+            .onChange(of: selectedSSEItemName) { _, newSelection in
                 settingsSSECommandItem = newSelection ?? ""
             }
             .onAppear {
@@ -219,7 +219,7 @@ struct HomeSettingsView: View {
                 NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
             }
         }
-        .onChange(of: currentSnapshot) { newSnapshot in
+        .onChange(of: currentSnapshot) { _, newSnapshot in
             isDirty = newSnapshot != initialSnapshot
         }
         .task {

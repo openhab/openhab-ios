@@ -91,10 +91,10 @@ private struct SegmentedRowContent: View {
         .onAppear {
             clearOptimisticSelection()
         }
-        .onChange(of: input.widgetId) { _ in
+        .onChange(of: input.widgetId) {
             clearOptimisticSelection()
         }
-        .onChange(of: widgetVersion) { _ in
+        .onChange(of: widgetVersion) {
             guard let optimisticBaseState,
                   optimisticWidgetId == input.widgetId,
                   let optimisticStartVersion,
@@ -108,7 +108,7 @@ private struct SegmentedRowContent: View {
                 self.optimisticStartVersion = widgetVersion
             }
         }
-        .onChange(of: interactionState) { newState in
+        .onChange(of: interactionState) { _, newState in
             switch newState {
             case .idle:
                 // HTTP command completed. Wait for SSE/long-poll to deliver the new state.

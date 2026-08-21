@@ -109,13 +109,13 @@ private struct SliderRowContent: View {
             dragStartVersion = nil
             dragWidgetId = nil
         }
-        .onChange(of: input.widgetId) { _ in
+        .onChange(of: input.widgetId) {
             isEditing = false
             dragValue = nil
             dragStartVersion = nil
             dragWidgetId = nil
         }
-        .onChange(of: widgetVersion) { _ in
+        .onChange(of: widgetVersion) {
             guard isEditing else { return }
             // If server refresh advanced while dragging, only cancel when the server value diverges
             // meaningfully from the local drag value. This avoids jarring cancels on polling echoes.

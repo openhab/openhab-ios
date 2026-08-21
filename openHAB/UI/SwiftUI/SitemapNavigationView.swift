@@ -88,7 +88,7 @@ struct SitemapNavigationView: View {
             sitemapContent
         }
         .environment(\.sitemapSideMenuAction, onShowSideMenu)
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
                 // Skip only the first activation to avoid racing the initial .task startup.

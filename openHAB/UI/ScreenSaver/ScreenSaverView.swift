@@ -86,7 +86,7 @@ struct ScreenSaverView: View {
             .onDisappear {
                 stopMovementTimer()
             }
-            .onChange(of: geometry.size) { _ in
+            .onChange(of: geometry.size) {
                 currentAnchor = randomAnchor()
             }
         }
