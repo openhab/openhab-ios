@@ -27,6 +27,13 @@ public enum OpenAPIServiceConfiguration {
     case asDefault
     case shortTerm
     case longTerm
+    /// For persistent SSE connections expected to stay open indefinitely. iOS's
+    /// per-request timeout does not reliably reset on each chunk of a streamed
+    /// response, so it must be set well beyond the server's ALIVE ping interval
+    /// (~10s) to avoid spurious disconnects while the stream is still healthy.
+    /// A genuinely dead connection is instead caught by the caller's own
+    /// idle-event watchdog.
+    case sse
 }
 
 public protocol OpenAPIServiceProtocol: AnyObject, Sendable {
@@ -82,6 +89,13 @@ public actor OpenAPIService {
         case .shortTerm:
             config.timeoutIntervalForRequest = 10.0
             config.timeoutIntervalForResource = 10.0
+        case .sse:
+            config.requestCachePolicy = .reloadIgnoringLocalCacheData
+            config.urlCache = nil
+            config.timeoutIntervalForRequest = 300.0
+            // Leave timeoutIntervalForResource at its default (7 days) — the stream
+            // is meant to stay open indefinitely; a dead connection is caught by
+            // the caller's own idle-event watchdog, not by a resource-lifetime cap.
         }
         let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
         urlSession = session

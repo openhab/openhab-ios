@@ -39,7 +39,7 @@ public actor SitemapEventStream {
     private let makeService: @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol
 
     public init(makeService: @escaping @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol = {
-        try OpenAPIService(connectionConfiguration: $0)
+        try OpenAPIService(connectionConfiguration: $0, serviceConfiguration: .sse)
     }) {
         self.makeService = makeService
     }

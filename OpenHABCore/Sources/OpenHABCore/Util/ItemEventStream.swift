@@ -165,7 +165,7 @@ public actor EventStream<Event: Sendable> {
 
         while !Task.isCancelled {
             do {
-                let service = try OpenAPIService(connectionConfiguration: config)
+                let service = try OpenAPIService(connectionConfiguration: config, serviceConfiguration: .sse)
                 let response = try await service.initNewStateTacker()
                 let eventStream = try response.ok.body.text_event_hyphen_stream.asDecodedServerSentEvents()
                 self.service = service
