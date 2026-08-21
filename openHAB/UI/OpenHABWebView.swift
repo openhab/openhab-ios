@@ -109,7 +109,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             webView.configuration.userContentController.add(self, name: "externalURL")
             webView.configuration.userContentController.addUserScript(Self.externalURLInterceptorScript)
             currentWebView = webView
-            
+
             hostView.addSubview(webView)
             webView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.deactivate(webViewLayoutConstraints)

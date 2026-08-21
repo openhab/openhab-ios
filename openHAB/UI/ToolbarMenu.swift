@@ -34,7 +34,7 @@ enum TargetController: Equatable {
 
 struct ConnectionView: View {
     static let cornerRadius: CGFloat = 14
-    
+
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
 
     var body: some View {
@@ -146,18 +146,18 @@ struct ToolbarMenu: View {
         ZStack(alignment: .topTrailing) {
             // Dimming backdrop — tapping dismisses the menu
             if isPresented {
-                
+
                 Color.black.opacity(0.1)
                     .ignoresSafeArea()
                     .onTapGesture { isPresented = false }
                     .transition(.opacity)
-                
+
                 let menu = menuContent(height: proxy.size.height * 0.8)
                     .transition(
                         .scale(scale: 0.01, anchor: .topTrailing)
                         .combined(with: .opacity)
                     )
-                
+
                 styleMenu(menu)
                     .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
                     .padding(.trailing, 8)
@@ -166,7 +166,7 @@ struct ToolbarMenu: View {
         }
         .animation(.spring(response: 0.32, dampingFraction: 0.78), value: isPresented)
     }
-    
+
     @ViewBuilder
     private func styleMenu<Content: View>(_ menu: Content) -> some View {
         if #available(iOS 26.0, *) {
@@ -252,7 +252,7 @@ struct ToolbarMenu: View {
             }
         }
     }
-    
+
     fileprivate func homesMenu() -> some View {
         return VStack(alignment: .leading, spacing: 0) {
             InlineHomePickerView(isMenuPresented: $isPresented)
@@ -261,7 +261,7 @@ struct ToolbarMenu: View {
         .transition(.blurReplace(.downUp))
 
     }
-    
+
     private func menuContent(height: CGFloat) -> some View {
         VStack(spacing: 0) {
             let scrollView = ScrollView {
@@ -335,7 +335,7 @@ struct ToolbarMenu: View {
             } else {
                 scrollView
             }
-            
+
         }
         .frame(width: 280)
     }
@@ -586,4 +586,3 @@ struct ToolbarMenu: View {
         onSelect(target)
     }
 }
-

@@ -40,14 +40,14 @@ public struct ConnectionInfo: Equatable, Sendable {
 /// A snapshot of the network tracker's observable state, delivered as a single value so
 /// consumers observe one coherent update rather than reconciling several parallel streams.
 public struct NetworkState: Equatable, Sendable, CustomStringConvertible {
-    
+
     public let activeConnection: ConnectionInfo?
     public let status: NetworkStatus
     /// When another connection attempt is scheduled, the time it will fire; `nil` otherwise.
     public let nextRetryDate: Date?
     /// Whether the device currently has a usable network path.
     public let isNetworkAvailable: Bool
-    
+
     public var description: String { "status: \(status.rawValue), activeConnection: \(activeConnection?.configuration.description ?? "nil"), next retry: \(nextRetryDate?.description ?? "nil"), network available: \(isNetworkAvailable ? "yes" : "no")" }
 
     public init(activeConnection: ConnectionInfo?, status: NetworkStatus, nextRetryDate: Date?, isNetworkAvailable: Bool) {

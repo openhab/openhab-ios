@@ -189,31 +189,31 @@ struct InlineHomePickerView: View {
     }
 
     private func summaryText(for homeId: UUID) -> [Text] {
-        
+
         guard let prefs = Preferences.shared.storedHomeWithCredentials(forId: homeId) else {
             return [Text("")]
         }
-        
+
         guard !prefs.demomode else {
             return [Text("Demo")]
         }
-        
+
         var parts: [Text] = []
-        
+
         let localHost = prefs.localConnectionConfig.url.isEmpty
             ? String(localized: "Not set")
             : prefs.localConnectionConfig.url
         let localCredentialsSymbol = prefs.localConnectionConfig.username.isEmpty
             ? Image(systemName: "lock.slash") : Image(systemName: "lock")
         parts.append(Text("\(Image(systemName: "wifi")): \(localHost) \(localCredentialsSymbol)"))
-        
+
         let remoteURL = prefs.remoteConnectionConfig.url.isEmpty
             ? "Not set"
             : prefs.remoteConnectionConfig.url
         let remoteCredentialsSymbol = prefs.remoteConnectionConfig.username.isEmpty
         ? Image(systemName: "lock.slash") : Image(systemName: "lock")
         parts.append(Text("\(Image(systemName: "cloud.fill")): \(remoteURL) \(remoteCredentialsSymbol)"))
-        
+
         if prefs.localConnectionConfig.ignoreSSL || prefs.remoteConnectionConfig.ignoreSSL {
             parts.append(Text("SSL off"))
         }
