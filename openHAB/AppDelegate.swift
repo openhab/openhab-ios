@@ -205,6 +205,13 @@ extension Notification.Name {
 }
 
 extension AppDelegate {
+    func applicationWillResignActive(_ application: UIApplication) {
+        // Dismiss the screensaver overlay and restore brightness before the app leaves the
+        // foreground (Control Center, an incoming call, the app switcher, backgrounding, etc.),
+        // rather than leaving that cleanup to happen reactively on the next touch.
+        NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
+    }
+
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
