@@ -21,7 +21,7 @@ struct ScreenSaverView: View {
     @State private var fadeOpacity = 1.0
     @State private var movementTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     @State private var isTimerActive = false
-    @State private var animationTask: Task<Void, Never>?
+    @State private var animationGeneration = 0
 
     var body: some View {
         GeometryReader { geometry in
@@ -64,15 +64,12 @@ struct ScreenSaverView: View {
 
                 let half = max(configuration.fadeDuration / 2.0, 0.01)
 
-                animationTask?.cancel()
-                animationTask = Task {
-                    withAnimation(.easeInOut(duration: half)) {
-                        fadeOpacity = 0.0
-                    }
-
-                    try? await Task.sleep(nanoseconds: UInt64(half * 1_000_000_000))
-                    guard !Task.isCancelled else { return }
-
+                animationGeneration += 1
+                let generation = animationGeneration
+                withAnimation(.easeInOut(duration: half), completionCriteria: .logicallyComplete) {
+                    fadeOpacity = 0.0
+                } completion: {
+                    guard animationGeneration == generation else { return }
                     currentAnchor = randomAnchor()
                     withAnimation(.easeInOut(duration: half)) {
                         fadeOpacity = 1.0
@@ -145,8 +142,7 @@ struct ScreenSaverView: View {
 
     private func stopMovementTimer() {
         isTimerActive = false
-        animationTask?.cancel()
-        animationTask = nil
+        animationGeneration += 1
         movementTimer.upstream.connect().cancel()
     }
 

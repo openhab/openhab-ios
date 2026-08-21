@@ -69,22 +69,19 @@ private struct VideoRowContent: View {
                                 .resizable()
                                 .aspectRatio(aspectRatio, contentMode: .fit)
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 200)
                                 .clipShape(.rect(cornerRadius: 8))
                         } else {
                             Rectangle()
                                 .fill(Color.gray.opacity(0.3))
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 200)
                                 .aspectRatio(aspectRatio, contentMode: .fit)
+                                .frame(maxWidth: .infinity)
                                 .clipShape(.rect(cornerRadius: 8))
                         }
                     } else {
                         // HLS/other video formats using VideoPlayer
                         VideoPlayer(player: player)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 200)
                             .aspectRatio(aspectRatio, contentMode: .fit)
+                            .frame(maxWidth: .infinity)
                             .clipShape(.rect(cornerRadius: 8))
                     }
 

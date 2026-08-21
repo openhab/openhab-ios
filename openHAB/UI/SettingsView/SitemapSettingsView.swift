@@ -20,6 +20,7 @@ struct SitemapSettingsView: View {
     @Binding var settingsSortSitemapsBy: SortSitemapsOrder
     @Binding var settingsSitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode
     @Binding var settingsSitemapForWatch: String
+    @Binding var settingsSitemapForCarPlay: String
     @Binding var sitemaps: [OpenHABSitemap]
 
     @State private var showingCacheAlert = false
@@ -33,6 +34,7 @@ struct SitemapSettingsView: View {
             displayModePicker
             sortOrderPicker
             watchSitemapPicker
+            carPlaySitemapPicker
         }
     }
 
@@ -117,6 +119,18 @@ struct SitemapSettingsView: View {
         .disabled(sitemaps.isEmpty)
     }
 
+    private var carPlaySitemapPicker: some View {
+        Picker("Sitemap for CarPlay", selection: $settingsSitemapForCarPlay) {
+            Text("None").tag("")
+            if !sitemaps.isEmpty {
+                ForEach(sitemaps, id: \.name) { sitemap in
+                    Text(sitemap.label).tag(sitemap.name)
+                }
+            }
+        }
+        .disabled(sitemaps.isEmpty)
+    }
+
     @ViewBuilder
     private func cacheAlertActions(_ result: Result<UInt, KingfisherError>) -> some View {
         switch result {
@@ -157,6 +171,7 @@ struct SitemapSettingsView: View {
         @State var sortSitemapsBy: SortSitemapsOrder = .label
         @State var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode = .label
         @State var sitemapForWatch = "Home"
+        @State var sitemapForCarPlay = ""
         @State var sitemaps: [OpenHABSitemap] = [
             OpenHABSitemap(
                 name: "home",
@@ -182,6 +197,7 @@ struct SitemapSettingsView: View {
                         settingsSortSitemapsBy: $sortSitemapsBy,
                         settingsSitemapNameLabelDisplayMode: $sitemapNameLabelDisplayMode,
                         settingsSitemapForWatch: $sitemapForWatch,
+                        settingsSitemapForCarPlay: $sitemapForCarPlay,
                         sitemaps: $sitemaps
                     )
                 }
