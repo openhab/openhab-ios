@@ -32,103 +32,12 @@ struct InlineHomePickerView: View {
     var body: some View {
         VStack(spacing: 0) {
             ForEach(homes, id: \.self) { home in
-                let homeName = Preferences.shared.storedHomes[home]?.homeName ?? ""
-                let isActive = Preferences.shared.currentHomePreferences.id == home
-                HStack(spacing: 8) {
-                    if showEditMode {
-                        Button(action: {
-                            homeNameForAlert = homeName
-                            homeForAlert = home
-                            newHomeName = homeName
-                            showingRenameAlert = true
-                        }, label: {
-                            Image(systemSymbol: .pencil).foregroundStyle(.blue)
-                        })
-                        .buttonStyle(.plain)
-                    }
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(homeName).font(.subheadline).fontWeight(.medium)
-                        VStack(alignment: .leading, spacing: 0) {
-                            ForEach(Array(summaryText(for: home).enumerated()), id: \.offset) { _, text in
-                                text
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(nil)
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        guard !showEditMode else { return }
-                        selectHome(home)
-                    }
-                    if showEditMode {
-                        if isActive {
-                            Image(systemSymbol: .checkmark).foregroundStyle(.blue)
-                        } else {
-                            Button(action: {
-                                homeNameForAlert = homeName
-                                homeForAlert = home
-                                showingDeleteAlert = true
-                            }, label: {
-                                Image(systemSymbol: .trash).foregroundStyle(.red)
-                            })
-                            .buttonStyle(.plain)
-                        }
-                    } else {
-                        if isActive {
-                            Image(systemSymbol: .checkmark)
-                                .foregroundStyle(.blue)
-                                .padding(.trailing, 4)
-                        }
-                        Button(action: {
-                            homeForSettings = home
-                        }, label: {
-                            Image(systemSymbol: .gear).foregroundStyle(.secondary)
-                        })
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 6)
+                homeRow(for: home)
             }
 
             Divider().padding(.horizontal, 12)
 
-            HStack(spacing: 0) {
-                Button(action: {
-                    newHomeName = ""
-                    showingNewHomeAlert = true
-                }, label: {
-                    HStack(spacing: 4) {
-                        Image(systemSymbol: .plus)
-                        Text("Add Home")
-                    }
-                    .font(.footnote)
-                    .foregroundStyle(.blue)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-                })
-                .buttonStyle(.plain)
-
-                Divider().frame(height: 20)
-
-                Button(action: {
-                    showEditMode.toggle()
-                }, label: {
-                    HStack(spacing: 4) {
-                        Image(systemSymbol: showEditMode ? .checkmark : .pencil)
-                        Text(showEditMode ? String(localized: "Done") : String(localized: "Edit"))
-                    }
-                    .font(.footnote)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-                })
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, 16)
+            actionBar
         }
         .onAppear { homes = Preferences.shared.listStoredHomes() }
         .alert(
@@ -186,6 +95,106 @@ struct InlineHomePickerView: View {
                 }
             }
         )
+    }
+
+    @ViewBuilder
+    private func homeRow(for home: UUID) -> some View {
+        let homeName = Preferences.shared.storedHomes[home]?.homeName ?? ""
+        let isActive = Preferences.shared.currentHomePreferences.id == home
+        HStack(spacing: 8) {
+            if showEditMode {
+                Button(action: {
+                    homeNameForAlert = homeName
+                    homeForAlert = home
+                    newHomeName = homeName
+                    showingRenameAlert = true
+                }, label: {
+                    Image(systemSymbol: .pencil).foregroundStyle(.blue)
+                })
+                .buttonStyle(.plain)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(homeName).font(.subheadline).fontWeight(.medium)
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(summaryText(for: home).enumerated()), id: \.offset) { _, text in
+                        text
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(nil)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                guard !showEditMode else { return }
+                selectHome(home)
+            }
+            if showEditMode {
+                if isActive {
+                    Image(systemSymbol: .checkmark).foregroundStyle(.blue)
+                } else {
+                    Button(action: {
+                        homeNameForAlert = homeName
+                        homeForAlert = home
+                        showingDeleteAlert = true
+                    }, label: {
+                        Image(systemSymbol: .trash).foregroundStyle(.red)
+                    })
+                    .buttonStyle(.plain)
+                }
+            } else {
+                if isActive {
+                    Image(systemSymbol: .checkmark)
+                        .foregroundStyle(.blue)
+                        .padding(.trailing, 4)
+                }
+                Button(action: {
+                    homeForSettings = home
+                }, label: {
+                    Image(systemSymbol: .gear).foregroundStyle(.secondary)
+                })
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 6)
+    }
+
+    private var actionBar: some View {
+        HStack(spacing: 0) {
+            Button(action: {
+                newHomeName = ""
+                showingNewHomeAlert = true
+            }, label: {
+                HStack(spacing: 4) {
+                    Image(systemSymbol: .plus)
+                    Text("Add Home")
+                }
+                .font(.footnote)
+                .foregroundStyle(.blue)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 13)
+            })
+            .buttonStyle(.plain)
+
+            Divider().frame(height: 20)
+
+            Button(action: {
+                showEditMode.toggle()
+            }, label: {
+                HStack(spacing: 4) {
+                    Image(systemSymbol: showEditMode ? .checkmark : .pencil)
+                    Text(showEditMode ? String(localized: "Done") : String(localized: "Edit"))
+                }
+                .font(.footnote)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 13)
+            })
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 16)
     }
 
     private func summaryText(for homeId: UUID) -> [Text] {

@@ -34,116 +34,134 @@ struct SitemapPageView: View {
     }
 
     var body: some View {
-        Group {
-            if viewModel.isLoading, viewModel.rowInputs.isEmpty {
-                if isLinkedPage {
-                    // Linked page: structure unknown until poll returns — show a plain spinner
-                    // rather than a skeleton that implies known structure.
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    // Root page: show skeleton/placeholder rows while loading
-                    List {
-                        ForEach(0 ..< 6, id: \.self) { _ in
-                            PlaceholderRowView()
-                                .redacted(reason: .placeholder)
-                                .disabled(true)
-                        }
-                    }
+        pageBody
+            .environmentObject(viewModel)
+            .listStyle(.plain)
+            .listRowSpacing(0)
+            .environment(\.defaultMinListRowHeight, 32)
+            .refreshable {
+                await viewModel.reload()
+                viewModel.startPageHandling(forceRestart: true, reason: "pull-to-refresh")
+            }
+            .task {
+                viewModel.startPageHandling()
+            }
+            .onAppear(perform: handleAppear)
+            .onDisappear(perform: handleDisappear)
+            .onChange(of: scenePhase) { _, newPhase in
+                handleScenePhaseChange(newPhase)
+            }
+            .navigationTitle(viewModel.pageTitle)
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar { toolbarContent }
+            .alert("Error", isPresented: errorAlertPresented, actions: {
+                Button("OK", role: .cancel) {}
+            }, message: {
+                if let error = viewModel.error {
+                    Text(error.localizedDescription)
+                        .ohTextToken(.secondary)
                 }
+            })
+    }
+
+    @ViewBuilder
+    private var pageBody: some View {
+        if viewModel.isLoading, viewModel.rowInputs.isEmpty {
+            if isLinkedPage {
+                // Linked page: structure unknown until poll returns — show a plain spinner
+                // rather than a skeleton that implies known structure.
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                GeometryReader { proxy in
-                    pageContent(width: proxy.size.width)
-                }
-                .scrollPosition($scrollPosition)
-                .onScrollGeometryChange(for: Bool.self) { geo in
-                    geo.contentOffset.y > 150
-                } action: { _, isScrolledDown in
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showScrollToTop = Preferences.shared.hideStatusBar && isScrolledDown
-                    }
-                }
-                .onChange(of: viewModel.pageId) {
-                    scrollPosition.scrollTo(edge: .top)
-                }
-                .overlay(alignment: .bottomTrailing) {
-                    if showScrollToTop {
-                        Button {
-                            withAnimation {
-                                scrollPosition.scrollTo(edge: .top)
-                            }
-                        } label: {
-                            Image(systemSymbol: .arrowUp)
-                                .font(.system(size: 16, weight: .semibold))
-                                .padding(12)
-                                .background(.ultraThinMaterial, in: Circle())
-                        }
-                        .padding([.trailing, .bottom], 16)
-                        .transition(.scale(scale: 0.8).combined(with: .opacity))
+                // Root page: show skeleton/placeholder rows while loading
+                List {
+                    ForEach(0 ..< 6, id: \.self) { _ in
+                        PlaceholderRowView()
+                            .redacted(reason: .placeholder)
+                            .disabled(true)
                     }
                 }
             }
-        }
-        .environmentObject(viewModel)
-        .listStyle(.plain)
-        .listRowSpacing(0)
-        .environment(\.defaultMinListRowHeight, 32)
-        .refreshable {
-            await viewModel.reload()
-            viewModel.startPageHandling(forceRestart: true, reason: "pull-to-refresh")
-        }
-        .task {
-            viewModel.startPageHandling()
-        }
-        .onAppear {
-            viewModel.markAppeared()
-            // Disable idle timer if configured in settings
-            if Preferences.shared.idleOff {
-                IdleTimerService.shared.isDisabled = true
-                idleTimerDisabled = true
+        } else {
+            GeometryReader { proxy in
+                pageContent(width: proxy.size.width)
             }
-        }
-        .onDisappear {
-            viewModel.stopPageHandling()
-            // Re-enable idle timer when leaving the view
-            if idleTimerDisabled {
-                IdleTimerService.shared.isDisabled = false
-            }
-        }
-        .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .active {
-                guard hasSeenActivePhase else {
-                    hasSeenActivePhase = true
-                    return
+            .scrollPosition($scrollPosition)
+            .onScrollGeometryChange(for: Bool.self) { geo in
+                geo.contentOffset.y > 150
+            } action: { _, isScrolledDown in
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showScrollToTop = Preferences.shared.hideStatusBar && isScrolledDown
                 }
-                viewModel.refreshOnForeground()
             }
-        }
-        .navigationTitle(viewModel.pageTitle)
-        .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            if let sideMenuAction {
-                ToolbarItem(placement: .navigationBarTrailing) {
+            .onChange(of: viewModel.pageId) {
+                scrollPosition.scrollTo(edge: .top)
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if showScrollToTop {
                     Button {
-                        sideMenuAction()
+                        withAnimation {
+                            scrollPosition.scrollTo(edge: .top)
+                        }
                     } label: {
-                        Image(systemName: "line.3.horizontal")
-                            .font(.title)
+                        Image(systemSymbol: .arrowUp)
+                            .font(.system(size: 16, weight: .semibold))
+                            .padding(12)
+                            .background(.ultraThinMaterial, in: Circle())
                     }
+                    .padding([.trailing, .bottom], 16)
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
             }
         }
-        .alert("Error", isPresented: Binding(
+    }
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        if let sideMenuAction {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    sideMenuAction()
+                } label: {
+                    Image(systemName: "line.3.horizontal")
+                        .font(.title)
+                }
+            }
+        }
+    }
+
+    private var errorAlertPresented: Binding<Bool> {
+        Binding(
             get: { viewModel.error != nil && !(viewModel.error is SitemapPageError) },
             set: { if !$0 { Task { @MainActor in viewModel.error = nil } } }
-        ), actions: {
-            Button("OK", role: .cancel) {}
-        }, message: {
-            if let error = viewModel.error {
-                Text(error.localizedDescription)
-                    .ohTextToken(.secondary)
+        )
+    }
+
+    private func handleAppear() {
+        viewModel.markAppeared()
+        // Disable idle timer if configured in settings
+        if Preferences.shared.idleOff {
+            IdleTimerService.shared.isDisabled = true
+            idleTimerDisabled = true
+        }
+    }
+
+    private func handleDisappear() {
+        viewModel.stopPageHandling()
+        // Re-enable idle timer when leaving the view
+        if idleTimerDisabled {
+            IdleTimerService.shared.isDisabled = false
+        }
+    }
+
+    private func handleScenePhaseChange(_ newPhase: ScenePhase) {
+        if newPhase == .active {
+            guard hasSeenActivePhase else {
+                hasSeenActivePhase = true
+                return
             }
-        })
+            viewModel.refreshOnForeground()
+        }
     }
 
     init(viewModel: SitemapPageViewModel) {

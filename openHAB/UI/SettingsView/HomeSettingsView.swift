@@ -98,29 +98,7 @@ struct HomeSettingsView: View {
                 localTestedOKURL: $localTestedOKURL
             )
 
-            Section(footer: Text(String(localized: "command_item_footer"))) {
-                NavigationLink {
-                    ItemSelectionView(selectedItemName: $selectedSSEItemName)
-                } label: {
-                    HStack {
-                        Text("Command Item \(selectedSSEItemName?.isEmpty == false ? "(\(selectedSSEItemName ?? ""))" : "")")
-                        Spacer()
-                        Button {
-                            showCommandItemInfo = true
-                        } label: {
-                            Image(systemName: "questionmark.circle")
-                                .foregroundStyle(.secondary)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-            .onChange(of: selectedSSEItemName) { _, newSelection in
-                settingsSSECommandItem = newSelection ?? ""
-            }
-            .onAppear {
-                selectedSSEItemName = settingsSSECommandItem
-            }
+            commandItemSection
 
             MainUISettingsView(
                 settingsAlwaysAllowWebRTC: $settingsAlwaysAllowWebRTC,
@@ -162,69 +140,8 @@ struct HomeSettingsView: View {
         } message: {
             Text("To connect to your local openHAB server, please allow Local Network access when prompted. If you previously denied it, enable it in Settings → Privacy & Security → Local Network.")
         }
-        .toolbar {
-            if isDirty {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        savedExplicitly = true
-                        saveSettings()
-                        NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
-                        if !settingsDemomode,
-                           !settingsLocalConnectionConfiguration.url.isEmpty,
-                           settingsLocalConnectionConfiguration.url != loadedLocalURL,
-                           settingsLocalConnectionConfiguration.url != localTestedOKURL {
-                            showLocalNetworkAlert = true
-                        } else {
-                            dismiss()
-                        }
-                    } label: {
-                        Image(systemName: "checkmark")
-                    }
-                }
-            }
-            ToolbarItem(placement: .cancellationAction) {
-                Button {
-                    savedExplicitly = true // treat explicit X as intentional discard — no dialog
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                }
-            }
-        }
-        .onDisappear {
-            guard isDirty, !savedExplicitly else { return }
-            // Sheet was swiped away with unsaved changes — capture values and notify parent
-            let dm = settingsDemomode, rts = settingsRealTimeSliders
-            let it = settingsIconType, ssb = settingsSortSitemapsBy
-            let sdm = settingsSitemapNameLabelDisplayMode
-            let dmu = settingsDefaultMainUIPath, aawrtc = settingsAlwaysAllowWebRTC
-            let sfw = settingsSitemapForWatch
-            let sfwLabel = sitemaps.first { $0.name == sfw }?.label ?? settingsSitemapForWatchLabel
-            let sfc = settingsSitemapForCarPlay
-            let lcc = settingsLocalConnectionConfiguration
-            let rcc = settingsRemoteConnectionConfiguration
-            let sseCI = settingsSSECommandItem
-            let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
-            let snapshot = currentSnapshot
-            onDismissedDirty?(snapshot) {
-                Preferences.shared.modifyStoredHome(targetId) { @MainActor prefs in
-                    prefs.demomode = dm
-                    prefs.realTimeSliders = rts
-                    prefs.iconType = it.rawValue
-                    prefs.sortSitemapsBy = ssb.rawValue
-                    prefs.sitemapNameLabelDisplayMode = sdm
-                    prefs.defaultMainUIPath = dmu
-                    prefs.alwaysAllowWebRTC = aawrtc
-                    prefs.sitemapForWatch = sfw
-                    prefs.sitemapForWatchLabel = sfwLabel
-                    prefs.sitemapForCarPlay = sfc
-                    prefs.localConnectionConfig = lcc
-                    prefs.remoteConnectionConfig = rcc
-                    prefs.sseCommandItem = sseCI
-                }
-                NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
-            }
-        }
+        .toolbar { settingsToolbar }
+        .onDisappear(perform: handleSwipeDismiss)
         .onChange(of: currentSnapshot) { _, newSnapshot in
             isDirty = newSnapshot != initialSnapshot
         }
@@ -255,6 +172,108 @@ struct HomeSettingsView: View {
         .sheet(isPresented: $showCommandItemInfo) {
             CommandItemInfoSheet()
                 .presentationDetents([.medium, .large])
+        }
+    }
+
+    private var commandItemLabelText: String {
+        guard let selectedSSEItemName, !selectedSSEItemName.isEmpty else {
+            return "Command Item "
+        }
+        return "Command Item (\(selectedSSEItemName))"
+    }
+
+    @ViewBuilder
+    private var commandItemSection: some View {
+        Section(footer: Text(String(localized: "command_item_footer"))) {
+            NavigationLink {
+                ItemSelectionView(selectedItemName: $selectedSSEItemName)
+            } label: {
+                HStack {
+                    Text(commandItemLabelText)
+                    Spacer()
+                    Button {
+                        showCommandItemInfo = true
+                    } label: {
+                        Image(systemName: "questionmark.circle")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .onChange(of: selectedSSEItemName) { _, newSelection in
+            settingsSSECommandItem = newSelection ?? ""
+        }
+        .onAppear {
+            selectedSSEItemName = settingsSSECommandItem
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var settingsToolbar: some ToolbarContent {
+        if isDirty {
+            ToolbarItem(placement: .confirmationAction) {
+                Button(action: handleSaveTapped) {
+                    Image(systemName: "checkmark")
+                }
+            }
+        }
+        ToolbarItem(placement: .cancellationAction) {
+            Button {
+                savedExplicitly = true // treat explicit X as intentional discard — no dialog
+                dismiss()
+            } label: {
+                Image(systemName: "xmark")
+            }
+        }
+    }
+
+    private func handleSaveTapped() {
+        savedExplicitly = true
+        saveSettings()
+        NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+        if !settingsDemomode,
+           !settingsLocalConnectionConfiguration.url.isEmpty,
+           settingsLocalConnectionConfiguration.url != loadedLocalURL,
+           settingsLocalConnectionConfiguration.url != localTestedOKURL {
+            showLocalNetworkAlert = true
+        } else {
+            dismiss()
+        }
+    }
+
+    private func handleSwipeDismiss() {
+        guard isDirty, !savedExplicitly else { return }
+        // Sheet was swiped away with unsaved changes — capture values and notify parent
+        let dm = settingsDemomode, rts = settingsRealTimeSliders
+        let it = settingsIconType, ssb = settingsSortSitemapsBy
+        let sdm = settingsSitemapNameLabelDisplayMode
+        let dmu = settingsDefaultMainUIPath, aawrtc = settingsAlwaysAllowWebRTC
+        let sfw = settingsSitemapForWatch
+        let sfwLabel = sitemaps.first { $0.name == sfw }?.label ?? settingsSitemapForWatchLabel
+        let sfc = settingsSitemapForCarPlay
+        let lcc = settingsLocalConnectionConfiguration
+        let rcc = settingsRemoteConnectionConfiguration
+        let sseCI = settingsSSECommandItem
+        let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
+        let snapshot = currentSnapshot
+        onDismissedDirty?(snapshot) {
+            Preferences.shared.modifyStoredHome(targetId) { @MainActor prefs in
+                prefs.demomode = dm
+                prefs.realTimeSliders = rts
+                prefs.iconType = it.rawValue
+                prefs.sortSitemapsBy = ssb.rawValue
+                prefs.sitemapNameLabelDisplayMode = sdm
+                prefs.defaultMainUIPath = dmu
+                prefs.alwaysAllowWebRTC = aawrtc
+                prefs.sitemapForWatch = sfw
+                prefs.sitemapForWatchLabel = sfwLabel
+                prefs.sitemapForCarPlay = sfc
+                prefs.localConnectionConfig = lcc
+                prefs.remoteConnectionConfig = rcc
+                prefs.sseCommandItem = sseCI
+            }
+            NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
         }
     }
 
