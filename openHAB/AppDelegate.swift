@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AVFoundation
+import CarPlay
 import Combine
 import Firebase
 import FirebaseMessaging
@@ -107,6 +108,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         activateWatchConnectivity()
 
         configureImageCoders()
+
+        // load and start the screensaver
+        if let keyWindow = UIApplication.shared.firstKeyWindow {
+            var config = ScreenSaverConfiguration()
+            config.isEnabled = Preferences.shared.screensaverEnabled
+            config.showsTime = Preferences.shared.screensaverShowsTime
+            config.showsDate = Preferences.shared.screensaverShowsDate
+            config.idleInterval = Preferences.shared.screensaverIdleInterval
+            config.movementInterval = Preferences.shared.screensaverMovementInterval
+            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
+            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
+            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
+            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
+            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
+            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
+            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
+            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
+            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
+
+            ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
+        }
+        // Start monitoring items for widget updates after the app is configured.
+        WidgetItemMonitor.shared.startMonitoring()
     }
 
     @MainActor
@@ -212,6 +236,15 @@ extension AppDelegate {
         NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
     }
 
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        switch connectingSceneSession.role {
+        case .carTemplateApplication:
+            UISceneConfiguration(name: "CarPlay Configuration", sessionRole: connectingSceneSession.role)
+        default:
+            UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        }
+    }
+
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
@@ -243,11 +276,17 @@ extension AppDelegate {
 
             ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
         }
+
+        Task {
+            await WidgetItemMonitor.shared.cleanupStaleItems()
+        }
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
+
+    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {}
 }
 
 extension AppDelegate: MessagingDelegate {

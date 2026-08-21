@@ -13,7 +13,7 @@ import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
-import SFSafeSymbols
+internal import SFSafeSymbols
 import SwiftUI
 
 struct IconRenderModel: Equatable {

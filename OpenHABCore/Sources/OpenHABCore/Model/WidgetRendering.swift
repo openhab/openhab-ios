@@ -153,7 +153,8 @@ public extension WidgetRendering {
             return itemState.parseAsNumber(format: item.stateDescription?.numberPattern)
                 .toString(locale: Locale(identifier: "US"))
         } else if widgetType == .switchWidget, mappings.isEmpty, !item.isOfTypeOrGroupType(.rollershutter) {
-            return (itemState == "0" || itemState == "OFF") ? "OFF" : "ON"
+            let switchState = state.isEmpty ? itemState : state
+            return (switchState == "0" || switchState == "OFF") ? "OFF" : "ON"
         }
         return itemState
     }

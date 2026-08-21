@@ -19,8 +19,8 @@ enum ContactState: String, AppEnum {
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Contact State")
 
     static let caseDisplayRepresentations: [Self: DisplayRepresentation] = [
-        .open: "Open",
-        .closed: "Closed"
+        .open: DisplayRepresentation(title: "Open", synonyms: ["Opened", "Triggered", "Active"]),
+        .closed: DisplayRepresentation(title: "Closed", synonyms: ["Shut", "Inactive", "Reset"])
     ]
 }
 

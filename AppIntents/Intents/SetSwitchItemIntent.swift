@@ -32,7 +32,7 @@ struct SetSwitchItemIntent: AppIntent {
     }
 
     static var allowedItemTypes: [OpenHABItem.ItemType] {
-        [.switchItem]
+        [.switchItem, .dimmer]
     }
 
     static var parameterSummary: some ParameterSummary {
@@ -77,6 +77,12 @@ struct SetSwitchItemIntent: AppIntent {
             throw ControlItemError.commandFailed(error.localizedDescription)
         }
 
-        return .result(dialog: "Sent \(action) to \(itemEntity.label)")
+        // openHAB accepts commands asynchronously: it returns HTTP 200 before the item
+        // state has actually changed. Without a pause, WidgetKit's immediate timeline
+        // refresh races the server and fetches the pre-command state, overwriting the
+        // Toggle's optimistic visual flip and showing the wrong colour/text.
+        try? await Task.sleep(for: .milliseconds(600))
+
+        return .result(dialog: "Sent \(action.rawValue) to \(itemEntity.label)")
     }
 }

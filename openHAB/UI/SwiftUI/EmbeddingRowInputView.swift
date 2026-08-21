@@ -12,6 +12,7 @@
 import CommonUI
 import OpenHABCore
 import SwiftUI
+import UIKit
 
 enum RowBackgroundKind: Equatable {
     case frame
@@ -20,6 +21,12 @@ enum RowBackgroundKind: Equatable {
 
 enum RowLayoutPolicy {
     static let regularInsets = EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16)
+    static let frameBackground = Color(UIColor.ohSystemGroupedBackground)
+    static let regularBackground = Color(UIColor.ohSecondarySystemGroupedBackground)
+
+    static func rowBackground(for rowInput: SitemapRowInput) -> Color {
+        backgroundKind(for: rowInput) == .frame ? frameBackground : regularBackground
+    }
 
     static func rowInsets(for rowInput: SitemapRowInput) -> EdgeInsets {
         switch rowInput {
@@ -30,6 +37,8 @@ enum RowLayoutPolicy {
                 return frameInsets(hasLabel: !input.displayState.labelText.isEmpty)
             }
             return regularInsets
+        case .media:
+            return regularInsets
         case .text,
              .slider,
              .selection,
@@ -39,7 +48,6 @@ enum RowLayoutPolicy {
              .toggle,
              .input,
              .colorPicker,
-             .media,
              .colorTemperature,
              .buttonGrid,
              .generic:
@@ -87,6 +95,9 @@ private struct LinkedPageRowInputView: View {
             )
         ) {
             LinkedPageRowContent(input: input)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+                .background(Color.clear)
         }
         .buttonStyle(.plain)
     }
@@ -116,7 +127,7 @@ private struct LinkedPageRowContent: View {
 }
 
 /// Transitional adapter: drives list from immutable row inputs while reusing existing widget-driven rows.
-struct EmbeddingRowInputView: View {
+struct EmbeddingRowInputView: View, Equatable {
     let rowInput: SitemapRowInput
 
     // Subscribes to the view model so SwiftUI re-evaluates this view when
@@ -210,5 +221,9 @@ struct EmbeddingRowInputView: View {
                 .listRowInsets(RowLayoutPolicy.regularInsets)
                 .listRowBackground(regularRowBackground)
         }
+    }
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.rowInput == rhs.rowInput
     }
 }

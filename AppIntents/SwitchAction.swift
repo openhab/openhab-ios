@@ -17,12 +17,35 @@ enum SwitchAction: String, AppEnum {
     case off = "OFF"
     case toggle = "TOGGLE"
 
-    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Switch Action")
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(
+        name: LocalizedStringResource("Switch Action", defaultValue: "Switch Action")
+    )
 
     static let caseDisplayRepresentations: [Self: DisplayRepresentation] = [
-        .on: "On",
-        .off: "Off",
-        .toggle: "Toggle"
+        .on: DisplayRepresentation(
+            title: LocalizedStringResource("On", defaultValue: "On"),
+            synonyms: [
+                LocalizedStringResource("Turn on", defaultValue: "Turn on"),
+                LocalizedStringResource("Switch on", defaultValue: "Switch on"),
+                LocalizedStringResource("Enable", defaultValue: "Enable")
+            ]
+        ),
+        .off: DisplayRepresentation(
+            title: LocalizedStringResource("Off", defaultValue: "Off"),
+            synonyms: [
+                LocalizedStringResource("Turn off", defaultValue: "Turn off"),
+                LocalizedStringResource("Switch off", defaultValue: "Switch off"),
+                LocalizedStringResource("Disable", defaultValue: "Disable")
+            ]
+        ),
+        .toggle: DisplayRepresentation(
+            title: LocalizedStringResource("Toggle", defaultValue: "Toggle"),
+            synonyms: [
+                LocalizedStringResource("Flip", defaultValue: "Flip"),
+                LocalizedStringResource("Switch", defaultValue: "Switch"),
+                LocalizedStringResource("Change", defaultValue: "Change")
+            ]
+        )
     ]
 }
 

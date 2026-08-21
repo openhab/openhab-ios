@@ -35,6 +35,7 @@ struct HomeSettingsView: View {
     /// instead of "unknown" when `sitemaps` has no fresh match — e.g. for an inactive
     /// home, where sitemaps are deliberately not fetched (see the `.task` below).
     @State private var settingsSitemapForWatchLabel = ""
+    @State private var settingsSitemapForCarPlay = ""
 
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
@@ -65,6 +66,7 @@ struct HomeSettingsView: View {
         var defaultMainUIPath: String
         var alwaysAllowWebRTC: Bool
         var sitemapForWatch: String
+        var sitemapForCarPlay: String
         var localConnectionConfig: ConnectionConfiguration
         var remoteConnectionConfig: ConnectionConfiguration
         var sseCommandItem: String
@@ -80,6 +82,7 @@ struct HomeSettingsView: View {
             defaultMainUIPath: settingsDefaultMainUIPath,
             alwaysAllowWebRTC: settingsAlwaysAllowWebRTC,
             sitemapForWatch: settingsSitemapForWatch,
+            sitemapForCarPlay: settingsSitemapForCarPlay,
             localConnectionConfig: settingsLocalConnectionConfiguration,
             remoteConnectionConfig: settingsRemoteConnectionConfiguration,
             sseCommandItem: settingsSSECommandItem
@@ -130,6 +133,7 @@ struct HomeSettingsView: View {
                 settingsSortSitemapsBy: $settingsSortSitemapsBy,
                 settingsSitemapNameLabelDisplayMode: $settingsSitemapNameLabelDisplayMode,
                 settingsSitemapForWatch: $settingsSitemapForWatch,
+                settingsSitemapForCarPlay: $settingsSitemapForCarPlay,
                 sitemaps: $sitemaps
             )
 
@@ -196,6 +200,7 @@ struct HomeSettingsView: View {
             let dmu = settingsDefaultMainUIPath, aawrtc = settingsAlwaysAllowWebRTC
             let sfw = settingsSitemapForWatch
             let sfwLabel = sitemaps.first { $0.name == sfw }?.label ?? settingsSitemapForWatchLabel
+            let sfc = settingsSitemapForCarPlay
             let lcc = settingsLocalConnectionConfiguration
             let rcc = settingsRemoteConnectionConfiguration
             let sseCI = settingsSSECommandItem
@@ -212,6 +217,7 @@ struct HomeSettingsView: View {
                     prefs.alwaysAllowWebRTC = aawrtc
                     prefs.sitemapForWatch = sfw
                     prefs.sitemapForWatchLabel = sfwLabel
+                    prefs.sitemapForCarPlay = sfc
                     prefs.localConnectionConfig = lcc
                     prefs.remoteConnectionConfig = rcc
                     prefs.sseCommandItem = sseCI
@@ -291,6 +297,7 @@ struct HomeSettingsView: View {
         settingsAlwaysAllowWebRTC = homePrefs.alwaysAllowWebRTC
         settingsSitemapForWatch = homePrefs.sitemapForWatch
         settingsSitemapForWatchLabel = homePrefs.sitemapForWatchLabel
+        settingsSitemapForCarPlay = homePrefs.sitemapForCarPlay
         settingsLocalConnectionConfiguration = homePrefs.localConnectionConfig
         settingsRemoteConnectionConfiguration = homePrefs.remoteConnectionConfig
         loadedLocalURL = homePrefs.localConnectionConfig.url
@@ -307,6 +314,7 @@ struct HomeSettingsView: View {
         settingsDefaultMainUIPath = snapshot.defaultMainUIPath
         settingsAlwaysAllowWebRTC = snapshot.alwaysAllowWebRTC
         settingsSitemapForWatch = snapshot.sitemapForWatch
+        settingsSitemapForCarPlay = snapshot.sitemapForCarPlay
         settingsLocalConnectionConfiguration = snapshot.localConnectionConfig
         settingsRemoteConnectionConfiguration = snapshot.remoteConnectionConfig
         settingsSSECommandItem = snapshot.sseCommandItem
@@ -325,6 +333,7 @@ struct HomeSettingsView: View {
             homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
             homePreferences.sitemapForWatch = settingsSitemapForWatch
             homePreferences.sitemapForWatchLabel = sitemapLabel
+            homePreferences.sitemapForCarPlay = settingsSitemapForCarPlay
             homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration
             homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
             homePreferences.sseCommandItem = settingsSSECommandItem

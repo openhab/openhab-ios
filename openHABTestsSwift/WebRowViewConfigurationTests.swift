@@ -54,6 +54,7 @@ struct WebRowViewURLResolutionTests {
 }
 
 @Suite("WebRowViewConfigurationFactory")
+
 struct WebRowViewConfigurationTests {
     @MainActor
     @Test

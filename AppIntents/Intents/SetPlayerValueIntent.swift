@@ -76,6 +76,6 @@ struct SetPlayerValueIntent: AppIntent {
             throw PlayerValueError.commandFailed(error.localizedDescription)
         }
 
-        return .result(dialog: "Sent \(action) to \(itemEntity.label)")
+        return .result(dialog: "Sent \(action.rawValue) to \(itemEntity.label)")
     }
 }
