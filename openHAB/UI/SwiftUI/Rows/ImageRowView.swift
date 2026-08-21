@@ -104,7 +104,7 @@ private struct ImageRowContent: View {
         .task(id: chartSyncToken) {
             syncChartDisplayURL()
         }
-        .onChange(of: input.refresh) { _ in
+        .onChange(of: input.refresh) {
             setupRefreshTimer()
         }
     }

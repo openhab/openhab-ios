@@ -12,7 +12,6 @@
 import AppIntents
 import Foundation
 
-@available(iOS 17.0, macOS 14.0, *)
 enum ContactState: String, AppEnum {
     case open = "OPEN"
     case closed = "CLOSED"
@@ -25,7 +24,6 @@ enum ContactState: String, AppEnum {
     ]
 }
 
-@available(iOS 17.0, macOS 14.0, *)
 extension ContactState: CustomLocalizedStringResourceConvertible {
     var localizedStringResource: LocalizedStringResource {
         switch self {

@@ -21,8 +21,9 @@ public enum OHInterfaceStyle: Int {
         #elseif os(iOS)
         if UITraitCollection.current.userInterfaceStyle == .dark {
             return .dark
+        } else {
+            return .light
         }
-        return .light
         #else
         return .light
         #endif
@@ -33,38 +34,31 @@ public extension UIColor {
     /// system colors
     class var ohLabel: UIColor {
         #if os(iOS)
-        if #available(iOS 13.0, *) {
-            return .label
-        }
-        #endif
+        return .label
+        #else
         return .black
+        #endif
     }
 
     class var ohSecondaryLabel: UIColor {
         #if os(iOS)
-        if #available(iOS 13.0, *) {
-            return .secondaryLabel
-        }
-        #endif
+        return .secondaryLabel
+        #else
         return .lightGray
+        #endif
     }
 
     class var ohSystemBackground: UIColor {
         #if os(iOS)
-        if #available(iOS 13.0, *) {
-            return .systemBackground
-        }
-        #endif
+        return .systemBackground
+        #else
         return .white
+        #endif
     }
 
     class var ohSystemGroupedBackground: UIColor {
         #if os(iOS)
-        if #available(iOS 13.0, *) {
-            return .systemGroupedBackground
-        } else {
-            return .groupTableViewBackground
-        }
+        return .systemGroupedBackground
         #elseif os(watchOS)
         return .black
         #else
@@ -74,15 +68,13 @@ public extension UIColor {
 
     class var ohSecondarySystemGroupedBackground: UIColor {
         #if os(iOS)
-        if #available(iOS 13.0, *) {
-            return .secondarySystemGroupedBackground
-        }
-        #endif
-
+        return .secondarySystemGroupedBackground
+        #else
         return .white
+        #endif
     }
 
-    /// standard colors
+    // standard colors
     class var ohMaroon: UIColor {
         OHInterfaceStyle.current == .light ? UIColor(hex: "#800000") : UIColor(hex: "#800000")
     }
@@ -313,8 +305,9 @@ public extension UIColor {
 
         if alpha {
             return String(format: "%02lX%02lX%02lX%02lX", lroundf(red * 255), lroundf(green * 255), lroundf(blue * 255), lroundf(a * 255))
+        } else {
+            return String(format: "%02lX%02lX%02lX", lroundf(red * 255), lroundf(green * 255), lroundf(blue * 255))
         }
-        return String(format: "%02lX%02lX%02lX", lroundf(red * 255), lroundf(green * 255), lroundf(blue * 255))
     }
 
     /// Converts this color, including semantic and grayscale colors, to a hex string with a leading `#`.

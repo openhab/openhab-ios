@@ -48,6 +48,19 @@ struct CompactLabeledContentStyle: LabeledContentStyle {
 struct PreferencesSwiftUIView: View {
     @EnvironmentObject var settings: AppSettings
 
+    /// The selected sitemap rendered per the synced display-mode and sort-order
+    /// settings (e.g. just the name, just the label, or "Home – watch").
+    private var selectedSitemapText: String {
+        let sitemap = OpenHABSitemap(
+            name: settings.sitemapForWatch,
+            icon: "",
+            label: settings.sitemapForWatchLabel,
+            link: "",
+            page: nil
+        )
+        return settings.sitemapNameLabelDisplayMode.combinedText(for: sitemap, sortedBy: settings.sortSitemapsBy)
+    }
+
     var applicationVersionNumber: String = {
         let appBuildString = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
         let appVersionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
@@ -60,7 +73,9 @@ struct PreferencesSwiftUIView: View {
                 .highlightDotRow(if: settings.localConnectionConfig?.url == settings.openHABRootUrl)
             LabeledContent(LocalizedStringKey("remote_url"), value: settings.remoteConnectionConfig?.url ?? String(localized: "empty", comment: "local or remote URL: empty"))
                 .highlightDotRow(if: settings.remoteConnectionConfig?.url == settings.openHABRootUrl)
-            LabeledContent(LocalizedStringKey("sitemap"), value: settings.sitemapForWatchLabel)
+            // Show the selected sitemap honoring the same display-mode / sort-order
+            // setting as the phone (synced via WatchPreferences).
+            LabeledContent(LocalizedStringKey("sitemap"), value: selectedSitemapText)
                 .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))
             LabeledContent(LocalizedStringKey("version"), value: applicationVersionNumber)
                 .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))

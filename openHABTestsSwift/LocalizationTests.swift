@@ -17,6 +17,9 @@ private final class BundleLocator: AnyObject {}
 
 struct LocalizationTests {
     private struct StringCatalog: Decodable {
+        let sourceLanguage: String
+        let strings: [String: Entry]
+
         struct Entry: Decodable {
             let comment: String?
             let localizations: [String: Localization]?
@@ -31,9 +34,6 @@ struct LocalizationTests {
             let state: String
             let value: String
         }
-
-        let sourceLanguage: String
-        let strings: [String: Entry]
     }
 
     private static var localizations: [String] {

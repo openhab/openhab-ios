@@ -51,6 +51,8 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
             AppSettings.shared.sitemapForWatch = prefs.sitemapForWatch
             AppSettings.shared.sitemapForWatchLabel = prefs.sitemapForWatchLabel
             AppSettings.shared.iconType = IconType(rawValue: prefs.iconType) ?? .svg
+            AppSettings.shared.sitemapNameLabelDisplayMode = prefs.sitemapNameLabelDisplayMode.flatMap(SitemapNameLabelDisplayMode.init(rawValue:)) ?? .label
+            AppSettings.shared.sortSitemapsBy = prefs.sortSitemapsBy.flatMap(SortSitemapsOrder.init(rawValue:)) ?? .label
             AppSettings.shared.haveReceivedAppContext = true
             if let allHomes = prefs.allHomes {
                 let uuidKeyedHomes = Dictionary(uniqueKeysWithValues: allHomes.compactMap { key, value in

@@ -76,9 +76,7 @@ enum WebRowViewConfigurationFactory {
         // pages, preventing a widget from serving stale or mismatched assets to MainUI.
         // WebContent process assignment remains at WebKit's discretion.
         // Basic Auth challenge handling covers widget authentication.
-        if #available(iOS 17, *) {
-            configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: widgetStoreID(for: homeId))
-        }
+        configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: widgetStoreID(for: homeId))
         return configuration
     }
 

@@ -39,7 +39,6 @@ private func makeItem(name: String = "TestItem", type: String, label: String = "
 struct SetColorValueIntentTests {
     let homeId = UUID()
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     private func makeIntent(home: Home? = nil, value: String = "240,100,100") -> SetColorValueIntent {
         let defaultHome = Home(id: homeId.uuidString, displayString: "Test Home")
         let entity = ColorItemEntity(makeItem(type: "Color", label: "Color Light"), homeId: homeId)
@@ -50,7 +49,6 @@ struct SetColorValueIntentTests {
         return i
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func homeMismatchThrowsItemNotInHome() async {
         let wrongHome = Home(id: UUID().uuidString, displayString: "Wrong Home")
         await #expect(throws: ColorValueError.self) {
@@ -58,42 +56,36 @@ struct SetColorValueIntentTests {
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func twoComponentsThrowsInvalidValue() async {
         await #expect(throws: ColorValueError.self) {
             try await makeIntent(value: "240,100").perform()
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func hueAbove360ThrowsInvalidValue() async {
         await #expect(throws: ColorValueError.self) {
             try await makeIntent(value: "361,100,100").perform()
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func negativeHueThrowsInvalidValue() async {
         await #expect(throws: ColorValueError.self) {
             try await makeIntent(value: "-1,100,100").perform()
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func saturationAbove100ThrowsInvalidValue() async {
         await #expect(throws: ColorValueError.self) {
             try await makeIntent(value: "240,101,100").perform()
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func brightnessAbove100ThrowsInvalidValue() async {
         await #expect(throws: ColorValueError.self) {
             try await makeIntent(value: "240,100,101").perform()
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func nonNumericComponentThrowsInvalidValue() async {
         await #expect(throws: ColorValueError.self) {
             try await makeIntent(value: "blue,100,100").perform()
@@ -107,7 +99,6 @@ struct SetColorValueIntentTests {
 struct SetDimmerRollerValueIntentTests {
     let homeId = UUID()
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     private func makeIntent(home: Home? = nil, value: Int = 50) -> SetDimmerRollerValueIntent {
         let defaultHome = Home(id: homeId.uuidString, displayString: "Test Home")
         let entity = DimmerItemEntity(makeItem(type: "Dimmer", label: "Dimmer Light"), homeId: homeId)
@@ -118,7 +109,6 @@ struct SetDimmerRollerValueIntentTests {
         return i
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func homeMismatchThrowsItemNotInHome() async {
         let wrongHome = Home(id: UUID().uuidString, displayString: "Wrong Home")
         await #expect(throws: DimmerRollerValueError.self) {
@@ -126,14 +116,12 @@ struct SetDimmerRollerValueIntentTests {
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func valueAbove100ThrowsInvalidValue() async {
         await #expect(throws: DimmerRollerValueError.self) {
             try await makeIntent(value: 101).perform()
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func valueBelow0ThrowsInvalidValue() async {
         await #expect(throws: DimmerRollerValueError.self) {
             try await makeIntent(value: -1).perform()
@@ -147,7 +135,6 @@ struct SetDimmerRollerValueIntentTests {
 struct SetLocationValueIntentTests {
     let homeId = UUID()
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     private func makeIntent(home: Home? = nil, latitude: Double = 48.0, longitude: Double = 11.0) -> SetLocationValueIntent {
         let defaultHome = Home(id: homeId.uuidString, displayString: "Test Home")
         let entity = LocationItemEntity(makeItem(type: "Location", label: "My Location"), homeId: homeId)
@@ -159,7 +146,6 @@ struct SetLocationValueIntentTests {
         return intent
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func homeMismatchThrowsItemNotInHome() async {
         let wrongHome = Home(id: UUID().uuidString, displayString: "Wrong Home")
         await #expect(throws: LocationValueError.self) {
@@ -167,28 +153,24 @@ struct SetLocationValueIntentTests {
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func latitudeAbove90ThrowsInvalidLatitude() async {
         await #expect(throws: LocationValueError.self) {
             try await makeIntent(latitude: 90.001).perform()
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func latitudeBelow90ThrowsInvalidLatitude() async {
         await #expect(throws: LocationValueError.self) {
             try await makeIntent(latitude: -90.001).perform()
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func longitudeAbove180ThrowsInvalidLongitude() async {
         await #expect(throws: LocationValueError.self) {
             try await makeIntent(latitude: 0, longitude: 180.001).perform()
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func longitudeBelow180ThrowsInvalidLongitude() async {
         await #expect(throws: LocationValueError.self) {
             try await makeIntent(latitude: 0, longitude: -180.001).perform()
@@ -202,7 +184,12 @@ struct SetLocationValueIntentTests {
 struct SetSwitchItemIntentTests {
     let homeId = UUID()
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    @Test func queryAllowedTypesIncludesSwitchAndDimmer() {
+        let query = SwitchItemEntity.SwitchItemQuery()
+        #expect(query.allowedTypes.contains(.switchItem))
+        #expect(query.allowedTypes.contains(.dimmer))
+    }
+
     @Test func homeMismatchThrowsItemNotInHome() async {
         let wrongHome = Home(id: UUID().uuidString, displayString: "Wrong Home")
         let entity = SwitchItemEntity(makeItem(type: "Switch", label: "My Switch"), homeId: homeId)
@@ -235,7 +222,6 @@ struct ItemSearchRankingTests {
 
 @Suite("Intent error descriptions")
 struct IntentErrorDescriptionTests {
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func colorItemNotInHomeContainsItemAndHomeName() {
         let error = ColorValueError.itemNotInHome("Color Light", "My Home")
         let str = String(localized: error.localizedStringResource)
@@ -243,7 +229,6 @@ struct IntentErrorDescriptionTests {
         #expect(str.contains("My Home"))
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func colorInvalidValueContainsValueAndItemName() {
         let error = ColorValueError.invalidValue("blue,100,100", "Color Light")
         let str = String(localized: error.localizedStringResource)
@@ -251,7 +236,6 @@ struct IntentErrorDescriptionTests {
         #expect(str.contains("Color Light"))
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func dimmerInvalidValueContainsValueAndItemName() {
         let error = DimmerRollerValueError.invalidValue(150, "My Dimmer")
         let str = String(localized: error.localizedStringResource)
@@ -259,14 +243,12 @@ struct IntentErrorDescriptionTests {
         #expect(str.contains("My Dimmer"))
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func locationInvalidLatitudeDescriptionContains90() {
         let error = LocationValueError.invalidLatitude
         let str = String(localized: error.localizedStringResource)
         #expect(str.contains("90"))
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
     @Test func locationInvalidLongitudeDescriptionContains180() {
         let error = LocationValueError.invalidLongitude
         let str = String(localized: error.localizedStringResource)

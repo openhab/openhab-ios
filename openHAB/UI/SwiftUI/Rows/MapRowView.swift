@@ -36,47 +36,10 @@ private struct MapRowContent: View {
     }
 
     var body: some View {
-        if #available(iOS 17.0, *) {
-            MapRowViewNew(input: input, coordinate: coordinate)
-        } else {
-            MapRowViewLegacy(input: input, coordinate: coordinate)
-        }
+        MapRowViewNew(input: input, coordinate: coordinate)
     }
 }
 
-struct MapRowViewLegacy: View {
-    let input: MediaRowInput
-    let coordinate: CLLocationCoordinate2D?
-
-    private var region: MKCoordinateRegion {
-        let coordinate = coordinate ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
-        return MKCoordinateRegion(
-            center: coordinate,
-            latitudinalMeters: 1000.0,
-            longitudinalMeters: 1000.0
-        )
-    }
-
-    var body: some View {
-        let displayState = input.displayState
-        VStack(alignment: .leading, spacing: 8) {
-            if !displayState.labelText.isEmpty, input.labelSourceRawValue == OpenHABWidget.LabelSource.sitemapDefinition.rawValue {
-                let labelText = displayState.labelText
-                Text(labelText)
-                    .ohTextToken(.rowLabel)
-                    .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
-            }
-
-            Map(coordinateRegion: .constant(region), annotationItems: coordinate.map { [$0] } ?? []) { location in
-                MapMarker(coordinate: location, tint: .red)
-            }
-            .frame(height: input.preferredRowHeight.map { CGFloat($0) })
-            .clipShape(.rect(cornerRadius: 8))
-        }
-    }
-}
-
-@available(iOS 17.0, *)
 private struct MapRowViewNew: View {
     let input: MediaRowInput
     let coordinate: CLLocationCoordinate2D?

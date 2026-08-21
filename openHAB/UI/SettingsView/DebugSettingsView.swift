@@ -28,7 +28,7 @@ struct DebugSettingsView: View {
             .task { @MainActor in
                 updateSettingsSendCrashReports(Preferences.shared.sendCrashReports)
             }
-            .onChange(of: settingsSendCrashReports) { newValue in
+            .onChange(of: settingsSendCrashReports) { _, newValue in
                 #if !DEBUG
                 Logger.settingsView.debug("Detected change on settingsSendCrashReports")
                 #endif
@@ -59,7 +59,7 @@ struct DebugSettingsView: View {
             }
         Section(header: Text(LocalizedStringKey("debug"))) {
             Toggle("Sitemap Diagnostics Logging", isOn: $settingsSitemapDiagnosticsLogging)
-                .onChange(of: settingsSitemapDiagnosticsLogging) { newValue in
+                .onChange(of: settingsSitemapDiagnosticsLogging) { _, newValue in
                     Preferences.shared.modifyApplicationPreferences { prefs in
                         prefs.sitemapDiagnosticsLogging = newValue
                     }

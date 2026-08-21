@@ -9,9 +9,9 @@
 - UI tests: `xcodebuild test -workspace openHAB.xcworkspace -scheme openHABUITests`
 
 ## Architecture
-- **Main app**: openHAB/ - UIKit + SwiftUI hybrid iOS app targeting iOS 16+
+- **Main app**: openHAB/ - SwiftUI iOS app targeting iOS 18+ (UIKit still present in some files, goal is full removal)
 - **Core library**: OpenHABCore/ - Swift Package with shared business logic, models, API clients
-- **Watch app**: openHABWatch/ - watchOS companion app (watchOS 10+)
+- **Watch app**: openHABWatch/ - watchOS companion app (watchOS 11+)
 - **Extensions**: openHABIntents/ (Siri shortcuts), NotificationService/ (rich notifications)
 - **Tests**: openHABTestsSwift/ (Swift Testing), openHABUITests/ (UI automation). For targeted bug fixes,  run only focused tests by default.
 - **Dependencies**: Kingfisher (image loading), SwiftUI, Firebase, OpenAPI runtime, SFSafeSymbols
@@ -35,7 +35,14 @@
 
 - Always write tests with Swift Testing
 - Add a parameter with a default value (e.g. `networkTracker: NetworkTracker = .shared`) to make functions testable without coupling them to singletons
+- **Always write UI tests** for any new or modified UI surface. See **[docs/UI_TESTING_GUIDE.md](docs/UI_TESTING_GUIDE.md)** for the full guide, including how to register new test files, inject test state, write layout assertions, and pitfalls to avoid.
+
+## Verification cycle
+
+After every set of code changes, run a full verification cycle before committing. See **[docs/SIMULATOR_VERIFICATION.md](docs/SIMULATOR_VERIFICATION.md)** for the step-by-step process and full MCP tool reference.
+
+To replicate the MCP server setup, see **[docs/MCP_SETUP.md](docs/MCP_SETUP.md)**.
 
 ## git
-- Always use git commit with -s -S 
+- Always use git commit with -s (signed-off-by)
 - If using XcodeBuildMCP, use the installed XcodeBuildMCP skill before calling XcodeBuildMCP tools.

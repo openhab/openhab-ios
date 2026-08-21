@@ -69,7 +69,7 @@ private struct DateInputRowContent: View {
             ) {
                 EmptyView()
             }
-            .onChange(of: selectedDate) { newDate in
+            .onChange(of: selectedDate) { _, newDate in
                 guard !suppressSendingNewValue else {
                     suppressSendingNewValue = false
                     return
@@ -82,7 +82,7 @@ private struct DateInputRowContent: View {
             let newDate = try? Date(displayState.effectiveState, strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true))
             programmaticallySetDate(newDate ?? Date.now)
         }
-        .onChange(of: displayState.effectiveState) { newState in
+        .onChange(of: displayState.effectiveState) { _, newState in
             guard !suppressNextServerSync else {
                 suppressNextServerSync = false
                 return

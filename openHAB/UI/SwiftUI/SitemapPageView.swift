@@ -12,16 +12,11 @@
 import CommonUI
 import OpenHABCore
 import SwiftUI
-import UIKit
 
 struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
-    @Environment(\.scenePhase) private var scenePhase
     @State private var idleTimerDisabled = false
-    /// Sub-pages are created while the app is already active, so the first .active transition they
-    /// observe is a genuine return from background — don't skip it. Root pages start false to skip
-    /// the launch-time .active that races the initial .task startup.
-    @State private var hasSeenActivePhase: Bool
+    @Environment(\.sitemapSideMenuAction) private var sideMenuAction
 
     private var isLinkedPage: Bool {
         viewModel.isLinked
@@ -48,9 +43,6 @@ struct SitemapPageView: View {
             } else {
                 List(viewModel.rowInputs) { rowInput in
                     EmbeddingRowInputView(rowInput: rowInput)
-                        .equatable()
-                        .listRowInsets(RowLayoutPolicy.rowInsets(for: rowInput))
-                        .listRowBackground(RowLayoutPolicy.rowBackground(for: rowInput))
                 }
             }
         }
@@ -69,7 +61,7 @@ struct SitemapPageView: View {
             viewModel.markAppeared()
             // Disable idle timer if configured in settings
             if Preferences.shared.idleOff {
-                UIApplication.shared.isIdleTimerDisabled = true
+                IdleTimerService.shared.isDisabled = true
                 idleTimerDisabled = true
             }
         }
@@ -77,20 +69,23 @@ struct SitemapPageView: View {
             viewModel.stopPageHandling()
             // Re-enable idle timer when leaving the view
             if idleTimerDisabled {
-                UIApplication.shared.isIdleTimerDisabled = false
-            }
-        }
-        .onChange(of: scenePhase) { newPhase in
-            if newPhase == .active {
-                guard hasSeenActivePhase else {
-                    hasSeenActivePhase = true
-                    return
-                }
-                viewModel.refreshOnForeground()
+                IdleTimerService.shared.isDisabled = false
             }
         }
         .navigationTitle(viewModel.pageTitle)
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            if let sideMenuAction {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        sideMenuAction()
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.title)
+                    }
+                }
+            }
+        }
         .alert("Error", isPresented: Binding(
             get: { viewModel.error != nil },
             set: { if !$0 { viewModel.error = nil } }
@@ -106,7 +101,6 @@ struct SitemapPageView: View {
 
     init(viewModel: SitemapPageViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
-        _hasSeenActivePhase = State(initialValue: viewModel.isLinked)
     }
 }
 
@@ -129,7 +123,7 @@ extension SitemapPageView {
             }
             .padding(.vertical, 6)
             .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-            .listRowBackground(Color(UIColor.ohSecondarySystemGroupedBackground))
+            .listRowBackground(Color(.secondarySystemGroupedBackground))
         }
     }
 }

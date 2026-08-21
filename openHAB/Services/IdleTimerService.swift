@@ -9,16 +9,17 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import os.log
 import UIKit
 
-class UICircleButton: UIButton {
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
+/// Centralises UIApplication.isIdleTimerDisabled so callers outside the
+/// UIKit layer do not need to import UIKit directly.
+@MainActor
+final class IdleTimerService {
+    static let shared = IdleTimerService()
+    private init() {}
 
-        layer.borderWidth = 2
-        layer.borderColor = UIColor(white: 0, alpha: 0.05).cgColor
-
-        layer.cornerRadius = bounds.size.width / 2.0
+    var isDisabled: Bool {
+        get { UIApplication.shared.isIdleTimerDisabled }
+        set { UIApplication.shared.isIdleTimerDisabled = newValue }
     }
 }

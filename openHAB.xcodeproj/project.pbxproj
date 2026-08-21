@@ -8,9 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		2F399AC92F54599400F72A30 /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 2F399AC82F54599400F72A30 /* Flow */; };
-		3A5DAEE42F1FD8D300CFA482 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A0115E82F1E6A4400234D4B /* WidgetKit.framework */; };
-		3A5DAEE52F1FD8D300CFA482 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A0115EA2F1E6A4400234D4B /* SwiftUI.framework */; };
-		3A5DAEF22F1FD8D300CFA482 /* OpenHABWatchComplicationsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3A5DAEE32F1FD8D300CFA482 /* OpenHABWatchComplicationsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2FCB9FE6301FF9DC00B1261D /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4484270B379900A98C26 /* DeviceKit */; };
+		2FCB9FE7301FF9DC00B1261D /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 934E592828F16EBA00162004 /* DeviceKit */; };
 		6557AF8F2C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */; };
 		6557AF902C0241C10094D0C8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */; };
 		6557AF922C039D140094D0C8 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 6557AF912C039D140094D0C8 /* FirebaseMessaging */; };
@@ -22,10 +21,9 @@
 		937E4473270B36DD00A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4472270B36DD00A98C26 /* OpenHABCore */; };
 		937E4488270B37A600A98C26 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4487270B37A600A98C26 /* Kingfisher */; };
 		937E448C270B37CA00A98C26 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 937E448B270B37CA00A98C26 /* Kingfisher */; };
+		937E448E270B37D200A98C26 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 937E448D270B37D200A98C26 /* DeviceKit */; };
 		9397EDEC2587837000F266E1 /* openHABWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = DA0775152346705D0086C685 /* openHABWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		93F8063527AE6C620035A6B0 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8063427AE6C620035A6B0 /* FirebaseCrashlytics */; };
-		93F8064727AE7A050035A6B0 /* SwiftMessages in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8064627AE7A050035A6B0 /* SwiftMessages */; };
-		93F8065027AE7A830035A6B0 /* SideMenu in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8064F27AE7A830035A6B0 /* SideMenu */; };
 		DA10161B2DC7BAE500552D14 /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = DA10161A2DC7BAE500552D14 /* SFSafeSymbols */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA2C4FD52B4F573300D1C533 /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DA2C4FD42B4F573300D1C533 /* SDWebImageSVGCoder */; };
@@ -46,13 +44,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		3A5DAEF02F1FD8D300CFA482 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = DFB2621F18830A3600D3244D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3A5DAEE22F1FD8D300CFA482;
-			remoteInfo = OpenHABWatchComplicationsExtension;
-		};
 		657144532C1E438700C8A1F3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = DFB2621F18830A3600D3244D /* Project object */;
@@ -116,17 +107,6 @@
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3A0115FD2F1E6A4500234D4B /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				3A5DAEF22F1FD8D300CFA482 /* OpenHABWatchComplicationsExtension.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		4D6470DE2561F935007B03FC /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 12;
@@ -161,9 +141,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		3A0115E82F1E6A4400234D4B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
-		3A0115EA2F1E6A4400234D4B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		3A5DAEE32F1FD8D300CFA482 /* OpenHABWatchComplicationsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OpenHABWatchComplicationsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		6571444E2C1E438700C8A1F3 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		933D7F0422E7015000621A03 /* openHABUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -185,6 +162,7 @@
 		DFB2622A18830A3600D3244D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		DFB2622C18830A3600D3244D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		DFB2622E18830A3600D3244D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		DFB2624C18830A3600D3244D /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		DFE10413197415F900D94943 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -209,8 +187,11 @@
 		2FD4E2CF2F66F9F700EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				MainUILayoutUITests.swift,
+				NotificationInteractionUITests.swift,
 				OpenHABUITests.swift,
 				SnapshotHelper.swift,
+				ToastUITests.swift,
 			);
 			target = 933D7F0322E7015000621A03 /* openHABUITests */;
 		};
@@ -243,47 +224,6 @@
 			);
 			target = DA0775142346705D0086C685 /* openHABWatch */;
 		};
-		3A5DAEF32F1FD8D300CFA482 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 3A5DAEE22F1FD8D300CFA482 /* OpenHABWatchComplicationsExtension */;
-		};
-		DADB537C2FDECC790058522B /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				iOS16/GetItemState.swift,
-				iOS16/SetColorValue.swift,
-				iOS16/SetContactStateValue.swift,
-				iOS16/SetDateTimeValue.swift,
-				iOS16/SetDimmerRollerValue.swift,
-				iOS16/SetLocationValue.swift,
-				iOS16/SetNumberValue.swift,
-				iOS16/SetPlayerValue.swift,
-				iOS16/SetStringValue.swift,
-				iOS16/SetSwitchState.swift,
-			);
-			target = DFB2622618830A3600D3244D /* openHAB */;
-		};
-		DADB537D2FDECC790058522B /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Intents/SetActiveHomeIntent.swift,
-				iOS16/ActionMapper.swift,
-				iOS16/GetItemState.swift,
-				iOS16/SetColorValue.swift,
-				iOS16/SetContactStateValue.swift,
-				iOS16/SetDateTimeValue.swift,
-				iOS16/SetDimmerRollerValue.swift,
-				iOS16/SetLocationValue.swift,
-				iOS16/SetNumberValue.swift,
-				iOS16/SetPlayerValue.swift,
-				iOS16/SetStringValue.swift,
-				iOS16/SetSwitchState.swift,
-			);
-			target = DA0775142346705D0086C685 /* openHABWatch */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -295,9 +235,8 @@
 		2FD4E2E02F66F9FE00EBB340 /* openHABTestsSwift */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2FD4E2F02F66F9FE00EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = openHABTestsSwift; sourceTree = "<group>"; };
 		2FD4E2F42F66FA2900EBB340 /* TestPlans */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2FD4E2F62F66FA2900EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = TestPlans; sourceTree = "<group>"; };
 		2FD4E52B2F670BA500EBB340 /* openHAB */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2FD4E58D2F670BA500EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 2FD4E58E2F670BA600EBB340 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = openHAB; sourceTree = "<group>"; };
-		3A5DAEE62F1FD8D300CFA482 /* OpenHABWatchComplications */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3A5DAEF32F1FD8D300CFA482 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = OpenHABWatchComplications; sourceTree = "<group>"; };
 		DA8B15522F3BB74B007753FD /* openHABWatchTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = openHABWatchTests; sourceTree = "<group>"; };
-		DADB533F2FDECC780058522B /* AppIntents */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (DADB537C2FDECC790058522B /* PBXFileSystemSynchronizedBuildFileExceptionSet */, DADB537D2FDECC790058522B /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = AppIntents; sourceTree = "<group>"; };
+		DAAC0E1D30382383003E8A34 /* AppIntents */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AppIntents; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -305,22 +244,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2FCB9FE7301FF9DC00B1261D /* DeviceKit in Frameworks */,
 				DAC949FC2E219F30007E67B7 /* CommonUI in Frameworks */,
 				934E592728F16EBA00162004 /* Kingfisher in Frameworks */,
 				937E4473270B36DD00A98C26 /* OpenHABCore in Frameworks */,
 				DA2C4FD52B4F573300D1C533 /* SDWebImageSVGCoder in Frameworks */,
 				934E592528F16EBA00162004 /* OpenHABCore in Frameworks */,
 				DA9A7EFD2D668D5900824156 /* SFSafeSymbols in Frameworks */,
+				937E448E270B37D200A98C26 /* DeviceKit in Frameworks */,
 				937E448C270B37CA00A98C26 /* Kingfisher in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		3A5DAEE02F1FD8D300CFA482 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				3A5DAEE52F1FD8D300CFA482 /* SwiftUI.framework in Frameworks */,
-				3A5DAEE42F1FD8D300CFA482 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -374,6 +306,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2FCB9FE6301FF9DC00B1261D /* DeviceKit in Frameworks */,
 				6557AF922C039D140094D0C8 /* FirebaseMessaging in Frameworks */,
 				DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */,
 				DABB5E332D98972F009A4B8A /* SDWebImageSVGCoder in Frameworks */,
@@ -382,9 +315,7 @@
 				2F399AC92F54599400F72A30 /* Flow in Frameworks */,
 				DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */,
 				DAC949FA2E219F0D007E67B7 /* CommonUI in Frameworks */,
-				93F8065027AE7A830035A6B0 /* SideMenu in Frameworks */,
 				DFE10414197415F900D94943 /* Security.framework in Frameworks */,
-				93F8064727AE7A050035A6B0 /* SwiftMessages in Frameworks */,
 				DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */,
 				93F8063527AE6C620035A6B0 /* FirebaseCrashlytics in Frameworks */,
 				DA9A7EFF2D66915900824156 /* SFSafeSymbols in Frameworks */,
@@ -399,7 +330,7 @@
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
-				DADB533F2FDECC780058522B /* AppIntents */,
+				DAAC0E1D30382383003E8A34 /* AppIntents */,
 				DABB4CD22F45EFD100111AF3 /* openHABWatch.xctestplan */,
 				6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */,
 				DA4D4DB4233F9ACB00B37E37 /* README.md */,
@@ -414,7 +345,6 @@
 				2FD4E1EB2F66EF4F00EBB340 /* openHABWatchSwiftUI Watch AppUITests */,
 				2FD4E1E62F66EF4800EBB340 /* NotificationService */,
 				DA8B15522F3BB74B007753FD /* openHABWatchTests */,
-				3A5DAEE62F1FD8D300CFA482 /* OpenHABWatchComplications */,
 				DFB2622818830A3600D3244D /* Products */,
 				DFB2622918830A3600D3244D /* Frameworks */,
 				2FD4E1E22F66EF0200EBB340 /* fastlane */,
@@ -435,7 +365,6 @@
 				DAD085762AE4782E001D36BE /* openHABWatchSwiftUI Watch AppUITests.xctest */,
 				6571444E2C1E438700C8A1F3 /* NotificationService.appex */,
 				DA8B15512F3BB74B007753FD /* openHABWatchTests.xctest */,
-				3A5DAEE32F1FD8D300CFA482 /* OpenHABWatchComplicationsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -448,8 +377,7 @@
 				DFB2622A18830A3600D3244D /* Foundation.framework */,
 				DFE10413197415F900D94943 /* Security.framework */,
 				DFB2622E18830A3600D3244D /* UIKit.framework */,
-				3A0115E82F1E6A4400234D4B /* WidgetKit.framework */,
-				3A0115EA2F1E6A4400234D4B /* SwiftUI.framework */,
+				DFB2624C18830A3600D3244D /* XCTest.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -457,26 +385,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		3A5DAEE22F1FD8D300CFA482 /* OpenHABWatchComplicationsExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 3A5DAEF42F1FD8D300CFA482 /* Build configuration list for PBXNativeTarget "OpenHABWatchComplicationsExtension" */;
-			buildPhases = (
-				3A5DAEDF2F1FD8D300CFA482 /* Sources */,
-				3A5DAEE02F1FD8D300CFA482 /* Frameworks */,
-				3A5DAEE12F1FD8D300CFA482 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				3A5DAEE62F1FD8D300CFA482 /* OpenHABWatchComplications */,
-			);
-			name = OpenHABWatchComplicationsExtension;
-			productName = OpenHABWatchComplicationsExtension;
-			productReference = 3A5DAEE32F1FD8D300CFA482 /* OpenHABWatchComplicationsExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 		6571444D2C1E438700C8A1F3 /* NotificationService */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 657144582C1E438700C8A1F3 /* Build configuration list for PBXNativeTarget "NotificationService" */;
@@ -524,21 +432,19 @@
 				39C91164B60A5677322E8DE2 /* Frameworks */,
 				DA07751D2346705F0086C685 /* Sources */,
 				93F38C61238034AE001B1451 /* Embed Frameworks */,
-				3A0115FD2F1E6A4500234D4B /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				3A5DAEF12F1FD8D300CFA482 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				2FD4E29C2F66F9A500EBB340 /* openHABWatch */,
-				DADB533F2FDECC780058522B /* AppIntents */,
 			);
 			name = openHABWatch;
 			packageProductDependencies = (
 				934E592428F16EBA00162004 /* OpenHABCore */,
 				934E592628F16EBA00162004 /* Kingfisher */,
+				934E592828F16EBA00162004 /* DeviceKit */,
 				DA2C4FD42B4F573300D1C533 /* SDWebImageSVGCoder */,
 				DA9A7EFC2D668D5900824156 /* SFSafeSymbols */,
 				DAC949FB2E219F30007E67B7 /* CommonUI */,
@@ -648,15 +554,14 @@
 			);
 			fileSystemSynchronizedGroups = (
 				2FD4E52B2F670BA500EBB340 /* openHAB */,
-				DADB533F2FDECC780058522B /* AppIntents */,
+				DAAC0E1D30382383003E8A34 /* AppIntents */,
 			);
 			name = openHAB;
 			packageProductDependencies = (
 				937E4470270B36D000A98C26 /* OpenHABCore */,
+				937E4484270B379900A98C26 /* DeviceKit */,
 				937E4487270B37A600A98C26 /* Kingfisher */,
 				93F8063427AE6C620035A6B0 /* FirebaseCrashlytics */,
-				93F8064627AE7A050035A6B0 /* SwiftMessages */,
-				93F8064F27AE7A830035A6B0 /* SideMenu */,
 				6557AF912C039D140094D0C8 /* FirebaseMessaging */,
 				DA9A7EFE2D66915900824156 /* SFSafeSymbols */,
 				DABB5E322D98972F009A4B8A /* SDWebImageSVGCoder */,
@@ -745,10 +650,9 @@
 			);
 			mainGroup = DFB2621E18830A3600D3244D;
 			packageReferences = (
+				937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */,
 				937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */,
-				93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */,
 				DA3B75AC2C59729200E219AB /* XCRemoteSwiftPackageReference "SFSafeSymbols" */,
 				DA2C4FD32B4F573300D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */,
 				DADC42082E7AB899004E866F /* XCRemoteSwiftPackageReference "SDWebImage" */,
@@ -767,19 +671,11 @@
 				DAD085752AE4782D001D36BE /* openHABWatchSwiftUI Watch AppUITests */,
 				6571444D2C1E438700C8A1F3 /* NotificationService */,
 				DA8B15502F3BB74B007753FD /* openHABWatchTests */,
-				3A5DAEE22F1FD8D300CFA482 /* OpenHABWatchComplicationsExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		3A5DAEE12F1FD8D300CFA482 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		6571444C2C1E438700C8A1F3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -846,7 +742,7 @@
 		DAF0A2902C56FE9F00A14A6A /* Run swiftformat & swiftlint */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
-			buildActionMask = 12;
+			buildActionMask = 8;
 			files = (
 			);
 			inputFileListPaths = (
@@ -858,20 +754,13 @@
 			);
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
 			shellScript = "[[ -n \"$CI\" ]] && exit 0\n\ncd BuildTools\nSDKROOT=(xcrun --sdk macosx --show-sdk-path)\n\nswift package plugin --allow-writing-to-package-directory --allow-writing-to-directory \"$SRCROOT\" swiftformat \"$SRCROOT\" --config ./.swiftformat --cache /private/tmp/\nswift package plugin --allow-writing-to-package-directory --allow-writing-to-directory ../ swiftlint --cache-path /private/tmp/\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		3A5DAEDF2F1FD8D300CFA482 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		6571444A2C1E438700C8A1F3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -931,11 +820,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		3A5DAEF12F1FD8D300CFA482 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3A5DAEE22F1FD8D300CFA482 /* OpenHABWatchComplicationsExtension */;
-			targetProxy = 3A5DAEF02F1FD8D300CFA482 /* PBXContainerItemProxy */;
-		};
 		657144542C1E438700C8A1F3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 6571444D2C1E438700C8A1F3 /* NotificationService */;
@@ -974,99 +858,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		3A5DAEF52F1FD8D300CFA482 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = OpenHABWatchComplications/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = OpenHABWatchComplications;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 openHAB e.V. All rights reserved.";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-					"@executable_path/../../../../Frameworks",
-				);
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.watchkitapp.OpenHABWatchComplications;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
-			};
-			name = Debug;
-		};
-		3A5DAEF62F1FD8D300CFA482 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=watchos*]" = PBAPXHRAM9;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = OpenHABWatchComplications/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = OpenHABWatchComplications;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 openHAB e.V. All rights reserved.";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-					"@executable_path/../../../../Frameworks",
-				);
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.watchkitapp.OpenHABWatchComplications;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=watchos*]" = "match AppStore org.openhab.app.watchkitapp.OpenHABWatchComplications";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
-			};
-			name = Release;
-		};
 		657144562C1E438700C8A1F3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1086,7 +877,7 @@
 				INFOPLIST_FILE = NotificationService/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 openHAB e.V. All rights reserved.";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1124,7 +915,7 @@
 				INFOPLIST_FILE = NotificationService/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 openHAB e.V. All rights reserved.";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1155,7 +946,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = openHABUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1193,7 +984,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = openHABUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1233,9 +1024,10 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = openHABWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = openHAB;
+				INFOPLIST_KEY_CLKComplicationPrincipalClass = openHABWatch.ComplicationController;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = org.openhab.app;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
@@ -1250,7 +1042,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = 4;
 				VERSIONING_SYSTEM = "apple-generic";
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Debug;
 		};
@@ -1275,9 +1067,10 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = openHABWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = openHAB;
+				INFOPLIST_KEY_CLKComplicationPrincipalClass = openHABWatch.ComplicationController;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = org.openhab.app;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
@@ -1293,7 +1086,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = 4;
 				VERSIONING_SYSTEM = "apple-generic";
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Release;
 		};
@@ -1311,7 +1104,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = openHABTestsSwift/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1346,7 +1139,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = openHABTestsSwift/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1397,7 +1190,7 @@
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHABWatch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/openHABWatch";
-				WATCHOS_DEPLOYMENT_TARGET = 10.6;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Debug;
 		};
@@ -1433,7 +1226,7 @@
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHABWatch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/openHABWatch";
-				WATCHOS_DEPLOYMENT_TARGET = 10.6;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Release;
 		};
@@ -1462,7 +1255,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				TARGETED_DEVICE_FAMILY = 4;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHABWatch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/openHABWatch";
-				WATCHOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Debug;
 		};
@@ -1493,7 +1286,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				TARGETED_DEVICE_FAMILY = 4;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHABWatch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/openHABWatch";
-				WATCHOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Release;
 		};
@@ -1521,7 +1314,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				TARGETED_DEVICE_FAMILY = 4;
 				TEST_TARGET_NAME = openHABWatch;
-				WATCHOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Debug;
 		};
@@ -1551,7 +1344,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				TARGETED_DEVICE_FAMILY = 4;
 				TEST_TARGET_NAME = openHABWatch;
-				WATCHOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Release;
 		};
@@ -1610,7 +1403,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1686,7 +1479,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				ONLY_ACTIVE_ARCH = NO;
 				PROVISIONING_PROFILE_SPECIFIER = "match AppStore org.openhab.app";
 				SDKROOT = iphoneos;
@@ -1730,7 +1523,7 @@
 				INFOPLIST_FILE = "openHAB/Supporting Files/openHAB-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = openHAB;
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1776,7 +1569,7 @@
 				INFOPLIST_FILE = "openHAB/Supporting Files/openHAB-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = openHAB;
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1809,15 +1602,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3A5DAEF42F1FD8D300CFA482 /* Build configuration list for PBXNativeTarget "OpenHABWatchComplicationsExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				3A5DAEF52F1FD8D300CFA482 /* Debug */,
-				3A5DAEF62F1FD8D300CFA482 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		657144582C1E438700C8A1F3 /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1917,6 +1701,14 @@
 				minimumVersion = 3.1.1;
 			};
 		};
+		937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/devicekit/DeviceKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.0;
+			};
+		};
 		937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
@@ -1931,22 +1723,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 12.5.0;
-			};
-		};
-		93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SwiftKickMobile/SwiftMessages.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 10.0.0;
-			};
-		};
-		93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/jonkykong/SideMenu.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 6.5.0;
 			};
 		};
 		DA2C4FD32B4F573300D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */ = {
@@ -1999,6 +1775,11 @@
 			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
+		934E592828F16EBA00162004 /* DeviceKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */;
+			productName = DeviceKit;
+		};
 		937E4470270B36D000A98C26 /* OpenHABCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = OpenHABCore;
@@ -2006,6 +1787,11 @@
 		937E4472270B36DD00A98C26 /* OpenHABCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = OpenHABCore;
+		};
+		937E4484270B379900A98C26 /* DeviceKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */;
+			productName = DeviceKit;
 		};
 		937E4487270B37A600A98C26 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -2017,20 +1803,15 @@
 			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
+		937E448D270B37D200A98C26 /* DeviceKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */;
+			productName = DeviceKit;
+		};
 		93F8063427AE6C620035A6B0 /* FirebaseCrashlytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
-		};
-		93F8064627AE7A050035A6B0 /* SwiftMessages */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */;
-			productName = SwiftMessages;
-		};
-		93F8064F27AE7A830035A6B0 /* SideMenu */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */;
-			productName = SideMenu;
 		};
 		DA10161A2DC7BAE500552D14 /* SFSafeSymbols */ = {
 			isa = XCSwiftPackageProductDependency;

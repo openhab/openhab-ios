@@ -13,7 +13,6 @@
 import OpenHABCore
 import os.log
 import SwiftUI
-import UIKit
 
 private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "org.openhab.app", category: "SitemapPageViewModel")
 
@@ -180,7 +179,7 @@ class SitemapPageViewModel: ObservableObject {
         if isLinkedPage {
             foregroundObserverTask = Task { [weak self] in
                 let notifications = NotificationCenter.default.notifications(
-                    named: UIApplication.didBecomeActiveNotification
+                    named: .appDidBecomeActive
                 )
                 for await _ in notifications {
                     await MainActor.run { [weak self] in

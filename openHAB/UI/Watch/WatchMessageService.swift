@@ -138,6 +138,8 @@ extension WatchPreferences {
             sitemapForWatchLabel: preferences.sitemapForWatchLabel,
             iconType: preferences.iconType,
             demoMode: preferences.demomode,
+            sitemapNameLabelDisplayMode: preferences.sitemapNameLabelDisplayMode.rawValue,
+            sortSitemapsBy: preferences.sortSitemapsBy,
             localConnectionConfiguration: preferences.localConnectionConfig,
             remoteConnectionConfiguration: preferences.remoteConnectionConfig,
             allHomes: allHomes,

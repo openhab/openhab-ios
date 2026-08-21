@@ -40,6 +40,8 @@ final class AppSettings: ObservableObject {
     @Published var sitemapForWatch: String
     @Published var sitemapForWatchLabel: String
     @Published var iconType: IconType
+    @Published var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode
+    @Published var sortSitemapsBy: SortSitemapsOrder
     @Published var haveReceivedAppContext = false
     @Published var storedHomes: [UUID: HomePreferences] = [:]
     /// UUID of the active home, persisted so credentials can be injected from Watch Keychain on restart.
@@ -67,6 +69,8 @@ final class AppSettings: ObservableObject {
         sitemapForWatch = store.string(forKey: "sitemapForWatch") ?? ""
         sitemapForWatchLabel = store.string(forKey: "sitemapForWatchLabel") ?? ""
         iconType = IconType(rawValue: store.integer(forKey: "iconType")) ?? .svg
+        sitemapNameLabelDisplayMode = (store.object(forKey: "sitemapNameLabelDisplayMode") as? Int).flatMap(SitemapNameLabelDisplayMode.init(rawValue:)) ?? .label
+        sortSitemapsBy = SortSitemapsOrder(rawValue: store.integer(forKey: "sortSitemapsBy")) ?? .label
 
         if let data = store.data(forKey: "watchAllHomes"),
            let decoded = try? JSONDecoder().decode([String: HomePreferences].self, from: data) {
@@ -147,6 +151,20 @@ final class AppSettings: ObservableObject {
             .removeDuplicates()
             .sink { newValue in
                 store.set(newValue.rawValue, forKey: "iconType")
+            }
+            .store(in: &cancellables)
+
+        $sitemapNameLabelDisplayMode
+            .removeDuplicates()
+            .sink { newValue in
+                store.set(newValue.rawValue, forKey: "sitemapNameLabelDisplayMode")
+            }
+            .store(in: &cancellables)
+
+        $sortSitemapsBy
+            .removeDuplicates()
+            .sink { newValue in
+                store.set(newValue.rawValue, forKey: "sortSitemapsBy")
             }
             .store(in: &cancellables)
 

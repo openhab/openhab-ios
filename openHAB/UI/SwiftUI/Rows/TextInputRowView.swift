@@ -256,7 +256,7 @@ private struct TextInputRowContent: View {
             .alert("Enter new value", isPresented: $showInputAlert) {
                 TextField("Enter text", text: $draftInputText)
                     .keyboardType(inputHint == .number ? .numbersAndPunctuation : .default)
-                    .onChange(of: draftInputText) { newValue in
+                    .onChange(of: draftInputText) { _, newValue in
                         filterDraftInput(newValue)
                     }
                 Button("Cancel", role: .cancel) {}
@@ -272,7 +272,7 @@ private struct TextInputRowContent: View {
             .onAppear {
                 inputText = displayState.effectiveState
             }
-            .onChange(of: displayState.effectiveState) { newState in
+            .onChange(of: displayState.effectiveState) { _, newState in
                 inputText = newState
             }
         }
