@@ -69,6 +69,7 @@ struct ToolbarMenu: View {
     @State private var isSystemExpanded = true
     @State private var isHomeExpanded = false
     @State private var showAppSettings = false
+    @State private var sitemapForWatch: String?
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
@@ -105,6 +106,24 @@ struct ToolbarMenu: View {
         isSitemapsExpanded = prefs.isSitemapsExpanded ?? true
         isTilesExpanded = prefs.isTilesExpanded ?? true
         isSystemExpanded = prefs.isSystemExpanded ?? true
+        sitemapForWatch = prefs.sitemapForWatch
+    }
+
+    /// Toggles `sitemap` as the one sent to the paired Apple Watch, persisting the
+    /// choice (and its display label) to the active home, or clearing it if the
+    /// same sitemap is double-tapped again.
+    private func toggleWatchSitemap(_ sitemap: OpenHABSitemap) {
+        Preferences.shared.modifyActiveHome { prefs in
+            if sitemap.name == sitemapForWatch {
+                sitemapForWatch = nil
+                prefs.sitemapForWatch = ""
+                prefs.sitemapForWatchLabel = ""
+            } else {
+                sitemapForWatch = sitemap.name
+                prefs.sitemapForWatch = sitemap.name
+                prefs.sitemapForWatchLabel = sitemap.label
+            }
+        }
     }
 
     /// A binding that updates the local `@State` mirror for an immediate UI
@@ -200,10 +219,14 @@ struct ToolbarMenu: View {
                 icon: AnyView(sitemapIcon(for: sitemap)),
                 title: mode.titleText(for: sitemap, sortedBy: order),
                 detail: mode.detailText(for: sitemap, sortedBy: order),
-                accessibilityId: sitemap.name
+                accessibilityId: sitemap.name,
+                trailing: sitemap.name == sitemapForWatch
+                    ? AnyView(Image(systemSymbol: .applewatchWatchface))
+                    : nil
             ) {
                 select(.sitemap(sitemap.name))
             }
+            .onTapGesture(count: 2) { toggleWatchSitemap(sitemap) }
         }
     }
 
@@ -484,6 +507,7 @@ struct ToolbarMenu: View {
         title: String,
         detail: String,
         accessibilityId: String? = nil,
+        trailing: AnyView? = nil,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -499,6 +523,10 @@ struct ToolbarMenu: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
+                }
+                if let trailing {
+                    Spacer()
+                    trailing
                 }
             }
             .padding(.horizontal, 16)
