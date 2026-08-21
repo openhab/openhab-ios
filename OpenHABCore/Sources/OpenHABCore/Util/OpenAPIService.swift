@@ -169,10 +169,10 @@ public extension OpenAPIService {
         var request = URLRequest(url: endpoint)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         if !connectionConfiguration.username.isEmpty {
-            let creds = "\(connectionConfiguration.username):\(connectionConfiguration.password)"
-            if let data = creds.data(using: .utf8) {
-                request.setValue("Basic \(data.base64EncodedString())", forHTTPHeaderField: "Authorization")
-            }
+            request.setValue(
+                basicAuthHeader(username: connectionConfiguration.username, password: connectionConfiguration.password),
+                forHTTPHeaderField: "Authorization"
+            )
         }
         // urlSession is optional since the develop merge (retained for deinit teardown); a configured
         // service always has one — guard rather than fall back to .shared so we don't leak a session.
