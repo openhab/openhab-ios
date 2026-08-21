@@ -654,6 +654,17 @@ private struct InAppToastBanner: View {
         Group {
             if service.isPresented {
                 HStack(alignment: .center, spacing: 12) {
+                    if let iconURL = service.iconURL, let connection = service.connection {
+                        KFImage(iconURL)
+                            .withOpenHABCredentials(for: connection)
+                            .placeholder {
+                                Image("openHABIcon").resizable()
+                            }
+                            .resizable()
+                            .frame(width: 32, height: 32)
+                            .clipShape(.rect(cornerRadius: 8))
+                    }
+
                     // Left: title + message, takes all available space
                     VStack(alignment: .leading, spacing: 4) {
                         if !service.title.isEmpty {

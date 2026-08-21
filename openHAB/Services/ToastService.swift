@@ -22,6 +22,10 @@ final class ToastService {
     var title = ""
     var message = ""
     var actions: [NotificationActionItem] = []
+    /// The notification's icon, resolved against the active connection so the banner can
+    /// authenticate the request the same way NotificationRow does.
+    var iconURL: URL?
+    var connection: ConnectionInfo?
     var onTap: (() -> Void)?
     var onAction: ((NotificationActionItem) -> Void)?
     private(set) var showCount = 0
@@ -32,12 +36,16 @@ final class ToastService {
         title: String,
         message: String,
         actions: [NotificationActionItem] = [],
+        iconURL: URL? = nil,
+        connection: ConnectionInfo? = nil,
         onTap: (() -> Void)? = nil,
         onAction: ((NotificationActionItem) -> Void)? = nil
     ) {
         self.title = title
         self.message = message
         self.actions = actions
+        self.iconURL = iconURL
+        self.connection = connection
         self.onTap = onTap
         self.onAction = onAction
         showCount &+= 1

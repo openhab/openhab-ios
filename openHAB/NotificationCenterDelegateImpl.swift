@@ -78,7 +78,7 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         }
 
         let actions = payload.actions?.map { NotificationActionItem(title: $0.title, action: $0.action) } ?? []
-        await displayNotification(message: payload.displayMessage, action: payload.action, cloudUserId: payload.cloudUserId, actions: actions)
+        await displayNotification(message: payload.displayMessage, icon: payload.icon, action: payload.action, cloudUserId: payload.cloudUserId, actions: actions)
 
         return []
     }
@@ -103,16 +103,29 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         }
     }
 
-    private func displayNotification(message: String, action: String?, cloudUserId: String?, actions: [NotificationActionItem] = []) async {
+    private func displayNotification(message: String, icon: String?, action: String?, cloudUserId: String?, actions: [NotificationActionItem] = []) async {
         Logger.notificationCenterDelegateImpl.info("displayNotification \(message)")
 
         audioPlayer.playSound()
 
         let title = String(localized: "notification", comment: "")
+        let connection = MainActorNetworkTracker.shared.activeConnection
+        let iconURL = connection.flatMap { activeConnection in
+            Endpoint.icon(
+                rootUrl: activeConnection.configuration.url,
+                version: activeConnection.version,
+                icon: icon,
+                state: "",
+                iconType: .svg,
+                iconColor: ""
+            )?.url
+        }
         ToastService.shared.show(
             title: title,
             message: message,
             actions: actions,
+            iconURL: iconURL,
+            connection: connection,
             onTap: { [weak self] in
                 self?.notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
             },
