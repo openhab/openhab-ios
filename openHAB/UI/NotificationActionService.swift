@@ -103,11 +103,8 @@ class NotificationActionService: ObservableObject {
                 Logger.viewController.info("Switching to home \(targetHome.id)")
                 Preferences.shared.switchActiveHome(to: targetHome.id)
             }
-            await NetworkTracker.shared.startTracking(connectionConfigurations:
-                [
-                    Preferences.shared.currentHomePreferences.localConnectionConfig,
-                    Preferences.shared.currentHomePreferences.remoteConnectionConfig
-                ]
+            await NetworkTracker.shared.startTracking(
+                connectionConfigurations: Preferences.shared.currentHomePreferences.trackedConnections
             )
             _ = await NetworkTracker.shared.waitForActiveConnection()
             handleNotificationInternal(action, notification: notification)
