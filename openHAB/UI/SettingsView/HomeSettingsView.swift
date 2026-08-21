@@ -31,6 +31,10 @@ struct HomeSettingsView: View {
     @State private var settingsDefaultMainUIPath = ""
     @State private var settingsAlwaysAllowWebRTC = true
     @State private var settingsSitemapForWatch = ""
+    /// The label last persisted for `settingsSitemapForWatch`. Falls back to this
+    /// instead of "unknown" when `sitemaps` has no fresh match — e.g. for an inactive
+    /// home, where sitemaps are deliberately not fetched (see the `.task` below).
+    @State private var settingsSitemapForWatchLabel = ""
 
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
@@ -191,7 +195,7 @@ struct HomeSettingsView: View {
             let sdm = settingsSitemapNameLabelDisplayMode
             let dmu = settingsDefaultMainUIPath, aawrtc = settingsAlwaysAllowWebRTC
             let sfw = settingsSitemapForWatch
-            let sfwLabel = sitemaps.first { $0.name == sfw }?.label ?? "unknown"
+            let sfwLabel = sitemaps.first { $0.name == sfw }?.label ?? settingsSitemapForWatchLabel
             let lcc = settingsLocalConnectionConfiguration
             let rcc = settingsRemoteConnectionConfiguration
             let sseCI = settingsSSECommandItem
@@ -228,7 +232,13 @@ struct HomeSettingsView: View {
             }
         }
         .task(id: networkTracker.activeConnection) {
-            guard let activeConnection = networkTracker.activeConnection else { return }
+            // Sitemaps are only fetchable via the live active connection. For an
+            // inactive home being edited, leave `sitemaps` empty so the "Sitemap for
+            // Apple Watch" picker disables itself rather than showing/saving choices
+            // from a different home's server.
+            guard homeId == nil || homeId == Preferences.shared.currentHomePreferences.id,
+                  let activeConnection = networkTracker.activeConnection
+            else { return }
             await updateSitemaps(activeConfiguration: activeConnection.configuration)
         }
         .sheet(isPresented: $showAppSettings) {
@@ -280,6 +290,7 @@ struct HomeSettingsView: View {
         settingsDefaultMainUIPath = homePrefs.defaultMainUIPath
         settingsAlwaysAllowWebRTC = homePrefs.alwaysAllowWebRTC
         settingsSitemapForWatch = homePrefs.sitemapForWatch
+        settingsSitemapForWatchLabel = homePrefs.sitemapForWatchLabel
         settingsLocalConnectionConfiguration = homePrefs.localConnectionConfig
         settingsRemoteConnectionConfiguration = homePrefs.remoteConnectionConfig
         loadedLocalURL = homePrefs.localConnectionConfig.url
@@ -302,7 +313,7 @@ struct HomeSettingsView: View {
     }
 
     func saveSettings() {
-        let sitemapLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
+        let sitemapLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? settingsSitemapForWatchLabel
         let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
         Preferences.shared.modifyStoredHome(targetId) { @MainActor homePreferences in
             homePreferences.demomode = settingsDemomode
