@@ -191,6 +191,11 @@ struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: Observab
         .task {
             await notifications = loadNotifications()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .openHABDidReceiveNotification)) { _ in
+            Task {
+                notifications = await loadNotifications()
+            }
+        }
     }
 
     private func executeAction(_ action: String) {
