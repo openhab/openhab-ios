@@ -166,11 +166,6 @@
 		6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		6571444E2C1E438700C8A1F3 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		933D7F0422E7015000621A03 /* openHABUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		933D7F0622E7015000621A03 /* OpenHABUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABUITests.swift; sourceTree = "<group>"; };
-		933D7F0822E7015100621A03 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		933D7F0E22E7030600621A03 /* SnapshotHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SnapshotHelper.swift; path = fastlane/SnapshotHelper.swift; sourceTree = SOURCE_ROOT; };
-		93685A792ADE755C0077A9A6 /* openHABTests.xctestplan */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = openHABTests.xctestplan; sourceTree = "<group>"; };
-		93685A7B2ADE755C0077A9A6 /* openHABTestsSwift.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = openHABTestsSwift.xctestplan; sourceTree = "<group>"; };
 		DA0775152346705D0086C685 /* openHABWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = openHABWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0DA9E12E0C9B74000C5D0A /* BuildTools */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = BuildTools; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -398,25 +393,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		933D7F0522E7015000621A03 /* openHABUITests */ = {
-			isa = PBXGroup;
-			children = (
-				933D7F0E22E7030600621A03 /* SnapshotHelper.swift */,
-				933D7F0622E7015000621A03 /* OpenHABUITests.swift */,
-				933D7F0822E7015100621A03 /* Info.plist */,
-			);
-			path = openHABUITests;
-			sourceTree = "<group>";
-		};
-		93685A782ADE755C0077A9A6 /* TestPlans */ = {
-			isa = PBXGroup;
-			children = (
-				93685A792ADE755C0077A9A6 /* openHABTests.xctestplan */,
-				93685A7B2ADE755C0077A9A6 /* openHABTestsSwift.xctestplan */,
-			);
-			path = TestPlans;
-			sourceTree = "<group>";
-		};
 		964901D665A05573A8E2E7B2 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -438,8 +414,6 @@
 				DA4D4E0E2340A00200B37E37 /* Changes.md */,
 				DA817E79234BF39B00C91824 /* CHANGELOG.md */,
 				DACC0F7B2E883AC700B62043 /* AGENTS.md */,
-				93685A782ADE755C0077A9A6 /* TestPlans */,
-				933D7F0522E7015000621A03 /* openHABUITests */,
 				2FD4E52B2F670BA500EBB340 /* openHAB */,
 				2FD4E2F42F66FA2900EBB340 /* TestPlans */,
 				2FD4E2E02F66F9FE00EBB340 /* openHABTestsSwift */,
