@@ -34,13 +34,24 @@ struct NotificationRow: View {
                 .resizable()
                 .frame(width: 40, height: 40)
                 .clipShape(.rect(cornerRadius: 8))
-            VStack(alignment: .leading) {
-                Text(notification.message ?? "")
+            VStack(alignment: .leading, spacing: 2) {
+                Text(notification.title.isEmpty ? String(localized: "message_not_decoded", comment: "") : notification.title)
                     .font(.body)
+                if let subtitle = notification.subtitle {
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                }
                 if let timeStamp = notification.created {
                     Text(dateString(from: timeStamp))
                         .font(.caption)
                         .foregroundStyle(.gray)
+                }
+                if let tag = notification.payload?.tag, !tag.isEmpty {
+                    Text(tag)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

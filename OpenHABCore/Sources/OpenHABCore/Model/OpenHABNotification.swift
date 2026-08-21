@@ -79,6 +79,14 @@ public struct OpenHABNotification: Identifiable, Hashable, Sendable {
         return payload?.message ?? ""
     }
 
+    /// The message body shown beneath the title, only present when title comes from payload.title.
+    public var subtitle: String? {
+        guard let payloadTitle = payload?.title, !payloadTitle.isEmpty else { return nil }
+        if let msg = message, !msg.isEmpty { return msg }
+        if let payloadMsg = payload?.message, !payloadMsg.isEmpty { return payloadMsg }
+        return nil
+    }
+
     public init(id: String,
                 message: String?,
                 icon: String? = nil,
