@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [Version 3.4.20, Build 316] - 2026-08-21Z
+
+- committed version bump: 3.4.19 (315)
+- Merge/widgets with item display into menustructure (#1312)
+- Sidemenu replacement and menustructure refactoring (#1165)
+
 ## [Version 3.3.11, Build 313] - 2026-08-01Z
 
 - chore(deps): bump json from 2.19.5 to 2.19.9 (#1307)
