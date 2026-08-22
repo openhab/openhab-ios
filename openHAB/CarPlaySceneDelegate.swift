@@ -30,6 +30,12 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
     // Retained across SSE restarts so page refreshes don't need a full stream teardown.
     private var currentPage: OpenHABPage?
     private var currentService: OpenAPIService?
+    // Tracks the buttons currently on screen, keyed by widgetId, so updateTemplate can mutate
+    // existing CPGridButton instances in place (iOS 26+) instead of replacing the whole array —
+    // CPGridTemplate.updateGridButtons(_:) resets CarPlay's focused button, so avoiding it when
+    // only a button's state (not the widget set/order) changed keeps focus on the pressed button.
+    private var gridButtonsByWidgetId: [String: CPGridButton] = [:]
+    private var gridButtonOrder: [String] = []
 
     func templateApplicationScene(_ templateApplicationScene: CPTemplateApplicationScene,
                                   didConnect interfaceController: CPInterfaceController) {
@@ -234,12 +240,32 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
 
         guard !widgets.isEmpty else {
             currentGridTemplate = nil
+            gridButtonsByWidgetId.removeAll()
+            gridButtonOrder = []
             interfaceController?.setRootTemplate(placeholderTemplate(), animated: false, completion: nil)
             return
         }
 
         let title = page.title.isEmpty ? "openHAB" : "openHAB – \(page.title)"
+        let newOrder = widgets.map(\.widgetId)
+
+        if #available(iOS 26.0, *),
+           let existing = currentGridTemplate,
+           newOrder == gridButtonOrder {
+            // Same buttons, same order — update each in place so CarPlay doesn't reset focus.
+            existing.updateTitle(title)
+            for widget in widgets {
+                guard let button = gridButtonsByWidgetId[widget.widgetId] else { continue }
+                button.updateTitleVariants([widget.displayState.labelText])
+                button.updateImage(sfSymbol(for: widget))
+            }
+            return
+        }
+
+        // Button set/order changed, or pre-iOS 26 — full rebuild (resets CarPlay's focus).
         let buttons = widgets.map { makeGridButton(for: $0, service: service) }
+        gridButtonOrder = newOrder
+        gridButtonsByWidgetId = Dictionary(zip(newOrder, buttons), uniquingKeysWith: { first, _ in first })
 
         if let existing = currentGridTemplate {
             existing.updateTitle(title)
@@ -344,7 +370,11 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
                 if let releaseCommand {
                     try? await service.sendItemCommand(itemname: name, command: releaseCommand)
                 } else {
-                    try? await service.sendItemCommand(itemname: name, command: ds.isOn ? "OFF" : "ON")
+                    // Read displayState live (not the `ds` captured at button-creation time):
+                    // with in-place button updates (iOS 26+) this closure can outlive many state
+                    // changes, so a captured snapshot would freeze the on/off guess at whatever
+                    // it was when the button was first built.
+                    try? await service.sendItemCommand(itemname: name, command: widget.displayState.isOn ? "OFF" : "ON")
                 }
             }
         }
