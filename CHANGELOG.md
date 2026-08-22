@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [Version 3.4.23, Build 319] - 2026-08-22Z
+
+- fix(homes): localize "Local"/"Remote" labels in home summary
+- i18n: remove 37 stale string catalog entries
+- fix(settings): defer save until Local Network alert is acknowledged
+- fix(settings): CarPlay sitemap picker respects Show/Sort sitemaps by
+
 ## [Version 3.4.22, Build 318] - 2026-08-22Z
 
 - feat(carplay): update grid buttons in place on iOS 26 to preserve focus
