@@ -265,14 +265,14 @@ struct HomeSummaryView: View {
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 6) {
                     summaryItem(
-                        label: "Local",
+                        label: String(localized: "Local"),
                         value: prefs.localConnectionConfig.url.isEmpty
                             ? String(localized: "Not set")
                             : (URL(string: prefs.localConnectionConfig.url)?.host ?? prefs.localConnectionConfig.url)
                     )
                     Text("·").foregroundStyle(.tertiary)
                     summaryItem(
-                        label: "Remote",
+                        label: String(localized: "Remote"),
                         value: prefs.remoteConnectionConfig.url.isEmpty
                             ? String(localized: "Not set")
                             : (URL(string: prefs.remoteConnectionConfig.url)?.host ?? prefs.remoteConnectionConfig.url)
