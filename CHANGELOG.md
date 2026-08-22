@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.4.22, Build 318] - 2026-08-22Z
+
+- feat(carplay): update grid buttons in place on iOS 26 to preserve focus
+
 ## [Version 3.4.21, Build 317] - 2026-08-22Z
 
 - fix(carplay): sync selected sitemap reliably, fix Combine AsyncPublisher crash
