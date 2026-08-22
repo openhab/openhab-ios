@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.4.21, Build 317] - 2026-08-22Z
+
+- fix(carplay): sync selected sitemap reliably, fix Combine AsyncPublisher crash
+
 ## [Version 3.4.20, Build 316] - 2026-08-21Z
 
 - committed version bump: 3.4.19 (315)
