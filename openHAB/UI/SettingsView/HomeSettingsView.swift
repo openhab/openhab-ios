@@ -129,12 +129,14 @@ struct HomeSettingsView: View {
         .navigationTitle("\(settingsHomeName) Settings")
         .alert("Local Network Access Required", isPresented: $showLocalNetworkAlert) {
             Button("Open Settings") {
+                commitSave()
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     openURL(url)
                 }
                 dismiss()
             }
             Button("OK") {
+                commitSave()
                 dismiss()
             }
         } message: {
@@ -230,16 +232,25 @@ struct HomeSettingsView: View {
 
     private func handleSaveTapped() {
         savedExplicitly = true
-        saveSettings()
-        NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+        // Persisting settings reactively kicks off a real connection attempt to the new local
+        // URL (NetworkConnectionService, 500ms debounced) — which, for a self-signed local
+        // server, triggers the certificate-trust alert. Showing that heads-up first and
+        // deferring the actual save until it's acknowledged avoids the two alerts racing
+        // (the local-network one would otherwise flash and immediately get covered).
         if !settingsDemomode,
            !settingsLocalConnectionConfiguration.url.isEmpty,
            settingsLocalConnectionConfiguration.url != loadedLocalURL,
            settingsLocalConnectionConfiguration.url != localTestedOKURL {
             showLocalNetworkAlert = true
         } else {
+            commitSave()
             dismiss()
         }
+    }
+
+    private func commitSave() {
+        saveSettings()
+        NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
     }
 
     private func handleSwipeDismiss() {
