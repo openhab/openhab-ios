@@ -124,7 +124,7 @@ struct SitemapSettingsView: View {
             Text("None").tag("")
             if !sitemaps.isEmpty {
                 ForEach(sitemaps, id: \.name) { sitemap in
-                    Text(sitemap.label).tag(sitemap.name)
+                    Text(settingsSitemapNameLabelDisplayMode.combinedText(for: sitemap, sortedBy: settingsSortSitemapsBy)).tag(sitemap.name)
                 }
             }
         }
