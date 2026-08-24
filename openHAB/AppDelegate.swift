@@ -236,12 +236,43 @@ extension AppDelegate {
         NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
     }
 
+    func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
+        false
+    }
+
+    func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
+        // Explicitly opt out of UIKit state restoration. Without this, iOS defaults to
+        // attempting to restore any previously-saved archive for backward compatibility --
+        // including one saved by an older, storyboard-based build (pre-SwiftUI app lifecycle,
+        // see 6d89e35a). On a device upgraded in place from that older build, iOS tries to
+        // restore view controllers/storyboard IDs that no longer exist, producing a black,
+        // unresponsive screen with nothing logged (the failure happens before app code runs).
+        false
+    }
+
+    // Info.plist sets UIApplicationSupportsSecureRestorableState, which makes iOS consult these
+    // NSSecureCoding-based methods instead of the deprecated pair above. Both pairs are kept in
+    // sync (both false) since which one iOS actually calls depends on that flag; the deprecated
+    // pair stays as a defensive fallback.
+    func application(_ application: UIApplication, shouldSaveSecureApplicationState coder: NSCoder) -> Bool {
+        false
+    }
+
+    func application(_ application: UIApplication, shouldRestoreSecureApplicationState coder: NSCoder) -> Bool {
+        false
+    }
+
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         switch connectingSceneSession.role {
         case .carTemplateApplication:
             UISceneConfiguration(name: "CarPlay Configuration", sessionRole: connectingSceneSession.role)
         default:
-            UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+            // Named distinctly from the old "Default Configuration" (storyboard-based
+            // SceneDelegate + Main.storyboard, removed in 6d89e35a): reusing that name would
+            // let iOS try to reconnect a UISceneSession cached from a build that had it,
+            // referencing a scene delegate/storyboard that no longer exists. A new name forces
+            // a fresh session instead of a reconnection attempt on in-place upgrade.
+            UISceneConfiguration(name: "SwiftUI Configuration", sessionRole: connectingSceneSession.role)
         }
     }
 

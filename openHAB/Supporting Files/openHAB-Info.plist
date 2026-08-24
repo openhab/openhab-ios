@@ -91,6 +91,8 @@
 		<string>OpenHABSetStringValueIntent</string>
 		<string>OpenHABSetSwitchStateIntent</string>
 	</array>
+	<key>UIApplicationSupportsSecureRestorableState</key>
+	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -101,7 +103,7 @@
 			<array>
 				<dict>
 					<key>UISceneConfigurationName</key>
-					<string>Default Configuration</string>
+					<string>SwiftUI Configuration</string>
 				</dict>
 			</array>
 			<key>CPTemplateApplicationSceneSessionRoleApplication</key>
