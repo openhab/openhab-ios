@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.4.24, Build 320] - 2026-08-24Z
+
+- fix(lifecycle): prevent black screen on upgrade from storyboard-based build
+
 ## [Version 3.4.23, Build 319] - 2026-08-22Z
 
 - fix(homes): localize "Local"/"Remote" labels in home summary
