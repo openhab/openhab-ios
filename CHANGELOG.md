@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.4.25, Build 321] - 2026-08-25Z
+
+- fix(watch): restore OpenHABWatchComplicationsExtension Xcode target (#1318)
+
 ## [Version 3.4.24, Build 320] - 2026-08-24Z
 
 - fix(lifecycle): prevent black screen on upgrade from storyboard-based build
