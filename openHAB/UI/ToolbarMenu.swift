@@ -363,7 +363,7 @@ struct ToolbarMenu: View {
             }
 
         }
-        .frame(width: 280)
+        .frame(width: 300)
     }
 
     // MARK: - Home header
