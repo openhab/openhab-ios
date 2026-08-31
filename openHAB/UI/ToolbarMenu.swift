@@ -68,7 +68,13 @@ struct ToolbarMenu: View {
     @State private var isSitemapsExpanded = true
     @State private var isSystemExpanded = true
     @State private var isHomeExpanded = false
+    // Two-phase header animation state — independent of isHomeExpanded so each gets its own
+    // withAnimation context. Bool + ternary mirrors exactly how homeDetailsCollapsed drives
+    // frame; using the same mechanism ensures both animate identically.
+    @State private var headerDetailsHidden = false
+    @State private var homeDetailsCollapsed = false
     @State private var showAppSettings = false
+    @State private var showCurrentHomeSettings = false
     @State private var sitemapForWatch: String?
     @State private var sitemapForCarPlay: String?
     var onSelect: (TargetController) -> Void
@@ -77,7 +83,8 @@ struct ToolbarMenu: View {
     @ScaledMetric private var iconWidth = 20.0
 
     /// Shared curve so the section content and the container height animate in sync.
-    private static let sectionAnimation: Animation = .easeInOut(duration: 0.25)
+    private static let sectionAnimationDuration: Double = 0.25
+    private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
 
     var body: some View {
         GeometryReader { proxy in
@@ -89,12 +96,19 @@ struct ToolbarMenu: View {
                 // Re-read in case the active home changed while the menu was closed.
                 loadExpansionState()
             } else {
-                withAnimation(.easeInOut(duration: 0.2)) { isHomeExpanded = false }
+                isHomeExpanded = false
+                headerDetailsHidden = false
+                homeDetailsCollapsed = false
             }
         }
         .sheet(isPresented: $showAppSettings) {
             NavigationStack {
                 AppSettingsView()
+            }
+        }
+        .sheet(isPresented: $showCurrentHomeSettings) {
+            NavigationStack {
+                HomeSettingsView()
             }
         }
     }
@@ -109,6 +123,8 @@ struct ToolbarMenu: View {
         isSystemExpanded = prefs.isSystemExpanded ?? true
         sitemapForWatch = prefs.sitemapForWatch
         sitemapForCarPlay = prefs.sitemapForCarPlay
+        headerDetailsHidden = false
+        homeDetailsCollapsed = false
     }
 
     /// Toggles `sitemap` as the one sent to the paired Apple Watch, persisting the
@@ -258,12 +274,16 @@ struct ToolbarMenu: View {
 
     @ViewBuilder
     private func mainUIMenu() -> some View {
-        menuRow(
-            icon: AnyView(Image("openHABIcon").resizable()),
-            label: String(localized: "Home"),
-            accessibilityId: "Home"
-        ) {
-            select(.webview)
+        // Hidden until the current home has had at least one successful fetch —
+        // consistent with how sitemaps/pages behave during the loading state.
+        if menuData.hasSuccessfullyLoaded {
+            menuRow(
+                icon: AnyView(Image("openHABIcon").resizable()),
+                label: String(localized: "Home"),
+                accessibilityId: "Home"
+            ) {
+                select(.webview)
+            }
         }
         if menuData.isLoading {
             loadingRow(label: String(localized: "Pages"))
@@ -280,23 +300,30 @@ struct ToolbarMenu: View {
     }
 
     fileprivate func homesMenu() -> some View {
-        return VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 0) {
             InlineHomePickerView(isMenuPresented: $isPresented)
             Divider().padding(.horizontal, 12)
         }
-        .transition(.blurReplace(.downUp))
-
     }
 
     private func menuContent(height: CGFloat) -> some View {
         VStack(spacing: 0) {
             let scrollView = ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    homeHeader()
-                    Divider()
-                    if isHomeExpanded {
+                    // Home section: header + picker that is always in the layout.
+                    // Keeping homesMenu() in the layout at all times (height 0 when collapsed)
+                    // avoids the jump that occurs when conditional insertion allocates space
+                    // instantly before the transition visual can begin.
+                    VStack(alignment: .leading, spacing: 0) {
+                        homeHeader()
+                        Divider()
                         homesMenu()
+                            .opacity(isHomeExpanded ? 1 : 0)
+                            .frame(maxHeight: isHomeExpanded ? nil : 0, alignment: .top)
+                            .clipped()
                     }
+                    .animation(Self.sectionAnimation, value: isHomeExpanded)
+
                     // Main UI: Home + sidebar pages
                     collapsibleSection(
                         title: "Main UI",
@@ -368,36 +395,82 @@ struct ToolbarMenu: View {
 
     // MARK: - Home header
 
-    @ViewBuilder
+    private func toggleHomeExpanded() {
+        let half = Self.sectionAnimationDuration / 2
+        if !isHomeExpanded {
+            // Phase 1: fade out details (Bool ternary + withAnimation mirrors homeDetailsCollapsed).
+            withAnimation(.easeInOut(duration: half)) { headerDetailsHidden = true }
+            // Phase 2: collapse layout + rotate chevron (delayed by half).
+            withAnimation(.easeInOut(duration: half).delay(half)) { homeDetailsCollapsed = true }
+            // Expand picker with full sectionAnimation (drives homesMenu height/opacity).
+            withAnimation(Self.sectionAnimation) { isHomeExpanded = true }
+        } else {
+            // Phase 1: restore layout + rotate chevron back (immediate, half duration).
+            withAnimation(.easeInOut(duration: half)) { homeDetailsCollapsed = false }
+            // Phase 2: fade in details (delayed so content appears after layout has opened).
+            withAnimation(.easeInOut(duration: half).delay(half)) { headerDetailsHidden = false }
+            // Collapse picker.
+            withAnimation(Self.sectionAnimation) { isHomeExpanded = false }
+        }
+    }
+
     private func homeHeader() -> some View {
+        // Phase 1 (fade): conditional views keyed to headerDetailsHidden transition in/out.
+        // A hidden placeholder keeps the layout space so the header height doesn't jump.
+        // Phase 2 (layout): homeDetailsCollapsed collapses the frame after the fade completes.
         HStack(alignment: .center, spacing: 0) {
-            Button(action: { withAnimation { isHomeExpanded.toggle() } }, label: {
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 8) {
-                        Image(systemSymbol: isHomeExpanded ? .chevronDown : .chevronRight)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 10)
+            Button(action: toggleHomeExpanded) {
+                HStack(alignment: .center, spacing: 8) {
+                    Image(systemSymbol: .chevronRight)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 10)
+                        .rotationEffect(.degrees(homeDetailsCollapsed ? 90 : 0))
+
+                    VStack(alignment: .leading, spacing: 0) {
                         Text("Homes")
                             .font(.footnote)
                             .fontWeight(.semibold)
+
+                        ZStack(alignment: .topLeading) {
+                            // Always-present placeholder keeps space during the fade.
+                            ConnectionView().hidden()
+                            if !headerDetailsHidden {
+                                ConnectionView()
+                                    .transition(.opacity)
+                            }
+                        }
+                        .padding(.top, 3)
+                        .frame(maxHeight: homeDetailsCollapsed ? 0 : 30, alignment: .top)
+                        .clipped()
                     }
-                    ConnectionView()
-                        .padding(.leading, 18)
+                    Spacer(minLength: 0)
                 }
                 .contentShape(Rectangle())
-            })
+            }
             .buttonStyle(.plain)
-            Spacer(minLength: 8)
-            Button(action: {
-                menuData.refresh()
-                onReload?()
-                isPresented = false
-            }, label: {
-                Image(systemSymbol: .arrowClockwise)
-                    .foregroundStyle(.secondary)
-            })
+            .padding(.trailing, 12)
+
+            Button(action: { menuData.refresh(); onReload?(); isPresented = false }) {
+                Image(systemSymbol: .arrowClockwise).foregroundStyle(.secondary)
+            }
             .buttonStyle(.plain)
+            .padding(.trailing, homeDetailsCollapsed ? 0 : 12)
+
+            ZStack {
+                // Placeholder keeps gear button space during the fade.
+                Image(systemSymbol: .gear).hidden()
+                if !headerDetailsHidden {
+                    Button(action: { isPresented = false; showCurrentHomeSettings = true }) {
+                        Image(systemSymbol: .gear).foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.opacity)
+                }
+            }
+            .allowsHitTesting(!headerDetailsHidden && !homeDetailsCollapsed)
+            .frame(width: homeDetailsCollapsed ? 0 : nil)
+            .clipped()
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)

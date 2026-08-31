@@ -25,7 +25,9 @@ vendor/
 OsLogRewriter/.build
 OsLogRewriter/.swiftpm
 
-.claude/
+.claude/*
+!.claude/commands
+!.claude/commands/**
 skills-lock.json
 .agents/
 
