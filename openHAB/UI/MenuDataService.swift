@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import OpenHABCore
 import os.log
 
@@ -28,22 +27,23 @@ class MenuDataService: ObservableObject {
     /// on each switch (consistent with sitemaps/pages behaviour).
     @Published var hasSuccessfullyLoaded = false
 
-    private var cancellables = Set<AnyCancellable>()
-
     init() {
-        MainActorNetworkTracker.shared.$activeConnection
-            .sink { [weak self] activeConnection in
-                guard let self else { return }
+        // Observe activeConnection using Swift Concurrency — `for await` on
+        // `$publisher.values` participates in structured concurrency and
+        // respects @MainActor isolation without AnyCancellable bookkeeping.
+        // Deliveries are serialised: the loop waits for fetchData to complete
+        // before processing the next connection change, preventing race conditions.
+        Task { @MainActor [weak self] in
+            for await activeConnection in MainActorNetworkTracker.shared.$activeConnection.values {
+                guard let self else { break }
                 isConnected = activeConnection != nil
                 // Connection loss: retain the last-good snapshot — do NOT clear.
                 // New connection: fetch without wiping first so the menu stays
                 // populated until fresh data arrives.
-                guard let activeConnection else { return }
-                Task { [weak self] in
-                    await self?.fetchData(activeConnection: activeConnection)
-                }
+                guard let activeConnection else { continue }
+                await fetchData(activeConnection: activeConnection)
             }
-            .store(in: &cancellables)
+        }
     }
 
     /// Clears all data immediately (use for user-initiated refresh or explicit resets).
