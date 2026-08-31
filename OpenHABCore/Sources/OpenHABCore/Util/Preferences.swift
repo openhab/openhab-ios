@@ -125,6 +125,27 @@ public struct HomePreferences: Codable, Equatable {
     public var isSystemExpanded: Bool?
     public var sitemapForCarPlay = ""
 
+    // Avatar image stored as a file path, never raw Data in UserDefaults.
+    // Optional so a missing key in old stored data decodes as nil (no avatar).
+    public var avatarImagePath: String?
+
+    // Backing store for the computed `sectionOrder` property. Optional so that
+    // old stored data missing this field decodes as nil (resolves to default order).
+    private var sectionOrderStorage: [MenuSection]?
+
+    /// The display order of the toolbar menu sections for this home.
+    /// Defaults to `MenuSection.allCases` when not explicitly set.
+    public var sectionOrder: [MenuSection] {
+        get { sectionOrderStorage ?? MenuSection.allCases }
+        set { sectionOrderStorage = newValue }
+    }
+
+    // Per-section visibility. Optional so a missing key decodes as nil (visible = true).
+    public var isMainUIVisible: Bool?
+    public var isSitemapsVisible: Bool?
+    public var isTilesVisible: Bool?
+    public var isSystemVisible: Bool?
+
     fileprivate init(id: UUID) {
         self.id = id
     }
@@ -169,6 +190,13 @@ public struct HomePreferences: Codable, Equatable {
         isTilesExpanded = try container.decodeIfPresent(Bool.self, forKey: .isTilesExpanded)
         isSystemExpanded = try container.decodeIfPresent(Bool.self, forKey: .isSystemExpanded)
         sitemapForCarPlay = try container.decodeIfPresent(String.self, forKey: .sitemapForCarPlay) ?? ""
+        // Fields added for menu improvements. Optional — missing key decodes as nil.
+        avatarImagePath = try container.decodeIfPresent(String.self, forKey: .avatarImagePath)
+        sectionOrderStorage = try container.decodeIfPresent([MenuSection].self, forKey: .sectionOrderStorage)
+        isMainUIVisible = try container.decodeIfPresent(Bool.self, forKey: .isMainUIVisible)
+        isSitemapsVisible = try container.decodeIfPresent(Bool.self, forKey: .isSitemapsVisible)
+        isTilesVisible = try container.decodeIfPresent(Bool.self, forKey: .isTilesVisible)
+        isSystemVisible = try container.decodeIfPresent(Bool.self, forKey: .isSystemVisible)
     }
 }
 
@@ -313,6 +341,9 @@ public actor Preferences {
     public var currentWebViewPath: String
 
     /// settings for different homes
+    @UserDefaultObject("homeOrder", defaultValue: [UUID]())
+    public private(set) var homeOrder: [UUID]
+
     @UserDefaultObject("storedHomes", defaultValue: [:])
     public private(set) var storedHomes: [UUID: HomePreferences]
 
@@ -407,17 +438,27 @@ public extension Preferences {
 @MainActor
 public extension Preferences {
     func listStoredHomes() -> [UUID] {
-        storedHomes
-            .sorted { e1, e2 in
-                e1.value.homeName <= e2.value.homeName
-            }
-            .map(\.key)
+        let existing = Set(storedHomes.keys)
+        // Return homes in persisted order, filtered to homes that still exist.
+        let ordered = homeOrder.filter { existing.contains($0) }
+        // Append any homes not yet in homeOrder (migration / new installs).
+        let known = Set(ordered)
+        let unordered = storedHomes.keys
+            .filter { !known.contains($0) }
+            .sorted { storedHomes[$0]?.homeName ?? "" <= storedHomes[$1]?.homeName ?? "" }
+        return ordered + unordered
+    }
+
+    /// Persists a new home display order. Only UUIDs that exist in `storedHomes` are kept.
+    func updateHomeOrder(_ order: [UUID]) {
+        homeOrder = order.filter { storedHomes[$0] != nil }
     }
 
     func createAndLoadNewStoredSettings(homeName: String) {
         activeHomeId = UUID()
         var newHome = HomePreferences(id: activeHomeId)
         newHome.homeName = homeName
+        homeOrder = homeOrder + [activeHomeId]
         loadHomePreferences(newHome)
     }
 
@@ -456,6 +497,7 @@ public extension Preferences {
         var stored = storedHomes
         stored.removeValue(forKey: homeId)
         storedHomes = stored
+        homeOrder = homeOrder.filter { $0 != homeId }
         CredentialsStore.delete(homeId: homeId, type: .local)
         CredentialsStore.delete(homeId: homeId, type: .remote)
     }
@@ -475,6 +517,15 @@ public extension Preferences {
         if storedHomes.isEmpty {
             // first there might be no stored preferences, if no preference was changed since the update
             storeActiveHome()
+        }
+        // Migrate existing homes into homeOrder if it hasn't been populated yet
+        // (first launch after this feature, or fresh install). Alphabetical sort
+        // matches the previous listStoredHomes() behaviour so existing users see
+        // no change until they reorder manually.
+        if homeOrder.isEmpty, !storedHomes.isEmpty {
+            homeOrder = storedHomes
+                .sorted { $0.value.homeName <= $1.value.homeName }
+                .map(\.key)
         }
     }
 

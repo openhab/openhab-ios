@@ -193,3 +193,63 @@ struct UserDefaultsTests {
         #expect(homeWithoutCredentials == (try? JSONDecoder().decode(HomePreferences.self, from: try #require(data.data(forKey: "currentHomePreferences")))))
     }
 }
+
+// MARK: - MenuSection + HomePreferences menu-improvement fields
+
+@Suite("MenuSection and HomePreferences menu fields")
+@MainActor
+struct MenuSectionTests {
+    /// Old payload missing the new fields must decode successfully and resolve defaults.
+    @Test func newFieldsDefaultOnOldPayload() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        let prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        #expect(prefs.avatarImagePath == nil)
+        #expect(prefs.sectionOrder == MenuSection.allCases)
+        #expect(prefs.isMainUIVisible == nil)
+        #expect(prefs.isSitemapsVisible == nil)
+        #expect(prefs.isTilesVisible == nil)
+        #expect(prefs.isSystemVisible == nil)
+    }
+
+    /// A custom section order round-trips through encode → decode unchanged.
+    @Test func sectionOrderRoundTrip() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        let customOrder: [MenuSection] = [.tiles, .sitemaps, .mainUI, .system]
+        prefs.sectionOrder = customOrder
+
+        let encoded = try JSONEncoder().encode(prefs)
+        let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
+        #expect(decoded.sectionOrder == customOrder)
+    }
+
+    /// Visibility flags round-trip correctly.
+    @Test func visibilityFlagsRoundTrip() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        prefs.isMainUIVisible = false
+        prefs.isTilesVisible = true
+
+        let encoded = try JSONEncoder().encode(prefs)
+        let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
+        #expect(decoded.isMainUIVisible == false)
+        #expect(decoded.isTilesVisible == true)
+        #expect(decoded.isSitemapsVisible == nil) // unset fields stay nil
+        #expect(decoded.isSystemVisible == nil)
+    }
+
+    /// avatarImagePath round-trips correctly.
+    @Test func avatarImagePathRoundTrip() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        prefs.avatarImagePath = "/Library/Application Support/homes/test.jpg"
+
+        let encoded = try JSONEncoder().encode(prefs)
+        let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
+        #expect(decoded.avatarImagePath == "/Library/Application Support/homes/test.jpg")
+    }
+}
