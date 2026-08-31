@@ -81,9 +81,58 @@ struct MenuDataTests {
         #expect(result.isEmpty)
     }
 
+    // MARK: - State machine
+
+    @Test("hasSuccessfullyLoaded is false on init")
+    func initialLoadGateIsFalse() {
+        let service = MenuDataService()
+        #expect(service.hasSuccessfullyLoaded == false)
+    }
+
+    @Test("clearAll empties all collections")
+    func clearAllEmptiesCollections() {
+        let service = MenuDataService()
+        service.sitemaps = [makeSitemap(name: "a", label: "A")]
+        service.uiTiles = [makeUITile()]
+        service.uiPages = [makeUIPage()]
+        service.clearAll()
+        #expect(service.sitemaps.isEmpty)
+        #expect(service.uiTiles.isEmpty)
+        #expect(service.uiPages.isEmpty)
+    }
+
+    @Test("clearAll does not reset hasSuccessfullyLoaded")
+    func clearAllKeepsLoadGate() {
+        let service = MenuDataService()
+        service.hasSuccessfullyLoaded = true
+        service.clearAll()
+        // clearAll is for refresh, not home switch — gate should stay true
+        #expect(service.hasSuccessfullyLoaded == true)
+    }
+
+    @Test("clearForHomeSwitch empties collections and resets load gate")
+    func clearForHomeSwitchResetsAll() {
+        let service = MenuDataService()
+        service.sitemaps = [makeSitemap(name: "a", label: "A")]
+        service.hasSuccessfullyLoaded = true
+        service.clearForHomeSwitch()
+        #expect(service.sitemaps.isEmpty)
+        #expect(service.uiTiles.isEmpty)
+        #expect(service.uiPages.isEmpty)
+        #expect(service.hasSuccessfullyLoaded == false)
+    }
+
     // MARK: - Helpers
 
     private func makeSitemap(name: String, label: String) -> OpenHABSitemap {
         OpenHABSitemap(name: name, icon: "", label: label, link: "", page: nil)
+    }
+
+    private func makeUITile() -> OpenHABUiTile {
+        OpenHABUiTile(name: "Tile", url: "/ui/tile", imageUrl: "")
+    }
+
+    private func makeUIPage() -> OpenHABUIPage {
+        OpenHABUIPage(uid: "page1", label: "Page", icon: "", order: 0, url: "/ui/page1")
     }
 }

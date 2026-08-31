@@ -21,13 +21,24 @@ class MenuDataService: ObservableObject {
     @Published var uiTiles: [OpenHABUiTile] = []
     @Published var uiPages: [OpenHABUIPage] = []
     @Published var isLoading = false
+    /// `true` while `MainActorNetworkTracker` reports an active connection.
+    @Published private(set) var isConnected = false
+    /// `true` once the **current** home has had at least one successful data fetch.
+    /// Resets to `false` on every home switch so the "Home" MainUI entry is re-gated
+    /// on each switch (consistent with sitemaps/pages behaviour).
+    @Published var hasSuccessfullyLoaded = false
 
     private var cancellables = Set<AnyCancellable>()
 
     init() {
         MainActorNetworkTracker.shared.$activeConnection
             .sink { [weak self] activeConnection in
-                self?.clearAll()
+                guard let self else { return }
+                isConnected = activeConnection != nil
+                // Connection loss: retain the last-good snapshot — do NOT clear.
+                // New connection: fetch without wiping first so the menu stays
+                // populated until fresh data arrives.
+                guard let activeConnection else { return }
                 Task { [weak self] in
                     await self?.fetchData(activeConnection: activeConnection)
                 }
@@ -35,11 +46,22 @@ class MenuDataService: ObservableObject {
             .store(in: &cancellables)
     }
 
-    /// Clears all data immediately (shows empty state while fetching).
+    /// Clears all data immediately (use for user-initiated refresh or explicit resets).
     func clearAll() {
         sitemaps = []
         uiTiles = []
         uiPages = []
+    }
+
+    /// Call on home switch: clears data and resets the load gate.
+    /// Does NOT start an eager fetch — `MainActorNetworkTracker.shared.activeConnection`
+    /// still belongs to the old home at this point (the NetworkConnectionService
+    /// re-evaluates asynchronously). The `init()` Combine subscription fires once the
+    /// tracker reconnects to the new home and handles all fetching from there.
+    func clearForHomeSwitch() {
+        clearAll()
+        hasSuccessfullyLoaded = false
+        isConnected = false
     }
 
     /// Returns the display label for a tile or page URL, or an empty string if not found.
@@ -49,7 +71,7 @@ class MenuDataService: ObservableObject {
         return ""
     }
 
-    /// Re-fetches all menu data from the currently active connection.
+    /// Re-fetches all menu data from the currently active connection, clearing first.
     func refresh() {
         let connection = MainActorNetworkTracker.shared.activeConnection
         clearAll()
@@ -67,11 +89,11 @@ class MenuDataService: ObservableObject {
             await fetchSitemaps(using: openAPIService)
             await fetchTiles(using: openAPIService)
             await fetchPages(using: openAPIService, rootUrl: activeConnection.configuration.url)
+            // Service init succeeded — home is reachable; gate the "Home" entry.
+            hasSuccessfullyLoaded = true
         } catch {
             Logger.drawerView.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
-            sitemaps = []
-            uiTiles = []
-            uiPages = []
+            // Retain existing snapshot on connection-level failure.
         }
     }
 
@@ -82,7 +104,7 @@ class MenuDataService: ObservableObject {
             sitemaps = fetched
         } catch {
             Logger.drawerView.error("Failed to fetch sitemaps: \(error.localizedDescription)")
-            sitemaps = []
+            // Retain existing sitemaps on individual-fetch failure.
         }
     }
 
@@ -92,7 +114,7 @@ class MenuDataService: ObservableObject {
             Logger.drawerView.info("Fetched UI tiles successfully")
         } catch {
             Logger.drawerView.error("Failed to fetch UI tiles: \(error.localizedDescription)")
-            uiTiles = []
+            // Retain existing tiles on individual-fetch failure.
         }
     }
 
@@ -102,7 +124,7 @@ class MenuDataService: ObservableObject {
             Logger.drawerView.info("Fetched UI pages successfully")
         } catch {
             Logger.drawerView.error("Failed to fetch UI pages: \(error.localizedDescription)")
-            uiPages = []
+            // Retain existing pages on individual-fetch failure.
         }
     }
 

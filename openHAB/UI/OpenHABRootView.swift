@@ -107,7 +107,7 @@ struct OpenHABRootView: View {
             webViewModel.reloadView()
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
-            menuData.clearAll()
+            menuData.clearForHomeSwitch()
             switchToSavedView()
             // Reconcile the web view with the new home: loads if the active connection
             // already belongs to it (e.g. between two demo homes), otherwise blanks and
