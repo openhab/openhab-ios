@@ -103,16 +103,19 @@ Specific candidates:
 ### Home section header (`homeHeader()` / `homesMenu()` in `ToolbarMenu.swift`)
 
 - [ ] Subtitle duplication when expanded — suppress `ConnectionView` home-name subtitle while `isHomeExpanded == true`
+- [x] Cogwheel (gear) in collapsed header visible and animated — two-phase expand: ConnectionView + gear fade out (phase 1), layout collapses + chevron rotates (phase 2); exact mirror on collapse *(Layer 3A, committed)*
 - [ ] Reload left / cogwheel right in collapsed header; home-name tap expands/collapses
-- [ ] Replace URL + credential text with connection-type symbols (wifi / cloud / struck-through cloud / no-cloud / disconnected)
-- [ ] Per-home avatar: `PhotosPicker`, circular in menu, larger in Home Settings; stored as file, downscaled to screen resolution
+- [x] Replace URL + credential text with connection-type symbols in rows: `.wifi`, `.cloudFill`, `.exclamationmarkIcloud` (outline; matches header error icon), no symbol when cloud service off *(Layer 3A/3B)*
+- [x] Per-home avatar: circular 28×28 in menu rows, placeholder `houseFill` when no image set; blue ring replaces checkmark as active-home indicator; stored as file via `AvatarImageHelper` *(Layer 3B — menu side done; PhotosPicker + Home Settings = Layer 3C)*
+- [x] Unified row height: normal mode and edit mode rows both `44 pt`; List constrained via `frame(height:)` + `.clipped()` + `.environment(\.defaultMinListRowHeight, rowHeight)` *(Layer 3B)*
+- [x] Animated add/delete/mode-switch: `withAnimation` on all `homes` mutations; `.transition(.opacity)` on individual rows and on mode containers *(Layer 3B)*
+- [x] Single Edit button; edit mode = add / delete / reorder only; cogwheels hidden in edit mode; full-width Add Home above Done; dimmed trash on active-home row keeps column alignment *(Layer 3B)*
 - [ ] Full-row tap area fix (`contentShape` audit across all row types)
 - [ ] Broken/missing connection shown as disconnected symbol in header
 - [ ] Menu entries (sitemaps, pages, tiles) retained on connection loss; cleared only on home switch
 - [ ] "Home" MainUI entry gated behind `hasEverSuccessfullyLoaded`
-- [ ] Single Edit button; edit mode = add / delete / reorder only; cogwheels hidden in edit mode; full-width Add Home above Done
 
-### Per-home section customisation (Home Settings)
+### Per-home section customisation (Home Settings — Layer 3C)
 
 - [ ] Home name editable via `TextField` in `HomeSettingsView`
 - [ ] Avatar `PhotosPicker` in `HomeSettingsView`; save/persist via `AvatarImageHelper`; shown larger next to editable name

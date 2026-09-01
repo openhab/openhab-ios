@@ -136,3 +136,91 @@ struct MenuDataTests {
         OpenHABUIPage(uid: "page1", label: "Page", icon: "", order: 0, url: "/ui/page1")
     }
 }
+
+// MARK: - Connection symbol logic
+
+@Suite("InlineHomePickerView.connectionSymbols")
+@MainActor
+struct ConnectionSymbolTests {
+    @Test("Demo mode yields no symbols")
+    func demoModeYieldsEmpty() throws {
+        let prefs = try makePrefs(demomode: true)
+        #expect(InlineHomePickerView.connectionSymbols(for: prefs).isEmpty)
+    }
+
+    @Test("No local URL and cloud disabled yields no symbols")
+    func noConnectionsYieldsEmpty() throws {
+        let prefs = try makePrefs()
+        #expect(InlineHomePickerView.connectionSymbols(for: prefs).isEmpty)
+    }
+
+    @Test("Local URL configured yields wifi symbol")
+    func localURLYieldsWifi() throws {
+        let prefs = try makePrefs(localURL: "http://192.168.1.1:8080")
+        #expect(InlineHomePickerView.connectionSymbols(for: prefs) == [.wifi])
+    }
+
+    @Test("Cloud enabled with username and password yields cloudFill")
+    func cloudWithCredentialsYieldsCloudFill() throws {
+        let prefs = try makePrefs(remoteUsername: "user@example.com", remotePassword: "secret", cloudEnabled: true)
+        #expect(InlineHomePickerView.connectionSymbols(for: prefs) == [.cloudFill])
+    }
+
+    @Test("Cloud enabled without username yields cloudSlash")
+    func cloudWithoutUsernameYieldsCloudSlash() throws {
+        let prefs = try makePrefs(cloudEnabled: true)
+        #expect(InlineHomePickerView.connectionSymbols(for: prefs) == [.cloudSlash])
+    }
+
+    @Test("Cloud enabled with username but no password yields cloudSlash")
+    func cloudWithUsernameButNoPasswordYieldsCloudSlash() throws {
+        let prefs = try makePrefs(remoteUsername: "user@example.com", cloudEnabled: true)
+        #expect(InlineHomePickerView.connectionSymbols(for: prefs) == [.cloudSlash])
+    }
+
+    @Test("Cloud enabled with empty URL yields cloudSlash")
+    func cloudWithEmptyURLYieldsCloudSlash() throws {
+        let prefs = try makePrefs(remoteURL: "", remoteUsername: "user@example.com", remotePassword: "secret", cloudEnabled: true)
+        #expect(InlineHomePickerView.connectionSymbols(for: prefs) == [.cloudSlash])
+    }
+
+    @Test("Local URL plus cloud with credentials yields wifi and cloudFill")
+    func localAndCloudWithCredentials() throws {
+        let prefs = try makePrefs(localURL: "http://192.168.1.1:8080", remoteUsername: "user@example.com", remotePassword: "secret", cloudEnabled: true)
+        #expect(InlineHomePickerView.connectionSymbols(for: prefs) == [.wifi, .cloudFill])
+    }
+
+    @Test("Local URL plus cloud without credentials yields wifi and cloudSlash")
+    func localAndCloudWithoutCredentials() throws {
+        let prefs = try makePrefs(localURL: "http://192.168.1.1:8080", cloudEnabled: true)
+        #expect(InlineHomePickerView.connectionSymbols(for: prefs) == [.wifi, .cloudSlash])
+    }
+
+    // MARK: - Helper
+
+    /// Constructs a `HomePreferences` via JSON decoding, which is the only way to
+    /// create one from outside `OpenHABCore` (the memberwise init is fileprivate).
+    private func makePrefs(
+        demomode: Bool = false,
+        localURL: String = "",
+        remoteURL: String = "https://myopenhab.org",
+        remoteUsername: String = "",
+        remotePassword: String = "",
+        cloudEnabled: Bool = false
+    ) throws -> HomePreferences {
+        let json = """
+        {
+            "id": "\(UUID().uuidString)",
+            "demomode": \(demomode),
+            "localConnectionConfig": {"url": "\(localURL)"},
+            "remoteConnectionConfig": {
+                "url": "\(remoteURL)",
+                "username": "\(remoteUsername)",
+                "password": "\(remotePassword)",
+                "supportsNotifications": \(cloudEnabled)
+            }
+        }
+        """
+        return try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+    }
+}

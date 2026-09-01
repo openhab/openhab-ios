@@ -41,14 +41,22 @@ struct InlineHomePickerView: View {
     @State private var showingDeleteAlert = false
     @State private var showingNewHomeAlert = false
 
+    // Shared row height keeps normal and edit mode visually identical.
+    private static let rowHeight: CGFloat = 44
+
     var body: some View {
         VStack(spacing: 0) {
             if showEditMode {
                 editModeList
+                    .transition(.opacity)
             } else {
-                ForEach(homes, id: \.self) { home in
-                    homeRow(for: home)
+                VStack(spacing: 0) {
+                    ForEach(homes, id: \.self) { home in
+                        homeRow(for: home)
+                            .transition(.opacity)
+                    }
                 }
+                .transition(.opacity)
             }
             Divider().padding(.horizontal, 12)
             actionBar
@@ -61,7 +69,9 @@ struct InlineHomePickerView: View {
             Button(String(localized: "Cancel"), role: .cancel) {}
             Button(String(localized: "Delete"), role: .destructive) {
                 Preferences.shared.deleteStoredHome(homeForDeleteAlert)
-                homes = Preferences.shared.listStoredHomes()
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    homes = Preferences.shared.listStoredHomes()
+                }
             }
         }
         .alert(String(localized: "New Home"), isPresented: $showingNewHomeAlert) {
@@ -69,9 +79,11 @@ struct InlineHomePickerView: View {
             Button(String(localized: "Cancel"), role: .cancel) {}
             Button(String(localized: "Create")) {
                 Preferences.shared.createAndLoadNewStoredSettings(homeName: newHomeName)
-                homes = Preferences.shared.listStoredHomes()
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    homes = Preferences.shared.listStoredHomes()
+                }
                 homeForSettings = Preferences.shared.currentHomePreferences.id
-                showEditMode = false
+                withAnimation(.easeInOut(duration: 0.25)) { showEditMode = false }
             }
         } message: {
             Text("For Shortcuts to work across multiple devices, each home must have the same name on every device.")
@@ -99,7 +111,7 @@ struct InlineHomePickerView: View {
         let prefs = Preferences.shared.storedHomeWithCredentials(forId: home)
 
         HStack(spacing: 8) {
-            avatarView(for: home)
+            avatarView(for: home, isActive: isActive)
 
             Text(homeName)
                 .font(.subheadline)
@@ -112,11 +124,6 @@ struct InlineHomePickerView: View {
                 connectionSymbolsView(for: prefs)
             }
 
-            if isActive {
-                Image(systemSymbol: .checkmark)
-                    .foregroundStyle(.blue)
-            }
-
             // Gear opens Home Settings without triggering a home switch.
             Button(action: { homeForSettings = home }) {
                 Image(systemSymbol: .gear)
@@ -124,8 +131,8 @@ struct InlineHomePickerView: View {
             }
             .buttonStyle(.plain)
         }
+        .frame(height: Self.rowHeight)
         .padding(.horizontal, 16)
-        .padding(.vertical, 8)
         .contentShape(Rectangle())
         .onTapGesture { selectHome(home) }
     }
@@ -149,9 +156,16 @@ struct InlineHomePickerView: View {
         .scrollContentBackground(.hidden)
         .scrollDisabled(true)
         .environment(\.editMode, .constant(.active))
+        // List enforces a defaultMinListRowHeight independently of listRowInsets and
+        // frame(height:) on row content. Override it so the List doesn't inflate rows
+        // beyond our target height.
+        .environment(\.defaultMinListRowHeight, Self.rowHeight)
         // List with scrollDisabled doesn't auto-shrink; fix the height so
         // the parent ScrollView remains in control of total menu scrolling.
-        .frame(height: CGFloat(homes.count) * 52)
+        // .clipped() prevents the List from reporting a taller preferred size
+        // than the frame to the parent VStack.
+        .frame(height: CGFloat(homes.count) * Self.rowHeight)
+        .clipped()
     }
 
     @ViewBuilder
@@ -161,6 +175,8 @@ struct InlineHomePickerView: View {
         let prefs = Preferences.shared.storedHomeWithCredentials(forId: home)
 
         HStack(spacing: 8) {
+            avatarView(for: home, isActive: isActive)
+
             Text(homeName)
                 .font(.subheadline)
                 .fontWeight(.medium)
@@ -172,23 +188,19 @@ struct InlineHomePickerView: View {
                 connectionSymbolsView(for: prefs)
             }
 
-            if isActive {
-                Image(systemSymbol: .checkmark)
-                    .foregroundStyle(.blue)
-            } else {
-                Button(action: {
-                    homeNameForDeleteAlert = homeName
-                    homeForDeleteAlert = home
-                    showingDeleteAlert = true
-                }) {
-                    Image(systemSymbol: .trash)
-                        .foregroundStyle(.red)
-                }
-                .buttonStyle(.plain)
+            // Active home cannot be deleted; show a dimmed trash to keep column alignment.
+            Button(action: {
+                homeNameForDeleteAlert = homeName
+                homeForDeleteAlert = home
+                showingDeleteAlert = true
+            }) {
+                Image(systemSymbol: .trash)
+                    .foregroundStyle(isActive ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.red))
             }
+            .buttonStyle(.plain)
+            .disabled(isActive)
         }
-        // Fixed height matches the frame(height:) calculation above.
-        .frame(height: 52)
+        .frame(height: Self.rowHeight)
         .padding(.horizontal, 16)
         .contentShape(Rectangle())
     }
@@ -214,7 +226,7 @@ struct InlineHomePickerView: View {
 
                 Divider()
 
-                Button(action: { showEditMode = false }) {
+                Button(action: { withAnimation(.easeInOut(duration: 0.25)) { showEditMode = false } }) {
                     Text("Done")
                         .font(.footnote)
                         .fontWeight(.medium)
@@ -226,7 +238,7 @@ struct InlineHomePickerView: View {
             .padding(.horizontal, 16)
         } else {
             // Normal mode: single Edit button — add/delete/reorder only in edit mode
-            Button(action: { showEditMode = true }) {
+            Button(action: { withAnimation(.easeInOut(duration: 0.25)) { showEditMode = true } }) {
                 Text("Edit")
                     .font(.footnote)
                     .frame(maxWidth: .infinity)
@@ -239,14 +251,33 @@ struct InlineHomePickerView: View {
 
     // MARK: - Avatar
 
+    /// Always renders a 28 × 28 avatar circle. Uses the home's custom image when
+    /// available, falling back to a generic house icon. A blue ring overlaid when
+    /// `isActive` replaces the separate checkmark, keeping row widths consistent.
     @ViewBuilder
-    private func avatarView(for homeId: UUID) -> some View {
-        if let image = AvatarImageHelper.load(for: homeId) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 28, height: 28)
-                .clipShape(.circle)
+    private func avatarView(for homeId: UUID, isActive: Bool) -> some View {
+        Group {
+            if let image = AvatarImageHelper.load(for: homeId) {
+                image
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                ZStack {
+                    Circle()
+                        .fill(Color.secondary.opacity(0.12))
+                    Image(systemSymbol: .houseFill)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .frame(width: 28, height: 28)
+        .clipShape(.circle)
+        .overlay {
+            if isActive {
+                Circle()
+                    .strokeBorder(.blue, lineWidth: 2)
+            }
         }
     }
 
@@ -264,10 +295,14 @@ struct InlineHomePickerView: View {
         }
         // `supportsNotifications` is the "openHAB Cloud Service" toggle.
         // When it is off the user has explicitly disabled cloud; show no symbol.
-        if prefs.remoteConnectionConfig.supportsNotifications {
-            result.append(
-                prefs.remoteConnectionConfig.username.isEmpty ? .cloudSlash : .cloudFill
-            )
+        let remote = prefs.remoteConnectionConfig
+        if remote.supportsNotifications {
+            // All three must be present: a server URL, a username, and a password.
+            // username and password come from the Keychain (injected by
+            // storedHomeWithCredentials); either being empty means the connection
+            // will fail authentication even if the URL is correct.
+            let isValid = !remote.url.isEmpty && !remote.username.isEmpty && !remote.password.isEmpty
+            result.append(isValid ? .cloudFill : .cloudSlash)
         }
         return result
     }
@@ -283,7 +318,7 @@ struct InlineHomePickerView: View {
             if !symbols.isEmpty {
                 HStack(spacing: 4) {
                     ForEach(symbols, id: \.self) { symbol in
-                        Image(systemSymbol: sfSymbol(for: symbol))
+                        symbolImage(for: symbol)
                     }
                 }
                 .font(.caption)
@@ -292,11 +327,16 @@ struct InlineHomePickerView: View {
         }
     }
 
-    private func sfSymbol(for symbol: HomeConnectionSymbol) -> SFSymbol {
+    @ViewBuilder
+    private func symbolImage(for symbol: HomeConnectionSymbol) -> some View {
         switch symbol {
-        case .wifi: .wifi
-        case .cloudFill: .cloudFill
-        case .cloudSlash: .cloudSlash
+        case .wifi:
+            Image(systemSymbol: .wifi)
+        case .cloudFill:
+            Image(systemSymbol: .cloudFill)
+        case .cloudSlash:
+            // Outline variant keeps the exclamation mark visible against light/grey backgrounds.
+            Image(systemSymbol: .exclamationmarkIcloud)
         }
     }
 
