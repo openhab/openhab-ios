@@ -116,7 +116,7 @@ struct InlineHomePickerView: View {
             Text(homeName)
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .lineLimit(1)
+                .lineLimit(2)
 
             Spacer(minLength: 4)
 
@@ -180,7 +180,7 @@ struct InlineHomePickerView: View {
             Text(homeName)
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .lineLimit(1)
+                .lineLimit(2)
 
             Spacer(minLength: 4)
 
