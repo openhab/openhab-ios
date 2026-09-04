@@ -9,23 +9,25 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Observation
 import OpenHABCore
 import os.log
 
 /// Provides menu data (sitemaps, tiles, pages) for the navigation menu.
 /// Extracted from DrawerView for testability and reuse.
 @MainActor
-class MenuDataService: ObservableObject {
-    @Published var sitemaps: [OpenHABSitemap] = []
-    @Published var uiTiles: [OpenHABUiTile] = []
-    @Published var uiPages: [OpenHABUIPage] = []
-    @Published var isLoading = false
+@Observable
+class MenuDataService {
+    var sitemaps: [OpenHABSitemap] = []
+    var uiTiles: [OpenHABUiTile] = []
+    var uiPages: [OpenHABUIPage] = []
+    var isLoading = false
     /// `true` while `MainActorNetworkTracker` reports an active connection.
-    @Published private(set) var isConnected = false
+    private(set) var isConnected = false
     /// `true` once the **current** home has had at least one successful data fetch.
     /// Resets to `false` on every home switch so the "Home" MainUI entry is re-gated
     /// on each switch (consistent with sitemaps/pages behaviour).
-    @Published var hasSuccessfullyLoaded = false
+    var hasSuccessfullyLoaded = false
 
     init() {
         // Observe activeConnection using Swift Concurrency — `for await` on

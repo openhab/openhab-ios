@@ -23,7 +23,7 @@ struct OpenHABRootView: View {
     @StateObject private var notificationService = NotificationActionService()
     @StateObject private var pushService = PushRegistrationService()
     @StateObject private var crashService = CrashReportService()
-    @StateObject private var menuData = MenuDataService()
+    @State private var menuData = MenuDataService()
     @StateObject private var webViewModel = OpenHABWebViewModel()
     @State private var menuPresented = false
     @State private var navbarActionsPresented = false

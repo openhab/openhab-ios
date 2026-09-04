@@ -58,7 +58,7 @@ struct ConnectionView: View {
 /// Toolbar dropdown menu replacing the SideMenu drawer.
 struct ToolbarMenu: View {
     @Binding var isPresented: Bool
-    @ObservedObject var menuData: MenuDataService
+    var menuData: MenuDataService
     @State private var scrollViewContentSize: Double = 0
     // Section expansion is stored per home in `HomePreferences`. These `@State`
     // flags mirror the active home for immediate UI updates and are loaded from
@@ -373,20 +373,16 @@ struct ToolbarMenu: View {
             .animation(Self.sectionAnimation, value: isTilesExpanded)
             .animation(Self.sectionAnimation, value: isSystemExpanded)
 
-            if #available(iOS 18.0, *) {
-                scrollView.onScrollGeometryChange(for: Double.self, of: { $0.contentSize.height
-                }) { _, newValue in
-                    // Animate the container growing/shrinking so it tracks the section
-                    // content instead of snapping. Skip the first measurement (0 → N),
-                    // which would otherwise shrink the menu from full height on open.
-                    if scrollViewContentSize == 0 {
-                        scrollViewContentSize = newValue
-                    } else {
-                        withAnimation(Self.sectionAnimation) { scrollViewContentSize = newValue }
-                    }
+            scrollView.onScrollGeometryChange(for: Double.self, of: { $0.contentSize.height
+            }) { _, newValue in
+                // Animate the container growing/shrinking so it tracks the section
+                // content instead of snapping. Skip the first measurement (0 → N),
+                // which would otherwise shrink the menu from full height on open.
+                if scrollViewContentSize == 0 {
+                    scrollViewContentSize = newValue
+                } else {
+                    withAnimation(Self.sectionAnimation) { scrollViewContentSize = newValue }
                 }
-            } else {
-                scrollView
             }
 
         }

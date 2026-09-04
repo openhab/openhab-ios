@@ -92,7 +92,7 @@ Specific candidates:
 
 - **Avatar image helper** (Layer 1): downscale-to-screen-resolution logic; file write/read round-trip; path stored in `HomePreferences` after save.
 - **`MenuDataService` state machine** (Layer 2): snapshot retained on connection drop, cleared on home switch; `hasEverSuccessfullyLoaded` gate correct on first load vs. reconnect.
-- **Connection symbol mapping** (Layer 3): parameterised test over `(localURL, remoteURL, hasCredentials, cloudServiceEnabled, isConnected)` → expected symbol set. Cases to cover: local active, cloud active with credentials, cloud active no credentials, cloud service off, offline.
+- **Connection symbol mapping** (Layer 3): parameterised test over `(localURL, remoteURL, hasCredentials, cloudServiceEnabled, isConnected)` → expected symbol set. Cases to cover: local active, cloud active with credentials, cloud active no credentials, cloud service off, offline. *(8 cases written in `ConnectionSymbolTests`; missing: `disableRemoteConnection = true` → cloud symbol suppressed)*
 - **Section order/visibility persistence** (Layer 4): round-trip through `HomePreferences`; `ToolbarMenu` renders sections in persisted order.
 - **Notification visibility gate** (Layer 5): combined condition maps correctly to shown/hidden.
 
@@ -102,18 +102,18 @@ Specific candidates:
 
 ### Home section header (`homeHeader()` / `homesMenu()` in `ToolbarMenu.swift`)
 
-- [ ] Subtitle duplication when expanded — suppress `ConnectionView` home-name subtitle while `isHomeExpanded == true`
+- [x] Subtitle duplication when expanded — suppress `ConnectionView` home-name subtitle while `isHomeExpanded == true`
 - [x] Cogwheel (gear) in collapsed header visible and animated — two-phase expand: ConnectionView + gear fade out (phase 1), layout collapses + chevron rotates (phase 2); exact mirror on collapse *(Layer 3A, committed)*
-- [ ] Reload left / cogwheel right in collapsed header; home-name tap expands/collapses
+- [x] Reload left / cogwheel right in collapsed header; home-name tap expands/collapses — reload precedes gear in the right cluster; entire left area (chevron + avatar + home name) is the expand/collapse tap target
 - [x] Replace URL + credential text with connection-type symbols in rows: `.wifi`, `.cloudFill`, `.exclamationmarkIcloud` (outline; matches header error icon), no symbol when cloud service off *(Layer 3A/3B)*
 - [x] Per-home avatar: circular 28×28 in menu rows, placeholder `houseFill` when no image set; blue ring replaces checkmark as active-home indicator; stored as file via `AvatarImageHelper` *(Layer 3B — menu side done; PhotosPicker + Home Settings = Layer 3C)*
 - [x] Unified row height: normal mode and edit mode rows both `44 pt`; List constrained via `frame(height:)` + `.clipped()` + `.environment(\.defaultMinListRowHeight, rowHeight)` *(Layer 3B)*
 - [x] Animated add/delete/mode-switch: `withAnimation` on all `homes` mutations; `.transition(.opacity)` on individual rows and on mode containers *(Layer 3B)*
 - [x] Single Edit button; edit mode = add / delete / reorder only; cogwheels hidden in edit mode; full-width Add Home above Done; dimmed trash on active-home row keeps column alignment *(Layer 3B)*
-- [ ] Full-row tap area fix (`contentShape` audit across all row types)
-- [ ] Broken/missing connection shown as disconnected symbol in header
-- [ ] Menu entries (sitemaps, pages, tiles) retained on connection loss; cleared only on home switch
-- [ ] "Home" MainUI entry gated behind `hasEverSuccessfullyLoaded`
+- [x] Full-row tap area fix — `contentShape(Rectangle())` present on every row type: `homeRow`, `editModeRow`, `menuRow`, `menuDetailRow`, `sectionToggleHeader`
+- [x] Broken/missing connection shown as disconnected symbol in header — `ConnectionView` shows `.exclamationmarkIcloudFill` + "Connecting…" when `activeConnection == nil`
+- [x] Menu entries (sitemaps, pages, tiles) retained on connection loss; cleared only on home switch — `MenuDataService` loop does `guard let activeConnection else { continue }` on drop; data cleared only via `clearAll()` (explicit refresh) or `clearForHomeSwitch()`
+- [x] "Home" MainUI entry gated behind `hasEverSuccessfullyLoaded` — `mainUIMenu()` wraps the Home row in `if menuData.hasSuccessfullyLoaded`
 
 ### Per-home section customisation (Home Settings — Layer 3C)
 
@@ -123,7 +123,7 @@ Specific candidates:
 - [x] **Avatar icon/circle color logic**: 3-zone HSL lightness (L < 0.30 / mid / L > 0.70) × 2 environments → 6-branch table; circle adapts only at extremes, icon always contrasts circle; `hexString` rounding fix (`lroundf`); `HomeAvatarColorTests` covers all 6 branches, invariants (complementarity, contrast), hue preservation *(Layer 3C)*
 - [x] **Photo re-crop**: tapping the photo button when a photo is already set opens `CropImageView` directly on the stored `UIImage` instead of launching the gallery picker again *(Layer 3C)*
 - [x] **Avatar in collapsed home menu header**: the per-home avatar should appear alongside the cogwheel and home name when the home section is collapsed, matching the same treatment given to the gear icon *(Layer 3C or 4)*
-- [ ] **Deployment target iOS 18**: make the target consistently iOS 18 across the project (amend the first branch commit); audit and remove any `#available(iOS 17, *)` guards or iOS 17-era defensive code introduced during this branch under the wrong assumption
+- [x] **Deployment target iOS 18**: main app and all iOS targets confirmed at 18.0; Watch target's `IPHONEOS_DEPLOYMENT_TARGET = 17.0` is correct (companion minimum); removed the sole `#available(iOS 18.0, *)` guard in `ToolbarMenu.swift` that wrapped `onScrollGeometryChange` — the `else` branch was dead code at the 18.0 minimum; `MenuDataService` migrated from `ObservableObject`/`@Published` to `@Observable` (consistent with `ToastService`/`WidgetRowViewModel`; `@ObservedObject` removed from `ToolbarMenu`, `@StateObject` → `@State` in `OpenHABRootView`); `HomeSettingsView` corrected `@StateObject` → `@ObservedObject` for shared `MainActorNetworkTracker` singleton; `settingsColorPicker` duplication eliminated
 - [ ] Sections rearrangeable and individually hideable in Home Settings; expansion state shown read-only *(Layer 4 prerequisite)*
 
 ### System & App section (`systemMenu()` in `ToolbarMenu.swift`)

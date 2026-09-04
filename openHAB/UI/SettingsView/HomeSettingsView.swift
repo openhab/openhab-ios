@@ -15,7 +15,7 @@ import PhotosUI
 import SwiftUI
 
 struct HomeSettingsView: View {
-    @StateObject private var networkTracker = MainActorNetworkTracker.shared
+    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     /// When non-nil, the view edits the specified stored home instead of the active home.
     var homeId: UUID?
 
@@ -405,22 +405,16 @@ struct HomeSettingsView: View {
 
     @ViewBuilder
     private var settingsColorPicker: some View {
+        let base = ColorPicker("", selection: Binding(
+            get: { Color(hex: settingsAvatarColor ?? HomeAvatarView.colorPalette[0]) ?? HomeAvatarView.defaultColor },
+            set: { settingsAvatarColor = $0.hexString }
+        ), supportsOpacity: false)
+        .labelsHidden()
+        .frame(width: 30, height: 30)
         if #available(iOS 26, *) {
-            ColorPicker("", selection: Binding(
-                get: { Color(hex: settingsAvatarColor ?? HomeAvatarView.colorPalette[0]) ?? HomeAvatarView.defaultColor },
-                set: { settingsAvatarColor = $0.hexString }
-            ), supportsOpacity: false)
-            .labelsHidden()
-            .frame(width: 30, height: 30)
-            .padding(7)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 13))
+            base.padding(7).glassEffect(.regular, in: RoundedRectangle(cornerRadius: 13))
         } else {
-            ColorPicker("", selection: Binding(
-                get: { Color(hex: settingsAvatarColor ?? HomeAvatarView.colorPalette[0]) ?? HomeAvatarView.defaultColor },
-                set: { settingsAvatarColor = $0.hexString }
-            ), supportsOpacity: false)
-            .labelsHidden()
-            .frame(width: 30, height: 30)
+            base
         }
     }
 
