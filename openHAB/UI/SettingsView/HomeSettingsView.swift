@@ -14,6 +14,15 @@ import os
 import PhotosUI
 import SwiftUI
 
+private struct CropSource: Identifiable {
+    let id = UUID()
+    enum Kind {
+        case photoItem(PhotosPickerItem)
+        case uiImage(UIImage)
+    }
+    let kind: Kind
+}
+
 struct HomeSettingsView: View {
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     /// When non-nil, the view edits the specified stored home instead of the active home.
@@ -42,9 +51,7 @@ struct HomeSettingsView: View {
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var avatarDisplayImage: Image?
     @State private var showPhotoPicker = false
-    @State private var imageToCrop: PhotosPickerItem?
-    @State private var imageToCropDirectly: UIImage?
-    @State private var showCropView = false
+    @State private var cropSource: CropSource?
     @State private var showAvatarPicker = false
     @State private var showColorPickerRow = false
     @State private var settingsAvatarColor: String?
@@ -207,13 +214,11 @@ struct HomeSettingsView: View {
             CommandItemInfoSheet()
                 .presentationDetents([.medium, .large])
         }
-        .fullScreenCover(isPresented: $showCropView) {
+        .fullScreenCover(item: $cropSource) { source in
             let targetId = homeId ?? currentActiveHomeId ?? UUID()
             let bgHex = settingsAvatarColor ?? HomeAvatarView.colorPalette[0]
             let onConfirm: (UIImage) -> Void = { cropped in
-                showCropView = false
-                imageToCrop = nil
-                imageToCropDirectly = nil
+                cropSource = nil
                 selectedPhoto = nil
                 guard let data = cropped.jpegData(compressionQuality: 0.9),
                       let saved = AvatarImageHelper.save(data, for: targetId) else { return }
@@ -225,14 +230,13 @@ struct HomeSettingsView: View {
                 }
             }
             let onCancel: () -> Void = {
-                showCropView = false
-                imageToCrop = nil
-                imageToCropDirectly = nil
+                cropSource = nil
                 selectedPhoto = nil
             }
-            if let item = imageToCrop {
+            switch source.kind {
+            case .photoItem(let item):
                 CropImageView(photoItem: item, initialBackgroundHex: bgHex, onConfirm: onConfirm, onCancel: onCancel)
-            } else if let uiImage = imageToCropDirectly {
+            case .uiImage(let uiImage):
                 CropImageView(image: uiImage, initialBackgroundHex: bgHex, onConfirm: onConfirm, onCancel: onCancel)
             }
         }
@@ -299,8 +303,7 @@ struct HomeSettingsView: View {
         .photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhoto, matching: .images, photoLibrary: .shared())
         .onChange(of: selectedPhoto) { _, item in
             guard let item else { return }
-            imageToCrop = item
-            showCropView = true
+            cropSource = CropSource(kind: .photoItem(item))
         }
     }
 
@@ -369,8 +372,7 @@ struct HomeSettingsView: View {
                 // Re-crop the existing stored photo without going back to the gallery.
                 let targetId = homeId ?? currentActiveHomeId ?? UUID()
                 if let uiImage = UIImage(contentsOfFile: AvatarImageHelper.avatarURL(for: targetId).path) {
-                    imageToCropDirectly = uiImage
-                    showCropView = true
+                    cropSource = CropSource(kind: .uiImage(uiImage))
                 } else {
                     showPhotoPicker = true // file missing — fall back to picker
                 }
