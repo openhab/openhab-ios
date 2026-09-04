@@ -9472,6 +9472,9 @@
           "iconcolor": {
             "type": "string"
           },
+          "commandConfirmMessage": {
+              "type": "string"
+          },
           "pattern": {
             "type": "string"
           },
@@ -9591,6 +9594,9 @@
               "type": "string"
           },
           "iconcolor": {
+              "type": "string"
+          },
+          "commandConfirmMessage": {
               "type": "string"
           },
           "state": {

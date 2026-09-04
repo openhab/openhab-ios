@@ -3245,6 +3245,15 @@ public enum Components {
                     yield &self.storage.value.iconcolor
                 }
             }
+            /// - Remark: Generated from `#/components/schemas/WidgetDTO/commandConfirmMessage`.
+            public var commandConfirmMessage: Swift.String? {
+                get  {
+                    self.storage.value.commandConfirmMessage
+                }
+                _modify {
+                    yield &self.storage.value.commandConfirmMessage
+                }
+            }
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/pattern`.
             public var pattern: Swift.String? {
                 get  {
@@ -3511,6 +3520,7 @@ public enum Components {
             ///   - labelcolor:
             ///   - valuecolor:
             ///   - iconcolor:
+            ///   - commandConfirmMessage:
             ///   - pattern:
             ///   - unit:
             ///   - mappings:
@@ -3551,6 +3561,7 @@ public enum Components {
                 labelcolor: Swift.String? = nil,
                 valuecolor: Swift.String? = nil,
                 iconcolor: Swift.String? = nil,
+                commandConfirmMessage: Swift.String? = nil,
                 pattern: Swift.String? = nil,
                 unit: Swift.String? = nil,
                 mappings: [Components.Schemas.MappingDTO]? = nil,
@@ -3592,6 +3603,7 @@ public enum Components {
                     labelcolor: labelcolor,
                     valuecolor: valuecolor,
                     iconcolor: iconcolor,
+                    commandConfirmMessage: commandConfirmMessage,
                     pattern: pattern,
                     unit: unit,
                     mappings: mappings,
@@ -3634,6 +3646,7 @@ public enum Components {
                 case labelcolor
                 case valuecolor
                 case iconcolor
+                case commandConfirmMessage
                 case pattern
                 case unit
                 case mappings
@@ -3694,6 +3707,8 @@ public enum Components {
                 var valuecolor: Swift.String?
                 /// - Remark: Generated from `#/components/schemas/WidgetDTO/iconcolor`.
                 var iconcolor: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/WidgetDTO/commandConfirmMessage`.
+                var commandConfirmMessage: Swift.String?
                 /// - Remark: Generated from `#/components/schemas/WidgetDTO/pattern`.
                 var pattern: Swift.String?
                 /// - Remark: Generated from `#/components/schemas/WidgetDTO/unit`.
@@ -3762,6 +3777,7 @@ public enum Components {
                     labelcolor: Swift.String? = nil,
                     valuecolor: Swift.String? = nil,
                     iconcolor: Swift.String? = nil,
+                    commandConfirmMessage: Swift.String? = nil,
                     pattern: Swift.String? = nil,
                     unit: Swift.String? = nil,
                     mappings: [Components.Schemas.MappingDTO]? = nil,
@@ -3802,6 +3818,7 @@ public enum Components {
                     self.labelcolor = labelcolor
                     self.valuecolor = valuecolor
                     self.iconcolor = iconcolor
+                    self.commandConfirmMessage = commandConfirmMessage
                     self.pattern = pattern
                     self.unit = unit
                     self.mappings = mappings
@@ -3850,6 +3867,8 @@ public enum Components {
             public var valuecolor: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/iconcolor`.
             public var iconcolor: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/commandConfirmMessage`.
+            public var commandConfirmMessage: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/state`.
             public var state: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/reloadIcon`.
@@ -3874,6 +3893,7 @@ public enum Components {
             ///   - labelcolor:
             ///   - valuecolor:
             ///   - iconcolor:
+            ///   - commandConfirmMessage:
             ///   - state:
             ///   - reloadIcon:
             ///   - visibility:
@@ -3889,6 +3909,7 @@ public enum Components {
                 labelcolor: Swift.String? = nil,
                 valuecolor: Swift.String? = nil,
                 iconcolor: Swift.String? = nil,
+                commandConfirmMessage: Swift.String? = nil,
                 state: Swift.String? = nil,
                 reloadIcon: Swift.Bool? = nil,
                 visibility: Swift.Bool? = nil,
@@ -3904,6 +3925,7 @@ public enum Components {
                 self.labelcolor = labelcolor
                 self.valuecolor = valuecolor
                 self.iconcolor = iconcolor
+                self.commandConfirmMessage = commandConfirmMessage
                 self.state = state
                 self.reloadIcon = reloadIcon
                 self.visibility = visibility
@@ -3920,6 +3942,7 @@ public enum Components {
                 case labelcolor
                 case valuecolor
                 case iconcolor
+                case commandConfirmMessage
                 case state
                 case reloadIcon
                 case visibility

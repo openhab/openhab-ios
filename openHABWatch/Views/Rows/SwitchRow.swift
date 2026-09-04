@@ -16,6 +16,7 @@ import SwiftUI
 struct SwitchRow: View {
     let widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    @EnvironmentObject var pageData: UserData
     let stateToken: String
     @State private var localIsOn: Bool?
     @State private var commandSender = WidgetCommandDispatcher()
@@ -50,6 +51,11 @@ struct SwitchRow: View {
         .accessibilityValue(isOn ? "On" : "Off")
         .onChange(of: stateToken) {
             localIsOn = nil
+        }
+        .onAppear {
+            commandSender.confirmationHandler = { message, proceed in
+                pageData.pendingCommandConfirmation = PendingCommandConfirmation(message: message, onConfirm: proceed)
+            }
         }
     }
 }

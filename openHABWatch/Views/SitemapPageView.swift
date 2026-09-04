@@ -125,6 +125,20 @@ struct SitemapPageView: View {
         .refreshable {
             await viewModel.refreshUrl(force: true)
         }
+        .environmentObject(viewModel)
+        .alert(
+            "Confirm",
+            isPresented: Binding(
+                get: { viewModel.pendingCommandConfirmation != nil },
+                set: { if !$0 { viewModel.pendingCommandConfirmation = nil } }
+            ),
+            presenting: viewModel.pendingCommandConfirmation
+        ) { pending in
+            Button("Cancel", role: .cancel) {}
+            Button("Confirm") { pending.onConfirm() }
+        } message: { pending in
+            Text(pending.message)
+        }
     }
 
     init(viewModel: UserData, isRoot: Bool = true) {

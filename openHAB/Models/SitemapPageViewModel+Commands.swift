@@ -64,18 +64,35 @@ extension SitemapPageViewModel {
             phase: phase,
             key: key
         ) { [weak self] itemname, command in
-            self?.sendCommand(itemname: itemname, command: command, origin: .command)
+            self?.dispatchConfirmingIfNeeded(itemname: itemname, command: command, policy: policy)
         }
     }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         commandDispatcher.send(command, for: item, policy: .immediate, phase: .change) { [weak self] itemname, command in
-            self?.sendCommand(itemname: itemname, command: command, origin: .command)
+            self?.dispatchConfirmingIfNeeded(itemname: itemname, command: command, policy: .immediate)
         }
     }
 
     func sendCommand(itemname: String, command: String) {
-        sendCommand(itemname: itemname, command: command, origin: .command)
+        dispatchConfirmingIfNeeded(itemname: itemname, command: command, policy: .immediate)
+    }
+
+    /// Gates a discrete, single-shot command behind a confirmation alert if the originating
+    /// widget has a `commandConfirmMessage` set. Only `.immediate`-policy dispatches are gated:
+    /// continuous-drag interactions (Slider dragging, Setpoint's live update, ColorPicker's
+    /// debounced wheel drag -- all routed through sendToUpdate or a .debounce policy) can fire
+    /// their completion closure repeatedly during a single gesture, so confirming each one would
+    /// prompt mid-drag. Confirming a continuous gesture once, up front, is a different UX pattern
+    /// that isn't implemented here.
+    private func dispatchConfirmingIfNeeded(itemname: String, command: String, policy: WidgetCommandPolicy) {
+        guard case .immediate = policy, let message = commandConfirmMessagesByItemName[itemname] else {
+            sendCommand(itemname: itemname, command: command, origin: .command)
+            return
+        }
+        pendingCommandConfirmation = PendingCommandConfirmation(message: message) { [weak self] in
+            self?.sendCommand(itemname: itemname, command: command, origin: .command)
+        }
     }
 
     func sendToUpdate(item: OpenHABItem?,

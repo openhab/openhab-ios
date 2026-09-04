@@ -16,6 +16,15 @@ import os.log
 public final class WidgetCommandDispatcher {
     private var pendingTasks: [String: Task<Void, Never>] = [:]
 
+    /// When set, an `.immediate`-policy widget dispatch whose widget has a non-empty
+    /// commandConfirmMessage is routed through this instead of sending directly -- it's expected
+    /// to present a confirmation UI and call `proceed()` if the user confirms. Only `.immediate`
+    /// is gated: `.debounce`/`.finalOnly`/`.pressRelease` back continuous-drag interactions
+    /// (Slider, Setpoint, ColorPicker dragging), which can reach dispatch repeatedly during a
+    /// single gesture -- confirming each one would prompt mid-drag. Confirming a continuous
+    /// gesture once, up front, is a different UX pattern that isn't implemented here.
+    public var confirmationHandler: ((_ message: String, _ proceed: @escaping () -> Void) -> Void)?
+
     public init() {}
 
     @MainActor
@@ -29,7 +38,7 @@ public final class WidgetCommandDispatcher {
 
         switch policy {
         case .immediate:
-            dispatch(command: command, for: widget, fallbackItem: fallbackItem)
+            dispatchConfirmingIfNeeded(command: command, for: widget, fallbackItem: fallbackItem)
         case let .debounce(duration):
             guard phase != .release else {
                 dispatch(command: command, for: widget, fallbackItem: fallbackItem)
@@ -207,6 +216,17 @@ public final class WidgetCommandDispatcher {
             guard !Task.isCancelled else { return }
             execute(itemname, command)
             self?.pendingTasks.removeValue(forKey: taskKey)
+        }
+    }
+
+    @MainActor
+    private func dispatchConfirmingIfNeeded(command: String, for widget: OpenHABWidget, fallbackItem: OpenHABItem?) {
+        guard let message = widget.commandConfirmMessage, !message.isEmpty, let confirmationHandler else {
+            dispatch(command: command, for: widget, fallbackItem: fallbackItem)
+            return
+        }
+        confirmationHandler(message) { [weak self] in
+            self?.dispatch(command: command, for: widget, fallbackItem: fallbackItem)
         }
     }
 

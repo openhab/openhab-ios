@@ -64,6 +64,10 @@ class SitemapPageViewModel: ObservableObject {
     var commandStateVersions: [String: Int] = [:]
     var queuedCommands: [String: QueuedCommand] = [:]
     private var rowWidgetIndex: [RowID: OpenHABWidget] = [:]
+    var commandConfirmMessagesByItemName: [String: String] = [:]
+    /// Set while a command is being held for user confirmation. SitemapPageView presents this as
+    /// an alert; confirming or cancelling clears it and, if confirmed, runs `onConfirm`.
+    @Published var pendingCommandConfirmation: PendingCommandConfirmation?
     private var previousBuildRenderKeys: [WidgetRenderKey] = []
     private var previousBuildRowIDs: [RowID] = []
     var sliderValueOverrides: [String: Double] = [:]
@@ -713,6 +717,18 @@ extension SitemapPageViewModel {
         for (rowID, widget) in zip(result.rowIDs, widgets) {
             index[rowID] = widget
         }
+
+        // Keyed by item name (not by widget) to match the granularity SitemapPageViewModel+Commands
+        // already tracks command state at (commandStates[itemname], queuedCommands[itemname]). If
+        // multiple widgets on the same page target the same item with different confirm messages,
+        // the last one wins -- an acceptable simplification, not a new limitation.
+        var confirmMessages: [String: String] = [:]
+        for widget in widgets {
+            guard let itemname = widget.item?.name, let message = widget.commandConfirmMessage,
+                  !message.isEmpty else { continue }
+            confirmMessages[itemname] = message
+        }
+        commandConfirmMessagesByItemName = confirmMessages
 
         let rowInputLayoutChanged = SitemapRowLayoutIdentity.makeIdentities(from: result.inputs) !=
             SitemapRowLayoutIdentity.makeIdentities(from: rowInputs)
