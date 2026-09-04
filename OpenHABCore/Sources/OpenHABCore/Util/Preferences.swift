@@ -496,30 +496,24 @@ public extension Preferences {
     /// Use in SwiftUI `.task {}` to keep a `@State` property in sync without manual cancellation.
     var currentHomePreferencesStream: AsyncStream<HomePreferences> {
         ensureMigrated()
-        let publisher = currentHomePreferencesPublisher
-        return AsyncStream { continuation in
-            let box = CancellableBox()
-            box.cancellable = publisher.sink { value in
-                continuation.yield(value)
-            }
-            continuation.onTermination = { _ in
-                box.cancellable?.cancel()
-            }
-        }
+        return makeStream(currentHomePreferencesPublisher)
+    }
+
+    /// AsyncStream that emits `applicationPreferences` immediately then on every change.
+    var applicationPreferencesStream: AsyncStream<ApplicationPreferences> {
+        makeStream($applicationPreferences)
     }
 
     /// AsyncStream that emits `sendCrashReports` immediately then on every change.
     var sendCrashReportsStream: AsyncStream<Bool> {
-        ensureMigrated()
-        let publisher = $sendCrashReports
-        return AsyncStream { continuation in
+        makeStream($sendCrashReports)
+    }
+
+    private func makeStream<T: Sendable>(_ publisher: AnyPublisher<T, Never>) -> AsyncStream<T> {
+        AsyncStream { continuation in
             let box = CancellableBox()
-            box.cancellable = publisher.sink { value in
-                continuation.yield(value)
-            }
-            continuation.onTermination = { _ in
-                box.cancellable?.cancel()
-            }
+            box.cancellable = publisher.sink { value in continuation.yield(value) }
+            continuation.onTermination = { _ in box.cancellable?.cancel() }
         }
     }
 }
@@ -877,12 +871,7 @@ public extension Preferences {
     }
 
     var storedHomesStream: AsyncStream<[UUID: HomePreferences]> {
-        let publisher = $storedHomes
-        return AsyncStream { continuation in
-            let box = CancellableBox()
-            box.cancellable = publisher.sink { value in continuation.yield(value) }
-            continuation.onTermination = { _ in box.cancellable?.cancel() }
-        }
+        makeStream($storedHomes)
     }
 }
 

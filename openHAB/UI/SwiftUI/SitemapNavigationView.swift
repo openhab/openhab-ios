@@ -128,34 +128,33 @@ struct SitemapNavigationView: View {
                 }
             }
 
-        if viewModel.showSearchField {
-            if #available(iOS 26.0, *) {
-                // iOS 26: use safeAreaInset for reliable bottom-above-keyboard placement.
-                // .searchable on iOS 26 places the bar at the top after the first use due to
-                // UINavigationController caching UISearchController placement state.
-                page
-                    .safeAreaInset(edge: .bottom) {
-                        if isSearchPresented {
-                            NativeSearchBar(
-                                text: $viewModel.searchText,
-                                isPresented: $isSearchPresented,
-                                placeholder: String(localized: "search_items", comment: "")
-                            )
-                            .frame(height: 56)
-                        }
+        if #available(iOS 26.0, *) {
+            // iOS 26: always apply safeAreaInset so SitemapPageView stays in the same
+            // structural branch regardless of showSearchField — preventing .onDisappear
+            // from firing and cancelling the active page-handling task when the setting
+            // changes. The inset is empty when search is not active.
+            page
+                .safeAreaInset(edge: .bottom) {
+                    if viewModel.showSearchField && isSearchPresented {
+                        NativeSearchBar(
+                            text: $viewModel.searchText,
+                            isPresented: $isSearchPresented,
+                            placeholder: String(localized: "search_items", comment: "")
+                        )
+                        .frame(height: 56)
                     }
-            } else {
-                // iOS 17–25: native .searchable at the top
-                page
-                    .searchable(
-                        text: $viewModel.searchText,
-                        isPresented: $isSearchPresented,
-                        placement: .navigationBarDrawer(displayMode: .always),
-                        prompt: Text(String(localized: "search_items", comment: ""))
-                    )
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-            }
+                }
+        } else if viewModel.showSearchField {
+            // iOS 17–25: native .searchable at the top
+            page
+                .searchable(
+                    text: $viewModel.searchText,
+                    isPresented: $isSearchPresented,
+                    placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: Text(String(localized: "search_items", comment: ""))
+                )
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
         } else {
             page
         }
