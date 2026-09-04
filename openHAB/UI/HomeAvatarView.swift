@@ -98,20 +98,25 @@ extension Color {
     // Circle adapts only when it would blend into the environment (extremes only).
     // Icon is full tint exactly when the circle was adapted; otherwise icon adapts to mode.
 
-    private func avatarLightness(in environment: EnvironmentValues) -> (r: Double, g: Double, b: Double, isDark: Bool, lightness: Double) {
+    private func avatarColorValues(in environment: EnvironmentValues) -> (r: Double, g: Double, b: Double, lightness: Double) {
         let c = resolve(in: environment)
         let r = Double(c.red), g = Double(c.green), b = Double(c.blue)
-        let L = (max(r, g, b) + min(r, g, b)) / 2
-        return (r, g, b, environment.colorScheme == .dark, L)
+        let lightness = (max(r, g, b) + min(r, g, b)) / 2
+        return (r, g, b, lightness)
+    }
+    
+    private func isDark(_ environment: EnvironmentValues) -> Bool {
+        environment.colorScheme == .dark
     }
 
     /// Circle fill color that contrasts the ambient environment.
     func circleFillColor(in environment: EnvironmentValues) -> Color {
-        let (r, g, b, isDark, L) = avatarLightness(in: environment)
-        if isDark, L < 0.3 {
+        let (r, g, b, lightness) = avatarColorValues(in: environment)
+        let isDark = isDark(environment)
+        if isDark, lightness < 0.35 {
             return Color(.sRGB, red: r + (1-r)*0.7, green: g + (1-g)*0.7, blue: b + (1-b)*0.7)
         }
-        if !isDark, L > 0.7 {
+        if !isDark, lightness > 0.65 {
             return Color(.sRGB, red: r * 0.3, green: g * 0.3, blue: b * 0.3)
         }
         return self
@@ -119,10 +124,11 @@ extension Color {
 
     /// Icon foreground color that contrasts the circle fill.
     func iconForegroundColor(in environment: EnvironmentValues) -> Color {
-        let (r, g, b, isDark, L) = avatarLightness(in: environment)
+        let (r, g, b, lightness) = avatarColorValues(in: environment)
+        let isDark = isDark(environment)
         // Full tint when circle was adapted (complementarity).
-        if isDark, L < 0.3 { return self }
-        if !isDark, L > 0.7 { return self }
+        if isDark, lightness < 0.35 { return self }
+        if !isDark, lightness > 0.65 { return self }
         return isDark
             ? Color(.sRGB, red: r * 0.3, green: g * 0.3, blue: b * 0.3)
             : Color(.sRGB, red: r + (1-r)*0.7, green: g + (1-g)*0.7, blue: b + (1-b)*0.7)

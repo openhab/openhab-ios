@@ -427,6 +427,23 @@ struct ToolbarMenu: View {
                         .frame(width: 10)
                         .rotationEffect(.degrees(homeDetailsCollapsed ? 90 : 0))
 
+                    let homePrefs = Preferences.shared.currentHomePreferences
+                    ZStack(alignment: .center) {
+                        HomeAvatarView(photo: nil, iconName: HomeAvatarView.defaultIconName,
+                                       color: HomeAvatarView.defaultColor, size: 28).hidden()
+                        if !headerDetailsHidden {
+                            HomeAvatarView(
+                                photo: AvatarImageHelper.load(for: homePrefs.id),
+                                iconName: homePrefs.avatarIconName ?? HomeAvatarView.defaultIconName,
+                                color: Color(hex: homePrefs.avatarColor ?? "") ?? HomeAvatarView.defaultColor,
+                                size: 28
+                            )
+                            .transition(.opacity)
+                        }
+                    }
+                    .frame(width: homeDetailsCollapsed ? 0 : nil)
+                    .clipped()
+
                     VStack(alignment: .leading, spacing: 0) {
                         Text("Homes")
                             .font(.footnote)

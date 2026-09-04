@@ -13,8 +13,4 @@
    <FileRef
       location = "group:CommonUI">
    </FileRef>
-   <Group
-      location = "group:openHABTestsSwift 2"
-      name = "openHABTestsSwift 2">
-   </Group>
 </Workspace>
