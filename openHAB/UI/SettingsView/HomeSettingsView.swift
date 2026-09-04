@@ -52,6 +52,7 @@ struct HomeSettingsView: View {
     @State private var avatarDisplayImage: Image?
     @State private var showPhotoPicker = false
     @State private var cropSource: CropSource?
+    @State private var pendingCroppedImage: UIImage?
     @State private var showAvatarPicker = false
     @State private var showColorPickerRow = false
     @State private var settingsAvatarColor: String?
@@ -99,6 +100,7 @@ struct HomeSettingsView: View {
         var avatarImagePath: String?
         var avatarColor: String?
         var avatarIconName: String?
+        var hasPendingCrop: Bool
     }
 
     private var currentSnapshot: SettingsSnapshot {
@@ -119,7 +121,8 @@ struct HomeSettingsView: View {
             disableRemoteConnection: settingsDisableRemoteConnection,
             avatarImagePath: settingsAvatarImagePath,
             avatarColor: settingsAvatarColor,
-            avatarIconName: settingsAvatarIconName
+            avatarIconName: settingsAvatarIconName,
+            hasPendingCrop: pendingCroppedImage != nil
         )
     }
 
@@ -163,6 +166,7 @@ struct HomeSettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .interactiveDismissDisabled(isDirty)
         .navigationTitle("Home Settings")
         .alert("Local Network Access Required", isPresented: $showLocalNetworkAlert) {
             Button("Open Settings") {
@@ -220,9 +224,9 @@ struct HomeSettingsView: View {
             let onConfirm: (UIImage) -> Void = { cropped in
                 cropSource = nil
                 selectedPhoto = nil
-                guard let data = cropped.jpegData(compressionQuality: 0.9),
-                      let saved = AvatarImageHelper.save(data, for: targetId) else { return }
-                avatarDisplayImage = saved
+                // Hold in memory — written to disk only when the user taps the checkmark.
+                pendingCroppedImage = cropped
+                avatarDisplayImage = Image(uiImage: cropped)
                 settingsAvatarImagePath = AvatarImageHelper.avatarURL(for: targetId).path
                 withAnimation(.easeInOut(duration: 0.2)) {
                     showAvatarPicker = false
@@ -265,8 +269,7 @@ struct HomeSettingsView: View {
     }
 
     private var avatarPickerButton: some View {
-        let targetId = homeId ?? currentActiveHomeId ?? UUID()
-        let displayImage = avatarDisplayImage ?? AvatarImageHelper.load(for: targetId)
+        let displayImage = avatarDisplayImage
         let iconName = settingsAvatarIconName ?? HomeAvatarView.defaultIconName
         let avatarColor = Color(hex: settingsAvatarColor ?? "") ?? HomeAvatarView.defaultColor
         return Button {
@@ -308,7 +311,6 @@ struct HomeSettingsView: View {
     }
 
     private var iconPickerRow: some View {
-        let targetId = homeId ?? currentActiveHomeId ?? UUID()
         let hasPhoto = avatarDisplayImage != nil || settingsAvatarImagePath != nil
         let tint = Color(hex: settingsAvatarColor ?? "") ?? HomeAvatarView.defaultColor
         let pinLeading: CGFloat = 8
@@ -321,7 +323,11 @@ struct HomeSettingsView: View {
                         Button {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 settingsAvatarIconName = icon
-                                removeAvatar(for: targetId)
+                                // Clear display state only — file stays on disk so the
+                                // photo button can re-open crop without going to the gallery.
+                                avatarDisplayImage = nil
+                                pendingCroppedImage = nil
+                                settingsAvatarImagePath = nil
                                 showColorPickerRow = true
                             }
                         } label: {
@@ -367,15 +373,14 @@ struct HomeSettingsView: View {
 
     @ViewBuilder
     private func iconRowPhotoButton(hasPhoto: Bool) -> some View {
+        let targetId = homeId ?? currentActiveHomeId ?? UUID()
         let openAction: () -> Void = {
-            if hasPhoto {
-                // Re-crop the existing stored photo without going back to the gallery.
-                let targetId = homeId ?? currentActiveHomeId ?? UUID()
-                if let uiImage = UIImage(contentsOfFile: AvatarImageHelper.avatarURL(for: targetId).path) {
-                    cropSource = CropSource(kind: .uiImage(uiImage))
-                } else {
-                    showPhotoPicker = true // file missing — fall back to picker
-                }
+            // Prefer the in-memory pending crop; fall back to the file on disk (kept even
+            // when the user switches to an icon so they can recrop without re-picking).
+            if let pending = pendingCroppedImage {
+                cropSource = CropSource(kind: .uiImage(pending))
+            } else if let uiImage = UIImage(contentsOfFile: AvatarImageHelper.avatarURL(for: targetId).path) {
+                cropSource = CropSource(kind: .uiImage(uiImage))
             } else {
                 showPhotoPicker = true
             }
@@ -385,11 +390,11 @@ struct HomeSettingsView: View {
                 Image(systemName: "photo.stack")
                     .font(.system(size: 16))
                     .foregroundStyle(hasPhoto ? Color.blue : Color.accentColor)
-                    .frame(width: 30, height: 30)
-                    .padding(7)
-                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 13))
+                    .frame(width: 44, height: 44)
+                    .contentShape(RoundedRectangle(cornerRadius: 13))
             }
             .buttonStyle(.plain)
+            .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 13))
         } else {
             Button(action: openAction) {
                 RoundedRectangle(cornerRadius: 8)
@@ -410,14 +415,16 @@ struct HomeSettingsView: View {
 
     @ViewBuilder
     private var settingsColorPicker: some View {
+        // 44×44 frame extends UIColorWell's touch area to fill the glass shape.
         let base = ColorPicker("", selection: Binding(
             get: { Color(hex: settingsAvatarColor ?? HomeAvatarView.colorPalette[0]) ?? HomeAvatarView.defaultColor },
             set: { settingsAvatarColor = $0.hexString }
         ), supportsOpacity: false)
         .labelsHidden()
-        .frame(width: 30, height: 30)
+        .frame(width: 44, height: 44)
+        .contentShape(RoundedRectangle(cornerRadius: 13))
         if #available(iOS 26, *) {
-            base.padding(7).glassEffect(.regular, in: RoundedRectangle(cornerRadius: 13))
+            base.glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 13))
         } else {
             base
         }
@@ -487,12 +494,6 @@ struct HomeSettingsView: View {
         .allowsHitTesting(false)
     }
 
-    private func removeAvatar(for targetId: UUID) {
-        AvatarImageHelper.delete(for: targetId)
-        avatarDisplayImage = nil
-        settingsAvatarImagePath = nil
-    }
-
     private var commandItemLabelText: String {
         guard let selectedSSEItemName, !selectedSSEItemName.isEmpty else {
             return "Command Item "
@@ -530,7 +531,10 @@ struct HomeSettingsView: View {
     @ToolbarContentBuilder
     private var settingsToolbar: some ToolbarContent {
         if isDirty {
-            ToolbarItem(placement: .confirmationAction) {
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                Button(action: handleResetTapped) {
+                    Image(systemName: "arrow.counterclockwise")
+                }
                 Button(action: handleSaveTapped) {
                     Image(systemName: "checkmark")
                 }
@@ -544,6 +548,14 @@ struct HomeSettingsView: View {
                 Image(systemName: "xmark")
             }
         }
+    }
+
+    private func handleResetTapped() {
+        guard let snapshot = initialSnapshot else { return }
+        pendingCroppedImage = nil
+        let targetId = homeId ?? currentActiveHomeId ?? UUID()
+        avatarDisplayImage = AvatarImageHelper.load(for: targetId)
+        applySnapshot(snapshot)
     }
 
     private func handleSaveTapped() {
@@ -565,6 +577,17 @@ struct HomeSettingsView: View {
     }
 
     private func commitSave() {
+        let targetId = homeId ?? currentActiveHomeId ?? UUID()
+        if let pending = pendingCroppedImage {
+            // Flush the in-memory crop to disk now that the user has confirmed.
+            if let data = pending.jpegData(compressionQuality: 0.9) {
+                AvatarImageHelper.save(data, for: targetId)
+            }
+            pendingCroppedImage = nil
+        } else if settingsAvatarImagePath == nil, initialSnapshot?.avatarImagePath != nil {
+            // User switched from photo to icon — remove the old file.
+            AvatarImageHelper.delete(for: targetId)
+        }
         Task { @MainActor in
             await saveSettings()
             NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
