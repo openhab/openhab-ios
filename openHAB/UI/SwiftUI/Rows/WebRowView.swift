@@ -40,6 +40,7 @@ private func makeWebContainerContent(_ config: WebRowConfig) -> WebContainerCont
 private struct WebContainerContent: View {
     let input: MediaRowInput
     @EnvironmentObject var viewModel: SitemapPageViewModel
+    @State private var homeId: UUID?
 
     var body: some View {
         let displayState = input.displayState
@@ -51,15 +52,20 @@ private struct WebContainerContent: View {
                     .foregroundStyle(input.labelColor.isEmpty ? .primary : Color(fromString: input.labelColor))
             }
 
-            WebRowView(urlString: input.url, rootUrlString: viewModel.openHABRootUrl ?? "")
-                .frame(height: input.preferredRowHeight.map { CGFloat($0) })
-                .clipShape(.rect(cornerRadius: 8))
+            if let id = homeId {
+                WebRowView(urlString: input.url, rootUrlString: viewModel.openHABRootUrl ?? "", homeId: id)
+                    .frame(height: input.preferredRowHeight.map { CGFloat($0) })
+                    .clipShape(.rect(cornerRadius: 8))
+            }
 
             if let labelValue = displayState.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .ohTextToken(.rowValueCompact)
                     .foregroundStyle(input.valueColor.isEmpty ? .secondary : Color(fromString: input.valueColor))
             }
+        }
+        .task {
+            homeId = await Preferences.shared.currentHomePreferences.id
         }
     }
 }
@@ -131,13 +137,13 @@ struct WebRowView: UIViewRepresentable {
 
     let urlString: String
     let rootUrlString: String
+    let homeId: UUID
 
     private var webURL: URL? {
         webViewResolvedURL(urlString: urlString, rootUrlString: rootUrlString)
     }
 
     func makeUIView(context: Context) -> WKWebView {
-        let homeId = Preferences.shared.currentHomePreferences.id
         let webView = WKWebView(frame: .zero, configuration: WebRowViewConfigurationFactory.make(homeId: homeId))
         webView.navigationDelegate = context.coordinator
         return webView

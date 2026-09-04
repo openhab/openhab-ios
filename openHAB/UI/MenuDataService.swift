@@ -102,7 +102,7 @@ class MenuDataService {
     private func fetchSitemaps(using service: OpenAPIService) async {
         do {
             var fetched = try await service.openHABSitemaps()
-            fetched = Self.filterAndSortSitemaps(fetched)
+            fetched = await Self.filterAndSortSitemaps(fetched)
             sitemaps = fetched
         } catch {
             Logger.drawerView.error("Failed to fetch sitemaps: \(error.localizedDescription)")
@@ -131,8 +131,8 @@ class MenuDataService {
     }
 
     /// Filters out `_default` sitemap when others exist, then sorts per user preference.
-    static func filterAndSortSitemaps(_ sitemaps: [OpenHABSitemap]) -> [OpenHABSitemap] {
-        let sortBy = SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label
+    static func filterAndSortSitemaps(_ sitemaps: [OpenHABSitemap]) async -> [OpenHABSitemap] {
+        let sortBy = SortSitemapsOrder(rawValue: (await Preferences.shared.currentHomePreferences).sortSitemapsBy) ?? .label
         return filterAndSortSitemaps(sitemaps, sortBy: sortBy)
     }
 

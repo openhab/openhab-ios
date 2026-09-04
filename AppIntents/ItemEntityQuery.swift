@@ -22,33 +22,32 @@ protocol ItemEntityQuery: EntityStringQuery {
 }
 
 extension ItemEntityQuery {
-    @MainActor
-    func getHomeName(for homeId: UUID) -> String? {
-        Preferences.shared.storedHomes[homeId]?.homeName
+    func getHomeName(for homeId: UUID) async -> String? {
+        await Preferences.shared.storedHomes[homeId]?.homeName
     }
 
-    @MainActor
-    func getHomeIdentifier(for homeId: UUID) -> String {
-        guard let home = Preferences.shared.storedHomes[homeId] else {
+    func getHomeIdentifier(for homeId: UUID) async -> String {
+        let storedHomes = await Preferences.shared.storedHomes
+        guard let home = storedHomes[homeId] else {
             return homeId.uuidString
         }
         return "\(home.stableIdentifier)##\(home.id.uuidString)"
     }
 
-    @MainActor
-    func resolvedSelectedHomeId() -> UUID? {
+    func resolvedSelectedHomeId() async -> UUID? {
         guard let home = selectedHome else { return nil }
-        return Home.resolveStoredHomeKey(for: home.id, in: Preferences.shared.storedHomes)
+        let storedHomes = await Preferences.shared.storedHomes
+        let homeId = home.id
+        return await MainActor.run { Home.resolveStoredHomeKey(for: homeId, in: storedHomes) }
     }
 
-    @MainActor
-    func resolvedHomeId(for identifier: ItemIdentifier) -> UUID? {
-        let storedHomes = Preferences.shared.storedHomes
+    func resolvedHomeId(for identifier: ItemIdentifier) async -> UUID? {
+        let storedHomes = await Preferences.shared.storedHomes
         guard let homeIdentifier = identifier.homeIdentifier else {
             guard let homeId = identifier.homeId, storedHomes[homeId] != nil else { return nil }
             return homeId
         }
-        return Home.resolveStoredHomeKey(for: homeIdentifier, in: storedHomes)
+        return await MainActor.run { Home.resolveStoredHomeKey(for: homeIdentifier, in: storedHomes) }
     }
 
     func entity(for item: OpenHABItem, homeId: UUID) async -> EntityType {
@@ -221,9 +220,8 @@ extension ItemEntityQuery {
         return hasExactNameMatch || hasExactLabelMatch
     }
 
-    @MainActor
-    func homeNames(for homeIds: [UUID]) -> [UUID: String] {
-        let storedHomes = Preferences.shared.storedHomes
+    func homeNames(for homeIds: [UUID]) async -> [UUID: String] {
+        let storedHomes = await Preferences.shared.storedHomes
         return Dictionary(uniqueKeysWithValues: homeIds.compactMap { homeId in
             storedHomes[homeId].map { (homeId, $0.homeName) }
         })

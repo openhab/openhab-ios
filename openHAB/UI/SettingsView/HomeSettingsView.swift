@@ -68,6 +68,7 @@ struct HomeSettingsView: View {
     @State private var selectedSSEItemName: String?
     @State private var showAppSettings = false
     @State private var showCommandItemInfo = false
+    @State private var currentActiveHomeId: UUID?
 
     @Environment(\.self) private var environment
     @Environment(\.dismiss) private var dismiss
@@ -179,7 +180,8 @@ struct HomeSettingsView: View {
         .task {
             guard !viewAppearedOnce else { return }
             viewAppearedOnce = true
-            loadSettings()
+            currentActiveHomeId = await Preferences.shared.currentHomePreferences.id
+            await loadSettings()
             initialSnapshot = currentSnapshot
             if let initialValues {
                 applySnapshot(initialValues)
@@ -190,7 +192,8 @@ struct HomeSettingsView: View {
             // inactive home being edited, leave `sitemaps` empty so the "Sitemap for
             // Apple Watch" picker disables itself rather than showing/saving choices
             // from a different home's server.
-            guard homeId == nil || homeId == Preferences.shared.currentHomePreferences.id,
+            let activeHomeId = await Preferences.shared.currentHomePreferences.id
+            guard homeId == nil || homeId == activeHomeId,
                   let activeConnection = networkTracker.activeConnection
             else { return }
             await updateSitemaps(activeConfiguration: activeConnection.configuration)
@@ -205,7 +208,7 @@ struct HomeSettingsView: View {
                 .presentationDetents([.medium, .large])
         }
         .fullScreenCover(isPresented: $showCropView) {
-            let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
+            let targetId = homeId ?? currentActiveHomeId ?? UUID()
             let bgHex = settingsAvatarColor ?? HomeAvatarView.colorPalette[0]
             let onConfirm: (UIImage) -> Void = { cropped in
                 showCropView = false
@@ -258,7 +261,7 @@ struct HomeSettingsView: View {
     }
 
     private var avatarPickerButton: some View {
-        let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
+        let targetId = homeId ?? currentActiveHomeId ?? UUID()
         let displayImage = avatarDisplayImage ?? AvatarImageHelper.load(for: targetId)
         let iconName = settingsAvatarIconName ?? HomeAvatarView.defaultIconName
         let avatarColor = Color(hex: settingsAvatarColor ?? "") ?? HomeAvatarView.defaultColor
@@ -302,7 +305,7 @@ struct HomeSettingsView: View {
     }
 
     private var iconPickerRow: some View {
-        let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
+        let targetId = homeId ?? currentActiveHomeId ?? UUID()
         let hasPhoto = avatarDisplayImage != nil || settingsAvatarImagePath != nil
         let tint = Color(hex: settingsAvatarColor ?? "") ?? HomeAvatarView.defaultColor
         let pinLeading: CGFloat = 8
@@ -364,7 +367,7 @@ struct HomeSettingsView: View {
         let openAction: () -> Void = {
             if hasPhoto {
                 // Re-crop the existing stored photo without going back to the gallery.
-                let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
+                let targetId = homeId ?? currentActiveHomeId ?? UUID()
                 if let uiImage = UIImage(contentsOfFile: AvatarImageHelper.avatarURL(for: targetId).path) {
                     imageToCropDirectly = uiImage
                     showCropView = true
@@ -560,8 +563,10 @@ struct HomeSettingsView: View {
     }
 
     private func commitSave() {
-        saveSettings()
-        NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+        Task { @MainActor in
+            await saveSettings()
+            NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+        }
     }
 
     private func handleSwipeDismiss() {
@@ -582,30 +587,38 @@ struct HomeSettingsView: View {
         let aip = settingsAvatarImagePath
         let ac = settingsAvatarColor
         let ain = settingsAvatarIconName
-        let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
+        let capturedHomeId = homeId
         let snapshot = currentSnapshot
         onDismissedDirty?(snapshot) {
-            Preferences.shared.modifyStoredHome(targetId) { @MainActor prefs in
-                prefs.demomode = dm
-                prefs.realTimeSliders = rts
-                prefs.iconType = it.rawValue
-                prefs.sortSitemapsBy = ssb.rawValue
-                prefs.sitemapNameLabelDisplayMode = sdm
-                prefs.defaultMainUIPath = dmu
-                prefs.alwaysAllowWebRTC = aawrtc
-                prefs.sitemapForWatch = sfw
-                prefs.sitemapForWatchLabel = sfwLabel
-                prefs.sitemapForCarPlay = sfc
-                prefs.localConnectionConfig = lcc
-                prefs.remoteConnectionConfig = rcc
-                prefs.sseCommandItem = sseCI
-                prefs.homeName = hn
-                prefs.disableRemoteConnection = drc
-                prefs.avatarImagePath = aip
-                prefs.avatarColor = ac
-                prefs.avatarIconName = ain
+            Task {
+                let targetId: UUID
+                if let id = capturedHomeId {
+                    targetId = id
+                } else {
+                    targetId = (await Preferences.shared.currentHomePreferences).id
+                }
+                await Preferences.shared.modifyStoredHome(targetId) { prefs in
+                    prefs.demomode = dm
+                    prefs.realTimeSliders = rts
+                    prefs.iconType = it.rawValue
+                    prefs.sortSitemapsBy = ssb.rawValue
+                    prefs.sitemapNameLabelDisplayMode = sdm
+                    prefs.defaultMainUIPath = dmu
+                    prefs.alwaysAllowWebRTC = aawrtc
+                    prefs.sitemapForWatch = sfw
+                    prefs.sitemapForWatchLabel = sfwLabel
+                    prefs.sitemapForCarPlay = sfc
+                    prefs.localConnectionConfig = lcc
+                    prefs.remoteConnectionConfig = rcc
+                    prefs.sseCommandItem = sseCI
+                    prefs.homeName = hn
+                    prefs.disableRemoteConnection = drc
+                    prefs.avatarImagePath = aip
+                    prefs.avatarColor = ac
+                    prefs.avatarIconName = ain
+                }
+                NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
             }
-            NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
         }
     }
 
@@ -619,7 +632,8 @@ struct HomeSettingsView: View {
             }
 
             // Sort the sitemaps according to Settings selection.
-            switch SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label {
+            let sortSitemapsBy = (await Preferences.shared.currentHomePreferences).sortSitemapsBy
+            switch SortSitemapsOrder(rawValue: sortSitemapsBy) ?? .label {
             case .label: sitemaps.sort { $0.label < $1.label }
             case .name: sitemaps.sort { $0.name < $1.name }
             }
@@ -629,15 +643,15 @@ struct HomeSettingsView: View {
         }
     }
 
-    private func loadSettings() {
+    private func loadSettings() async {
         #if !DEBUG
         Logger.settingsView.debug("Loading Settings")
         #endif
         let homePrefs: HomePreferences
-        if let homeId, let stored = Preferences.shared.storedHomeWithCredentials(forId: homeId) {
+        if let homeId, let stored = await Preferences.shared.storedHomeWithCredentials(forId: homeId) {
             homePrefs = stored
         } else {
-            homePrefs = Preferences.shared.currentHomePreferences
+            homePrefs = await Preferences.shared.currentHomePreferences
         }
         settingsDemomode = homePrefs.demomode
         settingsRealTimeSliders = homePrefs.realTimeSliders
@@ -681,28 +695,48 @@ struct HomeSettingsView: View {
         settingsAvatarIconName = snapshot.avatarIconName
     }
 
-    func saveSettings() {
+    func saveSettings() async {
         let sitemapLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? settingsSitemapForWatchLabel
-        let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
-        Preferences.shared.modifyStoredHome(targetId) { @MainActor homePreferences in
-            homePreferences.demomode = settingsDemomode
-            homePreferences.realTimeSliders = settingsRealTimeSliders
-            homePreferences.iconType = settingsIconType.rawValue
-            homePreferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
-            homePreferences.sitemapNameLabelDisplayMode = settingsSitemapNameLabelDisplayMode
-            homePreferences.defaultMainUIPath = settingsDefaultMainUIPath
-            homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
-            homePreferences.sitemapForWatch = settingsSitemapForWatch
+        let capturedHomeId = homeId
+        let dm = settingsDemomode, rts = settingsRealTimeSliders
+        let it = settingsIconType, ssb = settingsSortSitemapsBy
+        let sdm = settingsSitemapNameLabelDisplayMode
+        let dmu = settingsDefaultMainUIPath, aawrtc = settingsAlwaysAllowWebRTC
+        let sfw = settingsSitemapForWatch
+        let sfc = settingsSitemapForCarPlay
+        let lcc = settingsLocalConnectionConfiguration
+        let rcc = settingsRemoteConnectionConfiguration
+        let sseCI = settingsSSECommandItem
+        let hn = settingsHomeName
+        let drc = settingsDisableRemoteConnection
+        let aip = settingsAvatarImagePath
+        let ac = settingsAvatarColor
+        let ain = settingsAvatarIconName
+        let targetId: UUID
+        if let id = capturedHomeId {
+            targetId = id
+        } else {
+            targetId = (await Preferences.shared.currentHomePreferences).id
+        }
+        await Preferences.shared.modifyStoredHome(targetId) { homePreferences in
+            homePreferences.demomode = dm
+            homePreferences.realTimeSliders = rts
+            homePreferences.iconType = it.rawValue
+            homePreferences.sortSitemapsBy = ssb.rawValue
+            homePreferences.sitemapNameLabelDisplayMode = sdm
+            homePreferences.defaultMainUIPath = dmu
+            homePreferences.alwaysAllowWebRTC = aawrtc
+            homePreferences.sitemapForWatch = sfw
             homePreferences.sitemapForWatchLabel = sitemapLabel
-            homePreferences.sitemapForCarPlay = settingsSitemapForCarPlay
-            homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration
-            homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
-            homePreferences.sseCommandItem = settingsSSECommandItem
-            homePreferences.homeName = settingsHomeName
-            homePreferences.disableRemoteConnection = settingsDisableRemoteConnection
-            homePreferences.avatarImagePath = settingsAvatarImagePath
-            homePreferences.avatarColor = settingsAvatarColor
-            homePreferences.avatarIconName = settingsAvatarIconName
+            homePreferences.sitemapForCarPlay = sfc
+            homePreferences.localConnectionConfig = lcc
+            homePreferences.remoteConnectionConfig = rcc
+            homePreferences.sseCommandItem = sseCI
+            homePreferences.homeName = hn
+            homePreferences.disableRemoteConnection = drc
+            homePreferences.avatarImagePath = aip
+            homePreferences.avatarColor = ac
+            homePreferences.avatarIconName = ain
         }
     }
 }

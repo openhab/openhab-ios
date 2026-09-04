@@ -24,6 +24,7 @@ class NetworkConnectionService: ObservableObject {
     // MARK: - Private state
 
     private var cancellables = Set<AnyCancellable>()
+    private var preferencesTask: Task<Void, Never>?
 
     struct CertificateAlertState: Identifiable {
         let id = UUID()
@@ -98,20 +99,24 @@ class NetworkConnectionService: ObservableObject {
         // 500 ms debounce + credential-injecting map is the prime suspect for the intermittent missed
         // reload. Investigate whether an emission is being coalesced/dropped or whether the new
         // connection compares equal so `$activeConnection` doesn't re-emit. Deferred for later.
-        Preferences.shared.currentHomePreferencesPublisher
-            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
-            .sink { homeSettings in
-                let trackedConnections = homeSettings.trackedConnections
-                let sseCommandItem = homeSettings.sseCommandItem
-
-                Task {
+        preferencesTask = Task { @MainActor in
+            var debounceTask: Task<Void, Never>?
+            for await homeSettings in await Preferences.shared.currentHomePreferencesStream {
+                debounceTask?.cancel()
+                let capturedSettings = homeSettings
+                debounceTask = Task {
+                    try? await Task.sleep(nanoseconds: 500_000_000)
+                    guard !Task.isCancelled else { return }
+                    let trackedConnections = capturedSettings.trackedConnections
+                    let sseCommandItem = capturedSettings.sseCommandItem
                     await NetworkTracker.shared.startTracking(connectionConfigurations: trackedConnections)
-                    if !homeSettings.demomode {
+                    if !capturedSettings.demomode {
                         await ItemEventStream.trackItems(sseCommandItem.isEmpty ? [] : [sseCommandItem])
                     }
                 }
             }
-            .store(in: &cancellables)
+            debounceTask?.cancel()
+        }
     }
 
     // MARK: - Certificate Trust

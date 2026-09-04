@@ -20,6 +20,8 @@ import WebKit
 
 struct HomeSelectionView: View {
     @State private var homes: [UUID] = []
+    @State private var cachedStoredHomes: [UUID: HomePreferences] = [:]
+    @State private var cachedActiveHomeId: UUID?
 
     @State private var showingNewHomeAlert = false
     @State private var newHomeName = ""
@@ -41,7 +43,7 @@ struct HomeSelectionView: View {
         List(homes, id: \.self) { home in
             homeRow(for: home)
         }
-        .onAppear(perform: loadHomesList)
+        .task { await loadHomesList() }
         .navigationBarBackButtonHidden(true)
         .navigationBarTitle("Manage Homes")
         .toolbar { toolbarContent }
@@ -59,7 +61,8 @@ struct HomeSelectionView: View {
 
     @ViewBuilder
     private func homeRow(for home: UUID) -> some View {
-        let homeName = Preferences.shared.storedHomes[home]?.homeName ?? ""
+        let homeName = cachedStoredHomes[home]?.homeName ?? ""
+        let isActive = cachedActiveHomeId == home
         HStack {
             HStack {
                 if showEditOptions {
@@ -69,10 +72,10 @@ struct HomeSelectionView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(homeName)
                     if !showEditOptions {
-                        HomeSummaryView(homeId: home)
+                        HomeSummaryView(homeId: home, cachedPrefs: cachedStoredHomes[home])
                     }
                 }
-                if Preferences.shared.currentHomePreferences.id == home, !showEditOptions {
+                if isActive, !showEditOptions {
                     Spacer()
                     Image(systemSymbol: .checkmark)
                         .foregroundStyle(.blue)
@@ -94,7 +97,7 @@ struct HomeSelectionView: View {
             if showEditOptions {
                 HStack {
                     Spacer()
-                    if Preferences.shared.currentHomePreferences.id != home {
+                    if !isActive {
                         Button(action: {
                             homeNameForAlert = homeName
                             homeForAlert = home
@@ -218,36 +221,43 @@ struct HomeSelectionView: View {
     }
 
     private func select(home: UUID) {
-        Preferences.shared.switchActiveHome(to: home)
-        NotificationCenter.default.post(name: .homeDidSwitch, object: nil)
-        dismiss()
+        Task { @MainActor in
+            await Preferences.shared.switchActiveHome(to: home)
+            NotificationCenter.default.post(name: .homeDidSwitch, object: nil)
+            dismiss()
+        }
     }
 
-    private func loadHomesList() {
-        homes = Preferences.shared.listStoredHomes()
+    private func loadHomesList() async {
+        homes = await Preferences.shared.listStoredHomes()
+        cachedActiveHomeId = (await Preferences.shared.currentHomePreferences).id
+        cachedStoredHomes = await Preferences.shared.storedHomes
     }
 
     private func delete(home toDelete: UUID?) {
-        guard let toDelete else {
-            return
-        }
+        guard let toDelete else { return }
         Logger.selectionView.info("delete home settings for \(toDelete.uuidString)")
-        Preferences.shared.deleteStoredHome(toDelete)
-        loadHomesList()
+        Task { @MainActor in
+            await Preferences.shared.deleteStoredHome(toDelete)
+            await loadHomesList()
+        }
     }
 
     private func rename(home toRename: UUID?) {
-        guard let toRename else {
-            return
-        }
+        guard let toRename else { return }
         let newName = newHomeName
         Logger.selectionView.info("rename home \(toRename.uuidString) to \(newName)")
-        Preferences.shared.renameHome(toRename, newHomeName: newName)
+        Task {
+            await Preferences.shared.renameHome(toRename, newHomeName: newName)
+            await loadHomesList()
+        }
     }
 
     private func addHome() {
-        Preferences.shared.createAndLoadNewStoredSettings(homeName: newHomeName)
-        loadHomesList()
+        Task { @MainActor in
+            await Preferences.shared.createAndLoadNewStoredSettings(homeName: newHomeName)
+            await loadHomesList()
+        }
     }
 }
 
@@ -255,13 +265,10 @@ struct HomeSelectionView: View {
 
 struct HomeSummaryView: View {
     let homeId: UUID
-
-    private var homePrefs: HomePreferences? {
-        Preferences.shared.storedHomeWithCredentials(forId: homeId)
-    }
+    let cachedPrefs: HomePreferences?
 
     var body: some View {
-        if let prefs = homePrefs {
+        if let prefs = cachedPrefs {
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 6) {
                     summaryItem(

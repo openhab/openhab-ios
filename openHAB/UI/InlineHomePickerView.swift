@@ -32,6 +32,9 @@ struct InlineHomePickerView: View {
     @Binding var isMenuPresented: Bool
 
     @State private var homes: [UUID] = []
+    @State private var cachedActiveHomeId: UUID?
+    @State private var cachedHomesWithCreds: [UUID: HomePreferences] = [:]
+
     @State private var showEditMode = false
     @State private var homeForSettings: UUID?
 
@@ -61,16 +64,17 @@ struct InlineHomePickerView: View {
             Divider().padding(.horizontal, 12)
             actionBar
         }
-        .onAppear { homes = Preferences.shared.listStoredHomes() }
+        .task { await reloadHomes() }
         .alert(
             String(localized: "Delete '\(homeNameForDeleteAlert)'?"),
             isPresented: $showingDeleteAlert
         ) {
             Button(String(localized: "Cancel"), role: .cancel) {}
             Button(String(localized: "Delete"), role: .destructive) {
-                Preferences.shared.deleteStoredHome(homeForDeleteAlert)
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    homes = Preferences.shared.listStoredHomes()
+                let idToDelete = homeForDeleteAlert
+                Task { @MainActor in
+                    await Preferences.shared.deleteStoredHome(idToDelete)
+                    await reloadHomes()
                 }
             }
         }
@@ -78,12 +82,13 @@ struct InlineHomePickerView: View {
             TextField(String(localized: "Home name"), text: $newHomeName)
             Button(String(localized: "Cancel"), role: .cancel) {}
             Button(String(localized: "Create")) {
-                Preferences.shared.createAndLoadNewStoredSettings(homeName: newHomeName)
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    homes = Preferences.shared.listStoredHomes()
+                let name = newHomeName
+                Task { @MainActor in
+                    await Preferences.shared.createAndLoadNewStoredSettings(homeName: name)
+                    await reloadHomes()
+                    homeForSettings = (await Preferences.shared.currentHomePreferences).id
+                    withAnimation(.easeInOut(duration: 0.25)) { showEditMode = false }
                 }
-                homeForSettings = Preferences.shared.currentHomePreferences.id
-                withAnimation(.easeInOut(duration: 0.25)) { showEditMode = false }
             }
         } message: {
             Text("For Shortcuts to work across multiple devices, each home must have the same name on every device.")
@@ -102,13 +107,28 @@ struct InlineHomePickerView: View {
         }
     }
 
+    // MARK: - Data loading
+
+    private func reloadHomes() async {
+        homes = await Preferences.shared.listStoredHomes()
+        cachedActiveHomeId = (await Preferences.shared.currentHomePreferences).id
+        let rawHomes = await Preferences.shared.storedHomes
+        var creds: [UUID: HomePreferences] = [:]
+        for id in rawHomes.keys {
+            if let p = await Preferences.shared.storedHomeWithCredentials(forId: id) {
+                creds[id] = p
+            }
+        }
+        cachedHomesWithCreds = creds
+    }
+
     // MARK: - Normal-mode home row
 
     @ViewBuilder
     private func homeRow(for home: UUID) -> some View {
-        let homeName = Preferences.shared.storedHomes[home]?.homeName ?? ""
-        let isActive = Preferences.shared.currentHomePreferences.id == home
-        let prefs = Preferences.shared.storedHomeWithCredentials(forId: home)
+        let homeName = cachedHomesWithCreds[home]?.homeName ?? ""
+        let isActive = cachedActiveHomeId == home
+        let prefs = cachedHomesWithCreds[home]
 
         HStack(spacing: 8) {
             avatarView(for: home, isActive: isActive)
@@ -149,7 +169,10 @@ struct InlineHomePickerView: View {
             }
             .onMove { source, destination in
                 homes.move(fromOffsets: source, toOffset: destination)
-                Preferences.shared.updateHomeOrder(homes)
+                let reordered = homes
+                Task {
+                    await Preferences.shared.updateHomeOrder(reordered)
+                }
             }
         }
         .listStyle(.plain)
@@ -170,9 +193,9 @@ struct InlineHomePickerView: View {
 
     @ViewBuilder
     private func editModeRow(for home: UUID) -> some View {
-        let homeName = Preferences.shared.storedHomes[home]?.homeName ?? ""
-        let isActive = Preferences.shared.currentHomePreferences.id == home
-        let prefs = Preferences.shared.storedHomeWithCredentials(forId: home)
+        let homeName = cachedHomesWithCreds[home]?.homeName ?? ""
+        let isActive = cachedActiveHomeId == home
+        let prefs = cachedHomesWithCreds[home]
 
         HStack(spacing: 8) {
             avatarView(for: home, isActive: isActive)
@@ -256,7 +279,7 @@ struct InlineHomePickerView: View {
     /// when `isActive` replaces the separate checkmark, keeping row widths consistent.
     @ViewBuilder
     private func avatarView(for homeId: UUID, isActive: Bool) -> some View {
-        let prefs = Preferences.shared.storedHomes[homeId]
+        let prefs = cachedHomesWithCreds[homeId]
         HomeAvatarView(
             photo: AvatarImageHelper.load(for: homeId),
             iconName: prefs?.avatarIconName ?? HomeAvatarView.defaultIconName,
@@ -328,8 +351,10 @@ struct InlineHomePickerView: View {
     // MARK: - Home selection
 
     private func selectHome(_ home: UUID) {
-        Preferences.shared.switchActiveHome(to: home)
-        NotificationCenter.default.post(name: .homeDidSwitch, object: nil)
-        isMenuPresented = false
+        Task { @MainActor in
+            await Preferences.shared.switchActiveHome(to: home)
+            NotificationCenter.default.post(name: .homeDidSwitch, object: nil)
+            isMenuPresented = false
+        }
     }
 }

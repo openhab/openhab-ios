@@ -18,7 +18,7 @@ public enum ChartStyle {
     case light
 }
 
-public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible, Codable {
+public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible, Codable, Sendable {
     case png
     case svg
 
@@ -36,7 +36,7 @@ public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible, 
     }
 }
 
-public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible {
+public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible, Sendable {
     case label
     case name
 

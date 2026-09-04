@@ -274,8 +274,12 @@ extension SitemapPageViewModel {
     }
 
     func loadSettings() {
-        defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
-        showSearchField = Preferences.shared.applicationPreferences.showSearchField
+        Task {
+            let prefs = await Preferences.shared.currentHomePreferences
+            let appPrefs = await Preferences.shared.applicationPreferences
+            defaultSitemap = prefs.defaultSitemap
+            showSearchField = appPrefs.showSearchField
+        }
     }
 
     func markAppeared() {
@@ -914,8 +918,9 @@ extension SitemapPageViewModel {
                 logger.info("Auto-selected single sitemap: \(self.defaultSitemap, privacy: .public)")
 
                 // Save as default for future launches
-                Preferences.shared.modifyActiveHome { homePreferences in
-                    homePreferences.defaultSitemap = defaultSitemap
+                let sitemapToSave1 = defaultSitemap
+                await Preferences.shared.modifyActiveHome { @Sendable homePreferences in
+                    homePreferences.defaultSitemap = sitemapToSave1
                 }
             case 2...:
                 // Multiple sitemaps available - select the first one
@@ -925,8 +930,9 @@ extension SitemapPageViewModel {
                 logger.info("Auto-selected first sitemap from \(filteredSitemaps.count, privacy: .public) available: \(self.defaultSitemap, privacy: .public)")
 
                 // Save as default for future launches
-                Preferences.shared.modifyActiveHome { homePreferences in
-                    homePreferences.defaultSitemap = defaultSitemap
+                let sitemapToSave2 = defaultSitemap
+                await Preferences.shared.modifyActiveHome { @Sendable homePreferences in
+                    homePreferences.defaultSitemap = sitemapToSave2
                 }
             default:
                 logger.error("No sitemaps available")

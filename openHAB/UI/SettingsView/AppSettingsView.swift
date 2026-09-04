@@ -16,6 +16,7 @@ import SwiftUI
 struct AppSettingsView: View {
     @State private var settingsIdleOff = true
     @State private var settingsSendCrashReports = false
+    @State private var settingsHideStatusBar = false
     @State private var settingsShowSearchField = true
     @State private var settingsSitemapDiagnosticsLogging = false
 
@@ -29,6 +30,7 @@ struct AppSettingsView: View {
     struct AppSettingsSnapshot: Equatable {
         var idleOff: Bool
         var sendCrashReports: Bool
+        var hideStatusBar: Bool
         var showSearchField: Bool
     }
 
@@ -36,6 +38,7 @@ struct AppSettingsView: View {
         AppSettingsSnapshot(
             idleOff: settingsIdleOff,
             sendCrashReports: settingsSendCrashReports,
+            hideStatusBar: settingsHideStatusBar,
             showSearchField: settingsShowSearchField
         )
     }
@@ -50,10 +53,7 @@ struct AppSettingsView: View {
             }
 
             Section(header: Text("User Interface")) {
-                Toggle("Hide Status Bar", isOn: Binding(
-                    get: { Preferences.shared.hideStatusBar },
-                    set: { Preferences.shared.hideStatusBar = $0 }
-                ))
+                Toggle("Hide Status Bar", isOn: $settingsHideStatusBar)
                 Toggle("Show Search Field in Sitemaps", isOn: $settingsShowSearchField)
             }
 
@@ -80,9 +80,11 @@ struct AppSettingsView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         savedExplicitly = true
-                        saveSettings()
-                        NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
-                        dismiss()
+                        Task { @MainActor in
+                            await saveSettings()
+                            NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+                            dismiss()
+                        }
                     } label: {
                         Image(systemName: "checkmark")
                     }
@@ -100,8 +102,10 @@ struct AppSettingsView: View {
         .onDisappear {
             guard isDirty, !savedExplicitly else { return }
             // Sheet was swiped away with unsaved changes — auto-save
-            saveSettings()
-            NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+            Task { @MainActor in
+                await saveSettings()
+                NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+            }
         }
         .onChange(of: currentSnapshot) { _, newSnapshot in
             isDirty = newSnapshot != initialSnapshot
@@ -109,24 +113,29 @@ struct AppSettingsView: View {
         .task {
             guard !viewAppearedOnce else { return }
             viewAppearedOnce = true
-            loadSettings()
+            await loadSettings()
             initialSnapshot = currentSnapshot
         }
     }
 
-    private func loadSettings() {
-        settingsIdleOff = Preferences.shared.idleOff
-        settingsSendCrashReports = Preferences.shared.sendCrashReports
-        settingsShowSearchField = Preferences.shared.applicationPreferences.showSearchField
-        settingsSitemapDiagnosticsLogging = Preferences.shared.applicationPreferences.sitemapDiagnosticsLogging
+    private func loadSettings() async {
+        settingsIdleOff = await Preferences.shared.idleOff
+        settingsSendCrashReports = await Preferences.shared.sendCrashReports
+        settingsHideStatusBar = await Preferences.shared.hideStatusBar
+        let appPrefs = await Preferences.shared.applicationPreferences
+        settingsShowSearchField = appPrefs.showSearchField
+        settingsSitemapDiagnosticsLogging = appPrefs.sitemapDiagnosticsLogging
     }
 
-    private func saveSettings() {
-        Preferences.shared.idleOff = settingsIdleOff
-        Preferences.shared.sendCrashReports = settingsSendCrashReports
-        Preferences.shared.modifyApplicationPreferences { @MainActor prefs in
-            prefs.showSearchField = settingsShowSearchField
-            prefs.sitemapDiagnosticsLogging = settingsSitemapDiagnosticsLogging
+    private func saveSettings() async {
+        await Preferences.shared.setIdleOff(settingsIdleOff)
+        await Preferences.shared.setSendCrashReports(settingsSendCrashReports)
+        await Preferences.shared.setHideStatusBar(settingsHideStatusBar)
+        let showSearchField = settingsShowSearchField
+        let sitemapDiagnosticsLogging = settingsSitemapDiagnosticsLogging
+        await Preferences.shared.modifyApplicationPreferences { prefs in
+            prefs.showSearchField = showSearchField
+            prefs.sitemapDiagnosticsLogging = sitemapDiagnosticsLogging
         }
     }
 }

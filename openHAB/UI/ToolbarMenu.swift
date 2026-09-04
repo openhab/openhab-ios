@@ -36,20 +36,26 @@ struct ConnectionView: View {
     static let cornerRadius: CGFloat = 14
 
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    @State private var cachedHomePrefs: HomePreferences?
 
     var body: some View {
         HStack {
             if let activeConnection = networkTracker.activeConnection {
-                let homePrefs = Preferences.shared.currentHomePreferences
-                let isLocal = activeConnection.configuration.url == homePrefs.localConnectionConfig.url
+                let homePrefs = cachedHomePrefs
+                let isLocal = activeConnection.configuration.url == homePrefs?.localConnectionConfig.url
                 Image(systemSymbol: isLocal ? .wifi : .cloudFill)
-                Text(homePrefs.homeName).fontWeight(.medium)
+                Text(homePrefs?.homeName ?? "").fontWeight(.medium)
             } else {
                 Image(systemSymbol: .exclamationmarkIcloudFill)
                 Text("Connecting…")
             }
         }
         .font(.footnote)
+        .task {
+            for await prefs in await Preferences.shared.currentHomePreferencesStream {
+                cachedHomePrefs = prefs
+            }
+        }
     }
 }
 
@@ -77,6 +83,7 @@ struct ToolbarMenu: View {
     @State private var showCurrentHomeSettings = false
     @State private var sitemapForWatch: String?
     @State private var sitemapForCarPlay: String?
+    @State private var cachedHomePrefs: HomePreferences?
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
@@ -90,11 +97,11 @@ struct ToolbarMenu: View {
         GeometryReader { proxy in
             overlayContent(proxy: proxy)
         }
-        .onAppear { loadExpansionState() }
+        .onAppear { Task { await loadExpansionState() } }
         .onChange(of: isPresented) { _, newValue in
             if newValue {
                 // Re-read in case the active home changed while the menu was closed.
-                loadExpansionState()
+                Task { await loadExpansionState() }
             } else {
                 isHomeExpanded = false
                 headerDetailsHidden = false
@@ -115,8 +122,9 @@ struct ToolbarMenu: View {
 
     /// Mirrors the active home's persisted section-expansion flags into local
     /// `@State`, defaulting to expanded when a home has no stored value yet.
-    private func loadExpansionState() {
-        let prefs = Preferences.shared.currentHomePreferences
+    private func loadExpansionState() async {
+        let prefs = await Preferences.shared.currentHomePreferences
+        cachedHomePrefs = prefs
         isMainUIExpanded = prefs.isMainUIExpanded ?? true
         isSitemapsExpanded = prefs.isSitemapsExpanded ?? true
         isTilesExpanded = prefs.isTilesExpanded ?? true
@@ -131,15 +139,19 @@ struct ToolbarMenu: View {
     /// choice (and its display label) to the active home, or clearing it if the
     /// same sitemap is double-tapped again.
     private func toggleWatchSitemap(_ sitemap: OpenHABSitemap) {
-        Preferences.shared.modifyActiveHome { prefs in
-            if sitemap.name == sitemapForWatch {
-                sitemapForWatch = nil
-                prefs.sitemapForWatch = ""
-                prefs.sitemapForWatchLabel = ""
-            } else {
-                sitemapForWatch = sitemap.name
-                prefs.sitemapForWatch = sitemap.name
-                prefs.sitemapForWatchLabel = sitemap.label
+        let isToggleOff = sitemap.name == sitemapForWatch
+        let sitemapName = sitemap.name
+        let sitemapLabel = sitemap.label
+        if isToggleOff { sitemapForWatch = nil } else { sitemapForWatch = sitemapName }
+        Task {
+            await Preferences.shared.modifyActiveHome { @Sendable prefs in
+                if isToggleOff {
+                    prefs.sitemapForWatch = ""
+                    prefs.sitemapForWatchLabel = ""
+                } else {
+                    prefs.sitemapForWatch = sitemapName
+                    prefs.sitemapForWatchLabel = sitemapLabel
+                }
             }
         }
     }
@@ -147,13 +159,16 @@ struct ToolbarMenu: View {
     /// Toggles `sitemap` as the one shown in CarPlay, persisting the choice to the
     /// active home, or clearing it if the same sitemap is long-pressed again.
     private func toggleCarPlaySitemap(_ sitemap: OpenHABSitemap) {
-        Preferences.shared.modifyActiveHome { prefs in
-            if sitemap.name == sitemapForCarPlay {
-                sitemapForCarPlay = nil
-                prefs.sitemapForCarPlay = ""
-            } else {
-                sitemapForCarPlay = sitemap.name
-                prefs.sitemapForCarPlay = sitemap.name
+        let isToggleOff = sitemap.name == sitemapForCarPlay
+        let sitemapName = sitemap.name
+        if isToggleOff { sitemapForCarPlay = nil } else { sitemapForCarPlay = sitemapName }
+        Task {
+            await Preferences.shared.modifyActiveHome { @Sendable prefs in
+                if isToggleOff {
+                    prefs.sitemapForCarPlay = ""
+                } else {
+                    prefs.sitemapForCarPlay = sitemapName
+                }
             }
         }
     }
@@ -163,13 +178,18 @@ struct ToolbarMenu: View {
     /// choice persists per home and across restarts.
     private func expansionBinding(
         _ state: Binding<Bool>,
-        persistTo keyPath: WritableKeyPath<HomePreferences, Bool?>
+        persistTo setter: @escaping @Sendable (inout HomePreferences, Bool) -> Void
     ) -> Binding<Bool> {
         Binding(
             get: { state.wrappedValue },
             set: { newValue in
                 state.wrappedValue = newValue
-                Preferences.shared.modifyActiveHome { $0[keyPath: keyPath] = newValue }
+                let capturedValue = newValue
+                Task {
+                    await Preferences.shared.modifyActiveHome { @Sendable prefs in
+                        setter(&prefs, capturedValue)
+                    }
+                }
             }
         )
     }
@@ -228,8 +248,9 @@ struct ToolbarMenu: View {
 
     @ViewBuilder
     private func systemMenu() -> some View {
-        if Preferences.shared.getNotificationConnection() != nil,
-           !Preferences.shared.currentHomePreferences.demomode {
+        if let prefs = cachedHomePrefs,
+           Preferences.getNotificationConnection(of: prefs) != nil,
+           !prefs.demomode {
             systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
         }
         systemRow(symbol: .gear, label: String(localized: "App Settings")) {
@@ -243,9 +264,9 @@ struct ToolbarMenu: View {
         // `sitemapNameLabelDisplayMode` chooses which field(s) to show; when it is `.both`,
         // the sort order decides which one is the title. The list itself is
         // already ordered by `MenuDataService`.
-        let prefs = Preferences.shared.currentHomePreferences
-        let order = SortSitemapsOrder(rawValue: prefs.sortSitemapsBy) ?? .label
-        let mode = prefs.sitemapNameLabelDisplayMode
+        let prefs = cachedHomePrefs
+        let order = SortSitemapsOrder(rawValue: prefs?.sortSitemapsBy ?? 0) ?? .label
+        let mode = prefs?.sitemapNameLabelDisplayMode ?? .label
         ForEach(menuData.sitemaps, id: \.name) { sitemap in
             let isWatch = sitemap.name == sitemapForWatch
             let isCarPlay = sitemap.name == sitemapForCarPlay
@@ -327,7 +348,7 @@ struct ToolbarMenu: View {
                     // Main UI: Home + sidebar pages
                     collapsibleSection(
                         title: "Main UI",
-                        isExpanded: expansionBinding($isMainUIExpanded, persistTo: \.isMainUIExpanded)
+                        isExpanded: expansionBinding($isMainUIExpanded) { prefs, v in prefs.isMainUIExpanded = v }
                     ) {
                         mainUIMenu()
                     }
@@ -335,7 +356,7 @@ struct ToolbarMenu: View {
                     // Sitemaps
                     collapsibleSection(
                         title: "Sitemaps",
-                        isExpanded: expansionBinding($isSitemapsExpanded, persistTo: \.isSitemapsExpanded),
+                        isExpanded: expansionBinding($isSitemapsExpanded) { prefs, v in prefs.isSitemapsExpanded = v },
                         isLoading: menuData.isLoading,
                         isEmpty: menuData.sitemaps.isEmpty
                     ) {
@@ -345,7 +366,7 @@ struct ToolbarMenu: View {
                     // Tiles
                     collapsibleSection(
                         title: "Tiles",
-                        isExpanded: expansionBinding($isTilesExpanded, persistTo: \.isTilesExpanded),
+                        isExpanded: expansionBinding($isTilesExpanded) { prefs, v in prefs.isTilesExpanded = v },
                         isLoading: menuData.isLoading,
                         isEmpty: menuData.uiTiles.isEmpty
                     ) {
@@ -355,7 +376,7 @@ struct ToolbarMenu: View {
                     // System & App
                     collapsibleSection(
                         title: "System & App",
-                        isExpanded: expansionBinding($isSystemExpanded, persistTo: \.isSystemExpanded),
+                        isExpanded: expansionBinding($isSystemExpanded) { prefs, v in prefs.isSystemExpanded = v },
                         showDivider: false
                     ) {
                         systemMenu()
@@ -423,11 +444,11 @@ struct ToolbarMenu: View {
                         .frame(width: 10)
                         .rotationEffect(.degrees(homeDetailsCollapsed ? 90 : 0))
 
-                    let homePrefs = Preferences.shared.currentHomePreferences
+                    let homePrefs = cachedHomePrefs
                     ZStack(alignment: .center) {
                         HomeAvatarView(photo: nil, iconName: HomeAvatarView.defaultIconName,
                                        color: HomeAvatarView.defaultColor, size: 28).hidden()
-                        if !headerDetailsHidden {
+                        if !headerDetailsHidden, let homePrefs {
                             HomeAvatarView(
                                 photo: AvatarImageHelper.load(for: homePrefs.id),
                                 iconName: homePrefs.avatarIconName ?? HomeAvatarView.defaultIconName,

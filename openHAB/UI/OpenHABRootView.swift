@@ -32,6 +32,7 @@ struct OpenHABRootView: View {
     @State private var activeNetworkConnection: ConnectionInfo? = MainActorNetworkTracker.shared.activeConnection
     @State private var showNotifications = false
     @State private var sitemapResetID = UUID()
+    @State private var cachedHomePrefs: HomePreferences?
 
     var body: some View {
         ZStack {
@@ -49,7 +50,9 @@ struct OpenHABRootView: View {
             #if DEBUG
             let env = ProcessInfo.processInfo.environment
             if env["UITest"] != nil {
-                Preferences.shared.modifyActiveHome { $0.demomode = true }
+                Task {
+                    await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.demomode = true }
+                }
             }
             if let title = env["UITestToastTitle"],
                let message = env["UITestToastMessage"] {
@@ -78,7 +81,7 @@ struct OpenHABRootView: View {
                    let data = Data(base64Encoded: encoded),
                    let html = String(data: data, encoding: .utf8) {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        webViewModel.loadHTMLString(html)
+                        Task { await webViewModel.loadHTMLString(html) }
                     }
                 }
             }
@@ -96,7 +99,7 @@ struct OpenHABRootView: View {
             }
             #endif
             ImageDownloader.default.authenticationChallengeResponder = networkService
-            switchToSavedView()
+            Task { await switchToSavedView() }
             setupExitToApp()
         }
         .onReceive(notificationService.$navigationCommand.compactMap { $0 }) { command in
@@ -108,7 +111,7 @@ struct OpenHABRootView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
             menuData.clearForHomeSwitch()
-            switchToSavedView()
+            Task { await switchToSavedView() }
             // Reconcile the web view with the new home: loads if the active connection
             // already belongs to it (e.g. between two demo homes), otherwise blanks and
             // waits for the tracker to connect the new home.
@@ -117,6 +120,11 @@ struct OpenHABRootView: View {
         .task {
             for await connection in MainActorNetworkTracker.shared.$activeConnection.values {
                 activeNetworkConnection = connection
+            }
+        }
+        .task {
+            for await prefs in await Preferences.shared.currentHomePreferencesStream {
+                cachedHomePrefs = prefs
             }
         }
         .sheet(isPresented: $showNotifications) {
@@ -366,11 +374,11 @@ struct OpenHABRootView: View {
         }
     }
 
-    private func switchToSavedView() {
+    private func switchToSavedView() async {
         // Select the surface for the current home. Demo homes follow their defaultView like
         // any other home. The web view's actual load is driven by syncActiveConnection, so
         // here we only choose which content is shown.
-        let prefs = Preferences.shared.currentHomePreferences
+        let prefs = await Preferences.shared.currentHomePreferences
         if prefs.defaultView == "sitemap" {
             switchContent(to: .sitemap(prefs.defaultSitemap))
         } else if !prefs.defaultMainUIPath.isEmpty {
@@ -414,7 +422,7 @@ struct OpenHABRootView: View {
                 break // modal/transient targets never reach switchContent
             }
 
-            if !Preferences.shared.currentHomePreferences.demomode {
+            if !(cachedHomePrefs?.demomode ?? false) {
                 let viewName: String
                 switch newContent {
                 case .webview: viewName = "web"
@@ -422,7 +430,10 @@ struct OpenHABRootView: View {
                 case .tile: viewName = "web" // treat tile as web for persistence
                 default: return // modal/transient targets never reach switchContent
                 }
-                Preferences.shared.modifyActiveHome { $0.defaultView = viewName }
+                let capturedViewName = viewName
+                Task {
+                    await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultView = capturedViewName }
+                }
             }
         }
     }
@@ -436,7 +447,10 @@ struct OpenHABRootView: View {
         case let .mainUIPage(path):
             showMainUI(path: path)
         case let .sitemap(name):
-            Preferences.shared.modifyActiveHome { $0.defaultSitemap = name }
+            let capturedName = name
+            Task {
+                await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultSitemap = capturedName }
+            }
             switchContent(to: .sitemap(name))
         case .notifications:
             showNotifications = true
@@ -464,8 +478,11 @@ struct OpenHABRootView: View {
             webViewModel.loadWebView(force: false, path: path)
         }
         persistDefaultViewIfNeeded("web")
-        if !Preferences.shared.currentHomePreferences.demomode {
-            Preferences.shared.modifyActiveHome { $0.defaultMainUIPath = path ?? "" }
+        if !(cachedHomePrefs?.demomode ?? false) {
+            let capturedPath = path ?? ""
+            Task {
+                await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultMainUIPath = capturedPath }
+            }
         }
     }
 
@@ -479,9 +496,12 @@ struct OpenHABRootView: View {
     /// Persists the home's default view only when it actually changes, avoiding a
     /// redundant preferences write (which would otherwise restart network tracking).
     private func persistDefaultViewIfNeeded(_ viewName: String) {
-        guard !Preferences.shared.currentHomePreferences.demomode else { return }
-        guard Preferences.shared.currentHomePreferences.defaultView != viewName else { return }
-        Preferences.shared.modifyActiveHome { $0.defaultView = viewName }
+        guard !(cachedHomePrefs?.demomode ?? false) else { return }
+        guard cachedHomePrefs?.defaultView != viewName else { return }
+        let capturedViewName = viewName
+        Task {
+            await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultView = capturedViewName }
+        }
     }
 
     /// Reloads the destination currently selected in the menu — never the arbitrary

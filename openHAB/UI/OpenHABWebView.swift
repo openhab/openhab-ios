@@ -152,7 +152,9 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                     proxyURL: connection?.proxyURL,
                     rootURLString: connection?.configuration.url ?? ""
                 )
-                Preferences.shared.currentWebViewPath = savedPath
+                Task {
+                        await Preferences.shared.setCurrentWebViewPath(savedPath)
+                    }
             }
             if message.name == "mainUi" {
                 // Dict body — JS test probe reports (DEBUG builds only)
@@ -217,7 +219,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                 return .cancel
             }
             if navigationAction.navigationType == .linkActivated {
-                if let rewritten = rewriteToActiveConnection(url) {
+                if let rewritten = await rewriteToActiveConnection(url) {
                     Logger.viewController.info("decidePolicyFor - loading in-app (rewritten): \(rewritten.absoluteString)")
                     webView.load(URLRequest(url: rewritten))
                     return .cancel
@@ -231,7 +233,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         /// Rewrites `url` to use the active connection's origin when the URL's host+port
         /// matches any configured home server connection.  Returns `nil` if no match is found,
         /// meaning the link should be opened externally.
-        private func rewriteToActiveConnection(_ url: URL) -> URL? {
+        private func rewriteToActiveConnection(_ url: URL) async -> URL? {
             guard let activeConnection = MainActorNetworkTracker.shared.activeConnection else {
                 return nil
             }
@@ -242,7 +244,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             if let proxyURLString = activeConnection.proxyURL?.absoluteString {
                 knownURLStrings.append(proxyURLString)
             }
-            for home in Preferences.shared.storedHomes.values {
+            for home in (await Preferences.shared.storedHomes).values {
                 knownURLStrings.append(home.localConnectionConfig.url)
                 knownURLStrings.append(home.remoteConnectionConfig.url)
             }
@@ -282,7 +284,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         func webView(_ webView: WKWebView, respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
             Logger.viewController.info("Challenge.protectionSpace.authenticationMethod: \(String(describing: challenge.protectionSpace.authenticationMethod))")
 
-            if let url = viewModel.resolvedURL(), challenge.protectionSpace.host == url.host {
+            if let url = await viewModel.resolvedURL(), challenge.protectionSpace.host == url.host {
                 if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
                     guard let serverTrust = challenge.protectionSpace.serverTrust else {
                         return (.performDefaultHandling, nil)
@@ -328,7 +330,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                      decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
                      initiatedBy frame: WKFrameInfo,
                      type: WKMediaCaptureType) async -> WKPermissionDecision {
-            Preferences.shared.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
+            (await Preferences.shared.currentHomePreferences).alwaysAllowWebRTC ? .grant : .prompt
         }
 
         // MARK: - External URL confirmation

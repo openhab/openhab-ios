@@ -97,14 +97,15 @@ class NotificationActionService: ObservableObject {
 
         Task {
             if let cloudUserId,
-               let targetHome = Preferences.shared.storedHome(forCloudUserId: cloudUserId),
-               Preferences.shared.currentHomePreferences.remoteConnectionConfig.cloudUserId != cloudUserId {
+               let targetHome = await Preferences.shared.storedHome(forCloudUserId: cloudUserId),
+               (await Preferences.shared.currentHomePreferences).remoteConnectionConfig.cloudUserId != cloudUserId {
                 await NetworkTracker.shared.stopTracking()
                 Logger.viewController.info("Switching to home \(targetHome.id)")
-                Preferences.shared.switchActiveHome(to: targetHome.id)
+                await Preferences.shared.switchActiveHome(to: targetHome.id)
             }
+            let homePrefs = await Preferences.shared.currentHomePreferences
             await NetworkTracker.shared.startTracking(
-                connectionConfigurations: Preferences.shared.currentHomePreferences.trackedConnections
+                connectionConfigurations: homePrefs.trackedConnections
             )
             _ = await NetworkTracker.shared.waitForActiveConnection()
             handleNotificationInternal(action, notification: notification)
