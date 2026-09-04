@@ -117,9 +117,13 @@ Specific candidates:
 
 ### Per-home section customisation (Home Settings — Layer 3C)
 
-- [ ] Home name editable via `TextField` in `HomeSettingsView`
-- [ ] Avatar `PhotosPicker` in `HomeSettingsView`; save/persist via `AvatarImageHelper`; shown larger next to editable name
-- [ ] **"Disable remote connection" toggle** per home in `HomeSettingsView`: when off, the remote/cloud connection is excluded everywhere credentials are retrieved or passed (connection pool, `NetworkTracker`, `OpenHABAccessTokenAdapter`, etc.), and no cloud icon is shown for that home in `InlineHomePickerView`. Persisted as a `Bool` flag in `HomePreferences`. The existing "openHAB Cloud Service" toggle already controls *push notifications* independently — this new toggle controls whether the remote URL is used for *data connections* at all.
+- [x] Home name editable via `TextField` in `HomeSettingsView`; included in `SettingsSnapshot` for dirty tracking; persisted on save *(Layer 3C)*
+- [x] Avatar `PhotosPicker` in `HomeSettingsView`; saves via `AvatarImageHelper`; displayed as 72 pt circle next to the editable name; `@State` uses SwiftUI `Image` (not `UIImage`) *(Layer 3C)*
+- [x] **"Disable remote connection" toggle** (`disableRemoteConnection` in `HomePreferences`): added to model + custom decoder; `trackedConnections` respects it; `NetworkConnectionService` now uses `trackedConnections` instead of building the list manually; `InlineHomePickerView.connectionSymbols` hides cloud symbol; `ConnectionSettingsView` shows a "Use Remote Connection" toggle that collapses the remote server section when off *(Layer 3C)*
+- [x] **Avatar icon/circle color logic**: 3-zone HSL lightness (L < 0.30 / mid / L > 0.70) × 2 environments → 6-branch table; circle adapts only at extremes, icon always contrasts circle; `hexString` rounding fix (`lroundf`); `HomeAvatarColorTests` covers all 6 branches, invariants (complementarity, contrast), hue preservation *(Layer 3C)*
+- [x] **Photo re-crop**: tapping the photo button when a photo is already set opens `CropImageView` directly on the stored `UIImage` instead of launching the gallery picker again *(Layer 3C)*
+- [ ] **Avatar in collapsed home menu header**: the per-home avatar should appear alongside the cogwheel and home name when the home section is collapsed, matching the same treatment given to the gear icon *(Layer 3C or 4)*
+- [ ] **Deployment target iOS 18**: make the target consistently iOS 18 across the project (amend the first branch commit); audit and remove any `#available(iOS 17, *)` guards or iOS 17-era defensive code introduced during this branch under the wrong assumption
 - [ ] Sections rearrangeable and individually hideable in Home Settings; expansion state shown read-only *(Layer 4 prerequisite)*
 
 ### System & App section (`systemMenu()` in `ToolbarMenu.swift`)

@@ -252,33 +252,18 @@ struct InlineHomePickerView: View {
     // MARK: - Avatar
 
     /// Always renders a 28 × 28 avatar circle. Uses the home's custom image when
-    /// available, falling back to a generic house icon. A blue ring overlaid when
-    /// `isActive` replaces the separate checkmark, keeping row widths consistent.
+    /// available, falling back to the home's configured icon and color. A blue ring
+    /// when `isActive` replaces the separate checkmark, keeping row widths consistent.
     @ViewBuilder
     private func avatarView(for homeId: UUID, isActive: Bool) -> some View {
-        Group {
-            if let image = AvatarImageHelper.load(for: homeId) {
-                image
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                ZStack {
-                    Circle()
-                        .fill(Color.secondary.opacity(0.12))
-                    Image(systemSymbol: .houseFill)
-                        .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-        .frame(width: 28, height: 28)
-        .clipShape(.circle)
-        .overlay {
-            if isActive {
-                Circle()
-                    .strokeBorder(.blue, lineWidth: 2)
-            }
-        }
+        let prefs = Preferences.shared.storedHomes[homeId]
+        HomeAvatarView(
+            photo: AvatarImageHelper.load(for: homeId),
+            iconName: prefs?.avatarIconName ?? HomeAvatarView.defaultIconName,
+            color: Color(hex: prefs?.avatarColor ?? "") ?? HomeAvatarView.defaultColor,
+            size: 28,
+            isActive: isActive
+        )
     }
 
     // MARK: - Connection symbols
@@ -296,7 +281,7 @@ struct InlineHomePickerView: View {
         // `supportsNotifications` is the "openHAB Cloud Service" toggle.
         // When it is off the user has explicitly disabled cloud; show no symbol.
         let remote = prefs.remoteConnectionConfig
-        if remote.supportsNotifications {
+        if remote.supportsNotifications, !prefs.disableRemoteConnection {
             // All three must be present: a server URL, a username, and a password.
             // username and password come from the Keychain (injected by
             // storedHomeWithCredentials); either being empty means the connection

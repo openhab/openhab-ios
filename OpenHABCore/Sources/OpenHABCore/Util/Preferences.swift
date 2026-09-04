@@ -128,6 +128,10 @@ public struct HomePreferences: Codable, Equatable {
     // Avatar image stored as a file path, never raw Data in UserDefaults.
     // Optional so a missing key in old stored data decodes as nil (no avatar).
     public var avatarImagePath: String?
+    // Hex color string and SF Symbol name for the avatar placeholder.
+    // Optional so missing keys in old stored data decode as nil (use defaults).
+    public var avatarColor: String?
+    public var avatarIconName: String?
 
     // Backing store for the computed `sectionOrder` property. Optional so that
     // old stored data missing this field decodes as nil (resolves to default order).
@@ -146,6 +150,11 @@ public struct HomePreferences: Codable, Equatable {
     public var isTilesVisible: Bool?
     public var isSystemVisible: Bool?
 
+    // When true, the remote URL is excluded from data-connection attempts.
+    // Independent of `supportsNotifications` (the openHAB Cloud push toggle).
+    // Non-optional with `decodeIfPresent` default so existing homes keep remote enabled.
+    public var disableRemoteConnection = false
+
     fileprivate init(id: UUID) {
         self.id = id
     }
@@ -155,7 +164,8 @@ public struct HomePreferences: Codable, Equatable {
     /// homes therefore resolve to the same set, which is why the tracker does not
     /// re-publish when switching between them.
     public var trackedConnections: [ConnectionConfiguration] {
-        demomode ? [.demo] : [localConnectionConfig, remoteConnectionConfig]
+        if demomode { return [.demo] }
+        return disableRemoteConnection ? [localConnectionConfig] : [localConnectionConfig, remoteConnectionConfig]
     }
 
     /// Custom decoder so that stored data from older app versions that are missing
@@ -197,6 +207,9 @@ public struct HomePreferences: Codable, Equatable {
         isSitemapsVisible = try container.decodeIfPresent(Bool.self, forKey: .isSitemapsVisible)
         isTilesVisible = try container.decodeIfPresent(Bool.self, forKey: .isTilesVisible)
         isSystemVisible = try container.decodeIfPresent(Bool.self, forKey: .isSystemVisible)
+        disableRemoteConnection = try container.decodeIfPresent(Bool.self, forKey: .disableRemoteConnection) ?? false
+        avatarColor = try container.decodeIfPresent(String.self, forKey: .avatarColor)
+        avatarIconName = try container.decodeIfPresent(String.self, forKey: .avatarIconName)
     }
 }
 

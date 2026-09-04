@@ -101,19 +101,12 @@ class NetworkConnectionService: ObservableObject {
         Preferences.shared.currentHomePreferencesPublisher
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { homeSettings in
-                let localConnectionConfig = homeSettings.localConnectionConfig
-                let remoteConnectionConfig = homeSettings.remoteConnectionConfig
-                let demomode = homeSettings.demomode
+                let trackedConnections = homeSettings.trackedConnections
                 let sseCommandItem = homeSettings.sseCommandItem
 
                 Task {
-                    if demomode {
-                        await NetworkTracker.shared.startTracking(connectionConfigurations: [.demo])
-                    } else {
-                        await NetworkTracker.shared.startTracking(connectionConfigurations: [
-                            localConnectionConfig,
-                            remoteConnectionConfig
-                        ])
+                    await NetworkTracker.shared.startTracking(connectionConfigurations: trackedConnections)
+                    if !homeSettings.demomode {
                         await ItemEventStream.trackItems(sseCommandItem.isEmpty ? [] : [sseCommandItem])
                     }
                 }

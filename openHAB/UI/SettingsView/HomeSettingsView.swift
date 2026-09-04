@@ -11,6 +11,7 @@
 
 import OpenHABCore
 import os
+import PhotosUI
 import SwiftUI
 
 struct HomeSettingsView: View {
@@ -36,6 +37,20 @@ struct HomeSettingsView: View {
     /// home, where sitemaps are deliberately not fetched (see the `.task` below).
     @State private var settingsSitemapForWatchLabel = ""
     @State private var settingsSitemapForCarPlay = ""
+    @State private var settingsDisableRemoteConnection = false
+    @State private var settingsAvatarImagePath: String?
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var avatarDisplayImage: Image?
+    @State private var showPhotoPicker = false
+    @State private var imageToCrop: PhotosPickerItem?
+    @State private var imageToCropDirectly: UIImage?
+    @State private var showCropView = false
+    @State private var showAvatarPicker = false
+    @State private var showColorPickerRow = false
+    @State private var settingsAvatarColor: String?
+    @State private var settingsAvatarIconName: String?
+    @State private var iconRowPinWidth: CGFloat = 44
+    @State private var colorRowPinWidth: CGFloat = 44
 
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
@@ -54,6 +69,7 @@ struct HomeSettingsView: View {
     @State private var showAppSettings = false
     @State private var showCommandItemInfo = false
 
+    @Environment(\.self) private var environment
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
@@ -70,6 +86,11 @@ struct HomeSettingsView: View {
         var localConnectionConfig: ConnectionConfiguration
         var remoteConnectionConfig: ConnectionConfiguration
         var sseCommandItem: String
+        var homeName: String
+        var disableRemoteConnection: Bool
+        var avatarImagePath: String?
+        var avatarColor: String?
+        var avatarIconName: String?
     }
 
     private var currentSnapshot: SettingsSnapshot {
@@ -85,17 +106,25 @@ struct HomeSettingsView: View {
             sitemapForCarPlay: settingsSitemapForCarPlay,
             localConnectionConfig: settingsLocalConnectionConfiguration,
             remoteConnectionConfig: settingsRemoteConnectionConfiguration,
-            sseCommandItem: settingsSSECommandItem
+            sseCommandItem: settingsSSECommandItem,
+            homeName: settingsHomeName,
+            disableRemoteConnection: settingsDisableRemoteConnection,
+            avatarImagePath: settingsAvatarImagePath,
+            avatarColor: settingsAvatarColor,
+            avatarIconName: settingsAvatarIconName
         )
     }
 
     var body: some View {
         Form {
+            homeIdentitySection
+
             ConnectionSettingsView(
                 settingsDemomode: $settingsDemomode,
                 localConnectionConfiguration: $settingsLocalConnectionConfiguration,
                 remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration,
-                localTestedOKURL: $localTestedOKURL
+                localTestedOKURL: $localTestedOKURL,
+                disableRemoteConnection: $settingsDisableRemoteConnection
             )
 
             commandItemSection
@@ -126,7 +155,7 @@ struct HomeSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .navigationTitle("\(settingsHomeName) Settings")
+        .navigationTitle("Home Settings")
         .alert("Local Network Access Required", isPresented: $showLocalNetworkAlert) {
             Button("Open Settings") {
                 commitSave()
@@ -175,6 +204,294 @@ struct HomeSettingsView: View {
             CommandItemInfoSheet()
                 .presentationDetents([.medium, .large])
         }
+        .fullScreenCover(isPresented: $showCropView) {
+            let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
+            let bgHex = settingsAvatarColor ?? HomeAvatarView.colorPalette[0]
+            let onConfirm: (UIImage) -> Void = { cropped in
+                showCropView = false
+                imageToCrop = nil
+                imageToCropDirectly = nil
+                selectedPhoto = nil
+                guard let data = cropped.jpegData(compressionQuality: 0.9),
+                      let saved = AvatarImageHelper.save(data, for: targetId) else { return }
+                avatarDisplayImage = saved
+                settingsAvatarImagePath = AvatarImageHelper.avatarURL(for: targetId).path
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showAvatarPicker = false
+                    showColorPickerRow = false
+                }
+            }
+            let onCancel: () -> Void = {
+                showCropView = false
+                imageToCrop = nil
+                imageToCropDirectly = nil
+                selectedPhoto = nil
+            }
+            if let item = imageToCrop {
+                CropImageView(photoItem: item, initialBackgroundHex: bgHex, onConfirm: onConfirm, onCancel: onCancel)
+            } else if let uiImage = imageToCropDirectly {
+                CropImageView(image: uiImage, initialBackgroundHex: bgHex, onConfirm: onConfirm, onCancel: onCancel)
+            }
+        }
+    }
+
+    // MARK: - Home identity section (avatar + name + icon/color)
+
+    private var homeIdentitySection: some View {
+        Section {
+            HStack(spacing: 16) {
+                avatarPickerButton
+                TextField("Home name", text: $settingsHomeName)
+                    .font(.headline)
+            }
+            .padding(.vertical, 4)
+
+            if showAvatarPicker {
+                iconPickerRow
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+            if showAvatarPicker && showColorPickerRow {
+                colorPickerRow
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+    }
+
+    private var avatarPickerButton: some View {
+        let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
+        let displayImage = avatarDisplayImage ?? AvatarImageHelper.load(for: targetId)
+        let iconName = settingsAvatarIconName ?? HomeAvatarView.defaultIconName
+        let avatarColor = Color(hex: settingsAvatarColor ?? "") ?? HomeAvatarView.defaultColor
+        return Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                if showAvatarPicker {
+                    showAvatarPicker = false
+                    showColorPickerRow = false
+                } else {
+                    showAvatarPicker = true
+                    // If the avatar is currently showing an icon (no loaded photo), pre-open
+                    // the color row so the user lands with both rows visible immediately.
+                    // Also ensure the icon name is explicit so the selection ring is visible.
+                    if avatarDisplayImage == nil {
+                        // loadSettings() found no photo file, so any stored path is stale.
+                        // Clear it so hasPhoto evaluates correctly in the icon picker.
+                        settingsAvatarImagePath = nil
+                        if settingsAvatarIconName == nil {
+                            settingsAvatarIconName = HomeAvatarView.defaultIconName
+                        }
+                        showColorPickerRow = true
+                    }
+                }
+            }
+        } label: {
+            HomeAvatarView(photo: displayImage, iconName: iconName, color: avatarColor, size: 72)
+                .overlay(alignment: .bottomTrailing) {
+                    Image(systemName: showAvatarPicker ? "checkmark.circle.fill" : "pencil.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(.white, .blue)
+                        .animation(.easeInOut(duration: 0.15), value: showAvatarPicker)
+                }
+        }
+        .buttonStyle(.plain)
+        .photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhoto, matching: .images, photoLibrary: .shared())
+        .onChange(of: selectedPhoto) { _, item in
+            guard let item else { return }
+            imageToCrop = item
+            showCropView = true
+        }
+    }
+
+    private var iconPickerRow: some View {
+        let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
+        let hasPhoto = avatarDisplayImage != nil || settingsAvatarImagePath != nil
+        let tint = Color(hex: settingsAvatarColor ?? "") ?? HomeAvatarView.defaultColor
+        let pinLeading: CGFloat = 8
+        let gap: CGFloat = 10 // matches icon HStack spacing
+        return ZStack(alignment: .leading) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(HomeAvatarView.availableIcons, id: \.self) { icon in
+                        let isSelected = !hasPhoto && (settingsAvatarIconName ?? HomeAvatarView.defaultIconName) == icon
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                settingsAvatarIconName = icon
+                                removeAvatar(for: targetId)
+                                showColorPickerRow = true
+                            }
+                        } label: {
+                            ZStack {
+                                Circle().fill(isSelected ? tint.circleFillColor(in: environment) : tint.iconForegroundColor(in: environment))
+                                Image(systemName: icon)
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(isSelected ? tint.iconForegroundColor(in: environment) : tint.circleFillColor(in: environment))
+                            }
+                            .frame(width: 40, height: 40)
+                            .overlay {
+                                if isSelected { Circle().strokeBorder(.blue, lineWidth: 2) }
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                // inset derived from measured button width — adapts to glass size on iOS 26
+                .padding(.leading, pinLeading + iconRowPinWidth + gap)
+                .padding(.trailing, 32)
+                .padding(.vertical, 4)
+            }
+            .overlay(alignment: .trailing) {
+                LinearGradient(
+                    colors: [.clear, Color(uiColor: .secondarySystemGroupedBackground)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: 32)
+                .allowsHitTesting(false)
+            }
+
+            leadingFadeGradient(
+                width: pinLeading + iconRowPinWidth + 20,
+                opaqueColor: Color(uiColor: .secondarySystemGroupedBackground)
+            )
+
+            iconRowPhotoButton(hasPhoto: hasPhoto)
+                .onGeometryChange(for: CGFloat.self, of: { $0.size.width }) { iconRowPinWidth = $0 }
+                .padding(.leading, pinLeading)
+        }
+    }
+
+    @ViewBuilder
+    private func iconRowPhotoButton(hasPhoto: Bool) -> some View {
+        let openAction: () -> Void = {
+            if hasPhoto {
+                // Re-crop the existing stored photo without going back to the gallery.
+                let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
+                if let uiImage = UIImage(contentsOfFile: AvatarImageHelper.avatarURL(for: targetId).path) {
+                    imageToCropDirectly = uiImage
+                    showCropView = true
+                } else {
+                    showPhotoPicker = true // file missing — fall back to picker
+                }
+            } else {
+                showPhotoPicker = true
+            }
+        }
+        if #available(iOS 26, *) {
+            Button(action: openAction) {
+                Image(systemName: "photo.stack")
+                    .font(.system(size: 16))
+                    .foregroundStyle(hasPhoto ? Color.blue : Color.accentColor)
+                    .frame(width: 30, height: 30)
+                    .padding(7)
+                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 13))
+            }
+            .buttonStyle(.plain)
+        } else {
+            Button(action: openAction) {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(hasPhoto ? Color.blue : Color.blue.opacity(0.12))
+                    .frame(width: 40, height: 40)
+                    .overlay {
+                        Image(systemName: "photo.stack")
+                            .font(.system(size: 16))
+                            .foregroundStyle(hasPhoto ? .white : .blue)
+                    }
+                    .overlay {
+                        if hasPhoto { RoundedRectangle(cornerRadius: 8).strokeBorder(.blue, lineWidth: 2) }
+                    }
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    @ViewBuilder
+    private var settingsColorPicker: some View {
+        if #available(iOS 26, *) {
+            ColorPicker("", selection: Binding(
+                get: { Color(hex: settingsAvatarColor ?? HomeAvatarView.colorPalette[0]) ?? HomeAvatarView.defaultColor },
+                set: { settingsAvatarColor = $0.hexString }
+            ), supportsOpacity: false)
+            .labelsHidden()
+            .frame(width: 30, height: 30)
+            .padding(7)
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 13))
+        } else {
+            ColorPicker("", selection: Binding(
+                get: { Color(hex: settingsAvatarColor ?? HomeAvatarView.colorPalette[0]) ?? HomeAvatarView.defaultColor },
+                set: { settingsAvatarColor = $0.hexString }
+            ), supportsOpacity: false)
+            .labelsHidden()
+            .frame(width: 30, height: 30)
+        }
+    }
+
+    private var colorPickerRow: some View {
+        let pinLeading: CGFloat = 8
+        let gap: CGFloat = 8 // matches swatch HStack spacing
+        return ZStack(alignment: .leading) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(HomeAvatarView.colorPalette, id: \.self) { hex in
+                        let color = Color(hex: hex) ?? .blue
+                        let isSelected = settingsAvatarColor == hex
+                        Button {
+                            settingsAvatarColor = hex
+                        } label: {
+                            Circle()
+                                .fill(color)
+                                .frame(width: 30, height: 30)
+                                .overlay {
+                                    if isSelected {
+                                        Circle().strokeBorder(.white, lineWidth: 2.5)
+                                    }
+                                }
+                                .shadow(color: .black.opacity(0.15), radius: 1, x: 0, y: 1)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                // inset derived from measured picker width — adapts to glass size on iOS 26
+                .padding(.leading, pinLeading + colorRowPinWidth + gap)
+                .padding(.trailing, 32)
+                .padding(.vertical, 4)
+            }
+            .overlay(alignment: .trailing) {
+                LinearGradient(
+                    colors: [.clear, Color(uiColor: .secondarySystemGroupedBackground)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: 32)
+                .allowsHitTesting(false)
+            }
+
+            leadingFadeGradient(
+                width: pinLeading + colorRowPinWidth + 20,
+                opaqueColor: Color(uiColor: .secondarySystemGroupedBackground)
+            )
+
+            settingsColorPicker
+                .onGeometryChange(for: CGFloat.self, of: { $0.size.width }) { colorRowPinWidth = $0 }
+                .padding(.leading, pinLeading)
+        }
+    }
+
+    /// Fades from `opaqueColor` to transparent, masking scroll content as it passes
+    /// under the pinned leading item. Glass on the pinned item is translucent, so
+    /// content scrolling behind it would cut off abruptly without this gradient.
+    private func leadingFadeGradient(width: CGFloat, opaqueColor: Color) -> some View {
+        LinearGradient(
+            colors: [opaqueColor, opaqueColor.opacity(0)],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+        .frame(width: width)
+        .allowsHitTesting(false)
+    }
+
+    private func removeAvatar(for targetId: UUID) {
+        AvatarImageHelper.delete(for: targetId)
+        avatarDisplayImage = nil
+        settingsAvatarImagePath = nil
     }
 
     private var commandItemLabelText: String {
@@ -266,6 +583,11 @@ struct HomeSettingsView: View {
         let lcc = settingsLocalConnectionConfiguration
         let rcc = settingsRemoteConnectionConfiguration
         let sseCI = settingsSSECommandItem
+        let hn = settingsHomeName
+        let drc = settingsDisableRemoteConnection
+        let aip = settingsAvatarImagePath
+        let ac = settingsAvatarColor
+        let ain = settingsAvatarIconName
         let targetId = homeId ?? Preferences.shared.currentHomePreferences.id
         let snapshot = currentSnapshot
         onDismissedDirty?(snapshot) {
@@ -283,6 +605,11 @@ struct HomeSettingsView: View {
                 prefs.localConnectionConfig = lcc
                 prefs.remoteConnectionConfig = rcc
                 prefs.sseCommandItem = sseCI
+                prefs.homeName = hn
+                prefs.disableRemoteConnection = drc
+                prefs.avatarImagePath = aip
+                prefs.avatarColor = ac
+                prefs.avatarIconName = ain
             }
             NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
         }
@@ -333,6 +660,11 @@ struct HomeSettingsView: View {
         loadedLocalURL = homePrefs.localConnectionConfig.url
         settingsHomeName = homePrefs.homeName
         settingsSSECommandItem = homePrefs.sseCommandItem
+        settingsDisableRemoteConnection = homePrefs.disableRemoteConnection
+        settingsAvatarImagePath = homePrefs.avatarImagePath
+        settingsAvatarColor = homePrefs.avatarColor
+        settingsAvatarIconName = homePrefs.avatarIconName
+        avatarDisplayImage = AvatarImageHelper.load(for: homePrefs.id)
     }
 
     private func applySnapshot(_ snapshot: SettingsSnapshot) {
@@ -348,6 +680,11 @@ struct HomeSettingsView: View {
         settingsLocalConnectionConfiguration = snapshot.localConnectionConfig
         settingsRemoteConnectionConfiguration = snapshot.remoteConnectionConfig
         settingsSSECommandItem = snapshot.sseCommandItem
+        settingsHomeName = snapshot.homeName
+        settingsDisableRemoteConnection = snapshot.disableRemoteConnection
+        settingsAvatarImagePath = snapshot.avatarImagePath
+        settingsAvatarColor = snapshot.avatarColor
+        settingsAvatarIconName = snapshot.avatarIconName
     }
 
     func saveSettings() {
@@ -367,6 +704,11 @@ struct HomeSettingsView: View {
             homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration
             homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
             homePreferences.sseCommandItem = settingsSSECommandItem
+            homePreferences.homeName = settingsHomeName
+            homePreferences.disableRemoteConnection = settingsDisableRemoteConnection
+            homePreferences.avatarImagePath = settingsAvatarImagePath
+            homePreferences.avatarColor = settingsAvatarColor
+            homePreferences.avatarIconName = settingsAvatarIconName
         }
     }
 }
