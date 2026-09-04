@@ -132,7 +132,7 @@ public extension OpenHABNotification {
             case created
             case v = "__v"
             case onClickAction = "on-click"
-            case actionsJSON = "actions"
+            case actions
             case cloudUserId = "userId"
             case payload
         }
@@ -171,10 +171,39 @@ public extension OpenHABNotification {
         public let created: Date?
         public let v: Int
         public let onClickAction: String?
-        /// The notification-list API returns `actions` as a JSON string (array of {title, action}).
-        public let actionsJSON: String?
+        /// Actions decoded from the `actions` field, which may arrive as either a proper JSON
+        /// array (REST list API) or a JSON-encoded string (legacy / APNs push format).
+        public let actions: [NotificationActionItem]
         public let cloudUserId: String?
         public let payload: PayloadInternal?
+
+        public init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = try container.decode(String.self, forKey: .id)
+            message = try container.decodeIfPresent(String.self, forKey: .message)
+            icon = try container.decodeIfPresent(String.self, forKey: .icon)
+            severity = try container.decodeIfPresent(String.self, forKey: .severity)
+            created = try container.decodeIfPresent(Date.self, forKey: .created)
+            v = try container.decode(Int.self, forKey: .v)
+            onClickAction = try container.decodeIfPresent(String.self, forKey: .onClickAction)
+            cloudUserId = try container.decodeIfPresent(String.self, forKey: .cloudUserId)
+            payload = try container.decodeIfPresent(PayloadInternal.self, forKey: .payload)
+
+            // The REST list API may return `actions` as a proper JSON array; the APNs push
+            // payload encodes it as a JSON string. Try the array form first, then the string.
+            if let items = try? container.decodeIfPresent([NotificationActionItem].self, forKey: .actions) {
+                actions = items
+            } else if let jsonString = try? container.decodeIfPresent(String.self, forKey: .actions),
+                      let data = jsonString.data(using: .utf8),
+                      let raw = try? JSONSerialization.jsonObject(with: data) as? [[String: String]] {
+                actions = raw.compactMap { dict in
+                    guard let title = dict["title"], let action = dict["action"] else { return nil }
+                    return NotificationActionItem(title: title, action: action)
+                }
+            } else {
+                actions = []
+            }
+        }
     }
 }
 
@@ -189,7 +218,7 @@ extension OpenHABNotification.CodingData {
             // Prefer the flat top-level on-click; fall back to a nested payload.onClick if that's all
             // the server sent.
             onClickAction: onClickAction ?? payload?.onClick,
-            actions: parsedActions,
+            actions: actions,
             cloudUserId: cloudUserId ?? payload?.userId,
             payload: payload.map {
                 Payload(
@@ -209,14 +238,5 @@ extension OpenHABNotification.CodingData {
         )
     }
 
-    private var parsedActions: [NotificationActionItem] {
-        guard let json = actionsJSON,
-              let data = json.data(using: .utf8),
-              let raw = try? JSONSerialization.jsonObject(with: data) as? [[String: String]]
-        else { return [] }
-        return raw.compactMap { dict in
-            guard let title = dict["title"], let action = dict["action"] else { return nil }
-            return NotificationActionItem(title: title, action: action)
-        }
-    }
+
 }
