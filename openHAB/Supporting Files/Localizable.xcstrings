@@ -10127,7 +10127,7 @@
     },
     "Label and name" : {
       "comment" : "A picker option that shows both the sitemap's label and its name.",
-      "extractionState" : "stale",
+      "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -15593,66 +15593,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Переименовать"
-          }
-        }
-      }
-    },
-    "Rename '%@'" : {
-      "comment" : "Alert title when renaming a home; %@ is replaced with the current home name.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "„%@“ umbenennen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rename '%@'"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Renombrar «%@»"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nimeä %@ uudelleen"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Renommer « %@ »"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rinomina «%@»"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gi «%@» nytt navn"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "'%@' hernoemen"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Переименовать «%@»"
           }
         }
       }
@@ -24292,66 +24232,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Warning"
-          }
-        }
-      }
-    },
-    "Warning: Renaming might break external integrations like shortcuts." : {
-      "comment" : "Short warning note shown inline when renaming a home, cautioning about broken Siri Shortcuts.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warnung: Das Umbenennen kann externe Integrationen wie Kurzbefehle beschädigen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warning: Renaming might break external integrations like shortcuts."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Advertencia: cambiar el nombre puede romper integraciones externas como los atajos."
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Varoitus: uudelleennimeäminen voi rikkoa ulkoisia integraatioita, kuten pikakomentoja."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Attention : renommer peut casser des intégrations externes comme les raccourcis."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Attenzione: la rinomina potrebbe compromettere integrazioni esterne come i comandi rapidi."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Advarsel: Å gi nytt navn kan ødelegge eksterne integrasjoner som snarveier."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Waarschuwing: hernoemen kan externe integraties zoals opdrachten verbreken."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Внимание: переименование может нарушить внешние интеграции, например быстрые команды."
           }
         }
       }
