@@ -95,6 +95,19 @@ public struct HomePreferences: Codable, Equatable {
     public var iconType = 0
     public var defaultSitemap = "demo"
     public var sortSitemapsBy = 0
+    // Backing store for `sitemapNameLabelDisplayMode`. Optional on purpose: synthesized
+    // `Codable` throws `keyNotFound` for a missing *non-optional* key (even one
+    // with a default), which would discard the whole home. Optional decodes a
+    // missing key as `nil`. Never read this directly — use `sitemapNameLabelDisplayMode`.
+    private var sitemapNameLabelDisplayModeStorage: SitemapNameLabelDisplayMode?
+
+    /// Which sitemap field(s) to show in menus and pickers. Resolves to the
+    /// default (`.label`) when unset — both for fresh installs and for homes saved
+    /// before this setting existed — so callers never have to handle `nil`.
+    public var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode {
+        get { SitemapNameLabelDisplayMode.resolved(sitemapNameLabelDisplayModeStorage) }
+        set { sitemapNameLabelDisplayModeStorage = newValue }
+    }
     public var defaultMainUIPath = ""
     public var alwaysAllowWebRTC = false
     public var sitemapForWatch = "watch"
@@ -103,9 +116,25 @@ public struct HomePreferences: Codable, Equatable {
     public var sitemapForWatchLabel = "watch"
     public var homeName = "Home#1"
     public var sseCommandItem = ""
+    // Toolbar menu section expansion, per home. Optional so that decoding data
+    // stored before these fields existed yields `nil` (treated as expanded)
+    // instead of throwing `keyNotFound` and discarding the whole home.
+    public var isMainUIExpanded: Bool?
+    public var isSitemapsExpanded: Bool?
+    public var isTilesExpanded: Bool?
+    public var isSystemExpanded: Bool?
+    public var sitemapForCarPlay = ""
 
     fileprivate init(id: UUID) {
         self.id = id
+    }
+
+    /// The connection configurations the network tracker uses for this home: the shared
+    /// demo connection in demo mode, otherwise the local and remote connections. Two demo
+    /// homes therefore resolve to the same set, which is why the tracker does not
+    /// re-publish when switching between them.
+    public var trackedConnections: [ConnectionConfiguration] {
+        demomode ? [.demo] : [localConnectionConfig, remoteConnectionConfig]
     }
 
     /// Custom decoder so that stored data from older app versions that are missing
@@ -132,6 +161,14 @@ public struct HomePreferences: Codable, Equatable {
         sitemapForWatchLabel = try container.decodeIfPresent(String.self, forKey: .sitemapForWatchLabel) ?? "watch"
         homeName = try container.decodeIfPresent(String.self, forKey: .homeName) ?? "Home#1"
         sseCommandItem = try container.decodeIfPresent(String.self, forKey: .sseCommandItem) ?? ""
+        // Fields added on this branch. Optional, so a missing key decodes as nil (the documented
+        // "treat as unset/expanded" behavior) rather than throwing keyNotFound and discarding the home.
+        sitemapNameLabelDisplayModeStorage = try container.decodeIfPresent(SitemapNameLabelDisplayMode.self, forKey: .sitemapNameLabelDisplayModeStorage)
+        isMainUIExpanded = try container.decodeIfPresent(Bool.self, forKey: .isMainUIExpanded)
+        isSitemapsExpanded = try container.decodeIfPresent(Bool.self, forKey: .isSitemapsExpanded)
+        isTilesExpanded = try container.decodeIfPresent(Bool.self, forKey: .isTilesExpanded)
+        isSystemExpanded = try container.decodeIfPresent(Bool.self, forKey: .isSystemExpanded)
+        sitemapForCarPlay = try container.decodeIfPresent(String.self, forKey: .sitemapForCarPlay) ?? ""
     }
 }
 
@@ -331,6 +368,21 @@ public extension Preferences {
         return prefs
     }
 
+    /// Returns a stored home's preferences with credentials injected from Keychain, or nil if not found.
+    /// Mirrors what `currentHomePreferences` does for the active home, but works for any stored home UUID.
+    func storedHomeWithCredentials(forId homeId: UUID) -> HomePreferences? {
+        guard var home = storedHomes[homeId] else { return nil }
+        if let creds = CredentialsStore.retrieve(homeId: homeId, type: .local) {
+            home.localConnectionConfig.username = creds.username
+            home.localConnectionConfig.password = creds.password
+        }
+        if let creds = CredentialsStore.retrieve(homeId: homeId, type: .remote) {
+            home.remoteConnectionConfig.username = creds.username
+            home.remoteConnectionConfig.password = creds.password
+        }
+        return home
+    }
+
     /// Publisher of active home preferences changes. Each emitted value has credentials injected from Keychain.
     var currentHomePreferencesPublisher: AnyPublisher<HomePreferences, Never> {
         $_currentHomePreferences
@@ -465,6 +517,32 @@ public extension Preferences {
         var applicationPreferences = applicationPreferences
         modificationFunction(&applicationPreferences)
         self.applicationPreferences = applicationPreferences
+    }
+
+    /// Modify an arbitrary stored home by UUID.  If `homeId` matches the active home,
+    /// delegates to `modifyActiveHome` so that `currentHomePreferences` stays in sync.
+    func modifyStoredHome(_ homeId: UUID, modificationFunction: @MainActor (inout HomePreferences) -> Void) {
+        if homeId == activeHomeId {
+            modifyActiveHome(modificationFunction: modificationFunction)
+        } else {
+            var stored = storedHomes
+            guard stored[homeId] != nil else { return }
+            modificationFunction(&stored[homeId]!)
+            let home = stored[homeId]!
+            CredentialsStore.store(
+                username: home.localConnectionConfig.username,
+                password: home.localConnectionConfig.password,
+                homeId: homeId,
+                type: .local
+            )
+            CredentialsStore.store(
+                username: home.remoteConnectionConfig.username,
+                password: home.remoteConnectionConfig.password,
+                homeId: homeId,
+                type: .remote
+            )
+            storedHomes = stored
+        }
     }
 }
 
@@ -641,5 +719,14 @@ public extension ConnectionConfiguration {
         ignoreSSL: false,
         supportsNotifications: true,
         priority: 1
+    )
+
+    /// The single connection every demo home is tracked against, regardless of its
+    /// stored local/remote configuration.
+    static let demo = ConnectionConfiguration(
+        url: "https://demo.openhab.org",
+        username: "",
+        password: "",
+        priority: 0
     )
 }

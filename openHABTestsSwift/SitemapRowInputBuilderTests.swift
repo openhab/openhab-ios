@@ -96,6 +96,70 @@ struct SitemapRowInputBuilderTests {
         #expect(updated.reusedInputCount == 0)
         #expect(updated.inputs.count == 2)
     }
+
+    /// Regression (#1301): widgets with visibility=false must not appear in row inputs.
+    /// In long-polling (≤3.4.6) the server omitted invisible widgets from the payload,
+    /// so this was implicit. SSE (≥3.4.7) mutates widget.visibility in-place, requiring
+    /// relevantWidgets to apply shouldShowWidget logic before building.
+    @Test
+    func invisibleWidgetsAreExcludedFromRowInputs() {
+        let mode = makeTextWidget(widgetID: "mode", label: "Mode")
+        let fan = makeTextWidget(widgetID: "fan", label: "Fan")
+        fan.visibility = false
+
+        let result = buildInitial(pageKey: "default|home", widgets: sitemapVisibleWidgets([mode, fan]))
+
+        #expect(result.inputs.count == 1)
+        #expect(result.rowIDs[0].widgetId == "mode")
+    }
+
+    @Test
+    func sseVisibilityEventExcludesWidgetFromRowInputs() {
+        let mode = makeTextWidget(widgetID: "mode", label: "Mode")
+        let fan = makeTextWidget(widgetID: "fan", label: "Fan")
+
+        // SSE delivers visibility=false for fan when mode selection changes
+        fan.apply(event: OpenHABSitemapWidgetEvent(widgetId: "fan", visibility: false))
+
+        let result = buildInitial(pageKey: "default|home", widgets: sitemapVisibleWidgets([mode, fan]))
+
+        #expect(result.inputs.count == 1)
+        #expect(result.rowIDs[0].widgetId == "mode")
+    }
+
+    @Test
+    func frameWithNoVisibleChildrenIsHidden() {
+        let frame = makeFrameWidget(widgetID: "frame-1", label: "HVAC")
+        let child = makeTextWidget(widgetID: "fan", label: "Fan")
+        child.parentWidgetId = "frame-1"
+        child.visibility = false
+
+        let result = buildInitial(pageKey: "default|home", widgets: sitemapVisibleWidgets([frame, child]))
+
+        #expect(result.inputs.isEmpty)
+    }
+
+    @Test
+    func emptyFrameIsHidden() {
+        let frame = makeFrameWidget(widgetID: "frame-1", label: "HVAC")
+
+        let result = buildInitial(pageKey: "default|home", widgets: sitemapVisibleWidgets([frame]))
+
+        #expect(result.inputs.isEmpty)
+    }
+
+    @Test
+    func childOfInvisibleFrameIsHiddenEvenWhenOwnVisibilityIsTrue() {
+        let frame = makeFrameWidget(widgetID: "frame-1", label: "HVAC")
+        frame.visibility = false
+        let child = makeTextWidget(widgetID: "fan", label: "Fan")
+        child.parentWidgetId = "frame-1"
+        child.visibility = true
+
+        let result = buildInitial(pageKey: "default|home", widgets: sitemapVisibleWidgets([frame, child]))
+
+        #expect(result.inputs.isEmpty)
+    }
 }
 
 private extension SitemapRowInputBuilderTests {
@@ -119,6 +183,14 @@ private extension SitemapRowInputBuilderTests {
         let widget = OpenHABWidget()
         widget.widgetId = widgetID
         widget.type = .text
+        widget.label = label
+        return widget
+    }
+
+    func makeFrameWidget(widgetID: String, label: String) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = widgetID
+        widget.type = .frame
         widget.label = label
         return widget
     }

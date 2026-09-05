@@ -29,4 +29,28 @@ struct OpenHABJSONParserTests {
         let codingData = try decoder.decode([OpenHABNotification.CodingData].self, from: json)
         #expect(codingData[0].message == "Light Küche was changed")
     }
+
+    @Test func notificationDecodesOnClickAction() throws {
+        let json = Data("""
+        [{"_id":"abc123","message":"Door opened","__v":0,"created":"2024-01-01T00:00:00.000Z","on-click":"ui:/overview"}]
+        """.utf8)
+
+        let codingData = try decoder.decode([OpenHABNotification.CodingData].self, from: json)
+        let notification = codingData[0].openHABNotification
+        #expect(notification.onClickAction == "ui:/overview")
+    }
+
+    @Test func notificationDecodesActionsJSONString() throws {
+        let actionsJSON = #"[{\"title\":\"Open\",\"action\":\"ui:/overview\"},{\"title\":\"Dismiss\",\"action\":\"\"}]"#
+        let json = Data("""
+        [{"_id":"abc456","message":"Motion detected","__v":0,"created":"2024-01-01T00:00:00.000Z","actions":"\(actionsJSON)"}]
+        """.utf8)
+
+        let codingData = try decoder.decode([OpenHABNotification.CodingData].self, from: json)
+        let notification = codingData[0].openHABNotification
+        #expect(notification.actions.count == 2)
+        #expect(notification.actions[0].title == "Open")
+        #expect(notification.actions[0].action == "ui:/overview")
+        #expect(notification.actions[1].title == "Dismiss")
+    }
 }

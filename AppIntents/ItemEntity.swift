@@ -14,7 +14,6 @@ import OpenHABCore
 
 // MARK: - Shared Protocol for All Item Entities
 
-@available(iOS 17.0, macOS 14.0, *)
 protocol ItemEntity: AppEntity where ID == ItemIdentifier {
     var id: ItemIdentifier { get set }
     var item: OpenHABItem { get set }
@@ -24,7 +23,6 @@ protocol ItemEntity: AppEntity where ID == ItemIdentifier {
     init(_ openHABItem: OpenHABItem, homeId: UUID, homeName: String?)
 }
 
-@available(iOS 17.0, macOS 14.0, *)
 extension ItemEntity {
     var homeId: UUID? {
         id.homeId
@@ -58,13 +56,13 @@ extension ItemEntity {
     var displayRepresentation: DisplayRepresentation {
         if let homeName {
             DisplayRepresentation(
-                title: nonLocalizedDisplayString(label, key: "__app_intents_item_label__"),
-                subtitle: nonLocalizedDisplayString("\(item.name) • \(homeName)", key: "__app_intents_item_subtitle__")
+                title: "\(label)",
+                subtitle: "\(item.name) • \(homeName)"
             )
         } else {
             DisplayRepresentation(
-                title: nonLocalizedDisplayString(label, key: "__app_intents_item_label__"),
-                subtitle: nonLocalizedDisplayString(item.name, key: "__app_intents_item_name__")
+                title: "\(label)",
+                subtitle: "\(item.name)"
             )
         }
     }
@@ -75,9 +73,5 @@ extension ItemEntity {
             item: openHABItem,
             homeName: homeName
         )
-    }
-
-    func nonLocalizedDisplayString(_ value: String, key: StaticString) -> LocalizedStringResource {
-        LocalizedStringResource(key, defaultValue: "\(value)")
     }
 }

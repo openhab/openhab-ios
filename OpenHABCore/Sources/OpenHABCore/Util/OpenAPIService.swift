@@ -27,9 +27,16 @@ public enum OpenAPIServiceConfiguration {
     case asDefault
     case shortTerm
     case longTerm
+    /// For persistent SSE connections expected to stay open indefinitely. iOS's
+    /// per-request timeout does not reliably reset on each chunk of a streamed
+    /// response, so it must be set well beyond the server's ALIVE ping interval
+    /// (~10s) to avoid spurious disconnects while the stream is still healthy.
+    /// A genuinely dead connection is instead caught by the caller's own
+    /// idle-event watchdog.
+    case sse
 }
 
-protocol OpenAPIServiceProtocol: AnyObject, Sendable {
+public protocol OpenAPIServiceProtocol: AnyObject, Sendable {
     func getRootVersion() async throws -> Int
     @discardableResult func getRoot() async throws -> OpenHABServerProperties
     func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) async throws
@@ -39,11 +46,12 @@ protocol OpenAPIServiceProtocol: AnyObject, Sendable {
     func getItemByName(id: String) async throws -> OpenHABItem?
     func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) async throws -> OpenHABPage?
     func runNow(ruleUID: String, payload: [String: any Sendable]) async throws
+    func openHABcreateSubscription() async throws -> String?
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String, pageId: String) async throws -> any AsyncSequence<SitemapEventMessage, any Error> & Sendable
+    func openHABEvents(topics: String?) async throws -> any AsyncSequence<OpenHABEvent, any Error> & Sendable
 }
 
 /// The generated OpenAPI client is wrapped by this curated API.
-/// The library leaks the fact that it uses Swift OpenAPI Generator under the hood in 'openHABSitemapWidgetEvents'.
-/// It will require the migration to Swift 6.1 before this can be changed.
 public actor OpenAPIService {
     private var client: any APIProtocol
     private var url: URL?
@@ -81,6 +89,13 @@ public actor OpenAPIService {
         case .shortTerm:
             config.timeoutIntervalForRequest = 10.0
             config.timeoutIntervalForResource = 10.0
+        case .sse:
+            config.requestCachePolicy = .reloadIgnoringLocalCacheData
+            config.urlCache = nil
+            config.timeoutIntervalForRequest = 300.0
+            // Leave timeoutIntervalForResource at its default (7 days) — the stream
+            // is meant to stay open indefinitely; a dead connection is caught by
+            // the caller's own idle-event watchdog, not by a resource-lifetime cap.
         }
         let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
         urlSession = session
@@ -135,6 +150,11 @@ public actor OpenAPIService {
         return "\(sourcePrefix)=>\(base)"
     }
 
+    private func subscriptionId(from location: String?) -> String? {
+        guard let location else { return nil }
+        return URL(string: location)?.lastPathComponent
+    }
+
     deinit {
         urlSession?.invalidateAndCancel()
     }
@@ -161,6 +181,51 @@ public extension OpenAPIService {
         try await client.getUITiles(.init())
             .ok.body.json
             .map(OpenHABUiTile.init)
+    }
+
+    func getUIPages(rootUrl: String) async throws -> [OpenHABUIPage] {
+        guard let base = url else { throw OpenAPIServiceError.noRootURL }
+        let endpoint = base.appending(path: "/rest/ui/components/ui:page")
+        var request = URLRequest(url: endpoint)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        if !connectionConfiguration.username.isEmpty {
+            request.setValue(
+                basicAuthHeader(username: connectionConfiguration.username, password: connectionConfiguration.password),
+                forHTTPHeaderField: "Authorization"
+            )
+        }
+        // urlSession is optional since the develop merge (retained for deinit teardown); a configured
+        // service always has one — guard rather than fall back to .shared so we don't leak a session.
+        guard let urlSession else { throw URLError(.badURL) }
+        let (data, _) = try await urlSession.data(for: request)
+
+        struct UIPageDTO: Decodable {
+            var uid: String?
+            var config: Config?
+            struct Config: Decodable {
+                var label: String?
+                var icon: String?
+                var order: String?
+                var sidebar: Bool?
+            }
+        }
+
+        return try JSONDecoder()
+            .decode([UIPageDTO].self, from: data)
+            .compactMap { dto -> OpenHABUIPage? in
+                guard let uid = dto.uid, !uid.isEmpty,
+                      dto.config?.sidebar == true
+                else { return nil }
+                let label = dto.config?.label ?? uid
+                let icon = dto.config?.icon ?? ""
+                let order = dto.config?.order.flatMap(Int.init) ?? Int.max
+                // The Main UI SPA uses Framework7 history mode (pushState).
+                // browser-history-root is set to the server origin, so routes resolve
+                // as {rootUrl}/page/{uid} — no /ui/ prefix, no hash fragment.
+                let url = "\(rootUrl.removeTrailingSlashes())/page/\(uid)"
+                return OpenHABUIPage(uid: uid, label: label, icon: icon, order: order, url: url)
+            }
+            .sorted { $0.order < $1.order }
     }
 }
 
@@ -213,73 +278,94 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
-    // Will need swift 6.0 SE-0421 and iOS 18 to return an opaque sequence without the type eraser AnyAsyncSequence<Element>
-//    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> some AsyncSequence<OpenHABSitemapWidgetEvent, any Error> {
-//
-//            let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
-//            let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: sitemap)
-//            let decodedSequence = try await client.getSitemapEvents_1(path: path, query: query)
-//                .ok.body.text_event_hyphen_stream
-//                .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
-//            return decodedSequence.compactMap { OpenHABSitemapWidgetEvent($0.data) }
-//        }
-    struct AnyAsyncSequence<Element>: AsyncSequence {
-        public struct Iterator: AsyncIteratorProtocol {
-            private var _next: () async throws -> Element?
-
-            init<S: AsyncSequence>(_ base: S) where S.Element == Element {
-                var it = base.makeAsyncIterator()
-                _next = { try await it.next() }
+    private static func parseSitemapEvent(_ sse: ServerSentEvent) -> SitemapEventMessage? {
+        if let event = sse.event?.lowercased(), event == "alive" {
+            Logger.openAPIService.debug("Sitemap SSE alive event")
+            return .alive
+        }
+        guard let raw = sse.data else { return nil }
+        Logger.openAPIService.debug("Sitemap SSE raw event: \(raw, privacy: .public)")
+        let data = Data(raw.utf8)
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let type = json["TYPE"] as? String {
+            switch type {
+            case "ALIVE":
+                return .alive
+            case "SITEMAP_CHANGED":
+                Logger.openAPIService.info("Sitemap SSE SITEMAP_CHANGED event")
+                return .sitemapChanged(
+                    sitemap: json["sitemapName"] as? String,
+                    pageId: json["pageId"] as? String
+                )
+            default:
+                break
             }
-
-            public mutating func next() async throws -> Element? {
-                try await _next()
-            }
         }
-
-        public let _make: () -> Iterator
-
-        init<S: AsyncSequence>(_ base: S) where S.Element == Element {
-            _make = { Iterator(base) }
+        if let decoded = try? JSONDecoder().decode(Components.Schemas.SitemapWidgetEvent.self, from: data),
+           let event = OpenHABSitemapWidgetEvent(decoded) {
+            Logger.openAPIService.debug("Sitemap SSE widget event decoded: \(event.widgetId.orEmpty, privacy: .public)")
+            return .widget(event)
         }
-
-        public func makeAsyncIterator() -> Iterator {
-            _make()
-        }
+        return .unknown(raw: raw)
     }
 
     /// Returns subscription id or nil
     func openHABcreateSubscription() async throws -> String? {
         Logger.openAPIService.info("Creating subscription")
-        let result = try await client.createSitemapEventSubscription()
-        guard let urlString = try result.ok.body.json.context?.headers?.Location?.first else { return nil }
-        return URL(string: urlString)?.lastPathComponent
+        guard let acceptValue = OpenAPIRuntime.AcceptHeaderContentType<Operations.createSitemapEventSubscription.AcceptableContentType>(rawValue: "application/json") else {
+            return nil
+        }
+        let accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.createSitemapEventSubscription.AcceptableContentType>] = [
+            acceptValue
+        ]
+        let headers = Operations.createSitemapEventSubscription.Input.Headers(accept: accept)
+        let result = try await client.createSitemapEventSubscription(.init(headers: headers))
+
+        switch result {
+        case let .ok(ok):
+            // openHAB < 3.3: returns 200 with Location in JSON body.
+            guard let urlString = try ok.body.json.context?.headers?.Location?.first else { return nil }
+            let subscriptionId = subscriptionId(from: urlString)
+            Logger.openAPIService.info("Sitemap SSE subscription created from JSON body: \(subscriptionId.orEmpty, privacy: .public)")
+            return subscriptionId
+        case let .created(created):
+            // openHAB >= 3.3: returns 201 with Location in the HTTP header.
+            let subscriptionId = subscriptionId(from: created.headers.Location)
+            Logger.openAPIService.info("Sitemap SSE subscription created from Location header: \(subscriptionId.orEmpty, privacy: .public)")
+            return subscriptionId
+        case .serviceUnavailable:
+            // Subscriptions limit reached on the server.
+            Logger.openAPIService.warning("Sitemap SSE subscription limit reached (503) — server has too many open subscriptions")
+            throw URLError(.badServerResponse)
+        default:
+            Logger.openAPIService.warning("Sitemap SSE subscription returned unexpected response")
+            throw URLError(.badServerResponse)
+        }
     }
 
-    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String)
-        async throws -> AnyAsyncSequence<OpenHABSitemapWidgetEvent> {
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String, pageId: String)
+        async throws -> any AsyncSequence<SitemapEventMessage, any Error> & Sendable {
         let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
-        let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: sitemap)
-
-        let seq = try await client.getSitemapEvents_1(path: path, query: query)
-            .ok.body.text_event_hyphen_stream
-            .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
-            .compactMap { OpenHABSitemapWidgetEvent($0.data) }
-
-        return AnyAsyncSequence(seq)
+        let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: pageId)
+        do {
+            return try await client.getSitemapEvents_1(path: path, query: query)
+                .ok.body.text_event_hyphen_stream
+                .asDecodedServerSentEvents()
+                .compactMap { @Sendable sse in Self.parseSitemapEvent(sse) }
+        } catch let clientError as ClientError where clientError.response?.status.code == 404 {
+            throw SitemapSseError.unsupported
+        }
     }
 
     func openHABEvents(topics: String? = nil)
-        async throws -> AnyAsyncSequence<OpenHABEvent> {
+        async throws -> any AsyncSequence<OpenHABEvent, any Error> & Sendable {
         let query: Operations.getEvents.Input.Query =
             (topics == nil) ? .init() : .init(topics: topics)
 
-        let seq = try await client.getEvents(query: query)
+        return try await client.getEvents(query: query)
             .ok.body.text_event_hyphen_stream
             .asDecodedServerSentEventsWithJSONData(of: OpenHABEvent.self)
             .compactMap(\.data)
-
-        return AnyAsyncSequence(seq)
     }
 }
 

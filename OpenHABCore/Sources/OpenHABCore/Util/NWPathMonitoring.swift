@@ -22,19 +22,43 @@ final class RealPathMonitor: NWPathMonitoring, Sendable {
     }
 
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
+        var lastSignature: PathSignature?
         // Use the manual paths() wrapper on all OS versions.
         // NWPathMonitor's native iOS 17 AsyncSequence conformance (makeAsyncStream()) has a
         // re-entrancy bug: startLocked() holds the monitor's os_unfair_lock and calls
         // AsyncStream.Continuation.finish(), whose onTermination callback tries to re-acquire
         // the same lock → os_unfair_lock_recursive_abort (crash seen on iOS 17.7.11).
         for await path in monitor.paths() {
+            let signature = PathSignature(path)
+            // Ignore link-quality-only updates (LQM flaps): NWPathMonitor fires frequently as
+            // signal strength changes, but those don't affect whether/how the server can be
+            // reached. Only forward changes to connectivity or the set of available interfaces,
+            // so a scheduled reconnection backoff isn't restarted by network noise.
+            guard signature != lastSignature else {
+                Logger.nwPathMonitoring.debug("Path update ignored (quality-only change): \(path.debugDescription)")
+                continue
+            }
+            lastSignature = signature
             Logger.nwPathMonitoring.debug("Path monitor update: \(path.debugDescription)")
-            await handler(path.status == .satisfied || path.status == .requiresConnection)
+            await handler(signature.isConnected)
         }
     }
 
     func cancel() {
         monitor.cancel()
+    }
+}
+
+/// The reachability-relevant fingerprint of an `NWPath`: its connectivity and the set of
+/// available interface types. Deliberately excludes link quality, which flaps frequently
+/// without changing whether or how the network can be reached.
+private struct PathSignature: Equatable {
+    let isConnected: Bool
+    let interfaces: Set<NWInterface.InterfaceType>
+
+    init(_ path: NWPath) {
+        isConnected = path.status == .satisfied || path.status == .requiresConnection
+        interfaces = Set(path.availableInterfaces.map(\.type))
     }
 }
 

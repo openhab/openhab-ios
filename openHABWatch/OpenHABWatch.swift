@@ -12,7 +12,7 @@
 import CommonUI
 import Kingfisher
 import OpenHABCore
-import SFSafeSymbols
+internal import SFSafeSymbols
 import SwiftUI
 import UserNotifications
 

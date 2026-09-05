@@ -11,12 +11,38 @@
 
 import OpenHABCore
 
+/// Filters a flat, pre-flattened widget list to only those that should be displayed,
+/// mirroring Android's visibility logic:
+///   - widget.visibility == false → hidden
+///   - frame with no visible direct children (including empty frames) → hidden
+///   - widget whose nearest frame ancestor is hidden → hidden
+func sitemapVisibleWidgets(_ widgets: [OpenHABWidget]) -> [OpenHABWidget] {
+    var widgetsById: [String: OpenHABWidget] = [:]
+    for widget in widgets {
+        widgetsById[widget.widgetId] = widget
+    }
+
+    func shouldShow(_ widget: OpenHABWidget) -> Bool {
+        guard widget.visibility else { return false }
+        if widget.type == .frame {
+            let children = widgets.filter { $0.parentWidgetId == widget.widgetId }
+            if !children.contains(where: \.visibility) { return false }
+        }
+        guard let parentId = widget.parentWidgetId,
+              let parent = widgetsById[parentId] else { return true }
+        return shouldShow(parent)
+    }
+
+    return widgets.filter { shouldShow($0) }
+}
+
 @MainActor
 extension SitemapPageViewModel {
     var relevantWidgets: [OpenHABWidget] {
         let widgets = currentPage?.widgets ?? []
-        guard !searchText.isEmpty else { return widgets }
-        return widgets.filter {
+        let visibleWidgets = sitemapVisibleWidgets(widgets)
+        guard !searchText.isEmpty else { return visibleWidgets }
+        return visibleWidgets.filter {
             $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
         }
     }

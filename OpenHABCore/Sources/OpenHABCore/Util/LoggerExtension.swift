@@ -19,6 +19,8 @@ public extension Logger {
 
     static let appDelegate = Logger(subsystem: subsystem, category: "AppDelegate")
 
+    static let carPlay = Logger(subsystem: subsystem, category: "CarPlay")
+
     static let clientCert = Logger(subsystem: subsystem, category: "ClientCert")
 
     static let connectionFailureTracker = Logger(subsystem: subsystem, category: "ConnectionFailureTracker")
@@ -90,10 +92,4 @@ public extension Logger {
     static let watchService = Logger(subsystem: subsystem, category: "WatchService")
 
     static let watchInterface = Logger(subsystem: subsystem, category: "WatchInterface")
-
-    #if DEBUG
-    private static let testSubsystem = subsystem + "." + "test"
-
-    static let testNetworkTracker = Logger(subsystem: testSubsystem, category: "NetworkTrackerTests")
-    #endif
 }

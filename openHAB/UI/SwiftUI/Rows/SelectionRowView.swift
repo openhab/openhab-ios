@@ -39,10 +39,10 @@ private struct SelectionRowContent: View {
         .onAppear {
             clearOptimisticSelection()
         }
-        .onChange(of: input.widgetId) { _ in
+        .onChange(of: input.widgetId) {
             clearOptimisticSelection()
         }
-        .onChange(of: widgetVersion) { _ in
+        .onChange(of: widgetVersion) {
             guard let optimisticBaseState,
                   optimisticWidgetId == input.widgetId,
                   let optimisticStartVersion,
@@ -56,7 +56,7 @@ private struct SelectionRowContent: View {
                 self.optimisticStartVersion = widgetVersion
             }
         }
-        .onChange(of: interactionState) { newState in
+        .onChange(of: interactionState) { _, newState in
             switch newState {
             case .idle:
                 guard optimisticWidgetId != nil else { return }

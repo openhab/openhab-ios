@@ -107,10 +107,13 @@ final class UserData {
 
         networkObservationTask = Task { [weak self] in
             // Obtain the stream without capturing self, so self is not held across suspensions.
-            let stream = await NetworkTracker.shared.activeConnectionStream()
-            for await connection in stream {
+            // stateStream() is now a pure AsyncStream (no Combine). The loop re-runs on every
+            // NetworkState change, not only when activeConnection changes, but handleConnectionEvent
+            // no-ops on an unchanged URL so behavior is correct.
+            let stream = await NetworkTracker.shared.stateStream()
+            for await state in stream {
                 guard let self else { break }
-                handleConnectionEvent(connection)
+                handleConnectionEvent(state.activeConnection)
             }
         }
     }

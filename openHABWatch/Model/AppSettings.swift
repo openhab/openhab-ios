@@ -73,6 +73,14 @@ final class AppSettings {
         didSet { store.set(iconType.rawValue, forKey: "iconType") }
     }
 
+    var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode {
+        didSet { store.set(sitemapNameLabelDisplayMode.rawValue, forKey: "sitemapNameLabelDisplayMode") }
+    }
+
+    var sortSitemapsBy: SortSitemapsOrder {
+        didSet { store.set(sortSitemapsBy.rawValue, forKey: "sortSitemapsBy") }
+    }
+
     var haveReceivedAppContext = false
 
     var storedHomes: [UUID: HomePreferences] = [:] {
@@ -113,6 +121,8 @@ final class AppSettings {
         sitemapForWatch = store.string(forKey: "sitemapForWatch") ?? ""
         sitemapForWatchLabel = store.string(forKey: "sitemapForWatchLabel") ?? ""
         iconType = IconType(rawValue: store.integer(forKey: "iconType")) ?? .svg
+        sitemapNameLabelDisplayMode = (store.object(forKey: "sitemapNameLabelDisplayMode") as? Int).flatMap(SitemapNameLabelDisplayMode.init(rawValue:)) ?? .label
+        sortSitemapsBy = SortSitemapsOrder(rawValue: store.integer(forKey: "sortSitemapsBy")) ?? .label
 
         if let data = store.data(forKey: "watchAllHomes"),
            let decoded = try? JSONDecoder().decode([String: HomePreferences].self, from: data) {

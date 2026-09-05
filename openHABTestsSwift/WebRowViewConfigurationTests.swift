@@ -54,6 +54,7 @@ struct WebRowViewURLResolutionTests {
 }
 
 @Suite("WebRowViewConfigurationFactory")
+
 struct WebRowViewConfigurationTests {
     @MainActor
     @Test
@@ -64,7 +65,6 @@ struct WebRowViewConfigurationTests {
         #expect(configuration.mediaTypesRequiringUserActionForPlayback == [])
     }
 
-    @available(iOS 17, *)
     @MainActor
     @Test
     func webRowConfigurationUsesPerHomeDerivedDataStore() {
@@ -75,7 +75,6 @@ struct WebRowViewConfigurationTests {
         #expect(configuration.websiteDataStore.identifier == expectedStoreID)
     }
 
-    @available(iOS 17, *)
     @MainActor
     @Test
     func widgetStoreIsIsolatedFromMainUIStore() {
@@ -90,7 +89,6 @@ struct WebRowViewConfigurationTests {
         #expect(WebRowViewConfigurationFactory.widgetStoreID(for: v5Home) != v5Home)
     }
 
-    @available(iOS 17, *)
     @MainActor
     @Test
     func separateHomesGetSeparateDataStores() {

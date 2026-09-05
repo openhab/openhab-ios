@@ -18,7 +18,6 @@ import OpenHABCore
 /// (ON/OFF, OPEN/CLOSED, player commands) are displayed in the user's
 /// language inside Shortcuts dialogs, while numeric or custom states
 /// pass through unchanged.
-@available(iOS 17.0, macOS 14.0, *)
 private struct LocalizedItemState: CustomLocalizedStringResourceConvertible {
     let rawValue: String
 
@@ -56,7 +55,6 @@ enum ItemStateError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, *)
 struct GetItemStateIntent: AppIntent {
     static var openAppWhenRun: Bool {
         false
@@ -69,7 +67,7 @@ struct GetItemStateIntent: AppIntent {
     }
 
     static let title: LocalizedStringResource = "Get Item State"
-    static let description = IntentDescription("Retrieve the current state of an item")
+    static let description = IntentDescription("Retrieve the current state of an item", resultValueName: "State")
 
     @Parameter(title: "Home")
     var home: Home?
@@ -94,18 +92,9 @@ struct GetItemStateIntent: AppIntent {
         guard let item = await OpenHABItemCache.instance.getItemUncached(name: itemEntity.itemName, home: homeId) else {
             throw ItemStateError.itemNotFound(itemEntity.itemName)
         }
-        let rawState = item.state ?? "Unknown state"
-
-        // Prefer the server-formatted state, then fall back to local number formatting,
-        // then fall back to the raw state string.
-        let displayState: String = if let transformed = item.transformedState, !transformed.isEmpty {
-            transformed
-        } else if let pattern = item.stateDescription?.numberPattern,
-                  Double(rawState.components(separatedBy: " ").first ?? "") != nil {
-            rawState.parseAsNumber(format: pattern).toString(locale: .current)
-        } else {
-            rawState
-        }
+        // See OpenHABItem.displayState (OpenHABCore) for the shared formatting rules —
+        // also used by the Home Screen widgets in SensorWidgetEntryView.swift.
+        let displayState = item.displayState ?? "Unknown state"
 
         let stateDisplay = LocalizedItemState(rawValue: displayState)
 

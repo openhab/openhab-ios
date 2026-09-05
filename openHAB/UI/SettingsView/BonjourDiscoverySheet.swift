@@ -96,24 +96,17 @@ struct BonjourDiscoverySheet: View {
     }
 }
 
-// **TODO Migrate to @Previewable on iOS 17
 #Preview {
-    struct PreviewWrapper: View {
-        @State private var isPresented = true
-        @State var connectionConfig = ConnectionConfiguration(
-            url: "https://openhab.local:8443",
-            username: "user",
-            password: "password123"
-        )
+    @Previewable @State var isPresented = true
+    @Previewable @State var connectionConfig = ConnectionConfiguration(
+        url: "https://openhab.local:8443",
+        username: "user",
+        password: "password123"
+    )
 
-        var body: some View {
-            NavigationStack {
-                Form {
-                    BonjourDiscoverySheet(isPresented: $isPresented, connectionConfig: $connectionConfig)
-                }
-            }
+    NavigationStack {
+        Form {
+            BonjourDiscoverySheet(isPresented: $isPresented, connectionConfig: $connectionConfig)
         }
     }
-
-    return PreviewWrapper()
 }

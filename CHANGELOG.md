@@ -2,6 +2,58 @@
 
 ## [Unreleased]
 
+## [Version 3.4.26, Build 322] - 2026-09-05Z
+
+- Stabilize NetworkTracker client-error retry test in CI (#1323)
+- fix(widget): use server transformedState in Sensor Home Screen widget (#1322)
+- chore(deps): update Firebase SDK 12.10.0 -> 12.18.0, refresh upload-symbols (#1320)
+- Slightly widening the new menu (#1319)
+
+## [Version 3.4.25, Build 321] - 2026-08-25Z
+
+- fix(watch): restore OpenHABWatchComplicationsExtension Xcode target (#1318)
+
+## [Version 3.4.24, Build 320] - 2026-08-24Z
+
+- fix(lifecycle): prevent black screen on upgrade from storyboard-based build
+
+## [Version 3.4.23, Build 319] - 2026-08-22Z
+
+- fix(homes): localize "Local"/"Remote" labels in home summary
+- i18n: remove 37 stale string catalog entries
+- fix(settings): defer save until Local Network alert is acknowledged
+- fix(settings): CarPlay sitemap picker respects Show/Sort sitemaps by
+
+## [Version 3.4.22, Build 318] - 2026-08-22Z
+
+- feat(carplay): update grid buttons in place on iOS 26 to preserve focus
+
+## [Version 3.4.21, Build 317] - 2026-08-22Z
+
+- fix(carplay): sync selected sitemap reliably, fix Combine AsyncPublisher crash
+
+## [Version 3.4.20, Build 316] - 2026-08-21Z
+
+- committed version bump: 3.4.19 (315)
+- Merge/widgets with item display into menustructure (#1312)
+- Sidemenu replacement and menustructure refactoring (#1165)
+
+## [Version 3.3.11, Build 313] - 2026-08-01Z
+
+- chore(deps): bump json from 2.19.5 to 2.19.9 (#1307)
+
+## [Version 3.3.10, Build 310] - 2026-07-24Z
+
+- fix: guard against three crash scenarios from degenerate server data
+
+
+
+## [Version 3.3.8, Build 304] - 2026-07-15Z
+
+- Remove ohMinimumHitTarget() to reinstate consistent sitemap row heights (#1298) (#1299)
+- fix: guard against empty string in device:tts and empty action parts (#1295)
+- singleMappingButton toggle button fix (#1297)
+
 ## [Version 3.3.7, Build 301] - 2026-07-13Z
 
 - chore: update legal.rtf — remove stale deps, add current packages, improve formatting

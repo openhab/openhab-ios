@@ -32,6 +32,7 @@ public struct WatchPreferences: Codable {
     enum CodingKeys: String, CodingKey {
         case localUrl, remoteUrl, username, password, alwaysSendCreds, defaultSitemap
         case ignoreSSL, sitemapForWatch, sitemapForWatchLabel, iconType, demoMode
+        case sitemapNameLabelDisplayMode, sortSitemapsBy
         case localConnectionConfiguration, remoteConnectionConfiguration
         case localUsername, localPassword
         case allHomes
@@ -51,6 +52,10 @@ public struct WatchPreferences: Codable {
     public var sitemapForWatchLabel: String
     public var iconType: Int
     public var demoMode: Bool
+    // Optional so a payload from a mismatched app version still decodes; the
+    // watch resolves them to defaults (`.name` / `.label`) when absent.
+    public var sitemapNameLabelDisplayMode: Int?
+    public var sortSitemapsBy: Int?
     public var localConnectionConfiguration: ConnectionConfiguration?
     public var remoteConnectionConfiguration: ConnectionConfiguration?
     /// All homes keyed by UUID string. Nil when sent by an older app version that predates this field.
@@ -79,6 +84,8 @@ public struct WatchPreferences: Codable {
         sitemapForWatchLabel = try c.decode(String.self, forKey: .sitemapForWatchLabel)
         iconType = try c.decode(Int.self, forKey: .iconType)
         demoMode = try c.decode(Bool.self, forKey: .demoMode)
+        sitemapNameLabelDisplayMode = try c.decodeIfPresent(Int.self, forKey: .sitemapNameLabelDisplayMode)
+        sortSitemapsBy = try c.decodeIfPresent(Int.self, forKey: .sortSitemapsBy)
         localConnectionConfiguration = try c.decodeIfPresent(ConnectionConfiguration.self, forKey: .localConnectionConfiguration)
         remoteConnectionConfiguration = try c.decodeIfPresent(ConnectionConfiguration.self, forKey: .remoteConnectionConfiguration)
         localUsername = try c.decodeIfPresent(String.self, forKey: .localUsername) ?? ""
@@ -99,6 +106,8 @@ public struct WatchPreferences: Codable {
                 sitemapForWatchLabel: String,
                 iconType: Int,
                 demoMode: Bool,
+                sitemapNameLabelDisplayMode: Int? = nil,
+                sortSitemapsBy: Int? = nil,
                 localConnectionConfiguration: ConnectionConfiguration? = nil,
                 remoteConnectionConfiguration: ConnectionConfiguration? = nil,
                 allHomes: [String: HomePreferences]? = nil,
@@ -117,6 +126,8 @@ public struct WatchPreferences: Codable {
         self.sitemapForWatchLabel = sitemapForWatchLabel
         self.iconType = iconType
         self.demoMode = demoMode
+        self.sitemapNameLabelDisplayMode = sitemapNameLabelDisplayMode
+        self.sortSitemapsBy = sortSitemapsBy
         self.localConnectionConfiguration = localConnectionConfiguration
         self.remoteConnectionConfiguration = remoteConnectionConfiguration
         self.allHomes = allHomes

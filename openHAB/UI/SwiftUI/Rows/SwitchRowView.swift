@@ -71,13 +71,13 @@ private struct SwitchRowContent: View {
             .disabled(input.readOnly)
         }
         .contentShape(Rectangle())
-        .onChange(of: displayState.effectiveState) { _ in
+        .onChange(of: displayState.effectiveState) {
             // Server confirmed the new state — clear optimistic override.
             revertTask?.cancel()
             revertTask = nil
             localIsOn = nil
         }
-        .onChange(of: interactionState) { newState in
+        .onChange(of: interactionState) { _, newState in
             switch newState {
             case .idle:
                 // HTTP command completed. Wait a short window for SSE/long-poll to arrive

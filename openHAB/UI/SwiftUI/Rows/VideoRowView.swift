@@ -69,22 +69,19 @@ private struct VideoRowContent: View {
                                 .resizable()
                                 .aspectRatio(aspectRatio, contentMode: .fit)
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 200)
                                 .clipShape(.rect(cornerRadius: 8))
                         } else {
                             Rectangle()
                                 .fill(Color.gray.opacity(0.3))
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 200)
                                 .aspectRatio(aspectRatio, contentMode: .fit)
+                                .frame(maxWidth: .infinity)
                                 .clipShape(.rect(cornerRadius: 8))
                         }
                     } else {
                         // HLS/other video formats using VideoPlayer
                         VideoPlayer(player: player)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 200)
                             .aspectRatio(aspectRatio, contentMode: .fit)
+                            .frame(maxWidth: .infinity)
                             .clipShape(.rect(cornerRadius: 8))
                     }
 
@@ -101,7 +98,7 @@ private struct VideoRowContent: View {
                 .onDisappear {
                     cleanup()
                 }
-                .onChange(of: input.url) { newValue in
+                .onChange(of: input.url) { _, newValue in
                     if !newValue.isEmpty, let newURL = URL(string: newValue) {
                         setupVideo(url: newURL)
                     } else {
@@ -176,9 +173,9 @@ private struct VideoRowContent: View {
                 switch item.status {
                 case .readyToPlay:
                     isLoading = false
-                    if item.presentationSize != .zero {
-                        let newAspectRatio = item.presentationSize.width / item.presentationSize.height
-                        aspectRatio = newAspectRatio
+                    let size = item.presentationSize
+                    if size.height > 0 {
+                        aspectRatio = size.width / size.height
                     }
                     // Auto-play when ready
                     player?.play()

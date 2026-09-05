@@ -52,7 +52,7 @@ private struct SegmentedRowContent: View {
                 Spacer(minLength: 8)
                 Text(detailTextLabel)
                     .ohTextToken(.rowValue)
-                    .foregroundStyle(input.valueColor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: input.valueColor))
+                    .foregroundStyle(input.valueColor.isEmpty ? Color(.secondaryLabel) : Color(fromString: input.valueColor))
                     .layoutPriority(1)
                     .monospacedDigit()
             }
@@ -91,10 +91,10 @@ private struct SegmentedRowContent: View {
         .onAppear {
             clearOptimisticSelection()
         }
-        .onChange(of: input.widgetId) { _ in
+        .onChange(of: input.widgetId) {
             clearOptimisticSelection()
         }
-        .onChange(of: widgetVersion) { _ in
+        .onChange(of: widgetVersion) {
             guard let optimisticBaseState,
                   optimisticWidgetId == input.widgetId,
                   let optimisticStartVersion,
@@ -108,7 +108,7 @@ private struct SegmentedRowContent: View {
                 self.optimisticStartVersion = widgetVersion
             }
         }
-        .onChange(of: interactionState) { newState in
+        .onChange(of: interactionState) { _, newState in
             switch newState {
             case .idle:
                 // HTTP command completed. Wait for SSE/long-poll to deliver the new state.
@@ -169,7 +169,6 @@ private struct SegmentedRowContent: View {
             RoundedRectangle(cornerRadius: 7)
                 .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
         )
-        .ohMinimumHitTarget()
         .fixedSize(horizontal: false, vertical: true)
     }
 
@@ -216,7 +215,6 @@ private struct SegmentedRowContent: View {
                         lineWidth: 0.5
                     )
             )
-            .ohMinimumHitTarget()
             .contentShape(Rectangle())
             .onTapGesture {
                 if !isSelected {
@@ -318,7 +316,6 @@ private struct SegmentedRowContent: View {
                 RoundedRectangle(cornerRadius: 7)
                     .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
             )
-            .ohMinimumHitTarget()
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)

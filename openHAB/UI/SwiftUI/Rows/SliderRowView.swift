@@ -80,7 +80,7 @@ private struct SliderRowContent: View {
                 labelContent(state: input)
             }
 
-            Slider(value: sliderBinding(state: input), in: input.sliderRange, step: input.step) { editing in
+            Slider(value: sliderBinding(state: input), in: input.sliderRange, step: input.safeStep) { editing in
                 isEditing = editing
                 if editing {
                     dragWidgetId = input.widgetId
@@ -109,13 +109,13 @@ private struct SliderRowContent: View {
             dragStartVersion = nil
             dragWidgetId = nil
         }
-        .onChange(of: input.widgetId) { _ in
+        .onChange(of: input.widgetId) {
             isEditing = false
             dragValue = nil
             dragStartVersion = nil
             dragWidgetId = nil
         }
-        .onChange(of: widgetVersion) { _ in
+        .onChange(of: widgetVersion) {
             guard isEditing else { return }
             // If server refresh advanced while dragging, only cancel when the server value diverges
             // meaningfully from the local drag value. This avoids jarring cancels on polling echoes.
@@ -162,7 +162,7 @@ private struct SliderRowContent: View {
             Text(isEditing ? currentValueText : (state.displayState.labelValue ?? currentValueText))
                 .ohTextToken(.rowValueCallout)
                 .monospacedDigit()
-                .foregroundStyle(state.valueColor.isEmpty ? Color(uiColor: UIColor.ohSecondaryLabel) : Color(fromString: state.valueColor))
+                .foregroundStyle(state.valueColor.isEmpty ? Color(.secondaryLabel) : Color(fromString: state.valueColor))
         }
         .contentShape(Rectangle())
     }

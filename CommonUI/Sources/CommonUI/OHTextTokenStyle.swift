@@ -22,10 +22,6 @@ public enum OHTextToken {
     case emphasis
 }
 
-public enum OHAccessibilityToken {
-    public static let minimumHitTarget: CGFloat = 44
-}
-
 private struct OHTextTokenModifier: ViewModifier {
     let token: OHTextToken
 
@@ -99,10 +95,5 @@ private struct OHTextTokenStyle {
 public extension View {
     func ohTextToken(_ token: OHTextToken) -> some View {
         modifier(OHTextTokenModifier(token: token))
-    }
-
-    /// Applies the standard minimum tappable target used across row controls.
-    func ohMinimumHitTarget(_ minHeight: CGFloat = OHAccessibilityToken.minimumHitTarget) -> some View {
-        frame(minHeight: minHeight)
     }
 }

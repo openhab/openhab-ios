@@ -26,7 +26,6 @@ enum PlayerValueError: Error, CustomLocalizedStringResourceConvertible {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, *)
 struct SetPlayerValueIntent: AppIntent {
     static var openAppWhenRun: Bool {
         false
@@ -77,6 +76,6 @@ struct SetPlayerValueIntent: AppIntent {
             throw PlayerValueError.commandFailed(error.localizedDescription)
         }
 
-        return .result(dialog: "Sent \(action) to \(itemEntity.label)")
+        return .result(dialog: "Sent \(action.rawValue) to \(itemEntity.label)")
     }
 }

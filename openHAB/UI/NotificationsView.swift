@@ -20,41 +20,85 @@ import SwiftUI
 typealias NotificationLoader = () async -> [OpenHABNotification]
 
 struct NotificationRow: View {
-    let notification: OpenHABNotification
-    let connection: ConnectionInfo
+    var notification: OpenHABNotification
+    var connection: ConnectionInfo
+    var onAction: (String) -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .center, spacing: 12) {
             KFImage(iconUrl)
                 .withOpenHABCredentials(for: connection)
                 .placeholder {
                     Image("openHABIcon").resizable()
                 }
-                .setProcessor(OpenHABImageProcessor())
-                .fade(duration: 0.25)
                 .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 24, height: 24)
-                .id(iconUrl?.absoluteString ?? "")
-            VStack(alignment: .leading) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(notification.title.isEmpty ? String(localized: "message_not_decoded", comment: "") : notification.title)
-                        .font(.body)
-                    if let timeStamp = notification.created {
-                        Text(dateString(from: timeStamp))
-                            .font(.caption)
-                            .foregroundStyle(.gray)
-                    }
+                .frame(width: 40, height: 40)
+                .clipShape(.rect(cornerRadius: 8))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(notification.title.isEmpty ? String(localized: "message_not_decoded", comment: "") : notification.title)
+                    .font(.body)
+                if let subtitle = notification.subtitle {
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
                 }
-                HStack {
-                    Spacer()
-                    Text(notification.payload?.tag ?? "")
+                if let timeStamp = notification.created {
+                    Text(dateString(from: timeStamp))
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                }
+                if let tag = notification.payload?.tag, !tag.isEmpty {
+                    Text(tag)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if !notification.actions.isEmpty {
+                Divider()
+                actionControl
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if let action = notification.onClickAction { onAction(action) }
         }
         .padding(.vertical, 8)
+    }
+
+    @ViewBuilder
+    private var actionControl: some View {
+        if notification.actions.count == 1, let item = notification.actions.first {
+            Button {
+                onAction(item.action)
+            } label: {
+                Text(item.title)
+                    .font(.subheadline.weight(.medium))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .frame(maxWidth: 120)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.tint)
+        } else {
+            Menu {
+                ForEach(notification.actions, id: \.action) { item in
+                    Button(item.title) { onAction(item.action) }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text("Actions")
+                        .font(.subheadline.weight(.medium))
+                        .lineLimit(1)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2.weight(.semibold))
+                }
+                .frame(maxWidth: 120)
+                .foregroundStyle(.tint)
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     private var iconUrl: URL? {
@@ -101,7 +145,8 @@ struct NotificationsViewPreview: View {
                     id: UUID().uuidString,
                     message: "Preview Notification 1",
                     icon: "sun",
-                    payload: Payload(tag: "test1"),
+                    onClickAction: "ui:/overview",
+                    actions: [NotificationActionItem(title: "Open", action: "ui:/overview")],
                     created: .now,
                     v: 0
                 ),
@@ -110,7 +155,7 @@ struct NotificationsViewPreview: View {
                     message: "Preview Notification 2",
                     icon: "moon",
                     created: .now.addingTimeInterval(-3600),
-                    v: 1
+                    v: 0
                 )
             ]
         }
@@ -124,7 +169,7 @@ protocol NetworkTracking {
     var activeConnection: ConnectionInfo? { get }
 }
 
-struct NotificationsView<Tracker: NetworkTracking & ObservableObject>: View {
+struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: ObservableObject {
     @ObservedObject var networkTracker: Tracker
     @State var notifications: [OpenHABNotification] = []
     let loadNotifications: NotificationLoader
@@ -133,7 +178,10 @@ struct NotificationsView<Tracker: NetworkTracking & ObservableObject>: View {
     var body: some View {
         List(notifications, id: \.id) { notification in
             if let connection = networkTracker.activeConnection {
-                NotificationRow(notification: notification, connection: connection)
+                NotificationRow(notification: notification, connection: connection) { action in
+                    executeAction(action)
+                    dismiss()
+                }
             }
         }
         .refreshable {
@@ -160,10 +208,37 @@ struct NotificationsView<Tracker: NetworkTracking & ObservableObject>: View {
             }
         }
     }
+
+    private func executeAction(_ action: String) {
+        NotificationCenter.default.post(
+            name: .openHABHandleNotificationAction,
+            object: nil,
+            userInfo: ["action": action, "cloudUserId": NSNull()]
+        )
+    }
 }
 
 extension NotificationsView where Tracker == MainActorNetworkTracker {
     init(notifications: [OpenHABNotification] = []) {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["UITestNotifications"] != nil {
+            networkTracker = MainActorNetworkTracker.shared
+            _notifications = State(initialValue: [])
+            loadNotifications = {
+                [
+                    OpenHABNotification(
+                        id: "uitest-1",
+                        message: "UITest Front Door Alert",
+                        onClickAction: "ui:/overview",
+                        actions: [NotificationActionItem(title: "Open Camera", action: "ui:/overview")],
+                        v: 0
+                    ),
+                    OpenHABNotification(id: "uitest-2", message: "UITest Regular Info", v: 0)
+                ]
+            }
+            return
+        }
+        #endif
         networkTracker = MainActorNetworkTracker.shared
         _notifications = State(initialValue: notifications)
         loadNotifications = {

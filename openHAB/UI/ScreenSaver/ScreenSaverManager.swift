@@ -57,6 +57,17 @@ final class ScreenSaverManager: NSObject {
         resetIdleTimer()
     }
 
+    /// Convenience variant that finds the key window internally — callers
+    /// outside the UIKit layer do not need to pass a UIWindow.
+    func startMonitoring(configuration: ScreenSaverConfiguration = ScreenSaverConfiguration()) {
+        guard let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive })?
+            .windows
+            .first(where: { $0.isKeyWindow }) else { return }
+        startMonitoring(window: keyWindow, configuration: configuration)
+    }
+
     func updateConfiguration(_ newConfiguration: ScreenSaverConfiguration) {
         configuration = newConfiguration
         if overlayWindow != nil {
@@ -112,7 +123,10 @@ final class ScreenSaverManager: NSObject {
             overlay = UIWindow(windowScene: scene)
             overlay.frame = scene.coordinateSpace.bounds
         } else {
-            overlay = UIWindow(frame: (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.screen.bounds ?? .zero)
+            let fallbackScene = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .first
+            overlay = UIWindow(frame: fallbackScene?.screen.bounds ?? .zero)
         }
         overlay.windowLevel = .alert + 1 // ensure above status bar
         overlay.backgroundColor = .clear

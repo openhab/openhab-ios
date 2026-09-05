@@ -64,12 +64,18 @@ public actor EventStream<Event: Sendable> {
         }
     }
 
-    private var trackedItems: Set<String> = []
+    private var trackedItemsByNamespace: [String: Set<String>] = [:]
+    private var trackedItems: Set<String> {
+        trackedItemsByNamespace.values.reduce(into: Set()) { $0.formUnion($1) }
+    }
+
     private var continuations = [UUID: AsyncStream<StreamOutput<Event>>.Continuation]()
     private var listenTask: Task<Void, Never>?
+    private var networkMonitoringTask: Task<Void, Never>?
     private var currentConfig: ConnectionConfiguration?
     private var sessionUUID: String?
     private var service: OpenAPIService?
+    private var lastEventTime = Date.now
     private let jsonDecoder = JSONDecoder()
 
     public func stream() -> AsyncStream<StreamOutput<Event>> {
@@ -85,9 +91,30 @@ public actor EventStream<Event: Sendable> {
         }
     }
 
-    public func trackItems(_ items: [String]) async {
-        trackedItems = Set(items)
+    public func setItems(_ items: [String], for namespace: String) async {
+        trackedItemsByNamespace[namespace] = Set(items)
         await sendTrackedItemsIfPossible()
+    }
+
+    /// Sets items for the ``"default"`` namespace. Use ``setItems(_:for:)`` when multiple
+    /// callers need to track independent sets simultaneously.
+    public func trackItems(_ items: [String]) async {
+        await setItems(items, for: "default")
+    }
+
+    public func startMonitoringNetworkIfNeeded(initialConnection: ConnectionInfo?) {
+        updateConnection(initialConnection)
+
+        // Keep network monitoring alive for the actor lifetime. Stop/restart
+        // behaviour is handled by updateConnection cancelling listenTask.
+        guard networkMonitoringTask == nil else { return }
+
+        networkMonitoringTask = Task { [weak self] in
+            guard let self else { return }
+            for await state in await NetworkTracker.shared.stateStream() {
+                await updateConnection(state.activeConnection)
+            }
+        }
     }
 
     private func cleanupContinuation(_ id: UUID) {
@@ -138,13 +165,25 @@ public actor EventStream<Event: Sendable> {
 
         while !Task.isCancelled {
             do {
-                let service = try OpenAPIService(connectionConfiguration: config)
+                let service = try OpenAPIService(connectionConfiguration: config, serviceConfiguration: .sse)
                 let response = try await service.initNewStateTacker()
                 let eventStream = try response.ok.body.text_event_hyphen_stream.asDecodedServerSentEvents()
                 self.service = service
                 broadcast(.connected)
+                lastEventTime = .now
+
+                let watchdog = Task { [weak self] in
+                    while !Task.isCancelled {
+                        try? await Task.sleep(for: .seconds(10))
+                        guard !Task.isCancelled else { return }
+                        guard let self else { return }
+                        await checkAliveWatchdog()
+                    }
+                }
+                defer { watchdog.cancel() }
 
                 for try await sse in eventStream {
+                    lastEventTime = .now
                     for rawMessage in parse(sse) {
                         if let message = rawMessage as? Event {
                             broadcast(.event(message))
@@ -164,6 +203,24 @@ public actor EventStream<Event: Sendable> {
                 backoff = min(backoff * 2, maxBackoff)
             }
         }
+    }
+
+    /// Reconnects if no SSE events have been received for 30 seconds.
+    /// The server sends ALIVE heartbeats every ~10 s, so 30 s of silence
+    /// indicates a silently dead connection (e.g. after a server restart).
+    private func checkAliveWatchdog() {
+        guard Date.now.timeIntervalSince(lastEventTime) > 30 else { return }
+        Logger.restAPI.warning("Item SSE watchdog: no events for 30 s, reconnecting")
+        restartListening()
+    }
+
+    private func restartListening() {
+        guard let cfg = currentConfig else {
+            broadcast(.disconnected(nil))
+            return
+        }
+        listenTask?.cancel()
+        listenTask = Task { await listen(using: cfg) }
     }
 
     private func broadcast(_ msg: StreamOutput<Event>) {
@@ -214,9 +271,11 @@ public extension ItemEventStream {
         await shared.trackItems(items)
     }
 
-    static func startMonitoringNetwork() async {
-        for await conn in await NetworkTracker.shared.activeConnectionStream() {
-            await shared.updateConnection(conn)
-        }
+    nonisolated static func setItems(_ items: [String], for namespace: String) async {
+        await shared.setItems(items, for: namespace)
+    }
+
+    static func startMonitoringNetwork(initialConnection: ConnectionInfo? = nil) async {
+        await shared.startMonitoringNetworkIfNeeded(initialConnection: initialConnection)
     }
 }
