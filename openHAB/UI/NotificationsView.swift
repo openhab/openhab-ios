@@ -28,12 +28,20 @@ struct NotificationRow: View {
         VStack(alignment: .leading, spacing: 6) {
             // iOS notification-style header: small icon + source name + relative time
             HStack(spacing: 6) {
-                KFImage(iconUrl)
-                    .withOpenHABCredentials(for: connection)
-                    .placeholder { Image("openHABIcon").resizable() }
-                    .resizable()
-                    .frame(width: 18, height: 18)
-                    .clipShape(.rect(cornerRadius: 4))
+                if notification.isHideNotification {
+                    Image(systemName: "bell.slash")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 18, height: 18)
+                        .foregroundStyle(.secondary)
+                } else {
+                    KFImage(iconUrl)
+                        .withOpenHABCredentials(for: connection)
+                        .placeholder { Image("openHABIcon").resizable() }
+                        .resizable()
+                        .frame(width: 18, height: 18)
+                        .clipShape(.rect(cornerRadius: 4))
+                }
                 Text("openHAB")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
@@ -44,15 +52,23 @@ struct NotificationRow: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            Text(notification.title.isEmpty ? String(localized: "message_not_decoded", comment: "") : notification.title)
-                .font(.subheadline.weight(.semibold))
-                .lineLimit(2)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            if let subtitle = notification.subtitle {
-                Text(subtitle)
-                    .font(.subheadline)
+            if notification.isHideNotification {
+                Text(String(localized: "notification_hide_type", comment: ""))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
-                    .lineLimit(3)
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                Text(notification.title.isEmpty ? String(localized: "message_not_decoded", comment: "") : notification.title)
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                if let subtitle = notification.subtitle {
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                }
             }
             if let tag = notification.payload?.tag, !tag.isEmpty {
                 Text(tag)

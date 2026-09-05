@@ -79,6 +79,11 @@ public struct OpenHABNotification: Identifiable, Hashable, Sendable {
         return payload?.message ?? ""
     }
 
+    /// Whether this is a control message that dismisses other notifications with the same tag.
+    public var isHideNotification: Bool {
+        payload?.type == "hideNotification"
+    }
+
     /// The message body shown beneath the title, only present when title comes from payload.title.
     public var subtitle: String? {
         guard let payloadTitle = payload?.title, !payloadTitle.isEmpty else { return nil }
