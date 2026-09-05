@@ -18,6 +18,7 @@ class PushRegistrationService: ObservableObject {
     // MARK: - Private state
 
     private var cancellables = Set<AnyCancellable>()
+    private var networkObservationTask: Task<Void, Never>?
     private var apsDeviceToken: String?
     private var apsDeviceId: String?
     private var apsDeviceName: String?
@@ -37,14 +38,16 @@ class PushRegistrationService: ObservableObject {
             }
         }
 
-        MainActorNetworkTracker.shared.$activeConnection
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] activeConnection in
-                if let activeConnection {
-                    self?.activeConnection = activeConnection
-                }
+        networkObservationTask = Task { [weak self] in
+            for await state in await NetworkTracker.shared.stateStream() {
+                guard let activeConnection = state.activeConnection else { continue }
+                self?.activeConnection = activeConnection
             }
-            .store(in: &cancellables)
+        }
+    }
+
+    deinit {
+        networkObservationTask?.cancel()
     }
 
     // MARK: - APS Registration

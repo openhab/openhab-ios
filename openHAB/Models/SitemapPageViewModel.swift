@@ -44,8 +44,7 @@ class SitemapPageViewModel: ObservableObject {
     private var pageHandlingTask: Task<Void, Never>?
     var sseStreamTask: Task<Void, Never>?
     private var foregroundRefreshTask: Task<Void, Never>?
-    private var connectionObserverTask: Task<Void, Never>?
-    private var networkStatusObserverTask: Task<Void, Never>?
+    private var networkObserverTask: Task<Void, Never>?
     let commandDispatcher = WidgetCommandDispatcher()
     let sitemapEventStream = SitemapEventStream()
     var defaultSitemap = ""
@@ -158,23 +157,27 @@ class SitemapPageViewModel: ObservableObject {
     private func startObservers() {
         trackerStatus = networkTracker.status
 
-        // Observe connection changes (skip initial value) — initial load is triggered by .task in the view.
-        connectionObserverTask = Task { [weak self] in
-            guard let tracker = self?.networkTracker else { return }
-            for await connection in tracker.$activeConnection.values.dropFirst() {
-                await MainActor.run { [weak self] in
-                    self?.handleActiveConnectionChange(connection)
+        // Observe connection and status changes together via the actor's own state stream.
+        // Connection changes skip the initial value (initial load is triggered by .task in
+        // the view); status changes are handled from the first emitted value, matching
+        // trackerStatus's synchronous seed above.
+        networkObserverTask = Task { [weak self] in
+            var previousConnection = self?.networkTracker.activeConnection
+            var previousStatus: NetworkStatus?
+            for await state in await NetworkTracker.shared.stateStream() {
+                if state.activeConnection != previousConnection {
+                    previousConnection = state.activeConnection
+                    await MainActor.run { [weak self] in
+                        self?.handleActiveConnectionChange(state.activeConnection)
+                    }
                 }
-            }
-        }
-
-        networkStatusObserverTask = Task { [weak self] in
-            guard let tracker = self?.networkTracker else { return }
-            for await status in tracker.$status.values {
-                await MainActor.run { [weak self] in
-                    self?.trackerStatus = status
-                    if status == .connected {
-                        self?.flushQueuedCommands()
+                if state.status != previousStatus {
+                    previousStatus = state.status
+                    await MainActor.run { [weak self] in
+                        self?.trackerStatus = state.status
+                        if state.status == .connected {
+                            self?.flushQueuedCommands()
+                        }
                     }
                 }
             }
@@ -237,8 +240,7 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     deinit {
-        connectionObserverTask?.cancel()
-        networkStatusObserverTask?.cancel()
+        networkObserverTask?.cancel()
         foregroundObserverTask?.cancel()
         pageHandlingTask?.cancel()
         sseStreamTask?.cancel()

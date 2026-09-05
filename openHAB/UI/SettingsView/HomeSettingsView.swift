@@ -14,7 +14,7 @@ import os
 import SwiftUI
 
 struct HomeSettingsView: View {
-    @StateObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
     /// When non-nil, the view edits the specified stored home instead of the active home.
     var homeId: UUID?
 
