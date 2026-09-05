@@ -429,36 +429,20 @@ final class NetworkTrackerTests: XCTestCase {
     /// A transient ClientError must trigger revalidateConnection() and one retry; the overall call succeeds.
     /// Covers the withClientErrorRetry/revalidateConnection resilience ported in develop commit 9de4e7f0.
     func testClientErrorTriggersRevalidateAndRetry() async throws {
-        let connected = XCTestExpectation(description: "Status becomes .connected")
-
         let service = MockOpenAPIService(returnedVersion: 8, clientErrorsBeforeSuccess: 1)
-        let mockMonitor = MockPathMonitor()
         let tracker = NetworkTracker(
-            monitor: mockMonitor,
             connectionPool: ConnectionPool { _ in service },
             failureTracker: ConnectionFailureTracker()
         )
-        let stateStream = await tracker.stateStream()
-
-        let task = Task {
-            for await state in stateStream where state.status == .connected {
-                connected.fulfill()
-                break
-            }
-        }
-
-        let monitoringTask = Task { await mockMonitor.waitForMonitoringToStart() }
         await tracker.startTracking(connectionConfigurations: [mockConfig])
-        await monitoringTask.value
-        await mockMonitor.simulateConnection(isConnected: true)
-        await fulfillment(of: [connected], timeout: 2.0)
-        task.cancel()
+        XCTAssertNotNil(await tracker.waitForActiveConnection())
 
         // First sendItemCommand throws ClientError → revalidateConnection() → retry succeeds.
         try await tracker.send(to: "TestItem", command: "ON", deviceId: nil)
 
         let callCount = await service.sendCommandCallCount
         XCTAssertEqual(callCount, 2, "Expected 1 failed attempt + 1 successful retry")
+        await tracker.stopTracking()
     }
 }
 
