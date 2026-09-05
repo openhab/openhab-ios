@@ -87,7 +87,7 @@ class OpenHABWebViewModel: ObservableObject {
     private var viewAccessOrder: [UUID] = []
     private var etagChecker: ETagChecker?
     private var etagCheckerConfigURL: String?
-    private var trackerCancellables = Set<AnyCancellable>()
+    private var networkObservationTask: Task<Void, Never>?
 
     /// JS injected after each page load to proxy the MainUI Framework7 navbar
     /// into the native bar and hide the web navbar.
@@ -358,14 +358,18 @@ class OpenHABWebViewModel: ObservableObject {
     // MARK: - Network observation
 
     private func observeNetworkChanges() {
-        MainActorNetworkTracker.shared.$activeConnection
-            .sink { [weak self] connection in
-                // Use the value the publisher delivers, not a re-read of
-                // MainActorNetworkTracker.activeConnection: @Published notifies in willSet,
-                // so the stored property still holds the previous value inside this closure.
-                self?.syncActiveConnection(with: connection)
+        networkObservationTask = Task { [weak self] in
+            var previousConnection: ConnectionInfo?
+            for await state in await NetworkTracker.shared.stateStream() {
+                guard state.activeConnection != previousConnection else { continue }
+                previousConnection = state.activeConnection
+                self?.syncActiveConnection(with: state.activeConnection)
             }
-            .store(in: &trackerCancellables)
+        }
+    }
+
+    deinit {
+        networkObservationTask?.cancel()
     }
 
     /// Reconciles the web view with the current active connection. Safe to call outside a

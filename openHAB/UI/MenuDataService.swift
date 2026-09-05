@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import OpenHABCore
 import os.log
 
@@ -22,17 +21,22 @@ class MenuDataService: ObservableObject {
     @Published var uiPages: [OpenHABUIPage] = []
     @Published var isLoading = false
 
-    private var cancellables = Set<AnyCancellable>()
+    private var networkObservationTask: Task<Void, Never>?
 
     init() {
-        MainActorNetworkTracker.shared.$activeConnection
-            .sink { [weak self] activeConnection in
+        networkObservationTask = Task { [weak self] in
+            var previousConnection: ConnectionInfo?
+            for await state in await NetworkTracker.shared.stateStream() {
+                guard state.activeConnection != previousConnection else { continue }
+                previousConnection = state.activeConnection
                 self?.clearAll()
-                Task { [weak self] in
-                    await self?.fetchData(activeConnection: activeConnection)
-                }
+                await self?.fetchData(activeConnection: state.activeConnection)
             }
-            .store(in: &cancellables)
+        }
+    }
+
+    deinit {
+        networkObservationTask?.cancel()
     }
 
     /// Clears all data immediately (shows empty state while fetching).
