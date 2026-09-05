@@ -27,7 +27,7 @@ struct IconRenderModel: Equatable {
 
 struct WatchIconView: View {
     let model: IconRenderModel
-    @ObservedObject var settings = AppSettings.shared
+    var settings: AppSettings = .shared
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
     @State private var lastResolvedIconURL: URL?
     @State private var lastResolvedConnection: ConnectionInfo?
