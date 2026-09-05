@@ -109,28 +109,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         configureImageCoders()
 
-        // load and start the screensaver
-        if let keyWindow = UIApplication.shared.firstKeyWindow {
-            Task { @MainActor in
-                var config = ScreenSaverConfiguration()
-                config.isEnabled = await Preferences.shared.screensaverEnabled
-                config.showsTime = await Preferences.shared.screensaverShowsTime
-                config.showsDate = await Preferences.shared.screensaverShowsDate
-                config.idleInterval = await Preferences.shared.screensaverIdleInterval
-                config.movementInterval = await Preferences.shared.screensaverMovementInterval
-                let fontName = await Preferences.shared.screensaverFontName
-                config.fontName = fontName.isEmpty ? nil : fontName
-                config.timeFontSizeRatio = CGFloat(await Preferences.shared.screensaverTimeFontRatio)
-                config.dateFontRelativeSize = CGFloat(await Preferences.shared.screensaverDateFontRatio)
-                config.enablesAutoDimming = await Preferences.shared.screensaverEnableDimming
-                config.dimLevel = CGFloat(await Preferences.shared.screensaverDimLevel)
-                config.wakeBrightnessLevel = CGFloat(await Preferences.shared.screensaverWakeBrightness)
-                config.showsSeconds = await Preferences.shared.screensaverShowsSeconds
-                config.uses24HourTime = await Preferences.shared.screensaverUse24Hour
-                config.restoresBrightness = await Preferences.shared.screensaverRestoreBrightness
-                ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
-            }
-        }
+        ScreenSaverManager.shared.applyCurrentPreferences()
         // Start monitoring items for widget updates after the app is configured.
         WidgetItemMonitor.shared.startMonitoring()
     }
@@ -291,27 +270,8 @@ extension AppDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         NotificationCenter.default.post(name: .appDidBecomeActive, object: nil)
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        if let keyWindow = UIApplication.shared.firstKeyWindow {
-            Task { @MainActor in
-                let ssPrefs = await Preferences.shared.screensaverPreferences()
-                var config = ScreenSaverConfiguration()
-                config.isEnabled = ssPrefs.isEnabled
-                config.showsTime = ssPrefs.showsTime
-                config.showsDate = ssPrefs.showsDate
-                config.idleInterval = ssPrefs.idleInterval
-                config.movementInterval = ssPrefs.movementInterval
-                config.fontName = ssPrefs.fontName.isEmpty ? nil : ssPrefs.fontName
-                config.timeFontSizeRatio = CGFloat(ssPrefs.timeFontSizeRatio)
-                config.dateFontRelativeSize = CGFloat(ssPrefs.dateFontRelativeSize)
-                config.enablesAutoDimming = ssPrefs.enablesAutoDimming
-                config.dimLevel = CGFloat(ssPrefs.dimLevel)
-                config.wakeBrightnessLevel = CGFloat(ssPrefs.wakeBrightnessLevel)
-                config.showsSeconds = ssPrefs.showsSeconds
-                config.uses24HourTime = ssPrefs.uses24HourTime
-                config.restoresBrightness = ssPrefs.restoresBrightness
-                ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
-            }
+        Task { @MainActor in
+            ScreenSaverManager.shared.applyCurrentPreferences()
         }
 
         Task {

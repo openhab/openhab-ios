@@ -68,6 +68,14 @@ final class ScreenSaverManager: NSObject {
         startMonitoring(window: keyWindow, configuration: configuration)
     }
 
+    /// Fetches the current screensaver preferences in one actor hop and (re)starts monitoring.
+    func applyCurrentPreferences() {
+        Task {
+            let prefs = await Preferences.shared.screensaverPreferences()
+            startMonitoring(configuration: ScreenSaverConfiguration(prefs))
+        }
+    }
+
     func updateConfiguration(_ newConfiguration: ScreenSaverConfiguration) {
         configuration = newConfiguration
         if overlayWindow != nil {
