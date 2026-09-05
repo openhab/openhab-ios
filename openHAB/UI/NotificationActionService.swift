@@ -37,14 +37,10 @@ class NotificationActionService: ObservableObject {
     // MARK: - Injectable network back-ends (swap in tests)
 
     /// Sends an item command to the openHAB server.
-    var commandSender: (String, String, String?) async throws -> Void = { item, command, deviceId in
-        try await NetworkTracker.shared.send(to: item, command: command, deviceId: deviceId)
-    }
+    var commandSender: (String, String, String?) async throws -> Void
 
     /// Triggers an openHAB rule by UID.
-    var ruleSender: (String, [String: String]) async throws -> Void = { ruleUID, payload in
-        try await NetworkTracker.shared.runNow(ruleUID: ruleUID, payload: payload)
-    }
+    var ruleSender: (String, [String: String]) async throws -> Void
 
     // MARK: - Private state
 
@@ -52,6 +48,12 @@ class NotificationActionService: ObservableObject {
     private var streamTask: Task<Void, Never>?
 
     init(autoStart: Bool = true) {
+        commandSender = { item, command, deviceId in
+            try await NetworkTracker.shared.send(to: item, command: command, deviceId: deviceId)
+        }
+        ruleSender = { ruleUID, payload in
+            try await NetworkTracker.shared.runNow(ruleUID: ruleUID, payload: payload)
+        }
         if autoStart {
             startSSEListening()
             setupNotificationHandling()

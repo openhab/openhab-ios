@@ -99,6 +99,16 @@ struct NotificationCommandTests {
         }
     }
 
+    @Test("Parses bare HTTPS URL action")
+    func httpsDirectURL() {
+        let result = NotificationCommandParser.parse("https://example.com/page")
+        if case let .http(url) = result {
+            #expect(url.absoluteString == "https://example.com/page")
+        } else {
+            Issue.record("Expected .http, got \(String(describing: result))")
+        }
+    }
+
     // MARK: - App commands
 
     @Test("Parses iOS app URL")
