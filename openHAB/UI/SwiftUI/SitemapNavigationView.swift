@@ -225,6 +225,15 @@ struct SitemapNavigationView: View {
         self.onShowSideMenu = onShowSideMenu
     }
 
+    init(sitemapName: String, widgetId: String?, onShowSideMenu: (() -> Void)? = nil) {
+        if let widgetId {
+            _viewModel = StateObject(wrappedValue: SitemapPageViewModel(sitemapName: sitemapName, pageUrl: "", title: "", pageId: widgetId))
+        } else {
+            _viewModel = StateObject(wrappedValue: SitemapPageViewModel())
+        }
+        self.onShowSideMenu = onShowSideMenu
+    }
+
     init(onShowSideMenu: (() -> Void)? = nil) {
         _viewModel = StateObject(wrappedValue: SitemapPageViewModel())
         self.onShowSideMenu = onShowSideMenu

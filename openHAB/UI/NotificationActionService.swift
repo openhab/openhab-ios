@@ -27,14 +27,35 @@ class NotificationActionService: ObservableObject {
 
     @Published var navigationCommand: NavigationCommand?
 
+    // MARK: - Retry configuration
+
+    /// Maximum number of automatic retries after a transient network failure.
+    var maxRetryCount = 3
+    /// Base interval (seconds) for exponential back-off: attempt n waits `retryBackoffBase × 2ⁿ`.
+    var retryBackoffBase: TimeInterval = 2.0
+
+    // MARK: - Injectable network back-ends (swap in tests)
+
+    /// Sends an item command to the openHAB server.
+    var commandSender: (String, String, String?) async throws -> Void = { item, command, deviceId in
+        try await NetworkTracker.shared.send(to: item, command: command, deviceId: deviceId)
+    }
+
+    /// Triggers an openHAB rule by UID.
+    var ruleSender: (String, [String: String]) async throws -> Void = { ruleUID, payload in
+        try await NetworkTracker.shared.runNow(ruleUID: ruleUID, payload: payload)
+    }
+
     // MARK: - Private state
 
     private var synthesizer = AVSpeechSynthesizer()
     private var streamTask: Task<Void, Never>?
 
-    init() {
-        startSSEListening()
-        setupNotificationHandling()
+    init(autoStart: Bool = true) {
+        if autoStart {
+            startSSEListening()
+            setupNotificationHandling()
+        }
     }
 
     // MARK: - SSE
@@ -83,14 +104,13 @@ class NotificationActionService: ObservableObject {
         ) { [weak self] notification in
             let action = notification.userInfo?["action"] as? String
             let cloudUserId = notification.userInfo?["cloudUserId"] as? String
-            let originalNotification = notification.userInfo?["notification"] as? UNNotification
             Task { @MainActor in
-                self?.handleNotification(action: action, cloudUserId: cloudUserId, notification: originalNotification)
+                self?.handleNotification(action: action, cloudUserId: cloudUserId)
             }
         }
     }
 
-    func handleNotification(action: String?, cloudUserId: String?, notification: UNNotification? = nil) {
+    func handleNotification(action: String?, cloudUserId: String?) {
         guard let action else { return }
 
         Logger.viewController.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
@@ -108,25 +128,25 @@ class NotificationActionService: ObservableObject {
                 connectionConfigurations: homePrefs.trackedConnections
             )
             _ = await NetworkTracker.shared.waitForActiveConnection()
-            handleNotificationInternal(action, notification: notification)
+            handleNotificationInternal(action)
         }
     }
 
-    private func handleNotificationInternal(_ action: String?, notification: UNNotification? = nil) {
+    func handleNotificationInternal(_ action: String?) {
         guard let parsed = NotificationCommandParser.parse(action) else { return }
 
         switch parsed {
         case let .ui(target):
             handleUICommand(target)
         case let .sendCommand(item, command):
-            sendItemCommand(item: item, command: command, notification: notification)
+            sendItemCommand(item: item, command: command)
         case let .http(url):
             openInSafari(url: url)
         case let .app(url):
             Logger.viewController.info("appCommandAction opening \(url.absoluteString)")
             UIApplication.shared.open(url)
         case let .rule(uuid, properties):
-            executeRule(uuid: uuid, properties: properties, notification: notification)
+            executeRule(uuid: uuid, properties: properties)
         case let .device(deviceCmd):
             handleDeviceCommand(deviceCmd)
         }
@@ -143,18 +163,18 @@ class NotificationActionService: ObservableObject {
         }
     }
 
-    private func sendItemCommand(item: String, command: String, notification: UNNotification? = nil) {
+    private func sendItemCommand(item: String, command: String) {
         let deviceId = UIDevice.current.identifierForVendor?.uuidString
         Task {
             do {
-                Logger.viewController.info("Sending command")
-                try await NetworkTracker.shared.send(to: item, command: command, deviceId: deviceId)
+                try await withRetry {
+                    Logger.viewController.info("Sending command")
+                    try await self.commandSender(item, command, deviceId)
+                }
             } catch NetworkTrackerError.noActiveConnection {
                 displayErrorNotification("Could not find server")
-                repostNotification(notification)
             } catch {
                 displayErrorNotification("Failed to establish a connection: \(error.localizedDescription)")
-                repostNotification(notification)
                 Logger.viewController.error("Could not send data \(error.localizedDescription)")
             }
         }
@@ -169,42 +189,45 @@ class NotificationActionService: ObservableObject {
         UNUserNotificationCenter.current().add(request)
     }
 
-    // Re-posts the original notification so the user can retry the action after a failure.
-    // iOS removes a notification from the notification center as soon as any action button
-    // is tapped; re-posting it restores both the message and the action buttons.
-    private func repostNotification(_ notification: UNNotification?) {
-        guard let notification else { return }
-        let original = notification.request.content
-        let content = UNMutableNotificationContent()
-        content.title = original.title
-        content.subtitle = original.subtitle
-        content.body = original.body
-        content.sound = original.sound
-        content.categoryIdentifier = original.categoryIdentifier
-        content.userInfo = original.userInfo
-        content.badge = original.badge
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request)
-    }
-
     private func openInSafari(url: URL) {
         let vc = SFSafariViewController(url: url)
         UIApplication.shared.firstKeyWindow?.rootViewController?.present(vc, animated: true)
     }
 
-    private func executeRule(uuid: String, properties: [String: String], notification: UNNotification? = nil) {
+    private func executeRule(uuid: String, properties: [String: String]) {
         Task {
             do {
-                Logger.viewController.info("Executing rule \(uuid)")
-                try await NetworkTracker.shared.runNow(ruleUID: uuid, payload: properties)
-                Logger.viewController.info("Request succeeded")
+                try await withRetry {
+                    Logger.viewController.info("Executing rule \(uuid)")
+                    try await self.ruleSender(uuid, properties)
+                    Logger.viewController.info("Request succeeded")
+                }
             } catch let error as NetworkTrackerError {
                 displayErrorNotification("\(error.localizedDescription)")
-                repostNotification(notification)
             } catch {
                 Logger.viewController.error("Could not send data \(error.localizedDescription)")
                 displayErrorNotification("Request to server failed: \(error.localizedDescription)")
-                repostNotification(notification)
+            }
+        }
+    }
+
+    /// Runs `operation` up to `maxRetryCount + 1` times with exponential back-off.
+    /// Cancellation propagates immediately; all other errors trigger a retry delay.
+    /// Throws the last error when all attempts are exhausted.
+    func withRetry(operation: () async throws -> Void) async throws {
+        let retries = maxRetryCount
+        let backoff = retryBackoffBase
+        for attempt in 0...retries {
+            do {
+                try await operation()
+                return
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                guard attempt < retries else { throw error }
+                let delay = backoff * pow(2.0, Double(attempt))
+                Logger.viewController.info("Operation failed (attempt \(attempt + 1)/\(retries + 1)), retrying in \(delay, format: .fixed(precision: 1))s: \(error.localizedDescription)")
+                try await Task.sleep(for: .seconds(delay))
             }
         }
     }

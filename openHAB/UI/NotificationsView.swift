@@ -82,7 +82,9 @@ struct NotificationRow: View {
         .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
         .contentShape(RoundedRectangle(cornerRadius: 14))
         .onTapGesture {
-            if let action = notification.onClickAction { onAction(action) }
+            if let action = notification.onClickAction {
+                onAction(action)
+            }
         }
         .contextMenu {
             if let onClickAction = notification.onClickAction {

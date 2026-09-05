@@ -24,7 +24,7 @@ enum TargetController: Equatable {
     /// Rendered in the same web view as `.webview`; kept distinct so a reload
     /// returns to this page rather than the MainUI root.
     case mainUIPage(String)
-    case sitemap(String)
+    case sitemap(String, widgetId: String? = nil)
     case notifications
     case browser(String)
     case tile(String)

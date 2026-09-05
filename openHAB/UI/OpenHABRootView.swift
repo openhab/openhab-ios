@@ -191,9 +191,9 @@ struct OpenHABRootView: View {
             }
             .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
             .onAppear { webViewModel.triggerAppMenuProbe() }
-        case let .sitemap(name):
-            SitemapNavigationView(onShowSideMenu: { menuPresented = true })
-                .id("\(name)-\(sitemapResetID)")
+        case let .sitemap(name, widgetId: widgetId):
+            SitemapNavigationView(sitemapName: name, widgetId: widgetId, onShowSideMenu: { menuPresented = true })
+                .id("\(name)-\(widgetId ?? "")-\(sitemapResetID)")
         case .tile:
             VStack(spacing: 0) {
                 menuBar
@@ -446,7 +446,7 @@ struct OpenHABRootView: View {
             showMainUI(path: nil)
         case let .mainUIPage(path):
             showMainUI(path: path)
-        case let .sitemap(name):
+        case let .sitemap(name, _):
             let capturedName = name
             Task {
                 await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultSitemap = capturedName }
@@ -533,8 +533,12 @@ struct OpenHABRootView: View {
                 if !isMainUIShown { showMainUI(path: nil) }
                 if let path { webViewModel.navigateCommand(path) }
             }
-        case let .switchToSitemap(name, _):
-            switchContent(to: .sitemap(name))
+        case let .switchToSitemap(name, widgetId):
+            let capturedName = name
+            Task {
+                await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultSitemap = capturedName }
+            }
+            switchContent(to: .sitemap(name, widgetId: widgetId))
         }
         notificationService.navigationCommand = nil
     }
