@@ -62,6 +62,16 @@ struct SitemapPageView: View {
                         .ohTextToken(.secondary)
                 }
             })
+            .alert(
+                "Confirm",
+                isPresented: commandConfirmationPresented,
+                presenting: viewModel.pendingCommandConfirmation
+            ) { pending in
+                Button("Cancel", role: .cancel) {}
+                Button("Confirm") { pending.onConfirm() }
+            } message: { pending in
+                Text(pending.message)
+            }
     }
 
     @ViewBuilder
@@ -134,6 +144,13 @@ struct SitemapPageView: View {
         Binding(
             get: { viewModel.error != nil && !(viewModel.error is SitemapPageError) },
             set: { if !$0 { Task { @MainActor in viewModel.error = nil } } }
+        )
+    }
+
+    private var commandConfirmationPresented: Binding<Bool> {
+        Binding(
+            get: { viewModel.pendingCommandConfirmation != nil },
+            set: { if !$0 { viewModel.pendingCommandConfirmation = nil } }
         )
     }
 
