@@ -169,10 +169,14 @@ final class MockPathMonitor: NWPathMonitoring, @unchecked Sendable {
     private let monitor: PathMonitor = .init()
 
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
-        // Signal that monitoring has started before entering the loop
+        // Subscribe (registers PathMonitor.handler synchronously) before signaling
+        // "started". Signaling first let a caller woken by waitForMonitoringToStart()
+        // race ahead and call simulateConnection() while `handler` was still nil,
+        // silently dropping the event — the cause of this test's intermittent failures.
+        let stream = await monitor.connectionUpdates()
         await monitor.signalMonitoringStarted()
 
-        for await connected in await monitor.connectionUpdates() {
+        for await connected in stream {
             await handler(connected)
         }
     }
@@ -347,43 +351,6 @@ final class NetworkTrackerTests: XCTestCase {
         XCTAssertNil(nextRetryDate)
     }
 
-    /// A network-down event must mark the network unavailable and abandon the pending retry.
-    func testNetworkLossMarksUnavailableAndAbandonsRetry() async {
-        let retryScheduled = XCTestExpectation(description: "nextRetryDate published")
-        retryScheduled.assertForOverFulfill = false
-        let networkUnavailable = XCTestExpectation(description: "isNetworkAvailable false and retry cleared")
-
-        let mockMonitor = MockPathMonitor()
-        let tracker = NetworkTracker(
-            monitor: mockMonitor,
-            connectionPool: ConnectionPool { _ in MockOpenAPIService(returnedVersion: 8, shouldFail: true) },
-            failureTracker: ConnectionFailureTracker()
-        )
-        let stateStream = await tracker.stateStream()
-
-        let task = Task {
-            for await state in stateStream {
-                if state.nextRetryDate != nil { retryScheduled.fulfill() }
-                if !state.isNetworkAvailable, state.nextRetryDate == nil {
-                    networkUnavailable.fulfill()
-                    break
-                }
-            }
-        }
-
-        await tracker.startTracking(connectionConfigurations: [mockConfig])
-        // The failing connection schedules a retry (sets nextRetryDate).
-        await fulfillment(of: [retryScheduled], timeout: 3.0)
-
-        // Once the path monitor is active, a network-down event must abandon that retry.
-        await mockMonitor.waitForMonitoringToStart()
-        await mockMonitor.simulateConnection(isConnected: false)
-
-        await fulfillment(of: [networkUnavailable], timeout: 3.0)
-        task.cancel()
-        await tracker.stopTracking()
-    }
-
     /// When a preferred connection is slow, the fallback must become active before the preferred times out.
     /// Ported from develop commit 06f0bf1c, re-expressed against stateStream() instead of statusStream().
     func testFallbackConnectionBecomesActiveBeforePreferredConnectionTimesOut() async {
@@ -453,6 +420,70 @@ struct NetworkTrackerClientErrorRetryTests {
 
         let callCount = await service.sendCommandCallCount
         #expect(callCount == 2, "Expected 1 failed attempt + 1 successful retry")
+        await tracker.stopTracking()
+    }
+}
+
+// MARK: - Network-loss handling (Swift Testing)
+
+/// Minimal stand-in for XCTestExpectation/fulfillment(of:timeout:) — the latter is an
+/// XCTestCase instance method, unavailable from a plain Swift Testing `@Suite` struct.
+private actor NetworkLossMilestones {
+    private(set) var retryScheduled = false
+    private(set) var networkUnavailable = false
+
+    func markRetryScheduled() { retryScheduled = true }
+    func markNetworkUnavailable() { networkUnavailable = true }
+}
+
+/// Polls `condition` until it's true, or returns false after `timeoutSeconds`.
+private func poll(timeoutSeconds: Double, interval: Duration = .milliseconds(10), until condition: () async -> Bool) async -> Bool {
+    let deadline = ContinuousClock.now + .seconds(timeoutSeconds)
+    while ContinuousClock.now < deadline {
+        if await condition() { return true }
+        try? await Task.sleep(for: interval)
+    }
+    return await condition()
+}
+
+@Suite("NetworkTracker network-loss handling")
+struct NetworkTrackerNetworkLossTests {
+    /// A network-down event must mark the network unavailable and abandon the pending retry.
+    @Test("Network loss marks isNetworkAvailable false and abandons the pending retry")
+    func networkLossMarksUnavailableAndAbandonsRetry() async {
+        let milestones = NetworkLossMilestones()
+
+        let mockMonitor = MockPathMonitor()
+        let tracker = NetworkTracker(
+            monitor: mockMonitor,
+            connectionPool: ConnectionPool { _ in MockOpenAPIService(returnedVersion: 8, shouldFail: true) },
+            failureTracker: ConnectionFailureTracker()
+        )
+        let config = ConnectionConfiguration(url: "http://mock", username: "", password: "", priority: 0)
+        let stateStream = await tracker.stateStream()
+
+        let task = Task {
+            for await state in stateStream {
+                if state.nextRetryDate != nil { await milestones.markRetryScheduled() }
+                if !state.isNetworkAvailable, state.nextRetryDate == nil {
+                    await milestones.markNetworkUnavailable()
+                    break
+                }
+            }
+        }
+
+        await tracker.startTracking(connectionConfigurations: [config])
+        // The failing connection schedules a retry (sets nextRetryDate).
+        let sawRetryScheduled = await poll(timeoutSeconds: 3.0) { await milestones.retryScheduled }
+        #expect(sawRetryScheduled)
+
+        // Once the path monitor is active, a network-down event must abandon that retry.
+        await mockMonitor.waitForMonitoringToStart()
+        await mockMonitor.simulateConnection(isConnected: false)
+
+        let sawNetworkUnavailable = await poll(timeoutSeconds: 3.0) { await milestones.networkUnavailable }
+        #expect(sawNetworkUnavailable)
+        task.cancel()
         await tracker.stopTracking()
     }
 }
