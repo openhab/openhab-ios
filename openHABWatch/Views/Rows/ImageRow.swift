@@ -9,17 +9,19 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import CommonUI
 import Kingfisher
+import Observation
 import OpenHABCore
 import os.log
 import SwiftUI
 
 /// Timer manager that persists across view updates
-private class ImageRefreshTimer: ObservableObject {
-    @Published var refreshCount = 0
-    private var timer: AnyCancellable?
+@MainActor
+@Observable
+private final class ImageRefreshTimer {
+    var refreshCount = 0
+    @ObservationIgnored private var timerTask: Task<Void, Never>?
     private var currentInterval = 0
     private var isActive = false
 
@@ -29,8 +31,8 @@ private class ImageRefreshTimer: ObservableObject {
         currentInterval = interval
         isActive = false
 
-        timer?.cancel()
-        timer = nil
+        timerTask?.cancel()
+        timerTask = nil
 
         guard interval > 0 else { return }
 
@@ -38,22 +40,24 @@ private class ImageRefreshTimer: ObservableObject {
         Logger.widgets.info("Starting image refresh timer with interval \(intervalSeconds) seconds")
 
         isActive = true
-        timer = Timer.publish(every: intervalSeconds, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
+        timerTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(intervalSeconds))
+                guard !Task.isCancelled else { return }
                 Logger.widgets.info("Image refresh timer fired")
                 self?.refreshCount += 1
             }
+        }
     }
 
     func stop() {
-        timer?.cancel()
-        timer = nil
+        timerTask?.cancel()
+        timerTask = nil
         isActive = false
     }
 
     deinit {
-        timer?.cancel()
+        timerTask?.cancel()
     }
 }
 
@@ -61,7 +65,7 @@ struct ImageRow: View, Equatable {
     let url: URL?
     let refresh: Int // Refresh interval in milliseconds, 0 means no refresh
 
-    @StateObject private var refreshTimer = ImageRefreshTimer()
+    @State private var refreshTimer = ImageRefreshTimer()
     @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
 
     /// For refreshing images, append a query parameter to bust the cache
