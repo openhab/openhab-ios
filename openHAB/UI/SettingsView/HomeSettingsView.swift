@@ -24,7 +24,7 @@ private struct CropSource: Identifiable {
 }
 
 struct HomeSettingsView: View {
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
     /// When non-nil, the view edits the specified stored home instead of the active home.
     var homeId: UUID?
 

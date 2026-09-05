@@ -9,14 +9,12 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Observation
 import OpenHABCore
 import os.log
 
 /// Provides menu data (sitemaps, tiles, pages) for the navigation menu.
 /// Extracted from DrawerView for testability and reuse.
 @MainActor
-@Observable
 class MenuDataService {
     var sitemaps: [OpenHABSitemap] = []
     var uiTiles: [OpenHABUiTile] = []

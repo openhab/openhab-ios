@@ -88,7 +88,7 @@ struct IconInputView: View {
     let input: RowIconInput
     let rowIdentity: String
     let fallbackSymbol: SFSymbol?
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
     @ObservedObject private var iconReloader = IconReloadCoordinator.shared
     @Environment(\.colorScheme) private var colorScheme
 
@@ -276,7 +276,7 @@ struct IconInputView: View {
 /// A SwiftUI view that displays widget icons with openHAB-specific styling and caching
 struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
     @ObservedObject private var iconReloader = IconReloadCoordinator.shared
     @Environment(\.colorScheme) private var colorScheme
 

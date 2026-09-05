@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [Version 3.4.26, Build 322] - 2026-09-05Z
+
+- Stabilize NetworkTracker client-error retry test in CI (#1323)
+- fix(widget): use server transformedState in Sensor Home Screen widget (#1322)
+- chore(deps): update Firebase SDK 12.10.0 -> 12.18.0, refresh upload-symbols (#1320)
+- Slightly widening the new menu (#1319)
+
 ## [Version 3.4.25, Build 321] - 2026-08-25Z
 
 - fix(watch): restore OpenHABWatchComplicationsExtension Xcode target (#1318)

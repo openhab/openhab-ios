@@ -118,8 +118,11 @@ struct OpenHABRootView: View {
             webViewModel.syncActiveConnection()
         }
         .task {
-            for await connection in MainActorNetworkTracker.shared.$activeConnection.values {
-                activeNetworkConnection = connection
+            var previousConnection: ConnectionInfo?
+            for await state in await NetworkTracker.shared.stateStream() {
+                guard state.activeConnection != previousConnection else { continue }
+                previousConnection = state.activeConnection
+                activeNetworkConnection = state.activeConnection
             }
         }
         .task {
@@ -581,7 +584,7 @@ struct OpenHABRootView: View {
 /// has given up — a static "cannot connect" message. On an adaptive background so the blank
 /// page reads as intentional in both light and dark mode.
 private struct ConnectingPlaceholder: View {
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
 
     private enum Phase: Equatable {
         case connecting

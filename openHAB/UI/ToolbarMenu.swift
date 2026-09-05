@@ -35,7 +35,7 @@ enum TargetController: Equatable {
 struct ConnectionView: View {
     static let cornerRadius: CGFloat = 14
 
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
     @State private var cachedHomePrefs: HomePreferences?
 
     var body: some View {

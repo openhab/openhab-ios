@@ -124,8 +124,8 @@ struct NotificationRow: View {
 #if DEBUG
 
 @MainActor
-class MockNetworkTracker: NetworkTracking, ObservableObject {
-    @Published var activeConnection: ConnectionInfo?
+final class MockNetworkTracker: NetworkTracking {
+    var activeConnection: ConnectionInfo?
 
     init(connection: ConnectionInfo?) {
         activeConnection = connection
@@ -177,8 +177,8 @@ protocol NetworkTracking {
     var activeConnection: ConnectionInfo? { get }
 }
 
-struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: ObservableObject {
-    @ObservedObject var networkTracker: Tracker
+struct NotificationsView<Tracker: NetworkTracking>: View {
+    var networkTracker: Tracker
     @State var notifications: [OpenHABNotification] = []
     let loadNotifications: NotificationLoader
     @Environment(\.dismiss) private var dismiss
