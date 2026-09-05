@@ -101,6 +101,31 @@ struct JSONParserTests {
         #expect(widget2.widgets?[0].label == "Admin Items")
     }
 
+    /// Verifies decoding of the real myopenHAB cloud notification list shape where
+    /// `on-click` and `actions` live inside the nested `payload` object.
+    @Test func cloudNotificationWithPayloadActions() throws {
+        let data = Data(jsonCloudNotifications.utf8)
+        let codingDatas = try decoder.decode([OpenHABNotification.CodingData].self, from: data)
+        let notifications = codingDatas.map(\.openHABNotification)
+
+        #expect(notifications.count == 2)
+
+        let rich = try #require(notifications.first)
+        #expect(rich.id == "aabbccdd112233440000aaaa")
+        #expect(rich.title == "Window open detected")
+        #expect(rich.onClickAction == "ui:/basicui/app?w=0_01&sitemap=page_00000000")
+        #expect(rich.actions.count == 1)
+        #expect(rich.actions[0].action == "rule:restore_heating:-")
+        #expect(rich.actions[0].title == "Turn heating back on")
+        #expect(rich.payload?.tag == "window_open")
+
+        let hide = notifications[1]
+        #expect(hide.id == "aabbccdd112233440000cccc")
+        #expect(hide.actions.isEmpty)
+        #expect(hide.onClickAction == nil)
+        #expect(hide.payload?.type == "hideNotification")
+    }
+
     @Test func serverVersion() throws {
         let json = """
         {"version":"3", "links":[{"type":"uuid","url":"http://192.168.2.15:8081/rest/uuid"},

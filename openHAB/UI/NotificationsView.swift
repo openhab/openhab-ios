@@ -73,7 +73,7 @@ struct NotificationRow: View {
                 Button {
                     onAction(onClickAction)
                 } label: {
-                    Label("Open", systemImage: "arrow.up.right")
+                    Label("notification_action_open", systemImage: "arrow.up.right")
                 }
             }
             if notification.onClickAction != nil, !notification.actions.isEmpty {

@@ -149,6 +149,7 @@ public extension OpenHABNotification {
                 case message
                 case title
                 case userId
+                case actions
             }
 
             // swiftlint:enable nesting
@@ -162,6 +163,7 @@ public extension OpenHABNotification {
             public let message: String?
             public let title: String?
             public let userId: String?
+            public let actions: [NotificationActionItem]?
         }
 
         public let id: String
@@ -218,7 +220,7 @@ extension OpenHABNotification.CodingData {
             // Prefer the flat top-level on-click; fall back to a nested payload.onClick if that's all
             // the server sent.
             onClickAction: onClickAction ?? payload?.onClick,
-            actions: actions,
+            actions: actions.isEmpty ? (payload?.actions ?? []) : actions,
             cloudUserId: cloudUserId ?? payload?.userId,
             payload: payload.map {
                 Payload(
