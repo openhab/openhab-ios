@@ -15,6 +15,18 @@ import SFSafeSymbols
 import SwiftUI
 import UIKit
 
+// MARK: - Navigation state
+
+enum SitemapNavigationState: Equatable {
+    case loading
+    case ready([LinkedPageNavigation])
+
+    var navigationPath: [LinkedPageNavigation] {
+        if case let .ready(path) = self { return path }
+        return []
+    }
+}
+
 // MARK: - Environment key for side-menu action
 
 private struct SitemapSideMenuKey: EnvironmentKey {

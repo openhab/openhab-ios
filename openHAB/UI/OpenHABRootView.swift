@@ -194,9 +194,9 @@ struct OpenHABRootView: View {
             }
             .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
             .onAppear { webViewModel.triggerAppMenuProbe() }
-        case let .sitemap(name, navigationPath: navigationPath):
-            SitemapNavigationView(sitemapName: name, navigationPath: navigationPath, onShowSideMenu: { menuPresented = true })
-                .id("\(name)-\(navigationPath.last?.pageLink ?? "")-\(sitemapResetID)")
+        case let .sitemap(name, navigationState: state):
+            SitemapNavigationView(sitemapName: name, navigationPath: state.navigationPath, onShowSideMenu: { menuPresented = true })
+                .id("\(name)-\(state.navigationPath.last?.pageLink ?? "")-\(sitemapResetID)")
         case .tile:
             VStack(spacing: 0) {
                 menuBar
@@ -541,8 +541,9 @@ struct OpenHABRootView: View {
             let capturedWidgetId = widgetId
             Task { @MainActor in
                 await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultSitemap = capturedName }
+                switchContent(to: .sitemap(capturedName, navigationState: .loading))
                 let path = await resolveAncestorChain(sitemapName: capturedName, pageId: capturedWidgetId)
-                switchContent(to: .sitemap(capturedName, navigationPath: path))
+                currentContent = .sitemap(capturedName, navigationState: .ready(path))
             }
         }
         notificationService.navigationCommand = nil
