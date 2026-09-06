@@ -408,6 +408,32 @@ public extension OpenAPIService {
         return try await pollDataForPage(path: path, headers: headers)
     }
 
+    /// Builds an ordered list of navigation entries from the first child of root down to
+    /// (and including) the target page, by following `PageDTO.parent.link` iteratively.
+    /// Each response only contains one level of parent, so this makes O(depth) requests.
+    /// The root page (whose parent is nil) is excluded — it is the NavigationStack base view.
+    func ancestorChain(sitemapname: String, pageId: String) async throws -> [(link: String, title: String)] {
+        var chain: [(link: String, title: String)] = []
+        var currentPageId = pageId
+
+        for _ in 0..<20 {
+            let path = Operations.pollDataForPage.Input.Path(sitemapname: sitemapname, pageid: currentPageId)
+            let response = try await client.pollDataForPage(path: path, query: .init(), headers: .init())
+            guard case let .ok(okresponse) = response else { break }
+            let pageDTO = try okresponse.body.json
+
+            // A nil parent means this is the root — stop without including it.
+            guard let parent = pageDTO.parent, let parentLink = parent.link else { break }
+
+            chain.insert((link: pageDTO.link ?? "", title: pageDTO.title ?? ""), at: 0)
+
+            guard let parentPageId = URL(string: parentLink)?.lastPathComponent, !parentPageId.isEmpty else { break }
+            currentPageId = parentPageId
+        }
+
+        return chain
+    }
+
     /// Internal function for pollSitemap
     internal func pollDataForSitemap(path: Operations.pollDataForSitemap.Input.Path,
                                      query: Operations.pollDataForSitemap.Input.Query = .init(),

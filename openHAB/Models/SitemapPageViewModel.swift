@@ -138,6 +138,13 @@ class SitemapPageViewModel: ObservableObject {
         openHABRootUrl = networkTracker.activeConnection?.configuration.url
     }
 
+    init(sitemapName: String, initialNavigationPath: [LinkedPageNavigation] = []) {
+        defaultSitemap = sitemapName
+        navigationPath = initialNavigationPath
+        startObservers()
+        openHABRootUrl = networkTracker.activeConnection?.configuration.url
+    }
+
     /// Initializes the view model with a fixed set of widgets, without loading or polling
     init(pageUrl: String = "", title: String = "Preview Page", pageId: String = "", widgets: [OpenHABWidget]) {
         isLinkedPage = !pageUrl.isEmpty
@@ -878,19 +885,6 @@ extension SitemapPageViewModel {
         pendingLinkedPageNavigation = nil
         error = nil
         ssePreferred = true
-    }
-
-    @MainActor
-    func navigateToLinkedPage(_ nav: LinkedPageNavigation) {
-        navigationPath.append(nav)
-    }
-
-    @MainActor
-    // swiftlint:disable:next async_without_await
-    func pushSitemap(name: String, path: String?, pendingNavigation: LinkedPageNavigation? = nil) async {
-        configureSitemap(name: name, pageId: path)
-        pendingLinkedPageNavigation = pendingNavigation
-        startPageHandling(forceRestart: true, reason: "push-sitemap")
     }
 
     private func fetchSitemapLabel() async {

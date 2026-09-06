@@ -84,8 +84,11 @@ struct SitemapNavigationView: View {
     var onShowSideMenu: (() -> Void)?
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $viewModel.navigationPath) {
             sitemapContent
+                .navigationDestination(for: LinkedPageNavigation.self) { nav in
+                    SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: nav.pageLink, title: nav.pageTitle))
+                }
         }
         .environment(\.sitemapSideMenuAction, onShowSideMenu)
         .onChange(of: scenePhase) { _, newPhase in
@@ -225,12 +228,8 @@ struct SitemapNavigationView: View {
         self.onShowSideMenu = onShowSideMenu
     }
 
-    init(sitemapName: String, widgetId: String?, onShowSideMenu: (() -> Void)? = nil) {
-        if let widgetId {
-            _viewModel = StateObject(wrappedValue: SitemapPageViewModel(sitemapName: sitemapName, pageUrl: "", title: "", pageId: widgetId))
-        } else {
-            _viewModel = StateObject(wrappedValue: SitemapPageViewModel())
-        }
+    init(sitemapName: String, navigationPath: [LinkedPageNavigation] = [], onShowSideMenu: (() -> Void)? = nil) {
+        _viewModel = StateObject(wrappedValue: SitemapPageViewModel(sitemapName: sitemapName, initialNavigationPath: navigationPath))
         self.onShowSideMenu = onShowSideMenu
     }
 

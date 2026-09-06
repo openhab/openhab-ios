@@ -194,9 +194,9 @@ struct OpenHABRootView: View {
             }
             .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
             .onAppear { webViewModel.triggerAppMenuProbe() }
-        case let .sitemap(name, widgetId: widgetId):
-            SitemapNavigationView(sitemapName: name, widgetId: widgetId, onShowSideMenu: { menuPresented = true })
-                .id("\(name)-\(widgetId ?? "")-\(sitemapResetID)")
+        case let .sitemap(name, navigationPath: navigationPath):
+            SitemapNavigationView(sitemapName: name, navigationPath: navigationPath, onShowSideMenu: { menuPresented = true })
+                .id("\(name)-\(navigationPath.last?.pageLink ?? "")-\(sitemapResetID)")
         case .tile:
             VStack(spacing: 0) {
                 menuBar
@@ -538,12 +538,33 @@ struct OpenHABRootView: View {
             }
         case let .switchToSitemap(name, widgetId):
             let capturedName = name
-            Task {
+            let capturedWidgetId = widgetId
+            Task { @MainActor in
                 await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultSitemap = capturedName }
+                let path = await resolveAncestorChain(sitemapName: capturedName, pageId: capturedWidgetId)
+                switchContent(to: .sitemap(capturedName, navigationPath: path))
             }
-            switchContent(to: .sitemap(name, widgetId: widgetId))
         }
         notificationService.navigationCommand = nil
+    }
+
+    @MainActor
+    private func resolveAncestorChain(sitemapName: String, pageId: String?) async -> [LinkedPageNavigation] {
+        guard let pageId, !pageId.isEmpty else { return [] }
+        let connection: ConnectionInfo
+        if let active = MainActorNetworkTracker.shared.activeConnection {
+            connection = active
+        } else if let active = await NetworkTracker.shared.waitForActiveConnection() {
+            connection = active
+        } else {
+            return []
+        }
+        guard let service = try? OpenAPIService(
+            connectionConfiguration: connection.configuration,
+            serviceConfiguration: .shortTerm
+        ) else { return [] }
+        return (try? await service.ancestorChain(sitemapname: sitemapName, pageId: pageId))?
+            .map { LinkedPageNavigation(pageLink: $0.link, pageTitle: $0.title) } ?? []
     }
 
     // MARK: - Helpers
