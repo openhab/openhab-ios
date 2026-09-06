@@ -1133,10 +1133,10 @@ public enum Components {
                 public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -1155,10 +1155,10 @@ public enum Components {
                 public init(additionalProperties: [String: Swift.String] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -1216,10 +1216,10 @@ public enum Components {
                 public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -1238,10 +1238,10 @@ public enum Components {
                 public init(additionalProperties: [String: Swift.String] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -1299,10 +1299,10 @@ public enum Components {
                 public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -1400,10 +1400,10 @@ public enum Components {
                 public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -1459,10 +1459,10 @@ public enum Components {
                 public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -1618,10 +1618,10 @@ public enum Components {
                 public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -1671,10 +1671,10 @@ public enum Components {
                 public init(additionalProperties: [String: Swift.String] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -1736,10 +1736,10 @@ public enum Components {
                 public init(additionalProperties: [String: Swift.String] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -1951,10 +1951,10 @@ public enum Components {
                 public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -2404,10 +2404,10 @@ public enum Components {
                 public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -2467,10 +2467,10 @@ public enum Components {
                 public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -3097,10 +3097,10 @@ public enum Components {
                 case timeout
                 case widgets
             }
-            public init(from decoder: any Decoder) throws {
+            public init(from decoder: any Swift.Decoder) throws {
                 self.storage = try .init(from: decoder)
             }
-            public func encode(to encoder: any Encoder) throws {
+            public func encode(to encoder: any Swift.Encoder) throws {
                 try self.storage.encode(to: encoder)
             }
             /// Internal reference storage to allow type recursion.
@@ -3663,10 +3663,10 @@ public enum Components {
                 case linkedPage
                 case widgets
             }
-            public init(from decoder: any Decoder) throws {
+            public init(from decoder: any Swift.Decoder) throws {
                 self.storage = try .init(from: decoder)
             }
-            public func encode(to encoder: any Encoder) throws {
+            public func encode(to encoder: any Swift.Encoder) throws {
                 try self.storage.encode(to: encoder)
             }
             /// Internal reference storage to allow type recursion.
@@ -3985,10 +3985,10 @@ public enum Components {
                 public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -4005,10 +4005,10 @@ public enum Components {
                 public init(additionalProperties: [String: [Components.Schemas.UIComponent]] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -4080,10 +4080,10 @@ public enum Components {
                 public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
-                public init(from decoder: any Decoder) throws {
+                public init(from decoder: any Swift.Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
-                public func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Swift.Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
@@ -5493,10 +5493,10 @@ public enum Operations {
                     public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                         self.additionalProperties = additionalProperties
                     }
-                    public init(from decoder: any Decoder) throws {
+                    public init(from decoder: any Swift.Decoder) throws {
                         additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                     }
-                    public func encode(to encoder: any Encoder) throws {
+                    public func encode(to encoder: any Swift.Encoder) throws {
                         try encoder.encodeAdditionalProperties(additionalProperties)
                     }
                 }
@@ -6485,10 +6485,10 @@ public enum Operations {
                     public init(additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()) {
                         self.additionalProperties = additionalProperties
                     }
-                    public init(from decoder: any Decoder) throws {
+                    public init(from decoder: any Swift.Decoder) throws {
                         additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                     }
-                    public func encode(to encoder: any Encoder) throws {
+                    public func encode(to encoder: any Swift.Encoder) throws {
                         try encoder.encodeAdditionalProperties(additionalProperties)
                     }
                 }
