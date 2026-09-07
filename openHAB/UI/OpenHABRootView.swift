@@ -474,13 +474,13 @@ struct OpenHABRootView: View {
     /// arbitrary route the user reached inside the SPA.
     private func showMainUI(path: String?) {
         let wasShowingMainUI = isMainUIShown
-        // A tile put a different URL in this web view, so returning needs a real load.
-        let wasShowingTile: Bool
-        if case .tile = currentContent { wasShowingTile = true } else { wasShowingTile = false }
+        // Ask the web view what it holds, not which surface was last visible: a tile's URL
+        // survives a detour through a sitemap.
+        let showsTile = webViewModel.isShowingTile
 
         currentContent = path.map(TargetController.mainUIPage) ?? .webview
 
-        if wasShowingTile {
+        if showsTile {
             // Explicit path, so the origin-only ETag check can't skip the load.
             webViewModel.loadWebView(force: false, path: path ?? "/")
         } else if let path {

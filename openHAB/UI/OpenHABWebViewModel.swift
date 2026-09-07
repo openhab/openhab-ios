@@ -70,6 +70,10 @@ class OpenHABWebViewModel: ObservableObject {
     @Published private(set) var isWebNavbarTitleHidden = false
     /// MainUI's `--f7-navbar-height`, excluding the safe area. 44 on iOS, 56 on Material.
     @Published private(set) var webNavbarHeight: CGFloat = 44
+    /// True while the web view holds a tile's URL rather than the Main UI. The web view is
+    /// shared, and its content outlives the surface that loaded it — a sitemap detour does
+    /// not put the Main UI back.
+    @Published private(set) var isShowingTile = false
     /// True once a real page (not the blank placeholder) has finished loading.
     /// Drives the "Connecting…" placeholder shown while a home is first loading.
     @Published private(set) var hasLoadedContent = false
@@ -79,6 +83,9 @@ class OpenHABWebViewModel: ObservableObject {
     var acceptsCommands = false
     var commandQueue: [String] = []
     var lastLoadedURL: String?
+    /// The connection that produced the page now on screen. Origin alone cannot tell two
+    /// connections apart when only the credentials differ.
+    private var lastLoadedConfiguration: ConnectionConfiguration?
     /// Callback fired when "exitToApp" is received from JS
     var onExitToApp: (() -> Void)?
 
@@ -121,6 +128,16 @@ class OpenHABWebViewModel: ObservableObject {
 
         // An open popup owns the bar, otherwise the current page. A page's navbar is a
         // direct child of .page, so '> .navbar' can't match a popup nested inside it.
+        // The current page's own navbar, ignoring any overlay. Page padding depends on
+        // this, not on whichever navbar is being mirrored.
+        function pageNavbar() {
+            return firstUsableNavbar([
+                '.view-main .page-current > .navbar',
+                '.view-main .navbar.navbar-current',
+                '.page-current > .navbar'
+            ]);
+        }
+
         function activeNavbar() {
             return firstUsableNavbar([
                 '.popup.modal-in .navbar',
@@ -157,14 +174,23 @@ class OpenHABWebViewModel: ObservableObject {
                 '.' + PROXIED_CLASS + ' > .navbar-inner > .title,' +
                 '.' + PROXIED_CLASS + ' > .navbar-inner > .nav-title,' +
                 '.' + PROXIED_CLASS + ' > .navbar-inner > .right' +
-                '{opacity:0 !important;pointer-events:none !important}';
+                '{opacity:0 !important;pointer-events:none !important}' +
+                // A panel opens at the top of the window, underneath the native bar, hiding
+                // the sidebar's Administration links. Framework7 already positions panels
+                // from --f7-appbar-app-offset for exactly this case; setting it on the panel
+                // moves it clear. Scoped to the panel because the main views read the same
+                // variable for their height and must stay full screen. Padding would not
+                // work: the page inside is absolutely positioned and ignores it.
+                //
+                // The navbar height alone — a panel already insets its own content by the
+                // safe area, so including that here would offset it twice.
+                '.panel,.panel-backdrop{--f7-appbar-app-offset:var(--f7-navbar-height)}';
             (document.head || document.documentElement).appendChild(style);
         }
         // Guard every write. classList.add/remove rewrite the attribute even when nothing
         // changes, emitting a mutation record — and this runs from the MutationObserver
         // below, so an unguarded write loops forever and pegs the main thread.
         function hideProxiedParts(navbar) {
-            installProxyStyle();
             document.querySelectorAll('.' + PROXIED_CLASS).forEach(function(el) {
                 if (el !== navbar) el.classList.remove(PROXIED_CLASS);
             });
@@ -199,6 +225,7 @@ class OpenHABWebViewModel: ObservableObject {
         var lastState = null;
         function reportState() {
             var navbar = activeNavbar();
+            if (!ownsBar(navbar)) navbar = null;
             var hidden = navbar ? !!navbar.closest('.navbar-hidden') : false;
             // An expanded large title already shows the page title, so don't show it twice.
             var titleHidden = !!navbar &&
@@ -239,9 +266,10 @@ class OpenHABWebViewModel: ObservableObject {
         }
 
         function serializeNavbar() {
+            installProxyStyle();
             var navbar = activeNavbar();
             var owns = ownsBar(navbar);
-            syncPagePadding(owns);
+            syncPagePadding(!!pageNavbar());
             // Nothing to mirror: clear the bar rather than leave the previous page's
             // buttons on it, whose proxy tokens are already gone.
             if (!owns) {
@@ -388,7 +416,7 @@ class OpenHABWebViewModel: ObservableObject {
         // without one as settled too — it still needs padding and scroll state.
         function readyPageWithoutNavbar() {
             var page = activePage();
-            return !!page && !!page.querySelector('.page-content') && !ownsBar(activeNavbar());
+            return !!page && !!page.querySelector('.page-content') && !pageNavbar();
         }
         function waitAndSerialize() {
             if (readyNavbar() || readyPageWithoutNavbar()) {
@@ -628,6 +656,7 @@ class OpenHABWebViewModel: ObservableObject {
 
         Logger.viewController.info("Loading URL: \(modifiedUrl)")
         isLoading = true
+        isShowingTile = false
         webView.load(request)
     }
 
@@ -704,7 +733,8 @@ class OpenHABWebViewModel: ObservableObject {
 
     /// Loading again would only discard live SPA state.
     private func canKeepLoadedPage(target: URL) -> Bool {
-        guard hasLoadedContent, currentHomeWebViewShown else { return false }
+        guard hasLoadedContent, currentHomeWebViewShown,
+              lastLoadedConfiguration == activeConfig else { return false }
         let normalizedTarget = WebViewURLHelper.normalizeForComparison(target.absoluteString, includeBasePath: false)
         let normalizedLoaded = WebViewURLHelper.normalizeForComparison(lastLoadedURL, includeBasePath: false)
         Logger.viewController.debug("Comparing base URLs: loaded=\(normalizedLoaded ?? "nil") vs target=\(normalizedTarget ?? "nil")")
@@ -842,6 +872,7 @@ class OpenHABWebViewModel: ObservableObject {
 
     func loadDirectURL(_ url: URL) {
         isLoading = true
+        isShowingTile = true
         webView.load(URLRequest(url: url))
     }
 
@@ -853,6 +884,7 @@ class OpenHABWebViewModel: ObservableObject {
     /// reads the URL path on startup and routes to the correct page automatically.
     func loadTilePage(_ url: URL) {
         isLoading = true
+        isShowingTile = true
         webView.load(URLRequest(url: url))
     }
 
@@ -860,6 +892,7 @@ class OpenHABWebViewModel: ObservableObject {
     /// content rather than redisplaying the cached page.
     func reloadTile(_ url: URL) {
         isLoading = true
+        isShowingTile = true
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         webView.load(request)
@@ -918,6 +951,7 @@ class OpenHABWebViewModel: ObservableObject {
 
     func handleDidFinish() {
         lastLoadedURL = webView.url?.absoluteString
+        lastLoadedConfiguration = activeConfig
         isLoading = false
         acceptsCommands = true
         // A finished navigation to anything other than the blank placeholder means real
