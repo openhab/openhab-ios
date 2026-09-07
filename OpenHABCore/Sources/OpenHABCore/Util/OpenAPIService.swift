@@ -278,7 +278,29 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
-    private static func parseSitemapEvent(_ sse: ServerSentEvent) -> SitemapEventMessage? {
+    /// Lightweight view of the `TYPE` discriminator shared by every sitemap event.
+    ///
+    /// The `SitemapEvent` schema is a `oneOf` over the concrete event types, but
+    /// `SitemapWidgetEvent` has no required properties and would match any payload,
+    /// so we peek at `TYPE` once instead of relying on decode order.
+    private struct SitemapEventEnvelope: Decodable {
+        enum EventType: String, Decodable {
+            case alive = "ALIVE"
+            case sitemapChanged = "SITEMAP_CHANGED"
+        }
+
+        let type: EventType?
+
+        enum CodingKeys: String, CodingKey {
+            case type = "TYPE"
+        }
+    }
+
+    /// Maps a raw sitemap SSE event to a ``SitemapEventMessage``.
+    ///
+    /// Not `private` so it can be unit-tested directly; treat it as an
+    /// implementation detail of ``openHABSitemapWidgetEvents(subscriptionid:sitemap:pageId:)``.
+    internal static func parseSitemapEvent(_ sse: ServerSentEvent) -> SitemapEventMessage? {
         if let event = sse.event?.lowercased(), event == "alive" {
             Logger.openAPIService.debug("Sitemap SSE alive event")
             return .alive
@@ -286,27 +308,24 @@ public extension OpenAPIService {
         guard let raw = sse.data else { return nil }
         Logger.openAPIService.debug("Sitemap SSE raw event: \(raw, privacy: .public)")
         let data = Data(raw.utf8)
-        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let type = json["TYPE"] as? String {
-            switch type {
-            case "ALIVE":
-                return .alive
-            case "SITEMAP_CHANGED":
-                Logger.openAPIService.info("Sitemap SSE SITEMAP_CHANGED event")
-                return .sitemapChanged(
-                    sitemap: json["sitemapName"] as? String,
-                    pageId: json["pageId"] as? String
-                )
-            default:
-                break
+        let decoder = JSONDecoder()
+
+        switch try? decoder.decode(SitemapEventEnvelope.self, from: data).type {
+        case .alive:
+            Logger.openAPIService.debug("Sitemap SSE ALIVE event")
+            return .alive
+        case .sitemapChanged:
+            Logger.openAPIService.info("Sitemap SSE SITEMAP_CHANGED event")
+            let changed = try? decoder.decode(Components.Schemas.SitemapChangedEvent.self, from: data)
+            return .sitemapChanged(sitemap: changed?.sitemapName, pageId: changed?.pageId)
+        case .none:
+            if let decoded = try? decoder.decode(Components.Schemas.SitemapWidgetEvent.self, from: data),
+               let event = OpenHABSitemapWidgetEvent(decoded) {
+                Logger.openAPIService.debug("Sitemap SSE widget event decoded: \(event.widgetId.orEmpty, privacy: .public)")
+                return .widget(event)
             }
+            return .unknown(raw: raw)
         }
-        if let decoded = try? JSONDecoder().decode(Components.Schemas.SitemapWidgetEvent.self, from: data),
-           let event = OpenHABSitemapWidgetEvent(decoded) {
-            Logger.openAPIService.debug("Sitemap SSE widget event decoded: \(event.widgetId.orEmpty, privacy: .public)")
-            return .widget(event)
-        }
-        return .unknown(raw: raw)
     }
 
     /// Returns subscription id or nil
