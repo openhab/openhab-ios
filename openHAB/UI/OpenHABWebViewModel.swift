@@ -70,9 +70,8 @@ class OpenHABWebViewModel: ObservableObject {
     @Published private(set) var isWebNavbarTitleHidden = false
     /// MainUI's `--f7-navbar-height`, excluding the safe area. 44 on iOS, 56 on Material.
     @Published private(set) var webNavbarHeight: CGFloat = 44
-    /// True while the web view holds a tile's URL rather than the Main UI. The web view is
-    /// shared, and its content outlives the surface that loaded it — a sitemap detour does
-    /// not put the Main UI back.
+    /// True while the web view holds a tile's URL. Its content outlives the surface that
+    /// loaded it, so a sitemap detour does not put the Main UI back.
     @Published private(set) var isShowingTile = false
     /// True once a real page (not the blank placeholder) has finished loading.
     /// Drives the "Connecting…" placeholder shown while a home is first loading.
@@ -107,9 +106,8 @@ class OpenHABWebViewModel: ObservableObject {
     private let navbarProxyJS = """
     (function() {
         // Framework7 keeps closed popups mounted, and a page can contain one (the code
-        // editor's "Parse Errors" popup sits inside the Thing page). Their navbars match
-        // the same selectors as the page's own, so only count an overlay that is open.
-        // Side panels are never proxied — the app's own menu replaces them.
+        // editor's "Parse Errors" popup sits inside the Thing page), so only count an
+        // overlay that is open. Side panels are never proxied.
         function isUsableNavbar(navbar) {
             if (navbar.closest('.panel')) return false;
             var overlay = navbar.closest('.popup, .sheet-modal, .dialog, .actions-modal, .login-screen');
@@ -126,10 +124,9 @@ class OpenHABWebViewModel: ObservableObject {
             return null;
         }
 
-        // An open popup owns the bar, otherwise the current page. A page's navbar is a
-        // direct child of .page, so '> .navbar' can't match a popup nested inside it.
-        // The current page's own navbar, ignoring any overlay. Page padding depends on
-        // this, not on whichever navbar is being mirrored.
+        // A page's navbar is a direct child of .page, so '> .navbar' cannot match a popup
+        // nested inside that page.
+        // Page padding depends on this, not on whichever navbar is being mirrored.
         function pageNavbar() {
             return firstUsableNavbar([
                 '.view-main .page-current > .navbar',
@@ -155,14 +152,13 @@ class OpenHABWebViewModel: ObservableObject {
                 || document.querySelector('.page-current');
         }
 
-        // Hide only what the native bar reproduces, and leave the navbar in the layout:
-        // Framework7 sizes pages, subnavbars and absolutely positioned content (the map
-        // page) from --f7-navbar-height.
+        // Leave the navbar in the layout — Framework7 sizes pages and absolutely positioned
+        // content (the map page) from --f7-navbar-height — and hide only what the native
+        // bar reproduces.
         //
         // opacity, because innerText reads nothing out of a visibility:hidden subtree and
-        // the labels and icons below come from these elements. A stylesheet rule, because
-        // Framework7 writes inline opacity on .navbar-bg and .title as a large title
-        // collapses and would overwrite ours.
+        // the labels below come from these elements. A stylesheet rule, because Framework7
+        // writes inline opacity on .navbar-bg and .title and would overwrite ours.
         var PROXIED_CLASS = 'oh-navbar-proxied';
         function installProxyStyle() {
             if (document.getElementById('oh-navbar-proxy-style')) return;
@@ -175,15 +171,11 @@ class OpenHABWebViewModel: ObservableObject {
                 '.' + PROXIED_CLASS + ' > .navbar-inner > .nav-title,' +
                 '.' + PROXIED_CLASS + ' > .navbar-inner > .right' +
                 '{opacity:0 !important;pointer-events:none !important}' +
-                // A panel opens at the top of the window, underneath the native bar, hiding
-                // the sidebar's Administration links. Framework7 already positions panels
-                // from --f7-appbar-app-offset for exactly this case; setting it on the panel
-                // moves it clear. Scoped to the panel because the main views read the same
-                // variable for their height and must stay full screen. Padding would not
-                // work: the page inside is absolutely positioned and ignores it.
-                //
-                // The navbar height alone — a panel already insets its own content by the
-                // safe area, so including that here would offset it twice.
+                // A panel opens under the native bar, hiding the sidebar's Administration
+                // links. Framework7 positions panels from --f7-appbar-app-offset for exactly
+                // this; scoped to the panel because the main views read it too and must stay
+                // full screen. Navbar height alone — a panel already insets itself by the
+                // safe area.
                 '.panel,.panel-backdrop{--f7-appbar-app-offset:var(--f7-navbar-height)}';
             (document.head || document.documentElement).appendChild(style);
         }
@@ -194,7 +186,7 @@ class OpenHABWebViewModel: ObservableObject {
             document.querySelectorAll('.' + PROXIED_CLASS).forEach(function(el) {
                 if (el !== navbar) el.classList.remove(PROXIED_CLASS);
             });
-            if (!navbar.classList.contains(PROXIED_CLASS)) {
+            if (navbar && !navbar.classList.contains(PROXIED_CLASS)) {
                 navbar.classList.add(PROXIED_CLASS);
             }
         }
@@ -215,26 +207,49 @@ class OpenHABWebViewModel: ObservableObject {
             });
         }
 
+        function isMainUIDocument() {
+            return !!(document.querySelector('.framework7-root') || document.getElementById('app'));
+        }
+
+        // A document that is not the Main UI — an openHAB error page, Basic UI, the REST
+        // docs — reserves no room for the native bar, so pad the body itself.
+        function syncDocumentPadding() {
+            var body = document.body;
+            if (!body) return;
+            var needsPadding = !isMainUIDocument();
+            if (needsPadding === !!body.__ohPadded) return;
+            body.__ohPadded = needsPadding;
+            body.style.paddingTop = needsPadding
+                ? 'calc(var(--f7-navbar-height, 44px) + env(safe-area-inset-top, 0px))'
+                : '';
+        }
+
         function navbarHeight() {
             var v = parseFloat(getComputedStyle(document.documentElement)
                 .getPropertyValue('--f7-navbar-height'));
             return (isFinite(v) && v > 0) ? v : 44;
         }
+        // getComputedStyle forces a style recalc, and the state below is reported every
+        // animation frame while scrolling — so re-read only in the debounced pass.
+        function cachedNavbarHeight() {
+            if (window.__ohNavbarHeight == null) window.__ohNavbarHeight = navbarHeight();
+            return window.__ohNavbarHeight;
+        }
 
         // Posts only on change — this runs on every scroll frame.
-        var lastState = null;
-        function reportState() {
-            var navbar = activeNavbar();
+        // On window because the observer is installed once and holds the first injection's
+        // closure, while Swift re-injects this script and resets its own copy.
+        function reportState(navbar) {
             if (!ownsBar(navbar)) navbar = null;
             var hidden = navbar ? !!navbar.closest('.navbar-hidden') : false;
             // An expanded large title already shows the page title, so don't show it twice.
             var titleHidden = !!navbar &&
                 navbar.classList.contains('navbar-large') &&
                 !navbar.classList.contains('navbar-large-collapsed');
-            var height = navbarHeight();
+            var height = cachedNavbarHeight();
             var state = hidden + '|' + titleHidden + '|' + height;
-            if (state === lastState) return;
-            lastState = state;
+            if (state === window.__ohNavbarLastState) return;
+            window.__ohNavbarLastState = state;
             window.webkit.messageHandlers.mainUi.postMessage({
                 type: 'navbarState',
                 hidden: hidden ? 'true' : 'false',
@@ -243,19 +258,23 @@ class OpenHABWebViewModel: ObservableObject {
             });
         }
 
-        var statePending = false;
+        // Collapses a burst of mutations into one pass per frame. Still runs before the
+        // next paint, so a new page's navbar never flashes under the native bar.
+        var framePending = false;
         function scheduleStateReport() {
-            if (statePending) return;
-            statePending = true;
-            requestAnimationFrame(function() { statePending = false; reportState(); });
+            if (framePending) return;
+            framePending = true;
+            requestAnimationFrame(function() {
+                framePending = false;
+                var navbar = activeNavbar();
+                hideProxiedParts(ownsBar(navbar) ? navbar : null);
+                reportState(navbar);
+            });
         }
 
-        // Only mirror a navbar from what is actually on screen. The fallback selectors in
-        // activeNavbar() can otherwise reach a previous page that is still mounted.
-        //
-        // On the iOS theme Framework7 lifts navbars out of the pages into a .navbars
-        // container and marks the live one .navbar-current, so containment alone would
-        // reject every page navbar there.
+        // Only mirror a navbar from what is on screen — activeNavbar()'s fallbacks can
+        // reach a previous page that is still mounted. On the iOS theme Framework7 lifts
+        // navbars out of the pages into .navbars, so containment alone rejects them all.
         function ownsBar(navbar) {
             if (!navbar) return false;
             if (navbar.closest('.popup.modal-in, .sheet-modal.modal-in')) return true;
@@ -267,16 +286,19 @@ class OpenHABWebViewModel: ObservableObject {
 
         function serializeNavbar() {
             installProxyStyle();
+            window.__ohNavbarHeight = navbarHeight();
             var navbar = activeNavbar();
             var owns = ownsBar(navbar);
             syncPagePadding(!!pageNavbar());
+            syncDocumentPadding();
             // Nothing to mirror: clear the bar rather than leave the previous page's
             // buttons on it, whose proxy tokens are already gone.
             if (!owns) {
+                hideProxiedParts(null);
                 window.webkit.messageHandlers.mainUi.postMessage({
                     type: 'navbarElements', title: '', items: []
                 });
-                reportState();
+                reportState(navbar);
                 return;
             }
             // Wait for web fonts (Framework7 Icons) to be ready before canvas rendering.
@@ -314,10 +336,9 @@ class OpenHABWebViewModel: ObservableObject {
                     } catch(e) { return null; }
                 }
 
-                // Tokens must be unique across the document, not just within this navbar.
-                // A popup sits after the main view, so a bare index would collide with the
-                // page's navbar and querySelector would resolve to the page instead —
-                // the popup's close button would click the hidden page behind it.
+                // Unique across the document, not just within this navbar: a popup sits
+                // after the main view, so a bare index would collide with the page's navbar
+                // and the popup's close button would click the page behind it.
                 window.__ohProxyRun = (window.__ohProxyRun || 0) + 1;
                 var proxyRun = window.__ohProxyRun;
                 document.querySelectorAll('[data-oh-proxy]').forEach(function(el) {
@@ -371,7 +392,7 @@ class OpenHABWebViewModel: ObservableObject {
                     title: title,
                     items: items
                 });
-                reportState();
+                reportState(navbar);
             });
         }
 
@@ -388,8 +409,6 @@ class OpenHABWebViewModel: ObservableObject {
             var root = document.body || document.documentElement;
             var timer = null;
             new MutationObserver(function() {
-                var navbar = activeNavbar();
-                if (navbar) hideProxiedParts(navbar);
                 scheduleStateReport();
                 clearTimeout(timer);
                 timer = setTimeout(serializeNavbar, 200);
@@ -419,7 +438,7 @@ class OpenHABWebViewModel: ObservableObject {
             return !!page && !!page.querySelector('.page-content') && !pageNavbar();
         }
         function waitAndSerialize() {
-            if (readyNavbar() || readyPageWithoutNavbar()) {
+            if (readyNavbar() || readyPageWithoutNavbar() || !isMainUIDocument()) {
                 serializeNavbar();
                 observeNavbar();
                 return;
@@ -427,7 +446,7 @@ class OpenHABWebViewModel: ObservableObject {
             var root = document.body || document.documentElement;
             if (!root) return;
             var bodyObserver = new MutationObserver(function() {
-                if (readyNavbar() || readyPageWithoutNavbar()) {
+                if (readyNavbar() || readyPageWithoutNavbar() || !isMainUIDocument()) {
                     bodyObserver.disconnect();
                     serializeNavbar();
                     observeNavbar();
@@ -1007,7 +1026,12 @@ class OpenHABWebViewModel: ObservableObject {
         #endif
         // Clear the re-installation guards so the next page gets a fresh proxy.
         webView.evaluateJavaScript(
-            "window.__ohNavbarProxyInstalled = undefined; window.__ohNavbarObserverInstalled = undefined;"
+            """
+            window.__ohNavbarProxyInstalled = undefined;
+            window.__ohNavbarObserverInstalled = undefined;
+            window.__ohNavbarLastState = undefined;
+            window.__ohNavbarHeight = undefined;
+            """
         )
     }
 

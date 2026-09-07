@@ -499,9 +499,10 @@ struct OpenHABRootView: View {
         }
     }
 
-    /// Routes client-side when the SPA is live, so its in-app state survives.
+    /// Routes client-side when the SPA is live, so its in-app state survives. `isMainUIReady`
+    /// alone is not enough — it is true for `about:blank` too.
     private func routeMainUI(to path: String) {
-        if webViewModel.isMainUIReady {
+        if webViewModel.isMainUIReady, webViewModel.hasLoadedContent {
             webViewModel.navigateCommand("navigate:\(path)")
         } else {
             webViewModel.loadWebView(force: false, path: path)
