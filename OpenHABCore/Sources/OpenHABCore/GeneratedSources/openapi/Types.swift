@@ -3834,6 +3834,51 @@ public enum Components {
                 typealias CodingKeys = Components.Schemas.WidgetDTO.CodingKeys
             }
         }
+        /// - Remark: Generated from `#/components/schemas/SitemapEvent`.
+        @frozen public enum SitemapEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/SitemapEvent/case1`.
+            case SitemapWidgetEvent(Components.Schemas.SitemapWidgetEvent)
+            /// - Remark: Generated from `#/components/schemas/SitemapEvent/case2`.
+            case SitemapChangedEvent(Components.Schemas.SitemapChangedEvent)
+            /// - Remark: Generated from `#/components/schemas/SitemapEvent/case3`.
+            case ServerAliveEvent(Components.Schemas.ServerAliveEvent)
+            public init(from decoder: any Swift.Decoder) throws {
+                var errors: [any Swift.Error] = []
+                do {
+                    self = .SitemapWidgetEvent(try .init(from: decoder))
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .SitemapChangedEvent(try .init(from: decoder))
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .ServerAliveEvent(try .init(from: decoder))
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                throw Swift.DecodingError.failedToDecodeOneOfSchema(
+                    type: Self.self,
+                    codingPath: decoder.codingPath,
+                    errors: errors
+                )
+            }
+            public func encode(to encoder: any Swift.Encoder) throws {
+                switch self {
+                case let .SitemapWidgetEvent(value):
+                    try value.encode(to: encoder)
+                case let .SitemapChangedEvent(value):
+                    try value.encode(to: encoder)
+                case let .ServerAliveEvent(value):
+                    try value.encode(to: encoder)
+                }
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent`.
         public struct SitemapWidgetEvent: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/widgetId`.
@@ -3927,6 +3972,72 @@ public enum Components {
                 case item
                 case sitemapName
                 case pageId
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/SitemapChangedEvent`.
+        public struct SitemapChangedEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/SitemapChangedEvent/sitemapName`.
+            public var sitemapName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/SitemapChangedEvent/pageId`.
+            public var pageId: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/SitemapChangedEvent/TYPE`.
+            @frozen public enum TYPEPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case SITEMAP_CHANGED = "SITEMAP_CHANGED"
+            }
+            /// - Remark: Generated from `#/components/schemas/SitemapChangedEvent/TYPE`.
+            public var TYPE: Components.Schemas.SitemapChangedEvent.TYPEPayload
+            /// Creates a new `SitemapChangedEvent`.
+            ///
+            /// - Parameters:
+            ///   - sitemapName:
+            ///   - pageId:
+            ///   - TYPE:
+            public init(
+                sitemapName: Swift.String? = nil,
+                pageId: Swift.String? = nil,
+                TYPE: Components.Schemas.SitemapChangedEvent.TYPEPayload
+            ) {
+                self.sitemapName = sitemapName
+                self.pageId = pageId
+                self.TYPE = TYPE
+            }
+            public enum CodingKeys: String, CodingKey {
+                case sitemapName
+                case pageId
+                case TYPE
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ServerAliveEvent`.
+        public struct ServerAliveEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ServerAliveEvent/sitemapName`.
+            public var sitemapName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ServerAliveEvent/pageId`.
+            public var pageId: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ServerAliveEvent/TYPE`.
+            @frozen public enum TYPEPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case ALIVE = "ALIVE"
+            }
+            /// - Remark: Generated from `#/components/schemas/ServerAliveEvent/TYPE`.
+            public var TYPE: Components.Schemas.ServerAliveEvent.TYPEPayload
+            /// Creates a new `ServerAliveEvent`.
+            ///
+            /// - Parameters:
+            ///   - sitemapName:
+            ///   - pageId:
+            ///   - TYPE:
+            public init(
+                sitemapName: Swift.String? = nil,
+                pageId: Swift.String? = nil,
+                TYPE: Components.Schemas.ServerAliveEvent.TYPEPayload
+            ) {
+                self.sitemapName = sitemapName
+                self.pageId = pageId
+                self.TYPE = TYPE
+            }
+            public enum CodingKeys: String, CodingKey {
+                case sitemapName
+                case pageId
+                case TYPE
             }
         }
         /// - Remark: Generated from `#/components/schemas/SitemapDTO`.
@@ -11079,30 +11190,6 @@ public enum Operations {
                             switch self {
                             case let .text_event_hyphen_stream(body):
                                 return body
-                            default:
-                                try throwUnexpectedResponseBody(
-                                    expectedContent: "text/event-stream",
-                                    body: self
-                                )
-                            }
-                        }
-                    }
-                    /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/GET/responses/200/content/application\/json`.
-                    case json(Components.Schemas.SitemapWidgetEvent)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.SitemapWidgetEvent {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            default:
-                                try throwUnexpectedResponseBody(
-                                    expectedContent: "application/json",
-                                    body: self
-                                )
                             }
                         }
                     }
@@ -11217,14 +11304,11 @@ public enum Operations {
         }
         @frozen public enum AcceptableContentType: AcceptableProtocol {
             case text_event_hyphen_stream
-            case json
             case other(Swift.String)
             public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "text/event-stream":
                     self = .text_event_hyphen_stream
-                case "application/json":
-                    self = .json
                 default:
                     self = .other(rawValue)
                 }
@@ -11235,14 +11319,11 @@ public enum Operations {
                     return string
                 case .text_event_hyphen_stream:
                     return "text/event-stream"
-                case .json:
-                    return "application/json"
                 }
             }
             public static var allCases: [Self] {
                 [
-                    .text_event_hyphen_stream,
-                    .json
+                    .text_event_hyphen_stream
                 ]
             }
         }
