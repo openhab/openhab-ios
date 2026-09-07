@@ -5868,11 +5868,10 @@
           "200": {
             "description": "OK",
             "content": {
-              "text/event-stream": {},
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SitemapWidgetEvent"
-                }
+              "text/event-stream": {
+                  "schema": {
+                      "$ref": "#/components/schemas/SitemapEvent"
+                  }
               }
             }
           },
@@ -9569,6 +9568,18 @@
           }
         }
       },
+      "SitemapEvent" : {
+             "type" : "object",
+             "properties" : {
+               "sitemapName" : { "type" : "string" },
+               "pageId" : { "type" : "string" }
+             },
+             "oneOf" : [
+               { "$ref" : "#/components/schemas/SitemapWidgetEvent" },
+               { "$ref" : "#/components/schemas/SitemapChangedEvent" },
+               { "$ref" : "#/components/schemas/ServerAliveEvent" }
+             ]
+           },
       "SitemapWidgetEvent": {
         "type": "object",
         "properties": {
@@ -9616,6 +9627,25 @@
           }
         }
       },
+      "SitemapChangedEvent" : {
+            "required" : [ "TYPE" ],
+            "type" : "object",
+            "properties" : {
+              "sitemapName" : { "type" : "string" },
+              "pageId" : { "type" : "string" },
+              "TYPE" : { "type" : "string", "readOnly" : true, "enum" : [ "SITEMAP_CHANGED" ] }
+            }
+          },
+          "ServerAliveEvent" : {
+            "required" : [ "TYPE" ],
+            "type" : "object",
+            "properties" : {
+              "sitemapName" : { "type" : "string" },
+              "pageId" : { "type" : "string" },
+              "TYPE" : { "type" : "string", "readOnly" : true, "enum" : [ "ALIVE" ] }
+            }
+          },
+      
       "SitemapDTO": {
         "type": "object",
         "properties": {
