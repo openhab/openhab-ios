@@ -64,6 +64,12 @@ class OpenHABWebViewModel: ObservableObject {
     /// Title text proxied from the MainUI web navbar. Empty until the JS
     /// proxy posts the first `navbarElements` message.
     @Published private(set) var navbarTitle: String = ""
+    /// True while MainUI has hidden its own navbar (Framework7 `hide-bars-on-scroll`).
+    @Published private(set) var isWebNavbarHidden = false
+    /// True while an expanded large title is showing the page title instead.
+    @Published private(set) var isWebNavbarTitleHidden = false
+    /// MainUI's `--f7-navbar-height`, excluding the safe area. 44 on iOS, 56 on Material.
+    @Published private(set) var webNavbarHeight: CGFloat = 44
     /// True once a real page (not the blank placeholder) has finished loading.
     /// Drives the "Connecting…" placeholder shown while a home is first loading.
     @Published private(set) var hasLoadedContent = false
@@ -93,48 +99,162 @@ class OpenHABWebViewModel: ObservableObject {
     /// into the native bar and hide the web navbar.
     private let navbarProxyJS = """
     (function() {
-        // Returns the active/visible navbar. Popups take highest priority;
-        // then the main view's current page. Scoping .view-main selectors
-        // prevents the right panel ("Other Apps") from matching during
-        // F7 initialisation when it briefly carries .page-current.
+        // Framework7 keeps closed popups mounted, and a page can contain one (the code
+        // editor's "Parse Errors" popup sits inside the Thing page). Their navbars match
+        // the same selectors as the page's own, so only count an overlay that is open.
+        // Side panels are never proxied — the app's own menu replaces them.
+        function isUsableNavbar(navbar) {
+            if (navbar.closest('.panel')) return false;
+            var overlay = navbar.closest('.popup, .sheet-modal, .dialog, .actions-modal, .login-screen');
+            return !overlay || overlay.classList.contains('modal-in');
+        }
+
+        function firstUsableNavbar(selectors) {
+            for (var i = 0; i < selectors.length; i++) {
+                var found = document.querySelectorAll(selectors[i]);
+                for (var j = 0; j < found.length; j++) {
+                    if (isUsableNavbar(found[j])) return found[j];
+                }
+            }
+            return null;
+        }
+
+        // An open popup owns the bar, otherwise the current page. A page's navbar is a
+        // direct child of .page, so '> .navbar' can't match a popup nested inside it.
         function activeNavbar() {
-            return document.querySelector('.popup.modal-in .navbar')
-                || document.querySelector('.view-main .page-current .navbar')
-                || document.querySelector('.view-main .navbar.navbar-current')
-                || document.querySelector('.page-current .navbar:not(.panel *)')
-                || document.querySelector('.navbar:not(.navbar-hidden):not(.panel *)')
-                || document.querySelector('.navbar');
+            return firstUsableNavbar([
+                '.popup.modal-in .navbar',
+                '.sheet-modal.modal-in .navbar',
+                '.view-main .page-current > .navbar',
+                '.view-main .navbar.navbar-current',
+                '.page-current > .navbar',
+                '.navbar:not(.navbar-hidden)',
+                '.navbar'
+            ]);
+        }
+
+        function activePage() {
+            return document.querySelector('.view-main .page-current')
+                || document.querySelector('.page-current');
+        }
+
+        // Hide only what the native bar reproduces, and leave the navbar in the layout:
+        // Framework7 sizes pages, subnavbars and absolutely positioned content (the map
+        // page) from --f7-navbar-height.
+        //
+        // opacity, because innerText reads nothing out of a visibility:hidden subtree and
+        // the labels and icons below come from these elements. A stylesheet rule, because
+        // Framework7 writes inline opacity on .navbar-bg and .title as a large title
+        // collapses and would overwrite ours.
+        var PROXIED_CLASS = 'oh-navbar-proxied';
+        function installProxyStyle() {
+            if (document.getElementById('oh-navbar-proxy-style')) return;
+            var style = document.createElement('style');
+            style.id = 'oh-navbar-proxy-style';
+            style.textContent =
+                '.' + PROXIED_CLASS + ' > .navbar-bg,' +
+                '.' + PROXIED_CLASS + ' > .navbar-inner > .left,' +
+                '.' + PROXIED_CLASS + ' > .navbar-inner > .title,' +
+                '.' + PROXIED_CLASS + ' > .navbar-inner > .nav-title,' +
+                '.' + PROXIED_CLASS + ' > .navbar-inner > .right' +
+                '{opacity:0 !important;pointer-events:none !important}';
+            (document.head || document.documentElement).appendChild(style);
+        }
+        // Guard every write. classList.add/remove rewrite the attribute even when nothing
+        // changes, emitting a mutation record — and this runs from the MutationObserver
+        // below, so an unguarded write loops forever and pegs the main thread.
+        function hideProxiedParts(navbar) {
+            installProxyStyle();
+            document.querySelectorAll('.' + PROXIED_CLASS).forEach(function(el) {
+                if (el !== navbar) el.classList.remove(PROXIED_CLASS);
+            });
+            if (!navbar.classList.contains(PROXIED_CLASS)) {
+                navbar.classList.add(PROXIED_CLASS);
+            }
+        }
+
+        // A hideNavbar page reserves no room for the native bar, so pad it and push the
+        // floating icons down. Reversible, in case the page gains a navbar later.
+        function syncPagePadding(hasNavbar) {
+            var page = activePage();
+            if (!page) return;
+            var needsPadding = !hasNavbar;
+            if (needsPadding === !!page.__ohPadded) return;
+            page.__ohPadded = needsPadding;
+            var offset = needsPadding ? 'calc(var(--f7-navbar-height) + var(--f7-safe-area-top))' : '';
+            var pc = page.querySelector('.page-content');
+            if (pc) pc.style.paddingTop = offset;
+            page.querySelectorAll('.sidebar-icon, .fullscreen-icon').forEach(function(el) {
+                el.style.marginTop = offset;
+            });
+        }
+
+        function navbarHeight() {
+            var v = parseFloat(getComputedStyle(document.documentElement)
+                .getPropertyValue('--f7-navbar-height'));
+            return (isFinite(v) && v > 0) ? v : 44;
+        }
+
+        // Posts only on change — this runs on every scroll frame.
+        var lastState = null;
+        function reportState() {
+            var navbar = activeNavbar();
+            var hidden = navbar ? !!navbar.closest('.navbar-hidden') : false;
+            // An expanded large title already shows the page title, so don't show it twice.
+            var titleHidden = !!navbar &&
+                navbar.classList.contains('navbar-large') &&
+                !navbar.classList.contains('navbar-large-collapsed');
+            var height = navbarHeight();
+            var state = hidden + '|' + titleHidden + '|' + height;
+            if (state === lastState) return;
+            lastState = state;
+            window.webkit.messageHandlers.mainUi.postMessage({
+                type: 'navbarState',
+                hidden: hidden ? 'true' : 'false',
+                titleHidden: titleHidden ? 'true' : 'false',
+                height: String(height)
+            });
+        }
+
+        var statePending = false;
+        function scheduleStateReport() {
+            if (statePending) return;
+            statePending = true;
+            requestAnimationFrame(function() { statePending = false; reportState(); });
+        }
+
+        // Only mirror a navbar from what is actually on screen. The fallback selectors in
+        // activeNavbar() can otherwise reach a previous page that is still mounted.
+        //
+        // On the iOS theme Framework7 lifts navbars out of the pages into a .navbars
+        // container and marks the live one .navbar-current, so containment alone would
+        // reject every page navbar there.
+        function ownsBar(navbar) {
+            if (!navbar) return false;
+            if (navbar.closest('.popup.modal-in, .sheet-modal.modal-in')) return true;
+            if (navbar.matches('.navbar-current')) return true;
+            if (navbar.matches('.navbar-previous, .navbar-next, .stacked')) return false;
+            var page = activePage();
+            return !page || page.contains(navbar);
         }
 
         function serializeNavbar() {
             var navbar = activeNavbar();
-            if (!navbar) return;
+            var owns = ownsBar(navbar);
+            syncPagePadding(owns);
+            // Nothing to mirror: clear the bar rather than leave the previous page's
+            // buttons on it, whose proxy tokens are already gone.
+            if (!owns) {
+                window.webkit.messageHandlers.mainUi.postMessage({
+                    type: 'navbarElements', title: '', items: []
+                });
+                reportState();
+                return;
+            }
             // Wait for web fonts (Framework7 Icons) to be ready before canvas rendering.
             // document.fonts.ready resolves immediately on subsequent calls once fonts are loaded.
             (document.fonts ? document.fonts.ready : Promise.resolve()).then(function() {
-                var navPage = navbar.closest('.page');
-                var pc = (navPage && navPage.querySelector('.page-content'))
-                       || document.querySelector('.view-main .page-current .page-content')
-                       || document.querySelector('.page-current .page-content')
-                       || document.querySelector('.page-content');
-                // Preserve any subnavbar (e.g. a search box). Framework7 positions the
-                // subnavbar absolutely with a negative bottom offset below the navbar, so
-                // collapsing the navbar height to zero shifts the subnavbar up to the top
-                // while keeping it visible and interactive inside the web view.
-                var subnavbar = navbar.querySelector('.subnavbar');
-                if (subnavbar) {
-                    navbar.querySelectorAll(
-                        '.navbar-inner > .left, .navbar-inner > .title,' +
-                        '.navbar-inner > .right, .navbar-inner > .nav-title'
-                    ).forEach(function(el) { el.style.display = 'none'; });
-                    navbar.style.setProperty('height', '0px', 'important');
-                    navbar.style.setProperty('min-height', '0px', 'important');
-                    navbar.style.overflow = 'visible';
-                    if (pc) pc.style.paddingTop = (subnavbar.offsetHeight || 44) + 'px';
-                } else {
-                    navbar.style.display = 'none';
-                    if (pc) pc.style.paddingTop = '0px';
-                }
+                hideProxiedParts(navbar);
 
                 var titleEl = navbar.querySelector('.title') || navbar.querySelector('[class*="title"]');
                 var title = titleEl ? titleEl.innerText.trim() : '';
@@ -165,6 +285,16 @@ class OpenHABWebViewModel: ObservableObject {
                         return canvas.toDataURL('image/png').split(',')[1];
                     } catch(e) { return null; }
                 }
+
+                // Tokens must be unique across the document, not just within this navbar.
+                // A popup sits after the main view, so a bare index would collide with the
+                // page's navbar and querySelector would resolve to the page instead —
+                // the popup's close button would click the hidden page behind it.
+                window.__ohProxyRun = (window.__ohProxyRun || 0) + 1;
+                var proxyRun = window.__ohProxyRun;
+                document.querySelectorAll('[data-oh-proxy]').forEach(function(el) {
+                    el.removeAttribute('data-oh-proxy');
+                });
 
                 var items = [];
                 btns.forEach(function(el, idx) {
@@ -197,8 +327,9 @@ class OpenHABWebViewModel: ObservableObject {
                     if (el.classList.contains('back')) {
                         action = 'window.history.back()';
                     } else {
-                        el.setAttribute('data-oh-proxy', String(idx));
-                        action = '(function(){var el=document.querySelector("[data-oh-proxy=\\'' + idx + '\\']");if(el)el.click();})()';
+                        var token = proxyRun + '-' + idx;
+                        el.setAttribute('data-oh-proxy', token);
+                        action = '(function(){var el=document.querySelector("[data-oh-proxy=\\'' + token + '\\']");if(el)el.click();})()';
                     }
                     var item = { label: label, action: action };
                     if (isBack) item.isBack = 'true';
@@ -212,34 +343,55 @@ class OpenHABWebViewModel: ObservableObject {
                     title: title,
                     items: items
                 });
+                reportState();
             });
         }
 
         // Observe document.body for page transitions and popup open/close.
         // Watching .view-main alone misses popups (they are siblings of .view-main).
         // class changes on .popup.modal-in and page elements all bubble up to body.
-        // Debounced 200 ms.
+        // Hiding runs immediately so a new page's navbar never flashes under the native
+        // bar; only the expensive part (rendering icons to canvas) is debounced.
         function observeNavbar() {
+            // Swift re-injects this script several times per page; without a guard each
+            // injection leaves another observer and scroll listener behind.
+            if (window.__ohNavbarObserverInstalled) return;
+            window.__ohNavbarObserverInstalled = true;
             var root = document.body || document.documentElement;
             var timer = null;
             new MutationObserver(function() {
+                var navbar = activeNavbar();
+                if (navbar) hideProxiedParts(navbar);
+                scheduleStateReport();
                 clearTimeout(timer);
                 timer = setTimeout(serializeNavbar, 200);
             }).observe(root, {
                 childList: true, subtree: true,
                 attributes: true, attributeFilter: ['class']
             });
+            // Framework7 hides the navbar and collapses large titles from a scroll
+            // handler — neither touches a class the observer above sees.
+            document.addEventListener('scroll', scheduleStateReport, { capture: true, passive: true });
         }
 
-        // Wait for the *correct* navbar. Popups first, then .view-main.
+        // Wait for the *correct* navbar. Open popups first, then .view-main.
         function readyNavbar() {
-            return document.querySelector('.popup.modal-in .navbar')
-                || document.querySelector('.view-main .page-current .navbar')
-                || document.querySelector('.view-main .navbar.navbar-current')
-                || document.querySelector('.page-current .navbar:not(.panel *)');
+            return firstUsableNavbar([
+                '.popup.modal-in .navbar',
+                '.sheet-modal.modal-in .navbar',
+                '.view-main .page-current > .navbar',
+                '.view-main .navbar.navbar-current',
+                '.page-current > .navbar'
+            ]);
+        }
+        // A hideNavbar page never produces a navbar to wait for, so treat a rendered page
+        // without one as settled too — it still needs padding and scroll state.
+        function readyPageWithoutNavbar() {
+            var page = activePage();
+            return !!page && !!page.querySelector('.page-content') && !ownsBar(activeNavbar());
         }
         function waitAndSerialize() {
-            if (readyNavbar()) {
+            if (readyNavbar() || readyPageWithoutNavbar()) {
                 serializeNavbar();
                 observeNavbar();
                 return;
@@ -247,7 +399,7 @@ class OpenHABWebViewModel: ObservableObject {
             var root = document.body || document.documentElement;
             if (!root) return;
             var bodyObserver = new MutationObserver(function() {
-                if (readyNavbar()) {
+                if (readyNavbar() || readyPageWithoutNavbar()) {
                     bodyObserver.disconnect();
                     serializeNavbar();
                     observeNavbar();
@@ -386,8 +538,18 @@ class OpenHABWebViewModel: ObservableObject {
             clearView()
             return
         }
+        // The tracker republishes on every restart, and any preferences write restarts it,
+        // so re-emitting the same connection must not disturb a page that is already up.
+        // Equality alone isn't enough though: two demo homes both track `.demo`, so a home
+        // switch looks identical here — the web view instance is what tells them apart.
+        let sameConnection = activeConnectionInfo?.configuration == connection.configuration
+            && activeConnectionInfo?.proxyURL == connection.proxyURL
         openHABTrackedRootUrl = connection.configuration.url
         activeConnectionInfo = connection
+        if sameConnection, hasLoadedContent, currentHomeWebViewShown {
+            Logger.viewController.info("Active connection unchanged, keeping the loaded page")
+            return
+        }
         loadWebView(force: false)
     }
 
@@ -415,9 +577,11 @@ class OpenHABWebViewModel: ObservableObject {
         let authStr = "\(activeConfig.username):\(activeConfig.password)"
         let newTarget = "\(activeConfig.url):\(authStr)"
 
-        if force {
+        // An explicit path always loads. The ETag shortcut compares origins only, so it
+        // can't tell one route from another and would silently drop the request.
+        if force || path != nil {
             Task {
-                await performLoadWebView(newTarget: newTarget, path: path, force: true)
+                await performLoadWebView(newTarget: newTarget, path: path, force: force)
             }
             return
         }
@@ -498,21 +662,20 @@ class OpenHABWebViewModel: ObservableObject {
             return
         }
 
-        let result = await checker.checkIfChanged(url: fullURL)
+        // Check the app shell, not the page we are loading. Every Main UI route serves the
+        // same index.html, but openHAB's SPA fallback returns it without an ETag — and no
+        // ETag means "changed", so checking a route would reload every time.
+        let shellURL = WebViewURLHelper.resolveWebViewURL(
+            baseURL: url,
+            proxyURL: activeConnectionInfo?.proxyURL,
+            path: nil,
+            defaultPath: ""
+        ) ?? fullURL
+        let result = await checker.checkIfChanged(url: shellURL)
 
         switch result {
         case .unchanged:
-            let normalizedTarget = WebViewURLHelper.normalizeForComparison(fullURL.absoluteString, includeBasePath: false)
-            let normalizedLoaded = WebViewURLHelper.normalizeForComparison(lastLoadedURL, includeBasePath: false)
-            Logger.viewController.debug("ETag unchanged - comparing base URLs: loaded=\(normalizedLoaded ?? "nil") vs target=\(normalizedTarget ?? "nil")")
-
-            // Skipping the load is only safe when the origin is unchanged AND the web view
-            // already shown is the current home's instance. Two homes can share an origin
-            // (e.g. two demo homes both on demo.openhab.org) while using different per-home
-            // web views, so an origin-only match would wrongly skip the swap and leave the
-            // previous home's (or a blank) web view visible.
-            let currentHomeWebViewShown = views[Preferences.shared.currentHomePreferences.id] === webView
-            if let normalizedTarget, let normalizedLoaded, normalizedLoaded == normalizedTarget, currentHomeWebViewShown {
+            if canKeepLoadedPage(target: fullURL) {
                 Logger.viewController.info("ETag unchanged and current home's web view already shown, skipping load")
                 currentTarget = newTarget
                 isLoading = false
@@ -526,9 +689,27 @@ class OpenHABWebViewModel: ObservableObject {
             await performLoadWebView(newTarget: newTarget, path: path, force: false)
 
         case let .failed(error):
-            Logger.viewController.info("ETag check failed: \(error.localizedDescription), loading anyway")
-            await performLoadWebView(newTarget: newTarget, path: path, force: false)
+            // A failed check is not evidence of new content. The first request after the
+            // app resumes often times out, and reloading on that throws away a good page.
+            if canKeepLoadedPage(target: fullURL) {
+                Logger.viewController.info("ETag check failed: \(error.localizedDescription), keeping the loaded page")
+                currentTarget = newTarget
+                isLoading = false
+            } else {
+                Logger.viewController.info("ETag check failed: \(error.localizedDescription), loading anyway")
+                await performLoadWebView(newTarget: newTarget, path: path, force: false)
+            }
         }
+    }
+
+    /// Loading again would only discard live SPA state.
+    private func canKeepLoadedPage(target: URL) -> Bool {
+        guard hasLoadedContent, currentHomeWebViewShown else { return false }
+        let normalizedTarget = WebViewURLHelper.normalizeForComparison(target.absoluteString, includeBasePath: false)
+        let normalizedLoaded = WebViewURLHelper.normalizeForComparison(lastLoadedURL, includeBasePath: false)
+        Logger.viewController.debug("Comparing base URLs: loaded=\(normalizedLoaded ?? "nil") vs target=\(normalizedTarget ?? "nil")")
+        guard let normalizedTarget, let normalizedLoaded else { return false }
+        return normalizedTarget == normalizedLoaded
     }
 
     // MARK: - WKWebView instance management
@@ -591,6 +772,12 @@ class OpenHABWebViewModel: ObservableObject {
     }
 
     // MARK: - Navigation commands
+
+    /// True when the web view on screen is this home's own instance. Homes get one each,
+    /// and two homes can share a connection, so the URL alone proves nothing.
+    private var currentHomeWebViewShown: Bool {
+        views[Preferences.shared.currentHomePreferences.id] === webView
+    }
 
     /// True once the MainUI SPA is live in the current web view and can accept
     /// client-side navigation via `window.MainUI.handleCommand`. Mirrors the state
@@ -702,6 +889,8 @@ class OpenHABWebViewModel: ObservableObject {
         isSSEConnected = false
         hasLoadedContent = false
         showMenuBar = true
+        isWebNavbarHidden = false
+        isWebNavbarTitleHidden = false
         #if DEBUG
         if !uiTestContentLocked {
             navbarItems = []
@@ -771,6 +960,8 @@ class OpenHABWebViewModel: ObservableObject {
     func handleNavigationStart() {
         showMenuBar = true
         isSSEConnected = false
+        isWebNavbarHidden = false
+        isWebNavbarTitleHidden = false
         #if DEBUG
         if !uiTestContentLocked {
             navbarItems = []
@@ -780,14 +971,25 @@ class OpenHABWebViewModel: ObservableObject {
         navbarItems = []
         navbarTitle = ""
         #endif
-        // Clear the re-installation guard so the next page gets a fresh proxy.
-        webView.evaluateJavaScript("window.__ohNavbarProxyInstalled = undefined;")
+        // Clear the re-installation guards so the next page gets a fresh proxy.
+        webView.evaluateJavaScript(
+            "window.__ohNavbarProxyInstalled = undefined; window.__ohNavbarObserverInstalled = undefined;"
+        )
     }
 
     /// Updates the proxied navbar items and title received from the web content.
     func updateNavbarItems(_ items: [WebNavbarItem], title: String = "") {
         navbarItems = items
         navbarTitle = title
+    }
+
+    /// A bad `height` reading is ignored, so it can never collapse the native bar.
+    func updateNavbarState(hidden: Bool, titleHidden: Bool, height: Double?) {
+        isWebNavbarHidden = hidden
+        isWebNavbarTitleHidden = titleHidden
+        if let height, (32.0 ... 96.0).contains(height) {
+            webNavbarHeight = CGFloat(height)
+        }
     }
 
     /// Called when the openHAB Main UI fires its `OHApp.ready()` callback.

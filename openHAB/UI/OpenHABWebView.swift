@@ -166,6 +166,17 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                     return
                 }
                 #endif
+                // Dict body — navbar state
+                if let dict = message.body as? [String: Any],
+                   let type = dict["type"] as? String,
+                   type == "navbarState" {
+                    viewModel.updateNavbarState(
+                        hidden: dict["hidden"] as? String == "true",
+                        titleHidden: dict["titleHidden"] as? String == "true",
+                        height: (dict["height"] as? String).flatMap(Double.init)
+                    )
+                    return
+                }
                 // Dict body — navbar proxy elements
                 if let dict = message.body as? [String: Any],
                    let type = dict["type"] as? String,
