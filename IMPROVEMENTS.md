@@ -71,6 +71,10 @@ All items below touch the same views; implement together to avoid multiple passe
   - Adding a home: show a cancellable name-entry alert. On confirm, create the home and immediately navigate to its settings.
 - "Home" (root MainUI entry) hidden until `MenuDataService.hasEverSuccessfullyLoaded` is true for that home; behaves like sitemaps/pages in the loading state.
 
+- Add section order array to `HomePreferences`. Visibility is encoded in `sectionOrder` itself: a section is visible iff it appears in the array; absent = hidden. No separate visibility flags needed. `MenuSection.allCases` minus `sectionOrder` gives the hidden set for settings UI.
+- Replace the four per-section `Bool?` expansion fields with `expandedSections: Set<MenuSection>` (nil-backed; nil → all expanded). Mutated via `setSection(_:expanded:)`.
+- Hide Notifications row when no notification-capable connection is active. Gate: `Preferences.getNotificationConnection(of: prefs) != nil` — this already covers demomode (demo connection has `supportsNotifications: false`) and `disableRemoteConnection: true` (remote excluded from `trackedConnections`), so no additional flag is needed.
+
 ### Layer 4 — `ToolbarMenu` structural changes *(needs Layer 1)*
 
 - Render sections dynamically from the persisted order/visibility in `HomePreferences` instead of hardcoded.
@@ -94,7 +98,7 @@ Specific candidates:
 - **`MenuDataService` state machine** (Layer 2): snapshot retained on connection drop, cleared on home switch; `hasEverSuccessfullyLoaded` gate correct on first load vs. reconnect.
 - **Connection symbol mapping** (Layer 3): parameterised test over `(localURL, remoteURL, hasCredentials, cloudServiceEnabled, isConnected)` → expected symbol set. Cases to cover: local active, cloud active with credentials, cloud active no credentials, cloud service off, offline. *(8 cases written in `ConnectionSymbolTests`; missing: `disableRemoteConnection = true` → cloud symbol suppressed)*
 - **Section order/visibility persistence** (Layer 4): round-trip through `HomePreferences`; `ToolbarMenu` renders sections in persisted order.
-- **Notification visibility gate** (Layer 5): combined condition maps correctly to shown/hidden.
+- **Notification visibility gate** (Layer 5): `getNotificationConnection(of:)` returns nil for demomode, `disableRemoteConnection: true`, and no-remote-URL cases; non-nil when remote is properly configured and enabled.
 
 ---
 

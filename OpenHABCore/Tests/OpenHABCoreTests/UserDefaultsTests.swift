@@ -227,13 +227,11 @@ struct MenuSectionTests {
 
         #expect(prefs.avatarImagePath == nil)
         #expect(prefs.sectionOrder == MenuSection.allCases)
-        #expect(prefs.isMainUIVisible == nil)
-        #expect(prefs.isSitemapsVisible == nil)
-        #expect(prefs.isTilesVisible == nil)
-        #expect(prefs.isSystemVisible == nil)
+        #expect(prefs.collapsedSections.isEmpty)
     }
 
     /// A custom section order round-trips through encode → decode unchanged.
+    /// Absent sections are hidden — presence in `sectionOrder` is the visibility flag.
     @Test func sectionOrderRoundTrip() throws {
         let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
         var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
@@ -246,20 +244,43 @@ struct MenuSectionTests {
         #expect(decoded.sectionOrder == customOrder)
     }
 
-    /// Visibility flags round-trip correctly.
-    @Test func visibilityFlagsRoundTrip() throws {
+    /// Hiding a section by removing it from sectionOrder round-trips correctly.
+    @Test func sectionVisibilityViaOrderRoundTrip() throws {
         let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
         var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
 
-        prefs.isMainUIVisible = false
-        prefs.isTilesVisible = true
+        prefs.sectionOrder = [.sitemaps, .tiles, .system] // mainUI hidden
 
         let encoded = try JSONEncoder().encode(prefs)
         let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
-        #expect(decoded.isMainUIVisible == false)
-        #expect(decoded.isTilesVisible == true)
-        #expect(decoded.isSitemapsVisible == nil) // unset fields stay nil
-        #expect(decoded.isSystemVisible == nil)
+        #expect(!decoded.sectionOrder.contains(.mainUI))
+        #expect(decoded.sectionOrder.contains(.sitemaps))
+    }
+
+    /// collapsedSections set-membership round-trips correctly; unknown raw strings are dropped.
+    @Test func collapsedSectionsRoundTrip() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        prefs.setSection(.mainUI, expanded: false)
+        prefs.setSection(.tiles, expanded: false)
+
+        let encoded = try JSONEncoder().encode(prefs)
+        let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
+        #expect(decoded.collapsedSections.contains(.mainUI))
+        #expect(decoded.collapsedSections.contains(.tiles))
+        #expect(!decoded.collapsedSections.contains(.sitemaps))
+        #expect(!decoded.collapsedSections.contains(.system))
+    }
+
+    /// Unknown section strings in stored JSON are silently dropped on decode.
+    @Test func unknownSectionStringsDroppedGracefully() throws {
+        // Simulate stored data containing a section name that no longer exists.
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000","sectionOrderStorage":["mainUI","obsoleteSection","sitemaps"],"collapsedSectionsStorage":["obsoleteSection","tiles"]}"#
+        let prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        #expect(prefs.sectionOrder == [.mainUI, .sitemaps]) // unknown dropped
+        #expect(prefs.collapsedSections == [.tiles])        // unknown dropped
     }
 
     /// avatarImagePath round-trips correctly.

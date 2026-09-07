@@ -24,9 +24,25 @@ struct HomeAvatarView: View {
     static let defaultIconName = "house.fill"
 
     static let availableIcons: [String] = [
-        "house.fill", "building.2.fill", "house.and.flag.fill", "leaf.fill",
-        "star.fill", "heart.fill", "bolt.fill", "flame.fill",
-        "moon.fill", "drop.fill", "sun.max.fill", "cloud.fill"
+        "house.fill",
+        "building.2.fill",
+        "house.and.flag.fill",
+        "house.lodge.fill",
+        "mountain.2.fill",
+        "sailboat.fill",
+        "tent.fill",
+        "tent.2.fill",
+        "bed.double.fill",
+        "storefront.fill",
+        "leaf.fill",
+        "star.fill",
+        "heart.fill",
+        "bolt.fill",
+        "flame.fill",
+        "moon.fill",
+        "drop.fill",
+        "sun.max.fill",
+        "cloud.fill"
     ]
 
     static let colorPalette: [String] = [

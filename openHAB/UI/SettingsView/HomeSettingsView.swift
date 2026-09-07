@@ -23,31 +23,18 @@ private struct CropSource: Identifiable {
     let kind: Kind
 }
 
-struct HomeSettingsView: View {
+struct HomeSettingsView: View, SettingsSheetView {
     var networkTracker = MainActorNetworkTracker.shared
     /// When non-nil, the view edits the specified stored home instead of the active home.
     var homeId: UUID?
 
-    /// Called after the sheet is dismissed via swipe with unsaved changes.
-    /// The passed closure performs the save when invoked by the parent.
-    var onDismissedDirty: ((SettingsSnapshot, @escaping () -> Void) -> Void)?
     var initialValues: SettingsSnapshot?
 
-    @State private var settingsDemomode = false
-    @State private var settingsRealTimeSliders = true
-    @State private var settingsIconType: IconType = .svg
-    @State private var settingsSortSitemapsBy: SortSitemapsOrder = .label
-    @State private var settingsSitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode = .label
-    @State private var settingsDefaultMainUIPath = ""
-    @State private var settingsAlwaysAllowWebRTC = true
-    @State private var settingsSitemapForWatch = ""
-    /// The label last persisted for `settingsSitemapForWatch`. Falls back to this
-    /// instead of "unknown" when `sitemaps` has no fresh match — e.g. for an inactive
-    /// home, where sitemaps are deliberately not fetched (see the `.task` below).
-    @State private var settingsSitemapForWatchLabel = ""
-    @State private var settingsSitemapForCarPlay = ""
-    @State private var settingsDisableRemoteConnection = false
-    @State private var settingsAvatarImagePath: String?
+    // MARK: — Tracked settings state
+    @State var current = SettingsSnapshot()
+    @State var initial = SettingsSnapshot()
+
+    // MARK: — Avatar / photo state (not part of dirty tracking)
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var avatarDisplayImage: Image?
     @State private var showPhotoPicker = false
@@ -55,24 +42,16 @@ struct HomeSettingsView: View {
     @State private var pendingCroppedImage: UIImage?
     @State private var showAvatarPicker = false
     @State private var showColorPickerRow = false
-    @State private var settingsAvatarColor: String?
-    @State private var settingsAvatarIconName: String?
     @State private var iconRowPinWidth: CGFloat = 44
     @State private var colorRowPinWidth: CGFloat = 44
 
+    // MARK: — Auxiliary state
     @State private var sitemaps: [OpenHABSitemap] = []
-    @State private var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
-    @State private var settingsRemoteConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
-    @State private var settingsHomeName = ""
+    @State private var sitemapForWatchLabel = ""
     @State private var viewAppearedOnce = false
-    @State private var settingsSSECommandItem = ""
     @State private var showLocalNetworkAlert = false
     @State private var loadedLocalURL = ""
     @State private var localTestedOKURL = ""
-
-    @State private var initialSnapshot: SettingsSnapshot?
-    @State private var isDirty = false
-    @State private var savedExplicitly = false
     @State private var selectedSSEItemName: String?
     @State private var showAppSettings = false
     @State private var showCommandItemInfo = false
@@ -83,47 +62,31 @@ struct HomeSettingsView: View {
     @Environment(\.openURL) private var openURL
 
     struct SettingsSnapshot: Equatable {
-        var demomode: Bool
-        var realTimeSliders: Bool
-        var iconType: IconType
-        var sortSitemapsBy: SortSitemapsOrder
-        var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode
-        var defaultMainUIPath: String
-        var alwaysAllowWebRTC: Bool
-        var sitemapForWatch: String
-        var sitemapForCarPlay: String
-        var localConnectionConfig: ConnectionConfiguration
-        var remoteConnectionConfig: ConnectionConfiguration
-        var sseCommandItem: String
-        var homeName: String
-        var disableRemoteConnection: Bool
+        var demomode: Bool = false
+        var realTimeSliders: Bool = true
+        var iconType: IconType = .svg
+        var sortSitemapsBy: SortSitemapsOrder = .label
+        var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode = .label
+        var defaultMainUIPath: String = ""
+        var alwaysAllowWebRTC: Bool = true
+        var sitemapForWatch: String = ""
+        var sitemapForCarPlay: String = ""
+        var localConnectionConfig: ConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
+        var remoteConnectionConfig: ConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
+        var sseCommandItem: String = ""
+        var homeName: String = ""
+        var disableRemoteConnection: Bool = false
         var avatarImagePath: String?
         var avatarColor: String?
         var avatarIconName: String?
-        var hasPendingCrop: Bool
+        var hasPendingCrop: Bool = false
+        var sectionOrder: [MenuSection] = MenuSection.allCases
+        var collapsedSections: Set<MenuSection> = []
     }
 
-    private var currentSnapshot: SettingsSnapshot {
-        SettingsSnapshot(
-            demomode: settingsDemomode,
-            realTimeSliders: settingsRealTimeSliders,
-            iconType: settingsIconType,
-            sortSitemapsBy: settingsSortSitemapsBy,
-            sitemapNameLabelDisplayMode: settingsSitemapNameLabelDisplayMode,
-            defaultMainUIPath: settingsDefaultMainUIPath,
-            alwaysAllowWebRTC: settingsAlwaysAllowWebRTC,
-            sitemapForWatch: settingsSitemapForWatch,
-            sitemapForCarPlay: settingsSitemapForCarPlay,
-            localConnectionConfig: settingsLocalConnectionConfiguration,
-            remoteConnectionConfig: settingsRemoteConnectionConfiguration,
-            sseCommandItem: settingsSSECommandItem,
-            homeName: settingsHomeName,
-            disableRemoteConnection: settingsDisableRemoteConnection,
-            avatarImagePath: settingsAvatarImagePath,
-            avatarColor: settingsAvatarColor,
-            avatarIconName: settingsAvatarIconName,
-            hasPendingCrop: pendingCroppedImage != nil
-        )
+    private var hiddenSections: [MenuSection] {
+        let visible = Set(current.sectionOrder)
+        return MenuSection.allCases.filter { !visible.contains($0) }
     }
 
     var body: some View {
@@ -131,29 +94,44 @@ struct HomeSettingsView: View {
             homeIdentitySection
 
             ConnectionSettingsView(
-                settingsDemomode: $settingsDemomode,
-                localConnectionConfiguration: $settingsLocalConnectionConfiguration,
-                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration,
+                settingsDemomode: $current.demomode,
+                localConnectionConfiguration: $current.localConnectionConfig,
+                remoteConnectionConfiguration: $current.remoteConnectionConfig,
                 localTestedOKURL: $localTestedOKURL,
-                disableRemoteConnection: $settingsDisableRemoteConnection
+                disableRemoteConnection: $current.disableRemoteConnection
             )
 
             commandItemSection
 
             MainUISettingsView(
-                settingsAlwaysAllowWebRTC: $settingsAlwaysAllowWebRTC,
-                settingsDefaultMainUIPath: $settingsDefaultMainUIPath
+                settingsAlwaysAllowWebRTC: $current.alwaysAllowWebRTC,
+                settingsDefaultMainUIPath: $current.defaultMainUIPath
             )
 
             SitemapSettingsView(
-                settingsRealTimeSliders: $settingsRealTimeSliders,
-                settingsIconType: $settingsIconType,
-                settingsSortSitemapsBy: $settingsSortSitemapsBy,
-                settingsSitemapNameLabelDisplayMode: $settingsSitemapNameLabelDisplayMode,
-                settingsSitemapForWatch: $settingsSitemapForWatch,
-                settingsSitemapForCarPlay: $settingsSitemapForCarPlay,
+                settingsRealTimeSliders: $current.realTimeSliders,
+                settingsIconType: $current.iconType,
+                settingsSortSitemapsBy: $current.sortSitemapsBy,
+                settingsSitemapNameLabelDisplayMode: $current.sitemapNameLabelDisplayMode,
+                settingsSitemapForWatch: $current.sitemapForWatch,
+                settingsSitemapForCarPlay: $current.sitemapForCarPlay,
                 sitemaps: $sitemaps
             )
+
+            Section(header: Text("Menu Sections")) {
+                ForEach(current.sectionOrder, id: \.self) { section in
+                    inlineSectionRow(section, isVisible: true)
+                        .id("v-\(section.rawValue)")
+                }
+                .onMove { source, destination in
+                    current.sectionOrder.move(fromOffsets: source, toOffset: destination)
+                }
+                ForEach(hiddenSections, id: \.self) { section in
+                    inlineSectionRow(section, isVisible: false)
+                        .moveDisabled(true)
+                        .id("h-\(section.rawValue)")
+                }
+            }
 
             Section {
                 Button {
@@ -166,7 +144,7 @@ struct HomeSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .interactiveDismissDisabled(isDirty)
+        .environment(\.editMode, .constant(.active))
         .navigationTitle("Home Settings")
         .alert("Local Network Access Required", isPresented: $showLocalNetworkAlert) {
             Button("Open Settings") {
@@ -183,19 +161,27 @@ struct HomeSettingsView: View {
         } message: {
             Text("To connect to your local openHAB server, please allow Local Network access when prompted. If you previously denied it, enable it in Settings → Privacy & Security → Local Network.")
         }
-        .toolbar { settingsToolbar }
-        .onDisappear(perform: handleSwipeDismiss)
-        .onChange(of: currentSnapshot) { _, newSnapshot in
-            isDirty = newSnapshot != initialSnapshot
+        .settingsSheet(from: self)
+        .onChange(of: pendingCroppedImage) { _, new in
+            current.hasPendingCrop = new != nil
         }
         .task {
             guard !viewAppearedOnce else { return }
             viewAppearedOnce = true
             currentActiveHomeId = await Preferences.shared.currentHomePreferences.id
-            await loadSettings()
-            initialSnapshot = currentSnapshot
+            let homePrefs: HomePreferences
+            if let homeId, let stored = await Preferences.shared.storedHomeWithCredentials(forId: homeId) {
+                homePrefs = stored
+            } else {
+                homePrefs = await Preferences.shared.currentHomePreferences
+            }
+            current = SettingsSnapshot(from: homePrefs)
+            sitemapForWatchLabel = homePrefs.sitemapForWatchLabel
+            avatarDisplayImage = AvatarImageHelper.load(for: homePrefs.id)
+            loadedLocalURL = homePrefs.localConnectionConfig.url
+            initial = current
             if let initialValues {
-                applySnapshot(initialValues)
+                current = initialValues
             }
         }
         .task(id: networkTracker.activeConnection) {
@@ -220,14 +206,14 @@ struct HomeSettingsView: View {
         }
         .fullScreenCover(item: $cropSource) { source in
             let targetId = homeId ?? currentActiveHomeId ?? UUID()
-            let bgHex = settingsAvatarColor ?? HomeAvatarView.colorPalette[0]
+            let bgHex = current.avatarColor ?? HomeAvatarView.colorPalette[0]
             let onConfirm: (UIImage) -> Void = { cropped in
                 cropSource = nil
                 selectedPhoto = nil
                 // Hold in memory — written to disk only when the user taps the checkmark.
                 pendingCroppedImage = cropped
                 avatarDisplayImage = Image(uiImage: cropped)
-                settingsAvatarImagePath = AvatarImageHelper.avatarURL(for: targetId).path
+                current.avatarImagePath = AvatarImageHelper.avatarURL(for: targetId).path
                 withAnimation(.easeInOut(duration: 0.2)) {
                     showAvatarPicker = false
                     showColorPickerRow = false
@@ -252,7 +238,7 @@ struct HomeSettingsView: View {
         Section {
             HStack(spacing: 16) {
                 avatarPickerButton
-                TextField("Home name", text: $settingsHomeName)
+                TextField("Home name", text: $current.homeName)
                     .font(.headline)
             }
             .padding(.vertical, 4)
@@ -270,8 +256,8 @@ struct HomeSettingsView: View {
 
     private var avatarPickerButton: some View {
         let displayImage = avatarDisplayImage
-        let iconName = settingsAvatarIconName ?? HomeAvatarView.defaultIconName
-        let avatarColor = Color(hex: settingsAvatarColor ?? "") ?? HomeAvatarView.defaultColor
+        let iconName = current.avatarIconName ?? HomeAvatarView.defaultIconName
+        let avatarColor = Color(hex: current.avatarColor ?? "") ?? HomeAvatarView.defaultColor
         return Button {
             withAnimation(.easeInOut(duration: 0.2)) {
                 if showAvatarPicker {
@@ -283,11 +269,11 @@ struct HomeSettingsView: View {
                     // the color row so the user lands with both rows visible immediately.
                     // Also ensure the icon name is explicit so the selection ring is visible.
                     if avatarDisplayImage == nil {
-                        // loadSettings() found no photo file, so any stored path is stale.
+                        // No photo file found on load, so any stored path is stale.
                         // Clear it so hasPhoto evaluates correctly in the icon picker.
-                        settingsAvatarImagePath = nil
-                        if settingsAvatarIconName == nil {
-                            settingsAvatarIconName = HomeAvatarView.defaultIconName
+                        current.avatarImagePath = nil
+                        if current.avatarIconName == nil {
+                            current.avatarIconName = HomeAvatarView.defaultIconName
                         }
                         showColorPickerRow = true
                     }
@@ -311,23 +297,23 @@ struct HomeSettingsView: View {
     }
 
     private var iconPickerRow: some View {
-        let hasPhoto = avatarDisplayImage != nil || settingsAvatarImagePath != nil
-        let tint = Color(hex: settingsAvatarColor ?? "") ?? HomeAvatarView.defaultColor
+        let hasPhoto = avatarDisplayImage != nil || current.avatarImagePath != nil
+        let tint = Color(hex: current.avatarColor ?? "") ?? HomeAvatarView.defaultColor
         let pinLeading: CGFloat = 8
         let gap: CGFloat = 10 // matches icon HStack spacing
         return ZStack(alignment: .leading) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     ForEach(HomeAvatarView.availableIcons, id: \.self) { icon in
-                        let isSelected = !hasPhoto && (settingsAvatarIconName ?? HomeAvatarView.defaultIconName) == icon
+                        let isSelected = !hasPhoto && (current.avatarIconName ?? HomeAvatarView.defaultIconName) == icon
                         Button {
                             withAnimation(.easeInOut(duration: 0.2)) {
-                                settingsAvatarIconName = icon
+                                current.avatarIconName = icon
                                 // Clear display state only — file stays on disk so the
                                 // photo button can re-open crop without going to the gallery.
                                 avatarDisplayImage = nil
                                 pendingCroppedImage = nil
-                                settingsAvatarImagePath = nil
+                                current.avatarImagePath = nil
                                 showColorPickerRow = true
                             }
                         } label: {
@@ -417,8 +403,8 @@ struct HomeSettingsView: View {
     private var settingsColorPicker: some View {
         // 44×44 frame extends UIColorWell's touch area to fill the glass shape.
         let base = ColorPicker("", selection: Binding(
-            get: { Color(hex: settingsAvatarColor ?? HomeAvatarView.colorPalette[0]) ?? HomeAvatarView.defaultColor },
-            set: { settingsAvatarColor = $0.hexString }
+            get: { Color(hex: current.avatarColor ?? HomeAvatarView.colorPalette[0]) ?? HomeAvatarView.defaultColor },
+            set: { current.avatarColor = $0.hexString }
         ), supportsOpacity: false)
         .labelsHidden()
         .frame(width: 44, height: 44)
@@ -438,9 +424,9 @@ struct HomeSettingsView: View {
                 HStack(spacing: 8) {
                     ForEach(HomeAvatarView.colorPalette, id: \.self) { hex in
                         let color = Color(hex: hex) ?? .blue
-                        let isSelected = settingsAvatarColor == hex
+                        let isSelected = current.avatarColor == hex
                         Button {
-                            settingsAvatarColor = hex
+                            current.avatarColor = hex
                         } label: {
                             Circle()
                                 .fill(color)
@@ -521,54 +507,74 @@ struct HomeSettingsView: View {
             }
         }
         .onChange(of: selectedSSEItemName) { _, newSelection in
-            settingsSSECommandItem = newSelection ?? ""
+            current.sseCommandItem = newSelection ?? ""
         }
         .onAppear {
-            selectedSSEItemName = settingsSSECommandItem
+            selectedSSEItemName = current.sseCommandItem
         }
     }
 
-    @ToolbarContentBuilder
-    private var settingsToolbar: some ToolbarContent {
-        if isDirty {
-            ToolbarItemGroup(placement: .navigationBarTrailing) {
-                Button(action: handleResetTapped) {
-                    Image(systemName: "arrow.counterclockwise")
-                }
-                Button(action: handleSaveTapped) {
-                    Image(systemName: "checkmark")
-                }
-            }
-        }
-        ToolbarItem(placement: .cancellationAction) {
+    @ViewBuilder
+    private func inlineSectionRow(_ section: MenuSection, isVisible: Bool) -> some View {
+        HStack(spacing: 12) {
             Button {
-                savedExplicitly = true // treat explicit X as intentional discard — no dialog
-                dismiss()
+                withAnimation {
+                    if isVisible {
+                        current.sectionOrder.removeAll { $0 == section }
+                    } else {
+                        current.sectionOrder.append(section)
+                    }
+                }
             } label: {
-                Image(systemName: "xmark")
+                Image(systemName: isVisible ? "eye.fill" : "eye.slash")
+                    .foregroundStyle(isVisible ? Color.accentColor : Color.secondary)
+                    .imageScale(.large)
             }
+            .buttonStyle(.plain)
+
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    if current.collapsedSections.contains(section) {
+                        current.collapsedSections.remove(section)
+                    } else {
+                        current.collapsedSections.insert(section)
+                    }
+                }
+            } label: {
+                Image(systemName: "chevron.down.circle")
+                    .rotationEffect(.degrees(current.collapsedSections.contains(section) ? -90 : 0))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 20)
+            }
+            .buttonStyle(.plain)
+
+            Text(section.displayName)
         }
+        .frame(minHeight: 44)
     }
 
-    private func handleResetTapped() {
-        guard let snapshot = initialSnapshot else { return }
+    func onRevert() {
         pendingCroppedImage = nil
         let targetId = homeId ?? currentActiveHomeId ?? UUID()
         avatarDisplayImage = AvatarImageHelper.load(for: targetId)
-        applySnapshot(snapshot)
+        current = initial
     }
 
-    private func handleSaveTapped() {
-        savedExplicitly = true
+    func onCancel() {
+        dismiss()
+    }
+
+    func onSave() {
         // Persisting settings reactively kicks off a real connection attempt to the new local
         // URL (NetworkConnectionService, 500ms debounced) — which, for a self-signed local
         // server, triggers the certificate-trust alert. Showing that heads-up first and
         // deferring the actual save until it's acknowledged avoids the two alerts racing
         // (the local-network one would otherwise flash and immediately get covered).
-        if !settingsDemomode,
-           !settingsLocalConnectionConfiguration.url.isEmpty,
-           settingsLocalConnectionConfiguration.url != loadedLocalURL,
-           settingsLocalConnectionConfiguration.url != localTestedOKURL {
+        if !current.demomode,
+           !current.localConnectionConfig.url.isEmpty,
+           current.localConnectionConfig.url != loadedLocalURL,
+           current.localConnectionConfig.url != localTestedOKURL {
             showLocalNetworkAlert = true
         } else {
             commitSave()
@@ -584,66 +590,13 @@ struct HomeSettingsView: View {
                 AvatarImageHelper.save(data, for: targetId)
             }
             pendingCroppedImage = nil
-        } else if settingsAvatarImagePath == nil, initialSnapshot?.avatarImagePath != nil {
+        } else if current.avatarImagePath == nil, initial.avatarImagePath != nil {
             // User switched from photo to icon — remove the old file.
             AvatarImageHelper.delete(for: targetId)
         }
         Task { @MainActor in
             await saveSettings()
             NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
-        }
-    }
-
-    private func handleSwipeDismiss() {
-        guard isDirty, !savedExplicitly else { return }
-        // Sheet was swiped away with unsaved changes — capture values and notify parent
-        let dm = settingsDemomode, rts = settingsRealTimeSliders
-        let it = settingsIconType, ssb = settingsSortSitemapsBy
-        let sdm = settingsSitemapNameLabelDisplayMode
-        let dmu = settingsDefaultMainUIPath, aawrtc = settingsAlwaysAllowWebRTC
-        let sfw = settingsSitemapForWatch
-        let sfwLabel = sitemaps.first { $0.name == sfw }?.label ?? settingsSitemapForWatchLabel
-        let sfc = settingsSitemapForCarPlay
-        let lcc = settingsLocalConnectionConfiguration
-        let rcc = settingsRemoteConnectionConfiguration
-        let sseCI = settingsSSECommandItem
-        let hn = settingsHomeName
-        let drc = settingsDisableRemoteConnection
-        let aip = settingsAvatarImagePath
-        let ac = settingsAvatarColor
-        let ain = settingsAvatarIconName
-        let capturedHomeId = homeId
-        let snapshot = currentSnapshot
-        onDismissedDirty?(snapshot) {
-            Task {
-                let targetId: UUID
-                if let id = capturedHomeId {
-                    targetId = id
-                } else {
-                    targetId = (await Preferences.shared.currentHomePreferences).id
-                }
-                await Preferences.shared.modifyStoredHome(targetId) { prefs in
-                    prefs.demomode = dm
-                    prefs.realTimeSliders = rts
-                    prefs.iconType = it.rawValue
-                    prefs.sortSitemapsBy = ssb.rawValue
-                    prefs.sitemapNameLabelDisplayMode = sdm
-                    prefs.defaultMainUIPath = dmu
-                    prefs.alwaysAllowWebRTC = aawrtc
-                    prefs.sitemapForWatch = sfw
-                    prefs.sitemapForWatchLabel = sfwLabel
-                    prefs.sitemapForCarPlay = sfc
-                    prefs.localConnectionConfig = lcc
-                    prefs.remoteConnectionConfig = rcc
-                    prefs.sseCommandItem = sseCI
-                    prefs.homeName = hn
-                    prefs.disableRemoteConnection = drc
-                    prefs.avatarImagePath = aip
-                    prefs.avatarColor = ac
-                    prefs.avatarIconName = ain
-                }
-                NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
-            }
         }
     }
 
@@ -668,75 +621,10 @@ struct HomeSettingsView: View {
         }
     }
 
-    private func loadSettings() async {
-        #if !DEBUG
-        Logger.settingsView.debug("Loading Settings")
-        #endif
-        let homePrefs: HomePreferences
-        if let homeId, let stored = await Preferences.shared.storedHomeWithCredentials(forId: homeId) {
-            homePrefs = stored
-        } else {
-            homePrefs = await Preferences.shared.currentHomePreferences
-        }
-        settingsDemomode = homePrefs.demomode
-        settingsRealTimeSliders = homePrefs.realTimeSliders
-        settingsIconType = IconType(rawValue: homePrefs.iconType) ?? .svg
-        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: homePrefs.sortSitemapsBy) ?? .label
-        settingsSitemapNameLabelDisplayMode = homePrefs.sitemapNameLabelDisplayMode
-        settingsDefaultMainUIPath = homePrefs.defaultMainUIPath
-        settingsAlwaysAllowWebRTC = homePrefs.alwaysAllowWebRTC
-        settingsSitemapForWatch = homePrefs.sitemapForWatch
-        settingsSitemapForWatchLabel = homePrefs.sitemapForWatchLabel
-        settingsSitemapForCarPlay = homePrefs.sitemapForCarPlay
-        settingsLocalConnectionConfiguration = homePrefs.localConnectionConfig
-        settingsRemoteConnectionConfiguration = homePrefs.remoteConnectionConfig
-        loadedLocalURL = homePrefs.localConnectionConfig.url
-        settingsHomeName = homePrefs.homeName
-        settingsSSECommandItem = homePrefs.sseCommandItem
-        settingsDisableRemoteConnection = homePrefs.disableRemoteConnection
-        settingsAvatarImagePath = homePrefs.avatarImagePath
-        settingsAvatarColor = homePrefs.avatarColor
-        settingsAvatarIconName = homePrefs.avatarIconName
-        avatarDisplayImage = AvatarImageHelper.load(for: homePrefs.id)
-    }
-
-    private func applySnapshot(_ snapshot: SettingsSnapshot) {
-        settingsDemomode = snapshot.demomode
-        settingsRealTimeSliders = snapshot.realTimeSliders
-        settingsIconType = snapshot.iconType
-        settingsSortSitemapsBy = snapshot.sortSitemapsBy
-        settingsSitemapNameLabelDisplayMode = snapshot.sitemapNameLabelDisplayMode
-        settingsDefaultMainUIPath = snapshot.defaultMainUIPath
-        settingsAlwaysAllowWebRTC = snapshot.alwaysAllowWebRTC
-        settingsSitemapForWatch = snapshot.sitemapForWatch
-        settingsSitemapForCarPlay = snapshot.sitemapForCarPlay
-        settingsLocalConnectionConfiguration = snapshot.localConnectionConfig
-        settingsRemoteConnectionConfiguration = snapshot.remoteConnectionConfig
-        settingsSSECommandItem = snapshot.sseCommandItem
-        settingsHomeName = snapshot.homeName
-        settingsDisableRemoteConnection = snapshot.disableRemoteConnection
-        settingsAvatarImagePath = snapshot.avatarImagePath
-        settingsAvatarColor = snapshot.avatarColor
-        settingsAvatarIconName = snapshot.avatarIconName
-    }
-
-    func saveSettings() async {
-        let sitemapLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? settingsSitemapForWatchLabel
+    private func saveSettings() async {
+        let snapshot = current
+        let sitemapLabel = sitemaps.first { $0.name == snapshot.sitemapForWatch }?.label ?? sitemapForWatchLabel
         let capturedHomeId = homeId
-        let dm = settingsDemomode, rts = settingsRealTimeSliders
-        let it = settingsIconType, ssb = settingsSortSitemapsBy
-        let sdm = settingsSitemapNameLabelDisplayMode
-        let dmu = settingsDefaultMainUIPath, aawrtc = settingsAlwaysAllowWebRTC
-        let sfw = settingsSitemapForWatch
-        let sfc = settingsSitemapForCarPlay
-        let lcc = settingsLocalConnectionConfiguration
-        let rcc = settingsRemoteConnectionConfiguration
-        let sseCI = settingsSSECommandItem
-        let hn = settingsHomeName
-        let drc = settingsDisableRemoteConnection
-        let aip = settingsAvatarImagePath
-        let ac = settingsAvatarColor
-        let ain = settingsAvatarIconName
         let targetId: UUID
         if let id = capturedHomeId {
             targetId = id
@@ -744,24 +632,63 @@ struct HomeSettingsView: View {
             targetId = (await Preferences.shared.currentHomePreferences).id
         }
         await Preferences.shared.modifyStoredHome(targetId) { homePreferences in
-            homePreferences.demomode = dm
-            homePreferences.realTimeSliders = rts
-            homePreferences.iconType = it.rawValue
-            homePreferences.sortSitemapsBy = ssb.rawValue
-            homePreferences.sitemapNameLabelDisplayMode = sdm
-            homePreferences.defaultMainUIPath = dmu
-            homePreferences.alwaysAllowWebRTC = aawrtc
-            homePreferences.sitemapForWatch = sfw
+            homePreferences.demomode = snapshot.demomode
+            homePreferences.realTimeSliders = snapshot.realTimeSliders
+            homePreferences.iconType = snapshot.iconType.rawValue
+            homePreferences.sortSitemapsBy = snapshot.sortSitemapsBy.rawValue
+            homePreferences.sitemapNameLabelDisplayMode = snapshot.sitemapNameLabelDisplayMode
+            homePreferences.defaultMainUIPath = snapshot.defaultMainUIPath
+            homePreferences.alwaysAllowWebRTC = snapshot.alwaysAllowWebRTC
+            homePreferences.sitemapForWatch = snapshot.sitemapForWatch
             homePreferences.sitemapForWatchLabel = sitemapLabel
-            homePreferences.sitemapForCarPlay = sfc
-            homePreferences.localConnectionConfig = lcc
-            homePreferences.remoteConnectionConfig = rcc
-            homePreferences.sseCommandItem = sseCI
-            homePreferences.homeName = hn
-            homePreferences.disableRemoteConnection = drc
-            homePreferences.avatarImagePath = aip
-            homePreferences.avatarColor = ac
-            homePreferences.avatarIconName = ain
+            homePreferences.sitemapForCarPlay = snapshot.sitemapForCarPlay
+            homePreferences.localConnectionConfig = snapshot.localConnectionConfig
+            homePreferences.remoteConnectionConfig = snapshot.remoteConnectionConfig
+            homePreferences.sseCommandItem = snapshot.sseCommandItem
+            homePreferences.homeName = snapshot.homeName
+            homePreferences.disableRemoteConnection = snapshot.disableRemoteConnection
+            homePreferences.avatarImagePath = snapshot.avatarImagePath
+            homePreferences.avatarColor = snapshot.avatarColor
+            homePreferences.avatarIconName = snapshot.avatarIconName
+            homePreferences.sectionOrder = snapshot.sectionOrder
+            homePreferences.collapsedSections = snapshot.collapsedSections
+        }
+    }
+}
+
+extension HomeSettingsView.SettingsSnapshot {
+    /// Populates a snapshot from a `HomePreferences` value (synchronous — prefs are already fetched).
+    init(from homePrefs: HomePreferences) {
+        demomode = homePrefs.demomode
+        realTimeSliders = homePrefs.realTimeSliders
+        iconType = IconType(rawValue: homePrefs.iconType) ?? .svg
+        sortSitemapsBy = SortSitemapsOrder(rawValue: homePrefs.sortSitemapsBy) ?? .label
+        sitemapNameLabelDisplayMode = homePrefs.sitemapNameLabelDisplayMode
+        defaultMainUIPath = homePrefs.defaultMainUIPath
+        alwaysAllowWebRTC = homePrefs.alwaysAllowWebRTC
+        sitemapForWatch = homePrefs.sitemapForWatch
+        sitemapForCarPlay = homePrefs.sitemapForCarPlay
+        localConnectionConfig = homePrefs.localConnectionConfig
+        remoteConnectionConfig = homePrefs.remoteConnectionConfig
+        sseCommandItem = homePrefs.sseCommandItem
+        homeName = homePrefs.homeName
+        disableRemoteConnection = homePrefs.disableRemoteConnection
+        avatarImagePath = homePrefs.avatarImagePath
+        avatarColor = homePrefs.avatarColor
+        avatarIconName = homePrefs.avatarIconName
+        sectionOrder = homePrefs.sectionOrder
+        collapsedSections = homePrefs.collapsedSections
+        // hasPendingCrop defaults to false — no in-flight crop on initial load
+    }
+}
+
+extension MenuSection {
+    var displayName: String {
+        switch self {
+        case .mainUI: return String(localized: "Main UI")
+        case .sitemaps: return String(localized: "Sitemaps")
+        case .tiles: return String(localized: "Tiles")
+        case .system: return String(localized: "System & App")
         }
     }
 }

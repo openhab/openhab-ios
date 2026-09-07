@@ -120,15 +120,15 @@ struct ToolbarMenu: View {
         }
     }
 
-    /// Mirrors the active home's persisted section-expansion flags into local
-    /// `@State`, defaulting to expanded when a home has no stored value yet.
+    /// Mirrors the active home's persisted section-expansion state into local `@State`.
     private func loadExpansionState() async {
         let prefs = await Preferences.shared.currentHomePreferences
         cachedHomePrefs = prefs
-        isMainUIExpanded = prefs.isMainUIExpanded ?? true
-        isSitemapsExpanded = prefs.isSitemapsExpanded ?? true
-        isTilesExpanded = prefs.isTilesExpanded ?? true
-        isSystemExpanded = prefs.isSystemExpanded ?? true
+        let collapsed = prefs.collapsedSections
+        isMainUIExpanded = !collapsed.contains(.mainUI)
+        isSitemapsExpanded = !collapsed.contains(.sitemaps)
+        isTilesExpanded = !collapsed.contains(.tiles)
+        isSystemExpanded = !collapsed.contains(.system)
         sitemapForWatch = prefs.sitemapForWatch
         sitemapForCarPlay = prefs.sitemapForCarPlay
         headerDetailsHidden = false
@@ -249,8 +249,7 @@ struct ToolbarMenu: View {
     @ViewBuilder
     private func systemMenu() -> some View {
         if let prefs = cachedHomePrefs,
-           Preferences.getNotificationConnection(of: prefs) != nil,
-           !prefs.demomode {
+           Preferences.getNotificationConnection(of: prefs) != nil {
             systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
         }
         systemRow(symbol: .gear, label: String(localized: "App Settings")) {
@@ -327,6 +326,48 @@ struct ToolbarMenu: View {
         }
     }
 
+    @ViewBuilder
+    private func menuSection(_ section: MenuSection, isLast: Bool) -> some View {
+        switch section {
+        case .mainUI:
+            collapsibleSection(
+                title: "Main UI",
+                isExpanded: expansionBinding($isMainUIExpanded) { prefs, v in prefs.setSection(.mainUI, expanded: v) },
+                showDivider: !isLast
+            ) {
+                mainUIMenu()
+            }
+        case .sitemaps:
+            collapsibleSection(
+                title: "Sitemaps",
+                isExpanded: expansionBinding($isSitemapsExpanded) { prefs, v in prefs.setSection(.sitemaps, expanded: v) },
+                isLoading: menuData.isLoading,
+                isEmpty: menuData.sitemaps.isEmpty,
+                showDivider: !isLast
+            ) {
+                sitemapsMenu()
+            }
+        case .tiles:
+            collapsibleSection(
+                title: "Tiles",
+                isExpanded: expansionBinding($isTilesExpanded) { prefs, v in prefs.setSection(.tiles, expanded: v) },
+                isLoading: menuData.isLoading,
+                isEmpty: menuData.uiTiles.isEmpty,
+                showDivider: !isLast
+            ) {
+                tilesMenu()
+            }
+        case .system:
+            collapsibleSection(
+                title: "System & App",
+                isExpanded: expansionBinding($isSystemExpanded) { prefs, v in prefs.setSection(.system, expanded: v) },
+                showDivider: !isLast
+            ) {
+                systemMenu()
+            }
+        }
+    }
+
     private func menuContent(height: CGFloat) -> some View {
         VStack(spacing: 0) {
             let scrollView = ScrollView {
@@ -345,41 +386,9 @@ struct ToolbarMenu: View {
                     }
                     .animation(Self.sectionAnimation, value: isHomeExpanded)
 
-                    // Main UI: Home + sidebar pages
-                    collapsibleSection(
-                        title: "Main UI",
-                        isExpanded: expansionBinding($isMainUIExpanded) { prefs, v in prefs.isMainUIExpanded = v }
-                    ) {
-                        mainUIMenu()
-                    }
-
-                    // Sitemaps
-                    collapsibleSection(
-                        title: "Sitemaps",
-                        isExpanded: expansionBinding($isSitemapsExpanded) { prefs, v in prefs.isSitemapsExpanded = v },
-                        isLoading: menuData.isLoading,
-                        isEmpty: menuData.sitemaps.isEmpty
-                    ) {
-                        sitemapsMenu()
-                    }
-
-                    // Tiles
-                    collapsibleSection(
-                        title: "Tiles",
-                        isExpanded: expansionBinding($isTilesExpanded) { prefs, v in prefs.isTilesExpanded = v },
-                        isLoading: menuData.isLoading,
-                        isEmpty: menuData.uiTiles.isEmpty
-                    ) {
-                        tilesMenu()
-                    }
-
-                    // System & App
-                    collapsibleSection(
-                        title: "System & App",
-                        isExpanded: expansionBinding($isSystemExpanded) { prefs, v in prefs.isSystemExpanded = v },
-                        showDivider: false
-                    ) {
-                        systemMenu()
+                    let sectionOrder = cachedHomePrefs?.sectionOrder ?? MenuSection.allCases
+                    ForEach(sectionOrder, id: \.self) { section in
+                        menuSection(section, isLast: section == sectionOrder.last)
                     }
                 }
             }

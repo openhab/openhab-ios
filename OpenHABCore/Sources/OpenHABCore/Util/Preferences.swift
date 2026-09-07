@@ -142,13 +142,6 @@ public struct HomePreferences: Codable, Equatable, Sendable {
     public var sitemapForWatchLabel = "watch"
     public var homeName = "Home#1"
     public var sseCommandItem = ""
-    // Toolbar menu section expansion, per home. Optional so that decoding data
-    // stored before these fields existed yields `nil` (treated as expanded)
-    // instead of throwing `keyNotFound` and discarding the whole home.
-    public var isMainUIExpanded: Bool?
-    public var isSitemapsExpanded: Bool?
-    public var isTilesExpanded: Bool?
-    public var isSystemExpanded: Bool?
     public var sitemapForCarPlay = ""
 
     // Avatar image stored as a file path, never raw Data in UserDefaults.
@@ -159,22 +152,42 @@ public struct HomePreferences: Codable, Equatable, Sendable {
     public var avatarColor: String?
     public var avatarIconName: String?
 
-    // Backing store for the computed `sectionOrder` property. Optional so that
-    // old stored data missing this field decodes as nil (resolves to default order).
-    private var sectionOrderStorage: [MenuSection]?
+    // Visible sections in order, stored as raw strings so that renamed or removed
+    // sections are silently dropped on decode rather than failing. nil → all sections
+    // in canonical order. Visibility is encoded by presence: absent = hidden.
+    private var sectionOrderStorage: [String]?
 
-    /// The display order of the toolbar menu sections for this home.
-    /// Defaults to `MenuSection.allCases` when not explicitly set.
+    /// The visible toolbar menu sections for this home, in display order.
+    /// Sections absent from the array are hidden. Defaults to all sections in canonical order.
     public var sectionOrder: [MenuSection] {
-        get { sectionOrderStorage ?? MenuSection.allCases }
-        set { sectionOrderStorage = newValue }
+        get {
+            guard let storage = sectionOrderStorage else { return MenuSection.allCases }
+            return storage.compactMap { MenuSection(rawValue: $0) }
+        }
+        set { sectionOrderStorage = newValue.map(\.rawValue) }
     }
 
-    // Per-section visibility. Optional so a missing key decodes as nil (visible = true).
-    public var isMainUIVisible: Bool?
-    public var isSitemapsVisible: Bool?
-    public var isTilesVisible: Bool?
-    public var isSystemVisible: Bool?
+    // Collapsed (not expanded) sections stored as raw strings. nil or empty → all expanded.
+    // Storing collapsed (not expanded) means new sections default to expanded automatically,
+    // and removed sections in the set are silently dropped via compactMap on decode.
+    private var collapsedSectionsStorage: Set<String>?
+
+    /// The sections currently collapsed in the toolbar menu. Defaults to none (all expanded).
+    public var collapsedSections: Set<MenuSection> {
+        get {
+            guard let storage = collapsedSectionsStorage else { return [] }
+            return Set(storage.compactMap { MenuSection(rawValue: $0) })
+        }
+        set { collapsedSectionsStorage = Set(newValue.map(\.rawValue)) }
+    }
+
+    /// Sets or clears `section` in the collapsed set.
+    public mutating func setSection(_ section: MenuSection, expanded: Bool) {
+        var collapsed = collapsedSections
+        if expanded { collapsed.remove(section) } else { collapsed.insert(section) }
+        collapsedSections = collapsed
+    }
+
 
     // When true, the remote URL is excluded from data-connection attempts.
     // Independent of `supportsNotifications` (the openHAB Cloud push toggle).
@@ -218,21 +231,12 @@ public struct HomePreferences: Codable, Equatable, Sendable {
         sitemapForWatchLabel = try container.decodeIfPresent(String.self, forKey: .sitemapForWatchLabel) ?? "watch"
         homeName = try container.decodeIfPresent(String.self, forKey: .homeName) ?? "Home#1"
         sseCommandItem = try container.decodeIfPresent(String.self, forKey: .sseCommandItem) ?? ""
-        // Fields added on this branch. Optional, so a missing key decodes as nil (the documented
-        // "treat as unset/expanded" behavior) rather than throwing keyNotFound and discarding the home.
+        // Fields added on this branch. Optional — missing key decodes as nil.
         sitemapNameLabelDisplayModeStorage = try container.decodeIfPresent(SitemapNameLabelDisplayMode.self, forKey: .sitemapNameLabelDisplayModeStorage)
-        isMainUIExpanded = try container.decodeIfPresent(Bool.self, forKey: .isMainUIExpanded)
-        isSitemapsExpanded = try container.decodeIfPresent(Bool.self, forKey: .isSitemapsExpanded)
-        isTilesExpanded = try container.decodeIfPresent(Bool.self, forKey: .isTilesExpanded)
-        isSystemExpanded = try container.decodeIfPresent(Bool.self, forKey: .isSystemExpanded)
         sitemapForCarPlay = try container.decodeIfPresent(String.self, forKey: .sitemapForCarPlay) ?? ""
-        // Fields added for menu improvements. Optional — missing key decodes as nil.
         avatarImagePath = try container.decodeIfPresent(String.self, forKey: .avatarImagePath)
-        sectionOrderStorage = try container.decodeIfPresent([MenuSection].self, forKey: .sectionOrderStorage)
-        isMainUIVisible = try container.decodeIfPresent(Bool.self, forKey: .isMainUIVisible)
-        isSitemapsVisible = try container.decodeIfPresent(Bool.self, forKey: .isSitemapsVisible)
-        isTilesVisible = try container.decodeIfPresent(Bool.self, forKey: .isTilesVisible)
-        isSystemVisible = try container.decodeIfPresent(Bool.self, forKey: .isSystemVisible)
+        sectionOrderStorage = try container.decodeIfPresent([String].self, forKey: .sectionOrderStorage)
+        collapsedSectionsStorage = try container.decodeIfPresent(Set<String>.self, forKey: .collapsedSectionsStorage)
         disableRemoteConnection = try container.decodeIfPresent(Bool.self, forKey: .disableRemoteConnection) ?? false
         avatarColor = try container.decodeIfPresent(String.self, forKey: .avatarColor)
         avatarIconName = try container.decodeIfPresent(String.self, forKey: .avatarIconName)
@@ -858,7 +862,7 @@ public extension Preferences {
     }
 
     static func getNotificationConnection(of homeConfig: HomePreferences) -> ConnectionConfiguration? {
-        getNotificationConnection(of: [homeConfig.remoteConnectionConfig])
+        getNotificationConnection(of: homeConfig.trackedConnections)
     }
 
     /// this will support mutliple connection configs, right now we just pass in the remote config
