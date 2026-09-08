@@ -65,6 +65,9 @@ struct InlineHomePickerView: View {
             actionBar
         }
         .task { await reloadHomes() }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
+            Task { await reloadHomes() }
+        }
         .alert(
             String(localized: "Delete '\(homeNameForDeleteAlert)'?"),
             isPresented: $showingDeleteAlert
@@ -166,6 +169,7 @@ struct InlineHomePickerView: View {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .moveDisabled(homes.count < 2)
             }
             .onMove { source, destination in
                 homes.move(fromOffsets: source, toOffset: destination)
@@ -211,17 +215,18 @@ struct InlineHomePickerView: View {
                 connectionSymbolsView(for: prefs)
             }
 
-            // Active home cannot be deleted; show a dimmed trash to keep column alignment.
-            Button(action: {
-                homeNameForDeleteAlert = homeName
-                homeForDeleteAlert = home
-                showingDeleteAlert = true
-            }) {
-                Image(systemSymbol: .trash)
-                    .foregroundStyle(isActive ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.red))
+            if homes.count >= 2 {
+                Button(action: {
+                    homeNameForDeleteAlert = homeName
+                    homeForDeleteAlert = home
+                    showingDeleteAlert = true
+                }) {
+                    Image(systemSymbol: .trash)
+                        .foregroundStyle(isActive ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.red))
+                }
+                .buttonStyle(.plain)
+                .disabled(isActive)
             }
-            .buttonStyle(.plain)
-            .disabled(isActive)
         }
         .frame(height: Self.rowHeight)
         .padding(.horizontal, 16)

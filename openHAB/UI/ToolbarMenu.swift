@@ -118,6 +118,11 @@ struct ToolbarMenu: View {
                 HomeSettingsView()
             }
         }
+        .task {
+            for await prefs in await Preferences.shared.currentHomePreferencesStream {
+                cachedHomePrefs = prefs
+            }
+        }
     }
 
     /// Mirrors the active home's persisted section-expansion state into local `@State`.
