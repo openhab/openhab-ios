@@ -16,6 +16,42 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
+// MARK: - Button-area width alignment
+
+private struct SegmentedButtonAreaWidthKey: PreferenceKey {
+    static var defaultValue: CGFloat { 0 }
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
+    }
+}
+
+private struct AlignSegmentedButtonAreasModifier: ViewModifier {
+    @State private var maxWidth: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .onPreferenceChange(SegmentedButtonAreaWidthKey.self) { maxWidth = $0 }
+            .environment(\.segmentedButtonAreaMaxWidth, maxWidth)
+    }
+}
+
+private struct ButtonAreaWidthModifier: ViewModifier {
+    @Environment(\.segmentedButtonAreaMaxWidth) private var maxWidth
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(key: SegmentedButtonAreaWidthKey.self, value: geo.size.width)
+                }
+            )
+            .frame(width: maxWidth > 0 ? maxWidth : nil, alignment: .trailing)
+    }
+}
+
+// MARK: -
+
 private struct SegmentedRowContent: View {
     let input: SegmentedRowInput
     let widgetVersion: Int
@@ -65,7 +101,7 @@ private struct SegmentedRowContent: View {
                         Spacer(minLength: 8)
                     }
                     pressReleaseButtons(mappings: input.mappings)
-                        .fixedSize(horizontal: true, vertical: false)
+                        .buttonAreaWidth()
                         .padding(.leading, 8)
 
                 } else if input.mappings.count == 1 {
@@ -73,7 +109,7 @@ private struct SegmentedRowContent: View {
                         Spacer(minLength: 8)
                     }
                     singleMappingButton(displayState: input.displayState, mappings: input.mappings, widgetVersion: widgetVersion)
-                        .fixedSize(horizontal: true, vertical: false)
+                        .buttonAreaWidth()
                         .padding(.leading, 8)
                 } else {
                     if noInputLabelValue {
@@ -83,6 +119,7 @@ private struct SegmentedRowContent: View {
                     // Button-based segmented control with animated selection indicator
                     segmentedButtons(mappings: input.mappings, selectedIndex: selectedIndex, displayState: input.displayState, widgetVersion: widgetVersion)
                         .frame(minWidth: 75)
+                        .buttonAreaWidth()
                         .padding(.leading, leadingPadding)
                         .layoutPriority(1)
                 }
@@ -401,6 +438,7 @@ struct PreviewList<Content: View>: View {
             content()
                 .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
         }
+        .alignSegmentedButtonAreas()
         .listStyle(.plain)
         .listRowSpacing(0)
         .environment(\.defaultMinListRowHeight, 32)
@@ -421,6 +459,22 @@ private extension SegmentedRowView {
             icon: icon,
             valueText: detailLabel
         ))
+    }
+}
+
+extension EnvironmentValues {
+    @Entry var segmentedButtonAreaMaxWidth: CGFloat = 0
+}
+
+extension View {
+    func alignSegmentedButtonAreas() -> some View {
+        modifier(AlignSegmentedButtonAreasModifier())
+    }
+}
+
+private extension View {
+    func buttonAreaWidth() -> some View {
+        modifier(ButtonAreaWidthModifier())
     }
 }
 

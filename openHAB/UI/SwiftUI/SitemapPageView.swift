@@ -112,6 +112,7 @@ struct SitemapPageView: View {
                     .padding([.trailing, .bottom], 16)
                     .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
+                .alignSegmentedButtonAreas()
             }
         }
     }
