@@ -458,10 +458,11 @@ struct ToolbarMenu: View {
                         HomeAvatarView(photo: nil, iconName: HomeAvatarView.defaultIconName,
                                        color: HomeAvatarView.defaultColor, size: 28).hidden()
                         if !headerDetailsHidden, let homePrefs {
+                            let mode = homePrefs.avatarMode
                             HomeAvatarView(
-                                photo: AvatarImageHelper.load(for: homePrefs.id),
-                                iconName: homePrefs.avatarIconName ?? HomeAvatarView.defaultIconName,
-                                color: Color(hex: homePrefs.avatarColor ?? "") ?? HomeAvatarView.defaultColor,
+                                photo: AvatarImageHelper.renderedAvatar(for: homePrefs.id, mode: mode),
+                                iconName: mode?.iconName ?? HomeAvatarView.defaultIconName,
+                                color: Color(hex: mode?.colorHex ?? "") ?? HomeAvatarView.defaultColor,
                                 size: 28
                             )
                             .transition(.opacity)

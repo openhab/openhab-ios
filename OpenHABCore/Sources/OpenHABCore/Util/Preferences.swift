@@ -113,6 +113,68 @@ public struct UserDefaultObject<T: Codable & Sendable> {
     }
 }
 
+/// How a home's avatar is represented. The single source of truth for both icon
+/// and photo modes — replaces the three separate optional fields (`avatarIconName`,
+/// `avatarColor`, `avatarImagePath`) with an explicit discriminated union.
+///
+/// Crop parameters use plain `Double` scalars so this type lives in `OpenHABCore`
+/// without a CoreGraphics dependency. The app target converts to `CGPoint`/`CGFloat`
+/// in `AvatarImageHelper`.
+///
+/// `nil` in `HomePreferences.avatarMode` means "use default icon".
+public enum AvatarMode: Equatable, Sendable {
+    /// SF Symbol icon with a background color (hex string).
+    case icon(name: String, color: String)
+    /// Custom photo. Crop is stored as a square in image-point space:
+    /// `(originX, originY)` is the top-left corner of the crop, `size` is
+    /// the side length — all in the original image's logical-pixel coordinate
+    /// system. `background` is a hex color string for the region outside the photo.
+    case image(originX: Double, originY: Double, size: Double, background: String)
+}
+
+extension AvatarMode: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case type, name, color, originX, originY, size, background
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .icon(let name, let color):
+            try c.encode("icon", forKey: .type)
+            try c.encode(name, forKey: .name)
+            try c.encode(color, forKey: .color)
+        case .image(let x, let y, let s, let bg):
+            try c.encode("image", forKey: .type)
+            try c.encode(x, forKey: .originX)
+            try c.encode(y, forKey: .originY)
+            try c.encode(s, forKey: .size)
+            try c.encode(bg, forKey: .background)
+        }
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let typeName = try c.decode(String.self, forKey: .type)
+        switch typeName {
+        case "icon":
+            self = .icon(
+                name: try c.decode(String.self, forKey: .name),
+                color: try c.decode(String.self, forKey: .color)
+            )
+        case "image":
+            self = .image(
+                originX: try c.decode(Double.self, forKey: .originX),
+                originY: try c.decode(Double.self, forKey: .originY),
+                size: try c.decode(Double.self, forKey: .size),
+                background: try c.decode(String.self, forKey: .background)
+            )
+        default:
+            throw DecodingError.dataCorruptedError(forKey: .type, in: c, debugDescription: "Unknown AvatarMode: \(typeName)")
+        }
+    }
+}
+
 public struct HomePreferences: Codable, Equatable, Sendable {
     public let id: UUID
     public var defaultView = "web"
@@ -144,13 +206,9 @@ public struct HomePreferences: Codable, Equatable, Sendable {
     public var sseCommandItem = ""
     public var sitemapForCarPlay = ""
 
-    // Avatar image stored as a file path, never raw Data in UserDefaults.
-    // Optional so a missing key in old stored data decodes as nil (no avatar).
-    public var avatarImagePath: String?
-    // Hex color string and SF Symbol name for the avatar placeholder.
-    // Optional so missing keys in old stored data decode as nil (use defaults).
-    public var avatarColor: String?
-    public var avatarIconName: String?
+    /// How the home's avatar is displayed. `nil` means "use default icon".
+    /// Old data is migrated from the legacy `avatarIconName`/`avatarColor` fields in `init(from:)`.
+    public var avatarMode: AvatarMode?
 
     // Visible sections in order, stored as raw strings so that renamed or removed
     // sections are silently dropped on decode rather than failing. nil → all sections
@@ -234,12 +292,24 @@ public struct HomePreferences: Codable, Equatable, Sendable {
         // Fields added on this branch. Optional — missing key decodes as nil.
         sitemapNameLabelDisplayModeStorage = try container.decodeIfPresent(SitemapNameLabelDisplayMode.self, forKey: .sitemapNameLabelDisplayModeStorage)
         sitemapForCarPlay = try container.decodeIfPresent(String.self, forKey: .sitemapForCarPlay) ?? ""
-        avatarImagePath = try container.decodeIfPresent(String.self, forKey: .avatarImagePath)
         sectionOrderStorage = try container.decodeIfPresent([String].self, forKey: .sectionOrderStorage)
         collapsedSectionsStorage = try container.decodeIfPresent(Set<String>.self, forKey: .collapsedSectionsStorage)
         disableRemoteConnection = try container.decodeIfPresent(Bool.self, forKey: .disableRemoteConnection) ?? false
-        avatarColor = try container.decodeIfPresent(String.self, forKey: .avatarColor)
-        avatarIconName = try container.decodeIfPresent(String.self, forKey: .avatarIconName)
+        // Try new field first; fall back to migrating legacy fields.
+        if let mode = try container.decodeIfPresent(AvatarMode.self, forKey: .avatarMode) {
+            avatarMode = mode
+        } else {
+            // Migration: avatarIconName + avatarColor → .icon; avatarImagePath had no
+            // recoverable crop settings so photo mode can't be migrated.
+            enum LegacyKeys: String, CodingKey { case avatarIconName, avatarColor }
+            let legacy = try decoder.container(keyedBy: LegacyKeys.self)
+            if let iconName = try legacy.decodeIfPresent(String.self, forKey: .avatarIconName) {
+                let color = try legacy.decodeIfPresent(String.self, forKey: .avatarColor)
+                avatarMode = .icon(name: iconName, color: color ?? "#3478F6")
+            } else {
+                avatarMode = nil
+            }
+        }
     }
 }
 

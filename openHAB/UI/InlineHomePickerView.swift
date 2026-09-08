@@ -280,10 +280,11 @@ struct InlineHomePickerView: View {
     @ViewBuilder
     private func avatarView(for homeId: UUID, isActive: Bool) -> some View {
         let prefs = cachedHomesWithCreds[homeId]
+        let mode = prefs?.avatarMode
         HomeAvatarView(
-            photo: AvatarImageHelper.load(for: homeId),
-            iconName: prefs?.avatarIconName ?? HomeAvatarView.defaultIconName,
-            color: Color(hex: prefs?.avatarColor ?? "") ?? HomeAvatarView.defaultColor,
+            photo: AvatarImageHelper.renderedAvatar(for: homeId, mode: mode),
+            iconName: mode?.iconName ?? HomeAvatarView.defaultIconName,
+            color: Color(hex: mode?.colorHex ?? "") ?? HomeAvatarView.defaultColor,
             size: 28,
             isActive: isActive
         )
@@ -322,16 +323,21 @@ struct InlineHomePickerView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         } else {
+            // Two fixed-width slots so the gear button never shifts position:
+            //   Slot 1 — wifi (always reserved, invisible when URL is empty)
+            //   Slot 2 — cloud (always reserved, invisible when remote is disabled)
             let symbols = Self.connectionSymbols(for: prefs)
-            if !symbols.isEmpty {
-                HStack(spacing: 4) {
-                    ForEach(symbols, id: \.self) { symbol in
-                        symbolImage(for: symbol)
-                    }
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            let hasWifi = symbols.contains(.wifi)
+            let cloudSymbol = symbols.first { $0 == .cloudFill || $0 == .cloudSlash }
+            let hasCloud = cloudSymbol != nil
+            HStack(spacing: 4) {
+                symbolImage(for: .wifi)
+                    .opacity(hasWifi ? 1 : 0)
+                symbolImage(for: cloudSymbol ?? .cloudFill)
+                    .opacity(hasCloud ? 1 : 0)
             }
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 

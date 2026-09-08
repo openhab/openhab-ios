@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import PhotosUI
 import SwiftUI
 
@@ -17,12 +18,18 @@ import SwiftUI
 /// download is in progress. Pan with drag, zoom with pinch. The image may be
 /// smaller than the crop circle; the chosen background color fills the gap.
 /// The photo library button lets the user re-pick without leaving the view.
-/// `onConfirm` receives a composited UIImage (background + image); `onCancel`
-/// dismisses without changes.
+///
+/// `onConfirm` receives the original (unmodified) `UIImage` plus the crop
+/// parameters as an `AvatarMode.image(...)` value. The caller stores the
+/// original and the crop params separately — no destructive compositing here.
+/// `onCancel` dismisses without changes.
 struct CropImageView: View {
     let initialPhotoItem: PhotosPickerItem?
-    let onConfirm: (UIImage) -> Void
+    let onConfirm: (UIImage, AvatarMode) -> Void
     let onCancel: () -> Void
+    /// When set, `setupLayout` restores the previous pan/zoom so the user sees
+    /// the same crop position they chose last time.
+    let initialAvatarMode: AvatarMode?
 
     @State private var currentImage: UIImage?
     @State private var isLoading = true
@@ -45,23 +52,29 @@ struct CropImageView: View {
 
     init(photoItem: PhotosPickerItem,
          initialBackgroundHex: String = HomeAvatarView.colorPalette[0],
-         onConfirm: @escaping (UIImage) -> Void,
+         onConfirm: @escaping (UIImage, AvatarMode) -> Void,
          onCancel: @escaping () -> Void) {
         self.initialPhotoItem = photoItem
+        self.initialAvatarMode = nil
         _backgroundHex = State(initialValue: initialBackgroundHex)
         self.onConfirm = onConfirm
         self.onCancel = onCancel
     }
 
     /// Opens the crop view pre-loaded with an existing `UIImage` — no async photo loading.
+    /// Pass `initialMode` to restore the previous crop position; omit to start at fit-to-circle.
     init(image: UIImage,
-         initialBackgroundHex: String = HomeAvatarView.colorPalette[0],
-         onConfirm: @escaping (UIImage) -> Void,
+         initialMode: AvatarMode? = nil,
+         onConfirm: @escaping (UIImage, AvatarMode) -> Void,
          onCancel: @escaping () -> Void) {
         self.initialPhotoItem = nil
+        self.initialAvatarMode = initialMode
         _currentImage = State(initialValue: image)
         _isLoading = State(initialValue: false)
-        _backgroundHex = State(initialValue: initialBackgroundHex)
+        let bgHex: String
+        if case .image(_, _, _, let bg) = initialMode { bgHex = bg }
+        else { bgHex = HomeAvatarView.colorPalette[0] }
+        _backgroundHex = State(initialValue: bgHex)
         self.onConfirm = onConfirm
         self.onCancel = onCancel
     }
@@ -334,11 +347,29 @@ struct CropImageView: View {
         fittedSize = aspect > cAspect
             ? CGSize(width: containerSize.width, height: containerSize.width / aspect)
             : CGSize(width: containerSize.height * aspect, height: containerSize.height)
-        let initialScale = min(cropDiameter / fittedSize.width, cropDiameter / fittedSize.height)
-        scale = max(0.1, initialScale)
-        lastScale = scale
-        offset = .zero
-        lastOffset = .zero
+
+        if case .image(let ox, let oy, let sz, _) = initialAvatarMode, sz > 0 {
+            // Restore stored crop: reverse-engineer the scale and offset that produced it.
+            // ptsPerDisplayPt = sz / cropDiameter  →  dw = img.width / ptsPerDisplayPt
+            let dw = img.size.width * cropDiameter / CGFloat(sz)
+            let dh = img.size.height * cropDiameter / CGFloat(sz)
+            scale = dw / fittedSize.width
+            lastScale = scale
+            // imageInCropX = -ox * cropDiameter / sz;  offset = imageInCropX + dw/2 - cropDiameter/2
+            let imageInCropX = -CGFloat(ox) * cropDiameter / CGFloat(sz)
+            let imageInCropY = -CGFloat(oy) * cropDiameter / CGFloat(sz)
+            offset = CGSize(
+                width: imageInCropX + dw / 2 - cropDiameter / 2,
+                height: imageInCropY + dh / 2 - cropDiameter / 2
+            )
+            lastOffset = offset
+        } else {
+            let initialScale = min(cropDiameter / fittedSize.width, cropDiameter / fittedSize.height)
+            scale = max(0.1, initialScale)
+            lastScale = scale
+            offset = .zero
+            lastOffset = .zero
+        }
     }
 
     // MARK: - Clamping
@@ -350,23 +381,29 @@ struct CropImageView: View {
         )
     }
 
-    // MARK: - Compositing crop
+    // MARK: - Crop parameter extraction
 
     private func crop() {
         guard let img = currentImage else { return }
-        let dw = fittedSize.width * scale
+        let dw = fittedSize.width * scale  // displayed image width (display pts)
         let dh = fittedSize.height * scale
         let imageInCropX = offset.width - dw / 2 + cropDiameter / 2
         let imageInCropY = offset.height - dh / 2 + cropDiameter / 2
 
-        let canvasSize = CGSize(width: cropDiameter, height: cropDiameter)
-        let renderer = UIGraphicsImageRenderer(size: canvasSize)
-        let result = renderer.image { _ in
-            UIColor(backgroundColor).setFill()
-            UIRectFill(CGRect(origin: .zero, size: canvasSize))
-            img.draw(in: CGRect(x: imageInCropX, y: imageInCropY, width: dw, height: dh))
-        }
-        onConfirm(result)
+        // Convert from display-space to image-space (image points per display point).
+        // ptsPerDisplayPt is uniform because fittedSize preserves the aspect ratio.
+        let ptsPerDisplayPt = img.size.width / dw
+        let originX = -imageInCropX * ptsPerDisplayPt
+        let originY = -imageInCropY * ptsPerDisplayPt
+        let cropSize = cropDiameter * ptsPerDisplayPt  // side length of square in image pts
+
+        let mode = AvatarMode.image(
+            originX: Double(originX),
+            originY: Double(originY),
+            size: Double(cropSize),
+            background: backgroundHex
+        )
+        onConfirm(img, mode)
     }
 }
 

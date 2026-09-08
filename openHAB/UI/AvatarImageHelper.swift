@@ -44,8 +44,9 @@ enum AvatarImageHelper {
 
     // MARK: - Public API
 
-    /// Saves `image` as the original for `homeId` and clears the render cache entry.
+    /// Saves `image` as the original for `homeId` and synchronously clears the render cache.
     /// The image is stored full-resolution — no downscaling.
+    @MainActor
     static func saveOriginal(_ image: UIImage, for homeId: UUID) {
         let url = originalURL(for: homeId)
         let dir = url.deletingLastPathComponent()
@@ -53,7 +54,7 @@ enum AvatarImageHelper {
               let data = image.jpegData(compressionQuality: 0.92),
               (try? data.write(to: url, options: .atomic)) != nil
         else { return }
-        Task { @MainActor in renderCache.removeValue(forKey: homeId) }
+        renderCache.removeValue(forKey: homeId)
     }
 
     /// Returns the full-resolution original for `homeId`, or `nil` if none is stored.
@@ -64,9 +65,10 @@ enum AvatarImageHelper {
     }
 
     /// Deletes the entire home directory (original + any future variants) and clears the cache.
+    @MainActor
     static func deleteOriginal(for homeId: UUID) {
         try? FileManager.default.removeItem(at: homeDirectory(for: homeId))
-        Task { @MainActor in renderCache.removeValue(forKey: homeId) }
+        renderCache.removeValue(forKey: homeId)
     }
 
     /// Returns a rendered 280×280 SwiftUI `Image` for `homeId` in the given `mode`.

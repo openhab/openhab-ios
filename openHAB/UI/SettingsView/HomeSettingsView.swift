@@ -39,7 +39,8 @@ struct HomeSettingsView: View, SettingsSheetView {
     @State private var avatarDisplayImage: Image?
     @State private var showPhotoPicker = false
     @State private var cropSource: CropSource?
-    @State private var pendingCroppedImage: UIImage?
+    /// Full-resolution original held in memory until save; written to disk only in `commitSave()`.
+    @State private var pendingOriginalImage: UIImage?
     @State private var showAvatarPicker = false
     @State private var showColorPickerRow = false
     @State private var iconRowPinWidth: CGFloat = 44
@@ -76,10 +77,8 @@ struct HomeSettingsView: View, SettingsSheetView {
         var sseCommandItem: String = ""
         var homeName: String = ""
         var disableRemoteConnection: Bool = false
-        var avatarImagePath: String?
-        var avatarColor: String?
-        var avatarIconName: String?
-        var hasPendingCrop: Bool = false
+        /// `nil` means "use default icon". Changes here drive `isDirty`.
+        var avatarMode: AvatarMode?
         var sectionOrder: [MenuSection] = MenuSection.allCases
         var collapsedSections: Set<MenuSection> = []
     }
@@ -162,9 +161,6 @@ struct HomeSettingsView: View, SettingsSheetView {
             Text("To connect to your local openHAB server, please allow Local Network access when prompted. If you previously denied it, enable it in Settings → Privacy & Security → Local Network.")
         }
         .settingsSheet(from: self)
-        .onChange(of: pendingCroppedImage) { _, new in
-            current.hasPendingCrop = new != nil
-        }
         .task {
             guard !viewAppearedOnce else { return }
             viewAppearedOnce = true
@@ -177,7 +173,7 @@ struct HomeSettingsView: View, SettingsSheetView {
             }
             current = SettingsSnapshot(from: homePrefs)
             sitemapForWatchLabel = homePrefs.sitemapForWatchLabel
-            avatarDisplayImage = AvatarImageHelper.load(for: homePrefs.id)
+            avatarDisplayImage = AvatarImageHelper.renderedAvatar(for: homePrefs.id, mode: homePrefs.avatarMode)
             loadedLocalURL = homePrefs.localConnectionConfig.url
             initial = current
             if let initialValues {
@@ -205,15 +201,13 @@ struct HomeSettingsView: View, SettingsSheetView {
                 .presentationDetents([.medium, .large])
         }
         .fullScreenCover(item: $cropSource) { source in
-            let targetId = homeId ?? currentActiveHomeId ?? UUID()
-            let bgHex = current.avatarColor ?? HomeAvatarView.colorPalette[0]
-            let onConfirm: (UIImage) -> Void = { cropped in
+            let onConfirm: (UIImage, AvatarMode) -> Void = { original, mode in
                 cropSource = nil
                 selectedPhoto = nil
-                // Hold in memory — written to disk only when the user taps the checkmark.
-                pendingCroppedImage = cropped
-                avatarDisplayImage = Image(uiImage: cropped)
-                current.avatarImagePath = AvatarImageHelper.avatarURL(for: targetId).path
+                // Hold original in memory — written to disk only when the user taps checkmark.
+                pendingOriginalImage = original
+                avatarDisplayImage = AvatarImageHelper.renderPending(original, mode: mode)
+                current.avatarMode = mode
                 withAnimation(.easeInOut(duration: 0.2)) {
                     showAvatarPicker = false
                     showColorPickerRow = false
@@ -225,9 +219,9 @@ struct HomeSettingsView: View, SettingsSheetView {
             }
             switch source.kind {
             case .photoItem(let item):
-                CropImageView(photoItem: item, initialBackgroundHex: bgHex, onConfirm: onConfirm, onCancel: onCancel)
+                CropImageView(photoItem: item, onConfirm: onConfirm, onCancel: onCancel)
             case .uiImage(let uiImage):
-                CropImageView(image: uiImage, initialBackgroundHex: bgHex, onConfirm: onConfirm, onCancel: onCancel)
+                CropImageView(image: uiImage, initialMode: current.avatarMode, onConfirm: onConfirm, onCancel: onCancel)
             }
         }
     }
@@ -256,8 +250,8 @@ struct HomeSettingsView: View, SettingsSheetView {
 
     private var avatarPickerButton: some View {
         let displayImage = avatarDisplayImage
-        let iconName = current.avatarIconName ?? HomeAvatarView.defaultIconName
-        let avatarColor = Color(hex: current.avatarColor ?? "") ?? HomeAvatarView.defaultColor
+        let iconName = current.avatarMode?.iconName ?? HomeAvatarView.defaultIconName
+        let avatarColor = Color(hex: current.avatarMode?.colorHex ?? "") ?? HomeAvatarView.defaultColor
         return Button {
             withAnimation(.easeInOut(duration: 0.2)) {
                 if showAvatarPicker {
@@ -265,16 +259,10 @@ struct HomeSettingsView: View, SettingsSheetView {
                     showColorPickerRow = false
                 } else {
                     showAvatarPicker = true
-                    // If the avatar is currently showing an icon (no loaded photo), pre-open
-                    // the color row so the user lands with both rows visible immediately.
-                    // Also ensure the icon name is explicit so the selection ring is visible.
+                    // If no photo is displayed, open the color row immediately so the
+                    // user lands with icon + color rows both visible. Don't mutate
+                    // current.avatarMode here — that would make the form look dirty.
                     if avatarDisplayImage == nil {
-                        // No photo file found on load, so any stored path is stale.
-                        // Clear it so hasPhoto evaluates correctly in the icon picker.
-                        current.avatarImagePath = nil
-                        if current.avatarIconName == nil {
-                            current.avatarIconName = HomeAvatarView.defaultIconName
-                        }
                         showColorPickerRow = true
                     }
                 }
@@ -297,23 +285,23 @@ struct HomeSettingsView: View, SettingsSheetView {
     }
 
     private var iconPickerRow: some View {
-        let hasPhoto = avatarDisplayImage != nil || current.avatarImagePath != nil
-        let tint = Color(hex: current.avatarColor ?? "") ?? HomeAvatarView.defaultColor
+        let hasPhoto: Bool = { if case .image = current.avatarMode { return true } else { return false } }()
+        let tint = Color(hex: current.avatarMode?.colorHex ?? "") ?? HomeAvatarView.defaultColor
         let pinLeading: CGFloat = 8
         let gap: CGFloat = 10 // matches icon HStack spacing
         return ZStack(alignment: .leading) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     ForEach(HomeAvatarView.availableIcons, id: \.self) { icon in
-                        let isSelected = !hasPhoto && (current.avatarIconName ?? HomeAvatarView.defaultIconName) == icon
+                        let isSelected = !hasPhoto && (current.avatarMode?.iconName ?? HomeAvatarView.defaultIconName) == icon
                         Button {
                             withAnimation(.easeInOut(duration: 0.2)) {
-                                current.avatarIconName = icon
-                                // Clear display state only — file stays on disk so the
+                                let color = current.avatarMode?.colorHex ?? HomeAvatarView.colorPalette[0]
+                                current.avatarMode = .icon(name: icon, color: color)
+                                // Clear display state — the original stays on disk so the
                                 // photo button can re-open crop without going to the gallery.
                                 avatarDisplayImage = nil
-                                pendingCroppedImage = nil
-                                current.avatarImagePath = nil
+                                pendingOriginalImage = nil
                                 showColorPickerRow = true
                             }
                         } label: {
@@ -361,12 +349,12 @@ struct HomeSettingsView: View, SettingsSheetView {
     private func iconRowPhotoButton(hasPhoto: Bool) -> some View {
         let targetId = homeId ?? currentActiveHomeId ?? UUID()
         let openAction: () -> Void = {
-            // Prefer the in-memory pending crop; fall back to the file on disk (kept even
-            // when the user switches to an icon so they can recrop without re-picking).
-            if let pending = pendingCroppedImage {
+            // Prefer the in-memory pending original; fall back to the original on disk (kept
+            // even when the user switches to an icon so they can recrop without re-picking).
+            if let pending = pendingOriginalImage {
                 cropSource = CropSource(kind: .uiImage(pending))
-            } else if let uiImage = UIImage(contentsOfFile: AvatarImageHelper.avatarURL(for: targetId).path) {
-                cropSource = CropSource(kind: .uiImage(uiImage))
+            } else if let original = AvatarImageHelper.loadOriginal(for: targetId) {
+                cropSource = CropSource(kind: .uiImage(original))
             } else {
                 showPhotoPicker = true
             }
@@ -403,8 +391,8 @@ struct HomeSettingsView: View, SettingsSheetView {
     private var settingsColorPicker: some View {
         // 44×44 frame extends UIColorWell's touch area to fill the glass shape.
         let base = ColorPicker("", selection: Binding(
-            get: { Color(hex: current.avatarColor ?? HomeAvatarView.colorPalette[0]) ?? HomeAvatarView.defaultColor },
-            set: { current.avatarColor = $0.hexString }
+            get: { Color(hex: current.avatarMode?.colorHex ?? HomeAvatarView.colorPalette[0]) ?? HomeAvatarView.defaultColor },
+            set: { current.avatarMode = (current.avatarMode ?? .icon(name: HomeAvatarView.defaultIconName, color: "")).withColor($0.hexString) }
         ), supportsOpacity: false)
         .labelsHidden()
         .frame(width: 44, height: 44)
@@ -424,9 +412,9 @@ struct HomeSettingsView: View, SettingsSheetView {
                 HStack(spacing: 8) {
                     ForEach(HomeAvatarView.colorPalette, id: \.self) { hex in
                         let color = Color(hex: hex) ?? .blue
-                        let isSelected = current.avatarColor == hex
+                        let isSelected = current.avatarMode?.colorHex == hex
                         Button {
-                            current.avatarColor = hex
+                            current.avatarMode = (current.avatarMode ?? .icon(name: HomeAvatarView.defaultIconName, color: "")).withColor(hex)
                         } label: {
                             Circle()
                                 .fill(color)
@@ -555,9 +543,9 @@ struct HomeSettingsView: View, SettingsSheetView {
     }
 
     func onRevert() {
-        pendingCroppedImage = nil
+        pendingOriginalImage = nil
         let targetId = homeId ?? currentActiveHomeId ?? UUID()
-        avatarDisplayImage = AvatarImageHelper.load(for: targetId)
+        avatarDisplayImage = AvatarImageHelper.renderedAvatar(for: targetId, mode: initial.avatarMode)
         current = initial
     }
 
@@ -584,15 +572,15 @@ struct HomeSettingsView: View, SettingsSheetView {
 
     private func commitSave() {
         let targetId = homeId ?? currentActiveHomeId ?? UUID()
-        if let pending = pendingCroppedImage {
-            // Flush the in-memory crop to disk now that the user has confirmed.
-            if let data = pending.jpegData(compressionQuality: 0.9) {
-                AvatarImageHelper.save(data, for: targetId)
-            }
-            pendingCroppedImage = nil
-        } else if current.avatarImagePath == nil, initial.avatarImagePath != nil {
-            // User switched from photo to icon — remove the old file.
-            AvatarImageHelper.delete(for: targetId)
+        if let pending = pendingOriginalImage {
+            // Flush the in-memory original to disk now that the user has confirmed.
+            AvatarImageHelper.saveOriginal(pending, for: targetId)
+            pendingOriginalImage = nil
+        } else if case .icon = current.avatarMode, case .image = initial.avatarMode {
+            // User switched from photo to icon — remove the stored original.
+            AvatarImageHelper.deleteOriginal(for: targetId)
+        } else if current.avatarMode == nil, case .image = initial.avatarMode {
+            AvatarImageHelper.deleteOriginal(for: targetId)
         }
         Task { @MainActor in
             await saveSettings()
@@ -647,9 +635,7 @@ struct HomeSettingsView: View, SettingsSheetView {
             homePreferences.sseCommandItem = snapshot.sseCommandItem
             homePreferences.homeName = snapshot.homeName
             homePreferences.disableRemoteConnection = snapshot.disableRemoteConnection
-            homePreferences.avatarImagePath = snapshot.avatarImagePath
-            homePreferences.avatarColor = snapshot.avatarColor
-            homePreferences.avatarIconName = snapshot.avatarIconName
+            homePreferences.avatarMode = snapshot.avatarMode
             homePreferences.sectionOrder = snapshot.sectionOrder
             homePreferences.collapsedSections = snapshot.collapsedSections
         }
@@ -673,12 +659,9 @@ extension HomeSettingsView.SettingsSnapshot {
         sseCommandItem = homePrefs.sseCommandItem
         homeName = homePrefs.homeName
         disableRemoteConnection = homePrefs.disableRemoteConnection
-        avatarImagePath = homePrefs.avatarImagePath
-        avatarColor = homePrefs.avatarColor
-        avatarIconName = homePrefs.avatarIconName
+        avatarMode = homePrefs.avatarMode
         sectionOrder = homePrefs.sectionOrder
         collapsedSections = homePrefs.collapsedSections
-        // hasPendingCrop defaults to false — no in-flight crop on initial load
     }
 }
 

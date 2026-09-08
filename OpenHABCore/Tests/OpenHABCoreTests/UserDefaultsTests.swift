@@ -225,7 +225,7 @@ struct MenuSectionTests {
         let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
         let prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
 
-        #expect(prefs.avatarImagePath == nil)
+        #expect(prefs.avatarMode == nil)
         #expect(prefs.sectionOrder == MenuSection.allCases)
         #expect(prefs.collapsedSections.isEmpty)
     }
@@ -283,15 +283,43 @@ struct MenuSectionTests {
         #expect(prefs.collapsedSections == [.tiles])        // unknown dropped
     }
 
-    /// avatarImagePath round-trips correctly.
-    @Test func avatarImagePathRoundTrip() throws {
+    /// AvatarMode.icon round-trips through encode → decode.
+    @Test func avatarModeIconRoundTrip() throws {
         let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
         var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
 
-        prefs.avatarImagePath = "/Library/Application Support/homes/test.jpg"
+        prefs.avatarMode = .icon(name: "house.fill", color: "#3478F6")
 
         let encoded = try JSONEncoder().encode(prefs)
         let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
-        #expect(decoded.avatarImagePath == "/Library/Application Support/homes/test.jpg")
+        #expect(decoded.avatarMode == .icon(name: "house.fill", color: "#3478F6"))
+    }
+
+    /// AvatarMode.image round-trips through encode → decode.
+    @Test func avatarModeImageRoundTrip() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        prefs.avatarMode = .image(originX: 12.5, originY: 34.0, size: 280.0, background: "#FF2D55")
+
+        let encoded = try JSONEncoder().encode(prefs)
+        let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
+        #expect(decoded.avatarMode == .image(originX: 12.5, originY: 34.0, size: 280.0, background: "#FF2D55"))
+    }
+
+    /// Legacy avatarIconName + avatarColor payload is migrated to AvatarMode.icon on decode.
+    @Test func legacyAvatarFieldsMigratedToMode() throws {
+        let json = ##"{"id":"550E8400-E29B-41D4-A716-446655440000","avatarIconName":"tent.fill","avatarColor":"#5856D6"}"##
+        let prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        #expect(prefs.avatarMode == .icon(name: "tent.fill", color: "#5856D6"))
+    }
+
+    /// Legacy avatarImagePath payload cannot recover crop settings — avatarMode stays nil.
+    @Test func legacyAvatarImagePathNotMigrated() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000","avatarImagePath":"/homes/test.jpg"}"#
+        let prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        #expect(prefs.avatarMode == nil)
     }
 }
