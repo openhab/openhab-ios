@@ -248,13 +248,13 @@ struct ToolbarMenu: View {
 
     @ViewBuilder
     private func systemMenu() -> some View {
-        if let prefs = cachedHomePrefs,
-           Preferences.getNotificationConnection(of: prefs) != nil {
-            systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
-        }
         systemRow(symbol: .gear, label: String(localized: "App Settings")) {
             isPresented = false
             showAppSettings = true
+        }
+        if let prefs = cachedHomePrefs,
+           Preferences.getNotificationConnection(of: prefs) != nil {
+            systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
         }
     }
 
