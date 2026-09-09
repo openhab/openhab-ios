@@ -9,9 +9,9 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import Foundation
 import Network
+import Observation
 import OpenAPIRuntime
 import os.log
 import Timeout
@@ -155,12 +155,13 @@ public actor ConnectionFailureTracker {
 }
 
 @MainActor
-public class MainActorNetworkTracker: ObservableObject {
+@Observable
+public final class MainActorNetworkTracker {
     public static let shared = MainActorNetworkTracker()
-    @Published public var activeConnection: ConnectionInfo?
-    @Published public var status: NetworkStatus = .stopped
-    @Published public var nextRetryDate: Date?
-    @Published public var isNetworkAvailable = true
+    public var activeConnection: ConnectionInfo?
+    public var status: NetworkStatus = .stopped
+    public var nextRetryDate: Date?
+    public var isNetworkAvailable = true
 
     public init(tracker: NetworkTracker = NetworkTracker.shared) {
         Task {

@@ -26,14 +26,18 @@ class CrashReportService: ObservableObject {
     // MARK: - Crash Report
 
     private func setupCrashReportCheck() {
-        if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !Preferences.shared.sendCrashReports {
-            crashReportAlert = true
+        Task { @MainActor in
+            if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !(await Preferences.shared.sendCrashReports) {
+                crashReportAlert = true
+            }
         }
     }
 
     func enableCrashReporting() {
-        Preferences.shared.sendCrashReports = true
-        Crashlytics.crashlytics().sendUnsentReports()
+        Task {
+            await Preferences.shared.setSendCrashReports(true)
+            Crashlytics.crashlytics().sendUnsentReports()
+        }
     }
 
     func deleteCrashReports() {
