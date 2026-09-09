@@ -68,8 +68,10 @@ class PushRegistrationService: ObservableObject {
 
         networkObservationTask = Task { [weak self] in
             for await state in await NetworkTracker.shared.stateStream() {
-                guard let activeConnection = state.activeConnection else { continue }
-                self?.activeConnection = activeConnection
+                guard let activeConnection = state.activeConnection, let self else { continue }
+                guard activeConnection != self.activeConnection else { continue }
+                self.activeConnection = activeConnection
+                registerPendingConnections()
             }
         }
 
@@ -167,12 +169,13 @@ class PushRegistrationService: ObservableObject {
                 if let cloudUserId = try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) {
                     await Preferences.shared.setCloudUserId(cloudUserId, for: uuid)
                     Logger.viewController.info("my.openHAB registration succeeded with cloudUserId \(cloudUserId)")
+                } else {
+                    Logger.viewController.info("my.openHAB registration succeeded without cloudUserId")
                 }
-                Logger.viewController.info("my.openHAB registration succeeded without cloudUserId")
             } catch {
                 let detail = (error as? URLError).map { "URLError \($0.errorCode)" } ?? String(describing: error)
                 Logger.viewController.error("my.openHAB registration failed for \(config.url): \(error.localizedDescription) (\(detail))")
-                // Allow a later trigger to retry this home.
+                // Retried when the active connection changes, see networkObservationTask.
                 registeredConnections.remove(UuidWithConnection(uuid: uuid, connection: config))
             }
         }

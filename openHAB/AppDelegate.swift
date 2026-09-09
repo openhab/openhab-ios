@@ -176,6 +176,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     /// launch post-install. Fixed upstream in 12.19.0 (unreleased as of 2026-09-09).
     @MainActor
     private func publishCurrentFCMToken() {
+        #if DEBUG
+        // do not register with the cloud if running UITest, as registerForPushNotifications does
+        if ProcessInfo.processInfo.environment["UITest"] != nil {
+            return
+        }
+        #endif
+
         // Deprecated in favour of FID registration, but my.openHAB expects the FCM token as regId.
         if let cachedToken = Messaging.messaging().fcmToken, !cachedToken.isEmpty {
             AppDelegate.postApsRegistration(fcmToken: cachedToken)
