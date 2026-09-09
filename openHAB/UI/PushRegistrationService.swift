@@ -175,6 +175,10 @@ class PushRegistrationService: ObservableObject {
             } catch {
                 let detail = (error as? URLError).map { "URLError \($0.errorCode)" } ?? String(describing: error)
                 Logger.viewController.error("my.openHAB registration failed for \(config.url): \(error.localizedDescription) (\(detail))")
+                // Only the attempt for the current token may clear the marker. A slow failing
+                // attempt for a token that has since been replaced would otherwise remove the
+                // marker of the attempt that replaced it, and register that home twice over.
+                guard deviceToken == apsDeviceToken else { return }
                 // Retried when the active connection changes, see networkObservationTask.
                 registeredConnections.remove(UuidWithConnection(uuid: uuid, connection: config))
             }
