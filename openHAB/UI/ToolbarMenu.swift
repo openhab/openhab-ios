@@ -24,7 +24,7 @@ enum TargetController: Equatable {
     /// Rendered in the same web view as `.webview`; kept distinct so a reload
     /// returns to this page rather than the MainUI root.
     case mainUIPage(String)
-    case sitemap(String)
+    case sitemap(String, navigationState: SitemapNavigationState = .ready([]))
     case notifications
     case browser(String)
     case tile(String)
@@ -35,21 +35,27 @@ enum TargetController: Equatable {
 struct ConnectionView: View {
     static let cornerRadius: CGFloat = 14
 
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
+    @State private var cachedHomePrefs: HomePreferences?
 
     var body: some View {
         HStack {
             if let activeConnection = networkTracker.activeConnection {
-                let homePrefs = Preferences.shared.currentHomePreferences
-                let isLocal = activeConnection.configuration.url == homePrefs.localConnectionConfig.url
+                let homePrefs = cachedHomePrefs
+                let isLocal = activeConnection.configuration.url == homePrefs?.localConnectionConfig.url
                 Image(systemSymbol: isLocal ? .wifi : .cloudFill)
-                Text(homePrefs.homeName).fontWeight(.medium)
+                Text(homePrefs?.homeName ?? "").fontWeight(.medium)
             } else {
                 Image(systemSymbol: .exclamationmarkIcloudFill)
                 Text("Connecting…")
             }
         }
         .font(.footnote)
+        .task {
+            for await prefs in await Preferences.shared.currentHomePreferencesStream {
+                cachedHomePrefs = prefs
+            }
+        }
     }
 }
 
@@ -58,7 +64,7 @@ struct ConnectionView: View {
 /// Toolbar dropdown menu replacing the SideMenu drawer.
 struct ToolbarMenu: View {
     @Binding var isPresented: Bool
-    @ObservedObject var menuData: MenuDataService
+    var menuData: MenuDataService
     @State private var scrollViewContentSize: Double = 0
     // Section expansion is stored per home in `HomePreferences`. These `@State`
     // flags mirror the active home for immediate UI updates and are loaded from
@@ -68,28 +74,38 @@ struct ToolbarMenu: View {
     @State private var isSitemapsExpanded = true
     @State private var isSystemExpanded = true
     @State private var isHomeExpanded = false
+    // Two-phase header animation state — independent of isHomeExpanded so each gets its own
+    // withAnimation context. Bool + ternary mirrors exactly how homeDetailsCollapsed drives
+    // frame; using the same mechanism ensures both animate identically.
+    @State private var headerDetailsHidden = false
+    @State private var homeDetailsCollapsed = false
     @State private var showAppSettings = false
+    @State private var showCurrentHomeSettings = false
     @State private var sitemapForWatch: String?
     @State private var sitemapForCarPlay: String?
+    @State private var cachedHomePrefs: HomePreferences?
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
     @ScaledMetric private var iconWidth = 20.0
 
     /// Shared curve so the section content and the container height animate in sync.
-    private static let sectionAnimation: Animation = .easeInOut(duration: 0.25)
+    private static let sectionAnimationDuration: Double = 0.25
+    private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
 
     var body: some View {
         GeometryReader { proxy in
             overlayContent(proxy: proxy)
         }
-        .onAppear { loadExpansionState() }
+        .onAppear { Task { await loadExpansionState() } }
         .onChange(of: isPresented) { _, newValue in
             if newValue {
                 // Re-read in case the active home changed while the menu was closed.
-                loadExpansionState()
+                Task { await loadExpansionState() }
             } else {
-                withAnimation(.easeInOut(duration: 0.2)) { isHomeExpanded = false }
+                isHomeExpanded = false
+                headerDetailsHidden = false
+                homeDetailsCollapsed = false
             }
         }
         .sheet(isPresented: $showAppSettings) {
@@ -97,33 +113,50 @@ struct ToolbarMenu: View {
                 AppSettingsView()
             }
         }
+        .sheet(isPresented: $showCurrentHomeSettings) {
+            NavigationStack {
+                HomeSettingsView()
+            }
+        }
+        .task {
+            for await prefs in await Preferences.shared.currentHomePreferencesStream {
+                cachedHomePrefs = prefs
+            }
+        }
     }
 
-    /// Mirrors the active home's persisted section-expansion flags into local
-    /// `@State`, defaulting to expanded when a home has no stored value yet.
-    private func loadExpansionState() {
-        let prefs = Preferences.shared.currentHomePreferences
-        isMainUIExpanded = prefs.isMainUIExpanded ?? true
-        isSitemapsExpanded = prefs.isSitemapsExpanded ?? true
-        isTilesExpanded = prefs.isTilesExpanded ?? true
-        isSystemExpanded = prefs.isSystemExpanded ?? true
+    /// Mirrors the active home's persisted section-expansion state into local `@State`.
+    private func loadExpansionState() async {
+        let prefs = await Preferences.shared.currentHomePreferences
+        cachedHomePrefs = prefs
+        let collapsed = prefs.collapsedSections
+        isMainUIExpanded = !collapsed.contains(.mainUI)
+        isSitemapsExpanded = !collapsed.contains(.sitemaps)
+        isTilesExpanded = !collapsed.contains(.tiles)
+        isSystemExpanded = !collapsed.contains(.system)
         sitemapForWatch = prefs.sitemapForWatch
         sitemapForCarPlay = prefs.sitemapForCarPlay
+        headerDetailsHidden = false
+        homeDetailsCollapsed = false
     }
 
     /// Toggles `sitemap` as the one sent to the paired Apple Watch, persisting the
     /// choice (and its display label) to the active home, or clearing it if the
     /// same sitemap is double-tapped again.
     private func toggleWatchSitemap(_ sitemap: OpenHABSitemap) {
-        Preferences.shared.modifyActiveHome { prefs in
-            if sitemap.name == sitemapForWatch {
-                sitemapForWatch = nil
-                prefs.sitemapForWatch = ""
-                prefs.sitemapForWatchLabel = ""
-            } else {
-                sitemapForWatch = sitemap.name
-                prefs.sitemapForWatch = sitemap.name
-                prefs.sitemapForWatchLabel = sitemap.label
+        let isToggleOff = sitemap.name == sitemapForWatch
+        let sitemapName = sitemap.name
+        let sitemapLabel = sitemap.label
+        if isToggleOff { sitemapForWatch = nil } else { sitemapForWatch = sitemapName }
+        Task {
+            await Preferences.shared.modifyActiveHome { @Sendable prefs in
+                if isToggleOff {
+                    prefs.sitemapForWatch = ""
+                    prefs.sitemapForWatchLabel = ""
+                } else {
+                    prefs.sitemapForWatch = sitemapName
+                    prefs.sitemapForWatchLabel = sitemapLabel
+                }
             }
         }
     }
@@ -131,13 +164,16 @@ struct ToolbarMenu: View {
     /// Toggles `sitemap` as the one shown in CarPlay, persisting the choice to the
     /// active home, or clearing it if the same sitemap is long-pressed again.
     private func toggleCarPlaySitemap(_ sitemap: OpenHABSitemap) {
-        Preferences.shared.modifyActiveHome { prefs in
-            if sitemap.name == sitemapForCarPlay {
-                sitemapForCarPlay = nil
-                prefs.sitemapForCarPlay = ""
-            } else {
-                sitemapForCarPlay = sitemap.name
-                prefs.sitemapForCarPlay = sitemap.name
+        let isToggleOff = sitemap.name == sitemapForCarPlay
+        let sitemapName = sitemap.name
+        if isToggleOff { sitemapForCarPlay = nil } else { sitemapForCarPlay = sitemapName }
+        Task {
+            await Preferences.shared.modifyActiveHome { @Sendable prefs in
+                if isToggleOff {
+                    prefs.sitemapForCarPlay = ""
+                } else {
+                    prefs.sitemapForCarPlay = sitemapName
+                }
             }
         }
     }
@@ -147,13 +183,18 @@ struct ToolbarMenu: View {
     /// choice persists per home and across restarts.
     private func expansionBinding(
         _ state: Binding<Bool>,
-        persistTo keyPath: WritableKeyPath<HomePreferences, Bool?>
+        persistTo setter: @escaping @Sendable (inout HomePreferences, Bool) -> Void
     ) -> Binding<Bool> {
         Binding(
             get: { state.wrappedValue },
             set: { newValue in
                 state.wrappedValue = newValue
-                Preferences.shared.modifyActiveHome { $0[keyPath: keyPath] = newValue }
+                let capturedValue = newValue
+                Task {
+                    await Preferences.shared.modifyActiveHome { @Sendable prefs in
+                        setter(&prefs, capturedValue)
+                    }
+                }
             }
         )
     }
@@ -212,13 +253,13 @@ struct ToolbarMenu: View {
 
     @ViewBuilder
     private func systemMenu() -> some View {
-        if Preferences.shared.getNotificationConnection() != nil,
-           !Preferences.shared.currentHomePreferences.demomode {
-            systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
-        }
         systemRow(symbol: .gear, label: String(localized: "App Settings")) {
             isPresented = false
             showAppSettings = true
+        }
+        if let prefs = cachedHomePrefs,
+           Preferences.getNotificationConnection(of: prefs) != nil {
+            systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
         }
     }
 
@@ -227,9 +268,9 @@ struct ToolbarMenu: View {
         // `sitemapNameLabelDisplayMode` chooses which field(s) to show; when it is `.both`,
         // the sort order decides which one is the title. The list itself is
         // already ordered by `MenuDataService`.
-        let prefs = Preferences.shared.currentHomePreferences
-        let order = SortSitemapsOrder(rawValue: prefs.sortSitemapsBy) ?? .label
-        let mode = prefs.sitemapNameLabelDisplayMode
+        let prefs = cachedHomePrefs
+        let order = SortSitemapsOrder(rawValue: prefs?.sortSitemapsBy ?? 0) ?? .label
+        let mode = prefs?.sitemapNameLabelDisplayMode ?? .label
         ForEach(menuData.sitemaps, id: \.name) { sitemap in
             let isWatch = sitemap.name == sitemapForWatch
             let isCarPlay = sitemap.name == sitemapForCarPlay
@@ -258,12 +299,16 @@ struct ToolbarMenu: View {
 
     @ViewBuilder
     private func mainUIMenu() -> some View {
-        menuRow(
-            icon: AnyView(Image("openHABIcon").resizable()),
-            label: String(localized: "Home"),
-            accessibilityId: "Home"
-        ) {
-            select(.webview)
+        // Hidden until the current home has had at least one successful fetch —
+        // consistent with how sitemaps/pages behave during the loading state.
+        if menuData.hasSuccessfullyLoaded {
+            menuRow(
+                icon: AnyView(Image("openHABIcon").resizable()),
+                label: String(localized: "Home"),
+                accessibilityId: "Home"
+            ) {
+                select(.webview)
+            }
         }
         if menuData.isLoading {
             loadingRow(label: String(localized: "Pages"))
@@ -280,58 +325,75 @@ struct ToolbarMenu: View {
     }
 
     fileprivate func homesMenu() -> some View {
-        return VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 0) {
             InlineHomePickerView(isMenuPresented: $isPresented)
             Divider().padding(.horizontal, 12)
         }
-        .transition(.blurReplace(.downUp))
+    }
 
+    @ViewBuilder
+    private func menuSection(_ section: MenuSection, isLast: Bool) -> some View {
+        switch section {
+        case .mainUI:
+            collapsibleSection(
+                title: "Main UI",
+                isExpanded: expansionBinding($isMainUIExpanded) { prefs, v in prefs.setSection(.mainUI, expanded: v) },
+                showDivider: !isLast
+            ) {
+                mainUIMenu()
+            }
+        case .sitemaps:
+            collapsibleSection(
+                title: "Sitemaps",
+                isExpanded: expansionBinding($isSitemapsExpanded) { prefs, v in prefs.setSection(.sitemaps, expanded: v) },
+                isLoading: menuData.isLoading,
+                isEmpty: menuData.sitemaps.isEmpty,
+                showDivider: !isLast
+            ) {
+                sitemapsMenu()
+            }
+        case .tiles:
+            collapsibleSection(
+                title: "Tiles",
+                isExpanded: expansionBinding($isTilesExpanded) { prefs, v in prefs.setSection(.tiles, expanded: v) },
+                isLoading: menuData.isLoading,
+                isEmpty: menuData.uiTiles.isEmpty,
+                showDivider: !isLast
+            ) {
+                tilesMenu()
+            }
+        case .system:
+            collapsibleSection(
+                title: "System & App",
+                isExpanded: expansionBinding($isSystemExpanded) { prefs, v in prefs.setSection(.system, expanded: v) },
+                showDivider: !isLast
+            ) {
+                systemMenu()
+            }
+        }
     }
 
     private func menuContent(height: CGFloat) -> some View {
         VStack(spacing: 0) {
             let scrollView = ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    homeHeader()
-                    Divider()
-                    if isHomeExpanded {
+                    // Home section: header + picker that is always in the layout.
+                    // Keeping homesMenu() in the layout at all times (height 0 when collapsed)
+                    // avoids the jump that occurs when conditional insertion allocates space
+                    // instantly before the transition visual can begin.
+                    VStack(alignment: .leading, spacing: 0) {
+                        homeHeader()
+                        Divider()
                         homesMenu()
+                            .opacity(isHomeExpanded ? 1 : 0)
+                            .frame(maxHeight: isHomeExpanded ? nil : 0, alignment: .top)
+                            .clipped()
                     }
-                    // Main UI: Home + sidebar pages
-                    collapsibleSection(
-                        title: "Main UI",
-                        isExpanded: expansionBinding($isMainUIExpanded, persistTo: \.isMainUIExpanded)
-                    ) {
-                        mainUIMenu()
-                    }
+                    .animation(Self.sectionAnimation, value: isHomeExpanded)
 
-                    // Sitemaps
-                    collapsibleSection(
-                        title: "Sitemaps",
-                        isExpanded: expansionBinding($isSitemapsExpanded, persistTo: \.isSitemapsExpanded),
-                        isLoading: menuData.isLoading,
-                        isEmpty: menuData.sitemaps.isEmpty
-                    ) {
-                        sitemapsMenu()
-                    }
-
-                    // Tiles
-                    collapsibleSection(
-                        title: "Tiles",
-                        isExpanded: expansionBinding($isTilesExpanded, persistTo: \.isTilesExpanded),
-                        isLoading: menuData.isLoading,
-                        isEmpty: menuData.uiTiles.isEmpty
-                    ) {
-                        tilesMenu()
-                    }
-
-                    // System & App
-                    collapsibleSection(
-                        title: "System & App",
-                        isExpanded: expansionBinding($isSystemExpanded, persistTo: \.isSystemExpanded),
-                        showDivider: false
-                    ) {
-                        systemMenu()
+                    let sectionOrder = cachedHomePrefs?.sectionOrder ?? MenuSection.allCases
+                    ForEach(sectionOrder, id: \.self) { section in
+                        menuSection(section, isLast: section == sectionOrder.last)
                     }
                 }
             }
@@ -346,20 +408,16 @@ struct ToolbarMenu: View {
             .animation(Self.sectionAnimation, value: isTilesExpanded)
             .animation(Self.sectionAnimation, value: isSystemExpanded)
 
-            if #available(iOS 18.0, *) {
-                scrollView.onScrollGeometryChange(for: Double.self, of: { $0.contentSize.height
-                }) { _, newValue in
-                    // Animate the container growing/shrinking so it tracks the section
-                    // content instead of snapping. Skip the first measurement (0 → N),
-                    // which would otherwise shrink the menu from full height on open.
-                    if scrollViewContentSize == 0 {
-                        scrollViewContentSize = newValue
-                    } else {
-                        withAnimation(Self.sectionAnimation) { scrollViewContentSize = newValue }
-                    }
+            scrollView.onScrollGeometryChange(for: Double.self, of: { $0.contentSize.height
+            }) { _, newValue in
+                // Animate the container growing/shrinking so it tracks the section
+                // content instead of snapping. Skip the first measurement (0 → N),
+                // which would otherwise shrink the menu from full height on open.
+                if scrollViewContentSize == 0 {
+                    scrollViewContentSize = newValue
+                } else {
+                    withAnimation(Self.sectionAnimation) { scrollViewContentSize = newValue }
                 }
-            } else {
-                scrollView
             }
 
         }
@@ -368,36 +426,100 @@ struct ToolbarMenu: View {
 
     // MARK: - Home header
 
-    @ViewBuilder
+    private func toggleHomeExpanded() {
+        let half = Self.sectionAnimationDuration / 2
+        if !isHomeExpanded {
+            // Phase 1: fade out details (Bool ternary + withAnimation mirrors homeDetailsCollapsed).
+            withAnimation(.easeInOut(duration: half)) { headerDetailsHidden = true }
+            // Phase 2: collapse layout + rotate chevron (delayed by half).
+            withAnimation(.easeInOut(duration: half).delay(half)) { homeDetailsCollapsed = true }
+            // Expand picker with full sectionAnimation (drives homesMenu height/opacity).
+            withAnimation(Self.sectionAnimation) { isHomeExpanded = true }
+        } else {
+            // Phase 1: restore layout + rotate chevron back (immediate, half duration).
+            withAnimation(.easeInOut(duration: half)) { homeDetailsCollapsed = false }
+            // Phase 2: fade in details (delayed so content appears after layout has opened).
+            withAnimation(.easeInOut(duration: half).delay(half)) { headerDetailsHidden = false }
+            // Collapse picker.
+            withAnimation(Self.sectionAnimation) { isHomeExpanded = false }
+        }
+    }
+
     private func homeHeader() -> some View {
+        // Phase 1 (fade): conditional views keyed to headerDetailsHidden transition in/out.
+        // A hidden placeholder keeps the layout space so the header height doesn't jump.
+        // Phase 2 (layout): homeDetailsCollapsed collapses the frame after the fade completes.
         HStack(alignment: .center, spacing: 0) {
-            Button(action: { withAnimation { isHomeExpanded.toggle() } }, label: {
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 8) {
-                        Image(systemSymbol: isHomeExpanded ? .chevronDown : .chevronRight)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 10)
+            Button(action: toggleHomeExpanded) {
+                HStack(alignment: .center, spacing: 8) {
+                    Image(systemSymbol: .chevronRight)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 10)
+                        .rotationEffect(.degrees(homeDetailsCollapsed ? 90 : 0))
+
+                    let homePrefs = cachedHomePrefs
+                    ZStack(alignment: .center) {
+                        HomeAvatarView(photo: nil, iconName: HomeAvatarView.defaultIconName,
+                                       color: HomeAvatarView.defaultColor, size: 28).hidden()
+                        if !headerDetailsHidden, let homePrefs {
+                            let mode = homePrefs.avatarMode
+                            HomeAvatarView(
+                                photo: AvatarImageHelper.renderedAvatar(for: homePrefs.id, mode: mode),
+                                iconName: mode?.iconName ?? HomeAvatarView.defaultIconName,
+                                color: Color(hex: mode?.colorHex ?? "") ?? HomeAvatarView.defaultColor,
+                                size: 28
+                            )
+                            .transition(.opacity)
+                        }
+                    }
+                    .frame(width: homeDetailsCollapsed ? 0 : nil)
+                    .clipped()
+
+                    VStack(alignment: .leading, spacing: 0) {
                         Text("Homes")
                             .font(.footnote)
                             .fontWeight(.semibold)
+
+                        ZStack(alignment: .topLeading) {
+                            // Always-present placeholder keeps space during the fade.
+                            ConnectionView().hidden()
+                            if !headerDetailsHidden {
+                                ConnectionView()
+                                    .transition(.opacity)
+                            }
+                        }
+                        .padding(.top, 3)
+                        .frame(maxHeight: homeDetailsCollapsed ? 0 : 30, alignment: .top)
+                        .clipped()
                     }
-                    ConnectionView()
-                        .padding(.leading, 18)
+                    Spacer(minLength: 0)
                 }
                 .contentShape(Rectangle())
-            })
+            }
             .buttonStyle(.plain)
-            Spacer(minLength: 8)
-            Button(action: {
-                menuData.refresh()
-                onReload?()
-                isPresented = false
-            }, label: {
-                Image(systemSymbol: .arrowClockwise)
-                    .foregroundStyle(.secondary)
-            })
+            .padding(.trailing, 12)
+
+            Button(action: { menuData.refresh(); onReload?(); isPresented = false }) {
+                Image(systemSymbol: .arrowClockwise).foregroundStyle(.secondary)
+            }
             .buttonStyle(.plain)
+            .padding(.trailing, homeDetailsCollapsed ? 0 : 12)
+
+            ZStack {
+                // Placeholder keeps gear button space during the fade.
+                Image(systemSymbol: .gear).hidden()
+                if !headerDetailsHidden {
+                    Button(action: { isPresented = false; showCurrentHomeSettings = true }) {
+                        Image(systemSymbol: .gear).foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.opacity)
+                }
+            }
+            .allowsHitTesting(!headerDetailsHidden && !homeDetailsCollapsed)
+            .frame(width: homeDetailsCollapsed ? 0 : nil)
+            .clipped()
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)

@@ -21,7 +21,7 @@ import SwiftUI
 struct ImageView: View {
     let url: String
 
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
 
     var body: some View {
         if !url.isEmpty {

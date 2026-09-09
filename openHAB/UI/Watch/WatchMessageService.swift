@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import Foundation
 import OpenHABCore
 import os.log
@@ -24,7 +23,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     private var cachedWatchPreferences: [String: Data] = [:]
     private let lock = NSLock()
 
-    private var preferencesSubscription: AnyCancellable?
+    private var preferencesTask: Task<Void, Never>?
 
     /// This method gets called when the watch requests the data
     /// ⚠️ This is called off the main thread. Do NOT touch @MainActor stuff.
@@ -72,28 +71,30 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     // MARK: - Sync Preferences
 
     @MainActor
-    // swiftlint:disable:next async_without_await
     func subscribeToPreferences() async {
-        preferencesSubscription = Preferences.shared.currentHomePreferencesPublisher
-            .debounce(for: .seconds(1), scheduler: RunLoop.main)
-            .sink { _ in } receiveValue: { homeSettings in
-                Task { @MainActor in
-                    await self.syncPreferencesToWatch(homeSettings)
-                }
+        preferencesTask = Task { [weak self] in
+            for await homeSettings in await Preferences.shared.currentHomePreferencesStream {
+                await self?.syncPreferencesToWatch(homeSettings)
             }
+        }
     }
 
     @MainActor
-    // swiftlint:disable:next async_without_await
     func syncPreferencesToWatch(_ homeSettings: HomePreferences? = nil) async {
         guard WCSession.default.activationState == .activated else {
             Logger.preferences.warning("WCSession not activated; skipping sync.")
             return
         }
-        let settings = homeSettings ?? Preferences.shared.currentHomePreferences
-        let storedHomes = Dictionary(uniqueKeysWithValues: Preferences.shared.storedHomes.map { ($0.key.uuidString, $0.value) })
+        let settings: HomePreferences
+        if let homeSettings {
+            settings = homeSettings
+        } else {
+            settings = await Preferences.shared.currentHomePreferences
+        }
+        let allStoredHomes = await Preferences.shared.storedHomes
+        let storedHomes = Dictionary(uniqueKeysWithValues: allStoredHomes.map { ($0.key.uuidString, $0.value) })
         // Build per-home credentials from iOS Keychain so Watch can persist them in its own Keychain.
-        let homeCredentials = Dictionary(uniqueKeysWithValues: Preferences.shared.storedHomes.keys.map { uuid in
+        let homeCredentials = Dictionary(uniqueKeysWithValues: allStoredHomes.keys.map { uuid in
             let local = CredentialsStore.retrieve(homeId: uuid, type: .local)
             let remote = CredentialsStore.retrieve(homeId: uuid, type: .remote)
             return (uuid.uuidString, HomeCredentials(

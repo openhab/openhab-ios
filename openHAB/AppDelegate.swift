@@ -24,7 +24,7 @@ import WatchConnectivity
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    private var crashlyticsSubscriber: AnyCancellable?
+    private var crashlyticsTask: Task<Void, Never>?
 
     let notificationDelegate = NotificationCenterDelegateImpl()
 
@@ -54,7 +54,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
         UserDefaults.standard.register(defaults: appDefaults)
 
-        Preferences.migratePreferences()
+        Task { _ = await Preferences.shared.listStoredHomes() }
         SitemapDiagnostics.markProcessLaunch(source: launchSource(launchOptions))
 
         // Firebase must be configured before the storyboard loads its root view controller,
@@ -109,26 +109,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         configureImageCoders()
 
-        // load and start the screensaver
-        if let keyWindow = UIApplication.shared.firstKeyWindow {
-            var config = ScreenSaverConfiguration()
-            config.isEnabled = Preferences.shared.screensaverEnabled
-            config.showsTime = Preferences.shared.screensaverShowsTime
-            config.showsDate = Preferences.shared.screensaverShowsDate
-            config.idleInterval = Preferences.shared.screensaverIdleInterval
-            config.movementInterval = Preferences.shared.screensaverMovementInterval
-            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
-            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
-            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
-            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
-            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
-            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
-            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
-            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
-            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
-
-            ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
-        }
+        ScreenSaverManager.shared.applyCurrentPreferences()
         // Start monitoring items for widget updates after the app is configured.
         WidgetItemMonitor.shared.startMonitoring()
     }
@@ -144,9 +125,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // init Firebase crash reporting
         FirebaseApp.configure()
         FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
-        crashlyticsSubscriber = Preferences.shared.$sendCrashReports.sink {
-            Crashlytics.crashlytics().setCrashlyticsCollectionEnabled($0)
-            Logger.appDelegate.debug("setCrashlyticsCollectionEnabled to \($0)")
+        crashlyticsTask = Task {
+            for await value in await Preferences.shared.sendCrashReportsStream {
+                Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(value)
+                Logger.appDelegate.debug("setCrashlyticsCollectionEnabled to \(value)")
+            }
         }
         Messaging.messaging().delegate = self
     }
@@ -287,25 +270,8 @@ extension AppDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         NotificationCenter.default.post(name: .appDidBecomeActive, object: nil)
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        if let keyWindow = UIApplication.shared.firstKeyWindow {
-            var config = ScreenSaverConfiguration()
-            config.isEnabled = Preferences.shared.screensaverEnabled
-            config.showsTime = Preferences.shared.screensaverShowsTime
-            config.showsDate = Preferences.shared.screensaverShowsDate
-            config.idleInterval = Preferences.shared.screensaverIdleInterval
-            config.movementInterval = Preferences.shared.screensaverMovementInterval
-            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
-            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
-            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
-            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
-            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
-            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
-            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
-            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
-            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
-
-            ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
+        Task { @MainActor in
+            ScreenSaverManager.shared.applyCurrentPreferences()
         }
 
         Task {

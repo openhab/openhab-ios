@@ -25,79 +25,81 @@ struct NotificationRow: View {
     var onAction: (String) -> Void
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            KFImage(iconUrl)
-                .withOpenHABCredentials(for: connection)
-                .placeholder {
-                    Image("openHABIcon").resizable()
+        VStack(alignment: .leading, spacing: 6) {
+            // iOS notification-style header: small icon + source name + relative time
+            HStack(spacing: 6) {
+                if notification.isHideNotification {
+                    Image(systemName: "bell.slash")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 18, height: 18)
+                        .foregroundStyle(.secondary)
+                } else {
+                    KFImage(iconUrl)
+                        .withOpenHABCredentials(for: connection)
+                        .placeholder { Image("openHABIcon").resizable() }
+                        .resizable()
+                        .frame(width: 18, height: 18)
+                        .clipShape(.rect(cornerRadius: 4))
                 }
-                .resizable()
-                .frame(width: 40, height: 40)
-                .clipShape(.rect(cornerRadius: 8))
-            VStack(alignment: .leading, spacing: 2) {
+                Text("openHAB")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if let timeStamp = notification.created {
+                    Text(timeStamp, style: .relative)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            if notification.isHideNotification {
+                Text(String(localized: "notification_hide_type", comment: ""))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
                 Text(notification.title.isEmpty ? String(localized: "message_not_decoded", comment: "") : notification.title)
-                    .font(.body)
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 if let subtitle = notification.subtitle {
                     Text(subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .lineLimit(3)
                 }
-                if let timeStamp = notification.created {
-                    Text(dateString(from: timeStamp))
-                        .font(.caption)
-                        .foregroundStyle(.gray)
-                }
-                if let tag = notification.payload?.tag, !tag.isEmpty {
-                    Text(tag)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            if !notification.actions.isEmpty {
-                Divider()
-                actionControl
+            if let tag = notification.payload?.tag, !tag.isEmpty {
+                Text(tag)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
-        .contentShape(Rectangle())
+        .padding(14)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+        .contentShape(RoundedRectangle(cornerRadius: 14))
         .onTapGesture {
-            if let action = notification.onClickAction { onAction(action) }
+            if let action = notification.onClickAction {
+                onAction(action)
+            }
         }
-        .padding(.vertical, 8)
-    }
-
-    @ViewBuilder
-    private var actionControl: some View {
-        if notification.actions.count == 1, let item = notification.actions.first {
-            Button {
-                onAction(item.action)
-            } label: {
-                Text(item.title)
-                    .font(.subheadline.weight(.medium))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .frame(maxWidth: 120)
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(.tint)
-        } else {
-            Menu {
-                ForEach(notification.actions, id: \.action) { item in
-                    Button(item.title) { onAction(item.action) }
+        .contextMenu {
+            if let onClickAction = notification.onClickAction {
+                Button {
+                    onAction(onClickAction)
+                } label: {
+                    Label("notification_action_open", systemImage: "arrow.up.right")
                 }
-            } label: {
-                HStack(spacing: 4) {
-                    Text("Actions")
-                        .font(.subheadline.weight(.medium))
-                        .lineLimit(1)
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.caption2.weight(.semibold))
-                }
-                .frame(maxWidth: 120)
-                .foregroundStyle(.tint)
             }
-            .buttonStyle(.plain)
+            if notification.onClickAction != nil, !notification.actions.isEmpty {
+                Divider()
+            }
+            ForEach(notification.actions, id: \.action) { item in
+                Button(item.title) { onAction(item.action) }
+            }
         }
     }
 
@@ -110,26 +112,20 @@ struct NotificationRow: View {
             iconType: .svg,
             iconColor: ""
         )
-
         guard let url = endpoint?.url, url.scheme != nil else {
             Logger.viewController
                 .warning("Invalid icon URL for icon: \(notification.icon ?? "nil", privacy: .public)")
             return nil
         }
-
         return url
-    }
-
-    private func dateString(from date: Date) -> String {
-        date.formatted(date: .abbreviated, time: .shortened)
     }
 }
 
 #if DEBUG
 
 @MainActor
-class MockNetworkTracker: NetworkTracking, ObservableObject {
-    @Published var activeConnection: ConnectionInfo?
+final class MockNetworkTracker: NetworkTracking {
+    var activeConnection: ConnectionInfo?
 
     init(connection: ConnectionInfo?) {
         activeConnection = connection
@@ -141,6 +137,18 @@ struct NotificationsViewPreview: View {
         let mockTracker = MockNetworkTracker(connection: .mock)
         return NotificationsView(networkTracker: mockTracker, notifications: []) {
             [
+                OpenHABNotification(
+                    id: UUID().uuidString,
+                    message: "Motion detected at front door",
+                    icon: "motion",
+                    onClickAction: "ui:/overview",
+                    actions: [
+                        NotificationActionItem(title: "View Camera", action: "ui:/camera"),
+                        NotificationActionItem(title: "Turn on Light", action: "sendCommand:FrontLight:ON")
+                    ],
+                    created: .now.addingTimeInterval(-90),
+                    v: 0
+                ),
                 OpenHABNotification(
                     id: UUID().uuidString,
                     message: "Preview Notification 1",
@@ -169,8 +177,8 @@ protocol NetworkTracking {
     var activeConnection: ConnectionInfo? { get }
 }
 
-struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: ObservableObject {
-    @ObservedObject var networkTracker: Tracker
+struct NotificationsView<Tracker: NetworkTracking>: View {
+    var networkTracker: Tracker
     @State var notifications: [OpenHABNotification] = []
     let loadNotifications: NotificationLoader
     @Environment(\.dismiss) private var dismiss
@@ -179,9 +187,20 @@ struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: Observab
         List(notifications, id: \.id) { notification in
             if let connection = networkTracker.activeConnection {
                 NotificationRow(notification: notification, connection: connection) { action in
-                    executeAction(action)
+                    executeAction(action, cloudUserId: notification.cloudUserId)
                     dismiss()
                 }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(Color(.systemGroupedBackground))
+        .listStyle(.plain)
+        .overlay {
+            if notifications.isEmpty {
+                ContentUnavailableView("No Notifications", systemImage: "bell.slash")
             }
         }
         .refreshable {
@@ -209,11 +228,11 @@ struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: Observab
         }
     }
 
-    private func executeAction(_ action: String) {
+    private func executeAction(_ action: String, cloudUserId: String?) {
         NotificationCenter.default.post(
             name: .openHABHandleNotificationAction,
             object: nil,
-            userInfo: ["action": action, "cloudUserId": NSNull()]
+            userInfo: ["action": action, "cloudUserId": cloudUserId as Any]
         )
     }
 }
@@ -243,7 +262,7 @@ extension NotificationsView where Tracker == MainActorNetworkTracker {
         _notifications = State(initialValue: notifications)
         loadNotifications = {
             do {
-                guard let config = Preferences.shared.getNotificationConnection() else {
+                guard let config = await Preferences.shared.getNotificationConnection() else {
                     Logger.notificationService.warning("No openHAB configuration found.")
                     return []
                 }

@@ -44,8 +44,7 @@ class SitemapPageViewModel: ObservableObject {
     private var pageHandlingTask: Task<Void, Never>?
     var sseStreamTask: Task<Void, Never>?
     private var foregroundRefreshTask: Task<Void, Never>?
-    private var connectionObserverTask: Task<Void, Never>?
-    private var networkStatusObserverTask: Task<Void, Never>?
+    private var networkObserverTask: Task<Void, Never>?
     let commandDispatcher = WidgetCommandDispatcher()
     let sitemapEventStream = SitemapEventStream()
     var defaultSitemap = ""
@@ -76,6 +75,7 @@ class SitemapPageViewModel: ObservableObject {
     private var pendingLinkedPageNavigation: LinkedPageNavigation?
     private var longPollDebounceTask: Task<Void, Never>?
     private var foregroundObserverTask: Task<Void, Never>?
+    private var preferencesObserverTask: Task<Void, Never>?
     private var rowInputRebuildTask: Task<Void, Never>?
 
     var pageTitle: String {
@@ -99,35 +99,34 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     init() {
-        loadSettings()
         startObservers()
     }
 
     init(pageUrl: String, title: String, pageId: String = "") {
-        loadSettings()
         isLinkedPage = true
+
+        // Extract sitemap name and pageId from the REST URL (…/sitemaps/{name}/{pageId})
+        if let url = URL(string: pageUrl) {
+            let parts = url.pathComponents
+            if let idx = parts.firstIndex(of: "sitemaps"), idx + 1 < parts.count {
+                defaultSitemap = parts[idx + 1]
+            }
+            if pageId.isEmpty {
+                self.pageId = url.lastPathComponent
+            } else {
+                self.pageId = pageId
+            }
+        }
+
         startObservers()
         fallbackTitle = title
         defaultSitemapLabel = title
 
         // Set openHABRootUrl from current active connection for charts/images
         openHABRootUrl = networkTracker.activeConnection?.configuration.url
-
-        // Extract pageId from URL if not provided
-        if pageId.isEmpty {
-            if let urlComponents = URLComponents(string: pageUrl),
-               let extractedPageId = urlComponents.queryItems?.first(where: { $0.name == "sitemap" })?.value {
-                self.pageId = extractedPageId
-            } else if let lastPathComponent = URL(string: pageUrl)?.lastPathComponent {
-                self.pageId = lastPathComponent
-            }
-        } else {
-            self.pageId = pageId
-        }
     }
 
     init(sitemapName: String, pageUrl: String, title: String, pageId: String) {
-        loadSettings()
         defaultSitemap = sitemapName
         isLinkedPage = true
         startObservers()
@@ -136,6 +135,13 @@ class SitemapPageViewModel: ObservableObject {
         self.pageId = pageId
 
         // Set openHABRootUrl from current active connection for charts/images
+        openHABRootUrl = networkTracker.activeConnection?.configuration.url
+    }
+
+    init(sitemapName: String, initialNavigationPath: [LinkedPageNavigation] = []) {
+        defaultSitemap = sitemapName
+        navigationPath = initialNavigationPath
+        startObservers()
         openHABRootUrl = networkTracker.activeConnection?.configuration.url
     }
 
@@ -158,24 +164,55 @@ class SitemapPageViewModel: ObservableObject {
     private func startObservers() {
         trackerStatus = networkTracker.status
 
-        // Observe connection changes (skip initial value) — initial load is triggered by .task in the view.
-        connectionObserverTask = Task { [weak self] in
-            guard let tracker = self?.networkTracker else { return }
-            for await connection in tracker.$activeConnection.values.dropFirst() {
-                await MainActor.run { [weak self] in
-                    self?.handleActiveConnectionChange(connection)
+        // Observe connection and status changes together via the actor's own state stream.
+        // Connection changes skip the initial value (initial load is triggered by .task in
+        // the view); status changes are handled from the first emitted value, matching
+        // trackerStatus's synchronous seed above.
+        networkObserverTask = Task { [weak self] in
+            var previousConnection = self?.networkTracker.activeConnection
+            var previousStatus: NetworkStatus?
+            for await state in await NetworkTracker.shared.stateStream() {
+                if state.activeConnection != previousConnection {
+                    previousConnection = state.activeConnection
+                    await MainActor.run { [weak self] in
+                        self?.handleActiveConnectionChange(state.activeConnection)
+                    }
+                }
+                if state.status != previousStatus {
+                    previousStatus = state.status
+                    await MainActor.run { [weak self] in
+                        self?.trackerStatus = state.status
+                        if state.status == .connected {
+                            self?.flushQueuedCommands()
+                        }
+                    }
                 }
             }
         }
 
-        networkStatusObserverTask = Task { [weak self] in
-            guard let tracker = self?.networkTracker else { return }
-            for await status in tracker.$status.values {
+        // Observe active home preference changes. Restores the live observation that was
+        // removed when Preferences was converted to a plain actor. The stream fires
+        // immediately with the current value (initial sitemap load) and again on every
+        // preference write (e.g. sitemap selection from the menu). Linked pages ignore
+        // this because their defaultSitemap is set explicitly by the caller, not from prefs.
+        preferencesObserverTask = Task { [weak self] in
+            for await prefs in await Preferences.shared.currentHomePreferencesStream {
                 await MainActor.run { [weak self] in
-                    self?.trackerStatus = status
-                    if status == .connected {
-                        self?.flushQueuedCommands()
-                    }
+                    guard let self, !self.isLinkedPage else { return }
+                    let newSitemap = prefs.defaultSitemap
+                    guard !newSitemap.isEmpty, newSitemap != self.defaultSitemap else { return }
+                    self.defaultSitemap = newSitemap
+                    self.startPageHandling(forceRestart: true, reason: "settings-updated")
+                }
+            }
+        }
+
+        // Observe application preference changes — fires immediately with the current value
+        // and again on every write, replacing the one-shot loadSettings() read.
+        Task { [weak self] in
+            for await appPrefs in await Preferences.shared.applicationPreferencesStream {
+                await MainActor.run { [weak self] in
+                    self?.showSearchField = appPrefs.showSearchField
                 }
             }
         }
@@ -237,9 +274,9 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     deinit {
-        connectionObserverTask?.cancel()
-        networkStatusObserverTask?.cancel()
+        networkObserverTask?.cancel()
         foregroundObserverTask?.cancel()
+        preferencesObserverTask?.cancel()
         pageHandlingTask?.cancel()
         sseStreamTask?.cancel()
         let stream = sitemapEventStream
@@ -271,11 +308,6 @@ extension SitemapPageViewModel {
                 previousRowIDs: previousRowIDs
             )
         }.value
-    }
-
-    func loadSettings() {
-        defaultSitemap = Preferences.shared.currentHomePreferences.defaultSitemap
-        showSearchField = Preferences.shared.applicationPreferences.showSearchField
     }
 
     func markAppeared() {
@@ -855,19 +887,6 @@ extension SitemapPageViewModel {
         ssePreferred = true
     }
 
-    @MainActor
-    func navigateToLinkedPage(_ nav: LinkedPageNavigation) {
-        navigationPath.append(nav)
-    }
-
-    @MainActor
-    // swiftlint:disable:next async_without_await
-    func pushSitemap(name: String, path: String?, pendingNavigation: LinkedPageNavigation? = nil) async {
-        configureSitemap(name: name, pageId: path)
-        pendingLinkedPageNavigation = pendingNavigation
-        startPageHandling(forceRestart: true, reason: "push-sitemap")
-    }
-
     private func fetchSitemapLabel() async {
         guard let service = openAPIService else {
             logger.error("OpenAPI service not available for fetching sitemap label")
@@ -914,8 +933,9 @@ extension SitemapPageViewModel {
                 logger.info("Auto-selected single sitemap: \(self.defaultSitemap, privacy: .public)")
 
                 // Save as default for future launches
-                Preferences.shared.modifyActiveHome { homePreferences in
-                    homePreferences.defaultSitemap = defaultSitemap
+                let sitemapToSave1 = defaultSitemap
+                await Preferences.shared.modifyActiveHome { @Sendable homePreferences in
+                    homePreferences.defaultSitemap = sitemapToSave1
                 }
             case 2...:
                 // Multiple sitemaps available - select the first one
@@ -925,14 +945,19 @@ extension SitemapPageViewModel {
                 logger.info("Auto-selected first sitemap from \(filteredSitemaps.count, privacy: .public) available: \(self.defaultSitemap, privacy: .public)")
 
                 // Save as default for future launches
-                Preferences.shared.modifyActiveHome { homePreferences in
-                    homePreferences.defaultSitemap = defaultSitemap
+                let sitemapToSave2 = defaultSitemap
+                await Preferences.shared.modifyActiveHome { @Sendable homePreferences in
+                    homePreferences.defaultSitemap = sitemapToSave2
                 }
             default:
                 logger.error("No sitemaps available")
                 error = SitemapPageError.serviceUnavailable
             }
         } catch {
+            // Don't mutate error state if this task was cancelled — a newer page-handling run
+            // has already cleared self.error and started fresh; overwriting it here would
+            // incorrectly block the new run's content from appearing.
+            guard !Task.isCancelled else { return }
             logger.error("Failed to discover sitemaps: \(error.localizedDescription, privacy: .public)")
             self.error = error as? any LocalizedError ?? SitemapPageError.serviceUnavailable
         }

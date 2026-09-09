@@ -63,8 +63,8 @@ enum NotificationCommandParser {
             return parseUICommand(cmd)
         case "command":
             return parseSendCommand(cmd)
-        case "http":
-            // http commands pass the full original action (including "http:" prefix) as the URL
+        case "http", "https":
+            // http/https commands pass the full original action (including scheme prefix) as the URL
             return parseHTTPCommand(action)
         case "app":
             return parseAppCommand(cmd)

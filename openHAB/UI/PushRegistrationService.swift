@@ -18,6 +18,8 @@ class PushRegistrationService: ObservableObject {
     // MARK: - Private state
 
     private var cancellables = Set<AnyCancellable>()
+    private var networkObservationTask: Task<Void, Never>?
+    private var storedHomesTask: Task<Void, Never>?
     private var apsDeviceToken: String?
     private var apsDeviceId: String?
     private var apsDeviceName: String?
@@ -37,14 +39,16 @@ class PushRegistrationService: ObservableObject {
             }
         }
 
-        MainActorNetworkTracker.shared.$activeConnection
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] activeConnection in
-                if let activeConnection {
-                    self?.activeConnection = activeConnection
-                }
+        networkObservationTask = Task { [weak self] in
+            for await state in await NetworkTracker.shared.stateStream() {
+                guard let activeConnection = state.activeConnection else { continue }
+                self?.activeConnection = activeConnection
             }
-            .store(in: &cancellables)
+        }
+    }
+
+    deinit {
+        networkObservationTask?.cancel()
     }
 
     // MARK: - APS Registration
@@ -63,36 +67,38 @@ class PushRegistrationService: ObservableObject {
             let connection: ConnectionConfiguration
         }
 
-        let storedOpenHabConnections = Preferences.shared.$storedHomes
-            .debounce(for: .seconds(1), scheduler: RunLoop.main)
-            .map { updatedPreferences in
-                Set<UuidWithConnection>(updatedPreferences.compactMap { storedWithUuid in
-                    let (uuid, homeConfig) = storedWithUuid
-                    guard let connection = Preferences.shared.getNotificationConnection(of: homeConfig) else { return nil }
-                    return UuidWithConnection(uuid: uuid, connection: connection)
-                })
-            }
+        storedHomesTask?.cancel()
+        storedHomesTask = Task { @MainActor [weak self] in
+            var previousConnections = Set<UuidWithConnection>()
+            var debounceTask: Task<Void, Never>?
 
-        let connectionsWithPreviousValues = storedOpenHabConnections
-            .scan((previous: Set<UuidWithConnection>(), current: Set<UuidWithConnection>())) { previous, current in
-                (previous: previous.current, current: current)
-            }
+            for await storedHomes in await Preferences.shared.storedHomesStream {
+                debounceTask?.cancel()
+                let capturedHomes = storedHomes
+                debounceTask = Task { @MainActor [weak self] in
+                    try? await Task.sleep(nanoseconds: 1_000_000_000)
+                    guard !Task.isCancelled, let self else { return }
 
-        let differences = connectionsWithPreviousValues.map { (previous, current) in
-            (newValues: current.subtracting(previous), deletedValues: previous.subtracting(current))
+                    let currentConnections = Set<UuidWithConnection>(capturedHomes.compactMap { (uuid, homeConfig) in
+                        guard let connection = Preferences.getNotificationConnection(of: homeConfig) else { return nil }
+                        return UuidWithConnection(uuid: uuid, connection: connection)
+                    })
+                    let newValues = currentConnections.subtracting(previousConnections)
+                    let deletedValues = previousConnections.subtracting(currentConnections)
+                    previousConnections = currentConnections
+
+                    Logger.viewController.info("openhabConnectionSubscription updated")
+                    for newHome in newValues {
+                        Logger.viewController.info("openhabConnectionSubscription uuid \(newHome.uuid) registering for push notifications")
+                        self.registerHome(uuid: newHome.uuid, connection: newHome.connection)
+                    }
+                    for deletedHome in deletedValues {
+                        Logger.viewController.warning("APNS Deregistration is missing (wanted to deregister \(deletedHome.connection.url))")
+                    }
+                }
+            }
+            debounceTask?.cancel()
         }
-
-        differences.sink { [weak self] diff in
-            Logger.viewController.info("openhabConnectionSubscription updated")
-            for newHome in diff.newValues {
-                Logger.viewController.info("openhabConnectionSubscription uuid \(newHome.uuid) registering for push notifications")
-                self?.registerHome(uuid: newHome.uuid, connection: newHome.connection)
-            }
-            for deletedHome in diff.deletedValues {
-                Logger.viewController.warning("APNS Deregistration is missing (wanted to deregister \(deletedHome.connection.url))")
-            }
-        }
-        .store(in: &cancellables)
     }
 
     private func registerHome(uuid: UUID, connection: ConnectionConfiguration) {
@@ -111,7 +117,7 @@ class PushRegistrationService: ObservableObject {
             do {
                 let client = HTTPClient(connectionConfiguration: config)
                 if let cloudUserId = try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) {
-                    Preferences.shared.setCloudUserId(cloudUserId, for: uuid)
+                    await Preferences.shared.setCloudUserId(cloudUserId, for: uuid)
                     Logger.viewController.info("my.openHAB registration succeeded with cloudUserId \(cloudUserId)")
                 }
                 Logger.viewController.info("my.openHAB registration succeeded without cloudUserId")

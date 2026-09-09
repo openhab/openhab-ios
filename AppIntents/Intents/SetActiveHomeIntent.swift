@@ -28,13 +28,11 @@ struct SetActiveHomeIntent: AppIntent {
     var home: Home
 
     func perform() async throws -> some IntentResult {
-        try await MainActor.run {
-            let storedHomes = Preferences.shared.storedHomes
-            guard let localUUID = Home.resolveStoredHomeKey(for: home.id, in: storedHomes) else {
-                throw HomeResolutionError.unknownHome
-            }
-            Preferences.shared.switchActiveHome(to: localUUID)
+        let storedHomes = await Preferences.shared.storedHomes
+        guard let localUUID = Home.resolveStoredHomeKey(for: home.id, in: storedHomes) else {
+            throw HomeResolutionError.unknownHome
         }
+        await Preferences.shared.switchActiveHome(to: localUUID)
         return .result()
     }
 }
