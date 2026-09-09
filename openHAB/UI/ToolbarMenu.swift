@@ -84,6 +84,7 @@ struct ToolbarMenu: View {
     @State private var sitemapForWatch: String?
     @State private var sitemapForCarPlay: String?
     @State private var cachedHomePrefs: HomePreferences?
+    @State private var currentSitemapName: String?
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
@@ -136,6 +137,7 @@ struct ToolbarMenu: View {
         isSystemExpanded = !collapsed.contains(.system)
         sitemapForWatch = prefs.sitemapForWatch
         sitemapForCarPlay = prefs.sitemapForCarPlay
+        currentSitemapName = prefs.defaultSitemap
         headerDetailsHidden = false
         homeDetailsCollapsed = false
     }
@@ -274,25 +276,35 @@ struct ToolbarMenu: View {
         ForEach(menuData.sitemaps, id: \.name) { sitemap in
             let isWatch = sitemap.name == sitemapForWatch
             let isCarPlay = sitemap.name == sitemapForCarPlay
+            let isCurrent = sitemap.name == currentSitemapName
             menuDetailRow(
                 icon: AnyView(sitemapIcon(for: sitemap)),
                 title: mode.titleText(for: sitemap, sortedBy: order),
                 detail: mode.detailText(for: sitemap, sortedBy: order),
                 accessibilityId: sitemap.name,
-                trailing: (isWatch || isCarPlay)
-                    ? AnyView(
-                        HStack(spacing: 4) {
-                            if isWatch { Image(systemSymbol: .applewatchWatchface) }
-                            if isCarPlay { Image(systemSymbol: .steeringwheel) }
-                        }
-                    )
-                    : nil
+                trailing: {
+                    var views: [AnyView] = []
+                    if isWatch { views.append(AnyView(Image(systemSymbol: .applewatchWatchface))) }
+                    if isCarPlay { views.append(AnyView(Image(systemSymbol: .steeringwheel))) }
+                    if views.isEmpty { return nil }
+                    return AnyView(HStack(spacing: 4) { ForEach(Array(views.enumerated()), id: \.offset) { _, v in v } })
+                }()
+            )
+            .background(
+                Group {
+                    if isCurrent {
+                        Color.secondary.opacity(0.12)
+                    }
+                }
             )
             // All three gestures are on this same view so SwiftUI can disambiguate the
             // single- vs double-tap count correctly (it can't across separate modifier
             // layers, e.g. one inside menuDetailRow and one attached by the caller).
             .onTapGesture(count: 2) { toggleWatchSitemap(sitemap) }
-            .onTapGesture { select(.sitemap(sitemap.name)) }
+            .onTapGesture {
+                currentSitemapName = sitemap.name
+                select(.sitemap(sitemap.name))
+            }
             .onLongPressGesture { toggleCarPlaySitemap(sitemap) }
         }
     }
@@ -678,11 +690,12 @@ struct ToolbarMenu: View {
                         .lineLimit(1)
                 }
             }
+            Spacer(minLength: 0)
             if let trailing {
-                Spacer()
                 trailing
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .contentShape(Rectangle())
