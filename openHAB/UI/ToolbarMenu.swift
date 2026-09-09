@@ -480,6 +480,7 @@ struct ToolbarMenu: View {
                         Text("Homes")
                             .font(.footnote)
                             .fontWeight(.semibold)
+                            .padding(.bottom, 3)
 
                         ZStack(alignment: .topLeading) {
                             // Always-present placeholder keeps space during the fade.
@@ -489,9 +490,9 @@ struct ToolbarMenu: View {
                                     .transition(.opacity)
                             }
                         }
-                        .padding(.top, 3)
-                        .frame(maxHeight: homeDetailsCollapsed ? 0 : 30, alignment: .top)
+                        .frame(maxHeight: homeDetailsCollapsed ? 0 : 40, alignment: .top)
                         .clipped()
+                        .layoutPriority(1)
                     }
                     Spacer(minLength: 0)
                 }
@@ -504,6 +505,7 @@ struct ToolbarMenu: View {
                 Image(systemSymbol: .arrowClockwise).foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
+            .frame(maxHeight: .infinity)
             .padding(.trailing, homeDetailsCollapsed ? 0 : 12)
 
             ZStack {
@@ -520,6 +522,7 @@ struct ToolbarMenu: View {
             .allowsHitTesting(!headerDetailsHidden && !homeDetailsCollapsed)
             .frame(width: homeDetailsCollapsed ? 0 : nil)
             .clipped()
+            .frame(maxHeight: .infinity)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -736,3 +739,4 @@ struct ToolbarMenu: View {
         onSelect(target)
     }
 }
+
