@@ -180,9 +180,11 @@ struct OpenHABRootView: View {
         switch currentContent {
         case .webview, .mainUIPage:
             ZStack(alignment: .top) {
+                // The Main UI lays itself out from the safe-area insets and reserves the
+                // navbar space the bar below sits on.
                 OpenHABWebViewContainer(viewModel: webViewModel)
-                    .padding(.top, 44)
                     .background(.clear)
+                    .ignoresSafeArea()
                 // Placeholder while a home is first loading. Sits above the (transparent)
                 // web view but below the menu bar, so the menu stays reachable and the user
                 // can switch homes even while connecting.
@@ -190,7 +192,13 @@ struct OpenHABRootView: View {
                     ConnectingPlaceholder()
                         .transition(.opacity)
                 }
+                // Same slide Framework7 uses for its navbar: up by the bar height, fading, 400ms.
                 menuBar
+                    .offset(y: webViewModel.isWebNavbarHidden ? -menuBarHeight : 0)
+                    .opacity(webViewModel.isWebNavbarHidden ? 0 : 1)
+                    .allowsHitTesting(!webViewModel.isWebNavbarHidden)
+                    .animation(.timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.4),
+                               value: webViewModel.isWebNavbarHidden)
             }
             .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
             .onAppear { webViewModel.triggerAppMenuProbe() }
@@ -207,6 +215,14 @@ struct OpenHABRootView: View {
         }
     }
 
+    /// Matches the height Framework7 reserves for its navbar, so the bar covers it exactly.
+    private var menuBarHeight: CGFloat {
+        switch currentContent {
+        case .webview, .mainUIPage: webViewModel.webNavbarHeight
+        default: 44
+        }
+    }
+
     @ViewBuilder
     private var menuBar: some View {
         let isWebviewMode: Bool = {
@@ -217,7 +233,7 @@ struct OpenHABRootView: View {
         }()
 
         let barTitle: String = {
-            if isWebviewMode { return webViewModel.navbarTitle }
+            if isWebviewMode { return webViewModel.isWebNavbarTitleHidden ? "" : webViewModel.navbarTitle }
             if case .tile = currentContent { return currentViewTitle }
             return ""
         }()
@@ -298,7 +314,7 @@ struct OpenHABRootView: View {
             .opacity(menuPresented ? 0.0 : 1.0)
             .animation(.spring(response: 0.32, dampingFraction: 0.78), value: menuPresented)
         }
-        .frame(height: 44)
+        .frame(height: menuBarHeight)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("MainMenuBar")
         .overlay {
@@ -474,18 +490,42 @@ struct OpenHABRootView: View {
     /// is recorded as `currentContent` so a later reload returns here rather than to an
     /// arbitrary route the user reached inside the SPA.
     private func showMainUI(path: String?) {
+        let wasShowingMainUI = isMainUIShown
+        // Ask the web view what it holds, not which surface was last visible: a tile's URL
+        // survives a detour through a sitemap.
+        let showsTile = webViewModel.isShowingTile
+
         currentContent = path.map(TargetController.mainUIPage) ?? .webview
-        if webViewModel.isMainUIReady {
-            webViewModel.navigateCommand("navigate:\(path ?? "/")")
-        } else {
-            webViewModel.loadWebView(force: false, path: path)
+
+        if showsTile {
+            // Explicit path, so the origin-only ETag check can't skip the load.
+            webViewModel.loadWebView(force: false, path: path ?? "/")
+        } else if let path {
+            routeMainUI(to: path)
+        } else if !webViewModel.hasLoadedContent {
+            webViewModel.loadWebView(force: false, path: nil)
+        } else if wasShowingMainUI {
+            // Picking Main UI while already on it goes to the root, like re-picking a sitemap.
+            routeMainUI(to: "/")
         }
+        // Coming back from a sitemap: the web view still holds the page, so leave it alone.
+
         persistDefaultViewIfNeeded("web")
         if !(cachedHomePrefs?.demomode ?? false) {
             let capturedPath = path ?? ""
             Task {
                 await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultMainUIPath = capturedPath }
-            }
+			}
+		}
+	}
+
+    /// Routes client-side when the SPA is live, so its in-app state survives. `isMainUIReady`
+    /// alone is not enough — it is true for `about:blank` too.
+    private func routeMainUI(to path: String) {
+        if webViewModel.isMainUIReady, webViewModel.hasLoadedContent {
+            webViewModel.navigateCommand("navigate:\(path)")
+        } else {
+            webViewModel.loadWebView(force: false, path: path)
         }
     }
 
@@ -496,8 +536,6 @@ struct OpenHABRootView: View {
         }
     }
 
-    /// Persists the home's default view only when it actually changes, avoiding a
-    /// redundant preferences write (which would otherwise restart network tracking).
     private func persistDefaultViewIfNeeded(_ viewName: String) {
         guard !(cachedHomePrefs?.demomode ?? false) else { return }
         guard cachedHomePrefs?.defaultView != viewName else { return }
