@@ -158,17 +158,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
                 guard settings.authorizationStatus == .authorized else { return }
                 Task { @MainActor in
+                    Logger.appDelegate.info("Calling registerForRemoteNotifications")
                     UIApplication.shared.registerForRemoteNotifications()
                 }
             }
         }
     }
 
-    /// This is only informational - on success - DID Register
+    @MainActor
+    private static func postApsRegistration(fcmToken: String) {
+        let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "UnknownDeviceID"
+        let deviceName = UIDevice.current.name
+
+        Logger.appDelegate.info("My FCM token is: \(fcmToken, privacy: .private)")
+
+        let dataDict: [String: Any] = [
+            "deviceToken": fcmToken,
+            "deviceId": deviceID,
+            "deviceName": deviceName
+        ]
+
+        NotificationCenter.default.post(
+            name: NSNotification.Name("apsRegistered"),
+            object: nil,
+            userInfo: dataDict
+        )
+    }
+
+    /// FCM only mints a new registration token once it sees the APNs token change. Without this
+    /// it can keep serving a token whose APNs token Apple has since disabled, which my.openHAB
+    /// then accepts as a registration and pushes to forever, getting
+    /// registration-token-not-registered back on every send.
+    /// https://firebase.google.com/docs/cloud-messaging/ios/client#disable-swizzling-token
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        // TODO: remove before shipping
-        // Logger.appDelegate.info("APNs token: \(deviceToken.map { String(format: "%02x", $0) }.joined())")
-        // Do nothing now, we are using FCM
+        Messaging.messaging().apnsToken = deviceToken
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
@@ -287,25 +310,14 @@ extension AppDelegate {
 }
 
 extension AppDelegate: MessagingDelegate {
+    /// Called when the FCM token is created or refreshed.
     nonisolated func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        guard let fcmToken, !fcmToken.isEmpty else {
+            Logger.appDelegate.error("Received an empty FCM token")
+            return
+        }
         Task { @MainActor in
-            let safeToken = fcmToken ?? ""
-            let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "UnknownDeviceID"
-            let deviceName = UIDevice.current.name
-
-            Logger.appDelegate.info("My FCM token is: \(safeToken, privacy: .private)")
-
-            let dataDict: [String: Any] = [
-                "deviceToken": safeToken,
-                "deviceId": deviceID,
-                "deviceName": deviceName
-            ]
-
-            NotificationCenter.default.post(
-                name: NSNotification.Name("apsRegistered"),
-                object: self,
-                userInfo: dataDict
-            )
+            AppDelegate.postApsRegistration(fcmToken: fcmToken)
         }
     }
 }
