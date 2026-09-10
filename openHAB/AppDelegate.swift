@@ -185,6 +185,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         )
     }
 
+    /// FCM only mints a new registration token once it sees the APNs token change. Without this
+    /// it can keep serving a token whose APNs token Apple has since disabled, which my.openHAB
+    /// then accepts as a registration and pushes to forever, getting
+    /// registration-token-not-registered back on every send.
+    /// https://firebase.google.com/docs/cloud-messaging/ios/client#disable-swizzling-token
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
+    }
+
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
         Logger.appDelegate.error("Failed to get token for notifications: \(error.localizedDescription)")
     }
