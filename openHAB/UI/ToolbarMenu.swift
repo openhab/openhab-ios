@@ -85,6 +85,7 @@ struct ToolbarMenu: View {
     @State private var sitemapForCarPlay: String?
     @State private var cachedHomePrefs: HomePreferences?
     @State private var currentSitemapName: String?
+    @State private var currentMainUIRoute: String?
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
@@ -293,7 +294,7 @@ struct ToolbarMenu: View {
             .background(
                 Group {
                     if isCurrent {
-                        Color.secondary.opacity(0.12)
+                        Color.secondary.opacity(0.15)
                     }
                 }
             )
@@ -314,24 +315,30 @@ struct ToolbarMenu: View {
         // Hidden until the current home has had at least one successful fetch —
         // consistent with how sitemaps/pages behave during the loading state.
         if menuData.hasSuccessfullyLoaded {
+            let homeRoute = "/"
             menuRow(
                 icon: AnyView(Image("openHABIcon").resizable()),
                 label: String(localized: "Home"),
                 accessibilityId: "Home"
             ) {
+                currentMainUIRoute = homeRoute
                 select(.webview)
             }
+            .background(currentMainUIRoute == homeRoute ? Color.secondary.opacity(0.15) : Color.clear)
         }
         if menuData.isLoading {
             loadingRow(label: String(localized: "Pages"))
         } else {
             ForEach(menuData.uiPages, id: \.uid) { page in
+                let route = "/page/\(page.uid)"
                 menuRow(
                     icon: AnyView(pageIcon(for: page)),
                     label: page.label
                 ) {
-                    select(.mainUIPage("/page/\(page.uid)"))
+                    currentMainUIRoute = route
+                    select(.mainUIPage(route))
                 }
+                .background(currentMainUIRoute == route ? Color.secondary.opacity(0.15) : Color.clear)
             }
         }
     }
@@ -653,6 +660,7 @@ struct ToolbarMenu: View {
                     trailing
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .contentShape(Rectangle())
