@@ -95,7 +95,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     @MainActor
     private func performDeferredSetup() {
         registerForPushNotifications()
-        publishCurrentFCMToken()
         Logger.appDelegate.info("uniq id: \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
         Logger.appDelegate.info("device name: \(UIDevice.current.name)")
 
@@ -162,45 +161,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     Logger.appDelegate.info("Calling registerForRemoteNotifications")
                     UIApplication.shared.registerForRemoteNotifications()
                 }
-            }
-        }
-    }
-
-    /// Publishes the current FCM registration token to `PushRegistrationService`.
-    ///
-    /// Remove this method and its call site in `performDeferredSetup()` once we are on Firebase
-    /// 12.19.0 or later.
-    ///
-    /// Why it exists: FCM 12.18.0 stopped calling `messaging(_:didReceiveRegistrationToken:)` at
-    /// launch for a cached, unchanged token, so nothing triggered registration after the first
-    /// launch post-install. Fixed upstream in 12.19.0 (unreleased as of 2026-09-09).
-    @MainActor
-    private func publishCurrentFCMToken() {
-        #if DEBUG
-        // do not register with the cloud if running UITest, as registerForPushNotifications does
-        if ProcessInfo.processInfo.environment["UITest"] != nil {
-            return
-        }
-        #endif
-
-        // Deprecated in favour of FID registration, but my.openHAB expects the FCM token as regId.
-        if let cachedToken = Messaging.messaging().fcmToken, !cachedToken.isEmpty {
-            AppDelegate.postApsRegistration(fcmToken: cachedToken)
-            return
-        }
-
-        Logger.appDelegate.info("No cached FCM token, requesting one")
-        Messaging.messaging().token { token, error in
-            if let error {
-                Logger.appDelegate.error("Failed to fetch FCM token: \(error.localizedDescription)")
-                return
-            }
-            guard let token, !token.isEmpty else {
-                Logger.appDelegate.error("Fetched FCM token was empty")
-                return
-            }
-            Task { @MainActor in
-                AppDelegate.postApsRegistration(fcmToken: token)
             }
         }
     }
