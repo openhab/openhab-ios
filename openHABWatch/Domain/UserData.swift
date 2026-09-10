@@ -26,6 +26,7 @@ final class UserData: ObservableObject {
     @Published var showCertificateAlert = false
     @Published var certificateErrorDescription = ""
     @Published var isLoadingSitemap = false
+    @Published var pendingCommandConfirmation: PendingCommandConfirmation?
 
     // Cache last successful widgets to prevent empty state during reconnections
     private var cachedWidgets: [OpenHABWidget] = []

@@ -47,6 +47,7 @@ struct InteractiveStateTokenPreview<Content: View>: View {
 
 struct PreviewNavigationContainer<Content: View>: View {
     @State private var settings = AppSettings()
+    @State private var userData = UserData(preview: true)
     private let content: Content
 
     var body: some View {
@@ -54,6 +55,7 @@ struct PreviewNavigationContainer<Content: View>: View {
             content
         }
         .environmentObject(settings)
+        .environmentObject(userData)
     }
 
     init(@ViewBuilder content: () -> Content) {

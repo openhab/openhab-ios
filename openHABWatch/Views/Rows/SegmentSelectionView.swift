@@ -17,6 +17,7 @@ struct SegmentSelectionView: View {
     let stateToken: String
     @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var pageData: UserData
     @State private var pressedIndex: Int?
     @State private var viewModel: WidgetRowViewModel
     @State private var commandSender = WidgetCommandDispatcher()
@@ -46,6 +47,11 @@ struct SegmentSelectionView: View {
         .onChange(of: stateToken, initial: false) { _, _ in
             viewModel.update(from: widget)
             selectedIndex = viewModel.selectedIndex
+        }
+        .onAppear {
+            commandSender.confirmationHandler = { message, proceed in
+                pageData.pendingCommandConfirmation = PendingCommandConfirmation(message: message, onConfirm: proceed)
+            }
         }
     }
 
