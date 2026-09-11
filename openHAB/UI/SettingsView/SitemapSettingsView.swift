@@ -101,10 +101,13 @@ struct SitemapSettingsView: View {
         Picker("Sitemap for Apple Watch", selection: $settingsSitemapForWatch) {
             Text("None").tag("")
             if sitemaps.isEmpty {
-                // Tag the placeholder with the stored selection so the Picker has a
-                // matching tag (avoids the "invalid selection" warning while the
-                // sitemap list is still loading).
-                Text("No sitemaps available").tag(settingsSitemapForWatch).foregroundStyle(.secondary)
+                // "None" above already covers the empty selection, so only add this
+                // placeholder when the stored selection is some other, not-yet-loaded
+                // sitemap — otherwise it would tag "" a second time (avoids the
+                // "invalid selection" warning while the sitemap list is still loading).
+                if !settingsSitemapForWatch.isEmpty {
+                    Text("No sitemaps available").tag(settingsSitemapForWatch).foregroundStyle(.secondary)
+                }
             } else {
                 ForEach(sitemaps, id: \.name) { sitemap in
                     Text(settingsSitemapNameLabelDisplayMode.combinedText(for: sitemap, sortedBy: settingsSortSitemapsBy)).tag(sitemap.name)
