@@ -285,6 +285,7 @@ struct OpenHABRootView: View {
             ToolbarMenu(
                 isPresented: $menuPresented,
                 menuData: menuData,
+                currentContent: currentContent,
                 onSelect: { target in handleMenuSelection(target) },
                 onReload: { reloadCurrentContent() }
             )
