@@ -84,14 +84,37 @@ struct ToolbarMenu: View {
     @State private var sitemapForWatch: String?
     @State private var sitemapForCarPlay: String?
     @State private var cachedHomePrefs: HomePreferences?
+    /// The surface `OpenHABRootView` currently shows. The single source of truth for which
+    /// row (if any) is highlighted as current — read directly rather than mirrored into local
+    /// `@State`, so navigation that bypasses this menu entirely (a push-notification deep
+    /// link, a home switch) is reflected here too instead of leaving a stale highlight.
+    var currentContent: TargetController
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
     @ScaledMetric private var iconWidth = 20.0
 
+    private var currentSitemapName: String? {
+        if case let .sitemap(name, _) = currentContent { return name }
+        return nil
+    }
+
+    private var currentMainUIRoute: String? {
+        switch currentContent {
+        case .webview: Self.mainUIHomeRoute
+        case let .mainUIPage(path): path
+        default: nil
+        }
+    }
+
     /// Shared curve so the section content and the container height animate in sync.
     private static let sectionAnimationDuration: Double = 0.25
     private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
+
+    /// Route for the MainUI root/Home row, matching what `OpenHABRootView.showMainUI(path:)`
+    /// persists to `defaultMainUIPath` when the user picks Home (an empty path there means
+    /// this route, since `path: nil` is captured as `""`).
+    private static let mainUIHomeRoute = "/"
 
     var body: some View {
         GeometryReader { proxy in
@@ -274,20 +297,20 @@ struct ToolbarMenu: View {
         ForEach(menuData.sitemaps, id: \.name) { sitemap in
             let isWatch = sitemap.name == sitemapForWatch
             let isCarPlay = sitemap.name == sitemapForCarPlay
+            let isCurrent = sitemap.name == currentSitemapName
             menuDetailRow(
                 icon: AnyView(sitemapIcon(for: sitemap)),
                 title: mode.titleText(for: sitemap, sortedBy: order),
                 detail: mode.detailText(for: sitemap, sortedBy: order),
                 accessibilityId: sitemap.name,
-                trailing: (isWatch || isCarPlay)
-                    ? AnyView(
-                        HStack(spacing: 4) {
-                            if isWatch { Image(systemSymbol: .applewatchWatchface) }
-                            if isCarPlay { Image(systemSymbol: .steeringwheel) }
-                        }
-                    )
-                    : nil
+                trailing: (isWatch || isCarPlay) ? AnyView(
+                    HStack(spacing: 4) {
+                        if isWatch { Image(systemSymbol: .applewatchWatchface) }
+                        if isCarPlay { Image(systemSymbol: .steeringwheel) }
+                    }
+                ) : nil
             )
+            .background(currentRowBackground(isCurrent))
             // All three gestures are on this same view so SwiftUI can disambiguate the
             // single- vs double-tap count correctly (it can't across separate modifier
             // layers, e.g. one inside menuDetailRow and one attached by the caller).
@@ -302,6 +325,7 @@ struct ToolbarMenu: View {
         // Hidden until the current home has had at least one successful fetch —
         // consistent with how sitemaps/pages behave during the loading state.
         if menuData.hasSuccessfullyLoaded {
+            let homeRoute = Self.mainUIHomeRoute
             menuRow(
                 icon: AnyView(Image("openHABIcon").resizable()),
                 label: String(localized: "Home"),
@@ -309,17 +333,20 @@ struct ToolbarMenu: View {
             ) {
                 select(.webview)
             }
+            .background(currentRowBackground(currentMainUIRoute == homeRoute))
         }
         if menuData.isLoading {
             loadingRow(label: String(localized: "Pages"))
         } else {
             ForEach(menuData.uiPages, id: \.uid) { page in
+                let route = "/page/\(page.uid)"
                 menuRow(
                     icon: AnyView(pageIcon(for: page)),
                     label: page.label
                 ) {
-                    select(.mainUIPage("/page/\(page.uid)"))
+                    select(.mainUIPage(route))
                 }
+                .background(currentRowBackground(currentMainUIRoute == route))
             }
         }
     }
@@ -641,6 +668,7 @@ struct ToolbarMenu: View {
                     trailing
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .contentShape(Rectangle())
@@ -678,16 +706,23 @@ struct ToolbarMenu: View {
                         .lineLimit(1)
                 }
             }
+            Spacer(minLength: 0)
             if let trailing {
-                Spacer()
                 trailing
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .contentShape(Rectangle())
         .accessibilityIdentifier(accessibilityId ?? title)
         .accessibilityAddTraits(.isButton)
+    }
+
+    /// Shared highlight background for a menu row representing the currently displayed
+    /// sitemap/page, used by both `sitemapsMenu()` and `mainUIMenu()`.
+    private func currentRowBackground(_ isCurrent: Bool) -> some View {
+        isCurrent ? Color.secondary.opacity(0.15) : Color.clear
     }
 
     private func systemRow(symbol: SFSymbol, label: String, action: @escaping () -> Void) -> some View {
