@@ -281,21 +281,14 @@ extension ToolbarMenu {
                 title: mode.titleText(for: sitemap, sortedBy: order),
                 detail: mode.detailText(for: sitemap, sortedBy: order),
                 accessibilityId: sitemap.name,
-                trailing: {
-                    var views: [AnyView] = []
-                    if isWatch { views.append(AnyView(Image(systemSymbol: .applewatchWatchface))) }
-                    if isCarPlay { views.append(AnyView(Image(systemSymbol: .steeringwheel))) }
-                    if views.isEmpty { return nil }
-                    return AnyView(HStack(spacing: 4) { ForEach(Array(views.enumerated()), id: \.offset) { _, v in v } })
-                }()
-            )
-            .background(
-                Group {
-                    if isCurrent {
-                        Color.secondary.opacity(0.15)
+                trailing: (isWatch || isCarPlay) ? AnyView(
+                    HStack(spacing: 4) {
+                        if isWatch { Image(systemSymbol: .applewatchWatchface) }
+                        if isCarPlay { Image(systemSymbol: .steeringwheel) }
                     }
-                }
+                ) : nil
             )
+            .background(currentRowBackground(isCurrent))
             // All three gestures are on this same view so SwiftUI can disambiguate the
             // single- vs double-tap count correctly (it can't across separate modifier
             // layers, e.g. one inside menuDetailRow and one attached by the caller).
@@ -322,7 +315,7 @@ extension ToolbarMenu {
                 currentMainUIRoute = homeRoute
                 select(.webview)
             }
-            .background(currentMainUIRoute == homeRoute ? Color.secondary.opacity(0.15) : Color.clear)
+            .background(currentRowBackground(currentMainUIRoute == homeRoute))
         }
         if menuData.isLoading {
             loadingRow(label: String(localized: "Pages"))
@@ -336,7 +329,7 @@ extension ToolbarMenu {
                     currentMainUIRoute = route
                     select(.mainUIPage(route))
                 }
-                .background(currentMainUIRoute == route ? Color.secondary.opacity(0.15) : Color.clear)
+                .background(currentRowBackground(currentMainUIRoute == route))
             }
         }
     }
@@ -709,6 +702,12 @@ extension ToolbarMenu {
         .contentShape(Rectangle())
         .accessibilityIdentifier(accessibilityId ?? title)
         .accessibilityAddTraits(.isButton)
+    }
+
+    /// Shared highlight background for a menu row representing the currently displayed
+    /// sitemap/page, used by both `sitemapsMenu()` and `mainUIMenu()`.
+    private func currentRowBackground(_ isCurrent: Bool) -> some View {
+        isCurrent ? Color.secondary.opacity(0.15) : Color.clear
     }
 
     private func systemRow(symbol: SFSymbol, label: String, action: @escaping () -> Void) -> some View {
