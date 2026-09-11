@@ -88,8 +88,11 @@ struct ToolbarMenu: View {
     @State private var sitemapForWatch: String?
     @State private var sitemapForCarPlay: String?
     @State private var cachedHomePrefs: HomePreferences?
-    @State private var currentSitemapName: String?
-    @State private var currentMainUIRoute: String?
+    /// The surface `OpenHABRootView` currently shows. The single source of truth for which
+    /// row (if any) is highlighted as current — read directly rather than mirrored into local
+    /// `@State`, so navigation that bypasses this menu entirely (a push-notification deep
+    /// link, a home switch) is reflected here too instead of leaving a stale highlight.
+    var currentContent: TargetController
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
 
@@ -140,7 +143,6 @@ extension ToolbarMenu {
         isSystemExpanded = !collapsed.contains(.system)
         sitemapForWatch = prefs.sitemapForWatch
         sitemapForCarPlay = prefs.sitemapForCarPlay
-        currentSitemapName = prefs.defaultSitemap
         headerDetailsHidden = false
         homeDetailsCollapsed = false
     }
@@ -293,10 +295,7 @@ extension ToolbarMenu {
             // single- vs double-tap count correctly (it can't across separate modifier
             // layers, e.g. one inside menuDetailRow and one attached by the caller).
             .onTapGesture(count: 2) { toggleWatchSitemap(sitemap) }
-            .onTapGesture {
-                currentSitemapName = sitemap.name
-                select(.sitemap(sitemap.name))
-            }
+            .onTapGesture { select(.sitemap(sitemap.name)) }
             .onLongPressGesture { toggleCarPlaySitemap(sitemap) }
         }
     }
@@ -306,13 +305,12 @@ extension ToolbarMenu {
         // Hidden until the current home has had at least one successful fetch —
         // consistent with how sitemaps/pages behave during the loading state.
         if menuData.hasSuccessfullyLoaded {
-            let homeRoute = "/"
+            let homeRoute = Self.mainUIHomeRoute
             menuRow(
                 icon: AnyView(Image("openHABIcon").resizable()),
                 label: String(localized: "Home"),
                 accessibilityId: "Home"
             ) {
-                currentMainUIRoute = homeRoute
                 select(.webview)
             }
             .background(currentRowBackground(currentMainUIRoute == homeRoute))
@@ -326,7 +324,6 @@ extension ToolbarMenu {
                     icon: AnyView(pageIcon(for: page)),
                     label: page.label
                 ) {
-                    currentMainUIRoute = route
                     select(.mainUIPage(route))
                 }
                 .background(currentRowBackground(currentMainUIRoute == route))
