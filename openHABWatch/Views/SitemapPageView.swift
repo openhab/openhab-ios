@@ -16,7 +16,7 @@ import SwiftUI
 /// A wrapper view that handles linkedPage navigation for widgets
 struct WidgetRowView: View {
     @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
 
     private var refreshToken: String {
         let displayState = widget.displayState
@@ -38,8 +38,8 @@ struct WidgetRowView: View {
 }
 
 struct SitemapPageView: View {
-    @ObservedObject var viewModel: UserData
-    @EnvironmentObject var settings: AppSettings
+    @Bindable var viewModel: UserData
+    @Environment(AppSettings.self) var settings
     @State var title = "Sitemap"
     @State private var scrollPosition: String?
     var isRoot = true
@@ -51,7 +51,7 @@ struct SitemapPageView: View {
                     pageContent
                         .navigationDestination(for: OpenHABPage.self) { linkedPage in
                             SitemapPageView(viewModel: UserData(linkedPage: linkedPage), isRoot: false)
-                                .environmentObject(settings)
+                                .environment(settings)
                         }
                 }
             } else {
@@ -139,9 +139,8 @@ struct SitemapPageView: View {
 
     return Group {
         SitemapPageView(viewModel: userData)
-            .environmentObject(userData)
 
         SitemapPageView(viewModel: userData)
     }
-    .environmentObject(appSettings)
+    .environment(appSettings)
 }

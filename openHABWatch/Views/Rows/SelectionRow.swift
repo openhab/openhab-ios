@@ -81,7 +81,7 @@ struct SelectionRow: View {
     let title: String
     let initialSelectedIndex: Int?
     let labelValue: String?
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
     @State private var selectedIndex: Int?
 
     /// Returns the label of the currently selected mapping
