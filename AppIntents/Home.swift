@@ -75,17 +75,16 @@ enum HomeResolver {
         return homeId
     }
 
-    /// Production overload — builds the stable-identifier map on the main actor before delegating
+    /// Production overload — builds the stable-identifier map from the Preferences actor before delegating
     /// to the testable sync overload. Intent `perform()` methods call this with `try await`.
-    @MainActor
     static func resolvedHomeId(selectedHome: Home?,
                                itemHomeId: UUID?,
                                itemLabel: String,
-                               mismatchError: (String, String) -> some Error) throws -> UUID {
+                               mismatchError: (String, String) -> some Error) async throws -> UUID {
         // Map entries use the storedHomes dict key (not HomePreferences.id) so the resolved UUID
         // matches the dict key stored in ItemIdentifier.homeId by entities(for:) — both sides of
         // the guard homeId == itemHomeId check are then the same value.
-        let storedHomes = Preferences.shared.storedHomes
+        let storedHomes = await Preferences.shared.storedHomes
         // Count occurrences of each stableIdentifier so bare-name entries are only added when
         // unique — mirrors resolvePreferences(for:in:) which requires a unique stable-id match.
         let stableIdCounts = storedHomes.values.reduce(into: [String: Int]()) { $0[$1.stableIdentifier, default: 0] += 1 }
@@ -116,9 +115,8 @@ enum HomeResolver {
             selectedHome: selectedHome,
             itemName: itemName,
             findHomeId: { identifier in
-                await MainActor.run {
-                    Home.resolveStoredHomeKey(for: identifier, in: Preferences.shared.storedHomes)
-                }
+                let storedHomes = await Preferences.shared.storedHomes
+                return Home.resolveStoredHomeKey(for: identifier, in: storedHomes)
             },
             listStoredHomes: { await Preferences.shared.listStoredHomes() },
             exactMatchedHomes: {
@@ -181,9 +179,8 @@ enum HomeResolver {
 
 struct Home: AppEntity {
     struct HomeQuery: EntityQuery {
-        @MainActor
-        func entities(for identifiers: [Home.ID]) throws -> [Home] {
-            let storedHomes = Preferences.shared.storedHomes
+        func entities(for identifiers: [Home.ID]) async throws -> [Home] {
+            let storedHomes = await Preferences.shared.storedHomes
             return identifiers.compactMap { identifier in
                 if let prefs = Home.resolvePreferences(for: identifier, in: storedHomes) {
                     // Return the home with the ORIGINAL identifier so Home.id matches what the
@@ -205,9 +202,9 @@ struct Home: AppEntity {
             }
         }
 
-        @MainActor
-        func suggestedEntities() throws -> [Home] {
-            Preferences.shared.storedHomes.values
+        func suggestedEntities() async throws -> [Home] {
+            let storedHomes = await Preferences.shared.storedHomes
+            return storedHomes.values
                 .sorted {
                     let nameOrder = $0.homeName.localizedCaseInsensitiveCompare($1.homeName)
                     if nameOrder != .orderedSame {
@@ -236,7 +233,6 @@ struct Home: AppEntity {
         self.displayString = displayString
     }
 
-    @MainActor
     init(homePrefs: HomePreferences) {
         // Append the local UUID after "##" to disambiguate homes that share the same
         // stableIdentifier (e.g. same local URL on two different networks). Resolution
@@ -264,13 +260,11 @@ struct Home: AppEntity {
     ///
     /// Unlike `resolvePreferences(for:in:)?.id`, this always returns the canonical dictionary key.
     /// The key may differ from `HomePreferences.id` when stored data has a key/id mismatch.
-    @MainActor
     static func resolveStoredHomeKey(for identifier: String, in storedHomes: [UUID: HomePreferences]) -> UUID? {
         guard let prefs = resolvePreferences(for: identifier, in: storedHomes) else { return nil }
         return storedHomes.first { $0.value.id == prefs.id }?.key ?? prefs.id
     }
 
-    @MainActor
     static func resolvePreferences(for identifier: String, in storedHomes: [UUID: HomePreferences]) -> HomePreferences? {
         if identifier.contains("##") {
             // Current format: "stableIdentifier##localUUID"

@@ -23,7 +23,7 @@ struct OpenHABRootView: View {
     @StateObject private var notificationService = NotificationActionService()
     @StateObject private var pushService = PushRegistrationService()
     @StateObject private var crashService = CrashReportService()
-    @StateObject private var menuData = MenuDataService()
+    @State private var menuData = MenuDataService()
     @StateObject private var webViewModel = OpenHABWebViewModel()
     @State private var menuPresented = false
     @State private var navbarActionsPresented = false
@@ -32,6 +32,7 @@ struct OpenHABRootView: View {
     @State private var activeNetworkConnection: ConnectionInfo? = MainActorNetworkTracker.shared.activeConnection
     @State private var showNotifications = false
     @State private var sitemapResetID = UUID()
+    @State private var cachedHomePrefs: HomePreferences?
 
     var body: some View {
         ZStack {
@@ -49,7 +50,9 @@ struct OpenHABRootView: View {
             #if DEBUG
             let env = ProcessInfo.processInfo.environment
             if env["UITest"] != nil {
-                Preferences.shared.modifyActiveHome { $0.demomode = true }
+                Task {
+                    await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.demomode = true }
+                }
             }
             if let title = env["UITestToastTitle"],
                let message = env["UITestToastMessage"] {
@@ -78,7 +81,7 @@ struct OpenHABRootView: View {
                    let data = Data(base64Encoded: encoded),
                    let html = String(data: data, encoding: .utf8) {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        webViewModel.loadHTMLString(html)
+                        Task { await webViewModel.loadHTMLString(html) }
                     }
                 }
             }
@@ -96,7 +99,7 @@ struct OpenHABRootView: View {
             }
             #endif
             ImageDownloader.default.authenticationChallengeResponder = networkService
-            switchToSavedView()
+            Task { await switchToSavedView() }
             setupExitToApp()
         }
         .onReceive(notificationService.$navigationCommand.compactMap { $0 }) { command in
@@ -107,16 +110,24 @@ struct OpenHABRootView: View {
             webViewModel.reloadView()
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
-            menuData.clearAll()
-            switchToSavedView()
+            menuData.clearForHomeSwitch()
+            Task { await switchToSavedView() }
             // Reconcile the web view with the new home: loads if the active connection
             // already belongs to it (e.g. between two demo homes), otherwise blanks and
             // waits for the tracker to connect the new home.
             webViewModel.syncActiveConnection()
         }
         .task {
-            for await connection in MainActorNetworkTracker.shared.$activeConnection.values {
-                activeNetworkConnection = connection
+            var previousConnection: ConnectionInfo?
+            for await state in await NetworkTracker.shared.stateStream() {
+                guard state.activeConnection != previousConnection else { continue }
+                previousConnection = state.activeConnection
+                activeNetworkConnection = state.activeConnection
+            }
+        }
+        .task {
+            for await prefs in await Preferences.shared.currentHomePreferencesStream {
+                cachedHomePrefs = prefs
             }
         }
         .sheet(isPresented: $showNotifications) {
@@ -169,9 +180,11 @@ struct OpenHABRootView: View {
         switch currentContent {
         case .webview, .mainUIPage:
             ZStack(alignment: .top) {
+                // The Main UI lays itself out from the safe-area insets and reserves the
+                // navbar space the bar below sits on.
                 OpenHABWebViewContainer(viewModel: webViewModel)
-                    .padding(.top, 44)
                     .background(.clear)
+                    .ignoresSafeArea()
                 // Placeholder while a home is first loading. Sits above the (transparent)
                 // web view but below the menu bar, so the menu stays reachable and the user
                 // can switch homes even while connecting.
@@ -179,13 +192,19 @@ struct OpenHABRootView: View {
                     ConnectingPlaceholder()
                         .transition(.opacity)
                 }
+                // Same slide Framework7 uses for its navbar: up by the bar height, fading, 400ms.
                 menuBar
+                    .offset(y: webViewModel.isWebNavbarHidden ? -menuBarHeight : 0)
+                    .opacity(webViewModel.isWebNavbarHidden ? 0 : 1)
+                    .allowsHitTesting(!webViewModel.isWebNavbarHidden)
+                    .animation(.timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.4),
+                               value: webViewModel.isWebNavbarHidden)
             }
             .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
             .onAppear { webViewModel.triggerAppMenuProbe() }
-        case let .sitemap(name):
-            SitemapNavigationView(onShowSideMenu: { menuPresented = true })
-                .id("\(name)-\(sitemapResetID)")
+        case let .sitemap(name, navigationState: state):
+            SitemapNavigationView(sitemapName: name, navigationPath: state.navigationPath, onShowSideMenu: { menuPresented = true })
+                .id("\(name)-\(state.navigationPath.last?.pageLink ?? "")-\(sitemapResetID)")
         case .tile:
             VStack(spacing: 0) {
                 menuBar
@@ -193,6 +212,14 @@ struct OpenHABRootView: View {
             }
         case .notifications, .browser:
             preconditionFailure("Modal/transient targets must never become currentContent")
+        }
+    }
+
+    /// Matches the height Framework7 reserves for its navbar, so the bar covers it exactly.
+    private var menuBarHeight: CGFloat {
+        switch currentContent {
+        case .webview, .mainUIPage: webViewModel.webNavbarHeight
+        default: 44
         }
     }
 
@@ -206,7 +233,7 @@ struct OpenHABRootView: View {
         }()
 
         let barTitle: String = {
-            if isWebviewMode { return webViewModel.navbarTitle }
+            if isWebviewMode { return webViewModel.isWebNavbarTitleHidden ? "" : webViewModel.navbarTitle }
             if case .tile = currentContent { return currentViewTitle }
             return ""
         }()
@@ -287,7 +314,7 @@ struct OpenHABRootView: View {
             .opacity(menuPresented ? 0.0 : 1.0)
             .animation(.spring(response: 0.32, dampingFraction: 0.78), value: menuPresented)
         }
-        .frame(height: 44)
+        .frame(height: menuBarHeight)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("MainMenuBar")
         .overlay {
@@ -366,11 +393,11 @@ struct OpenHABRootView: View {
         }
     }
 
-    private func switchToSavedView() {
+    private func switchToSavedView() async {
         // Select the surface for the current home. Demo homes follow their defaultView like
         // any other home. The web view's actual load is driven by syncActiveConnection, so
         // here we only choose which content is shown.
-        let prefs = Preferences.shared.currentHomePreferences
+        let prefs = await Preferences.shared.currentHomePreferences
         if prefs.defaultView == "sitemap" {
             switchContent(to: .sitemap(prefs.defaultSitemap))
         } else if !prefs.defaultMainUIPath.isEmpty {
@@ -414,7 +441,7 @@ struct OpenHABRootView: View {
                 break // modal/transient targets never reach switchContent
             }
 
-            if !Preferences.shared.currentHomePreferences.demomode {
+            if !(cachedHomePrefs?.demomode ?? false) {
                 let viewName: String
                 switch newContent {
                 case .webview: viewName = "web"
@@ -422,7 +449,10 @@ struct OpenHABRootView: View {
                 case .tile: viewName = "web" // treat tile as web for persistence
                 default: return // modal/transient targets never reach switchContent
                 }
-                Preferences.shared.modifyActiveHome { $0.defaultView = viewName }
+                let capturedViewName = viewName
+                Task {
+                    await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultView = capturedViewName }
+                }
             }
         }
     }
@@ -435,8 +465,11 @@ struct OpenHABRootView: View {
             showMainUI(path: nil)
         case let .mainUIPage(path):
             showMainUI(path: path)
-        case let .sitemap(name):
-            Preferences.shared.modifyActiveHome { $0.defaultSitemap = name }
+        case let .sitemap(name, _):
+            let capturedName = name
+            Task {
+                await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultSitemap = capturedName }
+            }
             switchContent(to: .sitemap(name))
         case .notifications:
             showNotifications = true
@@ -457,15 +490,42 @@ struct OpenHABRootView: View {
     /// is recorded as `currentContent` so a later reload returns here rather than to an
     /// arbitrary route the user reached inside the SPA.
     private func showMainUI(path: String?) {
+        let wasShowingMainUI = isMainUIShown
+        // Ask the web view what it holds, not which surface was last visible: a tile's URL
+        // survives a detour through a sitemap.
+        let showsTile = webViewModel.isShowingTile
+
         currentContent = path.map(TargetController.mainUIPage) ?? .webview
-        if webViewModel.isMainUIReady {
-            webViewModel.navigateCommand("navigate:\(path ?? "/")")
+
+        if showsTile {
+            // Explicit path, so the origin-only ETag check can't skip the load.
+            webViewModel.loadWebView(force: false, path: path ?? "/")
+        } else if let path {
+            routeMainUI(to: path)
+        } else if !webViewModel.hasLoadedContent {
+            webViewModel.loadWebView(force: false, path: nil)
+        } else if wasShowingMainUI {
+            // Picking Main UI while already on it goes to the root, like re-picking a sitemap.
+            routeMainUI(to: "/")
+        }
+        // Coming back from a sitemap: the web view still holds the page, so leave it alone.
+
+        persistDefaultViewIfNeeded("web")
+        if !(cachedHomePrefs?.demomode ?? false) {
+            let capturedPath = path ?? ""
+            Task {
+                await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultMainUIPath = capturedPath }
+			}
+		}
+	}
+
+    /// Routes client-side when the SPA is live, so its in-app state survives. `isMainUIReady`
+    /// alone is not enough — it is true for `about:blank` too.
+    private func routeMainUI(to path: String) {
+        if webViewModel.isMainUIReady, webViewModel.hasLoadedContent {
+            webViewModel.navigateCommand("navigate:\(path)")
         } else {
             webViewModel.loadWebView(force: false, path: path)
-        }
-        persistDefaultViewIfNeeded("web")
-        if !Preferences.shared.currentHomePreferences.demomode {
-            Preferences.shared.modifyActiveHome { $0.defaultMainUIPath = path ?? "" }
         }
     }
 
@@ -476,12 +536,13 @@ struct OpenHABRootView: View {
         }
     }
 
-    /// Persists the home's default view only when it actually changes, avoiding a
-    /// redundant preferences write (which would otherwise restart network tracking).
     private func persistDefaultViewIfNeeded(_ viewName: String) {
-        guard !Preferences.shared.currentHomePreferences.demomode else { return }
-        guard Preferences.shared.currentHomePreferences.defaultView != viewName else { return }
-        Preferences.shared.modifyActiveHome { $0.defaultView = viewName }
+        guard !(cachedHomePrefs?.demomode ?? false) else { return }
+        guard cachedHomePrefs?.defaultView != viewName else { return }
+        let capturedViewName = viewName
+        Task {
+            await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultView = capturedViewName }
+        }
     }
 
     /// Reloads the destination currently selected in the menu — never the arbitrary
@@ -513,10 +574,36 @@ struct OpenHABRootView: View {
                 if !isMainUIShown { showMainUI(path: nil) }
                 if let path { webViewModel.navigateCommand(path) }
             }
-        case let .switchToSitemap(name, _):
-            switchContent(to: .sitemap(name))
+        case let .switchToSitemap(name, widgetId):
+            let capturedName = name
+            let capturedWidgetId = widgetId
+            Task { @MainActor in
+                await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultSitemap = capturedName }
+                switchContent(to: .sitemap(capturedName, navigationState: .loading))
+                let path = await resolveAncestorChain(sitemapName: capturedName, pageId: capturedWidgetId)
+                currentContent = .sitemap(capturedName, navigationState: .ready(path))
+            }
         }
         notificationService.navigationCommand = nil
+    }
+
+    @MainActor
+    private func resolveAncestorChain(sitemapName: String, pageId: String?) async -> [LinkedPageNavigation] {
+        guard let pageId, !pageId.isEmpty else { return [] }
+        let connection: ConnectionInfo
+        if let active = MainActorNetworkTracker.shared.activeConnection {
+            connection = active
+        } else if let active = await NetworkTracker.shared.waitForActiveConnection() {
+            connection = active
+        } else {
+            return []
+        }
+        guard let service = try? OpenAPIService(
+            connectionConfiguration: connection.configuration,
+            serviceConfiguration: .shortTerm
+        ) else { return [] }
+        return (try? await service.ancestorChain(sitemapname: sitemapName, pageId: pageId))?
+            .map { LinkedPageNavigation(pageLink: $0.link, pageTitle: $0.title) } ?? []
     }
 
     // MARK: - Helpers
@@ -557,7 +644,7 @@ struct OpenHABRootView: View {
 /// has given up — a static "cannot connect" message. On an adaptive background so the blank
 /// page reads as intentional in both light and dark mode.
 private struct ConnectingPlaceholder: View {
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
 
     private enum Phase: Equatable {
         case connecting

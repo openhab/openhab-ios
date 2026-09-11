@@ -23,6 +23,8 @@ struct SitemapPageView: View {
     @State private var idleTimerDisabled = false
     @State private var scrollPosition = ScrollPosition()
     @State private var showScrollToTop = false
+    @State private var prefsHideStatusBar = false
+    @State private var prefsIdleOff = false
     @State private var gridLayoutCache = SitemapGridLayoutCache()
     /// Sub-pages are created while the app is already active, so the first .active transition they
     /// observe is a genuine return from background — don't skip it. Root pages start false to skip
@@ -45,6 +47,8 @@ struct SitemapPageView: View {
             }
             .task {
                 viewModel.startPageHandling()
+                prefsHideStatusBar = await Preferences.shared.hideStatusBar
+                prefsIdleOff = await Preferences.shared.idleOff
             }
             .onAppear(perform: handleAppear)
             .onDisappear(perform: handleDisappear)
@@ -91,7 +95,7 @@ struct SitemapPageView: View {
                 geo.contentOffset.y > 150
             } action: { _, isScrolledDown in
                 withAnimation(.easeInOut(duration: 0.2)) {
-                    showScrollToTop = Preferences.shared.hideStatusBar && isScrolledDown
+                    showScrollToTop = prefsHideStatusBar && isScrolledDown
                 }
             }
             .onChange(of: viewModel.pageId) {
@@ -140,7 +144,7 @@ struct SitemapPageView: View {
     private func handleAppear() {
         viewModel.markAppeared()
         // Disable idle timer if configured in settings
-        if Preferences.shared.idleOff {
+        if prefsIdleOff {
             IdleTimerService.shared.isDisabled = true
             idleTimerDisabled = true
         }

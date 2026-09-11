@@ -139,18 +139,32 @@ struct HomePreferencesDecodingTests {
     }
 }
 
+// Actor-isolated shims used only by UserDefaultsTests.
+// Two limitations apply when calling Preferences from outside the actor:
+//   1. var property setters cannot be called with await — a method is required.
+//   2. (inout HomePreferences) -> Void is not @Sendable, so it cannot cross the
+//      actor boundary. A value-returning (HomePreferences) -> HomePreferences
+//      closure is used instead and bridged to modifyActiveHome internally.
+private extension Preferences {
+    func setIdleOff(_ value: Bool) { idleOff = value }
+
+    func modifyActiveHomeForTests(_ block: @Sendable (HomePreferences) -> HomePreferences) {
+        modifyActiveHome { prefs in prefs = block(prefs) }
+    }
+}
+
 /// .serialized prevents parallel test clones from racing on the shared group.org.openhab.app UserDefaults suite.
 @Suite(.serialized)
 @MainActor
 struct UserDefaultsTests {
-    @Test func consistency() throws {
+    @Test func consistency() async throws {
         let data = try #require(UserDefaults(suiteName: "group.org.openhab.app"))
         let defaultsName = try #require(Bundle.main.bundleIdentifier)
         data.removePersistentDomain(forName: defaultsName)
 
         let random: String = UUID().uuidString
 
-        var home = Preferences.shared.currentHomePreferences
+        var home = await Preferences.shared.currentHomePreferences
         home.remoteConnectionConfig.username = "testuser\(random)"
         home.localConnectionConfig.url = "http://local\(random).test"
         home.remoteConnectionConfig.url = "http://remote\(random).test"
@@ -161,29 +175,36 @@ struct UserDefaultsTests {
         home.defaultSitemap = "default\(random)"
         home.sitemapForWatch = "watchmap\(random)"
 
-        Preferences.shared.modifyActiveHome { preferences in
-            preferences.remoteConnectionConfig.username = "testuser\(random)"
-            preferences.localConnectionConfig.url = "http://local\(random).test"
-            preferences.remoteConnectionConfig.url = "http://remote\(random).test"
-            preferences.remoteConnectionConfig.password = "secret\(random)"
-            preferences.remoteConnectionConfig.ignoreSSL = true
-            preferences.demomode = true
-            preferences.iconType = 2
-            preferences.defaultSitemap = "default\(random)"
-            preferences.sitemapForWatch = "watchmap\(random)"
+        await Preferences.shared.modifyActiveHomeForTests { prefs in
+            var p = prefs
+            p.remoteConnectionConfig.username = "testuser\(random)"
+            p.localConnectionConfig.url = "http://local\(random).test"
+            p.remoteConnectionConfig.url = "http://remote\(random).test"
+            p.remoteConnectionConfig.password = "secret\(random)"
+            p.remoteConnectionConfig.ignoreSSL = true
+            p.demomode = true
+            p.iconType = 2
+            p.defaultSitemap = "default\(random)"
+            p.sitemapForWatch = "watchmap\(random)"
+            return p
         }
 
-        Preferences.shared.idleOff = false
+        await Preferences.shared.setIdleOff(false)
+
+        // Pre-fetch actor-isolated values; #expect expands into sync closures so
+        // await cannot appear directly inside the macro invocations.
+        let storedPrefs = await Preferences.shared.currentHomePreferences
+        let storedIdleOff = await Preferences.shared.idleOff
 
         // Non-credential properties round-trip through UserDefaults
-        #expect(Preferences.shared.currentHomePreferences.localConnectionConfig.url == home.localConnectionConfig.url)
-        #expect(Preferences.shared.currentHomePreferences.remoteConnectionConfig.url == home.remoteConnectionConfig.url)
-        #expect(Preferences.shared.currentHomePreferences.remoteConnectionConfig.ignoreSSL == home.remoteConnectionConfig.ignoreSSL)
-        #expect(Preferences.shared.currentHomePreferences.demomode == home.demomode)
-        #expect(Preferences.shared.idleOff == data.bool(forKey: "idleOff"))
-        #expect(Preferences.shared.currentHomePreferences.iconType == home.iconType)
-        #expect(Preferences.shared.currentHomePreferences.defaultSitemap == home.defaultSitemap)
-        #expect(Preferences.shared.currentHomePreferences.sitemapForWatch == home.sitemapForWatch)
+        #expect(storedPrefs.localConnectionConfig.url == home.localConnectionConfig.url)
+        #expect(storedPrefs.remoteConnectionConfig.url == home.remoteConnectionConfig.url)
+        #expect(storedPrefs.remoteConnectionConfig.ignoreSSL == home.remoteConnectionConfig.ignoreSSL)
+        #expect(storedPrefs.demomode == home.demomode)
+        #expect(storedIdleOff == data.bool(forKey: "idleOff"))
+        #expect(storedPrefs.iconType == home.iconType)
+        #expect(storedPrefs.defaultSitemap == home.defaultSitemap)
+        #expect(storedPrefs.sitemapForWatch == home.sitemapForWatch)
         // Credentials are stored in Keychain, not in UserDefaults JSON
         var homeWithoutCredentials = home
         homeWithoutCredentials.localConnectionConfig.username = ""
@@ -191,5 +212,114 @@ struct UserDefaultsTests {
         homeWithoutCredentials.remoteConnectionConfig.username = ""
         homeWithoutCredentials.remoteConnectionConfig.password = ""
         #expect(homeWithoutCredentials == (try? JSONDecoder().decode(HomePreferences.self, from: try #require(data.data(forKey: "currentHomePreferences")))))
+    }
+}
+
+// MARK: - MenuSection + HomePreferences menu-improvement fields
+
+@Suite("MenuSection and HomePreferences menu fields")
+@MainActor
+struct MenuSectionTests {
+    /// Old payload missing the new fields must decode successfully and resolve defaults.
+    @Test func newFieldsDefaultOnOldPayload() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        let prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        #expect(prefs.avatarMode == nil)
+        #expect(prefs.sectionOrder == MenuSection.allCases)
+        #expect(prefs.collapsedSections.isEmpty)
+    }
+
+    /// A custom section order round-trips through encode → decode unchanged.
+    /// Absent sections are hidden — presence in `sectionOrder` is the visibility flag.
+    @Test func sectionOrderRoundTrip() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        let customOrder: [MenuSection] = [.tiles, .sitemaps, .mainUI, .system]
+        prefs.sectionOrder = customOrder
+
+        let encoded = try JSONEncoder().encode(prefs)
+        let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
+        #expect(decoded.sectionOrder == customOrder)
+    }
+
+    /// Hiding a section by removing it from sectionOrder round-trips correctly.
+    @Test func sectionVisibilityViaOrderRoundTrip() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        prefs.sectionOrder = [.sitemaps, .tiles, .system] // mainUI hidden
+
+        let encoded = try JSONEncoder().encode(prefs)
+        let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
+        #expect(!decoded.sectionOrder.contains(.mainUI))
+        #expect(decoded.sectionOrder.contains(.sitemaps))
+    }
+
+    /// collapsedSections set-membership round-trips correctly; unknown raw strings are dropped.
+    @Test func collapsedSectionsRoundTrip() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        prefs.setSection(.mainUI, expanded: false)
+        prefs.setSection(.tiles, expanded: false)
+
+        let encoded = try JSONEncoder().encode(prefs)
+        let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
+        #expect(decoded.collapsedSections.contains(.mainUI))
+        #expect(decoded.collapsedSections.contains(.tiles))
+        #expect(!decoded.collapsedSections.contains(.sitemaps))
+        #expect(!decoded.collapsedSections.contains(.system))
+    }
+
+    /// Unknown section strings in stored JSON are silently dropped on decode.
+    @Test func unknownSectionStringsDroppedGracefully() throws {
+        // Simulate stored data containing a section name that no longer exists.
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000","sectionOrderStorage":["mainUI","obsoleteSection","sitemaps"],"collapsedSectionsStorage":["obsoleteSection","tiles"]}"#
+        let prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        #expect(prefs.sectionOrder == [.mainUI, .sitemaps]) // unknown dropped
+        #expect(prefs.collapsedSections == [.tiles])        // unknown dropped
+    }
+
+    /// AvatarMode.icon round-trips through encode → decode.
+    @Test func avatarModeIconRoundTrip() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        prefs.avatarMode = .icon(name: "house.fill", color: "#3478F6")
+
+        let encoded = try JSONEncoder().encode(prefs)
+        let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
+        #expect(decoded.avatarMode == .icon(name: "house.fill", color: "#3478F6"))
+    }
+
+    /// AvatarMode.image round-trips through encode → decode.
+    @Test func avatarModeImageRoundTrip() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        prefs.avatarMode = .image(originX: 12.5, originY: 34.0, size: 280.0, background: "#FF2D55")
+
+        let encoded = try JSONEncoder().encode(prefs)
+        let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
+        #expect(decoded.avatarMode == .image(originX: 12.5, originY: 34.0, size: 280.0, background: "#FF2D55"))
+    }
+
+    /// Legacy avatarIconName + avatarColor payload is migrated to AvatarMode.icon on decode.
+    @Test func legacyAvatarFieldsMigratedToMode() throws {
+        let json = ##"{"id":"550E8400-E29B-41D4-A716-446655440000","avatarIconName":"tent.fill","avatarColor":"#5856D6"}"##
+        let prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        #expect(prefs.avatarMode == .icon(name: "tent.fill", color: "#5856D6"))
+    }
+
+    /// Legacy avatarImagePath payload cannot recover crop settings — avatarMode stays nil.
+    @Test func legacyAvatarImagePathNotMigrated() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000","avatarImagePath":"/homes/test.jpg"}"#
+        let prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        #expect(prefs.avatarMode == nil)
     }
 }

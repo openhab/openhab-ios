@@ -11,6 +11,7 @@
 
 import CoreGraphics
 import Foundation
+import OpenHABCore
 
 struct ScreenSaverConfiguration {
     var idleInterval: TimeInterval = 15
@@ -44,4 +45,24 @@ struct ScreenSaverConfiguration {
     var dateFontRelativeSize: CGFloat = 0.4
 
     var fadeDuration: TimeInterval = 2.0
+}
+
+extension ScreenSaverConfiguration {
+    init(_ prefs: ScreenSaverPreferences) {
+        isEnabled = prefs.isEnabled
+        showsTime = prefs.showsTime
+        showsDate = prefs.showsDate
+        showsSeconds = prefs.showsSeconds
+        uses24HourTime = prefs.uses24HourTime
+        idleInterval = prefs.idleInterval
+        movementInterval = prefs.movementInterval
+        fontName = prefs.fontName.isEmpty ? nil : prefs.fontName
+        timeFontSizeRatio = prefs.timeFontSizeRatio
+        dateFontRelativeSize = prefs.dateFontRelativeSize
+        enablesAutoDimming = prefs.enablesAutoDimming
+        dimLevel = prefs.dimLevel
+        wakeBrightnessLevel = prefs.wakeBrightnessLevel
+        restoresBrightness = prefs.restoresBrightness
+        fadeDuration = prefs.fadeDuration
+    }
 }
