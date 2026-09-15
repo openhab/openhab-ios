@@ -814,28 +814,23 @@ private extension OpenHABRootView {
 
 private extension OpenHABRootView {
     func handleNavigationCommand(_ command: NavigationCommand) {
-        switch command {
-        case let .switchToWebView(path):
-            switch WebViewNavigationRouter.route(for: path) {
-            case let .path(resolvedPath):
-                // Covers both an explicit server-side path and a "navigate:/page/…"
-                // command from a notification's onClickAction (e.g.
-                // "ui:navigate:/page/my_page" — see the openHAB Cloud Connector docs).
-                // Routing it through showMainUI rather than the liveCommand fallback
-                // below matters when Main UI isn't already showing — the common case
-                // for a notification tap — where that fallback shows the MainUI root
-                // first and queues the command to run once the SPA reports
-                // SSE-connected, which does not reliably happen before the user is
-                // looking at the (wrong) root page. showMainUI instead loads straight
-                // to the target path when the SPA isn't live yet, and routes
-                // client-side when it already is.
-                showMainUI(path: resolvedPath)
-            case .root:
-                if !isMainUIShown { showMainUI(path: nil) }
-            case let .liveCommand(command):
-                if !isMainUIShown { showMainUI(path: nil) }
-                webViewModel.navigateCommand(command)
-            }
+        switch NavigationCommandCoordinator.action(for: command, isMainUIShown: isMainUIShown) {
+        case let .showMainUI(path):
+            // Covers both an explicit server-side path and a "navigate:/page/…" command
+            // from a notification's onClickAction (e.g. "ui:navigate:/page/my_page" — see
+            // the openHAB Cloud Connector docs). Routing it through showMainUI rather than
+            // the live-command fallback below matters when Main UI isn't already showing —
+            // the common case for a notification tap — where that fallback shows the
+            // MainUI root first and queues the command to run once the SPA reports
+            // SSE-connected, which does not reliably happen before the user is looking at
+            // the (wrong) root page. showMainUI instead loads straight to the target path
+            // when the SPA isn't live yet, and routes client-side when it already is.
+            showMainUI(path: path)
+        case .none:
+            break
+        case let .navigateLive(command, ensureShown):
+            if ensureShown { showMainUI(path: nil) }
+            webViewModel.navigateCommand(command)
         case let .switchToSitemap(name, widgetId):
             let capturedName = name
             let capturedWidgetId = widgetId
