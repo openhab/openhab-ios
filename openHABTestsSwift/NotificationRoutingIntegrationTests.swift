@@ -21,7 +21,7 @@ import Testing
 @MainActor
 struct NotificationRoutingIntegrationTests {
     @Test("ui:navigate:/page/… loads the target path directly when Main UI isn't already shown")
-    func navigatePageCommandLoadsDirectlyOnColdMainUI() {
+    func navigatePageCommandLoadsDirectlyOnColdMainUI() throws {
         // 1. NotificationCommandParser parses the raw onClickAction.
         let parsed = NotificationCommandParser.parse("ui:navigate:/page/my_page")
         #expect(parsed == .ui(.webViewCommand("navigate:/page/my_page")))
@@ -29,29 +29,22 @@ struct NotificationRoutingIntegrationTests {
         // 2. NotificationActionService turns that into a NavigationCommand.
         let svc = NotificationActionService(autoStart: false)
         svc.handleNotificationInternal("ui:navigate:/page/my_page")
-        let navigationCommand = svc.navigationCommand
-        #expect(navigationCommand == .switchToWebView(path: "navigate:/page/my_page"))
+        #expect(svc.navigationCommand == .switchToWebView(path: "navigate:/page/my_page"))
 
         // 3. On a cold launch (Main UI not already shown), the coordinator must resolve
         // this to loading the target path directly — not queuing it as a live command,
         // which is what left the user on the Overview page in #1336.
-        guard let navigationCommand else {
-            Issue.record("Expected a navigationCommand to be set")
-            return
-        }
+        let navigationCommand = try #require(svc.navigationCommand)
         let action = NavigationCommandCoordinator.action(for: navigationCommand, isMainUIShown: false)
         #expect(action == .showMainUI(path: "/page/my_page"))
     }
 
     @Test("ui:navigate:/page/… routes client-side when Main UI is already shown")
-    func navigatePageCommandRoutesDirectlyWhenMainUIAlreadyShown() {
+    func navigatePageCommandRoutesDirectlyWhenMainUIAlreadyShown() throws {
         let svc = NotificationActionService(autoStart: false)
         svc.handleNotificationInternal("ui:navigate:/page/my_page")
 
-        guard let navigationCommand = svc.navigationCommand else {
-            Issue.record("Expected a navigationCommand to be set")
-            return
-        }
+        let navigationCommand = try #require(svc.navigationCommand)
         let action = NavigationCommandCoordinator.action(for: navigationCommand, isMainUIShown: true)
         // Same resolved path either way — showMainUI(path:) itself decides whether to
         // reload the SPA or route client-side depending on whether it's already live.
@@ -59,27 +52,21 @@ struct NotificationRoutingIntegrationTests {
     }
 
     @Test("ui:/some/path (explicit server-side path) also loads directly")
-    func absoluteServerPathLoadsDirectly() {
+    func absoluteServerPathLoadsDirectly() throws {
         let svc = NotificationActionService(autoStart: false)
         svc.handleNotificationInternal("ui:/some/path")
 
-        guard let navigationCommand = svc.navigationCommand else {
-            Issue.record("Expected a navigationCommand to be set")
-            return
-        }
+        let navigationCommand = try #require(svc.navigationCommand)
         let action = NavigationCommandCoordinator.action(for: navigationCommand, isMainUIShown: false)
         #expect(action == .showMainUI(path: "/some/path"))
     }
 
     @Test("ui:/basicui/app?sitemap=… resolves to a sitemap switch, not a web view route")
-    func sitemapCommandRoutesToSitemapAction() {
+    func sitemapCommandRoutesToSitemapAction() throws {
         let svc = NotificationActionService(autoStart: false)
         svc.handleNotificationInternal("ui:/basicui/app?sitemap=demo&w=0001")
 
-        guard let navigationCommand = svc.navigationCommand else {
-            Issue.record("Expected a navigationCommand to be set")
-            return
-        }
+        let navigationCommand = try #require(svc.navigationCommand)
         let action = NavigationCommandCoordinator.action(for: navigationCommand, isMainUIShown: false)
         #expect(action == .switchToSitemap(name: "demo", widgetId: "0001"))
     }
