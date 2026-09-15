@@ -244,7 +244,7 @@ public actor NetworkTracker {
         self.connectionConfigurations = connectionConfigurations
         setActiveConnection(nil)
 
-        Task(priority: .userInitiated) {
+        Task(priority: .userInitiated) { [self] in
             for configuration in connectionConfigurations {
                 do {
                     _ = try await connectionPool.getOrCreateService(for: configuration)
