@@ -14,7 +14,6 @@ import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
-import SafariServices
 import SFSafeSymbols
 import SwiftUI
 
@@ -472,10 +471,7 @@ private extension OpenHABRootView {
 
     @ViewBuilder
     var menuBar: some View {
-        let isWebviewMode = switch currentContent {
-        case .webview, .mainUIPage: true
-        default: false
-        }
+        let isWebviewMode = isMainUIShown
 
         let barTitle: String = {
             if isWebviewMode { return webViewModel.isWebNavbarTitleHidden ? "" : webViewModel.navbarTitle }
@@ -668,7 +664,10 @@ private extension OpenHABRootView {
                 break // modal/transient targets never reach switchContent
             }
         } else {
-            let wasShowingTile = if case .tile = currentContent { true } else { false }
+            let wasShowingTile = switch currentContent {
+            case .tile: true
+            default: false
+            }
 
             currentContent = newContent
 
@@ -731,7 +730,7 @@ private extension OpenHABRootView {
             switchToTile(urlString)
         case let .browser(urlString):
             if let url = URL(string: urlString) {
-                openSafari(url: url)
+                SafariPresenter.present(url, entersReaderIfAvailable: true)
             }
         }
     }
@@ -885,12 +884,5 @@ private extension OpenHABRootView {
         if let resolvedUrl {
             switchContent(to: .tile(resolvedUrl.absoluteString))
         }
-    }
-
-    func openSafari(url: URL) {
-        let config = SFSafariViewController.Configuration()
-        config.entersReaderIfAvailable = true
-        let svc = SFSafariViewController(url: url, configuration: config)
-        UIApplication.shared.firstKeyWindow?.rootViewController?.present(svc, animated: true)
     }
 }
