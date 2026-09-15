@@ -712,15 +712,6 @@ private extension OpenHABRootView {
         }
     }
 
-    /// Extracts `/page/…` from a Framework7 router command of the form `"navigate:/page/…"`
-    /// (the shape `NotificationCommandParser` produces for a `ui:navigate:/page/<pageId>`
-    /// onClickAction). `nil` for anything else, including a bare "navigate:" with no path.
-    static func mainUIPath(fromNavigateCommand command: String) -> String? {
-        guard command.hasPrefix("navigate:") else { return nil }
-        let path = command.dropFirst("navigate:".count)
-        return path.hasPrefix("/") ? String(path) : nil
-    }
-
     func handleMenuSelection(_ target: TargetController) {
         switch target {
         case .webview:
@@ -825,23 +816,25 @@ private extension OpenHABRootView {
     func handleNavigationCommand(_ command: NavigationCommand) {
         switch command {
         case let .switchToWebView(path):
-            if let path, path.starts(with: "/") {
-                showMainUI(path: path)
-            } else if let path, let mainUIPath = Self.mainUIPath(fromNavigateCommand: path) {
-                // A "navigate:<path>" command from a notification's onClickAction
-                // (e.g. "ui:navigate:/page/my_page" — see the openHAB Cloud Connector
-                // docs). Route it through showMainUI like an explicit path rather than
-                // the live-command fallback below: when Main UI isn't already showing —
-                // the common case for a notification tap — that fallback shows the
-                // MainUI root first and queues this command to run once the SPA
-                // reports SSE-connected, which does not reliably happen before the
-                // user is looking at the (wrong) root page. showMainUI instead loads
-                // straight to the target path when the SPA isn't live yet, and routes
+            switch WebViewNavigationRouter.route(for: path) {
+            case let .path(resolvedPath):
+                // Covers both an explicit server-side path and a "navigate:/page/…"
+                // command from a notification's onClickAction (e.g.
+                // "ui:navigate:/page/my_page" — see the openHAB Cloud Connector docs).
+                // Routing it through showMainUI rather than the liveCommand fallback
+                // below matters when Main UI isn't already showing — the common case
+                // for a notification tap — where that fallback shows the MainUI root
+                // first and queues the command to run once the SPA reports
+                // SSE-connected, which does not reliably happen before the user is
+                // looking at the (wrong) root page. showMainUI instead loads straight
+                // to the target path when the SPA isn't live yet, and routes
                 // client-side when it already is.
-                showMainUI(path: mainUIPath)
-            } else {
+                showMainUI(path: resolvedPath)
+            case .root:
                 if !isMainUIShown { showMainUI(path: nil) }
-                if let path { webViewModel.navigateCommand(path) }
+            case let .liveCommand(command):
+                if !isMainUIShown { showMainUI(path: nil) }
+                webViewModel.navigateCommand(command)
             }
         case let .switchToSitemap(name, widgetId):
             let capturedName = name
