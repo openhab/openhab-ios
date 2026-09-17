@@ -17,6 +17,7 @@ struct SegmentRow: View {
     let widget: OpenHABWidget
     let stateToken: String
     @EnvironmentObject var settings: AppSettings
+    @EnvironmentObject var pageData: UserData
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
     @State private var triggerPressFeedback = false
@@ -40,6 +41,11 @@ struct SegmentRow: View {
         .sensoryFeedback(.impact(weight: .medium), trigger: triggerPressFeedback)
         .onChange(of: stateToken, initial: false) { _, _ in
             viewModel.update(from: widget)
+        }
+        .onAppear {
+            commandSender.confirmationHandler = { message, proceed in
+                pageData.pendingCommandConfirmation = PendingCommandConfirmation(message: message, onConfirm: proceed)
+            }
         }
     }
 

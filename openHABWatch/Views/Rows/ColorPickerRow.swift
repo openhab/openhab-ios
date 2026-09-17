@@ -18,6 +18,7 @@ struct ColorPickerRow: View {
     let widget: OpenHABWidget
     let stateToken: String
     @EnvironmentObject var settings: AppSettings
+    @EnvironmentObject var pageData: UserData
     @State private var viewModel: WidgetRowViewModel
     @State private var commandSender = WidgetCommandDispatcher()
     var body: some View {
@@ -66,6 +67,11 @@ struct ColorPickerRow: View {
             }
             .onChange(of: stateToken, initial: false) { _, _ in
                 viewModel.update(from: widget)
+            }
+            .onAppear {
+                commandSender.confirmationHandler = { message, proceed in
+                    pageData.pendingCommandConfirmation = PendingCommandConfirmation(message: message, onConfirm: proceed)
+                }
             }
     }
 

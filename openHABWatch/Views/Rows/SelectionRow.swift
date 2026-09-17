@@ -21,6 +21,7 @@ struct SelectionListView: View {
     let title: String
     @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var pageData: UserData
     @State private var commandSender = WidgetCommandDispatcher()
 
     var body: some View {
@@ -59,6 +60,11 @@ struct SelectionListView: View {
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            commandSender.confirmationHandler = { message, proceed in
+                pageData.pendingCommandConfirmation = PendingCommandConfirmation(message: message, onConfirm: proceed)
+            }
+        }
     }
 
     private func selectOption(at index: Int) {

@@ -44,3 +44,18 @@ public enum WidgetCommandPolicy: Sendable {
     /// Dispatches only for `.press` and `.release` phases.
     case pressRelease
 }
+
+/// A discrete command held for user confirmation before it's actually sent. Shared between the
+/// iOS and watchOS apps: each presents this as an alert; confirming runs `onConfirm`, cancelling
+/// just discards it.
+@MainActor
+public struct PendingCommandConfirmation: Identifiable {
+    public let id = UUID()
+    public let message: String
+    public let onConfirm: () -> Void
+
+    public init(message: String, onConfirm: @escaping () -> Void) {
+        self.message = message
+        self.onConfirm = onConfirm
+    }
+}

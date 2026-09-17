@@ -17,6 +17,7 @@ import SwiftUI
 struct RollershutterRow: View {
     let widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
+    @EnvironmentObject var pageData: UserData
     @State private var commandSender = WidgetCommandDispatcher()
 
     var body: some View {
@@ -45,6 +46,11 @@ struct RollershutterRow: View {
             .frame(height: 50)
         }
         .accessibilityLabel(widget.labelText)
+        .onAppear {
+            commandSender.confirmationHandler = { message, proceed in
+                pageData.pendingCommandConfirmation = PendingCommandConfirmation(message: message, onConfirm: proceed)
+            }
+        }
     }
 }
 
