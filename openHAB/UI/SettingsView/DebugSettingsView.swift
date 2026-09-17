@@ -26,7 +26,7 @@ struct DebugSettingsView: View {
     var body: some View {
         Toggle("Crash Reporting", isOn: $settingsSendCrashReports)
             .task { @MainActor in
-                updateSettingsSendCrashReports(Preferences.shared.sendCrashReports)
+                updateSettingsSendCrashReports(await Preferences.shared.sendCrashReports)
             }
             .onChange(of: settingsSendCrashReports) { _, newValue in
                 #if !DEBUG
@@ -60,8 +60,10 @@ struct DebugSettingsView: View {
         Section(header: Text(LocalizedStringKey("debug"))) {
             Toggle("Sitemap Diagnostics Logging", isOn: $settingsSitemapDiagnosticsLogging)
                 .onChange(of: settingsSitemapDiagnosticsLogging) { _, newValue in
-                    Preferences.shared.modifyApplicationPreferences { prefs in
-                        prefs.sitemapDiagnosticsLogging = newValue
+                    Task {
+                        await Preferences.shared.modifyApplicationPreferences { prefs in
+                            prefs.sitemapDiagnosticsLogging = newValue
+                        }
                     }
                 }
             NavigationLink {

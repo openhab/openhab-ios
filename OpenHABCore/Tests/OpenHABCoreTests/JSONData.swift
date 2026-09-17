@@ -17,6 +17,48 @@ let jsonSitemap3 = """
 """
 // swiftlint:enable line_length
 
+/// Anonymised myopenHAB cloud notification list response (real JSON shape as of 2026).
+/// Actions and on-click are nested inside `payload`; the top-level fields carry only
+/// the plain message text and metadata. Covers both a rich notification (with actions)
+/// and a hide-notification control message (payload.type == "hideNotification").
+let jsonCloudNotifications = """
+[
+  {
+    "_id": "aabbccdd112233440000aaaa",
+    "user": "aabbccdd112233440000bbbb",
+    "message": "Window open, turning off heating.",
+    "severity": "window_open",
+    "acknowledged": false,
+    "payload": {
+      "on-click": "ui:/basicui/app?w=0_01&sitemap=page_00000000",
+      "reference-id": "00000000-0000-0000-0000-000000000001",
+      "tag": "window_open",
+      "type": "notification",
+      "message": "Window open, turning off heating.",
+      "title": "Window open detected",
+      "actions": [
+        { "action": "rule:restore_heating:-", "title": "Turn heating back on" }
+      ]
+    },
+    "created": "2026-01-01T12:00:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "aabbccdd112233440000cccc",
+    "user": "aabbccdd112233440000bbbb",
+    "message": "",
+    "severity": "window_open",
+    "acknowledged": false,
+    "payload": {
+      "tag": "window_open",
+      "type": "hideNotification"
+    },
+    "created": "2026-01-01T11:59:00.000Z",
+    "__v": 0
+  }
+]
+"""
+
 let jsonGroup = """
 {
   "version": "8",

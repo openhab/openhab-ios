@@ -18,7 +18,7 @@ public enum ChartStyle {
     case light
 }
 
-public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible, Codable {
+public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible, Codable, Sendable {
     case png
     case svg
 
@@ -36,7 +36,7 @@ public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible, 
     }
 }
 
-public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible {
+public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible, Sendable {
     case label
     case name
 
@@ -74,20 +74,20 @@ public extension SortSitemapsOrder {
 /// `SortSitemapsOrder`, which only affects ordering and — for `.both` — which
 /// field leads.
 public enum SitemapNameLabelDisplayMode: Int, CaseIterable, Identifiable, CustomStringConvertible, Codable, Sendable {
-    case name
     case label
+    case name
     case both
 
     public var id: Self { self }
 
     public var description: String {
         switch self {
-        case .name:
-            String(localized: "Name")
         case .label:
             String(localized: "Label")
+        case .name:
+            String(localized: "Name")
         case .both:
-            String(localized: "Label and name")
+            String(localized: "Name and label")
         }
     }
 }

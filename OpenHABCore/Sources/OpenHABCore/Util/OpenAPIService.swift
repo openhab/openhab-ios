@@ -278,7 +278,29 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
-    private static func parseSitemapEvent(_ sse: ServerSentEvent) -> SitemapEventMessage? {
+    /// Lightweight view of the `TYPE` discriminator shared by every sitemap event.
+    ///
+    /// The `SitemapEvent` schema is a `oneOf` over the concrete event types, but
+    /// `SitemapWidgetEvent` has no required properties and would match any payload,
+    /// so we peek at `TYPE` once instead of relying on decode order.
+    private struct SitemapEventEnvelope: Decodable {
+        enum EventType: String, Decodable {
+            case alive = "ALIVE"
+            case sitemapChanged = "SITEMAP_CHANGED"
+        }
+
+        let type: EventType?
+
+        enum CodingKeys: String, CodingKey {
+            case type = "TYPE"
+        }
+    }
+
+    /// Maps a raw sitemap SSE event to a ``SitemapEventMessage``.
+    ///
+    /// Not `private` so it can be unit-tested directly; treat it as an
+    /// implementation detail of ``openHABSitemapWidgetEvents(subscriptionid:sitemap:pageId:)``.
+    internal static func parseSitemapEvent(_ sse: ServerSentEvent) -> SitemapEventMessage? {
         if let event = sse.event?.lowercased(), event == "alive" {
             Logger.openAPIService.debug("Sitemap SSE alive event")
             return .alive
@@ -286,27 +308,24 @@ public extension OpenAPIService {
         guard let raw = sse.data else { return nil }
         Logger.openAPIService.debug("Sitemap SSE raw event: \(raw, privacy: .public)")
         let data = Data(raw.utf8)
-        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let type = json["TYPE"] as? String {
-            switch type {
-            case "ALIVE":
-                return .alive
-            case "SITEMAP_CHANGED":
-                Logger.openAPIService.info("Sitemap SSE SITEMAP_CHANGED event")
-                return .sitemapChanged(
-                    sitemap: json["sitemapName"] as? String,
-                    pageId: json["pageId"] as? String
-                )
-            default:
-                break
+        let decoder = JSONDecoder()
+
+        switch try? decoder.decode(SitemapEventEnvelope.self, from: data).type {
+        case .alive:
+            Logger.openAPIService.debug("Sitemap SSE ALIVE event")
+            return .alive
+        case .sitemapChanged:
+            Logger.openAPIService.info("Sitemap SSE SITEMAP_CHANGED event")
+            let changed = try? decoder.decode(Components.Schemas.SitemapChangedEvent.self, from: data)
+            return .sitemapChanged(sitemap: changed?.sitemapName, pageId: changed?.pageId)
+        case .none:
+            if let decoded = try? decoder.decode(Components.Schemas.SitemapWidgetEvent.self, from: data),
+               let event = OpenHABSitemapWidgetEvent(decoded) {
+                Logger.openAPIService.debug("Sitemap SSE widget event decoded: \(event.widgetId.orEmpty, privacy: .public)")
+                return .widget(event)
             }
+            return .unknown(raw: raw)
         }
-        if let decoded = try? JSONDecoder().decode(Components.Schemas.SitemapWidgetEvent.self, from: data),
-           let event = OpenHABSitemapWidgetEvent(decoded) {
-            Logger.openAPIService.debug("Sitemap SSE widget event decoded: \(event.widgetId.orEmpty, privacy: .public)")
-            return .widget(event)
-        }
-        return .unknown(raw: raw)
     }
 
     /// Returns subscription id or nil
@@ -406,6 +425,32 @@ public extension OpenAPIService {
         }
         //        logger.debug("pollDataForPage: :\(String(describing: headers)), \(String(describing: path))")
         return try await pollDataForPage(path: path, headers: headers)
+    }
+
+    /// Builds an ordered list of navigation entries from the first child of root down to
+    /// (and including) the target page, by following `PageDTO.parent.link` iteratively.
+    /// Each response only contains one level of parent, so this makes O(depth) requests.
+    /// The root page (whose parent is nil) is excluded — it is the NavigationStack base view.
+    func ancestorChain(sitemapname: String, pageId: String) async throws -> [(link: String, title: String)] {
+        var chain: [(link: String, title: String)] = []
+        var currentPageId = pageId
+
+        for _ in 0..<20 {
+            let path = Operations.pollDataForPage.Input.Path(sitemapname: sitemapname, pageid: currentPageId)
+            let response = try await client.pollDataForPage(path: path, query: .init(), headers: .init())
+            guard case let .ok(okresponse) = response else { break }
+            let pageDTO = try okresponse.body.json
+
+            // A nil parent means this is the root — stop without including it.
+            guard let parent = pageDTO.parent, let parentLink = parent.link else { break }
+
+            chain.insert((link: pageDTO.link ?? "", title: pageDTO.title ?? ""), at: 0)
+
+            guard let parentPageId = URL(string: parentLink)?.lastPathComponent, !parentPageId.isEmpty else { break }
+            currentPageId = parentPageId
+        }
+
+        return chain
     }
 
     /// Internal function for pollSitemap

@@ -11,7 +11,6 @@
 
 import CarPlay
 import CommonUI
-import Combine
 import OpenHABCore
 import os.log
 import SFSafeSymbols
@@ -24,7 +23,7 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
     private var interfaceController: CPInterfaceController?
     private var streamTask: Task<Void, Never>?
     private var refreshTask: Task<Void, Never>?
-    private var preferencesCancellable: AnyCancellable?
+    private var preferencesTask: Task<Void, Never>?
     private let sitemapEventStream = SitemapEventStream()
     private var currentGridTemplate: CPGridTemplate?
     // Retained across SSE restarts so page refreshes don't need a full stream teardown.
@@ -52,8 +51,8 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         streamTask = nil
         refreshTask?.cancel()
         refreshTask = nil
-        preferencesCancellable?.cancel()
-        preferencesCancellable = nil
+        preferencesTask?.cancel()
+        preferencesTask = nil
         Task { await sitemapEventStream.stop() }
         self.interfaceController = nil
         currentGridTemplate = nil
@@ -70,33 +69,26 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
     }
 
     private func startObservingPreferences() {
-        var lastSitemap = Preferences.shared.currentHomePreferences.sitemapForCarPlay
-        // Preferences.shared.currentHomePreferencesPublisher is driven directly by the
-        // in-memory @Published home preferences that modifyActiveHome(...) updates
-        // synchronously — unlike UserDefaults.didChangeNotification (previously used
-        // here), it doesn't depend on the App Group UserDefaults suite actually posting
-        // a change notification, which is what caused CarPlay to miss sitemap changes.
-        //
-        // Subscribed via sink (not `.values`/for-await): Combine's AsyncPublisher bridge
-        // asserts the downstream closure runs on the exact executor it captured at
-        // subscription time, which crashed here (dispatch_assert_queue failure) because
-        // delivery happened on the concurrent cooperative pool instead. receive(on:) + sink
-        // sidesteps that bridge entirely.
-        preferencesCancellable = Preferences.shared.currentHomePreferencesPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] prefs in
-                guard let self else { return }
+        preferencesTask?.cancel()
+        preferencesTask = Task { [weak self] in
+            // currentHomePreferencesStream is backed by currentHomePreferencesPublisher but
+            // delivered via AsyncStream continuation — avoids the dispatch_assert_queue crash
+            // that the Combine AsyncPublisher bridge (.values) caused here previously.
+            var lastSitemap = await Preferences.shared.currentHomePreferences.sitemapForCarPlay
+            for await prefs in await Preferences.shared.currentHomePreferencesStream {
+                guard !Task.isCancelled else { break }
                 let newSitemap = prefs.sitemapForCarPlay
-                guard newSitemap != lastSitemap else { return }
+                guard newSitemap != lastSitemap else { continue }
                 lastSitemap = newSitemap
                 // Sitemap selection changed — full restart needed (different page/subscription).
-                startStreaming()
+                await MainActor.run { self?.startStreaming() }
             }
+        }
     }
 
     @MainActor
     private func runStream() async {
-        let prefs = Preferences.shared.currentHomePreferences
+        let prefs = await Preferences.shared.currentHomePreferences
         await NetworkTracker.shared.startTracking(connectionConfigurations: [
             prefs.localConnectionConfig,
             prefs.remoteConnectionConfig
@@ -105,7 +97,7 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             Logger.carPlay.warning("CarPlay: no active connection")
             return
         }
-        let sitemapName = Preferences.shared.currentHomePreferences.sitemapForCarPlay
+        let sitemapName = (await Preferences.shared.currentHomePreferences).sitemapForCarPlay
         guard !sitemapName.isEmpty else {
             Logger.carPlay.info("CarPlay: no sitemap configured")
             interfaceController?.setRootTemplate(

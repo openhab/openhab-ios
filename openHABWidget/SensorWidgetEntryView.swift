@@ -147,11 +147,10 @@ struct SensorLargeProvider: AppIntentTimelineProvider {
 
 // MARK: - State formatting
 
+// See OpenHABItem.displayState (OpenHABCore) for the shared formatting rules —
+// also used by the "Get Item State" Shortcuts intent in GetItemStateIntent.swift.
 private func formattedState(for item: OpenHABItem) -> String {
-    guard let state = item.state else { return "—" }
-    guard let pattern = item.stateDescription?.numberPattern, !pattern.isEmpty else { return state }
-    let formatted = state.parseAsNumber(format: pattern).toString(locale: .current)
-    return formatted.isEmpty ? state : formatted
+    item.displayState ?? "—"
 }
 
 // MARK: - Unconfigured placeholder

@@ -62,7 +62,7 @@ struct ImageRow: View, Equatable {
     let refresh: Int // Refresh interval in milliseconds, 0 means no refresh
 
     @StateObject private var refreshTimer = ImageRefreshTimer()
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
 
     /// For refreshing images, append a query parameter to bust the cache
     private var displayUrl: URL? {

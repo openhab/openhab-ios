@@ -39,7 +39,7 @@ private struct ImageRowContent: View {
 
     let input: MediaRowInput
     @ObservedObject var viewModel: SitemapPageViewModel
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
     @Environment(\.colorScheme) var colorScheme
     @State private var refreshTimer: Timer?
     @State private var forceRefreshKey = UUID()

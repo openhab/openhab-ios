@@ -39,6 +39,9 @@ struct SingleConnectionSettingsView: View {
 
     var headerText: String
     var isLocalConnection = false
+    /// When non-nil, an "Enable" toggle is rendered as the section's first row
+    /// and the URL/credential rows are hidden while the toggle is off.
+    var isEnabled: Binding<Bool>? = nil
 
     @Binding var connectionConfig: ConnectionConfiguration
     var showNotificationToggle: Bool
@@ -60,6 +63,11 @@ struct SingleConnectionSettingsView: View {
 
     var body: some View {
         Section(header: Text(headerText)) {
+            if let isEnabled {
+                Toggle("Use Remote Connection", isOn: isEnabled)
+            }
+
+            if isEnabled?.wrappedValue ?? true {
             VStack(alignment: .leading) {
                 LabeledContent {
                     TextField("URL", text: $connectionConfig.url)
@@ -212,6 +220,7 @@ struct SingleConnectionSettingsView: View {
                     .font(.caption)
                     .opacity(0.8)
             }
+            } // end isEnabled?.wrappedValue ?? true
         }
     }
 

@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+## [Version 3.4.27, Build 323] - 2026-09-16Z
+
+- fix(notifications): route a notification's ui:navigate:/page/<id> action directly (#1337)
+- fix(NetworkTracker): explicitly capture self in startTracking Task (#1338)
+- Sitemap settings optimisations (#1335)
+- Fix registrations not working since May/June (#1334)
+- Allow for selected home to also wrap over two lines (#1333)
+- Various Webview and MenuBar fixes (#1330)
+- Menustructure improvements (#1331)
+- feat(sitemap): decode SSE events via SitemapEvent oneOf schema (#1329)
+- chore(OpenHABCore): upgrade swift-openapi-generator to 1.12.2 (#1328)
+- Fix flaky NetworkTracker test race, migrate NetworkTrackerTests to Swift Testing (#1324)
+- ci(fastlane): drop html from scan output_types to fix formatter warning (#1325)
+- chore(deps): upgrade fastlane 2.237.0 -> 2.239.0 (#1326)
+
+## [Version 3.4.26, Build 322] - 2026-09-05Z
+
+- Stabilize NetworkTracker client-error retry test in CI (#1323)
+- fix(widget): use server transformedState in Sensor Home Screen widget (#1322)
+- chore(deps): update Firebase SDK 12.10.0 -> 12.18.0, refresh upload-symbols (#1320)
+- Slightly widening the new menu (#1319)
+
 ## [Version 3.4.25, Build 321] - 2026-08-25Z
 
 - fix(watch): restore OpenHABWatchComplicationsExtension Xcode target (#1318)

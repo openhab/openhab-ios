@@ -9,37 +9,58 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import OpenHABCore
 import os.log
 
 /// Provides menu data (sitemaps, tiles, pages) for the navigation menu.
 /// Extracted from DrawerView for testability and reuse.
 @MainActor
-class MenuDataService: ObservableObject {
-    @Published var sitemaps: [OpenHABSitemap] = []
-    @Published var uiTiles: [OpenHABUiTile] = []
-    @Published var uiPages: [OpenHABUIPage] = []
-    @Published var isLoading = false
-
-    private var cancellables = Set<AnyCancellable>()
+class MenuDataService {
+    var sitemaps: [OpenHABSitemap] = []
+    var uiTiles: [OpenHABUiTile] = []
+    var uiPages: [OpenHABUIPage] = []
+    var isLoading = false
+    /// `true` while `MainActorNetworkTracker` reports an active connection.
+    private(set) var isConnected = false
+    /// `true` once the **current** home has had at least one successful data fetch.
+    /// Resets to `false` on every home switch so the "Home" MainUI entry is re-gated
+    /// on each switch (consistent with sitemaps/pages behaviour).
+    var hasSuccessfullyLoaded = false
 
     init() {
-        MainActorNetworkTracker.shared.$activeConnection
-            .sink { [weak self] activeConnection in
-                self?.clearAll()
-                Task { [weak self] in
-                    await self?.fetchData(activeConnection: activeConnection)
-                }
+        // Observe connection changes via NetworkTracker.stateStream() —
+        // an AsyncStream that delivers one coherent NetworkState per change.
+        // Deliveries are serialised: the loop waits for fetchData to complete
+        // before processing the next connection change, preventing race conditions.
+        Task { [weak self] in
+            for await state in await NetworkTracker.shared.stateStream() {
+                guard let self else { break }
+                isConnected = state.activeConnection != nil
+                // Connection loss: retain the last-good snapshot — do NOT clear.
+                // New connection: fetch without wiping first so the menu stays
+                // populated until fresh data arrives.
+                guard let activeConnection = state.activeConnection else { continue }
+                await fetchData(activeConnection: activeConnection)
             }
-            .store(in: &cancellables)
+        }
     }
 
-    /// Clears all data immediately (shows empty state while fetching).
+    /// Clears all data immediately (use for user-initiated refresh or explicit resets).
     func clearAll() {
         sitemaps = []
         uiTiles = []
         uiPages = []
+    }
+
+    /// Call on home switch: clears data and resets the load gate.
+    /// Does NOT start an eager fetch — `MainActorNetworkTracker.shared.activeConnection`
+    /// still belongs to the old home at this point (the NetworkConnectionService
+    /// re-evaluates asynchronously). The `init()` Combine subscription fires once the
+    /// tracker reconnects to the new home and handles all fetching from there.
+    func clearForHomeSwitch() {
+        clearAll()
+        hasSuccessfullyLoaded = false
+        isConnected = false
     }
 
     /// Returns the display label for a tile or page URL, or an empty string if not found.
@@ -49,7 +70,7 @@ class MenuDataService: ObservableObject {
         return ""
     }
 
-    /// Re-fetches all menu data from the currently active connection.
+    /// Re-fetches all menu data from the currently active connection, clearing first.
     func refresh() {
         let connection = MainActorNetworkTracker.shared.activeConnection
         clearAll()
@@ -67,22 +88,22 @@ class MenuDataService: ObservableObject {
             await fetchSitemaps(using: openAPIService)
             await fetchTiles(using: openAPIService)
             await fetchPages(using: openAPIService, rootUrl: activeConnection.configuration.url)
+            // Service init succeeded — home is reachable; gate the "Home" entry.
+            hasSuccessfullyLoaded = true
         } catch {
             Logger.drawerView.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
-            sitemaps = []
-            uiTiles = []
-            uiPages = []
+            // Retain existing snapshot on connection-level failure.
         }
     }
 
     private func fetchSitemaps(using service: OpenAPIService) async {
         do {
             var fetched = try await service.openHABSitemaps()
-            fetched = Self.filterAndSortSitemaps(fetched)
+            fetched = await Self.filterAndSortSitemaps(fetched)
             sitemaps = fetched
         } catch {
             Logger.drawerView.error("Failed to fetch sitemaps: \(error.localizedDescription)")
-            sitemaps = []
+            // Retain existing sitemaps on individual-fetch failure.
         }
     }
 
@@ -92,7 +113,7 @@ class MenuDataService: ObservableObject {
             Logger.drawerView.info("Fetched UI tiles successfully")
         } catch {
             Logger.drawerView.error("Failed to fetch UI tiles: \(error.localizedDescription)")
-            uiTiles = []
+            // Retain existing tiles on individual-fetch failure.
         }
     }
 
@@ -102,13 +123,13 @@ class MenuDataService: ObservableObject {
             Logger.drawerView.info("Fetched UI pages successfully")
         } catch {
             Logger.drawerView.error("Failed to fetch UI pages: \(error.localizedDescription)")
-            uiPages = []
+            // Retain existing pages on individual-fetch failure.
         }
     }
 
     /// Filters out `_default` sitemap when others exist, then sorts per user preference.
-    static func filterAndSortSitemaps(_ sitemaps: [OpenHABSitemap]) -> [OpenHABSitemap] {
-        let sortBy = SortSitemapsOrder(rawValue: Preferences.shared.currentHomePreferences.sortSitemapsBy) ?? .label
+    static func filterAndSortSitemaps(_ sitemaps: [OpenHABSitemap]) async -> [OpenHABSitemap] {
+        let sortBy = SortSitemapsOrder(rawValue: (await Preferences.shared.currentHomePreferences).sortSitemapsBy) ?? .label
         return filterAndSortSitemaps(sitemaps, sortBy: sortBy)
     }
 

@@ -58,7 +58,11 @@ platform :ios do
             xcargs: '-skipPackagePluginValidation CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO',
             testplan: 'openHABTests',
             devices: ['iPhone 17 Pro (26.4)'],
-            clean: true
+            clean: true,
+            # xcbeautify (the auto-selected formatter) can't produce an HTML report — only
+            # xcpretty can — so the default 'html,junit' output_types made scan warn and skip
+            # HTML every run. Nothing in CI uploads or reads either report file, so just drop it.
+            output_types: 'junit'
         )
     end
 

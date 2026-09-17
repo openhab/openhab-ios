@@ -17,17 +17,29 @@ import XCTest
 /// Each snippet calls window.ohUITest.report(key, value). The test reads results
 /// via app.staticTexts matching accessibility identifier "UITestReport-<key>".
 private enum LayoutJS {
-    /// Measures Framework7 .page-content padding-top — the spacing left by
-    /// the hidden web navbar (Bug 1).
-    static let pageContentSpacing = #"""
+    /// Checks the proxy left Framework7's layout intact and hid only what it mirrors.
+    /// UITestInjectJS also runs on the `about:blank` load that precedes the fixture, and
+    /// `waitForReport` latches the first value it sees — so wait for the fixture to be up.
+    static let navbarLayout = #"""
     (function(){
-      var pc = document.querySelector('.view-main .page-current .page-content')
-               || document.querySelector('.page-current .page-content')
-               || document.querySelector('.page-content');
-      if (!pc) { window.ohUITest.report('pageContentFound','0'); return; }
-      window.ohUITest.report('pageContentFound','1');
-      var s = getComputedStyle(pc);
-      window.ohUITest.report('pageContentPaddingTop', String(parseFloat(s.paddingTop) || 0));
+      var tries = 0;
+      (function poll(){
+        var pc = document.querySelector('.page-current .page-content');
+        var nb = document.querySelector('.page-current .navbar');
+        var title = nb && nb.querySelector('.navbar-inner > .title');
+        var proxyHasRun = title && parseFloat(getComputedStyle(title).opacity) === 0;
+        if (!proxyHasRun && ++tries < 60) { setTimeout(poll, 100); return; }
+        window.ohUITest.report('pageContentPaddingTop',
+          pc ? String(parseFloat(getComputedStyle(pc).paddingTop) || 0) : '-1');
+        window.ohUITest.report('navbarOffsetHeight', nb ? String(nb.offsetHeight) : '-1');
+        window.ohUITest.report('navbarTitleOpacity',
+          title ? String(parseFloat(getComputedStyle(title).opacity)) : '-1');
+        var bg = nb && nb.querySelector('.navbar-bg');
+        window.ohUITest.report('navbarBgOpacity',
+          bg ? String(parseFloat(getComputedStyle(bg).opacity)) : '-1');
+        // Hidden, but innerText must still read — labels and icons come from here.
+        window.ohUITest.report('navbarTitleInnerText', title ? title.innerText.trim() : '');
+      })();
     })();
     """#
 
@@ -36,78 +48,102 @@ private enum LayoutJS {
 
 // MARK: - HTML fixtures
 
-/// Minimal HTML pages mirroring the Framework7 DOM structure used by the MainUI SPA.
-/// The same JS probes that work on the real page work on these fixtures.
+/// Minimal HTML pages mirroring the Framework7 DOM and CSS the MainUI SPA produces,
+/// including the absolute offset `oh-map-page.vue` uses. The same JS probes that work on
+/// the real page work on these fixtures. `viewport-fit=cover` matches MainUI's own
+/// index.html, so `env(safe-area-inset-top)` resolves to the device inset.
 private enum LayoutHTML {
-    /// Overview page: web navbar hidden via display:none but page-content padding-top retained.
-    /// Reproduces Bug 1 — content starts 44pt lower than the native menuBar bottom.
-    static let overviewPage = """
-    <!DOCTYPE html><html>
-    <head><meta name='viewport' content='width=device-width,initial-scale=1'>
-    <style>
-    *{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui}
-    .navbar{height:44px;background:#eee;display:none}
-    .page-content{padding-top:44px;padding-left:16px}
-    h1{font-size:22px;padding:12px 0}
-    </style></head>
-    <body><div class='view view-main'><div class='page page-current'>
-      <div class='navbar'><div class='navbar-inner'><div class='title'>Overview</div></div></div>
-      <div class='page-content'><h1>UITest Overview Heading</h1></div>
-    </div></div></body></html>
+    private static let f7Base = """
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:system-ui}
+    :root{--f7-navbar-height:44px;--f7-safe-area-top:0px}
+    @supports (top: env(safe-area-inset-top)){
+      :root{--f7-safe-area-top:env(safe-area-inset-top)}
+    }
+    html,body,.view,.page{height:100%}
+    .page{position:relative;overflow:hidden}
+    .navbar{position:absolute;left:0;top:0;width:100%;z-index:50;
+            height:calc(var(--f7-navbar-height) + var(--f7-safe-area-top))}
+    .navbar-bg{position:absolute;left:0;top:0;width:100%;height:100%;background:#eee}
+    .navbar-inner{position:absolute;left:0;bottom:0;width:100%;height:100%;
+                  display:flex;align-items:center;padding-top:var(--f7-safe-area-top)}
+    .navbar-inner .left,.navbar-inner .right{width:44px}
+    .navbar-inner .title{flex:1;text-align:center}
+    .page-content{position:absolute;left:0;top:0;right:0;bottom:0;overflow:auto}
     """
 
-    /// Side panel rendered in open state.
-    /// The panel header is at y=0 of the webview — directly under the native menuBar.
-    /// viewport-fit=cover mirrors the real MainUI SPA (Framework7 always uses it), which
-    /// disables WebKit's automatic safe-area offset for position:fixed elements.
-    /// Reproduces Bug 2.
-    static let openSidePanel = """
+    /// Page with a navbar, laid out like the map page.
+    static let mapPage = """
     <!DOCTYPE html><html>
     <head><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'>
     <style>
-    *{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui;height:100vh}
-    .panel{position:fixed;top:0;left:0;width:75%;height:100%;background:white;z-index:100}
-    .panel-header{height:44px;background:#eee;display:flex;align-items:center;padding:0 16px}
-    .panel-header h2{font-size:16px}
-    .panel-items{padding:16px}
+    \(f7Base)
+    .page-content{padding-top:calc(var(--f7-navbar-height) + var(--f7-safe-area-top))}
+    .map{position:absolute;left:0;right:0;height:200px;border:none;background:#cde;
+         top:calc(var(--f7-navbar-height) + var(--f7-safe-area-top))}
     </style></head>
-    <body>
-    <div class='panel'>
-      <div class='panel-header'><h2>UITest Side Panel Header</h2></div>
-      <div class='panel-items'><p>Menu item 1</p><p>Menu item 2</p></div>
-    </div>
-    </body></html>
+    <body><div class='view view-main'><div class='page page-current'>
+      <div class='navbar'><div class='navbar-bg'></div><div class='navbar-inner'>
+        <div class='left'><a href='#' aria-label='UITest Nav Left'>L</a></div>
+        <div class='title'>Overview</div>
+        <div class='right'></div>
+      </div></div>
+      <div class='page-content'><p>UITest Overview Heading</p></div>
+      <button class='map' aria-label='UITest Map Top'></button>
+    </div></div></body></html>
     """
 
-    /// Equipment detail page: X/close button at top-right (y≈0 of webview).
-    /// Reproduces Bug 3 — button hidden under native menuBar.
-    static let equipmentDetail = """
+    /// A `hideNavbar` page: nothing reserves room for the native bar, so the proxy pads it.
+    static let pageWithoutNavbar = """
     <!DOCTYPE html><html>
-    <head><meta name='viewport' content='width=device-width,initial-scale=1'>
+    <head><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'>
     <style>
-    *{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui}
-    .page-header{position:relative;height:44px;background:#eee;display:flex;align-items:center;padding:0 8px}
-    .close-btn{position:absolute;right:8px;top:0;height:44px;width:44px;
-               display:flex;align-items:center;justify-content:center;
-               font-size:20px;cursor:pointer;border:none;background:none}
-    .title{flex:1;text-align:center;font-weight:bold}
-    .page-content{padding:16px}
+    \(f7Base)
+    .sidebar-icon{position:fixed;top:8px;left:8px}
     </style></head>
-    <body>
-    <div class='page-header'>
-      <div class='title'>Light Switch</div>
-      <button class='close-btn' aria-label='UITest Close Button'>&#x2715;</button>
-    </div>
-    <div class='page-content'><p>Equipment detail content.</p></div>
+    <body><div class='view view-main'><div class='page page-current'>
+      <div class='page-content'>
+        <button aria-label='UITest Fullscreen Content'>content</button>
+      </div>
+      <a class='sidebar-icon' aria-label='UITest Sidebar Icon'>&#9776;</a>
+    </div></div></body></html>
+    """
+
+    /// Page whose navbar can be toggled to `navbar-hidden` — the class Framework7 sets when
+    /// it hides the navbar on scroll (`hide-bars-on-scroll`) or when an expandable card
+    /// opens (`hideNavbarOnOpen`). The content is padded well clear of the native bar so
+    /// the toggle stays tappable.
+    static let hidableNavbar = """
+    <!DOCTYPE html><html>
+    <head><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'>
+    <style>
+    \(f7Base)
+    .page-content{padding-top:calc(var(--f7-navbar-height) + var(--f7-safe-area-top) + 140px)}
+    .toggle{display:block;margin:0 auto;padding:18px 28px;font-size:17px}
+    </style></head>
+    <body><div class='view view-main'><div class='page page-current'>
+      <div class='navbar'><div class='navbar-bg'></div><div class='navbar-inner'>
+        <div class='left'><a href='#' aria-label='UITest Nav Left'>L</a></div>
+        <div class='title'>Hidable</div>
+        <div class='right'></div>
+      </div></div>
+      <div class='page-content'>
+        <button class='toggle' aria-label='UITest Toggle Navbar'>toggle</button>
+      </div>
+    </div></div>
+    <script>
+    document.querySelector('.toggle').addEventListener('click', function () {
+      document.querySelector('.navbar').classList.toggle('navbar-hidden');
+    });
+    </script>
     </body></html>
     """
 
-    /// Framework7-like page with a position:fixed bottom tab bar.
-    /// Reproduces the regression from the first Bug 2/3 fix attempt: applying
-    /// contentInset.top=44 pushes position:fixed bottom:0 elements 44pt off-screen.
+    /// Framework7-like page with a position:fixed bottom tab bar. Catches the case where
+    /// applying `contentInset.top` pushes `position:fixed; bottom:0` elements off-screen.
     static let bottomTabBar = """
     <!DOCTYPE html><html>
-    <head><meta name='viewport' content='width=device-width,initial-scale=1'>
+    <head><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'>
     <style>
     *{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui;height:100vh}
     .page-content{padding:16px}
@@ -125,11 +161,11 @@ private enum LayoutHTML {
 
 // MARK: - Test class
 
-/// Layout tests for the three MainUI webview bugs and the navbar proxy button infrastructure.
+/// Layout tests for the MainUI webview surface.
 ///
-/// **Bug tests are EXPECTED TO FAIL** until the bugs are fixed — the failure messages
-/// explain the root cause. Infrastructure tests should PASS after the app-side
-/// injection mechanism is wired up.
+/// The contract: the web view is full screen and the proxy does not rewrite MainUI's
+/// layout. Framework7 already reserves the navbar space the native bar covers. Pages
+/// that render no navbar are the one case the proxy compensates for.
 @MainActor
 final class MainUILayoutUITests: XCTestCase {
     private var app: XCUIApplication!
@@ -176,15 +212,6 @@ final class MainUILayoutUITests: XCTestCase {
         return el.frame.maxY
     }
 
-    /// Finds a button by its accessibilityIdentifier (not label).
-    @discardableResult
-    private func waitForButton(_ identifier: String, timeout: TimeInterval = 6) -> XCUIElement {
-        let el = app.buttons.matching(identifier: identifier).firstMatch
-        XCTAssertTrue(el.waitForExistence(timeout: timeout),
-                      "Expected button with identifier '\(identifier)' within \(timeout)s")
-        return el
-    }
-
     /// Finds a web element inside the webView by its accessibility label (aria-label).
     @discardableResult
     private func waitForWebLabel(_ label: String, type: XCUIElement.ElementType = .any,
@@ -196,7 +223,18 @@ final class MainUILayoutUITests: XCTestCase {
         return el
     }
 
+    /// Polls until `condition` holds, so the bar's 400ms slide and the JS→native hop do
+    /// not have to be guessed at with a fixed sleep.
     @discardableResult
+    private func waitUntil(timeout: TimeInterval = 6, _ condition: () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if condition() { return true }
+            Thread.sleep(forTimeInterval: 0.1)
+        }
+        return condition()
+    }
+
     private func waitForReport(_ key: String, timeout: TimeInterval = 8) -> String {
         let el = app.staticTexts.matching(identifier: "UITestReport-\(key)").firstMatch
         XCTAssertTrue(el.waitForExistence(timeout: timeout),
@@ -204,106 +242,160 @@ final class MainUILayoutUITests: XCTestCase {
         return el.label
     }
 
-    // MARK: - Bug 1: Residual Framework7 padding-top after navbar is hidden
+    // MARK: - Full-bleed web view
 
-    /// BUG 1 — EXPECTED TO FAIL until fixed.
-    ///
-    /// After the JS proxy hides the web navbar with `display:none`, Framework7's
-    /// `.page-content` still has `padding-top` equal to the hidden navbar height.
-    /// Web content therefore starts ~44pt below the native bar bottom instead of
-    /// immediately beneath it — leaving a visible gap.
-    ///
-    /// Fix: the proxy must also zero the padding-top (or remove the spacer div
-    /// Framework7 injects for the navbar).
-    func testOverviewContentHasResidualNavbarPaddingAfterHide() {
-        launchInWebviewMode(html: LayoutHTML.overviewPage, js: LayoutJS.pageContentSpacing)
-        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
-        XCTAssertEqual(waitForReport("pageContentFound"), "1",
-                       "JS probe must locate .page-content in the loaded HTML")
-        let paddingTop = Double(waitForReport("pageContentPaddingTop")) ?? 0
+    /// Content must scroll under the status bar and into the bottom corners, and the page
+    /// must see the real safe-area insets — MainUI lays itself out from them.
+    func testWebViewFillsTheWindow() {
+        launchInWebviewMode()
+        let webView = app.webViews.firstMatch
+        XCTAssertTrue(webView.waitForExistence(timeout: 8))
+
         XCTAssertEqual(
-            paddingTop, 0, accuracy: 2,
+            webView.frame.minY, screen.minY, accuracy: 1,
             """
-            BUG 1: .page-content padding-top = \(paddingTop)pt after navbar hidden. \
-            Framework7 reserves the navbar height as padding-top on .page-content. \
-            The JS proxy sets navbar.style.display='none' but does NOT remove this padding, \
-            leaving a gap equal to the navbar height below the native menuBar.
+            Web view top is \(webView.frame.minY)pt, window top is \(screen.minY)pt. \
+            Insetting the web view stops content scrolling under the native bar and \
+            zeroes env(safe-area-inset-top) inside the page.
+            """
+        )
+        XCTAssertEqual(
+            webView.frame.maxY, screen.maxY, accuracy: 1,
+            """
+            Web view bottom is \(webView.frame.maxY)pt, window bottom is \(screen.maxY)pt. \
+            The scroll area must reach the bottom corners of the device.
             """
         )
     }
 
-    // MARK: - Bug 2: Framework7 side panel hidden under native bar
+    // MARK: - Framework7 layout left intact
 
-    /// BUG 2 — EXPECTED TO FAIL until fixed.
-    ///
-    /// The Framework7 side panel (opened by the extracted hamburger proxy button)
-    /// renders at webview y=0. The native menuBar covers webview y=0…44pt, so the
-    /// panel header is invisible and untappable.
-    ///
-    /// Fix: add `contentInset.top` = native bar height OR inject CSS `padding-top`
-    /// on the panel/body so panel content starts below the bar. Fix must be generic.
-    func testSidePanelHeaderHiddenUnderNativeMenuBar() {
-        launchInWebviewMode(html: LayoutHTML.openSidePanel)
-        let webView = app.webViews.firstMatch
-        XCTAssertTrue(webView.waitForExistence(timeout: 8))
+    /// Hiding must not touch the layout: Framework7 sizes pages and absolutely positioned
+    /// content from `--f7-navbar-height`, which is what the native bar covers.
+    func testProxyPreservesFrameworkNavbarLayout() {
+        launchInWebviewMode(html: LayoutHTML.mapPage, js: LayoutJS.navbarLayout)
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
 
-        let panelHeader = waitForWebLabel("UITest Side Panel Header", type: .staticText)
-        let barBottom = nativeBarBottom
+        let navbarHeight = Double(waitForReport("navbarOffsetHeight")) ?? -1
+        let paddingTop = Double(waitForReport("pageContentPaddingTop")) ?? -1
 
         XCTAssertGreaterThanOrEqual(
-            panelHeader.frame.minY, barBottom,
+            navbarHeight, 44,
+            "Navbar collapsed to \(navbarHeight)pt — it must keep its box so Framework7 keeps reserving room for the native bar"
+        )
+        XCTAssertEqual(
+            paddingTop, navbarHeight, accuracy: 2,
             """
-            BUG 2: Side panel header top (\(panelHeader.frame.minY)pt) is above the \
-            native menuBar bottom (\(barBottom)pt). The panel renders at webview y=0, \
-            covered by the native menuBar. Fix: shrink the webview frame so web content \
-            starts at or below the native bar bottom.
+            .page-content padding-top is \(paddingTop)pt but the navbar reserves \(navbarHeight)pt. \
+            The proxy must not rewrite Framework7's page padding — content that offsets \
+            itself by --f7-navbar-height (the map page) does not follow it, so the two \
+            drift apart and leave a gap.
+            """
+        )
+        XCTAssertEqual(Double(waitForReport("navbarTitleOpacity")) ?? -1, 0, accuracy: 0.01,
+                       "The web navbar title must be hidden — the native bar shows it instead")
+        XCTAssertEqual(Double(waitForReport("navbarBgOpacity")) ?? -1, 0, accuracy: 0.01,
+                       "The web navbar background must be hidden — it would show through the native bar")
+        XCTAssertEqual(
+            waitForReport("navbarTitleInnerText"), "Overview",
+            """
+            The hidden navbar title reads back as empty via innerText. Hiding the \
+            proxied regions with visibility or display breaks the serialization that \
+            reads button labels and icon glyphs out of them, so the native bar ends \
+            up with no title and no action buttons.
             """
         )
     }
 
-    // MARK: - Bug 3: Equipment close button hidden under native bar (generic)
+    /// Content offset by `--f7-navbar-height`, as the map page is, must meet the bar bottom.
+    func testContentBelowNavbarMeetsNativeBarBottom() {
+        launchInWebviewMode(html: LayoutHTML.mapPage)
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
 
-    /// BUG 3 — EXPECTED TO FAIL until fixed.
-    ///
-    /// In Equipment detail views — and generically for any web content at y≈0 of
-    /// the webview — the X/close button is covered by the native menuBar.
-    ///
-    /// Same root cause as Bug 2: webview contentInset=.zero means web content at
-    /// y=0 coincides with the native bar area.
-    ///
-    /// Fix must be generic (e.g. global CSS padding-top or contentInset.top),
-    /// not specific to the Equipment X button.
-    func testEquipmentCloseButtonHiddenUnderNativeMenuBar() {
-        launchInWebviewMode(html: LayoutHTML.equipmentDetail)
-        let webView = app.webViews.firstMatch
-        XCTAssertTrue(webView.waitForExistence(timeout: 8))
-
-        let closeBtn = waitForWebLabel("UITest Close Button", type: .button)
+        let mapTop = waitForWebLabel("UITest Map Top", type: .button).frame.minY
         let barBottom = nativeBarBottom
 
-        XCTAssertGreaterThanOrEqual(
-            closeBtn.frame.minY, barBottom,
+        XCTAssertEqual(
+            mapTop, barBottom, accuracy: 2,
             """
-            BUG 3: Equipment close button top (\(closeBtn.frame.minY)pt) is above the \
-            native menuBar bottom (\(barBottom)pt). Same root cause as Bug 2: web content \
-            at page y=0 is covered by the native bar. Fix must be generic (shrink the \
-            webview frame), not specific to this button.
+            Content top is \(mapTop)pt, native bar bottom is \(barBottom)pt — a \
+            \(mapTop - barBottom)pt gap. The native bar must be exactly as tall as the \
+            space Framework7 reserves for its own navbar.
             """
         )
     }
 
-    // MARK: - Regression: bottom-fixed elements cut off when top inset applied via contentInset
+    // MARK: - Pages that render no navbar
 
-    /// REGRESSION — EXPECTED TO FAIL if contentInset.top is used instead of frame shrink.
-    ///
-    /// Applying `scrollView.contentInset.top = 44` shifts the CSS viewport DOWN so the
-    /// top of content appears below the native bar, but `window.innerHeight` stays equal
-    /// to the FULL WKWebView frame height. As a result, `position:fixed; bottom:0`
-    /// elements (Framework7 tab bar) are pushed 44pt BELOW the visible screen bottom.
-    ///
-    /// The correct fix is `.padding(.top, 44)` on the webview container in SwiftUI so the
-    /// webview FRAME starts 44pt lower — giving `window.innerHeight = frame.height - 44`.
-    func testBottomFixedElementNotCutOffByTopInset() {
+    /// No navbar means nothing reserves room, so the proxy pads the page and shifts
+    /// MainUI's floating sidebar icon clear of the bar.
+    func testPageWithoutNavbarIsPaddedClearOfNativeBar() {
+        launchInWebviewMode(html: LayoutHTML.pageWithoutNavbar)
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
+
+        let barBottom = nativeBarBottom
+        let content = waitForWebLabel("UITest Fullscreen Content", type: .button)
+        XCTAssertGreaterThanOrEqual(
+            content.frame.minY, barBottom - 2,
+            "Content top (\(content.frame.minY)pt) is above the native bar bottom (\(barBottom)pt) on a page with no navbar"
+        )
+
+        let sidebarIcon = waitForWebLabel("UITest Sidebar Icon")
+        XCTAssertGreaterThanOrEqual(
+            sidebarIcon.frame.minY, barBottom - 2,
+            "MainUI's floating sidebar icon (\(sidebarIcon.frame.minY)pt) is covered by the native bar (\(barBottom)pt)"
+        )
+    }
+
+    // MARK: - Mirroring the web navbar's hidden state
+
+    /// Framework7 hides its own navbar on scroll and when an expandable card opens, marking
+    /// it `navbar-hidden`. The native bar mirrors that class, so it must slide away with the
+    /// web one and come back when it returns — otherwise the app's bar sits over content the
+    /// Main UI has deliberately cleared, and the two bars disagree about whether they exist.
+    func testNativeBarMirrorsWebNavbarHiding() {
+        launchInWebviewMode(html: LayoutHTML.hidableNavbar)
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
+
+        let bar = app.otherElements.matching(identifier: "MainMenuBar").firstMatch
+        XCTAssertTrue(bar.waitForExistence(timeout: 6),
+                      "Cannot locate MainMenuBar in the AX tree")
+        let shownBottom = bar.frame.maxY
+        XCTAssertGreaterThan(shownBottom, 0, "Native bar should be on screen to begin with")
+
+        let toggle = waitForWebLabel("UITest Toggle Navbar", type: .button)
+        toggle.tap()
+
+        let slidAway = waitUntil { bar.frame.maxY < shownBottom - 20 }
+        XCTAssertTrue(
+            slidAway,
+            """
+            Native bar bottom stayed at \(bar.frame.maxY)pt after the web navbar took \
+            .navbar-hidden (was \(shownBottom)pt). The bar mirrors that class, so it should \
+            have slid up by its own height.
+            """
+        )
+
+        toggle.tap()
+
+        let cameBack = waitUntil { abs(bar.frame.maxY - shownBottom) < 2 }
+        XCTAssertTrue(
+            cameBack,
+            """
+            Native bar bottom is \(bar.frame.maxY)pt after .navbar-hidden was removed, \
+            expected it back at \(shownBottom)pt. A bar that hides but never returns leaves \
+            the menu unreachable.
+            """
+        )
+    }
+
+    // MARK: - Bottom-fixed elements
+
+    /// Applying `scrollView.contentInset.top` shifts the CSS viewport DOWN so the top of
+    /// content appears below the native bar, but `window.innerHeight` stays equal to the
+    /// FULL WKWebView frame height. As a result, `position:fixed; bottom:0` elements
+    /// (Framework7's tab bar) are pushed BELOW the visible screen bottom.
+    func testBottomFixedElementSitsOnScreenBottom() {
         launchInWebviewMode(html: LayoutHTML.bottomTabBar)
         let webView = app.webViews.firstMatch
         XCTAssertTrue(webView.waitForExistence(timeout: 8))
@@ -314,19 +406,16 @@ final class MainUILayoutUITests: XCTestCase {
         XCTAssertLessThanOrEqual(
             overflowBelowWebview, 2,
             """
-            REGRESSION: position:fixed bottom:0 element extends \(overflowBelowWebview)pt \
-            below the webview bottom edge. Applying contentInset.top=44 without reducing the \
-            viewport height shifts the entire CSS viewport down — Framework7's bottom tab bar \
-            is pushed off-screen. Fix: use .padding(.top, 44) on the webview container so \
-            window.innerHeight shrinks by 44pt instead of the viewport shifting.
+            position:fixed bottom:0 element extends \(overflowBelowWebview)pt below the \
+            webview bottom edge. Applying a top contentInset without reducing the viewport \
+            height shifts the entire CSS viewport down — Framework7's bottom tab bar is \
+            pushed off-screen.
             """
         )
     }
 
-    // MARK: - Navbar proxy infrastructure (should PASS after app-side changes)
+    // MARK: - Navbar proxy infrastructure
 
-    /// PASSES once UITestWebViewNavbarItems injection is wired up.
-    ///
     /// Verifies: (1) navbarItems are set in the view model (UITestReport-navbarItemCount > 0),
     /// and (2) the proxy button is found and positioned near the top of the screen.
     ///
@@ -353,8 +442,6 @@ final class MainUILayoutUITests: XCTestCase {
         }
     }
 
-    /// PASSES once UITestWebViewNavbarItems injection is wired up.
-    ///
     /// Verifies the proxy button is hittable when navbarItems are set via the test environment.
     /// Same AX-tree caveat as testNavbarProxyButtonAppearsInMenuBar.
     func testNavbarProxyButtonIsHittable() {

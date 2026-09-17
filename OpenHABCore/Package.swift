@@ -15,10 +15,10 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/onevcat/Kingfisher.git", from: "8.6.1"),
-        .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.1.0"),
-        .package(url: "https://github.com/apple/swift-http-types.git", from: "1.5.1"),
+        .package(url: "https://github.com/onevcat/Kingfisher.git", from: "8.12.0"),
+        .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.12.1"),
+        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.3.1"),
+        .package(url: "https://github.com/apple/swift-http-types.git", from: "1.7.0"),
         .package(url: "https://github.com/SDWebImage/SDWebImage.git", from: "5.21.5"),
         .package(url: "https://github.com/SDWebImage/SDWebImageSVGCoder.git", from: "1.4.0"),
         .package(url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git", from: "7.0.0"),

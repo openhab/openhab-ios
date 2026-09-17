@@ -18,7 +18,7 @@ import SwiftUI
 /// A SwiftUI view that displays widget icons with openHAB-specific styling and caching
 struct IconURLView: View {
     @State var iconURL: URL
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
 
     let size: CGSize
 

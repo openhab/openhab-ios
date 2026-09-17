@@ -2,7 +2,7 @@
 
 This package contains code shared between the main openHAB app and its extensions.
 
-1. Invoke the (CLI manually)[https://swiftpackageindex.com/apple/swift-openapi-generator/1.10.1/documentation/swift-openapi-generator/manually-invoking-the-generator-cli]
+1. Invoke the (CLI manually)[https://swiftpackageindex.com/apple/swift-openapi-generator/1.12.2/documentation/swift-openapi-generator/manually-invoking-the-generator-cli]
 This is a work around to use openAPI in a package.
 
 1. Clone the generator package locally with git clone https://github.com/apple/swift-openapi-generator

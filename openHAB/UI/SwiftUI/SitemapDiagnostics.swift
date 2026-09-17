@@ -241,7 +241,11 @@ enum SitemapDiagnostics {
     private static let processStartedAt = ProcessInfo.processInfo.systemUptime
 
     static var isEnabled: Bool {
-        Preferences.shared.applicationPreferences.sitemapDiagnosticsLogging
+        guard let data = UserDefaults(suiteName: "group.org.openhab.app")?.data(forKey: "applicationPreferences"),
+              let prefs = try? JSONDecoder().decode(ApplicationPreferences.self, from: data) else {
+            return false
+        }
+        return prefs.sitemapDiagnosticsLogging
     }
 
     static var processAgeMs: Int {

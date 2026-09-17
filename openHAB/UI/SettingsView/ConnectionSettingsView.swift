@@ -18,6 +18,7 @@ struct ConnectionSettingsView: View {
     @Binding var localConnectionConfiguration: ConnectionConfiguration
     @Binding var remoteConnectionConfiguration: ConnectionConfiguration
     @Binding var localTestedOKURL: String
+    @Binding var disableRemoteConnection: Bool
 
     @State private var remoteTestedOKURL = ""
 
@@ -26,16 +27,22 @@ struct ConnectionSettingsView: View {
             .accessibilityIdentifier("Demo Mode")
 
         if !settingsDemomode {
-            Group {
-                SingleConnectionSettingsView(headerText: String(localized: "Local server"), isLocalConnection: true, connectionConfig: $localConnectionConfiguration, showNotificationToggle: false, testedOKURL: $localTestedOKURL)
-                SingleConnectionSettingsView(headerText: String(localized: "Remote server"), connectionConfig: $remoteConnectionConfiguration, showNotificationToggle: true, testedOKURL: $remoteTestedOKURL)
-            }
+            SingleConnectionSettingsView(headerText: String(localized: "Local server"), isLocalConnection: true, connectionConfig: $localConnectionConfiguration, showNotificationToggle: false, testedOKURL: $localTestedOKURL)
+
+            SingleConnectionSettingsView(
+                headerText: String(localized: "Remote server"),
+                isEnabled: Binding(get: { !disableRemoteConnection }, set: { disableRemoteConnection = !$0 }),
+                connectionConfig: $remoteConnectionConfiguration,
+                showNotificationToggle: true,
+                testedOKURL: $remoteTestedOKURL
+            )
         }
     }
 }
 
 #Preview {
     @Previewable @State var demoMode = false
+    @Previewable @State var disableRemote = false
     @Previewable @State var connectionConfig1 = ConnectionConfiguration(
         url: "https://openhab.local:8443",
         username: "user",
@@ -53,7 +60,8 @@ struct ConnectionSettingsView: View {
                 settingsDemomode: $demoMode,
                 localConnectionConfiguration: $connectionConfig1,
                 remoteConnectionConfiguration: $connectionConfig2,
-                localTestedOKURL: .constant("")
+                localTestedOKURL: .constant(""),
+                disableRemoteConnection: $disableRemote
             )
         }
     }
