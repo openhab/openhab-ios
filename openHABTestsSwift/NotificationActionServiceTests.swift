@@ -316,4 +316,57 @@ struct NotificationActionServiceTests {
 
         #expect(callCount == 1)
     }
+
+    // MARK: - Pending web-view navigation (openhab-ios#1336 race fix)
+
+    /// `handleNotification` marks a web-view navigation as pending synchronously, before its
+    /// connection wait even starts, so OpenHABWebViewModel's own connection-triggered auto-load
+    /// (which reacts to the same underlying event that wait resolves on) can see it and defer
+    /// instead of racing this navigation on a cold launch.
+    @Test("navigate:/page/… action marks pending web-view navigation synchronously")
+    func navigatePageActionMarksPendingNavigationSynchronously() {
+        let svc = makeService()
+        var markedCount = 0
+        svc.onPendingWebViewNavigation = { markedCount += 1 }
+
+        svc.handleNotification(action: "ui:navigate:/page/my_page", cloudUserId: nil)
+
+        #expect(markedCount == 1)
+    }
+
+    @Test("absolute path ui action marks pending web-view navigation synchronously")
+    func absolutePathActionMarksPendingNavigationSynchronously() {
+        let svc = makeService()
+        var markedCount = 0
+        svc.onPendingWebViewNavigation = { markedCount += 1 }
+
+        svc.handleNotification(action: "ui:/some/path", cloudUserId: nil)
+
+        #expect(markedCount == 1)
+    }
+
+    /// A sitemap target never calls `loadWebView`, so there is no auto-load to defer to —
+    /// marking it pending here would leave the flag stuck until some unrelated web-view
+    /// navigation happened to clear it.
+    @Test("sitemap ui action does not mark pending web-view navigation")
+    func sitemapActionDoesNotMarkPendingNavigation() {
+        let svc = makeService()
+        var markedCount = 0
+        svc.onPendingWebViewNavigation = { markedCount += 1 }
+
+        svc.handleNotification(action: "ui:/basicui/app?sitemap=demo", cloudUserId: nil)
+
+        #expect(markedCount == 0)
+    }
+
+    @Test("non-ui action does not mark pending web-view navigation")
+    func nonUIActionDoesNotMarkPendingNavigation() {
+        let svc = makeService()
+        var markedCount = 0
+        svc.onPendingWebViewNavigation = { markedCount += 1 }
+
+        svc.handleNotification(action: "command:item:ON", cloudUserId: nil)
+
+        #expect(markedCount == 0)
+    }
 }

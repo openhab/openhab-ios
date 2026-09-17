@@ -100,6 +100,14 @@ class OpenHABWebViewModel: ObservableObject {
     private var etagChecker: ETagChecker?
     private var etagCheckerConfigURL: String?
     private var networkObservationTask: Task<Void, Never>?
+    /// True while a notification's onClickAction is known to require navigating to a specific
+    /// web-view path, set via `markPendingExplicitNavigation()` before the connection wait that
+    /// precedes it even starts. `loadWebView` clears it the moment that explicit-path load
+    /// actually runs. Guards every nil-path ("just show whatever's default/current") auto-load
+    /// below, which otherwise races that explicit navigation on a cold launch — both react to
+    /// the same "connection becomes active" event — and can otherwise win with the wrong
+    /// (default) destination (openhab-ios#1336).
+    private var hasPendingExplicitNavigation = false
 
     /// JS injected after each page load to proxy the MainUI Framework7 navbar
     /// into the native bar and hide the web navbar.
@@ -615,10 +623,23 @@ class OpenHABWebViewModel: ObservableObject {
 
     // MARK: - Loading
 
+    /// Marks a notification-driven web-view navigation as imminent, before the connection wait
+    /// that precedes it even starts. See `hasPendingExplicitNavigation`.
+    func markPendingExplicitNavigation() {
+        Logger.notificationNavigation.info("markPendingExplicitNavigation: default auto-loads will defer until an explicit-path load runs")
+        hasPendingExplicitNavigation = true
+    }
+
     func loadWebView(force: Bool = false, path: String? = nil) {
         #if DEBUG
         if uiTestContentLocked { return }
         #endif
+        if path != nil {
+            hasPendingExplicitNavigation = false
+        } else if hasPendingExplicitNavigation {
+            Logger.notificationNavigation.info("loadWebView: skipping default (nil-path) auto-load — an explicit notification navigation is still pending (openhab-ios#1336)")
+            return
+        }
         Logger.viewController.info("loadWebView tracked URL: \(self.activeConfig?.url ?? "") forced \(force ? "true" : "false")")
         Logger.notificationNavigation.info("loadWebView: path=\(path ?? "nil", privacy: .public) force=\(force)")
         guard let activeConfig else { return }

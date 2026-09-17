@@ -27,6 +27,15 @@ class NotificationActionService: ObservableObject {
 
     @Published var navigationCommand: NavigationCommand?
 
+    /// Called synchronously, before this action's connection wait even starts, whenever the
+    /// action is a web-view navigation target. OpenHABRootView wires this to
+    /// `OpenHABWebViewModel.markPendingExplicitNavigation()` so its own connection- and
+    /// app-active-triggered default auto-loads know to defer to this explicit navigation
+    /// instead of racing it — and sometimes winning with the wrong (default) destination —
+    /// once the same "connection becomes active" event they're all waiting on fires on a
+    /// cold launch (openhab-ios#1336).
+    var onPendingWebViewNavigation: (() -> Void)?
+
     // MARK: - Retry configuration
 
     /// Maximum number of automatic retries after a transient network failure.
@@ -117,6 +126,20 @@ class NotificationActionService: ObservableObject {
 
         Logger.viewController.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
         Logger.notificationNavigation.info("handleNotification: action=\(action, privacy: .public) cloudUserId=\(cloudUserId ?? "<none>", privacy: .public) — awaiting active connection before dispatching")
+
+        // Mark the pending navigation immediately — before the connection wait below even
+        // starts — so OpenHABWebViewModel's own connection-triggered auto-load, which reacts
+        // to that same wait's underlying event, can see this and defer instead of racing it.
+        // Sitemap targets are excluded: they never call loadWebView, so there's no auto-load
+        // to defer to, and marking them would leave the flag stuck until some other web-view
+        // navigation happens to clear it.
+        switch NotificationCommandParser.parse(action) {
+        case .ui(.webViewPath(_)), .ui(.webViewCommand(_)):
+            Logger.notificationNavigation.info("handleNotification: marking pending web-view navigation ahead of the connection wait")
+            onPendingWebViewNavigation?()
+        default:
+            break
+        }
 
         Task {
             if let cloudUserId,

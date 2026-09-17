@@ -341,6 +341,9 @@ struct OpenHABRootView: View {
             }
             #endif
             ImageDownloader.default.authenticationChallengeResponder = networkService
+            notificationService.onPendingWebViewNavigation = { [weak webViewModel] in
+                webViewModel?.markPendingExplicitNavigation()
+            }
             Task { await switchToSavedView() }
             setupExitToApp()
         }
