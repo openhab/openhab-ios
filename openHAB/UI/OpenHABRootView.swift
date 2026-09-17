@@ -341,6 +341,9 @@ struct OpenHABRootView: View {
             }
             #endif
             ImageDownloader.default.authenticationChallengeResponder = networkService
+            notificationService.onPendingWebViewNavigation = { [weak webViewModel] in
+                webViewModel?.markPendingExplicitNavigation()
+            }
             Task { await switchToSavedView() }
             setupExitToApp()
         }
@@ -411,7 +414,7 @@ struct OpenHABRootView: View {
                     .frame(width: 0, height: 0)
                     .opacity(0)
                     .allowsHitTesting(false)
-            }
+        }
         #endif
     }
 }
@@ -474,8 +477,12 @@ private extension OpenHABRootView {
         let isWebviewMode = isMainUIShown
 
         let barTitle: String = {
-            if isWebviewMode { return webViewModel.isWebNavbarTitleHidden ? "" : webViewModel.navbarTitle }
-            if case .tile = currentContent { return currentViewTitle }
+            if isWebviewMode {
+                return webViewModel.isWebNavbarTitleHidden ? "" : webViewModel.navbarTitle
+            }
+            if case .tile = currentContent {
+                return currentViewTitle
+            }
             return ""
         }()
 
@@ -673,7 +680,9 @@ private extension OpenHABRootView {
 
             switch newContent {
             case .webview:
-                if wasShowingTile { webViewModel.reloadView() }
+                if wasShowingTile {
+                    webViewModel.reloadView()
+                }
             case .sitemap:
                 break
             case let .tile(url):
@@ -746,6 +755,7 @@ private extension OpenHABRootView {
         // Ask the web view what it holds, not which surface was last visible: a tile's URL
         // survives a detour through a sitemap.
         let showsTile = webViewModel.isShowingTile
+        Logger.notificationNavigation.info("showMainUI: path=\(path ?? "nil", privacy: .public) wasShowingMainUI=\(wasShowingMainUI) showsTile=\(showsTile) hasLoadedContent=\(webViewModel.hasLoadedContent)")
 
         currentContent = path.map(TargetController.mainUIPage) ?? .webview
 
@@ -775,8 +785,11 @@ private extension OpenHABRootView {
     /// alone is not enough — it is true for `about:blank` too.
     func routeMainUI(to path: String) {
         if webViewModel.isMainUIReady, webViewModel.hasLoadedContent {
+            Logger.notificationNavigation.info("routeMainUI: SPA already live — routing client-side to \(path, privacy: .public)")
+            webViewModel.clearPendingExplicitNavigation()
             webViewModel.navigateCommand("navigate:\(path)")
         } else {
+            Logger.notificationNavigation.info("routeMainUI: SPA not live yet — loading \(path, privacy: .public) directly")
             webViewModel.loadWebView(force: false, path: path)
         }
     }
@@ -800,7 +813,9 @@ private extension OpenHABRootView {
         case let .mainUIPage(path):
             webViewModel.loadWebView(force: true, path: path)
         case let .tile(urlString):
-            if let url = URL(string: urlString) { webViewModel.reloadTile(url) }
+            if let url = URL(string: urlString) {
+                webViewModel.reloadTile(url)
+            }
         case .sitemap:
             sitemapResetID = UUID()
         case .notifications, .browser:
@@ -813,7 +828,9 @@ private extension OpenHABRootView {
 
 private extension OpenHABRootView {
     func handleNavigationCommand(_ command: NavigationCommand) {
-        switch NavigationCommandCoordinator.action(for: command, isMainUIShown: isMainUIShown) {
+        let resolvedAction = NavigationCommandCoordinator.action(for: command, isMainUIShown: isMainUIShown)
+        Logger.notificationNavigation.info("handleNavigationCommand: command=\(String(describing: command), privacy: .public) isMainUIShown=\(isMainUIShown) -> \(String(describing: resolvedAction), privacy: .public)")
+        switch resolvedAction {
         case let .showMainUI(path):
             // Covers both an explicit server-side path and a "navigate:/page/…" command
             // from a notification's onClickAction (e.g. "ui:navigate:/page/my_page" — see
@@ -828,7 +845,9 @@ private extension OpenHABRootView {
         case .none:
             break
         case let .navigateLive(command, ensureShown):
-            if ensureShown { showMainUI(path: nil) }
+            if ensureShown {
+                showMainUI(path: nil)
+            }
             webViewModel.navigateCommand(command)
         case let .switchToSitemap(name, widgetId):
             let capturedName = name
