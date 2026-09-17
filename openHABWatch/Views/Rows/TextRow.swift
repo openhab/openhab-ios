@@ -16,7 +16,7 @@ import SwiftUI
 
 struct TextRow: View {
     let widget: OpenHABWidget
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
     let hasLinkedPage: Bool
 
     var body: some View {
