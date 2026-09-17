@@ -746,6 +746,7 @@ private extension OpenHABRootView {
         // Ask the web view what it holds, not which surface was last visible: a tile's URL
         // survives a detour through a sitemap.
         let showsTile = webViewModel.isShowingTile
+        Logger.notificationNavigation.info("showMainUI: path=\(path ?? "nil", privacy: .public) wasShowingMainUI=\(wasShowingMainUI) showsTile=\(showsTile) hasLoadedContent=\(self.webViewModel.hasLoadedContent)")
 
         currentContent = path.map(TargetController.mainUIPage) ?? .webview
 
@@ -775,8 +776,10 @@ private extension OpenHABRootView {
     /// alone is not enough — it is true for `about:blank` too.
     func routeMainUI(to path: String) {
         if webViewModel.isMainUIReady, webViewModel.hasLoadedContent {
+            Logger.notificationNavigation.info("routeMainUI: SPA already live — routing client-side to \(path, privacy: .public)")
             webViewModel.navigateCommand("navigate:\(path)")
         } else {
+            Logger.notificationNavigation.info("routeMainUI: SPA not live yet — loading \(path, privacy: .public) directly")
             webViewModel.loadWebView(force: false, path: path)
         }
     }
@@ -813,7 +816,9 @@ private extension OpenHABRootView {
 
 private extension OpenHABRootView {
     func handleNavigationCommand(_ command: NavigationCommand) {
-        switch NavigationCommandCoordinator.action(for: command, isMainUIShown: isMainUIShown) {
+        let resolvedAction = NavigationCommandCoordinator.action(for: command, isMainUIShown: isMainUIShown)
+        Logger.notificationNavigation.info("handleNavigationCommand: command=\(String(describing: command), privacy: .public) isMainUIShown=\(self.isMainUIShown) -> \(String(describing: resolvedAction), privacy: .public)")
+        switch resolvedAction {
         case let .showMainUI(path):
             // Covers both an explicit server-side path and a "navigate:/page/…" command
             // from a notification's onClickAction (e.g. "ui:navigate:/page/my_page" — see

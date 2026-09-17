@@ -116,6 +116,7 @@ class NotificationActionService: ObservableObject {
         guard let action else { return }
 
         Logger.viewController.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
+        Logger.notificationNavigation.info("handleNotification: action=\(action, privacy: .public) cloudUserId=\(cloudUserId ?? "<none>", privacy: .public) — awaiting active connection before dispatching")
 
         Task {
             if let cloudUserId,
@@ -129,13 +130,16 @@ class NotificationActionService: ObservableObject {
             await NetworkTracker.shared.startTracking(
                 connectionConfigurations: homePrefs.trackedConnections
             )
-            _ = await NetworkTracker.shared.waitForActiveConnection()
+            let waitStart = Date()
+            let connection = await NetworkTracker.shared.waitForActiveConnection()
+            Logger.notificationNavigation.info("handleNotification: waitForActiveConnection resolved after \(Date().timeIntervalSince(waitStart), format: .fixed(precision: 3))s, connection=\(connection?.configuration.description ?? "nil", privacy: .public) — dispatching action now (races OpenHABWebViewModel's own connection-triggered auto-load)")
             handleNotificationInternal(action)
         }
     }
 
     func handleNotificationInternal(_ action: String?) {
         guard let parsed = NotificationCommandParser.parse(action) else { return }
+        Logger.notificationNavigation.info("handleNotificationInternal: parsed \(String(describing: parsed), privacy: .public)")
 
         switch parsed {
         case let .ui(target):
@@ -163,6 +167,7 @@ class NotificationActionService: ObservableObject {
         case let .webViewCommand(command):
             navigationCommand = .switchToWebView(path: command)
         }
+        Logger.notificationNavigation.info("handleUICommand: publishing navigationCommand=\(String(describing: self.navigationCommand), privacy: .public)")
     }
 
     private func sendItemCommand(item: String, command: String) {

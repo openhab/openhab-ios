@@ -49,6 +49,11 @@ public extension Logger {
 
     static let notificationCenterDelegateImpl = Logger(subsystem: subsystem, category: "NotificationCenterDelegateImpl")
 
+    /// Traces a notification tap's onClickAction from parsing through to the actual
+    /// WKWebView load, so a race between it and OpenHABWebViewModel's own
+    /// connection-triggered auto-load (openhab-ios#1336) can be diagnosed from device logs.
+    static let notificationNavigation = Logger(subsystem: subsystem, category: "NotificationNavigation")
+
     static let nwPathMonitoring = Logger(subsystem: subsystem, category: "NWPathMonitoring")
 
     static let openAPIService = Logger(subsystem: subsystem, category: "OpenAPIService")
