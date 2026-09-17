@@ -341,8 +341,8 @@ struct OpenHABRootView: View {
             }
             #endif
             ImageDownloader.default.authenticationChallengeResponder = networkService
-            notificationService.onPendingWebViewNavigation = { [weak webViewModel] in
-                webViewModel?.markPendingExplicitNavigation()
+            notificationService.onPendingWebViewNavigation = { [weak weakWebViewModel = webViewModel] in
+                weakWebViewModel?.markPendingExplicitNavigation()
             }
             Task { await switchToSavedView() }
             setupExitToApp()
@@ -400,22 +400,25 @@ struct OpenHABRootView: View {
         .overlay(alignment: .bottom) {
             InAppToastBanner(service: ToastService.shared)
         }
+        // SwiftFormat miscomputes indentation for a closure wrapped in #if/#endif with --ifdef no-indent.
+        // swiftformat:disable indent
         #if DEBUG
         .overlay {
-                ForEach(Array(webViewModel.uiTestReports.keys.sorted()), id: \.self) { key in
-                    Text(webViewModel.uiTestReports[key] ?? "")
-                        .accessibilityIdentifier("UITestReport-\(key)")
-                        .frame(width: 0, height: 0)
-                        .opacity(0)
-                        .allowsHitTesting(false)
-                }
-                Text(String(webViewModel.navbarItems.count))
-                    .accessibilityIdentifier("UITestReport-navbarItemCount")
+            ForEach(Array(webViewModel.uiTestReports.keys.sorted()), id: \.self) { key in
+                Text(webViewModel.uiTestReports[key] ?? "")
+                    .accessibilityIdentifier("UITestReport-\(key)")
                     .frame(width: 0, height: 0)
                     .opacity(0)
                     .allowsHitTesting(false)
+            }
+            Text(String(webViewModel.navbarItems.count))
+                .accessibilityIdentifier("UITestReport-navbarItemCount")
+                .frame(width: 0, height: 0)
+                .opacity(0)
+                .allowsHitTesting(false)
         }
         #endif
+        // swiftformat:enable indent
     }
 }
 

@@ -29,7 +29,7 @@ public struct ConnectionInfo: Equatable, Sendable {
     public let version: Int
     public let proxyURL: URL?
 
-    // Explicit public memberwise initializer
+    /// Explicit public memberwise initializer
     public init(configuration: ConnectionConfiguration, version: Int, proxyURL: URL? = nil) {
         self.configuration = configuration
         self.version = version
@@ -40,7 +40,6 @@ public struct ConnectionInfo: Equatable, Sendable {
 /// A snapshot of the network tracker's observable state, delivered as a single value so
 /// consumers observe one coherent update rather than reconciling several parallel streams.
 public struct NetworkState: Equatable, Sendable, CustomStringConvertible {
-
     public let activeConnection: ConnectionInfo?
     public let status: NetworkStatus
     /// When another connection attempt is scheduled, the time it will fire; `nil` otherwise.
@@ -48,7 +47,9 @@ public struct NetworkState: Equatable, Sendable, CustomStringConvertible {
     /// Whether the device currently has a usable network path.
     public let isNetworkAvailable: Bool
 
-    public var description: String { "status: \(status.rawValue), activeConnection: \(activeConnection?.configuration.description ?? "nil"), next retry: \(nextRetryDate?.description ?? "nil"), network available: \(isNetworkAvailable ? "yes" : "no")" }
+    public var description: String {
+        "status: \(status.rawValue), activeConnection: \(activeConnection?.configuration.description ?? "nil"), next retry: \(nextRetryDate?.description ?? "nil"), network available: \(isNetworkAvailable ? "yes" : "no")"
+    }
 
     public init(activeConnection: ConnectionInfo?, status: NetworkStatus, nextRetryDate: Date?, isNetworkAvailable: Bool) {
         self.activeConnection = activeConnection
@@ -72,14 +73,14 @@ public enum NetworkTrackerError: Error, CustomDebugStringConvertible, Sendable {
     }
 }
 
-// Prevent race conditions.
-// Ensure thread-safe dictionary access.
-// Avoid memory corruption errors like unrecognized selector.
+/// Prevent race conditions.
+/// Ensure thread-safe dictionary access.
+/// Avoid memory corruption errors like unrecognized selector.
 public actor ConnectionPool {
     private var services: [ConnectionConfiguration: any OpenAPIServiceProtocol] = [:]
     private let serviceFactory: @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol
 
-    // Initializer allowing the injection of mocked OpenAPIServiceProtocol
+    /// Initializer allowing the injection of mocked OpenAPIServiceProtocol
     init(serviceFactory: @escaping @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol = {
         try OpenAPIService(connectionConfiguration: $0, serviceConfiguration: .shortTerm)
     }) {
@@ -98,7 +99,7 @@ public actor ConnectionPool {
     }
 }
 
-// Ensures a thread safe access to failureCounts dictionary
+/// Ensures a thread safe access to failureCounts dictionary
 public actor ConnectionFailureTracker {
     private var enabled = false
     private var failureCounts: [ConnectionConfiguration: Int] = [:]
@@ -200,7 +201,7 @@ public actor NetworkTracker {
     /// "server unreachable".
     public private(set) var isNetworkAvailable = true
 
-    // Registered observers: each call to stateStream() gets its own continuation entry.
+    /// Registered observers: each call to stateStream() gets its own continuation entry.
     private var stateContinuations: [UUID: AsyncStream<NetworkState>.Continuation] = [:]
 
     private var pathMonitor: any NWPathMonitoring
@@ -255,7 +256,7 @@ public actor NetworkTracker {
             }
             await attemptConnection()
 
-            await self.pathMonitor.startMonitoring { [weak self] isConnected in
+            await pathMonitor.startMonitoring { [weak self] isConnected in
                 await self?.handleNetworkChange(isConnected: isConnected)
             }
         }
@@ -293,7 +294,7 @@ public actor NetworkTracker {
         }
     }
 
-    // like startTracking but with the already configured connections and a fresh approach
+    /// like startTracking but with the already configured connections and a fresh approach
     public func restartTracking() async {
         Logger.networkTracker.debug("Networktracker: restartTracking")
         await failureTracker.resetAll() // just to make sure a few more connection attempts happen if necessary
@@ -303,7 +304,7 @@ public actor NetworkTracker {
         await startTracking(connectionConfigurations: connectionConfigurations)
     }
 
-    // This gets called periodically when we have an active connection to make sure it's still the best choice
+    /// This gets called periodically when we have an active connection to make sure it's still the best choice
     private func checkActiveConnection() async {
         guard status != .stopped else {
             return
@@ -621,7 +622,9 @@ public actor NetworkTracker {
     private func yieldCurrentState() {
         let state = NetworkState(activeConnection: activeConnection, status: status, nextRetryDate: nextRetryDate, isNetworkAvailable: isNetworkAvailable)
         Logger.networkTracker.debug("NetworkTracker: yielding state \(state)")
-        for cont in stateContinuations.values { cont.yield(state) }
+        for cont in stateContinuations.values {
+            cont.yield(state)
+        }
     }
 
     private func removeStateContinuation(id: UUID) {

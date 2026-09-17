@@ -40,14 +40,14 @@ enum NavigationCommandCoordinator {
         case let .switchToWebView(path):
             switch WebViewNavigationRouter.route(for: path) {
             case let .path(resolvedPath):
-                return .showMainUI(path: resolvedPath)
+                .showMainUI(path: resolvedPath)
             case .root:
-                return isMainUIShown ? .none : .showMainUI(path: nil)
+                isMainUIShown ? .none : .showMainUI(path: nil)
             case let .liveCommand(rawCommand):
-                return .navigateLive(command: rawCommand, ensureShown: !isMainUIShown)
+                .navigateLive(command: rawCommand, ensureShown: !isMainUIShown)
             }
         case let .switchToSitemap(name, widgetId):
-            return .switchToSitemap(name: name, widgetId: widgetId)
+            .switchToSitemap(name: name, widgetId: widgetId)
         }
     }
 }

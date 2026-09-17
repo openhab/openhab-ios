@@ -29,6 +29,9 @@ enum HomeConnectionSymbol: Hashable {
 // MARK: - Inline home picker
 
 struct InlineHomePickerView: View {
+    /// Shared row height keeps normal and edit mode visually identical.
+    private static let rowHeight: CGFloat = 44
+
     @Binding var isMenuPresented: Bool
 
     @State private var homes: [UUID] = []
@@ -43,9 +46,6 @@ struct InlineHomePickerView: View {
     @State private var newHomeName = ""
     @State private var showingDeleteAlert = false
     @State private var showingNewHomeAlert = false
-
-    // Shared row height keeps normal and edit mode visually identical.
-    private static let rowHeight: CGFloat = 44
 
     var body: some View {
         VStack(spacing: 0) {
@@ -89,7 +89,7 @@ struct InlineHomePickerView: View {
                 Task { @MainActor in
                     await Preferences.shared.createAndLoadNewStoredSettings(homeName: name)
                     await reloadHomes()
-                    homeForSettings = (await Preferences.shared.currentHomePreferences).id
+                    homeForSettings = await (Preferences.shared.currentHomePreferences).id
                     withAnimation(.easeInOut(duration: 0.25)) { showEditMode = false }
                 }
             }
@@ -108,56 +108,6 @@ struct InlineHomePickerView: View {
                 }
             }
         }
-    }
-
-    // MARK: - Data loading
-
-    private func reloadHomes() async {
-        homes = await Preferences.shared.listStoredHomes()
-        cachedActiveHomeId = (await Preferences.shared.currentHomePreferences).id
-        let rawHomes = await Preferences.shared.storedHomes
-        var creds: [UUID: HomePreferences] = [:]
-        for id in rawHomes.keys {
-            if let p = await Preferences.shared.storedHomeWithCredentials(forId: id) {
-                creds[id] = p
-            }
-        }
-        cachedHomesWithCreds = creds
-    }
-
-    // MARK: - Normal-mode home row
-
-    @ViewBuilder
-    private func homeRow(for home: UUID) -> some View {
-        let homeName = cachedHomesWithCreds[home]?.homeName ?? ""
-        let isActive = cachedActiveHomeId == home
-        let prefs = cachedHomesWithCreds[home]
-
-        HStack(spacing: 8) {
-            avatarView(for: home, isActive: isActive)
-
-            Text(homeName)
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .lineLimit(2)
-
-            Spacer(minLength: 4)
-
-            if let prefs {
-                connectionSymbolsView(for: prefs)
-            }
-
-            // Gear opens Home Settings without triggering a home switch.
-            Button(action: { homeForSettings = home }) {
-                Image(systemSymbol: .gear)
-                    .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.plain)
-        }
-        .frame(height: Self.rowHeight)
-        .padding(.horizontal, 16)
-        .contentShape(Rectangle())
-        .onTapGesture { selectHome(home) }
     }
 
     // MARK: - Edit-mode list (drag-to-reorder)
@@ -195,44 +145,6 @@ struct InlineHomePickerView: View {
         .clipped()
     }
 
-    @ViewBuilder
-    private func editModeRow(for home: UUID) -> some View {
-        let homeName = cachedHomesWithCreds[home]?.homeName ?? ""
-        let isActive = cachedActiveHomeId == home
-        let prefs = cachedHomesWithCreds[home]
-
-        HStack(spacing: 8) {
-            avatarView(for: home, isActive: isActive)
-
-            Text(homeName)
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .lineLimit(2)
-
-            Spacer(minLength: 4)
-
-            if let prefs {
-                connectionSymbolsView(for: prefs)
-            }
-
-            if homes.count >= 2 {
-                Button(action: {
-                    homeNameForDeleteAlert = homeName
-                    homeForDeleteAlert = home
-                    showingDeleteAlert = true
-                }) {
-                    Image(systemSymbol: .trash)
-                        .foregroundStyle(isActive ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.red))
-                }
-                .buttonStyle(.plain)
-                .disabled(isActive)
-            }
-        }
-        .frame(height: Self.rowHeight)
-        .padding(.horizontal, 16)
-        .contentShape(Rectangle())
-    }
-
     // MARK: - Action bar
 
     @ViewBuilder
@@ -240,62 +152,51 @@ struct InlineHomePickerView: View {
         if showEditMode {
             // Edit mode: full-width "Add Home" above full-width "Done"
             VStack(spacing: 0) {
-                Button(action: { newHomeName = ""; showingNewHomeAlert = true }) {
-                    HStack(spacing: 4) {
-                        Image(systemSymbol: .plus)
-                        Text("Add Home")
+                Button(
+                    action: { newHomeName = ""; showingNewHomeAlert = true },
+                    label: {
+                        HStack(spacing: 4) {
+                            Image(systemSymbol: .plus)
+                            Text("Add Home")
+                        }
+                        .font(.footnote)
+                        .foregroundStyle(.blue)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
                     }
-                    .font(.footnote)
-                    .foregroundStyle(.blue)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-                }
+                )
                 .buttonStyle(.plain)
 
                 Divider()
 
-                Button(action: { withAnimation(.easeInOut(duration: 0.25)) { showEditMode = false } }) {
-                    Text("Done")
-                        .font(.footnote)
-                        .fontWeight(.medium)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 13)
-                }
+                Button(
+                    action: { withAnimation(.easeInOut(duration: 0.25)) { showEditMode = false } },
+                    label: {
+                        Text("Done")
+                            .font(.footnote)
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 13)
+                    }
+                )
                 .buttonStyle(.plain)
             }
             .padding(.horizontal, 16)
         } else {
             // Normal mode: single Edit button — add/delete/reorder only in edit mode
-            Button(action: { withAnimation(.easeInOut(duration: 0.25)) { showEditMode = true } }) {
-                Text("Edit")
-                    .font(.footnote)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-            }
+            Button(
+                action: { withAnimation(.easeInOut(duration: 0.25)) { showEditMode = true } },
+                label: {
+                    Text("Edit")
+                        .font(.footnote)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                }
+            )
             .buttonStyle(.plain)
             .padding(.horizontal, 16)
         }
     }
-
-    // MARK: - Avatar
-
-    /// Always renders a 28 × 28 avatar circle. Uses the home's custom image when
-    /// available, falling back to the home's configured icon and color. A blue ring
-    /// when `isActive` replaces the separate checkmark, keeping row widths consistent.
-    @ViewBuilder
-    private func avatarView(for homeId: UUID, isActive: Bool) -> some View {
-        let prefs = cachedHomesWithCreds[homeId]
-        let mode = prefs?.avatarMode
-        HomeAvatarView(
-            photo: AvatarImageHelper.renderedAvatar(for: homeId, mode: mode),
-            iconName: mode?.iconName ?? HomeAvatarView.defaultIconName,
-            color: Color(hex: mode?.colorHex ?? "") ?? HomeAvatarView.defaultColor,
-            size: 28,
-            isActive: isActive
-        )
-    }
-
-    // MARK: - Connection symbols
 
     /// Maps a home's stored configuration to an ordered list of display symbols.
     ///
@@ -320,6 +221,120 @@ struct InlineHomePickerView: View {
         }
         return result
     }
+
+    // MARK: - Data loading
+
+    private func reloadHomes() async {
+        homes = await Preferences.shared.listStoredHomes()
+        cachedActiveHomeId = await (Preferences.shared.currentHomePreferences).id
+        let rawHomes = await Preferences.shared.storedHomes
+        var creds: [UUID: HomePreferences] = [:]
+        for id in rawHomes.keys {
+            if let p = await Preferences.shared.storedHomeWithCredentials(forId: id) {
+                creds[id] = p
+            }
+        }
+        cachedHomesWithCreds = creds
+    }
+
+    // MARK: - Normal-mode home row
+
+    @ViewBuilder
+    private func homeRow(for home: UUID) -> some View {
+        let homeName = cachedHomesWithCreds[home]?.homeName ?? ""
+        let isActive = cachedActiveHomeId == home
+        let prefs = cachedHomesWithCreds[home]
+
+        HStack(spacing: 8) {
+            avatarView(for: home, isActive: isActive)
+
+            Text(homeName)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .lineLimit(2)
+
+            Spacer(minLength: 4)
+
+            if let prefs {
+                connectionSymbolsView(for: prefs)
+            }
+
+            // Gear opens Home Settings without triggering a home switch.
+            Button(
+                action: { homeForSettings = home },
+                label: {
+                    Image(systemSymbol: .gear)
+                        .foregroundStyle(.secondary)
+                }
+            )
+            .buttonStyle(.plain)
+        }
+        .frame(height: Self.rowHeight)
+        .padding(.horizontal, 16)
+        .contentShape(Rectangle())
+        .onTapGesture { selectHome(home) }
+    }
+
+    @ViewBuilder
+    private func editModeRow(for home: UUID) -> some View {
+        let homeName = cachedHomesWithCreds[home]?.homeName ?? ""
+        let isActive = cachedActiveHomeId == home
+        let prefs = cachedHomesWithCreds[home]
+
+        HStack(spacing: 8) {
+            avatarView(for: home, isActive: isActive)
+
+            Text(homeName)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .lineLimit(2)
+
+            Spacer(minLength: 4)
+
+            if let prefs {
+                connectionSymbolsView(for: prefs)
+            }
+
+            if homes.count >= 2 {
+                Button(
+                    action: {
+                        homeNameForDeleteAlert = homeName
+                        homeForDeleteAlert = home
+                        showingDeleteAlert = true
+                    },
+                    label: {
+                        Image(systemSymbol: .trash)
+                            .foregroundStyle(isActive ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.red))
+                    }
+                )
+                .buttonStyle(.plain)
+                .disabled(isActive)
+            }
+        }
+        .frame(height: Self.rowHeight)
+        .padding(.horizontal, 16)
+        .contentShape(Rectangle())
+    }
+
+    // MARK: - Avatar
+
+    /// Always renders a 28 × 28 avatar circle. Uses the home's custom image when
+    /// available, falling back to the home's configured icon and color. A blue ring
+    /// when `isActive` replaces the separate checkmark, keeping row widths consistent.
+    @ViewBuilder
+    private func avatarView(for homeId: UUID, isActive: Bool) -> some View {
+        let prefs = cachedHomesWithCreds[homeId]
+        let mode = prefs?.avatarMode
+        HomeAvatarView(
+            photo: AvatarImageHelper.renderedAvatar(for: homeId, mode: mode),
+            icon: mode?.icon ?? HomeAvatarView.defaultIcon,
+            color: Color(hex: mode?.colorHex ?? "") ?? HomeAvatarView.defaultColor,
+            size: 28,
+            isActive: isActive
+        )
+    }
+
+    // MARK: - Connection symbols
 
     @ViewBuilder
     private func connectionSymbolsView(for prefs: HomePreferences) -> some View {

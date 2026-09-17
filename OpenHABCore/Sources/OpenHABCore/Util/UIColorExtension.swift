@@ -21,9 +21,9 @@ public enum OHInterfaceStyle: Int {
         #elseif os(iOS)
         if UITraitCollection.current.userInterfaceStyle == .dark {
             return .dark
-        } else {
-            return .light
         }
+        return .light
+
         #else
         return .light
         #endif
@@ -74,7 +74,7 @@ public extension UIColor {
         #endif
     }
 
-    // standard colors
+    /// standard colors
     class var ohMaroon: UIColor {
         OHInterfaceStyle.current == .light ? UIColor(hex: "#800000") : UIColor(hex: "#800000")
     }
@@ -305,9 +305,8 @@ public extension UIColor {
 
         if alpha {
             return String(format: "%02lX%02lX%02lX%02lX", lroundf(red * 255), lroundf(green * 255), lroundf(blue * 255), lroundf(a * 255))
-        } else {
-            return String(format: "%02lX%02lX%02lX", lroundf(red * 255), lroundf(green * 255), lroundf(blue * 255))
         }
+        return String(format: "%02lX%02lX%02lX", lroundf(red * 255), lroundf(green * 255), lroundf(blue * 255))
     }
 
     /// Converts this color, including semantic and grayscale colors, to a hex string with a leading `#`.

@@ -139,82 +139,6 @@ struct HomePreferencesDecodingTests {
     }
 }
 
-// Actor-isolated shims used only by UserDefaultsTests.
-// Two limitations apply when calling Preferences from outside the actor:
-//   1. var property setters cannot be called with await — a method is required.
-//   2. (inout HomePreferences) -> Void is not @Sendable, so it cannot cross the
-//      actor boundary. A value-returning (HomePreferences) -> HomePreferences
-//      closure is used instead and bridged to modifyActiveHome internally.
-private extension Preferences {
-    func setIdleOff(_ value: Bool) { idleOff = value }
-
-    func modifyActiveHomeForTests(_ block: @Sendable (HomePreferences) -> HomePreferences) {
-        modifyActiveHome { prefs in prefs = block(prefs) }
-    }
-}
-
-/// .serialized prevents parallel test clones from racing on the shared group.org.openhab.app UserDefaults suite.
-@Suite(.serialized)
-@MainActor
-struct UserDefaultsTests {
-    @Test func consistency() async throws {
-        let data = try #require(UserDefaults(suiteName: "group.org.openhab.app"))
-        let defaultsName = try #require(Bundle.main.bundleIdentifier)
-        data.removePersistentDomain(forName: defaultsName)
-
-        let random: String = UUID().uuidString
-
-        var home = await Preferences.shared.currentHomePreferences
-        home.remoteConnectionConfig.username = "testuser\(random)"
-        home.localConnectionConfig.url = "http://local\(random).test"
-        home.remoteConnectionConfig.url = "http://remote\(random).test"
-        home.remoteConnectionConfig.password = "secret\(random)"
-        home.remoteConnectionConfig.ignoreSSL = true
-        home.demomode = true
-        home.iconType = 2
-        home.defaultSitemap = "default\(random)"
-        home.sitemapForWatch = "watchmap\(random)"
-
-        await Preferences.shared.modifyActiveHomeForTests { prefs in
-            var p = prefs
-            p.remoteConnectionConfig.username = "testuser\(random)"
-            p.localConnectionConfig.url = "http://local\(random).test"
-            p.remoteConnectionConfig.url = "http://remote\(random).test"
-            p.remoteConnectionConfig.password = "secret\(random)"
-            p.remoteConnectionConfig.ignoreSSL = true
-            p.demomode = true
-            p.iconType = 2
-            p.defaultSitemap = "default\(random)"
-            p.sitemapForWatch = "watchmap\(random)"
-            return p
-        }
-
-        await Preferences.shared.setIdleOff(false)
-
-        // Pre-fetch actor-isolated values; #expect expands into sync closures so
-        // await cannot appear directly inside the macro invocations.
-        let storedPrefs = await Preferences.shared.currentHomePreferences
-        let storedIdleOff = await Preferences.shared.idleOff
-
-        // Non-credential properties round-trip through UserDefaults
-        #expect(storedPrefs.localConnectionConfig.url == home.localConnectionConfig.url)
-        #expect(storedPrefs.remoteConnectionConfig.url == home.remoteConnectionConfig.url)
-        #expect(storedPrefs.remoteConnectionConfig.ignoreSSL == home.remoteConnectionConfig.ignoreSSL)
-        #expect(storedPrefs.demomode == home.demomode)
-        #expect(storedIdleOff == data.bool(forKey: "idleOff"))
-        #expect(storedPrefs.iconType == home.iconType)
-        #expect(storedPrefs.defaultSitemap == home.defaultSitemap)
-        #expect(storedPrefs.sitemapForWatch == home.sitemapForWatch)
-        // Credentials are stored in Keychain, not in UserDefaults JSON
-        var homeWithoutCredentials = home
-        homeWithoutCredentials.localConnectionConfig.username = ""
-        homeWithoutCredentials.localConnectionConfig.password = ""
-        homeWithoutCredentials.remoteConnectionConfig.username = ""
-        homeWithoutCredentials.remoteConnectionConfig.password = ""
-        #expect(homeWithoutCredentials == (try? JSONDecoder().decode(HomePreferences.self, from: try #require(data.data(forKey: "currentHomePreferences")))))
-    }
-}
-
 // MARK: - MenuSection + HomePreferences menu-improvement fields
 
 @Suite("MenuSection and HomePreferences menu fields")
@@ -280,7 +204,7 @@ struct MenuSectionTests {
         let prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
 
         #expect(prefs.sectionOrder == [.mainUI, .sitemaps]) // unknown dropped
-        #expect(prefs.collapsedSections == [.tiles])        // unknown dropped
+        #expect(prefs.collapsedSections == [.tiles]) // unknown dropped
     }
 
     /// AvatarMode.icon round-trips through encode → decode.
@@ -321,5 +245,83 @@ struct MenuSectionTests {
         let prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
 
         #expect(prefs.avatarMode == nil)
+    }
+}
+
+/// .serialized prevents parallel test clones from racing on the shared group.org.openhab.app UserDefaults suite.
+@Suite(.serialized)
+@MainActor
+struct UserDefaultsTests {
+    @Test func consistency() async throws {
+        let data = try #require(UserDefaults(suiteName: "group.org.openhab.app"))
+        let defaultsName = try #require(Bundle.main.bundleIdentifier)
+        data.removePersistentDomain(forName: defaultsName)
+
+        let random: String = UUID().uuidString
+
+        var home = await Preferences.shared.currentHomePreferences
+        home.remoteConnectionConfig.username = "testuser\(random)"
+        home.localConnectionConfig.url = "http://local\(random).test"
+        home.remoteConnectionConfig.url = "http://remote\(random).test"
+        home.remoteConnectionConfig.password = "secret\(random)"
+        home.remoteConnectionConfig.ignoreSSL = true
+        home.demomode = true
+        home.iconType = 2
+        home.defaultSitemap = "default\(random)"
+        home.sitemapForWatch = "watchmap\(random)"
+
+        await Preferences.shared.modifyActiveHomeForTests { prefs in
+            var p = prefs
+            p.remoteConnectionConfig.username = "testuser\(random)"
+            p.localConnectionConfig.url = "http://local\(random).test"
+            p.remoteConnectionConfig.url = "http://remote\(random).test"
+            p.remoteConnectionConfig.password = "secret\(random)"
+            p.remoteConnectionConfig.ignoreSSL = true
+            p.demomode = true
+            p.iconType = 2
+            p.defaultSitemap = "default\(random)"
+            p.sitemapForWatch = "watchmap\(random)"
+            return p
+        }
+
+        await Preferences.shared.setIdleOff(false)
+
+        // Pre-fetch actor-isolated values; #expect expands into sync closures so
+        // await cannot appear directly inside the macro invocations.
+        let storedPrefs = await Preferences.shared.currentHomePreferences
+        let storedIdleOff = await Preferences.shared.idleOff
+
+        // Non-credential properties round-trip through UserDefaults
+        #expect(storedPrefs.localConnectionConfig.url == home.localConnectionConfig.url)
+        #expect(storedPrefs.remoteConnectionConfig.url == home.remoteConnectionConfig.url)
+        #expect(storedPrefs.remoteConnectionConfig.ignoreSSL == home.remoteConnectionConfig.ignoreSSL)
+        #expect(storedPrefs.demomode == home.demomode)
+        #expect(storedIdleOff == data.bool(forKey: "idleOff"))
+        #expect(storedPrefs.iconType == home.iconType)
+        #expect(storedPrefs.defaultSitemap == home.defaultSitemap)
+        #expect(storedPrefs.sitemapForWatch == home.sitemapForWatch)
+        // Credentials are stored in Keychain, not in UserDefaults JSON
+        var homeWithoutCredentials = home
+        homeWithoutCredentials.localConnectionConfig.username = ""
+        homeWithoutCredentials.localConnectionConfig.password = ""
+        homeWithoutCredentials.remoteConnectionConfig.username = ""
+        homeWithoutCredentials.remoteConnectionConfig.password = ""
+        #expect(homeWithoutCredentials == (try? JSONDecoder().decode(HomePreferences.self, from: try #require(data.data(forKey: "currentHomePreferences")))))
+    }
+}
+
+/// Actor-isolated shims used only by UserDefaultsTests.
+/// Two limitations apply when calling Preferences from outside the actor:
+///   1. var property setters cannot be called with await — a method is required.
+///   2. (inout HomePreferences) -> Void is not @Sendable, so it cannot cross the
+///      actor boundary. A value-returning (HomePreferences) -> HomePreferences
+///      closure is used instead and bridged to modifyActiveHome internally.
+private extension Preferences {
+    func setIdleOff(_ value: Bool) {
+        idleOff = value
+    }
+
+    func modifyActiveHomeForTests(_ block: @Sendable (HomePreferences) -> HomePreferences) {
+        modifyActiveHome { prefs in prefs = block(prefs) }
     }
 }

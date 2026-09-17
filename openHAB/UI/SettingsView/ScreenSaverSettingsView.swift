@@ -226,7 +226,6 @@ struct ScreenSaverSettingsView: View {
     }
 }
 
-
 #Preview {
     NavigationStack {
         ScreenSaverSettingsView()

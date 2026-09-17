@@ -92,11 +92,15 @@ identifier_name:
     - a
     - b
     - c
+    - d
+    - e
     - g
     - i
     - k
     - n
+    - p
     - r
+    - s
     - v
     - x
     - y

@@ -200,9 +200,9 @@ class SitemapPageViewModel: ObservableObject {
                 await MainActor.run { [weak self] in
                     guard let self, !self.isLinkedPage else { return }
                     let newSitemap = prefs.defaultSitemap
-                    guard !newSitemap.isEmpty, newSitemap != self.defaultSitemap else { return }
-                    self.defaultSitemap = newSitemap
-                    self.startPageHandling(forceRestart: true, reason: "settings-updated")
+                    guard !newSitemap.isEmpty, newSitemap != defaultSitemap else { return }
+                    defaultSitemap = newSitemap
+                    startPageHandling(forceRestart: true, reason: "settings-updated")
                 }
             }
         }

@@ -200,14 +200,15 @@ public extension OpenAPIService {
         let (data, _) = try await urlSession.data(for: request)
 
         struct UIPageDTO: Decodable {
-            var uid: String?
-            var config: Config?
             struct Config: Decodable {
                 var label: String?
                 var icon: String?
                 var order: String?
                 var sidebar: Bool?
             }
+
+            var uid: String?
+            var config: Config?
         }
 
         return try JSONDecoder()
@@ -289,11 +290,11 @@ public extension OpenAPIService {
             case sitemapChanged = "SITEMAP_CHANGED"
         }
 
-        let type: EventType?
-
         enum CodingKeys: String, CodingKey {
             case type = "TYPE"
         }
+
+        let type: EventType?
     }
 
     /// Maps a raw sitemap SSE event to a ``SitemapEventMessage``.
@@ -435,7 +436,7 @@ public extension OpenAPIService {
         var chain: [(link: String, title: String)] = []
         var currentPageId = pageId
 
-        for _ in 0..<20 {
+        for _ in 0 ..< 20 {
             let path = Operations.pollDataForPage.Input.Path(sitemapname: sitemapname, pageid: currentPageId)
             let response = try await client.pollDataForPage(path: path, query: .init(), headers: .init())
             guard case let .ok(okresponse) = response else { break }

@@ -97,7 +97,7 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             Logger.carPlay.warning("CarPlay: no active connection")
             return
         }
-        let sitemapName = (await Preferences.shared.currentHomePreferences).sitemapForCarPlay
+        let sitemapName = await (Preferences.shared.currentHomePreferences).sitemapForCarPlay
         guard !sitemapName.isEmpty else {
             Logger.carPlay.info("CarPlay: no sitemap configured")
             interfaceController?.setRootTemplate(
@@ -257,7 +257,9 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         // Button set/order changed, or pre-iOS 26 — full rebuild (resets CarPlay's focus).
         let buttons = widgets.map { makeGridButton(for: $0, service: service) }
         gridButtonOrder = newOrder
-        gridButtonsByWidgetId = Dictionary(zip(newOrder, buttons), uniquingKeysWith: { first, _ in first })
+        gridButtonsByWidgetId = Dictionary(zip(newOrder, buttons)) { first, _ in
+            first
+        }
 
         if let existing = currentGridTemplate {
             existing.updateTitle(title)

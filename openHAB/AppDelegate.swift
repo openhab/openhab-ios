@@ -23,7 +23,6 @@ import UIKit
 import WatchConnectivity
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
     private var crashlyticsTask: Task<Void, Never>?
 
     let notificationDelegate = NotificationCenterDelegateImpl()
@@ -37,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 session.activate()
                 Logger.appDelegate.info("Paired watch \(session.isPaired), watch app installed \(session.isWatchAppInstalled)")
                 Task {
-                    await watchMessageService.subscribeToPreferences()
+                    watchMessageService.subscribeToPreferences()
                 }
             }
         }
@@ -45,6 +44,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     override init() {
         super.init()
+    }
+
+    @MainActor
+    private static func postApsRegistration(fcmToken: String) {
+        let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "UnknownDeviceID"
+        let deviceName = UIDevice.current.name
+
+        Logger.appDelegate.info("My FCM token is: \(fcmToken, privacy: .private)")
+
+        let dataDict: [String: Any] = [
+            "deviceToken": fcmToken,
+            "deviceId": deviceID,
+            "deviceName": deviceName
+        ]
+
+        NotificationCenter.default.post(
+            name: NSNotification.Name("apsRegistered"),
+            object: nil,
+            userInfo: dataDict
+        )
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
@@ -165,26 +184,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
-    @MainActor
-    private static func postApsRegistration(fcmToken: String) {
-        let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "UnknownDeviceID"
-        let deviceName = UIDevice.current.name
-
-        Logger.appDelegate.info("My FCM token is: \(fcmToken, privacy: .private)")
-
-        let dataDict: [String: Any] = [
-            "deviceToken": fcmToken,
-            "deviceId": deviceID,
-            "deviceName": deviceName
-        ]
-
-        NotificationCenter.default.post(
-            name: NSNotification.Name("apsRegistered"),
-            object: nil,
-            userInfo: dataDict
-        )
-    }
-
     /// FCM only mints a new registration token once it sees the APNs token change. Without this
     /// it can keep serving a token whose APNs token Apple has since disabled, which my.openHAB
     /// then accepts as a registration and pushes to forever, getting
@@ -256,10 +255,10 @@ extension AppDelegate {
         false
     }
 
-    // Info.plist sets UIApplicationSupportsSecureRestorableState, which makes iOS consult these
-    // NSSecureCoding-based methods instead of the deprecated pair above. Both pairs are kept in
-    // sync (both false) since which one iOS actually calls depends on that flag; the deprecated
-    // pair stays as a defensive fallback.
+    /// Info.plist sets UIApplicationSupportsSecureRestorableState, which makes iOS consult these
+    /// NSSecureCoding-based methods instead of the deprecated pair above. Both pairs are kept in
+    /// sync (both false) since which one iOS actually calls depends on that flag; the deprecated
+    /// pair stays as a defensive fallback.
     func application(_ application: UIApplication, shouldSaveSecureApplicationState coder: NSCoder) -> Bool {
         false
     }

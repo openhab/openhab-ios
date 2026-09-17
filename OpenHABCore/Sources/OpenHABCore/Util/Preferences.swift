@@ -51,7 +51,7 @@ public struct UserDefault<T: Sendable> {
         self.defaultValue = defaultValue
         self.isHomeProperty = isHomeProperty
         let d = UserDefaults(suiteName: "group.org.openhab.app")!
-        self.defaults = d
+        defaults = d
         let currentValue = (d.object(forKey: key) as? T) ?? defaultValue
         subject = CurrentValueSubject(currentValue)
     }
@@ -101,13 +101,12 @@ public struct UserDefaultObject<T: Codable & Sendable> {
         self.defaultValue = defaultValue
         self.isHomeProperty = isHomeProperty
         let d = UserDefaults(suiteName: "group.org.openhab.app")!
-        self.defaults = d
-        let currentValue: T
-        if let data = d.object(forKey: key) as? Data,
-           let decoded = try? JSONDecoder().decode(T.self, from: data) {
-            currentValue = decoded
+        defaults = d
+        let currentValue: T = if let data = d.object(forKey: key) as? Data,
+                                 let decoded = try? JSONDecoder().decode(T.self, from: data) {
+            decoded
         } else {
-            currentValue = defaultValue
+            defaultValue
         }
         subject = CurrentValueSubject(currentValue)
     }
@@ -132,49 +131,6 @@ public enum AvatarMode: Equatable, Sendable {
     case image(originX: Double, originY: Double, size: Double, background: String)
 }
 
-extension AvatarMode: Codable {
-    private enum CodingKeys: String, CodingKey {
-        case type, name, color, originX, originY, size, background
-    }
-
-    public func encode(to encoder: any Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        switch self {
-        case .icon(let name, let color):
-            try c.encode("icon", forKey: .type)
-            try c.encode(name, forKey: .name)
-            try c.encode(color, forKey: .color)
-        case .image(let x, let y, let s, let bg):
-            try c.encode("image", forKey: .type)
-            try c.encode(x, forKey: .originX)
-            try c.encode(y, forKey: .originY)
-            try c.encode(s, forKey: .size)
-            try c.encode(bg, forKey: .background)
-        }
-    }
-
-    public init(from decoder: any Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let typeName = try c.decode(String.self, forKey: .type)
-        switch typeName {
-        case "icon":
-            self = .icon(
-                name: try c.decode(String.self, forKey: .name),
-                color: try c.decode(String.self, forKey: .color)
-            )
-        case "image":
-            self = .image(
-                originX: try c.decode(Double.self, forKey: .originX),
-                originY: try c.decode(Double.self, forKey: .originY),
-                size: try c.decode(Double.self, forKey: .size),
-                background: try c.decode(String.self, forKey: .background)
-            )
-        default:
-            throw DecodingError.dataCorruptedError(forKey: .type, in: c, debugDescription: "Unknown AvatarMode: \(typeName)")
-        }
-    }
-}
-
 public struct HomePreferences: Codable, Equatable, Sendable {
     public let id: UUID
     public var defaultView = "web"
@@ -183,10 +139,10 @@ public struct HomePreferences: Codable, Equatable, Sendable {
     public var iconType = 0
     public var defaultSitemap = "demo"
     public var sortSitemapsBy = 0
-    // Backing store for `sitemapNameLabelDisplayMode`. Optional on purpose: synthesized
-    // `Codable` throws `keyNotFound` for a missing *non-optional* key (even one
-    // with a default), which would discard the whole home. Optional decodes a
-    // missing key as `nil`. Never read this directly — use `sitemapNameLabelDisplayMode`.
+    /// Backing store for `sitemapNameLabelDisplayMode`. Optional on purpose: synthesized
+    /// `Codable` throws `keyNotFound` for a missing *non-optional* key (even one
+    /// with a default), which would discard the whole home. Optional decodes a
+    /// missing key as `nil`. Never read this directly — use `sitemapNameLabelDisplayMode`.
     private var sitemapNameLabelDisplayModeStorage: SitemapNameLabelDisplayMode?
 
     /// Which sitemap field(s) to show in menus and pickers. Resolves to the
@@ -196,6 +152,7 @@ public struct HomePreferences: Codable, Equatable, Sendable {
         get { SitemapNameLabelDisplayMode.resolved(sitemapNameLabelDisplayModeStorage) }
         set { sitemapNameLabelDisplayModeStorage = newValue }
     }
+
     public var defaultMainUIPath = ""
     public var alwaysAllowWebRTC = false
     public var sitemapForWatch = "watch"
@@ -210,9 +167,9 @@ public struct HomePreferences: Codable, Equatable, Sendable {
     /// Old data is migrated from the legacy `avatarIconName`/`avatarColor` fields in `init(from:)`.
     public var avatarMode: AvatarMode?
 
-    // Visible sections in order, stored as raw strings so that renamed or removed
-    // sections are silently dropped on decode rather than failing. nil → all sections
-    // in canonical order. Visibility is encoded by presence: absent = hidden.
+    /// Visible sections in order, stored as raw strings so that renamed or removed
+    /// sections are silently dropped on decode rather than failing. nil → all sections
+    /// in canonical order. Visibility is encoded by presence: absent = hidden.
     private var sectionOrderStorage: [String]?
 
     /// The visible toolbar menu sections for this home, in display order.
@@ -225,9 +182,9 @@ public struct HomePreferences: Codable, Equatable, Sendable {
         set { sectionOrderStorage = newValue.map(\.rawValue) }
     }
 
-    // Collapsed (not expanded) sections stored as raw strings. nil or empty → all expanded.
-    // Storing collapsed (not expanded) means new sections default to expanded automatically,
-    // and removed sections in the set are silently dropped via compactMap on decode.
+    /// Collapsed (not expanded) sections stored as raw strings. nil or empty → all expanded.
+    /// Storing collapsed (not expanded) means new sections default to expanded automatically,
+    /// and removed sections in the set are silently dropped via compactMap on decode.
     private var collapsedSectionsStorage: Set<String>?
 
     /// The sections currently collapsed in the toolbar menu. Defaults to none (all expanded).
@@ -239,22 +196,10 @@ public struct HomePreferences: Codable, Equatable, Sendable {
         set { collapsedSectionsStorage = Set(newValue.map(\.rawValue)) }
     }
 
-    /// Sets or clears `section` in the collapsed set.
-    public mutating func setSection(_ section: MenuSection, expanded: Bool) {
-        var collapsed = collapsedSections
-        if expanded { collapsed.remove(section) } else { collapsed.insert(section) }
-        collapsedSections = collapsed
-    }
-
-
-    // When true, the remote URL is excluded from data-connection attempts.
-    // Independent of `supportsNotifications` (the openHAB Cloud push toggle).
-    // Non-optional with `decodeIfPresent` default so existing homes keep remote enabled.
+    /// When true, the remote URL is excluded from data-connection attempts.
+    /// Independent of `supportsNotifications` (the openHAB Cloud push toggle).
+    /// Non-optional with `decodeIfPresent` default so existing homes keep remote enabled.
     public var disableRemoteConnection = false
-
-    fileprivate init(id: UUID) {
-        self.id = id
-    }
 
     /// The connection configurations the network tracker uses for this home: the shared
     /// demo connection in demo mode, otherwise the local and remote connections. Two demo
@@ -263,6 +208,10 @@ public struct HomePreferences: Codable, Equatable, Sendable {
     public var trackedConnections: [ConnectionConfiguration] {
         if demomode { return [.demo] }
         return disableRemoteConnection ? [localConnectionConfig] : [localConnectionConfig, remoteConnectionConfig]
+    }
+
+    fileprivate init(id: UUID) {
+        self.id = id
     }
 
     /// Custom decoder so that stored data from older app versions that are missing
@@ -310,6 +259,13 @@ public struct HomePreferences: Codable, Equatable, Sendable {
                 avatarMode = nil
             }
         }
+    }
+
+    /// Sets or clears `section` in the collapsed set.
+    public mutating func setSection(_ section: MenuSection, expanded: Bool) {
+        var collapsed = collapsedSections
+        if expanded { collapsed.remove(section) } else { collapsed.insert(section) }
+        collapsedSections = collapsed
     }
 }
 
@@ -395,7 +351,7 @@ public actor Preferences {
 
     private static let defaultHomeId = UUID()
 
-    // Used by migration methods to read old keys directly from the suite.
+    /// Used by migration methods to read old keys directly from the suite.
     private let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
 
     @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: defaultHomeId))
@@ -486,6 +442,7 @@ public actor Preferences {
     private var didMigrateCredentialsToKeychain: Bool
 
     private var internalPreferenceChangeOngoing = false
+    private var migrationChecked = false
 
     private func internalPreferenceChange(_ change: () -> Void) {
         internalPreferenceChangeOngoing = true
@@ -493,10 +450,8 @@ public actor Preferences {
         internalPreferenceChangeOngoing = false
     }
 
-    private var migrationChecked = false
-
-    // migrationChecked is set to true BEFORE calling any migration method to prevent
-    // re-entrant calls (modifyActiveHome → currentHomePreferences → ensureMigrated).
+    /// migrationChecked is set to true BEFORE calling any migration method to prevent
+    /// re-entrant calls (modifyActiveHome → currentHomePreferences → ensureMigrated).
     private func ensureMigrated() {
         guard !migrationChecked else { return }
         migrationChecked = true
@@ -504,6 +459,49 @@ public actor Preferences {
         migrateToSharedDefaultsIfRequired()
         migrateToMultipleHomesIfRequired()
         migrateCredentialsToKeychainIfRequired()
+    }
+}
+
+extension AvatarMode: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case type, name, color, originX, originY, size, background
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let typeName = try c.decode(String.self, forKey: .type)
+        switch typeName {
+        case "icon":
+            self = try .icon(
+                name: c.decode(String.self, forKey: .name),
+                color: c.decode(String.self, forKey: .color)
+            )
+        case "image":
+            self = try .image(
+                originX: c.decode(Double.self, forKey: .originX),
+                originY: c.decode(Double.self, forKey: .originY),
+                size: c.decode(Double.self, forKey: .size),
+                background: c.decode(String.self, forKey: .background)
+            )
+        default:
+            throw DecodingError.dataCorruptedError(forKey: .type, in: c, debugDescription: "Unknown AvatarMode: \(typeName)")
+        }
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case let .icon(name, color):
+            try c.encode("icon", forKey: .type)
+            try c.encode(name, forKey: .name)
+            try c.encode(color, forKey: .color)
+        case let .image(x, y, s, bg):
+            try c.encode("image", forKey: .type)
+            try c.encode(x, forKey: .originX)
+            try c.encode(y, forKey: .originY)
+            try c.encode(s, forKey: .size)
+            try c.encode(bg, forKey: .background)
+        }
     }
 }
 
@@ -531,21 +529,6 @@ public extension Preferences {
             prefs.remoteConnectionConfig.password = creds.password
         }
         return prefs
-    }
-
-    /// Returns a stored home's preferences with credentials injected from Keychain, or nil if not found.
-    /// Mirrors what `currentHomePreferences` does for the active home, but works for any stored home UUID.
-    func storedHomeWithCredentials(forId homeId: UUID) -> HomePreferences? {
-        guard var home = storedHomes[homeId] else { return nil }
-        if let creds = CredentialsStore.retrieve(homeId: homeId, type: .local) {
-            home.localConnectionConfig.username = creds.username
-            home.localConnectionConfig.password = creds.password
-        }
-        if let creds = CredentialsStore.retrieve(homeId: homeId, type: .remote) {
-            home.remoteConnectionConfig.username = creds.username
-            home.remoteConnectionConfig.password = creds.password
-        }
-        return home
     }
 
     /// Publisher of active home preferences changes. Each emitted value has credentials injected from Keychain.
@@ -590,6 +573,21 @@ public extension Preferences {
             continuation.onTermination = { _ in box.cancellable?.cancel() }
         }
     }
+
+    /// Returns a stored home's preferences with credentials injected from Keychain, or nil if not found.
+    /// Mirrors what `currentHomePreferences` does for the active home, but works for any stored home UUID.
+    func storedHomeWithCredentials(forId homeId: UUID) -> HomePreferences? {
+        guard var home = storedHomes[homeId] else { return nil }
+        if let creds = CredentialsStore.retrieve(homeId: homeId, type: .local) {
+            home.localConnectionConfig.username = creds.username
+            home.localConnectionConfig.password = creds.password
+        }
+        if let creds = CredentialsStore.retrieve(homeId: homeId, type: .remote) {
+            home.remoteConnectionConfig.username = creds.username
+            home.remoteConnectionConfig.password = creds.password
+        }
+        return home
+    }
 }
 
 // MARK: Multiple homes
@@ -617,7 +615,7 @@ public extension Preferences {
         activeHomeId = UUID()
         var newHome = HomePreferences(id: activeHomeId)
         newHome.homeName = homeName
-        homeOrder = homeOrder + [activeHomeId]
+        homeOrder += [activeHomeId]
         loadHomePreferences(newHome)
     }
 
@@ -729,10 +727,21 @@ public extension Preferences {
         self.applicationPreferences = applicationPreferences
     }
 
-    func setIdleOff(_ value: Bool) { idleOff = value }
-    func setSendCrashReports(_ value: Bool) { sendCrashReports = value }
-    func setHideStatusBar(_ value: Bool) { hideStatusBar = value }
-    func setCurrentWebViewPath(_ value: String) { currentWebViewPath = value }
+    func setIdleOff(_ value: Bool) {
+        idleOff = value
+    }
+
+    func setSendCrashReports(_ value: Bool) {
+        sendCrashReports = value
+    }
+
+    func setHideStatusBar(_ value: Bool) {
+        hideStatusBar = value
+    }
+
+    func setCurrentWebViewPath(_ value: String) {
+        currentWebViewPath = value
+    }
 
     /// Returns a snapshot of all screensaver settings in one actor call.
     func screensaverPreferences() -> ScreenSaverPreferences {
@@ -926,9 +935,8 @@ extension Preferences {
 // MARK: All connections
 
 public extension Preferences {
-    func getNotificationConnection() -> ConnectionConfiguration? {
-        ensureMigrated()
-        return Preferences.getNotificationConnection(of: [currentHomePreferences.remoteConnectionConfig])
+    var storedHomesStream: AsyncStream<[UUID: HomePreferences]> {
+        makeStream($storedHomes)
     }
 
     static func getNotificationConnection(of homeConfig: HomePreferences) -> ConnectionConfiguration? {
@@ -944,8 +952,9 @@ public extension Preferences {
             .first
     }
 
-    var storedHomesStream: AsyncStream<[UUID: HomePreferences]> {
-        makeStream($storedHomes)
+    func getNotificationConnection() -> ConnectionConfiguration? {
+        ensureMigrated()
+        return Preferences.getNotificationConnection(of: [currentHomePreferences.remoteConnectionConfig])
     }
 }
 

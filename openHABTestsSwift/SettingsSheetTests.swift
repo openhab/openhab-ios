@@ -55,7 +55,7 @@ struct SettingsSheetTests {
         current.idleOff = true
         current.sendCrashReports = false
         #expect(current != initial)
-        current = initial   // simulates onRevert callback
+        current = initial // simulates onRevert callback
         #expect(current == initial)
     }
 
@@ -80,7 +80,7 @@ struct SettingsSheetTests {
     @Test("Reordering moves a section without losing any section")
     func reorderingMovesWithoutLoss() {
         var order: [MenuSection] = [.mainUI, .sitemaps, .tiles, .system]
-        order.move(fromOffsets: IndexSet(integer: 0), toOffset: 4)   // mainUI → end
+        order.move(fromOffsets: IndexSet(integer: 0), toOffset: 4) // mainUI → end
         #expect(order == [.sitemaps, .tiles, .system, .mainUI])
         #expect(Set(order) == Set(MenuSection.allCases))
     }

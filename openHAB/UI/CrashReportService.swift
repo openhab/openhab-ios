@@ -27,7 +27,7 @@ class CrashReportService: ObservableObject {
 
     private func setupCrashReportCheck() {
         Task { @MainActor in
-            if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !(await Preferences.shared.sendCrashReports) {
+            if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), await !(Preferences.shared.sendCrashReports) {
                 crashReportAlert = true
             }
         }

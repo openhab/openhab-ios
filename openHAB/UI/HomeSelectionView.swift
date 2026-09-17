@@ -18,6 +18,72 @@ import SFSafeSymbols
 import SwiftUI
 import WebKit
 
+// MARK: - Summary
+
+struct HomeSummaryView: View {
+    let homeId: UUID
+    let cachedPrefs: HomePreferences?
+
+    var body: some View {
+        if let prefs = cachedPrefs {
+            VStack(alignment: .leading, spacing: 1) {
+                HStack(spacing: 6) {
+                    summaryItem(
+                        label: String(localized: "Local"),
+                        value: prefs.localConnectionConfig.url.isEmpty
+                            ? String(localized: "Not set")
+                            : (URL(string: prefs.localConnectionConfig.url)?.host ?? prefs.localConnectionConfig.url)
+                    )
+                    Text("·").foregroundStyle(.tertiary)
+                    summaryItem(
+                        label: String(localized: "Remote"),
+                        value: prefs.remoteConnectionConfig.url.isEmpty
+                            ? String(localized: "Not set")
+                            : (URL(string: prefs.remoteConnectionConfig.url)?.host ?? prefs.remoteConnectionConfig.url)
+                    )
+                }
+                HStack(spacing: 6) {
+                    let hasCredentials = !prefs.localConnectionConfig.username.isEmpty
+                        || !prefs.remoteConnectionConfig.username.isEmpty
+                    Text(hasCredentials ? String(localized: "Credentials set") : String(localized: "No credentials"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    if prefs.localConnectionConfig.ignoreSSL || prefs.remoteConnectionConfig.ignoreSSL {
+                        Text("·").foregroundStyle(.tertiary)
+                        Text("SSL off")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
+                    if prefs.demomode {
+                        Text("·").foregroundStyle(.tertiary)
+                        Text("Demo")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    let defaultView = prefs.defaultView
+                    if defaultView != "web" {
+                        Text("·").foregroundStyle(.tertiary)
+                        Text("Sitemap: \(prefs.defaultSitemap)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    private func summaryItem(label: String, value: String) -> some View {
+        HStack(spacing: 2) {
+            Text(label + ":")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+            Text(value)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
 struct HomeSelectionView: View {
     @State private var homes: [UUID] = []
     @State private var cachedStoredHomes: [UUID: HomePreferences] = [:]
@@ -55,6 +121,55 @@ struct HomeSelectionView: View {
                 NavigationStack {
                     HomeSettingsView(homeId: target)
                 }
+            }
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            Button(action: {
+                dismiss()
+            }, label: {
+                Image(systemSymbol: .chevronBackward)
+                    .accessibilityLabel("Back")
+            })
+        }
+        if showEditOptions {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button(action: {
+                    newHomeName = ""
+                    showingNewHomeAlert.toggle()
+                }, label: {
+                    Image(systemSymbol: .plus)
+                })
+                .alert("Enter a name for the new home", isPresented: $showingNewHomeAlert) {
+                    TextField("Name for new home", text: $newHomeName)
+                    HStack {
+                        Button("Cancel", role: .cancel) {
+                            showingNewHomeAlert.toggle()
+                        }
+                        Button("Create") {
+                            addHome()
+                            showingNewHomeAlert.toggle()
+                        }
+                    }
+                } message: {
+                    Text("For Shortcuts to work across multiple devices, each home must have the same name on every device.")
+                }
+                Button(action: {
+                    showEditOptions.toggle()
+                }, label: {
+                    Image(systemSymbol: .checkmark)
+                })
+            }
+        } else {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button(action: {
+                    showEditOptions.toggle()
+                }, label: {
+                    Image(systemSymbol: .pencil)
+                })
             }
         }
     }
@@ -171,55 +286,6 @@ struct HomeSelectionView: View {
         }
     }
 
-    @ToolbarContentBuilder
-    private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
-            Button(action: {
-                dismiss()
-            }, label: {
-                Image(systemSymbol: .chevronBackward)
-                    .accessibilityLabel("Back")
-            })
-        }
-        if showEditOptions {
-            ToolbarItemGroup(placement: .primaryAction) {
-                Button(action: {
-                    newHomeName = ""
-                    showingNewHomeAlert.toggle()
-                }, label: {
-                    Image(systemSymbol: .plus)
-                })
-                .alert("Enter a name for the new home", isPresented: $showingNewHomeAlert) {
-                    TextField("Name for new home", text: $newHomeName)
-                    HStack {
-                        Button("Cancel", role: .cancel) {
-                            showingNewHomeAlert.toggle()
-                        }
-                        Button("Create") {
-                            addHome()
-                            showingNewHomeAlert.toggle()
-                        }
-                    }
-                } message: {
-                    Text("For Shortcuts to work across multiple devices, each home must have the same name on every device.")
-                }
-                Button(action: {
-                    showEditOptions.toggle()
-                }, label: {
-                    Image(systemSymbol: .checkmark)
-                })
-            }
-        } else {
-            ToolbarItemGroup(placement: .primaryAction) {
-                Button(action: {
-                    showEditOptions.toggle()
-                }, label: {
-                    Image(systemSymbol: .pencil)
-                })
-            }
-        }
-    }
-
     private func select(home: UUID) {
         Task { @MainActor in
             await Preferences.shared.switchActiveHome(to: home)
@@ -230,7 +296,7 @@ struct HomeSelectionView: View {
 
     private func loadHomesList() async {
         homes = await Preferences.shared.listStoredHomes()
-        cachedActiveHomeId = (await Preferences.shared.currentHomePreferences).id
+        cachedActiveHomeId = await (Preferences.shared.currentHomePreferences).id
         cachedStoredHomes = await Preferences.shared.storedHomes
     }
 
@@ -257,73 +323,6 @@ struct HomeSelectionView: View {
         Task { @MainActor in
             await Preferences.shared.createAndLoadNewStoredSettings(homeName: newHomeName)
             await loadHomesList()
-        }
-    }
-}
-
-// MARK: - Summary
-
-struct HomeSummaryView: View {
-    let homeId: UUID
-    let cachedPrefs: HomePreferences?
-
-    var body: some View {
-        if let prefs = cachedPrefs {
-            VStack(alignment: .leading, spacing: 1) {
-                HStack(spacing: 6) {
-                    summaryItem(
-                        label: String(localized: "Local"),
-                        value: prefs.localConnectionConfig.url.isEmpty
-                            ? String(localized: "Not set")
-                            : (URL(string: prefs.localConnectionConfig.url)?.host ?? prefs.localConnectionConfig.url)
-                    )
-                    Text("·").foregroundStyle(.tertiary)
-                    summaryItem(
-                        label: String(localized: "Remote"),
-                        value: prefs.remoteConnectionConfig.url.isEmpty
-                            ? String(localized: "Not set")
-                            : (URL(string: prefs.remoteConnectionConfig.url)?.host ?? prefs.remoteConnectionConfig.url)
-                    )
-                }
-                HStack(spacing: 6) {
-                    let hasCredentials = !prefs.localConnectionConfig.username.isEmpty
-                        || !prefs.remoteConnectionConfig.username.isEmpty
-                    Text(hasCredentials ? String(localized: "Credentials set") : String(localized: "No credentials"))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    if prefs.localConnectionConfig.ignoreSSL || prefs.remoteConnectionConfig.ignoreSSL {
-                        Text("·").foregroundStyle(.tertiary)
-                        Text("SSL off")
-                            .font(.caption)
-                            .foregroundStyle(.orange)
-                    }
-                    if prefs.demomode {
-                        Text("·").foregroundStyle(.tertiary)
-                        Text("Demo")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    let defaultView = prefs.defaultView
-                    if defaultView != "web" {
-                        Text("·").foregroundStyle(.tertiary)
-                        Text("Sitemap: \(prefs.defaultSitemap)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func summaryItem(label: String, value: String) -> some View {
-        HStack(spacing: 2) {
-            Text(label + ":")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-            Text(value)
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
     }
 }

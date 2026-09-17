@@ -11,7 +11,28 @@
 
 import OpenHABCore
 import PhotosUI
+import SFSafeSymbols
 import SwiftUI
+
+// MARK: - Overlay with circular cutout
+
+private struct CropMaskCanvas: View {
+    let cropDiameter: CGFloat
+
+    var body: some View {
+        Canvas { ctx, size in
+            var path = Path(CGRect(origin: .zero, size: size))
+            path.addEllipse(in: CGRect(
+                x: size.width / 2 - cropDiameter / 2,
+                y: size.height / 2 - cropDiameter / 2,
+                width: cropDiameter,
+                height: cropDiameter
+            ))
+            ctx.fill(path, with: .color(.black.opacity(0.55)), style: FillStyle(eoFill: true))
+        }
+        .ignoresSafeArea()
+    }
+}
 
 /// Full-screen photo crop sheet. Opens immediately and loads the photo
 /// asynchronously — a spinner is shown in the crop circle while an iCloud
@@ -49,35 +70,6 @@ struct CropImageView: View {
 
     private let cropDiameter: CGFloat = 280
     private let maxOffset: CGFloat = 280
-
-    init(photoItem: PhotosPickerItem,
-         initialBackgroundHex: String = HomeAvatarView.colorPalette[0],
-         onConfirm: @escaping (UIImage, AvatarMode) -> Void,
-         onCancel: @escaping () -> Void) {
-        self.initialPhotoItem = photoItem
-        self.initialAvatarMode = nil
-        _backgroundHex = State(initialValue: initialBackgroundHex)
-        self.onConfirm = onConfirm
-        self.onCancel = onCancel
-    }
-
-    /// Opens the crop view pre-loaded with an existing `UIImage` — no async photo loading.
-    /// Pass `initialMode` to restore the previous crop position; omit to start at fit-to-circle.
-    init(image: UIImage,
-         initialMode: AvatarMode? = nil,
-         onConfirm: @escaping (UIImage, AvatarMode) -> Void,
-         onCancel: @escaping () -> Void) {
-        self.initialPhotoItem = nil
-        self.initialAvatarMode = initialMode
-        _currentImage = State(initialValue: image)
-        _isLoading = State(initialValue: false)
-        let bgHex: String
-        if case .image(_, _, _, let bg) = initialMode { bgHex = bg }
-        else { bgHex = HomeAvatarView.colorPalette[0] }
-        _backgroundHex = State(initialValue: bgHex)
-        self.onConfirm = onConfirm
-        self.onCancel = onCancel
-    }
 
     private var backgroundColor: Color {
         Color(hex: backgroundHex) ?? HomeAvatarView.defaultColor
@@ -130,7 +122,7 @@ struct CropImageView: View {
                                     .tint(.white)
                                     .scaleEffect(1.5)
                             } else {
-                                Image(systemName: "exclamationmark.triangle")
+                                Image(systemSymbol: .exclamationmarkTriangle)
                                     .font(.title)
                                     .foregroundStyle(.white.opacity(0.6))
                             }
@@ -149,11 +141,15 @@ struct CropImageView: View {
                 // onGeometryChange fires on every layout pass (including after the
                 // fullScreenCover animation completes), so containerSize is always
                 // current. If the image arrived before layout was valid, we catch up here.
-                .onGeometryChange(for: CGSize.self, of: { $0.size }) { newSize in
-                    containerSize = newSize
-                    guard currentImage != nil else { return }
-                    setupLayout(containerSize: newSize)
-                }
+                .onGeometryChange(
+                    for: CGSize.self,
+                    of: { $0.size },
+                    action: { newSize in
+                        containerSize = newSize
+                        guard currentImage != nil else { return }
+                        setupLayout(containerSize: newSize)
+                    }
+                )
                 // Fires when the image becomes available. Uses the stored containerSize
                 // which is kept current by onGeometryChange above.
                 .onChange(of: currentImage) { _, img in
@@ -192,22 +188,8 @@ struct CropImageView: View {
         }
     }
 
-    @MainActor
-    private func loadPhoto(_ item: PhotosPickerItem) async {
-        guard let data = try? await item.loadTransferable(type: Data.self),
-              let uiImage = UIImage(data: data) else {
-            isLoading = false
-            loadFailed = true
-            return
-        }
-        currentImage = uiImage
-        isLoading = false
-        loadFailed = false
-    }
-
     // MARK: - Top bar
 
-    @ViewBuilder
     private var topBar: some View {
         HStack {
             photoPickerButton
@@ -228,7 +210,7 @@ struct CropImageView: View {
     private var photoPickerButton: some View {
         if #available(iOS 26, *) {
             Button { showPhotoPicker = true } label: {
-                Image(systemName: "photo.stack")
+                Image(systemSymbol: .photoStack)
                     .font(.system(size: 15))
                     .foregroundStyle(.white)
                     .frame(width: 34, height: 34)
@@ -240,7 +222,7 @@ struct CropImageView: View {
                     .fill(Color.white.opacity(0.18))
                     .frame(width: 34, height: 34)
                     .overlay {
-                        Image(systemName: "photo.stack")
+                        Image(systemSymbol: .photoStack)
                             .font(.system(size: 15))
                             .foregroundStyle(.white)
                     }
@@ -258,17 +240,17 @@ struct CropImageView: View {
                 get: { Color(hex: backgroundHex) ?? HomeAvatarView.defaultColor },
                 set: { backgroundHex = $0.hexString }
             ), supportsOpacity: false)
-            .labelsHidden()
-            .frame(width: 28, height: 28)
-            .padding(7)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 13))
+                .labelsHidden()
+                .frame(width: 28, height: 28)
+                .padding(7)
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 13))
         } else {
             ColorPicker("", selection: Binding(
                 get: { Color(hex: backgroundHex) ?? HomeAvatarView.defaultColor },
                 set: { backgroundHex = $0.hexString }
             ), supportsOpacity: false)
-            .labelsHidden()
-            .frame(width: 28, height: 28)
+                .labelsHidden()
+                .frame(width: 28, height: 28)
         }
     }
 
@@ -307,8 +289,7 @@ struct CropImageView: View {
                 .allowsHitTesting(false)
             }
 
-            if #available(iOS 26, *) {
-            } else {
+            if #unavailable(iOS 26) {
                 LinearGradient(
                     colors: [.black.opacity(0.6), .clear],
                     startPoint: .leading,
@@ -319,7 +300,11 @@ struct CropImageView: View {
             }
 
             bgColorPicker
-                .onGeometryChange(for: CGFloat.self, of: { $0.size.width }) { bgColorPickerWidth = $0 }
+                .onGeometryChange(
+                    for: CGFloat.self,
+                    of: { $0.size.width },
+                    action: { bgColorPickerWidth = $0 }
+                )
                 .padding(.leading, pinLeading)
         }
     }
@@ -338,6 +323,46 @@ struct CropImageView: View {
         }
     }
 
+    init(photoItem: PhotosPickerItem,
+         initialBackgroundHex: String = HomeAvatarView.colorPalette[0],
+         onConfirm: @escaping (UIImage, AvatarMode) -> Void,
+         onCancel: @escaping () -> Void) {
+        initialPhotoItem = photoItem
+        initialAvatarMode = nil
+        _backgroundHex = State(initialValue: initialBackgroundHex)
+        self.onConfirm = onConfirm
+        self.onCancel = onCancel
+    }
+
+    /// Opens the crop view pre-loaded with an existing `UIImage` — no async photo loading.
+    /// Pass `initialMode` to restore the previous crop position; omit to start at fit-to-circle.
+    init(image: UIImage,
+         initialMode: AvatarMode? = nil,
+         onConfirm: @escaping (UIImage, AvatarMode) -> Void,
+         onCancel: @escaping () -> Void) {
+        initialPhotoItem = nil
+        initialAvatarMode = initialMode
+        _currentImage = State(initialValue: image)
+        _isLoading = State(initialValue: false)
+        let bgHex: String = if case let .image(_, _, _, bg) = initialMode { bg } else { HomeAvatarView.colorPalette[0] }
+        _backgroundHex = State(initialValue: bgHex)
+        self.onConfirm = onConfirm
+        self.onCancel = onCancel
+    }
+
+    @MainActor
+    private func loadPhoto(_ item: PhotosPickerItem) async {
+        guard let data = try? await item.loadTransferable(type: Data.self),
+              let uiImage = UIImage(data: data) else {
+            isLoading = false
+            loadFailed = true
+            return
+        }
+        currentImage = uiImage
+        isLoading = false
+        loadFailed = false
+    }
+
     // MARK: - Layout
 
     private func setupLayout(containerSize: CGSize) {
@@ -348,7 +373,7 @@ struct CropImageView: View {
             ? CGSize(width: containerSize.width, height: containerSize.width / aspect)
             : CGSize(width: containerSize.height * aspect, height: containerSize.height)
 
-        if case .image(let ox, let oy, let sz, _) = initialAvatarMode, sz > 0 {
+        if case let .image(ox, oy, sz, _) = initialAvatarMode, sz > 0 {
             // Restore stored crop: reverse-engineer the scale and offset that produced it.
             // ptsPerDisplayPt = sz / cropDiameter  →  dw = img.width / ptsPerDisplayPt
             let dw = img.size.width * cropDiameter / CGFloat(sz)
@@ -385,7 +410,7 @@ struct CropImageView: View {
 
     private func crop() {
         guard let img = currentImage else { return }
-        let dw = fittedSize.width * scale  // displayed image width (display pts)
+        let dw = fittedSize.width * scale // displayed image width (display pts)
         let dh = fittedSize.height * scale
         let imageInCropX = offset.width - dw / 2 + cropDiameter / 2
         let imageInCropY = offset.height - dh / 2 + cropDiameter / 2
@@ -395,7 +420,7 @@ struct CropImageView: View {
         let ptsPerDisplayPt = img.size.width / dw
         let originX = -imageInCropX * ptsPerDisplayPt
         let originY = -imageInCropY * ptsPerDisplayPt
-        let cropSize = cropDiameter * ptsPerDisplayPt  // side length of square in image pts
+        let cropSize = cropDiameter * ptsPerDisplayPt // side length of square in image pts
 
         let mode = AvatarMode.image(
             originX: Double(originX),
@@ -404,25 +429,5 @@ struct CropImageView: View {
             background: backgroundHex
         )
         onConfirm(img, mode)
-    }
-}
-
-// MARK: - Overlay with circular cutout
-
-private struct CropMaskCanvas: View {
-    let cropDiameter: CGFloat
-
-    var body: some View {
-        Canvas { ctx, size in
-            var path = Path(CGRect(origin: .zero, size: size))
-            path.addEllipse(in: CGRect(
-                x: size.width / 2 - cropDiameter / 2,
-                y: size.height / 2 - cropDiameter / 2,
-                width: cropDiameter,
-                height: cropDiameter
-            ))
-            ctx.fill(path, with: .color(.black.opacity(0.55)), style: FillStyle(eoFill: true))
-        }
-        .ignoresSafeArea()
     }
 }
