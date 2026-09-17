@@ -27,6 +27,15 @@ class NotificationActionService: ObservableObject {
 
     @Published var navigationCommand: NavigationCommand?
 
+    /// Called synchronously, before this action's connection wait even starts, whenever the
+    /// action is a web-view navigation target. OpenHABRootView wires this to
+    /// `OpenHABWebViewModel.markPendingExplicitNavigation()` so its own connection- and
+    /// app-active-triggered default auto-loads know to defer to this explicit navigation
+    /// instead of racing it — and sometimes winning with the wrong (default) destination —
+    /// once the same "connection becomes active" event they're all waiting on fires on a
+    /// cold launch (openhab-ios#1336).
+    var onPendingWebViewNavigation: (() -> Void)?
+
     // MARK: - Retry configuration
 
     /// Maximum number of automatic retries after a transient network failure.
@@ -116,11 +125,20 @@ class NotificationActionService: ObservableObject {
         guard let action else { return }
 
         Logger.viewController.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
+        Logger.notificationNavigation.info("handleNotification: action=\(action, privacy: .public) cloudUserId=\(cloudUserId ?? "<none>", privacy: .public) — awaiting active connection before dispatching")
+
+        // Mark the pending navigation immediately — before the connection wait below even
+        // starts — so OpenHABWebViewModel's own connection-triggered auto-load, which reacts
+        // to that same wait's underlying event, can see this and defer instead of racing it.
+        if NotificationCommandParser.parse(action)?.requiresPendingWebViewNavigationMark == true {
+            Logger.notificationNavigation.info("handleNotification: marking pending web-view navigation ahead of the connection wait")
+            onPendingWebViewNavigation?()
+        }
 
         Task {
             if let cloudUserId,
                let targetHome = await Preferences.shared.storedHome(forCloudUserId: cloudUserId),
-               (await Preferences.shared.currentHomePreferences).remoteConnectionConfig.cloudUserId != cloudUserId {
+               await (Preferences.shared.currentHomePreferences).remoteConnectionConfig.cloudUserId != cloudUserId {
                 await NetworkTracker.shared.stopTracking()
                 Logger.viewController.info("Switching to home \(targetHome.id)")
                 await Preferences.shared.switchActiveHome(to: targetHome.id)
@@ -129,13 +147,16 @@ class NotificationActionService: ObservableObject {
             await NetworkTracker.shared.startTracking(
                 connectionConfigurations: homePrefs.trackedConnections
             )
-            _ = await NetworkTracker.shared.waitForActiveConnection()
+            let waitStart = Date()
+            let connection = await NetworkTracker.shared.waitForActiveConnection()
+            Logger.notificationNavigation.info("handleNotification: waitForActiveConnection resolved after \(Date().timeIntervalSince(waitStart), format: .fixed(precision: 3))s, connection=\(connection?.configuration.description ?? "nil", privacy: .public) — dispatching action now (races OpenHABWebViewModel's own connection-triggered auto-load)")
             handleNotificationInternal(action)
         }
     }
 
     func handleNotificationInternal(_ action: String?) {
         guard let parsed = NotificationCommandParser.parse(action) else { return }
+        Logger.notificationNavigation.info("handleNotificationInternal: parsed \(String(describing: parsed), privacy: .public)")
 
         switch parsed {
         case let .ui(target):
@@ -163,6 +184,8 @@ class NotificationActionService: ObservableObject {
         case let .webViewCommand(command):
             navigationCommand = .switchToWebView(path: command)
         }
+        let publishedCommand = navigationCommand // avoids `self.` inside the Logger call below
+        Logger.notificationNavigation.info("handleUICommand: publishing navigationCommand=\(String(describing: publishedCommand), privacy: .public)")
     }
 
     private func sendItemCommand(item: String, command: String) {
@@ -219,7 +242,7 @@ class NotificationActionService: ObservableObject {
     func withRetry(operation: () async throws -> Void) async throws {
         let retries = maxRetryCount
         let backoff = retryBackoffBase
-        for attempt in 0...retries {
+        for attempt in 0 ... retries {
             do {
                 try await operation()
                 return

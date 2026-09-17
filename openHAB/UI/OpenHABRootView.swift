@@ -14,9 +14,252 @@ import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
-import SafariServices
 import SFSafeSymbols
 import SwiftUI
+
+// MARK: - Connecting placeholder
+
+/// Shown centered over the (transparent) web view while a home is first loading. While the
+/// tracker is still trying, the openHAB mark gently breathes above a spinner. Once an attempt
+/// has failed it switches to a warning: a countdown to the next retry, or — when the tracker
+/// has given up — a static "cannot connect" message. On an adaptive background so the blank
+/// page reads as intentional in both light and dark mode.
+private struct ConnectingPlaceholder: View {
+    private enum Phase: Equatable {
+        case connecting
+        case retrying(Date)
+        case failed
+        case noNetwork
+    }
+
+    var networkTracker = MainActorNetworkTracker.shared
+
+    private var phase: Phase {
+        if !networkTracker.isNetworkAvailable {
+            return .noNetwork
+        }
+        if let retry = networkTracker.nextRetryDate, retry.timeIntervalSinceNow > 0 {
+            return .retrying(retry)
+        }
+        if networkTracker.status == .stopped {
+            return .failed
+        }
+        return .connecting
+    }
+
+    var body: some View {
+        ZStack {
+            Color(.systemBackground)
+                .ignoresSafeArea()
+            VStack(spacing: 18) {
+                switch phase {
+                case .connecting:
+                    PulsingLogo()
+                    label(spinner: true) { Text("Connecting…") }
+                case let .retrying(date):
+                    statusIcon(.exclamationmarkTriangle)
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        let remaining = max(0, Int(date.timeIntervalSince(context.date).rounded(.up)))
+                        label(spinner: false) { Text("Cannot connect — retrying in \(remaining)s") }
+                    }
+                case .failed:
+                    statusIcon(.exclamationmarkTriangle)
+                    label(spinner: false) { Text("Cannot connect to the server") }
+                case .noNetwork:
+                    statusIcon(.wifiSlash)
+                    label(spinner: false) { Text("No network connection") }
+                }
+            }
+            .animation(.easeInOut(duration: 0.25), value: phase)
+        }
+    }
+
+    private func statusIcon(_ symbol: SFSymbol) -> some View {
+        Image(systemSymbol: symbol)
+            .font(.system(size: 52))
+            .symbolRenderingMode(.hierarchical)
+            .foregroundStyle(.secondary)
+    }
+
+    private func label(spinner: Bool, @ViewBuilder text: () -> some View) -> some View {
+        HStack(spacing: 8) {
+            if spinner {
+                ProgressView().controlSize(.small)
+            }
+            text()
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// The openHAB mark breathing (opacity + scale). Extracted so that each time the connecting
+/// phase reappears a fresh instance restarts the repeating animation from its `onAppear`.
+private struct PulsingLogo: View {
+    @State private var animating = false
+
+    var body: some View {
+        Image("openHABIcon")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 72, height: 72)
+            .opacity(animating ? 1.0 : 0.55)
+            .scaleEffect(animating ? 1.0 : 0.94)
+            .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: animating)
+            .onAppear { animating = true }
+    }
+}
+
+// MARK: - In-app toast banner
+
+/// Slide-up banner driven by ToastService.
+/// Layout mirrors sitemap input rows: text content on the left, action control
+/// on the right (single action → plain button label; multiple → Menu with chevron).
+private struct InAppToastBanner: View {
+    let service: ToastService
+
+    var body: some View {
+        Group {
+            if service.isPresented {
+                HStack(alignment: .center, spacing: 12) {
+                    leadingIcon
+
+                    // Left: title + message, takes all available space
+                    VStack(alignment: .leading, spacing: 4) {
+                        if !service.title.isEmpty {
+                            Text(service.title)
+                                .font(.headline)
+                                .lineLimit(2)
+                        }
+                        if !service.message.isEmpty {
+                            Text(service.message)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .lineLimit(4)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    // Right: action control — only when actions are present
+                    if !service.actions.isEmpty {
+                        Divider()
+                        actionControl
+                    }
+                }
+                // fixedSize prevents Divider from expanding to the overlay's proposed screen height
+                .fixedSize(horizontal: false, vertical: true)
+                .padding()
+                // .thickMaterial (rather than .regularMaterial) plus a tinted border and a
+                // real drop shadow so the banner reads as its own floating surface against
+                // busy content behind it (a MainUI page or a Sitemap's own rows) instead of
+                // blending into whatever's already using translucency there.
+                .background(.thickMaterial, in: RoundedRectangle(cornerRadius: 16))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .strokeBorder(.tint.opacity(0.35), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.25), radius: 12, y: 4)
+                .padding([.horizontal, .bottom])
+                .contentShape(RoundedRectangle(cornerRadius: 16))
+                .onTapGesture { dismiss() }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .task(id: service.showCount) { await autoDismiss() }
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.78), value: service.isPresented)
+    }
+
+    /// The item's own icon when available; otherwise a bell badge, so the banner always
+    /// carries a "this is a notification" marker instead of just floating text that can
+    /// be mistaken for part of the page behind it.
+    @ViewBuilder
+    private var leadingIcon: some View {
+        if let iconURL = service.iconURL, let connection = service.connection {
+            KFImage(iconURL)
+                .withOpenHABCredentials(for: connection)
+                .placeholder { bellBadge }
+                .resizable()
+                .frame(width: 32, height: 32)
+                .clipShape(.rect(cornerRadius: 8))
+        } else {
+            bellBadge
+        }
+    }
+
+    private var bellBadge: some View {
+        Image(systemSymbol: .bellFill)
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 32, height: 32)
+            .background(.tint, in: .circle)
+    }
+
+    @ViewBuilder
+    private var actionControl: some View {
+        if service.actions.count == 1, let item = service.actions.first {
+            Button {
+                fireAction(item)
+            } label: {
+                Text(item.title)
+                    .font(.subheadline.weight(.medium))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .frame(maxWidth: 120)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.tint)
+        } else {
+            Menu {
+                ForEach(service.actions, id: \.action) { item in
+                    Button(item.title) { fireAction(item) }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text("Actions")
+                        .font(.subheadline.weight(.medium))
+                        .lineLimit(1)
+                    Image(systemSymbol: .chevronUpChevronDown)
+                        .font(.caption2.weight(.semibold))
+                }
+                .frame(maxWidth: 120)
+                .foregroundStyle(.tint)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    /// Scales with content length so a longer message isn't cut off mid-read by the same
+    /// flat timeout as a one-line alert. ~15 chars/second is a brisk-but-readable pace;
+    /// clamped to [5, 10]s so a short toast still lingers and a long one doesn't sit forever.
+    private var autoDismissDuration: Double {
+        let charCount = service.title.count + service.message.count
+        return (3.0 + Double(charCount) / 15.0).clamped(to: 5.0 ... 10.0)
+    }
+
+    private func fireAction(_ item: NotificationActionItem) {
+        service.onAction?(item)
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+            service.isPresented = false
+        }
+    }
+
+    private func dismiss() {
+        service.onTap?()
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+            service.isPresented = false
+        }
+    }
+
+    private func autoDismiss() async {
+        try? await Task.sleep(for: .seconds(autoDismissDuration))
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+            service.isPresented = false
+        }
+    }
+}
+
+// MARK: - Root view
 
 struct OpenHABRootView: View {
     @StateObject private var networkService = NetworkConnectionService()
@@ -28,7 +271,7 @@ struct OpenHABRootView: View {
     @State private var menuPresented = false
     @State private var navbarActionsPresented = false
     @State private var currentContent: TargetController = .webview
-    @State private var currentViewTitle: String = ""
+    @State private var currentViewTitle = ""
     @State private var activeNetworkConnection: ConnectionInfo? = MainActorNetworkTracker.shared.activeConnection
     @State private var showNotifications = false
     @State private var sitemapResetID = UUID()
@@ -56,13 +299,12 @@ struct OpenHABRootView: View {
             }
             if let title = env["UITestToastTitle"],
                let message = env["UITestToastMessage"] {
-                let actions: [NotificationActionItem]
-                if let actionsJSON = env["UITestToastActions"],
-                   let data = actionsJSON.data(using: .utf8),
-                   let items = try? JSONDecoder().decode([NotificationActionItem].self, from: data) {
-                    actions = items
+                let actions: [NotificationActionItem] = if let actionsJSON = env["UITestToastActions"],
+                                                           let data = actionsJSON.data(using: .utf8),
+                                                           let items = try? JSONDecoder().decode([NotificationActionItem].self, from: data) {
+                    items
                 } else {
-                    actions = []
+                    []
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     ToastService.shared.show(title: title, message: message, actions: actions)
@@ -88,8 +330,8 @@ struct OpenHABRootView: View {
             if let json = env["UITestWebViewNavbarItems"],
                let data = json.data(using: .utf8),
                let raw = try? JSONDecoder().decode([[String: String]].self, from: data) {
-                let items = raw.compactMap { d -> WebNavbarItem? in
-                    guard let label = d["label"], let action = d["jsAction"] else { return nil }
+                let items = raw.compactMap { dict -> WebNavbarItem? in
+                    guard let label = dict["label"], let action = dict["jsAction"] else { return nil }
                     return WebNavbarItem(label: label, jsAction: action, iconBase64: nil, isBack: false)
                 }
                 webViewModel.lockUITestContent()
@@ -99,10 +341,13 @@ struct OpenHABRootView: View {
             }
             #endif
             ImageDownloader.default.authenticationChallengeResponder = networkService
+            notificationService.onPendingWebViewNavigation = { [weak webViewModel] in
+                webViewModel?.markPendingExplicitNavigation()
+            }
             Task { await switchToSavedView() }
             setupExitToApp()
         }
-        .onReceive(notificationService.$navigationCommand.compactMap { $0 }) { command in
+        .onReceive(notificationService.$navigationCommand.compactMap(\.self)) { command in
             handleNavigationCommand(command)
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
@@ -157,26 +402,28 @@ struct OpenHABRootView: View {
         }
         #if DEBUG
         .overlay {
-            ForEach(Array(webViewModel.uiTestReports.keys.sorted()), id: \.self) { key in
-                Text(webViewModel.uiTestReports[key] ?? "")
-                    .accessibilityIdentifier("UITestReport-\(key)")
+                ForEach(Array(webViewModel.uiTestReports.keys.sorted()), id: \.self) { key in
+                    Text(webViewModel.uiTestReports[key] ?? "")
+                        .accessibilityIdentifier("UITestReport-\(key)")
+                        .frame(width: 0, height: 0)
+                        .opacity(0)
+                        .allowsHitTesting(false)
+                }
+                Text(String(webViewModel.navbarItems.count))
+                    .accessibilityIdentifier("UITestReport-navbarItemCount")
                     .frame(width: 0, height: 0)
                     .opacity(0)
                     .allowsHitTesting(false)
-            }
-            Text(String(webViewModel.navbarItems.count))
-                .accessibilityIdentifier("UITestReport-navbarItemCount")
-                .frame(width: 0, height: 0)
-                .opacity(0)
-                .allowsHitTesting(false)
         }
         #endif
     }
+}
 
-    // MARK: - Content switching
+// MARK: - Content switching
 
+private extension OpenHABRootView {
     @ViewBuilder
-    private var contentView: some View {
+    var contentView: some View {
         switch currentContent {
         case .webview, .mainUIPage:
             ZStack(alignment: .top) {
@@ -197,13 +444,15 @@ struct OpenHABRootView: View {
                     .offset(y: webViewModel.isWebNavbarHidden ? -menuBarHeight : 0)
                     .opacity(webViewModel.isWebNavbarHidden ? 0 : 1)
                     .allowsHitTesting(!webViewModel.isWebNavbarHidden)
-                    .animation(.timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.4),
-                               value: webViewModel.isWebNavbarHidden)
+                    .animation(
+                        .timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.4),
+                        value: webViewModel.isWebNavbarHidden
+                    )
             }
             .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
             .onAppear { webViewModel.triggerAppMenuProbe() }
         case let .sitemap(name, navigationState: state):
-            SitemapNavigationView(sitemapName: name, navigationPath: state.navigationPath, onShowSideMenu: { menuPresented = true })
+            SitemapNavigationView(sitemapName: name, navigationPath: state.navigationPath) { menuPresented = true }
                 .id("\(name)-\(state.navigationPath.last?.pageLink ?? "")-\(sitemapResetID)")
         case .tile:
             VStack(spacing: 0) {
@@ -216,7 +465,7 @@ struct OpenHABRootView: View {
     }
 
     /// Matches the height Framework7 reserves for its navbar, so the bar covers it exactly.
-    private var menuBarHeight: CGFloat {
+    var menuBarHeight: CGFloat {
         switch currentContent {
         case .webview, .mainUIPage: webViewModel.webNavbarHeight
         default: 44
@@ -224,17 +473,16 @@ struct OpenHABRootView: View {
     }
 
     @ViewBuilder
-    private var menuBar: some View {
-        let isWebviewMode: Bool = {
-            switch currentContent {
-            case .webview, .mainUIPage: return true
-            default: return false
-            }
-        }()
+    var menuBar: some View {
+        let isWebviewMode = isMainUIShown
 
         let barTitle: String = {
-            if isWebviewMode { return webViewModel.isWebNavbarTitleHidden ? "" : webViewModel.navbarTitle }
-            if case .tile = currentContent { return currentViewTitle }
+            if isWebviewMode {
+                return webViewModel.isWebNavbarTitleHidden ? "" : webViewModel.navbarTitle
+            }
+            if case .tile = currentContent {
+                return currentViewTitle
+            }
             return ""
         }()
 
@@ -333,11 +581,12 @@ struct OpenHABRootView: View {
             ignoresSafeAreaEdges: .top
         )
     }
+}
 
-    // MARK: - Navbar proxy helpers
+// MARK: - Navbar proxy helpers
 
-    @ViewBuilder
-    private func navbarProxyButton(_ item: WebNavbarItem) -> some View {
+private extension OpenHABRootView {
+    func navbarProxyButton(_ item: WebNavbarItem) -> some View {
         Button {
             webViewModel.evaluateJS(item.jsAction)
         } label: {
@@ -355,12 +604,11 @@ struct OpenHABRootView: View {
         .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
     }
 
-    @ViewBuilder
-    private func navbarActionsButton(_ items: [WebNavbarItem]) -> some View {
+    func navbarActionsButton(_ items: [WebNavbarItem]) -> some View {
         Button {
             navbarActionsPresented = true
         } label: {
-            Image(systemName: "ellipsis.circle")
+            Image(systemSymbol: .ellipsisCircle)
                 .font(.title2)
         }
         .accessibilityLabel("Actions")
@@ -393,7 +641,7 @@ struct OpenHABRootView: View {
         }
     }
 
-    private func switchToSavedView() async {
+    func switchToSavedView() async {
         // Select the surface for the current home. Demo homes follow their defaultView like
         // any other home. The web view's actual load is driven by syncActiveConnection, so
         // here we only choose which content is shown.
@@ -407,7 +655,7 @@ struct OpenHABRootView: View {
         }
     }
 
-    private func switchContent(to newContent: TargetController) {
+    func switchContent(to newContent: TargetController) {
         if currentContent == newContent {
             // Tapped same item — reload
             switch newContent {
@@ -423,14 +671,18 @@ struct OpenHABRootView: View {
                 break // modal/transient targets never reach switchContent
             }
         } else {
-            let wasShowingTile: Bool
-            if case .tile = currentContent { wasShowingTile = true } else { wasShowingTile = false }
+            let wasShowingTile = switch currentContent {
+            case .tile: true
+            default: false
+            }
 
             currentContent = newContent
 
             switch newContent {
             case .webview:
-                if wasShowingTile { webViewModel.reloadView() }
+                if wasShowingTile {
+                    webViewModel.reloadView()
+                }
             case .sitemap:
                 break
             case let .tile(url):
@@ -456,10 +708,19 @@ struct OpenHABRootView: View {
             }
         }
     }
+}
 
-    // MARK: - Menu handling
+// MARK: - Menu handling
 
-    private func handleMenuSelection(_ target: TargetController) {
+private extension OpenHABRootView {
+    var isMainUIShown: Bool {
+        switch currentContent {
+        case .webview, .mainUIPage: true
+        default: false
+        }
+    }
+
+    func handleMenuSelection(_ target: TargetController) {
         switch target {
         case .webview:
             showMainUI(path: nil)
@@ -478,7 +739,7 @@ struct OpenHABRootView: View {
             switchToTile(urlString)
         case let .browser(urlString):
             if let url = URL(string: urlString) {
-                openSafari(url: url)
+                SafariPresenter.present(url, entersReaderIfAvailable: true)
             }
         }
     }
@@ -489,11 +750,12 @@ struct OpenHABRootView: View {
     /// URL at that path and Framework7 routes to it on startup. The chosen destination
     /// is recorded as `currentContent` so a later reload returns here rather than to an
     /// arbitrary route the user reached inside the SPA.
-    private func showMainUI(path: String?) {
+    func showMainUI(path: String?) {
         let wasShowingMainUI = isMainUIShown
         // Ask the web view what it holds, not which surface was last visible: a tile's URL
         // survives a detour through a sitemap.
         let showsTile = webViewModel.isShowingTile
+        Logger.notificationNavigation.info("showMainUI: path=\(path ?? "nil", privacy: .public) wasShowingMainUI=\(wasShowingMainUI) showsTile=\(showsTile) hasLoadedContent=\(webViewModel.hasLoadedContent)")
 
         currentContent = path.map(TargetController.mainUIPage) ?? .webview
 
@@ -515,28 +777,24 @@ struct OpenHABRootView: View {
             let capturedPath = path ?? ""
             Task {
                 await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultMainUIPath = capturedPath }
-			}
-		}
-	}
+            }
+        }
+    }
 
     /// Routes client-side when the SPA is live, so its in-app state survives. `isMainUIReady`
     /// alone is not enough — it is true for `about:blank` too.
-    private func routeMainUI(to path: String) {
+    func routeMainUI(to path: String) {
         if webViewModel.isMainUIReady, webViewModel.hasLoadedContent {
+            Logger.notificationNavigation.info("routeMainUI: SPA already live — routing client-side to \(path, privacy: .public)")
+            webViewModel.clearPendingExplicitNavigation()
             webViewModel.navigateCommand("navigate:\(path)")
         } else {
+            Logger.notificationNavigation.info("routeMainUI: SPA not live yet — loading \(path, privacy: .public) directly")
             webViewModel.loadWebView(force: false, path: path)
         }
     }
 
-    private var isMainUIShown: Bool {
-        switch currentContent {
-        case .webview, .mainUIPage: return true
-        default: return false
-        }
-    }
-
-    private func persistDefaultViewIfNeeded(_ viewName: String) {
+    func persistDefaultViewIfNeeded(_ viewName: String) {
         guard !(cachedHomePrefs?.demomode ?? false) else { return }
         guard cachedHomePrefs?.defaultView != viewName else { return }
         let capturedViewName = viewName
@@ -548,32 +806,49 @@ struct OpenHABRootView: View {
     /// Reloads the destination currently selected in the menu — never the arbitrary
     /// route the user may have reached inside the SPA — so a reload always lands
     /// somewhere the menu can navigate away from.
-    private func reloadCurrentContent() {
+    func reloadCurrentContent() {
         switch currentContent {
         case .webview:
             webViewModel.loadWebView(force: true, path: nil)
         case let .mainUIPage(path):
             webViewModel.loadWebView(force: true, path: path)
         case let .tile(urlString):
-            if let url = URL(string: urlString) { webViewModel.reloadTile(url) }
+            if let url = URL(string: urlString) {
+                webViewModel.reloadTile(url)
+            }
         case .sitemap:
             sitemapResetID = UUID()
         case .notifications, .browser:
             break
         }
     }
+}
 
-    // MARK: - Navigation command handling
+// MARK: - Navigation command handling
 
-    private func handleNavigationCommand(_ command: NavigationCommand) {
-        switch command {
-        case let .switchToWebView(path):
-            if let path, path.starts(with: "/") {
-                showMainUI(path: path)
-            } else {
-                if !isMainUIShown { showMainUI(path: nil) }
-                if let path { webViewModel.navigateCommand(path) }
+private extension OpenHABRootView {
+    func handleNavigationCommand(_ command: NavigationCommand) {
+        let resolvedAction = NavigationCommandCoordinator.action(for: command, isMainUIShown: isMainUIShown)
+        Logger.notificationNavigation.info("handleNavigationCommand: command=\(String(describing: command), privacy: .public) isMainUIShown=\(isMainUIShown) -> \(String(describing: resolvedAction), privacy: .public)")
+        switch resolvedAction {
+        case let .showMainUI(path):
+            // Covers both an explicit server-side path and a "navigate:/page/…" command
+            // from a notification's onClickAction (e.g. "ui:navigate:/page/my_page" — see
+            // the openHAB Cloud Connector docs). Routing it through showMainUI rather than
+            // the live-command fallback below matters when Main UI isn't already showing —
+            // the common case for a notification tap — where that fallback shows the
+            // MainUI root first and queues the command to run once the SPA reports
+            // SSE-connected, which does not reliably happen before the user is looking at
+            // the (wrong) root page. showMainUI instead loads straight to the target path
+            // when the SPA isn't live yet, and routes client-side when it already is.
+            showMainUI(path: path)
+        case .none:
+            break
+        case let .navigateLive(command, ensureShown):
+            if ensureShown {
+                showMainUI(path: nil)
             }
+            webViewModel.navigateCommand(command)
         case let .switchToSitemap(name, widgetId):
             let capturedName = name
             let capturedWidgetId = widgetId
@@ -588,7 +863,7 @@ struct OpenHABRootView: View {
     }
 
     @MainActor
-    private func resolveAncestorChain(sitemapName: String, pageId: String?) async -> [LinkedPageNavigation] {
+    func resolveAncestorChain(sitemapName: String, pageId: String?) async -> [LinkedPageNavigation] {
         guard let pageId, !pageId.isEmpty else { return [] }
         let connection: ConnectionInfo
         if let active = MainActorNetworkTracker.shared.activeConnection {
@@ -602,19 +877,21 @@ struct OpenHABRootView: View {
             connectionConfiguration: connection.configuration,
             serviceConfiguration: .shortTerm
         ) else { return [] }
-        return (try? await service.ancestorChain(sitemapname: sitemapName, pageId: pageId))?
+        return await (try? service.ancestorChain(sitemapname: sitemapName, pageId: pageId))?
             .map { LinkedPageNavigation(pageLink: $0.link, pageTitle: $0.title) } ?? []
     }
+}
 
-    // MARK: - Helpers
+// MARK: - Helpers
 
-    private func setupExitToApp() {
+private extension OpenHABRootView {
+    func setupExitToApp() {
         webViewModel.onExitToApp = {
             menuPresented = true
         }
     }
 
-    private func switchToTile(_ urlString: String) {
+    func switchToTile(_ urlString: String) {
         guard !urlString.isEmpty else { return }
         let resolvedUrl: URL?
         if urlString.hasPrefix("http") {
@@ -625,222 +902,6 @@ struct OpenHABRootView: View {
         }
         if let resolvedUrl {
             switchContent(to: .tile(resolvedUrl.absoluteString))
-        }
-    }
-
-    private func openSafari(url: URL) {
-        let config = SFSafariViewController.Configuration()
-        config.entersReaderIfAvailable = true
-        let svc = SFSafariViewController(url: url, configuration: config)
-        UIApplication.shared.firstKeyWindow?.rootViewController?.present(svc, animated: true)
-    }
-}
-
-// MARK: - Connecting placeholder
-
-/// Shown centered over the (transparent) web view while a home is first loading. While the
-/// tracker is still trying, the openHAB mark gently breathes above a spinner. Once an attempt
-/// has failed it switches to a warning: a countdown to the next retry, or — when the tracker
-/// has given up — a static "cannot connect" message. On an adaptive background so the blank
-/// page reads as intentional in both light and dark mode.
-private struct ConnectingPlaceholder: View {
-    var networkTracker = MainActorNetworkTracker.shared
-
-    private enum Phase: Equatable {
-        case connecting
-        case retrying(Date)
-        case failed
-        case noNetwork
-    }
-
-    private var phase: Phase {
-        if !networkTracker.isNetworkAvailable {
-            return .noNetwork
-        }
-        if let retry = networkTracker.nextRetryDate, retry.timeIntervalSinceNow > 0 {
-            return .retrying(retry)
-        }
-        if networkTracker.status == .stopped {
-            return .failed
-        }
-        return .connecting
-    }
-
-    var body: some View {
-        ZStack {
-            Color(.systemBackground)
-                .ignoresSafeArea()
-            VStack(spacing: 18) {
-                switch phase {
-                case .connecting:
-                    PulsingLogo()
-                    label(spinner: true) { Text("Connecting…") }
-                case let .retrying(date):
-                    statusIcon(.exclamationmarkTriangle)
-                    TimelineView(.periodic(from: .now, by: 1)) { context in
-                        let remaining = max(0, Int(date.timeIntervalSince(context.date).rounded(.up)))
-                        label(spinner: false) { Text("Cannot connect — retrying in \(remaining)s") }
-                    }
-                case .failed:
-                    statusIcon(.exclamationmarkTriangle)
-                    label(spinner: false) { Text("Cannot connect to the server") }
-                case .noNetwork:
-                    statusIcon(.wifiSlash)
-                    label(spinner: false) { Text("No network connection") }
-                }
-            }
-            .animation(.easeInOut(duration: 0.25), value: phase)
-        }
-    }
-
-    private func statusIcon(_ symbol: SFSymbol) -> some View {
-        Image(systemSymbol: symbol)
-            .font(.system(size: 52))
-            .symbolRenderingMode(.hierarchical)
-            .foregroundStyle(.secondary)
-    }
-
-    private func label(spinner: Bool, @ViewBuilder text: () -> some View) -> some View {
-        HStack(spacing: 8) {
-            if spinner {
-                ProgressView().controlSize(.small)
-            }
-            text()
-                .font(.callout)
-                .foregroundStyle(.secondary)
-        }
-    }
-}
-
-/// The openHAB mark breathing (opacity + scale). Extracted so that each time the connecting
-/// phase reappears a fresh instance restarts the repeating animation from its `onAppear`.
-private struct PulsingLogo: View {
-    @State private var animating = false
-
-    var body: some View {
-        Image("openHABIcon")
-            .resizable()
-            .scaledToFit()
-            .frame(width: 72, height: 72)
-            .opacity(animating ? 1.0 : 0.55)
-            .scaleEffect(animating ? 1.0 : 0.94)
-            .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: animating)
-            .onAppear { animating = true }
-    }
-}
-
-// MARK: - In-app toast banner
-
-/// Slide-up banner driven by ToastService.
-/// Layout mirrors sitemap input rows: text content on the left, action control
-/// on the right (single action → plain button label; multiple → Menu with chevron).
-private struct InAppToastBanner: View {
-    let service: ToastService
-
-    var body: some View {
-        Group {
-            if service.isPresented {
-                HStack(alignment: .center, spacing: 12) {
-                    if let iconURL = service.iconURL, let connection = service.connection {
-                        KFImage(iconURL)
-                            .withOpenHABCredentials(for: connection)
-                            .placeholder {
-                                Image("openHABIcon").resizable()
-                            }
-                            .resizable()
-                            .frame(width: 32, height: 32)
-                            .clipShape(.rect(cornerRadius: 8))
-                    }
-
-                    // Left: title + message, takes all available space
-                    VStack(alignment: .leading, spacing: 4) {
-                        if !service.title.isEmpty {
-                            Text(service.title)
-                                .font(.headline)
-                                .lineLimit(2)
-                        }
-                        if !service.message.isEmpty {
-                            Text(service.message)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .lineLimit(4)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    // Right: action control — only when actions are present
-                    if !service.actions.isEmpty {
-                        Divider()
-                        actionControl
-                    }
-                }
-                // fixedSize prevents Divider from expanding to the overlay's proposed screen height
-                .fixedSize(horizontal: false, vertical: true)
-                .padding()
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-                .padding([.horizontal, .bottom])
-                .contentShape(RoundedRectangle(cornerRadius: 12))
-                .onTapGesture { dismiss() }
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-                .task(id: service.showCount) { await autoDismiss() }
-            }
-        }
-        .animation(.spring(response: 0.35, dampingFraction: 0.78), value: service.isPresented)
-    }
-
-    @ViewBuilder
-    private var actionControl: some View {
-        if service.actions.count == 1, let item = service.actions.first {
-            Button {
-                fireAction(item)
-            } label: {
-                Text(item.title)
-                    .font(.subheadline.weight(.medium))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .frame(maxWidth: 120)
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(.tint)
-        } else {
-            Menu {
-                ForEach(service.actions, id: \.action) { item in
-                    Button(item.title) { fireAction(item) }
-                }
-            } label: {
-                HStack(spacing: 4) {
-                    Text("Actions")
-                        .font(.subheadline.weight(.medium))
-                        .lineLimit(1)
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.caption2.weight(.semibold))
-                }
-                .frame(maxWidth: 120)
-                .foregroundStyle(.tint)
-            }
-            .buttonStyle(.plain)
-        }
-    }
-
-    private func fireAction(_ item: NotificationActionItem) {
-        service.onAction?(item)
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
-            service.isPresented = false
-        }
-    }
-
-    private func dismiss() {
-        service.onTap?()
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
-            service.isPresented = false
-        }
-    }
-
-    private func autoDismiss() async {
-        try? await Task.sleep(for: .seconds(5))
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
-            service.isPresented = false
         }
     }
 }
