@@ -48,16 +48,31 @@ enum NotificationCommand: Equatable {
     }
 
     /// True for a target that will eventually call `OpenHABWebViewModel.loadWebView` (or route
-    /// through it client-side) — i.e. one `NotificationActionService.handleNotification` must
-    /// call `markPendingExplicitNavigation()` for, synchronously, before its connection wait
+    /// through it client-side via `routeMainUI`) — i.e. one `NotificationActionService.handleNotification`
+    /// must call `markPendingExplicitNavigation()` for, synchronously, before its connection wait
     /// starts, so that load can't lose its race against the web view's own connection- and
     /// app-active-triggered default auto-loads (openhab-ios#1336). A pure decision, kept
     /// separate from that async dispatch so it can be unit tested without spawning the real
     /// network/preferences work `handleNotification` does.
+    ///
+    /// `webViewCommand` needs `WebViewNavigationRouter`'s own verdict: only the "navigate:/page/…"
+    /// shape resolves to a path and goes through `loadWebView`/`routeMainUI`. A raw command (or a
+    /// bare/relative "navigate:") goes straight to `webViewModel.navigateCommand(_:)` instead,
+    /// which never clears the flag — marking it pending here would leave it stuck forever, and
+    /// could even block the `showMainUI(path: nil)` that a not-yet-shown Main UI needs to bring
+    /// the SPA up before that raw command can run.
     var requiresPendingWebViewNavigationMark: Bool {
         switch self {
-        case .ui(.webViewPath), .ui(.webViewCommand):
-            true
+        case let .ui(.webViewPath(path)):
+            switch WebViewNavigationRouter.route(for: path) {
+            case .path: true
+            case .root, .liveCommand: false
+            }
+        case let .ui(.webViewCommand(command)):
+            switch WebViewNavigationRouter.route(for: command) {
+            case .path: true
+            case .root, .liveCommand: false
+            }
         case .ui(.sitemap), .sendCommand, .http, .app, .rule, .device:
             false
         }

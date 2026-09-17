@@ -264,4 +264,21 @@ struct NotificationCommandTests {
         #expect(NotificationCommandParser.parse("command:item:ON")?.requiresPendingWebViewNavigationMark == false)
         #expect(NotificationCommandParser.parse("device:screensaver:wake")?.requiresPendingWebViewNavigationMark == false)
     }
+
+    /// A raw webViewCommand that WebViewNavigationRouter resolves to `.liveCommand` (not
+    /// `.path`) never calls `loadWebView` — it goes straight from `handleNavigationCommand`'s
+    /// `.navigateLive` case to `webViewModel.navigateCommand(_:)`, which never clears the flag.
+    /// Marking it pending would leave it stuck forever and could even block the
+    /// `showMainUI(path: nil)` that case uses to bring up a not-yet-shown Main UI first.
+    @Test("raw webViewCommand that resolves to a live command does not require the pending-navigation mark")
+    func liveCommandDoesNotRequireMark() {
+        #expect(NotificationCommand.ui(.webViewCommand("someRawCommand")).requiresPendingWebViewNavigationMark == false)
+        #expect(NotificationCommand.ui(.webViewCommand("navigate:")).requiresPendingWebViewNavigationMark == false)
+        #expect(NotificationCommand.ui(.webViewCommand("navigate:relative/path")).requiresPendingWebViewNavigationMark == false)
+    }
+
+    @Test("webViewCommand that resolves to a path still requires the pending-navigation mark")
+    func webViewCommandResolvingToPathRequiresMark() {
+        #expect(NotificationCommand.ui(.webViewCommand("navigate:/page/my_page")).requiresPendingWebViewNavigationMark == true)
+    }
 }
