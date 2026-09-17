@@ -18,6 +18,14 @@ build/
 BuildTools/.build
 OpenHABCore/Package.resolved
 
+# Xcode's own implicit workspace for openHAB.xcodeproj (created when the .xcodeproj is opened
+# directly instead of openHAB.xcworkspace). Its Package.resolved drifts from the real one at
+# openHAB.xcworkspace/xcshareddata/swiftpm/Package.resolved and, left committed, silently pins
+# stale dependency versions (it caused openHAB.app to reintroduce the Firebase 12.6.0 FCM-token
+# bug #1334 fixed, since #1334's version bump only touched the real workspace's lockfile) for
+# anyone whose Xcode happens to resolve against it.
+openHAB.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
 swift-openapi-generator/
 OpenHABCore/swift-openapi-generator/
 vendor/
