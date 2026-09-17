@@ -130,21 +130,15 @@ class NotificationActionService: ObservableObject {
         // Mark the pending navigation immediately — before the connection wait below even
         // starts — so OpenHABWebViewModel's own connection-triggered auto-load, which reacts
         // to that same wait's underlying event, can see this and defer instead of racing it.
-        // Sitemap targets are excluded: they never call loadWebView, so there's no auto-load
-        // to defer to, and marking them would leave the flag stuck until some other web-view
-        // navigation happens to clear it.
-        switch NotificationCommandParser.parse(action) {
-        case .ui(.webViewPath(_)), .ui(.webViewCommand(_)):
+        if NotificationCommandParser.parse(action)?.requiresPendingWebViewNavigationMark == true {
             Logger.notificationNavigation.info("handleNotification: marking pending web-view navigation ahead of the connection wait")
             onPendingWebViewNavigation?()
-        default:
-            break
         }
 
         Task {
             if let cloudUserId,
                let targetHome = await Preferences.shared.storedHome(forCloudUserId: cloudUserId),
-               (await Preferences.shared.currentHomePreferences).remoteConnectionConfig.cloudUserId != cloudUserId {
+               await (Preferences.shared.currentHomePreferences).remoteConnectionConfig.cloudUserId != cloudUserId {
                 await NetworkTracker.shared.stopTracking()
                 Logger.viewController.info("Switching to home \(targetHome.id)")
                 await Preferences.shared.switchActiveHome(to: targetHome.id)
@@ -190,7 +184,8 @@ class NotificationActionService: ObservableObject {
         case let .webViewCommand(command):
             navigationCommand = .switchToWebView(path: command)
         }
-        Logger.notificationNavigation.info("handleUICommand: publishing navigationCommand=\(String(describing: self.navigationCommand), privacy: .public)")
+        let publishedCommand = navigationCommand // avoids `self.` inside the Logger call below
+        Logger.notificationNavigation.info("handleUICommand: publishing navigationCommand=\(String(describing: publishedCommand), privacy: .public)")
     }
 
     private func sendItemCommand(item: String, command: String) {
@@ -247,7 +242,7 @@ class NotificationActionService: ObservableObject {
     func withRetry(operation: () async throws -> Void) async throws {
         let retries = maxRetryCount
         let backoff = retryBackoffBase
-        for attempt in 0...retries {
+        for attempt in 0 ... retries {
             do {
                 try await operation()
                 return

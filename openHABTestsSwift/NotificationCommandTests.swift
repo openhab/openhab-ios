@@ -233,4 +233,35 @@ struct NotificationCommandTests {
         let result = NotificationCommandParser.parse("device:unknown:arg")
         #expect(result == nil)
     }
+
+    // MARK: - requiresPendingWebViewNavigationMark (openhab-ios#1336 race fix)
+
+    /// A pure decision `NotificationActionService.handleNotification` consults synchronously,
+    /// before its connection wait starts — tested here in isolation so these cases don't need
+    /// to spawn (and outlive) the real async network/preferences work that method does.
+    @Test("navigate:/page/… webViewCommand target requires the pending-navigation mark")
+    func webViewCommandRequiresMark() {
+        let result = NotificationCommandParser.parse("ui:navigate:/page/my_page")
+        #expect(result?.requiresPendingWebViewNavigationMark == true)
+    }
+
+    @Test("absolute path webViewPath target requires the pending-navigation mark")
+    func webViewPathRequiresMark() {
+        let result = NotificationCommandParser.parse("ui:/some/path")
+        #expect(result?.requiresPendingWebViewNavigationMark == true)
+    }
+
+    /// Sitemap targets never call `loadWebView`, so there is no default auto-load to defer to —
+    /// marking one would leave the flag stuck until an unrelated web-view navigation cleared it.
+    @Test("sitemap target does not require the pending-navigation mark")
+    func sitemapDoesNotRequireMark() {
+        let result = NotificationCommandParser.parse("ui:/basicui/app?sitemap=demo")
+        #expect(result?.requiresPendingWebViewNavigationMark == false)
+    }
+
+    @Test("non-UI commands do not require the pending-navigation mark")
+    func nonUICommandsDoNotRequireMark() {
+        #expect(NotificationCommandParser.parse("command:item:ON")?.requiresPendingWebViewNavigationMark == false)
+        #expect(NotificationCommandParser.parse("device:screensaver:wake")?.requiresPendingWebViewNavigationMark == false)
+    }
 }

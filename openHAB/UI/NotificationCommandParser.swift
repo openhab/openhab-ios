@@ -46,6 +46,22 @@ enum NotificationCommand: Equatable {
             case activate, disable, wake
         }
     }
+
+    /// True for a target that will eventually call `OpenHABWebViewModel.loadWebView` (or route
+    /// through it client-side) — i.e. one `NotificationActionService.handleNotification` must
+    /// call `markPendingExplicitNavigation()` for, synchronously, before its connection wait
+    /// starts, so that load can't lose its race against the web view's own connection- and
+    /// app-active-triggered default auto-loads (openhab-ios#1336). A pure decision, kept
+    /// separate from that async dispatch so it can be unit tested without spawning the real
+    /// network/preferences work `handleNotification` does.
+    var requiresPendingWebViewNavigationMark: Bool {
+        switch self {
+        case .ui(.webViewPath), .ui(.webViewCommand):
+            true
+        case .ui(.sitemap), .sendCommand, .http, .app, .rule, .device:
+            false
+        }
+    }
 }
 
 /// Parses notification action strings into structured `NotificationCommand` values.
@@ -92,11 +108,11 @@ enum NotificationCommandParser {
             let sitemap = queryItems?.first { $0.name == "sitemap" }?.value ?? defaultSitemap
             let widgetId = queryItems?.first { $0.name == "w" }?.value
             return .ui(.sitemap(name: sitemap, widgetId: widgetId))
-        } else if path.starts(with: "/") {
-            return .ui(.webViewPath(path))
-        } else {
-            return .ui(.webViewCommand(path))
         }
+        if path.starts(with: "/") {
+            return .ui(.webViewPath(path))
+        }
+        return .ui(.webViewCommand(path))
     }
 
     // MARK: - Send Command

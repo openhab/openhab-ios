@@ -32,7 +32,6 @@ private func makeService(retries: Int = 0) -> NotificationActionService {
 @Suite("NotificationActionService")
 @MainActor
 struct NotificationActionServiceTests {
-
     // MARK: - Navigation commands (synchronous dispatch)
 
     @Test("sitemap ui action sets navigationCommand for sitemap root")
@@ -241,7 +240,9 @@ struct NotificationActionServiceTests {
 
         try await svc.withRetry {
             callCount += 1
-            if callCount < 3 { throw TestError() }
+            if callCount < 3 {
+                throw TestError()
+            }
         }
 
         #expect(callCount == 3)
@@ -294,13 +295,17 @@ struct NotificationActionServiceTests {
         var callCount = 0
         svc.commandSender = { _, _, _ in
             callCount += 1
-            if callCount < 3 { throw NetworkTrackerError.noActiveConnection }
+            if callCount < 3 {
+                throw NetworkTrackerError.noActiveConnection
+            }
         }
 
         svc.handleNotificationInternal("command:item:ON")
 
         // Allow up to (retries + 1) Task.yield cycles for the spawned task plus retry delays.
-        for _ in 0..<20 { await Task.yield() }
+        for _ in 0 ..< 20 {
+            await Task.yield()
+        }
 
         #expect(callCount == 3)
     }
@@ -317,56 +322,8 @@ struct NotificationActionServiceTests {
         #expect(callCount == 1)
     }
 
-    // MARK: - Pending web-view navigation (openhab-ios#1336 race fix)
-
-    /// `handleNotification` marks a web-view navigation as pending synchronously, before its
-    /// connection wait even starts, so OpenHABWebViewModel's own connection-triggered auto-load
-    /// (which reacts to the same underlying event that wait resolves on) can see it and defer
-    /// instead of racing this navigation on a cold launch.
-    @Test("navigate:/page/… action marks pending web-view navigation synchronously")
-    func navigatePageActionMarksPendingNavigationSynchronously() {
-        let svc = makeService()
-        var markedCount = 0
-        svc.onPendingWebViewNavigation = { markedCount += 1 }
-
-        svc.handleNotification(action: "ui:navigate:/page/my_page", cloudUserId: nil)
-
-        #expect(markedCount == 1)
-    }
-
-    @Test("absolute path ui action marks pending web-view navigation synchronously")
-    func absolutePathActionMarksPendingNavigationSynchronously() {
-        let svc = makeService()
-        var markedCount = 0
-        svc.onPendingWebViewNavigation = { markedCount += 1 }
-
-        svc.handleNotification(action: "ui:/some/path", cloudUserId: nil)
-
-        #expect(markedCount == 1)
-    }
-
-    /// A sitemap target never calls `loadWebView`, so there is no auto-load to defer to —
-    /// marking it pending here would leave the flag stuck until some unrelated web-view
-    /// navigation happened to clear it.
-    @Test("sitemap ui action does not mark pending web-view navigation")
-    func sitemapActionDoesNotMarkPendingNavigation() {
-        let svc = makeService()
-        var markedCount = 0
-        svc.onPendingWebViewNavigation = { markedCount += 1 }
-
-        svc.handleNotification(action: "ui:/basicui/app?sitemap=demo", cloudUserId: nil)
-
-        #expect(markedCount == 0)
-    }
-
-    @Test("non-ui action does not mark pending web-view navigation")
-    func nonUIActionDoesNotMarkPendingNavigation() {
-        let svc = makeService()
-        var markedCount = 0
-        svc.onPendingWebViewNavigation = { markedCount += 1 }
-
-        svc.handleNotification(action: "command:item:ON", cloudUserId: nil)
-
-        #expect(markedCount == 0)
-    }
+    // Whether an action requires marking a pending web-view navigation is covered directly on
+    // NotificationCommand.requiresPendingWebViewNavigationMark in NotificationCommandTests —
+    // calling handleNotification here would spawn its real network/preferences Task, which can
+    // outlive the test and mutate NetworkTracker/Preferences singleton state during later ones.
 }
