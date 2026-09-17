@@ -63,7 +63,7 @@ class OpenHABWebViewModel: ObservableObject {
     @Published private(set) var navbarItems: [WebNavbarItem] = []
     /// Title text proxied from the MainUI web navbar. Empty until the JS
     /// proxy posts the first `navbarElements` message.
-    @Published private(set) var navbarTitle: String = ""
+    @Published private(set) var navbarTitle = ""
     /// True while MainUI has hidden its own navbar (Framework7 `hide-bars-on-scroll`).
     @Published private(set) var isWebNavbarHidden = false
     /// True while an expanded large title is showing the page title instead.
@@ -93,13 +93,24 @@ class OpenHABWebViewModel: ObservableObject {
     private var currentTarget = ""
     private var openHABTrackedRootUrl = ""
     private var activeConnectionInfo: ConnectionInfo?
-    private var activeConfig: ConnectionConfiguration? { activeConnectionInfo?.configuration }
+    private var activeConfig: ConnectionConfiguration? {
+        activeConnectionInfo?.configuration
+    }
+
     private var sseTimer: Timer?
     private var views: [UUID: WKWebView] = [:]
     private var viewAccessOrder: [UUID] = []
     private var etagChecker: ETagChecker?
     private var etagCheckerConfigURL: String?
     private var networkObservationTask: Task<Void, Never>?
+    /// True while a notification's onClickAction is known to require navigating to a specific
+    /// web-view path, set via `markPendingExplicitNavigation()` before the connection wait that
+    /// precedes it even starts. `loadWebView` clears it the moment that explicit-path load
+    /// actually runs. Guards every nil-path ("just show whatever's default/current") auto-load
+    /// below, which otherwise races that explicit navigation on a cold launch — both react to
+    /// the same "connection becomes active" event — and can otherwise win with the wrong
+    /// (default) destination (openhab-ios#1336).
+    private var hasPendingExplicitNavigation = false
 
     /// JS injected after each page load to proxy the MainUI Framework7 navbar
     /// into the native bar and hide the web navbar.
@@ -584,18 +595,20 @@ class OpenHABWebViewModel: ObservableObject {
     /// active (e.g. between two demo homes) loads immediately, while a switch whose
     /// connection isn't active yet blanks without ever showing the previous home.
     private func syncActiveConnection(with connection: ConnectionInfo?) {
+        Logger.notificationNavigation.info("syncActiveConnection: connection changed to \(connection?.configuration.description ?? "nil", privacy: .public) — will auto-load default path unless a notification's own load wins the race (openhab-ios#1336)")
         Task { @MainActor [weak self] in
             guard let self else { return }
             let home = await Preferences.shared.currentHomePreferences
             guard let connection, home.trackedConnections.contains(connection.configuration) else {
-                self.clearView()
+                clearView()
                 return
             }
-            self.openHABTrackedRootUrl = connection.configuration.url
-            self.activeConnectionInfo = connection
-            self.loadWebView(force: false)
+            openHABTrackedRootUrl = connection.configuration.url
+            activeConnectionInfo = connection
+            Logger.notificationNavigation.info("syncActiveConnection: connection confirmed for current home — calling loadWebView(force: false, path: nil)")
+            loadWebView(force: false)
         }
-		// The tracker republishes on every restart, and any preferences write restarts it,
+        // The tracker republishes on every restart, and any preferences write restarts it,
     }
 
     private func observeAppLifecycle() {
@@ -613,11 +626,36 @@ class OpenHABWebViewModel: ObservableObject {
 
     // MARK: - Loading
 
+    /// Marks a notification-driven web-view navigation as imminent, before the connection wait
+    /// that precedes it even starts. See `hasPendingExplicitNavigation`.
+    func markPendingExplicitNavigation() {
+        Logger.notificationNavigation.info("markPendingExplicitNavigation: default auto-loads will defer until an explicit-path load runs")
+        hasPendingExplicitNavigation = true
+    }
+
+    /// Clears a pending explicit navigation once it resolves via `routeMainUI`'s client-side
+    /// route (`navigateCommand`) rather than `loadWebView(path:)` — the case when Main UI is
+    /// already live. Without this, a notification tap while Main UI is already showing would
+    /// leave `hasPendingExplicitNavigation` stuck true forever, since `loadWebView` never runs
+    /// with a non-nil path to clear it, silently blocking every later default auto-load.
+    func clearPendingExplicitNavigation() {
+        hasPendingExplicitNavigation = false
+    }
+
     func loadWebView(force: Bool = false, path: String? = nil) {
         #if DEBUG
-        if uiTestContentLocked { return }
+        if uiTestContentLocked {
+            return
+        }
         #endif
+        if path != nil {
+            hasPendingExplicitNavigation = false
+        } else if hasPendingExplicitNavigation {
+            Logger.notificationNavigation.info("loadWebView: skipping default (nil-path) auto-load — an explicit notification navigation is still pending (openhab-ios#1336)")
+            return
+        }
         Logger.viewController.info("loadWebView tracked URL: \(self.activeConfig?.url ?? "") forced \(force ? "true" : "false")")
+        Logger.notificationNavigation.info("loadWebView: path=\(path ?? "nil", privacy: .public) force=\(force)")
         guard let activeConfig else { return }
         let authStr = "\(activeConfig.username):\(activeConfig.password)"
         let newTarget = "\(activeConfig.url):\(authStr)"
@@ -669,23 +707,26 @@ class OpenHABWebViewModel: ObservableObject {
             webView.navigationDelegate = nil
             webView.uiDelegate = nil
             webView = newWebview
-        } else {
-        }
+        } else {}
 
         Logger.viewController.info("Loading URL: \(modifiedUrl)")
+        // Local avoids `self.` inside the Logger interpolation, which redundantSelf would strip.
+        let webViewID = ObjectIdentifier(webView).debugDescription
+        Logger.notificationNavigation.info("performLoadWebView: about to call webView.load(\(modifiedUrl.absoluteString, privacy: .public)) [requestedPath=\(path ?? "nil", privacy: .public), webView=\(webViewID, privacy: .public)] — whichever load call lands here last wins the race")
         isLoading = true
         isShowingTile = false
         webView.load(request)
     }
 
     private func loadWebViewWithETagCheck(newTarget: String, path: String?) async {
+        Logger.notificationNavigation.info("loadWebViewWithETagCheck: starting network ETag round-trip for path=\(path ?? "nil", privacy: .public) — this is the slow path most likely to land its webView.load() after a notification's direct load and clobber it")
         guard let activeConfig,
               let url = URL(string: activeConfig.url) else {
             Logger.viewController.info("ETag check skipped: invalid configuration")
             await performLoadWebView(newTarget: newTarget, path: path, force: false)
             return
         }
-        let defaultPath = (await Preferences.shared.currentHomePreferences).defaultMainUIPath
+        let defaultPath = await (Preferences.shared.currentHomePreferences).defaultMainUIPath
         guard let fullURL = WebViewURLHelper.resolveWebViewURL(
             baseURL: url,
             proxyURL: activeConnectionInfo?.proxyURL,
@@ -751,7 +792,7 @@ class OpenHABWebViewModel: ObservableObject {
 
     /// Loading again would only discard live SPA state.
     private func canKeepLoadedPage(target: URL) async -> Bool {
-        let currentHomeWebViewShown = views[(await Preferences.shared.currentHomePreferences).id] === webView
+        let currentHomeWebViewShown = await views[(Preferences.shared.currentHomePreferences).id] === webView
         guard hasLoadedContent, currentHomeWebViewShown,
               lastLoadedConfiguration == activeConfig else { return false }
         let normalizedTarget = WebViewURLHelper.normalizeForComparison(target.absoluteString, includeBasePath: false)
@@ -825,7 +866,9 @@ class OpenHABWebViewModel: ObservableObject {
     /// True once the MainUI SPA is live in the current web view and can accept
     /// client-side navigation via `window.MainUI.handleCommand`. Mirrors the state
     /// that gates command execution vs. queuing.
-    var isMainUIReady: Bool { acceptsCommands }
+    var isMainUIReady: Bool {
+        acceptsCommands
+    }
 
     func navigateCommand(_ command: String) {
         if acceptsCommands {
@@ -974,9 +1017,10 @@ class OpenHABWebViewModel: ObservableObject {
         }
 
         if let webviewURL = webView.url {
-            let url = URL(string: webviewURL.path, relativeTo: URL(string: openHABTrackedRootUrl))
+            let rootUrl = openHABTrackedRootUrl // avoids `self.` inside the Logger call below
+            let url = URL(string: webviewURL.path, relativeTo: URL(string: rootUrl))
             if let path = url?.path {
-                Logger.viewController.info("navigation change base: \(self.openHABTrackedRootUrl) path: \(path)")
+                Logger.viewController.info("navigation change base: \(rootUrl) path: \(path)")
                 Task {
                     await Preferences.shared.setCurrentWebViewPath(path.hasSuffix("/") ? path : path + "/")
                 }
@@ -1180,9 +1224,11 @@ class OpenHABWebViewModel: ObservableObject {
     /// tests work without a live openHAB instance.
     func loadHTMLString(_ html: String) async {
         uiTestContentLocked = true
-        let homeId = (await Preferences.shared.currentHomePreferences).id
+        let homeId = await (Preferences.shared.currentHomePreferences).id
         let wv = getOrCreateWebView(for: homeId, isCloudConnection: false)
-        if wv !== webView { webView = wv }
+        if wv !== webView {
+            webView = wv
+        }
         wv.loadHTMLString(html, baseURL: nil)
     }
     #endif
@@ -1191,11 +1237,11 @@ class OpenHABWebViewModel: ObservableObject {
 
     func resolvedURL() async -> URL? {
         guard let url = URL(string: openHABTrackedRootUrl) else { return nil }
-        return WebViewURLHelper.resolveWebViewURL(
+        return await WebViewURLHelper.resolveWebViewURL(
             baseURL: url,
             proxyURL: activeConnectionInfo?.proxyURL,
             path: nil,
-            defaultPath: (await Preferences.shared.currentHomePreferences).defaultMainUIPath
+            defaultPath: (Preferences.shared.currentHomePreferences).defaultMainUIPath
         )
     }
 }

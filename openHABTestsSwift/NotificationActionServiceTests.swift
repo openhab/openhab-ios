@@ -32,7 +32,6 @@ private func makeService(retries: Int = 0) -> NotificationActionService {
 @Suite("NotificationActionService")
 @MainActor
 struct NotificationActionServiceTests {
-
     // MARK: - Navigation commands (synchronous dispatch)
 
     @Test("sitemap ui action sets navigationCommand for sitemap root")
@@ -241,7 +240,9 @@ struct NotificationActionServiceTests {
 
         try await svc.withRetry {
             callCount += 1
-            if callCount < 3 { throw TestError() }
+            if callCount < 3 {
+                throw TestError()
+            }
         }
 
         #expect(callCount == 3)
@@ -294,13 +295,17 @@ struct NotificationActionServiceTests {
         var callCount = 0
         svc.commandSender = { _, _, _ in
             callCount += 1
-            if callCount < 3 { throw NetworkTrackerError.noActiveConnection }
+            if callCount < 3 {
+                throw NetworkTrackerError.noActiveConnection
+            }
         }
 
         svc.handleNotificationInternal("command:item:ON")
 
         // Allow up to (retries + 1) Task.yield cycles for the spawned task plus retry delays.
-        for _ in 0..<20 { await Task.yield() }
+        for _ in 0 ..< 20 {
+            await Task.yield()
+        }
 
         #expect(callCount == 3)
     }
@@ -316,4 +321,9 @@ struct NotificationActionServiceTests {
 
         #expect(callCount == 1)
     }
+
+    // Whether an action requires marking a pending web-view navigation is covered directly on
+    // NotificationCommand.requiresPendingWebViewNavigationMark in NotificationCommandTests —
+    // calling handleNotification here would spawn its real network/preferences Task, which can
+    // outlive the test and mutate NetworkTracker/Preferences singleton state during later ones.
 }
