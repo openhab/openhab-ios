@@ -66,6 +66,8 @@ struct ToolbarMenu: View {
     /// Shared curve so the section content and the container height animate in sync.
     private static let sectionAnimationDuration = 0.25
     private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
+    /// Route sentinel for the MainUI home page, used to highlight the "Home" row.
+    private static let mainUIHomeRoute = "/"
 
     @Binding var isPresented: Bool
     var menuData: MenuDataService
@@ -88,8 +90,34 @@ struct ToolbarMenu: View {
     @State private var sitemapForWatch: String?
     @State private var sitemapForCarPlay: String?
     @State private var cachedHomePrefs: HomePreferences?
+    /// The surface `OpenHABRootView` currently shows. The single source of truth for which
+    /// row (if any) is highlighted as current — read directly rather than mirrored into local
+    /// `@State`, so navigation that bypasses this menu entirely (a push-notification deep
+    /// link, a home switch) is reflected here too instead of leaving a stale highlight.
+    var currentContent: TargetController
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
+
+    /// The sitemap row (if any) to highlight as current, derived from `currentContent`.
+    private var currentSitemapName: String? {
+        if case let .sitemap(name, _) = currentContent { return name }
+        return nil
+    }
+
+    /// The MainUI row (if any) to highlight as current, derived from `currentContent`.
+    private var currentMainUIRoute: String? {
+        switch currentContent {
+        case .webview: Self.mainUIHomeRoute
+        case let .mainUIPage(route): route
+        case .sitemap, .notifications, .browser, .tile: nil
+        }
+    }
+
+    /// The tile row (if any) to highlight as current, derived from `currentContent`.
+    private var currentTileURL: String? {
+        if case let .tile(url) = currentContent { return url }
+        return nil
+    }
 
     @ScaledMetric private var iconWidth = 20.0
 
@@ -246,6 +274,7 @@ extension ToolbarMenu {
             ) {
                 select(.tile(tile.url))
             }
+            .background(currentRowBackground(tile.url == currentTileURL))
         }
     }
 
@@ -272,20 +301,20 @@ extension ToolbarMenu {
         ForEach(menuData.sitemaps, id: \.name) { sitemap in
             let isWatch = sitemap.name == sitemapForWatch
             let isCarPlay = sitemap.name == sitemapForCarPlay
+            let isCurrent = sitemap.name == currentSitemapName
             menuDetailRow(
                 icon: AnyView(sitemapIcon(for: sitemap)),
                 title: mode.titleText(for: sitemap, sortedBy: order),
                 detail: mode.detailText(for: sitemap, sortedBy: order),
                 accessibilityId: sitemap.name,
-                trailing: (isWatch || isCarPlay)
-                    ? AnyView(
-                        HStack(spacing: 4) {
-                            if isWatch { Image(systemSymbol: .applewatchWatchface) }
-                            if isCarPlay { Image(systemSymbol: .steeringwheel) }
-                        }
-                    )
-                    : nil
+                trailing: (isWatch || isCarPlay) ? AnyView(
+                    HStack(spacing: 4) {
+                        if isWatch { Image(systemSymbol: .applewatchWatchface) }
+                        if isCarPlay { Image(systemSymbol: .steeringwheel) }
+                    }
+                ) : nil
             )
+            .background(currentRowBackground(isCurrent))
             // All three gestures are on this same view so SwiftUI can disambiguate the
             // single- vs double-tap count correctly (it can't across separate modifier
             // layers, e.g. one inside menuDetailRow and one attached by the caller).
@@ -300,6 +329,7 @@ extension ToolbarMenu {
         // Hidden until the current home has had at least one successful fetch —
         // consistent with how sitemaps/pages behave during the loading state.
         if menuData.hasSuccessfullyLoaded {
+            let homeRoute = Self.mainUIHomeRoute
             menuRow(
                 icon: AnyView(Image("openHABIcon").resizable()),
                 label: String(localized: "Home"),
@@ -307,17 +337,20 @@ extension ToolbarMenu {
             ) {
                 select(.webview)
             }
+            .background(currentRowBackground(currentMainUIRoute == homeRoute))
         }
         if menuData.isLoading {
             loadingRow(label: String(localized: "Pages"))
         } else {
             ForEach(menuData.uiPages, id: \.uid) { page in
+                let route = "/page/\(page.uid)"
                 menuRow(
                     icon: AnyView(pageIcon(for: page)),
                     label: page.label
                 ) {
-                    select(.mainUIPage("/page/\(page.uid)"))
+                    select(.mainUIPage(route))
                 }
+                .background(currentRowBackground(currentMainUIRoute == route))
             }
         }
     }
@@ -643,6 +676,7 @@ extension ToolbarMenu {
                     trailing
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .contentShape(Rectangle())
@@ -678,16 +712,23 @@ extension ToolbarMenu {
                         .lineLimit(1)
                 }
             }
+            Spacer(minLength: 0)
             if let trailing {
-                Spacer()
                 trailing
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .contentShape(Rectangle())
         .accessibilityIdentifier(accessibilityId ?? title)
         .accessibilityAddTraits(.isButton)
+    }
+
+    /// Shared highlight background for a menu row representing the currently displayed
+    /// sitemap/page, used by both `sitemapsMenu()` and `mainUIMenu()`.
+    private func currentRowBackground(_ isCurrent: Bool) -> some View {
+        isCurrent ? Color.secondary.opacity(0.15) : Color.clear
     }
 
     private func systemRow(symbol: SFSymbol, label: String, action: @escaping () -> Void) -> some View {
