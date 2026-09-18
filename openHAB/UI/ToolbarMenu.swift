@@ -66,6 +66,8 @@ struct ToolbarMenu: View {
     /// Shared curve so the section content and the container height animate in sync.
     private static let sectionAnimationDuration = 0.25
     private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
+    /// Route sentinel for the MainUI home page, used to highlight the "Home" row.
+    private static let mainUIHomeRoute = "/"
 
     @Binding var isPresented: Bool
     var menuData: MenuDataService
@@ -95,6 +97,27 @@ struct ToolbarMenu: View {
     var currentContent: TargetController
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
+
+    /// The sitemap row (if any) to highlight as current, derived from `currentContent`.
+    private var currentSitemapName: String? {
+        if case let .sitemap(name, _) = currentContent { return name }
+        return nil
+    }
+
+    /// The MainUI row (if any) to highlight as current, derived from `currentContent`.
+    private var currentMainUIRoute: String? {
+        switch currentContent {
+        case .webview: Self.mainUIHomeRoute
+        case let .mainUIPage(route): route
+        case .sitemap, .notifications, .browser, .tile: nil
+        }
+    }
+
+    /// The tile row (if any) to highlight as current, derived from `currentContent`.
+    private var currentTileURL: String? {
+        if case let .tile(url) = currentContent { return url }
+        return nil
+    }
 
     @ScaledMetric private var iconWidth = 20.0
 
@@ -251,6 +274,7 @@ extension ToolbarMenu {
             ) {
                 select(.tile(tile.url))
             }
+            .background(currentRowBackground(tile.url == currentTileURL))
         }
     }
 
