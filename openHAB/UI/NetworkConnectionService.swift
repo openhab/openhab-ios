@@ -129,7 +129,12 @@ class NetworkConnectionService: ObservableObject {
 
     func certificateAlertAction(_ result: CertificateEvaluateResult) {
         certificateAlert?.delegate.completeEvaluation(result)
-        certificateAlert = nil
+        // Deferred: this is called from an alert button action during SwiftUI's dismiss
+        // transaction, and mutating the @Published property inline triggers
+        // "Publishing changes from within view updates is not allowed."
+        DispatchQueue.main.async { [weak self] in
+            self?.certificateAlert = nil
+        }
     }
 }
 
