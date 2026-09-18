@@ -83,27 +83,10 @@ line_length:
 
 identifier_name:
   allowed_symbols: "_"
-  min_length: 2
+  min_length: 1
   max_length:
     warning: 90
     error: 1000
-  excluded:
-    - id
-    - a
-    - b
-    - c
-    - d
-    - e
-    - g
-    - i
-    - k
-    - n
-    - p
-    - r
-    - s
-    - v
-    - x
-    - y
 
 private_outlet:
   allow_private_set: true
