@@ -41,7 +41,7 @@ struct SingleConnectionSettingsView: View {
     var isLocalConnection = false
     /// When non-nil, an "Enable" toggle is rendered as the section's first row
     /// and the URL/credential rows are hidden while the toggle is off.
-    var isEnabled: Binding<Bool>? = nil
+    var isEnabled: Binding<Bool>?
 
     @Binding var connectionConfig: ConnectionConfiguration
     var showNotificationToggle: Bool
@@ -68,158 +68,158 @@ struct SingleConnectionSettingsView: View {
             }
 
             if isEnabled?.wrappedValue ?? true {
-            VStack(alignment: .leading) {
-                LabeledContent {
-                    TextField("URL", text: $connectionConfig.url)
-                        .textContentType(.URL) // Helps iOS identify it as a URL field
-                        .keyboardType(.URL)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled(true)
-                        .multilineTextAlignment(.trailing)
-                        .font(.system(.caption))
-                        .focused($focusedField, equals: .url)
-                        .onChange(of: connectionConfig.url) {
-                            connectionTestMessage = nil
-                            connectionTestDetail = nil
-                            connectionTestSuccess = nil
-                        }
-                } label: {
-                    HStack {
-                        Text("URL")
-                        if isLocalConnection {
-                            Button(action: {
-                                isPresentingDiscoverySheet = true
-                            }, label: {
-                                Image(systemSymbol: .bonjour)
-                                    .font(.callout) // Smaller than default .body
-                                    .imageScale(.small)
-                            })
-                            .buttonStyle(BorderlessButtonStyle())
-                        }
-                        if isTestingConnection {
-                            SpinningSymbol()
-                                .scaleEffect(0.8)
-                        } else {
-                            Button {
-                                Task {
-                                    await handleTestConnection()
-                                }
-                            } label: {
-                                Image(systemSymbol: .wifiCircle)
+                VStack(alignment: .leading) {
+                    LabeledContent {
+                        TextField("URL", text: $connectionConfig.url)
+                            .textContentType(.URL) // Helps iOS identify it as a URL field
+                            .keyboardType(.URL)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled(true)
+                            .multilineTextAlignment(.trailing)
+                            .font(.system(.caption))
+                            .focused($focusedField, equals: .url)
+                            .onChange(of: connectionConfig.url) {
+                                connectionTestMessage = nil
+                                connectionTestDetail = nil
+                                connectionTestSuccess = nil
                             }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(Color.accentColor)
-                            .disabled(connectionConfig.url.isEmpty)
-                            .help("Test Connection")
+                    } label: {
+                        HStack {
+                            Text("URL")
+                            if isLocalConnection {
+                                Button(action: {
+                                    isPresentingDiscoverySheet = true
+                                }, label: {
+                                    Image(systemSymbol: .bonjour)
+                                        .font(.callout) // Smaller than default .body
+                                        .imageScale(.small)
+                                })
+                                .buttonStyle(BorderlessButtonStyle())
+                            }
+                            if isTestingConnection {
+                                SpinningSymbol()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Button {
+                                    Task {
+                                        await handleTestConnection()
+                                    }
+                                } label: {
+                                    Image(systemSymbol: .wifiCircle)
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(Color.accentColor)
+                                .disabled(connectionConfig.url.isEmpty)
+                                .help("Test Connection")
+                            }
+                        }
+                        if connectionConfig.url.isEmpty {
+                            Text("Enter URL of remote server")
                         }
                     }
-                    if connectionConfig.url.isEmpty {
-                        Text("Enter URL of remote server")
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        focusedField = .url
+                    }
+                    .sheet(isPresented: $isPresentingDiscoverySheet) {
+                        BonjourDiscoverySheet(isPresented: $isPresentingDiscoverySheet, connectionConfig: $connectionConfig)
+                    }
+
+                    if let message = connectionTestMessage, let success = connectionTestSuccess {
+                        HStack(spacing: 4) {
+                            Image(systemSymbol: success ? .checkmarkCircle : .xmarkOctagon)
+                                .foregroundStyle(success ? .green : .red)
+                            Text(message)
+                                .foregroundStyle(success ? .green : .red)
+                                .font(.caption2)
+                        }
+                        .transition(.opacity)
+
+                        if let detail = connectionTestDetail, !success {
+                            Text(detail)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .monospaced()
+                                .transition(.opacity)
+                        }
+
+                        if isLocalConnection, !success {
+                            HStack(spacing: 4) {
+                                Image(systemSymbol: .wifiSlash)
+                                Text("Local Network access may be required.")
+                                Button("Open Settings") {
+                                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                                        openURL(url)
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(Color.accentColor)
+                            }
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .transition(.opacity)
+                        }
+                    }
+                }
+
+                VStack(alignment: .leading) {
+                    LabeledContent {
+                        TextField(
+                            "Foo",
+                            text: $connectionConfig.username
+                        )
+                        .textContentType(.username) // Associates with AutoFill
+                        .multilineTextAlignment(.trailing)
+                        .textInputAutocapitalization(.never)
+                        .disableAutocorrection(true)
+                        .focused($focusedField, equals: .username)
+                    } label: {
+                        Text("Username")
+                    }
+                    if connectionConfig.username.isEmpty {
+                        Text("Enter username for server, if required")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    focusedField = .url
-                }
-                .sheet(isPresented: $isPresentingDiscoverySheet) {
-                    BonjourDiscoverySheet(isPresented: $isPresentingDiscoverySheet, connectionConfig: $connectionConfig)
+                    focusedField = .username
                 }
 
-                if let message = connectionTestMessage, let success = connectionTestSuccess {
-                    HStack(spacing: 4) {
-                        Image(systemSymbol: success ? .checkmarkCircle : .xmarkOctagon)
-                            .foregroundStyle(success ? .green : .red)
-                        Text(message)
-                            .foregroundStyle(success ? .green : .red)
-                            .font(.caption2)
+                VStack(alignment: .leading) {
+                    LabeledContent {
+                        AnimatedSecureTextField(text: $connectionConfig.password, titleKey: "Password", isFocused: $passwordFocused)
+                            .textInputAutocapitalization(.never)
+                            .disableAutocorrection(true)
+                            .textContentType(.password) // Associates with AutoFill
+                    } label: {
+                        Text("Password")
+                            .onTapGesture { passwordFocused = true }
                     }
-                    .transition(.opacity)
-
-                    if let detail = connectionTestDetail, !success {
-                        Text(detail)
-                            .font(.caption2)
+                    if connectionConfig.password.isEmpty {
+                        Text("Enter password for server")
+                            .font(.caption)
                             .foregroundStyle(.secondary)
-                            .monospaced()
-                            .transition(.opacity)
-                    }
-
-                    if isLocalConnection, !success {
-                        HStack(spacing: 4) {
-                            Image(systemSymbol: .wifiSlash)
-                            Text("Local Network access may be required.")
-                            Button("Open Settings") {
-                                if let url = URL(string: UIApplication.openSettingsURLString) {
-                                    openURL(url)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(Color.accentColor)
-                        }
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .transition(.opacity)
+                            .onTapGesture { passwordFocused = true }
                     }
                 }
-            }
+                .contentShape(Rectangle())
+                .onTapGesture { passwordFocused = true }
 
-            VStack(alignment: .leading) {
-                LabeledContent {
-                    TextField(
-                        "Foo",
-                        text: $connectionConfig.username
-                    )
-                    .textContentType(.username) // Associates with AutoFill
-                    .multilineTextAlignment(.trailing)
-                    .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true)
-                    .focused($focusedField, equals: .username)
-                } label: {
-                    Text("Username")
-                }
-                if connectionConfig.username.isEmpty {
-                    Text("Enter username for server, if required")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .contentShape(Rectangle())
-            .onTapGesture {
-                focusedField = .username
-            }
-
-            VStack(alignment: .leading) {
-                LabeledContent {
-                    AnimatedSecureTextField(text: $connectionConfig.password, titleKey: "Password", isFocused: $passwordFocused)
-                        .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
-                        .textContentType(.password) // Associates with AutoFill
-                } label: {
-                    Text("Password")
-                        .onTapGesture { passwordFocused = true }
-                }
-                if connectionConfig.password.isEmpty {
-                    Text("Enter password for server")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .onTapGesture { passwordFocused = true }
-                }
-            }
-            .contentShape(Rectangle())
-            .onTapGesture { passwordFocused = true }
-
-            Toggle("Always send credentials", isOn: $connectionConfig.alwaysSendBasicAuth)
-                .font(.caption)
-                .opacity(0.8)
-
-            Toggle("Ignore SSL certificates", isOn: $connectionConfig.ignoreSSL)
-                .font(.caption)
-                .opacity(0.8)
-
-            if showNotificationToggle {
-                Toggle("openHAB Cloud Service", isOn: $connectionConfig.supportsNotifications)
+                Toggle("Always send credentials", isOn: $connectionConfig.alwaysSendBasicAuth)
                     .font(.caption)
                     .opacity(0.8)
-            }
+
+                Toggle("Ignore SSL certificates", isOn: $connectionConfig.ignoreSSL)
+                    .font(.caption)
+                    .opacity(0.8)
+
+                if showNotificationToggle {
+                    Toggle("openHAB Cloud Service", isOn: $connectionConfig.supportsNotifications)
+                        .font(.caption)
+                        .opacity(0.8)
+                }
             } // end isEnabled?.wrappedValue ?? true
         }
     }

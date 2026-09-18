@@ -29,7 +29,7 @@ struct NotificationRow: View {
             // iOS notification-style header: small icon + source name + relative time
             HStack(spacing: 6) {
                 if notification.isHideNotification {
-                    Image(systemName: "bell.slash")
+                    Image(systemSymbol: .bellSlash)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 18, height: 18)
@@ -91,7 +91,7 @@ struct NotificationRow: View {
                 Button {
                     onAction(onClickAction)
                 } label: {
-                    Label("notification_action_open", systemImage: "arrow.up.right")
+                    Label("notification_action_open", systemSymbol: .arrowUpRight)
                 }
             }
             if notification.onClickAction != nil, !notification.actions.isEmpty {

@@ -17,6 +17,13 @@ import SwiftUI
 
 @MainActor
 class NetworkConnectionService: ObservableObject {
+    struct CertificateAlertState: Identifiable {
+        let id = UUID()
+        let title: String
+        let message: String
+        let delegate: HTTPClientDelegate
+    }
+
     // MARK: - Published state
 
     @Published var certificateAlert: CertificateAlertState?
@@ -25,13 +32,6 @@ class NetworkConnectionService: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
     private var preferencesTask: Task<Void, Never>?
-
-    struct CertificateAlertState: Identifiable {
-        let id = UUID()
-        let title: String
-        let message: String
-        let delegate: HTTPClientDelegate
-    }
 
     init() {
         setupTracker()

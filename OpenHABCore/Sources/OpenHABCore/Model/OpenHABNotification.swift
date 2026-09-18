@@ -13,9 +13,10 @@ import Foundation
 
 /// An actionable button attached to a notification, shown in the in-app notification list
 /// and toasts for interaction parity with the push notification's action buttons.
-// TODO: Consider unifying with PushNotificationPayload.NotificationAction (same shape: title + action);
-// they are kept separate for now because the list model and the APNs push payload decode from
-// different sources.
+///
+/// TODO: Consider unifying with PushNotificationPayload.NotificationAction (same shape: title + action);
+/// they are kept separate for now because the list model and the APNs push payload decode from
+/// different sources.
 public struct NotificationActionItem: Sendable, Decodable, Hashable {
     public let title: String
     public let action: String
@@ -244,6 +245,4 @@ extension OpenHABNotification.CodingData {
             v: v
         )
     }
-
-
 }

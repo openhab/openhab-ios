@@ -71,7 +71,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     // MARK: - Sync Preferences
 
     @MainActor
-    func subscribeToPreferences() async {
+    func subscribeToPreferences() {
         preferencesTask = Task { [weak self] in
             for await homeSettings in await Preferences.shared.currentHomePreferencesStream {
                 await self?.syncPreferencesToWatch(homeSettings)
@@ -85,11 +85,10 @@ class WatchMessageService: NSObject, WCSessionDelegate {
             Logger.preferences.warning("WCSession not activated; skipping sync.")
             return
         }
-        let settings: HomePreferences
-        if let homeSettings {
-            settings = homeSettings
+        let settings: HomePreferences = if let homeSettings {
+            homeSettings
         } else {
-            settings = await Preferences.shared.currentHomePreferences
+            await Preferences.shared.currentHomePreferences
         }
         let allStoredHomes = await Preferences.shared.storedHomes
         let storedHomes = Dictionary(uniqueKeysWithValues: allStoredHomes.map { ($0.key.uuidString, $0.value) })

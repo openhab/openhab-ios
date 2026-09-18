@@ -43,7 +43,9 @@ private enum LayoutJS {
     })();
     """#
 
-    static func base64(_ js: String) -> String { Data(js.utf8).base64EncodedString() }
+    static func base64(_ js: String) -> String {
+        Data(js.utf8).base64EncodedString()
+    }
 }
 
 // MARK: - HTML fixtures
@@ -156,7 +158,9 @@ private enum LayoutHTML {
     </body></html>
     """
 
-    static func base64(_ html: String) -> String { Data(html.utf8).base64EncodedString() }
+    static func base64(_ html: String) -> String {
+        Data(html.utf8).base64EncodedString()
+    }
 }
 
 // MARK: - Test class
@@ -168,6 +172,25 @@ private enum LayoutHTML {
 /// that render no navbar are the one case the proxy compensates for.
 @MainActor
 final class MainUILayoutUITests: XCTestCase {
+    private static let placeholderHTML = "<html><body><p>UITest Placeholder</p></body></html>"
+
+    // MARK: - Helpers
+
+    private var screen: CGRect {
+        app.windows.firstMatch.frame
+    }
+
+    /// Bottom edge of the native menuBar HStack in screen coordinates.
+    /// SwiftUI exposes HStack containers as `.otherElements` in the XCTest AX tree.
+    private var nativeBarBottom: CGFloat {
+        let el = app.otherElements.matching(identifier: "MainMenuBar").firstMatch
+        guard el.waitForExistence(timeout: 4) else {
+            XCTFail("Cannot locate MainMenuBar in AX tree — check accessibilityIdentifier is set on the menuBar HStack")
+            return 100
+        }
+        return el.frame.maxY
+    }
+
     private var app: XCUIApplication!
 
     override func setUp() async throws {
@@ -177,11 +200,12 @@ final class MainUILayoutUITests: XCTestCase {
         app.launchEnvironment["UITest"] = "1"
     }
 
-    override func tearDown() { app = nil; super.tearDown() }
+    override func tearDown() async throws {
+        app = nil
+        try await super.tearDown()
+    }
 
     // MARK: - Launch helpers
-
-    private static let placeholderHTML = "<html><body><p>UITest Placeholder</p></body></html>"
 
     private func launchInWebviewMode(html: String? = nil, js: String? = nil, navbarItems: Bool = false) {
         app.launchEnvironment["UITestWebViewMode"] = "1"
@@ -197,29 +221,16 @@ final class MainUILayoutUITests: XCTestCase {
         app.launch()
     }
 
-    // MARK: - Helpers
-
-    private var screen: CGRect { app.windows.firstMatch.frame }
-
-    /// Bottom edge of the native menuBar HStack in screen coordinates.
-    /// SwiftUI exposes HStack containers as `.otherElements` in the XCTest AX tree.
-    private var nativeBarBottom: CGFloat {
-        let el = app.otherElements.matching(identifier: "MainMenuBar").firstMatch
-        guard el.waitForExistence(timeout: 4) else {
-            XCTFail("Cannot locate MainMenuBar in AX tree — check accessibilityIdentifier is set on the menuBar HStack")
-            return 100
-        }
-        return el.frame.maxY
-    }
-
     /// Finds a web element inside the webView by its accessibility label (aria-label).
     @discardableResult
     private func waitForWebLabel(_ label: String, type: XCUIElement.ElementType = .any,
                                  timeout: TimeInterval = 6) -> XCUIElement {
         let pred = NSPredicate(format: "label == %@", label)
         let el = app.webViews.firstMatch.descendants(matching: type).matching(pred).firstMatch
-        XCTAssertTrue(el.waitForExistence(timeout: timeout),
-                      "Expected web element with label '\(label)' within \(timeout)s")
+        XCTAssertTrue(
+            el.waitForExistence(timeout: timeout),
+            "Expected web element with label '\(label)' within \(timeout)s"
+        )
         return el
     }
 
@@ -237,8 +248,10 @@ final class MainUILayoutUITests: XCTestCase {
 
     private func waitForReport(_ key: String, timeout: TimeInterval = 8) -> String {
         let el = app.staticTexts.matching(identifier: "UITestReport-\(key)").firstMatch
-        XCTAssertTrue(el.waitForExistence(timeout: timeout),
-                      "Expected JS report '\(key)' within \(timeout)s — check ohUITest bridge is active")
+        XCTAssertTrue(
+            el.waitForExistence(timeout: timeout),
+            "Expected JS report '\(key)' within \(timeout)s — check ohUITest bridge is active"
+        )
         return el.label
     }
 
@@ -292,10 +305,18 @@ final class MainUILayoutUITests: XCTestCase {
             drift apart and leave a gap.
             """
         )
-        XCTAssertEqual(Double(waitForReport("navbarTitleOpacity")) ?? -1, 0, accuracy: 0.01,
-                       "The web navbar title must be hidden — the native bar shows it instead")
-        XCTAssertEqual(Double(waitForReport("navbarBgOpacity")) ?? -1, 0, accuracy: 0.01,
-                       "The web navbar background must be hidden — it would show through the native bar")
+        XCTAssertEqual(
+            Double(waitForReport("navbarTitleOpacity")) ?? -1,
+            0,
+            accuracy: 0.01,
+            "The web navbar title must be hidden — the native bar shows it instead"
+        )
+        XCTAssertEqual(
+            Double(waitForReport("navbarBgOpacity")) ?? -1,
+            0,
+            accuracy: 0.01,
+            "The web navbar background must be hidden — it would show through the native bar"
+        )
         XCTAssertEqual(
             waitForReport("navbarTitleInnerText"), "Overview",
             """
@@ -358,8 +379,10 @@ final class MainUILayoutUITests: XCTestCase {
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
 
         let bar = app.otherElements.matching(identifier: "MainMenuBar").firstMatch
-        XCTAssertTrue(bar.waitForExistence(timeout: 6),
-                      "Cannot locate MainMenuBar in the AX tree")
+        XCTAssertTrue(
+            bar.waitForExistence(timeout: 6),
+            "Cannot locate MainMenuBar in the AX tree"
+        )
         let shownBottom = bar.frame.maxY
         XCTAssertGreaterThan(shownBottom, 0, "Native bar should be on screen to begin with")
 
@@ -428,17 +451,25 @@ final class MainUILayoutUITests: XCTestCase {
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
 
         let countText = app.staticTexts.matching(identifier: "UITestReport-navbarItemCount").firstMatch
-        XCTAssertTrue(countText.waitForExistence(timeout: 6),
-                      "UITestReport-navbarItemCount must appear — check #if DEBUG overlay is wired up")
+        XCTAssertTrue(
+            countText.waitForExistence(timeout: 6),
+            "UITestReport-navbarItemCount must appear — check #if DEBUG overlay is wired up"
+        )
         let count = Int(countText.label) ?? 0
-        XCTAssertGreaterThan(count, 0,
-                             "navbarItems must be non-empty after UITestWebViewNavbarItems injection")
+        XCTAssertGreaterThan(
+            count,
+            0,
+            "navbarItems must be non-empty after UITestWebViewNavbarItems injection"
+        )
 
         // Best-effort: verify the button appears in the AX tree and is in the top bar area.
         let menuBtn = app.buttons.matching(identifier: "NavbarProxyButton-Menu").firstMatch
         if menuBtn.waitForExistence(timeout: 3) {
-            XCTAssertLessThan(menuBtn.frame.maxY, 120,
-                              "Proxy button must be in the native menuBar area (top 120pt of screen)")
+            XCTAssertLessThan(
+                menuBtn.frame.maxY,
+                120,
+                "Proxy button must be in the native menuBar area (top 120pt of screen)"
+            )
         }
     }
 
@@ -449,16 +480,23 @@ final class MainUILayoutUITests: XCTestCase {
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
 
         let countText = app.staticTexts.matching(identifier: "UITestReport-navbarItemCount").firstMatch
-        XCTAssertTrue(countText.waitForExistence(timeout: 6),
-                      "UITestReport-navbarItemCount must appear — check #if DEBUG overlay is wired up")
+        XCTAssertTrue(
+            countText.waitForExistence(timeout: 6),
+            "UITestReport-navbarItemCount must appear — check #if DEBUG overlay is wired up"
+        )
         let count = Int(countText.label) ?? 0
-        XCTAssertGreaterThan(count, 0,
-                             "navbarItems must be non-empty — proxy button would not appear without items")
+        XCTAssertGreaterThan(
+            count,
+            0,
+            "navbarItems must be non-empty — proxy button would not appear without items"
+        )
 
         let menuBtn = app.buttons.matching(identifier: "NavbarProxyButton-Menu").firstMatch
         if menuBtn.waitForExistence(timeout: 3) {
-            XCTAssertTrue(menuBtn.isHittable,
-                          "Navbar proxy 'Menu' button must be hittable inside the native menuBar")
+            XCTAssertTrue(
+                menuBtn.isHittable,
+                "Navbar proxy 'Menu' button must be hittable inside the native menuBar"
+            )
         }
     }
 }

@@ -45,6 +45,27 @@ class MenuDataService {
         }
     }
 
+    /// Filters out `_default` sitemap when others exist, then sorts per user preference.
+    static func filterAndSortSitemaps(_ sitemaps: [OpenHABSitemap]) async -> [OpenHABSitemap] {
+        let sortBy = await SortSitemapsOrder(rawValue: (Preferences.shared.currentHomePreferences).sortSitemapsBy) ?? .label
+        return filterAndSortSitemaps(sitemaps, sortBy: sortBy)
+    }
+
+    /// Filters and sorts sitemaps with an explicit sort order. Pure function for testing.
+    static func filterAndSortSitemaps(_ sitemaps: [OpenHABSitemap], sortBy: SortSitemapsOrder) -> [OpenHABSitemap] {
+        var result = sitemaps
+        if result.last?.name == "_default", result.count > 1 {
+            result = Array(result.dropLast())
+        }
+        switch sortBy {
+        case .label:
+            result.sort { $0.label < $1.label }
+        case .name:
+            result.sort { $0.name < $1.name }
+        }
+        return result
+    }
+
     /// Clears all data immediately (use for user-initiated refresh or explicit resets).
     func clearAll() {
         sitemaps = []
@@ -125,26 +146,5 @@ class MenuDataService {
             Logger.drawerView.error("Failed to fetch UI pages: \(error.localizedDescription)")
             // Retain existing pages on individual-fetch failure.
         }
-    }
-
-    /// Filters out `_default` sitemap when others exist, then sorts per user preference.
-    static func filterAndSortSitemaps(_ sitemaps: [OpenHABSitemap]) async -> [OpenHABSitemap] {
-        let sortBy = SortSitemapsOrder(rawValue: (await Preferences.shared.currentHomePreferences).sortSitemapsBy) ?? .label
-        return filterAndSortSitemaps(sitemaps, sortBy: sortBy)
-    }
-
-    /// Filters and sorts sitemaps with an explicit sort order. Pure function for testing.
-    static func filterAndSortSitemaps(_ sitemaps: [OpenHABSitemap], sortBy: SortSitemapsOrder) -> [OpenHABSitemap] {
-        var result = sitemaps
-        if result.last?.name == "_default", result.count > 1 {
-            result = Array(result.dropLast())
-        }
-        switch sortBy {
-        case .label:
-            result.sort { $0.label < $1.label }
-        case .name:
-            result.sort { $0.name < $1.name }
-        }
-        return result
     }
 }

@@ -15,7 +15,7 @@ import SwiftUI
 
 struct RTFTextView: View {
     let rtfFileName: String
-    @State private var content: AttributedString = AttributedString("")
+    @State private var content: AttributedString = .init("")
 
     var body: some View {
         ScrollView {
@@ -24,10 +24,10 @@ struct RTFTextView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
         }
-        .task { await load() }
+        .task { load() }
     }
 
-    private func load() async {
+    private func load() {
         guard let url = Bundle.main.url(forResource: rtfFileName, withExtension: "rtf"),
               let ns = try? NSAttributedString(
                   url: url,

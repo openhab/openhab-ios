@@ -27,16 +27,23 @@ enum SitemapNavigationState: Equatable {
     }
 }
 
-// MARK: - Environment key for side-menu action
+/// Wraps the side-menu action closure so it can live in `@Entry` storage. Closures aren't
+/// `Equatable`, which would otherwise make SwiftUI treat every environment update as a change
+/// and over-invalidate dependents; `==` always returns true since only presence/absence of an
+/// action (not closure identity) is meaningful here.
+struct SidebarMenuAction: Equatable {
+    private let action: () -> Void
 
-private struct SitemapSideMenuKey: EnvironmentKey {
-    nonisolated(unsafe) static let defaultValue: (() -> Void)? = nil
-}
+    init(_ action: @escaping () -> Void) {
+        self.action = action
+    }
 
-extension EnvironmentValues {
-    var sitemapSideMenuAction: (() -> Void)? {
-        get { self[SitemapSideMenuKey.self] }
-        set { self[SitemapSideMenuKey.self] = newValue }
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        true
+    }
+
+    func callAsFunction() {
+        action()
     }
 }
 
@@ -44,11 +51,35 @@ extension EnvironmentValues {
 
 @available(iOS 26.0, *)
 private struct NativeSearchBar: UIViewRepresentable {
+    final class Coordinator: NSObject, UISearchBarDelegate {
+        var parent: NativeSearchBar
+
+        init(_ parent: NativeSearchBar) {
+            self.parent = parent
+        }
+
+        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+            parent.text = searchText
+        }
+
+        func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+            parent.text = ""
+            parent.isPresented = false
+            searchBar.resignFirstResponder()
+        }
+
+        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+            searchBar.resignFirstResponder()
+        }
+    }
+
     @Binding var text: String
     @Binding var isPresented: Bool
     var placeholder: String
 
-    func makeCoordinator() -> Coordinator { Coordinator(self) }
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
 
     func makeUIView(context: Context) -> UISearchBar {
         let bar = UISearchBar()
@@ -67,25 +98,6 @@ private struct NativeSearchBar: UIViewRepresentable {
             uiView.text = text
         }
     }
-
-    final class Coordinator: NSObject, UISearchBarDelegate {
-        var parent: NativeSearchBar
-        init(_ parent: NativeSearchBar) { self.parent = parent }
-
-        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-            parent.text = searchText
-        }
-
-        func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-            parent.text = ""
-            parent.isPresented = false
-            searchBar.resignFirstResponder()
-        }
-
-        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-            searchBar.resignFirstResponder()
-        }
-    }
 }
 
 struct SitemapNavigationView: View {
@@ -102,7 +114,7 @@ struct SitemapNavigationView: View {
                     SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: nav.pageLink, title: nav.pageTitle))
                 }
         }
-        .environment(\.sitemapSideMenuAction, onShowSideMenu)
+        .environment(\.sitemapSideMenuAction, onShowSideMenu.map(SidebarMenuAction.init))
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
@@ -150,7 +162,7 @@ struct SitemapNavigationView: View {
             // changes. The inset is empty when search is not active.
             page
                 .safeAreaInset(edge: .bottom) {
-                    if viewModel.showSearchField && isSearchPresented {
+                    if viewModel.showSearchField, isSearchPresented {
                         NativeSearchBar(
                             text: $viewModel.searchText,
                             isPresented: $isSearchPresented,
@@ -249,6 +261,10 @@ struct SitemapNavigationView: View {
         _viewModel = StateObject(wrappedValue: SitemapPageViewModel())
         self.onShowSideMenu = onShowSideMenu
     }
+}
+
+extension EnvironmentValues {
+    @Entry var sitemapSideMenuAction: SidebarMenuAction?
 }
 
 #if DEBUG

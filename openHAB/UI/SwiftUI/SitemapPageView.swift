@@ -127,7 +127,7 @@ struct SitemapPageView: View {
                 Button {
                     sideMenuAction()
                 } label: {
-                    Image(systemName: "line.3.horizontal")
+                    Image(systemSymbol: .line3Horizontal)
                         .font(.title)
                 }
             }
@@ -139,6 +139,11 @@ struct SitemapPageView: View {
             get: { viewModel.error != nil && !(viewModel.error is SitemapPageError) },
             set: { if !$0 { Task { @MainActor in viewModel.error = nil } } }
         )
+    }
+
+    init(viewModel: SitemapPageViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+        _hasSeenActivePhase = State(initialValue: viewModel.isLinked)
     }
 
     private func handleAppear() {
@@ -166,11 +171,6 @@ struct SitemapPageView: View {
             }
             viewModel.refreshOnForeground()
         }
-    }
-
-    init(viewModel: SitemapPageViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
-        _hasSeenActivePhase = State(initialValue: viewModel.isLinked)
     }
 }
 

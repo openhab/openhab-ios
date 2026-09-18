@@ -75,7 +75,6 @@ struct SitemapSettingsView: View {
         }
     }
 
-    @ViewBuilder
     private var displayModePicker: some View {
         Picker(selection: $settingsSitemapNameLabelDisplayMode) {
             ForEach(SitemapNameLabelDisplayMode.allCases) { mode in
@@ -86,7 +85,6 @@ struct SitemapSettingsView: View {
         }
     }
 
-    @ViewBuilder
     private var sortOrderPicker: some View {
         Picker(selection: $settingsSortSitemapsBy) {
             ForEach(SortSitemapsOrder.allCases, id: \.self) { sortsitemaporder in
@@ -116,7 +114,7 @@ struct SitemapSettingsView: View {
         }
         .disabled(sitemaps.isEmpty)
         .onChange(of: sitemaps) { _, newList in
-            if !settingsSitemapForWatch.isEmpty && !newList.contains(where: { $0.name == settingsSitemapForWatch }) {
+            if !settingsSitemapForWatch.isEmpty, !newList.contains(where: { $0.name == settingsSitemapForWatch }) {
                 settingsSitemapForWatch = ""
             }
         }
@@ -133,7 +131,7 @@ struct SitemapSettingsView: View {
         }
         .disabled(sitemaps.isEmpty)
         .onChange(of: sitemaps) { _, newList in
-            if !settingsSitemapForCarPlay.isEmpty && !newList.contains(where: { $0.name == settingsSitemapForCarPlay }) {
+            if !settingsSitemapForCarPlay.isEmpty, !newList.contains(where: { $0.name == settingsSitemapForCarPlay }) {
                 settingsSitemapForCarPlay = ""
             }
         }

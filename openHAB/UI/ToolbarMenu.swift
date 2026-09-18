@@ -63,6 +63,10 @@ struct ConnectionView: View {
 
 /// Toolbar dropdown menu replacing the SideMenu drawer.
 struct ToolbarMenu: View {
+    /// Shared curve so the section content and the container height animate in sync.
+    private static let sectionAnimationDuration = 0.25
+    private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
+
     @Binding var isPresented: Bool
     var menuData: MenuDataService
     @State private var scrollViewContentSize: Double = 0
@@ -88,10 +92,6 @@ struct ToolbarMenu: View {
     var onReload: (() -> Void)?
 
     @ScaledMetric private var iconWidth = 20.0
-
-    /// Shared curve so the section content and the container height animate in sync.
-    private static let sectionAnimationDuration: Double = 0.25
-    private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
 
     var body: some View {
         GeometryReader { proxy in
@@ -124,7 +124,9 @@ struct ToolbarMenu: View {
             }
         }
     }
+}
 
+extension ToolbarMenu {
     /// Mirrors the active home's persisted section-expansion state into local `@State`.
     private func loadExpansionState() async {
         let prefs = await Preferences.shared.currentHomePreferences
@@ -181,10 +183,8 @@ struct ToolbarMenu: View {
     /// A binding that updates the local `@State` mirror for an immediate UI
     /// response and writes the new value through to the active home so the
     /// choice persists per home and across restarts.
-    private func expansionBinding(
-        _ state: Binding<Bool>,
-        persistTo setter: @escaping @Sendable (inout HomePreferences, Bool) -> Void
-    ) -> Binding<Bool> {
+    private func expansionBinding(_ state: Binding<Bool>,
+                                  persistTo setter: @escaping @Sendable (inout HomePreferences, Bool) -> Void) -> Binding<Bool> {
         Binding(
             get: { state.wrappedValue },
             set: { newValue in
@@ -203,7 +203,6 @@ struct ToolbarMenu: View {
         ZStack(alignment: .topTrailing) {
             // Dimming backdrop — tapping dismisses the menu
             if isPresented {
-
                 Color.black.opacity(0.1)
                     .ignoresSafeArea()
                     .onTapGesture { isPresented = false }
@@ -212,7 +211,7 @@ struct ToolbarMenu: View {
                 let menu = menuContent(height: proxy.size.height * 0.8)
                     .transition(
                         .scale(scale: 0.01, anchor: .topTrailing)
-                        .combined(with: .opacity)
+                            .combined(with: .opacity)
                     )
 
                 styleMenu(menu)
@@ -225,7 +224,7 @@ struct ToolbarMenu: View {
     }
 
     @ViewBuilder
-    private func styleMenu<Content: View>(_ menu: Content) -> some View {
+    private func styleMenu(_ menu: some View) -> some View {
         if #available(iOS 26.0, *) {
             GlassEffectContainer {
                 menu
@@ -239,7 +238,6 @@ struct ToolbarMenu: View {
 
     // MARK: - Menu content
 
-    @ViewBuilder
     private func tilesMenu() -> some View {
         ForEach(menuData.uiTiles, id: \.url) { tile in
             menuRow(
@@ -324,7 +322,7 @@ struct ToolbarMenu: View {
         }
     }
 
-    fileprivate func homesMenu() -> some View {
+    private func homesMenu() -> some View {
         VStack(alignment: .leading, spacing: 0) {
             InlineHomePickerView(isMenuPresented: $isPresented)
             Divider().padding(.horizontal, 12)
@@ -397,7 +395,7 @@ struct ToolbarMenu: View {
                     }
                 }
             }
-                .frame(maxHeight: scrollViewContentSize > 0 ? min(scrollViewContentSize, height) : height)
+            .frame(maxHeight: scrollViewContentSize > 0 ? min(scrollViewContentSize, height) : height)
             .scrollBounceBehavior(.basedOnSize)
             // Host the animation on the sections' shared parent so a change in any
             // one flag also animates the *repositioning* of the sibling sections
@@ -408,18 +406,20 @@ struct ToolbarMenu: View {
             .animation(Self.sectionAnimation, value: isTilesExpanded)
             .animation(Self.sectionAnimation, value: isSystemExpanded)
 
-            scrollView.onScrollGeometryChange(for: Double.self, of: { $0.contentSize.height
-            }) { _, newValue in
-                // Animate the container growing/shrinking so it tracks the section
-                // content instead of snapping. Skip the first measurement (0 → N),
-                // which would otherwise shrink the menu from full height on open.
-                if scrollViewContentSize == 0 {
-                    scrollViewContentSize = newValue
-                } else {
-                    withAnimation(Self.sectionAnimation) { scrollViewContentSize = newValue }
+            scrollView.onScrollGeometryChange(
+                for: Double.self,
+                of: { $0.contentSize.height },
+                action: { _, newValue in
+                    // Animate the container growing/shrinking so it tracks the section
+                    // content instead of snapping. Skip the first measurement (0 → N),
+                    // which would otherwise shrink the menu from full height on open.
+                    if scrollViewContentSize == 0 {
+                        scrollViewContentSize = newValue
+                    } else {
+                        withAnimation(Self.sectionAnimation) { scrollViewContentSize = newValue }
+                    }
                 }
-            }
-
+            )
         }
         .frame(width: 300)
     }
@@ -460,13 +460,17 @@ struct ToolbarMenu: View {
 
                     let homePrefs = cachedHomePrefs
                     ZStack(alignment: .center) {
-                        HomeAvatarView(photo: nil, iconName: HomeAvatarView.defaultIconName,
-                                       color: HomeAvatarView.defaultColor, size: 28).hidden()
+                        HomeAvatarView(
+                            photo: nil,
+                            icon: HomeAvatarView.defaultIcon,
+                            color: HomeAvatarView.defaultColor,
+                            size: 28
+                        ).hidden()
                         if !headerDetailsHidden, let homePrefs {
                             let mode = homePrefs.avatarMode
                             HomeAvatarView(
                                 photo: AvatarImageHelper.renderedAvatar(for: homePrefs.id, mode: mode),
-                                iconName: mode?.iconName ?? HomeAvatarView.defaultIconName,
+                                icon: mode?.icon ?? HomeAvatarView.defaultIcon,
                                 color: Color(hex: mode?.colorHex ?? "") ?? HomeAvatarView.defaultColor,
                                 size: 28
                             )
@@ -501,9 +505,10 @@ struct ToolbarMenu: View {
             .buttonStyle(.plain)
             .padding(.trailing, 12)
 
-            Button(action: { menuData.refresh(); onReload?(); isPresented = false }) {
-                Image(systemSymbol: .arrowClockwise).foregroundStyle(.secondary)
-            }
+            Button(
+                action: { menuData.refresh(); onReload?(); isPresented = false },
+                label: { Image(systemSymbol: .arrowClockwise).foregroundStyle(.secondary) }
+            )
             .buttonStyle(.plain)
             .frame(maxHeight: .infinity)
             .padding(.trailing, homeDetailsCollapsed ? 0 : 12)
@@ -512,9 +517,10 @@ struct ToolbarMenu: View {
                 // Placeholder keeps gear button space during the fade.
                 Image(systemSymbol: .gear).hidden()
                 if !headerDetailsHidden {
-                    Button(action: { isPresented = false; showCurrentHomeSettings = true }) {
-                        Image(systemSymbol: .gear).foregroundStyle(.secondary)
-                    }
+                    Button(
+                        action: { isPresented = false; showCurrentHomeSettings = true },
+                        label: { Image(systemSymbol: .gear).foregroundStyle(.secondary) }
+                    )
                     .buttonStyle(.plain)
                     .transition(.opacity)
                 }
@@ -559,14 +565,12 @@ struct ToolbarMenu: View {
     ///   - showDivider: Whether to append a trailing divider below the content.
     ///   - content: The section body, shown only while expanded.
     @ViewBuilder
-    private func collapsibleSection(
-        title: String.LocalizationValue,
-        isExpanded: Binding<Bool>,
-        isLoading: Bool = false,
-        isEmpty: Bool = false,
-        showDivider: Bool = true,
-        @ViewBuilder content: () -> some View
-    ) -> some View {
+    private func collapsibleSection(title: String.LocalizationValue,
+                                    isExpanded: Binding<Bool>,
+                                    isLoading: Bool = false,
+                                    isEmpty: Bool = false,
+                                    showDivider: Bool = true,
+                                    @ViewBuilder content: () -> some View) -> some View {
         let localizedTitle = String(localized: title)
         if isLoading {
             loadingRow(label: localizedTitle)
@@ -623,13 +627,11 @@ struct ToolbarMenu: View {
 
     // MARK: - Row helpers
 
-    private func menuRow(
-        icon: AnyView,
-        label: String,
-        accessibilityId: String? = nil,
-        trailing: AnyView? = nil,
-        action: @escaping () -> Void
-    ) -> some View {
+    private func menuRow(icon: AnyView,
+                         label: String,
+                         accessibilityId: String? = nil,
+                         trailing: AnyView? = nil,
+                         action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 10) {
                 icon
@@ -658,13 +660,11 @@ struct ToolbarMenu: View {
     /// wins the touch immediately — firing select() before a second tap can be recognized as
     /// a double-tap. A plain view lets SwiftUI's .onTapGesture/.onTapGesture(count: 2) pair
     /// disambiguate correctly, the way DrawerView's original implementation did.
-    private func menuDetailRow(
-        icon: AnyView,
-        title: String,
-        detail: String,
-        accessibilityId: String? = nil,
-        trailing: AnyView? = nil
-    ) -> some View {
+    private func menuDetailRow(icon: AnyView,
+                               title: String,
+                               detail: String,
+                               accessibilityId: String? = nil,
+                               trailing: AnyView? = nil) -> some View {
         HStack(spacing: 10) {
             icon
                 .frame(width: iconWidth, height: iconWidth)
@@ -739,4 +739,3 @@ struct ToolbarMenu: View {
         onSelect(target)
     }
 }
-

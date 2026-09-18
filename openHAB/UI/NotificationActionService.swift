@@ -149,7 +149,14 @@ class NotificationActionService: ObservableObject {
             )
             let waitStart = Date()
             let connection = await NetworkTracker.shared.waitForActiveConnection()
-            Logger.notificationNavigation.info("handleNotification: waitForActiveConnection resolved after \(Date().timeIntervalSince(waitStart), format: .fixed(precision: 3))s, connection=\(connection?.configuration.description ?? "nil", privacy: .public) — dispatching action now (races OpenHABWebViewModel's own connection-triggered auto-load)")
+            Logger.notificationNavigation.info(
+                """
+                handleNotification: waitForActiveConnection resolved after \
+                \(Date().timeIntervalSince(waitStart), format: .fixed(precision: 3))s, \
+                connection=\(connection?.configuration.description ?? "nil", privacy: .public) — dispatching action now \
+                (races OpenHABWebViewModel's own connection-triggered auto-load)
+                """
+            )
             handleNotificationInternal(action)
         }
     }

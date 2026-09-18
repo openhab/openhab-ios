@@ -16,10 +16,16 @@ import UIKit
 
 // MARK: - Helpers
 
+private struct RGBComponents {
+    let r: Double
+    let g: Double
+    let b: Double
+}
+
 /// Resolve gamma-corrected sRGB components. Works for fixed sRGB colors in any environment.
-private func rgb(_ color: Color, env: EnvironmentValues = EnvironmentValues()) -> (r: Double, g: Double, b: Double) {
+private func rgb(_ color: Color, env: EnvironmentValues = EnvironmentValues()) -> RGBComponents {
     let c = color.resolve(in: env)
-    return (Double(c.red), Double(c.green), Double(c.blue))
+    return RGBComponents(r: Double(c.red), g: Double(c.green), b: Double(c.blue))
 }
 
 private func approx(_ a: Double, _ b: Double, tol: Double = 0.003) -> Bool {
@@ -27,8 +33,8 @@ private func approx(_ a: Double, _ b: Double, tol: Double = 0.003) -> Bool {
 }
 
 private func hslLightness(_ color: Color, env: EnvironmentValues = EnvironmentValues()) -> Double {
-    let (r, g, b) = rgb(color, env: env)
-    return (max(r, g, b) + min(r, g, b)) / 2
+    let comps = rgb(color, env: env)
+    return (max(comps.r, comps.g, comps.b) + min(comps.r, comps.g, comps.b)) / 2
 }
 
 private var lightEnv: EnvironmentValues {
@@ -47,57 +53,57 @@ private var darkEnv: EnvironmentValues {
 //   darkTint  L ≈ 0.15  < 0.30  (very dark zone)
 //   midTint   L ≈ 0.58  in 0.30–0.70  (mid zone)
 //   lightTint L ≈ 0.90  > 0.70  (very light zone)
-private let darkTint  = Color(hex: "#001A4D")!  // dark navy
-private let midTint   = Color(hex: "#3478F6")!  // system blue (palette entry)
-private let lightTint = Color(hex: "#FFE8CC")!  // warm peach
+private let darkTint = Color(hex: "#001A4D")! // dark navy
+private let midTint = Color(hex: "#3478F6")! // system blue (palette entry)
+private let lightTint = Color(hex: "#FFE8CC")! // warm peach
 
 // MARK: - hex parsing
 
-// Explicit `Color?` annotations force Swift to pick the failable `openHAB` init
-// over `CommonUI`'s non-failable `init(hex:)`, which are both in scope here.
+/// Explicit `Color?` annotations force Swift to pick the failable `openHAB` init
+/// over `CommonUI`'s non-failable `init(hex:)`, which are both in scope here.
 @Suite("Color hex parsing")
 struct ColorHexParsingTests {
     @Test("6-digit hex with leading hash")
-    func sixDigitWithHash() {
+    func sixDigitWithHash() throws {
         let c: Color? = Color(hex: "#FF0000")
         #expect(c != nil)
-        let (r, g, b) = rgb(c!)
-        #expect(approx(r, 1.0))
-        #expect(approx(g, 0.0))
-        #expect(approx(b, 0.0))
+        let comps = try rgb(#require(c))
+        #expect(approx(comps.r, 1.0))
+        #expect(approx(comps.g, 0.0))
+        #expect(approx(comps.b, 0.0))
     }
 
     @Test("6-digit hex without hash")
-    func sixDigitWithoutHash() {
+    func sixDigitWithoutHash() throws {
         let c: Color? = Color(hex: "00FF00")
         #expect(c != nil)
-        let (r, g, b) = rgb(c!)
-        #expect(approx(r, 0.0))
-        #expect(approx(g, 1.0))
-        #expect(approx(b, 0.0))
+        let comps = try rgb(#require(c))
+        #expect(approx(comps.r, 0.0))
+        #expect(approx(comps.g, 1.0))
+        #expect(approx(comps.b, 0.0))
     }
 
     @Test("8-digit hex sets alpha; blue component correct")
-    func eightDigitHex() {
+    func eightDigitHex() throws {
         let c: Color? = Color(hex: "#0000FFCC")
         #expect(c != nil)
-        let (r, g, b) = rgb(c!)
-        #expect(approx(r, 0.0))
-        #expect(approx(g, 0.0))
-        #expect(approx(b, 1.0))
+        let comps = try rgb(#require(c))
+        #expect(approx(comps.r, 0.0))
+        #expect(approx(comps.g, 0.0))
+        #expect(approx(comps.b, 1.0))
     }
 
     @Test("Case-insensitive parsing")
-    func caseInsensitive() {
+    func caseInsensitive() throws {
         let upper: Color? = Color(hex: "#3478F6")
         let lower: Color? = Color(hex: "#3478f6")
         #expect(upper != nil)
         #expect(lower != nil)
-        let (ru, gu, bu) = rgb(upper!)
-        let (rl, gl, bl) = rgb(lower!)
-        #expect(approx(ru, rl))
-        #expect(approx(gu, gl))
-        #expect(approx(bu, bl))
+        let upperComps = try rgb(#require(upper))
+        let lowerComps = try rgb(#require(lower))
+        #expect(approx(upperComps.r, lowerComps.r))
+        #expect(approx(upperComps.g, lowerComps.g))
+        #expect(approx(upperComps.b, lowerComps.b))
     }
 
     @Test("5-digit hex returns nil")
@@ -122,11 +128,11 @@ struct ColorHexParsingTests {
     }
 
     @Test("Black and white parse correctly")
-    func blackAndWhite() {
-        let (br, bg, bb) = rgb(Color(hex: "#000000")!)
-        let (wr, wg, wb) = rgb(Color(hex: "#FFFFFF")!)
-        #expect(approx(br, 0.0) && approx(bg, 0.0) && approx(bb, 0.0))
-        #expect(approx(wr, 1.0) && approx(wg, 1.0) && approx(wb, 1.0))
+    func blackAndWhite() throws {
+        let blackComps = try rgb(#require(Color(hex: "#000000")))
+        let whiteComps = try rgb(#require(Color(hex: "#FFFFFF")))
+        #expect(approx(blackComps.r, 0.0) && approx(blackComps.g, 0.0) && approx(blackComps.b, 0.0))
+        #expect(approx(whiteComps.r, 1.0) && approx(whiteComps.g, 1.0) && approx(whiteComps.b, 1.0))
     }
 }
 
@@ -136,17 +142,17 @@ struct ColorHexParsingTests {
 @MainActor
 struct ColorHexStringTests {
     @Test("Pure primaries round-trip without loss")
-    func primariesRoundTrip() {
+    func primariesRoundTrip() throws {
         for hex in ["#FF0000", "#00FF00", "#0000FF", "#000000", "#FFFFFF"] {
-            let result = Color(hex: hex)!.hexString
+            let result = try #require(Color(hex: hex)?.hexString)
             #expect(result == hex, "Expected \(hex), got \(result)")
         }
     }
 
     @Test("All palette colors round-trip")
-    func paletteRoundTrip() {
+    func paletteRoundTrip() throws {
         for hex in HomeAvatarView.colorPalette {
-            let result = Color(hex: hex)!.hexString
+            let result = try #require(Color(hex: hex)?.hexString)
             #expect(result == hex, "Palette round-trip failed: expected \(hex), got \(result)")
         }
     }
@@ -162,7 +168,6 @@ struct ColorHexStringTests {
 @Suite("Avatar color pair — six branches (3 zones)")
 @MainActor
 struct AvatarColorPairTests {
-
     // MARK: Branch 1 — dark env + dark tint
 
     @Test("dark env + dark tint: circle is lightened")
@@ -174,9 +179,9 @@ struct AvatarColorPairTests {
     @Test("dark env + dark tint: icon is full tint")
     func darkEnvDarkTintIconIsFull() {
         let icon = darkTint.iconForegroundColor(in: darkEnv)
-        let (tr, tg, tb) = rgb(darkTint)
-        let (ir, ig, ib) = rgb(icon)
-        #expect(approx(tr, ir) && approx(tg, ig) && approx(tb, ib))
+        let tintComps = rgb(darkTint)
+        let iconComps = rgb(icon)
+        #expect(approx(tintComps.r, iconComps.r) && approx(tintComps.g, iconComps.g) && approx(tintComps.b, iconComps.b))
     }
 
     // MARK: Branch 2 — light env + dark tint
@@ -184,9 +189,9 @@ struct AvatarColorPairTests {
     @Test("light env + dark tint: circle is full tint")
     func lightEnvDarkTintCircleIsFull() {
         let circle = darkTint.circleFillColor(in: lightEnv)
-        let (tr, tg, tb) = rgb(darkTint)
-        let (cr, cg, cb) = rgb(circle)
-        #expect(approx(tr, cr) && approx(tg, cg) && approx(tb, cb))
+        let tintComps = rgb(darkTint)
+        let circleComps = rgb(circle)
+        #expect(approx(tintComps.r, circleComps.r) && approx(tintComps.g, circleComps.g) && approx(tintComps.b, circleComps.b))
     }
 
     @Test("light env + dark tint: icon is lightened")
@@ -200,9 +205,9 @@ struct AvatarColorPairTests {
     @Test("dark env + light tint: circle is full tint")
     func darkEnvLightTintCircleIsFull() {
         let circle = lightTint.circleFillColor(in: darkEnv)
-        let (tr, tg, tb) = rgb(lightTint)
-        let (cr, cg, cb) = rgb(circle)
-        #expect(approx(tr, cr) && approx(tg, cg) && approx(tb, cb))
+        let tintComps = rgb(lightTint)
+        let circleComps = rgb(circle)
+        #expect(approx(tintComps.r, circleComps.r) && approx(tintComps.g, circleComps.g) && approx(tintComps.b, circleComps.b))
     }
 
     @Test("dark env + light tint: icon is darkened")
@@ -222,9 +227,9 @@ struct AvatarColorPairTests {
     @Test("light env + light tint: icon is full tint")
     func lightEnvLightTintIconIsFull() {
         let icon = lightTint.iconForegroundColor(in: lightEnv)
-        let (tr, tg, tb) = rgb(lightTint)
-        let (ir, ig, ib) = rgb(icon)
-        #expect(approx(tr, ir) && approx(tg, ig) && approx(tb, ib))
+        let tintComps = rgb(lightTint)
+        let iconComps = rgb(icon)
+        #expect(approx(tintComps.r, iconComps.r) && approx(tintComps.g, iconComps.g) && approx(tintComps.b, iconComps.b))
     }
 
     // MARK: Branch 5 — dark env + mid tint
@@ -232,9 +237,9 @@ struct AvatarColorPairTests {
     @Test("dark env + mid tint: circle is full tint")
     func darkEnvMidTintCircleIsFull() {
         let circle = midTint.circleFillColor(in: darkEnv)
-        let (tr, tg, tb) = rgb(midTint)
-        let (cr, cg, cb) = rgb(circle)
-        #expect(approx(tr, cr) && approx(tg, cg) && approx(tb, cb))
+        let tintComps = rgb(midTint)
+        let circleComps = rgb(circle)
+        #expect(approx(tintComps.r, circleComps.r) && approx(tintComps.g, circleComps.g) && approx(tintComps.b, circleComps.b))
     }
 
     @Test("dark env + mid tint: icon is darkened")
@@ -248,9 +253,9 @@ struct AvatarColorPairTests {
     @Test("light env + mid tint: circle is full tint")
     func lightEnvMidTintCircleIsFull() {
         let circle = midTint.circleFillColor(in: lightEnv)
-        let (tr, tg, tb) = rgb(midTint)
-        let (cr, cg, cb) = rgb(circle)
-        #expect(approx(tr, cr) && approx(tg, cg) && approx(tb, cb))
+        let tintComps = rgb(midTint)
+        let circleComps = rgb(circle)
+        #expect(approx(tintComps.r, circleComps.r) && approx(tintComps.g, circleComps.g) && approx(tintComps.b, circleComps.b))
     }
 
     @Test("light env + mid tint: icon is lightened")
@@ -262,17 +267,17 @@ struct AvatarColorPairTests {
     // MARK: Complementarity invariant
 
     @Test("circleFill and iconForeground are always different (contrast guaranteed)")
-    func circleFillAndIconAlwaysDiffer() {
+    func circleFillAndIconAlwaysDiffer() throws {
         for env in [lightEnv, darkEnv] {
             for hex in HomeAvatarView.colorPalette {
-                let tint = Color(hex: hex)!
+                let tint = try #require(Color(hex: hex))
                 let circle = tint.circleFillColor(in: env)
                 let icon = tint.iconForegroundColor(in: env)
-                let (cr, cg, cb) = rgb(circle)
-                let (ir, ig, ib) = rgb(icon)
-                let same = approx(cr, ir, tol: 0.02)
-                        && approx(cg, ig, tol: 0.02)
-                        && approx(cb, ib, tol: 0.02)
+                let circleComps = rgb(circle)
+                let iconComps = rgb(icon)
+                let same = approx(circleComps.r, iconComps.r, tol: 0.02)
+                    && approx(circleComps.g, iconComps.g, tol: 0.02)
+                    && approx(circleComps.b, iconComps.b, tol: 0.02)
                 let modeLabel = (env.colorScheme == .dark) ? "dark" : "light"
                 #expect(!same, "Circle == icon for \(hex) in \(modeLabel) mode — no contrast")
             }
@@ -280,19 +285,21 @@ struct AvatarColorPairTests {
     }
 
     @Test("Exactly one of the pair is always the full tint")
-    func exactlyOneIsFull() {
+    func exactlyOneIsFull() throws {
         // The two functions are exact complements: when circleFill == self, iconFg != self, and vice versa.
         for env in [lightEnv, darkEnv] {
             for hex in HomeAvatarView.colorPalette {
-                let tint = Color(hex: hex)!
-                let (tr, tg, tb) = rgb(tint)
-                let (cr, cg, cb) = rgb(tint.circleFillColor(in: env))
-                let (ir, ig, ib) = rgb(tint.iconForegroundColor(in: env))
-                let circleIsFull = approx(cr, tr) && approx(cg, tg) && approx(cb, tb)
-                let iconIsFull   = approx(ir, tr) && approx(ig, tg) && approx(ib, tb)
+                let tint = try #require(Color(hex: hex))
+                let tintComps = rgb(tint)
+                let circleComps = rgb(tint.circleFillColor(in: env))
+                let iconComps = rgb(tint.iconForegroundColor(in: env))
+                let circleIsFull = approx(circleComps.r, tintComps.r) && approx(circleComps.g, tintComps.g) && approx(circleComps.b, tintComps.b)
+                let iconIsFull = approx(iconComps.r, tintComps.r) && approx(iconComps.g, tintComps.g) && approx(iconComps.b, tintComps.b)
                 // Exactly one must be full (XOR)
-                #expect(circleIsFull != iconIsFull,
-                    "Both or neither are full tint for \(hex) — complement invariant broken")
+                #expect(
+                    circleIsFull != iconIsFull,
+                    "Both or neither are full tint for \(hex) — complement invariant broken"
+                )
             }
         }
     }
@@ -304,8 +311,8 @@ struct AvatarColorPairTests {
         // dark env + dark tint → circle is lightened; blue should remain dominant
         let navy = Color(.sRGB, red: 0, green: 0.1, blue: 0.3)
         let circle = navy.circleFillColor(in: darkEnv)
-        let (_, cg, cb) = rgb(circle)
-        #expect(cb > cg) // blue-dominant preserved after lifting
+        let comps = rgb(circle)
+        #expect(comps.b > comps.g) // blue-dominant preserved after lifting
     }
 
     @Test("Darkening preserves R:G:B ratio")
@@ -314,8 +321,8 @@ struct AvatarColorPairTests {
         // warmTint: L = (1.0 + 0.5) / 2 = 0.75
         let warmTint = Color(.sRGB, red: 1.0, green: 0.85, blue: 0.5)
         let circle = warmTint.circleFillColor(in: lightEnv)
-        let (cr, cg, _) = rgb(circle)
+        let comps = rgb(circle)
         // All channels scaled by 0.3, so R:G ratio preserved
-        #expect(approx(cr / cg, 1.0 / 0.85, tol: 0.01))
+        #expect(approx(comps.r / comps.g, 1.0 / 0.85, tol: 0.01))
     }
 }

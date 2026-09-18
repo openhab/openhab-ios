@@ -12,7 +12,6 @@
 import Foundation
 import Network
 import OpenAPIRuntime
-
 @testable import OpenHABCore
 import Testing
 
@@ -29,8 +28,8 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
     var returnedVersion = 123
     var mockServerProperties = OpenHABServerProperties(version: "", links: [])
     var rootVersionDelay: Duration?
-    var sendCommandCallCount: Int = 0
-    var clientErrorsBeforeSuccess: Int = 0
+    var sendCommandCallCount = 0
+    var clientErrorsBeforeSuccess = 0
 
     init(returnedVersion: Int = 123, shouldFail: Bool = false, mockServerProperties: OpenHABServerProperties = .init(version: "", links: []), rootVersionDelay: Duration? = nil, clientErrorsBeforeSuccess: Int = 0) {
         self.returnedVersion = returnedVersion
@@ -40,7 +39,7 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
         self.clientErrorsBeforeSuccess = clientErrorsBeforeSuccess
     }
 
-    func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) async throws {
+    func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) throws {
         sendCommandCallCount += 1
         if sendCommandCallCount <= clientErrorsBeforeSuccess {
             throw OpenAPIRuntime.ClientError(
@@ -55,38 +54,38 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
         }
     }
 
-    func updateItemState(itemname: String, with: String, sourcePrefix: String?, deviceId: String?) async throws {
+    func updateItemState(itemname: String, with: String, sourcePrefix: String?, deviceId: String?) throws {
         if shouldFail {
             throw networkTrackerError
         }
     }
 
-    func getItems(query: OpenHABCore.Operations.getItems.Input.Query) async throws -> [OpenHABCore.OpenHABItem] {
-        try await getItems()
+    func getItems(query: OpenHABCore.Operations.getItems.Input.Query) throws -> [OpenHABCore.OpenHABItem] {
+        try getItems()
     }
 
-    func getItems() async throws -> [OpenHABCore.OpenHABItem] {
+    func getItems() throws -> [OpenHABCore.OpenHABItem] {
         if shouldFail {
             throw networkTrackerError
         }
         return []
     }
 
-    func getItemByName(id: String) async throws -> OpenHABCore.OpenHABItem? {
+    func getItemByName(id: String) throws -> OpenHABCore.OpenHABItem? {
         if shouldFail {
             throw networkTrackerError
         }
         return nil
     }
 
-    func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) async throws -> OpenHABCore.OpenHABPage? {
+    func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) throws -> OpenHABCore.OpenHABPage? {
         if shouldFail {
             throw networkTrackerError
         }
         return nil
     }
 
-    func runNow(ruleUID: String, payload: [String: any Sendable]) async throws {
+    func runNow(ruleUID: String, payload: [String: any Sendable]) throws {
         if shouldFail {
             throw networkTrackerError
         }
@@ -103,7 +102,7 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
     }
 
     @discardableResult
-    func getRoot() async throws -> OpenHABServerProperties {
+    func getRoot() throws -> OpenHABServerProperties {
         if shouldFail {
             throw networkTrackerError
         }
@@ -209,15 +208,13 @@ private func makeTracker(service: MockOpenAPIService) -> NetworkTracker {
 /// Used across NetworkTracker's Swift Testing suites in place of the XCTestExpectation/
 /// fulfillment(of:timeout:) pattern, which is an XCTestCase instance method and unavailable
 /// from a plain Swift Testing struct.
-private func firstState(
-    in stream: AsyncStream<NetworkState>,
-    timeoutSeconds: Double,
-    where predicate: @escaping @Sendable (NetworkState) -> Bool
-) async -> NetworkState? {
+private func firstState(in stream: AsyncStream<NetworkState>,
+                        timeoutSeconds: Double,
+                        where predicate: @escaping @Sendable (NetworkState) -> Bool) async -> NetworkState? {
     await withTaskGroup(of: NetworkState?.self) { group in
         group.addTask {
-            for await state in stream {
-                if predicate(state) { return state }
+            for await state in stream where predicate(state) {
+                return state
             }
             return nil
         }
@@ -231,6 +228,167 @@ private func firstState(
         }
         group.cancelAll()
         return firstCompleted
+    }
+}
+
+// MARK: - connectionConfiguration(forHost:) Tests
+
+private let localConfig = ConnectionConfiguration(
+    url: "https://local.openhab.org",
+    username: "localuser",
+    password: "localpass",
+    priority: 0
+)
+
+private let remoteConfig = ConnectionConfiguration(
+    url: "https://remote.openhab.org",
+    username: "remoteuser",
+    password: "remotepass",
+    priority: 10
+)
+
+private let proxyURL = URL(string: "https://proxy.openhab.org")!
+
+@Suite("NetworkTracker.connectionConfiguration(forHost:)")
+struct ConnectionConfigurationForHostTests {
+    @Test("Returns active connection configuration when host matches active connection URL")
+    func matchesActiveConnectionHost() async {
+        let tracker = NetworkTracker()
+        let connection = ConnectionInfo(configuration: localConfig, version: 1)
+        await tracker.setMockConnection(connection)
+        await tracker.setMockConnectionConfigurations([localConfig, remoteConfig])
+
+        let result = await tracker.connectionConfiguration(forHost: "local.openhab.org")
+        #expect(result == localConfig)
+    }
+
+    @Test("Returns active connection configuration when host matches proxy URL")
+    func matchesProxyHost() async {
+        let tracker = NetworkTracker()
+        let connection = ConnectionInfo(configuration: remoteConfig, version: 1, proxyURL: proxyURL)
+        await tracker.setMockConnection(connection)
+        await tracker.setMockConnectionConfigurations([remoteConfig])
+
+        let result = await tracker.connectionConfiguration(forHost: "proxy.openhab.org")
+        #expect(result == remoteConfig)
+    }
+
+    @Test("Falls back to configured connections when active connection does not match")
+    func fallsBackToConfiguredConnections() async {
+        let tracker = NetworkTracker()
+        let connection = ConnectionInfo(configuration: localConfig, version: 1)
+        await tracker.setMockConnection(connection)
+        await tracker.setMockConnectionConfigurations([localConfig, remoteConfig])
+
+        let result = await tracker.connectionConfiguration(forHost: "remote.openhab.org")
+        #expect(result == remoteConfig)
+    }
+
+    @Test("Returns nil when no configuration matches")
+    func returnsNilForUnknownHost() async {
+        let tracker = NetworkTracker()
+        let connection = ConnectionInfo(configuration: localConfig, version: 1)
+        await tracker.setMockConnection(connection)
+        await tracker.setMockConnectionConfigurations([localConfig, remoteConfig])
+
+        let result = await tracker.connectionConfiguration(forHost: "unknown.example.com")
+        #expect(result == nil)
+    }
+
+    @Test("Returns matching configured connection when there is no active connection")
+    func matchesWithoutActiveConnection() async {
+        let tracker = NetworkTracker()
+        await tracker.setMockConnectionConfigurations([localConfig, remoteConfig])
+
+        let result = await tracker.connectionConfiguration(forHost: "remote.openhab.org")
+        #expect(result == remoteConfig)
+    }
+
+    @Test("Returns nil when there are no configured connections and no active connection")
+    func returnsNilWhenEmpty() async {
+        let tracker = NetworkTracker()
+
+        let result = await tracker.connectionConfiguration(forHost: "local.openhab.org")
+        #expect(result == nil)
+    }
+
+    @Test("Active connection takes priority over same-host configured connection")
+    func activeConnectionPrioritisedOverConfigured() async {
+        let tracker = NetworkTracker()
+        let activeConfig = ConnectionConfiguration(
+            url: "https://local.openhab.org",
+            username: "activeuser",
+            password: "activepass",
+            priority: 5
+        )
+        let connection = ConnectionInfo(configuration: activeConfig, version: 1)
+        await tracker.setMockConnection(connection)
+        await tracker.setMockConnectionConfigurations([localConfig, remoteConfig])
+
+        let result = await tracker.connectionConfiguration(forHost: "local.openhab.org")
+        #expect(result == activeConfig)
+        #expect(result?.username == "activeuser")
+    }
+}
+
+// MARK: - Client-error retry (Swift Testing)
+
+@Suite("NetworkTracker client-error retry")
+struct NetworkTrackerClientErrorRetryTests {
+    /// A transient ClientError must trigger revalidateConnection() and one retry; the overall call succeeds.
+    /// Covers the withClientErrorRetry/revalidateConnection resilience ported in develop commit 9de4e7f0.
+    @Test("A transient ClientError triggers revalidateConnection() and one retry; the overall call succeeds")
+    func clientErrorTriggersRevalidateAndRetry() async throws {
+        let service = MockOpenAPIService(returnedVersion: 8, clientErrorsBeforeSuccess: 1)
+        let tracker = NetworkTracker(
+            monitor: MockPathMonitor(),
+            connectionPool: ConnectionPool { _ in service },
+            failureTracker: ConnectionFailureTracker()
+        )
+
+        await tracker.startTracking(connectionConfigurations: [defaultMockConfig])
+        let activeConnection = await tracker.waitForActiveConnection()
+        #expect(activeConnection != nil)
+
+        // First sendItemCommand throws ClientError → revalidateConnection() → retry succeeds.
+        try await tracker.send(to: "TestItem", command: "ON", deviceId: nil)
+
+        let callCount = await service.sendCommandCallCount
+        #expect(callCount == 2, "Expected 1 failed attempt + 1 successful retry")
+        await tracker.stopTracking()
+    }
+}
+
+// MARK: - Network-loss handling (Swift Testing)
+
+@Suite("NetworkTracker network-loss handling")
+struct NetworkTrackerNetworkLossTests {
+    /// A network-down event must mark the network unavailable and abandon the pending retry.
+    @Test("Network loss marks isNetworkAvailable false and abandons the pending retry")
+    func networkLossMarksUnavailableAndAbandonsRetry() async {
+        let mockMonitor = MockPathMonitor()
+        let tracker = NetworkTracker(
+            monitor: mockMonitor,
+            connectionPool: ConnectionPool { _ in MockOpenAPIService(returnedVersion: 8, shouldFail: true) },
+            failureTracker: ConnectionFailureTracker()
+        )
+        let stateStream = await tracker.stateStream()
+
+        await tracker.startTracking(connectionConfigurations: [defaultMockConfig])
+        // The failing connection schedules a retry (sets nextRetryDate).
+        let retryScheduled = await firstState(in: stateStream, timeoutSeconds: 3.0) { $0.nextRetryDate != nil }
+        #expect(retryScheduled != nil)
+
+        // Once the path monitor is active, a network-down event must abandon that retry.
+        await mockMonitor.waitForMonitoringToStart()
+        await mockMonitor.simulateConnection(isConnected: false)
+
+        let networkUnavailable = await firstState(in: stateStream, timeoutSeconds: 3.0) {
+            !$0.isNetworkAvailable && $0.nextRetryDate == nil
+        }
+        #expect(networkUnavailable != nil)
+
+        await tracker.stopTracking()
     }
 }
 
@@ -346,166 +504,5 @@ struct NetworkTrackerConnectionLifecycleTests {
         #expect(fallbackActive != nil)
 
         await tracker.stopTracking()
-    }
-}
-
-// MARK: - Client-error retry (Swift Testing)
-
-@Suite("NetworkTracker client-error retry")
-struct NetworkTrackerClientErrorRetryTests {
-    /// A transient ClientError must trigger revalidateConnection() and one retry; the overall call succeeds.
-    /// Covers the withClientErrorRetry/revalidateConnection resilience ported in develop commit 9de4e7f0.
-    @Test("A transient ClientError triggers revalidateConnection() and one retry; the overall call succeeds")
-    func clientErrorTriggersRevalidateAndRetry() async throws {
-        let service = MockOpenAPIService(returnedVersion: 8, clientErrorsBeforeSuccess: 1)
-        let tracker = NetworkTracker(
-            monitor: MockPathMonitor(),
-            connectionPool: ConnectionPool { _ in service },
-            failureTracker: ConnectionFailureTracker()
-        )
-
-        await tracker.startTracking(connectionConfigurations: [defaultMockConfig])
-        let activeConnection = await tracker.waitForActiveConnection()
-        #expect(activeConnection != nil)
-
-        // First sendItemCommand throws ClientError → revalidateConnection() → retry succeeds.
-        try await tracker.send(to: "TestItem", command: "ON", deviceId: nil)
-
-        let callCount = await service.sendCommandCallCount
-        #expect(callCount == 2, "Expected 1 failed attempt + 1 successful retry")
-        await tracker.stopTracking()
-    }
-}
-
-// MARK: - Network-loss handling (Swift Testing)
-
-@Suite("NetworkTracker network-loss handling")
-struct NetworkTrackerNetworkLossTests {
-    /// A network-down event must mark the network unavailable and abandon the pending retry.
-    @Test("Network loss marks isNetworkAvailable false and abandons the pending retry")
-    func networkLossMarksUnavailableAndAbandonsRetry() async {
-        let mockMonitor = MockPathMonitor()
-        let tracker = NetworkTracker(
-            monitor: mockMonitor,
-            connectionPool: ConnectionPool { _ in MockOpenAPIService(returnedVersion: 8, shouldFail: true) },
-            failureTracker: ConnectionFailureTracker()
-        )
-        let stateStream = await tracker.stateStream()
-
-        await tracker.startTracking(connectionConfigurations: [defaultMockConfig])
-        // The failing connection schedules a retry (sets nextRetryDate).
-        let retryScheduled = await firstState(in: stateStream, timeoutSeconds: 3.0) { $0.nextRetryDate != nil }
-        #expect(retryScheduled != nil)
-
-        // Once the path monitor is active, a network-down event must abandon that retry.
-        await mockMonitor.waitForMonitoringToStart()
-        await mockMonitor.simulateConnection(isConnected: false)
-
-        let networkUnavailable = await firstState(in: stateStream, timeoutSeconds: 3.0) {
-            !$0.isNetworkAvailable && $0.nextRetryDate == nil
-        }
-        #expect(networkUnavailable != nil)
-
-        await tracker.stopTracking()
-    }
-}
-
-// MARK: - connectionConfiguration(forHost:) Tests
-
-private let localConfig = ConnectionConfiguration(
-    url: "https://local.openhab.org",
-    username: "localuser",
-    password: "localpass",
-    priority: 0
-)
-
-private let remoteConfig = ConnectionConfiguration(
-    url: "https://remote.openhab.org",
-    username: "remoteuser",
-    password: "remotepass",
-    priority: 10
-)
-
-private let proxyURL = URL(string: "https://proxy.openhab.org")!
-
-@Suite("NetworkTracker.connectionConfiguration(forHost:)")
-struct ConnectionConfigurationForHostTests {
-    @Test("Returns active connection configuration when host matches active connection URL")
-    func matchesActiveConnectionHost() async {
-        let tracker = NetworkTracker()
-        let connection = ConnectionInfo(configuration: localConfig, version: 1)
-        await tracker.setMockConnection(connection)
-        await tracker.setMockConnectionConfigurations([localConfig, remoteConfig])
-
-        let result = await tracker.connectionConfiguration(forHost: "local.openhab.org")
-        #expect(result == localConfig)
-    }
-
-    @Test("Returns active connection configuration when host matches proxy URL")
-    func matchesProxyHost() async {
-        let tracker = NetworkTracker()
-        let connection = ConnectionInfo(configuration: remoteConfig, version: 1, proxyURL: proxyURL)
-        await tracker.setMockConnection(connection)
-        await tracker.setMockConnectionConfigurations([remoteConfig])
-
-        let result = await tracker.connectionConfiguration(forHost: "proxy.openhab.org")
-        #expect(result == remoteConfig)
-    }
-
-    @Test("Falls back to configured connections when active connection does not match")
-    func fallsBackToConfiguredConnections() async {
-        let tracker = NetworkTracker()
-        let connection = ConnectionInfo(configuration: localConfig, version: 1)
-        await tracker.setMockConnection(connection)
-        await tracker.setMockConnectionConfigurations([localConfig, remoteConfig])
-
-        let result = await tracker.connectionConfiguration(forHost: "remote.openhab.org")
-        #expect(result == remoteConfig)
-    }
-
-    @Test("Returns nil when no configuration matches")
-    func returnsNilForUnknownHost() async {
-        let tracker = NetworkTracker()
-        let connection = ConnectionInfo(configuration: localConfig, version: 1)
-        await tracker.setMockConnection(connection)
-        await tracker.setMockConnectionConfigurations([localConfig, remoteConfig])
-
-        let result = await tracker.connectionConfiguration(forHost: "unknown.example.com")
-        #expect(result == nil)
-    }
-
-    @Test("Returns matching configured connection when there is no active connection")
-    func matchesWithoutActiveConnection() async {
-        let tracker = NetworkTracker()
-        await tracker.setMockConnectionConfigurations([localConfig, remoteConfig])
-
-        let result = await tracker.connectionConfiguration(forHost: "remote.openhab.org")
-        #expect(result == remoteConfig)
-    }
-
-    @Test("Returns nil when there are no configured connections and no active connection")
-    func returnsNilWhenEmpty() async {
-        let tracker = NetworkTracker()
-
-        let result = await tracker.connectionConfiguration(forHost: "local.openhab.org")
-        #expect(result == nil)
-    }
-
-    @Test("Active connection takes priority over same-host configured connection")
-    func activeConnectionPrioritisedOverConfigured() async {
-        let tracker = NetworkTracker()
-        let activeConfig = ConnectionConfiguration(
-            url: "https://local.openhab.org",
-            username: "activeuser",
-            password: "activepass",
-            priority: 5
-        )
-        let connection = ConnectionInfo(configuration: activeConfig, version: 1)
-        await tracker.setMockConnection(connection)
-        await tracker.setMockConnectionConfigurations([localConfig, remoteConfig])
-
-        let result = await tracker.connectionConfiguration(forHost: "local.openhab.org")
-        #expect(result == activeConfig)
-        #expect(result?.username == "activeuser")
     }
 }
