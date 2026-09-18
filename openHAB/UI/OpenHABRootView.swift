@@ -276,6 +276,9 @@ struct OpenHABRootView: View {
     @State private var showNotifications = false
     @State private var sitemapResetID = UUID()
     @State private var cachedHomePrefs: HomePreferences?
+    /// True while running in an iPad windowed/Stage Manager session smaller than the full
+    /// screen, where the system's window controls overlap the top-left corner of our content.
+    @State private var isWindowedIPad = false
 
     var body: some View {
         ZStack {
@@ -289,6 +292,10 @@ struct OpenHABRootView: View {
                 onReload: { reloadCurrentContent() }
             )
         }
+        .onWindowedModeChange($isWindowedIPad)
+        // Trackpad two-finger swipe-back, matching the "swipe between pages" convention.
+        // No-op when there's no proxied back item (see performBack()).
+        .gesture(TrackpadBackSwipeGesture(action: performBack))
         .onAppear {
             #if DEBUG
             let env = ProcessInfo.processInfo.environment
@@ -533,7 +540,9 @@ private extension OpenHABRootView {
                     .foregroundStyle(.secondary)
                 }
             }
-            .padding(.leading)
+            // In an iPad windowed session the system draws its window controls over this
+            // corner without reserving safe-area space for them, so reserve extra room by hand.
+            .padding(.leading, isWindowedIPad ? 80 : 16)
 
             Spacer()
 
@@ -589,8 +598,9 @@ private extension OpenHABRootView {
 // MARK: - Navbar proxy helpers
 
 private extension OpenHABRootView {
+    @ViewBuilder
     func navbarProxyButton(_ item: WebNavbarItem) -> some View {
-        Button {
+        let button = Button {
             webViewModel.evaluateJS(item.jsAction)
         } label: {
             if let uiImg = item.iconImage {
@@ -605,6 +615,23 @@ private extension OpenHABRootView {
         }
         .accessibilityLabel(item.label)
         .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
+
+        // Gives back navigation a keyboard path on iPad, where the on-screen button can
+        // sit under the windowed-mode window controls (see WindowedModeObserver). Trackpad
+        // swipe-back is handled separately by TrackpadBackSwipeGesture.
+        if item.isBack {
+            button.keyboardShortcut("[", modifiers: .command)
+        } else {
+            button
+        }
+    }
+
+    /// Triggers the currently proxied back navbar item, if any. Shared by the keyboard
+    /// shortcut (via `navbarProxyButton`'s own action) and `TrackpadBackSwipeGesture`, which
+    /// has no specific `WebNavbarItem` to close over.
+    func performBack() {
+        guard let backItem = webViewModel.navbarItems.first(where: \.isBack) else { return }
+        webViewModel.evaluateJS(backItem.jsAction)
     }
 
     func navbarActionsButton(_ items: [WebNavbarItem]) -> some View {
