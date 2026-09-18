@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [Version 3.4.28, Build 324] - 2026-09-17Z
+
+- fix(build): stop tracking openHAB.xcodeproj's own stale SwiftPM lockfile (#1340)
+- fix(notifications): defer default web-view auto-loads to a pending navigate (#1336) (#1339)
+
 ## [Version 3.4.27, Build 323] - 2026-09-16Z
 
 - fix(notifications): route a notification's ui:navigate:/page/<id> action directly (#1337)
