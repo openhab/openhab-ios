@@ -112,6 +112,15 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
             let cloudUserId = userInfo["userId"] as? String
 
+            // userInfo's own log above is redacted (no .public privacy, to avoid leaking message
+            // content); this logs only key names and value types so a missing/mistyped "on-click"
+            // is diagnosable without exposing payload content (openhab-ios#1336).
+            let keyDescriptions = userInfo.keys.compactMap { $0 as? String }.sorted().map { key -> String in
+                guard let value = userInfo[key] else { return "\(key): nil" }
+                return "\(key): \(type(of: value))"
+            }
+            Logger.notificationNavigation.info("didReceive: actionIdentifier=\(actionIdentifier, privacy: .public) resolvedAction=\(action == nil ? "nil" : "present", privacy: .public) userInfo keys=\(keyDescriptions, privacy: .public)")
+
             // Pass the original notification so action handlers can re-post it on failure,
             // allowing the user to retry without waiting for a new notification.
             notifyNotificationListeners(action: action, cloudUserId: cloudUserId, notification: response.notification)

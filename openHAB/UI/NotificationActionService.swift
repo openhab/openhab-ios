@@ -122,7 +122,10 @@ class NotificationActionService: ObservableObject {
     }
 
     func handleNotification(action: String?, cloudUserId: String?) {
-        guard let action else { return }
+        guard let action else {
+            Logger.notificationNavigation.info("handleNotification: received nil action (no actionIdentifier or on-click in the notification payload) — nothing to dispatch")
+            return
+        }
 
         Logger.viewController.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
         Logger.notificationNavigation.info("handleNotification: action=\(action, privacy: .public) cloudUserId=\(cloudUserId ?? "<none>", privacy: .public) — awaiting active connection before dispatching")
