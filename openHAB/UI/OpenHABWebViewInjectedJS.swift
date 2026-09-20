@@ -397,6 +397,27 @@ let webViewNavbarProxyJS = """
     })();
 """
 
+/// Catches taps on links that open other apps.
+/// `e.isTrusted` skips clicks made by scripts, so only real taps get through.
+let webViewExternalURLInterceptorJS = """
+    (function() {
+        const nativeSchemes = ['http', 'https', 'about', 'blob', 'data', 'javascript', ''];
+        function isCustomScheme(url) {
+            const m = /^([a-z][a-z0-9+\\-.]*):/.exec((url || '').toLowerCase());
+            return m != null && !nativeSchemes.includes(m[1]);
+        }
+        document.addEventListener('click', function(e) {
+            if (!e.isTrusted) return;
+            let el = e.target;
+            while (el && el.tagName !== 'A') el = el.parentElement;
+            if (el && el.href && isCustomScheme(el.href)) {
+                e.preventDefault();
+                window.webkit.messageHandlers.externalURL.postMessage(el.href);
+            }
+        }, true);
+    })();
+"""
+
 let webViewMainUIBridgeJS = """
     (function() {
         // App-menu button probe.
@@ -478,6 +499,152 @@ let webViewAppMenuProbeJS = """
     );
 })();
 """
+
+/// Records the pages the user opens in the Main UI, and puts them back after a connection
+/// switch. Deciding what to put back happens in `WebRouteRestore`.
+///
+/// - Parameters:
+///   - restore: the pages to put back, oldest first. Pass nil to leave the Main UI's own
+///     memory alone, which is what we want when the app has just started.
+///   - basePath: what the app's address hangs off, with no trailing slash, so a cloud
+///     connection's extra path is kept. Empty when the app sits at the top.
+func webViewRouteRestoreJS(restore: [String]?, basePath: String = "") -> String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .withoutEscapingSlashes
+    let restoreLiteral = restore
+        .flatMap { try? encoder.encode($0) }
+        .flatMap { String(data: $0, encoding: .utf8) } ?? "null"
+    let baseLiteral = (try? encoder.encode(basePath))
+        .flatMap { String(data: $0, encoding: .utf8) } ?? #""""#
+
+    return #"""
+    (function () {
+        var RESTORE = \#(restoreLiteral)
+        var BASE = \#(baseLiteral)
+        var VIEW_ID = 'view_main' // the name the Main UI gives its main view
+        var STORAGE_KEY = 'f7router-' + VIEW_ID + '-history'
+
+        // Write this before the Main UI starts up. It reads the list as it starts.
+        //
+        // Only on the app's front page, which is what we asked for. These same scripts run
+        // for every page the app opens, so a tile or a retry could otherwise pick this up
+        // and get dragged off to the wrong page.
+        if (RESTORE && RESTORE.length && isAppRoot()) {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(RESTORE)) } catch (e) {}
+            seedBrowserHistory(RESTORE)
+        }
+
+        function isAppRoot() {
+            var path = location.pathname
+            return path === BASE || path === BASE + '/'
+        }
+
+        // Two jobs. Going back in the Main UI is really the browser going back, and a page
+        // that just opened has nothing behind it, so give it something. And we asked for
+        // the app's front page rather than the page we want, so this is also what moves us
+        // to that page. Changing the address is safe. Everything the page needs is fetched
+        // from the top, not relative to wherever we are.
+        function seedBrowserHistory(stack) {
+            try {
+                history.replaceState(stateFor(stack[0]), '', BASE + stack[0])
+                for (var i = 1; i < stack.length; i++) {
+                    history.pushState(stateFor(stack[i]), '', BASE + stack[i])
+                }
+            } catch (e) {}
+        }
+
+        // The Main UI looks here to work out where "back" goes, so match what it writes.
+        function stateFor(url) {
+            var state = {}
+            state[VIEW_ID] = { url: url }
+            return state
+        }
+
+        var MODAL_KEYS = ['popup', 'popover', 'sheet', 'actions', 'panel', 'loginScreen', 'customModal']
+        var PROPS_ONLY = /\/(duplicate|stub)$/ // only work when opened from inside the app
+
+        function router() {
+            var el = document.querySelector('.view-main')
+            return el && el.f7View ? el.f7View.router : null
+        }
+
+        // Popups and the like show up in the address but cannot be opened again directly.
+        function navigable(r, url) {
+            if (!url || url.charAt(0) !== '/') return false
+            var path = url.split('#')[0]
+            if (PROPS_ONLY.test(path.split('?')[0])) return false
+            var m
+            try { m = r.findMatchingRoute(path) } catch (e) { return false }
+            if (!m || !m.route) return false
+            if (m.route.path === '(.*)') return false // nothing real behind this address
+            for (var i = 0; i < MODAL_KEYS.length; i++) {
+                if (m.route[MODAL_KEYS[i]]) return false // a popup, e.g. /analyzer/
+            }
+            return true
+        }
+
+        function capture() {
+            var r = router()
+            if (!r || !r.history) return null
+            var stack = []
+            for (var i = 0; i < r.history.length; i++) {
+                var url = String(r.history[i]).split('#')[0]
+                if (!navigable(r, url)) continue
+                if (stack.length && stack[stack.length - 1] === url) continue // same page twice
+                stack.push(url)
+            }
+            if (!stack.length) return null
+            return { history: stack, url: stack[stack.length - 1] }
+        }
+
+        var lastSent = null
+        var pending = null
+
+        function report() {
+            if (pending) clearTimeout(pending)
+            // Let the Main UI finish updating before we read anything.
+            pending = setTimeout(function () {
+                pending = null
+                var state = capture()
+                if (!state) return
+                var json = JSON.stringify(state)
+                if (json === lastSent) return // nothing moved, e.g. a popup opened
+                lastSent = json
+                try {
+                    window.webkit.messageHandlers.mainUi.postMessage({
+                        type: '\#(WebRouteRestore.messageType)', state: json
+                    })
+                } catch (e) {}
+            }, 0)
+        }
+
+        var origPush = history.pushState
+        var origReplace = history.replaceState
+
+        history.pushState = function () {
+            var out = origPush.apply(history, arguments)
+            report()
+            return out
+        }
+        history.replaceState = function () {
+            var out = origReplace.apply(history, arguments)
+            report()
+            return out
+        }
+        window.addEventListener('popstate', report)
+
+        // The Main UI normally announces its first page itself, which we catch above.
+        // This is a fallback in case it doesn't.
+        var tries = 0
+        var poll = setInterval(function () {
+            if (router() || ++tries > 100) {
+                clearInterval(poll)
+                report()
+            }
+        }, 100)
+    })()
+    """#
+}
 
 func editorHeightFixJS(safeAreaBottom: CGFloat) -> String {
     """

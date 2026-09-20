@@ -421,6 +421,11 @@ public actor Preferences {
     @UserDefault("currentWebViewPath", defaultValue: "")
     public var currentWebViewPath: String
 
+    /// The last pages the user visited, per home. Kept out of `HomePreferences` because we save
+    /// this every time they open a page, and saving a home also writes to the Keychain.
+    @UserDefaultObject("webRouteStates", defaultValue: [UUID: WebRouteSnapshot]())
+    private var webRouteStates: [UUID: WebRouteSnapshot]
+
     /// settings for different homes
     @UserDefaultObject("homeOrder", defaultValue: [UUID]())
     public private(set) var homeOrder: [UUID]
@@ -741,6 +746,23 @@ public extension Preferences {
 
     func setCurrentWebViewPath(_ value: String) {
         currentWebViewPath = value
+    }
+
+    /// The pages we remember for this home, or nil if there are none or they are too old.
+    /// Ones that are too old get deleted here, so they can never come back.
+    func webRouteSnapshot(for homeId: UUID) -> WebRouteSnapshot? {
+        guard let snapshot = webRouteStates[homeId] else { return nil }
+        guard snapshot.isFresh() else {
+            setWebRouteSnapshot(nil, for: homeId)
+            return nil
+        }
+        return snapshot
+    }
+
+    func setWebRouteSnapshot(_ snapshot: WebRouteSnapshot?, for homeId: UUID) {
+        var all = webRouteStates
+        all[homeId] = snapshot
+        webRouteStates = all
     }
 
     /// Returns a snapshot of all screensaver settings in one actor call.

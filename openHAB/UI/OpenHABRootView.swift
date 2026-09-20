@@ -496,8 +496,8 @@ private extension OpenHABRootView {
             // Left side: proxied navbar items (webview mode with items available),
             // or connection-status indicator as fallback.
             Group {
-                if isWebviewMode, !webViewModel.navbarItems.isEmpty {
-                    let backItem = webViewModel.navbarItems.first { $0.isBack }
+                if isWebviewMode, !webViewModel.navbarItems.isEmpty || backButton != nil {
+                    let backItem = webViewModel.navbarItems.first { $0.isBack } ?? backButton
                     let otherItems = webViewModel.navbarItems.filter { !$0.isBack }
                     HStack(spacing: 4) {
                         // Back button is always shown directly in the bar when present.
@@ -592,6 +592,23 @@ private extension OpenHABRootView {
 // MARK: - Navbar proxy helpers
 
 private extension OpenHABRootView {
+    /// A back button for pages that have none. Main UI pages expect a swipe instead, and
+    /// swiping only works on pages the user opened, not ones we put back.
+    ///
+    /// Nil while disconnected or still loading, so the offline and connecting messages get
+    /// shown rather than hidden behind a lone back arrow.
+    var backButton: WebNavbarItem? {
+        guard webViewModel.canGoBack,
+              activeNetworkConnection != nil,
+              !webViewModel.isLoading else { return nil }
+        return WebNavbarItem(
+            label: String(localized: "Back"),
+            jsAction: "window.history.back()",
+            iconBase64: nil,
+            isBack: true
+        )
+    }
+
     func navbarProxyButton(_ item: WebNavbarItem) -> some View {
         Button {
             webViewModel.evaluateJS(item.jsAction)
@@ -602,6 +619,9 @@ private extension OpenHABRootView {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 28, height: 28)
+            } else if item.isBack {
+                Image(systemSymbol: .chevronLeft)
+                    .font(.title3)
             } else {
                 Text(item.label)
             }
