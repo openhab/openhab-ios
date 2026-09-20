@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [Version 3.4.29, Build 325] - 2026-09-20Z
+
+- fix(notifications): log userInfo key shape and nil-action bail-out for #1336
+- Drop identifier_name min_length and its single-letter exclusion list
+- Fix SwiftUI publishing-during-view-update warning on certificate alert (#1343)
+- Re-enable SwiftLint/SwiftFormat and clean up all reported violations (#1341)
+
 ## [Version 3.4.28, Build 324] - 2026-09-17Z
 
 - fix(build): stop tracking openHAB.xcodeproj's own stale SwiftPM lockfile (#1340)
