@@ -382,7 +382,10 @@ struct OpenHABRootView: View {
             networkService.certificateAlert?.title ?? "",
             isPresented: Binding(
                 get: { networkService.certificateAlert != nil },
-                set: { if !$0 { networkService.certificateAlert = nil } }
+                // Defer to the next run loop tick: SwiftUI invokes this setter synchronously
+                // while dismissing the alert, and mutating the @Published property inline
+                // triggers "Publishing changes from within view updates is not allowed."
+                set: { if !$0 { DispatchQueue.main.async { networkService.certificateAlert = nil } } }
             )
         ) {
             Button("Always") { networkService.certificateAlertAction(.permitAlways) }
