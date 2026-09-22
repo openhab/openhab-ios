@@ -58,6 +58,114 @@ struct OpenHABWidgetEventApplicationTests {
     }
 
     @Test
+    func colorClearsOnStateChangeAwayFromMatchingCondition() {
+        // iconcolor/labelcolor/valuecolor=[==ON="orange"]: server includes the colors
+        // while ON, then omits them (not "") once the widget goes back to OFF and the
+        // condition no longer matches.
+        let widget = OpenHABWidget(
+            widgetId: "0600",
+            label: "Light",
+            icon: "light",
+            type: .switchWidget,
+            url: nil,
+            period: nil,
+            minValue: nil,
+            maxValue: nil,
+            step: nil,
+            refresh: nil,
+            height: nil,
+            isLeaf: nil,
+            iconColor: nil,
+            labelColor: nil,
+            valueColor: nil,
+            service: nil,
+            state: "OFF",
+            text: nil,
+            legend: nil,
+            inputHint: nil,
+            encoding: nil,
+            item: item(state: "OFF"),
+            linkedPage: nil,
+            mappings: [],
+            widgets: [],
+            visibility: true,
+            switchSupport: true,
+            forceAsItem: nil
+        )
+
+        let onResult = widget.apply(event: OpenHABSitemapWidgetEvent(
+            widgetId: "0600",
+            labelcolor: "orange",
+            valuecolor: "orange",
+            iconcolor: "orange",
+            state: "ON",
+            enrichedItem: item(state: "ON")
+        ))
+        #expect(onResult == .applied)
+        #expect(widget.iconColor == "orange")
+        #expect(widget.labelcolor == "orange")
+        #expect(widget.valuecolor == "orange")
+
+        let offResult = widget.apply(event: OpenHABSitemapWidgetEvent(
+            widgetId: "0600",
+            state: "OFF",
+            enrichedItem: item(state: "OFF")
+        ))
+        #expect(offResult == .applied)
+        #expect(widget.state == "OFF")
+        #expect(widget.iconColor == "")
+        #expect(widget.labelcolor == "")
+        #expect(widget.valuecolor == "")
+    }
+
+    @Test
+    func nonStateEventLeavesColorsUntouched() {
+        let widget = OpenHABWidget(
+            widgetId: "0600",
+            label: "Light",
+            icon: "light",
+            type: .switchWidget,
+            url: nil,
+            period: nil,
+            minValue: nil,
+            maxValue: nil,
+            step: nil,
+            refresh: nil,
+            height: nil,
+            isLeaf: nil,
+            iconColor: "orange",
+            labelColor: "orange",
+            valueColor: "orange",
+            service: nil,
+            state: "ON",
+            text: nil,
+            legend: nil,
+            inputHint: nil,
+            encoding: nil,
+            item: item(state: "ON"),
+            linkedPage: nil,
+            mappings: [],
+            widgets: [],
+            visibility: true,
+            switchSupport: true,
+            forceAsItem: nil
+        )
+
+        // An icon-reload-only event carries no state/item, so it must never clear colors
+        // that a prior state-driven event set.
+        let result = widget.apply(event: OpenHABSitemapWidgetEvent(
+            widgetId: "0600",
+            reloadIcon: true,
+            visibility: true
+        ))
+
+        #expect(result == .applied)
+        #expect(widget.iconColor == "orange")
+        #expect(widget.labelcolor == "orange")
+        #expect(widget.valuecolor == "orange")
+    }
+
+    @Test
     func reloadIconSitemapEventIsAppliedWithoutPageReload() {
         let widget = OpenHABWidget(
             widgetId: "0600",
