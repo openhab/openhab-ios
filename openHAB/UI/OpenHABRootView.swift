@@ -756,12 +756,20 @@ private extension OpenHABRootView {
     /// URL at that path and Framework7 routes to it on startup. The chosen destination
     /// is recorded as `currentContent` so a later reload returns here rather than to an
     /// arbitrary route the user reached inside the SPA.
-    func showMainUI(path: String?) {
+    ///
+    /// - Parameter persistAsDefault: Whether `path` should be remembered as the home's
+    ///   default landing page/tab. True when the user explicitly picked this destination
+    ///   from the menu; false for a one-off notification-driven `ui:navigate:/page/…`
+    ///   (openhab-ios#1336's follow-up: a notification tap was silently overwriting the
+    ///   user's "standard path" setting, which then made a *different*, unrelated app
+    ///   version look like it had fixed notification routing when it had merely inherited
+    ///   the hijacked default).
+    func showMainUI(path: String?, persistAsDefault: Bool = true) {
         let wasShowingMainUI = isMainUIShown
         // Ask the web view what it holds, not which surface was last visible: a tile's URL
         // survives a detour through a sitemap.
         let showsTile = webViewModel.isShowingTile
-        Logger.notificationNavigation.info("showMainUI: path=\(path ?? "nil", privacy: .public) wasShowingMainUI=\(wasShowingMainUI) showsTile=\(showsTile) hasLoadedContent=\(webViewModel.hasLoadedContent)")
+        Logger.notificationNavigation.info("showMainUI: path=\(path ?? "nil", privacy: .public) wasShowingMainUI=\(wasShowingMainUI) showsTile=\(showsTile) hasLoadedContent=\(webViewModel.hasLoadedContent) persistAsDefault=\(persistAsDefault)")
 
         currentContent = path.map(TargetController.mainUIPage) ?? .webview
 
@@ -778,6 +786,7 @@ private extension OpenHABRootView {
         }
         // Coming back from a sitemap: the web view still holds the page, so leave it alone.
 
+        guard persistAsDefault else { return }
         persistDefaultViewIfNeeded("web")
         if !(cachedHomePrefs?.demomode ?? false) {
             let capturedPath = path ?? ""
@@ -847,12 +856,14 @@ private extension OpenHABRootView {
             // SSE-connected, which does not reliably happen before the user is looking at
             // the (wrong) root page. showMainUI instead loads straight to the target path
             // when the SPA isn't live yet, and routes client-side when it already is.
-            showMainUI(path: path)
+            // Not persisted as the default: this is a one-off notification deep link, not
+            // the user picking a new home page (openhab-ios#1336).
+            showMainUI(path: path, persistAsDefault: false)
         case .none:
             break
         case let .navigateLive(command, ensureShown):
             if ensureShown {
-                showMainUI(path: nil)
+                showMainUI(path: nil, persistAsDefault: false)
             }
             webViewModel.navigateCommand(command)
         case let .switchToSitemap(name, widgetId):
