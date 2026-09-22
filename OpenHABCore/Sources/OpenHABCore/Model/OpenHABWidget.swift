@@ -278,9 +278,23 @@ public extension OpenHABWidget {
             else { return .unchanged }
             if let label = event.label { self.label = label }
             if let icon = event.icon { self.icon = icon }
-            if let labelcolor = event.labelcolor { self.labelcolor = labelcolor }
-            if let valuecolor = event.valuecolor { self.valuecolor = valuecolor }
-            if let iconcolor = event.iconcolor { iconColor = iconcolor }
+            // The server re-evaluates all three color expressions together whenever the
+            // widget's underlying item state changes, and omits a color entirely (rather
+            // than sending "") once its condition no longer matches — so on a state-driven
+            // event, an absent color means "cleared", not "unchanged". Without this, a
+            // color that matched once (e.g. iconcolor=[==ON="orange"]) would stick forever
+            // after the item went back to a non-matching state, until the next full sitemap
+            // reload rebuilt the widget from scratch. A non-state event (icon reload,
+            // visibility, …) never touches colors, so leave them alone there.
+            if event.state != nil || event.enrichedItem != nil {
+                labelcolor = event.labelcolor ?? ""
+                valuecolor = event.valuecolor ?? ""
+                iconColor = event.iconcolor ?? ""
+            } else {
+                if let labelcolor = event.labelcolor { self.labelcolor = labelcolor }
+                if let valuecolor = event.valuecolor { self.valuecolor = valuecolor }
+                if let iconcolor = event.iconcolor { iconColor = iconcolor }
+            }
             if let visibility = event.visibility { self.visibility = visibility }
             if let state = event.state {
                 self.state = state
