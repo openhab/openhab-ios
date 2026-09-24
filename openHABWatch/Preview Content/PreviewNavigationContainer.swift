@@ -53,7 +53,7 @@ struct PreviewNavigationContainer<Content: View>: View {
         NavigationStack {
             content
         }
-        .environmentObject(settings)
+        .environment(settings)
     }
 
     init(@ViewBuilder content: () -> Content) {
