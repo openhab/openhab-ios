@@ -196,6 +196,21 @@ struct MenuDataTests {
         #expect(service.hasSuccessfullyLoaded == true)
     }
 
+    @Test("reload without an active connection keeps the current snapshot")
+    func reloadWithoutConnectionKeepsSnapshot() async {
+        let service = MenuDataService()
+        let tracker = MainActorNetworkTracker()
+        tracker.activeConnection = nil
+        service.sitemaps = [makeSitemap(name: "a", label: "A")]
+        service.uiTiles = [makeUITile()]
+        service.uiPages = [makeUIPage()]
+        await service.reload(networkTracker: tracker)
+        #expect(service.sitemaps.map(\.name) == ["a"])
+        #expect(service.uiTiles.count == 1)
+        #expect(service.uiPages.count == 1)
+        #expect(service.isLoading == false)
+    }
+
     @Test("clearForHomeSwitch empties collections and resets load gate")
     func clearForHomeSwitchResetsAll() {
         let service = MenuDataService()
