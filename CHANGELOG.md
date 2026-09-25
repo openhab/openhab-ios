@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [Version 3.4.30, Build 326] - 2026-09-22Z
+
+- fix(sitemap): clear iconcolor/labelcolor/valuecolor when an SSE event omits them (#1345)
+- fix(notifications): don't persist a notification navigation as the default page (#1344)
+
 ## [Version 3.4.29, Build 325] - 2026-09-20Z
 
 - fix(notifications): log userInfo key shape and nil-action bail-out for #1336
