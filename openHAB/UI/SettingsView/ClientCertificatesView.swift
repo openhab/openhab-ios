@@ -12,7 +12,7 @@
 import SwiftUI
 
 struct ClientCertificatesView: View {
-    @StateObject private var viewModel = ClientCertificatesViewModel()
+    @State private var viewModel = ClientCertificatesViewModel()
 
     var body: some View {
         List {
