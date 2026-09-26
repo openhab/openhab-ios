@@ -1,0 +1,19 @@
+//
+//  Signing.xcconfig
+//
+//  Signing identity of the official openHAB app. These values are what the App Store
+//  build from GitHub CI uses; do not change them to run the app on your own device.
+//  Instead copy Signing.local.xcconfig.template to Signing.local.xcconfig (git-ignored)
+//  and override them there.
+
+DEVELOPMENT_TEAM = PBAPXHRAM9
+
+// Every bundle identifier, the app group and the keychain group derive from this prefix.
+OPENHAB_BUNDLE_ID_PREFIX = org.openhab
+OPENHAB_BUNDLE_ID = $(OPENHAB_BUNDLE_ID_PREFIX).app
+OPENHAB_APP_GROUP = group.$(OPENHAB_BUNDLE_ID)
+
+// The CarPlay entitlement is granted by Apple to the openHAB team only.
+OPENHAB_APP_ENTITLEMENTS = openHAB/Supporting Files/openHAB-CarPlay.entitlements
+
+#include? "Signing.local.xcconfig"

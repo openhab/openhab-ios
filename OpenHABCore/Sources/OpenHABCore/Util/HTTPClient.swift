@@ -79,7 +79,7 @@ public actor CertificateStore {
         path = URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
         #else
         // Try app group container first, fall back to documents directory for testing
-        if let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app") {
+        if let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroup.identifier) {
             path = appGroupURL.appendingPathComponent("trustedCertificates")
         } else {
             // Fallback for test environment where app group may not be available

@@ -13,6 +13,31 @@ Please report [iOS specific issues here](https://github.com/openhab/openhab.ios/
 For instructions on setting up your development environment, please
 see [README](https://github.com/openhab/openhab.ios).
 
+### Running on your own iPhone or Apple Watch
+
+The project is signed for the openHAB development team, so without further setup you
+can only run it in the Simulator. To run it on your own devices:
+
+1. Copy `Signing.local.xcconfig.template` to `Signing.local.xcconfig` in the repository
+   root. The copy is git-ignored.
+2. Set `DEVELOPMENT_TEAM` to your team ID and `OPENHAB_BUNDLE_ID_PREFIX` to a prefix you
+   own, e.g. `com.yourname`. All bundle IDs, the app group and the keychain group are
+   derived from it, and Xcode registers them on the first build.
+3. Build the Debug configuration to your device.
+
+These builds have no CarPlay (Apple grants that entitlement to the openHAB team only),
+and Crashlytics and myopenHAB push notifications don't work because they are tied to
+the official bundle ID. A free Personal Team additionally lacks push, Siri and App
+Groups, so use a paid Apple Developer account for a fully working build.
+
+Never change `Signing.xcconfig` itself: it holds the identity of the App Store build.
+The release lane refuses to run while a `Signing.local.xcconfig` is present.
+
+Don't pick a team in Xcode's *Signing & Capabilities* pane either. Xcode would write it
+into `project.pbxproj`, where it overrides both xcconfig files. Because the team comes
+from an xcconfig, the pane shows it in red as *Unknown Name (TEAMID)* and shows bundle
+IDs unexpanded, e.g. `$(OPENHAB_BUNDLE_ID)`. That is expected and signing works.
+
 ## Contribution guidelines
 
 ### Pull requests are always welcome
