@@ -265,7 +265,7 @@ struct OpenHABRootView: View {
     @StateObject private var networkService = NetworkConnectionService()
     @StateObject private var notificationService = NotificationActionService()
     @StateObject private var pushService = PushRegistrationService()
-    @StateObject private var crashService = CrashReportService()
+    @State private var crashService = CrashReportService()
     @State private var menuData = MenuDataService()
     @StateObject private var webViewModel = OpenHABWebViewModel()
     @State private var menuPresented = false
@@ -394,6 +394,7 @@ struct OpenHABRootView: View {
         } message: {
             Text(networkService.certificateAlert?.message ?? "")
         }
+        .task { await crashService.checkForPreviousCrash() }
         .alert("Crash Report", isPresented: $crashService.crashReportAlert) {
             Button("Send") { crashService.enableCrashReporting() }
             Button("Don't Send", role: .cancel) { crashService.deleteCrashReports() }

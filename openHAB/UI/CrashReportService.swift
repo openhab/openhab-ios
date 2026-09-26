@@ -10,26 +10,24 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import FirebaseCrashlytics
+import Observation
 import OpenHABCore
-import SwiftUI
 
 @MainActor
-class CrashReportService: ObservableObject {
-    // MARK: - Published state
-
-    @Published var crashReportAlert = false
-
-    init() {
-        setupCrashReportCheck()
-    }
+@Observable
+final class CrashReportService {
+    var crashReportAlert = false
 
     // MARK: - Crash Report
 
-    private func setupCrashReportCheck() {
-        Task { @MainActor in
-            if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), await !(Preferences.shared.sendCrashReports) {
-                crashReportAlert = true
-            }
+    /// Shows the crash report alert if the previous run crashed and the user has not
+    /// already opted in to sending reports. Called from the view's `.task` rather than
+    /// `init`, because `@State` may construct (and discard) extra instances.
+    func checkForPreviousCrash(didCrash: Bool = Crashlytics.crashlytics().didCrashDuringPreviousExecution(),
+                               isReportingEnabled: @Sendable () async -> Bool = { Preferences.shared.sendCrashReports }) async {
+        guard didCrash else { return }
+        if await !isReportingEnabled() {
+            crashReportAlert = true
         }
     }
 
