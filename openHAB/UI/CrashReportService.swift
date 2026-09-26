@@ -24,7 +24,7 @@ final class CrashReportService {
     /// already opted in to sending reports. Called from the view's `.task` rather than
     /// `init`, because `@State` may construct (and discard) extra instances.
     func checkForPreviousCrash(didCrash: Bool = Crashlytics.crashlytics().didCrashDuringPreviousExecution(),
-                               isReportingEnabled: @Sendable () async -> Bool = { await Preferences.shared.sendCrashReports }) async {
+                               isReportingEnabled: @Sendable () async -> Bool = { Preferences.shared.sendCrashReports }) async {
         guard didCrash else { return }
         if await !isReportingEnabled() {
             crashReportAlert = true
