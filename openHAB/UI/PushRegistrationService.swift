@@ -9,12 +9,13 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import OpenHABCore
 import os.log
 
+/// Registers configured homes for push notifications. Holds no UI state, so it is a plain
+/// class (not `@Observable`); `OpenHABApp` keeps the single instance alive.
 @MainActor
-class PushRegistrationService: ObservableObject {
+final class PushRegistrationService {
     private struct UuidWithConnection: Hashable, Equatable {
         let uuid: UUID
         /// not only URL, because auth and certs might be relevant for establishing the connection
