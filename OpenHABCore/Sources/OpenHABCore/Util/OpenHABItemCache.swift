@@ -154,7 +154,7 @@ public actor OpenHABItemCache {
     private static let networkTimeout: TimeInterval = 10
 
     private static let stubsDefaultsKey = "openHABItemStubs"
-    private static let sharedDefaultsSuiteName = "group.org.openhab.app"
+    private static let sharedDefaultsSuiteName = AppGroup.identifier
 
     private var networkTrackers: [UUID: NetworkTracker] = [:]
 

@@ -22,7 +22,7 @@ public actor WidgetItemRegistry {
     private let timestampsKey = "widgetTrackedItemTimestamps"
 
     private init() {
-        defaults = UserDefaults(suiteName: "group.org.openhab.app")
+        defaults = UserDefaults(suiteName: AppGroup.identifier)
     }
 
     /// Register an item as being displayed in a widget

@@ -248,12 +248,12 @@ struct MenuSectionTests {
     }
 }
 
-/// .serialized prevents parallel test clones from racing on the shared group.org.openhab.app UserDefaults suite.
+/// .serialized prevents parallel test clones from racing on the shared app-group UserDefaults suite.
 @Suite(.serialized)
 @MainActor
 struct UserDefaultsTests {
     @Test func consistency() async throws {
-        let data = try #require(UserDefaults(suiteName: "group.org.openhab.app"))
+        let data = try #require(UserDefaults(suiteName: AppGroup.identifier))
         let defaultsName = try #require(Bundle.main.bundleIdentifier)
         data.removePersistentDomain(forName: defaultsName)
 

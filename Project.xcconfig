@@ -1,0 +1,8 @@
+//
+//  Project.xcconfig
+//
+//  Project-level base configuration, inherited by every target.
+//  Version.xcconfig is kept separate because the release lane rewrites it.
+
+#include "Version.xcconfig"
+#include "Signing.xcconfig"

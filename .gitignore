@@ -44,3 +44,6 @@ BonjourDiscoveryTool/.swiftpm
 BonjourDiscoveryTool/bonjour-discovery
 
 .xcodebuildmcp/
+
+# Per-developer signing overrides, see Signing.local.xcconfig.template
+Signing.local.xcconfig

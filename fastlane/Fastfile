@@ -121,10 +121,17 @@ platform :ios do
 
         # ensure branch is clean
         ensure_git_status_clean
+
+        # A contributor's git-ignored signing override would change bundle IDs, team and
+        # entitlements of the App Store build. CI never has one; refuse to release with it.
+        if File.exist?('../Signing.local.xcconfig')
+            UI.user_error!('Signing.local.xcconfig is present. Remove it before building a release.')
+        end
         
         # Set up manual signing, independently of what is set in "Signing" with Xcode frontend
         update_code_signing_settings(
             use_automatic_signing: false,
+            team_id: 'PBAPXHRAM9',
             code_sign_identity: 'Apple Distribution',
             build_configurations: ["Release"]
         )

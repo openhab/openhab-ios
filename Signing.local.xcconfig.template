@@ -1,0 +1,35 @@
+//
+//  Signing.local.xcconfig
+//
+//  Lets you build and run openHAB on your own iPhone and Apple Watch without being a
+//  member of the openHAB development team.
+//
+//  1. Copy this file to Signing.local.xcconfig (it is git-ignored).
+//  2. Set your team ID: Xcode > Settings > Accounts > your team, or
+//     developer.apple.com > Membership details.
+//  3. Choose a bundle ID prefix you own, e.g. com.yourname. Bundle IDs become
+//     com.yourname.app, com.yourname.app.NotificationService, … and the app group
+//     group.com.yourname.app. Xcode registers them automatically on first build.
+//  4. Build the Debug configuration to your device.
+//
+//  Don't pick a team in Xcode's Signing & Capabilities pane: it would be written into
+//  project.pbxproj and override this file. The pane showing the team in red as
+//  "Unknown Name (TEAMID)" and unexpanded bundle IDs is expected; signing works.
+//
+//  Not available on your device: CarPlay (the entitlement is granted to the openHAB
+//  team only; use the Simulator's I/O > External Displays > CarPlay instead), and
+//  Crashlytics and myopenHAB push notifications, which are tied to the official
+//  bundle ID. A free Personal Team additionally can't sign Siri and Push
+//  Notifications; pick the matching entitlements line below.
+
+DEVELOPMENT_TEAM = ABCDE12345
+
+// Set only the prefix. Don't override OPENHAB_BUNDLE_ID or the bundle IDs themselves:
+// every target, the app group and the keychain group derive from this prefix.
+OPENHAB_BUNDLE_ID_PREFIX = com.yourname
+
+// Entitlements for device builds. Simulator builds keep the official set, including CarPlay.
+// Paid Apple Developer account: everything except CarPlay.
+OPENHAB_APP_ENTITLEMENTS[sdk=iphoneos*] = openHAB/Supporting Files/openHAB.entitlements
+// Free Personal Team: also without Siri and Push Notifications. Use this line instead.
+// OPENHAB_APP_ENTITLEMENTS[sdk=iphoneos*] = openHAB/Supporting Files/openHAB-PersonalTeam.entitlements
