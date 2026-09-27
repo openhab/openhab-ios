@@ -22,13 +22,22 @@ can only run it in the Simulator. To run it on your own devices:
    root. The copy is git-ignored.
 2. Set `DEVELOPMENT_TEAM` to your team ID and `OPENHAB_BUNDLE_ID_PREFIX` to a prefix you
    own, e.g. `com.yourname`. All bundle IDs, the app group and the keychain group are
-   derived from it, and Xcode registers them on the first build.
-3. Build the Debug configuration to your device.
+   derived from it, and Xcode registers them on the first build. Don't override
+   `OPENHAB_BUNDLE_ID` or individual bundle IDs.
+3. Pick the entitlements line in the file that matches your account: a paid Apple
+   Developer account, or a free Personal Team, which can't sign Siri and Push
+   Notifications.
+4. Close and reopen the project in Xcode, then build the Debug configuration to your
+   device.
 
-These builds have no CarPlay (Apple grants that entitlement to the openHAB team only),
-and Crashlytics and myopenHAB push notifications don't work because they are tied to
-the official bundle ID. A free Personal Team additionally lacks push, Siri and App
-Groups, so use a paid Apple Developer account for a fully working build.
+On your device these builds have no CarPlay: Apple grants that entitlement to the
+openHAB team only. Simulator builds keep it, so work on CarPlay in the Simulator via
+*I/O › External Displays › CarPlay*. Crashlytics and myopenHAB push notifications don't
+work because they are tied to the official bundle ID.
+
+If Xcode still reports provisioning errors for `org.openhab.app`, your
+`Signing.local.xcconfig` isn't being read: check that it sits in the repository root
+next to `Signing.xcconfig` and isn't named `.txt` or `.template`.
 
 Never change `Signing.xcconfig` itself: it holds the identity of the App Store build.
 The release lane refuses to run while a `Signing.local.xcconfig` is present.

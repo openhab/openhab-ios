@@ -16,13 +16,20 @@
 //  project.pbxproj and override this file. The pane showing the team in red as
 //  "Unknown Name (TEAMID)" and unexpanded bundle IDs is expected; signing works.
 //
-//  Not available in these builds: CarPlay (the entitlement is granted to the openHAB
-//  team only), and Crashlytics and myopenHAB push notifications, which are tied to
-//  the official bundle ID. A free Personal Team additionally lacks push, Siri and
-//  App Groups; use a paid Apple Developer account for a fully working build.
+//  Not available on your device: CarPlay (the entitlement is granted to the openHAB
+//  team only; use the Simulator's I/O > External Displays > CarPlay instead), and
+//  Crashlytics and myopenHAB push notifications, which are tied to the official
+//  bundle ID. A free Personal Team additionally can't sign Siri and Push
+//  Notifications; pick the matching entitlements line below.
 
 DEVELOPMENT_TEAM = ABCDE12345
+
+// Set only the prefix. Don't override OPENHAB_BUNDLE_ID or the bundle IDs themselves:
+// every target, the app group and the keychain group derive from this prefix.
 OPENHAB_BUNDLE_ID_PREFIX = com.yourname
 
-// Same entitlements as the official app, minus CarPlay.
-OPENHAB_APP_ENTITLEMENTS = openHAB/Supporting Files/openHAB.entitlements
+// Entitlements for device builds. Simulator builds keep the official set, including CarPlay.
+// Paid Apple Developer account: everything except CarPlay.
+OPENHAB_APP_ENTITLEMENTS[sdk=iphoneos*] = openHAB/Supporting Files/openHAB.entitlements
+// Free Personal Team: also without Siri and Push Notifications. Use this line instead.
+// OPENHAB_APP_ENTITLEMENTS[sdk=iphoneos*] = openHAB/Supporting Files/openHAB-PersonalTeam.entitlements
