@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [Version 3.4.31, Build 328] - 2026-10-01Z
+
+- chore(deps): bump rubyzip from 2.4.1 to 3.4.0 (#1347)
+
 ## [Version 3.4.30, Build 326] - 2026-09-22Z
 
 - fix(sitemap): clear iconcolor/labelcolor/valuecolor when an SSE event omits them (#1345)
