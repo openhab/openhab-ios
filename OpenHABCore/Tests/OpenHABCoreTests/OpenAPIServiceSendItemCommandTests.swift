@@ -40,15 +40,14 @@ struct OpenAPIServiceSendItemCommandTests {
         try await service.sendItemCommand(itemname: "MyItem", command: "ON")
     }
 
-    @Test("sendItemCommand uses application/json for empty string command")
-    func sendItemCommandUsesJSONForEmptyCommand() async throws {
+    @Test("sendItemCommand uses text/plain with an empty body for empty string command")
+    func sendItemCommandUsesPlainTextForEmptyCommand() async throws {
         let transport = TestClientTransport { request, body, _, operationID in
             #expect(operationID == "sendItemCommand")
-            #expect(request.headerFields[.contentType] == "application/json; charset=utf-8")
+            #expect(request.headerFields[.contentType] == "text/plain")
 
             let bodyString = try await encodedBody(from: body)
-            let json = try JSONDecoder().decode([String: String].self, from: Data(bodyString.utf8))
-            #expect(json["value"]?.isEmpty == true)
+            #expect(bodyString.isEmpty)
 
             return (HTTPResponse(status: .ok), nil)
         }

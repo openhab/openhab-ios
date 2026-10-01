@@ -1,5 +1,5 @@
 {
-  "originHash" : "225f713206a4b02e698ba5f1f327fabf70d7a5eac750973f2302953447904b97",
+  "originHash" : "2fd1882068244c037b897fb50ad4b8cb44e5656c1255eebbd60a8e71d1623bf3",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -204,8 +204,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-openapi-urlsession",
       "state" : {
-        "revision" : "08796d36c99ad2318929bfa1d1e40f82194b65cc",
-        "version" : "1.3.1"
+        "revision" : "77effea09e780f6f3f119ffb8150ff25e31c78b1",
+        "version" : "1.3.2"
       }
     },
     {
