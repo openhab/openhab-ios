@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import Observation
 @testable import openHAB
 import OpenHABCore
 import Testing
@@ -169,6 +170,49 @@ struct BonjourDiscoveryViewModelTests {
         #expect(viewModel.discoveredURLs.count == 2)
         #expect(viewModel.discoveredURLs.contains("http://192.168.1.1:8080"))
         #expect(viewModel.discoveredURLs.contains("https://192.168.1.1:8443"))
+    }
+
+    // MARK: - Observation Tests
+
+    @Test
+    func discoveringNewServerNotifiesObservers() async throws {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+        viewModel.discoverAll()
+        let didChange = ObservationFlag()
+        withObservationTracking {
+            _ = viewModel.discoveredURLs
+        } onChange: {
+            didChange.set()
+        }
+
+        mockService.simulateDiscovery(servers: [DiscoveredServer(scheme: "http", address: "192.168.1.1", port: 8080)])
+
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        #expect(didChange.value)
+    }
+
+    @Test
+    func rediscoveringKnownServerDoesNotNotifyObservers() async throws {
+        let mockService = MockBonjourService()
+        let viewModel = BonjourDiscoveryViewModel { mockService }
+        let server = DiscoveredServer(scheme: "http", address: "192.168.1.1", port: 8080)
+        viewModel.discoverAll()
+        mockService.simulateDiscovery(servers: [server])
+        try await Task.sleep(nanoseconds: 100_000_000)
+        let didChange = ObservationFlag()
+        withObservationTracking {
+            _ = viewModel.discoveredURLs
+        } onChange: {
+            didChange.set()
+        }
+
+        mockService.simulateDiscovery(servers: [server])
+
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        #expect(!didChange.value)
     }
 
     // MARK: - URL Deduplication Tests

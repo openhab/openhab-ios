@@ -9,17 +9,18 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import Foundation
+import Observation
 import OpenHABCore
 import os
 
 // MARK: - ViewModel
 
 @MainActor
-final class BonjourDiscoveryViewModel: ObservableObject {
-    @Published var discoveredURLs: [String] = []
-    @Published var isDiscovering = false
+@Observable
+final class BonjourDiscoveryViewModel {
+    var discoveredURLs: [String] = []
+    var isDiscovering = false
 
     private var bonjourService: (any BonjourServiceProtocol)?
     private let serviceFactory: @Sendable () -> any BonjourServiceProtocol
