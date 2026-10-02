@@ -115,10 +115,6 @@ class OpenHABWebViewModel: ObservableObject {
     /// the same "connection becomes active" event — and can otherwise win with the wrong
     /// (default) destination (openhab-ios#1336).
     private var hasPendingExplicitNavigation = false
-    /// Homes we have seen the user move around in since the app started. Before that, a home's
-    /// own start page wins over the pages we remember. Per home, so using one home does not
-    /// cost another its start page.
-    private var homesCapturedThisSession: Set<UUID> = []
     /// Which home the web view currently belongs to. Kept here so we can note pages against it
     /// right away. Looking it up takes a moment, and the user can switch homes in between.
     private var currentHomeId: UUID?
@@ -255,9 +251,7 @@ class OpenHABWebViewModel: ObservableObject {
         let snapshot = WebRouteRestore.snapshotToRestore(storedRoute, for: WebRouteRestore.Load(
             path: path,
             force: force,
-            isShowingTile: isShowingTile,
-            hasCapturedThisSession: homesCapturedThisSession.contains(currentPrefs.id),
-            defaultMainUIPath: defaultPath
+            isShowingTile: isShowingTile
         ))
         // Settings pages need admin rights, which may differ on the other connection.
         let restore = snapshot.flatMap {
@@ -739,7 +733,6 @@ extension OpenHABWebViewModel {
               let snapshot = WebRouteRestore.snapshot(fromJSON: json, connectionURL: connectionURL) else { return }
         canGoBack = snapshot.history.count > 1
         guard !isShowingTile, let homeId = currentHomeId else { return }
-        homesCapturedThisSession.insert(homeId)
         Task {
             await Preferences.shared.setWebRouteSnapshot(snapshot, for: homeId)
         }

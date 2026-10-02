@@ -23,10 +23,6 @@ enum WebRouteRestore {
         /// The user pulled to refresh, or the app is reloading after a problem.
         let force: Bool
         let isShowingTile: Bool
-        /// Whether the user has moved around in this home since the app started.
-        let hasCapturedThisSession: Bool
-        /// The home's own start page, empty when none is set.
-        let defaultMainUIPath: String
     }
 
     private struct Payload: Decodable {
@@ -63,12 +59,8 @@ enum WebRouteRestore {
     ///
     /// Only when we are opening the Main UI by ourselves. If a particular page was asked for,
     /// the user pulled to refresh, or a tile is showing, that choice wins instead.
-    ///
-    /// The first time after the app starts, the home's own start page wins. Opening there is
-    /// why it was set. Once the user has moved around, where they were is the better answer.
     static func snapshotToRestore(_ stored: WebRouteSnapshot?, for load: Load) -> WebRouteSnapshot? {
         guard let stored, load.path == nil, !load.force, !load.isShowingTile else { return nil }
-        guard load.hasCapturedThisSession || load.defaultMainUIPath.isEmpty else { return nil }
         return stored
     }
 

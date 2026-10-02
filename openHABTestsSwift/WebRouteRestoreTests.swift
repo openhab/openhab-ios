@@ -53,8 +53,7 @@ struct WebRouteRestoreTests {
     func restoresOnAutomaticLoad() {
         let stored = snapshot(["/overview/", "/page/kitchen"])
         let result = WebRouteRestore.snapshotToRestore(stored, for: .init(
-            path: nil, force: false, isShowingTile: false,
-            hasCapturedThisSession: true, defaultMainUIPath: ""
+            path: nil, force: false, isShowingTile: false
         ))
         #expect(result == stored)
     }
@@ -63,48 +62,21 @@ struct WebRouteRestoreTests {
     func suppressedByDeliberateDestinations() {
         let stored = snapshot(["/overview/", "/page/kitchen"])
         #expect(WebRouteRestore.snapshotToRestore(stored, for: .init(
-            path: "/page/other", force: false, isShowingTile: false,
-            hasCapturedThisSession: true, defaultMainUIPath: ""
+            path: "/page/other", force: false, isShowingTile: false
         )) == nil)
         #expect(WebRouteRestore.snapshotToRestore(stored, for: .init(
-            path: nil, force: true, isShowingTile: false,
-            hasCapturedThisSession: true, defaultMainUIPath: ""
+            path: nil, force: true, isShowingTile: false
         )) == nil)
         #expect(WebRouteRestore.snapshotToRestore(stored, for: .init(
-            path: nil, force: false, isShowingTile: true,
-            hasCapturedThisSession: true, defaultMainUIPath: ""
+            path: nil, force: false, isShowingTile: true
         )) == nil)
     }
 
     @Test("Nothing stored means nothing to restore")
     func noStoredSnapshot() {
         #expect(WebRouteRestore.snapshotToRestore(nil, for: .init(
-            path: nil, force: false, isShowingTile: false,
-            hasCapturedThisSession: true, defaultMainUIPath: ""
+            path: nil, force: false, isShowingTile: false
         )) == nil)
-    }
-
-    @Test("A configured default page wins on the first load of the session")
-    func defaultPageWinsOnColdStart() {
-        let stored = snapshot(["/overview/", "/page/kitchen"])
-        #expect(WebRouteRestore.snapshotToRestore(stored, for: .init(
-            path: nil, force: false, isShowingTile: false,
-            hasCapturedThisSession: false, defaultMainUIPath: "/page/dashboard"
-        )) == nil)
-        // ...but only until the user has moved somewhere in this session.
-        #expect(WebRouteRestore.snapshotToRestore(stored, for: .init(
-            path: nil, force: false, isShowingTile: false,
-            hasCapturedThisSession: true, defaultMainUIPath: "/page/dashboard"
-        )) == stored)
-    }
-
-    @Test("Without a configured default page a cold start restores")
-    func coldStartRestoresWithoutDefaultPage() {
-        let stored = snapshot(["/overview/", "/page/kitchen"])
-        #expect(WebRouteRestore.snapshotToRestore(stored, for: .init(
-            path: nil, force: false, isShowingTile: false,
-            hasCapturedThisSession: false, defaultMainUIPath: ""
-        )) == stored)
     }
 
     // MARK: - Seeding
