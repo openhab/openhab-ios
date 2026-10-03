@@ -57,7 +57,7 @@ enum NotificationCommand: Equatable {
     ///
     /// `webViewCommand` needs `WebViewNavigationRouter`'s own verdict: only the "navigate:/page/…"
     /// shape resolves to a path and goes through `loadWebView`/`routeMainUI`. A raw command (or a
-    /// bare/relative "navigate:") goes straight to `webViewModel.navigateCommand(_:)` instead,
+    /// bare/relative "navigate:") goes straight to `webViewModel.bridge.run(_:)` instead,
     /// which never clears the flag — marking it pending here would leave it stuck forever, and
     /// could even block the `showMainUI(path: nil)` that a not-yet-shown Main UI needs to bring
     /// the SPA up before that raw command can run.
