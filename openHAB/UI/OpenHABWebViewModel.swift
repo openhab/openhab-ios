@@ -113,6 +113,9 @@ class OpenHABWebViewModel: ObservableObject {
     /// the same "connection becomes active" event — and can otherwise win with the wrong
     /// (default) destination (openhab-ios#1336).
     private var hasPendingExplicitNavigation = false
+    /// Which home the web view currently belongs to. Kept here so we can note pages against it
+    /// right away. Looking it up takes a moment, and the user can switch homes in between.
+    private var currentHomeId: UUID?
 
     /// True once the MainUI SPA is live in the current web view and can accept
     /// client-side navigation via `window.MainUI.handleCommand`. Mirrors the state
@@ -240,12 +243,31 @@ class OpenHABWebViewModel: ObservableObject {
         let url = URL(string: activeConfig.url)
         let currentPrefs = await Preferences.shared.currentHomePreferences
         let defaultPath = currentPrefs.defaultMainUIPath
+
+        // Put the user back where they were, unless we were asked for a particular page.
+        let storedRoute = await Preferences.shared.webRouteSnapshot(for: currentPrefs.id)
+        let snapshot = WebRouteRestore.snapshotToRestore(storedRoute, for: WebRouteRestore.Load(
+            path: path,
+            force: force,
+            isShowingTile: isShowingTile
+        ))
+        // Settings pages need admin rights, which may differ on the other connection.
+        let restore = snapshot.flatMap {
+            WebRouteRestore.seed(for: $0, dropAdmin: $0.connectionURL != activeConfig.url)
+        }
+
+        // Ask for the Main UI's front page, not the page we actually want. Asking a server
+        // straight for a page only works once the Main UI has been opened there at least once,
+        // and after switching connection it has not, so you get a blank screen. The script then
+        // moves us to the right page as the Main UI starts.
         guard let modifiedUrl = WebViewURLHelper.resolveWebViewURL(
             baseURL: url,
             proxyURL: activeConnectionInfo?.proxyURL,
-            path: path,
-            defaultPath: defaultPath
+            path: restore == nil ? path : nil,
+            defaultPath: restore == nil ? defaultPath : ""
         ) else { return }
+        // What the page addresses hang off, so a cloud connection's extra path is kept.
+        let basePath = modifiedUrl.path.hasSuffix("/") ? String(modifiedUrl.path.dropLast()) : modifiedUrl.path
 
         acceptsCommands = false
         var request = URLRequest(url: modifiedUrl)
@@ -268,6 +290,8 @@ class OpenHABWebViewModel: ObservableObject {
             webView.uiDelegate = nil
             webView = newWebview
         } else {}
+
+        installUserScripts(on: webView, restore: restore?.history, props: restore?.props, basePath: basePath)
 
         Logger.viewController.info("Loading URL: \(modifiedUrl)")
         // Local avoids `self.` inside the Logger interpolation, which redundantSelf would strip.
@@ -365,6 +389,7 @@ class OpenHABWebViewModel: ObservableObject {
     // MARK: - WKWebView instance management
 
     private func getOrCreateWebView(for id: UUID, isCloudConnection: Bool) -> WKWebView {
+        currentHomeId = id
         if let existing = views[id] {
             Logger.viewController.info("Reusing webview for id:\(id.uuidString)")
             viewAccessOrder.removeAll { $0 == id }
@@ -375,18 +400,11 @@ class OpenHABWebViewModel: ObservableObject {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
-        // JS bridge is added by the Coordinator when it attaches delegates
-        config.userContentController.addUserScript(
-            WKUserScript(source: webViewMainUIBridgeJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
-        )
-        #if DEBUG
-        config.userContentController.addUserScript(
-            WKUserScript(source: webViewUITestProbeJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
-        )
-        #endif
         config.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
 
         let newWebView = WKWebView(frame: .zero, configuration: config)
+        // The Coordinator hooks up the messages these scripts send back.
+        installUserScripts(on: newWebView, restore: nil)
         newWebView.scrollView.bounces = false
         newWebView.isOpaque = false
         newWebView.backgroundColor = UIColor.clear
@@ -523,6 +541,9 @@ class OpenHABWebViewModel: ObservableObject {
         showMenuBar = true
         isWebNavbarHidden = false
         isWebNavbarTitleHidden = false
+        // Nothing is on screen now, so no tile either. Left set, we would still think a tile is
+        // showing and would neither put the user back nor remember where they go next.
+        isShowingTile = false
         #if DEBUG
         if !uiTestContentLocked {
             navbarItems = []
@@ -569,6 +590,10 @@ class OpenHABWebViewModel: ObservableObject {
                 }
             }
         }
+
+        // Done with the saved pages. If the page reloads on its own later, it should stay where
+        // it is rather than jump back to pages the user has since left.
+        installUserScripts(on: webView, restore: nil)
 
         injectNavbarProxy()
         injectEditorHeightFix()
@@ -633,6 +658,38 @@ class OpenHABWebViewModel: ObservableObject {
     }
 }
 
+private extension OpenHABWebViewModel {
+    // MARK: - Injected scripts
+
+    /// Adds the scripts that run whenever a page opens. They go in together every time. A
+    /// script's text cannot be changed once added, the list of pages to put back differs each
+    /// time, and removing one script removes them all.
+    func installUserScripts(on webView: WKWebView, restore: [String]?, props: [String]? = nil, basePath: String = "") {
+        let controller = webView.configuration.userContentController
+        controller.removeAllUserScripts()
+        // This one first. It rewrites the browser history, and the script after it reports every
+        // such change back to us, which would look like the user opening every page at once.
+        controller.addUserScript(
+            WKUserScript(
+                source: webViewRouteRestoreJS(restore: restore, props: props, basePath: basePath),
+                injectionTime: .atDocumentStart,
+                forMainFrameOnly: true
+            )
+        )
+        controller.addUserScript(
+            WKUserScript(source: webViewMainUIBridgeJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        )
+        controller.addUserScript(
+            WKUserScript(source: webViewExternalURLInterceptorJS, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        )
+        #if DEBUG
+        controller.addUserScript(
+            WKUserScript(source: webViewUITestProbeJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        )
+        #endif
+    }
+}
+
 extension OpenHABWebViewModel {
     // MARK: - Menu bar visibility
 
@@ -661,6 +718,19 @@ extension OpenHABWebViewModel {
             window.__ohNavbarHeight = undefined;
             """
         )
+    }
+
+    /// Notes where the user is, so we can put them back later.
+    ///
+    /// Tiles are skipped. A tile's address is its own, and saving it would later drop the
+    /// Main UI somewhere the menu never sent it.
+    func handleRouteState(_ json: String) {
+        guard let connectionURL = activeConfig?.url,
+              let snapshot = WebRouteRestore.snapshot(fromJSON: json, connectionURL: connectionURL) else { return }
+        guard !isShowingTile, let homeId = currentHomeId else { return }
+        Task {
+            await Preferences.shared.setWebRouteSnapshot(snapshot, for: homeId)
+        }
     }
 
     /// Updates the proxied navbar items and title received from the web content.
