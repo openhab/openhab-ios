@@ -315,6 +315,11 @@ struct OpenHABRootView: View {
                     showNotifications = true
                 }
             }
+            if env["UITestOpenMenu"] != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    menuPresented = true
+                }
+            }
             if env["UITestWebViewMode"] != nil {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     currentContent = .webview
