@@ -75,8 +75,6 @@ class OpenHABWebViewModel: ObservableObject {
     /// True while the web view holds a tile's URL. Its content outlives the surface that
     /// loaded it, so a sitemap detour does not put the Main UI back.
     @Published private(set) var isShowingTile = false
-    /// True when there is an earlier page to go back to.
-    @Published private(set) var canGoBack = false
     /// True once a real page (not the blank placeholder) has finished loading.
     /// Drives the "Connecting…" placeholder shown while a home is first loading.
     @Published private(set) var hasLoadedContent = false
@@ -543,7 +541,6 @@ class OpenHABWebViewModel: ObservableObject {
         showMenuBar = true
         isWebNavbarHidden = false
         isWebNavbarTitleHidden = false
-        canGoBack = false
         // Nothing is on screen now, so no tile either. Left set, we would still think a tile is
         // showing and would neither put the user back nor remember where they go next.
         isShowingTile = false
@@ -703,7 +700,6 @@ extension OpenHABWebViewModel {
         isSSEConnected = false
         isWebNavbarHidden = false
         isWebNavbarTitleHidden = false
-        canGoBack = false
         #if DEBUG
         if !uiTestContentLocked {
             navbarItems = []
@@ -731,7 +727,6 @@ extension OpenHABWebViewModel {
     func handleRouteState(_ json: String) {
         guard let connectionURL = activeConfig?.url,
               let snapshot = WebRouteRestore.snapshot(fromJSON: json, connectionURL: connectionURL) else { return }
-        canGoBack = snapshot.history.count > 1
         guard !isShowingTile, let homeId = currentHomeId else { return }
         Task {
             await Preferences.shared.setWebRouteSnapshot(snapshot, for: homeId)

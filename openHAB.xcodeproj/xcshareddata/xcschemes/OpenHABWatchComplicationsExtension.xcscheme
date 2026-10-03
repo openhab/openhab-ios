@@ -62,6 +62,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA0775142346705D0086C685"
             BuildableName = "openHABWatch.app"
+            BlueprintName = "openHABWatch"
             ReferencedContainer = "container:openHAB.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -79,6 +80,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA0775142346705D0086C685"
             BuildableName = "openHABWatch.app"
+            BlueprintName = "openHABWatch"
             ReferencedContainer = "container:openHAB.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
