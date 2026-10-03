@@ -18,11 +18,15 @@ import Testing
 struct WebRouteRestoreTests {
     private static let local = "http://openhab.local:8080"
 
+    private static let deep = #"{"deep":true}"#
+
     private func snapshot(_ history: [String],
+                          props: [String]? = nil,
                           connectionURL: String = local,
                           capturedAt: Date = Date()) -> WebRouteSnapshot {
         WebRouteSnapshot(
             history: history,
+            props: props,
             url: history.last ?? "",
             connectionURL: connectionURL,
             capturedAt: capturedAt
@@ -38,6 +42,29 @@ struct WebRouteRestoreTests {
         #expect(decoded?.history == ["/overview/", "/page/kitchen"])
         #expect(decoded?.url == "/page/kitchen")
         #expect(decoded?.connectionURL == Self.local)
+    }
+
+    @Test("Decodes the props posted with each page")
+    func decodesProps() {
+        let json = #"{"history":["/overview/","/page/kitchen"],"props":["{}","{\"deep\":true}"],"url":"/page/kitchen"}"#
+        let decoded = WebRouteRestore.snapshot(fromJSON: json, connectionURL: Self.local)
+        #expect(decoded?.props == ["{}", Self.deep])
+    }
+
+    @Test("Props that do not line up with the pages are dropped")
+    func dropsMisalignedProps() {
+        let json = #"{"history":["/overview/","/page/kitchen"],"props":["{}"],"url":"/page/kitchen"}"#
+        let decoded = WebRouteRestore.snapshot(fromJSON: json, connectionURL: Self.local)
+        #expect(decoded?.history == ["/overview/", "/page/kitchen"])
+        #expect(decoded?.props == nil)
+    }
+
+    @Test("A snapshot saved before props were kept still decodes")
+    func decodesSnapshotWithoutProps() throws {
+        let json = #"{"history":["/overview/"],"url":"/overview/","connectionURL":"http://a","capturedAt":0}"#
+        let decoded = try JSONDecoder().decode(WebRouteSnapshot.self, from: Data(json.utf8))
+        #expect(decoded.history == ["/overview/"])
+        #expect(decoded.props == nil)
     }
 
     @Test("Rejects an empty or malformed payload")
@@ -86,6 +113,51 @@ struct WebRouteRestoreTests {
         let seed = WebRouteRestore.seed(for: snapshot(["/overview/", "/settings/things/", "/page/kitchen"]), dropAdmin: false)
         #expect(seed?.history == ["/overview/", "/settings/things/", "/page/kitchen"])
         #expect(seed?.url == "/page/kitchen")
+    }
+
+    @Test("Each page keeps its own props")
+    func seedsProps() {
+        let stored = snapshot(["/overview/", "/page/kitchen"], props: ["{}", Self.deep])
+        let seed = WebRouteRestore.seed(for: stored, dropAdmin: false)
+        #expect(seed?.props == ["{}", Self.deep])
+    }
+
+    @Test("Pages saved without props get empty ones")
+    func seedsEmptyPropsWhenMissing() {
+        let seed = WebRouteRestore.seed(for: snapshot(["/overview/", "/page/kitchen"]), dropAdmin: false)
+        #expect(seed?.props == [WebRouteRestore.noProps, WebRouteRestore.noProps])
+    }
+
+    @Test("Props stay with their page when admin routes are dropped")
+    func propsFollowAdminDrop() {
+        let stored = snapshot(
+            ["/overview/", "/settings/things/", "/page/kitchen"],
+            props: ["{}", #"{"deep":false}"#, Self.deep]
+        )
+        let seed = WebRouteRestore.seed(for: stored, dropAdmin: true)
+        #expect(seed?.history == ["/overview/", "/page/kitchen"])
+        #expect(seed?.props == ["{}", Self.deep])
+    }
+
+    @Test("When repeats collapse, the page keeps how it was last opened")
+    func collapsedRepeatKeepsLaterProps() {
+        let stored = snapshot(
+            ["/overview/", "/page/a", "/settings/", "/page/a", "/page/b"],
+            props: ["{}", "{}", "{}", Self.deep, Self.deep]
+        )
+        let seed = WebRouteRestore.seed(for: stored, dropAdmin: true)
+        #expect(seed?.history == ["/overview/", "/page/a", "/page/b"])
+        #expect(seed?.props == ["{}", Self.deep, Self.deep])
+    }
+
+    @Test("Capping a long stack keeps props lined up")
+    func capKeepsPropsAligned() {
+        let long = (0 ..< 50).map { "/page/p\($0)" }
+        let props = (0 ..< 50).map { #"{"defineVars":{"n":\#($0)}}"# }
+        let seed = WebRouteRestore.seed(for: snapshot(long, props: props), dropAdmin: false)
+        #expect(seed?.props.count == WebRouteRestore.maxSeededEntries)
+        #expect(seed?.props.last == #"{"defineVars":{"n":49}}"#)
+        #expect(seed?.props.first == #"{"defineVars":{"n":\#(50 - WebRouteRestore.maxSeededEntries)}}"#)
     }
 
     @Test("Drops guarded admin routes when moving to another connection")
@@ -171,6 +243,38 @@ struct WebRouteRestoreTests {
     func nilRestoreEmitsNull() {
         let source = webViewRouteRestoreJS(restore: nil)
         #expect(source.contains("var RESTORE = null"))
+    }
+
+    @Test("Props are emitted as a JSON array of strings, parsed in the page")
+    func propsEmittedAsStrings() {
+        let source = webViewRouteRestoreJS(restore: ["/overview/", "/page/kitchen"], props: ["{}", Self.deep])
+        #expect(source.contains(#"var RESTORE_PROPS = ["{}","{\"deep\":true}"]"#))
+        #expect(webViewRouteRestoreJS(restore: nil).contains("var RESTORE_PROPS = null"))
+    }
+
+    /// The Main UI opens a restored page from its address alone, which carries no props.
+    @Test("The script hands the props back to Framework7 and reopens the current page with its own")
+    func scriptRestoresProps() {
+        let source = webViewRouteRestoreJS(restore: ["/overview/", "/page/kitchen"], props: ["{}", Self.deep])
+        #expect(source.contains("r.propsHistory = list"))
+        #expect(source.contains("reloadCurrent: true, animate: false, browserHistory: false, props: top"))
+        #expect(source.contains("if (restoring) whenRestoredPageOpen()"))
+    }
+
+    @Test("Only the props that survive being saved are captured")
+    func scriptKeepsOnlyKnownProps() {
+        let source = webViewRouteRestoreJS(restore: nil)
+        #expect(source.contains("var KEPT_PROPS = ['deep', 'defineVars']"))
+        #expect(source.contains("return { history: stack, props: props, url: stack[stack.length - 1] }"))
+    }
+
+    /// Framework7 adds a popup to its history without props, then removes the last props
+    /// when it closes, which would take the page underneath's back link with it.
+    @Test("Open popups get stand-in props so the page underneath keeps its own")
+    func scriptPadsPopupProps() {
+        let source = webViewRouteRestoreJS(restore: nil)
+        #expect(source.contains("padPopupProps(r)"))
+        #expect(source.contains("r.propsHistory.push(POPUP_PROPS)"))
     }
 
     @Test("A restore payload is emitted as a JSON array")

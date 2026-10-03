@@ -506,12 +506,17 @@ let webViewAppMenuProbeJS = """
 /// - Parameters:
 ///   - restore: the pages to put back, oldest first. Pass nil to leave the Main UI's own
 ///     memory alone, which is what we want when the app has just started.
+///   - props: what each page in `restore` was opened with, as JSON, one per page.
 ///   - basePath: what the app's address hangs off, with no trailing slash, so a cloud
 ///     connection's extra path is kept. Empty when the app sits at the top.
-func webViewRouteRestoreJS(restore: [String]?, basePath: String = "") -> String {
+func webViewRouteRestoreJS(restore: [String]?, props: [String]? = nil, basePath: String = "") -> String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = .withoutEscapingSlashes
     let restoreLiteral = restore
+        .flatMap { try? encoder.encode($0) }
+        .flatMap { String(data: $0, encoding: .utf8) } ?? "null"
+    // Kept as strings and parsed in the page, so stored text never runs as script.
+    let propsLiteral = props
         .flatMap { try? encoder.encode($0) }
         .flatMap { String(data: $0, encoding: .utf8) } ?? "null"
     let baseLiteral = (try? encoder.encode(basePath))
@@ -520,9 +525,13 @@ func webViewRouteRestoreJS(restore: [String]?, basePath: String = "") -> String 
     return #"""
     (function () {
         var RESTORE = \#(restoreLiteral)
+        var RESTORE_PROPS = \#(propsLiteral)
         var BASE = \#(baseLiteral)
         var VIEW_ID = 'view_main' // the name the Main UI gives its main view
         var STORAGE_KEY = 'f7router-' + VIEW_ID + '-history'
+        // True until the restored pages have their props back. Reporting before then would
+        // save the pages without them.
+        var restoring = false
 
         // Write this before the Main UI starts up. It reads the list as it starts.
         //
@@ -532,6 +541,7 @@ func webViewRouteRestoreJS(restore: [String]?, basePath: String = "") -> String 
         if (RESTORE && RESTORE.length && isAppRoot()) {
             try { localStorage.setItem(STORAGE_KEY, JSON.stringify(RESTORE)) } catch (e) {}
             seedBrowserHistory(RESTORE)
+            restoring = true
         }
 
         function isAppRoot() {
@@ -568,34 +578,128 @@ func webViewRouteRestoreJS(restore: [String]?, basePath: String = "") -> String 
             return el && el.f7View ? el.f7View.router : null
         }
 
+        function matchRoute(r, url) {
+            if (!url || url.charAt(0) !== '/') return null
+            var m
+            try { m = r.findMatchingRoute(url.split('#')[0]) } catch (e) { return null }
+            return m && m.route ? m : null
+        }
+
+        function isPopup(m) {
+            for (var i = 0; i < MODAL_KEYS.length; i++) {
+                if (m.route[MODAL_KEYS[i]]) return true // e.g. /analyzer/
+            }
+            return false
+        }
+
         // Popups and the like show up in the address but cannot be opened again directly.
         function navigable(r, url) {
-            if (!url || url.charAt(0) !== '/') return false
-            var path = url.split('#')[0]
-            if (PROPS_ONLY.test(path.split('?')[0])) return false
-            var m
-            try { m = r.findMatchingRoute(path) } catch (e) { return false }
-            if (!m || !m.route) return false
-            if (m.route.path === '(.*)') return false // nothing real behind this address
-            for (var i = 0; i < MODAL_KEYS.length; i++) {
-                if (m.route[MODAL_KEYS[i]]) return false // a popup, e.g. /analyzer/
+            var m = matchRoute(r, url)
+            if (!m || isPopup(m)) return false
+            if (PROPS_ONLY.test(url.split('#')[0].split('?')[0])) return false
+            return m.route.path !== '(.*)' // nothing real behind this address
+        }
+
+        // What a page is opened with lives beside the history, not in the address. `deep`
+        // gives a page its back link, `defineVars` sets its variables. Nothing else is kept,
+        // other pages get passed live objects that mean nothing once saved.
+        var KEPT_PROPS = ['deep', 'defineVars']
+
+        // Opening a popup adds it to Framework7's history but adds no props for it, and closing
+        // it removes the last of both, which throws away the props of the page underneath.
+        // Stand in for each open popup so both lists keep step.
+        var POPUP_PROPS = { popup: true }
+        function padPopupProps(r) {
+            if (!r.propsHistory) return
+            var open = 0
+            for (var i = r.history.length - 1; i >= 0; i--) {
+                var m = matchRoute(r, String(r.history[i]))
+                if (!m || !isPopup(m)) break
+                open++
             }
-            return true
+            var padded = 0
+            for (var j = r.propsHistory.length - 1; j >= 0 && r.propsHistory[j] === POPUP_PROPS; j--) padded++
+            for (; padded < open; padded++) r.propsHistory.push(POPUP_PROPS)
+        }
+
+        // Framework7 only adds to and removes from the end of both lists, but does not keep
+        // them the same length (a restored page starts with none), so line them up from the end.
+        function propsAt(r, i) {
+            var list = r.propsHistory || []
+            var p = list[i - (r.history.length - list.length)]
+            var kept = {}
+            if (!p) return kept
+            for (var k = 0; k < KEPT_PROPS.length; k++) {
+                if (p[KEPT_PROPS[k]] !== undefined) kept[KEPT_PROPS[k]] = p[KEPT_PROPS[k]]
+            }
+            return kept
         }
 
         function capture() {
             var r = router()
-            if (!r || !r.history) return null
+            if (!r || !r.history || restoring) return null
+            padPopupProps(r)
             var stack = []
+            var props = []
             for (var i = 0; i < r.history.length; i++) {
                 var url = String(r.history[i]).split('#')[0]
                 if (!navigable(r, url)) continue
-                if (stack.length && stack[stack.length - 1] === url) continue // same page twice
+                var p
+                try { p = JSON.stringify(propsAt(r, i)) } catch (e) { p = '{}' }
+                if (stack.length && stack[stack.length - 1] === url) {
+                    props[props.length - 1] = p // same page twice, keep how it was last opened
+                    continue
+                }
                 stack.push(url)
+                props.push(p)
             }
             if (!stack.length) return null
-            return { history: stack, url: stack[stack.length - 1] }
+            return { history: stack, props: props, url: stack[stack.length - 1] }
         }
+
+        // The Main UI opens the restored page from its address alone, so it comes up without
+        // its props: no back link, no variables. Hand them back to Framework7 for every page,
+        // so going back opens each one properly, and open the current page again with its own.
+        function restoreProps(r) {
+            var n = r.history.length
+            var k = RESTORE.length
+            if (r.history[n - 1] !== RESTORE[k - 1]) return // not the pages we put back
+            var list = []
+            for (var i = 0; i < n; i++) {
+                var p = {}
+                var j = i - (n - k)
+                if (RESTORE_PROPS && j >= 0) {
+                    try { p = JSON.parse(RESTORE_PROPS[j]) || {} } catch (e) {}
+                }
+                list.push(p)
+            }
+            r.propsHistory = list
+            var top = list[n - 1]
+            if (Object.keys(top).length) {
+                r.navigate(r.history[n - 1], {
+                    reloadCurrent: true, animate: false, browserHistory: false, props: top
+                })
+            }
+        }
+
+        // Wait for the Main UI to finish opening the restored page. Framework7 ignores a
+        // navigation while another is still under way.
+        function whenRestoredPageOpen() {
+            var tries = 0
+            var poll = setInterval(function () {
+                var r = router()
+                var page = r && r.currentPageEl && r.currentPageEl.f7Page
+                var ready = !!page && r.allowPageChange && page.route.url === RESTORE[RESTORE.length - 1]
+                if (!ready && ++tries <= 100) return
+                clearInterval(poll)
+                if (ready) {
+                    try { restoreProps(r) } catch (e) {}
+                }
+                restoring = false
+                report()
+            }, 100)
+        }
+        if (restoring) whenRestoredPageOpen()
 
         var lastSent = null
         var pending = null

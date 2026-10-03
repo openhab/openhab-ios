@@ -22,6 +22,9 @@ public struct WebRouteSnapshot: Codable, Equatable, Sendable {
     /// The pages visited, oldest first. Popups and the like are already left out, they show up
     /// in the address but the Main UI cannot reopen them directly.
     public let history: [String]
+    /// What each page in `history` was opened with, as JSON, one per page. The Main UI passes
+    /// these when opening a page, not in its address. Nil in snapshots saved before we kept them.
+    public let props: [String]?
     /// The page the user is on. Always the last one in `history`.
     public let url: String
     /// Which server address these were visited on, so we can tell whether we are putting them
@@ -29,8 +32,9 @@ public struct WebRouteSnapshot: Codable, Equatable, Sendable {
     public let connectionURL: String
     public let capturedAt: Date
 
-    public init(history: [String], url: String, connectionURL: String, capturedAt: Date = Date()) {
+    public init(history: [String], props: [String]? = nil, url: String, connectionURL: String, capturedAt: Date = Date()) {
         self.history = history
+        self.props = props
         self.url = url
         self.connectionURL = connectionURL
         self.capturedAt = capturedAt

@@ -27,8 +27,12 @@ enum WebRouteRestore {
 
     private struct Payload: Decodable {
         let history: [String]
+        let props: [String]?
         let url: String
     }
+
+    /// What a page opened with nothing passed to it gets.
+    static let noProps = "{}"
 
     /// The kind of message `webViewRouteRestoreJS` sends us.
     static let messageType = "routeState"
@@ -49,6 +53,7 @@ enum WebRouteRestore {
               !payload.history.isEmpty, !payload.url.isEmpty else { return nil }
         return WebRouteSnapshot(
             history: payload.history,
+            props: payload.props?.count == payload.history.count ? payload.props : nil,
             url: payload.url,
             connectionURL: connectionURL,
             capturedAt: capturedAt
@@ -64,21 +69,30 @@ enum WebRouteRestore {
         return stored
     }
 
-    /// The pages to put back and the one to show, or nil if nothing usable is left.
+    /// The pages to put back, what each was opened with, and the one to show, or nil if nothing
+    /// usable is left. `props` always has one entry per page in `history`.
     ///
     /// - Parameter dropAdmin: true when the user is landing on a different connection, which
     ///   may not have admin rights.
-    static func seed(for snapshot: WebRouteSnapshot, dropAdmin: Bool) -> (history: [String], url: String)? {
-        let pages = dropAdmin ? snapshot.history.filter { !isAdminPath($0) } : snapshot.history
+    static func seed(for snapshot: WebRouteSnapshot, dropAdmin: Bool) -> (history: [String], props: [String], url: String)? {
+        let props = snapshot.props.flatMap { $0.count == snapshot.history.count ? $0 : nil }
+            ?? Array(repeating: noProps, count: snapshot.history.count)
+        let all = zip(snapshot.history, props).map { (url: $0, props: $1) }
+        let pages = dropAdmin ? all.filter { !isAdminPath($0.url) } : all
         guard let last = pages.last else { return nil }
         // The Main UI cuts the list at the first place the current page appears, so an earlier
         // copy of it would quietly throw away everything after that.
-        let withoutEarlierCopies = pages.dropLast().filter { $0 != last } + [last]
-        // Removing pages can leave the same page sitting next to itself.
-        let history = withoutEarlierCopies.reduce(into: [String]()) { result, url in
-            if result.last != url { result.append(url) }
-        }
-        return (Array(history.suffix(maxSeededEntries)), last)
+        let withoutEarlierCopies = pages.dropLast().filter { $0.url != last.url } + [last]
+        // Removing pages can leave the same page sitting next to itself. Keep the later one,
+        // it is how the user last opened it.
+        let kept = withoutEarlierCopies.reduce(into: [(url: String, props: String)]()) { result, page in
+            if result.last?.url == page.url {
+                result[result.count - 1] = page
+            } else {
+                result.append(page)
+            }
+        }.suffix(maxSeededEntries)
+        return (kept.map(\.url), kept.map(\.props), last.url)
     }
 
     static func isAdminPath(_ url: String) -> Bool {

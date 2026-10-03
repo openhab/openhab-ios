@@ -291,7 +291,7 @@ class OpenHABWebViewModel: ObservableObject {
             webView = newWebview
         } else {}
 
-        installUserScripts(on: webView, restore: restore?.history, basePath: basePath)
+        installUserScripts(on: webView, restore: restore?.history, props: restore?.props, basePath: basePath)
 
         Logger.viewController.info("Loading URL: \(modifiedUrl)")
         // Local avoids `self.` inside the Logger interpolation, which redundantSelf would strip.
@@ -664,14 +664,14 @@ private extension OpenHABWebViewModel {
     /// Adds the scripts that run whenever a page opens. They go in together every time. A
     /// script's text cannot be changed once added, the list of pages to put back differs each
     /// time, and removing one script removes them all.
-    func installUserScripts(on webView: WKWebView, restore: [String]?, basePath: String = "") {
+    func installUserScripts(on webView: WKWebView, restore: [String]?, props: [String]? = nil, basePath: String = "") {
         let controller = webView.configuration.userContentController
         controller.removeAllUserScripts()
         // This one first. It rewrites the browser history, and the script after it reports every
         // such change back to us, which would look like the user opening every page at once.
         controller.addUserScript(
             WKUserScript(
-                source: webViewRouteRestoreJS(restore: restore, basePath: basePath),
+                source: webViewRouteRestoreJS(restore: restore, props: props, basePath: basePath),
                 injectionTime: .atDocumentStart,
                 forMainFrameOnly: true
             )
