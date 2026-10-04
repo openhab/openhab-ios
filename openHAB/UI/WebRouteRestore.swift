@@ -25,17 +25,8 @@ enum WebRouteRestore {
         let isShowingTile: Bool
     }
 
-    private struct Payload: Decodable {
-        let history: [String]
-        let props: [String]?
-        let url: String
-    }
-
     /// What a page opened with nothing passed to it gets.
     static let noProps = "{}"
-
-    /// The kind of message `webViewRouteRestoreJS` sends us.
-    static let messageType = "routeState"
 
     /// We add one browser history entry per page, and iOS quietly stops accepting them after
     /// about a hundred in half a minute, which would leave the user on the wrong page. The
@@ -46,15 +37,13 @@ enum WebRouteRestore {
     /// address, since there is no dependable way to ask the Main UI which pages are protected.
     private static let adminPrefixes = ["/settings", "/developer", "/addons", "/setup-wizard"]
 
-    /// Reads the message `webViewRouteRestoreJS` sends.
-    static func snapshot(fromJSON json: String, connectionURL: String, capturedAt: Date = Date()) -> WebRouteSnapshot? {
-        guard let data = json.data(using: .utf8),
-              let payload = try? JSONDecoder().decode(Payload.self, from: data),
-              !payload.history.isEmpty, !payload.url.isEmpty else { return nil }
+    /// Reads a `nav.changed` from the bridge.
+    static func snapshot(from state: OHBridgeNavState, connectionURL: String, capturedAt: Date = Date()) -> WebRouteSnapshot? {
+        guard !state.history.isEmpty, !state.path.isEmpty else { return nil }
         return WebRouteSnapshot(
-            history: payload.history,
-            props: payload.props?.count == payload.history.count ? payload.props : nil,
-            url: payload.url,
+            history: state.history,
+            props: state.props?.count == state.history.count ? state.props : nil,
+            url: state.path,
             connectionURL: connectionURL,
             capturedAt: capturedAt
         )

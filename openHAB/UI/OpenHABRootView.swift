@@ -285,7 +285,16 @@ struct OpenHABRootView: View {
             ToolbarMenu(
                 isPresented: $menuPresented,
                 menuData: menuData,
+                webMenu: webViewModel.menu,
                 onSelect: { target in handleMenuSelection(target) },
+                onActivateWebMenuItem: { id in
+                    // It runs in Main UI, so Main UI has to be on screen, reloaded in place of a
+                    // tile if need be. The bridge holds the message until the page says hello.
+                    if !isMainUIShown || webViewModel.isShowingTile {
+                        showMainUI(path: nil, persistAsDefault: false)
+                    }
+                    webViewModel.bridge.activateMenuItem(id)
+                },
                 onReload: { reloadCurrentContent() }
             )
         }
@@ -330,14 +339,20 @@ struct OpenHABRootView: View {
             if let json = env["UITestWebViewNavbarItems"],
                let data = json.data(using: .utf8),
                let raw = try? JSONDecoder().decode([[String: String]].self, from: data) {
-                let items = raw.compactMap { dict -> WebNavbarItem? in
-                    guard let label = dict["label"], let action = dict["jsAction"] else { return nil }
-                    return WebNavbarItem(label: label, jsAction: action, iconBase64: nil, isBack: false)
+                let actions = raw.compactMap { dict -> OHBridgeNavbarAction? in
+                    guard let label = dict["label"] else { return nil }
+                    return OHBridgeNavbarAction(id: dict["id"] ?? label, label: label, icon: nil, disabled: nil)
                 }
                 webViewModel.lockUITestContent()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                    webViewModel.updateNavbarItems(items)
+                    webViewModel.setUITestNavbar(OHBridgeNavbarState(
+                        title: "", titleInContent: false, hidden: false, back: nil, leading: actions, trailing: []
+                    ))
                 }
+            }
+            if let json = env["UITestWebMenu"],
+               let menu = try? JSONDecoder().decode(OHBridgeMenuState.self, from: Data(json.utf8)) {
+                webViewModel.setUITestMenu(menu)
             }
             #endif
             ImageDownloader.default.authenticationChallengeResponder = networkService
@@ -345,7 +360,6 @@ struct OpenHABRootView: View {
                 weakWebViewModel?.markPendingExplicitNavigation()
             }
             Task { await switchToSavedView() }
-            setupExitToApp()
         }
         .onReceive(notificationService.$navigationCommand.compactMap(\.self)) { command in
             handleNavigationCommand(command)
@@ -414,7 +428,7 @@ struct OpenHABRootView: View {
                     .opacity(0)
                     .allowsHitTesting(false)
             }
-            Text(String(webViewModel.navbarItems.count))
+            Text(String(webViewModel.navbar.actions.count))
                 .accessibilityIdentifier("UITestReport-navbarItemCount")
                 .frame(width: 0, height: 0)
                 .opacity(0)
@@ -447,16 +461,15 @@ private extension OpenHABRootView {
                 }
                 // Same slide Framework7 uses for its navbar: up by the bar height, fading, 400ms.
                 menuBar
-                    .offset(y: webViewModel.isWebNavbarHidden ? -menuBarHeight : 0)
-                    .opacity(webViewModel.isWebNavbarHidden ? 0 : 1)
-                    .allowsHitTesting(!webViewModel.isWebNavbarHidden)
+                    .offset(y: webViewModel.navbar.hidden ? -menuBarHeight : 0)
+                    .opacity(webViewModel.navbar.hidden ? 0 : 1)
+                    .allowsHitTesting(!webViewModel.navbar.hidden)
                     .animation(
                         .timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.4),
-                        value: webViewModel.isWebNavbarHidden
+                        value: webViewModel.navbar.hidden
                     )
             }
             .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
-            .onAppear { webViewModel.triggerAppMenuProbe() }
         case let .sitemap(name, navigationState: state):
             SitemapNavigationView(sitemapName: name, navigationPath: state.navigationPath) { menuPresented = true }
                 .id("\(name)-\(state.navigationPath.last?.pageLink ?? "")-\(sitemapResetID)")
@@ -470,12 +483,9 @@ private extension OpenHABRootView {
         }
     }
 
-    /// Matches the height Framework7 reserves for its navbar, so the bar covers it exactly.
+    /// The host owns the bar height; the bridge sizes Main UI's own navbar to match it.
     var menuBarHeight: CGFloat {
-        switch currentContent {
-        case .webview, .mainUIPage: webViewModel.webNavbarHeight
-        default: 44
-        }
+        OpenHABWebViewModel.navbarHeight
     }
 
     @ViewBuilder
@@ -484,7 +494,7 @@ private extension OpenHABRootView {
 
         let barTitle: String = {
             if isWebviewMode {
-                return webViewModel.isWebNavbarTitleHidden ? "" : webViewModel.navbarTitle
+                return webViewModel.navbar.titleInContent ? "" : webViewModel.navbar.title
             }
             if case .tile = currentContent {
                 return currentViewTitle
@@ -496,22 +506,22 @@ private extension OpenHABRootView {
             // Left side: proxied navbar items (webview mode with items available),
             // or connection-status indicator as fallback.
             Group {
-                if isWebviewMode, !webViewModel.navbarItems.isEmpty {
-                    let backItem = webViewModel.navbarItems.first { $0.isBack }
-                    let otherItems = webViewModel.navbarItems.filter { !$0.isBack }
+                if isWebviewMode, webViewModel.navbar.back != nil || !webViewModel.navbar.actions.isEmpty {
+                    let back = webViewModel.navbar.back
+                    let actions = webViewModel.navbar.actions
                     HStack(spacing: 4) {
                         // Back button is always shown directly in the bar when present.
-                        if let backItem {
-                            navbarProxyButton(backItem)
+                        if let back {
+                            navbarBackButton(back)
                         }
                         // When a back button is present, remaining items always go in a
                         // popover — even a single item, which may be text-only and too wide
                         // to sit next to the back button and the hamburger.
                         // Without a back button, a single item is shown directly.
-                        if !otherItems.isEmpty {
-                            if backItem != nil || otherItems.count > 1 {
-                                navbarActionsButton(otherItems)
-                            } else if let single = otherItems.first {
+                        if !actions.isEmpty {
+                            if back != nil || actions.count > 1 {
+                                navbarActionsButton(actions)
+                            } else if let single = actions.first {
                                 navbarProxyButton(single)
                             }
                         }
@@ -592,25 +602,39 @@ private extension OpenHABRootView {
 // MARK: - Navbar proxy helpers
 
 private extension OpenHABRootView {
-    func navbarProxyButton(_ item: WebNavbarItem) -> some View {
-        Button {
-            webViewModel.evaluateJS(item.jsAction)
+    func navbarBackButton(_ back: OHBridgeNavbarState.Back) -> some View {
+        let label = back.label.flatMap { $0.isEmpty ? nil : $0 } ?? String(localized: "Back")
+        return Button {
+            webViewModel.bridge.back()
         } label: {
-            if let uiImg = item.iconImage {
-                Image(uiImage: uiImg)
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 28, height: 28)
-            } else {
-                Text(item.label)
-            }
+            Image(systemSymbol: .chevronLeft)
+                .font(.title3)
         }
+        .accessibilityLabel(label)
+        .accessibilityIdentifier("NavbarProxyButton-\(label)")
+    }
+
+    func navbarProxyButton(_ item: OHBridgeNavbarAction) -> some View {
+        Button {
+            webViewModel.bridge.activateNavbarAction(item.id)
+        } label: {
+            navbarActionLabel(item)
+        }
+        .disabled(item.disabled == true)
         .accessibilityLabel(item.label)
         .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
     }
 
-    func navbarActionsButton(_ items: [WebNavbarItem]) -> some View {
+    @ViewBuilder
+    func navbarActionLabel(_ item: OHBridgeNavbarAction) -> some View {
+        if item.icon != nil {
+            OHBridgeIconView(icon: item.icon, size: 24, fallback: .questionmarkCircle)
+        } else {
+            Text(item.label)
+        }
+    }
+
+    func navbarActionsButton(_ items: [OHBridgeNavbarAction]) -> some View {
         Button {
             navbarActionsPresented = true
         } label: {
@@ -623,19 +647,12 @@ private extension OpenHABRootView {
             HStack(spacing: 20) {
                 ForEach(items) { item in
                     Button {
-                        webViewModel.evaluateJS(item.jsAction)
+                        webViewModel.bridge.activateNavbarAction(item.id)
                         navbarActionsPresented = false
                     } label: {
-                        if let uiImg = item.iconImage {
-                            Image(uiImage: uiImg)
-                                .renderingMode(.template)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 28, height: 28)
-                        } else {
-                            Text(item.label)
-                        }
+                        navbarActionLabel(item)
                     }
+                    .disabled(item.disabled == true)
                     .accessibilityLabel(item.label)
                     .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
                 }
@@ -731,7 +748,8 @@ private extension OpenHABRootView {
         case .webview:
             showMainUI(path: nil)
         case let .mainUIPage(path):
-            showMainUI(path: path)
+            // Only a page is worth landing on next time; Settings and the like are one-off visits.
+            showMainUI(path: path, persistAsDefault: path.hasPrefix("/page/"))
         case let .sitemap(name, _):
             let capturedName = name
             Task {
@@ -802,7 +820,7 @@ private extension OpenHABRootView {
         if webViewModel.isMainUIReady, webViewModel.hasLoadedContent {
             Logger.notificationNavigation.info("routeMainUI: SPA already live — routing client-side to \(path, privacy: .public)")
             webViewModel.clearPendingExplicitNavigation()
-            webViewModel.navigateCommand("navigate:\(path)")
+            webViewModel.bridge.navigate(to: path)
         } else {
             Logger.notificationNavigation.info("routeMainUI: SPA not live yet — loading \(path, privacy: .public) directly")
             webViewModel.loadWebView(force: false, path: path)
@@ -865,7 +883,9 @@ private extension OpenHABRootView {
             if ensureShown {
                 showMainUI(path: nil, persistAsDefault: false)
             }
-            webViewModel.navigateCommand(command)
+            if !webViewModel.bridge.run(command) {
+                Logger.notificationNavigation.info("handleNavigationCommand: no Main UI message for \(command, privacy: .public)")
+            }
         case let .switchToSitemap(name, widgetId):
             let capturedName = name
             let capturedWidgetId = widgetId
@@ -902,12 +922,6 @@ private extension OpenHABRootView {
 // MARK: - Helpers
 
 private extension OpenHABRootView {
-    func setupExitToApp() {
-        webViewModel.onExitToApp = {
-            menuPresented = true
-        }
-    }
-
     func switchToTile(_ urlString: String) {
         guard !urlString.isEmpty else { return }
         let resolvedUrl: URL?

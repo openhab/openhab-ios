@@ -31,6 +31,16 @@ class WebViewHostController: UIViewController {
 struct OpenHABWebViewContainer: UIViewControllerRepresentable {
     @MainActor
     class WebViewContainerCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
+        /// The page's message handlers. `externalURL` stays outside the bridge: it is an iOS
+        /// workaround for taps on custom-scheme links, not part of the protocol.
+        private static var handlerNames: [String] {
+            var names = [OHBridge.messageHandlerName, "externalURL"]
+            #if DEBUG
+            names.append("ohUITest")
+            #endif
+            return names
+        }
+
         let viewModel: OpenHABWebViewModel
         weak var hostController: WebViewHostController?
         private weak var currentWebView: WKWebView?
@@ -58,21 +68,19 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             if let old = currentWebView {
                 old.navigationDelegate = nil
                 old.uiDelegate = nil
-                old.configuration.userContentController.removeScriptMessageHandler(forName: "mainUi")
-                old.configuration.userContentController.removeScriptMessageHandler(forName: "pathChanged")
-                old.configuration.userContentController.removeScriptMessageHandler(forName: "externalURL")
+                for name in Self.handlerNames {
+                    old.configuration.userContentController.removeScriptMessageHandler(forName: name)
+                }
                 old.removeFromSuperview()
             }
 
             webView.navigationDelegate = self
             webView.uiDelegate = self
             // Remove any existing handlers (a previous coordinator may have registered them)
-            webView.configuration.userContentController.removeScriptMessageHandler(forName: "mainUi")
-            webView.configuration.userContentController.removeScriptMessageHandler(forName: "pathChanged")
-            webView.configuration.userContentController.removeScriptMessageHandler(forName: "externalURL")
-            webView.configuration.userContentController.add(self, name: "mainUi")
-            webView.configuration.userContentController.add(self, name: "pathChanged")
-            webView.configuration.userContentController.add(self, name: "externalURL")
+            for name in Self.handlerNames {
+                webView.configuration.userContentController.removeScriptMessageHandler(forName: name)
+                webView.configuration.userContentController.add(self, name: name)
+            }
             currentWebView = webView
 
             hostView.addSubview(webView)
@@ -109,84 +117,18 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                 }
                 return
             }
-            if message.name == "pathChanged", let newPath = message.body as? String {
-                Logger.viewController.debug("Path changed to: \(newPath)")
-                let connection = MainActorNetworkTracker.shared.activeConnection
-                let savedPath = relativeWebViewPath(
-                    newPath,
-                    proxyURL: connection?.proxyURL,
-                    rootURLString: connection?.configuration.url ?? ""
-                )
-                Task {
-                    await Preferences.shared.setCurrentWebViewPath(savedPath)
-                }
+            if message.name == OHBridge.messageHandlerName {
+                viewModel.bridge.receive(message)
+                return
             }
-            if message.name == "mainUi" {
-                // Dict body — JS test probe reports (DEBUG builds only)
-                #if DEBUG
-                if let dict = message.body as? [String: Any],
-                   let type = dict["type"] as? String,
-                   type == "uiTestReport",
-                   let key = dict["key"] as? String,
-                   let value = dict["value"] as? String {
-                    viewModel.recordUITestReport(key: key, value: value)
-                    return
-                }
-                #endif
-                // Dict body with the pages the user has visited, so we can put them back later
-                if let dict = message.body as? [String: Any],
-                   let type = dict["type"] as? String,
-                   type == WebRouteRestore.messageType,
-                   let state = dict["state"] as? String {
-                    viewModel.handleRouteState(state)
-                    return
-                }
-                // Dict body — navbar state
-                if let dict = message.body as? [String: Any],
-                   let type = dict["type"] as? String,
-                   type == "navbarState" {
-                    viewModel.updateNavbarState(
-                        hidden: dict["hidden"] as? String == "true",
-                        titleHidden: dict["titleHidden"] as? String == "true",
-                        height: (dict["height"] as? String).flatMap(Double.init)
-                    )
-                    return
-                }
-                // Dict body — navbar proxy elements
-                if let dict = message.body as? [String: Any],
-                   let type = dict["type"] as? String,
-                   type == "navbarElements",
-                   let rawItems = dict["items"] as? [[String: String]] {
-                    let items = rawItems.compactMap { raw -> WebNavbarItem? in
-                        guard let label = raw["label"], let action = raw["action"] else { return nil }
-                        return WebNavbarItem(label: label, jsAction: action, iconBase64: raw["icon"], isBack: raw["isBack"] == "true")
-                    }
-                    let title = dict["title"] as? String ?? ""
-                    viewModel.updateNavbarItems(items, title: title)
-                    return
-                }
-                // String body — standard callbacks
-                guard let callbackName = message.body as? String else { return }
-                Logger.viewController.info("WKScriptMessage \(callbackName)")
-                switch callbackName {
-                case "exitToApp":
-                    viewModel.onExitToApp?()
-                case "goFullscreen":
-                    viewModel.showMenuBar = false
-                case "ready":
-                    viewModel.handleReady()
-                case "appMenu-hidden":
-                    viewModel.handleAppMenuProbe(hidden: true)
-                case "appMenu-visible":
-                    viewModel.handleAppMenuProbe(hidden: false)
-                case "sseConnected-true":
-                    viewModel.handleSSEConnected(true)
-                case "sseConnected-false":
-                    viewModel.handleSSEConnected(false)
-                default:
-                    break
-                }
+            #if DEBUG
+            if message.name == "ohUITest",
+               let dict = message.body as? [String: Any],
+               let key = dict["key"] as? String,
+               let value = dict["value"] as? String {
+                viewModel.recordUITestReport(key: key, value: value)
             }
+            #endif
         }
 
         // MARK: - WKNavigationDelegate
