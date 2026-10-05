@@ -278,7 +278,7 @@ class OpenHABWebViewModel: ObservableObject {
         Logger.notificationNavigation.info("performLoadWebView: about to call webView.load(\(modifiedUrl.absoluteString, privacy: .public)) [requestedPath=\(path ?? "nil", privacy: .public), webView=\(webViewID, privacy: .public)] — whichever load call lands here last wins the race")
         isLoading = true
         isShowingTile = false
-        bridge.appDidStartLoad(webView.load(request))
+        bridge.trustRedirects(of: webView.load(request))
     }
 
     private func loadWebViewWithETagCheck(newTarget: String, path: String?) async {

@@ -295,14 +295,14 @@ final class OHBridgeHost {
         send(type, OHBridgeEmpty())
     }
 
-    /// The app started loading Main UI itself. Where the load ends up after redirects is trusted
-    /// like the connection's own origin.
-    func appDidStartLoad(_ navigation: WKNavigation?) {
+    /// Call with a load of Main UI the app starts itself. Where it ends up after redirects is
+    /// trusted like the connection's own origin.
+    func trustRedirects(of navigation: WKNavigation?) {
         appNavigation = navigation
     }
 
-    /// A page committed. Remembers where the app's own load ended up.
-    func pageDidCommit(_ navigation: WKNavigation?, url: URL?) {
+    /// Call when a page commits. Remembers where the app's own load ended up.
+    func recordCommit(_ navigation: WKNavigation?, url: URL?) {
         guard let navigation, navigation === appNavigation else { return }
         appNavigation = nil
         appLoadedURL = url

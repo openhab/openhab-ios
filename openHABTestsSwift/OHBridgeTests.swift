@@ -183,14 +183,14 @@ struct OHBridgeTests {
         let webView = WKWebView()
         let appLoad = webView.loadHTMLString("", baseURL: nil)
         let pageLoad = webView.loadHTMLString("", baseURL: nil)
-        host.appDidStartLoad(appLoad)
+        host.trustRedirects(of: appLoad)
         #expect(!host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
 
-        host.pageDidCommit(appLoad, url: URL(string: "https://openhab.local/"))
+        host.recordCommit(appLoad, url: URL(string: "https://openhab.local/"))
         #expect(host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
         #expect(host.acceptsOrigin(scheme: "http", host: "openhab.local", port: 8080))
 
-        host.pageDidCommit(pageLoad, url: URL(string: "https://evil.example/"))
+        host.recordCommit(pageLoad, url: URL(string: "https://evil.example/"))
         #expect(!host.acceptsOrigin(scheme: "https", host: "evil.example", port: 0))
         #expect(host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
     }
