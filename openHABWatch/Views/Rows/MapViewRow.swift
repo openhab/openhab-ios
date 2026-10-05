@@ -14,7 +14,6 @@ import SwiftUI
 
 struct MapViewRow: View {
     @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: AppSettings
     @State private var viewModel: WidgetRowViewModel
 
     var body: some View {
