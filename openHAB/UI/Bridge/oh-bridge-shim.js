@@ -423,9 +423,9 @@
     return item
   }
 
-  // Reads the entries of one sidebar list. `scope` names where the list sits (its section title,
-  // or the parent entry for a submenu) and prefixes the ids of entries without a path. `taken`
-  // counts the ids handed out so far in this menu, so duplicates get a suffix; see tagEntry.
+  // Reads the entries of one sidebar list. `scope` names the list's section and prefixes the ids
+  // of entries without a path; submenu entries add their parent's label to it. `taken` counts the
+  // ids handed out so far in this menu, so duplicates get a suffix; see tagEntry.
   function readList(list, scope, taken) {
     var items = []
     var lis = list.querySelectorAll(':scope > ul > li')
