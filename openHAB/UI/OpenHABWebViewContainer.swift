@@ -147,7 +147,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             if navigationAction.navigationType == .linkActivated {
                 if let rewritten = await rewriteToActiveConnection(url) {
                     Logger.viewController.info("decidePolicyFor - loading in-app (rewritten): \(rewritten.absoluteString)")
-                    webView.load(URLRequest(url: rewritten))
+                    viewModel.bridge.appDidStartLoad(webView.load(URLRequest(url: rewritten)))
                     return .cancel
                 }
                 await UIApplication.shared.open(url)
@@ -194,6 +194,10 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             Logger.viewController.info("didStartProvisionalNavigation - webView.url: \(String(describing: webView.url?.description))")
             viewModel.isLoading = true
             viewModel.handleNavigationStart()
+        }
+
+        func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+            viewModel.bridge.pageDidCommit(navigation, url: webView.url)
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {

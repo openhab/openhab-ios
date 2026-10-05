@@ -66,7 +66,8 @@ final class OHBridgeHost {
     var onEvent: ((OHBridgeEvent) -> Void)?
     /// Basic auth for a reverse proxy, answered to auth.getCredentials. Nil when there is none.
     var credentials: (() -> OHBridgeCredentials?)?
-    /// Where the active connection serves Main UI. Only pages from these origins are listened to.
+    /// Where the active connection serves Main UI. Only pages from these origins, or from where
+    /// the server redirected a load the app started, are listened to.
     var connectionURLs: () -> [URL] = { [] }
 
     #if DEBUG
@@ -75,6 +76,11 @@ final class OHBridgeHost {
     #endif
 
     private var pending: [String: Pending] = [:]
+    /// The last page load the app started itself, until it commits.
+    private var appNavigation: WKNavigation?
+    /// Where that load ended up, e.g. https after the server redirected http. A page that goes
+    /// somewhere else by itself — a link, a script, a redirect of its own — isn't trusted this way.
+    private var appLoadedURL: URL?
     private var nextID = 0
     /// What the page now loaded said it is in its `ui.hello`. Nil until then: messages wait.
     private var page: OHBridgeHello.Impl?
@@ -158,8 +164,13 @@ final class OHBridgeHost {
         #if DEBUG
         if acceptsLocalPages, origin.host.isEmpty { return true }
         #endif
-        return connectionURLs().contains {
-            OHBridge.isSameOrigin($0, scheme: origin.protocol, host: origin.host, port: origin.port)
+        return acceptsOrigin(scheme: origin.protocol, host: origin.host, port: origin.port)
+    }
+
+    /// The connection's own origins, and where the app's last load of Main UI ended up.
+    func acceptsOrigin(scheme: String, host: String, port: Int) -> Bool {
+        (connectionURLs() + [appLoadedURL].compactMap(\.self)).contains {
+            OHBridge.isSameOrigin($0, scheme: scheme, host: host, port: port)
         }
     }
 
@@ -282,6 +293,19 @@ final class OHBridgeHost {
 
     private func send(_ type: String) {
         send(type, OHBridgeEmpty())
+    }
+
+    /// The app started loading Main UI itself. Where the load ends up after redirects is trusted
+    /// like the connection's own origin.
+    func appDidStartLoad(_ navigation: WKNavigation?) {
+        appNavigation = navigation
+    }
+
+    /// A page committed. Remembers where the app's own load ended up.
+    func pageDidCommit(_ navigation: WKNavigation?, url: URL?) {
+        guard let navigation, navigation === appNavigation else { return }
+        appNavigation = nil
+        appLoadedURL = url
     }
 
     /// A new page is loading. Messages wait for its `ui.hello`, including any that were part way

@@ -394,14 +394,27 @@
     return (clone.innerText || clone.textContent || '').trim()
   }
 
-  function readItem(li) {
+  // An entry without a path is found again by a tag on its link. The tag comes from where the entry
+  // sits and what it says, so it survives Main UI rendering the panel again; a counter ensures two
+  // entries with the same label in one place still differ.
+  function tagEntry(link, key, taken) {
+    var id = 'm:' + key
+    var n = taken[id] || 0
+    taken[id] = n + 1
+    if (n) id += ':' + (n + 1)
+    if (link.getAttribute('data-oh-menu') !== id) link.setAttribute('data-oh-menu', id)
+    return id
+  }
+
+  function readItem(li, scope, taken) {
     var link = li.querySelector(':scope > a, :scope > .item-link, :scope > .item-content')
     if (!link) return null
     var href = link.getAttribute('href')
     var label = itemTitle(li)
     if (!label) return null
-    var item = { id: href || label, label: label }
-    if (href && href !== '#') item.path = href
+    var isPath = href && href !== '#'
+    var item = { id: isPath ? href : tagEntry(link, scope + '/' + label, taken), label: label }
+    if (isPath) item.path = href
     var footer = li.querySelector('.item-footer')
     if (footer && footer.innerText.trim()) item.footer = footer.innerText.trim()
     var icon = iconOf(li.querySelector('.item-media') || li)
@@ -410,7 +423,7 @@
     return item
   }
 
-  function readList(list) {
+  function readList(list, scope, taken) {
     var items = []
     var lis = list.querySelectorAll(':scope > ul > li')
     Array.prototype.forEach.call(lis, function (li) {
@@ -422,13 +435,13 @@
         var children = []
         Array.prototype.forEach.call(sub.querySelectorAll(':scope > li'), function (subLi) {
           if (subLi.matches(SKIP_ITEM)) return
-          var child = readItem(subLi)
+          var child = readItem(subLi, scope + '/' + parent.label, taken)
           if (child) children.push(child)
         })
         if (children.length) parent.children = children
         return
       }
-      var item = readItem(li)
+      var item = readItem(li, scope, taken)
       if (item) items.push(item)
     })
     return items
@@ -447,6 +460,7 @@
     var sections = []
     var accountSection = null
     var pendingTitle = null
+    var taken = {}
     // The account block sits in the page's fixed slot, outside .page-content.
     var nodes = panel.querySelectorAll('.page-content > .block-title, .page-content > .list, .account')
     Array.prototype.forEach.call(nodes, function (node, index) {
@@ -466,11 +480,11 @@
           })
         }
         var list = node.querySelector('.list')
-        if (list) account = account.concat(readList(list))
+        if (list) account = account.concat(readList(list, 'account', taken))
         if (account.length) accountSection = { id: 'account', items: account }
         return
       }
-      var items = readList(node)
+      var items = readList(node, pendingTitle || 's' + index, taken)
       if (!items.length) return
       var section = { id: sectionId(items, index), items: items }
       if (pendingTitle) section.title = pendingTitle
@@ -725,11 +739,16 @@
   // Host → web
   // ---------------------------------------------------------------------------
 
+  // Compares attribute values instead of building a selector, which a label could break.
   function clickTagged(attr, value) {
-    var el = document.querySelector('[' + attr + '="' + String(value).replace(/"/g, '\\"') + '"]')
-    if (!el) return false
-    el.click()
-    return true
+    var els = document.querySelectorAll('[' + attr + ']')
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].getAttribute(attr) === String(value)) {
+        els[i].click()
+        return true
+      }
+    }
+    return false
   }
 
   function legacyCommand(command) {
@@ -758,6 +777,8 @@
           return clickTagged('data-oh-proxy', p.id) ? reply(id) : fail(id, 'not_found')
         case 'menu.activate':
           if (!document.querySelector('.panel-left')) return fail(id, isMainUI ? 'not_ready' : 'not_allowed')
+          // Tags the entries again, in case Main UI rendered the panel since the last report.
+          readMenu()
           if (clickTagged('data-oh-menu', p.id)) return reply(id)
           // Entries with a path go through nav.navigate; this covers anything else rendered as a link.
           return clickTagged('href', p.id) ? reply(id) : fail(id, 'not_found')

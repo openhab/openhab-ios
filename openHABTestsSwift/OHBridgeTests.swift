@@ -174,6 +174,51 @@ struct OHBridgeTests {
         #expect(OHBridge.isSameOrigin(connection, scheme: scheme, host: host, port: port) == expected)
     }
 
+    @Test("Trusts where the app's own load was redirected, not where a page went by itself")
+    func trustsRedirectOfAppLoad() throws {
+        let host = OHBridgeHost()
+        let connection = try #require(URL(string: "http://openhab.local:8080"))
+        host.connectionURLs = { [connection] }
+        // WebKit's own navigations: a bare WKNavigation() crashes when released.
+        let webView = WKWebView()
+        let appLoad = webView.loadHTMLString("", baseURL: nil)
+        let pageLoad = webView.loadHTMLString("", baseURL: nil)
+        host.appDidStartLoad(appLoad)
+        #expect(!host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
+
+        host.pageDidCommit(appLoad, url: URL(string: "https://openhab.local/"))
+        #expect(host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
+        #expect(host.acceptsOrigin(scheme: "http", host: "openhab.local", port: 8080))
+
+        host.pageDidCommit(pageLoad, url: URL(string: "https://evil.example/"))
+        #expect(!host.acceptsOrigin(scheme: "https", host: "evil.example", port: 0))
+        #expect(host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
+    }
+
+    // MARK: - Shim
+
+    @Test("Sidebar entries without a path keep their ids when Main UI renders the panel again")
+    func shimMenuIDs() async throws {
+        let page = ShimPage()
+        page.load(ShimPage.sidebarHTML)
+        let json = try await page.waitFor("JSON.stringify((__posted.filter(function (m) { return m.type === 'menu.state' }).pop() || {}).payload || null)")
+        let menu = try JSONDecoder().decode(OHBridgeMenuState.self, from: Data(json.utf8))
+        #expect(menu.sections.flatMap(\.items).map(\.id) == ["m:Tools/Reload", "m:Tools/Help", "m:Tools/Help:2", "/settings/"])
+
+        // A fresh render: same entries, new elements, no tags.
+        _ = try await page.run("""
+        var c = document.querySelector('.panel-left .page-content');
+        c.innerHTML = c.innerHTML.replace(/ data-oh-menu="[^"]*"/g, ''); ''
+        """)
+        let clicked = try await page.run("""
+        OHBridge.onmessage({ data: JSON.stringify({ v: 1, type: 'menu.activate', id: 't1', payload: { id: 'm:Tools/Help:2' } }) });
+        window.__clicked || ''
+        """)
+        #expect(clicked == "Help (second)")
+        let reply = try await page.run("JSON.stringify(__posted.filter(function (m) { return m.replyTo === 't1' }).map(function (m) { return m.payload.ok }))")
+        #expect(reply == "[true]")
+    }
+
     // MARK: - Icons
 
     @Test("The bundled Framework7 font knows its icon names")
@@ -189,5 +234,67 @@ struct OHBridgeTests {
         let root = "http://openhab.local:8080"
         #expect(OHBridgeIconView.imageURL(for: "oh:classic:light", rootURL: root)?.absoluteString.hasPrefix("\(root)/icon/light") == true)
         #expect(OHBridgeIconView.imageURL(for: "material:settings", rootURL: root)?.host == "api.iconify.design")
+    }
+}
+
+/// A web view running the shim against a stand-in for the host's `OHBridge`, which records what
+/// the shim posts in `__posted`.
+@MainActor
+private final class ShimPage {
+    static let sidebarHTML = """
+    <!DOCTYPE html><html><body>
+    <div id="app" class="framework7-root">
+      <div class="panel panel-left"><div class="page"><div class="page-content">
+        <div class="block-title">Tools</div>
+        <div class="list"><ul>
+          <li><a href="#" class="item-link" onclick="window.__clicked = 'Reload'"><div class="item-inner"><div class="item-title">Reload</div></div></a></li>
+          <li><a href="#" class="item-link" onclick="window.__clicked = 'Help'"><div class="item-inner"><div class="item-title">Help</div></div></a></li>
+          <li><a href="#" class="item-link" onclick="window.__clicked = 'Help (second)'"><div class="item-inner"><div class="item-title">Help</div></div></a></li>
+          <li><a href="/settings/" class="item-link"><div class="item-inner"><div class="item-title">Settings</div></div></a></li>
+        </ul></div>
+      </div></div></div>
+      <div class="view view-main"><div class="page page-current"><div class="navbar"></div><div class="page-content"></div></div></div>
+    </div>
+    </body></html>
+    """
+
+    private static let stubBridge = """
+    window.__posted = [];
+    window.OHBridge = {
+        info: { features: ['navbar', 'menu'] },
+        onmessage: null,
+        postMessage: function (json) { window.__posted.push(JSON.parse(json)) }
+    };
+    """
+
+    let webView: WKWebView
+
+    init() {
+        let controller = WKUserContentController()
+        controller.addUserScript(WKUserScript(source: Self.stubBridge, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        controller.addUserScript(WKUserScript(source: OHBridgeHost.shimScript, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        let configuration = WKWebViewConfiguration()
+        configuration.userContentController = controller
+        webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 390, height: 844), configuration: configuration)
+    }
+
+    func load(_ html: String) {
+        webView.loadHTMLString(html, baseURL: URL(string: "https://openhab.example/"))
+    }
+
+    /// Runs `js`, whose last expression must be a string.
+    func run(_ js: String) async throws -> String {
+        try await webView.evaluateJavaScript(js) as? String ?? ""
+    }
+
+    /// Runs `js` until it gives something other than "null".
+    func waitFor(_ js: String) async throws -> String {
+        for _ in 0 ..< 50 {
+            let result = try? await run(js)
+            if let result, !result.isEmpty, result != "null" { return result }
+            try await Task.sleep(for: .milliseconds(100))
+        }
+        Issue.record("timed out waiting for \(js)")
+        return "null"
     }
 }
