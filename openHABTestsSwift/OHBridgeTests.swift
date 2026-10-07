@@ -195,6 +195,31 @@ struct OHBridgeTests {
         #expect(host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
     }
 
+    @Test("Forgets a redirect once the app loads another connection or leaves Main UI")
+    func forgetsRedirect() throws {
+        let host = OHBridgeHost()
+        let local = try #require(URL(string: "http://openhab.local:8080"))
+        let cloud = try #require(URL(string: "https://home.myopenhab.org"))
+        host.connectionURLs = { [local] }
+        let webView = WKWebView()
+        let localLoad = webView.loadHTMLString("", baseURL: nil)
+        host.trustRedirects(of: localLoad)
+        host.recordCommit(localLoad, url: URL(string: "https://openhab.local/"))
+        #expect(host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
+
+        // Switching connections: the local page is still on screen while the cloud one loads.
+        host.connectionURLs = { [cloud] }
+        host.trustRedirects(of: webView.loadHTMLString("", baseURL: nil))
+        #expect(!host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
+        #expect(host.acceptsOrigin(scheme: "https", host: "home.myopenhab.org", port: 0))
+
+        let cloudLoad = webView.loadHTMLString("", baseURL: nil)
+        host.trustRedirects(of: cloudLoad)
+        host.recordCommit(cloudLoad, url: URL(string: "https://eu.myopenhab.org/"))
+        host.stopTrustingRedirects()
+        #expect(!host.acceptsOrigin(scheme: "https", host: "eu.myopenhab.org", port: 0))
+    }
+
     // MARK: - Shim
 
     @Test("Sidebar entries without a path keep their ids when Main UI renders the panel again")
@@ -203,7 +228,7 @@ struct OHBridgeTests {
         page.load(ShimPage.sidebarHTML)
         let json = try await page.waitFor("JSON.stringify((__posted.filter(function (m) { return m.type === 'menu.state' }).pop() || {}).payload || null)")
         let menu = try JSONDecoder().decode(OHBridgeMenuState.self, from: Data(json.utf8))
-        #expect(menu.sections.flatMap(\.items).map(\.id) == ["m:Tools/Reload", "m:Tools/Help", "m:Tools/Help:2", "/settings/"])
+        #expect(menu.sections.flatMap(\.items).map(\.id) == ["m:Tools/Reload", "m:Tools/Help", "m:Tools/Help:2", "m:Tools/Help:2:2", "/settings/"])
 
         // A fresh render: same entries, new elements, no tags.
         _ = try await page.run("""
@@ -250,6 +275,7 @@ private final class ShimPage {
           <li><a href="#" class="item-link" onclick="window.__clicked = 'Reload'"><div class="item-inner"><div class="item-title">Reload</div></div></a></li>
           <li><a href="#" class="item-link" onclick="window.__clicked = 'Help'"><div class="item-inner"><div class="item-title">Help</div></div></a></li>
           <li><a href="#" class="item-link" onclick="window.__clicked = 'Help (second)'"><div class="item-inner"><div class="item-title">Help</div></div></a></li>
+          <li><a href="#" class="item-link"><div class="item-inner"><div class="item-title">Help:2</div></div></a></li>
           <li><a href="/settings/" class="item-link"><div class="item-inner"><div class="item-title">Settings</div></div></a></li>
         </ul></div>
       </div></div></div>

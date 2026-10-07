@@ -395,13 +395,13 @@
   }
 
   // An entry without a path is found again by a tag on its link. The tag comes from where the entry
-  // sits and what it says, so it survives Main UI rendering the panel again; a counter ensures two
-  // entries with the same label in one place still differ.
+  // sits and what it says, so it survives Main UI rendering the panel again. A repeated id gets the
+  // first free suffix, so entries labelled "Help", "Help" and "Help:2" still differ.
   function tagEntry(link, key, taken) {
-    var id = 'm:' + key
-    var n = taken[id] || 0
-    taken[id] = n + 1
-    if (n) id += ':' + (n + 1)
+    var base = 'm:' + key
+    var id = base
+    for (var n = 2; taken[id]; n++) id = base + ':' + n
+    taken[id] = true
     if (link.getAttribute('data-oh-menu') !== id) link.setAttribute('data-oh-menu', id)
     return id
   }

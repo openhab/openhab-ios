@@ -439,6 +439,7 @@ class OpenHABWebViewModel: ObservableObject {
     private func loadTile(_ request: URLRequest) {
         isLoading = true
         isShowingTile = true
+        bridge.stopTrustingRedirects()
         installTileScripts(on: webView)
         webView.load(request)
     }
@@ -459,6 +460,7 @@ class OpenHABWebViewModel: ObservableObject {
         activeConnectionInfo = nil
         openHABTrackedRootUrl = ""
         webView.stopLoading()
+        bridge.stopTrustingRedirects()
         webView.load(URLRequest(url: URL(string: "about:blank")!))
         isLoading = false
         isSSEConnected = false

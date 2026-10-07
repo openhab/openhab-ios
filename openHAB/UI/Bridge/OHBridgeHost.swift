@@ -296,9 +296,17 @@ final class OHBridgeHost {
     }
 
     /// Call with a load of Main UI the app starts itself. Where it ends up after redirects is
-    /// trusted like the connection's own origin.
+    /// trusted like the connection's own origin. The page it replaces loses that trust now, as it
+    /// may belong to another connection.
     func trustRedirects(of navigation: WKNavigation?) {
         appNavigation = navigation
+        appLoadedURL = nil
+    }
+
+    /// Call when the web view leaves Main UI, for a tile or a blank page.
+    func stopTrustingRedirects() {
+        appNavigation = nil
+        appLoadedURL = nil
     }
 
     /// Call when a page commits. Remembers where the app's own load ended up.
