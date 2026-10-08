@@ -394,10 +394,13 @@
     return (clone.innerText || clone.textContent || '').trim()
   }
 
+  var taggedLinks = null
+
   // An entry without a path is found again by a tag on its link. The tag comes from where the entry
   // sits and what it says, so it survives Main UI rendering the panel again. A repeated id gets the
   // first free suffix, so entries labelled "Help", "Help" and "Help:2" still differ.
   function tagEntry(link, key, taken) {
+    taggedLinks.add(link)
     var base = 'm:' + key
     var id = base
     for (var n = 2; taken[id]; n++) id = base + ':' + n
@@ -464,6 +467,7 @@
     var accountSection = null
     var pendingTitle = null
     var taken = {}
+    taggedLinks = new Set()
     // The account block sits in the page's fixed slot, outside .page-content.
     var nodes = panel.querySelectorAll('.page-content > .block-title, .page-content > .list, .account')
     Array.prototype.forEach.call(nodes, function (node, index) {
@@ -476,6 +480,7 @@
         var unlock = node.querySelector('.button')
         if (unlock) {
           unlock.setAttribute('data-oh-menu', 'unlock')
+          taggedLinks.add(unlock)
           account.push({
             id: 'unlock',
             label: unlock.getAttribute('aria-label') || unlock.getAttribute('title') || 'Unlock Administration',
@@ -496,6 +501,10 @@
     })
     // Main UI renders the account block first in the DOM but shows it at the bottom.
     if (accountSection) sections.push(accountSection)
+    // Main UI can reuse an element for another entry, so drop tags this pass didn't hand out.
+    panel.querySelectorAll('[data-oh-menu]').forEach(function (el) {
+      if (!taggedLinks.has(el)) el.removeAttribute('data-oh-menu')
+    })
     return { sections: sections }
   }
 

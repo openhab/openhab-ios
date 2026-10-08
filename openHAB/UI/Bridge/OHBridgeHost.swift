@@ -156,7 +156,8 @@ final class OHBridgeHost {
             Logger.viewController.warning("OHBridge: ignored a message from another frame or origin")
             return
         }
-        receive(json: json)
+        let origin = message.frameInfo.securityOrigin
+        receive(json: json, fromConnection: isConnectionOrigin(scheme: origin.protocol, host: origin.host, port: origin.port))
     }
 
     private func accepts(isMainFrame: Bool, origin: WKSecurityOrigin) -> Bool {
@@ -169,13 +170,17 @@ final class OHBridgeHost {
 
     /// The connection's own origins, and where the app's last load of Main UI ended up.
     func acceptsOrigin(scheme: String, host: String, port: Int) -> Bool {
-        (connectionURLs() + [appLoadedURL].compactMap(\.self)).contains {
-            OHBridge.isSameOrigin($0, scheme: scheme, host: host, port: port)
-        }
+        if isConnectionOrigin(scheme: scheme, host: host, port: port) { return true }
+        return appLoadedURL.map { OHBridge.isSameOrigin($0, scheme: scheme, host: host, port: port) } ?? false
+    }
+
+    /// Only these get credentials: a redirect can land on a sign-in page or captive portal.
+    func isConnectionOrigin(scheme: String, host: String, port: Int) -> Bool {
+        connectionURLs().contains { OHBridge.isSameOrigin($0, scheme: scheme, host: host, port: port) }
     }
 
     /// Decodes a message the page posted. Origin checks are done by `receive(_:)`.
-    func receive(json: String) {
+    func receive(json: String, fromConnection: Bool = false) {
         let data = Data(json.utf8)
         let decoder = JSONDecoder()
         guard let header = try? decoder.decode(OHBridgeHeader.self, from: data) else {
@@ -202,7 +207,7 @@ final class OHBridgeHost {
                 try onEvent?(.menuState(decoder.decode(OHBridgeIncoming<OHBridgeMenuState>.self, from: data).payload))
             case "auth.getCredentials":
                 guard let id = header.id else { return }
-                deliver(type: "reply", replyTo: id, payload: OHBridgeCredentialsReply(result: credentials?()))
+                deliver(type: "reply", replyTo: id, payload: OHBridgeCredentialsReply(result: fromConnection ? credentials?() : nil))
             default:
                 Logger.viewController.debug("OHBridge: ignoring \(header.type, privacy: .public)")
             }

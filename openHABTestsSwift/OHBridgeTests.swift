@@ -195,6 +195,21 @@ struct OHBridgeTests {
         #expect(host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
     }
 
+    @Test("A redirect is trusted for the UI but never gets credentials")
+    func redirectGetsNoCredentials() throws {
+        let host = OHBridgeHost()
+        let connection = try #require(URL(string: "https://oh.example.com"))
+        host.connectionURLs = { [connection] }
+        let webView = WKWebView()
+        let appLoad = webView.loadHTMLString("", baseURL: nil)
+        host.trustRedirects(of: appLoad)
+        host.recordCommit(appLoad, url: URL(string: "https://accounts.google.com/signin"))
+
+        #expect(host.acceptsOrigin(scheme: "https", host: "accounts.google.com", port: 0))
+        #expect(!host.isConnectionOrigin(scheme: "https", host: "accounts.google.com", port: 0))
+        #expect(host.isConnectionOrigin(scheme: "https", host: "oh.example.com", port: 0))
+    }
+
     @Test("Forgets a redirect once the app loads another connection or leaves Main UI")
     func forgetsRedirect() throws {
         let host = OHBridgeHost()
@@ -242,6 +257,24 @@ struct OHBridgeTests {
         #expect(clicked == "Help (second)")
         let reply = try await page.run("JSON.stringify(__posted.filter(function (m) { return m.replyTo === 't1' }).map(function (m) { return m.payload.ok }))")
         #expect(reply == "[true]")
+    }
+
+    @Test("An element Main UI reuses for an entry with a path loses its old tag")
+    func shimDropsStaleMenuTags() async throws {
+        let page = ShimPage()
+        page.load(ShimPage.sidebarHTML)
+        _ = try await page.waitFor("JSON.stringify((__posted.filter(function (m) { return m.type === 'menu.state' }).pop() || {}).payload || null)")
+
+        // Reload keeps its element, and its old tag, but now goes to a page.
+        let clicked = try await page.run("""
+        document.querySelector('[data-oh-menu="m:Tools/Reload"]').setAttribute('href', '/reload/');
+        window.__clicked = '';
+        OHBridge.onmessage({ data: JSON.stringify({ v: 1, type: 'menu.activate', id: 't2', payload: { id: 'm:Tools/Reload' } }) });
+        window.__clicked || ''
+        """)
+        #expect(clicked.isEmpty)
+        let reply = try await page.run("JSON.stringify(__posted.filter(function (m) { return m.replyTo === 't2' }).map(function (m) { return m.payload.error && m.payload.error.code }))")
+        #expect(reply == #"["not_found"]"#)
     }
 
     // MARK: - Icons
