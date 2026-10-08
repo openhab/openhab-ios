@@ -278,7 +278,7 @@ class OpenHABWebViewModel: ObservableObject {
         Logger.notificationNavigation.info("performLoadWebView: about to call webView.load(\(modifiedUrl.absoluteString, privacy: .public)) [requestedPath=\(path ?? "nil", privacy: .public), webView=\(webViewID, privacy: .public)] — whichever load call lands here last wins the race")
         isLoading = true
         isShowingTile = false
-        webView.load(request)
+        bridge.trustRedirects(of: webView.load(request))
     }
 
     private func loadWebViewWithETagCheck(newTarget: String, path: String?) async {
@@ -439,6 +439,7 @@ class OpenHABWebViewModel: ObservableObject {
     private func loadTile(_ request: URLRequest) {
         isLoading = true
         isShowingTile = true
+        bridge.stopTrustingRedirects()
         installTileScripts(on: webView)
         webView.load(request)
     }
@@ -459,6 +460,7 @@ class OpenHABWebViewModel: ObservableObject {
         activeConnectionInfo = nil
         openHABTrackedRootUrl = ""
         webView.stopLoading()
+        bridge.stopTrustingRedirects()
         webView.load(URLRequest(url: URL(string: "about:blank")!))
         isLoading = false
         isSSEConnected = false
