@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [Version 3.4.32, Build 329] - 2026-10-08Z
+
+- refactor(notifications): migrate NotificationActionService and PushRegistrationService off ObservableObject (#1349)
+- refactor: migrate certificate, crash report and Bonjour view models to @Observable (#1348)
+- fix(api): send empty item commands as text/plain (#1353)
+- Inject last known routes when switching to MainUI (#1352)
+
 ## [Version 3.4.31, Build 328] - 2026-10-01Z
 
 - chore(deps): bump rubyzip from 2.4.1 to 3.4.0 (#1347)
