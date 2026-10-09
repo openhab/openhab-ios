@@ -12,7 +12,6 @@
 import Foundation
 
 public struct NumberState: CustomStringConvertible, Equatable {
-    // swiftlint:disable:next large_tuple
     private typealias PlaceholderResult = (argument: FormatArgument, finalSpecifier: Character, specifierIndex: String.Index, usesExplicitIndex: Bool)
 
     private enum FormatArgument {
