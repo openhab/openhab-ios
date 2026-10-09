@@ -263,9 +263,8 @@ private struct InAppToastBanner: View {
 
 struct OpenHABRootView: View {
     @StateObject private var networkService = NetworkConnectionService()
-    @StateObject private var notificationService = NotificationActionService()
-    @StateObject private var pushService = PushRegistrationService()
-    @StateObject private var crashService = CrashReportService()
+    @Environment(NotificationActionService.self) private var notificationService
+    @State private var crashService = CrashReportService()
     @State private var menuData = MenuDataService()
     @StateObject private var webViewModel = OpenHABWebViewModel()
     @State private var menuPresented = false
@@ -361,7 +360,11 @@ struct OpenHABRootView: View {
             }
             Task { await switchToSavedView() }
         }
-        .onReceive(notificationService.$navigationCommand.compactMap(\.self)) { command in
+        // `initial: true` also delivers a command published before this view appeared,
+        // as the `@Published` subscription used to. `handleNavigationCommand` resets the
+        // command to nil, so the same command arriving again is still a change.
+        .onChange(of: notificationService.navigationCommand, initial: true) { _, command in
+            guard let command else { return }
             handleNavigationCommand(command)
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
@@ -408,6 +411,7 @@ struct OpenHABRootView: View {
         } message: {
             Text(networkService.certificateAlert?.message ?? "")
         }
+        .task { await crashService.checkForPreviousCrash() }
         .alert("Crash Report", isPresented: $crashService.crashReportAlert) {
             Button("Send") { crashService.enableCrashReporting() }
             Button("Don't Send", role: .cancel) { crashService.deleteCrashReports() }
