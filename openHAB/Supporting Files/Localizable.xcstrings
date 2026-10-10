@@ -1147,7 +1147,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajouter un domicile"
+            "value" : "Ajouter une maison"
           }
         },
         "it" : {
@@ -1598,7 +1598,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App Einstellungen"
+            "value" : "App-Einstellungen"
           }
         },
         "es" : {
@@ -1966,7 +1966,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bonjour discovery may not find all servers. Additional servers may be available on your network."
+            "value" : "La découverte Bonjour peut ne pas trouver tous les serveurs. D'autres serveurs peuvent être disponibles sur votre réseau."
           }
         },
         "it" : {
@@ -2677,7 +2677,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configurez une page de plan de site CarPlay dans les réglages de l'app iOS"
+            "value" : "Configurez une page de plan de site CarPlay dans les paramètres de l'app iOS\n"
           }
         },
         "it" : {
@@ -4610,7 +4610,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verbinden…"
+            "value" : "Verbinden …"
           }
         },
         "en" : {
@@ -5318,7 +5318,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rapport d'incident"
+            "value" : "Rapport de plantage"
           }
         },
         "it" : {
@@ -5436,7 +5436,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rapports d'erreurs"
+            "value" : "Rapport de plantage"
           }
         },
         "it" : {
@@ -5495,7 +5495,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En activant le rapport de d'erreurs, vous acceptez que les informations relatives à l'appareil et à son utilisation soient collectées et partagées avec Crashlytics (une entreprise Google). Pour plus d'informations, consultez notre politique de confidentialité."
+            "value" : "En activant le rapport de plantage, vous acceptez que les informations relatives à l'appareil et à son utilisation soient collectées et partagées avec Crashlytics (une entreprise Google). Pour plus d'informations, consultez notre politique de confidentialité."
           }
         },
         "it" : {
@@ -6198,7 +6198,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Supprimer la maison '%@' ?"
+            "value" : "Supprimer la maison «%@» ?"
           }
         },
         "it" : {
@@ -6787,7 +6787,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Discovered Servers"
+            "value" : "Serveurs découverts"
           }
         },
         "it" : {
@@ -7709,7 +7709,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saisissez un nouveau nom pour la maison '%@'"
+            "value" : "Saisissez un nouveau nom pour la maison «%@»"
           }
         },
         "it" : {
@@ -8919,7 +8919,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Domicile"
+            "value" : "Maison"
           }
         },
         "it" : {
@@ -8978,7 +8978,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nom du domicile"
+            "value" : "Nom de la maison"
           }
         },
         "it" : {
@@ -9038,7 +9038,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paramètres du domicile"
+            "value" : "Paramètres de la maison"
           }
         },
         "it" : {
@@ -9098,7 +9098,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Domiciles"
+            "value" : "Maisons"
           }
         },
         "it" : {
@@ -9923,7 +9923,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L'élément '%@' n'est pas dans la maison '%@'"
+            "value" : "L'élément «%@» n'est pas dans la maison «%@»"
           }
         },
         "it" : {
@@ -9977,7 +9977,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Élément '%@' introuvable"
+            "value" : "Élément «%@» introuvable"
           }
         },
         "it" : {
@@ -10250,7 +10250,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Breitengrad muss zwischen -90 and 90 sein"
+            "value" : "Breitengrad muss zwischen -90 und 90 sein"
           }
         },
         "en" : {
@@ -10511,7 +10511,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chargement du plan du site…"
+            "value" : "Chargement du sitemap…"
           }
         },
         "it" : {
@@ -11230,7 +11230,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Längengrad muss zwischen -180 and 180 sein"
+            "value" : "Längengrad muss zwischen -180 und 180 sein"
           }
         },
         "en" : {
@@ -11907,7 +11907,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nouveau domicile"
+            "value" : "Nouvelle maison"
           }
         },
         "it" : {
@@ -12490,7 +12490,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun plan du site disponible"
+            "value" : "Aucun sitemap disponible"
           }
         },
         "it" : {
@@ -12698,7 +12698,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keine aktive Verbindung vorhanden. Bitte Einstellungen prüfen"
+            "value" : "Keine aktive Verbindung vorhanden. Bitte Einstellungen prüfen."
           }
         },
         "en" : {
@@ -12722,7 +12722,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No active connection available. Please check your settings."
+            "value" : "Aucune connexion active disponible. Veuillez vérifier vos paramètres."
           }
         },
         "it" : {
@@ -12757,7 +12757,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No servers found"
+            "value" : "Keine Server gefunden"
           }
         },
         "en" : {
@@ -13357,7 +13357,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ÉTEINT"
+            "value" : "DÉSACTIVÉ"
           }
         },
         "it" : {
@@ -13768,7 +13768,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ALLUMÉ"
+            "value" : "ACTIVÉ"
           }
         },
         "it" : {
@@ -13995,7 +13995,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ouvrir les réglages"
+            "value" : "Ouvrir les paramètres"
           }
         },
         "it" : {
@@ -16548,7 +16548,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sélectionner un domicile pour « %@ »"
+            "value" : "Sélectionner une maison pour « %@ »"
           }
         },
         "it" : {
@@ -17317,7 +17317,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lf, %lf wurde an Standort %@ gesendet"
+            "value" : "Der Standort %lf, %lf wurde an %@ gesendet"
           }
         },
         "en" : {
@@ -17849,7 +17849,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Définir le domicile actif"
+            "value" : "Définir la maison active"
           }
         },
         "it" : {
@@ -17902,7 +17902,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Définir ${home} comme domicile actif"
+            "value" : "Définir ${home} comme maison active"
           }
         },
         "it" : {
@@ -18104,7 +18104,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wert eines Kontakt=Status festlegen"
+            "value" : "Wert eines Kontakt-Status festlegen"
           }
         },
         "en" : {
@@ -18217,7 +18217,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wert eines DateTime-Kontrollelements setzen "
+            "value" : "Wert eines DateTime-Kontrollelements setzen"
           }
         },
         "en" : {
@@ -18526,7 +18526,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Définir la valeur de contrôle du numéro"
+            "value" : "Définir la valeur de contrôle numérique"
           }
         },
         "it" : {
@@ -18988,7 +18988,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Définir la valeur décimale d'un item de contrôle de nombre"
+            "value" : "Définir la valeur décimale d'un item de contrôle numérique"
           }
         },
         "it" : {
@@ -19141,7 +19141,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Den Status von${itemEntity} auf ${state} setzen"
+            "value" : "Den Status von ${itemEntity} auf ${state} setzen"
           }
         },
         "es" : {
@@ -19455,7 +19455,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paramétrage"
+            "value" : "Paramètres"
           }
         },
         "it" : {
@@ -19864,7 +19864,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show Search Field"
+            "value" : "Afficher le champ de recherche"
           }
         },
         "it" : {
@@ -20036,7 +20036,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Plan du site"
+            "value" : "Sitemap"
           }
         },
         "it" : {
@@ -20154,7 +20154,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Plan du site pour Apple Watch"
+            "value" : "Sitemap pour Apple Watch"
           }
         },
         "it" : {
@@ -21450,7 +21450,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "String-Item"
+            "value" : "Stringelement"
           }
         },
         "es" : {
@@ -21784,7 +21784,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Switch-Item"
+            "value" : "Schalterelement"
           }
         },
         "es" : {
@@ -21802,7 +21802,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Élément interrupteur"
+            "value" : "Élément commutateur"
           }
         },
         "it" : {
@@ -22234,7 +22234,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Changer le domicile actif dans l'application openHAB"
+            "value" : "Changer la maison active dans l'application openHAB"
           }
         },
         "it" : {
@@ -22324,7 +22324,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Synchronisationseinstellung"
+            "value" : "Einstellungen synchronisieren"
           }
         },
         "en" : {
@@ -22556,7 +22556,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die App ist in der vorherigen Sitzung abgestürzt. Möchten Sie einen Absturzbericht senden?"
+            "value" : "Die App ist in der vorherigen Sitzung abgestürzt. Möchtest du einen Absturzbericht senden?"
           }
         },
         "en" : {
@@ -22580,7 +22580,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L'application s'est bloquée lors de la session précédente. Voulez-vous envoyer un rapport d'incident ?"
+            "value" : "L'application s'est bloquée lors de la session précédente. Voulez-vous envoyer un rapport de plantage ?"
           }
         },
         "it" : {
@@ -22965,7 +22965,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Um eine Verbindung zu deinem lokalen openHAB-Server herzustellen, erlauben bitte den Zugriff auf das lokale Netzwerk, wenn du dazu aufgefordert wirst. Wenn du es zuvor abgelehnt hast, aktiviere es unter Einstellungen → Datenschutz & Sicherheit → Lokales Netzwerk."
+            "value" : "Um eine Verbindung zu deinem lokalen openHAB-Server herzustellen, erlaube bitte den Zugriff auf das lokale Netzwerk, wenn du dazu aufgefordert wirst. Wenn du die Berechtigung zuvor abgelehnt hast, aktiviere sie unter Einstellungen → Datenschutz & Sicherheit → Lokales Netzwerk."
           }
         },
         "es" : {
@@ -22983,7 +22983,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pour te connecter à ton serveur openHAB local, autorise l’accès au réseau local lorsque tu y es invité. Si tu l’as précédemment refusé, active-le dans Réglages → Confidentialité et sécurité → Réseau local."
+            "value" : "Pour vous connecter à votre serveur openHAB local, autorisez l'accès au réseau local lorsque vous y êtes invité. Si vous l'avez précédemment refusé, activez-le dans Paramètres → Confidentialité et sécurité → Réseau local."
           }
         },
         "it" : {
@@ -23502,7 +23502,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Domicile inconnu"
+            "value" : "Maison inconnue"
           }
         },
         "it" : {
@@ -24385,7 +24385,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu sembles être hors ligne. Vérifie ta connexion Internet."
+            "value" : "Vous semblez être hors ligne. Vérifiez votre connexion Internet."
           }
         },
         "it" : {
