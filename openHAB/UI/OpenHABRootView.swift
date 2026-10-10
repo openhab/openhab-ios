@@ -285,6 +285,7 @@ struct OpenHABRootView: View {
                 isPresented: $menuPresented,
                 menuData: menuData,
                 webMenu: webViewModel.menu,
+                currentContent: currentContent,
                 onSelect: { target in handleMenuSelection(target) },
                 onActivateWebMenuItem: { id in
                     // It runs in Main UI, so Main UI has to be on screen, reloaded in place of a
@@ -373,6 +374,10 @@ struct OpenHABRootView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
             menuData.clearForHomeSwitch()
+            // Reset synchronously with the menu clear so a stale currentContent from the
+            // previous home can't coincidentally match a same-named row once the new
+            // home's sitemaps/pages arrive, before switchToSavedView() corrects it below.
+            currentContent = .webview
             Task { await switchToSavedView() }
             // Reconcile the web view with the new home: loads if the active connection
             // already belongs to it (e.g. between two demo homes), otherwise blanks and
