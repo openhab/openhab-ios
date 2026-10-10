@@ -106,7 +106,9 @@ doesn't know.
 
 `features` can hold:
 
-- `navbar`: the app draws the top bar. Main UI hides its own and sends `navbar.state`.
+- `navbar`: the app draws the top bar. Main UI hides its own and sends `navbar.state`. Popups
+  keep their own bar: while one is open, `navbar.state` says `hidden`, and the app moves its bar
+  out of the way.
 - `menu`: the app shows Main UI's sidebar in its own menu. Main UI hides its sidebar and sends
   `menu.state`.
 - `routeRestore`: the app remembers where the user was and passes it back in `initialHistory`.
@@ -121,7 +123,7 @@ doesn't know.
 | `ui.hello` | `impl`, `version?`, `accepted`, `features` | Sent once per page load, when the first page is on screen. Says whether this is Main UI (`mainui`), the shim (`shim`) or another page (`other`), and which of the app's offers Main UI took. |
 | `connection.state` | `sseConnected` | Main UI's live updates from the server connected or dropped. The app shows or hides its "connecting" indicator. |
 | `nav.changed` | `path`, `history`, `props?`, `modal` | Sent after every page change. The app keeps `history` to put the user back later, and knows when a popup is open. |
-| `navbar.state` | `title`, `titleInContent`, `hidden`, `back`, `leading`, `trailing` | Everything the app needs to draw the top bar. Describes the bar in front: an open popup's bar wins over the page's. Sent again whenever it changes. |
+| `navbar.state` | `title`, `titleInContent`, `hidden`, `back`, `leading`, `trailing` | Everything the app needs to draw the page's top bar. Sent again whenever it changes. `hidden` means the bar should be out of sight: the page scrolled it away, or a popup or an open search covers it. |
 | `menu.state` | `sections` | What Main UI's sidebar shows this user, for the app's menu. Sent again whenever it changes. |
 | `auth.getCredentials` | — | Asks the app for the user name and password of a proxy in front of openHAB. Sent only when Main UI's first call to the server is refused (401). The app answers with `{ username, password }`, or `null` if it has none. Main UI keeps them in memory only. |
 | `reply` | `ok`, `result` or `error` | The answer to a message from the app. |
@@ -192,14 +194,14 @@ Main UI starts on the Kitchen page, with Overview behind it, and reports back:
     "title": "Kitchen", "titleInContent": false, "hidden": false,
     "back": { "label": "Overview" },
     "leading": [],
-    "trailing": [ { "id": "7", "label": "", "icon": { "name": "f7:pencil", "md": "material:edit" } } ] } }
+    "trailing": [ { "id": "7", "label": "Edit", "icon": { "name": "f7:pencil", "md": "material:edit" } } ] } }
 
 { "v": 1, "type": "connection.state", "payload": { "sseConnected": true } }
 ```
 
 The app now shows "Kitchen" in its bar, with a back button and a pencil button, and hides its
-"connecting" indicator. The pencil has no text on screen, so its `label` is empty and the app
-draws just the icon.
+"connecting" indicator. The pencil has an icon, so the app draws the icon; `label` still says
+what it does.
 
 ### 2. Starting up with an older Main UI
 

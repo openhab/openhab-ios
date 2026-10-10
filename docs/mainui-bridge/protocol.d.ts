@@ -159,15 +159,15 @@ interface NavState {
 }
 
 /**
- * The top bar, for the app to draw. Sent only when Main UI took 'navbar', and again whenever it
- * changes. Describes the bar in front: an open popup's bar wins over the page's. Leaves out
- * buttons for things the app does itself, like the "Other Apps" button.
+ * The page's top bar, for the app to draw. Sent only when Main UI took 'navbar', and again
+ * whenever it changes. Every page describes its whole bar, leaving out only buttons for things the
+ * app does itself, like the "Other Apps" button. Popups keep their own bar.
  */
 interface NavbarState {
   title: string
   /** The page is showing its own large title, so the app shouldn't show it again. */
   titleInContent: boolean
-  /** The page has scrolled the bar out of sight. */
+  /** The bar should be out of sight: the page scrolled it away, or a popup or search covers it. */
   hidden: boolean
   /** null when there is nothing to go back to. */
   back: { label?: string } | null
@@ -178,7 +178,11 @@ interface NavbarState {
 interface NavbarAction {
   /** Stays the same while the button is on the page. Sent back in navbar.activate. */
   id: string
-  /** The button's visible text. Empty when it shows only an icon, never the icon's name. */
+  /**
+   * What the button does, in words, e.g. "Edit", even when it shows only an icon. Empty only when
+   * that isn't known (the shim can't tell), never the icon's name. The app draws the icon when
+   * there is one.
+   */
   label: string
   icon?: Icon
   disabled?: boolean

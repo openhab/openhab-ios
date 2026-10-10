@@ -367,6 +367,35 @@ struct OHBridgeTests {
         #expect(address == "/page/kitchen")
     }
 
+    @Test("An open popup keeps its own bar and moves the app's out of the way")
+    func shimHidesBarForPopup() async throws {
+        let page = ShimPage()
+        page.load(ShimPage.sidebarHTML.replacingOccurrences(
+            of: "</body>",
+            with: #"<div class="popup modal-in"><div class="navbar"><div class="navbar-inner"><div class="title">Pick</div></div></div></div></body>"#
+        ))
+        let hidden = try await page.waitFor("""
+        var s = (__posted.filter(function (m) { return m.type === 'navbar.state' }).pop() || {}).payload;
+        s && s.hidden ? 'yes' : 'null'
+        """)
+        #expect(hidden == "yes")
+        let proxied = try await page.run("document.querySelector('.popup .navbar').classList.contains('oh-navbar-proxied') ? 'yes' : 'no'")
+        #expect(proxied == "no")
+    }
+
+    @Test("The shim stays quiet when Main UI speaks the bridge itself")
+    func shimStandsDownForMainUI() async throws {
+        let page = ShimPage()
+        page.load(ShimPage.sidebarHTML.replacingOccurrences(
+            of: "<body>",
+            with: "<body><script>OHBridge.onmessage = function () {}</script>"
+        ))
+        _ = try await page.waitFor("document.readyState === 'complete' ? 'done' : 'null'")
+        try await Task.sleep(for: .milliseconds(500))
+        let sent = try await page.run("JSON.stringify(__posted.map(function (m) { return m.type }))")
+        #expect(sent == "[]")
+    }
+
     // MARK: - Icons
 
     @Test("The bundled Framework7 font knows its icon names")

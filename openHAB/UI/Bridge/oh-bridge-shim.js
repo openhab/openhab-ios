@@ -17,7 +17,8 @@
 //   OHBridge.info               startup data from the host (features, initialHistory, layout, …)
 //   window.OHBridgeShimConfig   { basePath }: what Main UI's addresses hang off, no trailing slash
 //
-// Stands down as soon as Main UI announces itself with ui.hello { impl: 'mainui' }.
+// Stands down when Main UI speaks the bridge itself: it took over OHBridge.onmessage, or said
+// ui.hello { impl: 'mainui' }.
 ;(function () {
   'use strict'
 
@@ -76,7 +77,7 @@
     }
   } catch (e) {}
 
-  bridge.onmessage = function (event) {
+  function onHostMessage(event) {
     var msg
     try {
       msg = JSON.parse(event.data)
@@ -84,6 +85,12 @@
       return
     }
     if (active && msg && msg.type && msg.type !== 'reply') handle(msg)
+  }
+  bridge.onmessage = onHostMessage
+
+  // Main UI that speaks the bridge sets its own onmessage when it starts, before its first page.
+  function mainUISpeaksBridge() {
+    return bridge.onmessage !== onHostMessage
   }
 
   function standDown() {
@@ -366,14 +373,23 @@
 
   var lastNavbarJSON = null
 
+  // A popup or an expanded searchbar shows its own bar, so the host moves its bar out of the way,
+  // as Main UI does.
+  function barCovered() {
+    return !!document.querySelector('.popup.modal-in, .view-main .navbar.with-searchbar-expandable-enabled')
+  }
+
   function reportNavbar() {
     if (!wants('navbar') || !helloSent) return
-    var navbar = activeNavbar()
+    var covered = barCovered()
+    var navbar = covered ? pageNavbar() : activeNavbar()
     var owns = ownsBar(navbar)
     markProxied(owns ? navbar : null)
     syncPagePadding(!!pageNavbar())
     syncDocumentPadding(false)
-    var json = JSON.stringify(readNavbar(navbar))
+    var state = readNavbar(navbar)
+    if (covered) state.hidden = true
+    var json = JSON.stringify(state)
     if (json === lastNavbarJSON) return
     lastNavbarJSON = json
     send('navbar.state', JSON.parse(json))
@@ -928,6 +944,7 @@
   }
 
   function startMainUI() {
+    if (mainUISpeaksBridge()) return standDown()
     sendHello('shim')
     reportNav()
     reportNavbar()
