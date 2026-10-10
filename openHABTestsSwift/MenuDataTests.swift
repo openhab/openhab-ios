@@ -192,7 +192,7 @@ struct MenuDataTests {
         let service = MenuDataService()
         service.hasSuccessfullyLoaded = true
         service.clearAll()
-        // clearAll is for refresh, not home switch — gate should stay true
+        // clearAll is for clearAndReload, not home switch — gate should stay true
         #expect(service.hasSuccessfullyLoaded == true)
     }
 
@@ -209,6 +209,41 @@ struct MenuDataTests {
         #expect(service.uiTiles.count == 1)
         #expect(service.uiPages.count == 1)
         #expect(service.isLoading == false)
+    }
+
+    @Test("clearAndReload without an active connection keeps the current snapshot")
+    func clearAndReloadWithoutConnectionKeepsSnapshot() {
+        let service = MenuDataService()
+        let tracker = MainActorNetworkTracker()
+        tracker.activeConnection = nil
+        service.sitemaps = [makeSitemap(name: "a", label: "A")]
+        service.uiTiles = [makeUITile()]
+        service.uiPages = [makeUIPage()]
+        service.clearAndReload(networkTracker: tracker)
+        #expect(service.sitemaps.map(\.name) == ["a"])
+        #expect(service.uiTiles.count == 1)
+        #expect(service.uiPages.count == 1)
+    }
+
+    @Test("isLoading stays on until the last of overlapping fetches ends")
+    func overlappingFetchesKeepLoading() async {
+        // A tracker with no connection, so the service starts no fetch of its own.
+        let service = MenuDataService(networkTracker: NetworkTracker())
+        let (first, endFirst) = AsyncStream<Void>.makeStream()
+        let (second, endSecond) = AsyncStream<Void>.makeStream()
+        let firstFetch = Task { await service.whileLoading { for await _ in first {} } }
+        let secondFetch = Task { await service.whileLoading { for await _ in second {} } }
+        while service.fetchesInFlight < 2 {
+            await Task.yield()
+        }
+
+        endFirst.finish()
+        await firstFetch.value
+        #expect(service.isLoading)
+
+        endSecond.finish()
+        await secondFetch.value
+        #expect(!service.isLoading)
     }
 
     @Test("clearForHomeSwitch empties collections and resets load gate")

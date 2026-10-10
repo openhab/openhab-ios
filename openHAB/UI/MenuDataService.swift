@@ -22,7 +22,14 @@ class MenuDataService {
     var sitemaps: [OpenHABSitemap] = []
     var uiTiles: [OpenHABUiTile] = []
     var uiPages: [OpenHABUIPage] = []
-    var isLoading = false
+    /// Fetches running now. The connection stream, opening the menu and pull-to-refresh can
+    /// each start one while another is still running.
+    private(set) var fetchesInFlight = 0
+    /// `true` until the last of any overlapping fetches has ended.
+    var isLoading: Bool {
+        fetchesInFlight > 0
+    }
+
     /// `true` while `MainActorNetworkTracker` reports an active connection.
     private(set) var isConnected = false
     /// `true` once the **current** home has had at least one successful data fetch.
@@ -30,13 +37,13 @@ class MenuDataService {
     /// on each switch (consistent with sitemaps/pages behaviour).
     var hasSuccessfullyLoaded = false
 
-    init() {
+    init(networkTracker: NetworkTracker = .shared) {
         // Observe connection changes via NetworkTracker.stateStream() —
         // an AsyncStream that delivers one coherent NetworkState per change.
         // Deliveries are serialised: the loop waits for fetchData to complete
         // before processing the next connection change, preventing race conditions.
         Task { [weak self] in
-            for await state in await NetworkTracker.shared.stateStream() {
+            for await state in await networkTracker.stateStream() {
                 guard let self else { break }
                 isConnected = state.activeConnection != nil
                 // Connection loss: retain the last-good snapshot — do NOT clear.
@@ -89,14 +96,20 @@ class MenuDataService {
 
     /// Returns the display label for a tile or page URL, or an empty string if not found.
     func label(forURL url: String) -> String {
-        if let tile = uiTiles.first(where: { $0.url == url }) { return tile.name }
-        if let page = uiPages.first(where: { $0.url == url }) { return page.label }
+        if let tile = uiTiles.first(where: { $0.url == url }) {
+            return tile.name
+        }
+        if let page = uiPages.first(where: { $0.url == url }) {
+            return page.label
+        }
         return ""
     }
 
-    /// Re-fetches all menu data from the currently active connection, clearing first.
-    func refresh() {
-        let connection = MainActorNetworkTracker.shared.activeConnection
+    /// Empties the menu and fetches it again from the active connection (header reload button,
+    /// saved preferences). Without a connection it keeps what it has, as on connection loss:
+    /// nothing would fill an emptied menu until the next connection change.
+    func clearAndReload(networkTracker: MainActorNetworkTracker = .shared) {
+        guard let connection = networkTracker.activeConnection else { return }
         clearAll()
         Task { await fetchData(activeConnection: connection) }
     }
@@ -109,10 +122,19 @@ class MenuDataService {
 
     func fetchData(activeConnection: ConnectionInfo?) async {
         guard let activeConnection else { return }
+        await whileLoading {
+            await fetchAll(from: activeConnection)
+        }
+    }
 
-        isLoading = true
-        defer { isLoading = false }
+    /// Runs `work` as one fetch, counted in `fetchesInFlight`.
+    func whileLoading(_ work: @MainActor () async -> Void) async {
+        fetchesInFlight += 1
+        defer { fetchesInFlight -= 1 }
+        await work()
+    }
 
+    private func fetchAll(from activeConnection: ConnectionInfo) async {
         do {
             let openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
             await fetchSitemaps(using: openAPIService)
