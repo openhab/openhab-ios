@@ -64,21 +64,51 @@ final class WebMenuUITests: XCTestCase {
         return el
     }
 
+    private var adminSettings: XCUIElement {
+        app.descendants(matching: .any).matching(identifier: "WebMenu-/settings/").firstMatch
+    }
+
+    /// Opens or closes Administration. Its state is kept per home, so it may already be either.
+    private func setAdministration(open: Bool) {
+        guard adminSettings.waitForExistence(timeout: 1) != open else { return }
+        element("WebMenuSection-settings").tap()
+        if open {
+            XCTAssertTrue(adminSettings.waitForExistence(timeout: 2), "Opening Administration shows its entries")
+        } else {
+            XCTAssertTrue(adminSettings.waitForNonExistence(timeout: 2), "Closing Administration hides its entries")
+        }
+    }
+
     // MARK: - Tests
 
     func testSidebarEntriesAppearInTheMenu() {
         openMenu()
         XCTAssertTrue(element("WebMenu-/page/uitest_kitchen").exists)
-        XCTAssertTrue(element("WebMenu-/settings/").exists)
-        XCTAssertTrue(
-            app.staticTexts["UITest Administration"].waitForExistence(timeout: 2),
-            "A section's title is shown above its entries"
-        )
+        XCTAssertTrue(element("WebMenuSection-settings").exists)
+        XCTAssertTrue(app.staticTexts["UITest Administration"].exists, "A section's title is its row")
         XCTAssertTrue(element("WebMenu-unlock").exists, "An entry without a path still shows")
+        setAdministration(open: true)
+    }
+
+    func testAdministrationIsRemembered() {
+        openMenu()
+        setAdministration(open: false)
+        setAdministration(open: true)
+
+        app.terminate()
+        openMenu()
+        XCTAssertTrue(adminSettings.waitForExistence(timeout: 4), "Administration stays open after a restart")
+
+        setAdministration(open: false)
+        app.terminate()
+        openMenu()
+        XCTAssertTrue(element("WebMenuSection-settings").exists)
+        XCTAssertFalse(adminSettings.exists, "Administration stays closed after a restart")
     }
 
     func testSubmenuOpensAndShowsAll() {
         openMenu()
+        setAdministration(open: true)
         let things = app.descendants(matching: .any).matching(identifier: "WebMenu-/settings/things/").firstMatch
         XCTAssertFalse(things.exists, "A submenu starts closed")
 

@@ -96,6 +96,8 @@ struct ToolbarMenu: View {
     /// Sidebar entries whose submenu is open, and those showing their whole submenu.
     @State private var expandedWebItems: Set<String> = []
     @State private var webItemsShowingAll: Set<String> = []
+    /// Main UI sections with a title, like Administration, that are open. Collapsed by default.
+    @State private var expandedWebSections: Set<String> = []
     /// The surface `OpenHABRootView` currently shows. The single source of truth for which
     /// row (if any) is highlighted as current — read directly rather than mirrored into local
     /// `@State`, so navigation that bypasses this menu entirely (a push-notification deep
@@ -174,6 +176,7 @@ extension ToolbarMenu {
         isSitemapsExpanded = !collapsed.contains(.sitemaps)
         isTilesExpanded = !collapsed.contains(.tiles)
         isSystemExpanded = !collapsed.contains(.system)
+        expandedWebSections = prefs.expandedWebSections
         sitemapForWatch = prefs.sitemapForWatch
         sitemapForCarPlay = prefs.sitemapForCarPlay
         headerDetailsHidden = false
@@ -371,21 +374,64 @@ extension ToolbarMenu {
 
     // MARK: - Main UI sidebar
 
+    /// A section with a title, like Administration, is a row that folds its entries away, and the
+    /// menu remembers it per home.
     @ViewBuilder
     private func webMenuSection(_ section: OHBridgeMenuSection) -> some View {
         if let title = section.title, !title.isEmpty {
-            Text(title)
-                .font(.caption2)
-                .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-                .padding(.horizontal, 16)
-                .padding(.top, 10)
-                .padding(.bottom, 2)
+            let isExpanded = webSectionBinding(section.id)
+            VStack(alignment: .leading, spacing: 0) {
+                Button {
+                    isExpanded.wrappedValue.toggle()
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemSymbol: .lockShield)
+                            .frame(width: iconWidth, height: iconWidth)
+                        Text(title)
+                            .lineLimit(1)
+                        Spacer(minLength: 0)
+                        Image(systemSymbol: isExpanded.wrappedValue ? .chevronDown : .chevronRight)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 44)
+                    }
+                    .padding(.leading, 16)
+                    .padding(.trailing, 4)
+                    .padding(.vertical, 10)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("WebMenuSection-\(section.id)")
+
+                if isExpanded.wrappedValue {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(section.items) { item in
+                            webMenuItem(item, depth: 1)
+                        }
+                    }
+                    .transition(.blurReplace(.downUp))
+                }
+            }
+            .animation(Self.sectionAnimation, value: isExpanded.wrappedValue)
+        } else {
+            ForEach(section.items) { item in
+                webMenuItem(item, depth: 0)
+            }
         }
-        ForEach(section.items) { item in
-            webMenuItem(item, depth: 0)
-        }
+    }
+
+    private func webSectionBinding(_ id: String) -> Binding<Bool> {
+        Binding(
+            get: { expandedWebSections.contains(id) },
+            set: { expanded in
+                if expanded { expandedWebSections.insert(id) } else { expandedWebSections.remove(id) }
+                Task {
+                    await Preferences.shared.modifyActiveHome { @Sendable prefs in
+                        prefs.setWebSection(id, expanded: expanded)
+                    }
+                }
+            }
+        )
     }
 
     /// One sidebar entry and, when open, its submenu. AnyView because it nests itself.

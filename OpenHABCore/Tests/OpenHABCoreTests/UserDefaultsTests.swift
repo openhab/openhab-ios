@@ -152,6 +152,21 @@ struct MenuSectionTests {
         #expect(prefs.avatarMode == nil)
         #expect(prefs.sectionOrder == MenuSection.allCases)
         #expect(prefs.collapsedSections.isEmpty)
+        #expect(prefs.expandedWebSections.isEmpty)
+    }
+
+    /// Main UI menu sections start collapsed, and an opened one is remembered.
+    @Test func expandedWebSectionsRoundTrip() throws {
+        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
+        var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
+
+        prefs.setWebSection("settings", expanded: true)
+        prefs.setWebSection("other", expanded: true)
+        prefs.setWebSection("other", expanded: false)
+
+        let encoded = try JSONEncoder().encode(prefs)
+        let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
+        #expect(decoded.expandedWebSections == ["settings"])
     }
 
     /// A custom section order round-trips through encode → decode unchanged.
