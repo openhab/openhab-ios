@@ -216,7 +216,7 @@ final class MainUILayoutUITests: XCTestCase {
         if let js { app.launchEnvironment["UITestInjectJS"] = LayoutJS.base64(js) }
         if navbarItems {
             app.launchEnvironment["UITestWebViewNavbarItems"] =
-                #"[{"label":"Menu","jsAction":"document.querySelector('.hamburger,.menu-btn')?.click()"}]"#
+                #"[{"label":"Menu","id":"menu"}]"#
         }
         app.launch()
     }

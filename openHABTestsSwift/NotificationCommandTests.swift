@@ -267,7 +267,7 @@ struct NotificationCommandTests {
 
     /// A raw webViewCommand that WebViewNavigationRouter resolves to `.liveCommand` (not
     /// `.path`) never calls `loadWebView` — it goes straight from `handleNavigationCommand`'s
-    /// `.navigateLive` case to `webViewModel.navigateCommand(_:)`, which never clears the flag.
+    /// `.navigateLive` case to `webViewModel.bridge.run(_:)`, which never clears the flag.
     /// Marking it pending would leave it stuck forever and could even block the
     /// `showMainUI(path: nil)` that case uses to bring up a not-yet-shown Main UI first.
     @Test("raw webViewCommand that resolves to a live command does not require the pending-navigation mark")

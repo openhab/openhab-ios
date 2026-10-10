@@ -196,6 +196,10 @@ public struct HomePreferences: Codable, Equatable, Sendable {
         set { collapsedSectionsStorage = Set(newValue.map(\.rawValue)) }
     }
 
+    /// Main UI menu sections, by id, that the user opened in the toolbar menu, like
+    /// Administration. Empty → all collapsed.
+    public var expandedWebSections: Set<String> = []
+
     /// When true, the remote URL is excluded from data-connection attempts.
     /// Independent of `supportsNotifications` (the openHAB Cloud push toggle).
     /// Non-optional with `decodeIfPresent` default so existing homes keep remote enabled.
@@ -243,6 +247,7 @@ public struct HomePreferences: Codable, Equatable, Sendable {
         sitemapForCarPlay = try container.decodeIfPresent(String.self, forKey: .sitemapForCarPlay) ?? ""
         sectionOrderStorage = try container.decodeIfPresent([String].self, forKey: .sectionOrderStorage)
         collapsedSectionsStorage = try container.decodeIfPresent(Set<String>.self, forKey: .collapsedSectionsStorage)
+        expandedWebSections = try container.decodeIfPresent(Set<String>.self, forKey: .expandedWebSections) ?? []
         disableRemoteConnection = try container.decodeIfPresent(Bool.self, forKey: .disableRemoteConnection) ?? false
         // Try new field first; fall back to migrating legacy fields.
         if let mode = try container.decodeIfPresent(AvatarMode.self, forKey: .avatarMode) {
@@ -266,6 +271,11 @@ public struct HomePreferences: Codable, Equatable, Sendable {
         var collapsed = collapsedSections
         if expanded { collapsed.remove(section) } else { collapsed.insert(section) }
         collapsedSections = collapsed
+    }
+
+    /// Opens or closes the Main UI menu section `id`.
+    public mutating func setWebSection(_ id: String, expanded: Bool) {
+        if expanded { expandedWebSections.insert(id) } else { expandedWebSections.remove(id) }
     }
 }
 

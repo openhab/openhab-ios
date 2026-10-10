@@ -16,27 +16,11 @@ import SafariServices
 import UIKit
 import WebKit
 
-/// A single action button proxied from the MainUI web navbar.
-struct WebNavbarItem: Identifiable {
-    let id = UUID()
-    let label: String
-    let jsAction: String
-    /// Base64-encoded PNG of the icon rendered from the web navbar element.
-    /// Nil if capture failed; fall back to `label` text in that case.
-    let iconBase64: String?
-    /// True when the JS identified this item as a back-navigation button,
-    /// either via the standard F7 `.back` class or the oh-nav-content chevron icon.
-    let isBack: Bool
-
-    var iconImage: UIImage? {
-        guard let b64 = iconBase64,
-              let data = Data(base64Encoded: b64) else { return nil }
-        return UIImage(data: data)
-    }
-}
-
 @MainActor
 class OpenHABWebViewModel: ObservableObject {
+    /// The host owns the bar height; the shim sizes Main UI's own navbar to match.
+    static let navbarHeight: CGFloat = 44
+
     // MARK: - Published state
 
     @Published var isLoading = false
@@ -49,29 +33,19 @@ class OpenHABWebViewModel: ObservableObject {
     /// True once a UI test has injected HTML or navbar items — blocks loadWebView
     /// from overriding injected state with real server content.
     private var uiTestContentLocked = false
+    /// True once a UI test has put its own navbar in place; the page's own is ignored after that.
+    private var uiTestNavbarInjected = false
+    /// The same for the sidebar menu.
+    private var uiTestMenuInjected = false
     #endif
 
-    /// Whether the iOS menu bar (and its hamburger button) should be visible.
-    /// Starts true (visible while loading) and is hidden once the openHAB
-    /// Main UI signals it has rendered its own native-app exit button via SSE,
-    /// or when the page requests fullscreen via JS.
-    @Published var showMenuBar = true
     /// True once the Main UI SPA has established its SSE connection.
-    /// Used to determine when the native menu bar can be hidden and to show
-    /// a connection-status indicator while connecting or offline.
     @Published private(set) var isSSEConnected = false
-    /// Navbar items proxied from the MainUI web top bar. Empty until the JS
-    /// MutationObserver posts the first `navbarElements` message.
-    @Published private(set) var navbarItems: [WebNavbarItem] = []
-    /// Title text proxied from the MainUI web navbar. Empty until the JS
-    /// proxy posts the first `navbarElements` message.
-    @Published private(set) var navbarTitle = ""
-    /// True while MainUI has hidden its own navbar (Framework7 `hide-bars-on-scroll`).
-    @Published private(set) var isWebNavbarHidden = false
-    /// True while an expanded large title is showing the page title instead.
-    @Published private(set) var isWebNavbarTitleHidden = false
-    /// MainUI's `--f7-navbar-height`, excluding the safe area. 44 on iOS, 56 on Material.
-    @Published private(set) var webNavbarHeight: CGFloat = 44
+    /// The page's navbar, as sent over the bridge. Empty until the first `navbar.state`.
+    @Published private(set) var navbar = OHBridgeNavbarState.empty
+    /// Main UI's sidebar, as sent over the bridge. Nil until the first `menu.state`; kept across
+    /// reloads of the same home so the menu doesn't empty while a page loads.
+    @Published private(set) var menu: OHBridgeMenuState?
     /// True while the web view holds a tile's URL. Its content outlives the surface that
     /// loaded it, so a sitemap detour does not put the Main UI back.
     @Published private(set) var isShowingTile = false
@@ -81,14 +55,16 @@ class OpenHABWebViewModel: ObservableObject {
 
     // MARK: - Internal state (used by Coordinator)
 
-    var acceptsCommands = false
-    var commandQueue: [String] = []
     var lastLoadedURL: String?
     /// The connection that produced the page now on screen. Origin alone cannot tell two
     /// connections apart when only the credentials differ.
     private var lastLoadedConfiguration: ConnectionConfiguration?
-    /// Callback fired when "exitToApp" is received from JS
-    var onExitToApp: (() -> Void)?
+    /// The bridge to Main UI in `webView`. Views tell Main UI what to do through it.
+    let bridge = OHBridgeHost()
+    /// What Main UI's addresses hang off on this connection, for the shim.
+    private var basePath = ""
+    /// The last `menu.state` from each web view, so switching homes shows that home's menu.
+    private var menus: [ObjectIdentifier: OHBridgeMenuState] = [:]
 
     // MARK: - Private state
 
@@ -99,7 +75,6 @@ class OpenHABWebViewModel: ObservableObject {
         activeConnectionInfo?.configuration
     }
 
-    private var sseTimer: Timer?
     private var views: [UUID: WKWebView] = [:]
     private var viewAccessOrder: [UUID] = []
     private var etagChecker: ETagChecker?
@@ -117,17 +92,19 @@ class OpenHABWebViewModel: ObservableObject {
     /// right away. Looking it up takes a moment, and the user can switch homes in between.
     private var currentHomeId: UUID?
 
-    /// True once the MainUI SPA is live in the current web view and can accept
-    /// client-side navigation via `window.MainUI.handleCommand`. Mirrors the state
-    /// that gates command execution vs. queuing.
+    /// True once Main UI is live in the page now loaded, so it can be navigated in place.
     var isMainUIReady: Bool {
-        acceptsCommands
+        bridge.isMainUIReady
     }
 
     // MARK: - Init
 
     init() {
         webView = WKWebView(frame: .zero)
+        bridge.webView = webView
+        bridge.onEvent = { [weak self] event in self?.handleBridgeEvent(event) }
+        bridge.credentials = { [weak self] in self?.proxyCredentials() }
+        bridge.connectionURLs = { [weak self] in self?.connectionURLs() ?? [] }
         observeNetworkChanges()
         observeAppLifecycle()
     }
@@ -197,7 +174,7 @@ class OpenHABWebViewModel: ObservableObject {
     }
 
     /// Clears a pending explicit navigation once it resolves via `routeMainUI`'s client-side
-    /// route (`navigateCommand`) rather than `loadWebView(path:)` — the case when Main UI is
+    /// route (`bridge.navigate(to:)`) rather than `loadWebView(path:)` — the case when Main UI is
     /// already live. Without this, a notification tap while Main UI is already showing would
     /// leave `hasPendingExplicitNavigation` stuck true forever, since `loadWebView` never runs
     /// with a non-nil path to clear it, silently blocking every later default auto-load.
@@ -269,7 +246,6 @@ class OpenHABWebViewModel: ObservableObject {
         // What the page addresses hang off, so a cloud connection's extra path is kept.
         let basePath = modifiedUrl.path.hasSuffix("/") ? String(modifiedUrl.path.dropLast()) : modifiedUrl.path
 
-        acceptsCommands = false
         var request = URLRequest(url: modifiedUrl)
 
         if force {
@@ -289,8 +265,11 @@ class OpenHABWebViewModel: ObservableObject {
             webView.navigationDelegate = nil
             webView.uiDelegate = nil
             webView = newWebview
-        } else {}
+            bridge.webView = newWebview
+            showMenu(of: newWebview)
+        }
 
+        self.basePath = basePath
         installUserScripts(on: webView, restore: restore?.history, props: restore?.props, basePath: basePath)
 
         Logger.viewController.info("Loading URL: \(modifiedUrl)")
@@ -299,7 +278,7 @@ class OpenHABWebViewModel: ObservableObject {
         Logger.notificationNavigation.info("performLoadWebView: about to call webView.load(\(modifiedUrl.absoluteString, privacy: .public)) [requestedPath=\(path ?? "nil", privacy: .public), webView=\(webViewID, privacy: .public)] — whichever load call lands here last wins the race")
         isLoading = true
         isShowingTile = false
-        webView.load(request)
+        bridge.trustRedirects(of: webView.load(request))
     }
 
     private func loadWebViewWithETagCheck(newTarget: String, path: String?) async {
@@ -423,74 +402,18 @@ class OpenHABWebViewModel: ObservableObject {
         viewAccessOrder.append(id)
         while viewAccessOrder.count > 2 {
             let evicted = viewAccessOrder.removeFirst()
-            views.removeValue(forKey: evicted)
+            if let evictedView = views.removeValue(forKey: evicted) {
+                menus[ObjectIdentifier(evictedView)] = nil
+            }
             Logger.viewController.info("Evicted webview cache entry for id:\(evicted.uuidString)")
         }
         return newWebView
     }
 
-    // MARK: - Navigation commands
-
-    func navigateCommand(_ command: String) {
-        if acceptsCommands {
-            navigateCommandInternal(command)
-        } else {
-            commandQueue.append(command)
-        }
-    }
-
-    private func navigateCommandInternal(_ command: String) {
-        let jsCode = "window.MainUI.handleCommand('\(command)')"
-        webView.evaluateJavaScript(jsCode) { _, error in
-            if let error {
-                Logger.viewController.error("navigateCommandInternal failed \(error.localizedDescription)")
-            } else {
-                Logger.viewController.info("navigateCommandInternal Success")
-            }
-        }
-    }
-
-    func executeQueuedCommands() {
-        while !commandQueue.isEmpty {
-            let command = commandQueue.removeFirst()
-            navigateCommandInternal(command)
-        }
-    }
-
-    // MARK: - SSE connection state
-
-    func handleSSEConnected(_ connected: Bool) {
-        isSSEConnected = connected
-        if connected {
-            Logger.viewController.info("WKScriptMessage sseConnected is true")
-            sseTimer?.invalidate()
-            acceptsCommands = true
-            executeQueuedCommands()
-            // SPA is live — hide the native menu bar so the SPA's own UI takes over.
-            showMenuBar = false
-            // Re-inject navbar proxy and re-run app-menu probe now that the SPA
-            // is fully live. window.MainUI is guaranteed defined at this point.
-            injectNavbarProxy()
-            triggerAppMenuProbe()
-        } else {
-            Logger.viewController.info("WKScriptMessage sseConnected is false")
-            // Show the native bar so the connection-status indicator is visible
-            showMenuBar = true
-            sseTimer?.invalidate()
-            sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
-                Task { @MainActor in
-                    self?.acceptsCommands = false
-                }
-            }
-        }
-    }
-
     // MARK: - Direct URL loading (for tiles)
 
     func loadDirectURL(_ url: URL) {
-        isLoading = true
-        isShowingTile = true
-        webView.load(URLRequest(url: url))
+        loadTile(URLRequest(url: url))
     }
 
     /// Loads a MainUI tile page by navigating directly to its URL.
@@ -500,18 +423,24 @@ class OpenHABWebViewModel: ObservableObject {
     /// Loading the URL causes the server to return the SPA's index.html; Framework7
     /// reads the URL path on startup and routes to the correct page automatically.
     func loadTilePage(_ url: URL) {
-        isLoading = true
-        isShowingTile = true
-        webView.load(URLRequest(url: url))
+        loadTile(URLRequest(url: url))
     }
 
     /// Reloads a tile URL bypassing HTTP caches, so the reload action fetches fresh
     /// content rather than redisplaying the cached page.
     func reloadTile(_ url: URL) {
-        isLoading = true
-        isShowingTile = true
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        loadTile(request)
+    }
+
+    /// A tile can be any site, so it loads without the bridge: nothing in it can ask the app for
+    /// anything, credentials included.
+    private func loadTile(_ request: URLRequest) {
+        isLoading = true
+        isShowingTile = true
+        bridge.stopTrustingRedirects()
+        installTileScripts(on: webView)
         webView.load(request)
     }
 
@@ -519,7 +448,6 @@ class OpenHABWebViewModel: ObservableObject {
 
     func reloadView() {
         currentTarget = ""
-        commandQueue = []
         webView.stopLoading()
         webView.evaluateJavaScript("document.body.remove()")
         loadWebView(force: true)
@@ -529,42 +457,20 @@ class OpenHABWebViewModel: ObservableObject {
     /// no active connection for the current home, so the previous home's page and navbar
     /// never linger and the menu bar shows its offline/connecting indicator instead.
     func clearView() {
-        acceptsCommands = false
-        commandQueue = []
         activeConnectionInfo = nil
         openHABTrackedRootUrl = ""
         webView.stopLoading()
+        bridge.stopTrustingRedirects()
         webView.load(URLRequest(url: URL(string: "about:blank")!))
         isLoading = false
         isSSEConnected = false
         hasLoadedContent = false
-        showMenuBar = true
-        isWebNavbarHidden = false
-        isWebNavbarTitleHidden = false
         // Nothing is on screen now, so no tile either. Left set, we would still think a tile is
         // showing and would neither put the user back nor remember where they go next.
         isShowingTile = false
-        #if DEBUG
-        if !uiTestContentLocked {
-            navbarItems = []
-            navbarTitle = ""
-        }
-        #else
-        navbarItems = []
-        navbarTitle = ""
-        #endif
-    }
-
-    // MARK: - JS evaluation
-
-    /// Evaluates an arbitrary JS expression in the current webview.
-    /// Used by the native navbar proxy to trigger action buttons.
-    func evaluateJS(_ js: String) {
-        webView.evaluateJavaScript(js) { _, error in
-            if let error {
-                Logger.viewController.error("evaluateJS failed: \(error.localizedDescription)")
-            }
-        }
+        // A blank view belongs to no home yet, so its menu goes too.
+        menu = nil
+        resetNavbar()
     }
 
     // MARK: - didFinish helpers
@@ -573,7 +479,6 @@ class OpenHABWebViewModel: ObservableObject {
         lastLoadedURL = webView.url?.absoluteString
         lastLoadedConfiguration = activeConfig
         isLoading = false
-        acceptsCommands = true
         // A finished navigation to anything other than the blank placeholder means real
         // content is now on screen, so the "Connecting…" placeholder can be dismissed.
         if let url = webView.url?.absoluteString, !url.hasPrefix("about:") {
@@ -591,12 +496,14 @@ class OpenHABWebViewModel: ObservableObject {
             }
         }
 
-        // Done with the saved pages. If the page reloads on its own later, it should stay where
-        // it is rather than jump back to pages the user has since left.
-        installUserScripts(on: webView, restore: nil)
+        if !isShowingTile {
+            // Done with the saved pages. If the page reloads on its own later, it should stay
+            // where it is rather than jump back to pages the user has since left.
+            installUserScripts(on: webView, restore: nil, basePath: basePath)
 
-        injectNavbarProxy()
-        injectEditorHeightFix()
+            // The safe area is only known once the web view is on screen.
+            bridge.updateLayout(currentLayout())
+        }
         #if DEBUG
         if let encoded = ProcessInfo.processInfo.environment["UITestInjectJS"],
            let data = Data(base64Encoded: encoded),
@@ -604,14 +511,6 @@ class OpenHABWebViewModel: ObservableObject {
             webView.evaluateJavaScript(jsSource, completionHandler: nil)
         }
         #endif
-    }
-
-    private func injectNavbarProxy() {
-        webView.evaluateJavaScript(webViewNavbarProxyJS) { _, error in
-            if let error {
-                Logger.viewController.debug("navbarProxyJS: \(error.localizedDescription)")
-            }
-        }
     }
 
     // MARK: - Test support
@@ -627,15 +526,30 @@ class OpenHABWebViewModel: ObservableObject {
         uiTestContentLocked = true
     }
 
+    /// Stands in for a `navbar.state` from the page.
+    func setUITestNavbar(_ state: OHBridgeNavbarState) {
+        uiTestNavbarInjected = true
+        navbar = state
+    }
+
+    /// Stands in for a `menu.state` from the page.
+    func setUITestMenu(_ state: OHBridgeMenuState) {
+        uiTestMenuInjected = true
+        menu = state
+    }
+
     /// Loads raw HTML into a fully configured webview (scripts injected).
     /// Used by UI tests via UITestInjectHTML env var — bypasses the server URL so
     /// tests work without a live openHAB instance.
     func loadHTMLString(_ html: String) async {
         uiTestContentLocked = true
+        bridge.acceptsLocalPages = true
         let homeId = await (Preferences.shared.currentHomePreferences).id
         let wv = getOrCreateWebView(for: homeId, isCloudConnection: false)
         if wv !== webView {
             webView = wv
+            bridge.webView = wv
+            showMenu(of: wv)
         }
         wv.loadHTMLString(html, baseURL: nil)
     }
@@ -667,18 +581,21 @@ private extension OpenHABWebViewModel {
     func installUserScripts(on webView: WKWebView, restore: [String]?, props: [String]? = nil, basePath: String = "") {
         let controller = webView.configuration.userContentController
         controller.removeAllUserScripts()
-        // This one first. It rewrites the browser history, and the script after it reports every
-        // such change back to us, which would look like the user opening every page at once.
+        bridge.installScripts(on: controller, restore: restore, props: props, basePath: basePath, layout: currentLayout())
         controller.addUserScript(
-            WKUserScript(
-                source: webViewRouteRestoreJS(restore: restore, props: props, basePath: basePath),
-                injectionTime: .atDocumentStart,
-                forMainFrameOnly: true
-            )
+            WKUserScript(source: webViewExternalURLInterceptorJS, injectionTime: .atDocumentStart, forMainFrameOnly: true)
         )
+        #if DEBUG
         controller.addUserScript(
-            WKUserScript(source: webViewMainUIBridgeJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+            WKUserScript(source: webViewUITestProbeJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         )
+        #endif
+    }
+
+    /// The scripts a tile gets: everything except the bridge.
+    func installTileScripts(on webView: WKWebView) {
+        let controller = webView.configuration.userContentController
+        controller.removeAllUserScripts()
         controller.addUserScript(
             WKUserScript(source: webViewExternalURLInterceptorJS, injectionTime: .atDocumentStart, forMainFrameOnly: true)
         )
@@ -691,90 +608,95 @@ private extension OpenHABWebViewModel {
 }
 
 extension OpenHABWebViewModel {
-    // MARK: - Menu bar visibility
+    // MARK: - Bridge
 
-    /// Called when a new top-level navigation starts (full page load).
-    /// Resets connection state and shows the bar until SSE confirms everything is live.
-    func handleNavigationStart() {
-        showMenuBar = true
-        isSSEConnected = false
-        isWebNavbarHidden = false
-        isWebNavbarTitleHidden = false
+    /// Shows the menu `webView` last sent, now that it is the one on screen.
+    func showMenu(of webView: WKWebView) {
         #if DEBUG
-        if !uiTestContentLocked {
-            navbarItems = []
-            navbarTitle = ""
-        }
-        #else
-        navbarItems = []
-        navbarTitle = ""
+        if uiTestMenuInjected { return }
         #endif
-        // Clear the re-installation guards so the next page gets a fresh proxy.
-        webView.evaluateJavaScript(
-            """
-            window.__ohNavbarProxyInstalled = undefined;
-            window.__ohNavbarObserverInstalled = undefined;
-            window.__ohNavbarLastState = undefined;
-            window.__ohNavbarHeight = undefined;
-            """
-        )
+        menu = menus[ObjectIdentifier(webView)]
+    }
+
+    /// Called when a new top-level navigation starts (full page load). The page has to say
+    /// hello again, and its bar starts empty.
+    func handleNavigationStart() {
+        isSSEConnected = false
+        bridge.pageWillLoad()
+        resetNavbar()
+        // The new page sends its own menu; until then the menu falls back to the REST page list.
+        menus[ObjectIdentifier(webView)] = nil
+        #if DEBUG
+        if uiTestMenuInjected { return }
+        #endif
+        menu = nil
+    }
+
+    private func resetNavbar() {
+        #if DEBUG
+        if uiTestNavbarInjected { return }
+        #endif
+        navbar = .empty
+    }
+
+    func handleBridgeEvent(_ event: OHBridgeEvent) {
+        switch event {
+        case let .hello(hello):
+            Logger.viewController.info("OHBridge: hello from \(hello.impl.rawValue, privacy: .public), accepted \(hello.accepted, privacy: .public)")
+        case let .connectionState(connected):
+            isSSEConnected = connected
+        case let .navChanged(state):
+            handleNavChanged(state)
+        case let .navbarState(state):
+            #if DEBUG
+            if uiTestNavbarInjected { return }
+            #endif
+            navbar = state
+        case let .menuState(state):
+            #if DEBUG
+            if uiTestMenuInjected { return }
+            #endif
+            menus[ObjectIdentifier(webView)] = state
+            menu = state
+        }
     }
 
     /// Notes where the user is, so we can put them back later.
     ///
     /// Tiles are skipped. A tile's address is its own, and saving it would later drop the
     /// Main UI somewhere the menu never sent it.
-    func handleRouteState(_ json: String) {
+    func handleNavChanged(_ state: OHBridgeNavState) {
+        let path = state.path
+        Task {
+            await Preferences.shared.setCurrentWebViewPath(path)
+        }
         guard let connectionURL = activeConfig?.url,
-              let snapshot = WebRouteRestore.snapshot(fromJSON: json, connectionURL: connectionURL) else { return }
+              let snapshot = WebRouteRestore.snapshot(from: state, connectionURL: connectionURL) else { return }
         guard !isShowingTile, let homeId = currentHomeId else { return }
         Task {
             await Preferences.shared.setWebRouteSnapshot(snapshot, for: homeId)
         }
     }
 
-    /// Updates the proxied navbar items and title received from the web content.
-    func updateNavbarItems(_ items: [WebNavbarItem], title: String = "") {
-        navbarItems = items
-        navbarTitle = title
+    /// The space the host's chrome takes over the page.
+    func currentLayout() -> OHBridgeLayout {
+        let insets = webView.safeAreaInsets
+        return OHBridgeLayout(
+            insets: .init(top: insets.top, bottom: insets.bottom),
+            navbarHeight: Self.navbarHeight
+        )
     }
 
-    /// A bad `height` reading is ignored, so it can never collapse the native bar.
-    func updateNavbarState(hidden: Bool, titleHidden: Bool, height: Double?) {
-        isWebNavbarHidden = hidden
-        isWebNavbarTitleHidden = titleHidden
-        if let height, (32.0 ... 96.0).contains(height) {
-            webNavbarHeight = CGFloat(height)
-        }
+    /// Basic auth for a reverse proxy, from the connection's settings. Nil when there is none.
+    private func proxyCredentials() -> OHBridgeCredentials? {
+        guard let activeConfig, !activeConfig.username.isEmpty, !activeConfig.password.isEmpty else { return nil }
+        return OHBridgeCredentials(username: activeConfig.username, password: activeConfig.password)
     }
 
-    /// Called when the openHAB Main UI fires its `OHApp.ready()` callback.
-    /// At this point the SPA has fully initialised: `window.MainUI` is defined
-    /// and Vue has mounted its components, so both the proxy and probe are reliable.
-    func handleReady() {
-        injectNavbarProxy()
-        triggerAppMenuProbe()
-    }
-
-    /// Called with the result of the JS probe that checks window.MainUI.
-    /// Hides the bar only when the SPA is present AND SSE is already connected
-    /// (re-entry into the webview without a full reload).
-    /// - Parameter hidden: true when the Main UI is present (iOS bar would be redundant).
-    func handleAppMenuProbe(hidden: Bool) {
-        if hidden, isSSEConnected {
-            showMenuBar = false
-        } else if !hidden {
-            showMenuBar = true
-        }
-    }
-
-    /// Evaluates the app-menu probe immediately in the current webview.
-    /// Use this when re-entering the webview content without a full page reload.
-    func triggerAppMenuProbe() {
-        webView.evaluateJavaScript(webViewAppMenuProbeJS)
-    }
-
-    private func injectEditorHeightFix() {
-        webView.evaluateJavaScript(editorHeightFixJS(safeAreaBottom: webView.safeAreaInsets.bottom))
+    /// Where the active connection serves Main UI: its own address, and the cloud proxy's.
+    private func connectionURLs() -> [URL] {
+        [activeConfig?.url, activeConnectionInfo?.proxyURL?.absoluteString]
+            .compactMap(\.self)
+            .compactMap(URL.init(string:))
     }
 }

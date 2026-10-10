@@ -71,6 +71,9 @@ struct ToolbarMenu: View {
 
     @Binding var isPresented: Bool
     var menuData: MenuDataService
+    /// Main UI's sidebar, sent over the bridge. Until the first one arrives the Main UI section
+    /// lists pages from the REST API instead.
+    var webMenu: OHBridgeMenuState?
     @State private var scrollViewContentSize: Double = 0
     // Section expansion is stored per home in `HomePreferences`. These `@State`
     // flags mirror the active home for immediate UI updates and are loaded from
@@ -90,12 +93,19 @@ struct ToolbarMenu: View {
     @State private var sitemapForWatch: String?
     @State private var sitemapForCarPlay: String?
     @State private var cachedHomePrefs: HomePreferences?
+    /// Sidebar entries whose submenu is open, and those showing their whole submenu.
+    @State private var expandedWebItems: Set<String> = []
+    @State private var webItemsShowingAll: Set<String> = []
+    /// Main UI sections with a title, like Administration, that are open. Collapsed by default.
+    @State private var expandedWebSections: Set<String> = []
     /// The surface `OpenHABRootView` currently shows. The single source of truth for which
     /// row (if any) is highlighted as current — read directly rather than mirrored into local
     /// `@State`, so navigation that bypasses this menu entirely (a push-notification deep
     /// link, a home switch) is reflected here too instead of leaving a stale highlight.
     var currentContent: TargetController
     var onSelect: (TargetController) -> Void
+    /// A sidebar entry without a path was tapped.
+    var onActivateWebMenuItem: (String) -> Void = { _ in }
     var onReload: (() -> Void)?
 
     /// The sitemap row (if any) to highlight as current, derived from `currentContent`.
@@ -166,6 +176,7 @@ extension ToolbarMenu {
         isSitemapsExpanded = !collapsed.contains(.sitemaps)
         isTilesExpanded = !collapsed.contains(.tiles)
         isSystemExpanded = !collapsed.contains(.system)
+        expandedWebSections = prefs.expandedWebSections
         sitemapForWatch = prefs.sitemapForWatch
         sitemapForCarPlay = prefs.sitemapForCarPlay
         headerDetailsHidden = false
@@ -330,7 +341,7 @@ extension ToolbarMenu {
     private func mainUIMenu() -> some View {
         // Hidden until the current home has had at least one successful fetch —
         // consistent with how sitemaps/pages behave during the loading state.
-        if menuData.hasSuccessfullyLoaded {
+        if menuData.hasSuccessfullyLoaded || webMenu != nil {
             let homeRoute = Self.mainUIHomeRoute
             menuRow(
                 icon: AnyView(Image("openHABIcon").resizable()),
@@ -341,7 +352,11 @@ extension ToolbarMenu {
             }
             .background(currentRowBackground(currentMainUIRoute == homeRoute))
         }
-        if menuData.isLoading, menuData.uiPages.isEmpty {
+        if let webMenu {
+            ForEach(webMenu.sections) { section in
+                webMenuSection(section)
+            }
+        } else if menuData.isLoading, menuData.uiPages.isEmpty {
             loadingRow(label: String(localized: "Pages"))
         } else {
             ForEach(menuData.uiPages, id: \.uid) { page in
@@ -354,6 +369,165 @@ extension ToolbarMenu {
                 }
                 .background(currentRowBackground(currentMainUIRoute == route))
             }
+        }
+    }
+
+    // MARK: - Main UI sidebar
+
+    /// A section with a title, like Administration, is a row that folds its entries away, and the
+    /// menu remembers it per home.
+    @ViewBuilder
+    private func webMenuSection(_ section: OHBridgeMenuSection) -> some View {
+        if let title = section.title, !title.isEmpty {
+            let isExpanded = webSectionBinding(section.id)
+            VStack(alignment: .leading, spacing: 0) {
+                Button {
+                    isExpanded.wrappedValue.toggle()
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemSymbol: .lockShield)
+                            .frame(width: iconWidth, height: iconWidth)
+                        Text(title)
+                            .lineLimit(1)
+                        Spacer(minLength: 0)
+                        Image(systemSymbol: isExpanded.wrappedValue ? .chevronDown : .chevronRight)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 44)
+                    }
+                    .padding(.leading, 16)
+                    .padding(.trailing, 4)
+                    .padding(.vertical, 10)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("WebMenuSection-\(section.id)")
+
+                if isExpanded.wrappedValue {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(section.items) { item in
+                            webMenuItem(item, depth: 1)
+                        }
+                    }
+                    .transition(.blurReplace(.downUp))
+                }
+            }
+            .animation(Self.sectionAnimation, value: isExpanded.wrappedValue)
+        } else {
+            ForEach(section.items) { item in
+                webMenuItem(item, depth: 0)
+            }
+        }
+    }
+
+    private func webSectionBinding(_ id: String) -> Binding<Bool> {
+        Binding(
+            get: { expandedWebSections.contains(id) },
+            set: { expanded in
+                if expanded { expandedWebSections.insert(id) } else { expandedWebSections.remove(id) }
+                Task {
+                    await Preferences.shared.modifyActiveHome { @Sendable prefs in
+                        prefs.setWebSection(id, expanded: expanded)
+                    }
+                }
+            }
+        )
+    }
+
+    /// One sidebar entry and, when open, its submenu. AnyView because it nests itself.
+    private func webMenuItem(_ item: OHBridgeMenuItem, depth: Int) -> AnyView {
+        let children = item.children ?? []
+        let more = item.more ?? []
+        let hasSubmenu = !children.isEmpty || !more.isEmpty
+        let isExpanded = expandedWebItems.contains(item.id)
+        let showsAll = webItemsShowingAll.contains(item.id)
+        return AnyView(
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 0) {
+                    Button {
+                        activateWebMenuItem(item)
+                    } label: {
+                        HStack(spacing: 10) {
+                            OHBridgeIconView(icon: item.icon, size: iconWidth)
+                                .foregroundStyle(item.active == true ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(item.label)
+                                    .fontWeight(item.active == true ? .semibold : .regular)
+                                    .lineLimit(1)
+                                if let footer = item.footer, !footer.isEmpty {
+                                    Text(footer)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                }
+                            }
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.leading, 16 + CGFloat(depth) * 20)
+                        .padding(.vertical, 10)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("WebMenu-\(item.id)")
+
+                    if hasSubmenu {
+                        Button {
+                            withAnimation(Self.sectionAnimation) {
+                                if isExpanded { expandedWebItems.remove(item.id) } else { expandedWebItems.insert(item.id) }
+                            }
+                        } label: {
+                            Image(systemSymbol: isExpanded ? .chevronDown : .chevronRight)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .frame(width: 44, height: 36)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(item.label)
+                        .accessibilityIdentifier("WebMenuToggle-\(item.id)")
+                    }
+                }
+                .padding(.trailing, hasSubmenu ? 4 : 16)
+
+                if isExpanded {
+                    ForEach(children) { child in
+                        webMenuItem(child, depth: depth + 1)
+                    }
+                    if showsAll {
+                        ForEach(more) { child in
+                            webMenuItem(child, depth: depth + 1)
+                        }
+                    }
+                    if !more.isEmpty {
+                        Button {
+                            withAnimation(Self.sectionAnimation) {
+                                if showsAll { webItemsShowingAll.remove(item.id) } else { webItemsShowingAll.insert(item.id) }
+                            }
+                        } label: {
+                            HStack(spacing: 10) {
+                                Image(systemSymbol: showsAll ? .chevronUp : .ellipsis)
+                                    .frame(width: iconWidth, height: iconWidth)
+                                Text(showsAll ? String(localized: "Show less") : String(localized: "Show all"))
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(.leading, 16 + CGFloat(depth + 1) * 20)
+                            .padding(.vertical, 10)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("WebMenuShowAll-\(item.id)")
+                    }
+                }
+            }
+        )
+    }
+
+    private func activateWebMenuItem(_ item: OHBridgeMenuItem) {
+        if let path = item.path {
+            select(.mainUIPage(path))
+        } else {
+            isPresented = false
+            onActivateWebMenuItem(item.id)
         }
     }
 
