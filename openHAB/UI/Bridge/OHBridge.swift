@@ -319,4 +319,10 @@ enum OHBridge {
             && urlHost == host.lowercased()
             && (url.port ?? defaultPort) == (port == 0 ? defaultPort : port)
     }
+
+    /// Whether `other` is served from the same origin as `url`. False when `other` has none.
+    static func isSameOrigin(_ url: URL, _ other: URL?) -> Bool {
+        guard let other, let scheme = other.scheme, let host = other.host else { return false }
+        return isSameOrigin(url, scheme: scheme, host: host, port: other.port ?? 0)
+    }
 }

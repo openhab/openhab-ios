@@ -314,11 +314,18 @@ final class OHBridgeHost {
         appLoadedURL = nil
     }
 
-    /// Call when a page commits. Remembers where the app's own load ended up.
+    /// Call when a page commits. Remembers where the app's own load ended up, and forgets it once
+    /// the page goes somewhere else by itself, so a later visit to that origin isn't trusted.
     func recordCommit(_ navigation: WKNavigation?, url: URL?) {
-        guard let navigation, navigation === appNavigation else { return }
-        appNavigation = nil
-        appLoadedURL = url
+        if let navigation, navigation === appNavigation {
+            appNavigation = nil
+            appLoadedURL = url
+            return
+        }
+        // A reload or Main UI's own login round trip stays on the same origin and keeps the trust.
+        if let trusted = appLoadedURL, !OHBridge.isSameOrigin(trusted, url) {
+            appLoadedURL = nil
+        }
     }
 
     /// A new page is loading. Messages wait for its `ui.hello`, including any that were part way

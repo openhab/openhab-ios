@@ -221,7 +221,41 @@ struct OHBridgeTests {
 
         host.recordCommit(pageLoad, url: URL(string: "https://evil.example/"))
         #expect(!host.acceptsOrigin(scheme: "https", host: "evil.example", port: 0))
-        #expect(host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
+        #expect(!host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
+        #expect(host.acceptsOrigin(scheme: "http", host: "openhab.local", port: 8080))
+    }
+
+    /// A reload, or Main UI's login coming back to /?code=…, is the page navigating by itself.
+    @Test("A redirect stays trusted while the page stays on its origin")
+    func keepsRedirectOnSameOrigin() throws {
+        let host = OHBridgeHost()
+        let connection = try #require(URL(string: "https://home.myopenhab.org"))
+        host.connectionURLs = { [connection] }
+        let webView = WKWebView()
+        let appLoad = webView.loadHTMLString("", baseURL: nil)
+        host.trustRedirects(of: appLoad)
+        host.recordCommit(appLoad, url: URL(string: "https://eu.myopenhab.org/"))
+
+        host.recordCommit(webView.loadHTMLString("", baseURL: nil), url: URL(string: "https://eu.myopenhab.org/?code=abc&state=xyz"))
+        #expect(host.acceptsOrigin(scheme: "https", host: "eu.myopenhab.org", port: 0))
+    }
+
+    @Test("A redirect is no longer trusted once the page leaves its origin and comes back by itself")
+    func forgetsRedirectAfterLeaving() throws {
+        let host = OHBridgeHost()
+        let connection = try #require(URL(string: "https://oh.example.com"))
+        host.connectionURLs = { [connection] }
+        let webView = WKWebView()
+        let appLoad = webView.loadHTMLString("", baseURL: nil)
+        host.trustRedirects(of: appLoad)
+        host.recordCommit(appLoad, url: URL(string: "https://accounts.google.com/signin"))
+        #expect(host.acceptsOrigin(scheme: "https", host: "accounts.google.com", port: 0))
+
+        // Signed in, back on openHAB, then a script or redirect returns to the sign-in origin.
+        host.recordCommit(webView.loadHTMLString("", baseURL: nil), url: URL(string: "https://oh.example.com/"))
+        host.recordCommit(webView.loadHTMLString("", baseURL: nil), url: URL(string: "https://accounts.google.com/"))
+        #expect(!host.acceptsOrigin(scheme: "https", host: "accounts.google.com", port: 0))
+        #expect(host.acceptsOrigin(scheme: "https", host: "oh.example.com", port: 0))
     }
 
     @Test("A redirect is trusted for the UI but never gets credentials")
