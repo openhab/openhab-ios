@@ -9,12 +9,15 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Observation
 import OpenHABCore
 import os.log
 
 /// Provides menu data (sitemaps, tiles, pages) for the navigation menu.
 /// Extracted from DrawerView for testability and reuse.
+/// `@Observable` so an open menu re-renders as soon as a fetch completes.
 @MainActor
+@Observable
 class MenuDataService {
     var sitemaps: [OpenHABSitemap] = []
     var uiTiles: [OpenHABUiTile] = []
@@ -96,6 +99,12 @@ class MenuDataService {
         let connection = MainActorNetworkTracker.shared.activeConnection
         clearAll()
         Task { await fetchData(activeConnection: connection) }
+    }
+
+    /// Re-fetches all menu data from the currently active connection without clearing,
+    /// so the menu stays populated until fresh data arrives (pull-to-refresh, menu open).
+    func reload(networkTracker: MainActorNetworkTracker = .shared) async {
+        await fetchData(activeConnection: networkTracker.activeConnection)
     }
 
     func fetchData(activeConnection: ConnectionInfo?) async {
