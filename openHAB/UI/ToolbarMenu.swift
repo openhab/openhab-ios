@@ -138,6 +138,8 @@ struct ToolbarMenu: View {
             if newValue {
                 // Re-read in case the active home changed while the menu was closed.
                 Task { await loadExpansionState() }
+                // Pick up sitemaps/pages added on the server since the last fetch.
+                Task { await menuData.reload() }
             } else {
                 isHomeExpanded = false
                 headerDetailsHidden = false
@@ -351,7 +353,7 @@ extension ToolbarMenu {
             ForEach(webMenu.sections) { section in
                 webMenuSection(section)
             }
-        } else if menuData.isLoading {
+        } else if menuData.isLoading, menuData.uiPages.isEmpty {
             loadingRow(label: String(localized: "Pages"))
         } else {
             ForEach(menuData.uiPages, id: \.uid) { page in
@@ -557,7 +559,11 @@ extension ToolbarMenu {
                 }
             }
             .frame(maxHeight: scrollViewContentSize > 0 ? min(scrollViewContentSize, height) : height)
-            .scrollBounceBehavior(.basedOnSize)
+            // Always bounce vertically — even when the content fits — so pull-to-refresh
+            // can be triggered on a short menu.
+            .scrollBounceBehavior(.always, axes: .vertical)
+            .refreshable { await menuData.reload() }
+            .accessibilityIdentifier("ToolbarMenuScrollView")
             // Host the animation on the sections' shared parent so a change in any
             // one flag also animates the *repositioning* of the sibling sections
             // below it — each section's own `.animation` only covers its own subtree.
@@ -721,7 +727,8 @@ extension ToolbarMenu {
     /// - Parameters:
     ///   - title: Localization key for the section label shown (uppercased) in the header.
     ///   - isExpanded: Binding to the section's persisted expansion flag.
-    ///   - isLoading: When `true`, a `loadingRow` replaces the section.
+    ///   - isLoading: When `true` and the section is empty, a `loadingRow` replaces it.
+    ///     A reload of a populated section keeps showing the current rows.
     ///   - isEmpty: When `true` (and not loading), the section is hidden entirely.
     ///   - showDivider: Whether to append a trailing divider below the content.
     ///   - content: The section body, shown only while expanded.
@@ -733,7 +740,7 @@ extension ToolbarMenu {
                                     showDivider: Bool = true,
                                     @ViewBuilder content: () -> some View) -> some View {
         let localizedTitle = String(localized: title)
-        if isLoading {
+        if isLoading, isEmpty {
             loadingRow(label: localizedTitle)
         } else if !isEmpty {
             VStack(alignment: .leading, spacing: 0) {

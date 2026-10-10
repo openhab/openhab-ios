@@ -236,6 +236,7 @@
 				SnapshotHelper.swift,
 				ToastUITests.swift,
 				WebMenuUITests.swift,
+				ToolbarMenuUITests.swift,
 			);
 			target = 933D7F0322E7015000621A03 /* openHABUITests */;
 		};
