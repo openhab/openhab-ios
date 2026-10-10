@@ -31,6 +31,14 @@ enum WebRouteRestore {
         let url: String
     }
 
+    /// The pages to put back, oldest first, what each was opened with, and the one to show.
+    struct Seed {
+        let history: [String]
+        /// One per page in `history`.
+        let props: [String]
+        let url: String
+    }
+
     /// What a page opened with nothing passed to it gets.
     static let noProps = "{}"
 
@@ -74,7 +82,7 @@ enum WebRouteRestore {
     ///
     /// - Parameter dropAdmin: true when the user is landing on a different connection, which
     ///   may not have admin rights.
-    static func seed(for snapshot: WebRouteSnapshot, dropAdmin: Bool) -> (history: [String], props: [String], url: String)? {
+    static func seed(for snapshot: WebRouteSnapshot, dropAdmin: Bool) -> Seed? {
         let props = snapshot.props.flatMap { $0.count == snapshot.history.count ? $0 : nil }
             ?? Array(repeating: noProps, count: snapshot.history.count)
         let all = zip(snapshot.history, props).map { (url: $0, props: $1) }
@@ -85,14 +93,15 @@ enum WebRouteRestore {
         let withoutEarlierCopies = pages.dropLast().filter { $0.url != last.url } + [last]
         // Removing pages can leave the same page sitting next to itself. Keep the later one,
         // it is how the user last opened it.
-        let kept = withoutEarlierCopies.reduce(into: [(url: String, props: String)]()) { result, page in
+        let deduplicated = withoutEarlierCopies.reduce(into: [(url: String, props: String)]()) { result, page in
             if result.last?.url == page.url {
                 result[result.count - 1] = page
             } else {
                 result.append(page)
             }
-        }.suffix(maxSeededEntries)
-        return (kept.map(\.url), kept.map(\.props), last.url)
+        }
+        let kept = deduplicated.suffix(maxSeededEntries)
+        return Seed(history: kept.map(\.url), props: kept.map(\.props), url: last.url)
     }
 
     static func isAdminPath(_ url: String) -> Bool {
