@@ -31,32 +31,6 @@ class WebViewHostController: UIViewController {
 struct OpenHABWebViewContainer: UIViewControllerRepresentable {
     @MainActor
     class WebViewContainerCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
-        /// Capture-phase click interceptor matching develop commit 12b8608c.
-        /// e.isTrusted filters programmatic .click() / dispatchEvent() calls so only
-        /// real user gestures reach the message handler.
-        private static let externalURLInterceptorScript = WKUserScript(
-            source: """
-            (function() {
-                const nativeSchemes = ['http', 'https', 'about', 'blob', 'data', 'javascript', ''];
-                function isCustomScheme(url) {
-                    const m = /^([a-z][a-z0-9+\\-.]*):/.exec((url || '').toLowerCase());
-                    return m != null && !nativeSchemes.includes(m[1]);
-                }
-                document.addEventListener('click', function(e) {
-                    if (!e.isTrusted) return;
-                    let el = e.target;
-                    while (el && el.tagName !== 'A') el = el.parentElement;
-                    if (el && el.href && isCustomScheme(el.href)) {
-                        e.preventDefault();
-                        window.webkit.messageHandlers.externalURL.postMessage(el.href);
-                    }
-                }, true);
-            })();
-            """,
-            injectionTime: .atDocumentStart,
-            forMainFrameOnly: true
-        )
-
         let viewModel: OpenHABWebViewModel
         weak var hostController: WebViewHostController?
         private weak var currentWebView: WKWebView?
@@ -99,7 +73,6 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             webView.configuration.userContentController.add(self, name: "mainUi")
             webView.configuration.userContentController.add(self, name: "pathChanged")
             webView.configuration.userContentController.add(self, name: "externalURL")
-            webView.configuration.userContentController.addUserScript(Self.externalURLInterceptorScript)
             currentWebView = webView
 
             hostView.addSubview(webView)
@@ -160,6 +133,14 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                     return
                 }
                 #endif
+                // Dict body with the pages the user has visited, so we can put them back later
+                if let dict = message.body as? [String: Any],
+                   let type = dict["type"] as? String,
+                   type == WebRouteRestore.messageType,
+                   let state = dict["state"] as? String {
+                    viewModel.handleRouteState(state)
+                    return
+                }
                 // Dict body — navbar state
                 if let dict = message.body as? [String: Any],
                    let type = dict["type"] as? String,

@@ -113,9 +113,9 @@ struct OpenHABWidgetEventApplicationTests {
         ))
         #expect(offResult == .applied)
         #expect(widget.state == "OFF")
-        #expect(widget.iconColor == "")
-        #expect(widget.labelcolor == "")
-        #expect(widget.valuecolor == "")
+        #expect(widget.iconColor.isEmpty)
+        #expect(widget.labelcolor.isEmpty)
+        #expect(widget.valuecolor.isEmpty)
     }
 
     @Test

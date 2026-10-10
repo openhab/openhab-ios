@@ -263,9 +263,8 @@ private struct InAppToastBanner: View {
 
 struct OpenHABRootView: View {
     @StateObject private var networkService = NetworkConnectionService()
-    @StateObject private var notificationService = NotificationActionService()
-    @StateObject private var pushService = PushRegistrationService()
-    @StateObject private var crashService = CrashReportService()
+    @Environment(NotificationActionService.self) private var notificationService
+    @State private var crashService = CrashReportService()
     @State private var menuData = MenuDataService()
     @StateObject private var webViewModel = OpenHABWebViewModel()
     @State private var menuPresented = false
@@ -285,6 +284,7 @@ struct OpenHABRootView: View {
             ToolbarMenu(
                 isPresented: $menuPresented,
                 menuData: menuData,
+                currentContent: currentContent,
                 onSelect: { target in handleMenuSelection(target) },
                 onReload: { reloadCurrentContent() }
             )
@@ -352,7 +352,11 @@ struct OpenHABRootView: View {
             Task { await switchToSavedView() }
             setupExitToApp()
         }
-        .onReceive(notificationService.$navigationCommand.compactMap(\.self)) { command in
+        // `initial: true` also delivers a command published before this view appeared,
+        // as the `@Published` subscription used to. `handleNavigationCommand` resets the
+        // command to nil, so the same command arriving again is still a change.
+        .onChange(of: notificationService.navigationCommand, initial: true) { _, command in
+            guard let command else { return }
             handleNavigationCommand(command)
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
@@ -361,6 +365,10 @@ struct OpenHABRootView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
             menuData.clearForHomeSwitch()
+            // Reset synchronously with the menu clear so a stale currentContent from the
+            // previous home can't coincidentally match a same-named row once the new
+            // home's sitemaps/pages arrive, before switchToSavedView() corrects it below.
+            currentContent = .webview
             Task { await switchToSavedView() }
             // Reconcile the web view with the new home: loads if the active connection
             // already belongs to it (e.g. between two demo homes), otherwise blanks and
@@ -399,6 +407,7 @@ struct OpenHABRootView: View {
         } message: {
             Text(networkService.certificateAlert?.message ?? "")
         }
+        .task { await crashService.checkForPreviousCrash() }
         .alert("Crash Report", isPresented: $crashService.crashReportAlert) {
             Button("Send") { crashService.enableCrashReporting() }
             Button("Don't Send", role: .cancel) { crashService.deleteCrashReports() }
