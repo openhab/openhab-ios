@@ -77,8 +77,81 @@ struct OHBridgeHostInfo: Encodable {
     let appVersion: String
     let features: [String]
     let initialHistory: [String]?
-    let initialProps: [String]?
+    let initialProps: [OHBridgeProps]?
     let layout: OHBridgeLayout
+}
+
+/// What a page was opened with. The app never looks inside, it only keeps it and hands it back,
+/// so it holds it as JSON text, the way it is saved, and sends it as the object it is.
+struct OHBridgeProps: Codable, Equatable {
+    private enum JSONValue: Codable {
+        case null
+        case bool(Bool)
+        case number(Double)
+        case string(String)
+        case array([JSONValue])
+        case object([String: JSONValue])
+
+        init(from decoder: any Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if container.decodeNil() {
+                self = .null
+            } else if let bool = try? container.decode(Bool.self) {
+                self = .bool(bool)
+            } else if let number = try? container.decode(Double.self) {
+                self = .number(number)
+            } else if let string = try? container.decode(String.self) {
+                self = .string(string)
+            } else if let array = try? container.decode([JSONValue].self) {
+                self = .array(array)
+            } else {
+                self = try .object(container.decode([String: JSONValue].self))
+            }
+        }
+
+        func encode(to encoder: any Encoder) throws {
+            var container = encoder.singleValueContainer()
+            switch self {
+            case .null: try container.encodeNil()
+            case let .bool(bool): try container.encode(bool)
+            case let .number(number): try container.encode(number)
+            case let .string(string): try container.encode(string)
+            case let .array(array): try container.encode(array)
+            case let .object(object): try container.encode(object)
+            }
+        }
+    }
+
+    private static let encoder: JSONEncoder = {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        return encoder
+    }()
+
+    let json: String
+
+    init(json: String) {
+        self.json = json
+    }
+
+    init(from decoder: any Decoder) throws {
+        let value = try JSONValue(from: decoder)
+        guard case .object = value else {
+            throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "props must be an object"))
+        }
+        json = try String(bytes: Self.encoder.encode(value), encoding: .utf8) ?? WebRouteRestore.noProps
+    }
+
+    /// Text that isn't a JSON object goes out as an empty one, which is what a page opened with
+    /// nothing passed to it gets.
+    func encode(to encoder: any Encoder) throws {
+        let value = try? JSONDecoder().decode(JSONValue.self, from: Data(json.utf8))
+        guard let value, case .object = value else {
+            try JSONValue.object([:]).encode(to: encoder)
+            return
+        }
+        try value.encode(to: encoder)
+    }
 }
 
 struct OHBridgeLayout: Codable, Equatable {
@@ -111,7 +184,7 @@ struct OHBridgeConnectionState: Decodable {
 struct OHBridgeNavState: Codable, Equatable {
     let path: String
     let history: [String]
-    let props: [String]?
+    let props: [OHBridgeProps]?
     let modal: Bool
 }
 
@@ -137,9 +210,18 @@ struct OHBridgeNavbarState: Decodable, Equatable {
 
 struct OHBridgeNavbarAction: Decodable, Equatable, Identifiable {
     let id: String
+    /// Empty for a button that only shows an icon.
     let label: String
     let icon: OHBridgeIcon?
     let disabled: Bool?
+
+    /// What VoiceOver reads and UI tests find the button by: the label, or for an icon-only
+    /// button its icon's name, e.g. "square list" for `f7:square_list`.
+    var accessibilityName: String {
+        guard label.isEmpty, let name = icon?.name else { return label }
+        let glyph = name.split(separator: ":").last.map(String.init) ?? name
+        return glyph.replacing("_", with: " ")
+    }
 }
 
 struct OHBridgeMenuState: Decodable, Equatable {
@@ -236,5 +318,11 @@ enum OHBridge {
         return urlScheme == scheme.lowercased()
             && urlHost == host.lowercased()
             && (url.port ?? defaultPort) == (port == 0 ? defaultPort : port)
+    }
+
+    /// Whether `other` is served from the same origin as `url`. False when `other` has none.
+    static func isSameOrigin(_ url: URL, _ other: URL?) -> Bool {
+        guard let other, let scheme = other.scheme, let host = other.host else { return false }
+        return isSameOrigin(url, scheme: scheme, host: host, port: other.port ?? 0)
     }
 }

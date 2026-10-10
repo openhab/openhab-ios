@@ -86,13 +86,42 @@ struct OHBridgeTests {
 
     @Test("Reads nav.changed with props")
     func readsNavChanged() {
-        let json = #"{"v":1,"type":"nav.changed","payload":{"path":"/page/a","history":["/","/page/a"],"props":["{}","{\"deep\":true}"],"modal":false}}"#
+        let json = #"{"v":1,"type":"nav.changed","payload":{"path":"/page/a","history":["/","/page/a"],"props":[{},{"deep":true,"defineVars":{"room":"kitchen"}}],"modal":false}}"#
         guard case let .navChanged(state)? = events(for: json).first else {
             Issue.record("expected a nav state")
             return
         }
         #expect(state.history == ["/", "/page/a"])
-        #expect(state.props?.last == #"{"deep":true}"#)
+        #expect(state.props?.map(\.json) == ["{}", #"{"deep":true,"defineVars":{"room":"kitchen"}}"#])
+    }
+
+    @Test("Props sent as a string instead of an object are refused")
+    func refusesStringProps() {
+        let json = #"{"v":1,"type":"nav.changed","payload":{"path":"/page/a","history":["/page/a"],"props":["{}"],"modal":false}}"#
+        #expect(events(for: json).isEmpty)
+    }
+
+    @Test("Saved props go out as the objects they are, and unreadable ones as an empty object", arguments: [
+        (#"{"deep":true}"#, #"{"deep":true}"#),
+        (#"{"defineVars":{"n":1,"on":false}}"#, #"{"defineVars":{"n":1,"on":false}}"#),
+        ("not json", "{}"),
+        ("[]", "{}")
+    ])
+    func encodesProps(saved: String, sent: String) throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let data = try encoder.encode(OHBridgeProps(json: saved))
+        #expect(String(bytes: data, encoding: .utf8) == sent)
+    }
+
+    @Test("An icon-only navbar button is named after its icon", arguments: [
+        (#"{"id":"1","label":"","icon":{"name":"f7:square_list"}}"#, "square list"),
+        (#"{"id":"2","label":"Save","icon":{"name":"f7:checkmark"}}"#, "Save"),
+        (#"{"id":"3","label":"","icon":{"svg":"<svg></svg>"}}"#, "")
+    ])
+    func navbarActionName(json: String, expected: String) throws {
+        let action = try JSONDecoder().decode(OHBridgeNavbarAction.self, from: Data(json.utf8))
+        #expect(action.accessibilityName == expected)
     }
 
     @Test("Reads connection.state")
@@ -192,7 +221,41 @@ struct OHBridgeTests {
 
         host.recordCommit(pageLoad, url: URL(string: "https://evil.example/"))
         #expect(!host.acceptsOrigin(scheme: "https", host: "evil.example", port: 0))
-        #expect(host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
+        #expect(!host.acceptsOrigin(scheme: "https", host: "openhab.local", port: 0))
+        #expect(host.acceptsOrigin(scheme: "http", host: "openhab.local", port: 8080))
+    }
+
+    /// A reload, or Main UI's login coming back to /?code=…, is the page navigating by itself.
+    @Test("A redirect stays trusted while the page stays on its origin")
+    func keepsRedirectOnSameOrigin() throws {
+        let host = OHBridgeHost()
+        let connection = try #require(URL(string: "https://home.myopenhab.org"))
+        host.connectionURLs = { [connection] }
+        let webView = WKWebView()
+        let appLoad = webView.loadHTMLString("", baseURL: nil)
+        host.trustRedirects(of: appLoad)
+        host.recordCommit(appLoad, url: URL(string: "https://eu.myopenhab.org/"))
+
+        host.recordCommit(webView.loadHTMLString("", baseURL: nil), url: URL(string: "https://eu.myopenhab.org/?code=abc&state=xyz"))
+        #expect(host.acceptsOrigin(scheme: "https", host: "eu.myopenhab.org", port: 0))
+    }
+
+    @Test("A redirect is no longer trusted once the page leaves its origin and comes back by itself")
+    func forgetsRedirectAfterLeaving() throws {
+        let host = OHBridgeHost()
+        let connection = try #require(URL(string: "https://oh.example.com"))
+        host.connectionURLs = { [connection] }
+        let webView = WKWebView()
+        let appLoad = webView.loadHTMLString("", baseURL: nil)
+        host.trustRedirects(of: appLoad)
+        host.recordCommit(appLoad, url: URL(string: "https://accounts.google.com/signin"))
+        #expect(host.acceptsOrigin(scheme: "https", host: "accounts.google.com", port: 0))
+
+        // Signed in, back on openHAB, then a script or redirect returns to the sign-in origin.
+        host.recordCommit(webView.loadHTMLString("", baseURL: nil), url: URL(string: "https://oh.example.com/"))
+        host.recordCommit(webView.loadHTMLString("", baseURL: nil), url: URL(string: "https://accounts.google.com/"))
+        #expect(!host.acceptsOrigin(scheme: "https", host: "accounts.google.com", port: 0))
+        #expect(host.acceptsOrigin(scheme: "https", host: "oh.example.com", port: 0))
     }
 
     @Test("A redirect is trusted for the UI but never gets credentials")
@@ -277,6 +340,33 @@ struct OHBridgeTests {
         #expect(reply == #"["not_found"]"#)
     }
 
+    @Test("An icon-only navbar button is sent without a label, a button with text keeps it")
+    func shimNavbarLabels() async throws {
+        let page = ShimPage()
+        page.load(ShimPage.navbarHTML)
+        let json = try await page.waitFor("JSON.stringify((__posted.filter(function (m) { return m.type === 'navbar.state' }).pop() || {}).payload || null)")
+        let navbar = try JSONDecoder().decode(OHBridgeNavbarState.self, from: Data(json.utf8))
+        #expect(navbar.trailing.map(\.label) == ["", "Save"])
+        #expect(navbar.trailing.first?.icon?.name == "f7:square_list")
+    }
+
+    /// Main UI's login comes back to the front page with the code in the address.
+    @Test("Restoring pages leaves an address with a query alone")
+    func shimKeepsLoginQuery() async throws {
+        let page = ShimPage(info: "{ features: ['routeRestore'], initialHistory: ['/', '/page/kitchen'] }")
+        page.load(ShimPage.sidebarHTML, at: "https://openhab.example/?code=abc&state=xyz")
+        let address = try await page.waitFor("document.getElementById('app') ? location.pathname + location.search : 'null'")
+        #expect(address == "/?code=abc&state=xyz")
+    }
+
+    @Test("Restoring pages on the bare front page moves to the last one")
+    func shimRestoresOnFrontPage() async throws {
+        let page = ShimPage(info: "{ features: ['routeRestore'], initialHistory: ['/', '/page/kitchen'] }")
+        page.load(ShimPage.sidebarHTML)
+        let address = try await page.waitFor("document.getElementById('app') ? location.pathname + location.search : 'null'")
+        #expect(address == "/page/kitchen")
+    }
+
     // MARK: - Icons
 
     @Test("The bundled Framework7 font knows its icon names")
@@ -317,28 +407,48 @@ private final class ShimPage {
     </body></html>
     """
 
-    private static let stubBridge = """
-    window.__posted = [];
-    window.OHBridge = {
-        info: { features: ['navbar', 'menu'] },
-        onmessage: null,
-        postMessage: function (json) { window.__posted.push(JSON.parse(json)) }
-    };
+    static let navbarHTML = """
+    <!DOCTYPE html><html><body>
+    <div id="app" class="framework7-root">
+      <div class="view view-main"><div class="page page-current">
+        <div class="navbar"><div class="navbar-inner">
+          <div class="title">Logs</div>
+          <div class="right">
+            <a class="link icon-only"><i class="icon f7-icons">square_list</i></a>
+            <a class="link"><i class="icon f7-icons">checkmark</i> Save</a>
+          </div>
+        </div></div>
+        <div class="page-content"></div>
+      </div></div>
+    </div>
+    </body></html>
     """
 
     let webView: WKWebView
 
-    init() {
+    init(info: String = "{ features: ['navbar', 'menu'] }") {
         let controller = WKUserContentController()
-        controller.addUserScript(WKUserScript(source: Self.stubBridge, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        controller.addUserScript(WKUserScript(source: Self.stubBridge(info: info), injectionTime: .atDocumentStart, forMainFrameOnly: true))
         controller.addUserScript(WKUserScript(source: OHBridgeHost.shimScript, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         let configuration = WKWebViewConfiguration()
         configuration.userContentController = controller
         webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 390, height: 844), configuration: configuration)
     }
 
-    func load(_ html: String) {
-        webView.loadHTMLString(html, baseURL: URL(string: "https://openhab.example/"))
+    /// A stand-in for the host's `OHBridge`, with `info` as a JavaScript object literal.
+    private static func stubBridge(info: String) -> String {
+        """
+        window.__posted = [];
+        window.OHBridge = {
+            info: \(info),
+            onmessage: null,
+            postMessage: function (json) { window.__posted.push(JSON.parse(json)) }
+        };
+        """
+    }
+
+    func load(_ html: String, at address: String = "https://openhab.example/") {
+        webView.loadHTMLString(html, baseURL: URL(string: address))
     }
 
     /// Runs `js`, whose last expression must be a string.
@@ -350,7 +460,9 @@ private final class ShimPage {
     func waitFor(_ js: String) async throws -> String {
         for _ in 0 ..< 50 {
             let result = try? await run(js)
-            if let result, !result.isEmpty, result != "null" { return result }
+            if let result, !result.isEmpty, result != "null" {
+                return result
+            }
             try await Task.sleep(for: .milliseconds(100))
         }
         Issue.record("timed out waiting for \(js)")

@@ -47,11 +47,10 @@ interface HostInfo {
   /** Pages to put back at startup, oldest first, as paths from Main UI's root. */
   initialHistory?: string[]
   /**
-   * What each page in initialHistory was opened with, as JSON, one per page: `deep` for the
-   * page's back link, `defineVars` for its variables. They aren't part of the address, so a
-   * page opened from its address alone would come up without them.
+   * What each page in initialHistory was opened with, one per page. They aren't part of the
+   * address, so a page opened from its address alone would come up without them.
    */
-  initialProps?: string[]
+  initialProps?: PageProps[]
   layout?: LayoutInfo
 }
 
@@ -138,14 +137,23 @@ interface UIHello {
   features: UIFeature[]
 }
 
+/**
+ * What a page was opened with: `deep` for the page's back link, `defineVars` for its variables.
+ * Only props that survive being saved as JSON; the app keeps them as they are and hands them back.
+ */
+interface PageProps {
+  deep?: boolean
+  defineVars?: Record<string, unknown>
+}
+
 /** Sent after every page change. */
 interface NavState {
   /** The page on screen, as a path from Main UI's root, e.g. "/page/overview". */
   path: string
   /** Pages that can be put back, oldest first. Popups and pages that can't be opened from an address are left out. */
   history: string[]
-  /** One JSON string per entry in history: the props it was opened with. See HostInfo.initialProps. */
-  props?: string[]
+  /** One per entry in history: the props it was opened with. See HostInfo.initialProps. */
+  props?: PageProps[]
   /** A popup, sheet or popover is open on top of the page. */
   modal: boolean
 }
@@ -170,6 +178,7 @@ interface NavbarState {
 interface NavbarAction {
   /** Stays the same while the button is on the page. Sent back in navbar.activate. */
   id: string
+  /** The button's visible text. Empty when it shows only an icon, never the icon's name. */
   label: string
   icon?: Icon
   disabled?: boolean

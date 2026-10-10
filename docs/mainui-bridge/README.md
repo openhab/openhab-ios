@@ -101,7 +101,7 @@ doesn't know.
 | `protocol`, `platform`, `appVersion` | Which app this is and which version of the protocol it speaks. |
 | `features` | What the app offers to take over. Main UI says which ones it took in `ui.hello`. |
 | `theme`, `darkMode` | Theme to start with if the user hasn't picked one in Main UI. |
-| `initialHistory`, `initialProps` | Pages to put back, oldest first, and what each was opened with (`deep`, `defineVars`). Main UI opens the last one, with the others behind it for Back. |
+| `initialHistory`, `initialProps` | Pages to put back, oldest first, and what each was opened with (`deep`, `defineVars`, as objects). Main UI opens the last one, with the others behind it for Back. |
 | `layout` | How much of the page the app's bars cover, so Main UI leaves room from the start. |
 
 `features` can hold:
@@ -110,6 +110,9 @@ doesn't know.
 - `menu`: the app shows Main UI's sidebar in its own menu. Main UI hides its sidebar and sends
   `menu.state`.
 - `routeRestore`: the app remembers where the user was and passes it back in `initialHistory`.
+  Main UI only puts the pages back when it starts on its front page with nothing after the
+  path. Coming back from its login (`/?code=…&state=…`) it leaves the address alone, or the
+  login would never finish.
 
 ### Page → app
 
@@ -189,13 +192,14 @@ Main UI starts on the Kitchen page, with Overview behind it, and reports back:
     "title": "Kitchen", "titleInContent": false, "hidden": false,
     "back": { "label": "Overview" },
     "leading": [],
-    "trailing": [ { "id": "7", "label": "Edit", "icon": { "name": "f7:pencil", "md": "material:edit" } } ] } }
+    "trailing": [ { "id": "7", "label": "", "icon": { "name": "f7:pencil", "md": "material:edit" } } ] } }
 
 { "v": 1, "type": "connection.state", "payload": { "sseConnected": true } }
 ```
 
 The app now shows "Kitchen" in its bar, with a back button and a pencil button, and hides its
-"connecting" indicator.
+"connecting" indicator. The pencil has no text on screen, so its `label` is empty and the app
+draws just the icon.
 
 ### 2. Starting up with an older Main UI
 
