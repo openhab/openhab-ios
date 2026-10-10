@@ -42,7 +42,7 @@ enum WebRouteRestore {
         guard !state.history.isEmpty, !state.path.isEmpty else { return nil }
         return WebRouteSnapshot(
             history: state.history,
-            props: state.props?.count == state.history.count ? state.props : nil,
+            props: state.props.flatMap { $0.count == state.history.count ? $0.map(\.json) : nil },
             url: state.path,
             connectionURL: connectionURL,
             capturedAt: capturedAt

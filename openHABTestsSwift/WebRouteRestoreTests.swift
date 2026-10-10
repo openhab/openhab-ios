@@ -41,7 +41,7 @@ struct WebRouteRestoreTests {
     // MARK: - Reading nav.changed
 
     private func navState(_ history: [String], props: [String]? = nil, path: String? = nil) -> OHBridgeNavState {
-        OHBridgeNavState(path: path ?? history.last ?? "", history: history, props: props, modal: false)
+        OHBridgeNavState(path: path ?? history.last ?? "", history: history, props: props?.map(OHBridgeProps.init(json:)), modal: false)
     }
 
     @Test("Reads the pages from a nav.changed")
@@ -267,12 +267,12 @@ struct WebRouteRestoreTests {
         #expect(shim.contains("var RESTORE = info.initialHistory && info.initialHistory.length ? info.initialHistory : null"))
     }
 
-    @Test("Pages and props go to the page as JSON arrays of strings, parsed there")
+    @Test("Pages go to the page as a JSON array, and their props as plain objects")
     @MainActor
     func restoreSentAsJSON() {
         let source = startupScript(restore: ["/overview/", "/page/kitchen"], props: ["{}", Self.deep])
         #expect(source.contains(#""initialHistory":["/overview/","/page/kitchen"]"#))
-        #expect(source.contains(#""initialProps":["{}","{\"deep\":true}"]"#))
+        #expect(source.contains(#""initialProps":[{},{"deep":true}]"#))
     }
 
     /// The Main UI opens a restored page from its address alone, which carries no props.

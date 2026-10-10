@@ -113,7 +113,7 @@ final class OHBridgeHost {
             appVersion: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "",
             features: Self.features,
             initialHistory: restore,
-            initialProps: props,
+            initialProps: props?.map(OHBridgeProps.init(json:)),
             layout: layout
         )
         // The bridge object first, then the shim that speaks it for Main UI versions without it.

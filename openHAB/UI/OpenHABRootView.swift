@@ -625,8 +625,8 @@ private extension OpenHABRootView {
             navbarActionLabel(item)
         }
         .disabled(item.disabled == true)
-        .accessibilityLabel(item.label)
-        .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
+        .accessibilityLabel(item.accessibilityName)
+        .accessibilityIdentifier("NavbarProxyButton-\(item.accessibilityName)")
     }
 
     @ViewBuilder
@@ -657,8 +657,8 @@ private extension OpenHABRootView {
                         navbarActionLabel(item)
                     }
                     .disabled(item.disabled == true)
-                    .accessibilityLabel(item.label)
-                    .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
+                    .accessibilityLabel(item.accessibilityName)
+                    .accessibilityIdentifier("NavbarProxyButton-\(item.accessibilityName)")
                 }
             }
             .padding(.horizontal, 20)
