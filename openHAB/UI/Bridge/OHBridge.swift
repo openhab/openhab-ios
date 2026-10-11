@@ -232,18 +232,27 @@ extension OHBridgeMenuState {
     /// The id the shim gives the sidebar's Administration section: the first path segment of its
     /// entries.
     static let administrationSectionID = "settings"
+    /// The id the shim gives the block with the user's account, or the entry that signs in.
+    static let accountSectionID = "account"
     /// The entry that signs the user in. Present only while Administration is locked.
     static let unlockItemID = "unlock"
 
-    /// Administration, once the user is signed in.
-    var administration: OHBridgeMenuSection? {
+    /// The Administration section of the sidebar, once the user is signed in.
+    private var administrationSection: OHBridgeMenuSection? {
         sections.first { $0.id == Self.administrationSectionID }
+    }
+
+    /// What Administration lists once the user is signed in: the admin entries, then the user's
+    /// account entry. None while it is locked.
+    var administrationItems: [OHBridgeMenuItem] {
+        let account = sections.first { $0.id == Self.accountSectionID }?.items ?? []
+        return ((administrationSection?.items ?? []) + account).filter { $0.id != Self.unlockItemID }
     }
 
     /// What to call Administration: its own title once signed in, until then the label of the
     /// entry that signs in.
     var administrationTitle: String? {
-        let title = administration?.title ?? sections.lazy.flatMap(\.items).first { $0.id == Self.unlockItemID }?.label
+        let title = administrationSection?.title ?? sections.lazy.flatMap(\.items).first { $0.id == Self.unlockItemID }?.label
         return title?.isEmpty == false ? title : nil
     }
 
@@ -251,11 +260,11 @@ extension OHBridgeMenuState {
         sections.contains { $0.items.contains { $0.id == Self.unlockItemID } }
     }
 
-    /// What the Main UI section lists. Administration has a section of its own, which also
-    /// stands for the unlock entry.
+    /// What the Main UI section lists. Administration has a section of its own, which takes the
+    /// admin entries and the user's account, and stands for the unlock entry.
     var mainUISections: [OHBridgeMenuSection] {
         sections.compactMap { section in
-            guard section.id != Self.administrationSectionID else { return nil }
+            guard section.id != Self.administrationSectionID, section.id != Self.accountSectionID else { return nil }
             let items = section.items.filter { $0.id != Self.unlockItemID }
             return items.isEmpty ? nil : OHBridgeMenuSection(id: section.id, title: section.title, items: items)
         }
