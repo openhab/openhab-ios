@@ -97,6 +97,10 @@ class OpenHABWebViewModel: ObservableObject {
     /// Which home the web view currently belongs to. Kept here so we can note pages against it
     /// right away. Looking it up takes a moment, and the user can switch homes in between.
     private var currentHomeId: UUID?
+    /// The layout a host view with a system navigation bar reports. While it is set, it replaces
+    /// the one derived from the custom bar. The system bar is part of the safe area it is
+    /// measured from, so the constant `navbarHeight` would make Main UI leave room twice.
+    private var systemBarLayout: OHBridgeLayout?
 
     /// True once Main UI is live in the page now loaded, so it can be navigated in place.
     var isMainUIReady: Bool {
@@ -714,8 +718,16 @@ extension OpenHABWebViewModel {
         }
     }
 
+    /// Tells Main UI how much of the page the host's system bars cover, and keeps sending it
+    /// with every page load.
+    func setSystemBarLayout(_ layout: OHBridgeLayout) {
+        systemBarLayout = layout
+        bridge.updateLayout(layout)
+    }
+
     /// The space the host's chrome takes over the page.
     func currentLayout() -> OHBridgeLayout {
+        if let systemBarLayout { return systemBarLayout }
         let insets = webView.safeAreaInsets
         return OHBridgeLayout(
             insets: .init(top: insets.top, bottom: insets.bottom),
