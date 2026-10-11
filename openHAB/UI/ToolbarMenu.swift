@@ -104,6 +104,12 @@ struct ToolbarMenu: View {
     /// A sidebar entry without a path was tapped.
     var onActivateWebMenuItem: (String) -> Void = { _ in }
     var onReload: (() -> Void)?
+    /// Shows only the menu itself, without the dimming backdrop and the corner animation, for a
+    /// host that presents it in its own container (a popover). The overlay is the default.
+    var isEmbedded = false
+
+    /// The tallest the embedded menu grows before it scrolls.
+    private static let embeddedMenuHeight: CGFloat = 480
 
     /// The sitemap row (if any) to highlight as current, derived from `currentContent`.
     private var currentSitemapName: String? {
@@ -129,8 +135,14 @@ struct ToolbarMenu: View {
     @ScaledMetric private var iconWidth = 20.0
 
     var body: some View {
-        GeometryReader { proxy in
-            overlayContent(proxy: proxy)
+        Group {
+            if isEmbedded {
+                menuContent(height: Self.embeddedMenuHeight)
+            } else {
+                GeometryReader { proxy in
+                    overlayContent(proxy: proxy)
+                }
+            }
         }
         .onAppear { Task { await loadExpansionState() } }
         .onChange(of: isPresented) { _, newValue in
