@@ -11,10 +11,11 @@
 
 import Foundation
 
-/// The four collapsible sections in the toolbar dropdown menu.
+/// The collapsible sections in the toolbar dropdown menu.
 /// `allCases` defines the canonical default display order.
 public enum MenuSection: String, Codable, CaseIterable, Hashable, Sendable {
     case mainUI
+    case administration
     case sitemaps
     case tiles
     case system

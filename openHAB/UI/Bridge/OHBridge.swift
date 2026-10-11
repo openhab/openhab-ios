@@ -228,6 +228,40 @@ struct OHBridgeMenuState: Decodable, Equatable {
     let sections: [OHBridgeMenuSection]
 }
 
+extension OHBridgeMenuState {
+    /// The id the shim gives the sidebar's Administration section: the first path segment of its
+    /// entries.
+    static let administrationSectionID = "settings"
+    /// The entry that signs the user in. Present only while Administration is locked.
+    static let unlockItemID = "unlock"
+
+    /// Administration, once the user is signed in.
+    var administration: OHBridgeMenuSection? {
+        sections.first { $0.id == Self.administrationSectionID }
+    }
+
+    /// What to call Administration: its own title once signed in, until then the label of the
+    /// entry that signs in.
+    var administrationTitle: String? {
+        let title = administration?.title ?? sections.lazy.flatMap(\.items).first { $0.id == Self.unlockItemID }?.label
+        return title?.isEmpty == false ? title : nil
+    }
+
+    var isAdministrationLocked: Bool {
+        sections.contains { $0.items.contains { $0.id == Self.unlockItemID } }
+    }
+
+    /// What the Main UI section lists. Administration has a section of its own, which also
+    /// stands for the unlock entry.
+    var mainUISections: [OHBridgeMenuSection] {
+        sections.compactMap { section in
+            guard section.id != Self.administrationSectionID else { return nil }
+            let items = section.items.filter { $0.id != Self.unlockItemID }
+            return items.isEmpty ? nil : OHBridgeMenuSection(id: section.id, title: section.title, items: items)
+        }
+    }
+}
+
 struct OHBridgeMenuSection: Decodable, Equatable, Identifiable {
     let id: String
     let title: String?
