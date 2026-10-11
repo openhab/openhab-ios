@@ -24,7 +24,7 @@ import SwiftUI
 /// has failed it switches to a warning: a countdown to the next retry, or — when the tracker
 /// has given up — a static "cannot connect" message. On an adaptive background so the blank
 /// page reads as intentional in both light and dark mode.
-private struct ConnectingPlaceholder: View {
+struct ConnectingPlaceholder: View {
     private enum Phase: Equatable {
         case connecting
         case retrying(Date)
