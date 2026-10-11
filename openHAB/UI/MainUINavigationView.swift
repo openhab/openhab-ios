@@ -144,7 +144,19 @@ import SwiftUI
 //      portrait inner display keeps horizontal bars). Use the canvas "Display" and
 //      "Orientation" variants. Static preview snapshots may not show web content.
 //
-// 11. NOT DONE / UNVERIFIED
+// 11. HIDING THE BAR MOVES THE SAFE AREA (experiment)
+//    - Framework7 hides its navbar when an expandable card opens (a location on the home page).
+//      Hiding the system bar then shrinks the web view's top safe area (`env(safe-area-inset-top)`
+//      went from 82 px to 0 px on the Duo) while the card is animating, and the card ended up 82
+//      px too high, with its close button above the screen. The old custom bar was an overlay and
+//      never changed the web view's safe area. Measured with the bar forced visible: card at y 0.
+//    - `holdsTopInsetWhileBarHidden` keeps the last visible top inset in place while the bar is
+//      hidden, through `additionalSafeAreaInsets` of the web view's host controller (a SwiftUI
+//      `safeAreaInset` does not reach the web view), so the page sees the same safe area either way.
+//      Open: whether that is right for every page, since content then keeps a blank band at the
+//      top while Main UI has hidden its navbar. Alternative: never hide the system bar.
+//
+// 12. NOT DONE / UNVERIFIED
 //    - Not run on the iPhone Duo simulator or a device by the author of this file. The vertical
 //      bar behavior is taken from Apple's tech talk "Prepare your app for iPhone Duo" and
 //      third-party write-ups. The local Xcode documentation search did not list
@@ -210,9 +222,20 @@ private struct MainUINavigationContent: View {
     @State private var isMenuPresented = false
     @State private var safeArea = EdgeInsets()
     @State private var reportedLayout = MainUILayout.zero
+    @State private var lastVisibleTopInset: CGFloat = 0
+
+    /// EXPERIMENT (see decision 11): while Main UI has hidden its navbar, and with it the system
+    /// bar, keep the web view's top safe area at the value it had with the bar visible. Set to
+    /// false to see the plain behavior, where hiding the bar shrinks the safe area.
+    private static let holdsTopInsetWhileBarHidden = true
 
     private var isTile: Bool {
         tileTitle != nil
+    }
+
+    /// The top inset to hold in place of the hidden bar.
+    private var heldTopInset: CGFloat {
+        Self.holdsTopInsetWhileBarHidden && !isTile && navbar.hidden ? lastVisibleTopInset : 0
     }
 
     /// A tile has no bridge, so the page's navbar (possibly left over from Main UI) is ignored.
@@ -225,12 +248,12 @@ private struct MainUINavigationContent: View {
             // The GeometryReader sits OUTSIDE `.ignoresSafeArea()` on purpose: it reads the real
             // safe area, while the Main UI web view inside it draws full bleed, as before.
             GeometryReader { proxy in
-                OpenHABWebViewContainer(viewModel: webViewModel)
+                OpenHABWebViewContainer(additionalSafeAreaTop: heldTopInset, viewModel: webViewModel)
                     .background(.clear)
                     .ignoresSafeArea(edges: isTile ? [] : .all)
                     .onChange(of: proxy.safeAreaInsets, initial: true) { _, insets in
                         safeArea = insets
-                        reportLayout()
+                        reportLayout(for: insets)
                     }
             }
             // Placeholder while a home is first loading, as in the custom-bar layout.
@@ -240,7 +263,7 @@ private struct MainUINavigationContent: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
-        .onChange(of: navbar.hidden) { _, _ in reportLayout() }
+        .onChange(of: navbar.hidden) { _, _ in reportLayout(for: safeArea) }
         .navigationTitle(tileTitle ?? (navbar.titleInContent ? "" : navbar.title))
         .toolbarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
@@ -250,9 +273,12 @@ private struct MainUINavigationContent: View {
     }
 
     /// See the layout reporting rule (8) in the decision log. A tile has no bridge to tell.
-    private func reportLayout() {
+    /// Takes the insets as an argument because the `safeArea` state is not updated yet when
+    /// this runs from the `onChange` that stores it.
+    private func reportLayout(for insets: EdgeInsets) {
         guard !isTile, !navbar.hidden else { return }
-        let layout = MainUILayout(safeArea: safeArea)
+        lastVisibleTopInset = insets.top
+        let layout = MainUILayout(safeArea: insets)
         guard layout != reportedLayout else { return }
         reportedLayout = layout
         webViewModel.setSystemBarLayout(layout.bridgeLayout)
