@@ -102,6 +102,10 @@ import SwiftUI
 //                          button, in the same placement, so it always stays to the right of (or
 //                          below, on a vertical bar) the back button. Not important enough to
 //                          get its own area; on a horizontal bar it is icon only.
+//    - Menu button      -> the last trailing item on a horizontal bar, as before. On a vertical bar
+//                          it is the topmost item (declared first, in the leading placement): the
+//                          items above it come and go, and a menu button below them would jump
+//                          whenever one appears or disappears.
 //    - Hamburger animation -> not important; replaced by the system popover morph (point 7).
 //
 // 7. MENU: POPOVER INSTEAD OF THE OVERLAY
@@ -266,6 +270,18 @@ private struct MainUINavigationContent: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
+        // DECISION: on a vertical bar the menu button is the topmost item. The items above it
+        // come and go (back, connection state, page actions), so a menu button below them would
+        // jump whenever one appears or disappears. It is declared first, in the leading
+        // placement, so the system puts it at the top of the strip. A horizontal bar keeps the
+        // menu button last in the trailing placement, see the end of this builder.
+        if verticalEdge != nil {
+            ToolbarItem(placement: .cancellationAction) {
+                menuButton
+            }
+            .axisBehavior(.verticalPreferred)
+        }
+
         if let back = navbar.back {
             ToolbarItem(placement: .cancellationAction) {
                 let title = back.label.flatMap { $0.isEmpty ? nil : $0 } ?? String(localized: "Back")
@@ -332,12 +348,13 @@ private struct MainUINavigationContent: View {
             }
         }
 
-        // The menu button. It is the last item, so on a vertical strip it ends up with the other
-        // trailing items, which is where the iPhone Duo user expects it.
-        ToolbarItem(placement: .topBarTrailing) {
-            menuButton
+        // The menu button on a horizontal bar: the last item at the trailing edge, as before.
+        // A vertical bar has it at the top instead, see the start of this builder.
+        if verticalEdge == nil {
+            ToolbarItem(placement: .topBarTrailing) {
+                menuButton
+            }
         }
-        .axisBehavior(.verticalPreferred)
     }
 
     /// The page's icon on a horizontal bar; on a vertical bar a symbol plus a title, which that
