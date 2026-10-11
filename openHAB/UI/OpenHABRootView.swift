@@ -287,14 +287,7 @@ struct OpenHABRootView: View {
                 webMenu: webViewModel.menu,
                 currentContent: currentContent,
                 onSelect: { target in handleMenuSelection(target) },
-                onActivateWebMenuItem: { id in
-                    // It runs in Main UI, so Main UI has to be on screen, reloaded in place of a
-                    // tile if need be. The bridge holds the message until the page says hello.
-                    if !isMainUIShown || webViewModel.isShowingTile {
-                        showMainUI(path: nil, persistAsDefault: false)
-                    }
-                    webViewModel.bridge.activateMenuItem(id)
-                },
+                onActivateWebMenuItem: { id in activateWebMenuItem(id) },
                 onReload: { reloadCurrentContent() }
             )
         }
@@ -460,41 +453,80 @@ private extension OpenHABRootView {
     var contentView: some View {
         switch currentContent {
         case .webview, .mainUIPage:
-            ZStack(alignment: .top) {
-                // The Main UI lays itself out from the safe-area insets and reserves the
-                // navbar space the bar below sits on.
-                OpenHABWebViewContainer(viewModel: webViewModel)
-                    .background(.clear)
-                    .ignoresSafeArea()
-                // Placeholder while a home is first loading. Sits above the (transparent)
-                // web view but below the menu bar, so the menu stays reachable and the user
-                // can switch homes even while connecting.
-                if !webViewModel.hasLoadedContent {
-                    ConnectingPlaceholder()
-                        .transition(.opacity)
-                }
-                // Same slide Framework7 uses for its navbar: up by the bar height, fading, 400ms.
-                menuBar
-                    .offset(y: webViewModel.navbar.hidden ? -menuBarHeight : 0)
-                    .opacity(webViewModel.navbar.hidden ? 0 : 1)
-                    .allowsHitTesting(!webViewModel.navbar.hidden)
-                    .animation(
-                        .timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.4),
-                        value: webViewModel.navbar.hidden
-                    )
+            if #available(iOS 27.1, *) {
+                // A system bar, so the toolbar can move into the iPhone Duo's vertical strip.
+                nativeBarContent(tileTitle: nil)
+            } else {
+                customBarMainUI
             }
-            .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
         case let .sitemap(name, navigationState: state):
             SitemapNavigationView(sitemapName: name, navigationPath: state.navigationPath) { menuPresented = true }
                 .id("\(name)-\(state.navigationPath.last?.pageLink ?? "")-\(sitemapResetID)")
         case .tile:
-            VStack(spacing: 0) {
-                menuBar
-                OpenHABWebViewContainer(viewModel: webViewModel)
+            if #available(iOS 27.1, *) {
+                nativeBarContent(tileTitle: currentViewTitle)
+            } else {
+                VStack(spacing: 0) {
+                    menuBar
+                    OpenHABWebViewContainer(viewModel: webViewModel)
+                }
             }
         case .notifications, .browser:
             preconditionFailure("Modal/transient targets must never become currentContent")
         }
+    }
+
+    /// Main UI or a tile with a system navigation bar. See `MainUINavigationView`.
+    @available(iOS 27.1, *)
+    func nativeBarContent(tileTitle: String?) -> some View {
+        MainUINavigationView(
+            webViewModel: webViewModel,
+            menuData: menuData,
+            activeConnection: activeNetworkConnection,
+            currentContent: currentContent,
+            tileTitle: tileTitle,
+            onSelect: { target in handleMenuSelection(target) },
+            onActivateWebMenuItem: { id in activateWebMenuItem(id) },
+            onReload: { reloadCurrentContent() }
+        )
+    }
+
+    /// Main UI with the custom bar drawn over it, for systems before iOS 27.1.
+    var customBarMainUI: some View {
+        ZStack(alignment: .top) {
+            // The Main UI lays itself out from the safe-area insets and reserves the
+            // navbar space the bar below sits on.
+            OpenHABWebViewContainer(viewModel: webViewModel)
+                .background(.clear)
+                .ignoresSafeArea()
+            // Placeholder while a home is first loading. Sits above the (transparent)
+            // web view but below the menu bar, so the menu stays reachable and the user
+            // can switch homes even while connecting.
+            if !webViewModel.hasLoadedContent {
+                ConnectingPlaceholder()
+                    .transition(.opacity)
+            }
+            // Same slide Framework7 uses for its navbar: up by the bar height, fading, 400ms.
+            menuBar
+                .offset(y: webViewModel.navbar.hidden ? -menuBarHeight : 0)
+                .opacity(webViewModel.navbar.hidden ? 0 : 1)
+                .allowsHitTesting(!webViewModel.navbar.hidden)
+                .animation(
+                    .timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.4),
+                    value: webViewModel.navbar.hidden
+                )
+        }
+        .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
+    }
+
+    /// A sidebar entry without a path was tapped. It runs in Main UI, so Main UI has to be on
+    /// screen, reloaded in place of a tile if need be. The bridge holds the message until the
+    /// page says hello.
+    func activateWebMenuItem(_ id: String) {
+        if !isMainUIShown || webViewModel.isShowingTile {
+            showMainUI(path: nil, persistAsDefault: false)
+        }
+        webViewModel.bridge.activateMenuItem(id)
     }
 
     /// The host owns the bar height; the bridge sizes Main UI's own navbar to match it.
