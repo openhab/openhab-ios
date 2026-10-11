@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [Version 3.4.33, Build 330] - 2026-10-11Z
+
+- chore(lint): fix SwiftLint warnings in WebRouteRestore.seed (#1357)
+- Updated Dutch translations (#1359)
+- Update Localizable.xcstrings (#1358)
+- fix(menu): keep the menu when reloading offline, track overlapping fetches (#1356)
+- Updated German and French translations (#1355)
+- feat(menu): pull-to-refresh and live updates in the toolbar menu (#1346)
+- Selected sitemap/MainUI page and tiles indicator (#1332)
+
 ## [Version 3.4.32, Build 329] - 2026-10-08Z
 
 - refactor(notifications): migrate NotificationActionService and PushRegistrationService off ObservableObject (#1349)
