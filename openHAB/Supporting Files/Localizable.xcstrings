@@ -84,7 +84,7 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : " - "
           }
         },
         "fr" : {
@@ -102,7 +102,7 @@
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : " - "
           }
         },
         "nl" : {
@@ -257,13 +257,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "/overview/"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "/overview/"
           }
         },
         "fr" : {
@@ -281,7 +281,7 @@
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "/overview/"
           }
         },
         "nl" : {
@@ -1165,7 +1165,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Huis toevoegen"
+            "value" : "Thuis toevoegen"
           }
         },
         "ru" : {
@@ -1753,7 +1753,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App Versie"
+            "value" : "App-versie"
           }
         },
         "ru" : {
@@ -1984,7 +1984,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bonjour discovery may not find all servers. Additional servers may be available on your network."
+            "value" : "De Bonjour-ontdekking vindt mogelijk niet alle servers. Er kunnen meer servers op uw netwerk beschikbaar zijn."
           }
         },
         "ru" : {
@@ -6216,7 +6216,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Huis '%@' verwijderen?"
+            "value" : "Thuis '%@' verwijderen?"
           }
         },
         "ru" : {
@@ -6805,7 +6805,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Discovered Servers"
+            "value" : "Ontdekte servers"
           }
         },
         "ru" : {
@@ -7668,7 +7668,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voer een naam in voor het nieuwe huis"
+            "value" : "Voer een naam in voor het nieuwe thuis"
           }
         },
         "ru" : {
@@ -7727,7 +7727,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voer een nieuwe naam in voor het huis '%@'"
+            "value" : "Voer een nieuwe naam in voor het thuis '%@'"
           }
         },
         "ru" : {
@@ -8996,7 +8996,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Naam van huis"
+            "value" : "Naam van thuis"
           }
         },
         "ru" : {
@@ -9941,7 +9941,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Item '%@' staat niet in huis '%@'"
+            "value" : "Item '%@' staat niet in thuis '%@'"
           }
         },
         "ru" : {
@@ -11450,7 +11450,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Main UI Instellingen"
+            "value" : "Main UI instellingen"
           }
         },
         "ru" : {
@@ -11866,7 +11866,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Naam voor nieuw huis"
+            "value" : "Naam voor nieuw thuis"
           }
         },
         "ru" : {
@@ -11925,7 +11925,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nieuw huis"
+            "value" : "Nieuw thuis"
           }
         },
         "ru" : {
@@ -12740,7 +12740,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No active connection available. Please check your settings."
+            "value" : "Geen actieve verbinding beschikbaar. Controleer uw instellingen."
           }
         },
         "ru" : {
@@ -12799,7 +12799,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No servers found"
+            "value" : "Geen servers gevonden"
           }
         },
         "ru" : {
@@ -16158,7 +16158,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uitvoeren in demo-modus. Controleer instellingen om demomodus uit te schakelen."
+            "value" : "Werkt in demomodus. Controleer de instellingen om de demomodus uit te schakelen."
           }
         },
         "ru" : {
@@ -16566,7 +16566,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Selecteer een huis voor '%@'"
+            "value" : "Selecteer een thuis voor '%@'"
           }
         },
         "ru" : {
@@ -18146,7 +18146,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stel contact status waarde in"
+            "value" : "Contactstatuswaarde instellen"
           }
         },
         "ru" : {
@@ -18372,7 +18372,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stel Dimmer of Rolluik waarde in"
+            "value" : "Dimmer- of rolluikwaarde instellen"
           }
         },
         "ru" : {
@@ -19006,7 +19006,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stel de decimale waarde van een nummer control item in"
+            "value" : "Stel de decimale waarde van een getalsbesturingsitem in"
           }
         },
         "ru" : {
@@ -19354,7 +19354,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De tekenreeks van een string controle item instellen"
+            "value" : "De tekenreeks van een stringbesturingsitem instellen"
           }
         },
         "ru" : {
@@ -19882,7 +19882,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show Search Field"
+            "value" : "Zoekveld tonen"
           }
         },
         "ru" : {
@@ -21820,7 +21820,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Schakelaar-item"
+            "value" : "Schakelaaritem"
           }
         },
         "ru" : {
@@ -22598,7 +22598,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De app is tijdens de vorige sessie gecrasht. Wil je een crashrapport verzenden?"
+            "value" : "De app is tijdens de vorige sessie gecrasht. Wilt u een crashrapport verzenden?"
           }
         },
         "ru" : {
@@ -22716,7 +22716,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De staat van %@ is %@"
+            "value" : "De status van %@ is %@"
           }
         },
         "ru" : {
@@ -22947,7 +22947,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Timing"
+            "value" : "Tijdinstellingen"
           }
         },
         "ru" : {
@@ -23520,7 +23520,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Onbekend huis"
+            "value" : "Onbekend thuis"
           }
         },
         "ru" : {
@@ -24344,7 +24344,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Waarschuwing: Het hernoemen van het huis kan ertoe leiden dat externe integraties zoals snelkoppelingen mislukken totdat ze opnieuw zijn geconfigureerd."
+            "value" : "Waarschuwing: Het hernoemen van het thuis kan ertoe leiden dat externe integraties zoals snelkoppelingen mislukken totdat ze opnieuw zijn geconfigureerd."
           }
         },
         "ru" : {
