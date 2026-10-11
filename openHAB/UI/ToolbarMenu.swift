@@ -545,7 +545,7 @@ extension ToolbarMenu {
             .padding(.trailing, 12)
 
             Button(
-                action: { menuData.refresh(); onReload?(); isPresented = false },
+                action: { menuData.clearAndReload(); onReload?(); isPresented = false },
                 label: { Image(systemSymbol: .arrowClockwise).foregroundStyle(.secondary) }
             )
             .buttonStyle(.plain)

@@ -360,7 +360,7 @@ struct OpenHABRootView: View {
             handleNavigationCommand(command)
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
-            menuData.refresh()
+            menuData.clearAndReload()
             webViewModel.reloadView()
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
