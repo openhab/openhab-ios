@@ -548,7 +548,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%lld"
           }
         },
         "fi" : {
@@ -607,7 +607,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%lldK"
           }
         },
         "fi" : {
@@ -1431,7 +1431,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Consenti sempre WebRTC"
+            "value" : "Permitir siempre WebRTC"
           }
         },
         "fi" : {
@@ -1954,7 +1954,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bonjour discovery may not find all servers. Additional servers may be available on your network."
+            "value" : "Es posible que la detección de Bonjour no encuentre todos los servidores. Puede haber otros servidores disponibles en la red."
           }
         },
         "fi" : {
@@ -2486,7 +2486,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se puede conectar al servidor. ¿Está en línea?"
+            "value" : "No se puede conectar al servidor. ¿Estás en línea?"
           }
         },
         "fi" : {
@@ -3130,7 +3130,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limpiar caché de imágenes"
+            "value" : "Borrar caché de imágenes"
           }
         },
         "fi" : {
@@ -3190,7 +3190,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limpiar caché web"
+            "value" : "Borrar caché web"
           }
         },
         "fi" : {
@@ -3999,7 +3999,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El Elemento de Comando es un canal de control remoto del servidor a la app. La app supervisa el estado del elemento a través del flujo de eventos en tiempo real del servidor. Cuando el estado del elemento cambia, el nuevo valor se interpreta como un comando y se ejecuta de inmediato, sin necesidad de notificación push.\n\nLos comandos admitidos incluyen: navegar a una sitemap o página de la interfaz principal, enviar un comando a otro elemento, activar una regla, mostrar el protector de pantalla, salida de texto a voz y ajustar el brillo de la pantalla.\n\nEsto usa el mismo formato de comando que las acciones de notificación push de openHAB."
+            "value" : "El Elemento de Comando es un canal de control remoto del servidor a la app. La app supervisa el estado del elemento a través del flujo de eventos en tiempo real del servidor. Cuando el estado del elemento cambia, el nuevo valor se interpreta como un comando y se ejecuta de inmediato, sin necesidad de notificación push.\n\nLos comandos admitidos incluyen: navegar a un sitemap o página de la interfaz principal, enviar un comando a otro elemento, activar una regla, mostrar el protector de pantalla, salida de texto a voz y ajustar el brillo de la pantalla.\n\nEsto usa el mismo formato de comando que las acciones de notificación push de openHAB."
           }
         },
         "fi" : {
@@ -5246,7 +5246,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Copiar etiqueta del ítem"
+            "value" : "Copiar etiqueta del elemento"
           }
         },
         "fi" : {
@@ -5306,7 +5306,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Informe de fallos"
+            "value" : "Informe de errores"
           }
         },
         "fi" : {
@@ -5483,7 +5483,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Al activar los informes de fallos, usted acepta que la información de uso y del dispositivo se recopilará y compartirá con Crashlytics (una empresa de Google). Para obtener más información, consulte nuestra política de privacidad."
+            "value" : "Al activar los informes de errores, aceptas que se recopile y comparta la información de uso y del dispositivo con Crashlytics (una empresa de Google). Para obtener más información, consulta nuestra política de privacidad."
           }
         },
         "fi" : {
@@ -6186,7 +6186,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Eliminar el hogar '%@'?"
+            "value" : "¿Eliminar el hogar «%@»?"
           }
         },
         "fi" : {
@@ -6775,7 +6775,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Discovered Servers"
+            "value" : "Servidores detectados"
           }
         },
         "fi" : {
@@ -7407,7 +7407,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "lista de mapas web de openHAB vacía"
+            "value" : "Lista de sitemaps de openHAB vacía"
           }
         },
         "fi" : {
@@ -7697,7 +7697,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Introduce un nuevo nombre para el hogar '%@'"
+            "value" : "Introduce un nuevo nombre para el hogar «%@»"
           }
         },
         "fi" : {
@@ -8625,7 +8625,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obtener estado del ítem"
+            "value" : "Obtener estado del elemento"
           }
         },
         "fi" : {
@@ -8907,7 +8907,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Casa"
+            "value" : "Hogar"
           }
         },
         "fi" : {
@@ -9852,7 +9852,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ítem"
+            "value" : "Elemento"
           }
         },
         "fi" : {
@@ -9911,7 +9911,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El elemento '%@' no está en el hogar '%@'"
+            "value" : "El elemento «%@» no está en el hogar «%@»"
           }
         },
         "fi" : {
@@ -9965,7 +9965,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elemento '%@' no encontrado"
+            "value" : "Elemento «%@» no encontrado"
           }
         },
         "fi" : {
@@ -10024,7 +10024,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ítems"
+            "value" : "Elementos"
           }
         },
         "fi" : {
@@ -10499,7 +10499,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cargando mapa del sitio…"
+            "value" : "Cargando sitemap…"
           }
         },
         "fi" : {
@@ -12478,7 +12478,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No hay mapas de sitio disponibles"
+            "value" : "No hay sitemaps disponibles"
           }
         },
         "fi" : {
@@ -12710,7 +12710,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No active connection available. Please check your settings."
+            "value" : "No hay ninguna conexión activa disponible. Comprueba la configuración."
           }
         },
         "fi" : {
@@ -12769,7 +12769,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No servers found"
+            "value" : "No se encontraron servidores."
           }
         },
         "fi" : {
@@ -12883,7 +12883,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sin definir"
+            "value" : "No establecido"
           }
         },
         "fi" : {
@@ -14324,7 +14324,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "conexión openHAB"
+            "value" : "Conexión openHAB"
           }
         },
         "fi" : {
@@ -16128,7 +16128,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Funccionando en modo demostración. Comprueba la configuración para desactivarlo."
+            "value" : "Funcionando en modo demostración. Comprueba la configuración para desactivarlo."
           }
         },
         "fi" : {
@@ -16187,7 +16187,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salvapantallas"
+            "value" : "Protector de pantalla"
           }
         },
         "fi" : {
@@ -16423,7 +16423,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Buscar ítems en openHAB"
+            "value" : "Buscar elementos en openHAB"
           }
         },
         "fi" : {
@@ -16655,7 +16655,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seleccionar mapa web"
+            "value" : "Seleccionar Sitemap"
           }
         },
         "fi" : {
@@ -17506,7 +17506,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Definir el número %lf a %@"
+            "value" : "Número %lf enviado a %@"
           }
         },
         "fi" : {
@@ -17837,7 +17837,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establecer casa activa"
+            "value" : "Establecer el hogar activo"
           }
         },
         "fi" : {
@@ -17890,7 +17890,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establecer casa activa como ${home}"
+            "value" : "Establecer el hogar activo como ${home}"
           }
         },
         "fi" : {
@@ -18003,7 +18003,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Define el valor de control de color"
+            "value" : "Establecer el valor de control de color"
           }
         },
         "fi" : {
@@ -18116,7 +18116,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establecer el valor del estado del pulsador"
+            "value" : "Establecer el valor del estado del sensor de contacto"
           }
         },
         "fi" : {
@@ -18342,7 +18342,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Definir el valor del regulador o persiana"
+            "value" : "Establecer el valor del regulador o persiana"
           }
         },
         "fi" : {
@@ -18745,7 +18745,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Definir el estado del interruptor"
+            "value" : "Establecer el estado del interruptor"
           }
         },
         "fi" : {
@@ -18858,7 +18858,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Definir el color de un ítem de control de color"
+            "value" : "Establecer el color de un elemento de control de color"
           }
         },
         "fi" : {
@@ -18976,7 +18976,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establecer el valor decimal de un ítem de control numérico"
+            "value" : "Establecer el valor decimal de un elemento de control numérico"
           }
         },
         "fi" : {
@@ -19035,7 +19035,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Define el valor entero de un regulador o persiana"
+            "value" : "Establecer el valor entero de un regulador o persiana"
           }
         },
         "fi" : {
@@ -19206,7 +19206,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establecer el estado de un interruptor encendido o apagado"
+            "value" : "Establecer el estado de un sensor de contacto abierto o cerrado"
           }
         },
         "fi" : {
@@ -19324,7 +19324,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establecer la cadena de un ítem controlador de cadena"
+            "value" : "Establecer la cadena de un elemento controlador de cadena"
           }
         },
         "fi" : {
@@ -19615,7 +19615,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mostrar campo de búsqueda en los mapas del sitio"
+            "value" : "Mostrar campo de búsqueda en los Sitemaps"
           }
         },
         "fi" : {
@@ -19733,7 +19733,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mostrar mapas de sitio por"
+            "value" : "Mostrar Sitemaps por"
           }
         },
         "fi" : {
@@ -19852,7 +19852,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show Search Field"
+            "value" : "Mostrar el campo de búsqueda"
           }
         },
         "fi" : {
@@ -19965,7 +19965,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mapa web"
+            "value" : "Sitemap"
           }
         },
         "fi" : {
@@ -20024,7 +20024,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mapa del sitio"
+            "value" : "Sitemap"
           }
         },
         "fi" : {
@@ -20142,7 +20142,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mapa del sitio para Apple Watch"
+            "value" : "Sitemap para Apple Watch"
           }
         },
         "fi" : {
@@ -20255,7 +20255,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajustes del esquema"
+            "value" : "Configuración del sitemap"
           }
         },
         "fi" : {
@@ -20374,7 +20374,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mapas del sitio"
+            "value" : "Sitemap"
           }
         },
         "fi" : {
@@ -20767,7 +20767,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ordenar mapas de sitio por"
+            "value" : "Ordenar Sitemaps por"
           }
         },
         "fi" : {
@@ -20827,7 +20827,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ordenar mapas del sitio por"
+            "value" : "Ordenar Sitemaps por"
           }
         },
         "fi" : {
@@ -21118,7 +21118,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El certificado SSL presentado por %1$@ para %2$@ no es válido. ¿Desea continuar?"
+            "value" : "El certificado SSL presentado por %1$@ para %2$@ no es válido. ¿Quieres continuar?"
           }
         },
         "fi" : {
@@ -21177,7 +21177,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El certificado SSL presentado por %1$@ para %2$@ no coincide con el registro. ¿Desea continuar?"
+            "value" : "El certificado SSL presentado por %1$@ para %2$@ no coincide con el registro. ¿Quieres continuar?"
           }
         },
         "fi" : {
@@ -21349,7 +21349,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Provincia"
+            "value" : "Estado"
           }
         },
         "fi" : {
@@ -21790,7 +21790,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elemento interruptor"
+            "value" : "Elemento de interruptor"
           }
         },
         "fi" : {
@@ -22222,7 +22222,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cambiar la casa activa en la app openHAB"
+            "value" : "Cambiar el hogar activo en la app openHAB"
           }
         },
         "fi" : {
@@ -22390,7 +22390,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "System & App"
+            "value" : "Sistema & aplicación"
           }
         },
         "fi" : {
@@ -22568,7 +22568,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La aplicación se cerró inesperadamente en la sesión anterior. ¿Quieres enviar un informe de fallos?"
+            "value" : "La aplicación se cerró inesperadamente en la sesión anterior. ¿Quieres enviar un informe de errores?"
           }
         },
         "fi" : {
@@ -23841,7 +23841,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nombre de usario"
+            "value" : "Nombre de usuario"
           }
         },
         "fi" : {
