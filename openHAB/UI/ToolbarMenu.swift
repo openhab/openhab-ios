@@ -113,15 +113,21 @@ struct ToolbarMenu: View {
 
     /// Closes the overlay menu before a sheet opens. An embedded menu stays open instead: it
     /// lives in a popover, and closing that would take down the sheet this menu is presenting,
-    /// since the sheet hangs off this view. `dismissEmbeddedMenu` closes it once the sheet is gone.
+    /// since the sheet hangs off this view.
     private func dismissOverlayMenu() {
         guard !isEmbedded else { return }
         isPresented = false
     }
 
-    private func dismissEmbeddedMenu() {
+    /// An overlay menu reloads when it is opened again. An embedded menu was never closed, so
+    /// it reloads its entries and its per-home state when the settings sheet goes away, in case
+    /// the settings changed what it shows.
+    private func refreshAfterSettings() {
         guard isEmbedded else { return }
-        isPresented = false
+        Task {
+            await menuData.reload()
+            await loadExpansionState()
+        }
     }
 
     /// The sitemap row (if any) to highlight as current, derived from `currentContent`.
@@ -170,12 +176,12 @@ struct ToolbarMenu: View {
                 homeDetailsCollapsed = false
             }
         }
-        .sheet(isPresented: $showAppSettings, onDismiss: dismissEmbeddedMenu) {
+        .sheet(isPresented: $showAppSettings, onDismiss: refreshAfterSettings) {
             NavigationStack {
                 AppSettingsView()
             }
         }
-        .sheet(isPresented: $showCurrentHomeSettings, onDismiss: dismissEmbeddedMenu) {
+        .sheet(isPresented: $showCurrentHomeSettings, onDismiss: refreshAfterSettings) {
             NavigationStack {
                 HomeSettingsView()
             }
