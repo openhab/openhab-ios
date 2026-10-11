@@ -21,13 +21,14 @@ private enum WebMenuFixture {
       {"id":"/page/uitest_kitchen","label":"UITest Kitchen","path":"/page/uitest_kitchen","icon":{"name":"f7:house"},"active":true}]}
     """#
 
-    /// Signed in: Administration has its entries and the unlock entry is gone.
+    /// Signed in: Administration has its entries and the user's account, and the unlock entry is gone.
     static let unlocked = """
     {"sections":[\(pages),
       {"id":"settings","title":"UITest Administration","items":[
         {"id":"/settings/","label":"UITest Settings","path":"/settings/","icon":{"name":"f7:gear_alt_fill"},
          "children":[{"id":"/settings/things/","label":"UITest Things","path":"/settings/things/","icon":{"name":"f7:lightbulb"}}],
-         "more":[{"id":"/settings/transformations/","label":"UITest Transformations","path":"/settings/transformations/"}]}]}]}
+         "more":[{"id":"/settings/transformations/","label":"UITest Transformations","path":"/settings/transformations/"}]}]},
+      {"id":"account","items":[{"id":"/account","label":"UITest Account","path":"/account"}]}]}
     """
 
     /// Signed out: no admin entries, only the entry that signs in.
@@ -97,6 +98,7 @@ final class WebMenuUITests: XCTestCase {
         XCTAssertTrue(element("WebMenuSection-settings").exists)
         XCTAssertTrue(app.staticTexts["UITest Administration"].exists, "Administration is a section of its own, titled by Main UI")
         setAdministration(open: true)
+        XCTAssertTrue(element("WebMenu-/account").exists, "The user's account is listed in Administration")
     }
 
     func testLockedAdministrationShowsALockAndSignsIn() {

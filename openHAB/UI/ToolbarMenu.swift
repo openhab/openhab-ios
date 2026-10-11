@@ -454,9 +454,9 @@ extension ToolbarMenu {
         }
     }
 
-    /// The entries of Main UI's Administration, or none while it is locked.
+    /// The admin entries and the user's account, or none while it is locked.
     private func administrationMenu() -> some View {
-        ForEach(webMenu?.administration?.items ?? []) { item in
+        ForEach(webMenu?.administrationItems ?? []) { item in
             webMenuItem(item, depth: 0)
         }
     }
@@ -466,7 +466,7 @@ extension ToolbarMenu {
     @ViewBuilder
     private func administrationSection(isLast: Bool) -> some View {
         let isLocked = webMenu?.isAdministrationLocked ?? false
-        let hasEntries = webMenu?.administration != nil
+        let hasEntries = webMenu?.administrationItems.isEmpty == false
         let unlock: (() -> Void)? = isLocked ? { unlockAdministration() } : nil
         let title = webMenu?.administrationTitle ?? String(localized: "Administration")
         collapsibleSection(

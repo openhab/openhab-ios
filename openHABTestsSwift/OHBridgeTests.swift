@@ -92,7 +92,7 @@ struct OHBridgeTests {
           {"id":"account","items":[{"id":"unlock","label":"Unlock Administration"}]}]}
         """#.utf8))
         #expect(locked.isAdministrationLocked)
-        #expect(locked.administration == nil)
+        #expect(locked.administrationItems.isEmpty)
         #expect(locked.mainUISections.map(\.id) == ["pages"])
 
         let unlocked = try JSONDecoder().decode(OHBridgeMenuState.self, from: Data(#"""
@@ -102,8 +102,8 @@ struct OHBridgeTests {
           {"id":"account","items":[{"id":"/account","label":"Account","path":"/account"}]}]}
         """#.utf8))
         #expect(!unlocked.isAdministrationLocked)
-        #expect(unlocked.administration?.items.map(\.label) == ["Settings"])
-        #expect(unlocked.mainUISections.map(\.id) == ["pages", "account"])
+        #expect(unlocked.administrationItems.map(\.label) == ["Settings", "Account"])
+        #expect(unlocked.mainUISections.map(\.id) == ["pages"])
     }
 
     @Test("Reads nav.changed with props")
