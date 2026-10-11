@@ -66,6 +66,8 @@ struct ToolbarMenu: View {
     /// Shared curve so the section content and the container height animate in sync.
     private static let sectionAnimationDuration = 0.25
     private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
+    /// Space above a section header's title, and below it while the section is closed.
+    private static let headerVerticalPadding: CGFloat = 14
     /// Route sentinel for the MainUI home page, used to highlight the "Home" row.
     private static let mainUIHomeRoute = "/"
 
@@ -80,6 +82,7 @@ struct ToolbarMenu: View {
     // (and written back to) that home whenever the menu opens or a section toggles.
     @State private var isTilesExpanded = true
     @State private var isMainUIExpanded = true
+    @State private var isAdministrationExpanded = true
     @State private var isSitemapsExpanded = true
     @State private var isSystemExpanded = true
     @State private var isHomeExpanded = false
@@ -96,8 +99,6 @@ struct ToolbarMenu: View {
     /// Sidebar entries whose submenu is open, and those showing their whole submenu.
     @State private var expandedWebItems: Set<String> = []
     @State private var webItemsShowingAll: Set<String> = []
-    /// Main UI sections with a title, like Administration, that are open. Collapsed by default.
-    @State private var expandedWebSections: Set<String> = []
     /// The surface `OpenHABRootView` currently shows. The single source of truth for which
     /// row (if any) is highlighted as current — read directly rather than mirrored into local
     /// `@State`, so navigation that bypasses this menu entirely (a push-notification deep
@@ -176,7 +177,7 @@ extension ToolbarMenu {
         isSitemapsExpanded = !collapsed.contains(.sitemaps)
         isTilesExpanded = !collapsed.contains(.tiles)
         isSystemExpanded = !collapsed.contains(.system)
-        expandedWebSections = prefs.expandedWebSections
+        isAdministrationExpanded = !collapsed.contains(.administration)
         sitemapForWatch = prefs.sitemapForWatch
         sitemapForCarPlay = prefs.sitemapForCarPlay
         headerDetailsHidden = false
@@ -353,7 +354,7 @@ extension ToolbarMenu {
             .background(currentRowBackground(currentMainUIRoute == homeRoute))
         }
         if let webMenu {
-            ForEach(webMenu.sections) { section in
+            ForEach(webMenu.mainUISections) { section in
                 webMenuSection(section)
             }
         } else if menuData.isLoading, menuData.uiPages.isEmpty {
@@ -374,64 +375,54 @@ extension ToolbarMenu {
 
     // MARK: - Main UI sidebar
 
-    /// A section with a title, like Administration, is a row that folds its entries away, and the
-    /// menu remembers it per home.
     @ViewBuilder
     private func webMenuSection(_ section: OHBridgeMenuSection) -> some View {
         if let title = section.title, !title.isEmpty {
-            let isExpanded = webSectionBinding(section.id)
-            VStack(alignment: .leading, spacing: 0) {
-                Button {
-                    isExpanded.wrappedValue.toggle()
-                } label: {
-                    HStack(spacing: 10) {
-                        Image(systemSymbol: .lockShield)
-                            .frame(width: iconWidth, height: iconWidth)
-                        Text(title)
-                            .lineLimit(1)
-                        Spacer(minLength: 0)
-                        Image(systemSymbol: isExpanded.wrappedValue ? .chevronDown : .chevronRight)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 44)
-                    }
-                    .padding(.leading, 16)
-                    .padding(.trailing, 4)
-                    .padding(.vertical, 10)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("WebMenuSection-\(section.id)")
-
-                if isExpanded.wrappedValue {
-                    VStack(alignment: .leading, spacing: 0) {
-                        ForEach(section.items) { item in
-                            webMenuItem(item, depth: 1)
-                        }
-                    }
-                    .transition(.blurReplace(.downUp))
-                }
-            }
-            .animation(Self.sectionAnimation, value: isExpanded.wrappedValue)
-        } else {
-            ForEach(section.items) { item in
-                webMenuItem(item, depth: 0)
-            }
+            Text(title)
+                .font(.caption2)
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+                .padding(.horizontal, 16)
+                .padding(.top, 10)
+                .padding(.bottom, 2)
+        }
+        ForEach(section.items) { item in
+            webMenuItem(item, depth: 0)
         }
     }
 
-    private func webSectionBinding(_ id: String) -> Binding<Bool> {
-        Binding(
-            get: { expandedWebSections.contains(id) },
-            set: { expanded in
-                if expanded { expandedWebSections.insert(id) } else { expandedWebSections.remove(id) }
-                Task {
-                    await Preferences.shared.modifyActiveHome { @Sendable prefs in
-                        prefs.setWebSection(id, expanded: expanded)
-                    }
-                }
-            }
-        )
+    /// The entries of Main UI's Administration, or none while it is locked.
+    private func administrationMenu() -> some View {
+        ForEach(webMenu?.administration?.items ?? []) { item in
+            webMenuItem(item, depth: 0)
+        }
+    }
+
+    /// Shown once Main UI has sent its sidebar: with the entries when signed in, as a lock that
+    /// signs in when not. Locked or not, the saved open/closed state is left alone.
+    @ViewBuilder
+    private func administrationSection(isLast: Bool) -> some View {
+        let isLocked = webMenu?.isAdministrationLocked ?? false
+        let hasEntries = webMenu?.administration != nil
+        let unlock: (() -> Void)? = isLocked ? { unlockAdministration() } : nil
+        let title = webMenu?.administrationTitle ?? String(localized: "Administration")
+        collapsibleSection(
+            title: "\(title)",
+            isExpanded: expansionBinding($isAdministrationExpanded) { prefs, v in prefs.setSection(.administration, expanded: v) },
+            isEmpty: !isLocked && !hasEntries,
+            showDivider: !isLast,
+            accessibilityId: "WebMenuSection-\(OHBridgeMenuState.administrationSectionID)",
+            onUnlock: unlock
+        ) {
+            administrationMenu()
+        }
+    }
+
+    /// Asks Main UI to sign the user in. It does so on its own page, so the menu makes room.
+    private func unlockAdministration() {
+        isPresented = false
+        onActivateWebMenuItem(OHBridgeMenuState.unlockItemID)
     }
 
     /// One sidebar entry and, when open, its submenu. AnyView because it nests itself.
@@ -549,6 +540,8 @@ extension ToolbarMenu {
             ) {
                 mainUIMenu()
             }
+        case .administration:
+            administrationSection(isLast: isLast)
         case .sitemaps:
             collapsibleSection(
                 title: "Sitemaps",
@@ -615,6 +608,7 @@ extension ToolbarMenu {
             // below it — each section's own `.animation` only covers its own subtree.
             .animation(Self.sectionAnimation, value: isHomeExpanded)
             .animation(Self.sectionAnimation, value: isMainUIExpanded)
+            .animation(Self.sectionAnimation, value: isAdministrationExpanded)
             .animation(Self.sectionAnimation, value: isSitemapsExpanded)
             .animation(Self.sectionAnimation, value: isTilesExpanded)
             .animation(Self.sectionAnimation, value: isSystemExpanded)
@@ -777,6 +771,9 @@ extension ToolbarMenu {
     ///     A reload of a populated section keeps showing the current rows.
     ///   - isEmpty: When `true` (and not loading), the section is hidden entirely.
     ///   - showDivider: Whether to append a trailing divider below the content.
+    ///   - accessibilityId: Identifier of the header, for UI tests.
+    ///   - onUnlock: Non-nil while the section is locked. The header then shows a lock instead of
+    ///     the chevron, runs this instead of toggling, and keeps the content away.
     ///   - content: The section body, shown only while expanded.
     @ViewBuilder
     private func collapsibleSection(title: String.LocalizationValue,
@@ -784,15 +781,23 @@ extension ToolbarMenu {
                                     isLoading: Bool = false,
                                     isEmpty: Bool = false,
                                     showDivider: Bool = true,
+                                    accessibilityId: String? = nil,
+                                    onUnlock: (() -> Void)? = nil,
                                     @ViewBuilder content: () -> some View) -> some View {
         let localizedTitle = String(localized: title)
         if isLoading, isEmpty {
             loadingRow(label: localizedTitle)
         } else if !isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                sectionToggleHeader(title: localizedTitle, isExpanded: isExpanded)
+                sectionToggleHeader(
+                    title: localizedTitle,
+                    isExpanded: isExpanded,
+                    isLocked: onUnlock != nil,
+                    accessibilityId: accessibilityId,
+                    onUnlock: onUnlock
+                )
 
-                if isExpanded.wrappedValue {
+                if isExpanded.wrappedValue, onUnlock == nil {
                     // Wrap in a single container so the transition has one stable
                     // identity to animate — a bare ViewBuilder group (TupleView /
                     // ForEach) is layout-transparent and won't transition.
@@ -814,13 +819,22 @@ extension ToolbarMenu {
     }
 
     /// Toggle header shared by every collapsible section: a disclosure chevron
-    /// followed by the uppercased section title, driving `isExpanded`.
-    private func sectionToggleHeader(title: String, isExpanded: Binding<Bool>) -> some View {
+    /// followed by the uppercased section title, driving `isExpanded`. A locked section
+    /// (`onUnlock` set) shows a lock in its place and unlocks instead of toggling.
+    private func sectionToggleHeader(title: String,
+                                     isExpanded: Binding<Bool>,
+                                     isLocked: Bool,
+                                     accessibilityId: String?,
+                                     onUnlock: (() -> Void)?) -> some View {
         Button {
-            isExpanded.wrappedValue.toggle()
+            if let onUnlock {
+                onUnlock()
+            } else {
+                isExpanded.wrappedValue.toggle()
+            }
         } label: {
             HStack(spacing: 8) {
-                Image(systemSymbol: isExpanded.wrappedValue ? .chevronDown : .chevronRight)
+                Image(systemSymbol: onUnlock != nil ? .lockFill : (isExpanded.wrappedValue ? .chevronDown : .chevronRight))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .frame(width: 10)
@@ -832,11 +846,15 @@ extension ToolbarMenu {
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 16)
-            .padding(.top, 10)
-            .padding(.bottom, 2)
+            .padding(.top, Self.headerVerticalPadding)
+            // An open section's entries follow right below. A closed one is only its header, so it
+            // mirrors the top padding to center the title, which with a caption line makes the
+            // header about 44 pt, the minimum tap target Apple recommends.
+            .padding(.bottom, isLocked || !isExpanded.wrappedValue ? Self.headerVerticalPadding : 2)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityId ?? title)
     }
 
     // MARK: - Row helpers

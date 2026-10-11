@@ -84,6 +84,28 @@ struct OHBridgeTests {
         #expect(unlock.icon?.svg == "<svg></svg>")
     }
 
+    @Test("Administration is its own section, and stands for the unlock entry while locked")
+    func splitsAdministrationFromMainUI() throws {
+        let locked = try JSONDecoder().decode(OHBridgeMenuState.self, from: Data(#"""
+        {"sections":[
+          {"id":"pages","items":[{"id":"/page/kitchen","label":"Kitchen","path":"/page/kitchen"}]},
+          {"id":"account","items":[{"id":"unlock","label":"Unlock Administration"}]}]}
+        """#.utf8))
+        #expect(locked.isAdministrationLocked)
+        #expect(locked.administration == nil)
+        #expect(locked.mainUISections.map(\.id) == ["pages"])
+
+        let unlocked = try JSONDecoder().decode(OHBridgeMenuState.self, from: Data(#"""
+        {"sections":[
+          {"id":"pages","items":[{"id":"/page/kitchen","label":"Kitchen","path":"/page/kitchen"}]},
+          {"id":"settings","title":"Administration","items":[{"id":"/settings/","label":"Settings","path":"/settings/"}]},
+          {"id":"account","items":[{"id":"/account","label":"Account","path":"/account"}]}]}
+        """#.utf8))
+        #expect(!unlocked.isAdministrationLocked)
+        #expect(unlocked.administration?.items.map(\.label) == ["Settings"])
+        #expect(unlocked.mainUISections.map(\.id) == ["pages", "account"])
+    }
+
     @Test("Reads nav.changed with props")
     func readsNavChanged() {
         let json = #"{"v":1,"type":"nav.changed","payload":{"path":"/page/a","history":["/","/page/a"],"props":[{},{"deep":true,"defineVars":{"room":"kitchen"}}],"modal":false}}"#

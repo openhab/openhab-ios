@@ -152,21 +152,6 @@ struct MenuSectionTests {
         #expect(prefs.avatarMode == nil)
         #expect(prefs.sectionOrder == MenuSection.allCases)
         #expect(prefs.collapsedSections.isEmpty)
-        #expect(prefs.expandedWebSections.isEmpty)
-    }
-
-    /// Main UI menu sections start collapsed, and an opened one is remembered.
-    @Test func expandedWebSectionsRoundTrip() throws {
-        let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
-        var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
-
-        prefs.setWebSection("settings", expanded: true)
-        prefs.setWebSection("other", expanded: true)
-        prefs.setWebSection("other", expanded: false)
-
-        let encoded = try JSONEncoder().encode(prefs)
-        let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
-        #expect(decoded.expandedWebSections == ["settings"])
     }
 
     /// A custom section order round-trips through encode → decode unchanged.
@@ -175,7 +160,7 @@ struct MenuSectionTests {
         let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
         var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
 
-        let customOrder: [MenuSection] = [.tiles, .sitemaps, .mainUI, .system]
+        let customOrder: [MenuSection] = [.tiles, .sitemaps, .administration, .mainUI, .system]
         prefs.sectionOrder = customOrder
 
         let encoded = try JSONEncoder().encode(prefs)
@@ -188,7 +173,7 @@ struct MenuSectionTests {
         let json = #"{"id":"550E8400-E29B-41D4-A716-446655440000"}"#
         var prefs = try JSONDecoder().decode(HomePreferences.self, from: Data(json.utf8))
 
-        prefs.sectionOrder = [.sitemaps, .tiles, .system] // mainUI hidden
+        prefs.sectionOrder = [.sitemaps, .tiles, .administration, .system] // mainUI hidden
 
         let encoded = try JSONEncoder().encode(prefs)
         let decoded = try JSONDecoder().decode(HomePreferences.self, from: encoded)
