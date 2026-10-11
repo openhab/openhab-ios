@@ -102,7 +102,7 @@ doesn't know.
 | `features` | What the app offers to take over. Main UI says which ones it took in `ui.hello`. |
 | `theme`, `darkMode` | Theme to start with if the user hasn't picked one in Main UI. |
 | `initialHistory`, `initialProps` | Pages to put back, oldest first, and what each was opened with (`deep`, `defineVars`, as objects). Main UI opens the last one, with the others behind it for Back. |
-| `layout` | How much of the page the app's bars cover, so Main UI leaves room from the start. |
+| `layout` | How much of the page the app's bars cover, so Main UI leaves room from the start. `navbarHeight` is the height of the app's top bar over the page: iOS lays its bar over the web view and sends `44`. An app whose bar sits above the web view sends `0`, for example Android with `{ insets: { top: 0, bottom: 0 }, navbarHeight: 0 }`. Main UI then leaves no room for the bar, and the app shows the page title. |
 
 `features` can hold:
 
@@ -138,8 +138,8 @@ doesn't know.
 | `nav.closeModals` | — | Close any open popup, popover or sheet. |
 | `navbar.activate` | `id` | A button in the app's top bar was tapped. Main UI does what that button does. |
 | `menu.activate` | `id` | A menu entry with no `path` was tapped, e.g. "Unlock Administration". |
-| `settings.changed` | `theme?`, `darkMode?` | The phone switched theme or dark mode while the page is open. |
-| `layout.changed` | `insets`, `navbarHeight?` | The space the app's bars cover changed. Main UI moves its content to match. |
+| `settings.changed` | `darkMode?` | The phone switched dark mode while the page is open. The theme is only read at startup, from `info.theme`. |
+| `layout.changed` | `insets`, `navbarHeight?` | The space the app's bars cover changed. Main UI moves its content to match, and never leaves less room than the web view's own safe area. |
 | `nav.getState` | — | Asks for the current page and history. |
 | `ui.reload` | — | Reload Main UI. |
 | `reply` | `ok`, `result` or `error` | The answer to a request from the page. |
@@ -403,7 +403,7 @@ keeps the old `OHApp` and `window.MainUI` hooks for app versions without the bri
 
 | Today | With the bridge |
 |---|---|
-| `OHApp.preferTheme()`, `preferDarkMode()` | `info.theme`, `info.darkMode`; changes via `settings.changed` |
+| `OHApp.preferTheme()`, `preferDarkMode()` | `info.theme`, `info.darkMode`; dark mode changes via `settings.changed` |
 | `OHApp.getBasicCredentials*()` | `auth.getCredentials` |
 | `OHApp.goFullscreen()` | Not needed: taking over `navbar` covers it |
 | `OHApp.exitToApp()`, `OHApp.pinToHome()` | Not in the bridge. They stay on `OHApp` for older apps. |

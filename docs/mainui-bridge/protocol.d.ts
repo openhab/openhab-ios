@@ -154,7 +154,7 @@ interface NavState {
   history: string[]
   /** One per entry in history: the props it was opened with. See HostInfo.initialProps. */
   props?: PageProps[]
-  /** A popup, sheet or popover is open on top of the page. */
+  /** A popup, sheet or popover is open on top of the page, whether opened by an address or from code. */
   modal: boolean
 }
 
@@ -256,15 +256,20 @@ type HostToWeb =
   | Envelope<'nav.closeModals', {}>
   | Envelope<'navbar.activate', { id: string }>
   | Envelope<'menu.activate', { id: string }> // a menu item without a path was tapped
-  | Envelope<'settings.changed', { theme?: 'ios' | 'md' | 'aurora'; darkMode?: 'light' | 'dark' }>
+  | Envelope<'settings.changed', { darkMode?: 'light' | 'dark' }> // the theme is only read at startup, from info.theme
   | Envelope<'layout.changed', LayoutInfo>
   | Envelope<'nav.getState', {}> // request → Reply<NavState>
   | Envelope<'ui.reload', {}>
   | Reply
 
 interface LayoutInfo {
-  /** How much of the page the app's bars cover, in CSS pixels. Main UI leaves this much room. */
+  /** How much of the page the app's bars cover, in CSS pixels. Main UI leaves this much room, or the web view's own safe area when that is larger. */
   insets: { top: number; bottom: number }
-  /** Height of the app's top bar, when the app draws one. */
+  /**
+   * How much of the page the app's top bar covers, when the app draws one. iOS lays its bar over
+   * the web view and sends its height. 0 when the bar sits above the web view (Android): Main UI
+   * then leaves no room for it, and the app shows the page title. Left out: Main UI keeps its own
+   * bar height.
+   */
   navbarHeight?: number
 }

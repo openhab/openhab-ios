@@ -367,6 +367,17 @@ struct OHBridgeTests {
         #expect(address == "/page/kitchen")
     }
 
+    @Test("A bar above the web view leaves no room on pages, and the app shows the title")
+    func shimBarOutside() async throws {
+        let page = ShimPage(info: "{ features: ['navbar'], layout: { insets: { top: 0, bottom: 0 }, navbarHeight: 0 } }")
+        page.load(ShimPage.navbarHTML.replacingOccurrences(of: #"class="navbar""#, with: #"class="navbar navbar-large""#))
+        let json = try await page.waitFor("JSON.stringify((__posted.filter(function (m) { return m.type === 'navbar.state' }).pop() || {}).payload || null)")
+        let navbar = try JSONDecoder().decode(OHBridgeNavbarState.self, from: Data(json.utf8))
+        #expect(!navbar.titleInContent)
+        let height = try await page.run("getComputedStyle(document.querySelector('.view-main')).getPropertyValue('--f7-navbar-height').trim()")
+        #expect(height == "0px")
+    }
+
     @Test("An open popup keeps its own bar and moves the app's out of the way")
     func shimHidesBarForPopup() async throws {
         let page = ShimPage()

@@ -144,7 +144,8 @@
     '.panel-left,.panel-backdrop{display:none !important}' +
     '.view-main,.framework7-root > .view,.framework7-root > .views{margin-left:0 !important}'
 
-  // The host owns the bar height. Main UI's own navbar stays the same size underneath it.
+  // The host owns the bar height. Main UI's own navbar stays the same size underneath it. 0 means
+  // the host's bar sits above the web view: pages keep no room for it, popups keep their own bar.
   function applyLayout(next) {
     layout = next || {}
     var h = Number(layout.navbarHeight)
@@ -153,9 +154,20 @@
         'oh-bridge-layout-style',
         ':root,html.ios,html.md,html.aurora{--f7-navbar-height:' + h + 'px !important}'
       )
+    } else if (barOutside()) {
+      setStyle(
+        'oh-bridge-layout-style',
+        '.view-main{--f7-navbar-height:0px !important;--f7-navbar-large-title-height:0px !important}' +
+          '.view-main .navbar .title-large{display:none !important}' +
+          '.panel,.panel-backdrop{--f7-appbar-app-offset:0px !important}'
+      )
     }
     syncDocumentPadding(true)
     scheduleEditorFix()
+  }
+
+  function barOutside() {
+    return layout.navbarHeight === 0
   }
 
   if (wants('navbar')) setStyle('oh-bridge-navbar-style', navbarCSS)
@@ -269,7 +281,7 @@
     var needsPadding = !isMainUIDocument()
     if (!force && needsPadding === !!body.__ohPadded) return
     body.__ohPadded = needsPadding
-    var h = Number(layout.navbarHeight) > 0 ? Number(layout.navbarHeight) : 44
+    var h = barOutside() ? 0 : Number(layout.navbarHeight) > 0 ? Number(layout.navbarHeight) : 44
     body.style.paddingTop = needsPadding ? 'calc(' + h + 'px + env(safe-area-inset-top, 0px))' : ''
   }
 
@@ -335,7 +347,8 @@
     state.title = titleEl ? titleEl.innerText.trim() : ''
     state.hidden = !!navbar.closest('.navbar-hidden')
     // An expanded large title already shows the page title, so the host shouldn't repeat it.
-    state.titleInContent = navbar.classList.contains('navbar-large') && !navbar.classList.contains('navbar-large-collapsed')
+    state.titleInContent =
+      !barOutside() && navbar.classList.contains('navbar-large') && !navbar.classList.contains('navbar-large-collapsed')
 
     backEl = null
 

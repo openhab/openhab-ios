@@ -106,19 +106,11 @@ final class WebMenuUITests: XCTestCase {
         XCTAssertFalse(adminSettings.exists, "Administration stays closed after a restart")
     }
 
-    func testSubmenuOpensAndShowsAll() {
+    func testAdminEntriesHaveNoSubmenuToggle() {
         openMenu()
         setAdministration(open: true)
-        let things = app.descendants(matching: .any).matching(identifier: "WebMenu-/settings/things/").firstMatch
-        XCTAssertFalse(things.exists, "A submenu starts closed")
-
-        element("WebMenuToggle-/settings/").tap()
-        XCTAssertTrue(things.waitForExistence(timeout: 2), "Opening Settings shows the entries the sidebar shows")
-
-        let transformations = app.descendants(matching: .any)
-            .matching(identifier: "WebMenu-/settings/transformations/").firstMatch
-        XCTAssertFalse(transformations.exists, "The rest of the submenu waits behind Show all")
-        element("WebMenuShowAll-/settings/").tap()
-        XCTAssertTrue(transformations.waitForExistence(timeout: 2), "Show all lists the rest of the submenu")
+        let toggle = app.descendants(matching: .any).matching(identifier: "WebMenuToggle-/settings/").firstMatch
+        XCTAssertFalse(toggle.exists, "Admin entries open their page; there is no submenu toggle")
+        XCTAssertFalse(app.descendants(matching: .any).matching(identifier: "WebMenu-/settings/things/").firstMatch.exists)
     }
 }
