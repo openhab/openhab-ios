@@ -66,6 +66,8 @@ struct ToolbarMenu: View {
     /// Shared curve so the section content and the container height animate in sync.
     private static let sectionAnimationDuration = 0.25
     private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
+    /// Space above a section header's title, and below it while the section is closed.
+    private static let headerVerticalPadding: CGFloat = 14
     /// Route sentinel for the MainUI home page, used to highlight the "Home" row.
     private static let mainUIHomeRoute = "/"
 
@@ -658,8 +660,11 @@ extension ToolbarMenu {
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 16)
-            .padding(.top, 10)
-            .padding(.bottom, 2)
+            .padding(.top, Self.headerVerticalPadding)
+            // An open section's entries follow right below. A closed one is only its header, so it
+            // mirrors the top padding to center the title, which with a caption line makes the
+            // header about 44 pt, the minimum tap target Apple recommends.
+            .padding(.bottom, isExpanded.wrappedValue ? 2 : Self.headerVerticalPadding)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
