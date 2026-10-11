@@ -155,6 +155,19 @@ struct ToolbarMenu: View {
     /// The tallest the embedded menu grows before it scrolls.
     private static let embeddedMenuHeight: CGFloat = 480
 
+    /// Closes the overlay menu before a sheet opens. An embedded menu stays open instead: it
+    /// lives in a popover, and closing that would take down the sheet this menu is presenting,
+    /// since the sheet hangs off this view. `dismissEmbeddedMenu` closes it once the sheet is gone.
+    private func dismissOverlayMenu() {
+        guard !isEmbedded else { return }
+        isPresented = false
+    }
+
+    private func dismissEmbeddedMenu() {
+        guard isEmbedded else { return }
+        isPresented = false
+    }
+
     /// The sitemap row (if any) to highlight as current, derived from `currentContent`.
     private var currentSitemapName: String? {
         if case let .sitemap(name, _) = currentContent {
@@ -205,12 +218,12 @@ struct ToolbarMenu: View {
                 homeDetailsCollapsed = false
             }
         }
-        .sheet(isPresented: $showAppSettings) {
+        .sheet(isPresented: $showAppSettings, onDismiss: dismissEmbeddedMenu) {
             NavigationStack {
                 AppSettingsView()
             }
         }
-        .sheet(isPresented: $showCurrentHomeSettings) {
+        .sheet(isPresented: $showCurrentHomeSettings, onDismiss: dismissEmbeddedMenu) {
             NavigationStack {
                 HomeSettingsView()
             }
@@ -364,7 +377,7 @@ extension ToolbarMenu {
     @ViewBuilder
     private func systemMenu() -> some View {
         systemRow(symbol: .gear, label: String(localized: "App Settings")) {
-            isPresented = false
+            dismissOverlayMenu()
             showAppSettings = true
         }
         if let prefs = cachedHomePrefs,
@@ -709,7 +722,7 @@ extension ToolbarMenu {
                 Image(systemSymbol: .gear).hidden()
                 if !headerDetailsHidden {
                     Button(
-                        action: { isPresented = false; showCurrentHomeSettings = true },
+                        action: { dismissOverlayMenu(); showCurrentHomeSettings = true },
                         label: { Image(systemSymbol: .gear).foregroundStyle(.secondary) }
                     )
                     .buttonStyle(.plain)
@@ -720,6 +733,18 @@ extension ToolbarMenu {
             .frame(width: homeDetailsCollapsed ? 0 : nil)
             .clipped()
             .frame(maxHeight: .infinity)
+
+            // A popover has no backdrop to tap, and the toolbar strip next to it does not close
+            // it, so an embedded menu brings its own way out.
+            // The system close button brings its own localized label and glass style.
+            if isEmbedded, #available(iOS 26.0, *) {
+                Button(role: .close, action: { isPresented = false })
+                    .labelStyle(.iconOnly)
+                    .controlSize(.small)
+                    .frame(maxHeight: .infinity)
+                    .padding(.leading, 12)
+                    .accessibilityIdentifier("ToolbarMenuCloseButton")
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
