@@ -147,25 +147,29 @@ struct InlineHomePickerView: View {
 
     // MARK: - Action bar
 
+    private var addHomeButton: some View {
+        Button(
+            action: { newHomeName = ""; showingNewHomeAlert = true },
+            label: {
+                HStack(spacing: 4) {
+                    Image(systemSymbol: .plus)
+                    Text("Add Home")
+                }
+                .font(.footnote)
+                .foregroundStyle(.blue)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 13)
+            }
+        )
+        .buttonStyle(.plain)
+    }
+
     @ViewBuilder
     private var actionBar: some View {
         if showEditMode {
             // Edit mode: full-width "Add Home" above full-width "Done"
             VStack(spacing: 0) {
-                Button(
-                    action: { newHomeName = ""; showingNewHomeAlert = true },
-                    label: {
-                        HStack(spacing: 4) {
-                            Image(systemSymbol: .plus)
-                            Text("Add Home")
-                        }
-                        .font(.footnote)
-                        .foregroundStyle(.blue)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 13)
-                    }
-                )
-                .buttonStyle(.plain)
+                addHomeButton
 
                 Divider()
 
@@ -182,6 +186,11 @@ struct InlineHomePickerView: View {
                 .buttonStyle(.plain)
             }
             .padding(.horizontal, 16)
+        } else if homes.count == 1 {
+            // A single home can be neither reordered nor deleted, so "Edit" would only reveal
+            // "Add Home". Offer it right away.
+            addHomeButton
+                .padding(.horizontal, 16)
         } else {
             // Normal mode: single Edit button — add/delete/reorder only in edit mode
             Button(
