@@ -17,7 +17,6 @@ import UIKit
 
 struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
-    @Environment(\.sitemapSideMenuAction) private var sideMenuAction
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var idleTimerDisabled = false
@@ -122,16 +121,8 @@ struct SitemapPageView: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        if let sideMenuAction {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    sideMenuAction()
-                } label: {
-                    Image(systemSymbol: .line3Horizontal)
-                        .font(.title)
-                }
-            }
-        }
+        AppMenuToolbarContent(slot: .verticalLeading)
+        AppMenuToolbarContent(slot: .horizontalTrailing)
     }
 
     private var errorAlertPresented: Binding<Bool> {
