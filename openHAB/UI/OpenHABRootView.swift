@@ -279,6 +279,7 @@ struct OpenHABRootView: View {
     var body: some View {
         ZStack {
             contentView
+                .environment(\.appMenu, appMenuConfiguration)
 
             // Toolbar menu overlay
             ToolbarMenu(
@@ -460,7 +461,7 @@ private extension OpenHABRootView {
                 customBarMainUI
             }
         case let .sitemap(name, navigationState: state):
-            SitemapNavigationView(sitemapName: name, navigationPath: state.navigationPath) { menuPresented = true }
+            SitemapNavigationView(sitemapName: name, navigationPath: state.navigationPath)
                 .id("\(name)-\(state.navigationPath.last?.pageLink ?? "")-\(sitemapResetID)")
         case .tile:
             if #available(iOS 27.1, *) {
@@ -476,17 +477,25 @@ private extension OpenHABRootView {
         }
     }
 
+    /// What the app menu shows, for every screen with a navigation bar. See `AppMenu.swift`.
+    var appMenuConfiguration: AppMenuConfiguration {
+        AppMenuConfiguration(
+            menuData: menuData,
+            webMenu: webViewModel.menu,
+            currentContent: currentContent,
+            onSelect: { target in handleMenuSelection(target) },
+            onActivateWebMenuItem: { id in activateWebMenuItem(id) },
+            onReload: { reloadCurrentContent() }
+        )
+    }
+
     /// Main UI or a tile with a system navigation bar. See `MainUINavigationView`.
     @available(iOS 27.1, *)
     func nativeBarContent(tileTitle: String?) -> some View {
         MainUINavigationView(
             webViewModel: webViewModel,
-            menuData: menuData,
             activeConnection: activeNetworkConnection,
-            currentContent: currentContent,
             tileTitle: tileTitle,
-            onSelect: { target in handleMenuSelection(target) },
-            onActivateWebMenuItem: { id in activateWebMenuItem(id) },
             onReload: { reloadCurrentContent() }
         )
     }

@@ -712,18 +712,6 @@ extension ToolbarMenu {
             .frame(width: homeDetailsCollapsed ? 0 : nil)
             .clipped()
             .frame(maxHeight: .infinity)
-
-            // A popover has no backdrop to tap, and the toolbar strip next to it does not close
-            // it, so an embedded menu brings its own way out.
-            // The system close button brings its own localized label and glass style.
-            if isEmbedded, #available(iOS 26.0, *) {
-                Button(role: .close, action: { isPresented = false })
-                    .labelStyle(.iconOnly)
-                    .controlSize(.small)
-                    .frame(maxHeight: .infinity)
-                    .padding(.leading, 12)
-                    .accessibilityIdentifier("ToolbarMenuCloseButton")
-            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)

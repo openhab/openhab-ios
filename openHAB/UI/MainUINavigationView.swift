@@ -21,9 +21,9 @@ import SwiftUI
 // iPhone Duo. `OpenHABRootView` uses this view from iOS 27.1 on and keeps the custom bar below.
 //
 // Everything else is reused from the app: the web view model and its bridge, the connection
-// state, `ConnectingPlaceholder`, `OHBridgeIconView`, and `ToolbarMenu` (presented in a popover
-// through `isEmbedded`). This view started as a proof of concept (commit "feat(duo): proof of
-// concept ..."), which ran standalone against the demo home.
+// state, `ConnectingPlaceholder`, `OHBridgeIconView`, and the app menu (`AppMenu.swift`). This
+// view started as a proof of concept (commit "feat(duo): proof of concept ..."), which ran
+// standalone against the demo home.
 //
 // ============================================================================================
 // DECISION LOG
@@ -106,20 +106,15 @@ import SwiftUI
 //                          it is the topmost item (declared first, in the leading placement): the
 //                          items above it come and go, and a menu button below them would jump
 //                          whenever one appears or disappears.
-//    - Hamburger animation -> not important; replaced by the system popover morph (point 7).
+//    - Hamburger animation -> not important; the system morphs the popover out of the button.
 //
-// 7. MENU: POPOVER INSTEAD OF THE OVERLAY
-//    - `ToolbarMenu` as an overlay springs out of the top-trailing corner, and the hamburger
-//      scales and fades into it. That only works because both are custom views. A button in the
-//      system toolbar, which the vertical strip requires, cannot be scaled or faded by the app.
-//    - Replacement: present the real menu with `.popover` from the toolbar button, using
-//      `ToolbarMenu(isEmbedded: true)`. With Liquid Glass the system morphs a popover out of the
-//      glass button it is anchored to and back on dismissal. That is the "hamburger and menu in
-//      the same glass group, native appearing/disappearing animation" behavior, done by the
-//      system instead of by `GlassEffectContainer` + `glassEffectID`.
-//    - Open (needs the Duo): whether the popover morphs from a toolbar item in a vertical strip
-//      and which side it opens to. Fallback: `.sheet` with `.presentationDetents`.
-//    - The overlay `ToolbarMenu` in `OpenHABRootView` stays for sitemaps and older systems.
+// 7. MENU
+//    - The app menu is a popover from the toolbar button, shared with the sitemaps; see
+//      `AppMenu.swift` for its decisions. With Liquid Glass the system morphs the popover out of
+//      the glass button it is anchored to and back on dismissal, which is the "hamburger and menu
+//      in the same glass group, native appearing/disappearing animation" behavior.
+//    - Open (needs the Duo): whether the popover morphs from a toolbar item in a vertical strip.
+//      Fallback: `.sheet` with `.presentationDetents`.
 //
 // 8. LAYOUT REPORTING RULE
 //    - The system bar is inside the safe area, so the reported layout is the safe area with
@@ -183,26 +178,17 @@ import SwiftUI
 @available(iOS 27.1, *)
 struct MainUINavigationView: View {
     @ObservedObject var webViewModel: OpenHABWebViewModel
-    let menuData: MenuDataService
     let activeConnection: ConnectionInfo?
-    /// The surface the root view shows, for the menu's current-row highlight.
-    let currentContent: TargetController
     /// The title of a tile. Nil for Main UI, whose title comes from the page's navbar.
     var tileTitle: String?
-    var onSelect: (TargetController) -> Void
-    var onActivateWebMenuItem: (String) -> Void
     var onReload: () -> Void
 
     var body: some View {
         NavigationStack {
             MainUINavigationContent(
                 webViewModel: webViewModel,
-                menuData: menuData,
                 activeConnection: activeConnection,
-                currentContent: currentContent,
                 tileTitle: tileTitle,
-                onSelect: onSelect,
-                onActivateWebMenuItem: onActivateWebMenuItem,
                 onReload: onReload
             )
         }
@@ -216,12 +202,8 @@ struct MainUINavigationView: View {
 @available(iOS 27.1, *)
 private struct MainUINavigationContent: View {
     @ObservedObject var webViewModel: OpenHABWebViewModel
-    let menuData: MenuDataService
     let activeConnection: ConnectionInfo?
-    let currentContent: TargetController
     let tileTitle: String?
-    let onSelect: (TargetController) -> Void
-    let onActivateWebMenuItem: (String) -> Void
     let onReload: () -> Void
 
     /// `.leading` or `.trailing` while the system lays its bars out vertically (iPhone Duo outer
@@ -229,7 +211,6 @@ private struct MainUINavigationContent: View {
     /// DECISION: this, not `userInterfaceIdiom` or orientation, decides how toolbar items are
     /// arranged, as Apple asks apps not to branch on the idiom.
     @Environment(\.toolbarVerticalEdge) private var verticalEdge
-    @State private var isMenuPresented = false
     @State private var safeArea = EdgeInsets()
     @State private var reportedLayout = MainUILayout.zero
 
@@ -294,17 +275,8 @@ private struct MainUINavigationContent: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        // DECISION: on a vertical bar the menu button is the topmost item. The items above it
-        // come and go (back, connection state, page actions), so a menu button below them would
-        // jump whenever one appears or disappears. It is declared first, in the leading
-        // placement, so the system puts it at the top of the strip. A horizontal bar keeps the
-        // menu button last in the trailing placement, see the end of this builder.
-        if verticalEdge != nil {
-            ToolbarItem(placement: .cancellationAction) {
-                menuButton
-            }
-            .axisBehavior(.verticalPreferred)
-        }
+        // The menu button is the topmost item of a vertical bar, see `AppMenuToolbarContent`.
+        AppMenuToolbarContent(slot: .verticalLeading)
 
         if let back = navbar.back {
             ToolbarItem(placement: .cancellationAction) {
@@ -372,13 +344,8 @@ private struct MainUINavigationContent: View {
             }
         }
 
-        // The menu button on a horizontal bar: the last item at the trailing edge, as before.
-        // A vertical bar has it at the top instead, see the start of this builder.
-        if verticalEdge == nil {
-            ToolbarItem(placement: .topBarTrailing) {
-                menuButton
-            }
-        }
+        // The last trailing item of a horizontal bar.
+        AppMenuToolbarContent(slot: .horizontalTrailing)
     }
 
     /// The page's icon on a horizontal bar; on a vertical bar a symbol plus a title, which that
@@ -389,28 +356,6 @@ private struct MainUINavigationContent: View {
             OHBridgeIconView(icon: action.icon, size: 24, fallback: .questionmarkCircle)
         } else {
             Label(action.accessibilityName, systemSymbol: action.icon?.toolbarSymbol ?? .squareGrid2x2)
-        }
-    }
-
-    /// The popover is anchored to this button. See decision 7 for why it replaces the overlay.
-    private var menuButton: some View {
-        Button(
-            action: { isMenuPresented.toggle() },
-            label: { Label("Menu", systemSymbol: .line3Horizontal) }
-        )
-        .accessibilityIdentifier("HamburgerButton")
-        .popover(isPresented: $isMenuPresented) {
-            ToolbarMenu(
-                isPresented: $isMenuPresented,
-                menuData: menuData,
-                webMenu: webViewModel.menu,
-                currentContent: currentContent,
-                onSelect: onSelect,
-                onActivateWebMenuItem: onActivateWebMenuItem,
-                onReload: onReload,
-                isEmbedded: true
-            )
-            .presentationCompactAdaptation(.popover)
         }
     }
 }
@@ -501,13 +446,20 @@ private struct MainUIPreviewHost: View {
     var body: some View {
         MainUINavigationView(
             webViewModel: webViewModel,
-            menuData: menuData,
             activeConnection: MainActorNetworkTracker.shared.activeConnection,
-            currentContent: tileTitle == nil ? .webview : .tile(""),
             tileTitle: tileTitle,
-            onSelect: { _ in },
-            onActivateWebMenuItem: { _ in },
             onReload: { webViewModel.loadWebView(force: true) }
+        )
+        .environment(
+            \.appMenu,
+            AppMenuConfiguration(
+                menuData: menuData,
+                webMenu: webViewModel.menu,
+                currentContent: tileTitle == nil ? .webview : .tile(""),
+                onSelect: { _ in },
+                onActivateWebMenuItem: { _ in },
+                onReload: { webViewModel.loadWebView(force: true) }
+            )
         )
         .onAppear {
             if let navbar {
