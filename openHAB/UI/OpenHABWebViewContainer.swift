@@ -20,6 +20,14 @@ import WebKit
 class WebViewHostController: UIViewController {
     var coordinator: OpenHABWebViewContainer.WebViewContainerCoordinator?
 
+    /// Top safe area the page keeps although the system bar above it is hidden.
+    var heldTopInset: CGFloat = 0 {
+        didSet {
+            guard heldTopInset != oldValue else { return }
+            additionalSafeAreaInsets.top = heldTopInset
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .clear
@@ -297,6 +305,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
     }
 
     @ObservedObject var viewModel: OpenHABWebViewModel
+    var heldTopInset: CGFloat = 0
 
     func makeCoordinator() -> WebViewContainerCoordinator {
         WebViewContainerCoordinator(viewModel: viewModel)
@@ -311,6 +320,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ controller: WebViewHostController, context: Context) {
+        controller.heldTopInset = heldTopInset
         context.coordinator.installWebView(viewModel.webView)
     }
 }
