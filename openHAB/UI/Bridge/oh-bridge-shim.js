@@ -285,6 +285,44 @@
     body.style.paddingTop = needsPadding ? 'calc(' + h + 'px + env(safe-area-inset-top, 0px))' : ''
   }
 
+  // A system bar that comes and goes changes the safe area under a page that is already open.
+  // Framework7 lays out an opened card from the safe area it saw when it opened it, and again only
+  // on a `resize`, which the web view does not send for a safe-area change. So the card sits where
+  // the old safe area put it (the host's bar hides while the card opens, and the card ends up as
+  // high as the bar was tall). Watch the safe area and send that event when it changes. A resize in
+  // the middle of the card's opening or closing animation leaves it half open, so it waits until
+  // no card is moving.
+  var safeAreaProbe = null
+  var resizeTimer = null
+
+  function scheduleResize() {
+    clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(function () {
+      if (document.querySelector('.card-opening, .card-closing')) return scheduleResize()
+      window.dispatchEvent(new Event('resize'))
+    }, 100)
+  }
+
+  function watchSafeArea() {
+    if (safeAreaProbe || !window.ResizeObserver) return
+    // An element whose size follows the safe area: its padding is the four insets.
+    safeAreaProbe = document.createElement('div')
+    safeAreaProbe.style.cssText =
+      'position:fixed;top:0;left:0;width:1px;height:1px;visibility:hidden;pointer-events:none;' +
+      'padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) ' +
+      'env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)'
+    document.documentElement.appendChild(safeAreaProbe)
+    var initial = true
+    new ResizeObserver(function () {
+      // The first call only reports the size the probe starts with.
+      if (initial) {
+        initial = false
+        return
+      }
+      scheduleResize()
+    }).observe(safeAreaProbe, { box: 'border-box' })
+  }
+
   function iconOf(el) {
     if (!el) return null
     var f7 = el.querySelector('i.f7-icons, .f7-icons')
@@ -972,6 +1010,7 @@
     // no class the observer sees.
     document.addEventListener('scroll', scheduleReport, { capture: true, passive: true })
     scheduleEditorFix()
+    watchSafeArea()
   }
 
   // Main UI announces its first page through pushState/replaceState, which these catch.

@@ -29,11 +29,6 @@ class WebViewHostController: UIViewController {
 /// Container view that manages the WKWebView lifecycle with SwiftUI.
 /// Handles the case where the ViewModel's webView instance may change (e.g. home switch).
 struct OpenHABWebViewContainer: UIViewControllerRepresentable {
-    /// Extra top safe area the page sees on top of the one UIKit derives, for a host that wants
-    /// it to stay constant while a system bar comes and goes. SwiftUI's `safeAreaInset` does not
-    /// reach the web view; only the host controller's `additionalSafeAreaInsets` does.
-    var additionalSafeAreaTop: CGFloat = 0
-
     @MainActor
     class WebViewContainerCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
         /// The page's message handlers. `externalURL` stays outside the bridge: it is an iOS
@@ -317,7 +312,6 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
 
     func updateUIViewController(_ controller: WebViewHostController, context: Context) {
         context.coordinator.installWebView(viewModel.webView)
-        controller.additionalSafeAreaInsets.top = additionalSafeAreaTop
     }
 }
 
