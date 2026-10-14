@@ -12,7 +12,6 @@
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
-import WebKit
 
 // MARK: - Main UI and tiles with a native navigation bar (iOS 27.1+, iPhone Duo)
 
@@ -145,30 +144,27 @@ import WebKit
 //      portrait inner display keeps horizontal bars). Use the canvas "Display" and
 //      "Orientation" variants. Static preview snapshots may not show web content.
 //
-// 11. HIDING THE BAR MOVES THE SAFE AREA (experiment)
-//    - Framework7 hides its navbar when an expandable card opens (a location on the home page).
-//      Hiding the system bar then shrinks the web view's top safe area (`env(safe-area-inset-top)`
-//      went from 82 px to 0 px on the Duo) while the card is animating, and the card ended up 82
-//      px too high, with its close button above the screen. The old custom bar was an overlay and
-//      never changed the web view's safe area. Measured with the bar forced visible: card at y 0.
-//    - `holdsTopInsetWhileBarHidden` keeps the last visible top inset in place while the bar is
-//      hidden, through `additionalSafeAreaInsets` of the web view's host controller (a SwiftUI
-//      `safeAreaInset` does not reach the web view), so the page sees the same safe area either way.
-//    - Holding the full 82 px kept the card in place but pushed its content down by 82 px, so it
-//      had to scroll. Measured with the card open (card top / `env()` top): held 82 -> 0 / 82,
-//      held 1 -> -81 / 1, held 0 -> -82 / 0. The card top is always held - 82: Framework7 places
-//      the card with the safe area it saw when the card opened (82, the bar had not hidden yet)
-//      and lays the header out with the live value, so zero is not special.
-//    - A `resize` event sent to the page after the card animation (900 ms) makes Framework7 lay
-//      the card out again. With held 1 the card then sits at y 0, fills the display and needs no
-//      scrolling (two openings in a row). The same event 350 ms after the change hit the opening
-//      animation: the second opening got stuck half open. With held 0 and the 350 ms event the
-//      first opening got stuck as well. Timing based, so not a fix to rely on; the clean fixes
-//      are in Main UI / Framework7 (lay the opened card out from the live safe area), or never
-//      hide the system bar while a card is open (the card then sits at y 0 below the bar).
-//    - Open: whether holding 1 is right for every page, and other page types than cards.
-//      `heldTopInsetWhileBarHidden` (nil holds the full value), `notifiesPageAfterBarChange` and
-//      `holdsTopInsetWhileBarHidden` switch the experiment parts off.
+// 11. HIDING THE BAR MOVES THE SAFE AREA
+//    - Framework7 hides its navbar when an expandable card opens (a location on the home page),
+//      and the system bar hides with it. That shrinks the web view's top safe area
+//      (`env(safe-area-inset-top)` went from 82 px to 0 px on the Duo) while the card is
+//      animating. Framework7 lays the card out from the safe area it saw when the card opened
+//      (82 px, the bar had not hidden yet) and again only on a `resize`, which the web view does
+//      not send for a safe-area change. The card ended up 82 px too high, with its close button
+//      above the screen. The old custom bar was an overlay and never changed the web view's safe
+//      area, so this could not happen there.
+//    - Measured (card top / `env()` top) while holding part of the bar's inset: held 82 -> 0 / 82,
+//      held 1 -> -81 / 1, held 0 -> -82 / 0. The card top is always held - 82, so zero is not
+//      special. Holding the full 82 px kept the card in place but pushed its content down by 82
+//      px, so it had to scroll. Holding the inset is therefore not done.
+//    - The fix is in the shim (`watchSafeArea` in oh-bridge-shim.js): it watches the safe area
+//      and sends the page a `resize` event when it changes, once no card is moving. Framework7
+//      then lays the opened card out from the live value. The card sits at y 0, fills the
+//      display and needs no scrolling (three openings in a row, no held inset). A resize sent
+//      by a timer 350 ms after the change hit the opening animation and left the card half open,
+//      which is why the shim waits for the card to stop moving instead.
+//    - Main UI / Framework7 should lay the opened card out from the live safe area itself; the
+//      shim can go once they do. Only cards were tried, not other page types.
 //
 // 12. NOT DONE / UNVERIFIED
 //    - Not run on the iPhone Duo simulator or a device by the author of this file. The vertical
@@ -236,33 +232,9 @@ private struct MainUINavigationContent: View {
     @State private var isMenuPresented = false
     @State private var safeArea = EdgeInsets()
     @State private var reportedLayout = MainUILayout.zero
-    @State private var lastVisibleTopInset: CGFloat = 0
-
-    /// EXPERIMENT (see decision 11): while Main UI has hidden its navbar, and with it the system
-    /// bar, keep the web view's top safe area at the value it had with the bar visible. Set to
-    /// false to see the plain behavior, where hiding the bar shrinks the safe area.
-    private static let holdsTopInsetWhileBarHidden = true
-
-    /// How much top inset to hold while the bar is hidden. Nil holds the full value the bar had,
-    /// which kept the card's close button in view but pushed the card down by that much, so it
-    /// had to scroll. A small value such as 1 keeps the safe area non-zero, in case Framework7
-    /// only misplaces the card for exactly 0, while the card uses nearly the whole screen.
-    private static let heldTopInsetWhileBarHidden: CGFloat? = 1
-
-    /// EXPERIMENT (see decision 11): after the bar was hidden or shown, send the page a `resize`
-    /// event once Framework7's card animation is over, so it lays the opened card out again with
-    /// the new safe area. Without it the card keeps the position computed from the old one.
-    private static let notifiesPageAfterBarChange = true
-    private static let barChangeNotificationDelayMilliseconds = 900
 
     private var isTile: Bool {
         tileTitle != nil
-    }
-
-    /// The top inset to hold in place of the hidden bar.
-    private var heldTopInset: CGFloat {
-        guard Self.holdsTopInsetWhileBarHidden, !isTile, navbar.hidden else { return 0 }
-        return Self.heldTopInsetWhileBarHidden ?? lastVisibleTopInset
     }
 
     /// A tile has no bridge, so the page's navbar (possibly left over from Main UI) is ignored.
@@ -275,7 +247,7 @@ private struct MainUINavigationContent: View {
             // The GeometryReader sits OUTSIDE `.ignoresSafeArea()` on purpose: it reads the real
             // safe area, while the Main UI web view inside it draws full bleed, as before.
             GeometryReader { proxy in
-                OpenHABWebViewContainer(additionalSafeAreaTop: heldTopInset, viewModel: webViewModel)
+                OpenHABWebViewContainer(viewModel: webViewModel)
                     .background(.clear)
                     .ignoresSafeArea(edges: isTile ? [] : .all)
                     .onChange(of: proxy.safeAreaInsets, initial: true) { _, insets in
@@ -290,10 +262,7 @@ private struct MainUINavigationContent: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
-        .onChange(of: navbar.hidden) { _, _ in
-            reportLayout(for: safeArea)
-            notifyPageOfBarChange()
-        }
+        .onChange(of: navbar.hidden) { _, _ in reportLayout(for: safeArea) }
         .navigationTitle(tileTitle ?? (navbar.titleInContent ? "" : navbar.title))
         .toolbarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
@@ -303,17 +272,10 @@ private struct MainUINavigationContent: View {
     }
 
     /// See the layout reporting rule (8) in the decision log. A tile has no bridge to tell.
-    private func notifyPageOfBarChange() {
-        guard Self.notifiesPageAfterBarChange, !isTile else { return }
-        let script = "setTimeout(function(){window.dispatchEvent(new Event('resize'))},\(Self.barChangeNotificationDelayMilliseconds))"
-        webViewModel.webView.evaluateJavaScript(script, completionHandler: nil)
-    }
-
     /// Takes the insets as an argument because the `safeArea` state is not updated yet when
     /// this runs from the `onChange` that stores it.
     private func reportLayout(for insets: EdgeInsets) {
         guard !isTile, !navbar.hidden else { return }
-        lastVisibleTopInset = insets.top
         let layout = MainUILayout(safeArea: insets)
         guard layout != reportedLayout else { return }
         reportedLayout = layout
