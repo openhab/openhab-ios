@@ -55,4 +55,40 @@ final class ToolbarMenuUITests: XCTestCase {
         XCTAssertTrue(sitemapsHeader.waitForExistence(timeout: 20), "Sitemaps should remain listed after pull-to-refresh")
         XCTAssertTrue(sitemapsHeader.isHittable, "Sitemaps header should be interactable once the refresh settles")
     }
+
+    /// "Add Home" opens the New Home alert. With several homes it sits behind "Edit".
+    /// Which button shows for a given home count is covered by HomePickerActionTests.
+    func testAddHomeOpensNewHomeAlert() {
+        app.launch()
+
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
+
+        let addHome = app.buttons["AddHomeButton"]
+        let editHomes = app.buttons["EditHomesButton"]
+        // The picker is hidden while the Homes section is collapsed; open it and restore afterwards.
+        let wasCollapsed = !addHome.exists && !editHomes.exists
+        let homesHeader = app.buttons.matching(NSPredicate(format: "label BEGINSWITH[c] 'Homes'")).firstMatch
+        if wasCollapsed {
+            XCTAssertTrue(homesHeader.waitForExistence(timeout: 5), "Homes header should be present")
+            homesHeader.tap()
+        }
+
+        XCTAssertTrue(addHome.waitForExistence(timeout: 5) || editHomes.exists, "Home picker should show an action button")
+        if editHomes.exists {
+            editHomes.tap()
+            XCTAssertTrue(addHome.waitForExistence(timeout: 2), "Edit mode should offer Add Home")
+        }
+
+        addHome.tap()
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: 2), "Add Home should open the New Home alert")
+        XCTAssertTrue(alert.textFields.firstMatch.exists, "The alert should ask for the home name")
+        alert.buttons["Cancel"].tap()
+
+        let alertGone = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: alert)
+        wait(for: [alertGone], timeout: 2)
+        if wasCollapsed {
+            homesHeader.tap()
+        }
+    }
 }

@@ -59,6 +59,46 @@ struct ConnectionView: View {
     }
 }
 
+// MARK: - Section toggle header
+
+/// Toggle header shared by every collapsible menu section: a disclosure chevron
+/// followed by the uppercased section title, driving `isExpanded`.
+struct SectionToggleHeader: View {
+    /// Space above and below the title.
+    static let verticalPadding: CGFloat = 14
+    /// Minimum tap target Apple recommends, applied in both states.
+    static let minTapTarget: CGFloat = 44
+
+    let title: String
+    @Binding var isExpanded: Bool
+
+    var body: some View {
+        Button {
+            isExpanded.toggle()
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemSymbol: isExpanded ? .chevronDown : .chevronRight)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 10)
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 16)
+            // The same padding in both states keeps the title in place when the section toggles.
+            .padding(.vertical, Self.verticalPadding)
+            // Padding alone falls short of the tap target at small Dynamic Type sizes.
+            .frame(minHeight: Self.minTapTarget)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 // MARK: - Toolbar dropdown menu
 
 /// Toolbar dropdown menu replacing the SideMenu drawer.
@@ -66,8 +106,6 @@ struct ToolbarMenu: View {
     /// Shared curve so the section content and the container height animate in sync.
     private static let sectionAnimationDuration = 0.25
     private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
-    /// Space above a section header's title, and below it while the section is closed.
-    private static let headerVerticalPadding: CGFloat = 14
     /// Route sentinel for the MainUI home page, used to highlight the "Home" row.
     private static let mainUIHomeRoute = "/"
 
@@ -618,7 +656,7 @@ extension ToolbarMenu {
             loadingRow(label: localizedTitle)
         } else if !isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                sectionToggleHeader(title: localizedTitle, isExpanded: isExpanded)
+                SectionToggleHeader(title: localizedTitle, isExpanded: isExpanded)
 
                 if isExpanded.wrappedValue {
                     // Wrap in a single container so the transition has one stable
@@ -639,35 +677,6 @@ extension ToolbarMenu {
             // the resolved value here animates the change regardless of trigger.
             .animation(Self.sectionAnimation, value: isExpanded.wrappedValue)
         }
-    }
-
-    /// Toggle header shared by every collapsible section: a disclosure chevron
-    /// followed by the uppercased section title, driving `isExpanded`.
-    private func sectionToggleHeader(title: String, isExpanded: Binding<Bool>) -> some View {
-        Button {
-            isExpanded.wrappedValue.toggle()
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemSymbol: isExpanded.wrappedValue ? .chevronDown : .chevronRight)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 10)
-                Text(title)
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, Self.headerVerticalPadding)
-            // An open section's entries follow right below. A closed one is only its header, so it
-            // mirrors the top padding to center the title, which with a caption line makes the
-            // header about 44 pt, the minimum tap target Apple recommends.
-            .padding(.bottom, isExpanded.wrappedValue ? 2 : Self.headerVerticalPadding)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Row helpers
