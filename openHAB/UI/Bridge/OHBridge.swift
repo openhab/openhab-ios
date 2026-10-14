@@ -198,6 +198,8 @@ struct OHBridgeNavbarState: Decodable, Equatable {
     let title: String
     let titleInContent: Bool
     let hidden: Bool
+    /// Hidden because a card, popup or search covers the page, not because the page scrolled.
+    var covered: Bool? = nil
     let back: Back?
     let leading: [OHBridgeNavbarAction]
     let trailing: [OHBridgeNavbarAction]

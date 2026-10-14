@@ -213,6 +213,16 @@ private struct MainUINavigationContent: View {
     @Environment(\.toolbarVerticalEdge) private var verticalEdge
     @State private var safeArea = EdgeInsets()
     @State private var reportedLayout = MainUILayout.zero
+    @State private var lastVisibleTopInset: CGFloat = 0
+
+    /// While the bar is hidden by scrolling the page keeps the top safe area it had with the bar
+    /// shown. A card, popup or search covering the page lays itself out from the shrunk one.
+    /// Otherwise hiding moves the page's content, Framework7 reads that as a scroll in the other
+    /// direction and shows the bar again, which moves the content back: the bar flickers.
+    private var heldTopInset: CGFloat {
+        guard navbar.hidden, navbar.covered != true else { return 0 }
+        return max(0, lastVisibleTopInset - safeArea.top)
+    }
 
     private var isTile: Bool {
         tileTitle != nil
@@ -228,11 +238,12 @@ private struct MainUINavigationContent: View {
             // The GeometryReader sits OUTSIDE `.ignoresSafeArea()` on purpose: it reads the real
             // safe area, while the Main UI web view inside it draws full bleed, as before.
             GeometryReader { proxy in
-                OpenHABWebViewContainer(viewModel: webViewModel)
+                OpenHABWebViewContainer(viewModel: webViewModel, heldTopInset: isTile ? 0 : heldTopInset)
                     .background(.clear)
                     .ignoresSafeArea(edges: isTile ? [] : .all)
                     .onChange(of: proxy.safeAreaInsets, initial: true) { _, insets in
                         safeArea = insets
+                        if !navbar.hidden { lastVisibleTopInset = insets.top }
                         reportLayout(for: insets)
                     }
             }

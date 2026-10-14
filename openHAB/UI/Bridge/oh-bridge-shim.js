@@ -430,6 +430,11 @@
     return !!document.querySelector('.popup.modal-in, .view-main .navbar.with-searchbar-expandable-enabled')
   }
 
+  // An opened card hides the bar too, and is laid out from the safe area the host has then.
+  function cardOpen() {
+    return !!document.querySelector('.card-opening, .card-opened')
+  }
+
   function reportNavbar() {
     if (!wants('navbar') || !helloSent) return
     var covered = barCovered()
@@ -440,6 +445,7 @@
     syncDocumentPadding(false)
     var state = readNavbar(navbar)
     if (covered) state.hidden = true
+    if (covered || cardOpen()) state.covered = true
     var json = JSON.stringify(state)
     if (json === lastNavbarJSON) return
     lastNavbarJSON = json
