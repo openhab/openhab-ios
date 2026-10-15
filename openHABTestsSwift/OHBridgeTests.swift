@@ -401,7 +401,9 @@ struct OHBridgeTests {
             of: "<body>",
             with: "<body><script>OHBridge.onmessage = function () {}</script>"
         ))
-        _ = try await page.waitFor("document.readyState === 'complete' ? 'done' : 'null'")
+        // The blank document a new web view starts with is already complete, so wait for this page:
+        // the stub bridge's `__posted` and Main UI's `#app`. By then the shim has decided to stand down.
+        _ = try await page.waitFor("window.__posted && document.getElementById('app') && document.readyState === 'complete' ? 'done' : 'null'")
         try await Task.sleep(for: .milliseconds(500))
         let sent = try await page.run("JSON.stringify(__posted.map(function (m) { return m.type }))")
         #expect(sent == "[]")
