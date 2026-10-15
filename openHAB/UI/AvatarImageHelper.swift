@@ -78,7 +78,9 @@ enum AvatarImageHelper {
     @MainActor
     static func renderedAvatar(for homeId: UUID, mode: AvatarMode?) -> Image? {
         guard case .image = mode else { return nil }
-        if let cached = renderCache[homeId] { return Image(uiImage: cached) }
+        if let cached = renderCache[homeId] {
+            return Image(uiImage: cached)
+        }
         guard let original = loadOriginal(for: homeId),
               let rendered = renderCrop(original: original, mode: mode!)
         else { return nil }
@@ -140,7 +142,9 @@ extension AvatarMode {
     /// name string, which is not validated against real symbol names — a stale/invalid
     /// name from old data becomes an `SFSymbol` that simply fails to render an icon.
     var icon: SFSymbol? {
-        if case let .icon(name, _) = self { return SFSymbol(rawValue: name) }
+        if case let .icon(name, _) = self {
+            return SFSymbol(rawValue: name)
+        }
         return nil
     }
 
@@ -154,17 +158,23 @@ extension AvatarMode {
 
     /// `true` when this is a `.image` mode.
     var isPhoto: Bool {
-        if case .image = self { return true }
+        if case .image = self {
+            return true
+        }
         return false
     }
 
     var cropOrigin: CGPoint? {
-        if case let .image(x, y, _, _) = self { return CGPoint(x: x, y: y) }
+        if case let .image(x, y, _, _) = self {
+            return CGPoint(x: x, y: y)
+        }
         return nil
     }
 
     var cropSize: CGFloat? {
-        if case let .image(_, _, s, _) = self { return CGFloat(s) }
+        if case let .image(_, _, s, _) = self {
+            return CGFloat(s)
+        }
         return nil
     }
 

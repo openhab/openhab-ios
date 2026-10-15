@@ -75,8 +75,12 @@ public struct OpenHABNotification: Identifiable, Hashable, Sendable {
 
     /// A convenient view-facing display string: payload title → root message → payload message
     public var title: String {
-        if let payloadTitle = payload?.title, !payloadTitle.isEmpty { return payloadTitle }
-        if let msg = message, !msg.isEmpty { return msg }
+        if let payloadTitle = payload?.title, !payloadTitle.isEmpty {
+            return payloadTitle
+        }
+        if let msg = message, !msg.isEmpty {
+            return msg
+        }
         return payload?.message ?? ""
     }
 
@@ -88,8 +92,12 @@ public struct OpenHABNotification: Identifiable, Hashable, Sendable {
     /// The message body shown beneath the title, only present when title comes from payload.title.
     public var subtitle: String? {
         guard let payloadTitle = payload?.title, !payloadTitle.isEmpty else { return nil }
-        if let msg = message, !msg.isEmpty { return msg }
-        if let payloadMsg = payload?.message, !payloadMsg.isEmpty { return payloadMsg }
+        if let msg = message, !msg.isEmpty {
+            return msg
+        }
+        if let payloadMsg = payload?.message, !payloadMsg.isEmpty {
+            return payloadMsg
+        }
         return nil
     }
 

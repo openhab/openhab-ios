@@ -101,12 +101,16 @@ public extension String {
     }
 
     func parseAsBool() -> Bool {
-        if self == "ON" { return true }
+        if self == "ON" {
+            return true
+        }
         // Try to parse as Float first
         if let floatValue = Float(self) {
             return floatValue > 0
         }
-        if let brightness = parseAsBrightness() { return brightness != 0 }
+        if let brightness = parseAsBrightness() {
+            return brightness != 0
+        }
         // Fallback
         return false
     }

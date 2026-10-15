@@ -206,7 +206,9 @@ public struct HomePreferences: Codable, Equatable, Sendable {
     /// homes therefore resolve to the same set, which is why the tracker does not
     /// re-publish when switching between them.
     public var trackedConnections: [ConnectionConfiguration] {
-        if demomode { return [.demo] }
+        if demomode {
+            return [.demo]
+        }
         return disableRemoteConnection ? [localConnectionConfig] : [localConnectionConfig, remoteConnectionConfig]
     }
 
@@ -264,7 +266,11 @@ public struct HomePreferences: Codable, Equatable, Sendable {
     /// Sets or clears `section` in the collapsed set.
     public mutating func setSection(_ section: MenuSection, expanded: Bool) {
         var collapsed = collapsedSections
-        if expanded { collapsed.remove(section) } else { collapsed.insert(section) }
+        if expanded {
+            collapsed.remove(section)
+        } else {
+            collapsed.insert(section)
+        }
         collapsedSections = collapsed
     }
 }

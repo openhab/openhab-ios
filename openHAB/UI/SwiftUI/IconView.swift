@@ -141,7 +141,7 @@ struct IconInputView: View {
             if let fallbackSymbol, currentImage == nil {
                 Image(systemSymbol: fallbackSymbol)
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(width: size.width * 0.75, height: size.height * 0.75)
                     .foregroundStyle(.primary)
             } else {
@@ -178,7 +178,7 @@ struct IconInputView: View {
                     .placeholder { _ in
                         Image(uiImage: currentImage ?? .init()).resizable()
                     }
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(width: size.width, height: size.height)
                     .id("\(iconURL.absoluteString)-\(colorScheme)-\(iconReloader.reloadEpoch)")
                     .onAppear {
@@ -333,7 +333,7 @@ struct IconView: View {
             if let fallbackSymbol {
                 Image(systemSymbol: fallbackSymbol)
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(width: size.width * 0.75, height: size.height * 0.75)
                     .foregroundStyle(.primary)
             } else {
@@ -371,7 +371,7 @@ struct IconView: View {
                         // Workaround to show current image before new image is displayed. See https://github.com/onevcat/Kingfisher/issues/2028
                         Image(uiImage: currentImage ?? .init()).resizable()
                     }
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(width: size.width, height: size.height)
                     .id("\(iconURL.absoluteString)-\(colorScheme)-\(iconReloader.reloadEpoch)")
                     .onAppear {

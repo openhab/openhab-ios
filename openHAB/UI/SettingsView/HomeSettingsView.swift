@@ -485,7 +485,11 @@ extension HomeSettingsView {
     }
 
     private var iconPickerRow: some View {
-        let hasPhoto = if case .image = current.avatarMode { true } else { false }
+        let hasPhoto = if case .image = current.avatarMode {
+            true
+        } else {
+            false
+        }
         let tint = Color(hex: current.avatarMode?.colorHex ?? "") ?? HomeAvatarView.defaultColor
         let pinLeading: CGFloat = 8
         let gap: CGFloat = 10 // matches icon HStack spacing
@@ -513,7 +517,9 @@ extension HomeSettingsView {
                             }
                             .frame(width: 40, height: 40)
                             .overlay {
-                                if isSelected { Circle().strokeBorder(.blue, lineWidth: 2) }
+                                if isSelected {
+                                    Circle().strokeBorder(.blue, lineWidth: 2)
+                                }
                             }
                         }
                         .buttonStyle(.plain)
@@ -669,7 +675,9 @@ extension HomeSettingsView {
                             .foregroundStyle(hasPhoto ? .white : .blue)
                     }
                     .overlay {
-                        if hasPhoto { RoundedRectangle(cornerRadius: 8).strokeBorder(.blue, lineWidth: 2) }
+                        if hasPhoto {
+                            RoundedRectangle(cornerRadius: 8).strokeBorder(.blue, lineWidth: 2)
+                        }
                     }
             }
             .buttonStyle(.plain)

@@ -166,7 +166,9 @@ public actor OpenHABItemCache {
     private init() {}
 
     private func loadedStubs() -> [String: [ItemStub]] {
-        if let cached = cachedStubs { return cached }
+        if let cached = cachedStubs {
+            return cached
+        }
         guard let data = UserDefaults(suiteName: Self.sharedDefaultsSuiteName)?.data(forKey: Self.stubsDefaultsKey),
               let decoded = try? JSONDecoder().decode([String: [ItemStub]].self, from: data) else {
             return [:]
@@ -189,7 +191,9 @@ public actor OpenHABItemCache {
     public func getCachedItem(name: String, home: UUID) async -> [OpenHABItem]? {
         await reloadCacheIfNeeded(homes: [home])
         let live = items[home]?.filter { $0.name == name }
-        if let live, !live.isEmpty { return live }
+        if let live, !live.isEmpty {
+            return live
+        }
         return persistedItem(name: name, home: home).map { [$0] }
     }
 
