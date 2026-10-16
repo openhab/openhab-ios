@@ -115,7 +115,11 @@ struct HomeSelectionView: View {
         .toolbar { toolbarContent }
         .sheet(isPresented: Binding(
             get: { homeForSettings != nil },
-            set: { if !$0 { homeForSettings = nil } }
+            set: {
+                if !$0 {
+                    homeForSettings = nil
+                }
+            }
         )) {
             if let target = homeForSettings {
                 NavigationStack {

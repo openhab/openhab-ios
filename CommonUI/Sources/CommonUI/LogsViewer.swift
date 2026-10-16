@@ -172,7 +172,9 @@ public extension Logger {
             }
         }
 
-        if logs.isEmpty { logs = ["Nothing found"] }
+        if logs.isEmpty {
+            logs = ["Nothing found"]
+        }
         return logs
     }
 }

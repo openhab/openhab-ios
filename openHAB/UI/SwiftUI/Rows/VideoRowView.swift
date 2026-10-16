@@ -150,7 +150,9 @@ private struct VideoRowContent: View {
             for: url,
             onFrame: { image in
                 mjpegImage = image
-                if isLoading { isLoading = false }
+                if isLoading {
+                    isLoading = false
+                }
             },
             onFirstFrame: { newAspectRatio in
                 aspectRatio = newAspectRatio

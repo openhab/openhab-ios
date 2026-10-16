@@ -276,8 +276,12 @@ public extension OpenHABWidget {
                 || event.valuecolor != nil || event.iconcolor != nil
                 || event.visibility != nil || event.labelSource != nil
             else { return .unchanged }
-            if let label = event.label { self.label = label }
-            if let icon = event.icon { self.icon = icon }
+            if let label = event.label {
+                self.label = label
+            }
+            if let icon = event.icon {
+                self.icon = icon
+            }
             // The server re-evaluates all three color expressions together whenever the
             // widget's underlying item state changes, and omits a color entirely (rather
             // than sending "") once its condition no longer matches — so on a state-driven
@@ -291,17 +295,27 @@ public extension OpenHABWidget {
                 valuecolor = event.valuecolor ?? ""
                 iconColor = event.iconcolor ?? ""
             } else {
-                if let labelcolor = event.labelcolor { self.labelcolor = labelcolor }
-                if let valuecolor = event.valuecolor { self.valuecolor = valuecolor }
-                if let iconcolor = event.iconcolor { iconColor = iconcolor }
+                if let labelcolor = event.labelcolor {
+                    self.labelcolor = labelcolor
+                }
+                if let valuecolor = event.valuecolor {
+                    self.valuecolor = valuecolor
+                }
+                if let iconcolor = event.iconcolor {
+                    iconColor = iconcolor
+                }
             }
-            if let visibility = event.visibility { self.visibility = visibility }
+            if let visibility = event.visibility {
+                self.visibility = visibility
+            }
             if let state = event.state {
                 self.state = state
             } else if let itemState = event.enrichedItem?.state {
                 state = itemState
             }
-            if let item = event.enrichedItem { self.item = item }
+            if let item = event.enrichedItem {
+                self.item = item
+            }
             if let labelSource = event.labelSource {
                 self.labelSource = OpenHABWidget.LabelSource(rawValue: labelSource) ?? .unknown
             }
