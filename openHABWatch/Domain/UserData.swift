@@ -118,116 +118,43 @@ final class UserData {
         }
     }
 
-    /// Replicates the old $haveReceivedAppContext.filter { $0 }.sink behavior.
-    /// Fires immediately if the value is already true, then watches for transitions to true.
-    private func observeHaveReceivedAppContext() {
+    /// Updates the network when the iPhone's application context has arrived: at launch when it
+    /// already has, and on each later change to true.
+    private func observeHaveReceivedAppContext(settings: AppSettings = .shared) {
         haveContextObservationTask = Task { @MainActor [weak self] in
-            if AppSettings.shared.haveReceivedAppContext {
+            for await haveContext in AsyncStream.observing({ settings.haveReceivedAppContext }) where haveContext {
                 await self?.updateNetwork()
             }
-            var previous = AppSettings.shared.haveReceivedAppContext
-            while !Task.isCancelled {
-                await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                    withObservationTracking {
-                        _ = AppSettings.shared.haveReceivedAppContext
-                    } onChange: {
-                        continuation.resume()
-                    }
-                }
-                guard let self else { break }
-                let current = AppSettings.shared.haveReceivedAppContext
-                if current, !previous {
-                    await updateNetwork()
-                }
-                previous = current
-            }
         }
     }
 
-    /// True debounce equivalent of $sitemapForWatch.removeDuplicates().debounce(0.3).sink.
-    /// Triggers on the initial value (no dropFirst) to start page handling on cold start.
-    /// Each detected change cancels the pending timer and starts a fresh 300ms one, so only
-    /// the final change in a rapid burst triggers startPageHandling.
-    private func observeSitemapForWatch() {
+    /// Starts page handling for the watch sitemap once it has stayed unchanged for 300 ms,
+    /// including for the stored value at launch.
+    private func observeSitemapForWatch(settings: AppSettings = .shared) {
         sitemapObservationTask = Task { @MainActor [weak self] in
-            let initial = AppSettings.shared.sitemapForWatch
-            var previous = initial
-            var debounceTask: Task<Void, Never>?
-            if !initial.isEmpty {
-                debounceTask = Task { @MainActor [weak self] in
-                    try? await Task.sleep(for: .milliseconds(300))
-                    guard !Task.isCancelled, let self else { return }
-                    let force = currentlyLoadingSitemap != initial
-                    Logger.userData.debug("Sitemap observer initial (debounced): \(initial), force: \(force)")
-                    startPageHandling(sitemapName: initial, force: force)
+            let sitemaps = AsyncStream.observing { settings.sitemapForWatch }
+            await sitemaps.debounce(for: .milliseconds(300)) { [weak self] sitemap in
+                guard let self else { return }
+                guard !sitemap.isEmpty else {
+                    Logger.userData.debug("Sitemap observer: empty sitemap, ignoring")
+                    return
                 }
+                let currentSitemap = currentlyLoadingSitemap
+                let force = currentSitemap != sitemap
+                Logger.userData.debug("Sitemap change detected - current: \(currentSitemap ?? "nil"), new: \(sitemap), force: \(force)")
+                startPageHandling(sitemapName: sitemap, force: force)
             }
-            while !Task.isCancelled {
-                await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                    withObservationTracking {
-                        _ = AppSettings.shared.sitemapForWatch
-                    } onChange: {
-                        continuation.resume()
-                    }
-                }
-                guard let self, !Task.isCancelled else { break }
-                let current = AppSettings.shared.sitemapForWatch
-                guard current != previous else { continue }
-                previous = current
-                debounceTask?.cancel()
-                debounceTask = Task { @MainActor [weak self] in
-                    try? await Task.sleep(for: .milliseconds(300))
-                    guard !Task.isCancelled, let self else { return }
-                    guard !current.isEmpty else {
-                        Logger.userData.debug("Sitemap observer: empty sitemap, ignoring")
-                        return
-                    }
-                    let isDifferentSitemap = currentlyLoadingSitemap != current
-                    let currentlySitemap = currentlyLoadingSitemap ?? "nil"
-                    Logger.userData.debug("Sitemap change detected - current: \(currentlySitemap), new: \(current), force: \(isDifferentSitemap)")
-                    startPageHandling(sitemapName: current, force: isDifferentSitemap)
-                }
-            }
-            debounceTask?.cancel()
         }
     }
 
-    /// True debounce equivalent of $localConnectionConfig.combineLatest($remoteConnectionConfig)
-    /// .removeDuplicates{url}.debounce(0.5).sink.
-    /// Triggers on initial values (no dropFirst) to cover cold start.
-    /// Each detected URL change cancels the pending timer and starts a fresh 500ms one.
-    private func observeConnectionConfigs() {
+    /// Updates the network once the local and remote URLs have stayed unchanged for 500 ms,
+    /// including for the stored values at launch.
+    private func observeConnectionConfigs(settings: AppSettings = .shared) {
         connectionConfigObservationTask = Task { @MainActor [weak self] in
-            var prevLocalURL = AppSettings.shared.localConnectionConfig?.url
-            var prevRemoteURL = AppSettings.shared.remoteConnectionConfig?.url
-            var debounceTask: Task<Void, Never>? = Task { @MainActor [weak self] in
-                try? await Task.sleep(for: .milliseconds(500))
-                guard !Task.isCancelled, let self else { return }
-                await updateNetwork()
+            let urls = AsyncStream.observing { [settings.localConnectionConfig?.url, settings.remoteConnectionConfig?.url] }
+            await urls.debounce(for: .milliseconds(500)) { [weak self] _ in
+                await self?.updateNetwork()
             }
-            while !Task.isCancelled {
-                await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                    withObservationTracking {
-                        _ = AppSettings.shared.localConnectionConfig
-                        _ = AppSettings.shared.remoteConnectionConfig
-                    } onChange: {
-                        continuation.resume()
-                    }
-                }
-                guard let self, !Task.isCancelled else { break }
-                let localURL = AppSettings.shared.localConnectionConfig?.url
-                let remoteURL = AppSettings.shared.remoteConnectionConfig?.url
-                guard localURL != prevLocalURL || remoteURL != prevRemoteURL else { continue }
-                prevLocalURL = localURL
-                prevRemoteURL = remoteURL
-                debounceTask?.cancel()
-                debounceTask = Task { @MainActor [weak self] in
-                    try? await Task.sleep(for: .milliseconds(500))
-                    guard !Task.isCancelled, let self else { return }
-                    await updateNetwork()
-                }
-            }
-            debounceTask?.cancel()
         }
     }
 
@@ -419,7 +346,7 @@ final class UserData {
                     }
                     guard let page else { continue }
                     // Only update page object when title changes to avoid
-                    // firing objectWillChange and resetting scroll position
+                    // invalidating the views that read it and resetting scroll position
                     if openHABSitemapPage?.title != page.title {
                         openHABSitemapPage = page
                     }

@@ -35,6 +35,7 @@ final class AppSettings {
 
     var localConnectionConfig: ConnectionConfiguration? {
         didSet {
+            guard oldValue != localConnectionConfig else { return }
             if let v = localConnectionConfig, let data = try? JSONEncoder().encode(v) {
                 store.set(data, forKey: "localConnectionConfig")
             } else {
@@ -45,6 +46,7 @@ final class AppSettings {
 
     var remoteConnectionConfig: ConnectionConfiguration? {
         didSet {
+            guard oldValue != remoteConnectionConfig else { return }
             if let v = remoteConnectionConfig, let data = try? JSONEncoder().encode(v) {
                 store.set(data, forKey: "remoteConnectionConfig")
             } else {
@@ -54,42 +56,67 @@ final class AppSettings {
     }
 
     var openHABRootUrl: String {
-        didSet { store.set(openHABRootUrl, forKey: "openHABRootUrl") }
+        didSet {
+            guard oldValue != openHABRootUrl else { return }
+            store.set(openHABRootUrl, forKey: "openHABRootUrl")
+        }
     }
 
     var sitemapName: String {
-        didSet { store.set(sitemapName, forKey: "sitemapName") }
+        didSet {
+            guard oldValue != sitemapName else { return }
+            store.set(sitemapName, forKey: "sitemapName")
+        }
     }
 
     var sitemapForWatch: String {
-        didSet { store.set(sitemapForWatch, forKey: "sitemapForWatch") }
+        didSet {
+            guard oldValue != sitemapForWatch else { return }
+            store.set(sitemapForWatch, forKey: "sitemapForWatch")
+        }
     }
 
     var sitemapForWatchLabel: String {
-        didSet { store.set(sitemapForWatchLabel, forKey: "sitemapForWatchLabel") }
+        didSet {
+            guard oldValue != sitemapForWatchLabel else { return }
+            store.set(sitemapForWatchLabel, forKey: "sitemapForWatchLabel")
+        }
     }
 
     var iconType: IconType {
-        didSet { store.set(iconType.rawValue, forKey: "iconType") }
+        didSet {
+            guard oldValue != iconType else { return }
+            store.set(iconType.rawValue, forKey: "iconType")
+        }
     }
 
     var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode {
-        didSet { store.set(sitemapNameLabelDisplayMode.rawValue, forKey: "sitemapNameLabelDisplayMode") }
+        didSet {
+            guard oldValue != sitemapNameLabelDisplayMode else { return }
+            store.set(sitemapNameLabelDisplayMode.rawValue, forKey: "sitemapNameLabelDisplayMode")
+        }
     }
 
     var sortSitemapsBy: SortSitemapsOrder {
-        didSet { store.set(sortSitemapsBy.rawValue, forKey: "sortSitemapsBy") }
+        didSet {
+            guard oldValue != sortSitemapsBy else { return }
+            store.set(sortSitemapsBy.rawValue, forKey: "sortSitemapsBy")
+        }
     }
 
     var haveReceivedAppContext = false
 
     var storedHomes: [UUID: HomePreferences] = [:] {
-        didSet { Self.persistStoredHomes(storedHomes) }
+        didSet {
+            guard oldValue != storedHomes else { return }
+            Self.persistStoredHomes(storedHomes)
+        }
     }
 
     /// UUID of the active home, persisted so credentials can be injected from Watch Keychain on restart.
     var activeHomeId: UUID? {
         didSet {
+            guard oldValue != activeHomeId else { return }
             if let activeHomeId {
                 store.set(activeHomeId.uuidString, forKey: "activeHomeId")
             } else {
@@ -129,10 +156,11 @@ final class AppSettings {
             storedHomes = Dictionary(uniqueKeysWithValues: decoded.compactMap { key, value in
                 UUID(uuidString: key).map { ($0, value) }
             })
-            // didSet doesn't fire during init, so seed the App Intents suite immediately.
-            // The old @Published subscription emitted the initial value and called this automatically.
-            Self.persistStoredHomes(storedHomes)
         }
+        // didSet doesn't fire during init, so seed the App Intents suite here, also with the empty
+        // default when "watchAllHomes" is missing or unreadable. That clears homes the App Intents
+        // suite still lists. The old @Published subscription did this with its initial value.
+        Self.persistStoredHomes(storedHomes)
 
         // Restore active home ID and inject credentials from Watch Keychain so the main
         // Watch UI has valid credentials even when the iOS app is not reachable on restart.
