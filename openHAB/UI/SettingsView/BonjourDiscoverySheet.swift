@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
@@ -17,7 +16,7 @@ import SwiftUI
 struct BonjourDiscoverySheet: View {
     @Binding var isPresented: Bool
     @Binding var connectionConfig: ConnectionConfiguration
-    @StateObject private var discovery = BonjourDiscoveryViewModel()
+    @State private var discovery = BonjourDiscoveryViewModel()
 
     var body: some View {
         NavigationStack {

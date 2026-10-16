@@ -87,7 +87,7 @@ struct ImageRow: View, Equatable {
             .cacheMemoryOnly(refresh > 0)
             .loadDiskFileSynchronously()
             .resizable()
-            .aspectRatio(contentMode: .fit)
+            .scaledToFit()
             .onAppear {
                 refreshTimer.configure(interval: refresh)
             }

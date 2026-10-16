@@ -17,6 +17,13 @@ import SwiftUI
 
 @MainActor
 class NetworkConnectionService: ObservableObject {
+    struct CertificateAlertState: Identifiable {
+        let id = UUID()
+        let title: String
+        let message: String
+        let delegate: HTTPClientDelegate
+    }
+
     // MARK: - Published state
 
     @Published var certificateAlert: CertificateAlertState?
@@ -25,13 +32,6 @@ class NetworkConnectionService: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
     private var preferencesTask: Task<Void, Never>?
-
-    struct CertificateAlertState: Identifiable {
-        let id = UUID()
-        let title: String
-        let message: String
-        let delegate: HTTPClientDelegate
-    }
 
     init() {
         setupTracker()
@@ -129,7 +129,12 @@ class NetworkConnectionService: ObservableObject {
 
     func certificateAlertAction(_ result: CertificateEvaluateResult) {
         certificateAlert?.delegate.completeEvaluation(result)
-        certificateAlert = nil
+        // Deferred: this is called from an alert button action during SwiftUI's dismiss
+        // transaction, and mutating the @Published property inline triggers
+        // "Publishing changes from within view updates is not allowed."
+        DispatchQueue.main.async { [weak self] in
+            self?.certificateAlert = nil
+        }
     }
 }
 

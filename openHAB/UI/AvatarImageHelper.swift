@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import OpenHABCore
+import SFSafeSymbols
 import SwiftUI
 
 /// Saves and loads per-home avatar images from Application Support.
@@ -30,6 +31,10 @@ enum AvatarImageHelper {
             .appendingPathComponent("homes", isDirectory: true)
     }
 
+    // MARK: - Render cache (main-actor, never persisted)
+
+    @MainActor private static var renderCache: [UUID: UIImage] = [:]
+
     private static func homeDirectory(for homeId: UUID) -> URL {
         homesDirectory.appendingPathComponent(homeId.uuidString, isDirectory: true)
     }
@@ -37,10 +42,6 @@ enum AvatarImageHelper {
     static func originalURL(for homeId: UUID) -> URL {
         homeDirectory(for: homeId).appendingPathComponent("avatarImage.jpg")
     }
-
-    // MARK: - Render cache (main-actor, never persisted)
-
-    @MainActor private static var renderCache: [UUID: UIImage] = [:]
 
     // MARK: - Public API
 
@@ -77,7 +78,9 @@ enum AvatarImageHelper {
     @MainActor
     static func renderedAvatar(for homeId: UUID, mode: AvatarMode?) -> Image? {
         guard case .image = mode else { return nil }
-        if let cached = renderCache[homeId] { return Image(uiImage: cached) }
+        if let cached = renderCache[homeId] {
+            return Image(uiImage: cached)
+        }
         guard let original = loadOriginal(for: homeId),
               let rendered = renderCrop(original: original, mode: mode!)
         else { return nil }
@@ -100,7 +103,7 @@ enum AvatarImageHelper {
     /// Renders a 280×280 crop of `original` according to `mode`.
     /// Returns `nil` if mode is `.icon` or if the image is missing.
     static func renderCrop(original: UIImage, mode: AvatarMode) -> UIImage? {
-        guard case .image(let ox, let oy, let sz, let bg) = mode, sz > 0 else { return nil }
+        guard case let .image(ox, oy, sz, bg) = mode, sz > 0 else { return nil }
         let outputSize = CGSize(width: 280, height: 280)
         // Scale factor: how many output pixels per image-space point
         let scale = CGFloat(280.0 / sz)
@@ -135,41 +138,51 @@ enum AvatarImageHelper {
 // MARK: - AvatarMode display helpers (app-target only, uses CGPoint/CGFloat)
 
 extension AvatarMode {
-    /// The SF Symbol name for `.icon` mode, or `nil` for `.image` mode.
-    var iconName: String? {
-        if case .icon(let name, _) = self { return name }
+    /// The SF Symbol for `.icon` mode, or `nil` for `.image` mode. Wraps the persisted
+    /// name string, which is not validated against real symbol names — a stale/invalid
+    /// name from old data becomes an `SFSymbol` that simply fails to render an icon.
+    var icon: SFSymbol? {
+        if case let .icon(name, _) = self {
+            return SFSymbol(rawValue: name)
+        }
         return nil
     }
 
     /// The hex color string for either mode (background color for icons, fill color for images).
     var colorHex: String {
         switch self {
-        case .icon(_, let c): return c
-        case .image(_, _, _, let bg): return bg
+        case let .icon(_, c): c
+        case let .image(_, _, _, bg): bg
         }
     }
 
     /// `true` when this is a `.image` mode.
     var isPhoto: Bool {
-        if case .image = self { return true }
+        if case .image = self {
+            return true
+        }
         return false
+    }
+
+    var cropOrigin: CGPoint? {
+        if case let .image(x, y, _, _) = self {
+            return CGPoint(x: x, y: y)
+        }
+        return nil
+    }
+
+    var cropSize: CGFloat? {
+        if case let .image(_, _, s, _) = self {
+            return CGFloat(s)
+        }
+        return nil
     }
 
     /// Returns a new mode with the color/background replaced by `hex`.
     func withColor(_ hex: String) -> AvatarMode {
         switch self {
-        case .icon(let name, _): return .icon(name: name, color: hex)
-        case .image(let x, let y, let s, _): return .image(originX: x, originY: y, size: s, background: hex)
+        case let .icon(name, _): .icon(name: name, color: hex)
+        case let .image(x, y, s, _): .image(originX: x, originY: y, size: s, background: hex)
         }
-    }
-
-    var cropOrigin: CGPoint? {
-        if case .image(let x, let y, _, _) = self { return CGPoint(x: x, y: y) }
-        return nil
-    }
-
-    var cropSize: CGFloat? {
-        if case .image(_, _, let s, _) = self { return CGFloat(s) }
-        return nil
     }
 }

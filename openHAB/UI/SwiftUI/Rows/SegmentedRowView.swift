@@ -231,7 +231,9 @@ private struct SegmentedRowContent: View {
                 } else {
                     // Toggle OFF
                     let offCommand: String = {
-                        if let rc = mapping.releaseCommand, !rc.isEmpty { return rc }
+                        if let rc = mapping.releaseCommand, !rc.isEmpty {
+                            return rc
+                        }
                         // Default to OFF if no explicit releaseCommand is provided
                         return "OFF"
                     }()

@@ -16,27 +16,19 @@ import SafariServices
 import SwiftUI
 import WebKit
 
+/// Minimal UIViewController that hosts a WKWebView managed by the Coordinator.
+class WebViewHostController: UIViewController {
+    var coordinator: OpenHABWebViewContainer.WebViewContainerCoordinator?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .clear
+    }
+}
+
 /// Container view that manages the WKWebView lifecycle with SwiftUI.
 /// Handles the case where the ViewModel's webView instance may change (e.g. home switch).
 struct OpenHABWebViewContainer: UIViewControllerRepresentable {
-    @ObservedObject var viewModel: OpenHABWebViewModel
-
-    func makeCoordinator() -> WebViewContainerCoordinator {
-        WebViewContainerCoordinator(viewModel: viewModel)
-    }
-
-    func makeUIViewController(context: Context) -> WebViewHostController {
-        let controller = WebViewHostController()
-        controller.coordinator = context.coordinator
-        context.coordinator.hostController = controller
-        context.coordinator.installWebView(viewModel.webView)
-        return controller
-    }
-
-    func updateUIViewController(_ controller: WebViewHostController, context: Context) {
-        context.coordinator.installWebView(viewModel.webView)
-    }
-
     @MainActor
     class WebViewContainerCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
         let viewModel: OpenHABWebViewModel
@@ -46,32 +38,6 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         private var isConfirmingExternalURL = false
         private var externalURLCooldownUntil: Date?
         private var cancellable: AnyCancellable?
-
-        // Capture-phase click interceptor matching develop commit 12b8608c.
-        // e.isTrusted filters programmatic .click() / dispatchEvent() calls so only
-        // real user gestures reach the message handler.
-        private static let externalURLInterceptorScript = WKUserScript(
-            source: """
-            (function() {
-                const nativeSchemes = ['http', 'https', 'about', 'blob', 'data', 'javascript', ''];
-                function isCustomScheme(url) {
-                    const m = /^([a-z][a-z0-9+\\-.]*):/.exec((url || '').toLowerCase());
-                    return m != null && !nativeSchemes.includes(m[1]);
-                }
-                document.addEventListener('click', function(e) {
-                    if (!e.isTrusted) return;
-                    let el = e.target;
-                    while (el && el.tagName !== 'A') el = el.parentElement;
-                    if (el && el.href && isCustomScheme(el.href)) {
-                        e.preventDefault();
-                        window.webkit.messageHandlers.externalURL.postMessage(el.href);
-                    }
-                }, true);
-            })();
-            """,
-            injectionTime: .atDocumentStart,
-            forMainFrameOnly: true
-        )
 
         init(viewModel: OpenHABWebViewModel) {
             self.viewModel = viewModel
@@ -107,7 +73,6 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             webView.configuration.userContentController.add(self, name: "mainUi")
             webView.configuration.userContentController.add(self, name: "pathChanged")
             webView.configuration.userContentController.add(self, name: "externalURL")
-            webView.configuration.userContentController.addUserScript(Self.externalURLInterceptorScript)
             currentWebView = webView
 
             hostView.addSubview(webView)
@@ -153,8 +118,8 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                     rootURLString: connection?.configuration.url ?? ""
                 )
                 Task {
-                        await Preferences.shared.setCurrentWebViewPath(savedPath)
-                    }
+                    await Preferences.shared.setCurrentWebViewPath(savedPath)
+                }
             }
             if message.name == "mainUi" {
                 // Dict body — JS test probe reports (DEBUG builds only)
@@ -168,6 +133,14 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                     return
                 }
                 #endif
+                // Dict body with the pages the user has visited, so we can put them back later
+                if let dict = message.body as? [String: Any],
+                   let type = dict["type"] as? String,
+                   type == WebRouteRestore.messageType,
+                   let state = dict["state"] as? String {
+                    viewModel.handleRouteState(state)
+                    return
+                }
                 // Dict body — navbar state
                 if let dict = message.body as? [String: Any],
                    let type = dict["type"] as? String,
@@ -255,13 +228,15 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             if let proxyURLString = activeConnection.proxyURL?.absoluteString {
                 knownURLStrings.append(proxyURLString)
             }
-            for home in (await Preferences.shared.storedHomes).values {
+            for home in await (Preferences.shared.storedHomes).values {
                 knownURLStrings.append(home.localConnectionConfig.url)
                 knownURLStrings.append(home.remoteConnectionConfig.url)
             }
             return WebViewURLHelper.rewriteToActiveConnection(url, knownBaseURLStrings: knownURLStrings, activeBaseURLString: activeUrl)
         }
 
+        // WKNavigationDelegate requires this signature to be async.
+        // swiftlint:disable:next async_without_await
         func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
             if let response = navigationResponse.response as? HTTPURLResponse {
                 Logger.viewController.info("navigationResponse: \(response.statusCode)")
@@ -301,13 +276,12 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                         return (.performDefaultHandling, nil)
                     }
                     return (.useCredential, URLCredential(trust: serverTrust))
-                } else {
-                    if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
-                        return await onReceiveSessionTaskChallenge(with: challenge)
-                    } else {
-                        return await onReceiveSessionChallenge(with: challenge)
-                    }
                 }
+
+                if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
+                    return await onReceiveSessionTaskChallenge(with: challenge)
+                }
+                return await onReceiveSessionChallenge(with: challenge)
             }
             return (.performDefaultHandling, nil)
         }
@@ -341,14 +315,14 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                      decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
                      initiatedBy frame: WKFrameInfo,
                      type: WKMediaCaptureType) async -> WKPermissionDecision {
-            (await Preferences.shared.currentHomePreferences).alwaysAllowWebRTC ? .grant : .prompt
+            await (Preferences.shared.currentHomePreferences).alwaysAllowWebRTC ? .grant : .prompt
         }
 
         // MARK: - External URL confirmation
 
-        // Shows a native confirmation alert before opening a custom URL scheme, matching
-        // develop commit 12b8608c. Guards against re-entrancy, missing window, and script
-        // spam (3-second cooldown after each resolution).
+        /// Shows a native confirmation alert before opening a custom URL scheme, matching
+        /// develop commit 12b8608c. Guards against re-entrancy, missing window, and script
+        /// spam (3-second cooldown after each resolution).
         private func confirmOpenURL(_ url: URL) async -> Bool {
             let now = Date()
             guard !isConfirmingExternalURL,
@@ -375,6 +349,24 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
             return confirmed
         }
     }
+
+    @ObservedObject var viewModel: OpenHABWebViewModel
+
+    func makeCoordinator() -> WebViewContainerCoordinator {
+        WebViewContainerCoordinator(viewModel: viewModel)
+    }
+
+    func makeUIViewController(context: Context) -> WebViewHostController {
+        let controller = WebViewHostController()
+        controller.coordinator = context.coordinator
+        context.coordinator.hostController = controller
+        context.coordinator.installWebView(viewModel.webView)
+        return controller
+    }
+
+    func updateUIViewController(_ controller: WebViewHostController, context: Context) {
+        context.coordinator.installWebView(viewModel.webView)
+    }
 }
 
 private extension URL {
@@ -391,15 +383,5 @@ private extension URL {
         let defaultPort = scheme == "https" ? 443 : scheme == "http" ? 80 : nil
         let portSuffix = (port != nil && port != defaultPort) ? ":\(port!)" : ""
         return "\(scheme)://\(host)\(portSuffix)"
-    }
-}
-
-/// Minimal UIViewController that hosts a WKWebView managed by the Coordinator.
-class WebViewHostController: UIViewController {
-    var coordinator: OpenHABWebViewContainer.WebViewContainerCoordinator?
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .clear
     }
 }

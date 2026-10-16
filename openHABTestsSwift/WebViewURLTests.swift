@@ -18,22 +18,22 @@ struct WebViewURLTests {
     // MARK: - appendPath
 
     @Test("Appends simple path to base URL")
-    func appendSimplePath() {
-        let base = URL(string: "https://openhab.local:8443")!
+    func appendSimplePath() throws {
+        let base = try #require(URL(string: "https://openhab.local:8443"))
         let result = WebViewURLHelper.appendPath("/dashboard", to: base)
         #expect(result?.absoluteString == "https://openhab.local:8443/dashboard")
     }
 
     @Test("Appends path with query to base URL")
-    func appendPathWithQuery() {
-        let base = URL(string: "https://openhab.local:8443")!
+    func appendPathWithQuery() throws {
+        let base = try #require(URL(string: "https://openhab.local:8443"))
         let result = WebViewURLHelper.appendPath("/page?param=value", to: base)
         #expect(result?.absoluteString == "https://openhab.local:8443/page?param=value")
     }
 
     @Test("Appends path to URL that already has a path")
-    func appendToExistingPath() {
-        let base = URL(string: "https://openhab.local:8443/api")!
+    func appendToExistingPath() throws {
+        let base = try #require(URL(string: "https://openhab.local:8443/api"))
         let result = WebViewURLHelper.appendPath("/v1/items", to: base)
         #expect(result?.absoluteString == "https://openhab.local:8443/api/v1/items")
     }
@@ -85,8 +85,8 @@ struct WebViewURLTests {
     // MARK: - rewriteToActiveConnection
 
     @Test("Returns nil when host does not match any known connection")
-    func rewriteNoMatch() {
-        let link = URL(string: "https://external.example.com/page")!
+    func rewriteNoMatch() throws {
+        let link = try #require(URL(string: "https://external.example.com/page"))
         let result = WebViewURLHelper.rewriteToActiveConnection(
             link,
             knownBaseURLStrings: ["https://openhab.local:8443", "https://remote.myopenhab.org"],
@@ -96,8 +96,8 @@ struct WebViewURLTests {
     }
 
     @Test("Rewrites URL when host matches active connection")
-    func rewriteMatchesActive() {
-        let link = URL(string: "https://openhab.local:8443/page?q=1#anchor")!
+    func rewriteMatchesActive() throws {
+        let link = try #require(URL(string: "https://openhab.local:8443/page?q=1#anchor"))
         let result = WebViewURLHelper.rewriteToActiveConnection(
             link,
             knownBaseURLStrings: ["https://openhab.local:8443"],
@@ -107,8 +107,8 @@ struct WebViewURLTests {
     }
 
     @Test("Rewrites local URL to active remote connection")
-    func rewriteLocalToRemote() {
-        let link = URL(string: "http://192.168.1.100:8080/dashboard")!
+    func rewriteLocalToRemote() throws {
+        let link = try #require(URL(string: "http://192.168.1.100:8080/dashboard"))
         let result = WebViewURLHelper.rewriteToActiveConnection(
             link,
             knownBaseURLStrings: ["http://192.168.1.100:8080", "https://remote.myopenhab.org"],
@@ -118,8 +118,8 @@ struct WebViewURLTests {
     }
 
     @Test("Rewrites remote URL to active local connection")
-    func rewriteRemoteToLocal() {
-        let link = URL(string: "https://remote.myopenhab.org/settings")!
+    func rewriteRemoteToLocal() throws {
+        let link = try #require(URL(string: "https://remote.myopenhab.org/settings"))
         let result = WebViewURLHelper.rewriteToActiveConnection(
             link,
             knownBaseURLStrings: ["http://192.168.1.100:8080", "https://remote.myopenhab.org"],
@@ -129,8 +129,8 @@ struct WebViewURLTests {
     }
 
     @Test("Returns nil when link has no host")
-    func rewriteNoHost() {
-        let link = URL(string: "/relative/path")!
+    func rewriteNoHost() throws {
+        let link = try #require(URL(string: "/relative/path"))
         let result = WebViewURLHelper.rewriteToActiveConnection(
             link,
             knownBaseURLStrings: ["https://openhab.local:8443"],
@@ -140,8 +140,8 @@ struct WebViewURLTests {
     }
 
     @Test("Does not match when port differs")
-    func rewritePortMismatch() {
-        let link = URL(string: "https://openhab.local:9090/page")!
+    func rewritePortMismatch() throws {
+        let link = try #require(URL(string: "https://openhab.local:9090/page"))
         let result = WebViewURLHelper.rewriteToActiveConnection(
             link,
             knownBaseURLStrings: ["https://openhab.local:8443"],
@@ -151,8 +151,8 @@ struct WebViewURLTests {
     }
 
     @Test("Returns nil when knownBaseURLStrings is empty")
-    func rewriteEmptyKnownList() {
-        let link = URL(string: "https://openhab.local:8443/page")!
+    func rewriteEmptyKnownList() throws {
+        let link = try #require(URL(string: "https://openhab.local:8443/page"))
         let result = WebViewURLHelper.rewriteToActiveConnection(
             link,
             knownBaseURLStrings: [],
@@ -162,8 +162,8 @@ struct WebViewURLTests {
     }
 
     @Test("Preserves query and fragment when rewriting")
-    func rewritePreservesQueryAndFragment() {
-        let link = URL(string: "http://192.168.1.10:8080/ui/page?tab=2#section")!
+    func rewritePreservesQueryAndFragment() throws {
+        let link = try #require(URL(string: "http://192.168.1.10:8080/ui/page?tab=2#section"))
         let result = WebViewURLHelper.rewriteToActiveConnection(
             link,
             knownBaseURLStrings: ["http://192.168.1.10:8080"],
@@ -175,38 +175,38 @@ struct WebViewURLTests {
     // MARK: - resolveWebViewURL
 
     @Test("Uses base URL when no proxy and no path")
-    func resolveBaseOnly() {
-        let base = URL(string: "https://openhab.local:8443")!
+    func resolveBaseOnly() throws {
+        let base = try #require(URL(string: "https://openhab.local:8443"))
         let result = WebViewURLHelper.resolveWebViewURL(baseURL: base, proxyURL: nil, path: nil, defaultPath: "")
         #expect(result?.absoluteString == "https://openhab.local:8443")
     }
 
     @Test("Uses proxy URL when provided")
-    func resolveWithProxy() {
-        let base = URL(string: "https://openhab.local:8443")!
-        let proxy = URL(string: "https://myopenhab.org/proxy")!
+    func resolveWithProxy() throws {
+        let base = try #require(URL(string: "https://openhab.local:8443"))
+        let proxy = try #require(URL(string: "https://myopenhab.org/proxy"))
         let result = WebViewURLHelper.resolveWebViewURL(baseURL: base, proxyURL: proxy, path: nil, defaultPath: "")
         #expect(result?.absoluteString == "https://myopenhab.org/proxy")
     }
 
     @Test("Appends explicit path")
-    func resolveWithExplicitPath() {
-        let base = URL(string: "https://openhab.local:8443")!
+    func resolveWithExplicitPath() throws {
+        let base = try #require(URL(string: "https://openhab.local:8443"))
         let result = WebViewURLHelper.resolveWebViewURL(baseURL: base, proxyURL: nil, path: "/dashboard", defaultPath: "/default")
         #expect(result?.absoluteString == "https://openhab.local:8443/dashboard")
     }
 
     @Test("Uses default path when no explicit path")
-    func resolveWithDefaultPath() {
-        let base = URL(string: "https://openhab.local:8443")!
+    func resolveWithDefaultPath() throws {
+        let base = try #require(URL(string: "https://openhab.local:8443"))
         let result = WebViewURLHelper.resolveWebViewURL(baseURL: base, proxyURL: nil, path: nil, defaultPath: "/default")
         #expect(result?.absoluteString == "https://openhab.local:8443/default")
     }
 
     @Test("Proxy URL with explicit path")
-    func resolveProxyWithPath() {
-        let base = URL(string: "https://openhab.local:8443")!
-        let proxy = URL(string: "https://myopenhab.org/proxy")!
+    func resolveProxyWithPath() throws {
+        let base = try #require(URL(string: "https://openhab.local:8443"))
+        let proxy = try #require(URL(string: "https://myopenhab.org/proxy"))
         let result = WebViewURLHelper.resolveWebViewURL(baseURL: base, proxyURL: proxy, path: "/page", defaultPath: "")
         #expect(result?.absoluteString == "https://myopenhab.org/proxy/page")
     }

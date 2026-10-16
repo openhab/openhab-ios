@@ -19,7 +19,7 @@ private enum Toast {
         let message: String
     }
 
-    // Titles are prefixed "UITest " to avoid collision with demo-sitemap labels.
+    /// Titles are prefixed "UITest " to avoid collision with demo-sitemap labels.
     static let short = Payload(
         title: "UITest Alert",
         message: "Motion detected."
@@ -44,6 +44,11 @@ private enum Toast {
 final class ToastUITests: XCTestCase {
     private var app: XCUIApplication!
 
+    /// The screen frame as seen by XCUITest — use the app's key window as proxy.
+    private var screenFrame: CGRect {
+        app.windows.firstMatch.frame
+    }
+
     override func setUp() async throws {
         try await super.setUp()
         continueAfterFailure = false
@@ -51,9 +56,9 @@ final class ToastUITests: XCTestCase {
         app.launchEnvironment["UITest"] = "1"
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         app = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - Helpers
@@ -69,11 +74,6 @@ final class ToastUITests: XCTestCase {
         let el = app.staticTexts[text]
         XCTAssertTrue(el.waitForExistence(timeout: timeout), "Expected '\(text)' to appear within \(timeout)s")
         return el
-    }
-
-    // The screen frame as seen by XCUITest — use the app's key window as proxy.
-    private var screenFrame: CGRect {
-        app.windows.firstMatch.frame
     }
 
     private func assertWithinScreen(_ el: XCUIElement, label: String) {

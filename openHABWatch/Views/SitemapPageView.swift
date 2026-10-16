@@ -45,19 +45,17 @@ struct SitemapPageView: View {
     var isRoot = true
 
     var body: some View {
-        Group {
-            if isRoot {
-                NavigationStack {
-                    pageContent
-                        .navigationDestination(for: OpenHABPage.self) { linkedPage in
-                            SitemapPageView(viewModel: UserData(linkedPage: linkedPage), isRoot: false)
-                                .environment(settings)
-                        }
-                }
-            } else {
+        if isRoot {
+            NavigationStack {
                 pageContent
-                    .onDisappear { viewModel.stopLongPolling() }
+                    .navigationDestination(for: OpenHABPage.self) { linkedPage in
+                        SitemapPageView(viewModel: UserData(linkedPage: linkedPage), isRoot: false)
+                            .environmentObject(settings)
+                    }
             }
+        } else {
+            pageContent
+                .onDisappear { viewModel.stopLongPolling() }
         }
     }
 

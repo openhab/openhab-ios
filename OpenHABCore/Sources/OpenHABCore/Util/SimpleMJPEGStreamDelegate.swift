@@ -48,7 +48,9 @@ public final class SimpleMJPEGStreamDelegate: NSObject, URLSessionDataDelegate, 
                 // New frame starts - process previous frame if we have data
                 if !imageData.isEmpty, let image = UIImage(data: imageData) {
                     let isFirst = isFirstFrame
-                    if isFirstFrame { isFirstFrame = false }
+                    if isFirstFrame {
+                        isFirstFrame = false
+                    }
 
                     Task { @MainActor in
                         self.onFrame(image, isFirst)

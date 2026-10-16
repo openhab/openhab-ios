@@ -53,7 +53,7 @@ struct SitemapDisplayTests {
         let sitemap = makeSitemap(name: "watch", label: "Home")
         for order in SortSitemapsOrder.allCases {
             #expect(SitemapNameLabelDisplayMode.name.titleText(for: sitemap, sortedBy: order) == "watch")
-            #expect(SitemapNameLabelDisplayMode.name.detailText(for: sitemap, sortedBy: order) == "")
+            #expect(SitemapNameLabelDisplayMode.name.detailText(for: sitemap, sortedBy: order).isEmpty)
         }
     }
 
@@ -62,7 +62,7 @@ struct SitemapDisplayTests {
         let sitemap = makeSitemap(name: "watch", label: "Home")
         for order in SortSitemapsOrder.allCases {
             #expect(SitemapNameLabelDisplayMode.label.titleText(for: sitemap, sortedBy: order) == "Home")
-            #expect(SitemapNameLabelDisplayMode.label.detailText(for: sitemap, sortedBy: order) == "")
+            #expect(SitemapNameLabelDisplayMode.label.detailText(for: sitemap, sortedBy: order).isEmpty)
         }
     }
 
@@ -79,7 +79,7 @@ struct SitemapDisplayTests {
     func bothModeCollapsesDetailWhenNameEqualsLabel() {
         let sitemap = makeSitemap(name: "Home", label: "Home")
         #expect(SitemapNameLabelDisplayMode.both.titleText(for: sitemap, sortedBy: .label) == "Home")
-        #expect(SitemapNameLabelDisplayMode.both.detailText(for: sitemap, sortedBy: .label) == "")
+        #expect(SitemapNameLabelDisplayMode.both.detailText(for: sitemap, sortedBy: .label).isEmpty)
     }
 
     // MARK: - SitemapNameLabelDisplayMode combined (picker) form

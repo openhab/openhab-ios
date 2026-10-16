@@ -16,10 +16,11 @@ import UIKit
 @MainActor
 final class IdleTimerService {
     static let shared = IdleTimerService()
-    private init() {}
 
     var isDisabled: Bool {
         get { UIApplication.shared.isIdleTimerDisabled }
         set { UIApplication.shared.isIdleTimerDisabled = newValue }
     }
+
+    private init() {}
 }

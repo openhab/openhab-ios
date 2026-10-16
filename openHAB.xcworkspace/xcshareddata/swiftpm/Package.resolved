@@ -1,5 +1,5 @@
 {
-  "originHash" : "225f713206a4b02e698ba5f1f327fabf70d7a5eac750973f2302953447904b97",
+  "originHash" : "c98add8597165b5a3dca39784fc8d77b41b617468b53a74e3eee136d95c343a2",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -204,8 +204,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-openapi-urlsession",
       "state" : {
-        "revision" : "08796d36c99ad2318929bfa1d1e40f82194b65cc",
-        "version" : "1.3.1"
+        "revision" : "77effea09e780f6f3f119ffb8150ff25e31c78b1",
+        "version" : "1.3.2"
       }
     },
     {
@@ -231,8 +231,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftFormatPlugin",
       "state" : {
-        "revision" : "c7c81920d715e051306d2172083c14aaec2c1b9d",
-        "version" : "0.61.1"
+        "revision" : "00bdb1f8cef4ddc51bade627d5d72caa16186e19",
+        "version" : "0.63.1"
       }
     },
     {
@@ -240,8 +240,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftLintPlugin.git",
       "state" : {
-        "revision" : "3741567a0252090897336f1f39b8490107b49ead",
-        "version" : "0.63.3"
+        "revision" : "dc342ba45ac5d2d9ecfdd51588c5f9bfbe455f81",
+        "version" : "0.65.1"
       }
     },
     {

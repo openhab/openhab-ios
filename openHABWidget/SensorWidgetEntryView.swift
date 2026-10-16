@@ -147,8 +147,8 @@ struct SensorLargeProvider: AppIntentTimelineProvider {
 
 // MARK: - State formatting
 
-// See OpenHABItem.displayState (OpenHABCore) for the shared formatting rules —
-// also used by the "Get Item State" Shortcuts intent in GetItemStateIntent.swift.
+/// See OpenHABItem.displayState (OpenHABCore) for the shared formatting rules —
+/// also used by the "Get Item State" Shortcuts intent in GetItemStateIntent.swift.
 private func formattedState(for item: OpenHABItem) -> String {
     item.displayState ?? "—"
 }

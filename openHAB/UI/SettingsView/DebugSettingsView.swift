@@ -26,7 +26,7 @@ struct DebugSettingsView: View {
     var body: some View {
         Toggle("Crash Reporting", isOn: $settingsSendCrashReports)
             .task { @MainActor in
-                updateSettingsSendCrashReports(await Preferences.shared.sendCrashReports)
+                await updateSettingsSendCrashReports(Preferences.shared.sendCrashReports)
             }
             .onChange(of: settingsSendCrashReports) { _, newValue in
                 #if !DEBUG

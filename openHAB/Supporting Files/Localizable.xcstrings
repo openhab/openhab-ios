@@ -84,7 +84,7 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : " - "
           }
         },
         "fr" : {
@@ -102,7 +102,7 @@
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : " - "
           }
         },
         "nl" : {
@@ -257,13 +257,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "/overview/"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "/overview/"
           }
         },
         "fr" : {
@@ -281,7 +281,7 @@
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "/overview/"
           }
         },
         "nl" : {
@@ -548,7 +548,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%lld"
           }
         },
         "fi" : {
@@ -607,7 +607,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%lldK"
           }
         },
         "fi" : {
@@ -1147,7 +1147,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajouter un domicile"
+            "value" : "Ajouter une maison"
           }
         },
         "it" : {
@@ -1165,7 +1165,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Huis toevoegen"
+            "value" : "Thuis toevoegen"
           }
         },
         "ru" : {
@@ -1431,7 +1431,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Consenti sempre WebRTC"
+            "value" : "Permitir siempre WebRTC"
           }
         },
         "fi" : {
@@ -1598,7 +1598,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App Einstellungen"
+            "value" : "App-Einstellungen"
           }
         },
         "es" : {
@@ -1753,7 +1753,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App Versie"
+            "value" : "App-versie"
           }
         },
         "ru" : {
@@ -1954,7 +1954,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bonjour discovery may not find all servers. Additional servers may be available on your network."
+            "value" : "Es posible que la detección de Bonjour no encuentre todos los servidores. Puede haber otros servidores disponibles en la red."
           }
         },
         "fi" : {
@@ -1966,7 +1966,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bonjour discovery may not find all servers. Additional servers may be available on your network."
+            "value" : "La découverte Bonjour peut ne pas trouver tous les serveurs. D'autres serveurs peuvent être disponibles sur votre réseau."
           }
         },
         "it" : {
@@ -1984,7 +1984,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bonjour discovery may not find all servers. Additional servers may be available on your network."
+            "value" : "De Bonjour-ontdekking vindt mogelijk niet alle servers. Er kunnen meer servers op uw netwerk beschikbaar zijn."
           }
         },
         "ru" : {
@@ -2486,7 +2486,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se puede conectar al servidor. ¿Está en línea?"
+            "value" : "No se puede conectar al servidor. ¿Estás en línea?"
           }
         },
         "fi" : {
@@ -2677,7 +2677,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configurez une page de plan de site CarPlay dans les réglages de l'app iOS"
+            "value" : "Configurez une page de plan de site CarPlay dans les paramètres de l'app iOS\n"
           }
         },
         "it" : {
@@ -3130,7 +3130,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limpiar caché de imágenes"
+            "value" : "Borrar caché de imágenes"
           }
         },
         "fi" : {
@@ -3190,7 +3190,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limpiar caché web"
+            "value" : "Borrar caché web"
           }
         },
         "fi" : {
@@ -3999,7 +3999,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El Elemento de Comando es un canal de control remoto del servidor a la app. La app supervisa el estado del elemento a través del flujo de eventos en tiempo real del servidor. Cuando el estado del elemento cambia, el nuevo valor se interpreta como un comando y se ejecuta de inmediato, sin necesidad de notificación push.\n\nLos comandos admitidos incluyen: navegar a una sitemap o página de la interfaz principal, enviar un comando a otro elemento, activar una regla, mostrar el protector de pantalla, salida de texto a voz y ajustar el brillo de la pantalla.\n\nEsto usa el mismo formato de comando que las acciones de notificación push de openHAB."
+            "value" : "El Elemento de Comando es un canal de control remoto del servidor a la app. La app supervisa el estado del elemento a través del flujo de eventos en tiempo real del servidor. Cuando el estado del elemento cambia, el nuevo valor se interpreta como un comando y se ejecuta de inmediato, sin necesidad de notificación push.\n\nLos comandos admitidos incluyen: navegar a un sitemap o página de la interfaz principal, enviar un comando a otro elemento, activar una regla, mostrar el protector de pantalla, salida de texto a voz y ajustar el brillo de la pantalla.\n\nEsto usa el mismo formato de comando que las acciones de notificación push de openHAB."
           }
         },
         "fi" : {
@@ -4610,7 +4610,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verbinden…"
+            "value" : "Verbinden …"
           }
         },
         "en" : {
@@ -5246,7 +5246,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Copiar etiqueta del ítem"
+            "value" : "Copiar etiqueta del elemento"
           }
         },
         "fi" : {
@@ -5306,7 +5306,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Informe de fallos"
+            "value" : "Informe de errores"
           }
         },
         "fi" : {
@@ -5318,7 +5318,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rapport d'incident"
+            "value" : "Rapport de plantage"
           }
         },
         "it" : {
@@ -5436,7 +5436,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rapports d'erreurs"
+            "value" : "Rapport de plantage"
           }
         },
         "it" : {
@@ -5483,7 +5483,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Al activar los informes de fallos, usted acepta que la información de uso y del dispositivo se recopilará y compartirá con Crashlytics (una empresa de Google). Para obtener más información, consulte nuestra política de privacidad."
+            "value" : "Al activar los informes de errores, aceptas que se recopile y comparta la información de uso y del dispositivo con Crashlytics (una empresa de Google). Para obtener más información, consulta nuestra política de privacidad."
           }
         },
         "fi" : {
@@ -5495,7 +5495,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En activant le rapport de d'erreurs, vous acceptez que les informations relatives à l'appareil et à son utilisation soient collectées et partagées avec Crashlytics (une entreprise Google). Pour plus d'informations, consultez notre politique de confidentialité."
+            "value" : "En activant le rapport de plantage, vous acceptez que les informations relatives à l'appareil et à son utilisation soient collectées et partagées avec Crashlytics (une entreprise Google). Pour plus d'informations, consultez notre politique de confidentialité."
           }
         },
         "it" : {
@@ -6186,7 +6186,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Eliminar el hogar '%@'?"
+            "value" : "¿Eliminar el hogar «%@»?"
           }
         },
         "fi" : {
@@ -6198,7 +6198,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Supprimer la maison '%@' ?"
+            "value" : "Supprimer la maison «%@» ?"
           }
         },
         "it" : {
@@ -6216,7 +6216,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Huis '%@' verwijderen?"
+            "value" : "Thuis '%@' verwijderen?"
           }
         },
         "ru" : {
@@ -6775,7 +6775,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Discovered Servers"
+            "value" : "Servidores detectados"
           }
         },
         "fi" : {
@@ -6787,7 +6787,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Discovered Servers"
+            "value" : "Serveurs découverts"
           }
         },
         "it" : {
@@ -6805,7 +6805,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Discovered Servers"
+            "value" : "Ontdekte servers"
           }
         },
         "ru" : {
@@ -7407,7 +7407,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "lista de mapas web de openHAB vacía"
+            "value" : "Lista de sitemaps de openHAB vacía"
           }
         },
         "fi" : {
@@ -7668,7 +7668,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voer een naam in voor het nieuwe huis"
+            "value" : "Voer een naam in voor het nieuwe thuis"
           }
         },
         "ru" : {
@@ -7697,7 +7697,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Introduce un nuevo nombre para el hogar '%@'"
+            "value" : "Introduce un nuevo nombre para el hogar «%@»"
           }
         },
         "fi" : {
@@ -7709,7 +7709,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saisissez un nouveau nom pour la maison '%@'"
+            "value" : "Saisissez un nouveau nom pour la maison «%@»"
           }
         },
         "it" : {
@@ -7727,7 +7727,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voer een nieuwe naam in voor het huis '%@'"
+            "value" : "Voer een nieuwe naam in voor het thuis '%@'"
           }
         },
         "ru" : {
@@ -8625,7 +8625,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obtener estado del ítem"
+            "value" : "Obtener estado del elemento"
           }
         },
         "fi" : {
@@ -8907,7 +8907,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Casa"
+            "value" : "Hogar"
           }
         },
         "fi" : {
@@ -8919,7 +8919,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Domicile"
+            "value" : "Maison"
           }
         },
         "it" : {
@@ -8978,7 +8978,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nom du domicile"
+            "value" : "Nom de la maison"
           }
         },
         "it" : {
@@ -8996,7 +8996,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Naam van huis"
+            "value" : "Naam van thuis"
           }
         },
         "ru" : {
@@ -9038,7 +9038,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paramètres du domicile"
+            "value" : "Paramètres de la maison"
           }
         },
         "it" : {
@@ -9098,7 +9098,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Domiciles"
+            "value" : "Maisons"
           }
         },
         "it" : {
@@ -9852,7 +9852,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ítem"
+            "value" : "Elemento"
           }
         },
         "fi" : {
@@ -9911,7 +9911,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El elemento '%@' no está en el hogar '%@'"
+            "value" : "El elemento «%@» no está en el hogar «%@»"
           }
         },
         "fi" : {
@@ -9923,7 +9923,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L'élément '%@' n'est pas dans la maison '%@'"
+            "value" : "L'élément «%@» n'est pas dans la maison «%@»"
           }
         },
         "it" : {
@@ -9941,7 +9941,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Item '%@' staat niet in huis '%@'"
+            "value" : "Item '%@' staat niet in thuis '%@'"
           }
         },
         "ru" : {
@@ -9965,7 +9965,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elemento '%@' no encontrado"
+            "value" : "Elemento «%@» no encontrado"
           }
         },
         "fi" : {
@@ -9977,7 +9977,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Élément '%@' introuvable"
+            "value" : "Élément «%@» introuvable"
           }
         },
         "it" : {
@@ -10024,7 +10024,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ítems"
+            "value" : "Elementos"
           }
         },
         "fi" : {
@@ -10250,7 +10250,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Breitengrad muss zwischen -90 and 90 sein"
+            "value" : "Breitengrad muss zwischen -90 und 90 sein"
           }
         },
         "en" : {
@@ -10499,7 +10499,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cargando mapa del sitio…"
+            "value" : "Cargando sitemap…"
           }
         },
         "fi" : {
@@ -10511,7 +10511,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chargement du plan du site…"
+            "value" : "Chargement du sitemap…"
           }
         },
         "it" : {
@@ -11230,7 +11230,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Längengrad muss zwischen -180 and 180 sein"
+            "value" : "Längengrad muss zwischen -180 und 180 sein"
           }
         },
         "en" : {
@@ -11450,7 +11450,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Main UI Instellingen"
+            "value" : "Main UI instellingen"
           }
         },
         "ru" : {
@@ -11866,7 +11866,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Naam voor nieuw huis"
+            "value" : "Naam voor nieuw thuis"
           }
         },
         "ru" : {
@@ -11907,7 +11907,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nouveau domicile"
+            "value" : "Nouvelle maison"
           }
         },
         "it" : {
@@ -11925,7 +11925,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nieuw huis"
+            "value" : "Nieuw thuis"
           }
         },
         "ru" : {
@@ -12478,7 +12478,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No hay mapas de sitio disponibles"
+            "value" : "No hay sitemaps disponibles"
           }
         },
         "fi" : {
@@ -12490,7 +12490,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun plan du site disponible"
+            "value" : "Aucun sitemap disponible"
           }
         },
         "it" : {
@@ -12698,7 +12698,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keine aktive Verbindung vorhanden. Bitte Einstellungen prüfen"
+            "value" : "Keine aktive Verbindung vorhanden. Bitte Einstellungen prüfen."
           }
         },
         "en" : {
@@ -12710,7 +12710,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No active connection available. Please check your settings."
+            "value" : "No hay ninguna conexión activa disponible. Comprueba la configuración."
           }
         },
         "fi" : {
@@ -12722,7 +12722,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No active connection available. Please check your settings."
+            "value" : "Aucune connexion active disponible. Veuillez vérifier vos paramètres."
           }
         },
         "it" : {
@@ -12740,7 +12740,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No active connection available. Please check your settings."
+            "value" : "Geen actieve verbinding beschikbaar. Controleer uw instellingen."
           }
         },
         "ru" : {
@@ -12757,7 +12757,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No servers found"
+            "value" : "Keine Server gefunden"
           }
         },
         "en" : {
@@ -12769,7 +12769,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No servers found"
+            "value" : "No se encontraron servidores."
           }
         },
         "fi" : {
@@ -12799,7 +12799,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No servers found"
+            "value" : "Geen servers gevonden"
           }
         },
         "ru" : {
@@ -12883,7 +12883,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sin definir"
+            "value" : "No establecido"
           }
         },
         "fi" : {
@@ -13357,7 +13357,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ÉTEINT"
+            "value" : "DÉSACTIVÉ"
           }
         },
         "it" : {
@@ -13768,7 +13768,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ALLUMÉ"
+            "value" : "ACTIVÉ"
           }
         },
         "it" : {
@@ -13995,7 +13995,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ouvrir les réglages"
+            "value" : "Ouvrir les paramètres"
           }
         },
         "it" : {
@@ -14324,7 +14324,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "conexión openHAB"
+            "value" : "Conexión openHAB"
           }
         },
         "fi" : {
@@ -16128,7 +16128,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Funccionando en modo demostración. Comprueba la configuración para desactivarlo."
+            "value" : "Funcionando en modo demostración. Comprueba la configuración para desactivarlo."
           }
         },
         "fi" : {
@@ -16158,7 +16158,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uitvoeren in demo-modus. Controleer instellingen om demomodus uit te schakelen."
+            "value" : "Werkt in demomodus. Controleer de instellingen om de demomodus uit te schakelen."
           }
         },
         "ru" : {
@@ -16187,7 +16187,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salvapantallas"
+            "value" : "Protector de pantalla"
           }
         },
         "fi" : {
@@ -16423,7 +16423,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Buscar ítems en openHAB"
+            "value" : "Buscar elementos en openHAB"
           }
         },
         "fi" : {
@@ -16548,7 +16548,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sélectionner un domicile pour « %@ »"
+            "value" : "Sélectionner une maison pour « %@ »"
           }
         },
         "it" : {
@@ -16566,7 +16566,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Selecteer een huis voor '%@'"
+            "value" : "Selecteer een thuis voor '%@'"
           }
         },
         "ru" : {
@@ -16655,7 +16655,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seleccionar mapa web"
+            "value" : "Seleccionar Sitemap"
           }
         },
         "fi" : {
@@ -17317,7 +17317,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lf, %lf wurde an Standort %@ gesendet"
+            "value" : "Der Standort %lf, %lf wurde an %@ gesendet"
           }
         },
         "en" : {
@@ -17506,7 +17506,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Definir el número %lf a %@"
+            "value" : "Número %lf enviado a %@"
           }
         },
         "fi" : {
@@ -17837,7 +17837,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establecer casa activa"
+            "value" : "Establecer el hogar activo"
           }
         },
         "fi" : {
@@ -17849,7 +17849,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Définir le domicile actif"
+            "value" : "Définir la maison active"
           }
         },
         "it" : {
@@ -17890,7 +17890,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establecer casa activa como ${home}"
+            "value" : "Establecer el hogar activo como ${home}"
           }
         },
         "fi" : {
@@ -17902,7 +17902,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Définir ${home} comme domicile actif"
+            "value" : "Définir ${home} comme maison active"
           }
         },
         "it" : {
@@ -18003,7 +18003,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Define el valor de control de color"
+            "value" : "Establecer el valor de control de color"
           }
         },
         "fi" : {
@@ -18104,7 +18104,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wert eines Kontakt=Status festlegen"
+            "value" : "Wert eines Kontakt-Status festlegen"
           }
         },
         "en" : {
@@ -18116,7 +18116,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establecer el valor del estado del pulsador"
+            "value" : "Establecer el valor del estado del sensor de contacto"
           }
         },
         "fi" : {
@@ -18146,7 +18146,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stel contact status waarde in"
+            "value" : "Contactstatuswaarde instellen"
           }
         },
         "ru" : {
@@ -18217,7 +18217,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wert eines DateTime-Kontrollelements setzen "
+            "value" : "Wert eines DateTime-Kontrollelements setzen"
           }
         },
         "en" : {
@@ -18342,7 +18342,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Definir el valor del regulador o persiana"
+            "value" : "Establecer el valor del regulador o persiana"
           }
         },
         "fi" : {
@@ -18372,7 +18372,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stel Dimmer of Rolluik waarde in"
+            "value" : "Dimmer- of rolluikwaarde instellen"
           }
         },
         "ru" : {
@@ -18526,7 +18526,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Définir la valeur de contrôle du numéro"
+            "value" : "Définir la valeur de contrôle numérique"
           }
         },
         "it" : {
@@ -18745,7 +18745,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Definir el estado del interruptor"
+            "value" : "Establecer el estado del interruptor"
           }
         },
         "fi" : {
@@ -18858,7 +18858,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Definir el color de un ítem de control de color"
+            "value" : "Establecer el color de un elemento de control de color"
           }
         },
         "fi" : {
@@ -18976,7 +18976,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establecer el valor decimal de un ítem de control numérico"
+            "value" : "Establecer el valor decimal de un elemento de control numérico"
           }
         },
         "fi" : {
@@ -18988,7 +18988,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Définir la valeur décimale d'un item de contrôle de nombre"
+            "value" : "Définir la valeur décimale d'un item de contrôle numérique"
           }
         },
         "it" : {
@@ -19006,7 +19006,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stel de decimale waarde van een nummer control item in"
+            "value" : "Stel de decimale waarde van een getalsbesturingsitem in"
           }
         },
         "ru" : {
@@ -19035,7 +19035,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Define el valor entero de un regulador o persiana"
+            "value" : "Establecer el valor entero de un regulador o persiana"
           }
         },
         "fi" : {
@@ -19141,7 +19141,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Den Status von${itemEntity} auf ${state} setzen"
+            "value" : "Den Status von ${itemEntity} auf ${state} setzen"
           }
         },
         "es" : {
@@ -19206,7 +19206,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establecer el estado de un interruptor encendido o apagado"
+            "value" : "Establecer el estado de un sensor de contacto abierto o cerrado"
           }
         },
         "fi" : {
@@ -19324,7 +19324,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establecer la cadena de un ítem controlador de cadena"
+            "value" : "Establecer la cadena de un elemento controlador de cadena"
           }
         },
         "fi" : {
@@ -19354,7 +19354,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De tekenreeks van een string controle item instellen"
+            "value" : "De tekenreeks van een stringbesturingsitem instellen"
           }
         },
         "ru" : {
@@ -19455,7 +19455,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paramétrage"
+            "value" : "Paramètres"
           }
         },
         "it" : {
@@ -19615,7 +19615,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mostrar campo de búsqueda en los mapas del sitio"
+            "value" : "Mostrar campo de búsqueda en los Sitemaps"
           }
         },
         "fi" : {
@@ -19733,7 +19733,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mostrar mapas de sitio por"
+            "value" : "Mostrar Sitemaps por"
           }
         },
         "fi" : {
@@ -19852,7 +19852,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show Search Field"
+            "value" : "Mostrar el campo de búsqueda"
           }
         },
         "fi" : {
@@ -19864,7 +19864,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show Search Field"
+            "value" : "Afficher le champ de recherche"
           }
         },
         "it" : {
@@ -19882,7 +19882,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show Search Field"
+            "value" : "Zoekveld tonen"
           }
         },
         "ru" : {
@@ -19965,7 +19965,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mapa web"
+            "value" : "Sitemap"
           }
         },
         "fi" : {
@@ -20024,7 +20024,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mapa del sitio"
+            "value" : "Sitemap"
           }
         },
         "fi" : {
@@ -20036,7 +20036,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Plan du site"
+            "value" : "Sitemap"
           }
         },
         "it" : {
@@ -20142,7 +20142,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mapa del sitio para Apple Watch"
+            "value" : "Sitemap para Apple Watch"
           }
         },
         "fi" : {
@@ -20154,7 +20154,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Plan du site pour Apple Watch"
+            "value" : "Sitemap pour Apple Watch"
           }
         },
         "it" : {
@@ -20255,7 +20255,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajustes del esquema"
+            "value" : "Configuración del sitemap"
           }
         },
         "fi" : {
@@ -20374,7 +20374,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mapas del sitio"
+            "value" : "Sitemap"
           }
         },
         "fi" : {
@@ -20767,7 +20767,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ordenar mapas de sitio por"
+            "value" : "Ordenar Sitemaps por"
           }
         },
         "fi" : {
@@ -20827,7 +20827,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ordenar mapas del sitio por"
+            "value" : "Ordenar Sitemaps por"
           }
         },
         "fi" : {
@@ -21118,7 +21118,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El certificado SSL presentado por %1$@ para %2$@ no es válido. ¿Desea continuar?"
+            "value" : "El certificado SSL presentado por %1$@ para %2$@ no es válido. ¿Quieres continuar?"
           }
         },
         "fi" : {
@@ -21177,7 +21177,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El certificado SSL presentado por %1$@ para %2$@ no coincide con el registro. ¿Desea continuar?"
+            "value" : "El certificado SSL presentado por %1$@ para %2$@ no coincide con el registro. ¿Quieres continuar?"
           }
         },
         "fi" : {
@@ -21349,7 +21349,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Provincia"
+            "value" : "Estado"
           }
         },
         "fi" : {
@@ -21450,7 +21450,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "String-Item"
+            "value" : "Stringelement"
           }
         },
         "es" : {
@@ -21784,13 +21784,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Switch-Item"
+            "value" : "Schalterelement"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elemento interruptor"
+            "value" : "Elemento de interruptor"
           }
         },
         "fi" : {
@@ -21802,7 +21802,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Élément interrupteur"
+            "value" : "Élément commutateur"
           }
         },
         "it" : {
@@ -21820,7 +21820,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Schakelaar-item"
+            "value" : "Schakelaaritem"
           }
         },
         "ru" : {
@@ -22222,7 +22222,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cambiar la casa activa en la app openHAB"
+            "value" : "Cambiar el hogar activo en la app openHAB"
           }
         },
         "fi" : {
@@ -22234,7 +22234,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Changer le domicile actif dans l'application openHAB"
+            "value" : "Changer la maison active dans l'application openHAB"
           }
         },
         "it" : {
@@ -22324,7 +22324,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Synchronisationseinstellung"
+            "value" : "Einstellungen synchronisieren"
           }
         },
         "en" : {
@@ -22390,7 +22390,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "System & App"
+            "value" : "Sistema & aplicación"
           }
         },
         "fi" : {
@@ -22556,7 +22556,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die App ist in der vorherigen Sitzung abgestürzt. Möchten Sie einen Absturzbericht senden?"
+            "value" : "Die App ist in der vorherigen Sitzung abgestürzt. Möchtest du einen Absturzbericht senden?"
           }
         },
         "en" : {
@@ -22568,7 +22568,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La aplicación se cerró inesperadamente en la sesión anterior. ¿Quieres enviar un informe de fallos?"
+            "value" : "La aplicación se cerró inesperadamente en la sesión anterior. ¿Quieres enviar un informe de errores?"
           }
         },
         "fi" : {
@@ -22580,7 +22580,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L'application s'est bloquée lors de la session précédente. Voulez-vous envoyer un rapport d'incident ?"
+            "value" : "L'application s'est bloquée lors de la session précédente. Voulez-vous envoyer un rapport de plantage ?"
           }
         },
         "it" : {
@@ -22598,7 +22598,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De app is tijdens de vorige sessie gecrasht. Wil je een crashrapport verzenden?"
+            "value" : "De app is tijdens de vorige sessie gecrasht. Wilt u een crashrapport verzenden?"
           }
         },
         "ru" : {
@@ -22716,7 +22716,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De staat van %@ is %@"
+            "value" : "De status van %@ is %@"
           }
         },
         "ru" : {
@@ -22947,7 +22947,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Timing"
+            "value" : "Tijdinstellingen"
           }
         },
         "ru" : {
@@ -22965,7 +22965,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Um eine Verbindung zu deinem lokalen openHAB-Server herzustellen, erlauben bitte den Zugriff auf das lokale Netzwerk, wenn du dazu aufgefordert wirst. Wenn du es zuvor abgelehnt hast, aktiviere es unter Einstellungen → Datenschutz & Sicherheit → Lokales Netzwerk."
+            "value" : "Um eine Verbindung zu deinem lokalen openHAB-Server herzustellen, erlaube bitte den Zugriff auf das lokale Netzwerk, wenn du dazu aufgefordert wirst. Wenn du die Berechtigung zuvor abgelehnt hast, aktiviere sie unter Einstellungen → Datenschutz & Sicherheit → Lokales Netzwerk."
           }
         },
         "es" : {
@@ -22983,7 +22983,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pour te connecter à ton serveur openHAB local, autorise l’accès au réseau local lorsque tu y es invité. Si tu l’as précédemment refusé, active-le dans Réglages → Confidentialité et sécurité → Réseau local."
+            "value" : "Pour vous connecter à votre serveur openHAB local, autorisez l'accès au réseau local lorsque vous y êtes invité. Si vous l'avez précédemment refusé, activez-le dans Paramètres → Confidentialité et sécurité → Réseau local."
           }
         },
         "it" : {
@@ -23502,7 +23502,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Domicile inconnu"
+            "value" : "Maison inconnue"
           }
         },
         "it" : {
@@ -23520,7 +23520,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Onbekend huis"
+            "value" : "Onbekend thuis"
           }
         },
         "ru" : {
@@ -23841,7 +23841,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nombre de usario"
+            "value" : "Nombre de usuario"
           }
         },
         "fi" : {
@@ -24344,7 +24344,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Waarschuwing: Het hernoemen van het huis kan ertoe leiden dat externe integraties zoals snelkoppelingen mislukken totdat ze opnieuw zijn geconfigureerd."
+            "value" : "Waarschuwing: Het hernoemen van het thuis kan ertoe leiden dat externe integraties zoals snelkoppelingen mislukken totdat ze opnieuw zijn geconfigureerd."
           }
         },
         "ru" : {
@@ -24385,7 +24385,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu sembles être hors ligne. Vérifie ta connexion Internet."
+            "value" : "Vous semblez être hors ligne. Vérifiez votre connexion Internet."
           }
         },
         "it" : {

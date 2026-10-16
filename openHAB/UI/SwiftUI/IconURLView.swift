@@ -44,7 +44,7 @@ struct IconURLView: View {
                 }
                 .fade(duration: 0.25)
                 .cancelOnDisappear(true)
-                .aspectRatio(contentMode: .fit)
+                .scaledToFit()
                 .frame(width: size.width, height: size.height)
         }
     }

@@ -16,7 +16,7 @@ import XCTest
 private enum InteractionFixture {
     static let toastTitle = "UITest Interaction Alert"
     static let toastMessage = "Motion detected."
-    // JSON-encoded action list for UITestToastActions
+    /// JSON-encoded action list for UITestToastActions
     static let actionsJSON = #"[{"title":"Open Camera","action":"ui:/overview"}]"#
 }
 
@@ -26,6 +26,10 @@ private enum InteractionFixture {
 final class NotificationInteractionUITests: XCTestCase {
     private var app: XCUIApplication!
 
+    private var screen: CGRect {
+        app.windows.firstMatch.frame
+    }
+
     override func setUp() async throws {
         try await super.setUp()
         continueAfterFailure = false
@@ -33,14 +37,12 @@ final class NotificationInteractionUITests: XCTestCase {
         app.launchEnvironment["UITest"] = "1"
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         app = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - Helpers
-
-    private var screen: CGRect { app.windows.firstMatch.frame }
 
     @discardableResult
     private func waitFor(_ text: String, timeout: TimeInterval = 4) -> XCUIElement {
@@ -79,14 +81,23 @@ final class NotificationInteractionUITests: XCTestCase {
         // Layout assertions — loose thresholds so minor spacing changes don't break them.
         let s = screen
         // Toast banner must sit in the lower portion of the screen (not at screen centre).
-        XCTAssertGreaterThan(title.frame.minY, s.height * 0.5,
-                             "Toast title must appear in the lower half of the screen")
+        XCTAssertGreaterThan(
+            title.frame.minY,
+            s.height * 0.5,
+            "Toast title must appear in the lower half of the screen"
+        )
         // Action button must be on the right side (action control is right-aligned).
-        XCTAssertGreaterThan(button.frame.minX, s.width * 0.45,
-                             "Action button must be on the right side of the banner")
+        XCTAssertGreaterThan(
+            button.frame.minX,
+            s.width * 0.45,
+            "Action button must be on the right side of the banner"
+        )
         // Action button and title must share roughly the same vertical centre (horizontal layout).
-        XCTAssertLessThan(abs(button.frame.midY - title.frame.midY), 30,
-                          "Action button and title must be at similar vertical positions")
+        XCTAssertLessThan(
+            abs(button.frame.midY - title.frame.midY),
+            30,
+            "Action button and title must be at similar vertical positions"
+        )
     }
 
     func testToastActionButtonDismissesToast() {
@@ -123,10 +134,16 @@ final class NotificationInteractionUITests: XCTestCase {
 
         // Layout assertions — action control must be right-aligned and inline with the row text.
         let s = screen
-        XCTAssertGreaterThan(button.frame.minX, s.width * 0.45,
-                             "Row action button must be on the right side of the screen")
-        XCTAssertLessThan(abs(button.frame.midY - alertText.frame.midY), 30,
-                          "Row action button and message text must share roughly the same vertical centre")
+        XCTAssertGreaterThan(
+            button.frame.minX,
+            s.width * 0.45,
+            "Row action button must be on the right side of the screen"
+        )
+        XCTAssertLessThan(
+            abs(button.frame.midY - alertText.frame.midY),
+            30,
+            "Row action button and message text must share roughly the same vertical centre"
+        )
     }
 
     func testNotificationRowActionButtonDismissesSheet() {
