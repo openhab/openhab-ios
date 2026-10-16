@@ -73,6 +73,9 @@ struct ToolbarMenu: View {
 
     @Binding var isPresented: Bool
     var menuData: MenuDataService
+    /// Main UI's sidebar, sent over the bridge. Until the first one arrives the Main UI section
+    /// lists pages from the REST API instead.
+    var webMenu: OHBridgeMenuState?
     @State private var scrollViewContentSize: Double = 0
     // Section expansion is stored per home in `HomePreferences`. These `@State`
     // flags mirror the active home for immediate UI updates and are loaded from
@@ -92,13 +95,42 @@ struct ToolbarMenu: View {
     @State private var sitemapForWatch: String?
     @State private var sitemapForCarPlay: String?
     @State private var cachedHomePrefs: HomePreferences?
+    /// Main UI sections with a title, like Administration, that are open. Collapsed by default.
+    @State private var expandedWebSections: Set<String> = []
     /// The surface `OpenHABRootView` currently shows. The single source of truth for which
     /// row (if any) is highlighted as current — read directly rather than mirrored into local
     /// `@State`, so navigation that bypasses this menu entirely (a push-notification deep
     /// link, a home switch) is reflected here too instead of leaving a stale highlight.
     var currentContent: TargetController
     var onSelect: (TargetController) -> Void
+    /// A sidebar entry without a path was tapped.
+    var onActivateWebMenuItem: (String) -> Void = { _ in }
     var onReload: (() -> Void)?
+    /// Shows only the menu itself, without the dimming backdrop and the corner animation, for a
+    /// host that presents it in its own container (a popover). The overlay is the default.
+    var isEmbedded = false
+
+    /// The tallest the embedded menu grows before it scrolls.
+    private static let embeddedMenuHeight: CGFloat = 480
+
+    /// Closes the overlay menu before a sheet opens. An embedded menu stays open instead: it
+    /// lives in a popover, and closing that would take down the sheet this menu is presenting,
+    /// since the sheet hangs off this view.
+    private func dismissOverlayMenu() {
+        guard !isEmbedded else { return }
+        isPresented = false
+    }
+
+    /// An overlay menu reloads when it is opened again. An embedded menu was never closed, so
+    /// it reloads its entries and its per-home state when the settings sheet goes away, in case
+    /// the settings changed what it shows.
+    private func refreshAfterSettings() {
+        guard isEmbedded else { return }
+        Task {
+            await menuData.reload()
+            await loadExpansionState()
+        }
+    }
 
     /// The sitemap row (if any) to highlight as current, derived from `currentContent`.
     private var currentSitemapName: String? {
@@ -128,8 +160,14 @@ struct ToolbarMenu: View {
     @ScaledMetric private var iconWidth = 20.0
 
     var body: some View {
-        GeometryReader { proxy in
-            overlayContent(proxy: proxy)
+        Group {
+            if isEmbedded {
+                menuContent(height: Self.embeddedMenuHeight)
+            } else {
+                GeometryReader { proxy in
+                    overlayContent(proxy: proxy)
+                }
+            }
         }
         .onAppear { Task { await loadExpansionState() } }
         .onChange(of: isPresented) { _, newValue in
@@ -144,12 +182,12 @@ struct ToolbarMenu: View {
                 homeDetailsCollapsed = false
             }
         }
-        .sheet(isPresented: $showAppSettings) {
+        .sheet(isPresented: $showAppSettings, onDismiss: refreshAfterSettings) {
             NavigationStack {
                 AppSettingsView()
             }
         }
-        .sheet(isPresented: $showCurrentHomeSettings) {
+        .sheet(isPresented: $showCurrentHomeSettings, onDismiss: refreshAfterSettings) {
             NavigationStack {
                 HomeSettingsView()
             }
@@ -172,6 +210,7 @@ extension ToolbarMenu {
         isSitemapsExpanded = !collapsed.contains(.sitemaps)
         isTilesExpanded = !collapsed.contains(.tiles)
         isSystemExpanded = !collapsed.contains(.system)
+        expandedWebSections = prefs.expandedWebSections
         sitemapForWatch = prefs.sitemapForWatch
         sitemapForCarPlay = prefs.sitemapForCarPlay
         headerDetailsHidden = false
@@ -297,7 +336,7 @@ extension ToolbarMenu {
     @ViewBuilder
     private func systemMenu() -> some View {
         systemRow(symbol: .gear, label: String(localized: "App Settings")) {
-            isPresented = false
+            dismissOverlayMenu()
             showAppSettings = true
         }
         if let prefs = cachedHomePrefs,
@@ -348,7 +387,7 @@ extension ToolbarMenu {
     private func mainUIMenu() -> some View {
         // Hidden until the current home has had at least one successful fetch —
         // consistent with how sitemaps/pages behave during the loading state.
-        if menuData.hasSuccessfullyLoaded {
+        if menuData.hasSuccessfullyLoaded || webMenu != nil {
             let homeRoute = Self.mainUIHomeRoute
             menuRow(
                 icon: AnyView(Image("openHABIcon").resizable()),
@@ -359,7 +398,11 @@ extension ToolbarMenu {
             }
             .background(currentRowBackground(currentMainUIRoute == homeRoute))
         }
-        if menuData.isLoading, menuData.uiPages.isEmpty {
+        if let webMenu {
+            ForEach(webMenu.sections) { section in
+                webMenuSection(section)
+            }
+        } else if menuData.isLoading, menuData.uiPages.isEmpty {
             loadingRow(label: String(localized: "Pages"))
         } else {
             ForEach(menuData.uiPages, id: \.uid) { page in
@@ -372,6 +415,107 @@ extension ToolbarMenu {
                 }
                 .background(currentRowBackground(currentMainUIRoute == route))
             }
+        }
+    }
+
+    // MARK: - Main UI sidebar
+
+    /// A section with a title, like Administration, is a row that folds its entries away, and the
+    /// menu remembers it per home.
+    @ViewBuilder
+    private func webMenuSection(_ section: OHBridgeMenuSection) -> some View {
+        if let title = section.title, !title.isEmpty {
+            let isExpanded = webSectionBinding(section.id)
+            VStack(alignment: .leading, spacing: 0) {
+                Button {
+                    isExpanded.wrappedValue.toggle()
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemSymbol: .lockShield)
+                            .frame(width: iconWidth, height: iconWidth)
+                        Text(title)
+                            .lineLimit(1)
+                        Spacer(minLength: 0)
+                        Image(systemSymbol: isExpanded.wrappedValue ? .chevronDown : .chevronRight)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 44)
+                    }
+                    .padding(.leading, 16)
+                    .padding(.trailing, 4)
+                    .padding(.vertical, 10)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("WebMenuSection-\(section.id)")
+
+                if isExpanded.wrappedValue {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(section.items) { item in
+                            webMenuItem(item, depth: 1)
+                        }
+                    }
+                    .transition(.blurReplace(.downUp))
+                }
+            }
+            .animation(Self.sectionAnimation, value: isExpanded.wrappedValue)
+        } else {
+            ForEach(section.items) { item in
+                webMenuItem(item, depth: 0)
+            }
+        }
+    }
+
+    private func webSectionBinding(_ id: String) -> Binding<Bool> {
+        Binding(
+            get: { expandedWebSections.contains(id) },
+            set: { expanded in
+                if expanded { expandedWebSections.insert(id) } else { expandedWebSections.remove(id) }
+                Task {
+                    await Preferences.shared.modifyActiveHome { @Sendable prefs in
+                        prefs.setWebSection(id, expanded: expanded)
+                    }
+                }
+            }
+        )
+    }
+
+    /// One sidebar entry.
+    private func webMenuItem(_ item: OHBridgeMenuItem, depth: Int) -> some View {
+        Button {
+            activateWebMenuItem(item)
+        } label: {
+            HStack(spacing: 10) {
+                OHBridgeIconView(icon: item.icon, size: iconWidth)
+                    .foregroundStyle(item.active == true ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.label)
+                        .fontWeight(item.active == true ? .semibold : .regular)
+                        .lineLimit(1)
+                    if let footer = item.footer, !footer.isEmpty {
+                        Text(footer)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.leading, 16 + CGFloat(depth) * 20)
+            .padding(.trailing, 16)
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("WebMenu-\(item.id)")
+    }
+
+    private func activateWebMenuItem(_ item: OHBridgeMenuItem) {
+        if let path = item.path {
+            select(.mainUIPage(path))
+        } else {
+            isPresented = false
+            onActivateWebMenuItem(item.id)
         }
     }
 
@@ -575,7 +719,7 @@ extension ToolbarMenu {
                 Image(systemSymbol: .gear).hidden()
                 if !headerDetailsHidden {
                     Button(
-                        action: { isPresented = false; showCurrentHomeSettings = true },
+                        action: { dismissOverlayMenu(); showCurrentHomeSettings = true },
                         label: { Image(systemSymbol: .gear).foregroundStyle(.secondary) }
                     )
                     .buttonStyle(.plain)

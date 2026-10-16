@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "swift-concurrency": {
+      "source": "AvdLee/Swift-Concurrency-Agent-Skill",
+      "sourceType": "github",
+      "computedHash": "fb91a851df4a0aabcb8eb8f9b3af98aa2fda5775c0f2ebc9aa61e8206e37d6ef"
+    },
+    "swiftui-expert-skill": {
+      "source": "AvdLee/SwiftUI-Agent-Skill",
+      "sourceType": "github",
+      "computedHash": "f8f1a9994e0c22bd01e37369f192651819fce9a80ee21b4faff43b6710191943"
+    },
+    "xcuitest-skill": {
+      "source": "LambdaTest/agent-skills",
+      "sourceType": "github",
+      "computedHash": "410c9976111e5186b7c1473fad6f988dfd216f8792ac7ec8deb4ee3f952d2d3d"
+    }
+  }
+}
