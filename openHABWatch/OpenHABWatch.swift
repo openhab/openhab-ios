@@ -19,11 +19,11 @@ import UserNotifications
 @main
 struct OpenHABWatch: App {
     @Environment(\.scenePhase) private var scenePhase
-    @ObservedObject var settings = AppSettings.shared
+    let settings = AppSettings.shared
     @State private var wasInBackground = false
     // https://developer.apple.com/documentation/watchkit/wkapplicationdelegate
     @WKApplicationDelegateAdaptor var appDelegate: OpenHABWatchAppDelegate
-    @ObservedObject var userData = UserData.shared
+    let userData = UserData.shared
 
     var body: some Scene {
         WindowGroup {
@@ -42,7 +42,7 @@ struct OpenHABWatch: App {
                     }
             }
             .tabViewStyle(.automatic)
-            .environmentObject(settings)
+            .environment(settings)
             .task {
                 let center = UNUserNotificationCenter.current()
                 _ = try? await center.requestAuthorization(
