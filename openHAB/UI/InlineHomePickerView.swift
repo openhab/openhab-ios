@@ -123,7 +123,11 @@ struct InlineHomePickerView: View {
         .sheet(
             isPresented: Binding(
                 get: { homeForSettings != nil },
-                set: { if !$0 { homeForSettings = nil } }
+                set: {
+                    if !$0 {
+                        homeForSettings = nil
+                    }
+                }
             )
         ) {
             if let target = homeForSettings {

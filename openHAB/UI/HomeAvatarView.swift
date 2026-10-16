@@ -161,8 +161,12 @@ extension Color {
         let c = avatarColorValues(in: environment)
         let isDark = isDark(environment)
         // Full tint when circle was adapted (complementarity).
-        if isDark, c.lightness < 0.35 { return self }
-        if !isDark, c.lightness > 0.65 { return self }
+        if isDark, c.lightness < 0.35 {
+            return self
+        }
+        if !isDark, c.lightness > 0.65 {
+            return self
+        }
         return isDark
             ? Color(.sRGB, red: c.r * 0.3, green: c.g * 0.3, blue: c.b * 0.3)
             : Color(.sRGB, red: c.r + (1 - c.r) * 0.7, green: c.g + (1 - c.g) * 0.7, blue: c.b + (1 - c.b) * 0.7)

@@ -158,7 +158,7 @@ class OpenHABWebViewModel: ObservableObject {
     /// active (e.g. between two demo homes) loads immediately, while a switch whose
     /// connection isn't active yet blanks without ever showing the previous home.
     private func syncActiveConnection(with connection: ConnectionInfo?) {
-        Logger.notificationNavigation.info("syncActiveConnection: connection changed to \(connection?.configuration.description ?? "nil", privacy: .public) — will auto-load default path unless a notification's own load wins the race (openhab-ios#1336)")
+        Logger.notificationNavigation.info("syncActiveConnection: connection changed to \(connection?.configuration.description ?? "nil", privacy: .public) — auto-loading default path unless a notification's own load wins the race (#1336)")
         Task { @MainActor [weak self] in
             guard let self else { return }
             let home = await Preferences.shared.currentHomePreferences
@@ -296,14 +296,14 @@ class OpenHABWebViewModel: ObservableObject {
         Logger.viewController.info("Loading URL: \(modifiedUrl)")
         // Local avoids `self.` inside the Logger interpolation, which redundantSelf would strip.
         let webViewID = ObjectIdentifier(webView).debugDescription
-        Logger.notificationNavigation.info("performLoadWebView: about to call webView.load(\(modifiedUrl.absoluteString, privacy: .public)) [requestedPath=\(path ?? "nil", privacy: .public), webView=\(webViewID, privacy: .public)] — whichever load call lands here last wins the race")
+        Logger.notificationNavigation.info("performLoadWebView: calling webView.load(\(modifiedUrl.absoluteString, privacy: .public)) [requestedPath=\(path ?? "nil", privacy: .public), webView=\(webViewID, privacy: .public)] — last load here wins")
         isLoading = true
         isShowingTile = false
         webView.load(request)
     }
 
     private func loadWebViewWithETagCheck(newTarget: String, path: String?) async {
-        Logger.notificationNavigation.info("loadWebViewWithETagCheck: starting network ETag round-trip for path=\(path ?? "nil", privacy: .public) — this is the slow path most likely to land its webView.load() after a notification's direct load and clobber it")
+        Logger.notificationNavigation.info("loadWebViewWithETagCheck: starting network ETag round-trip for path=\(path ?? "nil", privacy: .public) — slow path, may clobber a notification's direct load")
         guard let activeConfig,
               let url = URL(string: activeConfig.url) else {
             Logger.viewController.info("ETag check skipped: invalid configuration")

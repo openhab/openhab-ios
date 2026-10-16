@@ -29,8 +29,12 @@ enum WebViewNavigationRouter {
     /// - Parameter path: the `path` payload of a `NavigationCommand.switchToWebView(path:)`.
     static func route(for path: String?) -> WebViewRoute {
         guard let path else { return .root }
-        if path.starts(with: "/") { return .path(path) }
-        if let mainUIPath = mainUIPath(fromNavigateCommand: path) { return .path(mainUIPath) }
+        if path.starts(with: "/") {
+            return .path(path)
+        }
+        if let mainUIPath = mainUIPath(fromNavigateCommand: path) {
+            return .path(mainUIPath)
+        }
         return .liveCommand(path)
     }
 

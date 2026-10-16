@@ -31,7 +31,7 @@ struct NotificationRow: View {
                 if notification.isHideNotification {
                     Image(systemSymbol: .bellSlash)
                         .resizable()
-                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
                         .frame(width: 18, height: 18)
                         .foregroundStyle(.secondary)
                 } else {

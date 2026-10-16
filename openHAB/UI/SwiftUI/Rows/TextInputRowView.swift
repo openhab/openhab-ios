@@ -140,7 +140,9 @@ struct InputCommandFormatter {
     }
 
     func isValidNumberDraft(_ value: String) -> Bool {
-        if value.isEmpty { return true }
+        if value.isEmpty {
+            return true
+        }
 
         let wholeNumberPattern = /^-?[0-9]*$/
 
@@ -204,7 +206,9 @@ private struct TextInputRowContent: View {
             let numberState = inputText.parseAsNumber(format: pattern)
             if numberState.value.isFinite {
                 let formatted = numberState.toString(locale: Locale.current)
-                if !formatted.isEmpty { return formatted }
+                if !formatted.isEmpty {
+                    return formatted
+                }
             }
         }
         if let labelValue = input.displayState.labelValue, !labelValue.isEmpty {

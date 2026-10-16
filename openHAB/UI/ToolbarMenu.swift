@@ -140,7 +140,9 @@ struct ToolbarMenu: View {
 
     /// The sitemap row (if any) to highlight as current, derived from `currentContent`.
     private var currentSitemapName: String? {
-        if case let .sitemap(name, _) = currentContent { return name }
+        if case let .sitemap(name, _) = currentContent {
+            return name
+        }
         return nil
     }
 
@@ -155,7 +157,9 @@ struct ToolbarMenu: View {
 
     /// The tile row (if any) to highlight as current, derived from `currentContent`.
     private var currentTileURL: String? {
-        if case let .tile(url) = currentContent { return url }
+        if case let .tile(url) = currentContent {
+            return url
+        }
         return nil
     }
 
@@ -219,7 +223,11 @@ extension ToolbarMenu {
         let isToggleOff = sitemap.name == sitemapForWatch
         let sitemapName = sitemap.name
         let sitemapLabel = sitemap.label
-        if isToggleOff { sitemapForWatch = nil } else { sitemapForWatch = sitemapName }
+        if isToggleOff {
+            sitemapForWatch = nil
+        } else {
+            sitemapForWatch = sitemapName
+        }
         Task {
             await Preferences.shared.modifyActiveHome { @Sendable prefs in
                 if isToggleOff {
@@ -238,7 +246,11 @@ extension ToolbarMenu {
     private func toggleCarPlaySitemap(_ sitemap: OpenHABSitemap) {
         let isToggleOff = sitemap.name == sitemapForCarPlay
         let sitemapName = sitemap.name
-        if isToggleOff { sitemapForCarPlay = nil } else { sitemapForCarPlay = sitemapName }
+        if isToggleOff {
+            sitemapForCarPlay = nil
+        } else {
+            sitemapForCarPlay = sitemapName
+        }
         Task {
             await Preferences.shared.modifyActiveHome { @Sendable prefs in
                 if isToggleOff {
@@ -311,7 +323,7 @@ extension ToolbarMenu {
     private func tilesMenu() -> some View {
         ForEach(menuData.uiTiles, id: \.url) { tile in
             menuRow(
-                icon: AnyView(ImageView(url: tile.imageUrl).aspectRatio(contentMode: .fit)),
+                icon: AnyView(ImageView(url: tile.imageUrl).scaledToFit()),
                 label: tile.name
             ) {
                 select(.tile(tile.url))
@@ -351,8 +363,12 @@ extension ToolbarMenu {
                 accessibilityId: sitemap.name,
                 trailing: (isWatch || isCarPlay) ? AnyView(
                     HStack(spacing: 4) {
-                        if isWatch { Image(systemSymbol: .applewatchWatchface) }
-                        if isCarPlay { Image(systemSymbol: .steeringwheel) }
+                        if isWatch {
+                            Image(systemSymbol: .applewatchWatchface)
+                        }
+                        if isCarPlay {
+                            Image(systemSymbol: .steeringwheel)
+                        }
                     }
                 ) : nil
             )
@@ -754,7 +770,7 @@ extension ToolbarMenu {
 
     private func systemRow(symbol: SFSymbol, label: String, action: @escaping () -> Void) -> some View {
         menuRow(
-            icon: AnyView(Image(systemSymbol: symbol).resizable().aspectRatio(contentMode: .fit)),
+            icon: AnyView(Image(systemSymbol: symbol).resizable().scaledToFit()),
             label: label,
             action: action
         )
@@ -763,16 +779,16 @@ extension ToolbarMenu {
     private func pageIcon(for page: OpenHABUIPage) -> some View {
         Group {
             if page.icon.isEmpty || page.icon.isNoneIcon {
-                Image(systemSymbol: .squareGrid2x2).resizable().aspectRatio(contentMode: .fit)
+                Image(systemSymbol: .squareGrid2x2).resizable().scaledToFit()
             } else {
                 let url = Endpoint.iconForDrawer(
                     rootUrl: MainActorNetworkTracker.shared.activeConnection?.configuration.url ?? "",
                     icon: page.icon
                 ).url
                 KFImage(url)
-                    .placeholder { Image(systemSymbol: .squareGrid2x2).resizable().aspectRatio(contentMode: .fit) }
+                    .placeholder { Image(systemSymbol: .squareGrid2x2).resizable().scaledToFit() }
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
             }
         }
     }
@@ -791,7 +807,7 @@ extension ToolbarMenu {
                     .resizable()
             }
         }
-        .aspectRatio(contentMode: .fit)
+        .scaledToFit()
     }
 
     // MARK: - Helpers
