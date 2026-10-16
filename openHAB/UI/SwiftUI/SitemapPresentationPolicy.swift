@@ -12,13 +12,18 @@
 import SwiftUI
 
 enum SitemapPresentationPolicy {
-    static let minimumColumnWidth: CGFloat = 340
+    static let twoColumnMinimumWidth: CGFloat = 314
+    static let threeColumnMinimumWidth: CGFloat = 340
     static let maximumColumnCount = 3
     static let gridSpacing: CGFloat = 8
     static let gridHorizontalPadding: CGFloat = 16
     static let gridVerticalPadding: CGFloat = 8
     static let regularGridCellHeight: CGFloat = 72
     static let gridFrameSeparatorHeight: CGFloat = 0.5
+
+    static func minimumColumnWidth(for columnCount: Int) -> CGFloat {
+        columnCount >= 3 ? threeColumnMinimumWidth : twoColumnMinimumWidth
+    }
 
     static var minimumGridWidth: CGFloat {
         widthNeeded(for: 2)
@@ -30,7 +35,9 @@ enum SitemapPresentationPolicy {
         }
 
         let availableContentWidth = availableWidth - (gridHorizontalPadding * 2)
-        let widestPossibleCount = min(maximumColumnCount, Int(availableContentWidth / minimumColumnWidth))
+        // Estimate with the smallest per-column minimum so no count is undercounted;
+        // the stride below re-checks each count against its own minimum.
+        let widestPossibleCount = min(maximumColumnCount, Int(availableContentWidth / twoColumnMinimumWidth))
         guard widestPossibleCount >= 2 else { return 1 }
 
         for count in stride(from: widestPossibleCount, through: 2, by: -1)
@@ -43,7 +50,7 @@ enum SitemapPresentationPolicy {
 
     static func columns(count: Int) -> [GridItem] {
         Array(
-            repeating: GridItem(.flexible(minimum: minimumColumnWidth), spacing: gridSpacing, alignment: .top),
+            repeating: GridItem(.flexible(minimum: minimumColumnWidth(for: count)), spacing: gridSpacing, alignment: .top),
             count: count
         )
     }
@@ -61,6 +68,6 @@ enum SitemapPresentationPolicy {
     }
 
     private static func contentWidthNeeded(for columnCount: Int) -> CGFloat {
-        (CGFloat(columnCount) * minimumColumnWidth) + (CGFloat(columnCount - 1) * gridSpacing)
+        (CGFloat(columnCount) * minimumColumnWidth(for: columnCount)) + (CGFloat(columnCount - 1) * gridSpacing)
     }
 }
