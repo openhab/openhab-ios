@@ -50,7 +50,7 @@ struct SitemapPageView: View {
                 pageContent
                     .navigationDestination(for: OpenHABPage.self) { linkedPage in
                         SitemapPageView(viewModel: UserData(linkedPage: linkedPage), isRoot: false)
-                            .environmentObject(settings)
+                            .environment(settings)
                     }
             }
         } else {
