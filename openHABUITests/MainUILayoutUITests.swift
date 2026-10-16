@@ -213,7 +213,9 @@ final class MainUILayoutUITests: XCTestCase {
         // and loadWebView cannot race against injected state.
         let htmlToInject = html ?? Self.placeholderHTML
         app.launchEnvironment["UITestInjectHTML"] = LayoutHTML.base64(htmlToInject)
-        if let js { app.launchEnvironment["UITestInjectJS"] = LayoutJS.base64(js) }
+        if let js {
+            app.launchEnvironment["UITestInjectJS"] = LayoutJS.base64(js)
+        }
         if navbarItems {
             app.launchEnvironment["UITestWebViewNavbarItems"] =
                 #"[{"label":"Menu","id":"menu"}]"#
@@ -240,7 +242,9 @@ final class MainUILayoutUITests: XCTestCase {
     private func waitUntil(timeout: TimeInterval = 6, _ condition: () -> Bool) -> Bool {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
-            if condition() { return true }
+            if condition() {
+                return true
+            }
             Thread.sleep(forTimeInterval: 0.1)
         }
         return condition()

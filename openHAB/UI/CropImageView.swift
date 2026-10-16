@@ -268,7 +268,9 @@ struct CropImageView: View {
                                 .fill(color)
                                 .frame(width: 28, height: 28)
                                 .overlay {
-                                    if isSelected { Circle().strokeBorder(.white, lineWidth: 2.5) }
+                                    if isSelected {
+                                        Circle().strokeBorder(.white, lineWidth: 2.5)
+                                    }
                                 }
                                 .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
                         }
@@ -344,7 +346,11 @@ struct CropImageView: View {
         initialAvatarMode = initialMode
         _currentImage = State(initialValue: image)
         _isLoading = State(initialValue: false)
-        let bgHex: String = if case let .image(_, _, _, bg) = initialMode { bg } else { HomeAvatarView.colorPalette[0] }
+        let bgHex: String = if case let .image(_, _, _, bg) = initialMode {
+            bg
+        } else {
+            HomeAvatarView.colorPalette[0]
+        }
         _backgroundHex = State(initialValue: bgHex)
         self.onConfirm = onConfirm
         self.onCancel = onCancel

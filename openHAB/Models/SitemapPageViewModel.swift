@@ -716,7 +716,7 @@ extension SitemapPageViewModel {
         if SitemapDiagnostics.isEnabled {
             let t0 = Date()
             let changedRowCount = rowInputs.count == oldInputs.count
-                ? zip(rowInputs, oldInputs).reduce(into: 0) { n, pair in if pair.0 != pair.1 { n += 1 } }
+                ? zip(rowInputs, oldInputs).count { $0.0 != $0.1 }
                 : rowInputs.count
             let changedRowKinds = SitemapDiagnostics.changedRowKinds(from: oldInputs, to: rowInputs)
             let analysisMs = Int((Date().timeIntervalSince(t0) * 1000).rounded())

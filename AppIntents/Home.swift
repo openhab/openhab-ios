@@ -276,15 +276,21 @@ struct Home: AppEntity {
             // cloudUserId populated after shortcut creation). Falls back to id-field scan for stored
             // data where the dictionary key and HomePreferences.id differ.
             if let localId = localIdentifierComponent(of: identifier) {
-                if let match = storedHomes[localId] { return match }
-                if let match = storedHomes.values.first(where: { $0.id == localId }) { return match }
+                if let match = storedHomes[localId] {
+                    return match
+                }
+                if let match = storedHomes.values.first(where: { $0.id == localId }) {
+                    return match
+                }
             }
             // Stable identifier match: cross-device resolution.
             // Require a unique match — if two homes share a name the fallback is ambiguous and
             // a re-pick is safer than silently running against the wrong server.
             let stableId = stableIdentifierComponent(of: identifier)
             let stableMatches = storedHomes.values.filter { $0.stableIdentifier == stableId }
-            if stableMatches.count == 1 { return stableMatches.first }
+            if stableMatches.count == 1 {
+                return stableMatches.first
+            }
         } else {
             // Legacy format (pre-## era): raw UUID string or bare stable identifier.
             if let uuid = UUID(uuidString: identifier) {
@@ -293,7 +299,9 @@ struct Home: AppEntity {
                 }
             }
             let stableMatches = storedHomes.values.filter { $0.stableIdentifier == identifier }
-            if stableMatches.count == 1 { return stableMatches.first }
+            if stableMatches.count == 1 {
+                return stableMatches.first
+            }
         }
         return nil
     }

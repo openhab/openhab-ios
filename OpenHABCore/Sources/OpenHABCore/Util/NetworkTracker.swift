@@ -484,7 +484,9 @@ public actor NetworkTracker {
         do {
             let (data, _) = try await URLSession.shared.data(for: request)
             let json = try JSONDecoder().decode([String: String].self, from: data)
-            if let urlString = json["url"] { return URL(string: urlString) }
+            if let urlString = json["url"] {
+                return URL(string: urlString)
+            }
         } catch {
             Logger.networkTracker.info("NetworkTracker: Failed to fetch proxyURL: \(error.localizedDescription)")
         }

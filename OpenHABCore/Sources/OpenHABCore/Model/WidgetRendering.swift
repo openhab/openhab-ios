@@ -87,10 +87,18 @@ public extension WidgetRendering {
     var renderingKind: WidgetRenderingKind {
         switch widgetType {
         case .switchWidget:
-            if !mappings.isEmpty { return .segmentedSwitch }
-            if item?.isOfTypeOrGroupType(.switchItem) ?? false { return .toggleSwitch }
-            if item?.isOfTypeOrGroupType(.rollershutter) ?? false { return .rollershutterSwitch }
-            if !mappingsOrItemOptions.isEmpty { return .segmentedSwitch }
+            if !mappings.isEmpty {
+                return .segmentedSwitch
+            }
+            if item?.isOfTypeOrGroupType(.switchItem) ?? false {
+                return .toggleSwitch
+            }
+            if item?.isOfTypeOrGroupType(.rollershutter) ?? false {
+                return .rollershutterSwitch
+            }
+            if !mappingsOrItemOptions.isEmpty {
+                return .segmentedSwitch
+            }
             return .toggleSwitch
         case .slider: return .slider
         case .input: return [.date, .time, .dateTime].contains(inputHint) ? .dateInput : .textInput
@@ -160,11 +168,15 @@ public extension WidgetRendering {
     }
 
     func shouldUseSliderUpdatesDuringMove() -> Bool {
-        if let releaseOnly { return !releaseOnly }
+        if let releaseOnly {
+            return !releaseOnly
+        }
         guard let item else { return false }
         if item.isOfTypeOrGroupType(.dimmer) ||
             item.isOfTypeOrGroupType(.number) ||
-            item.isOfTypeOrGroupType(.color) { return true }
+            item.isOfTypeOrGroupType(.color) {
+            return true
+        }
         if item.isOfTypeOrGroupType(.numberWithDimension) {
             return stateValueAsNumberState?.unit == "%"
         }

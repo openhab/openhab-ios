@@ -22,7 +22,9 @@ enum SitemapNavigationState: Equatable {
     case ready([LinkedPageNavigation])
 
     var navigationPath: [LinkedPageNavigation] {
-        if case let .ready(path) = self { return path }
+        if case let .ready(path) = self {
+            return path
+        }
         return []
     }
 }

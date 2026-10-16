@@ -137,7 +137,11 @@ struct SitemapPageView: View {
     private var errorAlertPresented: Binding<Bool> {
         Binding(
             get: { viewModel.error != nil && !(viewModel.error is SitemapPageError) },
-            set: { if !$0 { Task { @MainActor in viewModel.error = nil } } }
+            set: {
+                if !$0 {
+                    Task { @MainActor in viewModel.error = nil }
+                }
+            }
         )
     }
 

@@ -148,7 +148,9 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
                 }
             case let .disconnected(error):
                 needsRefreshOnReconnect = true
-                if let error { Logger.carPlay.warning("CarPlay SSE disconnected: \(error)") }
+                if let error {
+                    Logger.carPlay.warning("CarPlay SSE disconnected: \(error)")
+                }
             case let .event(message):
                 handleSseMessage(message, sitemapName: sitemapName)
             }

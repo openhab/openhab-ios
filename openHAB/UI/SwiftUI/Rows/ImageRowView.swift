@@ -135,7 +135,7 @@ private struct ImageRowContent: View {
                 if let lastChartImage {
                     Image(uiImage: lastChartImage)
                         .resizable()
-                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
                 } else {
                     Color.gray.opacity(0.1)
                         .frame(height: 200)
@@ -150,7 +150,7 @@ private struct ImageRowContent: View {
             }
             .resizable()
             .id(effectiveChartURL?.absoluteString ?? currentChartKey)
-            .aspectRatio(contentMode: .fit)
+            .scaledToFit()
             .frame(maxWidth: .infinity)
             .clipShape(.rect(cornerRadius: 8))
     }
@@ -173,7 +173,9 @@ private struct ImageRowContent: View {
                     .configure { $0.contentMode = .scaleAspectFit }
                     .onSuccess { result in
                         let size = result.image.size
-                        if size.height > 0 { embeddedGIFAspectRatio = size.width / size.height }
+                        if size.height > 0 {
+                            embeddedGIFAspectRatio = size.width / size.height
+                        }
                     }
                     .animatedGIFFrame(aspectRatio: embeddedGIFAspectRatio)
                     .clipShape(.rect(cornerRadius: 8))
@@ -182,7 +184,7 @@ private struct ImageRowContent: View {
                     .withOpenHABCredentials(for: networkTracker.activeConnection)
                     .setProcessor(OpenHABImageProcessor(svgMaxSize: nil))
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(maxWidth: .infinity)
                     .clipShape(.rect(cornerRadius: 8))
             }
@@ -197,7 +199,7 @@ private struct ImageRowContent: View {
                         if let state = lastRegularImageState, state.url == url {
                             Image(uiImage: state.image)
                                 .resizable()
-                                .aspectRatio(contentMode: .fit)
+                                .scaledToFit()
                         } else {
                             Color.gray.opacity(0.1)
                                 .frame(height: 200)
@@ -228,7 +230,7 @@ private struct ImageRowContent: View {
                         if let state = lastRegularImageState, state.url == url {
                             Image(uiImage: state.image)
                                 .resizable()
-                                .aspectRatio(contentMode: .fit)
+                                .scaledToFit()
                         } else {
                             Color.gray.opacity(0.1)
                                 .frame(height: 200)
@@ -255,7 +257,7 @@ private struct ImageRowContent: View {
                     .forceRefresh(shouldCache ? false : true)
                     .cacheOriginalImage(!shouldCache ? false : true)
                     .id(shouldCache ? url?.absoluteString : "\(url?.absoluteString ?? "")-\(forceRefreshKey)")
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(maxWidth: .infinity)
                     .clipShape(.rect(cornerRadius: 8))
             }

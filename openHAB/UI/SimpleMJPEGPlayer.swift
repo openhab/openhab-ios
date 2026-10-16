@@ -66,8 +66,14 @@ final class SimpleMJPEGPlayer {
     func updateCallbacks(onFrame: (@MainActor (UIImage) -> Void)?,
                          onFirstFrame: ((CGFloat) -> Void)?,
                          onError: ((any Error) -> Void)?) {
-        if let onFrame { self.onFrame = onFrame }
-        if let onFirstFrame { self.onFirstFrame = onFirstFrame }
-        if let onError { self.onError = onError }
+        if let onFrame {
+            self.onFrame = onFrame
+        }
+        if let onFirstFrame {
+            self.onFirstFrame = onFirstFrame
+        }
+        if let onError {
+            self.onError = onError
+        }
     }
 }

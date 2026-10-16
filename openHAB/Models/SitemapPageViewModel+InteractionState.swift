@@ -26,7 +26,9 @@ func sitemapVisibleWidgets(_ widgets: [OpenHABWidget]) -> [OpenHABWidget] {
         guard widget.visibility else { return false }
         if widget.type == .frame {
             let children = widgets.filter { $0.parentWidgetId == widget.widgetId }
-            if !children.contains(where: \.visibility) { return false }
+            if !children.contains(where: \.visibility) {
+                return false
+            }
         }
         guard let parentId = widget.parentWidgetId,
               let parent = widgetsById[parentId] else { return true }
