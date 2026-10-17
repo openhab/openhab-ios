@@ -43,10 +43,10 @@ struct RowLayoutPolicyTests {
     }
 
     @Test
-    func sitemapGridStartsOnRegularWideLayouts() {
-        #expect(SitemapPresentationPolicy.columnCount(for: 667, horizontalSizeClass: .regular) == 1)
+    func sitemapGridUsesTwoColumnsOnAnyRegularWidth() {
+        #expect(SitemapPresentationPolicy.columnCount(for: 300, horizontalSizeClass: .regular) == 2)
         #expect(SitemapPresentationPolicy.columnCount(for: 668, horizontalSizeClass: .regular) == 2)
-        #expect(SitemapPresentationPolicy.columnCount(for: 668, horizontalSizeClass: .compact) == 1)
+        #expect(SitemapPresentationPolicy.columnCount(for: 1400, horizontalSizeClass: .compact) == 1)
     }
 
     @Test

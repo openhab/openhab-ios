@@ -25,27 +25,18 @@ enum SitemapPresentationPolicy {
         columnCount >= 3 ? threeColumnMinimumWidth : twoColumnMinimumWidth
     }
 
-    static var minimumGridWidth: CGFloat {
-        widthNeeded(for: 2)
-    }
-
     static func columnCount(for availableWidth: CGFloat, horizontalSizeClass: UserInterfaceSizeClass?) -> Int {
         guard horizontalSizeClass == .regular else {
             return 1
         }
 
+        // Two columns are size-class driven; only three columns need a width threshold.
         let availableContentWidth = availableWidth - (gridHorizontalPadding * 2)
-        // Estimate with the smallest per-column minimum so no count is undercounted;
-        // the stride below re-checks each count against its own minimum.
-        let widestPossibleCount = min(maximumColumnCount, Int(availableContentWidth / twoColumnMinimumWidth))
-        guard widestPossibleCount >= 2 else { return 1 }
-
-        for count in stride(from: widestPossibleCount, through: 2, by: -1)
-            where availableContentWidth >= contentWidthNeeded(for: count) {
-            return count
+        if availableContentWidth >= contentWidthNeeded(for: maximumColumnCount) {
+            return maximumColumnCount
         }
 
-        return 1
+        return 2
     }
 
     static func columns(count: Int) -> [GridItem] {
@@ -61,10 +52,6 @@ enum SitemapPresentationPolicy {
 
     static func usesFullWidthCell(for rowInput: SitemapRowInput) -> Bool {
         rowInput.usesFullWidthGridCell
-    }
-
-    private static func widthNeeded(for columnCount: Int) -> CGFloat {
-        contentWidthNeeded(for: columnCount) + (gridHorizontalPadding * 2)
     }
 
     private static func contentWidthNeeded(for columnCount: Int) -> CGFloat {
