@@ -281,7 +281,11 @@ public struct HomePreferences: Codable, Equatable, Sendable {
 
     /// Opens or closes the Main UI menu section `id`.
     public mutating func setWebSection(_ id: String, expanded: Bool) {
-        if expanded { expandedWebSections.insert(id) } else { expandedWebSections.remove(id) }
+        if expanded {
+            expandedWebSections.insert(id)
+        } else {
+            expandedWebSections.remove(id)
+        }
     }
 }
 

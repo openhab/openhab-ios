@@ -613,7 +613,9 @@ extension OpenHABWebViewModel {
     /// Shows the menu `webView` last sent, now that it is the one on screen.
     func showMenu(of webView: WKWebView) {
         #if DEBUG
-        if uiTestMenuInjected { return }
+        if uiTestMenuInjected {
+            return
+        }
         #endif
         menu = menus[ObjectIdentifier(webView)]
     }
@@ -627,14 +629,18 @@ extension OpenHABWebViewModel {
         // The new page sends its own menu; until then the menu falls back to the REST page list.
         menus[ObjectIdentifier(webView)] = nil
         #if DEBUG
-        if uiTestMenuInjected { return }
+        if uiTestMenuInjected {
+            return
+        }
         #endif
         menu = nil
     }
 
     private func resetNavbar() {
         #if DEBUG
-        if uiTestNavbarInjected { return }
+        if uiTestNavbarInjected {
+            return
+        }
         #endif
         navbar = .empty
     }
@@ -649,12 +655,16 @@ extension OpenHABWebViewModel {
             handleNavChanged(state)
         case let .navbarState(state):
             #if DEBUG
-            if uiTestNavbarInjected { return }
+            if uiTestNavbarInjected {
+                return
+            }
             #endif
             navbar = state
         case let .menuState(state):
             #if DEBUG
-            if uiTestMenuInjected { return }
+            if uiTestMenuInjected {
+                return
+            }
             #endif
             menus[ObjectIdentifier(webView)] = state
             menu = state

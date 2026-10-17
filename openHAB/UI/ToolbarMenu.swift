@@ -477,7 +477,11 @@ extension ToolbarMenu {
         Binding(
             get: { expandedWebSections.contains(id) },
             set: { expanded in
-                if expanded { expandedWebSections.insert(id) } else { expandedWebSections.remove(id) }
+                if expanded {
+                    expandedWebSections.insert(id)
+                } else {
+                    expandedWebSections.remove(id)
+                }
                 Task {
                     await Preferences.shared.modifyActiveHome { @Sendable prefs in
                         prefs.setWebSection(id, expanded: expanded)

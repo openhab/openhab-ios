@@ -163,14 +163,18 @@ final class OHBridgeHost {
     private func accepts(isMainFrame: Bool, origin: WKSecurityOrigin) -> Bool {
         guard isMainFrame else { return false }
         #if DEBUG
-        if acceptsLocalPages, origin.host.isEmpty { return true }
+        if acceptsLocalPages, origin.host.isEmpty {
+            return true
+        }
         #endif
         return acceptsOrigin(scheme: origin.protocol, host: origin.host, port: origin.port)
     }
 
     /// The connection's own origins, and where the app's last load of Main UI ended up.
     func acceptsOrigin(scheme: String, host: String, port: Int) -> Bool {
-        if isConnectionOrigin(scheme: scheme, host: host, port: port) { return true }
+        if isConnectionOrigin(scheme: scheme, host: host, port: port) {
+            return true
+        }
         return appLoadedURL.map { OHBridge.isSameOrigin($0, scheme: scheme, host: host, port: port) } ?? false
     }
 

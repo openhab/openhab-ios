@@ -48,7 +48,9 @@ enum F7IconFont {
         guard let fontName else { return false }
         lock.lock()
         defer { lock.unlock() }
-        if let cached = known[name] { return cached }
+        if let cached = known[name] {
+            return cached
+        }
         let font = CTFontCreateWithName(fontName as CFString, 17, nil)
         let text = NSAttributedString(string: name, attributes: [kCTFontAttributeName as NSAttributedString.Key: font])
         let found = CTLineGetGlyphCount(CTLineCreateWithAttributedString(text)) == 1
