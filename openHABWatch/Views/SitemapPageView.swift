@@ -37,6 +37,20 @@ struct WidgetRowView: View {
     }
 }
 
+/// Owns the model of a linked page. Created inline in `navigationDestination`, the model was
+/// replaced, and its long poll restarted, each time SwiftUI evaluated the destination again.
+private struct LinkedSitemapPageView: View {
+    @StateObject private var viewModel: UserData
+
+    var body: some View {
+        SitemapPageView(viewModel: viewModel, isRoot: false)
+    }
+
+    init(linkedPage: OpenHABPage) {
+        _viewModel = StateObject(wrappedValue: UserData(linkedPage: linkedPage))
+    }
+}
+
 struct SitemapPageView: View {
     @ObservedObject var viewModel: UserData
     @EnvironmentObject var settings: AppSettings
@@ -49,12 +63,13 @@ struct SitemapPageView: View {
             NavigationStack {
                 pageContent
                     .navigationDestination(for: OpenHABPage.self) { linkedPage in
-                        SitemapPageView(viewModel: UserData(linkedPage: linkedPage), isRoot: false)
+                        LinkedSitemapPageView(linkedPage: linkedPage)
                             .environmentObject(settings)
                     }
             }
         } else {
             pageContent
+                .onAppear { viewModel.resumeLongPolling() }
                 .onDisappear { viewModel.stopLongPolling() }
         }
     }
