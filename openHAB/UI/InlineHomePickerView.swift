@@ -26,6 +26,27 @@ enum HomeConnectionSymbol: Hashable {
     case cloudSlash
 }
 
+// MARK: - Home picker action bar
+
+/// What the home picker's action bar offers.
+enum HomePickerAction: Equatable {
+    /// Edit mode: "Add Home" above "Done".
+    case editing
+    /// Zero or one home: a single home can be neither reordered nor deleted, so "Edit" would only
+    /// reveal "Add Home". Offer it right away, also while the homes are still loading.
+    case addHome
+    /// Several homes: "Edit" leads to adding, deleting and reordering.
+    case edit
+
+    init(homeCount: Int, isEditing: Bool) {
+        guard !isEditing else {
+            self = .editing
+            return
+        }
+        self = homeCount <= 1 ? .addHome : .edit
+    }
+}
+
 // MARK: - Inline home picker
 
 struct InlineHomePickerView: View {
@@ -63,6 +84,9 @@ struct InlineHomePickerView: View {
             }
             Divider().padding(.horizontal, 12)
             actionBar
+                // `reloadHomes()` sets `homes` outside `withAnimation`; animate the switch
+                // between "Add Home" and "Edit" when the home count crosses one.
+                .animation(.easeInOut(duration: 0.25), value: action)
         }
         .task { await reloadHomes() }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
@@ -166,12 +190,17 @@ struct InlineHomePickerView: View {
             }
         )
         .buttonStyle(.plain)
+        .accessibilityIdentifier("AddHomeButton")
+    }
+
+    private var action: HomePickerAction {
+        HomePickerAction(homeCount: homes.count, isEditing: showEditMode)
     }
 
     @ViewBuilder
     private var actionBar: some View {
-        if showEditMode {
-            // Edit mode: full-width "Add Home" above full-width "Done"
+        switch action {
+        case .editing:
             VStack(spacing: 0) {
                 addHomeButton
 
@@ -190,13 +219,10 @@ struct InlineHomePickerView: View {
                 .buttonStyle(.plain)
             }
             .padding(.horizontal, 16)
-        } else if homes.count == 1 {
-            // A single home can be neither reordered nor deleted, so "Edit" would only reveal
-            // "Add Home". Offer it right away.
+        case .addHome:
             addHomeButton
                 .padding(.horizontal, 16)
-        } else {
-            // Normal mode: single Edit button — add/delete/reorder only in edit mode
+        case .edit:
             Button(
                 action: { withAnimation(.easeInOut(duration: 0.25)) { showEditMode = true } },
                 label: {
@@ -207,6 +233,7 @@ struct InlineHomePickerView: View {
                 }
             )
             .buttonStyle(.plain)
+            .accessibilityIdentifier("EditHomesButton")
             .padding(.horizontal, 16)
         }
     }
