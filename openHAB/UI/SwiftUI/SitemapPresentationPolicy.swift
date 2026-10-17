@@ -12,7 +12,8 @@
 import SwiftUI
 
 enum SitemapPresentationPolicy {
-    static let minimumColumnWidth: CGFloat = 340
+    static let twoColumnMinimumWidth: CGFloat = 314
+    static let threeColumnMinimumWidth: CGFloat = 340
     static let maximumColumnCount = 3
     static let gridSpacing: CGFloat = 8
     static let gridHorizontalPadding: CGFloat = 16
@@ -20,8 +21,8 @@ enum SitemapPresentationPolicy {
     static let regularGridCellHeight: CGFloat = 72
     static let gridFrameSeparatorHeight: CGFloat = 0.5
 
-    static var minimumGridWidth: CGFloat {
-        widthNeeded(for: 2)
+    static func minimumColumnWidth(for columnCount: Int) -> CGFloat {
+        columnCount >= 3 ? threeColumnMinimumWidth : twoColumnMinimumWidth
     }
 
     static func columnCount(for availableWidth: CGFloat, horizontalSizeClass: UserInterfaceSizeClass?) -> Int {
@@ -29,21 +30,18 @@ enum SitemapPresentationPolicy {
             return 1
         }
 
+        // Two columns are size-class driven; only three columns need a width threshold.
         let availableContentWidth = availableWidth - (gridHorizontalPadding * 2)
-        let widestPossibleCount = min(maximumColumnCount, Int(availableContentWidth / minimumColumnWidth))
-        guard widestPossibleCount >= 2 else { return 1 }
-
-        for count in stride(from: widestPossibleCount, through: 2, by: -1)
-            where availableContentWidth >= contentWidthNeeded(for: count) {
-            return count
+        if availableContentWidth >= contentWidthNeeded(for: maximumColumnCount) {
+            return maximumColumnCount
         }
 
-        return 1
+        return 2
     }
 
     static func columns(count: Int) -> [GridItem] {
         Array(
-            repeating: GridItem(.flexible(minimum: minimumColumnWidth), spacing: gridSpacing, alignment: .top),
+            repeating: GridItem(.flexible(minimum: minimumColumnWidth(for: count)), spacing: gridSpacing, alignment: .top),
             count: count
         )
     }
@@ -56,11 +54,7 @@ enum SitemapPresentationPolicy {
         rowInput.usesFullWidthGridCell
     }
 
-    private static func widthNeeded(for columnCount: Int) -> CGFloat {
-        contentWidthNeeded(for: columnCount) + (gridHorizontalPadding * 2)
-    }
-
     private static func contentWidthNeeded(for columnCount: Int) -> CGFloat {
-        (CGFloat(columnCount) * minimumColumnWidth) + (CGFloat(columnCount - 1) * gridSpacing)
+        (CGFloat(columnCount) * minimumColumnWidth(for: columnCount)) + (CGFloat(columnCount - 1) * gridSpacing)
     }
 }
