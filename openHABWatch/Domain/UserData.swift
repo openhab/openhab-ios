@@ -30,6 +30,8 @@ final class UserData: ObservableObject {
     // Cache last successful widgets to prevent empty state during reconnections
     private var cachedWidgets: [OpenHABWidget] = []
     private var currentlyLoadingSitemap: String?
+    /// Page ID of a linked page, `nil` for the root page.
+    private var linkedPageId: String?
     private var lastObservedConnectionURL: String?
     /// Incremented each time a new pageHandlingTask is created. The task captures its own
     /// generation at creation time and only clears shared state when the generation still matches,
@@ -67,6 +69,7 @@ final class UserData: ObservableObject {
     init(linkedPage: OpenHABPage) {
         // Use the pageId directly from the linkedPage object
         let extractedPageId = linkedPage.pageId
+        linkedPageId = extractedPageId
 
         Logger.userData.info("Initializing UserData for linked page: '\(linkedPage.title)' with pageId: '\(extractedPageId)', link: '\(linkedPage.link)'")
 
@@ -395,6 +398,16 @@ final class UserData: ObservableObject {
         }
     }
 
+    /// Restarts the long poll of a linked page after `stopLongPolling()` stopped it on disappear,
+    /// e.g. when a deeper page was pushed over it. Does nothing while page handling is running,
+    /// which includes the first appearance, or for the root page.
+    func resumeLongPolling() {
+        guard pageHandlingTask == nil, let linkedPageId else { return }
+        let sitemapName = AppSettings.shared.sitemapForWatch
+        guard !sitemapName.isEmpty else { return }
+        startPageHandling(sitemapName: sitemapName, pageId: linkedPageId, force: true)
+    }
+
     func stopLongPolling() {
         pageHandlingTask?.cancel()
         pageHandlingTask = nil
@@ -419,7 +432,7 @@ final class UserData: ObservableObject {
         guard AppSettings.shared.haveReceivedAppContext, !AppSettings.shared.sitemapForWatch.isEmpty else { return }
 
         showAlert = false
-        startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch, force: force)
+        startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch, pageId: linkedPageId ?? "", force: force)
     }
 
     /// Updates existing widget instances instead of replacing them to preserve @ObservedObject references
