@@ -569,6 +569,9 @@ class OpenHABWebViewModel: ObservableObject {
             showMenu(of: wv)
         }
         wv.loadHTMLString(html, baseURL: nil)
+        // An injected page has no URL for `handleDidFinish` to count as content, and the
+        // "Connecting…" placeholder would cover it and swallow the test's taps.
+        hasLoadedContent = true
     }
     #endif
 

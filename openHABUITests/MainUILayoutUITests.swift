@@ -209,6 +209,16 @@ final class MainUILayoutUITests: XCTestCase {
         )
     }
 
+    /// The counterpart of `skipWithSystemBar`: these tests cover the system bar and only run where
+    /// it replaces the app's own bar.
+    private func skipWithoutSystemBar() throws {
+        XCTAssertTrue(app.buttons["HamburgerButton"].waitForExistence(timeout: 8), "The menu button should be on screen")
+        try XCTSkipIf(
+            app.otherElements["MainMenuBar"].exists,
+            "The app draws its own bar here"
+        )
+    }
+
     private var app: XCUIApplication!
 
     override func setUp() async throws {
@@ -436,6 +446,44 @@ final class MainUILayoutUITests: XCTestCase {
             expected it back at \(shownBottom)pt. A bar that hides but never returns leaves \
             the menu unreachable.
             """
+        )
+    }
+
+    // MARK: - System bar (iPhone Duo on iOS 27.1)
+
+    /// The system bar sits outside the page, so Framework7 has no navbar to reserve room for.
+    func testSystemBarReservesNoNavbarSpace() throws {
+        launchInWebviewMode(html: LayoutHTML.mapPage, js: LayoutJS.navbarLayout)
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
+        try skipWithoutSystemBar()
+
+        XCTAssertEqual(
+            Double(waitForReport("navbarOffsetHeight")) ?? -1,
+            0,
+            accuracy: 0.5,
+            "The page's navbar must not take up room below the system bar"
+        )
+    }
+
+    /// The system bar goes away with the web navbar and returns with it.
+    func testSystemBarMirrorsWebNavbarHiding() throws {
+        launchInWebviewMode(html: LayoutHTML.hidableNavbar)
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
+        try skipWithoutSystemBar()
+
+        let menuButton = app.buttons["HamburgerButton"]
+        let toggle = waitForWebLabel("UITest Toggle Navbar", type: .button)
+
+        toggle.tap()
+        XCTAssertTrue(
+            waitUntil { !menuButton.isHittable },
+            "The system bar should hide when the web navbar takes .navbar-hidden"
+        )
+
+        toggle.tap()
+        XCTAssertTrue(
+            waitUntil { menuButton.isHittable },
+            "The system bar should come back when .navbar-hidden is removed"
         )
     }
 
