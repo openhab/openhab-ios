@@ -13,12 +13,13 @@ import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
 
-// MARK: - Main UI and tiles with a native navigation bar (iOS 27.1+, iPhone Duo)
+// MARK: - Main UI and tiles with a native navigation bar (every iOS version, vertical on iPhone Duo)
 
 //
 // Shows the Main UI web view, or a tile, with a real `NavigationStack` toolbar instead of the
 // hand-built `menuBar` of `OpenHABRootView`, so the bar can move into the vertical strip of the
-// iPhone Duo. `OpenHABRootView` uses this view from iOS 27.1 on and keeps the custom bar below.
+// iPhone Duo. `OpenHABRootView` uses this view on every iOS version. Only the vertical bar needs
+// iOS 27.1; see decision 9.
 //
 // Everything else is reused from the app: the web view model and its bridge, the connection
 // state, `ConnectingPlaceholder`, `OHBridgeIconView`, and the app menu (`AppMenu.swift`). This
@@ -127,10 +128,20 @@ import SwiftUI
 //
 // 9. AVAILABILITY
 //    - The compiler confirmed that `toolbarVerticalEdge` and `axisBehavior` need iOS 27.1 and
-//      `ToolbarOverflowMenu` needs iOS 27.0, while the app targets iOS 18+. This view is
-//      therefore `@available(iOS 27.1, *)`, and `OpenHABRootView` keeps the custom bar for
-//      older systems (those cannot have a vertical bar anyway). On iOS 27.1 the native bar is
-//      used on every device, not only the Duo, so the look is the same everywhere.
+//      `ToolbarOverflowMenu` needs iOS 27.0, while the app targets iOS 18+. Only the vertical
+//      strip needs them, so they are isolated: `readsBarOrientation()` turns `toolbarVerticalEdge`
+//      into the `barIsVertical` environment value, `verticalPreferred()` applies `axisBehavior`,
+//      and the overflow menu for text-only actions is behind `#available(iOS 27.1, *)`. Before
+//      iOS 27.1 a bar is never vertical, so everything else is the same horizontal bar.
+//    - This replaced the hand-built bar that `OpenHABRootView` used before iOS 27.1, together with
+//      the full-screen overlay menu and the hand-built "..." actions popover. The page therefore
+//      always gets the real safe area with `navbarHeight` 0, and the safe-area watcher in the
+//      shim (decision 11) matters on every version.
+//    - Before iOS 26 the system bar is transparent while the page is scrolled to its top, so the
+//      bar gets an opaque background there (`opaqueBarBeforeLiquidGlass`). Not run on iOS 18 to 25:
+//      the available simulators are iOS 27.0 and 27.1.
+//    - The menu is a popover on every version. A pull down at the top of a popover dismisses it,
+//      so the menu has no pull-to-refresh. It reloads every time it opens instead.
 //
 // 10. TESTING THE DUO LAYOUT
 //    - An iPhone Duo simulator (iOS 27.1) is a run destination, and previews render on the
