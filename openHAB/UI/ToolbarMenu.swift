@@ -542,10 +542,6 @@ extension ToolbarMenu {
                 }
             }
             .frame(maxHeight: scrollViewContentSize > 0 ? min(scrollViewContentSize, height) : height)
-            // Always bounce vertically — even when the content fits — so pull-to-refresh
-            // can be triggered on a short menu.
-            .scrollBounceBehavior(.always, axes: .vertical)
-            .refreshable { await menuData.reload() }
             .accessibilityIdentifier("ToolbarMenuScrollView")
             // Host the animation on the sections' shared parent so a change in any
             // one flag also animates the *repositioning* of the sibling sections

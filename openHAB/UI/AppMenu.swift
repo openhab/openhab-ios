@@ -17,7 +17,7 @@ import UIKit
 
 //
 // The menu button and the menu it opens, for every screen with a real navigation bar: Main UI and
-// tiles on iOS 27.1 (`MainUINavigationView`) and the sitemaps (`SitemapPageView`).
+// tiles (`MainUINavigationView`) and the sitemaps (`SitemapPageView`).
 //
 // DECISIONS (from the review of PR #1360 and the conversation around it)
 // - The menu is a popover anchored to the menu button. A popover from a bar button follows the
