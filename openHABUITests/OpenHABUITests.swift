@@ -21,6 +21,7 @@ class OpenHABUITests: XCTestCase {
         let app = await XCUIApplication()
         await MainActor.run {
             app.launchEnvironment = ["UITest": "1"]
+            app.useEnglishLocale()
         }
         continueAfterFailure = false
         await setupSnapshot(app)
@@ -36,7 +37,7 @@ class OpenHABUITests: XCTestCase {
         let app = XCUIApplication()
         app.activate()
 
-        let hamburgerButton = app.navigationBars.buttons["line.3.horizontal"]
+        let hamburgerButton = app.buttons["HamburgerButton"]
         hamburgerButton.tap()
         sleep(3)
 
@@ -137,5 +138,13 @@ class OpenHABUITests: XCTestCase {
         switch1.tap()
         sleep(2)
         snapshot("8_Settings_Server")
+    }
+}
+
+extension XCUIApplication {
+    /// The tests look elements up by their English labels, so run the app in English
+    /// whatever language the simulator uses.
+    func useEnglishLocale() {
+        launchArguments += ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
     }
 }
