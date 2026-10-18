@@ -180,15 +180,33 @@ final class MainUILayoutUITests: XCTestCase {
         app.windows.firstMatch.frame
     }
 
+    /// The bar is a fixed 44 pt tall (`OpenHABWebViewModel.navbarHeight`) with its content
+    /// centred, below the top safe area.
+    private static let barHeight: CGFloat = 44
+
     /// Bottom edge of the native menuBar HStack in screen coordinates.
-    /// SwiftUI exposes HStack containers as `.otherElements` in the XCTest AX tree.
+    /// SwiftUI exposes HStack containers as `.otherElements` in the XCTest AX tree, but the frame
+    /// it reports only spans the bar's content, not the bar itself. The content is centred in the
+    /// bar, so the bar's bottom lies half a bar height below the centre of that frame.
     private var nativeBarBottom: CGFloat {
         let el = app.otherElements.matching(identifier: "MainMenuBar").firstMatch
         guard el.waitForExistence(timeout: 4) else {
             XCTFail("Cannot locate MainMenuBar in AX tree — check accessibilityIdentifier is set on the menuBar HStack")
             return 100
         }
-        return el.frame.maxY
+        return el.frame.midY + Self.barHeight / 2
+    }
+
+    /// These tests cover the bar the app draws over the page. With the system bar (iPhone Duo on
+    /// iOS 27.1) the page sits below it. It keeps `HamburgerButton` but has no `MainMenuBar`
+    /// container, and there is no navbar space to reserve.
+    private func skipWithSystemBar() throws {
+        let hamburger = app.buttons["HamburgerButton"]
+        XCTAssertTrue(hamburger.waitForExistence(timeout: 8), "The menu button should be on screen")
+        try XCTSkipIf(
+            !app.otherElements["MainMenuBar"].exists,
+            "The system bar replaces the app's own bar"
+        )
     }
 
     private var app: XCUIApplication!
@@ -197,6 +215,7 @@ final class MainUILayoutUITests: XCTestCase {
         try await super.setUp()
         continueAfterFailure = false
         app = XCUIApplication()
+        app.useEnglishLocale()
         app.launchEnvironment["UITest"] = "1"
     }
 
@@ -289,9 +308,10 @@ final class MainUILayoutUITests: XCTestCase {
 
     /// Hiding must not touch the layout: Framework7 sizes pages and absolutely positioned
     /// content from `--f7-navbar-height`, which is what the native bar covers.
-    func testProxyPreservesFrameworkNavbarLayout() {
+    func testProxyPreservesFrameworkNavbarLayout() throws {
         launchInWebviewMode(html: LayoutHTML.mapPage, js: LayoutJS.navbarLayout)
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
+        try skipWithSystemBar()
 
         let navbarHeight = Double(waitForReport("navbarOffsetHeight")) ?? -1
         let paddingTop = Double(waitForReport("pageContentPaddingTop")) ?? -1
@@ -333,9 +353,10 @@ final class MainUILayoutUITests: XCTestCase {
     }
 
     /// Content offset by `--f7-navbar-height`, as the map page is, must meet the bar bottom.
-    func testContentBelowNavbarMeetsNativeBarBottom() {
+    func testContentBelowNavbarMeetsNativeBarBottom() throws {
         launchInWebviewMode(html: LayoutHTML.mapPage)
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
+        try skipWithSystemBar()
 
         let mapTop = waitForWebLabel("UITest Map Top", type: .button).frame.minY
         let barBottom = nativeBarBottom
@@ -354,9 +375,10 @@ final class MainUILayoutUITests: XCTestCase {
 
     /// No navbar means nothing reserves room, so the proxy pads the page and shifts
     /// MainUI's floating sidebar icon clear of the bar.
-    func testPageWithoutNavbarIsPaddedClearOfNativeBar() {
+    func testPageWithoutNavbarIsPaddedClearOfNativeBar() throws {
         launchInWebviewMode(html: LayoutHTML.pageWithoutNavbar)
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
+        try skipWithSystemBar()
 
         let barBottom = nativeBarBottom
         let content = waitForWebLabel("UITest Fullscreen Content", type: .button)
@@ -378,9 +400,10 @@ final class MainUILayoutUITests: XCTestCase {
     /// it `navbar-hidden`. The native bar mirrors that class, so it must slide away with the
     /// web one and come back when it returns — otherwise the app's bar sits over content the
     /// Main UI has deliberately cleared, and the two bars disagree about whether they exist.
-    func testNativeBarMirrorsWebNavbarHiding() {
+    func testNativeBarMirrorsWebNavbarHiding() throws {
         launchInWebviewMode(html: LayoutHTML.hidableNavbar)
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
+        try skipWithSystemBar()
 
         let bar = app.otherElements.matching(identifier: "MainMenuBar").firstMatch
         XCTAssertTrue(
