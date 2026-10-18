@@ -18,9 +18,6 @@ import WebKit
 
 @MainActor
 class OpenHABWebViewModel: ObservableObject {
-    /// The host owns the bar height; the shim sizes Main UI's own navbar to match.
-    static let navbarHeight: CGFloat = 44
-
     // MARK: - Published state
 
     @Published var isLoading = false
@@ -97,9 +94,9 @@ class OpenHABWebViewModel: ObservableObject {
     /// Which home the web view currently belongs to. Kept here so we can note pages against it
     /// right away. Looking it up takes a moment, and the user can switch homes in between.
     private var currentHomeId: UUID?
-    /// The layout a host view with a system navigation bar reports. While it is set, it replaces
-    /// the one derived from the custom bar. The system bar is part of the safe area it is
-    /// measured from, so the constant `navbarHeight` would make Main UI leave room twice.
+    /// The layout the host view reports from the safe area it measures. While it is set, it
+    /// replaces the one derived from the web view's own insets. The system bar is part of that
+    /// safe area, so a `navbarHeight` on top of it would make Main UI leave room twice.
     private var systemBarLayout: OHBridgeLayout?
 
     /// True once Main UI is live in the page now loaded, so it can be navigated in place.
@@ -728,7 +725,7 @@ extension OpenHABWebViewModel {
         bridge.updateLayout(layout)
     }
 
-    /// The space the host's chrome takes over the page.
+    /// The space the host's chrome takes over the page, before the host has reported a layout.
     func currentLayout() -> OHBridgeLayout {
         if let systemBarLayout {
             return systemBarLayout
@@ -736,7 +733,7 @@ extension OpenHABWebViewModel {
         let insets = webView.safeAreaInsets
         return OHBridgeLayout(
             insets: .init(top: insets.top, bottom: insets.bottom),
-            navbarHeight: Self.navbarHeight
+            navbarHeight: 0
         )
     }
 

@@ -148,26 +148,13 @@ struct ToolbarMenu: View {
     var currentContent: TargetController
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
-    /// Shows only the menu itself, without the dimming backdrop and the corner animation, for a
-    /// host that presents it in its own container (a popover). The overlay is the default.
-    var isEmbedded = false
+    /// The tallest the menu grows before it scrolls.
+    private static let menuHeight: CGFloat = 480
 
-    /// The tallest the embedded menu grows before it scrolls.
-    private static let embeddedMenuHeight: CGFloat = 480
-
-    /// Closes the overlay menu before a sheet opens. An embedded menu stays open instead: it
-    /// lives in a popover, and closing that would take down the sheet this menu is presenting,
-    /// since the sheet hangs off this view.
-    private func dismissOverlayMenu() {
-        guard !isEmbedded else { return }
-        isPresented = false
-    }
-
-    /// An overlay menu reloads when it is opened again. An embedded menu was never closed, so
-    /// it reloads its entries and its per-home state when the settings sheet goes away, in case
-    /// the settings changed what it shows.
+    /// The menu lives in a popover that stays open while a settings sheet shows, since closing it
+    /// would take down the sheet, which hangs off this view. So it reloads its entries and its
+    /// per-home state when the sheet goes away, in case the settings changed what it shows.
     private func refreshAfterSettings() {
-        guard isEmbedded else { return }
         Task {
             await menuData.reload()
             await loadExpansionState()
@@ -202,43 +189,35 @@ struct ToolbarMenu: View {
     @ScaledMetric private var iconWidth = 20.0
 
     var body: some View {
-        Group {
-            if isEmbedded {
-                menuContent(height: Self.embeddedMenuHeight)
-            } else {
-                GeometryReader { proxy in
-                    overlayContent(proxy: proxy)
+        menuContent(height: Self.menuHeight)
+            .onAppear { Task { await loadExpansionState() } }
+            .onChange(of: isPresented) { _, newValue in
+                if newValue {
+                    // Re-read in case the active home changed while the menu was closed.
+                    Task { await loadExpansionState() }
+                    // Pick up sitemaps/pages added on the server since the last fetch.
+                    Task { await menuData.reload() }
+                } else {
+                    isHomeExpanded = false
+                    headerDetailsHidden = false
+                    homeDetailsCollapsed = false
                 }
             }
-        }
-        .onAppear { Task { await loadExpansionState() } }
-        .onChange(of: isPresented) { _, newValue in
-            if newValue {
-                // Re-read in case the active home changed while the menu was closed.
-                Task { await loadExpansionState() }
-                // Pick up sitemaps/pages added on the server since the last fetch.
-                Task { await menuData.reload() }
-            } else {
-                isHomeExpanded = false
-                headerDetailsHidden = false
-                homeDetailsCollapsed = false
+            .sheet(isPresented: $showAppSettings, onDismiss: refreshAfterSettings) {
+                NavigationStack {
+                    AppSettingsView()
+                }
             }
-        }
-        .sheet(isPresented: $showAppSettings, onDismiss: refreshAfterSettings) {
-            NavigationStack {
-                AppSettingsView()
+            .sheet(isPresented: $showCurrentHomeSettings, onDismiss: refreshAfterSettings) {
+                NavigationStack {
+                    HomeSettingsView()
+                }
             }
-        }
-        .sheet(isPresented: $showCurrentHomeSettings, onDismiss: refreshAfterSettings) {
-            NavigationStack {
-                HomeSettingsView()
+            .task {
+                for await prefs in await Preferences.shared.currentHomePreferencesStream {
+                    cachedHomePrefs = prefs
+                }
             }
-        }
-        .task {
-            for await prefs in await Preferences.shared.currentHomePreferencesStream {
-                cachedHomePrefs = prefs
-            }
-        }
     }
 }
 
@@ -324,43 +303,6 @@ extension ToolbarMenu {
         )
     }
 
-    private func overlayContent(proxy: GeometryProxy) -> some View {
-        ZStack(alignment: .topTrailing) {
-            // Dimming backdrop — tapping dismisses the menu
-            if isPresented {
-                Color.black.opacity(0.1)
-                    .ignoresSafeArea()
-                    .onTapGesture { isPresented = false }
-                    .transition(.opacity)
-
-                let menu = menuContent(height: proxy.size.height * 0.8)
-                    .transition(
-                        .scale(scale: 0.01, anchor: .topTrailing)
-                            .combined(with: .opacity)
-                    )
-
-                styleMenu(menu)
-                    .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
-                    .padding(.trailing, 8)
-                    .padding(.top, 4)
-            }
-        }
-        .animation(.spring(response: 0.32, dampingFraction: 0.78), value: isPresented)
-    }
-
-    @ViewBuilder
-    private func styleMenu(_ menu: some View) -> some View {
-        if #available(iOS 26.0, *) {
-            GlassEffectContainer {
-                menu
-            }.glassEffect(.regular, in: .rect(cornerRadius: ConnectionView.cornerRadius))
-        } else {
-            menu
-                .background(.regularMaterial)
-                .clipShape(.rect(cornerRadius: ConnectionView.cornerRadius))
-        }
-    }
-
     // MARK: - Menu content
 
     private func tilesMenu() -> some View {
@@ -378,7 +320,6 @@ extension ToolbarMenu {
     @ViewBuilder
     private func systemMenu() -> some View {
         systemRow(symbol: .gear, label: String(localized: "App Settings")) {
-            dismissOverlayMenu()
             showAppSettings = true
         }
         if let prefs = cachedHomePrefs,
@@ -728,7 +669,7 @@ extension ToolbarMenu {
                 Image(systemSymbol: .gear).hidden()
                 if !headerDetailsHidden {
                     Button(
-                        action: { dismissOverlayMenu(); showCurrentHomeSettings = true },
+                        action: { showCurrentHomeSettings = true },
                         label: { Image(systemSymbol: .gear).foregroundStyle(.secondary) }
                     )
                     .buttonStyle(.plain)
