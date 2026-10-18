@@ -243,7 +243,9 @@ private struct MainUINavigationContent: View {
                     .ignoresSafeArea(edges: isTile ? [] : .all)
                     .onChange(of: proxy.safeAreaInsets, initial: true) { _, insets in
                         safeArea = insets
-                        if !navbar.hidden { lastVisibleTopInset = insets.top }
+                        if !navbar.hidden {
+                            lastVisibleTopInset = insets.top
+                        }
                         reportLayout(for: insets)
                     }
             }

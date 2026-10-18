@@ -727,7 +727,9 @@ extension OpenHABWebViewModel {
 
     /// The space the host's chrome takes over the page.
     func currentLayout() -> OHBridgeLayout {
-        if let systemBarLayout { return systemBarLayout }
+        if let systemBarLayout {
+            return systemBarLayout
+        }
         let insets = webView.safeAreaInsets
         return OHBridgeLayout(
             insets: .init(top: insets.top, bottom: insets.bottom),
