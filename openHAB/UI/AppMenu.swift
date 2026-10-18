@@ -68,6 +68,15 @@ struct AppMenuButton: View {
             label: { Label("Menu", systemSymbol: .line3Horizontal) }
         )
         .accessibilityIdentifier("HamburgerButton")
+        #if DEBUG
+        .onAppear {
+            // UI tests open the menu from the start, so they need no tap on the bar.
+            guard ProcessInfo.processInfo.environment["UITestOpenMenu"] != nil else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isPresented = true
+            }
+        }
+        #endif
         .popover(isPresented: $isPresented) {
             ToolbarMenu(
                 isPresented: $isPresented,
@@ -76,8 +85,7 @@ struct AppMenuButton: View {
                 currentContent: configuration.currentContent,
                 onSelect: configuration.onSelect,
                 onActivateWebMenuItem: configuration.onActivateWebMenuItem,
-                onReload: configuration.onReload,
-                isEmbedded: true
+                onReload: configuration.onReload
             )
             .background(PopoverClosesOnOutsideTaps())
             .presentationCompactAdaptation(.popover)

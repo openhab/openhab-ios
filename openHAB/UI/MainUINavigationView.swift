@@ -175,7 +175,6 @@ import SwiftUI
 //
 // ============================================================================================
 
-@available(iOS 27.1, *)
 struct MainUINavigationView: View {
     @ObservedObject var webViewModel: OpenHABWebViewModel
     let activeConnection: ConnectionInfo?
@@ -191,6 +190,61 @@ struct MainUINavigationView: View {
                 tileTitle: tileTitle,
                 onReload: onReload
             )
+            .readsBarOrientation()
+        }
+    }
+}
+
+// MARK: - Bar orientation
+
+private extension EnvironmentValues {
+    /// Whether the system lays its bars out vertically, in a strip. Only iOS 27.1 can; earlier
+    /// systems always have a horizontal bar.
+    @Entry var barIsVertical = false
+}
+
+/// Puts `toolbarVerticalEdge` into `barIsVertical` for the views inside the navigation container.
+/// That environment value only exists from iOS 27.1, so this is where the app reads it and
+/// everything else asks `barIsVertical`.
+@available(iOS 27.1, *)
+private struct BarOrientationReader: ViewModifier {
+    @Environment(\.toolbarVerticalEdge) private var verticalEdge
+
+    func body(content: Content) -> some View {
+        content.environment(\.barIsVertical, verticalEdge != nil)
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func readsBarOrientation() -> some View {
+        if #available(iOS 27.1, *) {
+            modifier(BarOrientationReader())
+        } else {
+            self
+        }
+    }
+
+    /// A bar that is opaque from the start. Before iOS 26 the system bar is transparent while the
+    /// page is scrolled to its top, which would let the web page show through the title.
+    @ViewBuilder
+    func opaqueBarBeforeLiquidGlass() -> some View {
+        if #available(iOS 26, *) {
+            self
+        } else {
+            toolbarBackground(.visible, for: .navigationBar)
+        }
+    }
+}
+
+private extension ToolbarContent {
+    /// Lets the item move into a vertical bar. Before iOS 27.1 there is none.
+    @ToolbarContentBuilder
+    func verticalPreferred() -> some ToolbarContent {
+        if #available(iOS 27.1, *) {
+            axisBehavior(.verticalPreferred)
+        } else {
+            self
         }
     }
 }
@@ -199,18 +253,17 @@ struct MainUINavigationView: View {
 
 /// Split from `MainUINavigationView` because `toolbarVerticalEdge` is only set for views
 /// *inside* the navigation container, not for the view that creates it.
-@available(iOS 27.1, *)
 private struct MainUINavigationContent: View {
     @ObservedObject var webViewModel: OpenHABWebViewModel
     let activeConnection: ConnectionInfo?
     let tileTitle: String?
     let onReload: () -> Void
 
-    /// `.leading` or `.trailing` while the system lays its bars out vertically (iPhone Duo outer
-    /// display, or inner display in landscape / Split View), `nil` for a normal horizontal bar.
+    /// True while the system lays its bars out vertically (iPhone Duo outer display, or inner
+    /// display in landscape / Split View), false for a normal horizontal bar.
     /// DECISION: this, not `userInterfaceIdiom` or orientation, decides how toolbar items are
     /// arranged, as Apple asks apps not to branch on the idiom.
-    @Environment(\.toolbarVerticalEdge) private var verticalEdge
+    @Environment(\.barIsVertical) private var barIsVertical
     @State private var safeArea = EdgeInsets()
     @State private var reportedLayout = MainUILayout.zero
     @State private var lastVisibleTopInset: CGFloat = 0
@@ -262,6 +315,7 @@ private struct MainUINavigationContent: View {
         .navigationBarBackButtonHidden()
         .toolbarVisibility(navbar.hidden ? .hidden : .visible, for: .navigationBar)
         .animation(.default, value: navbar.hidden)
+        .opaqueBarBeforeLiquidGlass()
         .toolbar { toolbarContent }
     }
 
@@ -300,7 +354,7 @@ private struct MainUINavigationContent: View {
                 )
                 .accessibilityIdentifier("NavbarProxyButton-\(title)")
             }
-            .axisBehavior(.verticalPreferred)
+            .verticalPreferred()
         }
 
         // DECISION: same placement as the back button and declared right after it, so the
@@ -314,13 +368,13 @@ private struct MainUINavigationContent: View {
                 )
                 .accessibilityIdentifier("ConnectionStateButton")
             }
-            .axisBehavior(.verticalPreferred)
+            .verticalPreferred()
         } else if webViewModel.isLoading {
             ToolbarItem(placement: .cancellationAction) {
                 Label("Connecting", systemSymbol: .arrowTriangle2Circlepath)
                     .accessibilityIdentifier("ConnectionStateButton")
             }
-            .axisBehavior(.verticalPreferred)
+            .verticalPreferred()
         }
 
         // Actions with an icon. The system moves the lowest priority items into the overflow
@@ -335,12 +389,12 @@ private struct MainUINavigationContent: View {
                 .accessibilityLabel(action.accessibilityName)
                 .accessibilityIdentifier("NavbarProxyButton-\(action.accessibilityName)")
             }
-            .axisBehavior(.verticalPreferred)
+            .verticalPreferred()
         }
 
         // Text-only actions: a text button works on a horizontal bar. A vertical bar drops
         // items without a symbol, so there they go into the overflow menu instead.
-        if verticalEdge == nil {
+        if !barIsVertical {
             ForEach(textOnlyActions) { action in
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action.label, action: { webViewModel.bridge.activateNavbarAction(action.id) })
@@ -348,7 +402,7 @@ private struct MainUINavigationContent: View {
                         .accessibilityIdentifier("NavbarProxyButton-\(action.accessibilityName)")
                 }
             }
-        } else if !textOnlyActions.isEmpty {
+        } else if !textOnlyActions.isEmpty, #available(iOS 27.1, *) {
             ToolbarOverflowMenu {
                 ForEach(textOnlyActions) { action in
                     Button(action.label, action: { webViewModel.bridge.activateNavbarAction(action.id) })
@@ -365,7 +419,7 @@ private struct MainUINavigationContent: View {
     /// bar requires of every item.
     @ViewBuilder
     private func actionLabel(_ action: OHBridgeNavbarAction) -> some View {
-        if verticalEdge == nil {
+        if !barIsVertical {
             OHBridgeIconView(icon: action.icon, size: 24, fallback: .questionmarkCircle)
         } else {
             Label(action.accessibilityName, systemSymbol: action.icon?.toolbarSymbol ?? .squareGrid2x2)
@@ -448,7 +502,6 @@ private enum MainUIPreviewNavbar {
     )
 }
 
-@available(iOS 27.1, *)
 private struct MainUIPreviewHost: View {
     @StateObject private var webViewModel = OpenHABWebViewModel()
     @StateObject private var networkService = NetworkConnectionService()
@@ -483,32 +536,22 @@ private struct MainUIPreviewHost: View {
 }
 
 #Preview("Live demo page") {
-    if #available(iOS 27.1, *) {
-        MainUIPreviewHost()
-    }
+    MainUIPreviewHost()
 }
 
 #Preview("Back + one action") {
-    if #available(iOS 27.1, *) {
-        MainUIPreviewHost(navbar: MainUIPreviewNavbar.kitchen)
-    }
+    MainUIPreviewHost(navbar: MainUIPreviewNavbar.kitchen)
 }
 
 #Preview("Many actions + text-only action") {
-    if #available(iOS 27.1, *) {
-        MainUIPreviewHost(navbar: MainUIPreviewNavbar.manyActions)
-    }
+    MainUIPreviewHost(navbar: MainUIPreviewNavbar.manyActions)
 }
 
 #Preview("Large title in content") {
-    if #available(iOS 27.1, *) {
-        MainUIPreviewHost(navbar: MainUIPreviewNavbar.largeTitle)
-    }
+    MainUIPreviewHost(navbar: MainUIPreviewNavbar.largeTitle)
 }
 
 #Preview("Tile") {
-    if #available(iOS 27.1, *) {
-        MainUIPreviewHost(tileTitle: "Tile")
-    }
+    MainUIPreviewHost(tileTitle: "Tile")
 }
 #endif
