@@ -531,10 +531,9 @@ private struct MainUIPreviewHost: View {
             \.appMenu,
             AppMenuConfiguration(
                 menuData: menuData,
-                webMenu: webViewModel.menu,
+                webAuth: webViewModel.auth,
                 currentContent: tileTitle == nil ? .webview : .tile(""),
                 onSelect: { _ in },
-                onActivateWebMenuItem: { _ in },
                 onReload: { webViewModel.loadWebView(force: true) }
             )
         )

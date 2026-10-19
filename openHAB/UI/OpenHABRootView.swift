@@ -278,16 +278,8 @@ struct OpenHABRootView: View {
         ZStack(alignment: .bottom) {
             contentView
                 .environment(\.appMenu, appMenuConfiguration)
-
-            // Toolbar menu overlay
-            ToolbarMenu(
-                isPresented: $menuPresented,
-                menuData: menuData,
-                webAuth: webViewModel.auth,
-                currentContent: currentContent,
-                onSelect: { target in handleMenuSelection(target) },
-                onReload: { reloadCurrentContent() }
-            )
+            // A sibling above the content rather than an overlay of the navigation container.
+            InAppToastBanner(service: ToastService.shared)
         }
         .onAppear {
             #if DEBUG
@@ -466,10 +458,9 @@ private extension OpenHABRootView {
     var appMenuConfiguration: AppMenuConfiguration {
         AppMenuConfiguration(
             menuData: menuData,
-            webMenu: webViewModel.menu,
+            webAuth: webViewModel.auth,
             currentContent: currentContent,
             onSelect: { target in handleMenuSelection(target) },
-            onActivateWebMenuItem: { id in activateWebMenuItem(id) },
             onReload: { reloadCurrentContent() }
         )
     }
@@ -482,16 +473,6 @@ private extension OpenHABRootView {
             tileTitle: tileTitle,
             onReload: { reloadCurrentContent() }
         )
-    }
-
-    /// A sidebar entry without a path was tapped. It runs in Main UI, so Main UI has to be on
-    /// screen, reloaded in place of a tile if need be. The bridge holds the message until the
-    /// page says hello.
-    func activateWebMenuItem(_ id: String) {
-        if !isMainUIShown || webViewModel.isShowingTile {
-            showMainUI(path: nil, persistAsDefault: false)
-        }
-        webViewModel.bridge.activateMenuItem(id)
     }
 
     func switchToSavedView() async {
