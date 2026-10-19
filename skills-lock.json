@@ -10,11 +10,6 @@
       "source": "AvdLee/SwiftUI-Agent-Skill",
       "sourceType": "github",
       "computedHash": "f8f1a9994e0c22bd01e37369f192651819fce9a80ee21b4faff43b6710191943"
-    },
-    "xcuitest-skill": {
-      "source": "LambdaTest/agent-skills",
-      "sourceType": "github",
-      "computedHash": "410c9976111e5186b7c1473fad6f988dfd216f8792ac7ec8deb4ee3f952d2d3d"
     }
   }
 }
