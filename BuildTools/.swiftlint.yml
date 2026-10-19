@@ -88,6 +88,10 @@ identifier_name:
     warning: 90
     error: 1000
 
+large_tuple:
+    warning: 4
+    error: 5
+
 private_outlet:
   allow_private_set: true
 
