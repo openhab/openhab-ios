@@ -38,6 +38,13 @@ struct WebViewURLTests {
         #expect(result?.absoluteString == "https://openhab.local:8443/api/v1/items")
     }
 
+    @Test("Keeps the trailing slash of a Main UI route")
+    func appendKeepsTrailingSlash() throws {
+        let base = try #require(URL(string: "https://openhab.local:8443"))
+        #expect(WebViewURLHelper.appendPath("/about/", to: base)?.absoluteString == "https://openhab.local:8443/about/")
+        #expect(WebViewURLHelper.appendPath("/settings/?a=b", to: base)?.absoluteString == "https://openhab.local:8443/settings/?a=b")
+    }
+
     // MARK: - normalizeForComparison
 
     @Test("Normalizes URL removing trailing slash")
