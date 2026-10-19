@@ -1,6 +1,26 @@
 # Async Sequences and Streams
 
-Patterns for iterating over values that arrive over time.
+Use this when:
+
+- You need to iterate over values that arrive over time.
+- You are bridging callback-based or delegate-based APIs to async/await.
+- You need to choose between `AsyncSequence`, `AsyncStream`, or a regular async method.
+
+Skip this file if:
+
+- You need time-based operators like debounce, throttle, or merge. Use `async-algorithms.md`.
+- You are choosing between `Task`, `async let`, or task groups. Use `tasks.md`.
+
+Jump to:
+
+- AsyncSequence Protocol
+- AsyncStream / AsyncThrowingStream
+- Bridging Callbacks and Delegates
+- Stream Lifecycle and Cleanup
+- Buffer Policies
+- Standard Library Integration
+- Limitations
+- When to Use AsyncAlgorithms
 
 ## AsyncSequence
 
@@ -663,6 +683,26 @@ for await value in stream {
     try? await Task.sleep(for: .seconds(1))
 }
 ```
+
+## Common Mistakes Agents Make
+
+```swift
+// ❌ Values after finish() are silently dropped
+continuation.finish()
+continuation.yield(1) // Never received
+
+// ❌ Stream never terminates (forgot finish)
+AsyncStream { continuation in
+    continuation.yield(1)
+    // Missing: continuation.finish()
+}
+
+// ❌ Wrapping a single-value API in a stream — use a regular async function instead
+func fetchUser() -> AsyncStream<User> { ... } // Overkill for one result
+```
+
+- **Sharing a single `AsyncStream` between multiple consumers**: Values split unpredictably. There is no built-in broadcast; use `AsyncChannel` for point-to-point multi-consumer patterns.
+- **Forgetting `onTermination`** when bridging delegate or observer APIs, causing resources to leak.
 
 ## Further Learning
 

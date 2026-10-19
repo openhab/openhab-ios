@@ -3,89 +3,114 @@
 ## Table of Contents
 
 - [View Structure Principles](#view-structure-principles)
-- [Prefer Modifiers Over Conditional Views](#prefer-modifiers-over-conditional-views)
+- [View File Structure (optional readability suggestion)](#view-file-structure-optional-readability-suggestion)
+- [Struct or Method / Computed Property?](#struct-or-method--computed-property)
 - [Extract Subviews, Not Computed Properties](#extract-subviews-not-computed-properties)
-- [When @ViewBuilder Functions Are Acceptable](#when-viewbuilder-functions-are-acceptable)
+- [@ViewBuilder](#viewbuilder)
+- [SDK 27 `@ContentBuilder`](#sdk-27-contentbuilder)
+- [Keep View Body Simple and Avoid High-Cost Operations](#keep-view-body-simple-and-avoid-high-cost-operations)
+- [Keep View `init` Cheap](#keep-view-init-cheap)
+- [Single-Child Group](#single-child-group)
 - [When to Extract Subviews](#when-to-extract-subviews)
 - [Container View Pattern](#container-view-pattern)
+- [Utilize Lazy Containers for Large Data Sets](#utilize-lazy-containers-for-large-data-sets)
 - [ZStack vs overlay/background](#zstack-vs-overlaybackground)
 - [Compositing Group Before Clipping](#compositing-group-before-clipping)
+- [Split State-Driven Parts into Custom View Types](#split-state-driven-parts-into-custom-view-types)
 - [Reusable Styling with ViewModifier](#reusable-styling-with-viewmodifier)
 - [Skeleton Loading with Redacted Views](#skeleton-loading-with-redacted-views)
+- [AnyView](#anyview)
 - [UIViewRepresentable Essentials](#uiviewrepresentable-essentials)
+- [Troubleshooting](#troubleshooting)
 - [Summary Checklist](#summary-checklist)
 
 ## View Structure Principles
 
 SwiftUI's diffing algorithm compares view hierarchies to determine what needs updating. Proper view composition directly impacts performance.
 
-## Prefer Modifiers Over Conditional Views
+## View File Structure (optional readability suggestion)
 
-**Prefer "no-effect" modifiers over conditionally including views.** When you introduce a branch, consider whether you're representing multiple views or two states of the same view.
-
-### Use Opacity Instead of Conditional Inclusion
+Property ordering has no effect on correctness or performance, so treat this as a personal/team readability preference rather than a rule. Some developers find a consistent order easier to scan — for example, environment, then state, then passed-in properties, then `init`, body, and helper subviews. Adopt it only if your team wants the consistency; never reorder existing code solely to match it.
 
 ```swift
-// Good - same view, different states
-SomeView()
-    .opacity(isVisible ? 1 : 0)
+struct ContentView: View {
+    // MARK: - Environment Properties
+    @Environment(\.colorScheme) var colorScheme
 
-// Avoid - creates/destroys view identity
-if isVisible {
-    SomeView()
-}
-```
+    // MARK: - State Properties
+    @Binding var isToggled: Bool
+    @State private var viewModel: SomeViewModel
 
-**Why**: Conditional view inclusion can cause loss of state, poor animation performance, and breaks view identity. Using modifiers maintains view identity across state changes.
+    // MARK: - Private Properties
+    private let title: String = "SwiftUI Guide"
 
-### When Conditionals Are Appropriate
+    // MARK: - Initializer (if needed)
+    init(isToggled: Binding<Bool>) {
+        self._isToggled = isToggled
+    }
 
-Use conditionals when you truly have **different views**, not different states:
+    // MARK: - Body
+    var body: some View {
+        VStack {
+            header
+            content
+        }
+    }
 
-```swift
-// Correct - fundamentally different views
-if isLoggedIn {
-    DashboardView()
-} else {
-    LoginView()
-}
+    // MARK: - Computed Subviews
+    private var header: some View {
+        Text(title).font(.largeTitle).padding()
+    }
 
-// Correct - optional content
-if let user {
-    UserProfileView(user: user)
-}
-```
-
-### Conditional View Modifier Extensions Break Identity
-
-A common pattern is an `if`-based `View` extension for conditional modifiers. This changes the view's return type between branches, which destroys view identity and breaks animations:
-
-```swift
-// Problematic -- different return types per branch
-extension View {
-    @ViewBuilder func `if`<T: View>(_ condition: Bool, transform: (Self) -> T) -> some View {
-        if condition {
-            transform(self)  // Returns T
-        } else {
-            self              // Returns Self
+    private var content: some View {
+        VStack {
+            Text("Counter: \(counter)")
         }
     }
 }
 ```
 
-Prefer applying the modifier directly with a ternary or always-present modifier:
+## Struct or Method / Computed Property?
+
+If a `View` is intended to be reusable across multiple screens, encapsulate it within a separate `struct`. If its usage is confined to a single context, it can be declared as a function or computed property within the containing `View`.
+
+However, if a view maintains state using `@State`, `@Binding`, `@ObservedObject`, `@Environment`, `@StateObject`, or similar wrappers, it should generally be a separate `struct`.
+
+- For simple, static views: a computed property is acceptable.
+- For views requiring parameters: a method is more appropriate, but only when those parameters are stable. If parameters change per-call (e.g. inside a `ForEach` where each call receives a different item), prefer a separate `struct` so SwiftUI can diff inputs and skip body evaluation.
+- For reusable, stateful, or logically independent UI sections: prefer a dedicated `struct`.
 
 ```swift
-// Good -- same view identity maintained
-Text("Hello")
-    .opacity(isHighlighted ? 1 : 0.5)
+struct ContentView: View {
+    var titleView: some View {
+        Text("Hello from Property")
+            .font(.largeTitle)
+            .foregroundStyle(.blue)
+    }
 
-// Good -- modifier always present, value changes
-Text("Hello")
-    .foregroundStyle(isError ? .red : .primary)
+    func messageView(text: String, color: Color) -> some View {
+        Text(text)
+            .font(.title)
+            .foregroundStyle(color)
+            .padding()
+    }
+
+    var body: some View {
+        VStack {
+            titleView
+            messageView(text: "Hello from Method", color: .red)
+        }
+    }
+}
 ```
 
+For conditional modifier composition and `AnyShapeStyle`, consult `references/modifier-patterns.md`.
+
 ## Extract Subviews, Not Computed Properties
+
+A view is SwiftUI's unit of invalidation. When an input changes, SwiftUI re-runs the body of the smallest enclosing **view type** that depends on it — every conditional, modifier chain, and string interpolation in that body, even if only one leaf actually depends on what changed. A computed property or `@ViewBuilder` helper is inlined into the parent's body, so it shares the parent's invalidation boundary and does not reduce update cost; it only reorganizes the code. A separate `View` type with narrow inputs becomes its own boundary and re-runs only when its own inputs change.
+
+This is why "split your body for readability" is also a performance tool — but only when you split into real `View` types, not computed properties.
 
 ### The Problem with @ViewBuilder Functions
 
@@ -155,9 +180,169 @@ struct ComplexSection: View {
 2. Since nothing changed, SwiftUI skips calling `ComplexSection.body`
 3. The complex view code never executes unnecessarily
 
-## When @ViewBuilder Functions Are Acceptable
+### Multi-section detail views
 
-Use for small, simple sections (a few views, no expensive computation) that don't affect performance. `@ViewBuilder` functions work particularly well for static content that doesn't depend on any `@State` or `@Binding`, since SwiftUI won't need to diff them independently. Extract to a separate `struct` when the section is complex, depends on state, or needs to be skipped during re-evaluation.
+The most common place this rule gets dropped is a detail screen with several distinct sections — `header + gallery + description + reviews`, `header + ingredients + steps`, `hero + specs + related`. The tempting shape is one big view with `private var header: some View`, `private var gallery: some View`, and so on. That shape shares one invalidation boundary, so a change that affects one section re-evaluates all of them. Factor each named section into its own `View` type that takes only the fields it renders, and keep the parent thin — it just composes the sections.
+
+```swift
+// PREFER: each section is its own type with narrow inputs.
+struct ProductDetailView: View {
+    let product: Product
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                ProductHeader(name: product.name, price: product.price)
+                ProductGallery(images: product.imageURLs)
+                ProductDescription(text: product.descriptionText)
+                ProductReviews(average: product.averageStars, count: product.reviewCount)
+            }
+            .padding()
+        }
+    }
+}
+```
+
+This generalizes to every `*DetailView`: one `View` type per section, narrow inputs each, a thin parent that composes them. Small `@ViewBuilder` fragments reused two or three times within the same body are still fine — the rule targets factoring done for organization or to manage body length, where a real `View` type does the right thing.
+
+## @ViewBuilder
+
+Use `@ViewBuilder` functions for small, simple sections (a few views, no expensive computation) that don't affect performance. They work particularly well for static content that doesn't depend on any `@State` or `@Binding`, since SwiftUI won't need to diff them independently. Extract to a separate `struct` when the section is complex, depends on state, or needs to be skipped during re-evaluation.
+
+The `@ViewBuilder` attribute is only required when a function or computed property returns multiple different views conditionally, for example through `if` or `switch`:
+
+```swift
+@ViewBuilder
+private var conditionalView: some View {
+    if isExpanded {
+        VStack {
+            Text("Expanded View")
+            Image(systemName: "star")
+        }
+    } else {
+        Text("Collapsed View")
+    }
+}
+```
+
+If every branch returns the same concrete type, `@ViewBuilder` is unnecessary:
+
+```swift
+var conditionalText: some View {
+    if Bool.random() {
+        Text("Hello")
+    } else {
+        Text("World")
+    }
+}
+```
+
+Prefer `@ViewBuilder` when:
+
+- there is conditional branching between multiple view types
+- extracting a separate `struct` would not provide meaningful separation
+
+## SDK 27 `@ContentBuilder`
+
+SDK 27 unifies many SwiftUI result builders under `@ContentBuilder`. Block contents are no longer constrained to `View`, so previously compiling source can become ambiguous. Choose the narrow fix matching the diagnostic. Do not broadly rewrite working builders or rename unrelated types.
+
+- For ambiguous `ShapeStyle.opacity` or `blendMode` passed directly to `overlay` or `background`, select the builder overload:
+  ```swift
+  Rectangle().overlay {
+      Color.blue.opacity(0.3).blendMode(.overlay)
+  }
+  ```
+- Fully qualify a shadowed SwiftUI type, such as `SwiftUI.Color.clear`.
+- Avoid spelling concrete `TupleView` or `TupleContent` generic structures; prefer opaque `some View`. If a concrete SDK 27 type is unavoidable, the builder now produces `TupleContent`. When the deployment target is below OS 27 and a concrete `TupleView` constraint is unavoidable, construct `TupleView((...))` explicitly inside the builder as a back-deployment fallback.
+- If an empty nested builder is ambiguous, provide `EmptyContent()` or `EmptyView()`. This can occur with MapKit in the dependency graph even when the file does not import MapKit, if member-import visibility is disabled. It also occurs with a conditional-compilation branch that becomes empty.
+- For deeply branching Charts content that times out only when back-deployed (typically around 10+ `if`/`else if` or `switch` branches), extract the branches into an `@ChartContentBuilder` helper.
+
+## Keep View Body Simple and Avoid High-Cost Operations
+
+Refrain from performing complex operations within the `body` of your view. Instead of passing a ready-to-use sequence with filtering, mapping, or sorting directly into `ForEach`, prepare the sequence outside the body.
+
+```swift
+// Avoid such things ...
+var body: some View {
+    List {
+        ForEach(model.values.filter { $0 > 0 }, id: \.self) {
+            Text(String($0))
+                .padding()
+        }
+    }
+}
+```
+
+Prefer already-prepared values. `init` is not a one-time filter — it reruns whenever the parent re-evaluates, so treat it as a constant-time copy of inputs. Cache derived collections on the model (or in `@State` updated from `.onChange`) and pass the prepared sequence in:
+
+```swift
+struct FilteredListView: View {
+    let filteredValues: [Int]
+
+    var body: some View {
+        List {
+            ForEach(filteredValues, id: \.self) { value in
+                Text(String(value))
+                    .padding()
+            }
+        }
+    }
+}
+```
+
+The reason this matters is that the system can call `body` multiple times during a single layout phase. Complex body computation makes those calls more expensive than necessary.
+
+General guidance:
+
+- avoid filtering, sorting, and mapping inline in `body`
+- avoid constructing expensive formatters in `body`
+- avoid heavy branching in large view trees
+- move data preparation into the model layer or dedicated helpers; do not filter in `init`
+
+## Keep View `init` Cheap
+
+A view's `init` runs every time the parent re-evaluates its body, which can be many times per second for views inside `List`, `LazyVStack`, scroll containers, or animated parents. Treat `init` as a constant-time copy of inputs into stored properties. Don't decode JSON, build a `DateFormatter`, touch the file system, or allocate large structures there — that work repeats on every parent body pass even when the inputs are identical.
+
+```swift
+// AVOID: decoding and formatting on every init
+init(rawJSON: Data, date: Date) {
+    self.summary = try! JSONDecoder().decode(WeatherSummary.self, from: rawJSON)
+    let formatter = DateFormatter()
+    formatter.dateStyle = .medium
+    self.formattedDate = formatter.string(from: date)
+}
+
+// PREFER: take already-prepared values; format lazily in body
+let summary: WeatherSummary
+let date: Date
+
+var body: some View {
+    VStack {
+        Text(summary.headline)
+        Text(date, format: .dateTime.day().month().year())  // cached, locale-aware
+    }
+}
+```
+
+If a derived value genuinely needs to be computed once and kept, store it on an `@State`-owned `@Observable` model or compute it asynchronously in `.task` — not in `init`. `init` is not a one-time setup hook; it runs as often as the parent's body does.
+
+## Single-Child Group
+
+`Group { SomeView() }` — a `Group` with exactly one concrete child — wraps the view in an extra `Group<SomeView>` type for no visual benefit. Every modifier chained after it must be type-checked against that wrapper, adding avoidable type-checking overhead in long chains. Drop the `Group` and chain modifiers directly on the child.
+
+```swift
+// AVOID: single concrete child wrapped in Group
+Group { Text(status) }
+    .padding(.horizontal, 8)
+    .background(.thinMaterial, in: Capsule())
+
+// PREFER: chain directly on the child
+Text(status)
+    .padding(.horizontal, 8)
+    .background(.thinMaterial, in: Capsule())
+```
+
+The rule is specifically about one concrete view. A `Group` whose content is a `ForEach`, multiple sibling views, or an `if`/`else` (which produces `_ConditionalContent`) is doing real work — applying a shared modifier across siblings or both branches — and is fine.
 
 ## When to Extract Subviews
 
@@ -167,6 +352,7 @@ Extract complex views into separate subviews when:
 - The view body becomes difficult to read or understand
 - You need to isolate state changes for performance
 - The view is becoming large (keep views small for better performance)
+- The section may evolve independently over time
 
 ## Container View Pattern
 
@@ -213,6 +399,33 @@ MyContainer {
     ExpensiveView()
 }
 ```
+
+## Utilize Lazy Containers for Large Data Sets
+
+When displaying extensive lists or grids, prefer `LazyVStack`, `LazyHStack`, `LazyVGrid`, or `LazyHGrid`. These containers load views only when they appear on the screen, reducing memory usage and improving performance.
+
+```swift
+struct ContentView: View {
+    let items = Array(0..<1000)
+
+    var body: some View {
+        ScrollView {
+            LazyVStack {
+                ForEach(items, id: \.self) { item in
+                    Text("Item \(item)")
+                }
+            }
+        }
+    }
+}
+```
+
+Prefer lazy containers when:
+
+- rendering large collections
+- row views are non-trivial
+- memory usage matters
+- the content is inside `ScrollView`
 
 ## ZStack vs overlay/background
 
@@ -269,6 +482,87 @@ Color.red
 ```
 
 `.compositingGroup()` forces all child layers to be rendered into a single offscreen buffer before the clip is applied. This means antialiasing only happens once — on the final composited result — eliminating the fringe artifacts.
+
+## Split State-Driven Parts into Custom View Types
+
+Large views often depend on multiple independent state sources. If a single view body depends on all of them, then any state change can cause the entire body to re-evaluate.
+
+```swift
+struct BigAndComplicatedView: View {
+    @State private var counter = 0
+    @State private var isToggled = false
+    @StateObject private var viewModel = SomeViewModel()
+
+    let title = "Big and Complicated View"
+
+    var body: some View {
+        VStack {
+            Text(title)
+                .font(.largeTitle)
+
+            Text("Counter: \(counter)")
+                .font(.title)
+
+            Toggle("Enable Feature", isOn: $isToggled)
+                .padding()
+
+            Button("Increment Counter") {
+                counter += 1
+            }
+
+            Text("ViewModel Data: \(viewModel.data)")
+                .padding()
+
+            Button("Fetch Data") {
+                viewModel.fetchData()
+            }
+        }
+    }
+}
+```
+
+### Better: Split Into Smaller Components
+
+```swift
+struct BigAndComplicatedView: View {
+    @State private var counter = 0
+    @State private var isToggled = false
+    @StateObject private var viewModel = SomeViewModel()
+
+    var body: some View {
+        VStack {
+            titleView
+            CounterView(counter: $counter)
+            ToggleView(isToggled: $isToggled)
+            ViewModelDataView(data: viewModel.data) {
+                viewModel.updateData()
+            }
+            .equatable()
+        }
+    }
+
+    private var titleView: some View {
+        Text("Big and Complicated View")
+            .font(.largeTitle)
+    }
+}
+```
+
+Why this is better:
+
+- changing `counter` only affects `CounterView`
+- toggling only affects `ToggleView`
+- updating the model data only affects `ViewModelDataView`
+
+### Notes on Equatable
+
+Using `Equatable` for a view is not a universal best practice, but it can be useful in targeted cases where:
+
+- the input is small and well-defined
+- the comparison logic is meaningful
+- you want to reduce unnecessary body evaluation for a specific subtree
+
+Do not use `Equatable` as a blanket optimization technique.
 
 ## Reusable Styling with ViewModifier
 
@@ -344,6 +638,36 @@ VStack(alignment: .leading) {
 
 Apply `.redacted` on a container to redact all children at once.
 
+## AnyView
+
+`AnyView` is type erasure. SwiftUI uses structural identity based on type information to determine when views should be updated.
+
+```swift
+private var nameView: some View {
+    if isEditable {
+        TextField("Your name", text: $name)
+    } else {
+        Text(name)
+    }
+}
+```
+
+Avoid patterns like:
+
+```swift
+private var nameView: some View {
+    if isEditable {
+        return AnyView(TextField("Your name", text: $name))
+    } else {
+        return AnyView(Text(name))
+    }
+}
+```
+
+Because `AnyView` erases type information, SwiftUI loses some optimization opportunities. Prefer `@ViewBuilder` or conditional branches with concrete view types.
+
+Use `AnyView` only when type erasure is truly necessary for API design.
+
 ## UIViewRepresentable Essentials
 
 When bridging UIKit views into SwiftUI:
@@ -373,17 +697,98 @@ struct MapView: UIViewRepresentable {
 }
 ```
 
+## Troubleshooting
+
+### Debug SwiftUI Renderings
+
+> See `references/performance-patterns.md` (item #8) for the `_printChanges()` vs `_logChanges()` comparison and the `@self`/`@identity` output meaning. The snippets below show the call sites.
+
+If it is needed to debug render cycles and read console output you can leverage the `_printChanges()` or `_logChanges()` methods on `View`. These methods print information about when the view is being evaluated and what changes are triggering updates. This can be very helpful when your view body is called multiple times and you want to know why.
+
+```swift
+struct ContentView: View {
+    @State private var counter: Int = 99
+
+    init() {
+        print(Self.self, #function)
+    }
+
+    var body: some View {
+        let _ = Self._printChanges()
+
+        VStack {
+            Text("Counter: \(counter)")
+            Button {
+                counter += 1
+            } label: {
+                Text("Counter +1")
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+    }
+}
+```
+
+As an alternative to `Self._printChanges()`, you can use `_logChanges()`
+
+```swift
+struct ContentView: View {
+    @State private var counter: Int = 99
+
+    var body: some View {
+        let _ = Self._logChanges()
+
+        VStack {
+            Text("Counter: \(counter)")
+            Button {
+                counter += 1
+            } label: {
+                Text("Counter +1")
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+    }
+}
+```
+
+Use these tools only for debugging and remove them from production code.
+
+### Handling "The Compiler Is Unable to Type-Check This Expression in Reasonable Time"
+
+If you encounter:
+
+> The compiler is unable to type-check this expression in reasonable time; try breaking up the expression into distinct sub-expressions
+
+it is often caused by overly complex view structures or expressions.
+
+Ways to fix it:
+
+- break large expressions into smaller computed values
+- extract subviews
+- split long modifier chains
+- simplify nested generics and builders
+- avoid huge inline closures
+
 ## Summary Checklist
 
-- [ ] Prefer modifiers over conditional views for state changes
-- [ ] Avoid `if`-based conditional modifier extensions (they break view identity)
-- [ ] Complex views extracted to separate subviews
-- [ ] Views kept small for better performance
-- [ ] `@ViewBuilder` functions only for simple sections
+- [ ] Extract complex views into separate subviews, not computed properties
+- [ ] Keep views small for readability and performance
+- [ ] Use `@ViewBuilder` only where it actually adds value
+- [ ] Avoid heavy filtering, mapping, sorting, or formatter creation inside `body` or `init`
+- [ ] Keep view `init` cheap (constant-time input copy; it runs on every parent body pass)
+- [ ] Resolve SDK 27 `@ContentBuilder` ambiguity with the matching narrow fix
+- [ ] Avoid single-child `Group { OneView() }` (chain modifiers directly on the child)
+- [ ] Use lazy containers for large data sets
 - [ ] Container views use `@ViewBuilder let content: Content`
-- [ ] Extract views when they have multiple responsibilities or become hard to read
-- [ ] Reusable styling extracted into `ViewModifier` or `ButtonStyle`
-- [ ] Custom styles exposed via static member lookup for discoverability
-- [ ] Use `.redacted(reason: .placeholder)` for skeleton loading states
-- [ ] `.compositingGroup()` before `.clipShape()` on layered views (overlay/background) to avoid antialiasing fringes
-- [ ] UIViewRepresentable: heavy work in make/update, not in struct init
+- [ ] Prefer `overlay` / `background` for decoration and `ZStack` for peer composition
+- [ ] `.compositingGroup()` before `.clipShape()` on layered views to avoid antialiasing fringes
+- [ ] Split state-heavy areas into smaller view types
+- [ ] Extract repeated styling into `ViewModifier` or `ButtonStyle`
+- [ ] Expose reusable styles via static member lookup when it improves discoverability
+- [ ] Use `.redacted(reason: .placeholder)` for loading skeletons
+- [ ] Avoid `AnyView` unless type erasure is truly needed
+- [ ] In `UIViewRepresentable`, keep heavy work out of struct init
+- [ ] Use `_printChanges()` / `_logChanges()` to debug rendering behavior
+- [ ] Break up overly complex expressions when the compiler struggles

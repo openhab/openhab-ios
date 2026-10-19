@@ -1,6 +1,19 @@
 # Linting & Concurrency
 
-Guidance for handling lint rules and compiler warnings related to Swift Concurrency.
+Use this when:
+
+- SwiftLint flags `async_without_await` or other concurrency-related warnings.
+- You need to decide whether to suppress, fix, or reconfigure a concurrency lint rule.
+
+Skip this file if:
+
+- The issue is a compiler diagnostic, not a lint rule. Use `actors.md`, `sendable.md`, or `threading.md`.
+
+Jump to:
+
+- SwiftLint Concurrency Rules Overview
+- `async_without_await` Rule
+- Suppression Strategies
 
 ## SwiftLint Concurrency Rules Overview
 

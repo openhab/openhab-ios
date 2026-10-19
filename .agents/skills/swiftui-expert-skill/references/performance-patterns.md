@@ -232,7 +232,7 @@ struct ItemRow: View {
 }
 ```
 
-**Avoid storing frequently-changing values in the environment.** Even when a view doesn't read the changed key, SwiftUI still checks all environment readers. This cost adds up with many views and frequent updates (geometry values, timers).
+For rapidly changing environment values, stable defaults, and closure comparison pitfalls, consult `references/environment-patterns.md`. Moving a raw value into `@Observable` is not enough by itself; readers need a coarsened or per-item property that changes less often.
 
 > Source: "Optimize SwiftUI performance with Instruments" (WWDC25, session 306)
 
