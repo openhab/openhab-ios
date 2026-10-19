@@ -19,12 +19,18 @@ public struct OpenHABUIPage: Sendable {
     public let icon: String
     public let order: Int
     public let url: String
+    /// `role:<role>` and `user:<name>` entries the page is limited to. Empty for a page everyone sees.
+    public let visibleTo: [String]
 
-    public init(uid: String, label: String, icon: String, order: Int, url: String) {
+    /// What Main UI sorts a page by when it has no `order`.
+    public static let defaultOrder = 1000
+
+    public init(uid: String, label: String, icon: String, order: Int, url: String, visibleTo: [String] = []) {
         self.uid = uid
         self.label = label
         self.icon = icon
         self.order = order
         self.url = url
+        self.visibleTo = visibleTo
     }
 }

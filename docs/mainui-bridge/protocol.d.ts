@@ -58,11 +58,13 @@ type HostFeature =
   | 'navbar' // the app draws the top bar; Main UI hides its own and sends navbar.state
   | 'menu' // the app shows the sidebar in its own menu; Main UI hides its sidebar and sends menu.state
   | 'routeRestore' // the app keeps nav.changed history and passes it back as initialHistory
+  | 'auth' // the app wants to know who is signed in; Main UI sends auth.state
 
 type UIFeature =
   | 'navbar'
   | 'menu'
   | 'routeRestore'
+  | 'auth'
   | 'layout'
 
 // ---------------------------------------------------------------------------
@@ -107,6 +109,7 @@ type WebToHost =
   | Envelope<'nav.changed', NavState>
   | Envelope<'navbar.state', NavbarState>
   | Envelope<'menu.state', MenuState>
+  | Envelope<'auth.state', AuthState>
   | Envelope<'auth.getCredentials', {}> // request → Reply<Credentials | null>
   | Reply
 
@@ -186,6 +189,14 @@ interface NavbarAction {
   label: string
   icon?: Icon
   disabled?: boolean
+}
+
+/**
+ * Who is signed in. Sent after ui.hello and whenever it changes.
+ */
+interface AuthState {
+  user: { name: string; roles: string[] } | null
+  noAuth?: boolean // the server has no sign-in, so everybody may do everything
 }
 
 /**

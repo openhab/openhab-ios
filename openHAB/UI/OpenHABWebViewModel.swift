@@ -37,6 +37,7 @@ class OpenHABWebViewModel: ObservableObject {
     private var uiTestNavbarInjected = false
     /// The same for the sidebar menu.
     private var uiTestMenuInjected = false
+    private var uiTestAuthInjected = false
     #endif
 
     /// True once the Main UI SPA has established its SSE connection.
@@ -46,6 +47,9 @@ class OpenHABWebViewModel: ObservableObject {
     /// Main UI's sidebar, as sent over the bridge. Nil until the first `menu.state`; kept across
     /// reloads of the same home so the menu doesn't empty while a page loads.
     @Published private(set) var menu: OHBridgeMenuState?
+    /// Who is signed in to Main UI, as sent over the bridge. Nil until the first `auth.state`, and
+    /// kept across reloads of the same home, so the menu keeps what it showed while a page loads.
+    @Published private(set) var auth: OHBridgeAuthState?
     /// True while the web view holds a tile's URL. Its content outlives the surface that
     /// loaded it, so a sitemap detour does not put the Main UI back.
     @Published private(set) var isShowingTile = false
@@ -65,6 +69,8 @@ class OpenHABWebViewModel: ObservableObject {
     private var basePath = ""
     /// The last `menu.state` from each web view, so switching homes shows that home's menu.
     private var menus: [ObjectIdentifier: OHBridgeMenuState] = [:]
+    /// The last `auth.state` from each web view, for the same reason.
+    private var auths: [ObjectIdentifier: OHBridgeAuthState] = [:]
 
     // MARK: - Private state
 
@@ -404,6 +410,7 @@ class OpenHABWebViewModel: ObservableObject {
             let evicted = viewAccessOrder.removeFirst()
             if let evictedView = views.removeValue(forKey: evicted) {
                 menus[ObjectIdentifier(evictedView)] = nil
+                auths[ObjectIdentifier(evictedView)] = nil
             }
             Logger.viewController.info("Evicted webview cache entry for id:\(evicted.uuidString)")
         }
@@ -532,6 +539,12 @@ class OpenHABWebViewModel: ObservableObject {
         navbar = state
     }
 
+    /// Stands in for an `auth.state` from the page.
+    func setUITestAuth(_ state: OHBridgeAuthState) {
+        uiTestAuthInjected = true
+        auth = state
+    }
+
     /// Stands in for a `menu.state` from the page.
     func setUITestMenu(_ state: OHBridgeMenuState) {
         uiTestMenuInjected = true
@@ -613,9 +626,14 @@ extension OpenHABWebViewModel {
     /// Shows the menu `webView` last sent, now that it is the one on screen.
     func showMenu(of webView: WKWebView) {
         #if DEBUG
+        if !uiTestAuthInjected {
+            auth = auths[ObjectIdentifier(webView)]
+        }
         if uiTestMenuInjected {
             return
         }
+        #else
+        auth = auths[ObjectIdentifier(webView)]
         #endif
         menu = menus[ObjectIdentifier(webView)]
     }
@@ -668,6 +686,14 @@ extension OpenHABWebViewModel {
             #endif
             menus[ObjectIdentifier(webView)] = state
             menu = state
+        case let .authState(state):
+            #if DEBUG
+            if uiTestAuthInjected {
+                return
+            }
+            #endif
+            auths[ObjectIdentifier(webView)] = state
+            auth = state
         }
     }
 

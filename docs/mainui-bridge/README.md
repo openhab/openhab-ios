@@ -48,7 +48,7 @@ and cloud. Moving between pages inside Main UI doesn't reload the page.
 
 1. The page starts loading. The app clears its top bar and menu and shows its loading screen.
 2. Before any page script runs, the app adds `OHBridge` with `info`, for example
-   `features: ['navbar', 'menu', 'routeRestore']`.
+   `features: ['navbar', 'menu', 'routeRestore', 'auth']`.
 3. The first thing Main UI's code does is set `OHBridge.onmessage`. Until Main UI can navigate,
    it answers the app with `not_ready`.
 4. Main UI starts from `info`. It decides then what to hand over to the app, so its first
@@ -111,6 +111,8 @@ doesn't know.
   out of the way.
 - `menu`: the app shows Main UI's sidebar in its own menu. Main UI hides its sidebar and sends
   `menu.state`.
+- `auth`: the app builds its own menu and needs to know who is signed in. Main UI sends
+  `auth.state`.
 - `routeRestore`: the app remembers where the user was and passes it back in `initialHistory`.
   Main UI only puts the pages back when it starts on its front page with nothing after the
   path. Coming back from its login (`/?code=…&state=…`) it leaves the address alone, or the
@@ -125,6 +127,7 @@ doesn't know.
 | `nav.changed` | `path`, `history`, `props?`, `modal` | Sent after every page change. The app keeps `history` to put the user back later, and knows when a popup is open. |
 | `navbar.state` | `title`, `titleInContent`, `hidden`, `back`, `leading`, `trailing` | Everything the app needs to draw the page's top bar. Sent again whenever it changes. `hidden` means the bar should be out of sight: the page scrolled it away, or a popup or an open search covers it. |
 | `menu.state` | `sections` | What Main UI's sidebar shows this user, for the app's menu. Sent again whenever it changes. |
+| `auth.state` | `user`, `noAuth` | Who is signed in: `user` is `{ name, roles }`, or null when nobody is. `noAuth` is true when the server has no sign-in. Sent after `ui.hello` and whenever it changes. The app uses it to show Administration and the pages limited by `visibleTo`. |
 | `auth.getCredentials` | — | Asks the app for the user name and password of a proxy in front of openHAB. Sent only when Main UI's first call to the server is refused (401). The app answers with `{ username, password }`, or `null` if it has none. Main UI keeps them in memory only. |
 | `reply` | `ok`, `result` or `error` | The answer to a message from the app. |
 
@@ -171,7 +174,7 @@ OHBridge.info = {
   protocol: 1,
   platform: 'ios',
   appVersion: '3.4.31',
-  features: ['navbar', 'menu', 'routeRestore'],
+  features: ['navbar', 'menu', 'routeRestore', 'auth'],
   initialHistory: ['/', '/page/overview', '/page/kitchen'],
   layout: { insets: { top: 0, bottom: 34 }, navbarHeight: 44 }
 }
@@ -182,8 +185,8 @@ Main UI starts on the Kitchen page, with Overview behind it, and reports back:
 ```json
 { "v": 1, "type": "ui.hello", "payload": {
     "protocol": 1, "impl": "mainui", "version": "5.1.0",
-    "accepted": ["navbar", "menu", "routeRestore"],
-    "features": ["navbar", "menu", "routeRestore", "layout"] } }
+    "accepted": ["navbar", "menu", "routeRestore", "auth"],
+    "features": ["navbar", "menu", "routeRestore", "auth", "layout"] } }
 
 { "v": 1, "type": "nav.changed", "payload": {
     "path": "/page/kitchen",

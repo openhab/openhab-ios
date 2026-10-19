@@ -224,6 +224,37 @@ struct OHBridgeNavbarAction: Decodable, Equatable, Identifiable {
     }
 }
 
+/// Who is signed in to Main UI, as the page reports it in `auth.state`.
+struct OHBridgeAuthState: Decodable, Equatable {
+    /// Nil while nobody is signed in.
+    let user: OHBridgeUser?
+    /// True when the server has no sign-in, so everybody may do everything.
+    let noAuth: Bool?
+}
+
+struct OHBridgeUser: Decodable, Equatable {
+    static let administratorRole = "administrator"
+
+    let name: String
+    let roles: [String]
+
+    private enum CodingKeys: String, CodingKey { case name, roles }
+
+    init(name: String, roles: [String]) {
+        self.name = name
+        self.roles = roles
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        roles = try container.decodeIfPresent([String].self, forKey: .roles) ?? []
+    }
+}
+
+/// The sidebar types below, and the shim reading it, are not used by the iOS app: it builds its menu
+/// itself (see `MainUIMenu`) and works without that part of the shim. All it still takes from the
+/// page is `auth.state`.
 struct OHBridgeMenuState: Decodable, Equatable {
     let sections: [OHBridgeMenuSection]
 }

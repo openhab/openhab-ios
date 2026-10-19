@@ -119,9 +119,8 @@ struct ToolbarMenu: View {
 
     @Binding var isPresented: Bool
     var menuData: MenuDataService
-    /// Main UI's sidebar, sent over the bridge. Until the first one arrives the Main UI section
-    /// lists pages from the REST API instead.
-    var webMenu: OHBridgeMenuState?
+    /// Who is signed in to Main UI, sent over the bridge. Nil until a page has said.
+    var webAuth: OHBridgeAuthState?
     @State private var scrollViewContentSize: Double = 0
     // Section expansion is stored per home in `HomePreferences`. These `@State`
     // flags mirror the active home for immediate UI updates and are loaded from
@@ -142,17 +141,12 @@ struct ToolbarMenu: View {
     @State private var sitemapForWatch: String?
     @State private var sitemapForCarPlay: String?
     @State private var cachedHomePrefs: HomePreferences?
-    /// Sidebar entries whose submenu is open, and those showing their whole submenu.
-    @State private var expandedWebItems: Set<String> = []
-    @State private var webItemsShowingAll: Set<String> = []
     /// The surface `OpenHABRootView` currently shows. The single source of truth for which
     /// row (if any) is highlighted as current — read directly rather than mirrored into local
     /// `@State`, so navigation that bypasses this menu entirely (a push-notification deep
     /// link, a home switch) is reflected here too instead of leaving a stale highlight.
     var currentContent: TargetController
     var onSelect: (TargetController) -> Void
-    /// A sidebar entry without a path was tapped.
-    var onActivateWebMenuItem: (String) -> Void = { _ in }
     var onReload: (() -> Void)?
 
     /// The sitemap row (if any) to highlight as current, derived from `currentContent`.
@@ -360,6 +354,7 @@ extension ToolbarMenu {
            Preferences.getNotificationConnection(of: prefs) != nil {
             systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
         }
+        mainUIEntryRow(MainUIMenu.aboutEntry)
     }
 
     @ViewBuilder
@@ -404,7 +399,7 @@ extension ToolbarMenu {
     private func mainUIMenu() -> some View {
         // Hidden until the current home has had at least one successful fetch —
         // consistent with how sitemaps/pages behave during the loading state.
-        if menuData.hasSuccessfullyLoaded || webMenu != nil {
+        if menuData.hasSuccessfullyLoaded {
             let homeRoute = Self.mainUIHomeRoute
             menuRow(
                 icon: AnyView(Image("openHABIcon").resizable()),
@@ -415,14 +410,10 @@ extension ToolbarMenu {
             }
             .background(currentRowBackground(currentMainUIRoute == homeRoute))
         }
-        if let webMenu {
-            ForEach(webMenu.mainUISections) { section in
-                webMenuSection(section)
-            }
-        } else if menuData.isLoading, menuData.uiPages.isEmpty {
+        if menuData.isLoading, menuData.uiPages.isEmpty {
             loadingRow(label: String(localized: "Pages"))
         } else {
-            ForEach(menuData.uiPages, id: \.uid) { page in
+            ForEach(MainUIMenu.pinnedPages(menuData.uiPages, access: access), id: \.uid) { page in
                 let route = "/page/\(page.uid)"
                 menuRow(
                     icon: AnyView(pageIcon(for: page)),
@@ -433,97 +424,74 @@ extension ToolbarMenu {
                 .background(currentRowBackground(currentMainUIRoute == route))
             }
         }
+        if let chat = MainUIMenu.chatEntry(server: menuData.server) {
+            mainUIEntryRow(chat)
+        }
     }
 
-    // MARK: - Main UI sidebar
+    // MARK: - Administration
 
+    /// What the user can do in Main UI. Nil until the server's endpoints are known.
+    private var access: MainUIAccess? {
+        MainUIAccess(server: menuData.server, auth: webAuth)
+    }
+
+    private func mainUIEntryRow(_ entry: MainUIMenuEntry, footer: String? = nil, accessibilityId: String? = nil) -> some View {
+        menuDetailRow(
+            icon: AnyView(Image(systemSymbol: entry.symbol).resizable().scaledToFit()),
+            title: entry.label,
+            detail: footer ?? "",
+            accessibilityId: accessibilityId ?? "MainUIEntry-\(entry.id)"
+        )
+        .background(currentRowBackground(currentMainUIRoute == entry.path))
+        .onTapGesture { select(.mainUIPage(entry.path)) }
+    }
+
+    /// What Administration lists: the entries for an administrator, then the signed-in user's
+    /// account. Nothing while it is locked.
     @ViewBuilder
-    private func webMenuSection(_ section: OHBridgeMenuSection) -> some View {
-        if let title = section.title, !title.isEmpty {
-            Text(title)
-                .font(.caption2)
-                .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-                .padding(.horizontal, 16)
-                .padding(.top, 10)
-                .padding(.bottom, 2)
-        }
-        ForEach(section.items) { item in
-            webMenuItem(item, depth: 0)
-        }
-    }
-
-    /// The admin entries and the user's account, or none while it is locked.
     private func administrationMenu() -> some View {
-        ForEach(webMenu?.administrationItems ?? []) { item in
-            webMenuItem(item, depth: 0)
+        if let access, let server = menuData.server {
+            if access.isAdministrator {
+                ForEach(MainUIMenu.administrationEntries(server: server)) { entry in
+                    mainUIEntryRow(entry)
+                }
+            }
+            if case let .signedIn(user) = access {
+                mainUIEntryRow(
+                    MainUIMenuEntry(
+                        id: "account",
+                        label: user.name,
+                        symbol: .personCropCircle,
+                        path: MainUIMenu.profileRoute
+                    ),
+                    footer: MainActorNetworkTracker.shared.activeConnection?.configuration.url
+                )
+            }
         }
     }
 
-    /// Shown once Main UI has sent its sidebar: with the entries when signed in, as a lock that
-    /// signs in when not. Locked or not, the saved open/closed state is left alone.
+    /// Shown once the server is known: with the entries when signed in, as a lock that signs in
+    /// when not. Locked or not, the saved open/closed state is left alone.
     @ViewBuilder
     private func administrationSection(isLast: Bool) -> some View {
-        let isLocked = webMenu?.isAdministrationLocked ?? false
-        let hasEntries = webMenu?.administrationItems.isEmpty == false
-        let unlock: (() -> Void)? = isLocked ? { unlockAdministration() } : nil
-        let title = webMenu?.administrationTitle ?? String(localized: "Administration")
+        let isLocked = access == .signedOut
         collapsibleSection(
-            title: "\(title)",
+            title: "Administration",
             isExpanded: expansionBinding($isAdministrationExpanded) { prefs, v in prefs.setSection(.administration, expanded: v) },
-            isEmpty: !isLocked && !hasEntries,
+            isEmpty: access == nil,
             showDivider: !isLast,
-            accessibilityId: "WebMenuSection-\(OHBridgeMenuState.administrationSectionID)",
-            onUnlock: unlock
+            accessibilityId: "AdministrationSection",
+            onUnlock: isLocked ? { unlockAdministration() } : nil
         ) {
             administrationMenu()
         }
     }
 
-    /// Asks Main UI to sign the user in. It does so on its own page, so the menu makes room.
+    /// Opens the profile in Main UI, which signs the user in if nobody is. It does so on its own
+    /// page, so the menu makes room. Somebody who signed in on an earlier visit is let straight in.
     private func unlockAdministration() {
-        isPresented = false
-        onActivateWebMenuItem(OHBridgeMenuState.unlockItemID)
-    }
-
-    /// One sidebar entry.
-    private func webMenuItem(_ item: OHBridgeMenuItem, depth: Int) -> some View {
-        Button {
-            activateWebMenuItem(item)
-        } label: {
-            HStack(spacing: 10) {
-                OHBridgeIconView(icon: item.icon, size: iconWidth)
-                    .foregroundStyle(item.active == true ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(item.label)
-                        .fontWeight(item.active == true ? .semibold : .regular)
-                        .lineLimit(1)
-                    if let footer = item.footer, !footer.isEmpty {
-                        Text(footer)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(.leading, 16 + CGFloat(depth) * 20)
-            .padding(.trailing, 16)
-            .padding(.vertical, 10)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier("WebMenu-\(item.id)")
-    }
-
-    private func activateWebMenuItem(_ item: OHBridgeMenuItem) {
-        if let path = item.path {
-            select(.mainUIPage(path))
-        } else {
-            isPresented = false
-            onActivateWebMenuItem(item.id)
-        }
+        select(.mainUIPage(MainUIMenu.profileRoute))
     }
 
     private func homesMenu() -> some View {
