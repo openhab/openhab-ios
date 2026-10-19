@@ -6,6 +6,12 @@
       "sourceType": "github",
       "computedHash": "fb91a851df4a0aabcb8eb8f9b3af98aa2fda5775c0f2ebc9aa61e8206e37d6ef"
     },
+    "swift-testing-expert": {
+      "source": "AvdLee/Swift-Testing-Agent-Skill",
+      "sourceType": "github",
+      "skillPath": "swift-testing-expert/SKILL.md",
+      "computedHash": "ee2a73c7148264cb7e0a0819d3063225541e57162353d97707d9fab830d27ba6"
+    },
     "swiftui-expert-skill": {
       "source": "AvdLee/SwiftUI-Agent-Skill",
       "sourceType": "github",
