@@ -19,6 +19,8 @@
 
 Liquid Glass is Apple's new design language introduced in iOS 26. It provides translucent, dynamic surfaces that respond to content and user interaction. This reference covers the native SwiftUI APIs for implementing Liquid Glass effects.
 
+**Only adopt Liquid Glass when explicitly requested by the user.** Do not proactively convert existing UI to glass effects.
+
 ## Availability
 
 All Liquid Glass APIs require iOS 26 or later. Always provide fallbacks:
@@ -38,7 +40,7 @@ if #available(iOS 26, *) {
 The primary modifier for applying glass effects to views:
 
 ```swift
-.glassEffect(_ style: GlassEffectStyle = .regular, in shape: some Shape = .rect)
+.glassEffect(_ glass: Glass = .regular, in shape: some Shape = DefaultGlassEffectShape())
 ```
 
 #### Basic Usage
@@ -46,7 +48,7 @@ The primary modifier for applying glass effects to views:
 ```swift
 Text("Hello")
     .padding()
-    .glassEffect()  // Default regular style, rect shape
+    .glassEffect()  // Default regular style, capsule shape
 ```
 
 #### With Shape
@@ -66,14 +68,19 @@ Text("Capsule")
     .glassEffect(in: .capsule)
 ```
 
-### GlassEffectStyle
+### Glass
 
-#### Prominence Levels
+#### Available Styles
+
+The `Glass` type exposes three static values — there is no `.prominent`:
 
 ```swift
-.glassEffect(.regular)     // Standard glass appearance
-.glassEffect(.prominent)   // More visible, higher contrast
+.glassEffect(.regular)   // Standard glass appearance (most common)
+.glassEffect(.clear)     // Nearly invisible glass surface
+.glassEffect(.identity)  // No-op / pass-through glass
 ```
+
+To make a surface appear more prominent, increase the tint opacity instead of reaching for a non-existent `.prominent` property.
 
 #### Tinting
 
@@ -81,7 +88,7 @@ Add color tint to the glass:
 
 ```swift
 .glassEffect(.regular.tint(.blue))
-.glassEffect(.prominent.tint(.red.opacity(0.3)))
+.glassEffect(.regular.tint(.red.opacity(0.3)))
 ```
 
 #### Interactivity
@@ -192,6 +199,23 @@ struct MorphingExample: View {
 3. Wrap in `GlassEffectContainer`
 4. Apply animation to the container or parent
 
+### Unioning glass effects
+
+Use `glassEffectUnion(id:namespace:)` when related glass views should render as one union while remaining separate views in the hierarchy. The ID is optional; use the same ID and namespace for views that belong to the union.
+
+```swift
+@Namespace private var glassNamespace
+
+HStack {
+    ActionButton()
+        .glassEffectUnion(id: "actions", namespace: glassNamespace)
+    StatusView()
+        .glassEffectUnion(id: "actions", namespace: glassNamespace)
+}
+```
+
+`glassEffectUnion(id:namespace:)` is available on iOS 26+, macOS 26+, tvOS 26+, and watchOS 26+; it is unavailable on visionOS.
+
 ## Modifier Order
 
 **Critical**: Apply `glassEffect` after layout and visual modifiers:
@@ -296,8 +320,8 @@ struct GlassSegmentedControl: View {
         if #available(iOS 26, *) {
             GlassEffectContainer(spacing: 4) {
                 HStack(spacing: 4) {
-                    ForEach(options.indices, id: \.self) { index in
-                        Button(options[index]) {
+                    ForEach(Array(options.enumerated()), id: \.offset) { index, option in
+                        Button(option) {
                             withAnimation(.smooth) {
                                 selection = index
                             }
@@ -305,7 +329,9 @@ struct GlassSegmentedControl: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                         .glassEffect(
-                            selection == index ? .prominent.interactive() : .regular.interactive(),
+                            selection == index
+                                ? .regular.tint(.accentColor.opacity(0.4)).interactive()
+                                : .regular.interactive(),
                             in: .capsule
                         )
                         .glassEffectID(selection == index ? "selected" : "option\(index)", in: animation)
@@ -315,8 +341,8 @@ struct GlassSegmentedControl: View {
             }
         } else {
             Picker("Options", selection: $selection) {
-                ForEach(options.indices, id: \.self) { index in
-                    Text(options[index]).tag(index)
+                ForEach(Array(options.enumerated()), id: \.offset) { index, option in
+                    Text(option).tag(index)
                 }
             }
             .pickerStyle(.segmented)
@@ -351,12 +377,12 @@ if #available(iOS 26, *) {
 extension View {
     @ViewBuilder
     func glassEffectWithFallback(
-        _ style: GlassEffectStyle = .regular,
+        _ glass: Glass = .regular,
         in shape: some Shape = .rect,
         fallbackMaterial: Material = .ultraThinMaterial
     ) -> some View {
         if #available(iOS 26, *) {
-            self.glassEffect(style, in: shape)
+            self.glassEffect(glass, in: shape)
         } else {
             self.background(fallbackMaterial, in: shape)
         }
@@ -401,6 +427,7 @@ An automatic scroll edge effect blurs and fades content under system toolbars to
 - Apply glass before padding/frame modifiers
 - Nest `GlassEffectContainer` unnecessarily
 - Add custom darkening backgrounds behind toolbars (conflicts with scroll edge effect)
+- For toolbar grouping, customization, overflow, and minimization, see [toolbar-patterns.md](toolbar-patterns.md).
 
 ## Checklist
 
@@ -411,4 +438,4 @@ An automatic scroll edge effect blurs and fades content under system toolbars to
 - [ ] `glassEffectID` with `@Namespace` for morphing
 - [ ] Consistent shapes and spacing across feature
 - [ ] Container spacing matches layout spacing
-- [ ] Appropriate prominence levels used
+- [ ] Tint opacity used instead of non-existent `.prominent` for emphasis

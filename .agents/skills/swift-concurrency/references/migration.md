@@ -1,6 +1,26 @@
 # Migration to Swift 6 and Strict Concurrency
 
-A practical guide to migrating existing Swift codebases to Swift 6's strict concurrency model, including strategies, habits, tooling, and common patterns.
+Use this when:
+
+- You are moving an existing codebase toward Swift 6 or stricter concurrency checking.
+- Compiler diagnostics depend on language mode, default isolation, or upcoming features.
+- You need the smallest safe migration sequence instead of a full architectural rewrite.
+
+Skip this file if:
+
+- You already know the exact diagnostic and only need a local fix. Start from `actors.md`, `sendable.md`, or `threading.md`.
+- You are looking for debounce, stream composition, or FRP operator replacements. Use `async-algorithms.md`.
+
+Jump to:
+
+- Project Settings
+- Six Migration Habits
+- Step-by-Step Migration
+- Migration Tooling
+- Rewriting Closures to Async/Await
+- Migrating from Combine/RxSwift
+- Concurrency-Safe Notifications (iOS 26+)
+- Anti-Patterns
 
 ---
 
@@ -1055,6 +1075,14 @@ This is the "concurrency rabbit hole":
 > **Course Deep Dive**: This topic is covered in detail in [Lesson 12.11: Frequently Asked Questions (FAQ) around Swift 6 Migrations](https://www.swiftconcurrencycourse.com?utm_source=github&utm_medium=agent-skill&utm_campaign=lesson-reference)
 
 ---
+
+## Common Mistakes Agents Make
+
+- **Blanket `@MainActor`**: Do not slap `@MainActor` on everything to silence errors. Ask whether the code truly needs main-actor isolation.
+- **Mixing migration with unrelated refactors**: Focus solely on concurrency changes. Architectural improvements belong in separate PRs.
+- **Using `@unchecked Sendable` as a first response**: Prefer immutable value types or actors. Reserve escape hatches for documented, temporary exceptions.
+- **Giving pre-Swift 6.2 execution advice without checking the active feature set**: `nonisolated async` behavior depends on whether `NonisolatedNonsendingByDefault` is enabled.
+- **Using Approachable Concurrency without migrating feature-by-feature first**: Enable individual upcoming features before the full bundle to understand each change's impact.
 
 ## Summary
 

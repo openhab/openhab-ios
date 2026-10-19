@@ -1,6 +1,24 @@
 # AsyncAlgorithms Package
 
-Patterns for combining, transforming, and managing asynchronous sequences beyond standard library. Provides time-based operators, stream combination tools, and multi-consumer primitives for Swift Concurrency.
+Use this when:
+
+- You need time-based operators (debounce, throttle, timers).
+- You need to combine multiple async sequences (merge, combineLatest, zip).
+- You are migrating from Combine or RxSwift operators to Swift Concurrency equivalents.
+
+Skip this file if:
+
+- You need basic `AsyncStream` bridging for callbacks or delegates. Use `async-sequences.md`.
+- You are choosing between `Task`, `async let`, or task groups. Use `tasks.md`.
+
+Jump to:
+
+- Quick Start
+- Time-Based Operators
+- Combining Operators
+- Multi-Consumer Scenarios
+- Combine Migration Guide
+- Best Practices
 
 ---
 
@@ -801,6 +819,13 @@ final class FormValidator {
 - `async let`: One-time validation when all values available
 
 ---
+
+## Common Mistakes Agents Make
+
+- **Manual debounce with `Task.sleep`**: This creates multiple concurrent tasks and risks out-of-order results. Use the stream-based `debounce(for:)` operator from AsyncAlgorithms instead.
+- **Sharing `AsyncStream` across multiple consumers**: Values split unpredictably between consumers. Use `AsyncChannel` for multi-consumer scenarios with backpressure. Note: `AsyncChannel` is point-to-point, not broadcast like Combine's `.share()`.
+- **Looking for a `.flatMap` equivalent**: Use `TaskGroup` for fan-out; the semantics differ from Combine/Rx `flatMap`.
+- **Looking for `.receive(on:)` equivalent**: Use `@MainActor` or `Task` context for isolation instead.
 
 ## Best Practices
 
