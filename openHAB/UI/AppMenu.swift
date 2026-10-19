@@ -38,18 +38,17 @@ import UIKit
 /// What the menu needs from the root view. Set in the environment by `OpenHABRootView`.
 struct AppMenuConfiguration: Equatable {
     let menuData: MenuDataService
-    /// Main UI's sidebar as sent over the bridge.
-    let webMenu: OHBridgeMenuState?
+    /// Who is signed in to Main UI, as sent over the bridge.
+    let webAuth: OHBridgeAuthState?
     /// The surface the root view shows, for the menu's current-row highlight.
     let currentContent: TargetController
     let onSelect: (TargetController) -> Void
-    let onActivateWebMenuItem: (String) -> Void
     let onReload: () -> Void
 
     /// The closures are not compared: only what the menu shows decides whether it has changed.
     /// Comparing them would make every environment update look like a change.
     static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.menuData === rhs.menuData && lhs.webMenu == rhs.webMenu && lhs.currentContent == rhs.currentContent
+        lhs.menuData === rhs.menuData && lhs.webAuth == rhs.webAuth && lhs.currentContent == rhs.currentContent
     }
 }
 
@@ -81,10 +80,9 @@ struct AppMenuButton: View {
             ToolbarMenu(
                 isPresented: $isPresented,
                 menuData: configuration.menuData,
-                webMenu: configuration.webMenu,
+                webAuth: configuration.webAuth,
                 currentContent: configuration.currentContent,
                 onSelect: configuration.onSelect,
-                onActivateWebMenuItem: configuration.onActivateWebMenuItem,
                 onReload: configuration.onReload
             )
             .background(PopoverClosesOnOutsideTaps())
