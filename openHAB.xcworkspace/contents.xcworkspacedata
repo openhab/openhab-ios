@@ -17,6 +17,9 @@
       location = "container:"
       name = "Agents">
       <FileRef
+         location = "group:AGENTS.md">
+      </FileRef>
+      <FileRef
          location = "group:CLAUDE.md">
       </FileRef>
       <FileRef
