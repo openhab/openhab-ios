@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "app-intents": {
+      "source": "n0an/App-Intents-Agent-Skill",
+      "sourceType": "github",
+      "skillPath": "app-intents/SKILL.md",
+      "computedHash": "344eb99f9696a5d930dc8bfb52bc49df19300ddf1d97f24c0af1c9c286b4b259"
+    },
     "swift-concurrency": {
       "source": "AvdLee/Swift-Concurrency-Agent-Skill",
       "sourceType": "github",
