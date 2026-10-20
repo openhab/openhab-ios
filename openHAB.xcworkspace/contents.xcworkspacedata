@@ -13,4 +13,17 @@
    <FileRef
       location = "group:CommonUI">
    </FileRef>
+   <Group
+      location = "container:"
+      name = "Agents">
+      <FileRef
+         location = "group:CLAUDE.md">
+      </FileRef>
+      <FileRef
+         location = "group:skills-lock.json">
+      </FileRef>
+      <FileRef
+         location = "group:.agents">
+      </FileRef>
+   </Group>
 </Workspace>
