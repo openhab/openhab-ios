@@ -35,7 +35,7 @@ struct OpenHABShortcuts: AppShortcutsProvider {
                 "Set dimmer in \(.applicationName)",
                 "Set roller shutter in \(.applicationName)"
             ],
-            shortTitle: "Set Dimmer / Roller",
+            shortTitle: "Set Dimmer / Shutter",
             systemImageName: "slider.horizontal.3"
         )
         AppShortcut(
