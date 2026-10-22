@@ -8613,7 +8613,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Status eines Items erhalten"
+            "value" : "Item-Status erhalten"
           }
         },
         "en" : {
@@ -18164,7 +18164,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Datum & Uhrzeit setzen"
+            "value" : "Datum & Zeit setzen"
           }
         },
         "es" : {
