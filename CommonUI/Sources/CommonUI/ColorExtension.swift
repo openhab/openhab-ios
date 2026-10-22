@@ -40,9 +40,8 @@ public extension Color {
     }
 }
 
-// For algorithm see https://web.archive.org/web/20151024031939/http://www.zombieprototypes.com/?p=210
-// Algorithm see  http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
-// swiftlint:disable:next large_tuple
+/// For algorithm see https://web.archive.org/web/20151024031939/http://www.zombieprototypes.com/?p=210
+/// Algorithm see  http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
 func componentsForColorTemperature(temperature: Kelvin) -> (r: Double, g: Double, b: Double) {
     let k = temperature / 100
     let r = (k <= 66 ? 255 : (329.698727446 * pow(k - 60, -0.1332047592))).clamped(to: 0 ... 255.0) / 255

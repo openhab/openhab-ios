@@ -77,10 +77,10 @@
 	<string>openHAB needs access to your local network to connect with the openHAB server.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>openHAB needs access to your microphone.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>openHAB needs access for speech recognition.</string>
 	<key>NSPrincipalClass</key>
 	<string>$(PRODUCT_MODULE_NAME).ActivityTrackingApplication</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>openHAB needs access for speech recognition.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>OpenHABGetItemStateIntent</string>
@@ -91,21 +91,12 @@
 		<string>OpenHABSetStringValueIntent</string>
 		<string>OpenHABSetSwitchStateIntent</string>
 	</array>
-	<key>UIApplicationSupportsSecureRestorableState</key>
-	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<true/>
 		<key>UISceneConfigurations</key>
 		<dict>
-			<key>UIWindowSceneSessionRoleApplication</key>
-			<array>
-				<dict>
-					<key>UISceneConfigurationName</key>
-					<string>SwiftUI Configuration</string>
-				</dict>
-			</array>
 			<key>CPTemplateApplicationSceneSessionRoleApplication</key>
 			<array>
 				<dict>
@@ -115,8 +106,17 @@
 					<string>$(PRODUCT_MODULE_NAME).CarPlaySceneDelegate</string>
 				</dict>
 			</array>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>SwiftUI Configuration</string>
+				</dict>
+			</array>
 		</dict>
 	</dict>
+	<key>UIApplicationSupportsSecureRestorableState</key>
+	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
