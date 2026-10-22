@@ -21,7 +21,6 @@ final class SimpleMJPEGPlayer {
     private var delegate: SimpleMJPEGStreamDelegate?
 
     var onFrame: (@MainActor (UIImage) -> Void)?
-    var onFirstFrame: ((CGFloat) -> Void)?
     var onError: ((any Error) -> Void)?
 
     func play(url: URL) {
@@ -34,12 +33,9 @@ final class SimpleMJPEGPlayer {
 
         delegate = SimpleMJPEGStreamDelegate(
             connectionConfiguration: config,
-            onFrame: { [weak self] image, isFirst in
+            onFrame: { [weak self] image, _ in
                 guard let self else { return }
                 onFrame?(image)
-                if isFirst {
-                    onFirstFrame?(image.size.width / image.size.height)
-                }
             },
             onError: { [weak self] error in
                 guard let self else { return }
@@ -64,13 +60,9 @@ final class SimpleMJPEGPlayer {
     }
 
     func updateCallbacks(onFrame: (@MainActor (UIImage) -> Void)?,
-                         onFirstFrame: ((CGFloat) -> Void)?,
                          onError: ((any Error) -> Void)?) {
         if let onFrame {
             self.onFrame = onFrame
-        }
-        if let onFirstFrame {
-            self.onFirstFrame = onFirstFrame
         }
         if let onError {
             self.onError = onError
