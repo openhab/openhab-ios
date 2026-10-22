@@ -224,8 +224,82 @@ struct OHBridgeNavbarAction: Decodable, Equatable, Identifiable {
     }
 }
 
+/// Who is signed in to Main UI, as the page reports it in `auth.state`.
+struct OHBridgeAuthState: Decodable, Equatable {
+    /// Nil while nobody is signed in.
+    let user: OHBridgeUser?
+    /// True when the server has no sign-in, so everybody may do everything.
+    let noAuth: Bool?
+}
+
+struct OHBridgeUser: Decodable, Equatable {
+    static let administratorRole = "administrator"
+
+    let name: String
+    let roles: [String]
+
+    private enum CodingKeys: String, CodingKey { case name, roles }
+
+    init(name: String, roles: [String]) {
+        self.name = name
+        self.roles = roles
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        roles = try container.decodeIfPresent([String].self, forKey: .roles) ?? []
+    }
+}
+
+/// The sidebar types below, and the shim reading it, are not used by the iOS app: it builds its menu
+/// itself (see `MainUIMenu`) and works without that part of the shim. All it still takes from the
+/// page is `auth.state`.
 struct OHBridgeMenuState: Decodable, Equatable {
     let sections: [OHBridgeMenuSection]
+}
+
+extension OHBridgeMenuState {
+    /// The id the shim gives the sidebar's Administration section: the first path segment of its
+    /// entries.
+    static let administrationSectionID = "settings"
+    /// The id the shim gives the block with the user's account, or the entry that signs in.
+    static let accountSectionID = "account"
+    /// The entry that signs the user in. Present only while Administration is locked.
+    static let unlockItemID = "unlock"
+
+    /// The Administration section of the sidebar, once the user is signed in.
+    private var administrationSection: OHBridgeMenuSection? {
+        sections.first { $0.id == Self.administrationSectionID }
+    }
+
+    /// What Administration lists once the user is signed in: the admin entries, then the user's
+    /// account entry. None while it is locked.
+    var administrationItems: [OHBridgeMenuItem] {
+        let account = sections.first { $0.id == Self.accountSectionID }?.items ?? []
+        return ((administrationSection?.items ?? []) + account).filter { $0.id != Self.unlockItemID }
+    }
+
+    /// What to call Administration: its own title once signed in, until then the label of the
+    /// entry that signs in.
+    var administrationTitle: String? {
+        let title = administrationSection?.title ?? sections.lazy.flatMap(\.items).first { $0.id == Self.unlockItemID }?.label
+        return title?.isEmpty == false ? title : nil
+    }
+
+    var isAdministrationLocked: Bool {
+        sections.contains { $0.items.contains { $0.id == Self.unlockItemID } }
+    }
+
+    /// What the Main UI section lists. Administration has a section of its own, which takes the
+    /// admin entries and the user's account, and stands for the unlock entry.
+    var mainUISections: [OHBridgeMenuSection] {
+        sections.compactMap { section in
+            guard section.id != Self.administrationSectionID, section.id != Self.accountSectionID else { return nil }
+            let items = section.items.filter { $0.id != Self.unlockItemID }
+            return items.isEmpty ? nil : OHBridgeMenuSection(id: section.id, title: section.title, items: items)
+        }
+    }
 }
 
 struct OHBridgeMenuSection: Decodable, Equatable, Identifiable {

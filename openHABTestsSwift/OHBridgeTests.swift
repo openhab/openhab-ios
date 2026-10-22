@@ -57,6 +57,16 @@ struct OHBridgeTests {
         #expect(state.actions.first?.icon?.name == "f7:pencil")
     }
 
+    @Test("Reads auth.state, with no roles when the page sends none")
+    func readsAuthState() {
+        let json = #"{"v":1,"type":"auth.state","payload":{"user":{"name":"ann"},"noAuth":false}}"#
+        guard case let .authState(auth)? = events(for: json).first else {
+            Issue.record("expected an auth state")
+            return
+        }
+        #expect(auth.user == OHBridgeUser(name: "ann", roles: []))
+    }
+
     @Test("Reads menu.state with submenus")
     func readsMenuState() {
         let json = #"""
@@ -82,6 +92,28 @@ struct OHBridgeTests {
         let unlock = menu.sections[2].items[0]
         #expect(unlock.path == nil)
         #expect(unlock.icon?.svg == "<svg></svg>")
+    }
+
+    @Test("Administration is its own section, and stands for the unlock entry while locked")
+    func splitsAdministrationFromMainUI() throws {
+        let locked = try JSONDecoder().decode(OHBridgeMenuState.self, from: Data(#"""
+        {"sections":[
+          {"id":"pages","items":[{"id":"/page/kitchen","label":"Kitchen","path":"/page/kitchen"}]},
+          {"id":"account","items":[{"id":"unlock","label":"Unlock Administration"}]}]}
+        """#.utf8))
+        #expect(locked.isAdministrationLocked)
+        #expect(locked.administrationItems.isEmpty)
+        #expect(locked.mainUISections.map(\.id) == ["pages"])
+
+        let unlocked = try JSONDecoder().decode(OHBridgeMenuState.self, from: Data(#"""
+        {"sections":[
+          {"id":"pages","items":[{"id":"/page/kitchen","label":"Kitchen","path":"/page/kitchen"}]},
+          {"id":"settings","title":"Administration","items":[{"id":"/settings/","label":"Settings","path":"/settings/"}]},
+          {"id":"account","items":[{"id":"/account","label":"Account","path":"/account"}]}]}
+        """#.utf8))
+        #expect(!unlocked.isAdministrationLocked)
+        #expect(unlocked.administrationItems.map(\.label) == ["Settings", "Account"])
+        #expect(unlocked.mainUISections.map(\.id) == ["pages"])
     }
 
     @Test("Reads nav.changed with props")
@@ -175,7 +207,7 @@ struct OHBridgeTests {
         #expect(sources.count == 2)
         let bootstrap = sources.first ?? ""
         #expect(bootstrap.contains(#""initialHistory":["/","/page/a"]"#))
-        #expect(bootstrap.contains(#""features":["navbar","menu","routeRestore"]"#))
+        #expect(bootstrap.contains(#""features":["navbar","menu","routeRestore","auth"]"#))
         #expect(bootstrap.contains(#""platform":"ios""#))
         #expect(bootstrap.contains(#"basePath: "/cloud""#))
         #expect(bootstrap.contains("webkit.messageHandlers.OHBridge"))
@@ -348,6 +380,56 @@ struct OHBridgeTests {
         let navbar = try JSONDecoder().decode(OHBridgeNavbarState.self, from: Data(json.utf8))
         #expect(navbar.trailing.map(\.label) == ["", "Save"])
         #expect(navbar.trailing.first?.icon?.name == "f7:square_list")
+    }
+
+    private func latestAuth(of page: ShimPage) async throws -> OHBridgeAuthState {
+        let json = try await page.waitFor("JSON.stringify((__posted.filter(function (m) { return m.type === 'auth.state' }).pop() || {}).payload || null)")
+        return try JSONDecoder().decode(OHBridgeAuthState.self, from: Data(json.utf8))
+    }
+
+    @Test("Reports the user from Main UI's user store")
+    func shimAuthFromUserStore() async throws {
+        let page = ShimPage(info: "{ features: ['auth'] }")
+        page.load(ShimPage.sidebarHTML.replacingOccurrences(of: "</body>", with: """
+        <script>document.getElementById('app').__vue_app__ = { config: { globalProperties: { $pinia: { state: { value: {
+          user: { user: { name: 'ann', roles: ['user'] }, noAuth: false } } } } } } }</script></body>
+        """))
+        let auth = try await latestAuth(of: page)
+        #expect(auth.user == OHBridgeUser(name: "ann", roles: ["user"]))
+        #expect(auth.noAuth == false)
+    }
+
+    @Test("Reports nobody signed in from the user store")
+    func shimAuthSignedOut() async throws {
+        let page = ShimPage(info: "{ features: ['auth'] }")
+        page.load(ShimPage.sidebarHTML.replacingOccurrences(of: "</body>", with: """
+        <script>document.getElementById('app').__vue_app__ = { config: { globalProperties: { $pinia: { state: { value: {
+          user: { user: null, noAuth: false } } } } } } }</script></body>
+        """))
+        let auth = try await latestAuth(of: page)
+        #expect(auth.user == nil)
+    }
+
+    @Test("Without a user store, reads the user from the sidebar and takes the Settings entry for an administrator")
+    func shimAuthFromSidebar() async throws {
+        let page = ShimPage(info: "{ features: ['auth'] }")
+        page.load(ShimPage.sidebarHTML.replacingOccurrences(
+            of: #"<div class="page"><div class="page-content">"#,
+            with: #"<div class="page"><div class="account"><div class="list"><ul><li><a href="/profile/"><div class="item-title">ann</div></a></li></ul></div></div><div class="page-content">"#
+        ))
+        let auth = try await latestAuth(of: page)
+        #expect(auth.user == OHBridgeUser(name: "ann", roles: ["administrator"]))
+    }
+
+    @Test("Without a user store, a sign-in button in the sidebar means nobody is signed in")
+    func shimAuthSidebarLocked() async throws {
+        let page = ShimPage(info: "{ features: ['auth'] }")
+        page.load(ShimPage.sidebarHTML.replacingOccurrences(
+            of: #"<div class="page"><div class="page-content">"#,
+            with: #"<div class="page"><div class="account"><a class="button">Unlock</a></div><div class="page-content">"#
+        ))
+        let auth = try await latestAuth(of: page)
+        #expect(auth.user == nil)
     }
 
     /// Main UI's login comes back to the front page with the code in the address.

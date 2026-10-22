@@ -21,6 +21,7 @@ enum OHBridgeEvent {
     case navChanged(OHBridgeNavState)
     case navbarState(OHBridgeNavbarState)
     case menuState(OHBridgeMenuState)
+    case authState(OHBridgeAuthState)
 }
 
 /// The host end of the bridge to Main UI: installs it in a web view, checks and decodes what the
@@ -51,7 +52,7 @@ final class OHBridgeHost {
     nonisolated static let maxWait: TimeInterval = 30
 
     /// What the host offers to take over from Main UI.
-    nonisolated static let features = ["navbar", "menu", "routeRestore"]
+    nonisolated static let features = ["navbar", "menu", "routeRestore", "auth"]
 
     nonisolated static let shimScript: String = {
         guard let url = Bundle.main.url(forResource: "oh-bridge-shim", withExtension: "js"),
@@ -209,6 +210,8 @@ final class OHBridgeHost {
                 try onEvent?(.navbarState(decoder.decode(OHBridgeIncoming<OHBridgeNavbarState>.self, from: data).payload))
             case "menu.state":
                 try onEvent?(.menuState(decoder.decode(OHBridgeIncoming<OHBridgeMenuState>.self, from: data).payload))
+            case "auth.state":
+                try onEvent?(.authState(decoder.decode(OHBridgeIncoming<OHBridgeAuthState>.self, from: data).payload))
             case "auth.getCredentials":
                 guard let id = header.id else { return }
                 deliver(type: "reply", replyTo: id, payload: OHBridgeCredentialsReply(result: fromConnection ? credentials?() : nil))

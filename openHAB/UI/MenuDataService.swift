@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Foundation
 import Observation
 import OpenHABCore
 import os.log
@@ -22,6 +23,8 @@ class MenuDataService {
     var sitemaps: [OpenHABSitemap] = []
     var uiTiles: [OpenHABUiTile] = []
     var uiPages: [OpenHABUIPage] = []
+    /// What `GET /rest/` said about the server. Nil until it has, and again after a home switch.
+    var server: MainUIServer?
     /// Fetches running now. The connection stream, opening the menu and pull-to-refresh can
     /// each start one while another is still running.
     private(set) var fetchesInFlight = 0
@@ -36,6 +39,19 @@ class MenuDataService {
     /// Resets to `false` on every home switch so the "Home" MainUI entry is re-gated
     /// on each switch (consistent with sitemaps/pages behaviour).
     var hasSuccessfullyLoaded = false
+
+    #if DEBUG
+    /// Set by `injectForUITest`: what the test put in is not replaced by what a server says.
+    private var isUITestInjected = false
+
+    /// Stands in for what the server returns, so UI tests need no server.
+    func injectForUITest(server: MainUIServer, pages: [OpenHABUIPage]) {
+        isUITestInjected = true
+        self.server = server
+        uiPages = pages
+        hasSuccessfullyLoaded = true
+    }
+    #endif
 
     init(networkTracker: NetworkTracker = .shared) {
         // Observe connection changes via NetworkTracker.stateStream() —
@@ -78,6 +94,11 @@ class MenuDataService {
 
     /// Clears all data immediately (use for user-initiated refresh or explicit resets).
     func clearAll() {
+        #if DEBUG
+        if isUITestInjected {
+            return
+        }
+        #endif
         sitemaps = []
         uiTiles = []
         uiPages = []
@@ -89,7 +110,13 @@ class MenuDataService {
     /// re-evaluates asynchronously). The `init()` Combine subscription fires once the
     /// tracker reconnects to the new home and handles all fetching from there.
     func clearForHomeSwitch() {
+        #if DEBUG
+        if isUITestInjected {
+            return
+        }
+        #endif
         clearAll()
+        server = nil
         hasSuccessfullyLoaded = false
         isConnected = false
     }
@@ -122,6 +149,11 @@ class MenuDataService {
 
     func fetchData(activeConnection: ConnectionInfo?) async {
         guard let activeConnection else { return }
+        #if DEBUG
+        if isUITestInjected {
+            return
+        }
+        #endif
         await whileLoading {
             await fetchAll(from: activeConnection)
         }
@@ -137,6 +169,7 @@ class MenuDataService {
     private func fetchAll(from activeConnection: ConnectionInfo) async {
         do {
             let openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
+            await fetchServer(using: openAPIService)
             await fetchSitemaps(using: openAPIService)
             await fetchTiles(using: openAPIService)
             await fetchPages(using: openAPIService, rootUrl: activeConnection.configuration.url)
@@ -145,6 +178,15 @@ class MenuDataService {
         } catch {
             Logger.drawerView.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
             // Retain existing snapshot on connection-level failure.
+        }
+    }
+
+    private func fetchServer(using service: OpenAPIService) async {
+        do {
+            server = try await MainUIServer(service.getRoot())
+        } catch {
+            Logger.drawerView.error("Failed to fetch server properties: \(error.localizedDescription)")
+            // Retain the existing server on failure.
         }
     }
 
@@ -179,3 +221,40 @@ class MenuDataService {
         }
     }
 }
+
+#if DEBUG
+/// The `UITestServer` launch environment: `{"version":"5.0.0","endpoints":["items"],"pages":[{"uid":"kitchen","label":"Kitchen","visibleTo":["role:user"]}]}`.
+struct UITestServerFixture: Decodable {
+    struct Page: Decodable {
+        let uid: String
+        let label: String
+        let visibleTo: [String]?
+    }
+
+    let version: String?
+    let endpoints: [String]
+    let pages: [Page]?
+
+    init?(json: String) {
+        guard let fixture = try? JSONDecoder().decode(Self.self, from: Data(json.utf8)) else { return nil }
+        self = fixture
+    }
+
+    var server: MainUIServer {
+        MainUIServer(majorVersion: version.flatMap { Int($0.split(separator: ".").first ?? "") }, endpoints: Set(endpoints))
+    }
+
+    var menuPages: [OpenHABUIPage] {
+        (pages ?? []).enumerated().map { index, page in
+            OpenHABUIPage(
+                uid: page.uid,
+                label: page.label,
+                icon: "",
+                order: OpenHABUIPage.defaultOrder + index,
+                url: "/page/\(page.uid)",
+                visibleTo: page.visibleTo ?? []
+            )
+        }
+    }
+}
+#endif

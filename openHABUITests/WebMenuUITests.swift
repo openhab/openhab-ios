@@ -16,21 +16,32 @@ import XCTest
 /// A `menu.state` as Main UI's sidebar would send it. Labels are prefixed "UITest " to avoid
 /// collision with the demo server's own pages.
 private enum WebMenuFixture {
-    static let json = #"""
-    {"sections":[
-      {"id":"pages","items":[
-        {"id":"/page/uitest_kitchen","label":"UITest Kitchen","path":"/page/uitest_kitchen","icon":{"name":"f7:house"},"active":true}]},
+    private static let pages = #"""
+    {"id":"pages","items":[
+      {"id":"/page/uitest_kitchen","label":"UITest Kitchen","path":"/page/uitest_kitchen","icon":{"name":"f7:house"},"active":true}]}
+    """#
+
+    /// Signed in: Administration has its entries and the user's account, and the unlock entry is gone.
+    static let unlocked = """
+    {"sections":[\(pages),
       {"id":"settings","title":"UITest Administration","items":[
         {"id":"/settings/","label":"UITest Settings","path":"/settings/","icon":{"name":"f7:gear_alt_fill"},
          "children":[{"id":"/settings/things/","label":"UITest Things","path":"/settings/things/","icon":{"name":"f7:lightbulb"}}],
          "more":[{"id":"/settings/transformations/","label":"UITest Transformations","path":"/settings/transformations/"}]}]},
+      {"id":"account","items":[{"id":"/account","label":"UITest Account","path":"/account"}]}]}
+    """
+
+    /// Signed out: no admin entries, only the entry that signs in.
+    static let locked = """
+    {"sections":[\(pages),
       {"id":"account","items":[{"id":"unlock","label":"UITest Unlock","icon":{"name":"f7:lock_shield_fill"}}]}]}
-    """#
+    """
 }
 
 // MARK: - Test class
 
-/// The native menu's Main UI section is built from the sidebar Main UI sends over the bridge.
+/// The native menu's Main UI and Administration sections are built from the sidebar Main UI sends
+/// over the bridge.
 @MainActor
 final class WebMenuUITests: XCTestCase {
     private var app: XCUIApplication!
@@ -41,7 +52,6 @@ final class WebMenuUITests: XCTestCase {
         app = XCUIApplication()
         app.launchEnvironment["UITest"] = "1"
         app.launchEnvironment["UITestWebViewMode"] = "1"
-        app.launchEnvironment["UITestWebMenu"] = WebMenuFixture.json
     }
 
     override func tearDown() async throws {
@@ -51,7 +61,8 @@ final class WebMenuUITests: XCTestCase {
 
     // MARK: - Helpers
 
-    private func openMenu() {
+    private func openMenu(sidebar: String = WebMenuFixture.unlocked) {
+        app.launchEnvironment["UITestWebMenu"] = sidebar
         app.launch()
         let hamburger = app.buttons["HamburgerButton"]
         XCTAssertTrue(hamburger.waitForExistence(timeout: 8), "The menu button must be on screen")
@@ -85,9 +96,22 @@ final class WebMenuUITests: XCTestCase {
         openMenu()
         XCTAssertTrue(element("WebMenu-/page/uitest_kitchen").exists)
         XCTAssertTrue(element("WebMenuSection-settings").exists)
-        XCTAssertTrue(app.staticTexts["UITest Administration"].exists, "A section's title is its row")
-        XCTAssertTrue(element("WebMenu-unlock").exists, "An entry without a path still shows")
+        XCTAssertTrue(app.staticTexts["UITest Administration"].exists, "Administration is a section of its own, titled by Main UI")
         setAdministration(open: true)
+        XCTAssertTrue(element("WebMenu-/account").exists, "The user's account is listed in Administration")
+    }
+
+    func testLockedAdministrationShowsALockAndSignsIn() {
+        openMenu(sidebar: WebMenuFixture.locked)
+        XCTAssertTrue(element("WebMenu-/page/uitest_kitchen").exists)
+        XCTAssertTrue(app.staticTexts["UITest Unlock"].exists, "A locked Administration is titled by the unlock entry")
+        XCTAssertFalse(adminSettings.exists, "A locked Administration has no entries")
+        XCTAssertFalse(app.buttons["WebMenu-unlock"].exists, "The section header stands for the unlock entry")
+
+        // Tapping the header asks Main UI to sign in, which closes the menu, and never opens it.
+        element("WebMenuSection-settings").tap()
+        XCTAssertTrue(app.buttons["HamburgerButton"].waitForExistence(timeout: 4))
+        XCTAssertFalse(adminSettings.exists)
     }
 
     func testAdministrationIsRemembered() {

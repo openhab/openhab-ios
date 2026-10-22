@@ -29,7 +29,7 @@
   var info = bridge.info || {}
   var config = window.OHBridgeShimConfig || {}
   var BASE = config.basePath || ''
-  var SHIM_FEATURES = ['navbar', 'menu', 'routeRestore']
+  var SHIM_FEATURES = ['navbar', 'menu', 'routeRestore', 'auth']
   var accepted = (info.features || []).filter(function (f) {
     return SHIM_FEATURES.indexOf(f) >= 0
   })
@@ -551,6 +551,58 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Signed-in user
+  // ---------------------------------------------------------------------------
+
+  // Main UI keeps who is signed in in its user store (Pinia, id 'user': `user` and `noAuth`).
+  function userStoreState() {
+    try {
+      var root = document.querySelector('#app')
+      var app = root && root.__vue_app__
+      var pinia = app && app.config.globalProperties.$pinia
+      return (pinia && pinia.state.value.user) || null
+    } catch (e) {
+      return null
+    }
+  }
+
+  // Versions without a store the shim can find show it in the sidebar: a button that signs in while
+  // nobody is, the user's name once somebody is. The roles are not shown; an administrator is who
+  // has the Settings entry.
+  function userFromSidebar() {
+    var panel = document.querySelector('.panel-left')
+    var account = panel && panel.querySelector('.account')
+    if (!account) return undefined
+    if (account.querySelector('.button')) return null
+    var name = account.querySelector('.item-title')
+    if (!name || !name.textContent.trim()) return undefined
+    var isAdmin = !!panel.querySelector('a[href="/settings/"]')
+    return { name: name.textContent.trim(), roles: isAdmin ? ['administrator'] : [] }
+  }
+
+  function readAuth() {
+    var state = userStoreState()
+    if (state) {
+      var user = state.user
+      return { user: user ? { name: user.name, roles: user.roles || [] } : null, noAuth: !!state.noAuth }
+    }
+    var fromSidebar = userFromSidebar()
+    return fromSidebar === undefined ? null : { user: fromSidebar, noAuth: false }
+  }
+
+  var lastAuthJSON = null
+
+  function reportAuth() {
+    if (!wants('auth') || !helloSent) return
+    var auth = readAuth()
+    if (!auth) return
+    var json = JSON.stringify(auth)
+    if (json === lastAuthJSON) return
+    lastAuthJSON = json
+    send('auth.state', auth)
+  }
+
+  // ---------------------------------------------------------------------------
   // Route capture and restore
   // ---------------------------------------------------------------------------
 
@@ -939,6 +991,7 @@
       if (!active) return
       reportNavbar()
       reportMenu()
+      reportAuth()
     })
   }
 
@@ -962,6 +1015,7 @@
     reportNav()
     reportNavbar()
     reportMenu()
+    reportAuth()
     new MutationObserver(onMutation).observe(document.body || document.documentElement, {
       childList: true,
       subtree: true,

@@ -284,17 +284,9 @@ struct OpenHABRootView: View {
             ToolbarMenu(
                 isPresented: $menuPresented,
                 menuData: menuData,
-                webMenu: webViewModel.menu,
+                webAuth: webViewModel.auth,
                 currentContent: currentContent,
                 onSelect: { target in handleMenuSelection(target) },
-                onActivateWebMenuItem: { id in
-                    // It runs in Main UI, so Main UI has to be on screen, reloaded in place of a
-                    // tile if need be. The bridge holds the message until the page says hello.
-                    if !isMainUIShown || webViewModel.isShowingTile {
-                        showMainUI(path: nil, persistAsDefault: false)
-                    }
-                    webViewModel.bridge.activateMenuItem(id)
-                },
                 onReload: { reloadCurrentContent() }
             )
         }
@@ -355,9 +347,13 @@ struct OpenHABRootView: View {
                     ))
                 }
             }
-            if let json = env["UITestWebMenu"],
-               let menu = try? JSONDecoder().decode(OHBridgeMenuState.self, from: Data(json.utf8)) {
-                webViewModel.setUITestMenu(menu)
+            if let json = env["UITestWebAuth"],
+               let auth = try? JSONDecoder().decode(OHBridgeAuthState.self, from: Data(json.utf8)) {
+                webViewModel.setUITestAuth(auth)
+            }
+            if let json = env["UITestServer"],
+               let server = UITestServerFixture(json: json) {
+                menuData.injectForUITest(server: server.server, pages: server.menuPages)
             }
             #endif
             ImageDownloader.default.authenticationChallengeResponder = networkService
