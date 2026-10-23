@@ -1,0 +1,9 @@
+{
+  "id" : "d8e77f4c-0581-4a4c-8c73-5061b26ccb72",
+  "targets" : [
+    {
+      "id" : "6A429CEF-45C4-4BDB-A25A-6180BA4AED94",
+      "name" : "openHAB"
+    }
+  ]
+}

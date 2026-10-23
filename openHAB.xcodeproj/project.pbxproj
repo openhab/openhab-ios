@@ -192,7 +192,6 @@
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA4D4DB4233F9ACB00B37E37 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA817E79234BF39B00C91824 /* CHANGELOG.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		DA83C81D2F48AF7600CDACED /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Version.xcconfig; sourceTree = "<group>"; };
 		DA8B15512F3BB74B007753FD /* openHABWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABWatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -236,6 +235,7 @@
 				SnapshotHelper.swift,
 				ToastUITests.swift,
 				ToolbarMenuUITests.swift,
+				WebMenuUITests.swift,
 			);
 			target = 933D7F0322E7015000621A03 /* openHABUITests */;
 		};
@@ -450,7 +450,6 @@
 				DABB4CD22F45EFD100111AF3 /* openHABWatch.xctestplan */,
 				6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */,
 				DA4D4DB4233F9ACB00B37E37 /* README.md */,
-				DA4D4E0E2340A00200B37E37 /* Changes.md */,
 				DA817E79234BF39B00C91824 /* CHANGELOG.md */,
 				DACC0F7B2E883AC700B62043 /* AGENTS.md */,
 				2FD4E52B2F670BA500EBB340 /* openHAB */,

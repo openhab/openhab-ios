@@ -218,7 +218,7 @@ final class MainUILayoutUITests: XCTestCase {
         }
         if navbarItems {
             app.launchEnvironment["UITestWebViewNavbarItems"] =
-                #"[{"label":"Menu","jsAction":"document.querySelector('.hamburger,.menu-btn')?.click()"}]"#
+                #"[{"label":"Menu","id":"menu"}]"#
         }
         app.launch()
     }

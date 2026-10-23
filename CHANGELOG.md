@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [Version 3.4.34, Build 331] - 2026-10-23Z
+
+- MainUI Native Bridge (#1354)
+- String correction and localisation adjustment (#1370)
+- Upgrade to Xcode 27.1, fix warnings, remove unused files (#1366)
+- fix(menu): keep section headers at 44 pt and show Add Home while loading (#1362)
+- chore(lint): upgrade SwiftFormat to 0.63.1 and SwiftLint to 0.65.1 (#1363)
+- Menu section header height and Add home while only one is there (#1361)
+- Revert "fix(menu): make closed section headers easier to tap"
+- fix(menu): make closed section headers easier to tap
+
 ## [Version 3.4.33, Build 330] - 2026-10-11Z
 
 - chore(lint): fix SwiftLint warnings in WebRouteRestore.seed (#1357)

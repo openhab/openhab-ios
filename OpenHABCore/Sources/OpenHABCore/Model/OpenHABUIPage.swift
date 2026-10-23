@@ -14,17 +14,23 @@ import Foundation
 /// A UI page registered in the openHAB `ui:page` namespace.
 /// Only pages with `sidebar: true` in their config are shown in the navigation menu.
 public struct OpenHABUIPage: Sendable {
+    /// What Main UI sorts a page by when it has no `order`.
+    public static let defaultOrder = 1000
+
     public let uid: String
     public let label: String
     public let icon: String
     public let order: Int
     public let url: String
+    /// `role:<role>` and `user:<name>` entries the page is limited to. Empty for a page everyone sees.
+    public let visibleTo: [String]
 
-    public init(uid: String, label: String, icon: String, order: Int, url: String) {
+    public init(uid: String, label: String, icon: String, order: Int, url: String, visibleTo: [String] = []) {
         self.uid = uid
         self.label = label
         self.icon = icon
         self.order = order
         self.url = url
+        self.visibleTo = visibleTo
     }
 }

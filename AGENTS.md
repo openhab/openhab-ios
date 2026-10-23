@@ -1,12 +1,14 @@
 # openHAB iOS Development Guide
 
 ## Build/Test Commands
-- Build: `xcodebuild -workspace openHAB.xcworkspace -scheme openHAB`
-- Test all: `fastlane unittests` or `xcodebuild test -workspace openHAB.xcworkspace -scheme openHABTestsSwift -destination 'platform=iOS Simulator,name=iPhone 17 Pro'`
-- Single test: `xcodebuild test -workspace openHAB.xcworkspace -scheme openHABTestsSwift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:openHABTestsSwift/TestClassName/testMethodName`
-- If the exact simulator is unavailable, switch to an available iPhone simulator
+- Build (compile check): `xcodebuild -workspace openHAB.xcworkspace -scheme openHAB -destination 'generic/platform=iOS Simulator' build` — no specific simulator needed
+- Simulator for tests: pick an installed iPhone with one command, never by hand or by guessing model names:
+  `SIM=$(xcrun simctl list devices available -j | jq -r '[.devices | to_entries[] | select(.key | contains("iOS")) | .value[] | select(.name | startswith("iPhone"))] | (map(select(.state == "Booted")) + .)[0].udid')`
+- Test all: `fastlane unittests` or `xcodebuild test -workspace openHAB.xcworkspace -scheme openHABTestsSwift -destination "platform=iOS Simulator,id=$SIM"`
+- Single test: `xcodebuild test -workspace openHAB.xcworkspace -scheme openHABTestsSwift -destination "platform=iOS Simulator,id=$SIM" -only-testing:openHABTestsSwift/TestClassName/testMethodName`
+- Never search for, create, or download simulators or runtimes. If `$SIM` is empty or the destination fails, stop and report instead of retrying other devices
 - Beta build: `fastlane beta`
-- UI tests: `xcodebuild test -workspace openHAB.xcworkspace -scheme openHABUITests`
+- UI tests: `xcodebuild test -workspace openHAB.xcworkspace -scheme openHABUITests -destination "platform=iOS Simulator,id=$SIM"`
 
 ## Architecture
 - **Main app**: openHAB/ - SwiftUI iOS app targeting iOS 18+ (UIKit still present in some files, goal is full removal)
@@ -39,7 +41,7 @@
 
 ## Verification cycle
 
-After every set of code changes, run a full verification cycle before committing. See **[docs/SIMULATOR_VERIFICATION.md](docs/SIMULATOR_VERIFICATION.md)** for the step-by-step process and full MCP tool reference.
+After every set of code changes, run a full verification cycle before committing. This applies only to tasks where you edited code: reviews, explanations, and investigations are read-only — never build, test, or boot simulators for them. See **[docs/SIMULATOR_VERIFICATION.md](docs/SIMULATOR_VERIFICATION.md)** for the step-by-step process and full MCP tool reference.
 
 To replicate the MCP server setup, see **[docs/MCP_SETUP.md](docs/MCP_SETUP.md)**.
 
