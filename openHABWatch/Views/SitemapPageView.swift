@@ -54,24 +54,48 @@ private struct LinkedSitemapPageView: View {
 struct SitemapPageView: View {
     @ObservedObject var viewModel: UserData
     @EnvironmentObject var settings: AppSettings
+    @Environment(\.scenePhase) private var scenePhase
     @State var title = "Sitemap"
+    @State private var isVisible = false
     @State private var scrollPosition: String?
     var isRoot = true
 
     var body: some View {
         if isRoot {
             NavigationStack {
-                pageContent
+                followedPageContent
                     .navigationDestination(for: OpenHABPage.self) { linkedPage in
                         LinkedSitemapPageView(linkedPage: linkedPage)
                             .environmentObject(settings)
                     }
             }
         } else {
-            pageContent
-                .onAppear { viewModel.resumeLongPolling() }
-                .onDisappear { viewModel.stopLongPolling() }
+            followedPageContent
         }
+    }
+
+    /// Follows the server only while this page is on screen and the app is in the foreground.
+    private var followedPageContent: some View {
+        pageContent
+            .onAppear {
+                isVisible = true
+                viewModel.resumePageHandling()
+            }
+            .onDisappear {
+                isVisible = false
+                viewModel.pausePageHandling()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                guard isVisible else { return }
+                switch phase {
+                case .background:
+                    viewModel.pausePageHandling()
+                case .active:
+                    viewModel.resumePageHandling()
+                default:
+                    break
+                }
+            }
     }
 
     private var pageContent: some View {

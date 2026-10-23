@@ -44,6 +44,9 @@ final class UserData: ObservableObject {
     /// generation at creation time and only clears shared state when the generation still matches,
     /// preventing a completing old task from wiping out a newly started task for the same sitemap.
     private var taskGeneration = 0
+    /// Set while the page is off screen or the app is in the background. Page handling stays
+    /// stopped then, so only the visible page follows the server, and only in the foreground.
+    private var isPaused = false
 
     private var pageHandlingTask: Task<Void, Never>?
     private let sitemapEventStream = SitemapEventStream()
@@ -90,9 +93,9 @@ final class UserData: ObservableObject {
 
         setupNotificationObservers()
 
-        // Assign to pageHandlingTask so stopLongPolling() can cancel this setup task
+        // Assign to pageHandlingTask so pausePageHandling() can cancel this setup task
         // before it runs if the view disappears while it is still queued on the main actor
-        // (e.g. rapid navigation). Without this, stopLongPolling() finds pageHandlingTask == nil,
+        // (e.g. rapid navigation). Without this, pausePageHandling() finds pageHandlingTask == nil,
         // cancels nothing, and the task later starts an uncancellable long-poll that leaks the
         // UserData instance via a retain cycle.
         pageHandlingTask = Task { @MainActor [weak self] in
@@ -293,6 +296,10 @@ final class UserData: ObservableObject {
 
     func startPageHandling(sitemapName: String, pageId: String = "", force: Bool = false) {
         Logger.userData.debug("startPageHandling called - sitemap: \(sitemapName), pageId: \(pageId), force: \(force)")
+        guard !isPaused else {
+            Logger.userData.debug("Page handling is paused, starting when the page is visible again")
+            return
+        }
 
         // Handle concurrent loads based on force parameter
         if let task = pageHandlingTask, !task.isCancelled {
@@ -422,17 +429,20 @@ final class UserData: ObservableObject {
         }
     }
 
-    /// Restarts the long poll of a linked page after `stopLongPolling()` stopped it on disappear,
-    /// e.g. when a deeper page was pushed over it. Does nothing while page handling is running,
-    /// which includes the first appearance, or for the root page.
-    func resumeLongPolling() {
-        guard pageHandlingTask == nil, let linkedPageId else { return }
+    /// Follows the page again after `pausePageHandling()`, starting from a fresh snapshot of it.
+    /// Does nothing unless paused, which includes the page's first appearance.
+    func resumePageHandling() {
+        guard isPaused else { return }
+        isPaused = false
         let sitemapName = AppSettings.shared.sitemapForWatch
         guard !sitemapName.isEmpty else { return }
-        startPageHandling(sitemapName: sitemapName, pageId: linkedPageId, force: true)
+        startPageHandling(sitemapName: sitemapName, pageId: linkedPageId ?? "", force: true)
     }
 
-    func stopLongPolling() {
+    /// Stops following the page, including its event stream and pending reloads, while the page
+    /// is off screen, e.g. under a pushed page or another tab, or the app is in the background.
+    func pausePageHandling() {
+        isPaused = true
         pageHandlingTask?.cancel()
         pageHandlingTask = nil
         isPolling = false
@@ -549,7 +559,7 @@ final class UserData: ObservableObject {
 
     deinit {
         // pageHandlingTask strongly captures self, creating a retain cycle that keeps self alive
-        // until the task finishes. For linked-page instances the cycle is broken by stopLongPolling()
+        // until the task finishes. For linked-page instances the cycle is broken by pausePageHandling()
         // (called from .onDisappear), which cancels the task and nils pageHandlingTask; by the time
         // deinit runs, the task has already completed and pageHandlingTask is nil. The cancel() call
         // here is therefore a no-op in the normal path but harmless as a safety net.
