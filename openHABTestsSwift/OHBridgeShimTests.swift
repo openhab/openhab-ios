@@ -53,11 +53,33 @@ private final class ShimPage {
     </body></html>
     """
 
+    /// Framework7's router as far as the shim uses it. `/` only redirects. Closing a modal and going
+    /// back are recorded in `__closed` and `__back`.
+    static let fakeRouter = """
+    (function () {
+      function closer(kind) {
+        return { close: function (el) { el.classList.remove('modal-in'); (window.__closed = window.__closed || []).push(kind) } }
+      }
+      document.querySelector('.view-main').f7View = { router: {
+        history: ['/', '/overview/'],
+        propsHistory: [],
+        findMatchingRoute: function (url) {
+          return url === '/' ? { route: { path: '/', redirect: '/overview/' } } : { route: { path: url } }
+        },
+        back: function () { window.__back = true },
+        app: { popup: closer('popup'), sheet: closer('sheet'), popover: closer('popover'),
+               actions: closer('actions'), dialog: closer('dialog'), card: closer('card') }
+      } }
+      return ''
+    })()
+    """
+
     let webView: WKWebView
 
-    init(info: String = "{ features: ['navbar', 'menu'] }") {
+    /// `host` runs before the bridge, like the app's own scripts.
+    init(info: String = "{ features: ['navbar', 'menu'] }", host: String = "") {
         let controller = WKUserContentController()
-        controller.addUserScript(WKUserScript(source: Self.stubBridge(info: info), injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        controller.addUserScript(WKUserScript(source: host + Self.stubBridge(info: info), injectionTime: .atDocumentStart, forMainFrameOnly: true))
         controller.addUserScript(WKUserScript(source: OHBridgeHost.shimScript, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         let configuration = WKWebViewConfiguration()
         configuration.userContentController = controller
@@ -78,6 +100,12 @@ private final class ShimPage {
 
     func load(_ html: String, at address: String = "https://openhab.example/") {
         webView.loadHTMLString(html, baseURL: URL(string: address))
+    }
+
+    /// Sends a command as the app would, and returns the shim's reply as JSON.
+    func command(_ type: String, id: String) async throws -> String {
+        _ = try await run("OHBridge.onmessage({ data: JSON.stringify({ v: 1, type: '\(type)', id: '\(id)', payload: {} }) }); ''")
+        return try await waitFor("JSON.stringify((__posted.filter(function (m) { return m.replyTo === '\(id)' }).pop() || {}).payload || null)")
     }
 
     /// Runs `js`, whose last expression must be a string.
@@ -228,6 +256,66 @@ struct OHBridgeShimTests {
         #expect(!navbar.titleInContent)
         let height = try await page.run("getComputedStyle(document.querySelector('.view-main')).getPropertyValue('--f7-navbar-height').trim()")
         #expect(height == "0px")
+    }
+
+    @Test("Keeps the app's own goFullscreen unless the app draws the bar", arguments: [
+        ("[]", "app"), ("['navbar']", "none")
+    ])
+    func shimGoFullscreen(features: String, expected: String) async throws {
+        let page = ShimPage(
+            info: "{ features: \(features) }",
+            host: "window.OHApp = { goFullscreen: function () { window.__full = 'app' } };"
+        )
+        page.load(ShimPage.navbarHTML)
+        _ = try await page.waitFor("window.__posted && document.getElementById('app') ? 'done' : 'null'")
+        let result = try await page.run("OHApp.goFullscreen(); window.__full || 'none'")
+        #expect(result == expected)
+    }
+
+    @Test("Leaves out the exit button on the md theme too")
+    func shimSkipsMdExitButton() async throws {
+        let page = ShimPage()
+        page.load(ShimPage.navbarHTML.replacingOccurrences(
+            of: "</div>\n        </div></div>",
+            with: #"<a class="link"><i class="icon material-icons">exit_to_app</i></a></div>\n        </div></div>"#
+        ))
+        let json = try await page.waitFor("JSON.stringify((__posted.filter(function (m) { return m.type === 'navbar.state' }).pop() || {}).payload || null)")
+        let navbar = try JSONDecoder().decode(OHBridgeNavbarState.self, from: Data(json.utf8))
+        #expect(navbar.trailing.count == 2)
+        #expect(navbar.trailing.allSatisfy { $0.icon?.name != "material:exit_to_app" })
+    }
+
+    @Test("Leaves redirects out of the history, and counts a dialog as open on top")
+    func shimHistoryAndModals() async throws {
+        let page = ShimPage()
+        page.load(ShimPage.navbarHTML)
+        _ = try await page.waitFor("__posted.some(function (m) { return m.type === 'ui.hello' }) ? 'done' : 'null'")
+        _ = try await page.run(ShimPage.fakeRouter)
+
+        let state = try await page.command("nav.getState", id: "g1")
+        #expect(state.contains(#""history":["/overview/"]"#))
+        #expect(state.contains(#""modal":false"#))
+
+        _ = try await page.run("document.body.insertAdjacentHTML('beforeend', '<div class=\"dialog modal-in\"></div>'); ''")
+        #expect(try await page.command("nav.getState", id: "g2").contains(#""modal":true"#))
+
+        _ = try await page.command("nav.back", id: "b1")
+        let closed = try await page.run("JSON.stringify({ closed: window.__closed || [], back: !!window.__back })")
+        #expect(closed == #"{"closed":["dialog"],"back":false}"#, "Back closes the dialog instead of going back")
+    }
+
+    @Test("Closing modals closes a popup opened by an address too")
+    func shimClosesModals() async throws {
+        let page = ShimPage()
+        page.load(ShimPage.navbarHTML)
+        _ = try await page.waitFor("__posted.some(function (m) { return m.type === 'ui.hello' }) ? 'done' : 'null'")
+        _ = try await page.run(ShimPage.fakeRouter)
+        _ = try await page.run("document.body.insertAdjacentHTML('beforeend', '<div class=\"popup modal-in\"></div><div class=\"sheet-modal modal-in\"></div>'); ''")
+
+        let reply = try await page.command("nav.closeModals", id: "c1")
+        #expect(reply.contains(#""ok":true"#))
+        let closed = try await page.run("JSON.stringify(window.__closed || [])")
+        #expect(closed == #"["popup","sheet"]"#)
     }
 
     @Test("An open popup keeps its own bar and moves the app's out of the way")

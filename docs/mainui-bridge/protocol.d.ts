@@ -25,8 +25,7 @@ interface OHBridgePort {
   onmessage: ((event: { data: string }) => void) | null
   /**
    * What Main UI needs before it draws anything. On Android, added with
-   * WebViewCompat.addDocumentStartJavaScript. Not yet tried on Android: if the listener's object
-   * can't take an extra property, this moves to its own global, window.OHBridgeInfo.
+   * WebViewCompat.addDocumentStartJavaScript.
    */
   readonly info: HostInfo
 }
@@ -157,7 +156,10 @@ interface NavState {
   history: string[]
   /** One per entry in history: the props it was opened with. See HostInfo.initialProps. */
   props?: PageProps[]
-  /** A popup, sheet or popover is open on top of the page, whether opened by an address or from code. */
+  /**
+   * Something is open on top of the page: a popup, sheet, popover, dialog, action sheet or
+   * expanded card, whether opened by an address or from code. nav.back closes it first.
+   */
   modal: boolean
 }
 
@@ -170,7 +172,7 @@ interface NavbarState {
   title: string
   /** The page is showing its own large title, so the app shouldn't show it again. */
   titleInContent: boolean
-  /** The bar should be out of sight: the page scrolled it away, or a popup or search covers it. */
+  /** The bar should be out of sight: the page scrolled it away, or a popup, expanded card or search covers it. */
   hidden: boolean
   /** null when there is nothing to go back to. */
   back: { label?: string } | null

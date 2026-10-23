@@ -37,9 +37,8 @@ The app puts an object called `OHBridge` on the page before any of the page's ow
   startup, where it reads `OHApp` today.
 - The app only listens to the page itself (not frames inside it), and only when the page comes
   from the server the app is connected to.
-- Android has not been tried yet. `addWebMessageListener` creates the `OHBridge` object, and
-  `addDocumentStartJavaScript` would add `info` to it. If that object can't take an extra
-  property, `info` moves to its own global, `window.OHBridgeInfo`.
+- On Android, `addWebMessageListener` creates the `OHBridge` object, and
+  `addDocumentStartJavaScript` adds `info` to it.
 
 ## What happens when a page loads
 
@@ -124,8 +123,8 @@ doesn't know.
 |---|---|---|
 | `ui.hello` | `impl`, `version?`, `accepted`, `features` | Sent once per page load, when the first page is on screen. Says whether this is Main UI (`mainui`), the shim (`shim`) or another page (`other`), and which of the app's offers Main UI took. |
 | `connection.state` | `sseConnected` | Main UI's live updates from the server connected or dropped. The app shows or hides its "connecting" indicator. |
-| `nav.changed` | `path`, `history`, `props?`, `modal` | Sent after every page change. The app keeps `history` to put the user back later, and knows when a popup is open. |
-| `navbar.state` | `title`, `titleInContent`, `hidden`, `back`, `leading`, `trailing` | Everything the app needs to draw the page's top bar. Sent again whenever it changes. `hidden` means the bar should be out of sight: the page scrolled it away, or a popup or an open search covers it. |
+| `nav.changed` | `path`, `history`, `props?`, `modal` | Sent after every page change, and when something opens or closes on top of the page. The app keeps `history` to put the user back later. `modal` is true while a popup, sheet, popover, dialog, action sheet or expanded card is open; back closes it first. |
+| `navbar.state` | `title`, `titleInContent`, `hidden`, `back`, `leading`, `trailing` | Everything the app needs to draw the page's top bar. Sent again whenever it changes. `hidden` means the bar should be out of sight: the page scrolled it away, or a popup, an expanded card or an open search covers it. |
 | `menu.state` | `sections` | What Main UI's sidebar shows this user, for the app's menu. Sent again whenever it changes. |
 | `auth.state` | `user`, `noAuth` | Who is signed in: `user` is `{ name, roles }`, or null when nobody is. `noAuth` is true when the server has no sign-in. Sent after `ui.hello` and whenever it changes. The app uses it to show Administration and the pages limited by `visibleTo`. |
 | `auth.getCredentials` | — | Asks the app for the user name and password of a proxy in front of openHAB. Sent only when Main UI's first call to the server is refused (401). The app answers with `{ username, password }`, or `null` if it has none. Main UI keeps them in memory only. |
