@@ -59,7 +59,7 @@ class AppMessageService: NSObject, WCSessionDelegate, @unchecked Sendable {
                     UUID(uuidString: key).map { ($0, value) }
                 })
                 let previousHomeIds = Set(AppSettings.shared.storedHomes.keys)
-                // Sink in AppSettings.init() persists to both UserDefaults suites.
+                // The storedHomes didSet persists to both UserDefaults suites.
                 AppSettings.shared.storedHomes = uuidKeyedHomes
                 if previousHomeIds != Set(uuidKeyedHomes.keys) {
                     Task {
