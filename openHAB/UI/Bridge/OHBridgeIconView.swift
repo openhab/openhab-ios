@@ -88,12 +88,12 @@ struct OHBridgeIconView: View {
                 .setProcessor(OpenHABImageProcessor())
                 .placeholder { fallbackImage }
                 .resizable()
-                .aspectRatio(contentMode: .fit)
+                .scaledToFit()
         } else if let svg = icon?.svg, let image = Self.image(fromSVG: svg) {
             Image(uiImage: image)
                 .renderingMode(.template)
                 .resizable()
-                .aspectRatio(contentMode: .fit)
+                .scaledToFit()
         } else {
             fallbackImage
         }
@@ -102,7 +102,7 @@ struct OHBridgeIconView: View {
     private var fallbackImage: some View {
         Image(systemSymbol: fallback)
             .resizable()
-            .aspectRatio(contentMode: .fit)
+            .scaledToFit()
     }
 
     /// `oh:` and bare names come from the server; `material:`, `iconify:` and any `f7:` name the

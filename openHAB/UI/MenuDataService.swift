@@ -14,6 +14,43 @@ import Observation
 import OpenHABCore
 import os.log
 
+#if DEBUG
+/// The `UITestServer` launch environment: `{"version":"5.0.0","endpoints":["items"],"pages":[{"uid":"kitchen","label":"Kitchen","visibleTo":["role:user"]}]}`.
+struct UITestServerFixture: Decodable {
+    struct Page: Decodable {
+        let uid: String
+        let label: String
+        let visibleTo: [String]?
+    }
+
+    let version: String?
+    let endpoints: [String]
+    let pages: [Page]?
+
+    var server: MainUIServer {
+        MainUIServer(majorVersion: version.flatMap { Int($0.split(separator: ".").first ?? "") }, endpoints: Set(endpoints))
+    }
+
+    var menuPages: [OpenHABUIPage] {
+        (pages ?? []).enumerated().map { index, page in
+            OpenHABUIPage(
+                uid: page.uid,
+                label: page.label,
+                icon: "",
+                order: OpenHABUIPage.defaultOrder + index,
+                url: "/page/\(page.uid)",
+                visibleTo: page.visibleTo ?? []
+            )
+        }
+    }
+
+    init?(json: String) {
+        guard let fixture = try? JSONDecoder().decode(Self.self, from: Data(json.utf8)) else { return nil }
+        self = fixture
+    }
+}
+#endif
+
 /// Provides menu data (sitemaps, tiles, pages) for the navigation menu.
 /// Extracted from DrawerView for testability and reuse.
 /// `@Observable` so an open menu re-renders as soon as a fetch completes.
@@ -44,13 +81,6 @@ class MenuDataService {
     /// Set by `injectForUITest`: what the test put in is not replaced by what a server says.
     private var isUITestInjected = false
 
-    /// Stands in for what the server returns, so UI tests need no server.
-    func injectForUITest(server: MainUIServer, pages: [OpenHABUIPage]) {
-        isUITestInjected = true
-        self.server = server
-        uiPages = pages
-        hasSuccessfullyLoaded = true
-    }
     #endif
 
     init(networkTracker: NetworkTracker = .shared) {
@@ -91,6 +121,18 @@ class MenuDataService {
         }
         return result
     }
+
+    #if DEBUG
+
+    /// Stands in for what the server returns, so UI tests need no server.
+    func injectForUITest(server: MainUIServer, pages: [OpenHABUIPage]) {
+        isUITestInjected = true
+        self.server = server
+        uiPages = pages
+        hasSuccessfullyLoaded = true
+    }
+
+    #endif
 
     /// Clears all data immediately (use for user-initiated refresh or explicit resets).
     func clearAll() {
@@ -221,40 +263,3 @@ class MenuDataService {
         }
     }
 }
-
-#if DEBUG
-/// The `UITestServer` launch environment: `{"version":"5.0.0","endpoints":["items"],"pages":[{"uid":"kitchen","label":"Kitchen","visibleTo":["role:user"]}]}`.
-struct UITestServerFixture: Decodable {
-    struct Page: Decodable {
-        let uid: String
-        let label: String
-        let visibleTo: [String]?
-    }
-
-    let version: String?
-    let endpoints: [String]
-    let pages: [Page]?
-
-    init?(json: String) {
-        guard let fixture = try? JSONDecoder().decode(Self.self, from: Data(json.utf8)) else { return nil }
-        self = fixture
-    }
-
-    var server: MainUIServer {
-        MainUIServer(majorVersion: version.flatMap { Int($0.split(separator: ".").first ?? "") }, endpoints: Set(endpoints))
-    }
-
-    var menuPages: [OpenHABUIPage] {
-        (pages ?? []).enumerated().map { index, page in
-            OpenHABUIPage(
-                uid: page.uid,
-                label: page.label,
-                icon: "",
-                order: OpenHABUIPage.defaultOrder + index,
-                url: "/page/\(page.uid)",
-                visibleTo: page.visibleTo ?? []
-            )
-        }
-    }
-}
-#endif

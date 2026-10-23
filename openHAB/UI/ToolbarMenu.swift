@@ -116,6 +116,8 @@ struct ToolbarMenu: View {
     private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
     /// Route sentinel for the MainUI home page, used to highlight the "Home" row.
     private static let mainUIHomeRoute = "/"
+    /// The tallest the menu grows before it scrolls.
+    private static let menuHeight: CGFloat = 480
 
     @Binding var isPresented: Bool
     var menuData: MenuDataService
@@ -148,18 +150,6 @@ struct ToolbarMenu: View {
     var currentContent: TargetController
     var onSelect: (TargetController) -> Void
     var onReload: (() -> Void)?
-    /// The tallest the menu grows before it scrolls.
-    private static let menuHeight: CGFloat = 480
-
-    /// The menu lives in a popover that stays open while a settings sheet shows, since closing it
-    /// would take down the sheet, which hangs off this view. So it reloads its entries and its
-    /// per-home state when the sheet goes away, in case the settings changed what it shows.
-    private func refreshAfterSettings() {
-        Task {
-            await menuData.reload()
-            await loadExpansionState()
-        }
-    }
 
     /// The sitemap row (if any) to highlight as current, derived from `currentContent`.
     private var currentSitemapName: String? {
@@ -222,6 +212,21 @@ struct ToolbarMenu: View {
 }
 
 extension ToolbarMenu {
+    /// What the user can do in Main UI. Nil until the server's endpoints are known.
+    private var access: MainUIAccess? {
+        MainUIAccess(server: menuData.server, auth: webAuth)
+    }
+
+    /// The menu lives in a popover that stays open while a settings sheet shows, since closing it
+    /// would take down the sheet, which hangs off this view. So it reloads its entries and its
+    /// per-home state when the sheet goes away, in case the settings changed what it shows.
+    private func refreshAfterSettings() {
+        Task {
+            await menuData.reload()
+            await loadExpansionState()
+        }
+    }
+
     /// Mirrors the active home's persisted section-expansion state into local `@State`.
     private func loadExpansionState() async {
         let prefs = await Preferences.shared.currentHomePreferences
@@ -402,11 +407,6 @@ extension ToolbarMenu {
     }
 
     // MARK: - Administration
-
-    /// What the user can do in Main UI. Nil until the server's endpoints are known.
-    private var access: MainUIAccess? {
-        MainUIAccess(server: menuData.server, auth: webAuth)
-    }
 
     private func mainUIEntryRow(_ entry: MainUIMenuEntry, footer: String? = nil, accessibilityId: String? = nil) -> some View {
         menuDetailRow(

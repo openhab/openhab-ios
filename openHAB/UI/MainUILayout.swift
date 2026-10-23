@@ -27,6 +27,8 @@ import SwiftUI
 /// way the right inset can reach Main UI (Framework7 derives its `--f7-safe-area-*` variables
 /// from it).
 struct MainUILayout: Equatable {
+    static let zero = MainUILayout(top: 0, bottom: 0, leading: 0, trailing: 0, navbarHeight: 0)
+
     var top: CGFloat
     var bottom: CGFloat
     var leading: CGFloat
@@ -34,7 +36,14 @@ struct MainUILayout: Equatable {
     /// Height of a top bar that the host draws *outside* the reported `top` inset.
     var navbarHeight: CGFloat
 
-    static let zero = MainUILayout(top: 0, bottom: 0, leading: 0, trailing: 0, navbarHeight: 0)
+    /// What the real bridge can carry today. `leading` and `trailing` are dropped until
+    /// `OHBridgeLayout.Insets` has them.
+    var bridgeLayout: OHBridgeLayout {
+        OHBridgeLayout(
+            insets: .init(top: top, bottom: bottom),
+            navbarHeight: navbarHeight
+        )
+    }
 
     /// Builds the layout from the safe area of the page container.
     ///
@@ -59,14 +68,5 @@ struct MainUILayout: Equatable {
         self.leading = leading
         self.trailing = trailing
         self.navbarHeight = navbarHeight
-    }
-
-    /// What the real bridge can carry today. `leading` and `trailing` are dropped until
-    /// `OHBridgeLayout.Insets` has them.
-    var bridgeLayout: OHBridgeLayout {
-        OHBridgeLayout(
-            insets: .init(top: top, bottom: bottom),
-            navbarHeight: navbarHeight
-        )
     }
 }
