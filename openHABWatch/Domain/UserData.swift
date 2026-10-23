@@ -40,6 +40,7 @@ final class UserData: ObservableObject {
 
     private var pageHandlingTask: Task<Void, Never>?
     private let sitemapEventStream = SitemapEventStream()
+    private var eventsDuringReload = SitemapEventReplayLog()
     private var networkObservationTask: Task<Void, Never>?
     // nonisolated(unsafe): accessed only from deinit, which is the last operation on the instance.
     private nonisolated(unsafe) var notificationObservers: [any NSObjectProtocol] = []
@@ -452,6 +453,7 @@ final class UserData: ObservableObject {
         // Check if the widget list structure changed (count, order, or IDs)
         let structureChanged = widgets.count != newWidgets.count
             || !zip(widgets, newWidgets).allSatisfy { $0.widgetId == $1.widgetId }
+        var visibilityChanged = false
 
         for newWidget in newWidgets {
             if let existingWidget = existingWidgetsMap[newWidget.widgetId] {
@@ -487,6 +489,7 @@ final class UserData: ObservableObject {
                 // parent reaches them.
                 existingWidget.widgets = newWidget.widgets.map { existingWidgetsMap[$0.widgetId] ?? $0 }
                 existingWidget.linkedPage = newWidget.linkedPage
+                visibilityChanged = visibilityChanged || existingWidget.visibility != newWidget.visibility
                 existingWidget.visibility = newWidget.visibility
                 existingWidget.staticIcon = newWidget.staticIcon
                 existingWidget.labelSource = newWidget.labelSource
@@ -516,6 +519,9 @@ final class UserData: ObservableObject {
         // ScrollView rebuild that resets the scroll position.
         if structureChanged {
             widgets = allWidgets
+        } else if visibilityChanged {
+            // Visibility isn't published: the page has to filter its widgets again.
+            objectWillChange.send()
         }
     }
 
@@ -550,6 +556,14 @@ private extension UserData {
         await sitemapEventStream.startMonitoringNetworkIfNeeded(initialConnection: connectionInfo)
         let stream = await sitemapEventStream.stream(sitemap: sitemapName, pageId: pageId)
         var hasConnected = false
+        var reloadTask: Task<Void, Never>?
+        defer { reloadTask?.cancel() }
+        // Reloads alongside the events, retrying until it succeeds, so a failed reload doesn't
+        // leave missed changes on screen. A newer reload replaces a pending one.
+        func reload() {
+            reloadTask?.cancel()
+            reloadTask = Task { await self.reloadPageUntilShown(sitemapName: sitemapName, pageId: pageId) }
+        }
 
         for await output in stream {
             switch output {
@@ -558,38 +572,47 @@ private extension UserData {
                 hasConnected = true
                 // Fetch the page again: it catches what changed before the subscription existed,
                 // or while the stream was down.
-                await reloadPage(sitemapName: sitemapName, pageId: pageId)
+                reload()
             case let .disconnected(error):
                 Logger.userData.warning("Sitemap events disconnected: \(error?.localizedDescription ?? "nil")")
                 guard SitemapUpdatePolicy.shouldFallBackToLongPolling(after: error, hasConnected: hasConnected) else { continue }
                 await sitemapEventStream.stop()
                 return false
             case let .event(message):
-                await handle(message, sitemapName: sitemapName, pageId: pageId)
+                if needsPageReload(after: message, sitemapName: sitemapName) {
+                    reload()
+                }
             }
         }
         return true
     }
 
-    func handle(_ message: SitemapEventMessage, sitemapName: String, pageId: String) async {
+    /// Handles a sitemap event. Returns whether the page has to be fetched again.
+    func needsPageReload(after message: SitemapEventMessage, sitemapName: String) -> Bool {
         switch message {
         case .alive:
-            return
+            return false
         case .sitemapChanged:
             Logger.userData.info("Sitemap \(sitemapName) changed, reloading page")
-            await reloadPage(sitemapName: sitemapName, pageId: pageId)
+            return true
         case let .widget(event):
-            guard apply(event) else { return }
+            guard apply(event) else { return false }
             Logger.userData.info("Widget \(event.widgetId ?? "") needs the page reloaded")
-            await reloadPage(sitemapName: sitemapName, pageId: pageId)
+            return true
         case let .unknown(raw):
             Logger.userData.debug("Unknown sitemap event: \(raw)")
+            return false
         }
     }
 
-    /// Applies a widget event to the widgets on screen. Returns whether the page has to be
-    /// fetched again.
+    /// Applies a widget event to the widgets on screen, and keeps it for reloads in flight.
+    /// Returns whether the page has to be fetched again.
     func apply(_ event: OpenHABSitemapWidgetEvent) -> Bool {
+        eventsDuringReload.record(event)
+        return applyToScreen(event)
+    }
+
+    func applyToScreen(_ event: OpenHABSitemapWidgetEvent) -> Bool {
         if let page = openHABSitemapPage, event.widgetId == page.pageId, let label = event.label {
             objectWillChange.send()
             page.title = label
@@ -603,17 +626,42 @@ private extension UserData {
         return SitemapUpdatePolicy.needsPageReload(after: result)
     }
 
-    /// Fetches the page again over whichever connection is active now, and shows it.
-    func reloadPage(sitemapName: String, pageId: String) async {
-        do {
-            guard let page = try await NetworkTracker.shared.pollDataForPage(sitemapname: sitemapName, pageId: pageId) else { return }
-            try Task.checkCancellation()
-            show(page)
-        } catch is CancellationError {
-            return
-        } catch {
-            Logger.userData.warning("Reloading page \(sitemapName)/\(pageId) failed: \(error.localizedDescription)")
+    /// Fetches the page again until it is shown or the task is cancelled.
+    func reloadPageUntilShown(sitemapName: String, pageId: String) async {
+        var failedAttempts = 0
+        while !Task.isCancelled {
+            guard await !reloadPage(sitemapName: sitemapName, pageId: pageId) else { return }
+            failedAttempts += 1
+            try? await Task.sleep(for: SitemapUpdatePolicy.reloadRetryDelay(afterFailedAttempts: failedAttempts))
         }
+    }
+
+    /// Fetches the page again over whichever connection is active now, and shows it with the
+    /// events that arrived meanwhile applied on top. Returns whether it was shown.
+    func reloadPage(sitemapName: String, pageId: String) async -> Bool {
+        let reload = eventsDuringReload.beginReload()
+        let page: OpenHABPage?
+        do {
+            page = try await NetworkTracker.shared.pollDataForPage(sitemapname: sitemapName, pageId: pageId)
+        } catch {
+            eventsDuringReload.endReload(reload)
+            if !(error is CancellationError) {
+                Logger.userData.warning("Reloading page \(sitemapName)/\(pageId) failed: \(error.localizedDescription)")
+            }
+            return false
+        }
+        let missedEvents = eventsDuringReload.endReload(reload)
+        guard !Task.isCancelled else { return false }
+        guard let page else {
+            Logger.userData.warning("Reloading page \(sitemapName)/\(pageId) returned no page")
+            return false
+        }
+        show(page)
+        // An event that needs another reload already asked for one when it first arrived.
+        for event in missedEvents {
+            _ = applyToScreen(event)
+        }
+        return true
     }
 
     func show(_ page: OpenHABPage) {

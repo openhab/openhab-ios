@@ -48,6 +48,13 @@ struct SitemapUpdatePolicyTests {
         #expect(SitemapUpdatePolicy.needsPageReload(after: result) == expected)
     }
 
+    @Test("Waits longer after each failed reload, up to 30 seconds", arguments: [
+        (1, 1), (2, 2), (3, 4), (5, 16), (6, 30), (20, 30)
+    ])
+    func reloadRetryDelay(failedAttempts: Int, seconds: Int) {
+        #expect(SitemapUpdatePolicy.reloadRetryDelay(afterFailedAttempts: failedAttempts) == .seconds(seconds))
+    }
+
     @Test("An event reaches a widget in a flat list through its frame")
     func appliesEventToFlatList() {
         let child = widget(id: "0000", state: "OFF")

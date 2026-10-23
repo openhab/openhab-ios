@@ -39,4 +39,10 @@ public enum SitemapUpdatePolicy {
         case .applied, .unchanged: false
         }
     }
+
+    /// How long to wait before fetching the page again after a failed reload: doubling from one
+    /// second, up to 30 seconds.
+    public static func reloadRetryDelay(afterFailedAttempts attempts: Int) -> Duration {
+        .seconds(min(1 << min(max(attempts - 1, 0), 5), 30))
+    }
 }
