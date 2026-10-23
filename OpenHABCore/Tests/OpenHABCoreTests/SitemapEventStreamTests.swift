@@ -13,6 +13,75 @@ import Foundation
 @testable import OpenHABCore
 import Testing
 
+private actor Messages {
+    private(set) var disconnections = 0
+
+    func append(_ message: StreamOutput<SitemapEventMessage>) {
+        if case .disconnected = message {
+            disconnections += 1
+        }
+    }
+}
+
+/// Holds each event request open until it is cancelled, then fails it the way LoggingMiddleware
+/// does: with an error that isn't a `CancellationError`.
+private actor WaitingEventsService: OpenAPIServiceProtocol {
+    struct Unused: Error {}
+
+    private(set) var requests = 0
+
+    func openHABcreateSubscription() -> String? {
+        "subscription"
+    }
+
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String, pageId: String)
+        async throws -> any AsyncSequence<SitemapEventMessage, any Error> & Sendable {
+        requests += 1
+        try? await Task.sleep(for: .seconds(60))
+        throw URLError(.badServerResponse)
+    }
+
+    func getRootVersion() throws -> Int {
+        throw Unused()
+    }
+
+    func getRoot() throws -> OpenHABServerProperties {
+        throw Unused()
+    }
+
+    func sendItemCommand(itemname: String, command: String, sourcePrefix: String?, deviceId: String?) throws {
+        throw Unused()
+    }
+
+    func updateItemState(itemname: String, with: String, sourcePrefix: String?, deviceId: String?) throws {
+        throw Unused()
+    }
+
+    func getItems() throws -> [OpenHABItem] {
+        throw Unused()
+    }
+
+    func getItems(query: Operations.getItems.Input.Query) throws -> [OpenHABItem] {
+        throw Unused()
+    }
+
+    func getItemByName(id: String) throws -> OpenHABItem? {
+        throw Unused()
+    }
+
+    func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) throws -> OpenHABPage? {
+        throw Unused()
+    }
+
+    func runNow(ruleUID: String, payload: [String: any Sendable]) throws {
+        throw Unused()
+    }
+
+    func openHABEvents(topics: String?) throws -> any AsyncSequence<OpenHABEvent, any Error> & Sendable {
+        throw Unused()
+    }
+}
+
 struct SitemapEventStreamTests {
     @Test("A network change reconnects the stream while someone reads it")
     func reconnectsWithConsumer() async throws {
@@ -40,6 +109,27 @@ struct SitemapEventStreamTests {
         await stream.updateConnection(connection("http://remote"))
 
         #expect(await !stream.isListening)
+    }
+
+    @Test("A replaced listener doesn't report its cancelled request as a disconnection")
+    func cancelledListenerStaysSilent() async throws {
+        let service = WaitingEventsService()
+        let stream = SitemapEventStream { _ in service }
+        await stream.updateConnection(connection("http://local"))
+        let messages = Messages()
+        let consumer = Task {
+            for await message in await stream.stream(sitemap: "home", pageId: "home") {
+                await messages.append(message)
+            }
+        }
+        defer { consumer.cancel() }
+        try await waitUntil { await service.requests == 1 }
+
+        await stream.updateConnection(connection("http://remote"))
+        try await waitUntil { await service.requests == 2 }
+        try await Task.sleep(for: .milliseconds(50))
+
+        #expect(await messages.disconnections == 0)
     }
 
     private func connection(_ url: String) -> ConnectionInfo {

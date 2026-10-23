@@ -194,6 +194,10 @@ public actor SitemapEventStream {
             } catch is CancellationError {
                 return
             } catch {
+                // A cancelled request can also end in another error, e.g. the empty 204 response
+                // LoggingMiddleware returns for it. A cancelled listener has been replaced or
+                // stopped, and must not report a disconnection.
+                guard !Task.isCancelled else { return }
                 broadcast(.disconnected(error))
                 Logger.restAPI.error("Sitemap SSE error: \(error.localizedDescription, privacy: .public) – retrying in \(backoff, privacy: .public)s")
                 try? await Task.sleep(for: .seconds(backoff))
