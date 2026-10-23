@@ -39,6 +39,7 @@ final class UserData: ObservableObject {
     private var taskGeneration = 0
 
     private var pageHandlingTask: Task<Void, Never>?
+    private let sitemapEventStream = SitemapEventStream()
     private var networkObservationTask: Task<Void, Never>?
     // nonisolated(unsafe): accessed only from deinit, which is the last operation on the instance.
     private nonisolated(unsafe) var notificationObservers: [any NSObjectProtocol] = []
@@ -338,12 +339,30 @@ final class UserData: ObservableObject {
                 }
 
                 Logger.userData.debug("Using connection: \(connectionInfo.configuration.url)")
-                Logger.userData.debug("Starting page stream for sitemap: \(taskSitemapName)")
+                let service = try OpenAPIService(
+                    connectionConfiguration: connectionInfo.configuration,
+                    serviceConfiguration: .longTerm
+                )
 
+                if SitemapUpdatePolicy.usesEvents(serverVersion: connectionInfo.version) {
+                    let page = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
+                    try Task.checkCancellation()
+                    isLoadingSitemap = false
+                    if let page {
+                        show(page)
+                    }
+                    let eventPageId = [page?.pageId, pageId].compactMap(\.self).first { !$0.isEmpty } ?? sitemapName
+                    guard await !followEvents(sitemapName: sitemapName, pageId: eventPageId, connectionInfo: connectionInfo) else {
+                        return
+                    }
+                    Logger.userData.info("Sitemap events unavailable for \(taskSitemapName), falling back to long polling")
+                }
+
+                Logger.userData.debug("Starting long polling for sitemap: \(taskSitemapName)")
                 for try await event in SitemapPageLoader.stream(
                     sitemapName: sitemapName,
                     pageId: pageId,
-                    connectionInfo: connectionInfo
+                    service: service
                 ) {
                     try Task.checkCancellation()
                     // Always clear loading state on the first event, even if the server
@@ -354,16 +373,7 @@ final class UserData: ObservableObject {
                     case let .longPoll(page, _): page
                     }
                     guard let page else { continue }
-                    // Only update page object when title changes to avoid
-                    // firing objectWillChange and resetting scroll position
-                    if openHABSitemapPage?.title != page.title {
-                        openHABSitemapPage = page
-                    }
-                    let newWidgets = page.widgets
-                    updateWidgets(with: newWidgets)
-                    if !newWidgets.isEmpty {
-                        cachedWidgets = newWidgets
-                    }
+                    show(page)
                 }
             } catch is CancellationError {
                 return
@@ -473,7 +483,9 @@ final class UserData: ObservableObject {
                 existingWidget.unit = newWidget.unit
                 existingWidget.switchSupport = newWidget.switchSupport
                 existingWidget.mappings = newWidget.mappings
-                existingWidget.widgets = newWidget.widgets
+                // Keep the widgets on screen as the children, so an event applied through the
+                // parent reaches them.
+                existingWidget.widgets = newWidget.widgets.map { existingWidgetsMap[$0.widgetId] ?? $0 }
                 existingWidget.linkedPage = newWidget.linkedPage
                 existingWidget.visibility = newWidget.visibility
                 existingWidget.staticIcon = newWidget.staticIcon
@@ -526,5 +538,93 @@ final class UserData: ObservableObject {
         pageHandlingTask?.cancel()
         networkObservationTask?.cancel()
         notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
+    }
+}
+
+// MARK: - Following the page
+
+private extension UserData {
+    /// Follows the page through the server's sitemap events until the task is cancelled. Returns
+    /// `false` when the events aren't available, so the caller falls back to long polling.
+    func followEvents(sitemapName: String, pageId: String, connectionInfo: ConnectionInfo) async -> Bool {
+        await sitemapEventStream.startMonitoringNetworkIfNeeded(initialConnection: connectionInfo)
+        let stream = await sitemapEventStream.stream(sitemap: sitemapName, pageId: pageId)
+        var hasConnected = false
+
+        for await output in stream {
+            switch output {
+            case .connected:
+                Logger.userData.debug("Sitemap events connected for \(sitemapName)/\(pageId)")
+                hasConnected = true
+                // Fetch the page again: it catches what changed before the subscription existed,
+                // or while the stream was down.
+                await reloadPage(sitemapName: sitemapName, pageId: pageId)
+            case let .disconnected(error):
+                Logger.userData.warning("Sitemap events disconnected: \(error?.localizedDescription ?? "nil")")
+                guard SitemapUpdatePolicy.shouldFallBackToLongPolling(after: error, hasConnected: hasConnected) else { continue }
+                await sitemapEventStream.stop()
+                return false
+            case let .event(message):
+                await handle(message, sitemapName: sitemapName, pageId: pageId)
+            }
+        }
+        return true
+    }
+
+    func handle(_ message: SitemapEventMessage, sitemapName: String, pageId: String) async {
+        switch message {
+        case .alive:
+            return
+        case .sitemapChanged:
+            Logger.userData.info("Sitemap \(sitemapName) changed, reloading page")
+            await reloadPage(sitemapName: sitemapName, pageId: pageId)
+        case let .widget(event):
+            guard apply(event) else { return }
+            Logger.userData.info("Widget \(event.widgetId ?? "") needs the page reloaded")
+            await reloadPage(sitemapName: sitemapName, pageId: pageId)
+        case let .unknown(raw):
+            Logger.userData.debug("Unknown sitemap event: \(raw)")
+        }
+    }
+
+    /// Applies a widget event to the widgets on screen. Returns whether the page has to be
+    /// fetched again.
+    func apply(_ event: OpenHABSitemapWidgetEvent) -> Bool {
+        if let page = openHABSitemapPage, event.widgetId == page.pageId, let label = event.label {
+            objectWillChange.send()
+            page.title = label
+            return false
+        }
+        let result = widgets.apply(event: event)
+        if result == .applied, event.visibility != nil {
+            // Visibility isn't published: the page has to filter its widgets again.
+            objectWillChange.send()
+        }
+        return SitemapUpdatePolicy.needsPageReload(after: result)
+    }
+
+    /// Fetches the page again over whichever connection is active now, and shows it.
+    func reloadPage(sitemapName: String, pageId: String) async {
+        do {
+            guard let page = try await NetworkTracker.shared.pollDataForPage(sitemapname: sitemapName, pageId: pageId) else { return }
+            try Task.checkCancellation()
+            show(page)
+        } catch is CancellationError {
+            return
+        } catch {
+            Logger.userData.warning("Reloading page \(sitemapName)/\(pageId) failed: \(error.localizedDescription)")
+        }
+    }
+
+    func show(_ page: OpenHABPage) {
+        // Only update page object when title changes to avoid
+        // firing objectWillChange and resetting scroll position
+        if openHABSitemapPage?.title != page.title {
+            openHABSitemapPage = page
+        }
+        updateWidgets(with: page.widgets)
+        if !page.widgets.isEmpty {
+            cachedWidgets = page.widgets
+        }
     }
 }

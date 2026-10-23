@@ -87,7 +87,7 @@ struct SitemapPageView: View {
             } else if !viewModel.widgets.isEmpty {
                 ScrollView {
                     VStack(spacing: 4) {
-                        ForEach(viewModel.widgets) { widget in
+                        ForEach(sitemapVisibleWidgets(viewModel.widgets)) { widget in
                             WidgetRowView(widget: widget)
                                 .id(widget.widgetId)
                         }

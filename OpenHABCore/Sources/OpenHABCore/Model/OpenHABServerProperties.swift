@@ -52,6 +52,6 @@ public extension OpenHABServerProperties {
     }
 
     func hasSseSupport() -> Bool {
-        (majorVersion ?? 0) >= 3
+        SitemapUpdatePolicy.usesEvents(serverVersion: majorVersion)
     }
 }
