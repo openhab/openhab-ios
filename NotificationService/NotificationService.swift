@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import Foundation
 import OpenHABCore
 import os.log
@@ -46,7 +45,6 @@ actor NotificationServiceHandler {
     static let networkTimeout: TimeInterval = 20 // don't go too long or we risk being terminated by the system
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
-    var cancellables = Set<AnyCancellable>()
     var networkTracker: NetworkTracker?
     var cloudUserId: String?
     private var notificationCategoryRegistrationTask: Task<Void, Never>?

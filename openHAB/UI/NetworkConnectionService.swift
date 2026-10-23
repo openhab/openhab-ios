@@ -30,7 +30,6 @@ class NetworkConnectionService: ObservableObject {
 
     // MARK: - Private state
 
-    private var cancellables = Set<AnyCancellable>()
     private var preferencesTask: Task<Void, Never>?
 
     init() {
