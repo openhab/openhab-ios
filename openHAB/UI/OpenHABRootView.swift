@@ -470,9 +470,8 @@ private extension OpenHABRootView {
         MainUINavigationView(
             webViewModel: webViewModel,
             activeConnection: activeNetworkConnection,
-            tileTitle: tileTitle,
-            onReload: { reloadCurrentContent() }
-        )
+            tileTitle: tileTitle
+        ) { reloadCurrentContent() }
     }
 
     func switchToSavedView() async {

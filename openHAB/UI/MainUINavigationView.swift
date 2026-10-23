@@ -186,33 +186,7 @@ import SwiftUI
 //
 // ============================================================================================
 
-struct MainUINavigationView: View {
-    @ObservedObject var webViewModel: OpenHABWebViewModel
-    let activeConnection: ConnectionInfo?
-    /// The title of a tile. Nil for Main UI, whose title comes from the page's navbar.
-    var tileTitle: String?
-    var onReload: () -> Void
-
-    var body: some View {
-        NavigationStack {
-            MainUINavigationContent(
-                webViewModel: webViewModel,
-                activeConnection: activeConnection,
-                tileTitle: tileTitle,
-                onReload: onReload
-            )
-            .readsBarOrientation()
-        }
-    }
-}
-
 // MARK: - Bar orientation
-
-private extension EnvironmentValues {
-    /// Whether the system lays its bars out vertically, in a strip. Only iOS 27.1 can; earlier
-    /// systems always have a horizontal bar.
-    @Entry var barIsVertical = false
-}
 
 /// Puts `toolbarVerticalEdge` into `barIsVertical` for the views inside the navigation container.
 /// That environment value only exists from iOS 27.1, so this is where the app reads it and
@@ -223,40 +197,6 @@ private struct BarOrientationReader: ViewModifier {
 
     func body(content: Content) -> some View {
         content.environment(\.barIsVertical, verticalEdge != nil)
-    }
-}
-
-private extension View {
-    @ViewBuilder
-    func readsBarOrientation() -> some View {
-        if #available(iOS 27.1, *) {
-            modifier(BarOrientationReader())
-        } else {
-            self
-        }
-    }
-
-    /// A bar that is opaque from the start. Before iOS 26 the system bar is transparent while the
-    /// page is scrolled to its top, which would let the web page show through the title.
-    @ViewBuilder
-    func opaqueBarBeforeLiquidGlass() -> some View {
-        if #available(iOS 26, *) {
-            self
-        } else {
-            toolbarBackground(.visible, for: .navigationBar)
-        }
-    }
-}
-
-private extension ToolbarContent {
-    /// Lets the item move into a vertical bar. Before iOS 27.1 there is none.
-    @ToolbarContentBuilder
-    func verticalPreferred() -> some ToolbarContent {
-        if #available(iOS 27.1, *) {
-            axisBehavior(.verticalPreferred)
-        } else {
-            self
-        }
     }
 }
 
@@ -330,17 +270,6 @@ private struct MainUINavigationContent: View {
         .toolbar { toolbarContent }
     }
 
-    /// See the layout reporting rule (8) in the decision log. A tile has no bridge to tell.
-    /// Takes the insets as an argument because the `safeArea` state is not updated yet when
-    /// this runs from the `onChange` that stores it.
-    private func reportLayout(for insets: EdgeInsets) {
-        guard !isTile, !navbar.hidden else { return }
-        let layout = MainUILayout(safeArea: insets)
-        guard layout != reportedLayout else { return }
-        reportedLayout = layout
-        webViewModel.setSystemBarLayout(layout.bridgeLayout)
-    }
-
     // MARK: Toolbar
 
     private var iconActions: [OHBridgeNavbarAction] {
@@ -382,7 +311,7 @@ private struct MainUINavigationContent: View {
             .verticalPreferred()
         } else if webViewModel.isLoading {
             ToolbarItem(placement: .cancellationAction) {
-                Label("Connecting", systemSymbol: .arrowTriangle2Circlepath)
+                Label("Connecting", systemSymbol: .arrowTrianglehead2ClockwiseRotate90)
                     .accessibilityIdentifier("ConnectionStateButton")
             }
             .verticalPreferred()
@@ -408,7 +337,7 @@ private struct MainUINavigationContent: View {
         if !barIsVertical {
             ForEach(textOnlyActions) { action in
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action.label, action: { webViewModel.bridge.activateNavbarAction(action.id) })
+                    Button(action.label) { webViewModel.bridge.activateNavbarAction(action.id) }
                         .disabled(action.disabled == true)
                         .accessibilityIdentifier("NavbarProxyButton-\(action.accessibilityName)")
                 }
@@ -416,7 +345,7 @@ private struct MainUINavigationContent: View {
         } else if !textOnlyActions.isEmpty, #available(iOS 27.1, *) {
             ToolbarOverflowMenu {
                 ForEach(textOnlyActions) { action in
-                    Button(action.label, action: { webViewModel.bridge.activateNavbarAction(action.id) })
+                    Button(action.label) { webViewModel.bridge.activateNavbarAction(action.id) }
                         .disabled(action.disabled == true)
                 }
             }
@@ -436,34 +365,16 @@ private struct MainUINavigationContent: View {
             Label(action.accessibilityName, systemSymbol: action.icon?.toolbarSymbol ?? .squareGrid2x2)
         }
     }
-}
 
-// MARK: - Icon mapping
-
-private extension OHBridgeIcon {
-    /// The SF Symbol shown in a vertical bar for a Main UI icon. Only Framework7 names that are
-    /// common in navbars are mapped; anything else falls back to a generic symbol, and the
-    /// action's title tells the buttons apart.
-    var toolbarSymbol: SFSymbol? {
-        guard let name else { return nil }
-        let glyph = name.hasPrefix("f7:") ? String(name.dropFirst(3)) : name
-        return switch glyph {
-        case "pencil": .pencil
-        case "trash": .trash
-        case "plus": .plus
-        case "square_list", "list_bullet": .listBullet
-        case "gear", "gear_alt", "gear_alt_fill": .gear
-        case "arrow_clockwise": .arrowClockwise
-        case "square_arrow_up": .squareAndArrowUp
-        case "checkmark": .checkmark
-        case "xmark": .xmark
-        case "info_circle": .infoCircle
-        case "ellipsis", "ellipsis_circle": .ellipsis
-        case "search", "magnifyingglass": .magnifyingglass
-        case "doc_on_doc": .docOnDoc
-        case "play", "play_fill": .play
-        default: nil
-        }
+    /// See the layout reporting rule (8) in the decision log. A tile has no bridge to tell.
+    /// Takes the insets as an argument because the `safeArea` state is not updated yet when
+    /// this runs from the `onChange` that stores it.
+    private func reportLayout(for insets: EdgeInsets) {
+        guard !isTile, !navbar.hidden else { return }
+        let layout = MainUILayout(safeArea: insets)
+        guard layout != reportedLayout else { return }
+        reportedLayout = layout
+        webViewModel.setSystemBarLayout(layout.bridgeLayout)
     }
 }
 
@@ -524,23 +435,44 @@ private struct MainUIPreviewHost: View {
         MainUINavigationView(
             webViewModel: webViewModel,
             activeConnection: MainActorNetworkTracker.shared.activeConnection,
-            tileTitle: tileTitle,
-            onReload: { webViewModel.loadWebView(force: true) }
-        )
-        .environment(
-            \.appMenu,
-            AppMenuConfiguration(
-                menuData: menuData,
-                webAuth: webViewModel.auth,
-                currentContent: tileTitle == nil ? .webview : .tile(""),
-                onSelect: { _ in },
-                onReload: { webViewModel.loadWebView(force: true) }
+            tileTitle: tileTitle
+        ) { webViewModel.loadWebView(force: true) }
+            .environment(
+                \.appMenu,
+                AppMenuConfiguration(
+                    menuData: menuData,
+                    webAuth: webViewModel.auth,
+                    currentContent: tileTitle == nil ? .webview : .tile(""),
+                    onSelect: { _ in },
+                    onReload: { webViewModel.loadWebView(force: true) }
+                )
             )
-        )
-        .onAppear {
-            if let navbar {
-                webViewModel.setUITestNavbar(navbar)
+            .onAppear {
+                if let navbar {
+                    webViewModel.setUITestNavbar(navbar)
+                }
             }
+    }
+}
+
+#endif
+
+struct MainUINavigationView: View {
+    @ObservedObject var webViewModel: OpenHABWebViewModel
+    let activeConnection: ConnectionInfo?
+    /// The title of a tile. Nil for Main UI, whose title comes from the page's navbar.
+    var tileTitle: String?
+    var onReload: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            MainUINavigationContent(
+                webViewModel: webViewModel,
+                activeConnection: activeConnection,
+                tileTitle: tileTitle,
+                onReload: onReload
+            )
+            .readsBarOrientation()
         }
     }
 }
@@ -564,4 +496,72 @@ private struct MainUIPreviewHost: View {
 #Preview("Tile") {
     MainUIPreviewHost(tileTitle: "Tile")
 }
-#endif
+
+// MARK: - Icon mapping
+
+private extension OHBridgeIcon {
+    /// The SF Symbol shown in a vertical bar for a Main UI icon. Only Framework7 names that are
+    /// common in navbars are mapped; anything else falls back to a generic symbol, and the
+    /// action's title tells the buttons apart.
+    var toolbarSymbol: SFSymbol? {
+        guard let name else { return nil }
+        let glyph = name.hasPrefix("f7:") ? String(name.dropFirst(3)) : name
+        return switch glyph {
+        case "pencil": .pencil
+        case "trash": .trash
+        case "plus": .plus
+        case "square_list", "list_bullet": .listBullet
+        case "gear", "gear_alt", "gear_alt_fill": .gear
+        case "arrow_clockwise": .arrowClockwise
+        case "square_arrow_up": .squareAndArrowUp
+        case "checkmark": .checkmark
+        case "xmark": .xmark
+        case "info_circle": .infoCircle
+        case "ellipsis", "ellipsis_circle": .ellipsis
+        case "search", "magnifyingglass": .magnifyingglass
+        case "doc_on_doc": .documentOnDocument
+        case "play", "play_fill": .play
+        default: nil
+        }
+    }
+}
+
+private extension EnvironmentValues {
+    /// Whether the system lays its bars out vertically, in a strip. Only iOS 27.1 can; earlier
+    /// systems always have a horizontal bar.
+    @Entry var barIsVertical = false
+}
+
+private extension View {
+    @ViewBuilder
+    func readsBarOrientation() -> some View {
+        if #available(iOS 27.1, *) {
+            modifier(BarOrientationReader())
+        } else {
+            self
+        }
+    }
+
+    /// A bar that is opaque from the start. Before iOS 26 the system bar is transparent while the
+    /// page is scrolled to its top, which would let the web page show through the title.
+    @ViewBuilder
+    func opaqueBarBeforeLiquidGlass() -> some View {
+        if #available(iOS 26, *) {
+            self
+        } else {
+            toolbarBackground(.visible, for: .navigationBar)
+        }
+    }
+}
+
+private extension ToolbarContent {
+    /// Lets the item move into a vertical bar. Before iOS 27.1 there is none.
+    @ToolbarContentBuilder
+    func verticalPreferred() -> some ToolbarContent {
+        if #available(iOS 27.1, *) {
+            axisBehavior(.verticalPreferred)
+        } else {
+            self
+        }
+    }
+}

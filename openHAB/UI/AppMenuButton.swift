@@ -52,45 +52,6 @@ struct AppMenuConfiguration: Equatable {
     }
 }
 
-extension EnvironmentValues {
-    @Entry var appMenu: AppMenuConfiguration?
-}
-
-/// The menu button, with the menu in a popover from it.
-struct AppMenuButton: View {
-    let configuration: AppMenuConfiguration
-    @State private var isPresented = false
-
-    var body: some View {
-        Button(
-            action: { isPresented.toggle() },
-            label: { Label("Menu", systemSymbol: .line3Horizontal) }
-        )
-        .accessibilityIdentifier("HamburgerButton")
-        #if DEBUG
-        .onAppear {
-            // UI tests open the menu from the start, so they need no tap on the bar.
-            guard ProcessInfo.processInfo.environment["UITestOpenMenu"] != nil else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                isPresented = true
-            }
-        }
-        #endif
-        .popover(isPresented: $isPresented) {
-            ToolbarMenu(
-                isPresented: $isPresented,
-                menuData: configuration.menuData,
-                webAuth: configuration.webAuth,
-                currentContent: configuration.currentContent,
-                onSelect: configuration.onSelect,
-                onReload: configuration.onReload
-            )
-            .background(PopoverClosesOnOutsideTaps())
-            .presentationCompactAdaptation(.popover)
-        }
-    }
-}
-
 /// Which of the two positions of the menu button an `AppMenuToolbarContent` is.
 enum AppMenuSlot {
     /// The topmost item of a vertical bar. Renders nothing on a horizontal bar. Declare it first.
@@ -166,4 +127,43 @@ private struct PopoverClosesOnOutsideTaps: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ controller: Controller, context: Context) {}
+}
+
+/// The menu button, with the menu in a popover from it.
+struct AppMenuButton: View {
+    let configuration: AppMenuConfiguration
+    @State private var isPresented = false
+
+    var body: some View {
+        Button(
+            action: { isPresented.toggle() },
+            label: { Label("Menu", systemSymbol: .line3Horizontal) }
+        )
+        .accessibilityIdentifier("HamburgerButton")
+        #if DEBUG
+        .onAppear {
+            // UI tests open the menu from the start, so they need no tap on the bar.
+            guard ProcessInfo.processInfo.environment["UITestOpenMenu"] != nil else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isPresented = true
+            }
+        }
+        #endif
+        .popover(isPresented: $isPresented) {
+            ToolbarMenu(
+                isPresented: $isPresented,
+                menuData: configuration.menuData,
+                webAuth: configuration.webAuth,
+                currentContent: configuration.currentContent,
+                onSelect: configuration.onSelect,
+                onReload: configuration.onReload
+            )
+            .background(PopoverClosesOnOutsideTaps())
+            .presentationCompactAdaptation(.popover)
+        }
+    }
+}
+
+extension EnvironmentValues {
+    @Entry var appMenu: AppMenuConfiguration?
 }
