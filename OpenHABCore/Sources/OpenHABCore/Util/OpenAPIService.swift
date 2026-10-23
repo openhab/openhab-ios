@@ -205,6 +205,7 @@ public extension OpenAPIService {
                 var icon: String?
                 var order: String?
                 var sidebar: Bool?
+                var visibleTo: [String]?
             }
 
             var uid: String?
@@ -219,12 +220,12 @@ public extension OpenAPIService {
                 else { return nil }
                 let label = dto.config?.label ?? uid
                 let icon = dto.config?.icon ?? ""
-                let order = dto.config?.order.flatMap(Int.init) ?? Int.max
+                let order = dto.config?.order.flatMap(Int.init) ?? OpenHABUIPage.defaultOrder
                 // The Main UI SPA uses Framework7 history mode (pushState).
                 // browser-history-root is set to the server origin, so routes resolve
                 // as {rootUrl}/page/{uid} — no /ui/ prefix, no hash fragment.
                 let url = "\(rootUrl.removeTrailingSlashes())/page/\(uid)"
-                return OpenHABUIPage(uid: uid, label: label, icon: icon, order: order, url: url)
+                return OpenHABUIPage(uid: uid, label: label, icon: icon, order: order, url: url, visibleTo: dto.config?.visibleTo ?? [])
             }
             .sorted { $0.order < $1.order }
     }

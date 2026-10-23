@@ -13,12 +13,17 @@ import Foundation
 @testable import openHAB
 @testable import OpenHABCore
 import Testing
+import WebKit
 
 @Suite("WebRouteRestore")
 struct WebRouteRestoreTests {
     private static let local = "http://openhab.local:8080"
 
     private static let deep = #"{"deep":true}"#
+
+    private var shim: String {
+        OHBridgeHost.shimScript
+    }
 
     private func snapshot(_ history: [String],
                           props: [String]? = nil,
@@ -33,28 +38,32 @@ struct WebRouteRestoreTests {
         )
     }
 
-    // MARK: - Payload decoding
+    // MARK: - Reading nav.changed
 
-    @Test("Decodes the payload posted by the injected script")
-    func decodesPayload() {
-        let json = #"{"history":["/overview/","/page/kitchen"],"url":"/page/kitchen"}"#
-        let decoded = WebRouteRestore.snapshot(fromJSON: json, connectionURL: Self.local)
+    private func navState(_ history: [String], props: [String]? = nil, path: String? = nil) -> OHBridgeNavState {
+        OHBridgeNavState(path: path ?? history.last ?? "", history: history, props: props?.map(OHBridgeProps.init(json:)), modal: false)
+    }
+
+    @Test("Reads the pages from a nav.changed")
+    func readsNavChanged() {
+        let decoded = WebRouteRestore.snapshot(from: navState(["/overview/", "/page/kitchen"]), connectionURL: Self.local)
         #expect(decoded?.history == ["/overview/", "/page/kitchen"])
         #expect(decoded?.url == "/page/kitchen")
         #expect(decoded?.connectionURL == Self.local)
     }
 
-    @Test("Decodes the props posted with each page")
-    func decodesProps() {
-        let json = #"{"history":["/overview/","/page/kitchen"],"props":["{}","{\"deep\":true}"],"url":"/page/kitchen"}"#
-        let decoded = WebRouteRestore.snapshot(fromJSON: json, connectionURL: Self.local)
+    @Test("Keeps the props sent with each page")
+    func keepsProps() {
+        let decoded = WebRouteRestore.snapshot(
+            from: navState(["/overview/", "/page/kitchen"], props: ["{}", Self.deep]),
+            connectionURL: Self.local
+        )
         #expect(decoded?.props == ["{}", Self.deep])
     }
 
     @Test("Props that do not line up with the pages are dropped")
     func dropsMisalignedProps() {
-        let json = #"{"history":["/overview/","/page/kitchen"],"props":["{}"],"url":"/page/kitchen"}"#
-        let decoded = WebRouteRestore.snapshot(fromJSON: json, connectionURL: Self.local)
+        let decoded = WebRouteRestore.snapshot(from: navState(["/overview/", "/page/kitchen"], props: ["{}"]), connectionURL: Self.local)
         #expect(decoded?.history == ["/overview/", "/page/kitchen"])
         #expect(decoded?.props == nil)
     }
@@ -67,11 +76,10 @@ struct WebRouteRestoreTests {
         #expect(decoded.props == nil)
     }
 
-    @Test("Rejects an empty or malformed payload")
-    func rejectsBadPayload() {
-        #expect(WebRouteRestore.snapshot(fromJSON: "not json", connectionURL: Self.local) == nil)
-        #expect(WebRouteRestore.snapshot(fromJSON: #"{"history":[],"url":""}"#, connectionURL: Self.local) == nil)
-        #expect(WebRouteRestore.snapshot(fromJSON: #"{"url":"/page/a"}"#, connectionURL: Self.local) == nil)
+    @Test("Rejects a nav.changed with no pages or no path")
+    func rejectsEmptyNavChanged() {
+        #expect(WebRouteRestore.snapshot(from: navState([]), connectionURL: Self.local) == nil)
+        #expect(WebRouteRestore.snapshot(from: navState(["/page/a"], path: ""), connectionURL: Self.local) == nil)
     }
 
     // MARK: - Restore eligibility
@@ -237,79 +245,84 @@ struct WebRouteRestoreTests {
         #expect(WebRouteRestore.isAdminPath("/settings/things/?tab=1"))
     }
 
-    // MARK: - Script generation
+    // MARK: - Shim and startup script
 
-    @Test("A nil restore leaves whatever Framework7 itself persisted")
-    func nilRestoreEmitsNull() {
-        let source = webViewRouteRestoreJS(restore: nil)
-        #expect(source.contains("var RESTORE = null"))
+    @MainActor
+    private func startupScript(restore: [String]?, props: [String]? = nil, basePath: String = "") -> String {
+        let controller = WKUserContentController()
+        OHBridgeHost().installScripts(
+            on: controller,
+            restore: restore,
+            props: props,
+            basePath: basePath,
+            layout: OHBridgeLayout(insets: .init(top: 0, bottom: 0), navbarHeight: 44)
+        )
+        return controller.userScripts.first?.source ?? ""
     }
 
-    @Test("Props are emitted as a JSON array of strings, parsed in the page")
-    func propsEmittedAsStrings() {
-        let source = webViewRouteRestoreJS(restore: ["/overview/", "/page/kitchen"], props: ["{}", Self.deep])
-        #expect(source.contains(#"var RESTORE_PROPS = ["{}","{\"deep\":true}"]"#))
-        #expect(webViewRouteRestoreJS(restore: nil).contains("var RESTORE_PROPS = null"))
+    @Test("A nil restore leaves whatever Framework7 itself persisted")
+    @MainActor
+    func nilRestoreSendsNoHistory() {
+        #expect(!startupScript(restore: nil).contains("initialHistory"))
+        #expect(shim.contains("var RESTORE = info.initialHistory && info.initialHistory.length ? info.initialHistory : null"))
+    }
+
+    @Test("Pages go to the page as a JSON array, and their props as plain objects")
+    @MainActor
+    func restoreSentAsJSON() {
+        let source = startupScript(restore: ["/overview/", "/page/kitchen"], props: ["{}", Self.deep])
+        #expect(source.contains(#""initialHistory":["/overview/","/page/kitchen"]"#))
+        #expect(source.contains(#""initialProps":[{},{"deep":true}]"#))
     }
 
     /// The Main UI opens a restored page from its address alone, which carries no props.
-    @Test("The script hands the props back to Framework7 and reopens the current page with its own")
-    func scriptRestoresProps() {
-        let source = webViewRouteRestoreJS(restore: ["/overview/", "/page/kitchen"], props: ["{}", Self.deep])
-        #expect(source.contains("r.propsHistory = list"))
-        #expect(source.contains("reloadCurrent: true, animate: false, browserHistory: false, props: top"))
-        #expect(source.contains("if (restoring) whenRestoredPageOpen()"))
+    @Test("The shim hands the props back to Framework7 and reopens the current page with its own")
+    func shimRestoresProps() {
+        #expect(shim.contains("r.propsHistory = list"))
+        #expect(shim.contains("r.navigate(r.history[n - 1], { reloadCurrent: true, animate: false, browserHistory: false, props: top })"))
+        #expect(shim.contains("if (restoring) whenRestoredPageOpen()"))
     }
 
     @Test("Only the props that survive being saved are captured")
-    func scriptKeepsOnlyKnownProps() {
-        let source = webViewRouteRestoreJS(restore: nil)
-        #expect(source.contains("var KEPT_PROPS = ['deep', 'defineVars']"))
-        #expect(source.contains("return { history: stack, props: props, url: stack[stack.length - 1] }"))
+    func shimKeepsOnlyKnownProps() {
+        #expect(shim.contains("var KEPT_PROPS = ['deep', 'defineVars']"))
+        #expect(shim.contains("return { path: stack[stack.length - 1], history: stack, props: props, modal: isModalOpen() }"))
     }
 
     /// Framework7 adds a popup to its history without props, then removes the last props
     /// when it closes, which would take the page underneath's back link with it.
     @Test("Open popups get stand-in props so the page underneath keeps its own")
-    func scriptPadsPopupProps() {
-        let source = webViewRouteRestoreJS(restore: nil)
-        #expect(source.contains("padPopupProps(r)"))
-        #expect(source.contains("r.propsHistory.push(POPUP_PROPS)"))
-    }
-
-    @Test("A restore payload is emitted as a JSON array")
-    func restoreEmitsJSONArray() {
-        let source = webViewRouteRestoreJS(restore: ["/overview/", "/page/kitchen"])
-        #expect(source.contains(#"var RESTORE = ["/overview/","/page/kitchen"]"#))
-        #expect(source.contains("'f7router-' + VIEW_ID + '-history'"))
+    func shimPadsPopupProps() {
+        #expect(shim.contains("padPopupProps(r)"))
+        #expect(shim.contains("r.propsHistory.push(POPUP_PROPS)"))
     }
 
     /// The Main UI remembers the pages itself, but going back is really the browser going
     /// back, and a page that just opened has nothing behind it.
-    @Test("The script seeds the browser session history as well as Framework7's stack")
+    @Test("The shim seeds the browser session history as well as Framework7's stack")
     func seedsBrowserHistory() {
-        let source = webViewRouteRestoreJS(restore: ["/overview/", "/page/kitchen"])
-        #expect(source.contains("seedBrowserHistory(RESTORE)"))
-        #expect(source.contains("history.replaceState(stateFor(stack[0]), '', BASE + stack[0])"))
-        #expect(source.contains("history.pushState(stateFor(stack[i]), '', BASE + stack[i])"))
-        #expect(source.contains("state[VIEW_ID] = { url: url }"))
+        #expect(shim.contains("var STORAGE_KEY = 'f7router-' + VIEW_ID + '-history'"))
+        #expect(shim.contains("seedBrowserHistory(RESTORE)"))
+        #expect(shim.contains("history.replaceState(stateFor(stack[0]), '', BASE + stack[0])"))
+        #expect(shim.contains("history.pushState(stateFor(stack[i]), '', BASE + stack[i])"))
+        #expect(shim.contains("state[VIEW_ID] = { url: url }"))
     }
 
     /// We ask for the app's front page, so the page addresses have to add back whatever the
     /// app sits under, or they would point outside it.
-    @Test("The base path is emitted as a JS string literal")
+    @Test("The base path reaches the shim as a JS string literal")
+    @MainActor
     func basePathIsEmitted() {
-        #expect(webViewRouteRestoreJS(restore: ["/overview/"]).contains(#"var BASE = """#))
-        #expect(webViewRouteRestoreJS(restore: ["/overview/"], basePath: "/oh").contains(#"var BASE = "/oh""#))
+        #expect(startupScript(restore: ["/overview/"]).contains(#"basePath: """#))
+        #expect(startupScript(restore: ["/overview/"], basePath: "/oh").contains(#"basePath: "/oh""#))
     }
 
     /// The same scripts run for every page the app opens, so without this a tile could get
     /// dragged off to the wrong page.
     @Test("Seeding is gated on the document being the app root")
     func seedingIsGatedOnAppRoot() {
-        let source = webViewRouteRestoreJS(restore: ["/overview/", "/page/kitchen"])
-        #expect(source.contains("RESTORE && RESTORE.length && isAppRoot()"))
-        #expect(source.contains("return path === BASE || path === BASE + '/'"))
+        #expect(shim.contains("if (RESTORE && wants('routeRestore') && isAppRoot())"))
+        #expect(shim.contains("return path === BASE || path === BASE + '/'"))
     }
 
     // MARK: - Snapshot freshness
