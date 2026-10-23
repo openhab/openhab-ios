@@ -80,12 +80,6 @@ public extension OpenHABPage {
 
     @discardableResult
     func apply(event: OpenHABSitemapWidgetEvent) -> SitemapWidgetEventApplicationResult {
-        for widget in widgets {
-            let result = widget.apply(event: event)
-            if result != .notFound {
-                return result
-            }
-        }
-        return .notFound
+        widgets.apply(event: event)
     }
 }

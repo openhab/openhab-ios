@@ -38,6 +38,15 @@ public actor SitemapEventStream {
     private var lastEventTime = Date.now
     private let makeService: @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol
 
+    /// Whether an SSE connection is running or being set up.
+    var isListening: Bool {
+        listenTask != nil
+    }
+
+    var hasConsumers: Bool {
+        !continuations.isEmpty
+    }
+
     public init(makeService: @escaping @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol = {
         try OpenAPIService(connectionConfiguration: $0, serviceConfiguration: .sse)
     }) {
@@ -107,7 +116,7 @@ public actor SitemapEventStream {
         }
     }
 
-    private func updateConnection(_ info: ConnectionInfo?) {
+    func updateConnection(_ info: ConnectionInfo?) {
         let newConfig = info?.configuration
 
         guard currentConfig != newConfig else { return }
@@ -122,15 +131,18 @@ public actor SitemapEventStream {
         restartListeningIfPossible()
     }
 
+    /// Starts listening unless already listening. Like `restartListeningIfPossible()`, it needs a
+    /// consumer: a network change or the watchdog must not reopen a connection nobody reads, e.g.
+    /// for a page that is off screen.
     private func restartListeningIfNeeded() {
-        guard !isStopped, listenTask == nil else { return }
+        guard !isStopped, !continuations.isEmpty, listenTask == nil else { return }
         guard let cfg = currentConfig, let target = currentTarget else { return }
         Logger.restAPI.info("Starting sitemap SSE listener for \(target.sitemap)/\(target.pageId)")
         listenTask = Task { await listen(using: cfg, target: target) }
     }
 
     private func restartListeningIfPossible() {
-        guard !isStopped else { return }
+        guard !isStopped, !continuations.isEmpty else { return }
         guard let cfg = currentConfig, let target = currentTarget else {
             broadcast(.disconnected(nil))
             return
@@ -182,6 +194,10 @@ public actor SitemapEventStream {
             } catch is CancellationError {
                 return
             } catch {
+                // A cancelled request can also end in another error, e.g. the empty 204 response
+                // LoggingMiddleware returns for it. A cancelled listener has been replaced or
+                // stopped, and must not report a disconnection.
+                guard !Task.isCancelled else { return }
                 broadcast(.disconnected(error))
                 Logger.restAPI.error("Sitemap SSE error: \(error.localizedDescription, privacy: .public) – retrying in \(backoff, privacy: .public)s")
                 try? await Task.sleep(for: .seconds(backoff))

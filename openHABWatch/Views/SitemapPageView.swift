@@ -37,26 +37,65 @@ struct WidgetRowView: View {
     }
 }
 
+/// Owns the model of a linked page. Created inline in `navigationDestination`, the model was
+/// replaced, and its long poll restarted, each time SwiftUI evaluated the destination again.
+private struct LinkedSitemapPageView: View {
+    @StateObject private var viewModel: UserData
+
+    var body: some View {
+        SitemapPageView(viewModel: viewModel, isRoot: false)
+    }
+
+    init(linkedPage: OpenHABPage) {
+        _viewModel = StateObject(wrappedValue: UserData(linkedPage: linkedPage))
+    }
+}
+
 struct SitemapPageView: View {
     @ObservedObject var viewModel: UserData
     @EnvironmentObject var settings: AppSettings
+    @Environment(\.scenePhase) private var scenePhase
     @State var title = "Sitemap"
+    @State private var isVisible = false
     @State private var scrollPosition: String?
     var isRoot = true
 
     var body: some View {
         if isRoot {
             NavigationStack {
-                pageContent
+                followedPageContent
                     .navigationDestination(for: OpenHABPage.self) { linkedPage in
-                        SitemapPageView(viewModel: UserData(linkedPage: linkedPage), isRoot: false)
+                        LinkedSitemapPageView(linkedPage: linkedPage)
                             .environmentObject(settings)
                     }
             }
         } else {
-            pageContent
-                .onDisappear { viewModel.stopLongPolling() }
+            followedPageContent
         }
+    }
+
+    /// Follows the server only while this page is on screen and the app is in the foreground.
+    private var followedPageContent: some View {
+        pageContent
+            .onAppear {
+                isVisible = true
+                viewModel.resumePageHandling()
+            }
+            .onDisappear {
+                isVisible = false
+                viewModel.pausePageHandling()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                guard isVisible else { return }
+                switch phase {
+                case .background:
+                    viewModel.pausePageHandling()
+                case .active:
+                    viewModel.resumePageHandling()
+                default:
+                    break
+                }
+            }
     }
 
     private var pageContent: some View {
@@ -72,7 +111,7 @@ struct SitemapPageView: View {
             } else if !viewModel.widgets.isEmpty {
                 ScrollView {
                     VStack(spacing: 4) {
-                        ForEach(viewModel.widgets) { widget in
+                        ForEach(viewModel.visibleWidgets) { widget in
                             WidgetRowView(widget: widget)
                                 .id(widget.widgetId)
                         }
@@ -93,7 +132,7 @@ struct SitemapPageView: View {
                     .padding(.vertical, 2)
                 }
                 .scrollPosition(id: $scrollPosition, anchor: .top)
-                .navigationBarTitle(viewModel.openHABSitemapPage?.title.labelValueTitle ?? "Sitemap")
+                .navigationBarTitle(viewModel.pageTitle?.labelValueTitle ?? "Sitemap")
             } else {
                 VStack {
                     Spacer()

@@ -20,7 +20,14 @@ import SwiftUI
 final class UserData: ObservableObject {
     static let shared = UserData()
 
-    @Published var widgets: [OpenHABWidget] = []
+    @Published var widgets: [OpenHABWidget] = [] {
+        didSet { refreshVisibleWidgets() }
+    }
+
+    /// The widgets the page shows, after hiding the invisible ones.
+    @Published private(set) var visibleWidgets: [OpenHABWidget] = []
+    /// The title the page shows. Kept apart from `openHABSitemapPage`, whose title changes in place.
+    @Published private(set) var pageTitle: String?
     @Published var showAlert = false
     @Published var errorDescription = ""
     @Published var showCertificateAlert = false
@@ -30,19 +37,29 @@ final class UserData: ObservableObject {
     // Cache last successful widgets to prevent empty state during reconnections
     private var cachedWidgets: [OpenHABWidget] = []
     private var currentlyLoadingSitemap: String?
+    /// Page ID of a linked page, `nil` for the root page.
+    private var linkedPageId: String?
     private var lastObservedConnectionURL: String?
     /// Incremented each time a new pageHandlingTask is created. The task captures its own
     /// generation at creation time and only clears shared state when the generation still matches,
     /// preventing a completing old task from wiping out a newly started task for the same sitemap.
     private var taskGeneration = 0
+    /// Set while the page is off screen or the app is in the background. Page handling stays
+    /// stopped then, so only the visible page follows the server, and only in the foreground.
+    private var isPaused = false
 
     private var pageHandlingTask: Task<Void, Never>?
+    private let sitemapEventStream = SitemapEventStream()
+    private var eventsDuringReload = SitemapEventReplayLog()
     private var networkObservationTask: Task<Void, Never>?
     // nonisolated(unsafe): accessed only from deinit, which is the last operation on the instance.
     private nonisolated(unsafe) var notificationObservers: [any NSObjectProtocol] = []
     @Published var isPolling = false
 
-    @Published var openHABSitemapPage: OpenHABPage?
+    @Published var openHABSitemapPage: OpenHABPage? {
+        didSet { showTitle(openHABSitemapPage?.title) }
+    }
+
     var currentClientDelegate: HTTPClientDelegate?
 
     private var cancellables = Set<AnyCancellable>()
@@ -56,6 +73,9 @@ final class UserData: ObservableObject {
                 openHABSitemapPage = OpenHABPage(sitemapPage)
                 widgets = openHABSitemapPage?.widgets ?? []
                 decorateWidgetsWithSendCommand(widgets)
+                // Property observers don't run in an initializer.
+                refreshVisibleWidgets()
+                showTitle(openHABSitemapPage?.title)
             } catch {
                 Logger.userData.error("Should not throw \(error.localizedDescription)")
             }
@@ -67,14 +87,15 @@ final class UserData: ObservableObject {
     init(linkedPage: OpenHABPage) {
         // Use the pageId directly from the linkedPage object
         let extractedPageId = linkedPage.pageId
+        linkedPageId = extractedPageId
 
         Logger.userData.info("Initializing UserData for linked page: '\(linkedPage.title)' with pageId: '\(extractedPageId)', link: '\(linkedPage.link)'")
 
         setupNotificationObservers()
 
-        // Assign to pageHandlingTask so stopLongPolling() can cancel this setup task
+        // Assign to pageHandlingTask so pausePageHandling() can cancel this setup task
         // before it runs if the view disappears while it is still queued on the main actor
-        // (e.g. rapid navigation). Without this, stopLongPolling() finds pageHandlingTask == nil,
+        // (e.g. rapid navigation). Without this, pausePageHandling() finds pageHandlingTask == nil,
         // cancels nothing, and the task later starts an uncancellable long-poll that leaks the
         // UserData instance via a retain cycle.
         pageHandlingTask = Task { @MainActor [weak self] in
@@ -275,6 +296,10 @@ final class UserData: ObservableObject {
 
     func startPageHandling(sitemapName: String, pageId: String = "", force: Bool = false) {
         Logger.userData.debug("startPageHandling called - sitemap: \(sitemapName), pageId: \(pageId), force: \(force)")
+        guard !isPaused else {
+            Logger.userData.debug("Page handling is paused, starting when the page is visible again")
+            return
+        }
 
         // Handle concurrent loads based on force parameter
         if let task = pageHandlingTask, !task.isCancelled {
@@ -335,12 +360,30 @@ final class UserData: ObservableObject {
                 }
 
                 Logger.userData.debug("Using connection: \(connectionInfo.configuration.url)")
-                Logger.userData.debug("Starting page stream for sitemap: \(taskSitemapName)")
+                let service = try OpenAPIService(
+                    connectionConfiguration: connectionInfo.configuration,
+                    serviceConfiguration: .longTerm
+                )
 
+                if SitemapUpdatePolicy.usesEvents(serverVersion: connectionInfo.version) {
+                    let page = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
+                    try Task.checkCancellation()
+                    isLoadingSitemap = false
+                    if let page {
+                        show(page)
+                    }
+                    let eventPageId = [page?.pageId, pageId].compactMap(\.self).first { !$0.isEmpty } ?? sitemapName
+                    guard await !followEvents(sitemapName: sitemapName, pageId: eventPageId, connectionInfo: connectionInfo) else {
+                        return
+                    }
+                    Logger.userData.info("Sitemap events unavailable for \(taskSitemapName), falling back to long polling")
+                }
+
+                Logger.userData.debug("Starting long polling for sitemap: \(taskSitemapName)")
                 for try await event in SitemapPageLoader.stream(
                     sitemapName: sitemapName,
                     pageId: pageId,
-                    connectionInfo: connectionInfo
+                    service: service
                 ) {
                     try Task.checkCancellation()
                     // Always clear loading state on the first event, even if the server
@@ -351,16 +394,7 @@ final class UserData: ObservableObject {
                     case let .longPoll(page, _): page
                     }
                     guard let page else { continue }
-                    // Only update page object when title changes to avoid
-                    // firing objectWillChange and resetting scroll position
-                    if openHABSitemapPage?.title != page.title {
-                        openHABSitemapPage = page
-                    }
-                    let newWidgets = page.widgets
-                    updateWidgets(with: newWidgets)
-                    if !newWidgets.isEmpty {
-                        cachedWidgets = newWidgets
-                    }
+                    show(page)
                 }
             } catch is CancellationError {
                 return
@@ -395,7 +429,20 @@ final class UserData: ObservableObject {
         }
     }
 
-    func stopLongPolling() {
+    /// Follows the page again after `pausePageHandling()`, starting from a fresh snapshot of it.
+    /// Does nothing unless paused, which includes the page's first appearance.
+    func resumePageHandling() {
+        guard isPaused else { return }
+        isPaused = false
+        let sitemapName = AppSettings.shared.sitemapForWatch
+        guard !sitemapName.isEmpty else { return }
+        startPageHandling(sitemapName: sitemapName, pageId: linkedPageId ?? "", force: true)
+    }
+
+    /// Stops following the page, including its event stream and pending reloads, while the page
+    /// is off screen, e.g. under a pushed page or another tab, or the app is in the background.
+    func pausePageHandling() {
+        isPaused = true
         pageHandlingTask?.cancel()
         pageHandlingTask = nil
         isPolling = false
@@ -419,7 +466,7 @@ final class UserData: ObservableObject {
         guard AppSettings.shared.haveReceivedAppContext, !AppSettings.shared.sitemapForWatch.isEmpty else { return }
 
         showAlert = false
-        startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch, force: force)
+        startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch, pageId: linkedPageId ?? "", force: force)
     }
 
     /// Updates existing widget instances instead of replacing them to preserve @ObservedObject references
@@ -429,6 +476,7 @@ final class UserData: ObservableObject {
         // Check if the widget list structure changed (count, order, or IDs)
         let structureChanged = widgets.count != newWidgets.count
             || !zip(widgets, newWidgets).allSatisfy { $0.widgetId == $1.widgetId }
+        var visibilityChanged = false
 
         for newWidget in newWidgets {
             if let existingWidget = existingWidgetsMap[newWidget.widgetId] {
@@ -460,8 +508,11 @@ final class UserData: ObservableObject {
                 existingWidget.unit = newWidget.unit
                 existingWidget.switchSupport = newWidget.switchSupport
                 existingWidget.mappings = newWidget.mappings
-                existingWidget.widgets = newWidget.widgets
+                // Keep the widgets on screen as the children, so an event applied through the
+                // parent reaches them.
+                existingWidget.widgets = newWidget.widgets.map { existingWidgetsMap[$0.widgetId] ?? $0 }
                 existingWidget.linkedPage = newWidget.linkedPage
+                visibilityChanged = visibilityChanged || existingWidget.visibility != newWidget.visibility
                 existingWidget.visibility = newWidget.visibility
                 existingWidget.staticIcon = newWidget.staticIcon
                 existingWidget.labelSource = newWidget.labelSource
@@ -491,6 +542,8 @@ final class UserData: ObservableObject {
         // ScrollView rebuild that resets the scroll position.
         if structureChanged {
             widgets = allWidgets
+        } else if visibilityChanged {
+            refreshVisibleWidgets()
         }
     }
 
@@ -506,12 +559,154 @@ final class UserData: ObservableObject {
 
     deinit {
         // pageHandlingTask strongly captures self, creating a retain cycle that keeps self alive
-        // until the task finishes. For linked-page instances the cycle is broken by stopLongPolling()
+        // until the task finishes. For linked-page instances the cycle is broken by pausePageHandling()
         // (called from .onDisappear), which cancels the task and nils pageHandlingTask; by the time
         // deinit runs, the task has already completed and pageHandlingTask is nil. The cancel() call
         // here is therefore a no-op in the normal path but harmless as a safety net.
         pageHandlingTask?.cancel()
         networkObservationTask?.cancel()
         notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
+    }
+}
+
+// MARK: - Following the page
+
+private extension UserData {
+    /// Follows the page through the server's sitemap events until the task is cancelled. Returns
+    /// `false` when the events aren't available, so the caller falls back to long polling.
+    func followEvents(sitemapName: String, pageId: String, connectionInfo: ConnectionInfo) async -> Bool {
+        await sitemapEventStream.startMonitoringNetworkIfNeeded(initialConnection: connectionInfo)
+        let stream = await sitemapEventStream.stream(sitemap: sitemapName, pageId: pageId)
+        var hasConnected = false
+        var reloadTask: Task<Void, Never>?
+        defer { reloadTask?.cancel() }
+        // Reloads alongside the events, retrying until it succeeds, so a failed reload doesn't
+        // leave missed changes on screen. A newer reload replaces a pending one.
+        func reload() {
+            reloadTask?.cancel()
+            reloadTask = Task { await self.reloadPageUntilShown(sitemapName: sitemapName, pageId: pageId) }
+        }
+
+        for await output in stream {
+            switch output {
+            case .connected:
+                Logger.userData.debug("Sitemap events connected for \(sitemapName)/\(pageId)")
+                hasConnected = true
+                // Fetch the page again: it catches what changed before the subscription existed,
+                // or while the stream was down.
+                reload()
+            case let .disconnected(error):
+                Logger.userData.warning("Sitemap events disconnected: \(error?.localizedDescription ?? "nil")")
+                guard SitemapUpdatePolicy.shouldFallBackToLongPolling(after: error, hasConnected: hasConnected) else { continue }
+                await sitemapEventStream.stop()
+                return false
+            case let .event(message):
+                if needsPageReload(after: message, sitemapName: sitemapName) {
+                    reload()
+                }
+            }
+        }
+        return true
+    }
+
+    /// Handles a sitemap event. Returns whether the page has to be fetched again.
+    func needsPageReload(after message: SitemapEventMessage, sitemapName: String) -> Bool {
+        switch message {
+        case .alive:
+            return false
+        case .sitemapChanged:
+            Logger.userData.info("Sitemap \(sitemapName) changed, reloading page")
+            return true
+        case let .widget(event):
+            guard apply(event) else { return false }
+            Logger.userData.info("Widget \(event.widgetId ?? "") needs the page reloaded")
+            return true
+        case let .unknown(raw):
+            Logger.userData.debug("Unknown sitemap event: \(raw)")
+            return false
+        }
+    }
+
+    /// Applies a widget event to the widgets on screen, and keeps it for reloads in flight.
+    /// Returns whether the page has to be fetched again.
+    func apply(_ event: OpenHABSitemapWidgetEvent) -> Bool {
+        eventsDuringReload.record(event)
+        return applyToScreen(event)
+    }
+
+    func applyToScreen(_ event: OpenHABSitemapWidgetEvent) -> Bool {
+        if let page = openHABSitemapPage, event.widgetId == page.pageId, let label = event.label {
+            page.title = label
+            showTitle(label)
+            return false
+        }
+        let result = widgets.apply(event: event)
+        if result == .applied, event.visibility != nil {
+            refreshVisibleWidgets()
+        }
+        return SitemapUpdatePolicy.needsPageReload(after: result)
+    }
+
+    /// Fetches the page again until it is shown or the task is cancelled.
+    func reloadPageUntilShown(sitemapName: String, pageId: String) async {
+        var failedAttempts = 0
+        while !Task.isCancelled {
+            guard await !reloadPage(sitemapName: sitemapName, pageId: pageId) else { return }
+            failedAttempts += 1
+            try? await Task.sleep(for: SitemapUpdatePolicy.reloadRetryDelay(afterFailedAttempts: failedAttempts))
+        }
+    }
+
+    /// Fetches the page again over whichever connection is active now, and shows it with the
+    /// events that arrived meanwhile applied on top. Returns whether it was shown.
+    func reloadPage(sitemapName: String, pageId: String) async -> Bool {
+        let reload = eventsDuringReload.beginReload()
+        let page: OpenHABPage?
+        do {
+            page = try await NetworkTracker.shared.pollDataForPage(sitemapname: sitemapName, pageId: pageId)
+        } catch {
+            eventsDuringReload.endReload(reload)
+            if !(error is CancellationError) {
+                Logger.userData.warning("Reloading page \(sitemapName)/\(pageId) failed: \(error.localizedDescription)")
+            }
+            return false
+        }
+        let missedEvents = eventsDuringReload.endReload(reload)
+        guard !Task.isCancelled else { return false }
+        guard let page else {
+            Logger.userData.warning("Reloading page \(sitemapName)/\(pageId) returned no page")
+            return false
+        }
+        show(page)
+        // An event that needs another reload already asked for one when it first arrived.
+        for event in missedEvents {
+            _ = applyToScreen(event)
+        }
+        return true
+    }
+
+    /// Filters the widgets again. Visibility isn't published, so this runs whenever it may have
+    /// changed. Only a different list is published, which keeps the scroll position otherwise.
+    func refreshVisibleWidgets() {
+        let visible = sitemapVisibleWidgets(widgets)
+        guard !visible.elementsEqual(visibleWidgets, by: ===) else { return }
+        visibleWidgets = visible
+    }
+
+    func showTitle(_ title: String?) {
+        guard pageTitle != title else { return }
+        pageTitle = title
+    }
+
+    func show(_ page: OpenHABPage) {
+        // Only update page object when title changes to avoid
+        // publishing a change and resetting scroll position
+        if openHABSitemapPage?.title != page.title {
+            openHABSitemapPage = page
+        }
+        updateWidgets(with: page.widgets)
+        if !page.widgets.isEmpty {
+            cachedWidgets = page.widgets
+        }
     }
 }
