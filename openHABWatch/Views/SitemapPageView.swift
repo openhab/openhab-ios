@@ -16,7 +16,7 @@ import SwiftUI
 /// A wrapper view that handles linkedPage navigation for widgets
 struct WidgetRowView: View {
     @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
 
     private var refreshToken: String {
         let displayState = widget.displayState
@@ -39,21 +39,25 @@ struct WidgetRowView: View {
 
 /// Owns the model of a linked page. Created inline in `navigationDestination`, the model was
 /// replaced, and its long poll restarted, each time SwiftUI evaluated the destination again.
+/// The model is created on first appearance: `State(initialValue:)` would create one, and start
+/// its page handling, on every evaluation.
 private struct LinkedSitemapPageView: View {
-    @StateObject private var viewModel: UserData
+    let linkedPage: OpenHABPage
+    @State private var viewModel: UserData?
 
     var body: some View {
-        SitemapPageView(viewModel: viewModel, isRoot: false)
-    }
-
-    init(linkedPage: OpenHABPage) {
-        _viewModel = StateObject(wrappedValue: UserData(linkedPage: linkedPage))
+        if let viewModel {
+            SitemapPageView(viewModel: viewModel, isRoot: false)
+        } else {
+            Color.clear
+                .onAppear { viewModel = UserData(linkedPage: linkedPage) }
+        }
     }
 }
 
 struct SitemapPageView: View {
-    @ObservedObject var viewModel: UserData
-    @EnvironmentObject var settings: AppSettings
+    @Bindable var viewModel: UserData
+    @Environment(AppSettings.self) var settings
     @Environment(\.scenePhase) private var scenePhase
     @State var title = "Sitemap"
     @State private var isVisible = false
@@ -66,7 +70,7 @@ struct SitemapPageView: View {
                 followedPageContent
                     .navigationDestination(for: OpenHABPage.self) { linkedPage in
                         LinkedSitemapPageView(linkedPage: linkedPage)
-                            .environmentObject(settings)
+                            .environment(settings)
                     }
             }
         } else {
@@ -176,9 +180,8 @@ struct SitemapPageView: View {
 
     return Group {
         SitemapPageView(viewModel: userData)
-            .environmentObject(userData)
 
         SitemapPageView(viewModel: userData)
     }
-    .environmentObject(appSettings)
+    .environment(appSettings)
 }

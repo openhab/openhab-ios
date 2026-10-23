@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import CommonUI
 import Foundation
 import OpenHABCore
@@ -17,22 +16,23 @@ import os.log
 import SwiftUI
 
 @MainActor
-final class UserData: ObservableObject {
+@Observable
+final class UserData {
     static let shared = UserData()
 
-    @Published var widgets: [OpenHABWidget] = [] {
+    var widgets: [OpenHABWidget] = [] {
         didSet { refreshVisibleWidgets() }
     }
 
     /// The widgets the page shows, after hiding the invisible ones.
-    @Published private(set) var visibleWidgets: [OpenHABWidget] = []
+    private(set) var visibleWidgets: [OpenHABWidget] = []
     /// The title the page shows. Kept apart from `openHABSitemapPage`, whose title changes in place.
-    @Published private(set) var pageTitle: String?
-    @Published var showAlert = false
-    @Published var errorDescription = ""
-    @Published var showCertificateAlert = false
-    @Published var certificateErrorDescription = ""
-    @Published var isLoadingSitemap = false
+    private(set) var pageTitle: String?
+    var showAlert = false
+    var errorDescription = ""
+    var showCertificateAlert = false
+    var certificateErrorDescription = ""
+    var isLoadingSitemap = false
 
     // Cache last successful widgets to prevent empty state during reconnections
     private var cachedWidgets: [OpenHABWidget] = []
@@ -48,21 +48,26 @@ final class UserData: ObservableObject {
     /// stopped then, so only the visible page follows the server, and only in the foreground.
     private var isPaused = false
 
-    private var pageHandlingTask: Task<Void, Never>?
-    private let sitemapEventStream = SitemapEventStream()
-    private var eventsDuringReload = SitemapEventReplayLog()
-    private var networkObservationTask: Task<Void, Never>?
-    // nonisolated(unsafe): accessed only from deinit, which is the last operation on the instance.
-    private nonisolated(unsafe) var notificationObservers: [any NSObjectProtocol] = []
-    @Published var isPolling = false
+    // @ObservationIgnored prevents the @Observable macro from generating @MainActor-isolated
+    // backing storage, keeping these as plain stored properties that deinit can cancel.
+    @ObservationIgnored private nonisolated(unsafe) var pageHandlingTask: Task<Void, Never>?
+    @ObservationIgnored private nonisolated(unsafe) var networkObservationTask: Task<Void, Never>?
+    @ObservationIgnored private nonisolated(unsafe) var haveContextObservationTask: Task<Void, Never>?
+    @ObservationIgnored private nonisolated(unsafe) var sitemapObservationTask: Task<Void, Never>?
+    @ObservationIgnored private nonisolated(unsafe) var connectionConfigObservationTask: Task<Void, Never>?
+    @ObservationIgnored private let sitemapEventStream = SitemapEventStream()
+    @ObservationIgnored private var eventsDuringReload = SitemapEventReplayLog()
+    // nonisolated(unsafe): [any NSObjectProtocol] is not Sendable; without this the compiler
+    // rejects the deinit removeObserver call, yet also warns that the annotation has no effect —
+    // a known Swift diagnostics contradiction; the annotation IS required for deinit access.
+    @ObservationIgnored private nonisolated(unsafe) var notificationObservers: [any NSObjectProtocol] = []
+    var isPolling = false
 
-    @Published var openHABSitemapPage: OpenHABPage? {
+    var openHABSitemapPage: OpenHABPage? {
         didSet { showTitle(openHABSitemapPage?.title) }
     }
 
     var currentClientDelegate: HTTPClientDelegate?
-
-    private var cancellables = Set<AnyCancellable>()
 
     init(preview: Bool = false) {
         #if DEBUG
@@ -117,59 +122,9 @@ final class UserData: ObservableObject {
 
     init() {
         setupNotificationObservers()
-
-        AppSettings.shared.$haveReceivedAppContext
-            .removeDuplicates()
-            .filter { $0 == true }
-            .sink { [weak self] _ in
-                Task {
-                    await self?.updateNetwork()
-                }
-            }
-            .store(in: &cancellables)
-
-        // Observe sitemap changes - reload the sitemap when it changes
-        // Note: We don't use .dropFirst() here because we need to catch the initial value
-        // when the app context is first received from the iOS app on real devices
-        AppSettings.shared.$sitemapForWatch
-            .removeDuplicates()
-            .debounce(for: .seconds(0.3), scheduler: RunLoop.main)
-            .sink { [weak self] newValue in
-                guard !newValue.isEmpty else {
-                    Logger.userData.debug("Sitemap observer: empty sitemap, ignoring")
-                    return
-                }
-                Logger.userData.debug("Sitemap observer fired: \(newValue)")
-                Task { @MainActor in
-                    guard let self else { return }
-
-                    // Only force restart if the sitemap name actually changed
-                    let isDifferentSitemap = self.currentlyLoadingSitemap != newValue
-                    Logger.userData.debug("Sitemap change detected - current: \(self.currentlyLoadingSitemap ?? "nil"), new: \(newValue), force: \(isDifferentSitemap)")
-
-                    // Note: We don't check for active connection here because NetworkTracker
-                    // can report false negatives (especially during long-polling on real devices).
-                    // The observeNetworkChanges() function will handle retrying when network becomes available.
-                    self.startPageHandling(sitemapName: newValue, force: isDifferentSitemap)
-                }
-            }
-            .store(in: &cancellables)
-
-        // Observe connection config changes and trigger on initial values (no dropFirst).
-        // This covers cold start (persisted connections fire immediately on subscription)
-        // and config updates (server URL changed on iPhone and synced via WC).
-        AppSettings.shared.$localConnectionConfig
-            .combineLatest(AppSettings.shared.$remoteConnectionConfig)
-            .removeDuplicates { lhs, rhs in
-                lhs.0?.url == rhs.0?.url && lhs.1?.url == rhs.1?.url
-            }
-            .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
-            .sink { [weak self] _, _ in
-                Task { @MainActor in
-                    await self?.updateNetwork()
-                }
-            }
-            .store(in: &cancellables)
+        observeHaveReceivedAppContext()
+        observeSitemapForWatch()
+        observeConnectionConfigs()
 
         networkObservationTask = Task { [weak self] in
             // Obtain the stream without capturing self, so self is not held across suspensions.
@@ -180,6 +135,46 @@ final class UserData: ObservableObject {
             for await state in stream {
                 guard let self else { break }
                 handleConnectionEvent(state.activeConnection)
+            }
+        }
+    }
+
+    /// Updates the network when the iPhone's application context has arrived: at launch when it
+    /// already has, and on each later change to true.
+    private func observeHaveReceivedAppContext(settings: AppSettings = .shared) {
+        haveContextObservationTask = Task { @MainActor [weak self] in
+            for await haveContext in AsyncStream.observing({ settings.haveReceivedAppContext }) where haveContext {
+                await self?.updateNetwork()
+            }
+        }
+    }
+
+    /// Starts page handling for the watch sitemap once it has stayed unchanged for 300 ms,
+    /// including for the stored value at launch.
+    private func observeSitemapForWatch(settings: AppSettings = .shared) {
+        sitemapObservationTask = Task { @MainActor [weak self] in
+            let sitemaps = AsyncStream.observing { settings.sitemapForWatch }
+            await sitemaps.debounce(for: .milliseconds(300)) { [weak self] sitemap in
+                guard let self else { return }
+                guard !sitemap.isEmpty else {
+                    Logger.userData.debug("Sitemap observer: empty sitemap, ignoring")
+                    return
+                }
+                let currentSitemap = currentlyLoadingSitemap
+                let force = currentSitemap != sitemap
+                Logger.userData.debug("Sitemap change detected - current: \(currentSitemap ?? "nil"), new: \(sitemap), force: \(force)")
+                startPageHandling(sitemapName: sitemap, force: force)
+            }
+        }
+    }
+
+    /// Updates the network once the local and remote URLs have stayed unchanged for 500 ms,
+    /// including for the stored values at launch.
+    private func observeConnectionConfigs(settings: AppSettings = .shared) {
+        connectionConfigObservationTask = Task { @MainActor [weak self] in
+            let urls = AsyncStream.observing { [settings.localConnectionConfig?.url, settings.remoteConnectionConfig?.url] }
+            await urls.debounce(for: .milliseconds(500)) { [weak self] _ in
+                await self?.updateNetwork()
             }
         }
     }
@@ -321,13 +316,12 @@ final class UserData: ObservableObject {
         let capturedGeneration = taskGeneration
 
         pageHandlingTask = Task {
-            let taskSitemapName = sitemapName
             defer {
                 // Use the captured generation rather than sitemap name: a force-refresh of the same
                 // sitemap would set currentlyLoadingSitemap to the same string, so the name check
                 // would incorrectly clear the new task's slot when the old task finishes.
                 if taskGeneration == capturedGeneration {
-                    Logger.userData.debug("Clearing page handling task for: \(taskSitemapName)")
+                    Logger.userData.debug("Clearing page handling task for: \(sitemapName)")
                     pageHandlingTask = nil
                     currentlyLoadingSitemap = nil
                 }
@@ -376,10 +370,10 @@ final class UserData: ObservableObject {
                     guard await !followEvents(sitemapName: sitemapName, pageId: eventPageId, connectionInfo: connectionInfo) else {
                         return
                     }
-                    Logger.userData.info("Sitemap events unavailable for \(taskSitemapName), falling back to long polling")
+                    Logger.userData.info("Sitemap events unavailable for \(sitemapName), falling back to long polling")
                 }
 
-                Logger.userData.debug("Starting long polling for sitemap: \(taskSitemapName)")
+                Logger.userData.debug("Starting long polling for sitemap: \(sitemapName)")
                 for try await event in SitemapPageLoader.stream(
                     sitemapName: sitemapName,
                     pageId: pageId,
@@ -399,7 +393,7 @@ final class UserData: ObservableObject {
             } catch is CancellationError {
                 return
             } catch {
-                Logger.userData.error("Page handling failed for sitemap '\(taskSitemapName)': \(error.localizedDescription)")
+                Logger.userData.error("Page handling failed for sitemap '\(sitemapName)': \(error.localizedDescription)")
 
                 // Use cached widgets if available instead of clearing completely
                 if cachedWidgets.isEmpty {
@@ -537,8 +531,8 @@ final class UserData: ObservableObject {
             : widgets
         decorateWidgetsWithSendCommand(allWidgets)
 
-        // Only reassign the @Published array when the list structure actually
-        // changed (widgets added, removed, or reordered). This avoids a full
+        // Only reassign the array when the list structure actually changed
+        // (widgets added, removed, or reordered). This avoids a full
         // ScrollView rebuild that resets the scroll position.
         if structureChanged {
             widgets = allWidgets
@@ -565,6 +559,9 @@ final class UserData: ObservableObject {
         // here is therefore a no-op in the normal path but harmless as a safety net.
         pageHandlingTask?.cancel()
         networkObservationTask?.cancel()
+        haveContextObservationTask?.cancel()
+        sitemapObservationTask?.cancel()
+        connectionConfigObservationTask?.cancel()
         notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 }
