@@ -22,15 +22,6 @@ struct MainUIServer: Equatable, Sendable {
     /// The endpoints it offers, e.g. "items", "rules", "auth".
     let endpoints: Set<String>
 
-    init(majorVersion: Int?, endpoints: Set<String>) {
-        self.majorVersion = majorVersion
-        self.endpoints = endpoints
-    }
-
-    init(_ properties: OpenHABServerProperties) {
-        self.init(majorVersion: properties.majorVersion, endpoints: properties.linkTypes)
-    }
-
     /// Without the `auth` endpoint nobody can sign in, so everybody is an administrator.
     var requiresSignIn: Bool {
         endpoints.contains("auth")
@@ -40,6 +31,15 @@ struct MainUIServer: Equatable, Sendable {
     var hasChat: Bool {
         (majorVersion ?? 0) >= 5
     }
+
+    init(majorVersion: Int?, endpoints: Set<String>) {
+        self.majorVersion = majorVersion
+        self.endpoints = endpoints
+    }
+
+    init(_ properties: OpenHABServerProperties) {
+        self.init(majorVersion: properties.majorVersion, endpoints: properties.linkTypes)
+    }
 }
 
 /// What the user can do in Main UI.
@@ -48,6 +48,14 @@ enum MainUIAccess: Equatable {
     case open
     case signedOut
     case signedIn(OHBridgeUser)
+
+    var isAdministrator: Bool {
+        switch self {
+        case .open: true
+        case .signedOut: false
+        case let .signedIn(user): user.roles.contains(OHBridgeUser.administratorRole)
+        }
+    }
 
     /// - Parameters:
     ///   - server: Nil until `GET /rest/` has been read, when nothing can be said yet.
@@ -62,14 +70,6 @@ enum MainUIAccess: Equatable {
             self = .signedIn(user)
         } else {
             self = .signedOut
-        }
-    }
-
-    var isAdministrator: Bool {
-        switch self {
-        case .open: true
-        case .signedOut: false
-        case let .signedIn(user): user.roles.contains(OHBridgeUser.administratorRole)
         }
     }
 
@@ -101,6 +101,13 @@ enum MainUIMenu {
     /// Main UI signs the user in from here when nobody is, and shows the profile when somebody is.
     static let profileRoute = "/profile/"
 
+    static let aboutEntry = MainUIMenuEntry(
+        id: "about",
+        label: String(localized: "Help & About"),
+        symbol: .questionmarkCircle,
+        path: aboutRoute
+    )
+
     /// The pinned pages `access` shows, in the order Main UI lists them.
     static func pinnedPages(_ pages: [OpenHABUIPage], access: MainUIAccess?) -> [OpenHABUIPage] {
         guard let access else { return pages.filter(\.visibleTo.isEmpty) }
@@ -116,13 +123,6 @@ enum MainUIMenu {
             path: chatRoute
         )
     }
-
-    static let aboutEntry = MainUIMenuEntry(
-        id: "about",
-        label: String(localized: "Help & About"),
-        symbol: .questionmarkCircle,
-        path: aboutRoute
-    )
 
     /// What Administration lists for an administrator. Each entry is there when the endpoints it
     /// works on are.

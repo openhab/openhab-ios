@@ -212,6 +212,11 @@ struct ToolbarMenu: View {
 }
 
 extension ToolbarMenu {
+    /// What the user can do in Main UI. Nil until the server's endpoints are known.
+    private var access: MainUIAccess? {
+        MainUIAccess(server: menuData.server, auth: webAuth)
+    }
+
     /// Mirrors the active home's persisted section-expansion state into local `@State`.
     private func loadExpansionState() async {
         let prefs = await Preferences.shared.currentHomePreferences
@@ -430,11 +435,6 @@ extension ToolbarMenu {
     }
 
     // MARK: - Administration
-
-    /// What the user can do in Main UI. Nil until the server's endpoints are known.
-    private var access: MainUIAccess? {
-        MainUIAccess(server: menuData.server, auth: webAuth)
-    }
 
     private func mainUIEntryRow(_ entry: MainUIMenuEntry, footer: String? = nil, accessibilityId: String? = nil) -> some View {
         menuDetailRow(

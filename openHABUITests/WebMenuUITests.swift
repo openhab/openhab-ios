@@ -46,6 +46,10 @@ private enum WebMenuFixture {
 final class WebMenuUITests: XCTestCase {
     private var app: XCUIApplication!
 
+    private var adminSettings: XCUIElement {
+        app.descendants(matching: .any).matching(identifier: "WebMenu-/settings/").firstMatch
+    }
+
     override func setUp() async throws {
         try await super.setUp()
         continueAfterFailure = false
@@ -73,10 +77,6 @@ final class WebMenuUITests: XCTestCase {
         let el = app.descendants(matching: .any).matching(identifier: identifier).firstMatch
         XCTAssertTrue(el.waitForExistence(timeout: timeout), "Expected '\(identifier)' within \(timeout)s")
         return el
-    }
-
-    private var adminSettings: XCUIElement {
-        app.descendants(matching: .any).matching(identifier: "WebMenu-/settings/").firstMatch
     }
 
     /// Opens or closes Administration. Its state is kept per home, so it may already be either.
