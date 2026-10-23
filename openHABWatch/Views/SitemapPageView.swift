@@ -87,7 +87,7 @@ struct SitemapPageView: View {
             } else if !viewModel.widgets.isEmpty {
                 ScrollView {
                     VStack(spacing: 4) {
-                        ForEach(sitemapVisibleWidgets(viewModel.widgets)) { widget in
+                        ForEach(viewModel.visibleWidgets) { widget in
                             WidgetRowView(widget: widget)
                                 .id(widget.widgetId)
                         }
@@ -108,7 +108,7 @@ struct SitemapPageView: View {
                     .padding(.vertical, 2)
                 }
                 .scrollPosition(id: $scrollPosition, anchor: .top)
-                .navigationBarTitle(viewModel.openHABSitemapPage?.title.labelValueTitle ?? "Sitemap")
+                .navigationBarTitle(viewModel.pageTitle?.labelValueTitle ?? "Sitemap")
             } else {
                 VStack {
                     Spacer()

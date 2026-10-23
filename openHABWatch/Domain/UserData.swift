@@ -20,7 +20,14 @@ import SwiftUI
 final class UserData: ObservableObject {
     static let shared = UserData()
 
-    @Published var widgets: [OpenHABWidget] = []
+    @Published var widgets: [OpenHABWidget] = [] {
+        didSet { refreshVisibleWidgets() }
+    }
+
+    /// The widgets the page shows, after hiding the invisible ones.
+    @Published private(set) var visibleWidgets: [OpenHABWidget] = []
+    /// The title the page shows. Kept apart from `openHABSitemapPage`, whose title changes in place.
+    @Published private(set) var pageTitle: String?
     @Published var showAlert = false
     @Published var errorDescription = ""
     @Published var showCertificateAlert = false
@@ -46,7 +53,10 @@ final class UserData: ObservableObject {
     private nonisolated(unsafe) var notificationObservers: [any NSObjectProtocol] = []
     @Published var isPolling = false
 
-    @Published var openHABSitemapPage: OpenHABPage?
+    @Published var openHABSitemapPage: OpenHABPage? {
+        didSet { showTitle(openHABSitemapPage?.title) }
+    }
+
     var currentClientDelegate: HTTPClientDelegate?
 
     private var cancellables = Set<AnyCancellable>()
@@ -60,6 +70,9 @@ final class UserData: ObservableObject {
                 openHABSitemapPage = OpenHABPage(sitemapPage)
                 widgets = openHABSitemapPage?.widgets ?? []
                 decorateWidgetsWithSendCommand(widgets)
+                // Property observers don't run in an initializer.
+                refreshVisibleWidgets()
+                showTitle(openHABSitemapPage?.title)
             } catch {
                 Logger.userData.error("Should not throw \(error.localizedDescription)")
             }
@@ -520,8 +533,7 @@ final class UserData: ObservableObject {
         if structureChanged {
             widgets = allWidgets
         } else if visibilityChanged {
-            // Visibility isn't published: the page has to filter its widgets again.
-            objectWillChange.send()
+            refreshVisibleWidgets()
         }
     }
 
@@ -614,14 +626,13 @@ private extension UserData {
 
     func applyToScreen(_ event: OpenHABSitemapWidgetEvent) -> Bool {
         if let page = openHABSitemapPage, event.widgetId == page.pageId, let label = event.label {
-            objectWillChange.send()
             page.title = label
+            showTitle(label)
             return false
         }
         let result = widgets.apply(event: event)
         if result == .applied, event.visibility != nil {
-            // Visibility isn't published: the page has to filter its widgets again.
-            objectWillChange.send()
+            refreshVisibleWidgets()
         }
         return SitemapUpdatePolicy.needsPageReload(after: result)
     }
@@ -664,9 +675,22 @@ private extension UserData {
         return true
     }
 
+    /// Filters the widgets again. Visibility isn't published, so this runs whenever it may have
+    /// changed. Only a different list is published, which keeps the scroll position otherwise.
+    func refreshVisibleWidgets() {
+        let visible = sitemapVisibleWidgets(widgets)
+        guard !visible.elementsEqual(visibleWidgets, by: ===) else { return }
+        visibleWidgets = visible
+    }
+
+    func showTitle(_ title: String?) {
+        guard pageTitle != title else { return }
+        pageTitle = title
+    }
+
     func show(_ page: OpenHABPage) {
         // Only update page object when title changes to avoid
-        // firing objectWillChange and resetting scroll position
+        // publishing a change and resetting scroll position
         if openHABSitemapPage?.title != page.title {
             openHABSitemapPage = page
         }
