@@ -50,7 +50,7 @@ enum DragState {
 }
 
 struct ColorSelection: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     @GestureState var thumb: DragState = .inactive
 
     @State private var hue = 0.0
