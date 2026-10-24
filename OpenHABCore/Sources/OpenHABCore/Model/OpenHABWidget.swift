@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-@_exported import Combine
+import Combine
 import Foundation
 @_exported import MapKit
 import os.log
