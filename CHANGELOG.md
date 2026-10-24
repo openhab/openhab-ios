@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [Version 3.4.35, Build 332] - 2026-10-24Z
+
+- Remove unused Combine leftovers (#1372)
+- watchos: migrate AppSettings and UserData from ObservableObject to @Observable (#1267)
+- Follow sitemap events on the watch, sharing the update policy with iOS (#1371)
+- watchos: own the linked-page model and keep it polling the right page (#1365)
+
 ## [Version 3.4.34, Build 331] - 2026-10-23Z
 
 - MainUI Native Bridge (#1354)
