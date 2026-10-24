@@ -27,6 +27,7 @@ final class ToolbarMenuUITests: XCTestCase {
         try await super.setUp()
         continueAfterFailure = false
         app = XCUIApplication()
+        app.useEnglishLocale()
         app.launchEnvironment["UITest"] = "1"
         app.launchEnvironment["UITestOpenMenu"] = "1"
     }
@@ -36,24 +37,26 @@ final class ToolbarMenuUITests: XCTestCase {
         try await super.tearDown()
     }
 
-    /// Pulling the menu down triggers a reload that keeps the menu open and populated —
-    /// unlike the header's reload button, which clears the data and closes the menu.
-    func testPullToRefreshKeepsMenuOpenAndPopulated() {
+    /// Opening the menu loads its entries, so there is no need to pull it down to refresh.
+    func testOpenMenuIsPopulated() {
         app.launch()
 
         XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
         XCTAssertTrue(sitemapsHeader.waitForExistence(timeout: 20), "Demo sitemaps should load into the open menu")
+        XCTAssertTrue(sitemapsHeader.isHittable, "Sitemaps header should be interactable once the menu has loaded")
+    }
 
-        let scrollView = app.scrollViews["ToolbarMenuScrollView"]
-        XCTAssertTrue(scrollView.exists, "Menu scroll view should be present")
+    /// A tap outside the popover closes it. A pull down on it would too, which is why the menu has
+    /// no pull-to-refresh: it reloads whenever it opens.
+    func testTapOutsideClosesTheMenu() {
+        app.launch()
 
-        let start = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2))
-        let end = start.withOffset(CGVector(dx: 0, dy: 250))
-        start.press(forDuration: 0.1, thenDragTo: end)
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
 
-        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 2), "Menu should stay open after pull-to-refresh")
-        XCTAssertTrue(sitemapsHeader.waitForExistence(timeout: 20), "Sitemaps should remain listed after pull-to-refresh")
-        XCTAssertTrue(sitemapsHeader.isHittable, "Sitemaps header should be interactable once the refresh settles")
+        app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.97)).tap()
+
+        let closed = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: appSettingsRow)
+        wait(for: [closed], timeout: 3)
     }
 
     /// "Add Home" opens the New Home alert. With several homes it sits behind "Edit".

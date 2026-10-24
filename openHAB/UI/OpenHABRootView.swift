@@ -24,7 +24,7 @@ import SwiftUI
 /// has failed it switches to a warning: a countdown to the next retry, or — when the tracker
 /// has given up — a static "cannot connect" message. On an adaptive background so the blank
 /// page reads as intentional in both light and dark mode.
-private struct ConnectingPlaceholder: View {
+struct ConnectingPlaceholder: View {
     private enum Phase: Equatable {
         case connecting
         case retrying(Date)
@@ -267,8 +267,6 @@ struct OpenHABRootView: View {
     @State private var crashService = CrashReportService()
     @State private var menuData = MenuDataService()
     @StateObject private var webViewModel = OpenHABWebViewModel()
-    @State private var menuPresented = false
-    @State private var navbarActionsPresented = false
     @State private var currentContent: TargetController = .webview
     @State private var currentViewTitle = ""
     @State private var activeNetworkConnection: ConnectionInfo? = MainActorNetworkTracker.shared.activeConnection
@@ -277,18 +275,11 @@ struct OpenHABRootView: View {
     @State private var cachedHomePrefs: HomePreferences?
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             contentView
-
-            // Toolbar menu overlay
-            ToolbarMenu(
-                isPresented: $menuPresented,
-                menuData: menuData,
-                webAuth: webViewModel.auth,
-                currentContent: currentContent,
-                onSelect: { target in handleMenuSelection(target) },
-                onReload: { reloadCurrentContent() }
-            )
+                .environment(\.appMenu, appMenuConfiguration)
+            // A sibling above the content rather than an overlay of the navigation container.
+            InAppToastBanner(service: ToastService.shared)
         }
         .onAppear {
             #if DEBUG
@@ -314,11 +305,6 @@ struct OpenHABRootView: View {
             if env["UITestNotifications"] != nil {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     showNotifications = true
-                }
-            }
-            if env["UITestOpenMenu"] != nil {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    menuPresented = true
                 }
             }
             if env["UITestWebViewMode"] != nil {
@@ -428,9 +414,6 @@ struct OpenHABRootView: View {
         } message: {
             Text("The app crashed during the previous session. Would you like to send a crash report?")
         }
-        .overlay(alignment: .bottom) {
-            InAppToastBanner(service: ToastService.shared)
-        }
         // SwiftFormat miscomputes indentation for a closure wrapped in #if/#endif with --ifdef no-indent.
         // swiftformat:disable indent
         #if DEBUG
@@ -460,222 +443,35 @@ private extension OpenHABRootView {
     var contentView: some View {
         switch currentContent {
         case .webview, .mainUIPage:
-            ZStack(alignment: .top) {
-                // The Main UI lays itself out from the safe-area insets and reserves the
-                // navbar space the bar below sits on.
-                OpenHABWebViewContainer(viewModel: webViewModel)
-                    .background(.clear)
-                    .ignoresSafeArea()
-                // Placeholder while a home is first loading. Sits above the (transparent)
-                // web view but below the menu bar, so the menu stays reachable and the user
-                // can switch homes even while connecting.
-                if !webViewModel.hasLoadedContent {
-                    ConnectingPlaceholder()
-                        .transition(.opacity)
-                }
-                // Same slide Framework7 uses for its navbar: up by the bar height, fading, 400ms.
-                menuBar
-                    .offset(y: webViewModel.navbar.hidden ? -menuBarHeight : 0)
-                    .opacity(webViewModel.navbar.hidden ? 0 : 1)
-                    .allowsHitTesting(!webViewModel.navbar.hidden)
-                    .animation(
-                        .timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.4),
-                        value: webViewModel.navbar.hidden
-                    )
-            }
-            .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
+            nativeBarContent(tileTitle: nil)
         case let .sitemap(name, navigationState: state):
-            SitemapNavigationView(sitemapName: name, navigationPath: state.navigationPath) { menuPresented = true }
+            SitemapNavigationView(sitemapName: name, navigationPath: state.navigationPath)
                 .id("\(name)-\(state.navigationPath.last?.pageLink ?? "")-\(sitemapResetID)")
         case .tile:
-            VStack(spacing: 0) {
-                menuBar
-                OpenHABWebViewContainer(viewModel: webViewModel)
-            }
+            nativeBarContent(tileTitle: currentViewTitle)
         case .notifications, .browser:
             preconditionFailure("Modal/transient targets must never become currentContent")
         }
     }
 
-    /// The host owns the bar height; the bridge sizes Main UI's own navbar to match it.
-    var menuBarHeight: CGFloat {
-        OpenHABWebViewModel.navbarHeight
-    }
-
-    @ViewBuilder
-    var menuBar: some View {
-        let isWebviewMode = isMainUIShown
-
-        let barTitle: String = {
-            if isWebviewMode {
-                return webViewModel.navbar.titleInContent ? "" : webViewModel.navbar.title
-            }
-            if case .tile = currentContent {
-                return currentViewTitle
-            }
-            return ""
-        }()
-
-        HStack {
-            // Left side: proxied navbar items (webview mode with items available),
-            // or connection-status indicator as fallback.
-            Group {
-                if isWebviewMode, webViewModel.navbar.back != nil || !webViewModel.navbar.actions.isEmpty {
-                    let back = webViewModel.navbar.back
-                    let actions = webViewModel.navbar.actions
-                    HStack(spacing: 4) {
-                        // Back button is always shown directly in the bar when present.
-                        if let back {
-                            navbarBackButton(back)
-                        }
-                        // When a back button is present, remaining items always go in a
-                        // popover — even a single item, which may be text-only and too wide
-                        // to sit next to the back button and the hamburger.
-                        // Without a back button, a single item is shown directly.
-                        if !actions.isEmpty {
-                            if back != nil || actions.count > 1 {
-                                navbarActionsButton(actions)
-                            } else if let single = actions.first {
-                                navbarProxyButton(single)
-                            }
-                        }
-                    }
-                } else if isWebviewMode, activeNetworkConnection == nil {
-                    HStack(spacing: 4) {
-                        Image(systemSymbol: .wifiExclamationmark)
-                        Text("Offline")
-                            .ohTextToken(.secondary)
-                        Button { reloadCurrentContent() } label: {
-                            Image(systemSymbol: .arrowClockwise)
-                        }
-                    }
-                    .foregroundStyle(.secondary)
-                } else if webViewModel.isLoading {
-                    HStack(spacing: 4) {
-                        ProgressView()
-                            .controlSize(.small)
-                        Text("Connecting")
-                            .ohTextToken(.secondary)
-                    }
-                    .foregroundStyle(.secondary)
-                }
-            }
-            .padding(.leading)
-
-            Spacer()
-
-            Group {
-                if #available(iOS 26, *) {
-                    Button {
-                        menuPresented = true
-                    } label: {
-                        Image(systemSymbol: .line3Horizontal)
-                            .font(.title)
-                    }
-                    .buttonStyle(.glass)
-                    .accessibilityIdentifier("HamburgerButton")
-                    .accessibilityLabel("Menu")
-                    .padding(.trailing)
-                } else {
-                    Button {
-                        menuPresented = true
-                    } label: {
-                        Image(systemSymbol: .line3Horizontal)
-                            .font(.title)
-                    }
-                    .accessibilityIdentifier("HamburgerButton")
-                    .accessibilityLabel("Menu")
-                    .padding(.trailing)
-                }
-            }
-            .scaleEffect(menuPresented ? 3.0 : 1.0, anchor: .topTrailing)
-            .opacity(menuPresented ? 0.0 : 1.0)
-            .animation(.spring(response: 0.32, dampingFraction: 0.78), value: menuPresented)
-        }
-        .frame(height: menuBarHeight)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("MainMenuBar")
-        .overlay {
-            if !barTitle.isEmpty {
-                Text(barTitle)
-                    .font(.headline)
-                    .lineLimit(1)
-                    .frame(maxWidth: 200)
-                    .allowsHitTesting(false)
-            }
-        }
-        .background(
-            isWebviewMode
-                ? AnyShapeStyle(.bar)
-                : AnyShapeStyle(Color(.systemBackground)),
-            ignoresSafeAreaEdges: .top
+    /// What the app menu shows, for every screen with a navigation bar. See `AppMenu.swift`.
+    var appMenuConfiguration: AppMenuConfiguration {
+        AppMenuConfiguration(
+            menuData: menuData,
+            webAuth: webViewModel.auth,
+            currentContent: currentContent,
+            onSelect: { target in handleMenuSelection(target) },
+            onReload: { reloadCurrentContent() }
         )
     }
-}
 
-// MARK: - Navbar proxy helpers
-
-private extension OpenHABRootView {
-    func navbarBackButton(_ back: OHBridgeNavbarState.Back) -> some View {
-        let label = back.label.flatMap { $0.isEmpty ? nil : $0 } ?? String(localized: "Back")
-        return Button {
-            webViewModel.bridge.back()
-        } label: {
-            Image(systemSymbol: .chevronLeft)
-                .font(.title3)
-        }
-        .accessibilityLabel(label)
-        .accessibilityIdentifier("NavbarProxyButton-\(label)")
-    }
-
-    func navbarProxyButton(_ item: OHBridgeNavbarAction) -> some View {
-        Button {
-            webViewModel.bridge.activateNavbarAction(item.id)
-        } label: {
-            navbarActionLabel(item)
-        }
-        .disabled(item.disabled == true)
-        .accessibilityLabel(item.accessibilityName)
-        .accessibilityIdentifier("NavbarProxyButton-\(item.accessibilityName)")
-    }
-
-    @ViewBuilder
-    func navbarActionLabel(_ item: OHBridgeNavbarAction) -> some View {
-        if item.icon != nil {
-            OHBridgeIconView(icon: item.icon, size: 24, fallback: .questionmarkCircle)
-        } else {
-            Text(item.label)
-        }
-    }
-
-    func navbarActionsButton(_ items: [OHBridgeNavbarAction]) -> some View {
-        Button {
-            navbarActionsPresented = true
-        } label: {
-            Image(systemSymbol: .ellipsisCircle)
-                .font(.title2)
-        }
-        .accessibilityLabel("Actions")
-        .accessibilityIdentifier("NavbarActionsMenu")
-        .popover(isPresented: $navbarActionsPresented) {
-            HStack(spacing: 20) {
-                ForEach(items) { item in
-                    Button {
-                        webViewModel.bridge.activateNavbarAction(item.id)
-                        navbarActionsPresented = false
-                    } label: {
-                        navbarActionLabel(item)
-                    }
-                    .disabled(item.disabled == true)
-                    .accessibilityLabel(item.accessibilityName)
-                    .accessibilityIdentifier("NavbarProxyButton-\(item.accessibilityName)")
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .presentationDetents([.height(72)])
-            .presentationCompactAdaptation(.popover)
-        }
+    /// Main UI or a tile with a system navigation bar. See `MainUINavigationView`.
+    func nativeBarContent(tileTitle: String?) -> some View {
+        MainUINavigationView(
+            webViewModel: webViewModel,
+            activeConnection: activeNetworkConnection,
+            tileTitle: tileTitle
+        ) { reloadCurrentContent() }
     }
 
     func switchToSavedView() async {

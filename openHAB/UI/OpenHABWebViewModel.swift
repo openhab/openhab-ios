@@ -18,9 +18,6 @@ import WebKit
 
 @MainActor
 class OpenHABWebViewModel: ObservableObject {
-    /// The host owns the bar height; the shim sizes Main UI's own navbar to match.
-    static let navbarHeight: CGFloat = 44
-
     // MARK: - Published state
 
     @Published var isLoading = false
@@ -97,6 +94,10 @@ class OpenHABWebViewModel: ObservableObject {
     /// Which home the web view currently belongs to. Kept here so we can note pages against it
     /// right away. Looking it up takes a moment, and the user can switch homes in between.
     private var currentHomeId: UUID?
+    /// The layout the host view reports from the safe area it measures. While it is set, it
+    /// replaces the one derived from the web view's own insets. The system bar is part of that
+    /// safe area, so a `navbarHeight` on top of it would make Main UI leave room twice.
+    private var systemBarLayout: OHBridgeLayout?
 
     /// True once Main UI is live in the page now loaded, so it can be navigated in place.
     var isMainUIReady: Bool {
@@ -565,6 +566,9 @@ class OpenHABWebViewModel: ObservableObject {
             showMenu(of: wv)
         }
         wv.loadHTMLString(html, baseURL: nil)
+        // An injected page has no URL for `handleDidFinish` to count as content, and the
+        // "Connecting…" placeholder would cover it and swallow the test's taps.
+        hasLoadedContent = true
     }
     #endif
 
@@ -714,12 +718,22 @@ extension OpenHABWebViewModel {
         }
     }
 
-    /// The space the host's chrome takes over the page.
+    /// Tells Main UI how much of the page the host's system bars cover, and keeps sending it
+    /// with every page load.
+    func setSystemBarLayout(_ layout: OHBridgeLayout) {
+        systemBarLayout = layout
+        bridge.updateLayout(layout)
+    }
+
+    /// The space the host's chrome takes over the page, before the host has reported a layout.
     func currentLayout() -> OHBridgeLayout {
+        if let systemBarLayout {
+            return systemBarLayout
+        }
         let insets = webView.safeAreaInsets
         return OHBridgeLayout(
             insets: .init(top: insets.top, bottom: insets.bottom),
-            navbarHeight: Self.navbarHeight
+            navbarHeight: 0
         )
     }
 

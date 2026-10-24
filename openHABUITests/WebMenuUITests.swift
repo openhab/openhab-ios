@@ -54,6 +54,7 @@ final class WebMenuUITests: XCTestCase {
         try await super.setUp()
         continueAfterFailure = false
         app = XCUIApplication()
+        app.useEnglishLocale()
         app.launchEnvironment["UITest"] = "1"
         app.launchEnvironment["UITestWebViewMode"] = "1"
     }
