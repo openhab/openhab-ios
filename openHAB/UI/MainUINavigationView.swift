@@ -58,14 +58,14 @@ import SwiftUI
 //      matching the page's navbar height. That makes a system bar, whose height differs, workable.
 //    - The bar is still a custom overlay in that PR; this view is the follow-up on top of it.
 //
-// 4. ASSUMED PROTOCOL EXTENSIONS (already commented on the PR; this view assumes them)
-//    - `layout` carries leading and trailing insets next to top and bottom.
+// 4. PROTOCOL EXTENSIONS THAT ARE NOT NEEDED SO FAR
+//    - `layout` could carry leading and trailing insets next to top and bottom.
 //    - `layout.navbarHeight` may be 0 ("no top bar").
-//    The real `OHBridgeLayout` and the shim do not have the first yet, and the shim falls back to
+//    The real `OHBridgeLayout` and the shim do not have the first, and the shim falls back to
 //    44 for a height of 0. `MainUILayout` models the extended layout and sends what the real type
-//    can carry. Not verified: whether Main UI's own CSS (`env(safe-area-inset-right)`, which
-//    Framework7 turns into `--f7-safe-area-right`) already keeps content clear of the strip
-//    without the protocol change.
+//    can carry. Main UI's pages stay clear of the strip without the extension (tested on the
+//    iPhone Duo with the demo home and a real home), so it is not needed until a page is found
+//    that draws under the strip.
 //
 // 5. WHAT THIS VIEW DOES
 //    - `NavigationStack` + `.toolbar` carries back, actions, connection state and the menu.
