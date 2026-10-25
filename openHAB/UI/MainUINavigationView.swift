@@ -443,7 +443,7 @@ private struct MainUIPreviewHost: View {
                 \.appMenu,
                 AppMenuConfiguration(
                     menuData: menuData,
-                    webAuth: webViewModel.auth,
+                    authStatus: webViewModel.authStatus,
                     currentContent: tileTitle == nil ? .webview : .tile(""),
                     onSelect: { _ in },
                     onReload: { webViewModel.loadWebView(force: true) }

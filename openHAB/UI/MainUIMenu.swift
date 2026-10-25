@@ -46,30 +46,50 @@ struct MainUIServer: Equatable, Sendable {
 enum MainUIAccess: Equatable {
     /// The server has no sign-in.
     case open
+    /// The server has sign-in and the page has not said yet who is signed in. Like signed out for
+    /// what shows, but without offering to sign in: the user may be signed in already.
+    case resolving
     case signedOut
     case signedIn(OHBridgeUser)
 
     var isAdministrator: Bool {
         switch self {
         case .open: true
-        case .signedOut: false
+        case .resolving, .signedOut: false
         case let .signedIn(user): user.roles.contains(OHBridgeUser.administratorRole)
         }
     }
 
     /// - Parameters:
     ///   - server: Nil until `GET /rest/` has been read, when nothing can be said yet.
-    ///   - auth: What the page reported. Nil while no page has been loaded since the app started,
-    ///     which counts as signed out: the user may be signed in already, and tapping the
-    ///     Administration header finds out.
+    ///   - auth: What the page reported. Nil counts as signed out; use `init(server:status:)` to
+    ///     tell that the page has not said yet.
     init?(server: MainUIServer?, auth: OHBridgeAuthState?) {
+        self.init(server: server, status: auth.map(MainUIAuthStatus.known) ?? .gaveUp)
+    }
+
+    /// - Parameters:
+    ///   - server: Nil until `GET /rest/` has been read, when nothing can be said yet.
+    ///   - status: What is known about who is signed in on the origin in use.
+    init?(server: MainUIServer?, status: MainUIAuthStatus) {
         guard let server else { return nil }
-        if auth?.noAuth == true || !server.requiresSignIn {
+        guard server.requiresSignIn else {
             self = .open
-        } else if let user = auth?.user {
-            self = .signedIn(user)
-        } else {
+            return
+        }
+        switch status {
+        case .unknown:
+            self = .resolving
+        case .gaveUp:
             self = .signedOut
+        case let .known(auth):
+            if auth.noAuth == true {
+                self = .open
+            } else if let user = auth.user {
+                self = .signedIn(user)
+            } else {
+                self = .signedOut
+            }
         }
     }
 
@@ -79,7 +99,7 @@ enum MainUIAccess: Equatable {
         guard !visibleTo.isEmpty else { return true }
         switch self {
         case .open: return true
-        case .signedOut: return false
+        case .resolving, .signedOut: return false
         case let .signedIn(user):
             return visibleTo.contains("user:\(user.name)") || user.roles.contains { visibleTo.contains("role:\($0)") }
         }

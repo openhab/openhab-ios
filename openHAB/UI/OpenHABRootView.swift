@@ -333,13 +333,15 @@ struct OpenHABRootView: View {
                     ))
                 }
             }
-            if let json = env["UITestWebAuth"],
-               let auth = try? JSONDecoder().decode(OHBridgeAuthState.self, from: Data(json.utf8)) {
+            if env["UITestWebAuth"] == "pending" {
+                webViewModel.setUITestAuthPending()
+            } else if let json = env["UITestWebAuth"],
+                      let auth = try? JSONDecoder().decode(OHBridgeAuthState.self, from: Data(json.utf8)) {
                 webViewModel.setUITestAuth(auth)
             }
             if let json = env["UITestServer"],
                let server = UITestServerFixture(json: json) {
-                menuData.injectForUITest(server: server.server, pages: server.menuPages)
+                menuData.injectForUITest(server: server.server, pages: server.menuPages, sitemaps: server.menuSitemaps)
             }
             #endif
             ImageDownloader.default.authenticationChallengeResponder = networkService
@@ -458,7 +460,7 @@ private extension OpenHABRootView {
     var appMenuConfiguration: AppMenuConfiguration {
         AppMenuConfiguration(
             menuData: menuData,
-            webAuth: webViewModel.auth,
+            authStatus: webViewModel.authStatus,
             currentContent: currentContent,
             onSelect: { target in handleMenuSelection(target) },
             onReload: { reloadCurrentContent() }

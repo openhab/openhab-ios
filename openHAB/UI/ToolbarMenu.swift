@@ -84,7 +84,8 @@ struct ConnectionView: View {
 
 /// Toggle header shared by every collapsible menu section: a disclosure chevron
 /// followed by the uppercased section title, driving `isExpanded`. A locked section
-/// (`onUnlock` set) shows a lock in its place and unlocks instead of toggling.
+/// (`onUnlock` set) shows a lock in its place and unlocks instead of toggling. A section that is
+/// still finding out whether it is locked (`isResolving`) shows a spinner and does nothing.
 struct SectionToggleHeader: View {
     /// Space above and below the title.
     static let verticalPadding: CGFloat = 14
@@ -95,20 +96,27 @@ struct SectionToggleHeader: View {
     @Binding var isExpanded: Bool
     var accessibilityId: String?
     var onUnlock: (() -> Void)?
+    var isResolving = false
 
     var body: some View {
         Button {
             if let onUnlock {
                 onUnlock()
-            } else {
+            } else if !isResolving {
                 isExpanded.toggle()
             }
         } label: {
             HStack(spacing: 8) {
-                Image(systemSymbol: onUnlock != nil ? .lockFill : (isExpanded ? .chevronDown : .chevronRight))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 10)
+                if isResolving {
+                    ProgressView()
+                        .controlSize(.mini)
+                        .frame(width: 10)
+                } else {
+                    Image(systemSymbol: onUnlock != nil ? .lockFill : (isExpanded ? .chevronDown : .chevronRight))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 10)
+                }
                 Text(title)
                     .font(.caption)
                     .fontWeight(.semibold)
@@ -142,8 +150,8 @@ struct ToolbarMenu: View {
     var menuData: MenuDataService
     /// The tallest the menu grows before it scrolls. See `MenuSizing`.
     var maxHeight = MenuSizing.defaultHeight
-    /// Who is signed in to Main UI, sent over the bridge. Nil until a page has said.
-    var webAuth: OHBridgeAuthState?
+    /// Who is signed in to Main UI on the origin in use, sent over the bridge.
+    var authStatus: MainUIAuthStatus
     @State private var scrollViewContentSize: Double = 0
     // Section expansion is stored per home in `HomePreferences`. These `@State`
     // flags mirror the active home for immediate UI updates and are loaded from
@@ -235,7 +243,7 @@ struct ToolbarMenu: View {
 extension ToolbarMenu {
     /// What the user can do in Main UI. Nil until the server's endpoints are known.
     private var access: MainUIAccess? {
-        MainUIAccess(server: menuData.server, auth: webAuth)
+        MainUIAccess(server: menuData.server, status: authStatus)
     }
 
     /// The menu lives in a popover that stays open while a settings sheet shows, since closing it
@@ -475,7 +483,8 @@ extension ToolbarMenu {
             isEmpty: access == nil,
             showDivider: !isLast,
             accessibilityId: "AdministrationSection",
-            onUnlock: isLocked ? { unlockAdministration() } : nil
+            onUnlock: isLocked ? { unlockAdministration() } : nil,
+            isResolving: access == .resolving
         ) {
             administrationMenu()
         }
@@ -742,6 +751,8 @@ extension ToolbarMenu {
     ///   - accessibilityId: Identifier of the header, for UI tests.
     ///   - onUnlock: Non-nil while the section is locked. The header then shows a lock instead of
     ///     the chevron, runs this instead of toggling, and keeps the content away.
+    ///   - isResolving: True while it is not yet known whether the section is locked. The header
+    ///     then shows a spinner, does nothing, and keeps the content away.
     ///   - content: The section body, shown only while expanded.
     @ViewBuilder
     private func collapsibleSection(title: String.LocalizationValue,
@@ -751,6 +762,7 @@ extension ToolbarMenu {
                                     showDivider: Bool = true,
                                     accessibilityId: String? = nil,
                                     onUnlock: (() -> Void)? = nil,
+                                    isResolving: Bool = false,
                                     @ViewBuilder content: () -> some View) -> some View {
         let localizedTitle = String(localized: title)
         if isLoading, isEmpty {
@@ -761,10 +773,11 @@ extension ToolbarMenu {
                     title: localizedTitle,
                     isExpanded: isExpanded,
                     accessibilityId: accessibilityId,
-                    onUnlock: onUnlock
+                    onUnlock: onUnlock,
+                    isResolving: isResolving
                 )
 
-                if isExpanded.wrappedValue, onUnlock == nil {
+                if isExpanded.wrappedValue, onUnlock == nil, !isResolving {
                     // Wrap in a single container so the transition has one stable
                     // identity to animate — a bare ViewBuilder group (TupleView /
                     // ForEach) is layout-transparent and won't transition.

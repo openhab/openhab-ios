@@ -23,9 +23,20 @@ struct UITestServerFixture: Decodable {
         let visibleTo: [String]?
     }
 
+    struct Sitemap: Decodable {
+        let name: String
+        let label: String
+    }
+
     let version: String?
     let endpoints: [String]
     let pages: [Page]?
+    /// Sitemaps for the menu to list. The sitemap itself is still loaded from the active connection.
+    let sitemaps: [Sitemap]?
+
+    var menuSitemaps: [OpenHABSitemap] {
+        (sitemaps ?? []).map { OpenHABSitemap(name: $0.name, icon: "", label: $0.label, link: "", page: nil) }
+    }
 
     var server: MainUIServer {
         MainUIServer(majorVersion: version.flatMap { Int($0.split(separator: ".").first ?? "") }, endpoints: Set(endpoints))
@@ -131,10 +142,11 @@ class MenuDataService {
     #if DEBUG
 
     /// Stands in for what the server returns, so UI tests need no server.
-    func injectForUITest(server: MainUIServer, pages: [OpenHABUIPage]) {
+    func injectForUITest(server: MainUIServer, pages: [OpenHABUIPage], sitemaps: [OpenHABSitemap] = []) {
         isUITestInjected = true
         self.server = server
         uiPages = pages
+        self.sitemaps = sitemaps
         hasSuccessfullyLoaded = true
     }
 

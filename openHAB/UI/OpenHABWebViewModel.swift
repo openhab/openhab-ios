@@ -44,9 +44,11 @@ class OpenHABWebViewModel: ObservableObject {
     /// Main UI's sidebar, as sent over the bridge. Nil until the first `menu.state`; kept across
     /// reloads of the same home so the menu doesn't empty while a page loads.
     @Published private(set) var menu: OHBridgeMenuState?
-    /// Who is signed in to Main UI, as sent over the bridge. Nil until the first `auth.state`, and
-    /// kept across reloads of the same home, so the menu keeps what it showed while a page loads.
-    @Published private(set) var auth: OHBridgeAuthState?
+    /// Who is signed in to Main UI on the origin in use, as sent over the bridge. Unknown until
+    /// that origin's page has said, and not what another origin said: the login is kept per
+    /// origin, see `MainUIAuthTracker`. It is kept across reloads of the same origin, so the menu
+    /// keeps what it showed while a page loads.
+    @Published private(set) var authStatus = MainUIAuthStatus.unknown
     /// True while the web view holds a tile's URL. Its content outlives the surface that
     /// loaded it, so a sitemap detour does not put the Main UI back.
     @Published private(set) var isShowingTile = false
@@ -66,8 +68,11 @@ class OpenHABWebViewModel: ObservableObject {
     private var basePath = ""
     /// The last `menu.state` from each web view, so switching homes shows that home's menu.
     private var menus: [ObjectIdentifier: OHBridgeMenuState] = [:]
-    /// The last `auth.state` from each web view, for the same reason.
-    private var auths: [ObjectIdentifier: OHBridgeAuthState] = [:]
+    /// The sign-in of every home and origin a page has reported for.
+    private var authTracker = MainUIAuthTracker()
+    private var authTimeoutTask: Task<Void, Never>?
+    /// How long to wait for a page to say who is signed in before offering to sign in.
+    var authResolutionTimeout = Duration.seconds(20)
 
     // MARK: - Private state
 
@@ -112,6 +117,12 @@ class OpenHABWebViewModel: ObservableObject {
         bridge.onEvent = { [weak self] event in self?.handleBridgeEvent(event) }
         bridge.credentials = { [weak self] in self?.proxyCredentials() }
         bridge.connectionURLs = { [weak self] in self?.connectionURLs() ?? [] }
+        #if DEBUG
+        // UI tests shorten (or lengthen) the wait for a page to say who is signed in.
+        if let seconds = ProcessInfo.processInfo.environment["UITestAuthTimeout"].flatMap(Double.init) {
+            authResolutionTimeout = .seconds(seconds)
+        }
+        #endif
         observeNetworkChanges()
         observeAppLifecycle()
     }
@@ -152,6 +163,7 @@ class OpenHABWebViewModel: ObservableObject {
             }
             openHABTrackedRootUrl = connection.configuration.url
             activeConnectionInfo = connection
+            refreshAuthTracking()
             Logger.notificationNavigation.info("syncActiveConnection: connection confirmed for current home — calling loadWebView(force: false, path: nil)")
             loadWebView(force: false)
         }
@@ -267,6 +279,8 @@ class OpenHABWebViewModel: ObservableObject {
         let isCloudConnection = activeConfig.isCloudConnection
         let homeId = currentPrefs.id
         let newWebview = getOrCreateWebView(for: homeId, isCloudConnection: isCloudConnection)
+        // The home is known now, so the sign-in can be looked up for it.
+        refreshAuthTracking()
         if newWebview !== webView {
             webView.stopLoading()
             webView.navigationDelegate = nil
@@ -411,7 +425,6 @@ class OpenHABWebViewModel: ObservableObject {
             let evicted = viewAccessOrder.removeFirst()
             if let evictedView = views.removeValue(forKey: evicted) {
                 menus[ObjectIdentifier(evictedView)] = nil
-                auths[ObjectIdentifier(evictedView)] = nil
             }
             Logger.viewController.info("Evicted webview cache entry for id:\(evicted.uuidString)")
         }
@@ -466,6 +479,7 @@ class OpenHABWebViewModel: ObservableObject {
     /// never linger and the menu bar shows its offline/connecting indicator instead.
     func clearView() {
         activeConnectionInfo = nil
+        refreshAuthTracking()
         openHABTrackedRootUrl = ""
         webView.stopLoading()
         bridge.stopTrustingRedirects()
@@ -543,7 +557,13 @@ class OpenHABWebViewModel: ObservableObject {
     /// Stands in for an `auth.state` from the page.
     func setUITestAuth(_ state: OHBridgeAuthState) {
         uiTestAuthInjected = true
-        auth = state
+        authStatus = .known(state)
+    }
+
+    /// Keeps the sign-in unknown, as while a page has not said yet, whatever pages report.
+    func setUITestAuthPending() {
+        uiTestAuthInjected = true
+        authStatus = .unknown
     }
 
     /// Stands in for a `menu.state` from the page.
@@ -629,15 +649,11 @@ extension OpenHABWebViewModel {
 
     /// Shows the menu `webView` last sent, now that it is the one on screen.
     func showMenu(of webView: WKWebView) {
+        refreshAuthTracking()
         #if DEBUG
-        if !uiTestAuthInjected {
-            auth = auths[ObjectIdentifier(webView)]
-        }
         if uiTestMenuInjected {
             return
         }
-        #else
-        auth = auths[ObjectIdentifier(webView)]
         #endif
         menu = menus[ObjectIdentifier(webView)]
     }
@@ -648,6 +664,9 @@ extension OpenHABWebViewModel {
         isSSEConnected = false
         bridge.pageWillLoad()
         resetNavbar()
+        // A page that gave up being waited for may be about to say after all.
+        authTracker.startWaiting()
+        publishAuthStatus()
         // The new page sends its own menu; until then the menu falls back to the REST page list.
         menus[ObjectIdentifier(webView)] = nil
         #if DEBUG
@@ -656,6 +675,57 @@ extension OpenHABWebViewModel {
         }
         #endif
         menu = nil
+    }
+
+    // MARK: - Sign-in state
+
+    /// Where the Main UI of the active connection lives: its address, or the cloud proxy's.
+    private var activeAuthKey: MainUIAuthKey? {
+        let url = WebViewURLHelper.resolveWebViewURL(
+            baseURL: activeConfig.flatMap { URL(string: $0.url) },
+            proxyURL: activeConnectionInfo?.proxyURL,
+            path: nil,
+            defaultPath: ""
+        )
+        return MainUIAuthKey(home: currentHomeId, url: url)
+    }
+
+    /// Points the sign-in state at the origin now in use: after a connection change, a home
+    /// switch, or when the connection goes away. What was known about the origin left stays
+    /// with it.
+    private func refreshAuthTracking() {
+        #if DEBUG
+        if uiTestAuthInjected {
+            return
+        }
+        #endif
+        authTracker.activate(activeAuthKey)
+        publishAuthStatus()
+    }
+
+    private func publishAuthStatus() {
+        #if DEBUG
+        if uiTestAuthInjected {
+            return
+        }
+        #endif
+        authStatus = authTracker.status
+        scheduleAuthTimeout()
+    }
+
+    /// While the active origin has not said who is signed in, wait for it a while, then offer to
+    /// sign in rather than wait for ever on a page that is slow, failed, or never says.
+    private func scheduleAuthTimeout() {
+        authTimeoutTask?.cancel()
+        authTimeoutTask = nil
+        guard authStatus == .unknown, authTracker.active != nil else { return }
+        let timeout = authResolutionTimeout
+        authTimeoutTask = Task { [weak self] in
+            try? await Task.sleep(for: timeout)
+            guard !Task.isCancelled, let self else { return }
+            authTracker.giveUp()
+            authStatus = authTracker.status
+        }
     }
 
     private func resetNavbar() {
@@ -696,8 +766,12 @@ extension OpenHABWebViewModel {
                 return
             }
             #endif
-            auths[ObjectIdentifier(webView)] = state
-            auth = state
+            // Kept for the origin the page came from, which is not necessarily the one in use.
+            let key = MainUIAuthKey(home: currentHomeId, url: webView.url) ?? activeAuthKey
+            if let key {
+                authTracker.report(state, from: key)
+            }
+            publishAuthStatus()
         }
     }
 
