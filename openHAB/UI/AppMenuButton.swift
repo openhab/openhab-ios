@@ -114,8 +114,6 @@ private struct VerticalAwareAppMenuItem: ToolbarContent {
 /// does so with the environment's `dismiss`, which belongs to the presentation itself: the button's
 /// own state may be that of a button the bar has since replaced.
 private struct PopoverClosesOnOutsideTaps: UIViewControllerRepresentable {
-    @Environment(\.dismiss) private var dismiss
-
     final class Controller: UIViewController {
         var onOutsideTap: () -> Void = {}
         private var catcher: UIView?
@@ -128,6 +126,12 @@ private struct PopoverClosesOnOutsideTaps: UIViewControllerRepresentable {
         override func viewDidLayoutSubviews() {
             super.viewDidLayoutSubviews()
             installCatcherIfNeeded()
+        }
+
+        override func viewWillDisappear(_ animated: Bool) {
+            super.viewWillDisappear(animated)
+            catcher?.removeFromSuperview()
+            catcher = nil
         }
 
         /// Tried at every chance, since the popover's container may not be there at the first.
@@ -145,12 +149,6 @@ private struct PopoverClosesOnOutsideTaps: UIViewControllerRepresentable {
             }
         }
 
-        override func viewWillDisappear(_ animated: Bool) {
-            super.viewWillDisappear(animated)
-            catcher?.removeFromSuperview()
-            catcher = nil
-        }
-
         /// Directly below the popover's own view, so the popover still gets its own touches and
         /// the catcher is above UIKit's dimming view, which has recognizers of its own.
         private func installCatcher(in container: UIView?) {
@@ -166,6 +164,8 @@ private struct PopoverClosesOnOutsideTaps: UIViewControllerRepresentable {
             onOutsideTap()
         }
     }
+
+    @Environment(\.dismiss) private var dismiss
 
     func makeUIViewController(context: Context) -> Controller {
         Controller()
@@ -187,8 +187,6 @@ private enum UITestMenuOpener {
 /// safe area. Sizing the menu from that, rather than from a fixed height, lets it use the whole
 /// height of a tall display or of the iPhone Duo's inner one.
 private struct PopoverRoomReader: UIViewControllerRepresentable {
-    let onRoom: (CGFloat) -> Void
-
     final class Controller: UIViewController {
         var onRoom: (CGFloat) -> Void = { _ in }
         private var lastRoom: CGFloat?
@@ -218,6 +216,8 @@ private struct PopoverRoomReader: UIViewControllerRepresentable {
             DispatchQueue.main.async { [onRoom] in onRoom(room) }
         }
     }
+
+    let onRoom: (CGFloat) -> Void
 
     func makeUIViewController(context: Context) -> Controller {
         Controller()

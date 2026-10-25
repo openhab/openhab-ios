@@ -25,6 +25,7 @@ struct MainUIAuthTrackerTests {
     private let signedInRoot = OHBridgeAuthState(user: OHBridgeUser(name: "root", roles: ["administrator"]), noAuth: false)
     private let signedOut = OHBridgeAuthState(user: nil, noAuth: false)
     private let noAuth = OHBridgeAuthState(user: nil, noAuth: true)
+    private let signInServer = MainUIServer(majorVersion: 5, endpoints: ["auth", "items", "ui"])
 
     private func key(_ url: URL?, home: UUID? = nil) -> MainUIAuthKey {
         MainUIAuthKey(home: home ?? self.home, url: url)!
@@ -225,8 +226,6 @@ struct MainUIAuthTrackerTests {
     }
 
     // MARK: - What the menu makes of it
-
-    private let signInServer = MainUIServer(majorVersion: 5, endpoints: ["auth", "items", "ui"])
 
     @Test("Unknown is resolving, which offers no sign-in and shows no administration")
     func resolvingAccess() {

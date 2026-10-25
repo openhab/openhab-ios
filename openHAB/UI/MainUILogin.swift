@@ -28,6 +28,19 @@ import Foundation
 //   without the app taking over the code exchange.
 
 enum MainUILogin {
+    /// What to do when the user cancels: depends on what they were looking at when the sign-in
+    /// began, which was not necessarily Main UI. The sign-in is started from the menu, so it is
+    /// as likely to begin on a sitemap or a tile.
+    enum WayBack: Equatable {
+        /// Show Main UI at `path` (nil for its front page).
+        case mainUI(path: String?)
+        /// Show the sitemap again, and load Main UI at `route` behind it, where it reports who is
+        /// signed in.
+        case sitemap(TargetController, mainUIRoute: String)
+        /// Show the tile again.
+        case tile(url: String)
+    }
+
     /// Where Main UI sends the user to sign in. It does so from the profile route.
     static let authorizePath = "/auth"
     static let profileRoute = MainUIMenu.profileRoute
@@ -55,19 +68,6 @@ enum MainUILogin {
         guard path == profileRoute else { return path }
         let before = history.dropLast().last { $0 != profileRoute }
         return before ?? "/"
-    }
-
-    /// What to do when the user cancels: depends on what they were looking at when the sign-in
-    /// began, which was not necessarily Main UI. The sign-in is started from the menu, so it is
-    /// as likely to begin on a sitemap or a tile.
-    enum WayBack: Equatable {
-        /// Show Main UI at `path` (nil for its front page).
-        case mainUI(path: String?)
-        /// Show the sitemap again, and load Main UI at `route` behind it, where it reports who is
-        /// signed in.
-        case sitemap(TargetController, mainUIRoute: String)
-        /// Show the tile again.
-        case tile(url: String)
     }
 
     static func wayBack(from previous: TargetController?, route: String) -> WayBack {

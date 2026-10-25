@@ -652,6 +652,17 @@ private extension OpenHABWebViewModel {
 extension OpenHABWebViewModel {
     // MARK: - Bridge
 
+    /// Where the Main UI of the active connection lives: its address, or the cloud proxy's.
+    private var activeAuthKey: MainUIAuthKey? {
+        let url = WebViewURLHelper.resolveWebViewURL(
+            baseURL: activeConfig.flatMap { URL(string: $0.url) },
+            proxyURL: activeConnectionInfo?.proxyURL,
+            path: nil,
+            defaultPath: ""
+        )
+        return MainUIAuthKey(home: currentHomeId, url: url)
+    }
+
     /// Shows the menu `webView` last sent, now that it is the one on screen.
     func showMenu(of webView: WKWebView) {
         refreshAuthTracking()
@@ -683,17 +694,6 @@ extension OpenHABWebViewModel {
     }
 
     // MARK: - Sign-in state
-
-    /// Where the Main UI of the active connection lives: its address, or the cloud proxy's.
-    private var activeAuthKey: MainUIAuthKey? {
-        let url = WebViewURLHelper.resolveWebViewURL(
-            baseURL: activeConfig.flatMap { URL(string: $0.url) },
-            proxyURL: activeConnectionInfo?.proxyURL,
-            path: nil,
-            defaultPath: ""
-        )
-        return MainUIAuthKey(home: currentHomeId, url: url)
-    }
 
     /// Points the sign-in state at the origin now in use: after a connection change, a home
     /// switch, or when the connection goes away. What was known about the origin left stays

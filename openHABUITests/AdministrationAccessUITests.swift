@@ -18,7 +18,11 @@ import XCTest
 final class AdministrationAccessUITests: XCTestCase {
     private var app: XCUIApplication!
 
-    private let signInServer = #"{"version":"5.0.0","endpoints":["auth","items","things","rules","ui","addons"],"pages":[{"uid":"uitest_members","label":"UITest Members","visibleTo":["role:user"]},{"uid":"uitest_all","label":"UITest All"}],"sitemaps":[{"name":"home","label":"Smart Home"}]}"#
+    private let signInServer = """
+    {"version":"5.0.0","endpoints":["auth","items","things","rules","ui","addons"],\
+    "pages":[{"uid":"uitest_members","label":"UITest Members","visibleTo":["role:user"]},\
+    {"uid":"uitest_all","label":"UITest All"}],"sitemaps":[{"name":"home","label":"Smart Home"}]}
+    """
     private let openServer = #"{"version":"5.0.0","endpoints":["items","things","rules","ui","addons"],"sitemaps":[{"name":"home","label":"Smart Home"}]}"#
     private let administrator = #"{"user":{"name":"root","roles":["administrator"]},"noAuth":false}"#
     private let plainUser = #"{"user":{"name":"ann","roles":["user"]},"noAuth":false}"#
