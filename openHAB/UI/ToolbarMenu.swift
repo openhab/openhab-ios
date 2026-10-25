@@ -575,7 +575,7 @@ extension ToolbarMenu {
             // Always bounce vertically — even when the content fits — so pull-to-refresh
             // can be triggered on a short menu.
             .scrollBounceBehavior(.always, axes: .vertical)
-            .refreshable { await menuData.reload() }
+            .refreshable { await menuData.refresh() }
             .accessibilityIdentifier("ToolbarMenuScrollView")
             #if DEBUG
             .accessibilityValue("\(menuData.reloadCount)")

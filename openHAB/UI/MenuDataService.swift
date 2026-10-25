@@ -210,6 +210,18 @@ class MenuDataService {
         await fetchData(activeConnection: networkTracker.activeConnection)
     }
 
+    /// What pull-to-refresh runs. SwiftUI cancels the refresh task when the menu re-renders while
+    /// it loads, which would cancel the requests and leave the old entries in place. So `reload`
+    /// runs in a task of its own that the refresh only waits for.
+    func refresh(networkTracker: MainActorNetworkTracker = .shared) async {
+        await refresh { await self.reload(networkTracker: networkTracker) }
+    }
+
+    /// Waits for `work`, which a cancellation of the caller does not reach.
+    func refresh(running work: @escaping @MainActor () async -> Void) async {
+        await Task { await work() }.value
+    }
+
     func fetchData(activeConnection: ConnectionInfo?) async {
         guard let activeConnection else { return }
         #if DEBUG
