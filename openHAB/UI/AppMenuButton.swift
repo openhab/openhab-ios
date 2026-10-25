@@ -183,10 +183,57 @@ private enum UITestMenuOpener {
 }
 #endif
 
+/// Reports how much room the popover it is in has: from its top to the bottom of the window's
+/// safe area. Sizing the menu from that, rather than from a fixed height, lets it use the whole
+/// height of a tall display or of the iPhone Duo's inner one.
+private struct PopoverRoomReader: UIViewControllerRepresentable {
+    let onRoom: (CGFloat) -> Void
+
+    final class Controller: UIViewController {
+        var onRoom: (CGFloat) -> Void = { _ in }
+        private var lastRoom: CGFloat?
+
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            reportRoom()
+        }
+
+        override func viewDidLayoutSubviews() {
+            super.viewDidLayoutSubviews()
+            reportRoom()
+        }
+
+        private func reportRoom() {
+            guard let window = view.window else { return }
+            var presented: UIViewController = self
+            while let parent = presented.parent {
+                presented = parent
+            }
+            guard let popoverView = presented.presentationController?.presentedView else { return }
+            let top = popoverView.convert(popoverView.bounds, to: window).minY
+            let room = window.safeAreaLayoutGuide.layoutFrame.maxY - top
+            guard room > 0, lastRoom.map({ abs($0 - room) >= 1 }) ?? true else { return }
+            lastRoom = room
+            // Out of the layout pass: the answer changes the menu's size, which lays it out again.
+            DispatchQueue.main.async { [onRoom] in onRoom(room) }
+        }
+    }
+
+    func makeUIViewController(context: Context) -> Controller {
+        Controller()
+    }
+
+    func updateUIViewController(_ controller: Controller, context: Context) {
+        controller.onRoom = onRoom
+    }
+}
+
 /// The menu button, with the menu in a popover from it.
 struct AppMenuButton: View {
     let configuration: AppMenuConfiguration
     @State private var isPresented = false
+    /// What `PopoverRoomReader` measured, once the popover is up.
+    @State private var menuRoom: CGFloat?
 
     var body: some View {
         Button(
@@ -194,6 +241,12 @@ struct AppMenuButton: View {
             label: { Label("Menu", systemSymbol: .line3Horizontal) }
         )
         .accessibilityIdentifier("HamburgerButton")
+        .onChange(of: isPresented) { _, presented in
+            // The next time it opens may be on another display or in another orientation.
+            if !presented {
+                menuRoom = nil
+            }
+        }
         #if DEBUG
         .onAppear {
             // UI tests open the menu from the start, so they need no tap on the bar.
@@ -211,12 +264,14 @@ struct AppMenuButton: View {
             ToolbarMenu(
                 isPresented: $isPresented,
                 menuData: configuration.menuData,
+                maxHeight: MenuSizing.maxHeight(room: menuRoom),
                 webAuth: configuration.webAuth,
                 currentContent: configuration.currentContent,
                 onSelect: configuration.onSelect,
                 onReload: configuration.onReload
             )
             .background(PopoverClosesOnOutsideTaps())
+            .background(PopoverRoomReader { menuRoom = $0 })
             .interactiveDismissDisabled()
             .presentationCompactAdaptation(.popover)
         }

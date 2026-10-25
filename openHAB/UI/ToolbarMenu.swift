@@ -30,6 +30,27 @@ enum TargetController: Equatable {
     case tile(String)
 }
 
+// MARK: - Menu size
+
+/// How tall the menu may grow. It grows with its content up to the room the popover has below
+/// its top, less a margin that stays free so that a tap there can dismiss it. The room is the
+/// window's safe area, so it follows the device, the orientation and a window that is resized.
+enum MenuSizing {
+    /// The tallest the menu grows before it scrolls, until the popover has measured the room it has.
+    static let defaultHeight: CGFloat = 480
+    /// Space left under the menu, enough to tap on.
+    static let dismissMargin: CGFloat = 60
+    /// Never smaller than this, however little room there is.
+    static let minimumHeight: CGFloat = 240
+
+    /// - Parameter room: From the top of the popover to the bottom of the window's safe area. Nil
+    ///   until the popover has been laid out.
+    static func maxHeight(room: CGFloat?, fallback: CGFloat = defaultHeight) -> CGFloat {
+        guard let room else { return fallback }
+        return max(minimumHeight, room - dismissMargin)
+    }
+}
+
 // MARK: - Connection status indicator
 
 struct ConnectionView: View {
@@ -116,11 +137,11 @@ struct ToolbarMenu: View {
     private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
     /// Route sentinel for the MainUI home page, used to highlight the "Home" row.
     private static let mainUIHomeRoute = "/"
-    /// The tallest the menu grows before it scrolls.
-    private static let menuHeight: CGFloat = 480
 
     @Binding var isPresented: Bool
     var menuData: MenuDataService
+    /// The tallest the menu grows before it scrolls. See `MenuSizing`.
+    var maxHeight = MenuSizing.defaultHeight
     /// Who is signed in to Main UI, sent over the bridge. Nil until a page has said.
     var webAuth: OHBridgeAuthState?
     @State private var scrollViewContentSize: Double = 0
@@ -179,7 +200,7 @@ struct ToolbarMenu: View {
     @ScaledMetric private var iconWidth = 20.0
 
     var body: some View {
-        menuContent(height: Self.menuHeight)
+        menuContent(height: maxHeight)
             .onAppear { Task { await loadExpansionState() } }
             .onChange(of: isPresented) { _, newValue in
                 if newValue {

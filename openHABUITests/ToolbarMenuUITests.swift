@@ -60,6 +60,23 @@ final class ToolbarMenuUITests: XCTestCase {
         wait(for: [closed], timeout: 3)
     }
 
+    /// The menu grows with its content up to the room the display has, not to a fixed height, and
+    /// leaves some space below it to tap on.
+    func testMenuGrowsToTheRoomItHas() {
+        app.launch()
+
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
+        XCTAssertTrue(sitemapsHeader.waitForExistence(timeout: 20), "Demo sitemaps should load into the open menu")
+
+        let menu = app.scrollViews["ToolbarMenuScrollView"]
+        let window = app.windows.firstMatch.frame
+        // The content of the demo server's menu is well over 480 points tall.
+        let grown = NSPredicate { _, _ in menu.frame.height > 520 }
+        let expectation = expectation(for: grown, evaluatedWith: nil)
+        wait(for: [expectation], timeout: 5)
+        XCTAssertLessThanOrEqual(menu.frame.maxY, window.maxY - 44, "Space is left below the menu to tap on")
+    }
+
     /// A pull down on the menu reloads it and does not close it.
     func testPullDownReloadsAndKeepsTheMenuOpen() {
         app.launch()
