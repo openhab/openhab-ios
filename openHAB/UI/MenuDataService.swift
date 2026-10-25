@@ -78,6 +78,12 @@ class MenuDataService {
     var hasSuccessfullyLoaded = false
 
     #if DEBUG
+    /// How often `reload()` ran, so a UI test can tell that a pull-to-refresh reloaded the menu.
+    private(set) var reloadCount = 0
+
+    #endif
+
+    #if DEBUG
     /// Set by `injectForUITest`: what the test put in is not replaced by what a server says.
     private var isUITestInjected = false
 
@@ -186,6 +192,9 @@ class MenuDataService {
     /// Re-fetches all menu data from the currently active connection without clearing,
     /// so the menu stays populated until fresh data arrives (pull-to-refresh, menu open).
     func reload(networkTracker: MainActorNetworkTracker = .shared) async {
+        #if DEBUG
+        reloadCount += 1
+        #endif
         await fetchData(activeConnection: networkTracker.activeConnection)
     }
 

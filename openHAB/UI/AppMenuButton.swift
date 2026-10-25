@@ -106,19 +106,64 @@ private struct VerticalAwareAppMenuItem: ToolbarContent {
 /// of the bar it came from. By default UIKit lets the bar of the popover's source stay tappable
 /// (`passthroughViews`), so a tap on the iPhone Duo's strip would trigger that button and leave
 /// the menu open.
+///
+/// The menu is also not dismissed by pulling it down (`interactiveDismissDisabled`), so that pull
+/// down reloads it instead. That makes the popover modal, and a modal popover's container passes
+/// touches outside of the popover on to the page below instead of closing it. So this puts a
+/// transparent view behind the popover that takes those touches and dismisses the popover. It
+/// does so with the environment's `dismiss`, which belongs to the presentation itself: the button's
+/// own state may be that of a button the bar has since replaced.
 private struct PopoverClosesOnOutsideTaps: UIViewControllerRepresentable {
+    @Environment(\.dismiss) private var dismiss
+
     final class Controller: UIViewController {
+        var onOutsideTap: () -> Void = {}
+        private var catcher: UIView?
+
         override func viewDidAppear(_ animated: Bool) {
             super.viewDidAppear(animated)
+            installCatcherIfNeeded()
+        }
+
+        override func viewDidLayoutSubviews() {
+            super.viewDidLayoutSubviews()
+            installCatcherIfNeeded()
+        }
+
+        /// Tried at every chance, since the popover's container may not be there at the first.
+        private func installCatcherIfNeeded() {
+            guard catcher == nil else { return }
             var current: UIViewController? = self
             while let controller = current {
                 if let popover = controller.popoverPresentationController
                     ?? controller.presentationController as? UIPopoverPresentationController {
                     popover.passthroughViews = nil
+                    installCatcher(in: popover.containerView)
                     return
                 }
                 current = controller.parent
             }
+        }
+
+        override func viewWillDisappear(_ animated: Bool) {
+            super.viewWillDisappear(animated)
+            catcher?.removeFromSuperview()
+            catcher = nil
+        }
+
+        /// Directly below the popover's own view, so the popover still gets its own touches and
+        /// the catcher is above UIKit's dimming view, which has recognizers of its own.
+        private func installCatcher(in container: UIView?) {
+            guard catcher == nil, let container else { return }
+            let catcher = UIView(frame: container.bounds)
+            catcher.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            catcher.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapped)))
+            container.insertSubview(catcher, at: max(container.subviews.count - 1, 0))
+            self.catcher = catcher
+        }
+
+        @objc private func tapped() {
+            onOutsideTap()
         }
     }
 
@@ -126,8 +171,17 @@ private struct PopoverClosesOnOutsideTaps: UIViewControllerRepresentable {
         Controller()
     }
 
-    func updateUIViewController(_ controller: Controller, context: Context) {}
+    func updateUIViewController(_ controller: Controller, context: Context) {
+        controller.onOutsideTap = { dismiss() }
+    }
 }
+
+#if DEBUG
+@MainActor
+private enum UITestMenuOpener {
+    static var didOpen = false
+}
+#endif
 
 /// The menu button, with the menu in a popover from it.
 struct AppMenuButton: View {
@@ -143,7 +197,11 @@ struct AppMenuButton: View {
         #if DEBUG
         .onAppear {
             // UI tests open the menu from the start, so they need no tap on the bar.
-            guard ProcessInfo.processInfo.environment["UITestOpenMenu"] != nil else { return }
+            // Only once: the button appears again when the toolbar is rebuilt, which must not reopen
+            // a menu the test has closed.
+            guard ProcessInfo.processInfo.environment["UITestOpenMenu"] != nil,
+                  !UITestMenuOpener.didOpen else { return }
+            UITestMenuOpener.didOpen = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 isPresented = true
             }
@@ -159,6 +217,7 @@ struct AppMenuButton: View {
                 onReload: configuration.onReload
             )
             .background(PopoverClosesOnOutsideTaps())
+            .interactiveDismissDisabled()
             .presentationCompactAdaptation(.popover)
         }
     }

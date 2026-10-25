@@ -141,7 +141,9 @@ import SwiftUI
 //      bar gets an opaque background there (`opaqueBarBeforeLiquidGlass`). Not run on iOS 18 to 25:
 //      the available simulators are iOS 27.0 and 27.1.
 //    - The menu is a popover on every version. A pull down at the top of a popover dismisses it,
-//      so the menu has no pull-to-refresh. It reloads every time it opens instead.
+//      which is also what pull-to-refresh is. The menu is `interactiveDismissDisabled`, so the
+//      pull down reloads it, and it closes itself on a tap outside (see `AppMenuButton.swift`).
+//      Told apart by speed instead was not tried: it would take the popover's own recognizers.
 //
 // 10. TESTING THE DUO LAYOUT
 //    - An iPhone Duo simulator (iOS 27.1) is a run destination, and previews render on the

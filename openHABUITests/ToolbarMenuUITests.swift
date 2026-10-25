@@ -37,7 +37,7 @@ final class ToolbarMenuUITests: XCTestCase {
         try await super.tearDown()
     }
 
-    /// Opening the menu loads its entries, so there is no need to pull it down to refresh.
+    /// Opening the menu loads its entries.
     func testOpenMenuIsPopulated() {
         app.launch()
 
@@ -46,17 +46,39 @@ final class ToolbarMenuUITests: XCTestCase {
         XCTAssertTrue(sitemapsHeader.isHittable, "Sitemaps header should be interactable once the menu has loaded")
     }
 
-    /// A tap outside the popover closes it. A pull down on it would too, which is why the menu has
-    /// no pull-to-refresh: it reloads whenever it opens.
+    /// A tap outside the popover closes it.
     func testTapOutsideClosesTheMenu() {
         app.launch()
 
         XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
+        // The tap is only taken once the popover has finished appearing, which a loaded menu has.
+        XCTAssertTrue(sitemapsHeader.waitForExistence(timeout: 20), "Demo sitemaps should load into the open menu")
 
-        app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.97)).tap()
+        app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.9)).tap()
 
         let closed = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: appSettingsRow)
         wait(for: [closed], timeout: 3)
+    }
+
+    /// A pull down on the menu reloads it and does not close it.
+    func testPullDownReloadsAndKeepsTheMenuOpen() {
+        app.launch()
+
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
+        XCTAssertTrue(sitemapsHeader.waitForExistence(timeout: 20), "Demo sitemaps should load into the open menu")
+
+        let scrollView = app.scrollViews["ToolbarMenuScrollView"]
+        // The debug build reports how often the menu reloaded as the scroll view's value.
+        let reloadsBefore = Int(scrollView.value as? String ?? "") ?? 0
+        let top = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
+        top.press(forDuration: 0.1, thenDragTo: scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.9)))
+
+        let reloaded = expectation(
+            for: NSPredicate { _, _ in (Int(scrollView.value as? String ?? "") ?? 0) > reloadsBefore },
+            evaluatedWith: nil
+        )
+        wait(for: [reloaded], timeout: 5)
+        XCTAssertTrue(appSettingsRow.exists, "A pull down should not close the menu")
     }
 
     /// "Add Home" opens the New Home alert. With several homes it sits behind "Edit".
