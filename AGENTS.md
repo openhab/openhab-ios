@@ -37,14 +37,20 @@
 
 - Always write tests with Swift Testing
 - Add a parameter with a default value (e.g. `networkTracker: NetworkTracker = .shared`) to make functions testable without coupling them to singletons
-- **Always write UI tests** for any new or modified UI surface. See **[docs/UI_TESTING_GUIDE.md](docs/UI_TESTING_GUIDE.md)** for the full guide, including how to register new test files, inject test state, write layout assertions, and pitfalls to avoid.
+- **Always write UI tests** for any new or modified UI surface. See **[.agents/docs/UI_TESTING_GUIDE.md](.agents/docs/UI_TESTING_GUIDE.md)** for the full guide, including how to register new test files, inject test state, write layout assertions, and pitfalls to avoid.
 
 ## Verification cycle
 
-After every set of code changes, run a full verification cycle before committing. This applies only to tasks where you edited code: reviews, explanations, and investigations are read-only — never build, test, or boot simulators for them. See **[docs/SIMULATOR_VERIFICATION.md](docs/SIMULATOR_VERIFICATION.md)** for the step-by-step process and full MCP tool reference.
+After every set of code changes, run a full verification cycle before committing. This applies only to tasks where you edited code: reviews, explanations, and investigations are read-only — never build, test, or boot simulators for them. See **[.agents/docs/SIMULATOR_VERIFICATION.md](.agents/docs/SIMULATOR_VERIFICATION.md)** for the step-by-step process and full MCP tool reference.
 
-To replicate the MCP server setup, see **[docs/MCP_SETUP.md](docs/MCP_SETUP.md)**.
+To replicate the MCP server setup, see **[.agents/docs/MCP_SETUP.md](.agents/docs/MCP_SETUP.md)**.
 
 ## git
 - Always use git commit with -s (signed-off-by)
 - If using XcodeBuildMCP, use the installed XcodeBuildMCP skill before calling XcodeBuildMCP tools.
+
+## Agent configuration layout
+- `AGENTS.md` is the single source of instructions for all agents (Copilot, Codex, Cursor, Claude, ...). `CLAUDE.md` only imports it via `@AGENTS.md`; do not duplicate content there.
+- Shared skills live in `.agents/skills/` (installed with `npx skills`, pinned in `skills-lock.json`). `.claude/skills/` contains relative symlinks to them for Claude Code.
+- Longer guides referenced from this file live in `.agents/docs/`.
+- Personal setup stays untracked: `.claude/settings.local.json`, `CLAUDE.local.md`, `.claude/worktrees/`, and skills named `local-*` (in `.agents/skills/` and `.claude/skills/`). User-wide skills belong in `~/.claude/skills` or `~/.agents/skills`.
