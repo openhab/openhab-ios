@@ -52,6 +52,7 @@ final class NotificationInteractionUITests: XCTestCase {
         return el
     }
 
+    @discardableResult
     private func waitForButton(_ label: String, timeout: TimeInterval = 4) -> XCUIElement {
         let el = app.buttons[label]
         XCTAssertTrue(el.waitForExistence(timeout: timeout), "Expected button '\(label)' to appear within \(timeout)s")
