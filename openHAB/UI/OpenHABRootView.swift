@@ -273,6 +273,8 @@ struct OpenHABRootView: View {
     @State private var showNotifications = false
     @State private var sitemapResetID = UUID()
     @State private var cachedHomePrefs: HomePreferences?
+    /// What was showing when the user started signing in, for the way back if they cancel.
+    @State private var contentBeforeLogin: TargetController?
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -282,6 +284,7 @@ struct OpenHABRootView: View {
             InAppToastBanner(service: ToastService.shared)
         }
         .onAppear {
+            webViewModel.onLoginCancelled = { route in finishCancelledLogin(route: route) }
             #if DEBUG
             let env = ProcessInfo.processInfo.environment
             if env["UITest"] != nil {
@@ -556,6 +559,12 @@ private extension OpenHABRootView {
     }
 
     func handleMenuSelection(_ target: TargetController) {
+        // Signing in starts from the profile; any other choice leaves a sign-in behind.
+        if target == .mainUIPage(MainUIMenu.profileRoute), currentContent != target {
+            contentBeforeLogin = currentContent
+        } else {
+            contentBeforeLogin = nil
+        }
         switch target {
         case .webview:
             showMainUI(path: nil)
@@ -577,6 +586,25 @@ private extension OpenHABRootView {
             if let url = URL(string: urlString) {
                 SafariPresenter.present(url, entersReaderIfAvailable: true)
             }
+        }
+    }
+
+    /// The user cancelled the sign-in on openHAB's authorize page: back to what they were looking
+    /// at, with Main UI behind it at the route it was on.
+    func finishCancelledLogin(route: String) {
+        let wayBack = MainUILogin.wayBack(from: contentBeforeLogin, route: route)
+        contentBeforeLogin = nil
+        switch wayBack {
+        case let .sitemap(content, mainUIRoute):
+            currentContent = content
+            webViewModel.loadWebView(force: false, path: mainUIRoute)
+        case let .tile(url):
+            currentContent = .tile(url)
+            if let url = URL(string: url) {
+                webViewModel.loadTilePage(url)
+            }
+        case let .mainUI(path):
+            showMainUI(path: path, persistAsDefault: false)
         }
     }
 

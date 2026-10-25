@@ -68,6 +68,11 @@ class OpenHABWebViewModel: ObservableObject {
     private var basePath = ""
     /// The last `menu.state` from each web view, so switching homes shows that home's menu.
     private var menus: [ObjectIdentifier: OHBridgeMenuState] = [:]
+    /// Main UI's latest `nav.changed`: where it is, and the pages behind it.
+    private var lastNavState: OHBridgeNavState?
+    /// Called with the route to go back to when the user cancels the sign-in on openHAB's
+    /// authorize page. See `MainUILogin`.
+    var onLoginCancelled: ((String) -> Void)?
     /// The sign-in of every home and origin a page has reported for.
     private var authTracker = MainUIAuthTracker()
     private var authTimeoutTask: Task<Void, Never>?
@@ -775,11 +780,21 @@ extension OpenHABWebViewModel {
         }
     }
 
+    /// The user cancelled the sign-in on openHAB's authorize page, whose Cancel button would
+    /// otherwise take the web view to the server's root. Reports where Main UI was when the
+    /// sign-in began.
+    func cancelLogin() {
+        let route = MainUILogin.routeBeforeLogin(path: lastNavState?.path, history: lastNavState?.history ?? [])
+        Logger.viewController.info("Sign-in cancelled, going back to \(route, privacy: .public)")
+        onLoginCancelled?(route)
+    }
+
     /// Notes where the user is, so we can put them back later.
     ///
     /// Tiles are skipped. A tile's address is its own, and saving it would later drop the
     /// Main UI somewhere the menu never sent it.
     func handleNavChanged(_ state: OHBridgeNavState) {
+        lastNavState = state
         let path = state.path
         Task {
             await Preferences.shared.setCurrentWebViewPath(path)

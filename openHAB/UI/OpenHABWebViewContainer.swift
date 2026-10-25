@@ -153,6 +153,12 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
                 return .cancel
             }
             if navigationAction.navigationType == .linkActivated {
+                // Cancel on openHAB's authorize page links to the server's root: put the user
+                // back where they were instead.
+                if MainUILogin.isCancel(link: url, on: webView.url) {
+                    viewModel.cancelLogin()
+                    return .cancel
+                }
                 if let rewritten = await rewriteToActiveConnection(url) {
                     Logger.viewController.info("decidePolicyFor - loading in-app (rewritten): \(rewritten.absoluteString)")
                     viewModel.bridge.trustRedirects(of: webView.load(URLRequest(url: rewritten)))
