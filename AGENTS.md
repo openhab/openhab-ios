@@ -1,14 +1,25 @@
 # openHAB iOS Development Guide
 
 ## Build/Test Commands
+Prefer the Xcode MCP tools (`BuildProject`, `RunSomeTests`, `RunAllTests`, `RunProject`, `GetBuildLog`) over `xcodebuild`. Fall back to the command line below only when the Xcode MCP is not available.
+- Pick the scheme with `XcodeSwitchScheme`: `openHABTestsSwift` for unit tests, `openHABUITests` for UI tests, `openHAB` to run the app. Check `activeDestinationDisplayTitle` in its answer: it can pick a physical device. Switch to a simulator with `XcodeSwitchRunDestination` before running anything
+- Build (compile check): `BuildProject`
+- Test all: `RunAllTests`. Single test or suite: `RunSomeTests` with the target name and test identifier, e.g. `MainUILoginTests` or `ToolbarMenuUITests/testTapOutsideClosesTheMenu()`
+- Run the app: `RunProject` (with `attachDebugger: true` to use `InvokeDebuggerCommand`)
+- Never search for, create, or download simulators or runtimes. Use one of the destinations `XcodeListRunDestinations` lists. If none is usable, stop and report
+- `DeviceInteractionInstallAndRun` and `XcodeSwitchScheme` can rewrite the launcher keys of `openHAB.xcscheme`. Run `git checkout -- openHAB.xcodeproj/xcshareddata/xcschemes/openHAB.xcscheme` before committing
+
+### Command line (only if the Xcode MCP is not available)
 - Build (compile check): `xcodebuild -workspace openHAB.xcworkspace -scheme openHAB -destination 'generic/platform=iOS Simulator' build` — no specific simulator needed
 - Simulator for tests: pick an installed iPhone with one command, never by hand or by guessing model names:
   `SIM=$(xcrun simctl list devices available -j | jq -r '[.devices | to_entries[] | select(.key | contains("iOS")) | .value[] | select(.name | startswith("iPhone"))] | (map(select(.state == "Booted")) + .)[0].udid')`
 - Test all: `fastlane unittests` or `xcodebuild test -workspace openHAB.xcworkspace -scheme openHABTestsSwift -destination "platform=iOS Simulator,id=$SIM"`
 - Single test: `xcodebuild test -workspace openHAB.xcworkspace -scheme openHABTestsSwift -destination "platform=iOS Simulator,id=$SIM" -only-testing:openHABTestsSwift/TestClassName/testMethodName`
 - Never search for, create, or download simulators or runtimes. If `$SIM` is empty or the destination fails, stop and report instead of retrying other devices
-- Beta build: `fastlane beta`
 - UI tests: `xcodebuild test -workspace openHAB.xcworkspace -scheme openHABUITests -destination "platform=iOS Simulator,id=$SIM"`
+
+### Release
+- Beta build: `fastlane beta`
 
 ## Architecture
 - **Main app**: openHAB/ - SwiftUI iOS app targeting iOS 18+ (UIKit still present in some files, goal is full removal)
