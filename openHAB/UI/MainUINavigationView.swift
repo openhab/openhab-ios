@@ -457,6 +457,26 @@ private struct MainUIPreviewHost: View {
     }
 }
 
+#Preview("Live demo page") {
+    MainUIPreviewHost()
+}
+
+#Preview("Back + one action") {
+    MainUIPreviewHost(navbar: MainUIPreviewNavbar.kitchen)
+}
+
+#Preview("Many actions + text-only action") {
+    MainUIPreviewHost(navbar: MainUIPreviewNavbar.manyActions)
+}
+
+#Preview("Large title in content") {
+    MainUIPreviewHost(navbar: MainUIPreviewNavbar.largeTitle)
+}
+
+#Preview("Tile") {
+    MainUIPreviewHost(tileTitle: "Tile")
+}
+
 #endif
 
 struct MainUINavigationView: View {
@@ -477,26 +497,6 @@ struct MainUINavigationView: View {
             .readsBarOrientation()
         }
     }
-}
-
-#Preview("Live demo page") {
-    MainUIPreviewHost()
-}
-
-#Preview("Back + one action") {
-    MainUIPreviewHost(navbar: MainUIPreviewNavbar.kitchen)
-}
-
-#Preview("Many actions + text-only action") {
-    MainUIPreviewHost(navbar: MainUIPreviewNavbar.manyActions)
-}
-
-#Preview("Large title in content") {
-    MainUIPreviewHost(navbar: MainUIPreviewNavbar.largeTitle)
-}
-
-#Preview("Tile") {
-    MainUIPreviewHost(tileTitle: "Tile")
 }
 
 // MARK: - Icon mapping
