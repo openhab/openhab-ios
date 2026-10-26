@@ -37,15 +37,17 @@ open('openHAB.xcodeproj/project.pbxproj', 'wb').write(c.replace(old, new, 1))
 
 The app reads `ProcessInfo.processInfo.environment` at launch. Set keys on `app.launchEnvironment` **before** calling `app.launch()`.
 
-### Defined keys
+### Finding the keys
 
-| Key | Effect |
-|-----|--------|
-| `UITest` = `"1"` | Forces demo mode, skips onboarding. **Set this in every test.** |
-| `UITestToastTitle` | Toast title to show 0.5 s after launch |
-| `UITestToastMessage` | Toast message body |
-| `UITestToastActions` | JSON-encoded `[{"title":"…","action":"…"}]` for toast action buttons |
-| `UITestNotifications` = `"1"` | Auto-opens the Notifications sheet with mock data 0.5 s after launch |
+Every key is a string literal that starts with `UITest` and is read inside `#if DEBUG`, so the code is the list: search for it, and read what the app does with the value (its format and its effect) where it is read.
+
+```bash
+grep -rn '"UITest' openHAB
+```
+
+Most are read in the `.onAppear` of `OpenHABRootView`. The others sit next to the thing they set up (`AppMenuButton`, `OpenHABWebViewModel`, `NotificationsView`, `AppDelegate`). Look at how an existing test in `openHABUITests` sets the key before writing a new one.
+
+`UITest` = `"1"` is the one every test sets: it forces demo mode and keeps the app from asking for notification permission.
 
 ### App-side hook (inside `#if DEBUG`)
 
@@ -183,38 +185,51 @@ func testMeasureLayout() {
 }
 ```
 
-Run with:
+Run it with `RunSomeTests` (see [Running UI tests](#running-ui-tests)) and read the `MEASURE` lines from the `fullConsoleLogsPath` it returns:
 ```bash
-xcodebuild test -workspace openHAB.xcworkspace -scheme openHABUITests \
-  -destination "platform=iOS Simulator,name=iPhone 17" \
-  -only-testing:openHABUITests/MyFeatureUITests/testMeasureLayout 2>&1 | grep MEASURE
+grep MEASURE "<fullConsoleLogsPath>"
 ```
 
 ---
 
 ## Running UI tests
 
+Prefer the Xcode MCP tools; use `xcodebuild` only when the Xcode MCP is not available (see [AGENTS.md](../AGENTS.md)).
+
+1. Switch to the UI test scheme with `XcodeSwitchScheme` (`openHABUITests`). Check `activeDestinationDisplayTitle` in its answer: it can pick a physical device. If it did, switch to a simulator with `XcodeSwitchRunDestination` (`XcodeListRunDestinations` lists them; the iPhone Duo simulator is one of them).
+2. Run tests with `RunSomeTests`, naming the target and the test identifier:
+   - Single method: `{"targetName": "openHABUITests", "testIdentifier": "ToastUITests/testShortToastAppears()"}`
+   - Single class: `{"targetName": "openHABUITests", "testIdentifier": "ToastUITests"}`
+   - Several at once: pass several entries in `tests`.
+3. The answer lists passed and failed tests with their error messages, and `fullConsoleLogsPath` holds the test's output (including anything it `print`s).
+
+`RunSomeTests` answers "Test … not found in target" for a test file that is not in `membershipExceptions` (see above). It can also say so for a test added a moment ago, before the project has been built with it; try again after the next build.
+
+The full suite is slow and needs the network (the demo server). Run the classes that cover what changed.
+
+Two side effects to know about:
+- `XcodeSwitchScheme` and `DeviceInteractionInstallAndRun` can rewrite the launcher keys in `openHAB.xcscheme`. Run `git checkout -- openHAB.xcodeproj/xcshareddata/xcschemes/openHAB.xcscheme` before committing.
+- A test that was started cannot be cancelled from the MCP. `StopProject` ends a run that hangs.
+
+### Command line (only if the Xcode MCP is not available)
+
 ```bash
 # Full UI test suite
 xcodebuild test -workspace openHAB.xcworkspace -scheme openHABUITests \
-  -destination "platform=iOS Simulator,name=iPhone 17"
+  -destination "platform=iOS Simulator,id=$SIM"
 
 # Single class
 xcodebuild test -workspace openHAB.xcworkspace -scheme openHABUITests \
-  -destination "platform=iOS Simulator,name=iPhone 17" \
+  -destination "platform=iOS Simulator,id=$SIM" \
   -only-testing:openHABUITests/ToastUITests
 
 # Single method
 xcodebuild test -workspace openHAB.xcworkspace -scheme openHABUITests \
-  -destination "platform=iOS Simulator,name=iPhone 17" \
+  -destination "platform=iOS Simulator,id=$SIM" \
   -only-testing:openHABUITests/ToastUITests/testShortToastAppears
 ```
 
-If `"iPhone 17"` is unavailable, list available destinations:
-```bash
-xcodebuild -workspace openHAB.xcworkspace -scheme openHABUITests \
-  -showdestinations 2>&1 | grep "iOS Simulator"
-```
+Pick `$SIM` with the one command in [AGENTS.md](../AGENTS.md); do not look for or create simulators by hand.
 
 ---
 
