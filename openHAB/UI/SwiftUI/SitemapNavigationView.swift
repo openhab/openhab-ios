@@ -29,26 +29,6 @@ enum SitemapNavigationState: Equatable {
     }
 }
 
-/// Wraps the side-menu action closure so it can live in `@Entry` storage. Closures aren't
-/// `Equatable`, which would otherwise make SwiftUI treat every environment update as a change
-/// and over-invalidate dependents; `==` always returns true since only presence/absence of an
-/// action (not closure identity) is meaningful here.
-struct SidebarMenuAction: Equatable {
-    private let action: () -> Void
-
-    init(_ action: @escaping () -> Void) {
-        self.action = action
-    }
-
-    static func == (lhs: Self, rhs: Self) -> Bool {
-        true
-    }
-
-    func callAsFunction() {
-        action()
-    }
-}
-
 // MARK: - Native UISearchBar wrapper for iOS 26 (reliable bottom placement)
 
 @available(iOS 26.0, *)
@@ -107,7 +87,6 @@ struct SitemapNavigationView: View {
     @StateObject var viewModel = SitemapPageViewModel()
     @State private var hasSeenActivePhase = false
     @State private var isSearchPresented = false
-    var onShowSideMenu: (() -> Void)?
 
     var body: some View {
         NavigationStack(path: $viewModel.navigationPath) {
@@ -116,7 +95,6 @@ struct SitemapNavigationView: View {
                     SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: nav.pageLink, title: nav.pageTitle))
                 }
         }
-        .environment(\.sitemapSideMenuAction, onShowSideMenu.map(SidebarMenuAction.init))
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
@@ -249,24 +227,17 @@ struct SitemapNavigationView: View {
         return false
     }
 
-    init(viewModel: SitemapPageViewModel, onShowSideMenu: @escaping () -> Void) {
+    init(viewModel: SitemapPageViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
-        self.onShowSideMenu = onShowSideMenu
     }
 
-    init(sitemapName: String, navigationPath: [LinkedPageNavigation] = [], onShowSideMenu: (() -> Void)? = nil) {
+    init(sitemapName: String, navigationPath: [LinkedPageNavigation] = []) {
         _viewModel = StateObject(wrappedValue: SitemapPageViewModel(sitemapName: sitemapName, initialNavigationPath: navigationPath))
-        self.onShowSideMenu = onShowSideMenu
     }
 
-    init(onShowSideMenu: (() -> Void)? = nil) {
+    init() {
         _viewModel = StateObject(wrappedValue: SitemapPageViewModel())
-        self.onShowSideMenu = onShowSideMenu
     }
-}
-
-extension EnvironmentValues {
-    @Entry var sitemapSideMenuAction: SidebarMenuAction?
 }
 
 #if DEBUG
@@ -275,8 +246,6 @@ extension EnvironmentValues {
         pageUrl: PreviewConstants.openHABSitemapPage?.link ?? "",
         title: PreviewConstants.openHABSitemapPage?.title ?? "Preview Page"
     )
-    SitemapNavigationView(viewModel: previewViewModel) {
-        print("Show side menu tapped")
-    }
+    SitemapNavigationView(viewModel: previewViewModel)
 }
 #endif

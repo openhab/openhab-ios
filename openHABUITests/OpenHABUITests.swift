@@ -21,6 +21,7 @@ class OpenHABUITests: XCTestCase {
         let app = await XCUIApplication()
         await MainActor.run {
             app.launchEnvironment = ["UITest": "1"]
+            app.useEnglishLocale()
         }
         continueAfterFailure = false
         await setupSnapshot(app)
@@ -36,12 +37,12 @@ class OpenHABUITests: XCTestCase {
         let app = XCUIApplication()
         app.activate()
 
-        let hamburgerButton = app.navigationBars.buttons["line.3.horizontal"]
+        let hamburgerButton = app.buttons["HamburgerButton"]
         hamburgerButton.tap()
         sleep(3)
 
         if runWebViewAndSitemap {
-            app.staticTexts["Home"].tap()
+            app.buttons["Home"].tap()
             sleep(10)
             snapshot("0_MainUI")
 
@@ -124,9 +125,13 @@ class OpenHABUITests: XCTestCase {
             hamburgerButton.tap()
             sleep(3)
         }
-        // "settings" is set via .accessibilityLabel not .accessibilityIdentifier in DrawerView,
-        // so subscript ["settings"] fails; match by label predicate instead.
-        app.buttons.matching(NSPredicate(format: "label == 'settings'")).firstMatch.tap()
+        // The current home's settings open from the gear next to the home in the app menu.
+        let homeSettingsButton = app.buttons["gear"]
+        if !homeSettingsButton.exists {
+            hamburgerButton.tap()
+        }
+        XCTAssertTrue(homeSettingsButton.waitForExistence(timeout: 5), "The app menu should offer the home's settings")
+        homeSettingsButton.tap()
         sleep(2)
         snapshot("7_Settings_Demo")
 
@@ -137,5 +142,13 @@ class OpenHABUITests: XCTestCase {
         switch1.tap()
         sleep(2)
         snapshot("8_Settings_Server")
+    }
+}
+
+extension XCUIApplication {
+    /// The tests look elements up by their English labels, so run the app in English
+    /// whatever language the simulator uses.
+    func useEnglishLocale() {
+        launchArguments += ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
     }
 }

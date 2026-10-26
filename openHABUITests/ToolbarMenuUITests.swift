@@ -27,6 +27,7 @@ final class ToolbarMenuUITests: XCTestCase {
         try await super.setUp()
         continueAfterFailure = false
         app = XCUIApplication()
+        app.useEnglishLocale()
         app.launchEnvironment["UITest"] = "1"
         app.launchEnvironment["UITestOpenMenu"] = "1"
     }
@@ -36,24 +37,65 @@ final class ToolbarMenuUITests: XCTestCase {
         try await super.tearDown()
     }
 
-    /// Pulling the menu down triggers a reload that keeps the menu open and populated —
-    /// unlike the header's reload button, which clears the data and closes the menu.
-    func testPullToRefreshKeepsMenuOpenAndPopulated() {
+    /// Opening the menu loads its entries.
+    func testOpenMenuIsPopulated() {
+        app.launch()
+
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
+        XCTAssertTrue(sitemapsHeader.waitForExistence(timeout: 20), "Demo sitemaps should load into the open menu")
+        XCTAssertTrue(sitemapsHeader.isHittable, "Sitemaps header should be interactable once the menu has loaded")
+    }
+
+    /// A tap outside the popover closes it.
+    func testTapOutsideClosesTheMenu() {
+        app.launch()
+
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
+        // The tap is only taken once the popover has finished appearing, which a loaded menu has.
+        XCTAssertTrue(sitemapsHeader.waitForExistence(timeout: 20), "Demo sitemaps should load into the open menu")
+
+        app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.9)).tap()
+
+        let closed = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: appSettingsRow)
+        wait(for: [closed], timeout: 3)
+    }
+
+    /// The menu grows with its content up to the room the display has, not to a fixed height, and
+    /// leaves some space below it to tap on.
+    func testMenuGrowsToTheRoomItHas() {
+        app.launch()
+
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
+        XCTAssertTrue(sitemapsHeader.waitForExistence(timeout: 20), "Demo sitemaps should load into the open menu")
+
+        let menu = app.scrollViews["ToolbarMenuScrollView"]
+        let window = app.windows.firstMatch.frame
+        // The content of the demo server's menu is well over 480 points tall.
+        let grown = NSPredicate { _, _ in menu.frame.height > 520 }
+        let expectation = expectation(for: grown, evaluatedWith: nil)
+        wait(for: [expectation], timeout: 5)
+        XCTAssertLessThanOrEqual(menu.frame.maxY, window.maxY - 44, "Space is left below the menu to tap on")
+    }
+
+    /// A pull down on the menu reloads it and does not close it.
+    func testPullDownReloadsAndKeepsTheMenuOpen() {
         app.launch()
 
         XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
         XCTAssertTrue(sitemapsHeader.waitForExistence(timeout: 20), "Demo sitemaps should load into the open menu")
 
         let scrollView = app.scrollViews["ToolbarMenuScrollView"]
-        XCTAssertTrue(scrollView.exists, "Menu scroll view should be present")
+        // The debug build reports how often the menu reloaded as the scroll view's value.
+        let reloadsBefore = Int(scrollView.value as? String ?? "") ?? 0
+        let top = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
+        top.press(forDuration: 0.1, thenDragTo: scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.9)))
 
-        let start = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2))
-        let end = start.withOffset(CGVector(dx: 0, dy: 250))
-        start.press(forDuration: 0.1, thenDragTo: end)
-
-        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 2), "Menu should stay open after pull-to-refresh")
-        XCTAssertTrue(sitemapsHeader.waitForExistence(timeout: 20), "Sitemaps should remain listed after pull-to-refresh")
-        XCTAssertTrue(sitemapsHeader.isHittable, "Sitemaps header should be interactable once the refresh settles")
+        let reloaded = expectation(
+            for: NSPredicate { _, _ in (Int(scrollView.value as? String ?? "") ?? 0) > reloadsBefore },
+            evaluatedWith: nil
+        )
+        wait(for: [reloaded], timeout: 5)
+        XCTAssertTrue(appSettingsRow.exists, "A pull down should not close the menu")
     }
 
     /// "Add Home" opens the New Home alert. With several homes it sits behind "Edit".
