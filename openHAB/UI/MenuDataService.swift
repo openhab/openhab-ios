@@ -73,20 +73,20 @@ class MenuDataService {
     var uiPages: [OpenHABUIPage] = []
     /// What `GET /rest/` said about the server. Nil until it has, and again after a home switch.
     var server: MainUIServer?
-    /// Fetches running now. The connection stream, opening the menu and pull-to-refresh can
-    /// each start one while another is still running.
-    private(set) var fetchesInFlight = 0
-    /// `true` until the last of any overlapping fetches has ended.
+    /// What the menu loads. Each part has its own task, so a slow one does not hold back the others.
+    private enum LoadPart: CaseIterable {
+        case server, sitemaps, tiles, pages
+    }
+
+    /// The loads in progress, at most one per part: starting a load cancels the one before it.
+    private var loadTasks: [LoadPart: Task<Void, Never>] = [:]
+    /// `true` while any part is loading.
     var isLoading: Bool {
-        fetchesInFlight > 0
+        !loadTasks.isEmpty
     }
 
     /// `true` while `MainActorNetworkTracker` reports an active connection.
     private(set) var isConnected = false
-    /// `true` once the **current** home has had at least one successful data fetch.
-    /// Resets to `false` on every home switch so the "Home" MainUI entry is re-gated
-    /// on each switch (consistent with sitemaps/pages behaviour).
-    var hasSuccessfullyLoaded = false
 
     #if DEBUG
     /// How often `reload()` ran, so a UI test can tell that a pull-to-refresh reloaded the menu.
@@ -103,8 +103,7 @@ class MenuDataService {
     init(networkTracker: NetworkTracker = .shared) {
         // Observe connection changes via NetworkTracker.stateStream() —
         // an AsyncStream that delivers one coherent NetworkState per change.
-        // Deliveries are serialised: the loop waits for fetchData to complete
-        // before processing the next connection change, preventing race conditions.
+        // A new connection cancels the load of the one before it, so only the latest one is ever shown.
         Task { [weak self] in
             for await state in await networkTracker.stateStream() {
                 guard let self else { break }
@@ -113,7 +112,7 @@ class MenuDataService {
                 // New connection: fetch without wiping first so the menu stays
                 // populated until fresh data arrives.
                 guard let activeConnection = state.activeConnection else { continue }
-                await fetchData(activeConnection: activeConnection)
+                load(from: activeConnection)
             }
         }
     }
@@ -147,24 +146,24 @@ class MenuDataService {
         self.server = server
         uiPages = pages
         self.sitemaps = sitemaps
-        hasSuccessfullyLoaded = true
     }
 
     #endif
 
-    /// Clears all data immediately (use for user-initiated refresh or explicit resets).
+    /// Stops the load in progress and clears all data immediately (use for user-initiated refresh or explicit resets).
     func clearAll() {
         #if DEBUG
         if isUITestInjected {
             return
         }
         #endif
+        cancelLoad()
         sitemaps = []
         uiTiles = []
         uiPages = []
     }
 
-    /// Call on home switch: clears data and resets the load gate.
+    /// Call on home switch: cancels the loads and clears the data.
     /// Does NOT start an eager fetch — `MainActorNetworkTracker.shared.activeConnection`
     /// still belongs to the old home at this point (the NetworkConnectionService
     /// re-evaluates asynchronously). The `init()` Combine subscription fires once the
@@ -177,7 +176,6 @@ class MenuDataService {
         #endif
         clearAll()
         server = nil
-        hasSuccessfullyLoaded = false
         isConnected = false
     }
 
@@ -198,101 +196,87 @@ class MenuDataService {
     func clearAndReload(networkTracker: MainActorNetworkTracker = .shared) {
         guard let connection = networkTracker.activeConnection else { return }
         clearAll()
-        Task { await fetchData(activeConnection: connection) }
+        load(from: connection)
     }
 
     /// Re-fetches all menu data from the currently active connection without clearing,
     /// so the menu stays populated until fresh data arrives (pull-to-refresh, menu open).
+    /// Returns when all parts are loaded. A cancelled caller does not cancel the loads: they are
+    /// tasks of their own, which only a newer load or a reset cancels.
     func reload(networkTracker: MainActorNetworkTracker = .shared) async {
         #if DEBUG
         reloadCount += 1
         #endif
-        await fetchData(activeConnection: networkTracker.activeConnection)
+        guard let connection = networkTracker.activeConnection else { return }
+        load(from: connection)
+        for task in Array(loadTasks.values) {
+            await task.value
+        }
     }
 
-    /// What pull-to-refresh runs. SwiftUI cancels the refresh task when the menu re-renders while
-    /// it loads, which would cancel the requests and leave the old entries in place. So `reload`
-    /// runs in a task of its own that the refresh only waits for.
+    /// What pull-to-refresh runs.
     func refresh(networkTracker: MainActorNetworkTracker = .shared) async {
-        await refresh { await self.reload(networkTracker: networkTracker) }
+        await reload(networkTracker: networkTracker)
     }
 
-    /// Waits for `work`, which a cancellation of the caller does not reach.
-    func refresh(running work: @escaping @MainActor () async -> Void) async {
-        await Task { await work() }.value
-    }
-
-    func fetchData(activeConnection: ConnectionInfo?) async {
-        guard let activeConnection else { return }
+    /// Starts loading every part of the menu, each in a task of its own, and cancels the loads before.
+    private func load(from connection: ConnectionInfo) {
         #if DEBUG
         if isUITestInjected {
             return
         }
         #endif
-        await whileLoading {
-            await fetchAll(from: activeConnection)
-        }
-    }
-
-    /// Runs `work` as one fetch, counted in `fetchesInFlight`.
-    func whileLoading(_ work: @MainActor () async -> Void) async {
-        fetchesInFlight += 1
-        defer { fetchesInFlight -= 1 }
-        await work()
-    }
-
-    private func fetchAll(from activeConnection: ConnectionInfo) async {
+        let service: OpenAPIService
         do {
-            let openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
-            await fetchServer(using: openAPIService)
-            await fetchSitemaps(using: openAPIService)
-            await fetchTiles(using: openAPIService)
-            await fetchPages(using: openAPIService, rootUrl: activeConnection.configuration.url)
-            // Service init succeeded — home is reachable; gate the "Home" entry.
-            hasSuccessfullyLoaded = true
+            service = try OpenAPIService(connectionConfiguration: connection.configuration)
         } catch {
             Logger.drawerView.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
             // Retain existing snapshot on connection-level failure.
+            return
+        }
+        let rootUrl = connection.configuration.url
+        // What `GET /rest/` says about the server: its version and endpoints, which decide what
+        // the Main UI entries of the menu offer (chat, administration, sign-in).
+        start(.server, fetch: { try await MainUIServer(service.getRoot()) }, apply: { self.server = $0 })
+        start(
+            .sitemaps,
+            fetch: { try await Self.filterAndSortSitemaps(service.openHABSitemaps()) },
+            apply: { self.sitemaps = $0 }
+        )
+        start(.tiles, fetch: { try await service.getUITiles() }, apply: { self.uiTiles = $0 })
+        start(.pages, fetch: { try await service.getUIPages(rootUrl: rootUrl) }, apply: { self.uiPages = $0 })
+    }
+
+    /// Runs one part's fetch in its own task and hands the result to `apply`. A part that failed
+    /// leaves what the menu has.
+    private func start<Value>(_ part: LoadPart,
+                              fetch: @escaping @MainActor () async throws -> Value,
+                              apply: @escaping @MainActor (Value) -> Void) {
+        loadTasks[part]?.cancel()
+        loadTasks[part] = Task {
+            let value: Value?
+            do {
+                value = try await fetch()
+            } catch {
+                Logger.drawerView.error("Failed to fetch \(String(describing: part)): \(error.localizedDescription)")
+                value = nil
+            }
+            // Critical section: from the last cancellation check to handing over the data there is
+            // no suspension point, and this class is on the main actor, so no other load can run in
+            // between. A cancelled load never reaches the menu, and the one that replaced it, or
+            // the reset that cancelled it, owns `loadTasks[part]`.
+            guard !Task.isCancelled else { return }
+            if let value {
+                apply(value)
+            }
+            loadTasks[part] = nil
         }
     }
 
-    private func fetchServer(using service: OpenAPIService) async {
-        do {
-            server = try await MainUIServer(service.getRoot())
-        } catch {
-            Logger.drawerView.error("Failed to fetch server properties: \(error.localizedDescription)")
-            // Retain the existing server on failure.
+    private func cancelLoad() {
+        for task in loadTasks.values {
+            task.cancel()
         }
-    }
-
-    private func fetchSitemaps(using service: OpenAPIService) async {
-        do {
-            var fetched = try await service.openHABSitemaps()
-            fetched = await Self.filterAndSortSitemaps(fetched)
-            sitemaps = fetched
-        } catch {
-            Logger.drawerView.error("Failed to fetch sitemaps: \(error.localizedDescription)")
-            // Retain existing sitemaps on individual-fetch failure.
-        }
-    }
-
-    private func fetchTiles(using service: OpenAPIService) async {
-        do {
-            uiTiles = try await service.getUITiles()
-            Logger.drawerView.info("Fetched UI tiles successfully")
-        } catch {
-            Logger.drawerView.error("Failed to fetch UI tiles: \(error.localizedDescription)")
-            // Retain existing tiles on individual-fetch failure.
-        }
-    }
-
-    private func fetchPages(using service: OpenAPIService, rootUrl: String) async {
-        do {
-            uiPages = try await service.getUIPages(rootUrl: rootUrl)
-            Logger.drawerView.info("Fetched UI pages successfully")
-        } catch {
-            Logger.drawerView.error("Failed to fetch UI pages: \(error.localizedDescription)")
-            // Retain existing pages on individual-fetch failure.
-        }
+        loadTasks = [:]
     }
 }

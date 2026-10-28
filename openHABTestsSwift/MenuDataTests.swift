@@ -169,12 +169,6 @@ struct MenuDataTests {
 
     // MARK: - State machine
 
-    @Test("hasSuccessfullyLoaded is false on init")
-    func initialLoadGateIsFalse() {
-        let service = MenuDataService()
-        #expect(service.hasSuccessfullyLoaded == false)
-    }
-
     @Test("clearAll empties all collections")
     func clearAllEmptiesCollections() {
         let service = MenuDataService()
@@ -185,15 +179,6 @@ struct MenuDataTests {
         #expect(service.sitemaps.isEmpty)
         #expect(service.uiTiles.isEmpty)
         #expect(service.uiPages.isEmpty)
-    }
-
-    @Test("clearAll does not reset hasSuccessfullyLoaded")
-    func clearAllKeepsLoadGate() {
-        let service = MenuDataService()
-        service.hasSuccessfullyLoaded = true
-        service.clearAll()
-        // clearAll is for clearAndReload, not home switch — gate should stay true
-        #expect(service.hasSuccessfullyLoaded == true)
     }
 
     @Test("reload without an active connection keeps the current snapshot")
@@ -225,61 +210,14 @@ struct MenuDataTests {
         #expect(service.uiPages.count == 1)
     }
 
-    @Test("isLoading stays on until the last of overlapping fetches ends")
-    func overlappingFetchesKeepLoading() async {
-        // A tracker with no connection, so the service starts no fetch of its own.
-        let service = MenuDataService(networkTracker: NetworkTracker())
-        let (first, endFirst) = AsyncStream<Void>.makeStream()
-        let (second, endSecond) = AsyncStream<Void>.makeStream()
-        let firstFetch = Task { await service.whileLoading { for await _ in first {} } }
-        let secondFetch = Task { await service.whileLoading { for await _ in second {} } }
-        while service.fetchesInFlight < 2 {
-            await Task.yield()
-        }
-
-        endFirst.finish()
-        await firstFetch.value
-        #expect(service.isLoading)
-
-        endSecond.finish()
-        await secondFetch.value
-        #expect(!service.isLoading)
-    }
-
-    @Test("a cancelled pull-to-refresh does not cancel the reload it started")
-    func cancelledRefreshDoesNotCancelTheReload() async {
-        // A tracker with no connection, so the service starts no fetch of its own.
-        let service = MenuDataService(networkTracker: NetworkTracker())
-        let (started, signalStarted) = AsyncStream<Void>.makeStream()
-        let (proceed, signalProceed) = AsyncStream<Void>.makeStream()
-        var reloadWasCancelled: Bool?
-        let refresh = Task {
-            await service.refresh {
-                signalStarted.finish()
-                for await _ in proceed {}
-                reloadWasCancelled = Task.isCancelled
-            }
-        }
-        for await _ in started {}
-
-        // SwiftUI cancels the refresh task, here while the reload is still running.
-        refresh.cancel()
-        signalProceed.finish()
-        await refresh.value
-
-        #expect(reloadWasCancelled == false)
-    }
-
-    @Test("clearForHomeSwitch empties collections and resets load gate")
+    @Test("clearForHomeSwitch empties collections")
     func clearForHomeSwitchResetsAll() {
         let service = MenuDataService()
         service.sitemaps = [makeSitemap(name: "a", label: "A")]
-        service.hasSuccessfullyLoaded = true
         service.clearForHomeSwitch()
         #expect(service.sitemaps.isEmpty)
         #expect(service.uiTiles.isEmpty)
         #expect(service.uiPages.isEmpty)
-        #expect(service.hasSuccessfullyLoaded == false)
     }
 
     // MARK: - Helpers
