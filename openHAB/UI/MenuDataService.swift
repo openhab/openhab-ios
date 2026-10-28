@@ -105,9 +105,15 @@ class MenuDataService {
         // an AsyncStream that delivers one coherent NetworkState per change.
         // A new connection cancels the load of the one before it, so only the latest one is ever shown.
         Task { [weak self] in
+            var previousConnection: ConnectionInfo?
             for await state in await networkTracker.stateStream() {
                 guard let self else { break }
                 isConnected = state.activeConnection != nil
+                // The state also changes with the connection status, the retry deadline and the
+                // reachability of the network, often several times for one new connection. Only
+                // another connection target, or none in between, is a reason to load again.
+                guard state.activeConnection != previousConnection else { continue }
+                previousConnection = state.activeConnection
                 // Connection loss: retain the last-good snapshot — do NOT clear.
                 // New connection: fetch without wiping first so the menu stays
                 // populated until fresh data arrives.
