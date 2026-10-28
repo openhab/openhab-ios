@@ -75,7 +75,25 @@ smaller one exists.
   `SitemapPageViewModel` (three files), `NetworkConnectionService`, `NotificationsView`,
   `OpenHABRootView`, `OpenHABWebViewContainer`, `OpenHABWebViewModel`, `ScreenSaverView`, `IconView`.
   PR #1373 (timbms, `@Observable` for `OpenHABWidget` and `IconReloadCoordinator`) removes two of
-  them and does not use `AsyncAlgorithms`.
+  them and does not use `AsyncAlgorithms`. PR #1372 ("Remove unused Combine leftovers", merged
+  2026-10-24) removed unused Combine code and does not use it either.
+- **Scan of all local and remote branches against `develop`** (Oct 29 2026, by counting added and
+  removed `import Combine` and `import AsyncAlgorithms` lines in each branch's own diff; a rough
+  heuristic, not a review):
+  - Only `root-view-tabbed-swiftui` and `root-view-tabbed-swiftui-original` add `AsyncAlgorithms`.
+    At the tip of `root-view-tabbed-swiftui` it is imported in `Preferences`, `AppDelegate`,
+    `AppServicesViewModel`, `IdleTimerService` and `WatchMessageService`.
+  - Those two branches also remove the most Combine imports (13 and 12 removed, 8 and 7 added).
+  - `menustructure_improvements` and `digitaldan/webview-fixes-with-1331` remove four Combine
+    imports each and add none; that is already in `develop` (PR #1331 and the follow-up work).
+  - `origin/refactor/observable-widget-icon-reloader` is PR #1373.
+  - Not looked at in detail, and the counts alone cannot say whether they matter:
+    `openapigen-swiftui`, `root-view-improved-sidemenu`, `menustructure_refactoring` (and its
+    `_clean` and `_merge` variants), `refinement/item-01` to `item-06`, `SessionChallengeHandler-cleanup`
+    and `backup`. They both remove and add Combine imports, probably because they predate later changes
+    on `develop`. The old `digitaldan/*` branches from 2024 and 2025 mostly add Combine.
+  - Open PRs other than #1373: none touch Combine or `AsyncAlgorithms`, except #1245, which adds one
+    `import Combine`.
 
 ## UI tests added on this branch
 
