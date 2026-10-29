@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [Version 3.4.36, Build 333] - 2026-10-29Z
+
+- fix(build): keep the Main UI previews inside the DEBUG block (#1376)
+- iPhone Duo: native navigation bar for Main UI and tiles (#1360)
+- chore: build on Xcode 27.1 and update agent docs (#1374)
+- Share agent configuration and remove older instruction files (#1367)
+
 ## [Version 3.4.35, Build 332] - 2026-10-24Z
 
 - Remove unused Combine leftovers (#1372)
