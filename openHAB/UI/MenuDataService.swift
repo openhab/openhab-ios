@@ -9,9 +9,58 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Foundation
 import Observation
 import OpenHABCore
 import os.log
+
+#if DEBUG
+/// The `UITestServer` launch environment: `{"version":"5.0.0","endpoints":["items"],"pages":[{"uid":"kitchen","label":"Kitchen","visibleTo":["role:user"]}]}`.
+struct UITestServerFixture: Decodable {
+    struct Page: Decodable {
+        let uid: String
+        let label: String
+        let visibleTo: [String]?
+    }
+
+    struct Sitemap: Decodable {
+        let name: String
+        let label: String
+    }
+
+    let version: String?
+    let endpoints: [String]
+    let pages: [Page]?
+    /// Sitemaps for the menu to list. The sitemap itself is still loaded from the active connection.
+    let sitemaps: [Sitemap]?
+
+    var menuSitemaps: [OpenHABSitemap] {
+        (sitemaps ?? []).map { OpenHABSitemap(name: $0.name, icon: "", label: $0.label, link: "", page: nil) }
+    }
+
+    var server: MainUIServer {
+        MainUIServer(majorVersion: version.flatMap { Int($0.split(separator: ".").first ?? "") }, endpoints: Set(endpoints))
+    }
+
+    var menuPages: [OpenHABUIPage] {
+        (pages ?? []).enumerated().map { index, page in
+            OpenHABUIPage(
+                uid: page.uid,
+                label: page.label,
+                icon: "",
+                order: OpenHABUIPage.defaultOrder + index,
+                url: "/page/\(page.uid)",
+                visibleTo: page.visibleTo ?? []
+            )
+        }
+    }
+
+    init?(json: String) {
+        guard let fixture = try? JSONDecoder().decode(Self.self, from: Data(json.utf8)) else { return nil }
+        self = fixture
+    }
+}
+#endif
 
 /// Provides menu data (sitemaps, tiles, pages) for the navigation menu.
 /// Extracted from DrawerView for testability and reuse.
@@ -22,6 +71,8 @@ class MenuDataService {
     var sitemaps: [OpenHABSitemap] = []
     var uiTiles: [OpenHABUiTile] = []
     var uiPages: [OpenHABUIPage] = []
+    /// What `GET /rest/` said about the server. Nil until it has, and again after a home switch.
+    var server: MainUIServer?
     /// Fetches running now. The connection stream, opening the menu and pull-to-refresh can
     /// each start one while another is still running.
     private(set) var fetchesInFlight = 0
@@ -36,6 +87,18 @@ class MenuDataService {
     /// Resets to `false` on every home switch so the "Home" MainUI entry is re-gated
     /// on each switch (consistent with sitemaps/pages behaviour).
     var hasSuccessfullyLoaded = false
+
+    #if DEBUG
+    /// How often `reload()` ran, so a UI test can tell that a pull-to-refresh reloaded the menu.
+    private(set) var reloadCount = 0
+
+    #endif
+
+    #if DEBUG
+    /// Set by `injectForUITest`: what the test put in is not replaced by what a server says.
+    private var isUITestInjected = false
+
+    #endif
 
     init(networkTracker: NetworkTracker = .shared) {
         // Observe connection changes via NetworkTracker.stateStream() —
@@ -76,8 +139,26 @@ class MenuDataService {
         return result
     }
 
+    #if DEBUG
+
+    /// Stands in for what the server returns, so UI tests need no server.
+    func injectForUITest(server: MainUIServer, pages: [OpenHABUIPage], sitemaps: [OpenHABSitemap] = []) {
+        isUITestInjected = true
+        self.server = server
+        uiPages = pages
+        self.sitemaps = sitemaps
+        hasSuccessfullyLoaded = true
+    }
+
+    #endif
+
     /// Clears all data immediately (use for user-initiated refresh or explicit resets).
     func clearAll() {
+        #if DEBUG
+        if isUITestInjected {
+            return
+        }
+        #endif
         sitemaps = []
         uiTiles = []
         uiPages = []
@@ -89,7 +170,13 @@ class MenuDataService {
     /// re-evaluates asynchronously). The `init()` Combine subscription fires once the
     /// tracker reconnects to the new home and handles all fetching from there.
     func clearForHomeSwitch() {
+        #if DEBUG
+        if isUITestInjected {
+            return
+        }
+        #endif
         clearAll()
+        server = nil
         hasSuccessfullyLoaded = false
         isConnected = false
     }
@@ -117,11 +204,31 @@ class MenuDataService {
     /// Re-fetches all menu data from the currently active connection without clearing,
     /// so the menu stays populated until fresh data arrives (pull-to-refresh, menu open).
     func reload(networkTracker: MainActorNetworkTracker = .shared) async {
+        #if DEBUG
+        reloadCount += 1
+        #endif
         await fetchData(activeConnection: networkTracker.activeConnection)
+    }
+
+    /// What pull-to-refresh runs. SwiftUI cancels the refresh task when the menu re-renders while
+    /// it loads, which would cancel the requests and leave the old entries in place. So `reload`
+    /// runs in a task of its own that the refresh only waits for.
+    func refresh(networkTracker: MainActorNetworkTracker = .shared) async {
+        await refresh { await self.reload(networkTracker: networkTracker) }
+    }
+
+    /// Waits for `work`, which a cancellation of the caller does not reach.
+    func refresh(running work: @escaping @MainActor () async -> Void) async {
+        await Task { await work() }.value
     }
 
     func fetchData(activeConnection: ConnectionInfo?) async {
         guard let activeConnection else { return }
+        #if DEBUG
+        if isUITestInjected {
+            return
+        }
+        #endif
         await whileLoading {
             await fetchAll(from: activeConnection)
         }
@@ -137,6 +244,7 @@ class MenuDataService {
     private func fetchAll(from activeConnection: ConnectionInfo) async {
         do {
             let openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
+            await fetchServer(using: openAPIService)
             await fetchSitemaps(using: openAPIService)
             await fetchTiles(using: openAPIService)
             await fetchPages(using: openAPIService, rootUrl: activeConnection.configuration.url)
@@ -145,6 +253,15 @@ class MenuDataService {
         } catch {
             Logger.drawerView.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
             // Retain existing snapshot on connection-level failure.
+        }
+    }
+
+    private func fetchServer(using service: OpenAPIService) async {
+        do {
+            server = try await MainUIServer(service.getRoot())
+        } catch {
+            Logger.drawerView.error("Failed to fetch server properties: \(error.localizedDescription)")
+            // Retain the existing server on failure.
         }
     }
 

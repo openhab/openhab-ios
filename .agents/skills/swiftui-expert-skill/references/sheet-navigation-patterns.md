@@ -1,0 +1,422 @@
+# SwiftUI Sheet, Navigation & Inspector Patterns Reference
+
+## Table of Contents
+
+- [Sheet Patterns](#sheet-patterns)
+- [Item-Driven Alerts and Confirmation Dialogs (SDK 27)](#item-driven-alerts-and-confirmation-dialogs-sdk-27)
+- [Navigation Patterns](#navigation-patterns)
+- [Multi-Column Navigation with NavigationSplitView](#multi-column-navigation-with-navigationsplitview)
+- [Inspector](#inspector)
+- [Presentation Modifiers](#presentation-modifiers)
+- [Summary Checklist](#summary-checklist)
+
+## Sheet Patterns
+
+### Item-Driven Sheets (Preferred)
+
+**Use `.sheet(item:)` instead of `.sheet(isPresented:)` when presenting model-based content.**
+
+```swift
+// Good - item-driven
+@State private var selectedItem: Item?
+
+var body: some View {
+    List(items) { item in
+        Button(item.name) {
+            selectedItem = item
+        }
+    }
+    .sheet(item: $selectedItem) { item in
+        ItemDetailSheet(item: item)
+    }
+}
+
+// Avoid - boolean flag requires separate state
+@State private var showSheet = false
+@State private var selectedItem: Item?
+
+var body: some View {
+    List(items) { item in
+        Button(item.name) {
+            selectedItem = item
+            showSheet = true
+        }
+    }
+    .sheet(isPresented: $showSheet) {
+        if let selectedItem {
+            ItemDetailSheet(item: selectedItem)
+        }
+    }
+}
+```
+
+**Why**: `.sheet(item:)` automatically handles presentation state and avoids optional unwrapping in the sheet body.
+
+### Sheets Own Their Actions
+
+**Sheets should handle their own dismiss and actions internally** using `@Environment(\.dismiss)`. Avoid passing `onSave`/`onCancel` closures from the parent -- it creates callback prop-drilling and reduces reusability.
+
+```swift
+struct EditItemSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let item: Item
+    @State private var name: String
+
+    init(item: Item) {
+        self.item = item
+        _name = State(initialValue: item.name)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form { TextField("Name", text: $name) }
+                .navigationTitle("Edit Item")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                    ToolbarItem(placement: .confirmationAction) { Button("Save") { /* save and dismiss */ } }
+                }
+        }
+    }
+}
+```
+
+### Enum-Based Sheet Management
+
+When presenting multiple different sheets, use an `Identifiable` enum with `.sheet(item:)` instead of multiple boolean state properties:
+
+```swift
+struct ArticlesView: View {
+    enum Sheet: Identifiable {
+        case add, edit(Article), categories
+        var id: String {
+            switch self {
+            case .add: "add"
+            case .edit(let a): "edit-\(a.id)"
+            case .categories: "categories"
+            }
+        }
+    }
+
+    @State private var presentedSheet: Sheet?
+
+    var body: some View {
+        List { /* ... */ }
+            .toolbar {
+                Button("Add") { presentedSheet = .add }
+            }
+            .sheet(item: $presentedSheet) { sheet in
+                switch sheet {
+                case .add: AddArticleView()
+                case .edit(let article): EditArticleView(article: article)
+                case .categories: CategoriesView()
+                }
+            }
+    }
+}
+```
+
+**Why**: A single `@State` property and one `.sheet(item:)` modifier replaces N boolean properties and N sheet modifiers, improving readability and preventing only-one-sheet-at-a-time conflicts.
+
+## Item-Driven Alerts and Confirmation Dialogs (SDK 27)
+
+SDK 27 adds `alert(_:item:actions:message:)` and `confirmationDialog(_:item:titleVisibility:actions:message:)`. The optional binding alone drives presentation, the unwrapped value is passed to the action and message closures, and dismissal resets the binding to `nil`. The item does not need to conform to `Identifiable`.
+
+```swift
+@State private var photoToDelete: Photo?
+
+var body: some View {
+    PhotoList { photoToDelete = $0 }
+        .confirmationDialog(
+            "Delete photo?",
+            item: $photoToDelete
+        ) { photo in
+            Button("Delete \(photo.name)", role: .destructive) {
+                delete(photo)
+            }
+        } message: { photo in
+            Text("\(photo.name) will be removed.")
+        }
+}
+```
+
+Prefer the item overload for an action tied to an optional value instead of synchronizing a separate Boolean or pairing `isPresented` with `presenting:`. Do not use the older `Alert`-returning `alert(item:)`. These overloads require the SDK 27 toolchain but back-deploy to iOS 15, macOS 12, tvOS 15, watchOS 8, and visionOS 1; no runtime availability gate is needed at those deployment targets.
+
+## Navigation Patterns
+
+### Type-Safe Navigation with NavigationStack
+
+```swift
+struct ContentView: View {
+    var body: some View {
+        NavigationStack {
+            List {
+                NavigationLink("Profile", value: Route.profile)
+                NavigationLink("Settings", value: Route.settings)
+            }
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .profile:
+                    ProfileView()
+                case .settings:
+                    SettingsView()
+                }
+            }
+        }
+    }
+}
+
+enum Route: Hashable {
+    case profile
+    case settings
+}
+```
+
+### Programmatic Navigation
+
+```swift
+struct ContentView: View {
+    @State private var navigationPath = NavigationPath()
+    
+    var body: some View {
+        NavigationStack(path: $navigationPath) {
+            List {
+                Button("Go to Detail") {
+                    navigationPath.append(DetailRoute.item(id: 1))
+                }
+            }
+            .navigationDestination(for: DetailRoute.self) { route in
+                switch route {
+                case .item(let id):
+                    ItemDetailView(id: id)
+                }
+            }
+        }
+    }
+}
+
+enum DetailRoute: Hashable {
+    case item(id: Int)
+}
+```
+
+## Multi-Column Navigation with NavigationSplitView
+
+### Two-Column Layout
+
+Use `NavigationSplitView` for sidebar-driven navigation. Available on iOS 16+, macOS 13+, tvOS 16+, watchOS 9+.
+
+```swift
+struct ContentView: View {
+    @State private var selectedItem: Item.ID?
+
+    var body: some View {
+        NavigationSplitView {
+            List(items, selection: $selectedItem) { item in
+                Text(item.name)
+            }
+            .navigationTitle("Items")
+        } detail: {
+            if let selectedItem, let item = items.first(where: { $0.id == selectedItem }) {
+                ItemDetailView(item: item)
+            } else {
+                ContentUnavailableView("Select an Item", systemImage: "doc")
+            }
+        }
+    }
+}
+```
+
+### Three-Column Layout
+
+```swift
+struct ContentView: View {
+    @State private var departmentId: Department.ID?
+    @State private var employeeIds = Set<Employee.ID>()
+
+    var body: some View {
+        NavigationSplitView {
+            List(model.departments, selection: $departmentId) { dept in
+                Text(dept.name)
+            }
+        } content: {
+            if let department = model.department(id: departmentId) {
+                List(department.employees, selection: $employeeIds) { emp in
+                    Text(emp.name)
+                }
+            } else {
+                Text("Select a department")
+            }
+        } detail: {
+            EmployeeDetails(for: employeeIds)
+        }
+    }
+}
+```
+
+### Configuration
+
+- **Column visibility**: `NavigationSplitView(columnVisibility: $visibility)` with `NavigationSplitViewVisibility` (`.detailOnly`, `.doubleColumn`, `.all`)
+- **Column widths**: `.navigationSplitViewColumnWidth(min:ideal:max:)` on each column
+- **Compact column**: `NavigationSplitView(preferredCompactColumn: $column)` to control which column shows on narrow devices
+- **Style**: `.navigationSplitViewStyle(.balanced)` or `.prominentDetail` (default)
+
+### Platform Behavior
+
+| Platform | Behavior |
+|----------|----------|
+| **macOS** | Columns always visible side-by-side; sidebar has translucent material; variable-width column resizing by dragging |
+| **iPadOS (regular)** | Sidebar can overlay or push detail; supports column visibility toggle via toolbar button |
+| **iOS / iPadOS (compact)** | Collapses into a single `NavigationStack`; sidebar items show disclosure chevrons; back button navigates between columns |
+| **iOS / iPadOS (regular)** | Can show columns tiled or as overlays, depending on available size and context |
+| **watchOS / tvOS** | Collapses into a single stack |
+
+Do not infer split-view behavior from the device family. Respond to the space SwiftUI offers: an iPhone can provide a regular-width context, including the inner display of iPhone Duo, where `NavigationSplitView` can show multiple columns. The same scene can later become compact and collapse, so keep selection and navigation state consistent through the transition.
+
+### Large Displays
+
+When rows push further screens (settings, mailboxes, folders), `NavigationSplitView` shows the next level beside the list on large displays and collapses on compact width; see [the screen-structure rule](iphone-duo.md#choose-the-technique-by-screen-structure).
+
+- Keep the sidebar visible with `columnVisibility` `.all` plus `toolbar(removing: .sidebarToggle)` when hiding the list would strand the user.
+- Use `navigationSplitViewColumnWidth(min:ideal:)` if sidebar cards or buttons wrap at the default width. Avoid `max:`: in a fold-aligned pose the system can widen the sidebar to the fold, and a maximum caps it short.
+- Consider choosing the default detail by importance, not position. When pushed pages are secondary, a regular-width-only overview page selected from a summary row atop the sidebar (as in Settings) can beat auto-selecting the first row.
+- The split view can reset selection to `nil` on expand: re-fill it on regular width, and clear regular-only selections on collapse so compact width returns to the list.
+- Use a `NavigationStack` in the detail column for deeper pushes.
+- In Xcode 27.1, a selectable `List` rendered `Link` and `Button` rows in the primary color rather than the tint.
+
+### Tab Bar and Sidebar (iOS 27+)
+
+On iPadOS, a `TabView` with `.tabViewStyle(.sidebarAdaptable)` morphs between a tab bar and a sidebar. On iPhone the bar cannot morph, so only one representation is shown. On iOS 27 an iPhone app can opt into the sidebar representation with `defaultTabBarPlacement(_:)`; on iPadOS the modifier has no effect and `defaultAdaptableTabBarPlacement(_:)` applies instead.
+
+```swift
+@available(iOS 27.0, *)
+struct RootTabs: View {
+    var body: some View {
+        TabView {
+            Tab("Home", systemImage: "house") { HomeView() }
+            Tab("Favorites", systemImage: "star") { FavoritesView() }
+        }
+        .tabViewStyle(.sidebarAdaptable)
+        .defaultTabBarPlacement(.sidebar)
+    }
+}
+```
+
+The system decides between tab bar and sidebar from the space available, and people cannot toggle it. Read `@Environment(\.isTabViewSidebarAvailable)` inside the tab content to learn whether a sidebar is (or can become) visible; it returns `false` outside a sidebar-capable `TabView`'s content. Use it rather than inspecting size classes for this question. When no sidebar is available, make sure content that lives behind nested tabs or sections stays reachable some other way. Keep a plain `TabView` fallback for earlier systems.
+
+## Inspector
+
+> **Availability:** iOS 17.0+, macOS 14.0+
+
+A trailing-edge panel for supplementary information.
+
+On wider size classes (macOS, iPad landscape), it appears as a **trailing column**. On compact size classes (iPhone), it **adapts to a sheet** automatically.
+
+### Basic Inspector
+
+```swift
+struct ShapeEditor: View {
+    @State private var showInspector = false
+
+    var body: some View {
+        MyEditorView()
+            .inspector(isPresented: $showInspector) {
+                InspectorContent()
+            }
+            .toolbar {
+                ToolbarItem {
+                    Button {
+                        showInspector.toggle()
+                    } label: {
+                        Label("Inspector", systemImage: "info.circle")
+                    }
+                }
+            }
+    }
+}
+```
+
+### Inspector with Column Width
+
+```swift
+MyEditorView()
+    .inspector(isPresented: $showInspector) {
+        InspectorContent()
+            .inspectorColumnWidth(min: 200, ideal: 250, max: 400)
+    }
+```
+
+### Inspector with Fixed Width
+
+```swift
+MyEditorView()
+    .inspector(isPresented: $showInspector) {
+        InspectorContent()
+            .inspectorColumnWidth(300)
+    }
+```
+
+### Platform Behavior
+
+| Platform | Behavior |
+|----------|----------|
+| **macOS** | Trailing-edge sidebar panel; resizable by dragging edge; integrates with window toolbar |
+| **iPadOS (regular)** | Trailing column alongside content; toggleable via toolbar button |
+| **iOS / iPadOS (compact)** | Adapts to a sheet presentation; swipe-to-dismiss supported |
+| **iOS / iPadOS (regular)** | Can appear as a trailing column when the presentation context provides enough space |
+
+> **Tip:** Use `InspectorCommands` in your app's `.commands` to include the default inspector toggle keyboard shortcut.
+
+## Presentation Modifiers
+
+### Full Screen Cover
+
+```swift
+struct ContentView: View {
+    @State private var showFullScreen = false
+    
+    var body: some View {
+        Button("Show Full Screen") {
+            showFullScreen = true
+        }
+        .fullScreenCover(isPresented: $showFullScreen) {
+            FullScreenView()
+        }
+    }
+}
+```
+
+### Popover
+
+```swift
+struct ContentView: View {
+    @State private var showPopover = false
+    
+    var body: some View {
+        Button("Show Popover") {
+            showPopover = true
+        }
+        .popover(isPresented: $showPopover) {
+            PopoverContentView()
+                .presentationCompactAdaptation(.popover)  // Don't adapt to sheet on iPhone
+        }
+    }
+}
+```
+
+For older `alert` and `confirmationDialog` API patterns, see `latest-apis.md`. Prefer the SDK 27 item overloads above when the presentation is tied to an optional value.
+
+## Summary Checklist
+
+- [ ] Use `.sheet(item:)` for model-based sheets
+- [ ] Sheets own their actions and dismiss internally
+- [ ] Use `NavigationStack` with `navigationDestination(for:)` for type-safe navigation
+- [ ] Use `NavigationPath` for programmatic navigation
+- [ ] Use `NavigationSplitView` for sidebar-driven multi-column layouts
+- [ ] `sidebarAdaptable` tab sidebars on iPhone use `defaultTabBarPlacement(_:)` behind `#available(iOS 27.0, *)`, with nested-tab content reachable when no sidebar is shown
+- [ ] Use `Inspector` for trailing-edge supplementary panels
+- [ ] Set column widths with `navigationSplitViewColumnWidth(min:ideal:max:)` or `inspectorColumnWidth(min:ideal:max:)`
+- [ ] Use appropriate presentation modifiers (sheet, fullScreenCover, popover)
+- [ ] Alerts and confirmation dialogs use modern API with actions; prefer the SDK 27 `item:` overload for an optional value
+- [ ] Avoid passing dismiss/save callbacks to sheets
+- [ ] Use enum-based `Identifiable` type with `.sheet(item:)` when presenting multiple sheets
+- [ ] Navigation state can be saved/restored when needed

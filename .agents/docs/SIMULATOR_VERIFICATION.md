@@ -15,7 +15,10 @@ Two MCP servers are in use. Their responsibilities are strictly separated:
 
 ## Verification cycle
 
-After every set of code changes, always run a full verification cycle before committing:
+After every set of code changes, always run a full verification cycle before committing. Skip it for read-only tasks (reviews, explanations, investigations).
+
+Use an already booted iPhone simulator, or the one selected by the `$SIM` command in [AGENTS.md](../AGENTS.md). Never search for, create, or download simulators or runtimes; if none is available, stop and report.
+
 
 1. **Build** using the Xcode MCP server (`mcp__xcode__BuildProject`, tab `windowtab1`). Fix any errors before proceeding.
 2. **Install & run** in the simulator:
@@ -76,4 +79,4 @@ After every set of code changes, always run a full verification cycle before com
 | `mcp__mobile-mcp__mobile_list_crashes` / `mobile_get_crash` | Access crash reports for diagnosis. |
 | `mcp__mobile-mcp__mobile_open_url` | Open a URL in the device browser. |
 
-**Coordinate note:** `mobile-mcp` coordinates are in pixels matching the screenshot dimensions — no logical-point conversion needed. iPhone 17 on iOS 26.5 is 402×874 px.
+**Coordinate note:** `mobile-mcp` coordinates are in pixels matching the screenshot dimensions — no logical-point conversion needed. Call `mobile_get_screen_size` rather than assuming dimensions for a particular model.

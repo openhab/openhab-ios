@@ -712,6 +712,7 @@ extension MenuSection {
     var displayName: String {
         switch self {
         case .mainUI: String(localized: "Main UI")
+        case .administration: String(localized: "Administration")
         case .sitemaps: String(localized: "Sitemaps")
         case .tiles: String(localized: "Tiles")
         case .system: String(localized: "System & App")

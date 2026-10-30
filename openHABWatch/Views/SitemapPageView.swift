@@ -16,7 +16,7 @@ import SwiftUI
 /// A wrapper view that handles linkedPage navigation for widgets
 struct WidgetRowView: View {
     @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
 
     private var refreshToken: String {
         let displayState = widget.displayState
@@ -37,26 +37,69 @@ struct WidgetRowView: View {
     }
 }
 
+/// Owns the model of a linked page. Created inline in `navigationDestination`, the model was
+/// replaced, and its long poll restarted, each time SwiftUI evaluated the destination again.
+/// The model is created on first appearance: `State(initialValue:)` would create one, and start
+/// its page handling, on every evaluation.
+private struct LinkedSitemapPageView: View {
+    let linkedPage: OpenHABPage
+    @State private var viewModel: UserData?
+
+    var body: some View {
+        if let viewModel {
+            SitemapPageView(viewModel: viewModel, isRoot: false)
+        } else {
+            Color.clear
+                .onAppear { viewModel = UserData(linkedPage: linkedPage) }
+        }
+    }
+}
+
 struct SitemapPageView: View {
-    @ObservedObject var viewModel: UserData
-    @EnvironmentObject var settings: AppSettings
+    @Bindable var viewModel: UserData
+    @Environment(AppSettings.self) var settings
+    @Environment(\.scenePhase) private var scenePhase
     @State var title = "Sitemap"
+    @State private var isVisible = false
     @State private var scrollPosition: String?
     var isRoot = true
 
     var body: some View {
         if isRoot {
             NavigationStack {
-                pageContent
+                followedPageContent
                     .navigationDestination(for: OpenHABPage.self) { linkedPage in
-                        SitemapPageView(viewModel: UserData(linkedPage: linkedPage), isRoot: false)
-                            .environmentObject(settings)
+                        LinkedSitemapPageView(linkedPage: linkedPage)
+                            .environment(settings)
                     }
             }
         } else {
-            pageContent
-                .onDisappear { viewModel.stopLongPolling() }
+            followedPageContent
         }
+    }
+
+    /// Follows the server only while this page is on screen and the app is in the foreground.
+    private var followedPageContent: some View {
+        pageContent
+            .onAppear {
+                isVisible = true
+                viewModel.resumePageHandling()
+            }
+            .onDisappear {
+                isVisible = false
+                viewModel.pausePageHandling()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                guard isVisible else { return }
+                switch phase {
+                case .background:
+                    viewModel.pausePageHandling()
+                case .active:
+                    viewModel.resumePageHandling()
+                default:
+                    break
+                }
+            }
     }
 
     private var pageContent: some View {
@@ -72,7 +115,7 @@ struct SitemapPageView: View {
             } else if !viewModel.widgets.isEmpty {
                 ScrollView {
                     VStack(spacing: 4) {
-                        ForEach(viewModel.widgets) { widget in
+                        ForEach(viewModel.visibleWidgets) { widget in
                             WidgetRowView(widget: widget)
                                 .id(widget.widgetId)
                         }
@@ -93,7 +136,7 @@ struct SitemapPageView: View {
                     .padding(.vertical, 2)
                 }
                 .scrollPosition(id: $scrollPosition, anchor: .top)
-                .navigationBarTitle(viewModel.openHABSitemapPage?.title.labelValueTitle ?? "Sitemap")
+                .navigationBarTitle(viewModel.pageTitle?.labelValueTitle ?? "Sitemap")
             } else {
                 VStack {
                     Spacer()
@@ -137,9 +180,8 @@ struct SitemapPageView: View {
 
     return Group {
         SitemapPageView(viewModel: userData)
-            .environmentObject(userData)
 
         SitemapPageView(viewModel: userData)
     }
-    .environmentObject(appSettings)
+    .environment(appSettings)
 }

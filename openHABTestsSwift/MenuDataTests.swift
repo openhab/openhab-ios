@@ -246,6 +246,30 @@ struct MenuDataTests {
         #expect(!service.isLoading)
     }
 
+    @Test("a cancelled pull-to-refresh does not cancel the reload it started")
+    func cancelledRefreshDoesNotCancelTheReload() async {
+        // A tracker with no connection, so the service starts no fetch of its own.
+        let service = MenuDataService(networkTracker: NetworkTracker())
+        let (started, signalStarted) = AsyncStream<Void>.makeStream()
+        let (proceed, signalProceed) = AsyncStream<Void>.makeStream()
+        var reloadWasCancelled: Bool?
+        let refresh = Task {
+            await service.refresh {
+                signalStarted.finish()
+                for await _ in proceed {}
+                reloadWasCancelled = Task.isCancelled
+            }
+        }
+        for await _ in started {}
+
+        // SwiftUI cancels the refresh task, here while the reload is still running.
+        refresh.cancel()
+        signalProceed.finish()
+        await refresh.value
+
+        #expect(reloadWasCancelled == false)
+    }
+
     @Test("clearForHomeSwitch empties collections and resets load gate")
     func clearForHomeSwitchResetsAll() {
         let service = MenuDataService()

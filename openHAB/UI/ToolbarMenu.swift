@@ -30,6 +30,27 @@ enum TargetController: Equatable {
     case tile(String)
 }
 
+// MARK: - Menu size
+
+/// How tall the menu may grow. It grows with its content up to the room the popover has below
+/// its top, less a margin that stays free so that a tap there can dismiss it. The room is the
+/// window's safe area, so it follows the device, the orientation and a window that is resized.
+enum MenuSizing {
+    /// The tallest the menu grows before it scrolls, until the popover has measured the room it has.
+    static let defaultHeight: CGFloat = 480
+    /// Space left under the menu, enough to tap on.
+    static let dismissMargin: CGFloat = 60
+    /// Never smaller than this, however little room there is.
+    static let minimumHeight: CGFloat = 240
+
+    /// - Parameter room: From the top of the popover to the bottom of the window's safe area. Nil
+    ///   until the popover has been laid out.
+    static func maxHeight(room: CGFloat?, fallback: CGFloat = defaultHeight) -> CGFloat {
+        guard let room else { return fallback }
+        return max(minimumHeight, room - dismissMargin)
+    }
+}
+
 // MARK: - Connection status indicator
 
 struct ConnectionView: View {
@@ -62,7 +83,9 @@ struct ConnectionView: View {
 // MARK: - Section toggle header
 
 /// Toggle header shared by every collapsible menu section: a disclosure chevron
-/// followed by the uppercased section title, driving `isExpanded`.
+/// followed by the uppercased section title, driving `isExpanded`. A locked section
+/// (`onUnlock` set) shows a lock in its place and unlocks instead of toggling. A section that is
+/// still finding out whether it is locked (`isResolving`) shows a spinner and does nothing.
 struct SectionToggleHeader: View {
     /// Space above and below the title.
     static let verticalPadding: CGFloat = 14
@@ -71,16 +94,29 @@ struct SectionToggleHeader: View {
 
     let title: String
     @Binding var isExpanded: Bool
+    var accessibilityId: String?
+    var onUnlock: (() -> Void)?
+    var isResolving = false
 
     var body: some View {
         Button {
-            isExpanded.toggle()
+            if let onUnlock {
+                onUnlock()
+            } else if !isResolving {
+                isExpanded.toggle()
+            }
         } label: {
             HStack(spacing: 8) {
-                Image(systemSymbol: isExpanded ? .chevronDown : .chevronRight)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 10)
+                if isResolving {
+                    ProgressView()
+                        .controlSize(.mini)
+                        .frame(width: 10)
+                } else {
+                    Image(systemSymbol: onUnlock != nil ? .lockFill : (isExpanded ? .chevronDown : .chevronRight))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 10)
+                }
                 Text(title)
                     .font(.caption)
                     .fontWeight(.semibold)
@@ -96,6 +132,7 @@ struct SectionToggleHeader: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityId ?? title)
     }
 }
 
@@ -111,12 +148,17 @@ struct ToolbarMenu: View {
 
     @Binding var isPresented: Bool
     var menuData: MenuDataService
+    /// The tallest the menu grows before it scrolls. See `MenuSizing`.
+    var maxHeight = MenuSizing.defaultHeight
+    /// Who is signed in to Main UI on the origin in use, sent over the bridge.
+    var authStatus: MainUIAuthStatus
     @State private var scrollViewContentSize: Double = 0
     // Section expansion is stored per home in `HomePreferences`. These `@State`
     // flags mirror the active home for immediate UI updates and are loaded from
     // (and written back to) that home whenever the menu opens or a section toggles.
     @State private var isTilesExpanded = true
     @State private var isMainUIExpanded = true
+    @State private var isAdministrationExpanded = true
     @State private var isSitemapsExpanded = true
     @State private var isSystemExpanded = true
     @State private var isHomeExpanded = false
@@ -166,41 +208,54 @@ struct ToolbarMenu: View {
     @ScaledMetric private var iconWidth = 20.0
 
     var body: some View {
-        GeometryReader { proxy in
-            overlayContent(proxy: proxy)
-        }
-        .onAppear { Task { await loadExpansionState() } }
-        .onChange(of: isPresented) { _, newValue in
-            if newValue {
-                // Re-read in case the active home changed while the menu was closed.
-                Task { await loadExpansionState() }
-                // Pick up sitemaps/pages added on the server since the last fetch.
-                Task { await menuData.reload() }
-            } else {
-                isHomeExpanded = false
-                headerDetailsHidden = false
-                homeDetailsCollapsed = false
+        menuContent(height: maxHeight)
+            .onAppear { Task { await loadExpansionState() } }
+            .onChange(of: isPresented) { _, newValue in
+                if newValue {
+                    // Re-read in case the active home changed while the menu was closed.
+                    Task { await loadExpansionState() }
+                    // Pick up sitemaps/pages added on the server since the last fetch.
+                    Task { await menuData.reload() }
+                } else {
+                    isHomeExpanded = false
+                    headerDetailsHidden = false
+                    homeDetailsCollapsed = false
+                }
             }
-        }
-        .sheet(isPresented: $showAppSettings) {
-            NavigationStack {
-                AppSettingsView()
+            .sheet(isPresented: $showAppSettings, onDismiss: refreshAfterSettings) {
+                NavigationStack {
+                    AppSettingsView()
+                }
             }
-        }
-        .sheet(isPresented: $showCurrentHomeSettings) {
-            NavigationStack {
-                HomeSettingsView()
+            .sheet(isPresented: $showCurrentHomeSettings, onDismiss: refreshAfterSettings) {
+                NavigationStack {
+                    HomeSettingsView()
+                }
             }
-        }
-        .task {
-            for await prefs in await Preferences.shared.currentHomePreferencesStream {
-                cachedHomePrefs = prefs
+            .task {
+                for await prefs in await Preferences.shared.currentHomePreferencesStream {
+                    cachedHomePrefs = prefs
+                }
             }
-        }
     }
 }
 
 extension ToolbarMenu {
+    /// What the user can do in Main UI. Nil until the server's endpoints are known.
+    private var access: MainUIAccess? {
+        MainUIAccess(server: menuData.server, status: authStatus)
+    }
+
+    /// The menu lives in a popover that stays open while a settings sheet shows, since closing it
+    /// would take down the sheet, which hangs off this view. So it reloads its entries and its
+    /// per-home state when the sheet goes away, in case the settings changed what it shows.
+    private func refreshAfterSettings() {
+        Task {
+            await menuData.reload()
+            await loadExpansionState()
+        }
+    }
+
     /// Mirrors the active home's persisted section-expansion state into local `@State`.
     private func loadExpansionState() async {
         let prefs = await Preferences.shared.currentHomePreferences
@@ -210,6 +265,7 @@ extension ToolbarMenu {
         isSitemapsExpanded = !collapsed.contains(.sitemaps)
         isTilesExpanded = !collapsed.contains(.tiles)
         isSystemExpanded = !collapsed.contains(.system)
+        isAdministrationExpanded = !collapsed.contains(.administration)
         sitemapForWatch = prefs.sitemapForWatch
         sitemapForCarPlay = prefs.sitemapForCarPlay
         headerDetailsHidden = false
@@ -281,43 +337,6 @@ extension ToolbarMenu {
         )
     }
 
-    private func overlayContent(proxy: GeometryProxy) -> some View {
-        ZStack(alignment: .topTrailing) {
-            // Dimming backdrop — tapping dismisses the menu
-            if isPresented {
-                Color.black.opacity(0.1)
-                    .ignoresSafeArea()
-                    .onTapGesture { isPresented = false }
-                    .transition(.opacity)
-
-                let menu = menuContent(height: proxy.size.height * 0.8)
-                    .transition(
-                        .scale(scale: 0.01, anchor: .topTrailing)
-                            .combined(with: .opacity)
-                    )
-
-                styleMenu(menu)
-                    .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
-                    .padding(.trailing, 8)
-                    .padding(.top, 4)
-            }
-        }
-        .animation(.spring(response: 0.32, dampingFraction: 0.78), value: isPresented)
-    }
-
-    @ViewBuilder
-    private func styleMenu(_ menu: some View) -> some View {
-        if #available(iOS 26.0, *) {
-            GlassEffectContainer {
-                menu
-            }.glassEffect(.regular, in: .rect(cornerRadius: ConnectionView.cornerRadius))
-        } else {
-            menu
-                .background(.regularMaterial)
-                .clipShape(.rect(cornerRadius: ConnectionView.cornerRadius))
-        }
-    }
-
     // MARK: - Menu content
 
     private func tilesMenu() -> some View {
@@ -335,13 +354,13 @@ extension ToolbarMenu {
     @ViewBuilder
     private func systemMenu() -> some View {
         systemRow(symbol: .gear, label: String(localized: "App Settings")) {
-            isPresented = false
             showAppSettings = true
         }
         if let prefs = cachedHomePrefs,
            Preferences.getNotificationConnection(of: prefs) != nil {
             systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
         }
+        mainUIEntryRow(MainUIMenu.aboutEntry)
     }
 
     @ViewBuilder
@@ -400,7 +419,7 @@ extension ToolbarMenu {
         if menuData.isLoading, menuData.uiPages.isEmpty {
             loadingRow(label: String(localized: "Pages"))
         } else {
-            ForEach(menuData.uiPages, id: \.uid) { page in
+            ForEach(MainUIMenu.pinnedPages(menuData.uiPages, access: access), id: \.uid) { page in
                 let route = "/page/\(page.uid)"
                 menuRow(
                     icon: AnyView(pageIcon(for: page)),
@@ -411,6 +430,70 @@ extension ToolbarMenu {
                 .background(currentRowBackground(currentMainUIRoute == route))
             }
         }
+        if let chat = MainUIMenu.chatEntry(server: menuData.server) {
+            mainUIEntryRow(chat)
+        }
+    }
+
+    // MARK: - Administration
+
+    private func mainUIEntryRow(_ entry: MainUIMenuEntry, footer: String? = nil, accessibilityId: String? = nil) -> some View {
+        menuDetailRow(
+            icon: AnyView(Image(systemSymbol: entry.symbol).resizable().scaledToFit()),
+            title: entry.label,
+            detail: footer ?? "",
+            accessibilityId: accessibilityId ?? "MainUIEntry-\(entry.id)"
+        )
+        .background(currentRowBackground(currentMainUIRoute == entry.path))
+        .onTapGesture { select(.mainUIPage(entry.path)) }
+    }
+
+    /// What Administration lists: the entries for an administrator, then the signed-in user's
+    /// account. Nothing while it is locked.
+    @ViewBuilder
+    private func administrationMenu() -> some View {
+        if let access, let server = menuData.server {
+            if access.isAdministrator {
+                ForEach(MainUIMenu.administrationEntries(server: server)) { entry in
+                    mainUIEntryRow(entry)
+                }
+            }
+            if case let .signedIn(user) = access {
+                mainUIEntryRow(
+                    MainUIMenuEntry(
+                        id: "account",
+                        label: user.name,
+                        symbol: .personCropCircle,
+                        path: MainUIMenu.profileRoute
+                    ),
+                    footer: MainActorNetworkTracker.shared.activeConnection?.configuration.url
+                )
+            }
+        }
+    }
+
+    /// Shown once the server is known: with the entries when signed in, as a lock that signs in
+    /// when not. Locked or not, the saved open/closed state is left alone.
+    @ViewBuilder
+    private func administrationSection(isLast: Bool) -> some View {
+        let isLocked = access == .signedOut
+        collapsibleSection(
+            title: "Administration",
+            isExpanded: expansionBinding($isAdministrationExpanded) { prefs, v in prefs.setSection(.administration, expanded: v) },
+            isEmpty: access == nil,
+            showDivider: !isLast,
+            accessibilityId: "AdministrationSection",
+            onUnlock: isLocked ? { unlockAdministration() } : nil,
+            isResolving: access == .resolving
+        ) {
+            administrationMenu()
+        }
+    }
+
+    /// Opens the profile in Main UI, which signs the user in if nobody is. It does so on its own
+    /// page, so the menu makes room. Somebody who signed in on an earlier visit is let straight in.
+    private func unlockAdministration() {
+        select(.mainUIPage(MainUIMenu.profileRoute))
     }
 
     private func homesMenu() -> some View {
@@ -431,6 +514,8 @@ extension ToolbarMenu {
             ) {
                 mainUIMenu()
             }
+        case .administration:
+            administrationSection(isLast: isLast)
         case .sitemaps:
             collapsibleSection(
                 title: "Sitemaps",
@@ -490,13 +575,17 @@ extension ToolbarMenu {
             // Always bounce vertically — even when the content fits — so pull-to-refresh
             // can be triggered on a short menu.
             .scrollBounceBehavior(.always, axes: .vertical)
-            .refreshable { await menuData.reload() }
+            .refreshable { await menuData.refresh() }
             .accessibilityIdentifier("ToolbarMenuScrollView")
+            #if DEBUG
+            .accessibilityValue("\(menuData.reloadCount)")
+            #endif
             // Host the animation on the sections' shared parent so a change in any
             // one flag also animates the *repositioning* of the sibling sections
             // below it — each section's own `.animation` only covers its own subtree.
             .animation(Self.sectionAnimation, value: isHomeExpanded)
             .animation(Self.sectionAnimation, value: isMainUIExpanded)
+            .animation(Self.sectionAnimation, value: isAdministrationExpanded)
             .animation(Self.sectionAnimation, value: isSitemapsExpanded)
             .animation(Self.sectionAnimation, value: isTilesExpanded)
             .animation(Self.sectionAnimation, value: isSystemExpanded)
@@ -613,7 +702,7 @@ extension ToolbarMenu {
                 Image(systemSymbol: .gear).hidden()
                 if !headerDetailsHidden {
                     Button(
-                        action: { isPresented = false; showCurrentHomeSettings = true },
+                        action: { showCurrentHomeSettings = true },
                         label: { Image(systemSymbol: .gear).foregroundStyle(.secondary) }
                     )
                     .buttonStyle(.plain)
@@ -659,6 +748,11 @@ extension ToolbarMenu {
     ///     A reload of a populated section keeps showing the current rows.
     ///   - isEmpty: When `true` (and not loading), the section is hidden entirely.
     ///   - showDivider: Whether to append a trailing divider below the content.
+    ///   - accessibilityId: Identifier of the header, for UI tests.
+    ///   - onUnlock: Non-nil while the section is locked. The header then shows a lock instead of
+    ///     the chevron, runs this instead of toggling, and keeps the content away.
+    ///   - isResolving: True while it is not yet known whether the section is locked. The header
+    ///     then shows a spinner, does nothing, and keeps the content away.
     ///   - content: The section body, shown only while expanded.
     @ViewBuilder
     private func collapsibleSection(title: String.LocalizationValue,
@@ -666,15 +760,24 @@ extension ToolbarMenu {
                                     isLoading: Bool = false,
                                     isEmpty: Bool = false,
                                     showDivider: Bool = true,
+                                    accessibilityId: String? = nil,
+                                    onUnlock: (() -> Void)? = nil,
+                                    isResolving: Bool = false,
                                     @ViewBuilder content: () -> some View) -> some View {
         let localizedTitle = String(localized: title)
         if isLoading, isEmpty {
             loadingRow(label: localizedTitle)
         } else if !isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                SectionToggleHeader(title: localizedTitle, isExpanded: isExpanded)
+                SectionToggleHeader(
+                    title: localizedTitle,
+                    isExpanded: isExpanded,
+                    accessibilityId: accessibilityId,
+                    onUnlock: onUnlock,
+                    isResolving: isResolving
+                )
 
-                if isExpanded.wrappedValue {
+                if isExpanded.wrappedValue, onUnlock == nil, !isResolving {
                     // Wrap in a single container so the transition has one stable
                     // identity to animate — a bare ViewBuilder group (TupleView /
                     // ForEach) is layout-transparent and won't transition.

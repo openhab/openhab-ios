@@ -46,7 +46,7 @@ struct CompactLabeledContentStyle: LabeledContentStyle {
 }
 
 struct PreferencesSwiftUIView: View {
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
 
     /// The selected sitemap rendered per the synced display-mode and sort-order
     /// settings (e.g. just the name, just the label, or "Home – watch").
@@ -98,5 +98,5 @@ extension View {
 
 #Preview {
     PreferencesSwiftUIView()
-        .environmentObject(AppSettings())
+        .environment(AppSettings())
 }

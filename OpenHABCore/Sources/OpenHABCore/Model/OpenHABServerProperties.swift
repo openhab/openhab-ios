@@ -19,6 +19,12 @@ public struct OpenHABServerProperties: Decodable, Sendable {
         linkUrl(byType: "habpanel")
     }
 
+    /// The REST endpoints this server offers, e.g. "items", "rules", "auth". The root resource
+    /// lists each as a link of that type.
+    public var linkTypes: Set<String> {
+        Set(links.compactMap(\.type))
+    }
+
     public func linkUrl(byType type: String?) -> String? {
         if let index = links.firstIndex(where: { $0.type == type }) {
             links[index].url
@@ -46,6 +52,6 @@ public extension OpenHABServerProperties {
     }
 
     func hasSseSupport() -> Bool {
-        (majorVersion ?? 0) >= 3
+        SitemapUpdatePolicy.usesEvents(serverVersion: majorVersion)
     }
 }

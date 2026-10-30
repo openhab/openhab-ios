@@ -569,6 +569,16 @@ Additional voices, including custom and novelty voices can be downloaded in the 
 
 
 
+## Development
+
+Open `openHAB.xcworkspace` in Xcode. Fastlane lanes (unit tests, screenshots, beta builds) run through Bundler, so install the pinned Ruby dependencies once with:
+
+```sh
+bundle install
+```
+
+and prefix fastlane commands with `bundle exec`, e.g. `bundle exec fastlane unittests`.
+
 ## Trademark Disclaimer
 Product names, logos, brands and other trademarks referred to within the openHAB website are the
 property of their respective trademark holders. These trademark holders are not affiliated with

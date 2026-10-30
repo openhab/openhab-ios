@@ -2,6 +2,31 @@
 
 ## [Unreleased]
 
+## [Version 3.4.36, Build 333] - 2026-10-29Z
+
+- fix(build): keep the Main UI previews inside the DEBUG block (#1376)
+- iPhone Duo: native navigation bar for Main UI and tiles (#1360)
+- chore: build on Xcode 27.1 and update agent docs (#1374)
+- Share agent configuration and remove older instruction files (#1367)
+
+## [Version 3.4.35, Build 332] - 2026-10-24Z
+
+- Remove unused Combine leftovers (#1372)
+- watchos: migrate AppSettings and UserData from ObservableObject to @Observable (#1267)
+- Follow sitemap events on the watch, sharing the update policy with iOS (#1371)
+- watchos: own the linked-page model and keep it polling the right page (#1365)
+
+## [Version 3.4.34, Build 331] - 2026-10-23Z
+
+- MainUI Native Bridge (#1354)
+- String correction and localisation adjustment (#1370)
+- Upgrade to Xcode 27.1, fix warnings, remove unused files (#1366)
+- fix(menu): keep section headers at 44 pt and show Add Home while loading (#1362)
+- chore(lint): upgrade SwiftFormat to 0.63.1 and SwiftLint to 0.65.1 (#1363)
+- Menu section header height and Add home while only one is there (#1361)
+- Revert "fix(menu): make closed section headers easier to tap"
+- fix(menu): make closed section headers easier to tap
+
 ## [Version 3.4.33, Build 330] - 2026-10-11Z
 
 - chore(lint): fix SwiftLint warnings in WebRouteRestore.seed (#1357)
