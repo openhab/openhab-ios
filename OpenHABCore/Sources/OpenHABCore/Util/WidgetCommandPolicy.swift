@@ -36,15 +36,6 @@ public enum WidgetCommandPhase: Sendable {
     case release
 }
 
-public enum WidgetCommandPolicy: Sendable {
-    case immediate
-    case debounce(Duration)
-    /// Dispatches only when phase is `.release`.
-    case finalOnly
-    /// Dispatches only for `.press` and `.release` phases.
-    case pressRelease
-}
-
 /// A discrete command held for user confirmation before it's actually sent. Shared between the
 /// iOS and watchOS apps: each presents this as an alert; confirming runs `onConfirm`, cancelling
 /// just discards it.
@@ -58,4 +49,13 @@ public struct PendingCommandConfirmation: Identifiable {
         self.message = message
         self.onConfirm = onConfirm
     }
+}
+
+public enum WidgetCommandPolicy: Sendable {
+    case immediate
+    case debounce(Duration)
+    /// Dispatches only when phase is `.release`.
+    case finalOnly
+    /// Dispatches only for `.press` and `.release` phases.
+    case pressRelease
 }
