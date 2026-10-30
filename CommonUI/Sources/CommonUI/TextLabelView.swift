@@ -13,7 +13,7 @@ import OpenHABCore
 import SwiftUI
 
 public struct TextLabelView: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     var font: Font?
     var token: OHTextToken
     var lineLimit: Int

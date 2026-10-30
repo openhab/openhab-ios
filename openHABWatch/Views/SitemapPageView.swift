@@ -15,7 +15,7 @@ import SwiftUI
 
 /// A wrapper view that handles linkedPage navigation for widgets
 struct WidgetRowView: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     @Environment(AppSettings.self) var settings
 
     private var refreshToken: String {

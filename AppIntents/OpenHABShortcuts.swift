@@ -11,7 +11,6 @@
 
 import AppIntents
 
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 struct OpenHABShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(

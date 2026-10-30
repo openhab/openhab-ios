@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import CommonUI
 import Kingfisher
 import OpenHABCore
@@ -25,13 +24,14 @@ import SwiftUI
 /// background for longer than `reloadThreshold`, which is included in each KFImage's
 /// `.id()` so that a fresh load from the Kingfisher disk cache is triggered automatically.
 @MainActor
-final class IconReloadCoordinator: ObservableObject {
+@Observable
+final class IconReloadCoordinator {
     static let shared = IconReloadCoordinator()
     static let reloadThreshold: TimeInterval = 60
 
-    @Published private(set) var reloadEpoch = 0
+    private(set) var reloadEpoch = 0
 
-    private var backgroundedAt: Date?
+    @ObservationIgnored private var backgroundedAt: Date?
 
     init(observeNotifications: Bool = true) {
         guard observeNotifications else { return }
@@ -89,7 +89,7 @@ struct IconInputView: View {
     let rowIdentity: String
     let fallbackSymbol: SFSymbol?
     var networkTracker = MainActorNetworkTracker.shared
-    @ObservedObject private var iconReloader = IconReloadCoordinator.shared
+    private let iconReloader = IconReloadCoordinator.shared
     @Environment(\.colorScheme) private var colorScheme
 
     let size: CGSize
@@ -275,9 +275,9 @@ struct IconInputView: View {
 
 /// A SwiftUI view that displays widget icons with openHAB-specific styling and caching
 struct IconView: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
     var networkTracker = MainActorNetworkTracker.shared
-    @ObservedObject private var iconReloader = IconReloadCoordinator.shared
+    private let iconReloader = IconReloadCoordinator.shared
     @Environment(\.colorScheme) private var colorScheme
 
     let size: CGSize

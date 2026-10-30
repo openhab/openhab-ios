@@ -14,7 +14,7 @@ import OpenHABCore
 import SwiftUI
 
 struct MapView: View {
-    @ObservedObject var widget: OpenHABWidget
+    let widget: OpenHABWidget
 
     @State private var cameraPosition: MapCameraPosition
 
