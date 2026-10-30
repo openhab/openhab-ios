@@ -23,9 +23,20 @@ struct UITestServerFixture: Decodable {
         let visibleTo: [String]?
     }
 
+    struct Sitemap: Decodable {
+        let name: String
+        let label: String
+    }
+
     let version: String?
     let endpoints: [String]
     let pages: [Page]?
+    /// Sitemaps for the menu to list. The sitemap itself is still loaded from the active connection.
+    let sitemaps: [Sitemap]?
+
+    var menuSitemaps: [OpenHABSitemap] {
+        (sitemaps ?? []).map { OpenHABSitemap(name: $0.name, icon: "", label: $0.label, link: "", page: nil) }
+    }
 
     var server: MainUIServer {
         MainUIServer(majorVersion: version.flatMap { Int($0.split(separator: ".").first ?? "") }, endpoints: Set(endpoints))
@@ -78,6 +89,12 @@ class MenuDataService {
     var hasSuccessfullyLoaded = false
 
     #if DEBUG
+    /// How often `reload()` ran, so a UI test can tell that a pull-to-refresh reloaded the menu.
+    private(set) var reloadCount = 0
+
+    #endif
+
+    #if DEBUG
     /// Set by `injectForUITest`: what the test put in is not replaced by what a server says.
     private var isUITestInjected = false
 
@@ -125,10 +142,11 @@ class MenuDataService {
     #if DEBUG
 
     /// Stands in for what the server returns, so UI tests need no server.
-    func injectForUITest(server: MainUIServer, pages: [OpenHABUIPage]) {
+    func injectForUITest(server: MainUIServer, pages: [OpenHABUIPage], sitemaps: [OpenHABSitemap] = []) {
         isUITestInjected = true
         self.server = server
         uiPages = pages
+        self.sitemaps = sitemaps
         hasSuccessfullyLoaded = true
     }
 
@@ -186,7 +204,22 @@ class MenuDataService {
     /// Re-fetches all menu data from the currently active connection without clearing,
     /// so the menu stays populated until fresh data arrives (pull-to-refresh, menu open).
     func reload(networkTracker: MainActorNetworkTracker = .shared) async {
+        #if DEBUG
+        reloadCount += 1
+        #endif
         await fetchData(activeConnection: networkTracker.activeConnection)
+    }
+
+    /// What pull-to-refresh runs. SwiftUI cancels the refresh task when the menu re-renders while
+    /// it loads, which would cancel the requests and leave the old entries in place. So `reload`
+    /// runs in a task of its own that the refresh only waits for.
+    func refresh(networkTracker: MainActorNetworkTracker = .shared) async {
+        await refresh { await self.reload(networkTracker: networkTracker) }
+    }
+
+    /// Waits for `work`, which a cancellation of the caller does not reach.
+    func refresh(running work: @escaping @MainActor () async -> Void) async {
+        await Task { await work() }.value
     }
 
     func fetchData(activeConnection: ConnectionInfo?) async {
