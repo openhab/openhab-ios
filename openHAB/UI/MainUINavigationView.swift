@@ -217,6 +217,7 @@ private struct MainUINavigationContent: View {
     /// DECISION: this, not `userInterfaceIdiom` or orientation, decides how toolbar items are
     /// arranged, as Apple asks apps not to branch on the idiom.
     @Environment(\.barIsVertical) private var barIsVertical
+    @Environment(\.barVisibility) private var barVisibility
     @State private var safeArea = EdgeInsets()
     @State private var reportedLayout = MainUILayout.zero
     @State private var lastVisibleTopInset: CGFloat = 0
@@ -266,8 +267,10 @@ private struct MainUINavigationContent: View {
         .navigationTitle(tileTitle ?? (navbar.titleInContent ? "" : navbar.title))
         .toolbarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
-        .toolbarVisibility(navbar.hidden ? .hidden : .visible, for: .navigationBar)
+        // The page hides its navbar on scroll; the app hides it for good with the setting.
+        .toolbarVisibility(navbar.hidden || barVisibility?.isHidden == true ? .hidden : .visible, for: .navigationBar)
         .animation(.default, value: navbar.hidden)
+        .animation(.default, value: barVisibility?.isHidden)
         .opaqueBarBeforeLiquidGlass()
         .toolbar { toolbarContent }
     }

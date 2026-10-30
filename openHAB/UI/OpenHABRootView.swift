@@ -266,6 +266,12 @@ struct OpenHABRootView: View {
     @Environment(NotificationActionService.self) private var notificationService
     @State private var crashService = CrashReportService()
     @State private var menuData = MenuDataService()
+    @State private var barVisibility = BarVisibility(revealDuration: BarVisibility.launchRevealDuration)
+
+    #if DEBUG
+    @State private var uiTestRevealScheduled = false
+    #endif
+
     @StateObject private var webViewModel = OpenHABWebViewModel()
     @State private var currentContent: TargetController = .webview
     @State private var currentViewTitle = ""
@@ -283,6 +289,23 @@ struct OpenHABRootView: View {
             // A sibling above the content rather than an overlay of the navigation container.
             InAppToastBanner(service: ToastService.shared)
         }
+        .environment(\.barVisibility, barVisibility)
+        .statusBarHidden(barVisibility.isHidden)
+        // Enabled while the setting hides the bars, so holding three fingers always shows them.
+        .background(ThreeFingerHoldInstaller(isEnabled: barVisibility.hidesBars) { barVisibility.reveal() })
+        .task { await loadBarSetting() }
+        .onChange(of: barsAreNeeded, initial: true) { _, needed in barVisibility.needsBars = needed }
+        // swiftformat:disable indent
+        #if DEBUG
+        // UI tests cannot hold three fingers, so this does what the gesture does a while after the bars first hide.
+        .onChange(of: barVisibility.isHidden) { _, hidden in
+            guard hidden, !uiTestRevealScheduled,
+                  let delay = ProcessInfo.processInfo.environment["UITestRevealBarsAfter"].flatMap(Double.init) else { return }
+            uiTestRevealScheduled = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { barVisibility.reveal() }
+        }
+        #endif
+        // swiftformat:enable indent
         .onAppear {
             webViewModel.onLoginCancelled = { route in finishCancelledLogin(route: route) }
             #if DEBUG
@@ -361,6 +384,7 @@ struct OpenHABRootView: View {
             handleNavigationCommand(command)
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
+            Task { await loadBarSetting() }
             menuData.clearAndReload()
             webViewModel.reloadView()
         }
@@ -457,6 +481,27 @@ private extension OpenHABRootView {
         case .notifications, .browser:
             preconditionFailure("Modal/transient targets must never become currentContent")
         }
+    }
+
+    /// Hidden bars stay shown while the screen has nothing but an error or a spinner, since
+    /// the indicator for it is in the bar.
+    var barsAreNeeded: Bool {
+        guard activeNetworkConnection != nil else { return true }
+        switch currentContent {
+        case .webview, .mainUIPage: return !webViewModel.hasLoadedContent
+        default: return false
+        }
+    }
+
+    /// The "Hide Status Bar" setting, which hides the navigation bar as well. See `BarVisibility`.
+    func loadBarSetting() async {
+        var hides = await Preferences.shared.hideStatusBar
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["UITestHideBars"] != nil {
+            hides = true
+        }
+        #endif
+        barVisibility.hidesBars = hides
     }
 
     /// What the app menu shows, for every screen with a navigation bar. See `AppMenu.swift`.

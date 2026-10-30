@@ -229,6 +229,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AdministrationAccessUITests.swift,
+				HiddenBarsUITests.swift,
 				MainUILayoutUITests.swift,
 				NotificationInteractionUITests.swift,
 				OpenHABUITests.swift,
