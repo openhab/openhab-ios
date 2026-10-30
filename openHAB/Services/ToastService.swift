@@ -32,15 +32,13 @@ final class ToastService {
 
     private init() {}
 
-    func show(
-        title: String,
-        message: String,
-        actions: [NotificationActionItem] = [],
-        iconURL: URL? = nil,
-        connection: ConnectionInfo? = nil,
-        onTap: (() -> Void)? = nil,
-        onAction: ((NotificationActionItem) -> Void)? = nil
-    ) {
+    func show(title: String,
+              message: String,
+              actions: [NotificationActionItem] = [],
+              iconURL: URL? = nil,
+              connection: ConnectionInfo? = nil,
+              onTap: (() -> Void)? = nil,
+              onAction: ((NotificationActionItem) -> Void)? = nil) {
         self.title = title
         self.message = message
         self.actions = actions

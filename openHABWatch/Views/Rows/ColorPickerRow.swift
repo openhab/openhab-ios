@@ -17,8 +17,8 @@ import SwiftUI
 struct ColorPickerRow: View {
     let widget: OpenHABWidget
     let stateToken: String
-    @EnvironmentObject var settings: AppSettings
-    @EnvironmentObject var pageData: UserData
+    @Environment(AppSettings.self) var settings
+    @Environment(UserData.self) var pageData
     @State private var viewModel: WidgetRowViewModel
     @State private var commandSender = WidgetCommandDispatcher()
     var body: some View {

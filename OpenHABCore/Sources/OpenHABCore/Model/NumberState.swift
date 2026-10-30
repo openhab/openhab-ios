@@ -12,7 +12,6 @@
 import Foundation
 
 public struct NumberState: CustomStringConvertible, Equatable {
-    // swiftlint:disable:next large_tuple
     private typealias PlaceholderResult = (argument: FormatArgument, finalSpecifier: Character, specifierIndex: String.Index, usesExplicitIndex: Bool)
 
     private enum FormatArgument {
@@ -161,14 +160,18 @@ public struct NumberState: CustomStringConvertible, Equatable {
             }
             let percentIndex = index
             index = format.index(after: index)
-            if index == format.endIndex { return nil }
+            if index == format.endIndex {
+                return nil
+            }
             if format[index] == "%" {
                 normalized.append("%%")
                 index = format.index(after: index)
                 continue
             }
             guard let result = parsePlaceholder(in: format, from: index) else { return nil }
-            if let firstArgument, firstArgument != result.argument { return nil }
+            if let firstArgument, firstArgument != result.argument {
+                return nil
+            }
             firstArgument = result.argument
             consumesArgumentCount += 1
             usesExplicitArgumentIndex = usesExplicitArgumentIndex || result.usesExplicitIndex

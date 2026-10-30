@@ -43,7 +43,9 @@ private enum LayoutJS {
     })();
     """#
 
-    static func base64(_ js: String) -> String { Data(js.utf8).base64EncodedString() }
+    static func base64(_ js: String) -> String {
+        Data(js.utf8).base64EncodedString()
+    }
 }
 
 // MARK: - HTML fixtures
@@ -90,22 +92,6 @@ private enum LayoutHTML {
       </div></div>
       <div class='page-content'><p>UITest Overview Heading</p></div>
       <button class='map' aria-label='UITest Map Top'></button>
-    </div></div></body></html>
-    """
-
-    /// A `hideNavbar` page: nothing reserves room for the native bar, so the proxy pads it.
-    static let pageWithoutNavbar = """
-    <!DOCTYPE html><html>
-    <head><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'>
-    <style>
-    \(f7Base)
-    .sidebar-icon{position:fixed;top:8px;left:8px}
-    </style></head>
-    <body><div class='view view-main'><div class='page page-current'>
-      <div class='page-content'>
-        <button aria-label='UITest Fullscreen Content'>content</button>
-      </div>
-      <a class='sidebar-icon' aria-label='UITest Sidebar Icon'>&#9776;</a>
     </div></div></body></html>
     """
 
@@ -156,7 +142,9 @@ private enum LayoutHTML {
     </body></html>
     """
 
-    static func base64(_ html: String) -> String { Data(html.utf8).base64EncodedString() }
+    static func base64(_ html: String) -> String {
+        Data(html.utf8).base64EncodedString()
+    }
 }
 
 // MARK: - Test class
@@ -168,20 +156,30 @@ private enum LayoutHTML {
 /// that render no navbar are the one case the proxy compensates for.
 @MainActor
 final class MainUILayoutUITests: XCTestCase {
+    private static let placeholderHTML = "<html><body><p>UITest Placeholder</p></body></html>"
+
+    // MARK: - Helpers
+
+    private var screen: CGRect {
+        app.windows.firstMatch.frame
+    }
+
     private var app: XCUIApplication!
 
     override func setUp() async throws {
         try await super.setUp()
         continueAfterFailure = false
         app = XCUIApplication()
+        app.useEnglishLocale()
         app.launchEnvironment["UITest"] = "1"
     }
 
-    override func tearDown() { app = nil; super.tearDown() }
+    override func tearDown() async throws {
+        app = nil
+        try await super.tearDown()
+    }
 
     // MARK: - Launch helpers
-
-    private static let placeholderHTML = "<html><body><p>UITest Placeholder</p></body></html>"
 
     private func launchInWebviewMode(html: String? = nil, js: String? = nil, navbarItems: Bool = false) {
         app.launchEnvironment["UITestWebViewMode"] = "1"
@@ -189,27 +187,14 @@ final class MainUILayoutUITests: XCTestCase {
         // and loadWebView cannot race against injected state.
         let htmlToInject = html ?? Self.placeholderHTML
         app.launchEnvironment["UITestInjectHTML"] = LayoutHTML.base64(htmlToInject)
-        if let js { app.launchEnvironment["UITestInjectJS"] = LayoutJS.base64(js) }
+        if let js {
+            app.launchEnvironment["UITestInjectJS"] = LayoutJS.base64(js)
+        }
         if navbarItems {
             app.launchEnvironment["UITestWebViewNavbarItems"] =
-                #"[{"label":"Menu","jsAction":"document.querySelector('.hamburger,.menu-btn')?.click()"}]"#
+                #"[{"label":"Menu","id":"menu"}]"#
         }
         app.launch()
-    }
-
-    // MARK: - Helpers
-
-    private var screen: CGRect { app.windows.firstMatch.frame }
-
-    /// Bottom edge of the native menuBar HStack in screen coordinates.
-    /// SwiftUI exposes HStack containers as `.otherElements` in the XCTest AX tree.
-    private var nativeBarBottom: CGFloat {
-        let el = app.otherElements.matching(identifier: "MainMenuBar").firstMatch
-        guard el.waitForExistence(timeout: 4) else {
-            XCTFail("Cannot locate MainMenuBar in AX tree — check accessibilityIdentifier is set on the menuBar HStack")
-            return 100
-        }
-        return el.frame.maxY
     }
 
     /// Finds a web element inside the webView by its accessibility label (aria-label).
@@ -218,8 +203,10 @@ final class MainUILayoutUITests: XCTestCase {
                                  timeout: TimeInterval = 6) -> XCUIElement {
         let pred = NSPredicate(format: "label == %@", label)
         let el = app.webViews.firstMatch.descendants(matching: type).matching(pred).firstMatch
-        XCTAssertTrue(el.waitForExistence(timeout: timeout),
-                      "Expected web element with label '\(label)' within \(timeout)s")
+        XCTAssertTrue(
+            el.waitForExistence(timeout: timeout),
+            "Expected web element with label '\(label)' within \(timeout)s"
+        )
         return el
     }
 
@@ -229,7 +216,9 @@ final class MainUILayoutUITests: XCTestCase {
     private func waitUntil(timeout: TimeInterval = 6, _ condition: () -> Bool) -> Bool {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
-            if condition() { return true }
+            if condition() {
+                return true
+            }
             Thread.sleep(forTimeInterval: 0.1)
         }
         return condition()
@@ -237,8 +226,10 @@ final class MainUILayoutUITests: XCTestCase {
 
     private func waitForReport(_ key: String, timeout: TimeInterval = 8) -> String {
         let el = app.staticTexts.matching(identifier: "UITestReport-\(key)").firstMatch
-        XCTAssertTrue(el.waitForExistence(timeout: timeout),
-                      "Expected JS report '\(key)' within \(timeout)s — check ohUITest bridge is active")
+        XCTAssertTrue(
+            el.waitForExistence(timeout: timeout),
+            "Expected JS report '\(key)' within \(timeout)s — check ohUITest bridge is active"
+        )
         return el.label
     }
 
@@ -270,32 +261,24 @@ final class MainUILayoutUITests: XCTestCase {
 
     // MARK: - Framework7 layout left intact
 
-    /// Hiding must not touch the layout: Framework7 sizes pages and absolutely positioned
-    /// content from `--f7-navbar-height`, which is what the native bar covers.
-    func testProxyPreservesFrameworkNavbarLayout() {
+    /// The page's own navbar stays in the page, hidden but readable: the native bar shows its title
+    /// and buttons, which are read out of it.
+    func testProxiedNavbarIsHiddenButStillReadable() {
         launchInWebviewMode(html: LayoutHTML.mapPage, js: LayoutJS.navbarLayout)
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
 
-        let navbarHeight = Double(waitForReport("navbarOffsetHeight")) ?? -1
-        let paddingTop = Double(waitForReport("pageContentPaddingTop")) ?? -1
-
-        XCTAssertGreaterThanOrEqual(
-            navbarHeight, 44,
-            "Navbar collapsed to \(navbarHeight)pt — it must keep its box so Framework7 keeps reserving room for the native bar"
+        XCTAssertEqual(
+            Double(waitForReport("navbarTitleOpacity")) ?? -1,
+            0,
+            accuracy: 0.01,
+            "The web navbar title must be hidden — the native bar shows it instead"
         )
         XCTAssertEqual(
-            paddingTop, navbarHeight, accuracy: 2,
-            """
-            .page-content padding-top is \(paddingTop)pt but the navbar reserves \(navbarHeight)pt. \
-            The proxy must not rewrite Framework7's page padding — content that offsets \
-            itself by --f7-navbar-height (the map page) does not follow it, so the two \
-            drift apart and leave a gap.
-            """
+            Double(waitForReport("navbarBgOpacity")) ?? -1,
+            0,
+            accuracy: 0.01,
+            "The web navbar background must be hidden — it would show through the native bar"
         )
-        XCTAssertEqual(Double(waitForReport("navbarTitleOpacity")) ?? -1, 0, accuracy: 0.01,
-                       "The web navbar title must be hidden — the native bar shows it instead")
-        XCTAssertEqual(Double(waitForReport("navbarBgOpacity")) ?? -1, 0, accuracy: 0.01,
-                       "The web navbar background must be hidden — it would show through the native bar")
         XCTAssertEqual(
             waitForReport("navbarTitleInnerText"), "Overview",
             """
@@ -307,85 +290,39 @@ final class MainUILayoutUITests: XCTestCase {
         )
     }
 
-    /// Content offset by `--f7-navbar-height`, as the map page is, must meet the bar bottom.
-    func testContentBelowNavbarMeetsNativeBarBottom() {
-        launchInWebviewMode(html: LayoutHTML.mapPage)
-        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
+    // MARK: - System bar layout
 
-        let mapTop = waitForWebLabel("UITest Map Top", type: .button).frame.minY
-        let barBottom = nativeBarBottom
+    /// The system bar sits outside the page, so Framework7 has no navbar to reserve room for.
+    func testSystemBarReservesNoNavbarSpace() {
+        launchInWebviewMode(html: LayoutHTML.mapPage, js: LayoutJS.navbarLayout)
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
 
         XCTAssertEqual(
-            mapTop, barBottom, accuracy: 2,
-            """
-            Content top is \(mapTop)pt, native bar bottom is \(barBottom)pt — a \
-            \(mapTop - barBottom)pt gap. The native bar must be exactly as tall as the \
-            space Framework7 reserves for its own navbar.
-            """
+            Double(waitForReport("navbarOffsetHeight")) ?? -1,
+            0,
+            accuracy: 0.5,
+            "The page's navbar must not take up room below the system bar"
         )
     }
 
-    // MARK: - Pages that render no navbar
-
-    /// No navbar means nothing reserves room, so the proxy pads the page and shifts
-    /// MainUI's floating sidebar icon clear of the bar.
-    func testPageWithoutNavbarIsPaddedClearOfNativeBar() {
-        launchInWebviewMode(html: LayoutHTML.pageWithoutNavbar)
-        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
-
-        let barBottom = nativeBarBottom
-        let content = waitForWebLabel("UITest Fullscreen Content", type: .button)
-        XCTAssertGreaterThanOrEqual(
-            content.frame.minY, barBottom - 2,
-            "Content top (\(content.frame.minY)pt) is above the native bar bottom (\(barBottom)pt) on a page with no navbar"
-        )
-
-        let sidebarIcon = waitForWebLabel("UITest Sidebar Icon")
-        XCTAssertGreaterThanOrEqual(
-            sidebarIcon.frame.minY, barBottom - 2,
-            "MainUI's floating sidebar icon (\(sidebarIcon.frame.minY)pt) is covered by the native bar (\(barBottom)pt)"
-        )
-    }
-
-    // MARK: - Mirroring the web navbar's hidden state
-
-    /// Framework7 hides its own navbar on scroll and when an expandable card opens, marking
-    /// it `navbar-hidden`. The native bar mirrors that class, so it must slide away with the
-    /// web one and come back when it returns — otherwise the app's bar sits over content the
-    /// Main UI has deliberately cleared, and the two bars disagree about whether they exist.
-    func testNativeBarMirrorsWebNavbarHiding() {
+    /// The system bar goes away with the web navbar and returns with it.
+    func testSystemBarMirrorsWebNavbarHiding() {
         launchInWebviewMode(html: LayoutHTML.hidableNavbar)
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
 
-        let bar = app.otherElements.matching(identifier: "MainMenuBar").firstMatch
-        XCTAssertTrue(bar.waitForExistence(timeout: 6),
-                      "Cannot locate MainMenuBar in the AX tree")
-        let shownBottom = bar.frame.maxY
-        XCTAssertGreaterThan(shownBottom, 0, "Native bar should be on screen to begin with")
-
+        let menuButton = app.buttons["HamburgerButton"]
         let toggle = waitForWebLabel("UITest Toggle Navbar", type: .button)
-        toggle.tap()
 
-        let slidAway = waitUntil { bar.frame.maxY < shownBottom - 20 }
+        toggle.tap()
         XCTAssertTrue(
-            slidAway,
-            """
-            Native bar bottom stayed at \(bar.frame.maxY)pt after the web navbar took \
-            .navbar-hidden (was \(shownBottom)pt). The bar mirrors that class, so it should \
-            have slid up by its own height.
-            """
+            waitUntil { !menuButton.isHittable },
+            "The system bar should hide when the web navbar takes .navbar-hidden"
         )
 
         toggle.tap()
-
-        let cameBack = waitUntil { abs(bar.frame.maxY - shownBottom) < 2 }
         XCTAssertTrue(
-            cameBack,
-            """
-            Native bar bottom is \(bar.frame.maxY)pt after .navbar-hidden was removed, \
-            expected it back at \(shownBottom)pt. A bar that hides but never returns leaves \
-            the menu unreachable.
-            """
+            waitUntil { menuButton.isHittable },
+            "The system bar should come back when .navbar-hidden is removed"
         )
     }
 
@@ -428,17 +365,25 @@ final class MainUILayoutUITests: XCTestCase {
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
 
         let countText = app.staticTexts.matching(identifier: "UITestReport-navbarItemCount").firstMatch
-        XCTAssertTrue(countText.waitForExistence(timeout: 6),
-                      "UITestReport-navbarItemCount must appear — check #if DEBUG overlay is wired up")
+        XCTAssertTrue(
+            countText.waitForExistence(timeout: 6),
+            "UITestReport-navbarItemCount must appear — check #if DEBUG overlay is wired up"
+        )
         let count = Int(countText.label) ?? 0
-        XCTAssertGreaterThan(count, 0,
-                             "navbarItems must be non-empty after UITestWebViewNavbarItems injection")
+        XCTAssertGreaterThan(
+            count,
+            0,
+            "navbarItems must be non-empty after UITestWebViewNavbarItems injection"
+        )
 
         // Best-effort: verify the button appears in the AX tree and is in the top bar area.
         let menuBtn = app.buttons.matching(identifier: "NavbarProxyButton-Menu").firstMatch
         if menuBtn.waitForExistence(timeout: 3) {
-            XCTAssertLessThan(menuBtn.frame.maxY, 120,
-                              "Proxy button must be in the native menuBar area (top 120pt of screen)")
+            XCTAssertLessThan(
+                menuBtn.frame.maxY,
+                120,
+                "Proxy button must be in the native menuBar area (top 120pt of screen)"
+            )
         }
     }
 
@@ -449,16 +394,23 @@ final class MainUILayoutUITests: XCTestCase {
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 8))
 
         let countText = app.staticTexts.matching(identifier: "UITestReport-navbarItemCount").firstMatch
-        XCTAssertTrue(countText.waitForExistence(timeout: 6),
-                      "UITestReport-navbarItemCount must appear — check #if DEBUG overlay is wired up")
+        XCTAssertTrue(
+            countText.waitForExistence(timeout: 6),
+            "UITestReport-navbarItemCount must appear — check #if DEBUG overlay is wired up"
+        )
         let count = Int(countText.label) ?? 0
-        XCTAssertGreaterThan(count, 0,
-                             "navbarItems must be non-empty — proxy button would not appear without items")
+        XCTAssertGreaterThan(
+            count,
+            0,
+            "navbarItems must be non-empty — proxy button would not appear without items"
+        )
 
         let menuBtn = app.buttons.matching(identifier: "NavbarProxyButton-Menu").firstMatch
         if menuBtn.waitForExistence(timeout: 3) {
-            XCTAssertTrue(menuBtn.isHittable,
-                          "Navbar proxy 'Menu' button must be hittable inside the native menuBar")
+            XCTAssertTrue(
+                menuBtn.isHittable,
+                "Navbar proxy 'Menu' button must be hittable inside the native menuBar"
+            )
         }
     }
 }

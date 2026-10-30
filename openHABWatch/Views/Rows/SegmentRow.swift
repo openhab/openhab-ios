@@ -16,8 +16,8 @@ import SwiftUI
 struct SegmentRow: View {
     let widget: OpenHABWidget
     let stateToken: String
-    @EnvironmentObject var settings: AppSettings
-    @EnvironmentObject var pageData: UserData
+    @Environment(AppSettings.self) var settings
+    @Environment(UserData.self) var pageData
     @State private var pressedIndex: Int?
     @State private var singlePressed = false
     @State private var triggerPressFeedback = false

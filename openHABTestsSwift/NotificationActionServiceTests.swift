@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Observation
 @testable import openHAB
 import OpenHABCore
 import Testing
@@ -74,6 +75,51 @@ struct NotificationActionServiceTests {
         let svc = makeService()
         svc.handleNotificationInternal("unknown:something")
         #expect(svc.navigationCommand == nil)
+    }
+
+    // MARK: - Navigation command observation
+
+    @Test("ui action notifies observers of navigationCommand")
+    func uiActionNotifiesObservers() {
+        let svc = makeService()
+        let didChange = trackNavigationCommand(of: svc)
+
+        svc.handleNotificationInternal("ui:/basicui/app?sitemap=demo")
+
+        #expect(didChange.value)
+    }
+
+    @Test("same ui action notifies again once the consumer reset navigationCommand")
+    func repeatedActionAfterResetNotifies() {
+        let svc = makeService()
+        svc.handleNotificationInternal("ui:/basicui/app?sitemap=demo")
+        svc.navigationCommand = nil // what OpenHABRootView.handleNavigationCommand does
+        let didChange = trackNavigationCommand(of: svc)
+
+        svc.handleNotificationInternal("ui:/basicui/app?sitemap=demo")
+
+        #expect(didChange.value)
+    }
+
+    @Test("same ui action without a reset does not notify — why the consumer must reset")
+    func repeatedActionWithoutResetDoesNotNotify() {
+        let svc = makeService()
+        svc.handleNotificationInternal("ui:/basicui/app?sitemap=demo")
+        let didChange = trackNavigationCommand(of: svc)
+
+        svc.handleNotificationInternal("ui:/basicui/app?sitemap=demo")
+
+        #expect(!didChange.value)
+    }
+
+    private func trackNavigationCommand(of svc: NotificationActionService) -> ObservationFlag {
+        let didChange = ObservationFlag()
+        withObservationTracking {
+            _ = svc.navigationCommand
+        } onChange: {
+            didChange.set()
+        }
+        return didChange
     }
 
     // MARK: - sendCommand dispatch

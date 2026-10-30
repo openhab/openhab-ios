@@ -14,19 +14,19 @@ import os
 import SwiftUI
 
 struct AppSettingsView: View, SettingsSheetView {
+    struct AppSettingsSnapshot: Equatable {
+        var idleOff = true
+        var sendCrashReports = false
+        var hideStatusBar = false
+        var showSearchField = true
+    }
+
     @State var current = AppSettingsSnapshot()
     @State var initial = AppSettingsSnapshot()
     @State private var settingsSitemapDiagnosticsLogging = false
     @State private var viewAppearedOnce = false
 
     @Environment(\.dismiss) private var dismiss
-
-    struct AppSettingsSnapshot: Equatable {
-        var idleOff: Bool = true
-        var sendCrashReports: Bool = false
-        var hideStatusBar: Bool = false
-        var showSearchField: Bool = true
-    }
 
     var body: some View {
         Form {
@@ -65,7 +65,7 @@ struct AppSettingsView: View, SettingsSheetView {
             guard !viewAppearedOnce else { return }
             viewAppearedOnce = true
             current = await AppSettingsSnapshot(from: .shared)
-            settingsSitemapDiagnosticsLogging = (await Preferences.shared.applicationPreferences).sitemapDiagnosticsLogging
+            settingsSitemapDiagnosticsLogging = await (Preferences.shared.applicationPreferences).sitemapDiagnosticsLogging
             initial = current
         }
     }
@@ -78,7 +78,9 @@ struct AppSettingsView: View, SettingsSheetView {
         }
     }
 
-    func onRevert() { current = initial }
+    func onRevert() {
+        current = initial
+    }
 
     func onCancel() {
         dismiss()
@@ -103,7 +105,7 @@ extension AppSettingsView.AppSettingsSnapshot {
         idleOff = await preferences.idleOff
         sendCrashReports = await preferences.sendCrashReports
         hideStatusBar = await preferences.hideStatusBar
-        showSearchField = (await preferences.applicationPreferences).showSearchField
+        showSearchField = await (preferences.applicationPreferences).showSearchField
     }
 }
 

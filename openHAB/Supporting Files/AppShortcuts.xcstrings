@@ -106,7 +106,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elementstatus ophalen in ${applicationName}"
+            "value" : "Itemstatus ophalen in ${applicationName}"
           }
         },
         "ru" : {

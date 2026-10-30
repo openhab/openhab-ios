@@ -9,26 +9,27 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
+import Observation
 import OpenHABCore
-import os.log
-import SwiftUI
+import Security
 
-class ClientCertificatesViewModel: ObservableObject {
-    @Published var clientCertificates: [SecIdentity] = []
+@MainActor
+@Observable
+final class ClientCertificatesViewModel {
+    var clientCertificates: [SecIdentity] = []
 
-    @MainActor func loadCertificates() {
+    func loadCertificates() {
         clientCertificates = CertificateManagers.clientCertificateManager.clientIdentities
     }
 
-    @MainActor func deleteCertificate(at index: Int) {
+    func deleteCertificate(at index: Int) {
         let status = CertificateManagers.clientCertificateManager.deleteFromKeychain(index: index)
         if status == noErr {
             clientCertificates.remove(at: index)
         }
     }
 
-    @MainActor func getIdentityName(for index: Int) -> String {
+    func getIdentityName(for index: Int) -> String {
         CertificateManagers.clientCertificateManager.getIdentityName(index: index)
     }
 }

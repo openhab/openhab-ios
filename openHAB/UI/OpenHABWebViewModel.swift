@@ -16,31 +16,13 @@ import SafariServices
 import UIKit
 import WebKit
 
-/// A single action button proxied from the MainUI web navbar.
-struct WebNavbarItem: Identifiable {
-    let id = UUID()
-    let label: String
-    let jsAction: String
-    /// Base64-encoded PNG of the icon rendered from the web navbar element.
-    /// Nil if capture failed; fall back to `label` text in that case.
-    let iconBase64: String?
-    /// True when the JS identified this item as a back-navigation button,
-    /// either via the standard F7 `.back` class or the oh-nav-content chevron icon.
-    let isBack: Bool
-
-    var iconImage: UIImage? {
-        guard let b64 = iconBase64,
-              let data = Data(base64Encoded: b64) else { return nil }
-        return UIImage(data: data)
-    }
-}
-
 @MainActor
 class OpenHABWebViewModel: ObservableObject {
     // MARK: - Published state
 
     @Published var isLoading = false
     @Published private(set) var webView: WKWebView
+
     #if DEBUG
     /// JS probe results keyed by the probe name. Exposed as zero-size accessibility
     /// labels so UI tests can read DOM measurements without native UI.
@@ -48,28 +30,25 @@ class OpenHABWebViewModel: ObservableObject {
     /// True once a UI test has injected HTML or navbar items — blocks loadWebView
     /// from overriding injected state with real server content.
     private var uiTestContentLocked = false
+    /// True once a UI test has put its own navbar in place; the page's own is ignored after that.
+    private var uiTestNavbarInjected = false
+    /// The same for the sidebar menu.
+    private var uiTestMenuInjected = false
+    private var uiTestAuthInjected = false
     #endif
-    /// Whether the iOS menu bar (and its hamburger button) should be visible.
-    /// Starts true (visible while loading) and is hidden once the openHAB
-    /// Main UI signals it has rendered its own native-app exit button via SSE,
-    /// or when the page requests fullscreen via JS.
-    @Published var showMenuBar = true
+
     /// True once the Main UI SPA has established its SSE connection.
-    /// Used to determine when the native menu bar can be hidden and to show
-    /// a connection-status indicator while connecting or offline.
     @Published private(set) var isSSEConnected = false
-    /// Navbar items proxied from the MainUI web top bar. Empty until the JS
-    /// MutationObserver posts the first `navbarElements` message.
-    @Published private(set) var navbarItems: [WebNavbarItem] = []
-    /// Title text proxied from the MainUI web navbar. Empty until the JS
-    /// proxy posts the first `navbarElements` message.
-    @Published private(set) var navbarTitle = ""
-    /// True while MainUI has hidden its own navbar (Framework7 `hide-bars-on-scroll`).
-    @Published private(set) var isWebNavbarHidden = false
-    /// True while an expanded large title is showing the page title instead.
-    @Published private(set) var isWebNavbarTitleHidden = false
-    /// MainUI's `--f7-navbar-height`, excluding the safe area. 44 on iOS, 56 on Material.
-    @Published private(set) var webNavbarHeight: CGFloat = 44
+    /// The page's navbar, as sent over the bridge. Empty until the first `navbar.state`.
+    @Published private(set) var navbar = OHBridgeNavbarState.empty
+    /// Main UI's sidebar, as sent over the bridge. Nil until the first `menu.state`; kept across
+    /// reloads of the same home so the menu doesn't empty while a page loads.
+    @Published private(set) var menu: OHBridgeMenuState?
+    /// Who is signed in to Main UI on the origin in use, as sent over the bridge. Unknown until
+    /// that origin's page has said, and not what another origin said: the login is kept per
+    /// origin, see `MainUIAuthTracker`. It is kept across reloads of the same origin, so the menu
+    /// keeps what it showed while a page loads.
+    @Published private(set) var authStatus = MainUIAuthStatus.unknown
     /// True while the web view holds a tile's URL. Its content outlives the surface that
     /// loaded it, so a sitemap detour does not put the Main UI back.
     @Published private(set) var isShowingTile = false
@@ -79,14 +58,26 @@ class OpenHABWebViewModel: ObservableObject {
 
     // MARK: - Internal state (used by Coordinator)
 
-    var acceptsCommands = false
-    var commandQueue: [String] = []
     var lastLoadedURL: String?
     /// The connection that produced the page now on screen. Origin alone cannot tell two
     /// connections apart when only the credentials differ.
     private var lastLoadedConfiguration: ConnectionConfiguration?
-    /// Callback fired when "exitToApp" is received from JS
-    var onExitToApp: (() -> Void)?
+    /// The bridge to Main UI in `webView`. Views tell Main UI what to do through it.
+    let bridge = OHBridgeHost()
+    /// What Main UI's addresses hang off on this connection, for the shim.
+    private var basePath = ""
+    /// The last `menu.state` from each web view, so switching homes shows that home's menu.
+    private var menus: [ObjectIdentifier: OHBridgeMenuState] = [:]
+    /// Main UI's latest `nav.changed`: where it is, and the pages behind it.
+    private var lastNavState: OHBridgeNavState?
+    /// Called with the route to go back to when the user cancels the sign-in on openHAB's
+    /// authorize page. See `MainUILogin`.
+    var onLoginCancelled: ((String) -> Void)?
+    /// The sign-in of every home and origin a page has reported for.
+    private var authTracker = MainUIAuthTracker()
+    private var authTimeoutTask: Task<Void, Never>?
+    /// How long to wait for a page to say who is signed in before offering to sign in.
+    var authResolutionTimeout = Duration.seconds(20)
 
     // MARK: - Private state
 
@@ -97,7 +88,6 @@ class OpenHABWebViewModel: ObservableObject {
         activeConnectionInfo?.configuration
     }
 
-    private var sseTimer: Timer?
     private var views: [UUID: WKWebView] = [:]
     private var viewAccessOrder: [UUID] = []
     private var etagChecker: ETagChecker?
@@ -111,456 +101,33 @@ class OpenHABWebViewModel: ObservableObject {
     /// the same "connection becomes active" event — and can otherwise win with the wrong
     /// (default) destination (openhab-ios#1336).
     private var hasPendingExplicitNavigation = false
+    /// Which home the web view currently belongs to. Kept here so we can note pages against it
+    /// right away. Looking it up takes a moment, and the user can switch homes in between.
+    private var currentHomeId: UUID?
+    /// The layout the host view reports from the safe area it measures. While it is set, it
+    /// replaces the one derived from the web view's own insets. The system bar is part of that
+    /// safe area, so a `navbarHeight` on top of it would make Main UI leave room twice.
+    private var systemBarLayout: OHBridgeLayout?
 
-    /// JS injected after each page load to proxy the MainUI Framework7 navbar
-    /// into the native bar and hide the web navbar.
-    private let navbarProxyJS = """
-    (function() {
-        // Framework7 keeps closed popups mounted, and a page can contain one (the code
-        // editor's "Parse Errors" popup sits inside the Thing page), so only count an
-        // overlay that is open. Side panels are never proxied.
-        function isUsableNavbar(navbar) {
-            if (navbar.closest('.panel')) return false;
-            var overlay = navbar.closest('.popup, .sheet-modal, .dialog, .actions-modal, .login-screen');
-            return !overlay || overlay.classList.contains('modal-in');
-        }
-
-        function firstUsableNavbar(selectors) {
-            for (var i = 0; i < selectors.length; i++) {
-                var found = document.querySelectorAll(selectors[i]);
-                for (var j = 0; j < found.length; j++) {
-                    if (isUsableNavbar(found[j])) return found[j];
-                }
-            }
-            return null;
-        }
-
-        // A page's navbar is a direct child of .page, so '> .navbar' cannot match a popup
-        // nested inside that page.
-        // Page padding depends on this, not on whichever navbar is being mirrored.
-        function pageNavbar() {
-            return firstUsableNavbar([
-                '.view-main .page-current > .navbar',
-                '.view-main .navbar.navbar-current',
-                '.page-current > .navbar'
-            ]);
-        }
-
-        function activeNavbar() {
-            return firstUsableNavbar([
-                '.popup.modal-in .navbar',
-                '.sheet-modal.modal-in .navbar',
-                '.view-main .page-current > .navbar',
-                '.view-main .navbar.navbar-current',
-                '.page-current > .navbar',
-                '.navbar:not(.navbar-hidden)',
-                '.navbar'
-            ]);
-        }
-
-        function activePage() {
-            return document.querySelector('.view-main .page-current')
-                || document.querySelector('.page-current');
-        }
-
-        // Leave the navbar in the layout — Framework7 sizes pages and absolutely positioned
-        // content (the map page) from --f7-navbar-height — and hide only what the native
-        // bar reproduces.
-        //
-        // opacity, because innerText reads nothing out of a visibility:hidden subtree and
-        // the labels below come from these elements. A stylesheet rule, because Framework7
-        // writes inline opacity on .navbar-bg and .title and would overwrite ours.
-        var PROXIED_CLASS = 'oh-navbar-proxied';
-        function installProxyStyle() {
-            if (document.getElementById('oh-navbar-proxy-style')) return;
-            var style = document.createElement('style');
-            style.id = 'oh-navbar-proxy-style';
-            style.textContent =
-                '.' + PROXIED_CLASS + ' > .navbar-bg,' +
-                '.' + PROXIED_CLASS + ' > .navbar-inner > .left,' +
-                '.' + PROXIED_CLASS + ' > .navbar-inner > .title,' +
-                '.' + PROXIED_CLASS + ' > .navbar-inner > .nav-title,' +
-                '.' + PROXIED_CLASS + ' > .navbar-inner > .right' +
-                '{opacity:0 !important;pointer-events:none !important}' +
-                // A panel opens under the native bar, hiding the sidebar's Administration
-                // links. Framework7 positions panels from --f7-appbar-app-offset for exactly
-                // this; scoped to the panel because the main views read it too and must stay
-                // full screen. Navbar height alone — a panel already insets itself by the
-                // safe area.
-                '.panel,.panel-backdrop{--f7-appbar-app-offset:var(--f7-navbar-height)}';
-            (document.head || document.documentElement).appendChild(style);
-        }
-        // Guard every write. classList.add/remove rewrite the attribute even when nothing
-        // changes, emitting a mutation record — and this runs from the MutationObserver
-        // below, so an unguarded write loops forever and pegs the main thread.
-        function hideProxiedParts(navbar) {
-            document.querySelectorAll('.' + PROXIED_CLASS).forEach(function(el) {
-                if (el !== navbar) el.classList.remove(PROXIED_CLASS);
-            });
-            if (navbar && !navbar.classList.contains(PROXIED_CLASS)) {
-                navbar.classList.add(PROXIED_CLASS);
-            }
-        }
-
-        // A hideNavbar page reserves no room for the native bar, so pad it and push the
-        // floating icons down. Reversible, in case the page gains a navbar later.
-        function syncPagePadding(hasNavbar) {
-            var page = activePage();
-            if (!page) return;
-            var needsPadding = !hasNavbar;
-            if (needsPadding === !!page.__ohPadded) return;
-            page.__ohPadded = needsPadding;
-            var offset = needsPadding ? 'calc(var(--f7-navbar-height) + var(--f7-safe-area-top))' : '';
-            var pc = page.querySelector('.page-content');
-            if (pc) pc.style.paddingTop = offset;
-            page.querySelectorAll('.sidebar-icon, .fullscreen-icon').forEach(function(el) {
-                el.style.marginTop = offset;
-            });
-        }
-
-        function isMainUIDocument() {
-            return !!(document.querySelector('.framework7-root') || document.getElementById('app'));
-        }
-
-        // A document that is not the Main UI — an openHAB error page, Basic UI, the REST
-        // docs — reserves no room for the native bar, so pad the body itself.
-        function syncDocumentPadding() {
-            var body = document.body;
-            if (!body) return;
-            var needsPadding = !isMainUIDocument();
-            if (needsPadding === !!body.__ohPadded) return;
-            body.__ohPadded = needsPadding;
-            body.style.paddingTop = needsPadding
-                ? 'calc(var(--f7-navbar-height, 44px) + env(safe-area-inset-top, 0px))'
-                : '';
-        }
-
-        function navbarHeight() {
-            var v = parseFloat(getComputedStyle(document.documentElement)
-                .getPropertyValue('--f7-navbar-height'));
-            return (isFinite(v) && v > 0) ? v : 44;
-        }
-        // getComputedStyle forces a style recalc, and the state below is reported every
-        // animation frame while scrolling — so re-read only in the debounced pass.
-        function cachedNavbarHeight() {
-            if (window.__ohNavbarHeight == null) window.__ohNavbarHeight = navbarHeight();
-            return window.__ohNavbarHeight;
-        }
-
-        // Posts only on change — this runs on every scroll frame.
-        // On window because the observer is installed once and holds the first injection's
-        // closure, while Swift re-injects this script and resets its own copy.
-        function reportState(navbar) {
-            if (!ownsBar(navbar)) navbar = null;
-            var hidden = navbar ? !!navbar.closest('.navbar-hidden') : false;
-            // An expanded large title already shows the page title, so don't show it twice.
-            var titleHidden = !!navbar &&
-                navbar.classList.contains('navbar-large') &&
-                !navbar.classList.contains('navbar-large-collapsed');
-            var height = cachedNavbarHeight();
-            var state = hidden + '|' + titleHidden + '|' + height;
-            if (state === window.__ohNavbarLastState) return;
-            window.__ohNavbarLastState = state;
-            window.webkit.messageHandlers.mainUi.postMessage({
-                type: 'navbarState',
-                hidden: hidden ? 'true' : 'false',
-                titleHidden: titleHidden ? 'true' : 'false',
-                height: String(height)
-            });
-        }
-
-        // Collapses a burst of mutations into one pass per frame. Still runs before the
-        // next paint, so a new page's navbar never flashes under the native bar.
-        var framePending = false;
-        function scheduleStateReport() {
-            if (framePending) return;
-            framePending = true;
-            requestAnimationFrame(function() {
-                framePending = false;
-                var navbar = activeNavbar();
-                hideProxiedParts(ownsBar(navbar) ? navbar : null);
-                reportState(navbar);
-            });
-        }
-
-        // Only mirror a navbar from what is on screen — activeNavbar()'s fallbacks can
-        // reach a previous page that is still mounted. On the iOS theme Framework7 lifts
-        // navbars out of the pages into .navbars, so containment alone rejects them all.
-        function ownsBar(navbar) {
-            if (!navbar) return false;
-            if (navbar.closest('.popup.modal-in, .sheet-modal.modal-in')) return true;
-            if (navbar.matches('.navbar-current')) return true;
-            if (navbar.matches('.navbar-previous, .navbar-next, .stacked')) return false;
-            var page = activePage();
-            return !page || page.contains(navbar);
-        }
-
-        function serializeNavbar() {
-            installProxyStyle();
-            window.__ohNavbarHeight = navbarHeight();
-            var navbar = activeNavbar();
-            var owns = ownsBar(navbar);
-            syncPagePadding(!!pageNavbar());
-            syncDocumentPadding();
-            // Nothing to mirror: clear the bar rather than leave the previous page's
-            // buttons on it, whose proxy tokens are already gone.
-            if (!owns) {
-                hideProxiedParts(null);
-                window.webkit.messageHandlers.mainUi.postMessage({
-                    type: 'navbarElements', title: '', items: []
-                });
-                reportState(navbar);
-                return;
-            }
-            // Wait for web fonts (Framework7 Icons) to be ready before canvas rendering.
-            // document.fonts.ready resolves immediately on subsequent calls once fonts are loaded.
-            (document.fonts ? document.fonts.ready : Promise.resolve()).then(function() {
-                hideProxiedParts(navbar);
-
-                var titleEl = navbar.querySelector('.title') || navbar.querySelector('[class*="title"]');
-                var title = titleEl ? titleEl.innerText.trim() : '';
-
-                // Collect interactive elements from left/right regions only —
-                // avoids picking up the title text as a button label.
-                var btns = Array.from(navbar.querySelectorAll(
-                    '.navbar-inner .left a, .navbar-inner .left button,' +
-                    '.navbar-inner .right a, .navbar-inner .right button'
-                ));
-                // Renders an element's icon glyph to a canvas and returns base64 PNG.
-                // Drawn in black on transparent so Swift can apply template tinting.
-                function iconBase64(el) {
-                    try {
-                        var iconEl = el.querySelector('i.icon, .icon') || el;
-                        var style = window.getComputedStyle(iconEl);
-                        var text = iconEl.innerText.trim() || el.innerText.trim();
-                        if (!text) return null;
-                        var px = 128;
-                        var canvas = document.createElement('canvas');
-                        canvas.width = px; canvas.height = px;
-                        var ctx = canvas.getContext('2d');
-                        ctx.font = 'normal ' + Math.round(px * 0.9) + 'px ' + style.fontFamily;
-                        ctx.fillStyle = 'black';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(text, px / 2, px / 2);
-                        return canvas.toDataURL('image/png').split(',')[1];
-                    } catch(e) { return null; }
-                }
-
-                // Unique across the document, not just within this navbar: a popup sits
-                // after the main view, so a bare index would collide with the page's navbar
-                // and the popup's close button would click the page behind it.
-                window.__ohProxyRun = (window.__ohProxyRun || 0) + 1;
-                var proxyRun = window.__ohProxyRun;
-                document.querySelectorAll('[data-oh-proxy]').forEach(function(el) {
-                    el.removeAttribute('data-oh-proxy');
-                });
-
-                var items = [];
-                btns.forEach(function(el, idx) {
-                    var inRight = !!el.closest('.navbar-inner .right');
-                    // Skip right-side panel-open buttons (the web "Other Apps" drawer).
-                    if (inRight && el.classList.contains('panel-open')) return;
-                    // Skip the in-app exit-to-app button (F7 icon: square_arrow_right).
-                    var iconChild = el.querySelector('i.icon, .icon');
-                    if (inRight && iconChild && iconChild.innerText.trim() === 'square_arrow_right') return;
-                    // Detect back buttons using two strategies:
-                    // 1. Standard F7: element has class 'back'.
-                    // 2. openHAB oh-nav-content style: a left-region button whose F7 icon
-                    //    is chevron_left (iOS) or arrow_left_md (MD). These use a Vue click
-                    //    handler (@click="back" → f7router.back()) instead of the F7 .back
-                    //    class, so the class check alone is insufficient.
-                    var f7Icon = el.querySelector('.f7-icons');
-                    var iconText = f7Icon ? (f7Icon.textContent || '').trim() : '';
-                    var isBack = el.classList.contains('back') ||
-                        (!inRight && (iconText === 'chevron_left' || iconText === 'arrow_left_md'));
-                    var label = (el.getAttribute('aria-label')
-                        || el.getAttribute('title')
-                        || el.innerText || '').trim();
-                    // Include back buttons even without a text label; give them a
-                    // fallback label so the native button has an accessibility string.
-                    if (!label && !isBack) return;
-                    if (!label) label = 'Back';
-                    // Back links: use history.back() for standard F7 .back class.
-                    // oh-nav-content style backs use a Vue click handler — proxy the click.
-                    var action;
-                    if (el.classList.contains('back')) {
-                        action = 'window.history.back()';
-                    } else {
-                        var token = proxyRun + '-' + idx;
-                        el.setAttribute('data-oh-proxy', token);
-                        action = '(function(){var el=document.querySelector("[data-oh-proxy=\\'' + token + '\\']");if(el)el.click();})()';
-                    }
-                    var item = { label: label, action: action };
-                    if (isBack) item.isBack = 'true';
-                    var b64 = f7Icon ? iconBase64(el) : null;
-                    if (b64) item.icon = b64;
-                    items.push(item);
-                });
-
-                window.webkit.messageHandlers.mainUi.postMessage({
-                    type: 'navbarElements',
-                    title: title,
-                    items: items
-                });
-                reportState(navbar);
-            });
-        }
-
-        // Observe document.body for page transitions and popup open/close.
-        // Watching .view-main alone misses popups (they are siblings of .view-main).
-        // class changes on .popup.modal-in and page elements all bubble up to body.
-        // Hiding runs immediately so a new page's navbar never flashes under the native
-        // bar; only the expensive part (rendering icons to canvas) is debounced.
-        function observeNavbar() {
-            // Swift re-injects this script several times per page; without a guard each
-            // injection leaves another observer and scroll listener behind.
-            if (window.__ohNavbarObserverInstalled) return;
-            window.__ohNavbarObserverInstalled = true;
-            var root = document.body || document.documentElement;
-            var timer = null;
-            new MutationObserver(function() {
-                scheduleStateReport();
-                clearTimeout(timer);
-                timer = setTimeout(serializeNavbar, 200);
-            }).observe(root, {
-                childList: true, subtree: true,
-                attributes: true, attributeFilter: ['class']
-            });
-            // Framework7 hides the navbar and collapses large titles from a scroll
-            // handler — neither touches a class the observer above sees.
-            document.addEventListener('scroll', scheduleStateReport, { capture: true, passive: true });
-        }
-
-        // Wait for the *correct* navbar. Open popups first, then .view-main.
-        function readyNavbar() {
-            return firstUsableNavbar([
-                '.popup.modal-in .navbar',
-                '.sheet-modal.modal-in .navbar',
-                '.view-main .page-current > .navbar',
-                '.view-main .navbar.navbar-current',
-                '.page-current > .navbar'
-            ]);
-        }
-        // A hideNavbar page never produces a navbar to wait for, so treat a rendered page
-        // without one as settled too — it still needs padding and scroll state.
-        function readyPageWithoutNavbar() {
-            var page = activePage();
-            return !!page && !!page.querySelector('.page-content') && !pageNavbar();
-        }
-        function waitAndSerialize() {
-            if (readyNavbar() || readyPageWithoutNavbar() || !isMainUIDocument()) {
-                serializeNavbar();
-                observeNavbar();
-                return;
-            }
-            var root = document.body || document.documentElement;
-            if (!root) return;
-            var bodyObserver = new MutationObserver(function() {
-                if (readyNavbar() || readyPageWithoutNavbar() || !isMainUIDocument()) {
-                    bodyObserver.disconnect();
-                    serializeNavbar();
-                    observeNavbar();
-                }
-            });
-            // Watch childList for new elements AND attributes for .page-current
-            // being added to an existing element.
-            bodyObserver.observe(root, { childList: true, subtree: true,
-                                         attributes: true, attributeFilter: ['class'] });
-        }
-
-        // Guard against re-installation when Swift injects this script multiple
-        // times (on ready, sseConnected, didFinish). Only set up history hooks once;
-        // always re-run waitAndSerialize so a fresh page or SPA navigation is covered.
-        if (window.__ohNavbarProxyInstalled) {
-            waitAndSerialize();
-            return;
-        }
-        window.__ohNavbarProxyInstalled = true;
-
-        waitAndSerialize();
-
-        // Re-run after SPA navigations. requestAnimationFrame fires after the
-        // browser's next paint, by which time Framework7 has updated the navbar.
-        var origPush = history.pushState;
-        history.pushState = function() {
-            origPush.apply(this, arguments);
-            requestAnimationFrame(waitAndSerialize);
-        };
-        var origReplace = history.replaceState;
-        history.replaceState = function() {
-            origReplace.apply(this, arguments);
-            requestAnimationFrame(waitAndSerialize);
-        };
-        window.addEventListener('popstate', function() {
-            requestAnimationFrame(waitAndSerialize);
-        });
-    })();
-    """
-
-    private let js = """
-    (function() {
-        // App-menu button probe.
-        // window.MainUI is the global registered by the openHAB Main UI SPA.
-        // Its presence means the Main UI is loaded and its own exit-to-app
-        // button is available, so the iOS floating button is redundant.
-        var _probeTimer = null;
-        function probeMainUIButton() {
-            var isOnMainUI = (typeof window.MainUI !== 'undefined');
-            window.webkit.messageHandlers.mainUi.postMessage(
-                isOnMainUI ? 'appMenu-hidden' : 'appMenu-visible'
-            );
-        }
-        function scheduleProbe() {
-            if (_probeTimer !== null) { clearTimeout(_probeTimer); }
-            _probeTimer = setTimeout(function() { _probeTimer = null; probeMainUIButton(); }, 800);
-        }
-
-        // Main UI Callbacks
-        window.OHApp = {
-            exitToApp : function(){
-                window.webkit.messageHandlers.mainUi.postMessage('exitToApp');
-            },
-            goFullscreen : function(){
-                window.webkit.messageHandlers.mainUi.postMessage('goFullscreen');
-            },
-            sseConnected : function(connected) {
-                window.webkit.messageHandlers.mainUi.postMessage('sseConnected-' + connected);
-            },
-            ready : function() {
-                window.webkit.messageHandlers.mainUi.postMessage('ready');
-            },
-        }
-
-        // Detect Path changes in SPA
-        function notifyPathChange() {
-            window.webkit.messageHandlers.pathChanged.postMessage(window.location.pathname);
-            scheduleProbe();
-        }
-
-        const originalPushState = history.pushState;
-        history.pushState = function() {
-            originalPushState.apply(this, arguments);
-            notifyPathChange();
-        };
-
-        const originalReplaceState = history.replaceState;
-        history.replaceState = function() {
-            originalReplaceState.apply(this, arguments);
-            notifyPathChange();
-        };
-
-        window.addEventListener('popstate', notifyPathChange);
-
-        // Notify initial path on load and run initial probe
-        notifyPathChange();
-    })();
-    """
+    /// True once Main UI is live in the page now loaded, so it can be navigated in place.
+    var isMainUIReady: Bool {
+        bridge.isMainUIReady
+    }
 
     // MARK: - Init
 
     init() {
         webView = WKWebView(frame: .zero)
+        bridge.webView = webView
+        bridge.onEvent = { [weak self] event in self?.handleBridgeEvent(event) }
+        bridge.credentials = { [weak self] in self?.proxyCredentials() }
+        bridge.connectionURLs = { [weak self] in self?.connectionURLs() ?? [] }
+        #if DEBUG
+        // UI tests shorten (or lengthen) the wait for a page to say who is signed in.
+        if let seconds = ProcessInfo.processInfo.environment["UITestAuthTimeout"].flatMap(Double.init) {
+            authResolutionTimeout = .seconds(seconds)
+        }
+        #endif
         observeNetworkChanges()
         observeAppLifecycle()
     }
@@ -578,10 +145,6 @@ class OpenHABWebViewModel: ObservableObject {
         }
     }
 
-    deinit {
-        networkObservationTask?.cancel()
-    }
-
     /// Reconciles the web view with the current active connection. Safe to call outside a
     /// publisher callback — e.g. on a home switch — where the stored value is up to date.
     func syncActiveConnection() {
@@ -595,7 +158,7 @@ class OpenHABWebViewModel: ObservableObject {
     /// active (e.g. between two demo homes) loads immediately, while a switch whose
     /// connection isn't active yet blanks without ever showing the previous home.
     private func syncActiveConnection(with connection: ConnectionInfo?) {
-        Logger.notificationNavigation.info("syncActiveConnection: connection changed to \(connection?.configuration.description ?? "nil", privacy: .public) — will auto-load default path unless a notification's own load wins the race (openhab-ios#1336)")
+        Logger.notificationNavigation.info("syncActiveConnection: connection changed to \(connection?.configuration.description ?? "nil", privacy: .public) — auto-loading default path unless a notification's own load wins the race (#1336)")
         Task { @MainActor [weak self] in
             guard let self else { return }
             let home = await Preferences.shared.currentHomePreferences
@@ -605,6 +168,7 @@ class OpenHABWebViewModel: ObservableObject {
             }
             openHABTrackedRootUrl = connection.configuration.url
             activeConnectionInfo = connection
+            refreshAuthTracking()
             Logger.notificationNavigation.info("syncActiveConnection: connection confirmed for current home — calling loadWebView(force: false, path: nil)")
             loadWebView(force: false)
         }
@@ -634,7 +198,7 @@ class OpenHABWebViewModel: ObservableObject {
     }
 
     /// Clears a pending explicit navigation once it resolves via `routeMainUI`'s client-side
-    /// route (`navigateCommand`) rather than `loadWebView(path:)` — the case when Main UI is
+    /// route (`bridge.navigate(to:)`) rather than `loadWebView(path:)` — the case when Main UI is
     /// already live. Without this, a notification tap while Main UI is already showing would
     /// leave `hasPendingExplicitNavigation` stuck true forever, since `loadWebView` never runs
     /// with a non-nil path to clear it, silently blocking every later default auto-load.
@@ -680,14 +244,32 @@ class OpenHABWebViewModel: ObservableObject {
         let url = URL(string: activeConfig.url)
         let currentPrefs = await Preferences.shared.currentHomePreferences
         let defaultPath = currentPrefs.defaultMainUIPath
+
+        // Put the user back where they were, unless we were asked for a particular page.
+        let storedRoute = await Preferences.shared.webRouteSnapshot(for: currentPrefs.id)
+        let snapshot = WebRouteRestore.snapshotToRestore(storedRoute, for: WebRouteRestore.Load(
+            path: path,
+            force: force,
+            isShowingTile: isShowingTile
+        ))
+        // Settings pages need admin rights, which may differ on the other connection.
+        let restore = snapshot.flatMap {
+            WebRouteRestore.seed(for: $0, dropAdmin: $0.connectionURL != activeConfig.url)
+        }
+
+        // Ask for the Main UI's front page, not the page we actually want. Asking a server
+        // straight for a page only works once the Main UI has been opened there at least once,
+        // and after switching connection it has not, so you get a blank screen. The script then
+        // moves us to the right page as the Main UI starts.
         guard let modifiedUrl = WebViewURLHelper.resolveWebViewURL(
             baseURL: url,
             proxyURL: activeConnectionInfo?.proxyURL,
-            path: path,
-            defaultPath: defaultPath
+            path: restore == nil ? path : nil,
+            defaultPath: restore == nil ? defaultPath : ""
         ) else { return }
+        // What the page addresses hang off, so a cloud connection's extra path is kept.
+        let basePath = modifiedUrl.path.hasSuffix("/") ? String(modifiedUrl.path.dropLast()) : modifiedUrl.path
 
-        acceptsCommands = false
         var request = URLRequest(url: modifiedUrl)
 
         if force {
@@ -702,24 +284,31 @@ class OpenHABWebViewModel: ObservableObject {
         let isCloudConnection = activeConfig.isCloudConnection
         let homeId = currentPrefs.id
         let newWebview = getOrCreateWebView(for: homeId, isCloudConnection: isCloudConnection)
+        // The home is known now, so the sign-in can be looked up for it.
+        refreshAuthTracking()
         if newWebview !== webView {
             webView.stopLoading()
             webView.navigationDelegate = nil
             webView.uiDelegate = nil
             webView = newWebview
-        } else {}
+            bridge.webView = newWebview
+            showMenu(of: newWebview)
+        }
+
+        self.basePath = basePath
+        installUserScripts(on: webView, restore: restore?.history, props: restore?.props, basePath: basePath)
 
         Logger.viewController.info("Loading URL: \(modifiedUrl)")
         // Local avoids `self.` inside the Logger interpolation, which redundantSelf would strip.
         let webViewID = ObjectIdentifier(webView).debugDescription
-        Logger.notificationNavigation.info("performLoadWebView: about to call webView.load(\(modifiedUrl.absoluteString, privacy: .public)) [requestedPath=\(path ?? "nil", privacy: .public), webView=\(webViewID, privacy: .public)] — whichever load call lands here last wins the race")
+        Logger.notificationNavigation.info("performLoadWebView: calling webView.load(\(modifiedUrl.absoluteString, privacy: .public)) [requestedPath=\(path ?? "nil", privacy: .public), webView=\(webViewID, privacy: .public)] — last load here wins")
         isLoading = true
         isShowingTile = false
-        webView.load(request)
+        bridge.trustRedirects(of: webView.load(request))
     }
 
     private func loadWebViewWithETagCheck(newTarget: String, path: String?) async {
-        Logger.notificationNavigation.info("loadWebViewWithETagCheck: starting network ETag round-trip for path=\(path ?? "nil", privacy: .public) — this is the slow path most likely to land its webView.load() after a notification's direct load and clobber it")
+        Logger.notificationNavigation.info("loadWebViewWithETagCheck: starting network ETag round-trip for path=\(path ?? "nil", privacy: .public) — slow path, may clobber a notification's direct load")
         guard let activeConfig,
               let url = URL(string: activeConfig.url) else {
             Logger.viewController.info("ETag check skipped: invalid configuration")
@@ -805,6 +394,7 @@ class OpenHABWebViewModel: ObservableObject {
     // MARK: - WKWebView instance management
 
     private func getOrCreateWebView(for id: UUID, isCloudConnection: Bool) -> WKWebView {
+        currentHomeId = id
         if let existing = views[id] {
             Logger.viewController.info("Reusing webview for id:\(id.uuidString)")
             viewAccessOrder.removeAll { $0 == id }
@@ -815,28 +405,11 @@ class OpenHABWebViewModel: ObservableObject {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
-        // JS bridge is added by the Coordinator when it attaches delegates
-        config.userContentController.addUserScript(
-            WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false)
-        )
-        #if DEBUG
-        let ohUITestJS = """
-        (function(){
-          if(window.ohUITest)return;
-          window.ohUITest={report:function(k,v){
-            if(window.webkit&&window.webkit.messageHandlers.mainUi)
-              window.webkit.messageHandlers.mainUi.postMessage(
-                {type:'uiTestReport',key:String(k),value:String(v)});
-          }};
-        })();
-        """
-        config.userContentController.addUserScript(
-            WKUserScript(source: ohUITestJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
-        )
-        #endif
         config.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
 
         let newWebView = WKWebView(frame: .zero, configuration: config)
+        // The Coordinator hooks up the messages these scripts send back.
+        installUserScripts(on: newWebView, restore: nil)
         newWebView.scrollView.bounces = false
         newWebView.isOpaque = false
         newWebView.backgroundColor = UIColor.clear
@@ -855,81 +428,18 @@ class OpenHABWebViewModel: ObservableObject {
         viewAccessOrder.append(id)
         while viewAccessOrder.count > 2 {
             let evicted = viewAccessOrder.removeFirst()
-            views.removeValue(forKey: evicted)
+            if let evictedView = views.removeValue(forKey: evicted) {
+                menus[ObjectIdentifier(evictedView)] = nil
+            }
             Logger.viewController.info("Evicted webview cache entry for id:\(evicted.uuidString)")
         }
         return newWebView
     }
 
-    // MARK: - Navigation commands
-
-    /// True once the MainUI SPA is live in the current web view and can accept
-    /// client-side navigation via `window.MainUI.handleCommand`. Mirrors the state
-    /// that gates command execution vs. queuing.
-    var isMainUIReady: Bool {
-        acceptsCommands
-    }
-
-    func navigateCommand(_ command: String) {
-        if acceptsCommands {
-            navigateCommandInternal(command)
-        } else {
-            commandQueue.append(command)
-        }
-    }
-
-    private func navigateCommandInternal(_ command: String) {
-        let jsCode = "window.MainUI.handleCommand('\(command)')"
-        webView.evaluateJavaScript(jsCode) { _, error in
-            if let error {
-                Logger.viewController.error("navigateCommandInternal failed \(error.localizedDescription)")
-            } else {
-                Logger.viewController.info("navigateCommandInternal Success")
-            }
-        }
-    }
-
-    func executeQueuedCommands() {
-        while !commandQueue.isEmpty {
-            let command = commandQueue.removeFirst()
-            navigateCommandInternal(command)
-        }
-    }
-
-    // MARK: - SSE connection state
-
-    func handleSSEConnected(_ connected: Bool) {
-        isSSEConnected = connected
-        if connected {
-            Logger.viewController.info("WKScriptMessage sseConnected is true")
-            sseTimer?.invalidate()
-            acceptsCommands = true
-            executeQueuedCommands()
-            // SPA is live — hide the native menu bar so the SPA's own UI takes over.
-            showMenuBar = false
-            // Re-inject navbar proxy and re-run app-menu probe now that the SPA
-            // is fully live. window.MainUI is guaranteed defined at this point.
-            injectNavbarProxy()
-            triggerAppMenuProbe()
-        } else {
-            Logger.viewController.info("WKScriptMessage sseConnected is false")
-            // Show the native bar so the connection-status indicator is visible
-            showMenuBar = true
-            sseTimer?.invalidate()
-            sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
-                Task { @MainActor in
-                    self?.acceptsCommands = false
-                }
-            }
-        }
-    }
-
     // MARK: - Direct URL loading (for tiles)
 
     func loadDirectURL(_ url: URL) {
-        isLoading = true
-        isShowingTile = true
-        webView.load(URLRequest(url: url))
+        loadTile(URLRequest(url: url))
     }
 
     /// Loads a MainUI tile page by navigating directly to its URL.
@@ -939,18 +449,24 @@ class OpenHABWebViewModel: ObservableObject {
     /// Loading the URL causes the server to return the SPA's index.html; Framework7
     /// reads the URL path on startup and routes to the correct page automatically.
     func loadTilePage(_ url: URL) {
-        isLoading = true
-        isShowingTile = true
-        webView.load(URLRequest(url: url))
+        loadTile(URLRequest(url: url))
     }
 
     /// Reloads a tile URL bypassing HTTP caches, so the reload action fetches fresh
     /// content rather than redisplaying the cached page.
     func reloadTile(_ url: URL) {
-        isLoading = true
-        isShowingTile = true
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        loadTile(request)
+    }
+
+    /// A tile can be any site, so it loads without the bridge: nothing in it can ask the app for
+    /// anything, credentials included.
+    private func loadTile(_ request: URLRequest) {
+        isLoading = true
+        isShowingTile = true
+        bridge.stopTrustingRedirects()
+        installTileScripts(on: webView)
         webView.load(request)
     }
 
@@ -958,7 +474,6 @@ class OpenHABWebViewModel: ObservableObject {
 
     func reloadView() {
         currentTarget = ""
-        commandQueue = []
         webView.stopLoading()
         webView.evaluateJavaScript("document.body.remove()")
         loadWebView(force: true)
@@ -968,39 +483,21 @@ class OpenHABWebViewModel: ObservableObject {
     /// no active connection for the current home, so the previous home's page and navbar
     /// never linger and the menu bar shows its offline/connecting indicator instead.
     func clearView() {
-        acceptsCommands = false
-        commandQueue = []
         activeConnectionInfo = nil
+        refreshAuthTracking()
         openHABTrackedRootUrl = ""
         webView.stopLoading()
+        bridge.stopTrustingRedirects()
         webView.load(URLRequest(url: URL(string: "about:blank")!))
         isLoading = false
         isSSEConnected = false
         hasLoadedContent = false
-        showMenuBar = true
-        isWebNavbarHidden = false
-        isWebNavbarTitleHidden = false
-        #if DEBUG
-        if !uiTestContentLocked {
-            navbarItems = []
-            navbarTitle = ""
-        }
-        #else
-        navbarItems = []
-        navbarTitle = ""
-        #endif
-    }
-
-    // MARK: - JS evaluation
-
-    /// Evaluates an arbitrary JS expression in the current webview.
-    /// Used by the native navbar proxy to trigger action buttons.
-    func evaluateJS(_ js: String) {
-        webView.evaluateJavaScript(js) { _, error in
-            if let error {
-                Logger.viewController.error("evaluateJS failed: \(error.localizedDescription)")
-            }
-        }
+        // Nothing is on screen now, so no tile either. Left set, we would still think a tile is
+        // showing and would neither put the user back nor remember where they go next.
+        isShowingTile = false
+        // A blank view belongs to no home yet, so its menu goes too.
+        menu = nil
+        resetNavbar()
     }
 
     // MARK: - didFinish helpers
@@ -1009,7 +506,6 @@ class OpenHABWebViewModel: ObservableObject {
         lastLoadedURL = webView.url?.absoluteString
         lastLoadedConfiguration = activeConfig
         isLoading = false
-        acceptsCommands = true
         // A finished navigation to anything other than the blank placeholder means real
         // content is now on screen, so the "Connecting…" placeholder can be dismissed.
         if let url = webView.url?.absoluteString, !url.hasPrefix("about:") {
@@ -1027,8 +523,14 @@ class OpenHABWebViewModel: ObservableObject {
             }
         }
 
-        injectNavbarProxy()
-        injectEditorHeightFix()
+        if !isShowingTile {
+            // Done with the saved pages. If the page reloads on its own later, it should stay
+            // where it is rather than jump back to pages the user has since left.
+            installUserScripts(on: webView, restore: nil, basePath: basePath)
+
+            // The safe area is only known once the web view is on screen.
+            bridge.updateLayout(currentLayout())
+        }
         #if DEBUG
         if let encoded = ProcessInfo.processInfo.environment["UITestInjectJS"],
            let data = Data(base64Encoded: encoded),
@@ -1036,174 +538,6 @@ class OpenHABWebViewModel: ObservableObject {
             webView.evaluateJavaScript(jsSource, completionHandler: nil)
         }
         #endif
-    }
-
-    private func injectNavbarProxy() {
-        webView.evaluateJavaScript(navbarProxyJS) { _, error in
-            if let error {
-                Logger.viewController.debug("navbarProxyJS: \(error.localizedDescription)")
-            }
-        }
-    }
-
-    // MARK: - Menu bar visibility
-
-    /// Called when a new top-level navigation starts (full page load).
-    /// Resets connection state and shows the bar until SSE confirms everything is live.
-    func handleNavigationStart() {
-        showMenuBar = true
-        isSSEConnected = false
-        isWebNavbarHidden = false
-        isWebNavbarTitleHidden = false
-        #if DEBUG
-        if !uiTestContentLocked {
-            navbarItems = []
-            navbarTitle = ""
-        }
-        #else
-        navbarItems = []
-        navbarTitle = ""
-        #endif
-        // Clear the re-installation guards so the next page gets a fresh proxy.
-        webView.evaluateJavaScript(
-            """
-            window.__ohNavbarProxyInstalled = undefined;
-            window.__ohNavbarObserverInstalled = undefined;
-            window.__ohNavbarLastState = undefined;
-            window.__ohNavbarHeight = undefined;
-            """
-        )
-    }
-
-    /// Updates the proxied navbar items and title received from the web content.
-    func updateNavbarItems(_ items: [WebNavbarItem], title: String = "") {
-        navbarItems = items
-        navbarTitle = title
-    }
-
-    /// A bad `height` reading is ignored, so it can never collapse the native bar.
-    func updateNavbarState(hidden: Bool, titleHidden: Bool, height: Double?) {
-        isWebNavbarHidden = hidden
-        isWebNavbarTitleHidden = titleHidden
-        if let height, (32.0 ... 96.0).contains(height) {
-            webNavbarHeight = CGFloat(height)
-        }
-    }
-
-    /// Called when the openHAB Main UI fires its `OHApp.ready()` callback.
-    /// At this point the SPA has fully initialised: `window.MainUI` is defined
-    /// and Vue has mounted its components, so both the proxy and probe are reliable.
-    func handleReady() {
-        injectNavbarProxy()
-        triggerAppMenuProbe()
-    }
-
-    /// Called with the result of the JS probe that checks window.MainUI.
-    /// Hides the bar only when the SPA is present AND SSE is already connected
-    /// (re-entry into the webview without a full reload).
-    /// - Parameter hidden: true when the Main UI is present (iOS bar would be redundant).
-    func handleAppMenuProbe(hidden: Bool) {
-        if hidden, isSSEConnected {
-            showMenuBar = false
-        } else if !hidden {
-            showMenuBar = true
-        }
-    }
-
-    /// Evaluates the app-menu probe immediately in the current webview.
-    /// Use this when re-entering the webview content without a full page reload.
-    func triggerAppMenuProbe() {
-        let probeJS = """
-        (function() {
-            var isOnMainUI = (typeof window.MainUI !== 'undefined');
-            window.webkit.messageHandlers.mainUi.postMessage(
-                isOnMainUI ? 'appMenu-hidden' : 'appMenu-visible'
-            );
-        })();
-        """
-        webView.evaluateJavaScript(probeJS)
-    }
-
-    private func injectEditorHeightFix() {
-        let safeAreaBottom = webView.safeAreaInsets.bottom
-        let editorFixJS = """
-        (function() {
-            if (window.__ohEditorFixInstalled) return;
-            window.__ohEditorFixInstalled = true;
-
-            var safeAreaBottom = \(safeAreaBottom);
-
-            function fixScriptEditorHeight() {
-                var editor = document.querySelector('.rule-script-editor.v-codemirror');
-                if (!editor) return;
-
-                var page = editor.closest('.page');
-                if (!page) return;
-
-                var toolbar = page.querySelector('.toolbar');
-                if (!toolbar) return;
-
-                var fab = page.querySelector('.fab') || document.querySelector('.fab');
-                var fabHeight = 0;
-                if (fab) {
-                    var fabRect = fab.getBoundingClientRect();
-                    fabHeight = fabRect.height || 56;
-                }
-
-                var totalBottomPadding = safeAreaBottom;
-                if (fab && fabHeight > 0) {
-                    totalBottomPadding += fabHeight + 16;
-                } else if (fab) {
-                    totalBottomPadding += 56 + 16;
-                }
-
-                var pageContent = page.querySelector('.page-content');
-                if (pageContent) {
-                    pageContent.style.paddingBottom = totalBottomPadding + 'px';
-                }
-
-                var scrollContainer = editor.querySelector('.cm-scroller') ||
-                                     editor.querySelector('.CodeMirror-scroll') ||
-                                     editor.querySelector('.cm-content');
-
-                if (scrollContainer && scrollContainer !== editor) {
-                    scrollContainer.style.paddingBottom = totalBottomPadding + 'px';
-                    scrollContainer.style.overflowY = 'auto';
-                    editor.style.marginBottom = totalBottomPadding + 'px';
-                } else {
-                    editor.style.paddingBottom = totalBottomPadding + 'px';
-                    editor.style.marginBottom = totalBottomPadding + 'px';
-                }
-            }
-
-            new MutationObserver(function(mutations) {
-                for (var i = 0; i < mutations.length; i++) {
-                    for (var j = 0; j < mutations[i].addedNodes.length; j++) {
-                        var n = mutations[i].addedNodes[j];
-                        if (n.nodeType === 1 &&
-                            ((n.classList && n.classList.contains('rule-script-editor')) ||
-                             (n.querySelector && n.querySelector('.rule-script-editor')))) {
-                            setTimeout(function() {
-                                requestAnimationFrame(fixScriptEditorHeight);
-                            }, 100);
-                            return;
-                        }
-                    }
-                }
-            }).observe(document.body || document.documentElement, { subtree: true, childList: true });
-
-            window.addEventListener('resize', function() {
-                setTimeout(function() {
-                    requestAnimationFrame(fixScriptEditorHeight);
-                }, 100);
-            });
-
-            setTimeout(function() {
-                fixScriptEditorHeight();
-            }, 500);
-        })();
-        """
-        webView.evaluateJavaScript(editorFixJS)
     }
 
     // MARK: - Test support
@@ -1219,17 +553,47 @@ class OpenHABWebViewModel: ObservableObject {
         uiTestContentLocked = true
     }
 
+    /// Stands in for a `navbar.state` from the page.
+    func setUITestNavbar(_ state: OHBridgeNavbarState) {
+        uiTestNavbarInjected = true
+        navbar = state
+    }
+
+    /// Stands in for an `auth.state` from the page.
+    func setUITestAuth(_ state: OHBridgeAuthState) {
+        uiTestAuthInjected = true
+        authStatus = .known(state)
+    }
+
+    /// Keeps the sign-in unknown, as while a page has not said yet, whatever pages report.
+    func setUITestAuthPending() {
+        uiTestAuthInjected = true
+        authStatus = .unknown
+    }
+
+    /// Stands in for a `menu.state` from the page.
+    func setUITestMenu(_ state: OHBridgeMenuState) {
+        uiTestMenuInjected = true
+        menu = state
+    }
+
     /// Loads raw HTML into a fully configured webview (scripts injected).
     /// Used by UI tests via UITestInjectHTML env var — bypasses the server URL so
     /// tests work without a live openHAB instance.
     func loadHTMLString(_ html: String) async {
         uiTestContentLocked = true
+        bridge.acceptsLocalPages = true
         let homeId = await (Preferences.shared.currentHomePreferences).id
         let wv = getOrCreateWebView(for: homeId, isCloudConnection: false)
         if wv !== webView {
             webView = wv
+            bridge.webView = wv
+            showMenu(of: wv)
         }
         wv.loadHTMLString(html, baseURL: nil)
+        // An injected page has no URL for `handleDidFinish` to count as content, and the
+        // "Connecting…" placeholder would cover it and swallow the test's taps.
+        hasLoadedContent = true
     }
     #endif
 
@@ -1243,5 +607,235 @@ class OpenHABWebViewModel: ObservableObject {
             path: nil,
             defaultPath: (Preferences.shared.currentHomePreferences).defaultMainUIPath
         )
+    }
+
+    deinit {
+        networkObservationTask?.cancel()
+    }
+}
+
+private extension OpenHABWebViewModel {
+    // MARK: - Injected scripts
+
+    /// Adds the scripts that run whenever a page opens. They go in together every time. A
+    /// script's text cannot be changed once added, the list of pages to put back differs each
+    /// time, and removing one script removes them all.
+    func installUserScripts(on webView: WKWebView, restore: [String]?, props: [String]? = nil, basePath: String = "") {
+        let controller = webView.configuration.userContentController
+        controller.removeAllUserScripts()
+        bridge.installScripts(on: controller, restore: restore, props: props, basePath: basePath, layout: currentLayout())
+        controller.addUserScript(
+            WKUserScript(source: webViewExternalURLInterceptorJS, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        )
+        #if DEBUG
+        controller.addUserScript(
+            WKUserScript(source: webViewUITestProbeJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        )
+        #endif
+    }
+
+    /// The scripts a tile gets: everything except the bridge.
+    func installTileScripts(on webView: WKWebView) {
+        let controller = webView.configuration.userContentController
+        controller.removeAllUserScripts()
+        controller.addUserScript(
+            WKUserScript(source: webViewExternalURLInterceptorJS, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        )
+        #if DEBUG
+        controller.addUserScript(
+            WKUserScript(source: webViewUITestProbeJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        )
+        #endif
+    }
+}
+
+extension OpenHABWebViewModel {
+    // MARK: - Bridge
+
+    /// Where the Main UI of the active connection lives: its address, or the cloud proxy's.
+    private var activeAuthKey: MainUIAuthKey? {
+        let url = WebViewURLHelper.resolveWebViewURL(
+            baseURL: activeConfig.flatMap { URL(string: $0.url) },
+            proxyURL: activeConnectionInfo?.proxyURL,
+            path: nil,
+            defaultPath: ""
+        )
+        return MainUIAuthKey(home: currentHomeId, url: url)
+    }
+
+    /// Shows the menu `webView` last sent, now that it is the one on screen.
+    func showMenu(of webView: WKWebView) {
+        refreshAuthTracking()
+        #if DEBUG
+        if uiTestMenuInjected {
+            return
+        }
+        #endif
+        menu = menus[ObjectIdentifier(webView)]
+    }
+
+    /// Called when a new top-level navigation starts (full page load). The page has to say
+    /// hello again, and its bar starts empty.
+    func handleNavigationStart() {
+        isSSEConnected = false
+        bridge.pageWillLoad()
+        resetNavbar()
+        // A page that gave up being waited for may be about to say after all.
+        authTracker.startWaiting()
+        publishAuthStatus()
+        // The new page sends its own menu; until then the menu falls back to the REST page list.
+        menus[ObjectIdentifier(webView)] = nil
+        #if DEBUG
+        if uiTestMenuInjected {
+            return
+        }
+        #endif
+        menu = nil
+    }
+
+    // MARK: - Sign-in state
+
+    /// Points the sign-in state at the origin now in use: after a connection change, a home
+    /// switch, or when the connection goes away. What was known about the origin left stays
+    /// with it.
+    private func refreshAuthTracking() {
+        #if DEBUG
+        if uiTestAuthInjected {
+            return
+        }
+        #endif
+        authTracker.activate(activeAuthKey)
+        publishAuthStatus()
+    }
+
+    private func publishAuthStatus() {
+        #if DEBUG
+        if uiTestAuthInjected {
+            return
+        }
+        #endif
+        authStatus = authTracker.status
+        scheduleAuthTimeout()
+    }
+
+    /// While the active origin has not said who is signed in, wait for it a while, then offer to
+    /// sign in rather than wait for ever on a page that is slow, failed, or never says.
+    private func scheduleAuthTimeout() {
+        authTimeoutTask?.cancel()
+        authTimeoutTask = nil
+        guard authStatus == .unknown, authTracker.active != nil else { return }
+        let timeout = authResolutionTimeout
+        authTimeoutTask = Task { [weak self] in
+            try? await Task.sleep(for: timeout)
+            guard !Task.isCancelled, let self else { return }
+            authTracker.giveUp()
+            authStatus = authTracker.status
+        }
+    }
+
+    private func resetNavbar() {
+        #if DEBUG
+        if uiTestNavbarInjected {
+            return
+        }
+        #endif
+        navbar = .empty
+    }
+
+    func handleBridgeEvent(_ event: OHBridgeEvent) {
+        switch event {
+        case let .hello(hello):
+            Logger.viewController.info("OHBridge: hello from \(hello.impl.rawValue, privacy: .public), accepted \(hello.accepted, privacy: .public)")
+        case let .connectionState(connected):
+            isSSEConnected = connected
+        case let .navChanged(state):
+            handleNavChanged(state)
+        case let .navbarState(state):
+            #if DEBUG
+            if uiTestNavbarInjected {
+                return
+            }
+            #endif
+            navbar = state
+        case let .menuState(state):
+            #if DEBUG
+            if uiTestMenuInjected {
+                return
+            }
+            #endif
+            menus[ObjectIdentifier(webView)] = state
+            menu = state
+        case let .authState(state):
+            #if DEBUG
+            if uiTestAuthInjected {
+                return
+            }
+            #endif
+            // Kept for the origin the page came from, which is not necessarily the one in use.
+            let key = MainUIAuthKey(home: currentHomeId, url: webView.url) ?? activeAuthKey
+            if let key {
+                authTracker.report(state, from: key)
+            }
+            publishAuthStatus()
+        }
+    }
+
+    /// The user cancelled the sign-in on openHAB's authorize page, whose Cancel button would
+    /// otherwise take the web view to the server's root. Reports where Main UI was when the
+    /// sign-in began.
+    func cancelLogin() {
+        let route = MainUILogin.routeBeforeLogin(path: lastNavState?.path, history: lastNavState?.history ?? [])
+        Logger.viewController.info("Sign-in cancelled, going back to \(route, privacy: .public)")
+        onLoginCancelled?(route)
+    }
+
+    /// Notes where the user is, so we can put them back later.
+    ///
+    /// Tiles are skipped. A tile's address is its own, and saving it would later drop the
+    /// Main UI somewhere the menu never sent it.
+    func handleNavChanged(_ state: OHBridgeNavState) {
+        lastNavState = state
+        let path = state.path
+        Task {
+            await Preferences.shared.setCurrentWebViewPath(path)
+        }
+        guard let connectionURL = activeConfig?.url,
+              let snapshot = WebRouteRestore.snapshot(from: state, connectionURL: connectionURL) else { return }
+        guard !isShowingTile, let homeId = currentHomeId else { return }
+        Task {
+            await Preferences.shared.setWebRouteSnapshot(snapshot, for: homeId)
+        }
+    }
+
+    /// Tells Main UI how much of the page the host's system bars cover, and keeps sending it
+    /// with every page load.
+    func setSystemBarLayout(_ layout: OHBridgeLayout) {
+        systemBarLayout = layout
+        bridge.updateLayout(layout)
+    }
+
+    /// The space the host's chrome takes over the page, before the host has reported a layout.
+    func currentLayout() -> OHBridgeLayout {
+        if let systemBarLayout {
+            return systemBarLayout
+        }
+        let insets = webView.safeAreaInsets
+        return OHBridgeLayout(
+            insets: .init(top: insets.top, bottom: insets.bottom),
+            navbarHeight: 0
+        )
+    }
+
+    /// Basic auth for a reverse proxy, from the connection's settings. Nil when there is none.
+    private func proxyCredentials() -> OHBridgeCredentials? {
+        guard let activeConfig, !activeConfig.username.isEmpty, !activeConfig.password.isEmpty else { return nil }
+        return OHBridgeCredentials(username: activeConfig.username, password: activeConfig.password)
+    }
+
+    /// Where the active connection serves Main UI: its own address, and the cloud proxy's.
+    private func connectionURLs() -> [URL] {
+        [activeConfig?.url, activeConnectionInfo?.proxyURL?.absoluteString]
+            .compactMap(\.self)
+            .compactMap(URL.init(string:))
     }
 }

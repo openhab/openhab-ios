@@ -15,10 +15,16 @@ import SwiftUI
 @main
 struct OpenHABApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    // App-wide services live here rather than in OpenHABRootView: the App is initialised
+    // once, so they start listening at launch (a cold-launch notification tap or APNs token
+    // is not buffered) and are never duplicated when the root view is re-created.
+    @State private var notificationService = NotificationActionService()
+    @State private var pushService = PushRegistrationService()
 
     var body: some Scene {
         WindowGroup {
             OpenHABRootView()
+                .environment(notificationService)
                 .onOpenURL { url in
                     if url.isFileURL {
                         let clientCertificateManager = CertificateManagers.clientCertificateManager

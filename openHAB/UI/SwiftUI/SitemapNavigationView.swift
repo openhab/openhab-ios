@@ -22,21 +22,10 @@ enum SitemapNavigationState: Equatable {
     case ready([LinkedPageNavigation])
 
     var navigationPath: [LinkedPageNavigation] {
-        if case let .ready(path) = self { return path }
+        if case let .ready(path) = self {
+            return path
+        }
         return []
-    }
-}
-
-// MARK: - Environment key for side-menu action
-
-private struct SitemapSideMenuKey: EnvironmentKey {
-    nonisolated(unsafe) static let defaultValue: (() -> Void)? = nil
-}
-
-extension EnvironmentValues {
-    var sitemapSideMenuAction: (() -> Void)? {
-        get { self[SitemapSideMenuKey.self] }
-        set { self[SitemapSideMenuKey.self] = newValue }
     }
 }
 
@@ -44,11 +33,35 @@ extension EnvironmentValues {
 
 @available(iOS 26.0, *)
 private struct NativeSearchBar: UIViewRepresentable {
+    final class Coordinator: NSObject, UISearchBarDelegate {
+        var parent: NativeSearchBar
+
+        init(_ parent: NativeSearchBar) {
+            self.parent = parent
+        }
+
+        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+            parent.text = searchText
+        }
+
+        func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+            parent.text = ""
+            parent.isPresented = false
+            searchBar.resignFirstResponder()
+        }
+
+        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+            searchBar.resignFirstResponder()
+        }
+    }
+
     @Binding var text: String
     @Binding var isPresented: Bool
     var placeholder: String
 
-    func makeCoordinator() -> Coordinator { Coordinator(self) }
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
 
     func makeUIView(context: Context) -> UISearchBar {
         let bar = UISearchBar()
@@ -67,25 +80,6 @@ private struct NativeSearchBar: UIViewRepresentable {
             uiView.text = text
         }
     }
-
-    final class Coordinator: NSObject, UISearchBarDelegate {
-        var parent: NativeSearchBar
-        init(_ parent: NativeSearchBar) { self.parent = parent }
-
-        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-            parent.text = searchText
-        }
-
-        func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-            parent.text = ""
-            parent.isPresented = false
-            searchBar.resignFirstResponder()
-        }
-
-        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-            searchBar.resignFirstResponder()
-        }
-    }
 }
 
 struct SitemapNavigationView: View {
@@ -93,7 +87,6 @@ struct SitemapNavigationView: View {
     @StateObject var viewModel = SitemapPageViewModel()
     @State private var hasSeenActivePhase = false
     @State private var isSearchPresented = false
-    var onShowSideMenu: (() -> Void)?
 
     var body: some View {
         NavigationStack(path: $viewModel.navigationPath) {
@@ -102,7 +95,6 @@ struct SitemapNavigationView: View {
                     SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: nav.pageLink, title: nav.pageTitle))
                 }
         }
-        .environment(\.sitemapSideMenuAction, onShowSideMenu)
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
@@ -150,7 +142,7 @@ struct SitemapNavigationView: View {
             // changes. The inset is empty when search is not active.
             page
                 .safeAreaInset(edge: .bottom) {
-                    if viewModel.showSearchField && isSearchPresented {
+                    if viewModel.showSearchField, isSearchPresented {
                         NativeSearchBar(
                             text: $viewModel.searchText,
                             isPresented: $isSearchPresented,
@@ -235,19 +227,16 @@ struct SitemapNavigationView: View {
         return false
     }
 
-    init(viewModel: SitemapPageViewModel, onShowSideMenu: @escaping () -> Void) {
+    init(viewModel: SitemapPageViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
-        self.onShowSideMenu = onShowSideMenu
     }
 
-    init(sitemapName: String, navigationPath: [LinkedPageNavigation] = [], onShowSideMenu: (() -> Void)? = nil) {
+    init(sitemapName: String, navigationPath: [LinkedPageNavigation] = []) {
         _viewModel = StateObject(wrappedValue: SitemapPageViewModel(sitemapName: sitemapName, initialNavigationPath: navigationPath))
-        self.onShowSideMenu = onShowSideMenu
     }
 
-    init(onShowSideMenu: (() -> Void)? = nil) {
+    init() {
         _viewModel = StateObject(wrappedValue: SitemapPageViewModel())
-        self.onShowSideMenu = onShowSideMenu
     }
 }
 
@@ -257,8 +246,6 @@ struct SitemapNavigationView: View {
         pageUrl: PreviewConstants.openHABSitemapPage?.link ?? "",
         title: PreviewConstants.openHABSitemapPage?.title ?? "Preview Page"
     )
-    SitemapNavigationView(viewModel: previewViewModel) {
-        print("Show side menu tapped")
-    }
+    SitemapNavigationView(viewModel: previewViewModel)
 }
 #endif

@@ -15,8 +15,8 @@ import SwiftUI
 
 struct SwitchRow: View {
     let widget: OpenHABWidget
-    @EnvironmentObject var settings: AppSettings
-    @EnvironmentObject var pageData: UserData
+    @Environment(AppSettings.self) var settings
+    @Environment(UserData.self) var pageData
     let stateToken: String
     @State private var localIsOn: Bool?
     @State private var commandSender = WidgetCommandDispatcher()
@@ -78,5 +78,5 @@ struct SwitchRow: View {
     NavigationStack {
         SwitchRow(widget: widget, stateToken: widget.item?.state ?? "OFF")
     }
-    .environmentObject(mockSettings)
+    .environment(mockSettings)
 }

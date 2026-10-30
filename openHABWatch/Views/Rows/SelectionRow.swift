@@ -21,7 +21,7 @@ struct SelectionListView: View {
     let title: String
     @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var pageData: UserData
+    @Environment(UserData.self) var pageData
     @State private var commandSender = WidgetCommandDispatcher()
 
     var body: some View {
@@ -87,7 +87,7 @@ struct SelectionRow: View {
     let title: String
     let initialSelectedIndex: Int?
     let labelValue: String?
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
     @State private var selectedIndex: Int?
 
     /// Returns the label of the currently selected mapping

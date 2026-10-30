@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import SFSafeSymbols
 import SwiftUI
 
 /// Contract that settings sheets must satisfy to use the shared toolbar and dismiss guard.
@@ -31,21 +32,15 @@ protocol SettingsSheetView: View {
     func onCancel()
 }
 
-extension SettingsSheetView {
-    /// `true` when `current` differs from `initial`. Recomputed on every render.
-    /// Reading `current` and `initial` is non-mutating so this works in a protocol extension.
-    var isDirty: Bool { current != initial }
-}
-
 struct SettingsSheetModifier: ViewModifier {
     var isDirty: Bool
     var onSave: () -> Void
     var onRevert: () -> Void
     var onCancel: () -> Void
 
-    // Animated mirror of `isDirty`. Using a separate @State (driven via withAnimation in
-    // onChange) ensures the toolbar items are added/removed from the hierarchy — not just
-    // made transparent — so the Liquid Glass backing disappears along with the buttons.
+    /// Animated mirror of `isDirty`. Using a separate @State (driven via withAnimation in
+    /// onChange) ensures the toolbar items are added/removed from the hierarchy — not just
+    /// made transparent — so the Liquid Glass backing disappears along with the buttons.
     @State private var showsDirtyButtons = false
 
     func body(content: Content) -> some View {
@@ -58,7 +53,7 @@ struct SettingsSheetModifier: ViewModifier {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action: onCancel) {
-                        Image(systemName: "xmark")
+                        Image(systemSymbol: .xmark)
                     }
                 }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
@@ -66,11 +61,11 @@ struct SettingsSheetModifier: ViewModifier {
                         Button {
                             withAnimation(.easeInOut(duration: 0.2)) { onRevert() }
                         } label: {
-                            Image(systemName: "arrow.counterclockwise")
+                            Image(systemSymbol: .arrowCounterclockwise)
                         }
 
                         Button(action: onSave) {
-                            Image(systemName: "checkmark")
+                            Image(systemSymbol: .checkmark)
                         }
                     }
                 }
@@ -82,12 +77,20 @@ extension View {
     /// Applies the settings-sheet toolbar and dismiss guard using a `SettingsSheetView`.
     /// The modifier reads `isDirty` and the three action callbacks directly from the
     /// conforming view, so the call site is simply `.settingsSheet(from: self)`.
-    func settingsSheet<S: SettingsSheetView>(from view: S) -> some View {
+    func settingsSheet(from view: some SettingsSheetView) -> some View {
         modifier(SettingsSheetModifier(
             isDirty: view.isDirty,
             onSave: view.onSave,
             onRevert: view.onRevert,
             onCancel: view.onCancel
         ))
+    }
+}
+
+extension SettingsSheetView {
+    /// `true` when `current` differs from `initial`. Recomputed on every render.
+    /// Reading `current` and `initial` is non-mutating so this works in a protocol extension.
+    var isDirty: Bool {
+        current != initial
     }
 }

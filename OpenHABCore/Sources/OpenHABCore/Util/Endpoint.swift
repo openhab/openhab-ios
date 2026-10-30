@@ -50,26 +50,6 @@ public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible, Senda
     }
 }
 
-public extension SortSitemapsOrder {
-    /// The field that leads when both are shown, matching the chosen sort order:
-    /// sorting by name makes the name primary, sorting by label makes the label
-    /// primary.
-    func primaryText(for sitemap: OpenHABSitemap) -> String {
-        self == .name ? sitemap.name : sitemap.label
-    }
-
-    /// The counterpart of `primaryText`.
-    func secondaryText(for sitemap: OpenHABSitemap) -> String {
-        self == .name ? sitemap.label : sitemap.name
-    }
-
-    /// Joins a primary and secondary display value into one line, collapsing to
-    /// just the primary when both are equal (e.g. a sitemap whose name == label).
-    static func combined(_ primary: String, _ secondary: String) -> String {
-        primary == secondary ? primary : "\(primary) – \(secondary)"
-    }
-}
-
 /// Which sitemap field(s) to show in menus and pickers. Independent of
 /// `SortSitemapsOrder`, which only affects ordering and — for `.both` — which
 /// field leads.
@@ -78,7 +58,9 @@ public enum SitemapNameLabelDisplayMode: Int, CaseIterable, Identifiable, Custom
     case name
     case both
 
-    public var id: Self { self }
+    public var id: Self {
+        self
+    }
 
     public var description: String {
         switch self {
@@ -89,44 +71,6 @@ public enum SitemapNameLabelDisplayMode: Int, CaseIterable, Identifiable, Custom
         case .both:
             String(localized: "Name and label")
         }
-    }
-}
-
-public extension SitemapNameLabelDisplayMode {
-    /// The value stored per home; `nil` (data saved before this setting existed)
-    /// resolves to the default, `.label`, which matches the pre-setting behaviour
-    /// so upgrading users keep seeing sitemap labels.
-    static func resolved(_ stored: SitemapNameLabelDisplayMode?) -> SitemapNameLabelDisplayMode {
-        stored ?? .label
-    }
-
-    /// Title (primary line) for a sitemap. In `.both`, `sortOrder` decides which
-    /// field leads.
-    func titleText(for sitemap: OpenHABSitemap, sortedBy sortOrder: SortSitemapsOrder) -> String {
-        switch self {
-        case .name:
-            sitemap.name
-        case .label:
-            sitemap.label
-        case .both:
-            sortOrder.primaryText(for: sitemap)
-        }
-    }
-
-    /// Detail (secondary line) for a sitemap: empty unless the mode is `.both`
-    /// and the two fields actually differ.
-    func detailText(for sitemap: OpenHABSitemap, sortedBy sortOrder: SortSitemapsOrder) -> String {
-        guard self == .both else { return "" }
-        let primary = sortOrder.primaryText(for: sitemap)
-        let secondary = sortOrder.secondaryText(for: sitemap)
-        return primary == secondary ? "" : secondary
-    }
-
-    /// Single-line form for pickers, e.g. `"Home – watch"` for `.both`.
-    func combinedText(for sitemap: OpenHABSitemap, sortedBy sortOrder: SortSitemapsOrder) -> String {
-        let title = titleText(for: sitemap, sortedBy: sortOrder)
-        let detail = detailText(for: sitemap, sortedBy: sortOrder)
-        return detail.isEmpty ? title : SortSitemapsOrder.combined(title, detail)
     }
 }
 
@@ -327,6 +271,44 @@ public extension Endpoint {
     }
 }
 
+public extension SitemapNameLabelDisplayMode {
+    /// The value stored per home; `nil` (data saved before this setting existed)
+    /// resolves to the default, `.label`, which matches the pre-setting behaviour
+    /// so upgrading users keep seeing sitemap labels.
+    static func resolved(_ stored: SitemapNameLabelDisplayMode?) -> SitemapNameLabelDisplayMode {
+        stored ?? .label
+    }
+
+    /// Title (primary line) for a sitemap. In `.both`, `sortOrder` decides which
+    /// field leads.
+    func titleText(for sitemap: OpenHABSitemap, sortedBy sortOrder: SortSitemapsOrder) -> String {
+        switch self {
+        case .name:
+            sitemap.name
+        case .label:
+            sitemap.label
+        case .both:
+            sortOrder.primaryText(for: sitemap)
+        }
+    }
+
+    /// Detail (secondary line) for a sitemap: empty unless the mode is `.both`
+    /// and the two fields actually differ.
+    func detailText(for sitemap: OpenHABSitemap, sortedBy sortOrder: SortSitemapsOrder) -> String {
+        guard self == .both else { return "" }
+        let primary = sortOrder.primaryText(for: sitemap)
+        let secondary = sortOrder.secondaryText(for: sitemap)
+        return primary == secondary ? "" : secondary
+    }
+
+    /// Single-line form for pickers, e.g. `"Home – watch"` for `.both`.
+    func combinedText(for sitemap: OpenHABSitemap, sortedBy sortOrder: SortSitemapsOrder) -> String {
+        let title = titleText(for: sitemap, sortedBy: sortOrder)
+        let detail = detailText(for: sitemap, sortedBy: sortOrder)
+        return detail.isEmpty ? title : SortSitemapsOrder.combined(title, detail)
+    }
+}
+
 public extension URL {
     init(staticString string: StaticString) {
         guard let url = URL(string: "\(string)") else {
@@ -334,5 +316,25 @@ public extension URL {
         }
 
         self = url
+    }
+}
+
+public extension SortSitemapsOrder {
+    /// Joins a primary and secondary display value into one line, collapsing to
+    /// just the primary when both are equal (e.g. a sitemap whose name == label).
+    static func combined(_ primary: String, _ secondary: String) -> String {
+        primary == secondary ? primary : "\(primary) – \(secondary)"
+    }
+
+    /// The field that leads when both are shown, matching the chosen sort order:
+    /// sorting by name makes the name primary, sorting by label makes the label
+    /// primary.
+    func primaryText(for sitemap: OpenHABSitemap) -> String {
+        self == .name ? sitemap.name : sitemap.label
+    }
+
+    /// The counterpart of `primaryText`.
+    func secondaryText(for sitemap: OpenHABSitemap) -> String {
+        self == .name ? sitemap.label : sitemap.name
     }
 }

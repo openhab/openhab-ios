@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import CommonUI
 import OpenHABCore
 import os.log
@@ -26,7 +25,7 @@ struct DebugSettingsView: View {
     var body: some View {
         Toggle("Crash Reporting", isOn: $settingsSendCrashReports)
             .task { @MainActor in
-                updateSettingsSendCrashReports(await Preferences.shared.sendCrashReports)
+                await updateSettingsSendCrashReports(Preferences.shared.sendCrashReports)
             }
             .onChange(of: settingsSendCrashReports) { _, newValue in
                 #if !DEBUG

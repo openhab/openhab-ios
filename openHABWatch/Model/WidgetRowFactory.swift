@@ -53,7 +53,11 @@ enum WidgetRowFactory {
                 rootUrl: settings.openHABRootUrl,
                 chartStyle: .dark
             )
-            let chartURL: URL? = if case let .link(url) = payload { url } else { nil }
+            let chartURL: URL? = if case let .link(url) = payload {
+                url
+            } else {
+                nil
+            }
             EquatableView(content: ImageRow(url: chartURL, refresh: widget.refresh))
         case .mapview:
             MapViewRow(widget: widget)

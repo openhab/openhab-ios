@@ -2,6 +2,69 @@
 
 ## [Unreleased]
 
+## [Version 3.4.36, Build 333] - 2026-10-29Z
+
+- fix(build): keep the Main UI previews inside the DEBUG block (#1376)
+- iPhone Duo: native navigation bar for Main UI and tiles (#1360)
+- chore: build on Xcode 27.1 and update agent docs (#1374)
+- Share agent configuration and remove older instruction files (#1367)
+
+## [Version 3.4.35, Build 332] - 2026-10-24Z
+
+- Remove unused Combine leftovers (#1372)
+- watchos: migrate AppSettings and UserData from ObservableObject to @Observable (#1267)
+- Follow sitemap events on the watch, sharing the update policy with iOS (#1371)
+- watchos: own the linked-page model and keep it polling the right page (#1365)
+
+## [Version 3.4.34, Build 331] - 2026-10-23Z
+
+- MainUI Native Bridge (#1354)
+- String correction and localisation adjustment (#1370)
+- Upgrade to Xcode 27.1, fix warnings, remove unused files (#1366)
+- fix(menu): keep section headers at 44 pt and show Add Home while loading (#1362)
+- chore(lint): upgrade SwiftFormat to 0.63.1 and SwiftLint to 0.65.1 (#1363)
+- Menu section header height and Add home while only one is there (#1361)
+- Revert "fix(menu): make closed section headers easier to tap"
+- fix(menu): make closed section headers easier to tap
+
+## [Version 3.4.33, Build 330] - 2026-10-11Z
+
+- chore(lint): fix SwiftLint warnings in WebRouteRestore.seed (#1357)
+- Updated Dutch translations (#1359)
+- Update Localizable.xcstrings (#1358)
+- fix(menu): keep the menu when reloading offline, track overlapping fetches (#1356)
+- Updated German and French translations (#1355)
+- feat(menu): pull-to-refresh and live updates in the toolbar menu (#1346)
+- Selected sitemap/MainUI page and tiles indicator (#1332)
+
+## [Version 3.4.32, Build 329] - 2026-10-08Z
+
+- refactor(notifications): migrate NotificationActionService and PushRegistrationService off ObservableObject (#1349)
+- refactor: migrate certificate, crash report and Bonjour view models to @Observable (#1348)
+- fix(api): send empty item commands as text/plain (#1353)
+- Inject last known routes when switching to MainUI (#1352)
+
+## [Version 3.4.31, Build 328] - 2026-10-01Z
+
+- chore(deps): bump rubyzip from 2.4.1 to 3.4.0 (#1347)
+
+## [Version 3.4.30, Build 326] - 2026-09-22Z
+
+- fix(sitemap): clear iconcolor/labelcolor/valuecolor when an SSE event omits them (#1345)
+- fix(notifications): don't persist a notification navigation as the default page (#1344)
+
+## [Version 3.4.29, Build 325] - 2026-09-20Z
+
+- fix(notifications): log userInfo key shape and nil-action bail-out for #1336
+- Drop identifier_name min_length and its single-letter exclusion list
+- Fix SwiftUI publishing-during-view-update warning on certificate alert (#1343)
+- Re-enable SwiftLint/SwiftFormat and clean up all reported violations (#1341)
+
+## [Version 3.4.28, Build 324] - 2026-09-17Z
+
+- fix(build): stop tracking openHAB.xcodeproj's own stale SwiftPM lockfile (#1340)
+- fix(notifications): defer default web-view auto-loads to a pending navigate (#1336) (#1339)
+
 ## [Version 3.4.27, Build 323] - 2026-09-16Z
 
 - fix(notifications): route a notification's ui:navigate:/page/<id> action directly (#1337)

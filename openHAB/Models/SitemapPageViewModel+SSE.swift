@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import OpenHABCore
 import os.log
 
@@ -69,14 +70,7 @@ extension SitemapPageViewModel {
     }
 
     func shouldFallbackToLongPolling(after error: (any Error)?) -> Bool {
-        guard let error else { return !sseConnected }
-        if let sseError = error as? SitemapSseError {
-            switch sseError {
-            case .unsupported:
-                return true
-            }
-        }
-        return !sseConnected
+        SitemapUpdatePolicy.shouldFallBackToLongPolling(after: error, hasConnected: sseConnected)
     }
 
     func startLongPollingFallback(_ error: (any Error)?) {

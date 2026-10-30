@@ -16,7 +16,7 @@ import XCTest
 private enum InteractionFixture {
     static let toastTitle = "UITest Interaction Alert"
     static let toastMessage = "Motion detected."
-    // JSON-encoded action list for UITestToastActions
+    /// JSON-encoded action list for UITestToastActions
     static let actionsJSON = #"[{"title":"Open Camera","action":"ui:/overview"}]"#
 }
 
@@ -26,21 +26,24 @@ private enum InteractionFixture {
 final class NotificationInteractionUITests: XCTestCase {
     private var app: XCUIApplication!
 
+    private var screen: CGRect {
+        app.windows.firstMatch.frame
+    }
+
     override func setUp() async throws {
         try await super.setUp()
         continueAfterFailure = false
         app = XCUIApplication()
+        app.useEnglishLocale()
         app.launchEnvironment["UITest"] = "1"
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         app = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - Helpers
-
-    private var screen: CGRect { app.windows.firstMatch.frame }
 
     @discardableResult
     private func waitFor(_ text: String, timeout: TimeInterval = 4) -> XCUIElement {
@@ -49,6 +52,7 @@ final class NotificationInteractionUITests: XCTestCase {
         return el
     }
 
+    @discardableResult
     private func waitForButton(_ label: String, timeout: TimeInterval = 4) -> XCUIElement {
         let el = app.buttons[label]
         XCTAssertTrue(el.waitForExistence(timeout: timeout), "Expected button '\(label)' to appear within \(timeout)s")
@@ -79,14 +83,23 @@ final class NotificationInteractionUITests: XCTestCase {
         // Layout assertions — loose thresholds so minor spacing changes don't break them.
         let s = screen
         // Toast banner must sit in the lower portion of the screen (not at screen centre).
-        XCTAssertGreaterThan(title.frame.minY, s.height * 0.5,
-                             "Toast title must appear in the lower half of the screen")
+        XCTAssertGreaterThan(
+            title.frame.minY,
+            s.height * 0.5,
+            "Toast title must appear in the lower half of the screen"
+        )
         // Action button must be on the right side (action control is right-aligned).
-        XCTAssertGreaterThan(button.frame.minX, s.width * 0.45,
-                             "Action button must be on the right side of the banner")
+        XCTAssertGreaterThan(
+            button.frame.minX,
+            s.width * 0.45,
+            "Action button must be on the right side of the banner"
+        )
         // Action button and title must share roughly the same vertical centre (horizontal layout).
-        XCTAssertLessThan(abs(button.frame.midY - title.frame.midY), 30,
-                          "Action button and title must be at similar vertical positions")
+        XCTAssertLessThan(
+            abs(button.frame.midY - title.frame.midY),
+            30,
+            "Action button and title must be at similar vertical positions"
+        )
     }
 
     func testToastActionButtonDismissesToast() {
@@ -113,26 +126,21 @@ final class NotificationInteractionUITests: XCTestCase {
 
     // MARK: - Notification list interaction tests
 
+    /// A row's actions live in its context menu, which a long press opens.
     func testNotificationRowWithActionsShowsButton() {
         launchWithNotificationList()
 
         // Notifications sheet is auto-opened after 0.5 s; wait for mock data to load
         let alertText = waitFor("UITest Front Door Alert")
+        alertText.press(forDuration: 1)
         let button = waitForButton("Open Camera")
-        XCTAssertTrue(button.isHittable, "Action button must be visible in the notification row")
-
-        // Layout assertions — action control must be right-aligned and inline with the row text.
-        let s = screen
-        XCTAssertGreaterThan(button.frame.minX, s.width * 0.45,
-                             "Row action button must be on the right side of the screen")
-        XCTAssertLessThan(abs(button.frame.midY - alertText.frame.midY), 30,
-                          "Row action button and message text must share roughly the same vertical centre")
+        XCTAssertTrue(button.isHittable, "Action button must be visible in the row's context menu")
     }
 
     func testNotificationRowActionButtonDismissesSheet() {
         launchWithNotificationList()
 
-        waitFor("UITest Front Door Alert")
+        waitFor("UITest Front Door Alert").press(forDuration: 1)
         waitForButton("Open Camera").tap()
 
         let gone = NSPredicate(format: "exists == false")
@@ -151,13 +159,14 @@ final class NotificationInteractionUITests: XCTestCase {
     func testNotificationRowWithoutActionsHasNoActionButton() {
         launchWithNotificationList()
 
-        // "UITest Regular Info" row should exist but have no "Open Camera" action button
-        waitFor("UITest Regular Info")
+        // "UITest Regular Info" has no actions, so its long press opens no menu.
+        waitFor("UITest Regular Info").press(forDuration: 1)
+        let actionButton = app.buttons["Open Camera"]
+        XCTAssertFalse(actionButton.waitForExistence(timeout: 1), "A row without actions should show no 'Open Camera' button")
 
-        // The "Open Camera" button belongs only to the first row; query it via the second row's
-        // containing element. Since we can't easily scope to a specific cell, we verify at the
-        // list level: exactly one "Open Camera" button exists (for the first row only).
-        let buttons = app.buttons.matching(identifier: "Open Camera")
-        XCTAssertEqual(buttons.count, 1, "Only the row with actions should show an 'Open Camera' button")
+        // The row that has the action does.
+        waitFor("UITest Front Door Alert").press(forDuration: 1)
+        waitForButton("Open Camera")
+        XCTAssertEqual(app.buttons.matching(identifier: "Open Camera").count, 1, "Only the row with actions should show an 'Open Camera' button")
     }
 }

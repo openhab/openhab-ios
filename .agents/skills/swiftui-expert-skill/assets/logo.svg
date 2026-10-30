@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024px" height="1024px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>SwiftUI SVG Cursor Logo</title>
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#00C3EF" offset="0%"></stop>
+            <stop stop-color="#006BFF" offset="100%"></stop>
+        </linearGradient>
+        <path d="M0,0 L1024,0 L1024,1024 L0,1024 L0,0 Z" id="path-2"></path>
+        <linearGradient x1="51.5697096%" y1="42.6786407%" x2="48.9983667%" y2="86.7108194%" id="linearGradient-3">
+            <stop stop-color="#01154A" offset="0%"></stop>
+            <stop stop-color="#003A94" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="SwiftUI-SVG-Cursor-Logo" stroke="none" fill="none" xlink:href="#path-2" fill-rule="evenodd">
+        <use fill="url(#linearGradient-1)" xlink:href="#path-2"></use>
+        <g id="swift-2" transform="translate(-21, -13)" fill="url(#linearGradient-3)" stroke-width="1">
+            <g id="file_type_swift" transform="translate(64, 128.192)">
+                <path d="M557.504,0.032 C557.504,0.032 756.448,113.76 808.512,294.432 C855.424,457.632 817.856,535.52 817.856,535.52 C841.847562,561.660272 860.752251,592.046684 873.6,625.12 C899.791784,668.248743 903.256789,721.454496 882.88,767.616 C882.88,767.616 879.68,701.056 780.48,687.264 C689.568,674.464 656.512,762.976 482.88,758.688 C287.546617,754.965914 106.725903,654.777578 0,491.136 C84.832,537.408 195.968,609.248 334.368,598.208 C472.768,587.168 501.664,544.64 501.664,544.64 C346.095944,421.53523 208.394364,277.40413 92.512,116.384 C201.312,207.424 470.816,388.608 464.544,384 C365.964721,287.675354 275.771854,183.126567 194.944,71.488 C194.944,71.488 599.296,403.936 631.84,401.824 C645.216,374.272 714.368,231.648 557.472,0 L557.504,0.032 Z" id="Path"></path>
+            </g>
+        </g>
+    </g>
+</svg>

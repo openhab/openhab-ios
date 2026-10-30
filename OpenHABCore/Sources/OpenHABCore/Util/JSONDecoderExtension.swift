@@ -25,7 +25,9 @@ private enum ISO8601Tolerant {
 
     static func parse(_ string: String) -> Date? {
         for style in strategies {
-            if let date = try? Date(string, strategy: style) { return date }
+            if let date = try? Date(string, strategy: style) {
+                return date
+            }
         }
         return nil
     }

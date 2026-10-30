@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-@_exported import Combine
+import Combine
 import Foundation
 @_exported import MapKit
 import os.log
@@ -266,6 +266,47 @@ public extension [OpenHABWidget] {
     }
 }
 
+/// Filters a flat, pre-flattened widget list to only those that should be displayed,
+/// mirroring Android's visibility logic:
+///   - widget.visibility == false → hidden
+///   - frame with no visible direct children (including empty frames) → hidden
+///   - widget whose nearest frame ancestor is hidden → hidden
+public func sitemapVisibleWidgets(_ widgets: [OpenHABWidget]) -> [OpenHABWidget] {
+    var widgetsById: [String: OpenHABWidget] = [:]
+    for widget in widgets {
+        widgetsById[widget.widgetId] = widget
+    }
+
+    func shouldShow(_ widget: OpenHABWidget) -> Bool {
+        guard widget.visibility else { return false }
+        if widget.type == .frame {
+            let children = widgets.filter { $0.parentWidgetId == widget.widgetId }
+            if !children.contains(where: \.visibility) {
+                return false
+            }
+        }
+        guard let parentId = widget.parentWidgetId,
+              let parent = widgetsById[parentId] else { return true }
+        return shouldShow(parent)
+    }
+
+    return widgets.filter { shouldShow($0) }
+}
+
+public extension [OpenHABWidget] {
+    /// Applies a sitemap event to the first widget it concerns, looking into child widgets too.
+    @discardableResult
+    func apply(event: OpenHABSitemapWidgetEvent) -> SitemapWidgetEventApplicationResult {
+        for widget in self {
+            let result = widget.apply(event: event)
+            if result != .notFound {
+                return result
+            }
+        }
+        return .notFound
+    }
+}
+
 public extension OpenHABWidget {
     @discardableResult
     func apply(event: OpenHABSitemapWidgetEvent) -> SitemapWidgetEventApplicationResult {
@@ -283,19 +324,49 @@ public extension OpenHABWidget {
                 || event.visibility != nil || event.labelSource != nil
                 || event.commandConfirmMessage != nil
             else { return .unchanged }
-            if let label = event.label { self.label = label }
-            if let icon = event.icon { self.icon = icon }
-            if let labelcolor = event.labelcolor { self.labelcolor = labelcolor }
-            if let valuecolor = event.valuecolor { self.valuecolor = valuecolor }
-            if let iconcolor = event.iconcolor { iconColor = iconcolor }
-            if let commandConfirmMessage = event.commandConfirmMessage { self.commandConfirmMessage = commandConfirmMessage }
-            if let visibility = event.visibility { self.visibility = visibility }
+            if let label = event.label {
+                self.label = label
+            }
+            if let icon = event.icon {
+                self.icon = icon
+            }
+            // The server re-evaluates all three color expressions together whenever the
+            // widget's underlying item state changes, and omits a color entirely (rather
+            // than sending "") once its condition no longer matches — so on a state-driven
+            // event, an absent color means "cleared", not "unchanged". Without this, a
+            // color that matched once (e.g. iconcolor=[==ON="orange"]) would stick forever
+            // after the item went back to a non-matching state, until the next full sitemap
+            // reload rebuilt the widget from scratch. A non-state event (icon reload,
+            // visibility, …) never touches colors, so leave them alone there.
+            if event.state != nil || event.enrichedItem != nil {
+                labelcolor = event.labelcolor ?? ""
+                valuecolor = event.valuecolor ?? ""
+                iconColor = event.iconcolor ?? ""
+            } else {
+                if let labelcolor = event.labelcolor {
+                    self.labelcolor = labelcolor
+                }
+                if let valuecolor = event.valuecolor {
+                    self.valuecolor = valuecolor
+                }
+                if let iconcolor = event.iconcolor {
+                    iconColor = iconcolor
+                }
+            }
+            if let commandConfirmMessage = event.commandConfirmMessage {
+                self.commandConfirmMessage = commandConfirmMessage
+            }
+            if let visibility = event.visibility {
+                self.visibility = visibility
+            }
             if let state = event.state {
                 self.state = state
             } else if let itemState = event.enrichedItem?.state {
                 state = itemState
             }
-            if let item = event.enrichedItem { self.item = item }
+            if let item = event.enrichedItem {
+                self.item = item
+            }
             if let labelSource = event.labelSource {
                 self.labelSource = OpenHABWidget.LabelSource(rawValue: labelSource) ?? .unknown
             }

@@ -13,9 +13,10 @@ import Foundation
 
 /// An actionable button attached to a notification, shown in the in-app notification list
 /// and toasts for interaction parity with the push notification's action buttons.
-// TODO: Consider unifying with PushNotificationPayload.NotificationAction (same shape: title + action);
-// they are kept separate for now because the list model and the APNs push payload decode from
-// different sources.
+///
+/// TODO: Consider unifying with PushNotificationPayload.NotificationAction (same shape: title + action);
+/// they are kept separate for now because the list model and the APNs push payload decode from
+/// different sources.
 public struct NotificationActionItem: Sendable, Decodable, Hashable {
     public let title: String
     public let action: String
@@ -74,8 +75,12 @@ public struct OpenHABNotification: Identifiable, Hashable, Sendable {
 
     /// A convenient view-facing display string: payload title → root message → payload message
     public var title: String {
-        if let payloadTitle = payload?.title, !payloadTitle.isEmpty { return payloadTitle }
-        if let msg = message, !msg.isEmpty { return msg }
+        if let payloadTitle = payload?.title, !payloadTitle.isEmpty {
+            return payloadTitle
+        }
+        if let msg = message, !msg.isEmpty {
+            return msg
+        }
         return payload?.message ?? ""
     }
 
@@ -87,8 +92,12 @@ public struct OpenHABNotification: Identifiable, Hashable, Sendable {
     /// The message body shown beneath the title, only present when title comes from payload.title.
     public var subtitle: String? {
         guard let payloadTitle = payload?.title, !payloadTitle.isEmpty else { return nil }
-        if let msg = message, !msg.isEmpty { return msg }
-        if let payloadMsg = payload?.message, !payloadMsg.isEmpty { return payloadMsg }
+        if let msg = message, !msg.isEmpty {
+            return msg
+        }
+        if let payloadMsg = payload?.message, !payloadMsg.isEmpty {
+            return payloadMsg
+        }
         return nil
     }
 
@@ -244,6 +253,4 @@ extension OpenHABNotification.CodingData {
             v: v
         )
     }
-
-
 }

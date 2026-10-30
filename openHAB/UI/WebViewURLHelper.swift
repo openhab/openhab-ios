@@ -28,11 +28,9 @@ enum WebViewURLHelper {
     ///     is found the link is rewritten to use this origin.
     /// - Returns: The rewritten URL (preserving path, query, and fragment) or `nil` when the
     ///   link does not target a known home server.
-    static func rewriteToActiveConnection(
-        _ linkURL: URL,
-        knownBaseURLStrings: [String],
-        activeBaseURLString: String
-    ) -> URL? {
+    static func rewriteToActiveConnection(_ linkURL: URL,
+                                          knownBaseURLStrings: [String],
+                                          activeBaseURLString: String) -> URL? {
         guard let linkHost = linkURL.host, !linkHost.isEmpty else { return nil }
         let linkPort = linkURL.port
 
@@ -51,19 +49,25 @@ enum WebViewURLHelper {
         components.port = activeComponents.port
         return components.url
     }
-    /// Appends a path (and optional query) to a base URL.
+
+    /// Appends a path (and optional query) to a base URL. A trailing slash on the path is kept:
+    /// Main UI's routes are declared with one (`/about/`), and it does not match them without.
     static func appendPath(_ path: String, to baseURL: URL) -> URL? {
         guard var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
             return nil
         }
+        let pathComponent: String
         if let questionMarkRange = path.range(of: "?") {
-            let pathComponent = String(path[..<questionMarkRange.lowerBound])
-            let queryComponent = String(path[questionMarkRange.upperBound...])
-            urlComponents.path = (urlComponents.path as NSString).appendingPathComponent(pathComponent)
-            urlComponents.query = queryComponent
+            pathComponent = String(path[..<questionMarkRange.lowerBound])
+            urlComponents.query = String(path[questionMarkRange.upperBound...])
         } else {
-            urlComponents.path = (urlComponents.path as NSString).appendingPathComponent(path)
+            pathComponent = path
         }
+        var joined = (urlComponents.path as NSString).appendingPathComponent(pathComponent)
+        if pathComponent.hasSuffix("/"), !joined.hasSuffix("/") {
+            joined += "/"
+        }
+        urlComponents.path = joined
         return urlComponents.url
     }
 
@@ -106,7 +110,8 @@ enum WebViewURLHelper {
         }
         if let path {
             return appendPath(path, to: url) ?? url
-        } else if !defaultPath.isEmpty {
+        }
+        if !defaultPath.isEmpty {
             return appendPath(defaultPath, to: url) ?? url
         }
         return url

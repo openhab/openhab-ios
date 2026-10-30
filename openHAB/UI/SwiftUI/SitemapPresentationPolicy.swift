@@ -12,7 +12,7 @@
 import SwiftUI
 
 enum SitemapPresentationPolicy {
-    static let minimumColumnWidth: CGFloat = 340
+    static let threeColumnMinimumWidth: CGFloat = 340
     static let maximumColumnCount = 3
     static let gridSpacing: CGFloat = 8
     static let gridHorizontalPadding: CGFloat = 16
@@ -20,32 +20,24 @@ enum SitemapPresentationPolicy {
     static let regularGridCellHeight: CGFloat = 72
     static let gridFrameSeparatorHeight: CGFloat = 0.5
 
-    static var minimumGridWidth: CGFloat {
-        widthNeeded(for: 2)
-    }
-
     static func columnCount(for availableWidth: CGFloat, horizontalSizeClass: UserInterfaceSizeClass?) -> Int {
-        guard horizontalSizeClass == .regular else {
+        let availableContentWidth = availableWidth - (gridHorizontalPadding * 2)
+
+        switch horizontalSizeClass {
+        case .regular where availableContentWidth >= contentWidthNeeded(for: maximumColumnCount):
+            return maximumColumnCount
+        case .regular:
+            return 2
+        default:
             return 1
         }
-
-        let availableContentWidth = availableWidth - (gridHorizontalPadding * 2)
-        let widestPossibleCount = min(maximumColumnCount, Int(availableContentWidth / minimumColumnWidth))
-        guard widestPossibleCount >= 2 else { return 1 }
-
-        for count in stride(from: widestPossibleCount, through: 2, by: -1)
-            where availableContentWidth >= contentWidthNeeded(for: count) {
-            return count
-        }
-
-        return 1
     }
 
     static func columns(count: Int) -> [GridItem] {
-        Array(
-            repeating: GridItem(.flexible(minimum: minimumColumnWidth), spacing: gridSpacing, alignment: .top),
-            count: count
-        )
+        let gridItem = count == maximumColumnCount
+            ? GridItem(.flexible(minimum: threeColumnMinimumWidth), spacing: gridSpacing, alignment: .top)
+            : GridItem(.flexible(), spacing: gridSpacing, alignment: .top)
+        return Array(repeating: gridItem, count: count)
     }
 
     static func cellHeight(for rowInput: SitemapRowInput) -> CGFloat? {
@@ -56,11 +48,7 @@ enum SitemapPresentationPolicy {
         rowInput.usesFullWidthGridCell
     }
 
-    private static func widthNeeded(for columnCount: Int) -> CGFloat {
-        contentWidthNeeded(for: columnCount) + (gridHorizontalPadding * 2)
-    }
-
     private static func contentWidthNeeded(for columnCount: Int) -> CGFloat {
-        (CGFloat(columnCount) * minimumColumnWidth) + (CGFloat(columnCount - 1) * gridSpacing)
+        (CGFloat(columnCount) * threeColumnMinimumWidth) + (CGFloat(columnCount - 1) * gridSpacing)
     }
 }

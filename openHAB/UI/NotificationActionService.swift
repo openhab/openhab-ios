@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AVFoundation
+import Observation
 import OpenHABCore
 import os.log
 import SafariServices
@@ -22,10 +23,11 @@ enum NavigationCommand: Equatable {
 }
 
 @MainActor
-class NotificationActionService: ObservableObject {
-    // MARK: - Published state
+@Observable
+final class NotificationActionService {
+    // MARK: - Observed state
 
-    @Published var navigationCommand: NavigationCommand?
+    var navigationCommand: NavigationCommand?
 
     /// Called synchronously, before this action's connection wait even starts, whenever the
     /// action is a web-view navigation target. OpenHABRootView wires this to
@@ -34,7 +36,7 @@ class NotificationActionService: ObservableObject {
     /// instead of racing it — and sometimes winning with the wrong (default) destination —
     /// once the same "connection becomes active" event they're all waiting on fires on a
     /// cold launch (openhab-ios#1336).
-    var onPendingWebViewNavigation: (() -> Void)?
+    @ObservationIgnored var onPendingWebViewNavigation: (() -> Void)?
 
     // MARK: - Retry configuration
 
@@ -46,15 +48,15 @@ class NotificationActionService: ObservableObject {
     // MARK: - Injectable network back-ends (swap in tests)
 
     /// Sends an item command to the openHAB server.
-    var commandSender: (String, String, String?) async throws -> Void
+    @ObservationIgnored var commandSender: (String, String, String?) async throws -> Void
 
     /// Triggers an openHAB rule by UID.
-    var ruleSender: (String, [String: String]) async throws -> Void
+    @ObservationIgnored var ruleSender: (String, [String: String]) async throws -> Void
 
     // MARK: - Private state
 
-    private var synthesizer = AVSpeechSynthesizer()
-    private var streamTask: Task<Void, Never>?
+    @ObservationIgnored private var synthesizer = AVSpeechSynthesizer()
+    @ObservationIgnored private var streamTask: Task<Void, Never>?
 
     init(autoStart: Bool = true) {
         commandSender = { item, command, deviceId in
@@ -122,7 +124,10 @@ class NotificationActionService: ObservableObject {
     }
 
     func handleNotification(action: String?, cloudUserId: String?) {
-        guard let action else { return }
+        guard let action else {
+            Logger.notificationNavigation.info("handleNotification: received nil action (no actionIdentifier or on-click in the notification payload) — nothing to dispatch")
+            return
+        }
 
         Logger.viewController.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
         Logger.notificationNavigation.info("handleNotification: action=\(action, privacy: .public) cloudUserId=\(cloudUserId ?? "<none>", privacy: .public) — awaiting active connection before dispatching")
@@ -149,7 +154,14 @@ class NotificationActionService: ObservableObject {
             )
             let waitStart = Date()
             let connection = await NetworkTracker.shared.waitForActiveConnection()
-            Logger.notificationNavigation.info("handleNotification: waitForActiveConnection resolved after \(Date().timeIntervalSince(waitStart), format: .fixed(precision: 3))s, connection=\(connection?.configuration.description ?? "nil", privacy: .public) — dispatching action now (races OpenHABWebViewModel's own connection-triggered auto-load)")
+            Logger.notificationNavigation.info(
+                """
+                handleNotification: waitForActiveConnection resolved after \
+                \(Date().timeIntervalSince(waitStart), format: .fixed(precision: 3))s, \
+                connection=\(connection?.configuration.description ?? "nil", privacy: .public) — dispatching action now \
+                (races OpenHABWebViewModel's own connection-triggered auto-load)
+                """
+            )
             handleNotificationInternal(action)
         }
     }

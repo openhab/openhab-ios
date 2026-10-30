@@ -9,13 +9,13 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import Foundation
 import OpenHABCore
 import os.log
 import SwiftUI
 
-final class AppSettings: ObservableObject {
+@Observable
+final class AppSettings {
     @MainActor static let shared = AppSettings()
 
     /// Stable per-install identifier, analogous to UIDevice.identifierForVendor on iOS.
@@ -31,24 +31,103 @@ final class AppSettings: ObservableObject {
     }
 
     var openHABVersion = 2
-    var cancellables = Set<AnyCancellable>()
+    private let store: UserDefaults
 
-    @Published var localConnectionConfig: ConnectionConfiguration?
-    @Published var remoteConnectionConfig: ConnectionConfiguration?
-    @Published var openHABRootUrl: String
-    @Published var sitemapName: String
-    @Published var sitemapForWatch: String
-    @Published var sitemapForWatchLabel: String
-    @Published var iconType: IconType
-    @Published var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode
-    @Published var sortSitemapsBy: SortSitemapsOrder
-    @Published var haveReceivedAppContext = false
-    @Published var storedHomes: [UUID: HomePreferences] = [:]
+    var localConnectionConfig: ConnectionConfiguration? {
+        didSet {
+            guard oldValue != localConnectionConfig else { return }
+            if let v = localConnectionConfig, let data = try? JSONEncoder().encode(v) {
+                store.set(data, forKey: "localConnectionConfig")
+            } else {
+                store.removeObject(forKey: "localConnectionConfig")
+            }
+        }
+    }
+
+    var remoteConnectionConfig: ConnectionConfiguration? {
+        didSet {
+            guard oldValue != remoteConnectionConfig else { return }
+            if let v = remoteConnectionConfig, let data = try? JSONEncoder().encode(v) {
+                store.set(data, forKey: "remoteConnectionConfig")
+            } else {
+                store.removeObject(forKey: "remoteConnectionConfig")
+            }
+        }
+    }
+
+    var openHABRootUrl: String {
+        didSet {
+            guard oldValue != openHABRootUrl else { return }
+            store.set(openHABRootUrl, forKey: "openHABRootUrl")
+        }
+    }
+
+    var sitemapName: String {
+        didSet {
+            guard oldValue != sitemapName else { return }
+            store.set(sitemapName, forKey: "sitemapName")
+        }
+    }
+
+    var sitemapForWatch: String {
+        didSet {
+            guard oldValue != sitemapForWatch else { return }
+            store.set(sitemapForWatch, forKey: "sitemapForWatch")
+        }
+    }
+
+    var sitemapForWatchLabel: String {
+        didSet {
+            guard oldValue != sitemapForWatchLabel else { return }
+            store.set(sitemapForWatchLabel, forKey: "sitemapForWatchLabel")
+        }
+    }
+
+    var iconType: IconType {
+        didSet {
+            guard oldValue != iconType else { return }
+            store.set(iconType.rawValue, forKey: "iconType")
+        }
+    }
+
+    var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode {
+        didSet {
+            guard oldValue != sitemapNameLabelDisplayMode else { return }
+            store.set(sitemapNameLabelDisplayMode.rawValue, forKey: "sitemapNameLabelDisplayMode")
+        }
+    }
+
+    var sortSitemapsBy: SortSitemapsOrder {
+        didSet {
+            guard oldValue != sortSitemapsBy else { return }
+            store.set(sortSitemapsBy.rawValue, forKey: "sortSitemapsBy")
+        }
+    }
+
+    var haveReceivedAppContext = false
+
+    var storedHomes: [UUID: HomePreferences] = [:] {
+        didSet {
+            guard oldValue != storedHomes else { return }
+            Self.persistStoredHomes(storedHomes)
+        }
+    }
+
     /// UUID of the active home, persisted so credentials can be injected from Watch Keychain on restart.
-    @Published var activeHomeId: UUID?
+    var activeHomeId: UUID? {
+        didSet {
+            guard oldValue != activeHomeId else { return }
+            if let activeHomeId {
+                store.set(activeHomeId.uuidString, forKey: "activeHomeId")
+            } else {
+                store.removeObject(forKey: "activeHomeId")
+            }
+        }
+    }
 
     init() {
         let store = UserDefaults(suiteName: "group.openhab.shared") ?? UserDefaults.standard
+        self.store = store
 
         if let data = store.data(forKey: "localConnectionConfig"),
            let decoded = try? JSONDecoder().decode(ConnectionConfiguration.self, from: data) {
@@ -78,6 +157,10 @@ final class AppSettings: ObservableObject {
                 UUID(uuidString: key).map { ($0, value) }
             })
         }
+        // didSet doesn't fire during init, so seed the App Intents suite here, also with the empty
+        // default when "watchAllHomes" is missing or unreadable. That clears homes the App Intents
+        // suite still lists. The old @Published subscription did this with its initial value.
+        Self.persistStoredHomes(storedHomes)
 
         // Restore active home ID and inject credentials from Watch Keychain so the main
         // Watch UI has valid credentials even when the iOS app is not reachable on restart.
@@ -95,96 +178,6 @@ final class AppSettings: ObservableObject {
         } else {
             activeHomeId = nil
         }
-
-        // Observe changes and write back to UserDefaults
-        $localConnectionConfig
-            .sink { newValue in
-                if let newValue,
-                   let data = try? JSONEncoder().encode(newValue) {
-                    store.set(data, forKey: "localConnectionConfig")
-                } else {
-                    store.removeObject(forKey: "localConnectionConfig")
-                }
-            }
-            .store(in: &cancellables)
-
-        $remoteConnectionConfig
-            .sink { newValue in
-                if let newValue,
-                   let data = try? JSONEncoder().encode(newValue) {
-                    store.set(data, forKey: "remoteConnectionConfig")
-                } else {
-                    store.removeObject(forKey: "remoteConnectionConfig")
-                }
-            }
-            .store(in: &cancellables)
-
-        $openHABRootUrl
-            .removeDuplicates()
-            .sink { newValue in
-                store.set(newValue, forKey: "openHABRootUrl")
-            }
-            .store(in: &cancellables)
-
-        $sitemapName
-            .removeDuplicates()
-            .sink { newValue in
-                store.set(newValue, forKey: "sitemapName")
-            }
-            .store(in: &cancellables)
-
-        $sitemapForWatch
-            .removeDuplicates()
-            .sink { newValue in
-                store.set(newValue, forKey: "sitemapForWatch")
-            }
-            .store(in: &cancellables)
-
-        $sitemapForWatchLabel
-            .removeDuplicates()
-            .sink { newValue in
-                store.set(newValue, forKey: "sitemapForWatchLabel")
-            }
-            .store(in: &cancellables)
-
-        $iconType
-            .removeDuplicates()
-            .sink { newValue in
-                store.set(newValue.rawValue, forKey: "iconType")
-            }
-            .store(in: &cancellables)
-
-        $sitemapNameLabelDisplayMode
-            .removeDuplicates()
-            .sink { newValue in
-                store.set(newValue.rawValue, forKey: "sitemapNameLabelDisplayMode")
-            }
-            .store(in: &cancellables)
-
-        $sortSitemapsBy
-            .removeDuplicates()
-            .sink { newValue in
-                store.set(newValue.rawValue, forKey: "sortSitemapsBy")
-            }
-            .store(in: &cancellables)
-
-        $storedHomes
-            .removeDuplicates()
-            .sink { newValue in
-                Self.persistStoredHomes(newValue)
-            }
-            .store(in: &cancellables)
-
-        $activeHomeId
-            .removeDuplicates()
-            .sink { newValue in
-                if let newValue {
-                    store.set(newValue.uuidString, forKey: "activeHomeId")
-                } else {
-                    store.removeObject(forKey: "activeHomeId")
-                }
-            }
-            .store(in: &cancellables)
     }
 
     convenience init(debug: Bool = false, openHABRootUrl: String = "") {

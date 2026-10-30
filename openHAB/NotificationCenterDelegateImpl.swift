@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AudioToolbox
-import Combine
 import Firebase
 import FirebaseMessaging
 import Kingfisher
@@ -54,7 +53,20 @@ final class AudioPlayerActor {
 final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDelegate {
     let audioPlayer = AudioPlayerActor()
 
+    private static func parseActionItems(_ json: String?) -> [NotificationActionItem] {
+        guard let json,
+              let data = json.data(using: .utf8),
+              let raw = try? JSONSerialization.jsonObject(with: data) as? [[String: String]]
+        else { return [] }
+        return raw.compactMap { dict in
+            guard let title = dict["title"], let action = dict["action"] else { return nil }
+            return NotificationActionItem(title: title, action: action)
+        }
+    }
+
     // this is called when a notification comes in while in the foreground
+    // Must stay `async`: bridges UNUserNotificationCenterDelegate's completion-handler requirement.
+    // swiftlint:disable:next async_without_await
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
         let userInfo = notification.request.content.userInfo
         Logger.notificationCenterDelegateImpl.info("Notification received while app is in foreground: \(userInfo)")
@@ -78,12 +90,14 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
         }
 
         let actions = payload.actions?.map { NotificationActionItem(title: $0.title, action: $0.action) } ?? []
-        await displayNotification(message: payload.displayMessage, icon: payload.icon, action: payload.action, cloudUserId: payload.cloudUserId, actions: actions)
+        displayNotification(message: payload.displayMessage, icon: payload.icon, action: payload.action, cloudUserId: payload.cloudUserId, actions: actions)
 
         return []
     }
 
     // this is called when clicking a notification while in the background
+    // Must stay `async`: bridges UNUserNotificationCenterDelegate's completion-handler requirement.
+    // swiftlint:disable:next async_without_await
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier
@@ -97,13 +111,22 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
             let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
             let cloudUserId = userInfo["userId"] as? String
 
+            // userInfo's own log above is redacted (no .public privacy, to avoid leaking message
+            // content); this logs only key names and value types so a missing/mistyped "on-click"
+            // is diagnosable without exposing payload content (openhab-ios#1336).
+            let keyDescriptions = userInfo.keys.compactMap { $0 as? String }.sorted().map { key -> String in
+                guard let value = userInfo[key] else { return "\(key): nil" }
+                return "\(key): \(type(of: value))"
+            }
+            Logger.notificationNavigation.info("didReceive: actionIdentifier=\(actionIdentifier, privacy: .public) resolvedAction=\(action == nil ? "nil" : "present", privacy: .public) userInfo keys=\(keyDescriptions, privacy: .public)")
+
             // Pass the original notification so action handlers can re-post it on failure,
             // allowing the user to retry without waiting for a new notification.
             notifyNotificationListeners(action: action, cloudUserId: cloudUserId, notification: response.notification)
         }
     }
 
-    private func displayNotification(message: String, icon: String?, action: String?, cloudUserId: String?, actions: [NotificationActionItem] = []) async {
+    private func displayNotification(message: String, icon: String?, action: String?, cloudUserId: String?, actions: [NotificationActionItem] = []) {
         Logger.notificationCenterDelegateImpl.info("displayNotification \(message)")
 
         audioPlayer.playSound()
@@ -133,17 +156,6 @@ final class NotificationCenterDelegateImpl: NSObject, UNUserNotificationCenterDe
                 self?.notifyNotificationListeners(action: item.action, cloudUserId: cloudUserId)
             }
         )
-    }
-
-    private static func parseActionItems(_ json: String?) -> [NotificationActionItem] {
-        guard let json,
-              let data = json.data(using: .utf8),
-              let raw = try? JSONSerialization.jsonObject(with: data) as? [[String: String]]
-        else { return [] }
-        return raw.compactMap { dict in
-            guard let title = dict["title"], let action = dict["action"] else { return nil }
-            return NotificationActionItem(title: title, action: action)
-        }
     }
 
     @MainActor

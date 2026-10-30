@@ -9,15 +9,16 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import OpenHABCore
 import os.log
 
+/// Registers configured homes for push notifications. Holds no UI state, so it is a plain
+/// class (not `@Observable`); `OpenHABApp` keeps the single instance alive.
 @MainActor
-class PushRegistrationService: ObservableObject {
+final class PushRegistrationService {
     private struct UuidWithConnection: Hashable, Equatable {
         let uuid: UUID
-        // not only URL, because auth and certs might be relevant for establishing the connection
+        /// not only URL, because auth and certs might be relevant for establishing the connection
         let connection: ConnectionConfiguration
 
         /// cloudUserId is written back by a successful registration, so comparing it would make
@@ -80,11 +81,6 @@ class PushRegistrationService: ObservableObject {
         subscribeToOpenhabConnectionChanges()
     }
 
-    deinit {
-        networkObservationTask?.cancel()
-        storedHomesTask?.cancel()
-    }
-
     // MARK: - APS Registration
 
     private func handleApsRegistration(deviceToken: String?, deviceId: String?, deviceName: String?) {
@@ -111,7 +107,7 @@ class PushRegistrationService: ObservableObject {
                     // avoid overexcited registrations / deregistrations in batch updates
                     try? await Task.sleep(nanoseconds: 1_000_000_000)
                     guard !Task.isCancelled, let self else { return }
-                    await self.updateKnownConnections(from: capturedHomes)
+                    await updateKnownConnections(from: capturedHomes)
                 }
             }
             debounceTask?.cancel()
@@ -183,5 +179,10 @@ class PushRegistrationService: ObservableObject {
                 registeredConnections.remove(UuidWithConnection(uuid: uuid, connection: config))
             }
         }
+    }
+
+    deinit {
+        networkObservationTask?.cancel()
+        storedHomesTask?.cancel()
     }
 }

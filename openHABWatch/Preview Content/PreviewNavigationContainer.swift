@@ -54,8 +54,8 @@ struct PreviewNavigationContainer<Content: View>: View {
         NavigationStack {
             content
         }
-        .environmentObject(settings)
-        .environmentObject(userData)
+        .environment(settings)
+        .environment(userData)
     }
 
     init(@ViewBuilder content: () -> Content) {

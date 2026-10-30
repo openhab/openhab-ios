@@ -17,7 +17,6 @@ import UIKit
 
 struct SitemapPageView: View {
     @StateObject var viewModel = SitemapPageViewModel()
-    @Environment(\.sitemapSideMenuAction) private var sideMenuAction
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var idleTimerDisabled = false
@@ -132,30 +131,35 @@ struct SitemapPageView: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        if let sideMenuAction {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    sideMenuAction()
-                } label: {
-                    Image(systemName: "line.3.horizontal")
-                        .font(.title)
-                }
-            }
-        }
+        AppMenuToolbarContent(slot: .verticalLeading)
+        AppMenuToolbarContent(slot: .horizontalTrailing)
     }
 
     private var errorAlertPresented: Binding<Bool> {
         Binding(
             get: { viewModel.error != nil && !(viewModel.error is SitemapPageError) },
-            set: { if !$0 { Task { @MainActor in viewModel.error = nil } } }
+            set: {
+                if !$0 {
+                    Task { @MainActor in viewModel.error = nil }
+                }
+            }
         )
     }
 
     private var commandConfirmationPresented: Binding<Bool> {
         Binding(
             get: { viewModel.pendingCommandConfirmation != nil },
-            set: { if !$0 { viewModel.pendingCommandConfirmation = nil } }
+            set: {
+                if !$0 {
+                    viewModel.pendingCommandConfirmation = nil
+                }
+            }
         )
+    }
+
+    init(viewModel: SitemapPageViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+        _hasSeenActivePhase = State(initialValue: viewModel.isLinked)
     }
 
     private func handleAppear() {
@@ -183,11 +187,6 @@ struct SitemapPageView: View {
             }
             viewModel.refreshOnForeground()
         }
-    }
-
-    init(viewModel: SitemapPageViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
-        _hasSeenActivePhase = State(initialValue: viewModel.isLinked)
     }
 }
 

@@ -24,7 +24,7 @@ import SwiftUI
 /// has failed it switches to a warning: a countdown to the next retry, or — when the tracker
 /// has given up — a static "cannot connect" message. On an adaptive background so the blank
 /// page reads as intentional in both light and dark mode.
-private struct ConnectingPlaceholder: View {
+struct ConnectingPlaceholder: View {
     private enum Phase: Equatable {
         case connecting
         case retrying(Date)
@@ -263,33 +263,28 @@ private struct InAppToastBanner: View {
 
 struct OpenHABRootView: View {
     @StateObject private var networkService = NetworkConnectionService()
-    @StateObject private var notificationService = NotificationActionService()
-    @StateObject private var pushService = PushRegistrationService()
-    @StateObject private var crashService = CrashReportService()
+    @Environment(NotificationActionService.self) private var notificationService
+    @State private var crashService = CrashReportService()
     @State private var menuData = MenuDataService()
     @StateObject private var webViewModel = OpenHABWebViewModel()
-    @State private var menuPresented = false
-    @State private var navbarActionsPresented = false
     @State private var currentContent: TargetController = .webview
     @State private var currentViewTitle = ""
     @State private var activeNetworkConnection: ConnectionInfo? = MainActorNetworkTracker.shared.activeConnection
     @State private var showNotifications = false
     @State private var sitemapResetID = UUID()
     @State private var cachedHomePrefs: HomePreferences?
+    /// What was showing when the user started signing in, for the way back if they cancel.
+    @State private var contentBeforeLogin: TargetController?
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             contentView
-
-            // Toolbar menu overlay
-            ToolbarMenu(
-                isPresented: $menuPresented,
-                menuData: menuData,
-                onSelect: { target in handleMenuSelection(target) },
-                onReload: { reloadCurrentContent() }
-            )
+                .environment(\.appMenu, appMenuConfiguration)
+            // A sibling above the content rather than an overlay of the navigation container.
+            InAppToastBanner(service: ToastService.shared)
         }
         .onAppear {
+            webViewModel.onLoginCancelled = { route in finishCancelledLogin(route: route) }
             #if DEBUG
             let env = ProcessInfo.processInfo.environment
             if env["UITest"] != nil {
@@ -330,32 +325,51 @@ struct OpenHABRootView: View {
             if let json = env["UITestWebViewNavbarItems"],
                let data = json.data(using: .utf8),
                let raw = try? JSONDecoder().decode([[String: String]].self, from: data) {
-                let items = raw.compactMap { dict -> WebNavbarItem? in
-                    guard let label = dict["label"], let action = dict["jsAction"] else { return nil }
-                    return WebNavbarItem(label: label, jsAction: action, iconBase64: nil, isBack: false)
+                let actions = raw.compactMap { dict -> OHBridgeNavbarAction? in
+                    guard let label = dict["label"] else { return nil }
+                    return OHBridgeNavbarAction(id: dict["id"] ?? label, label: label, icon: nil, disabled: nil)
                 }
                 webViewModel.lockUITestContent()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                    webViewModel.updateNavbarItems(items)
+                    webViewModel.setUITestNavbar(OHBridgeNavbarState(
+                        title: "", titleInContent: false, hidden: false, back: nil, leading: actions, trailing: []
+                    ))
                 }
+            }
+            if env["UITestWebAuth"] == "pending" {
+                webViewModel.setUITestAuthPending()
+            } else if let json = env["UITestWebAuth"],
+                      let auth = try? JSONDecoder().decode(OHBridgeAuthState.self, from: Data(json.utf8)) {
+                webViewModel.setUITestAuth(auth)
+            }
+            if let json = env["UITestServer"],
+               let server = UITestServerFixture(json: json) {
+                menuData.injectForUITest(server: server.server, pages: server.menuPages, sitemaps: server.menuSitemaps)
             }
             #endif
             ImageDownloader.default.authenticationChallengeResponder = networkService
-            notificationService.onPendingWebViewNavigation = { [weak webViewModel] in
-                webViewModel?.markPendingExplicitNavigation()
+            notificationService.onPendingWebViewNavigation = { [weak weakWebViewModel = webViewModel] in
+                weakWebViewModel?.markPendingExplicitNavigation()
             }
             Task { await switchToSavedView() }
-            setupExitToApp()
         }
-        .onReceive(notificationService.$navigationCommand.compactMap(\.self)) { command in
+        // `initial: true` also delivers a command published before this view appeared,
+        // as the `@Published` subscription used to. `handleNavigationCommand` resets the
+        // command to nil, so the same command arriving again is still a change.
+        .onChange(of: notificationService.navigationCommand, initial: true) { _, command in
+            guard let command else { return }
             handleNavigationCommand(command)
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
-            menuData.refresh()
+            menuData.clearAndReload()
             webViewModel.reloadView()
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
             menuData.clearForHomeSwitch()
+            // Reset synchronously with the menu clear so a stale currentContent from the
+            // previous home can't coincidentally match a same-named row once the new
+            // home's sitemaps/pages arrive, before switchToSavedView() corrects it below.
+            currentContent = .webview
             Task { await switchToSavedView() }
             // Reconcile the web view with the new home: loads if the active connection
             // already belongs to it (e.g. between two demo homes), otherwise blanks and
@@ -382,7 +396,14 @@ struct OpenHABRootView: View {
             networkService.certificateAlert?.title ?? "",
             isPresented: Binding(
                 get: { networkService.certificateAlert != nil },
-                set: { if !$0 { networkService.certificateAlert = nil } }
+                // Defer to the next run loop tick: SwiftUI invokes this setter synchronously
+                // while dismissing the alert, and mutating the @Published property inline
+                // triggers "Publishing changes from within view updates is not allowed."
+                set: {
+                    if !$0 {
+                        DispatchQueue.main.async { networkService.certificateAlert = nil }
+                    }
+                }
             )
         ) {
             Button("Always") { networkService.certificateAlertAction(.permitAlways) }
@@ -391,31 +412,32 @@ struct OpenHABRootView: View {
         } message: {
             Text(networkService.certificateAlert?.message ?? "")
         }
+        .task { await crashService.checkForPreviousCrash() }
         .alert("Crash Report", isPresented: $crashService.crashReportAlert) {
             Button("Send") { crashService.enableCrashReporting() }
             Button("Don't Send", role: .cancel) { crashService.deleteCrashReports() }
         } message: {
             Text("The app crashed during the previous session. Would you like to send a crash report?")
         }
-        .overlay(alignment: .bottom) {
-            InAppToastBanner(service: ToastService.shared)
-        }
+        // SwiftFormat miscomputes indentation for a closure wrapped in #if/#endif with --ifdef no-indent.
+        // swiftformat:disable indent
         #if DEBUG
         .overlay {
-                ForEach(Array(webViewModel.uiTestReports.keys.sorted()), id: \.self) { key in
-                    Text(webViewModel.uiTestReports[key] ?? "")
-                        .accessibilityIdentifier("UITestReport-\(key)")
-                        .frame(width: 0, height: 0)
-                        .opacity(0)
-                        .allowsHitTesting(false)
-                }
-                Text(String(webViewModel.navbarItems.count))
-                    .accessibilityIdentifier("UITestReport-navbarItemCount")
+            ForEach(Array(webViewModel.uiTestReports.keys.sorted()), id: \.self) { key in
+                Text(webViewModel.uiTestReports[key] ?? "")
+                    .accessibilityIdentifier("UITestReport-\(key)")
                     .frame(width: 0, height: 0)
                     .opacity(0)
                     .allowsHitTesting(false)
+            }
+            Text(String(webViewModel.navbar.actions.count))
+                .accessibilityIdentifier("UITestReport-navbarItemCount")
+                .frame(width: 0, height: 0)
+                .opacity(0)
+                .allowsHitTesting(false)
         }
         #endif
+        // swiftformat:enable indent
     }
 }
 
@@ -426,219 +448,35 @@ private extension OpenHABRootView {
     var contentView: some View {
         switch currentContent {
         case .webview, .mainUIPage:
-            ZStack(alignment: .top) {
-                // The Main UI lays itself out from the safe-area insets and reserves the
-                // navbar space the bar below sits on.
-                OpenHABWebViewContainer(viewModel: webViewModel)
-                    .background(.clear)
-                    .ignoresSafeArea()
-                // Placeholder while a home is first loading. Sits above the (transparent)
-                // web view but below the menu bar, so the menu stays reachable and the user
-                // can switch homes even while connecting.
-                if !webViewModel.hasLoadedContent {
-                    ConnectingPlaceholder()
-                        .transition(.opacity)
-                }
-                // Same slide Framework7 uses for its navbar: up by the bar height, fading, 400ms.
-                menuBar
-                    .offset(y: webViewModel.isWebNavbarHidden ? -menuBarHeight : 0)
-                    .opacity(webViewModel.isWebNavbarHidden ? 0 : 1)
-                    .allowsHitTesting(!webViewModel.isWebNavbarHidden)
-                    .animation(
-                        .timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.4),
-                        value: webViewModel.isWebNavbarHidden
-                    )
-            }
-            .animation(.easeInOut(duration: 0.25), value: webViewModel.hasLoadedContent)
-            .onAppear { webViewModel.triggerAppMenuProbe() }
+            nativeBarContent(tileTitle: nil)
         case let .sitemap(name, navigationState: state):
-            SitemapNavigationView(sitemapName: name, navigationPath: state.navigationPath) { menuPresented = true }
+            SitemapNavigationView(sitemapName: name, navigationPath: state.navigationPath)
                 .id("\(name)-\(state.navigationPath.last?.pageLink ?? "")-\(sitemapResetID)")
         case .tile:
-            VStack(spacing: 0) {
-                menuBar
-                OpenHABWebViewContainer(viewModel: webViewModel)
-            }
+            nativeBarContent(tileTitle: currentViewTitle)
         case .notifications, .browser:
             preconditionFailure("Modal/transient targets must never become currentContent")
         }
     }
 
-    /// Matches the height Framework7 reserves for its navbar, so the bar covers it exactly.
-    var menuBarHeight: CGFloat {
-        switch currentContent {
-        case .webview, .mainUIPage: webViewModel.webNavbarHeight
-        default: 44
-        }
-    }
-
-    @ViewBuilder
-    var menuBar: some View {
-        let isWebviewMode = isMainUIShown
-
-        let barTitle: String = {
-            if isWebviewMode {
-                return webViewModel.isWebNavbarTitleHidden ? "" : webViewModel.navbarTitle
-            }
-            if case .tile = currentContent {
-                return currentViewTitle
-            }
-            return ""
-        }()
-
-        HStack {
-            // Left side: proxied navbar items (webview mode with items available),
-            // or connection-status indicator as fallback.
-            Group {
-                if isWebviewMode, !webViewModel.navbarItems.isEmpty {
-                    let backItem = webViewModel.navbarItems.first { $0.isBack }
-                    let otherItems = webViewModel.navbarItems.filter { !$0.isBack }
-                    HStack(spacing: 4) {
-                        // Back button is always shown directly in the bar when present.
-                        if let backItem {
-                            navbarProxyButton(backItem)
-                        }
-                        // When a back button is present, remaining items always go in a
-                        // popover — even a single item, which may be text-only and too wide
-                        // to sit next to the back button and the hamburger.
-                        // Without a back button, a single item is shown directly.
-                        if !otherItems.isEmpty {
-                            if backItem != nil || otherItems.count > 1 {
-                                navbarActionsButton(otherItems)
-                            } else if let single = otherItems.first {
-                                navbarProxyButton(single)
-                            }
-                        }
-                    }
-                } else if isWebviewMode, activeNetworkConnection == nil {
-                    HStack(spacing: 4) {
-                        Image(systemSymbol: .wifiExclamationmark)
-                        Text("Offline")
-                            .ohTextToken(.secondary)
-                        Button { reloadCurrentContent() } label: {
-                            Image(systemSymbol: .arrowClockwise)
-                        }
-                    }
-                    .foregroundStyle(.secondary)
-                } else if webViewModel.isLoading {
-                    HStack(spacing: 4) {
-                        ProgressView()
-                            .controlSize(.small)
-                        Text("Connecting")
-                            .ohTextToken(.secondary)
-                    }
-                    .foregroundStyle(.secondary)
-                }
-            }
-            .padding(.leading)
-
-            Spacer()
-
-            Group {
-                if #available(iOS 26, *) {
-                    Button {
-                        menuPresented = true
-                    } label: {
-                        Image(systemSymbol: .line3Horizontal)
-                            .font(.title)
-                    }
-                    .buttonStyle(.glass)
-                    .accessibilityIdentifier("HamburgerButton")
-                    .accessibilityLabel("Menu")
-                    .padding(.trailing)
-                } else {
-                    Button {
-                        menuPresented = true
-                    } label: {
-                        Image(systemSymbol: .line3Horizontal)
-                            .font(.title)
-                    }
-                    .accessibilityIdentifier("HamburgerButton")
-                    .accessibilityLabel("Menu")
-                    .padding(.trailing)
-                }
-            }
-            .scaleEffect(menuPresented ? 3.0 : 1.0, anchor: .topTrailing)
-            .opacity(menuPresented ? 0.0 : 1.0)
-            .animation(.spring(response: 0.32, dampingFraction: 0.78), value: menuPresented)
-        }
-        .frame(height: menuBarHeight)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("MainMenuBar")
-        .overlay {
-            if !barTitle.isEmpty {
-                Text(barTitle)
-                    .font(.headline)
-                    .lineLimit(1)
-                    .frame(maxWidth: 200)
-                    .allowsHitTesting(false)
-            }
-        }
-        .background(
-            isWebviewMode
-                ? AnyShapeStyle(.bar)
-                : AnyShapeStyle(Color(.systemBackground)),
-            ignoresSafeAreaEdges: .top
+    /// What the app menu shows, for every screen with a navigation bar. See `AppMenu.swift`.
+    var appMenuConfiguration: AppMenuConfiguration {
+        AppMenuConfiguration(
+            menuData: menuData,
+            authStatus: webViewModel.authStatus,
+            currentContent: currentContent,
+            onSelect: { target in handleMenuSelection(target) },
+            onReload: { reloadCurrentContent() }
         )
     }
-}
 
-// MARK: - Navbar proxy helpers
-
-private extension OpenHABRootView {
-    func navbarProxyButton(_ item: WebNavbarItem) -> some View {
-        Button {
-            webViewModel.evaluateJS(item.jsAction)
-        } label: {
-            if let uiImg = item.iconImage {
-                Image(uiImage: uiImg)
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 28, height: 28)
-            } else {
-                Text(item.label)
-            }
-        }
-        .accessibilityLabel(item.label)
-        .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
-    }
-
-    func navbarActionsButton(_ items: [WebNavbarItem]) -> some View {
-        Button {
-            navbarActionsPresented = true
-        } label: {
-            Image(systemSymbol: .ellipsisCircle)
-                .font(.title2)
-        }
-        .accessibilityLabel("Actions")
-        .accessibilityIdentifier("NavbarActionsMenu")
-        .popover(isPresented: $navbarActionsPresented) {
-            HStack(spacing: 20) {
-                ForEach(items) { item in
-                    Button {
-                        webViewModel.evaluateJS(item.jsAction)
-                        navbarActionsPresented = false
-                    } label: {
-                        if let uiImg = item.iconImage {
-                            Image(uiImage: uiImg)
-                                .renderingMode(.template)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 28, height: 28)
-                        } else {
-                            Text(item.label)
-                        }
-                    }
-                    .accessibilityLabel(item.label)
-                    .accessibilityIdentifier("NavbarProxyButton-\(item.label)")
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .presentationDetents([.height(72)])
-            .presentationCompactAdaptation(.popover)
-        }
+    /// Main UI or a tile with a system navigation bar. See `MainUINavigationView`.
+    func nativeBarContent(tileTitle: String?) -> some View {
+        MainUINavigationView(
+            webViewModel: webViewModel,
+            activeConnection: activeNetworkConnection,
+            tileTitle: tileTitle
+        ) { reloadCurrentContent() }
     }
 
     func switchToSavedView() async {
@@ -721,11 +559,18 @@ private extension OpenHABRootView {
     }
 
     func handleMenuSelection(_ target: TargetController) {
+        // Signing in starts from the profile; any other choice leaves a sign-in behind.
+        if target == .mainUIPage(MainUIMenu.profileRoute), currentContent != target {
+            contentBeforeLogin = currentContent
+        } else {
+            contentBeforeLogin = nil
+        }
         switch target {
         case .webview:
             showMainUI(path: nil)
         case let .mainUIPage(path):
-            showMainUI(path: path)
+            // Only a page is worth landing on next time; Settings and the like are one-off visits.
+            showMainUI(path: path, persistAsDefault: path.hasPrefix("/page/"))
         case let .sitemap(name, _):
             let capturedName = name
             Task {
@@ -744,18 +589,45 @@ private extension OpenHABRootView {
         }
     }
 
+    /// The user cancelled the sign-in on openHAB's authorize page: back to what they were looking
+    /// at, with Main UI behind it at the route it was on.
+    func finishCancelledLogin(route: String) {
+        let wayBack = MainUILogin.wayBack(from: contentBeforeLogin, route: route)
+        contentBeforeLogin = nil
+        switch wayBack {
+        case let .sitemap(content, mainUIRoute):
+            currentContent = content
+            webViewModel.loadWebView(force: false, path: mainUIRoute)
+        case let .tile(url):
+            currentContent = .tile(url)
+            if let url = URL(string: url) {
+                webViewModel.loadTilePage(url)
+            }
+        case let .mainUI(path):
+            showMainUI(path: path, persistAsDefault: false)
+        }
+    }
+
     /// Shows the MainUI web surface at `path` (nil = the MainUI root). When the SPA is
     /// already live it routes client-side through the page's own Framework7 router, so
     /// no full page load happens and in-app state is preserved; otherwise it loads the
     /// URL at that path and Framework7 routes to it on startup. The chosen destination
     /// is recorded as `currentContent` so a later reload returns here rather than to an
     /// arbitrary route the user reached inside the SPA.
-    func showMainUI(path: String?) {
+    ///
+    /// - Parameter persistAsDefault: Whether `path` should be remembered as the home's
+    ///   default landing page/tab. True when the user explicitly picked this destination
+    ///   from the menu; false for a one-off notification-driven `ui:navigate:/page/…`
+    ///   (openhab-ios#1336's follow-up: a notification tap was silently overwriting the
+    ///   user's "standard path" setting, which then made a *different*, unrelated app
+    ///   version look like it had fixed notification routing when it had merely inherited
+    ///   the hijacked default).
+    func showMainUI(path: String?, persistAsDefault: Bool = true) {
         let wasShowingMainUI = isMainUIShown
         // Ask the web view what it holds, not which surface was last visible: a tile's URL
         // survives a detour through a sitemap.
         let showsTile = webViewModel.isShowingTile
-        Logger.notificationNavigation.info("showMainUI: path=\(path ?? "nil", privacy: .public) wasShowingMainUI=\(wasShowingMainUI) showsTile=\(showsTile) hasLoadedContent=\(webViewModel.hasLoadedContent)")
+        Logger.notificationNavigation.info("showMainUI: path=\(path ?? "nil", privacy: .public) wasShowingMainUI=\(wasShowingMainUI) showsTile=\(showsTile) hasLoadedContent=\(webViewModel.hasLoadedContent) persistAsDefault=\(persistAsDefault)")
 
         currentContent = path.map(TargetController.mainUIPage) ?? .webview
 
@@ -772,6 +644,7 @@ private extension OpenHABRootView {
         }
         // Coming back from a sitemap: the web view still holds the page, so leave it alone.
 
+        guard persistAsDefault else { return }
         persistDefaultViewIfNeeded("web")
         if !(cachedHomePrefs?.demomode ?? false) {
             let capturedPath = path ?? ""
@@ -787,7 +660,7 @@ private extension OpenHABRootView {
         if webViewModel.isMainUIReady, webViewModel.hasLoadedContent {
             Logger.notificationNavigation.info("routeMainUI: SPA already live — routing client-side to \(path, privacy: .public)")
             webViewModel.clearPendingExplicitNavigation()
-            webViewModel.navigateCommand("navigate:\(path)")
+            webViewModel.bridge.navigate(to: path)
         } else {
             Logger.notificationNavigation.info("routeMainUI: SPA not live yet — loading \(path, privacy: .public) directly")
             webViewModel.loadWebView(force: false, path: path)
@@ -841,14 +714,18 @@ private extension OpenHABRootView {
             // SSE-connected, which does not reliably happen before the user is looking at
             // the (wrong) root page. showMainUI instead loads straight to the target path
             // when the SPA isn't live yet, and routes client-side when it already is.
-            showMainUI(path: path)
+            // Not persisted as the default: this is a one-off notification deep link, not
+            // the user picking a new home page (openhab-ios#1336).
+            showMainUI(path: path, persistAsDefault: false)
         case .none:
             break
         case let .navigateLive(command, ensureShown):
             if ensureShown {
-                showMainUI(path: nil)
+                showMainUI(path: nil, persistAsDefault: false)
             }
-            webViewModel.navigateCommand(command)
+            if !webViewModel.bridge.run(command) {
+                Logger.notificationNavigation.info("handleNavigationCommand: no Main UI message for \(command, privacy: .public)")
+            }
         case let .switchToSitemap(name, widgetId):
             let capturedName = name
             let capturedWidgetId = widgetId
@@ -885,12 +762,6 @@ private extension OpenHABRootView {
 // MARK: - Helpers
 
 private extension OpenHABRootView {
-    func setupExitToApp() {
-        webViewModel.onExitToApp = {
-            menuPresented = true
-        }
-    }
-
     func switchToTile(_ urlString: String) {
         guard !urlString.isEmpty else { return }
         let resolvedUrl: URL?

@@ -55,7 +55,7 @@ struct SettingsSheetTests {
         current.idleOff = true
         current.sendCrashReports = false
         #expect(current != initial)
-        current = initial   // simulates onRevert callback
+        current = initial // simulates onRevert callback
         #expect(current == initial)
     }
 
@@ -71,7 +71,7 @@ struct SettingsSheetTests {
 
     @Test("Showing a hidden section appends it to the end of the order")
     func showingAHiddenSectionAppendsToEnd() {
-        var order: [MenuSection] = [.mainUI, .sitemaps, .system]
+        var order: [MenuSection] = [.mainUI, .administration, .sitemaps, .system]
         order.append(.tiles)
         #expect(order.last == .tiles)
         #expect(Set(order) == Set(MenuSection.allCases))
@@ -79,9 +79,9 @@ struct SettingsSheetTests {
 
     @Test("Reordering moves a section without losing any section")
     func reorderingMovesWithoutLoss() {
-        var order: [MenuSection] = [.mainUI, .sitemaps, .tiles, .system]
-        order.move(fromOffsets: IndexSet(integer: 0), toOffset: 4)   // mainUI → end
-        #expect(order == [.sitemaps, .tiles, .system, .mainUI])
+        var order: [MenuSection] = [.mainUI, .administration, .sitemaps, .tiles, .system]
+        order.move(fromOffsets: IndexSet(integer: 0), toOffset: 5) // mainUI → end
+        #expect(order == [.administration, .sitemaps, .tiles, .system, .mainUI])
         #expect(Set(order) == Set(MenuSection.allCases))
     }
 
@@ -97,7 +97,8 @@ struct SettingsSheetTests {
     func hiddenSectionsAreComplement() {
         let order: [MenuSection] = [.mainUI, .sitemaps]
         let hidden = MenuSection.allCases.filter { !Set(order).contains($0) }
-        #expect(hidden.count == 2)
+        #expect(hidden.count == 3)
+        #expect(hidden.contains(.administration))
         #expect(hidden.contains(.tiles))
         #expect(hidden.contains(.system))
     }

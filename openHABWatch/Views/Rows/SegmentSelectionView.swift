@@ -17,7 +17,7 @@ struct SegmentSelectionView: View {
     let stateToken: String
     @Binding var selectedIndex: Int?
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var pageData: UserData
+    @Environment(UserData.self) var pageData
     @State private var pressedIndex: Int?
     @State private var viewModel: WidgetRowViewModel
     @State private var commandSender = WidgetCommandDispatcher()
