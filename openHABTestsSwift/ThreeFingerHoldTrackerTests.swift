@@ -14,114 +14,157 @@ import CoreGraphics
 import Testing
 
 struct ThreeFingerHoldTrackerTests {
+    private typealias Tracker = ThreeFingerHoldTracker<Int>
+
     private static let origin = CGPoint(x: 100, y: 100)
 
-    /// A tracker with the first two fingers down.
-    private func trackerWithTwoFingers() -> ThreeFingerHoldTracker<Int> {
-        var tracker = ThreeFingerHoldTracker<Int>(allowableMovement: 10)
-        tracker.touchDown(1, at: Self.origin)
-        tracker.touchDown(2, at: Self.origin)
-        return tracker
+    private func tracker() -> Tracker {
+        Tracker(allowableMovement: 10)
+    }
+
+    /// The touches with the given ids, all at `point`.
+    private func touches(_ ids: Int..., at point: CGPoint = origin) -> [Int: CGPoint] {
+        Dictionary(uniqueKeysWithValues: ids.map { ($0, point) })
     }
 
     @Test func waitsUntilThreeFingersAreDown() {
-        let tracker = trackerWithTwoFingers()
+        var tracker = tracker()
+        let one = tracker.update(touches(1))
+        let two = tracker.update(touches(1, 2))
+        #expect(one == .none)
+        #expect(two == .none)
         #expect(tracker.phase == .waiting)
     }
 
     @Test func holdStartsWithTheThirdFinger() {
-        var tracker = trackerWithTwoFingers()
-        let started = tracker.touchDown(3, at: Self.origin)
-        #expect(started)
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2))
+        let action = tracker.update(touches(1, 2, 3))
+        #expect(action == .startHold)
         #expect(tracker.phase == .holding)
     }
 
+    /// The fingers may land in any order, however far apart in time: only how many are down counts.
+    @Test func startsWhenTheFingersLandAtOnce() {
+        var tracker = tracker()
+        let action = tracker.update(touches(1, 2, 3))
+        #expect(action == .startHold)
+    }
+
     @Test func completesWhenTheHoldTimeIsUp() {
-        var tracker = trackerWithTwoFingers()
-        tracker.touchDown(3, at: Self.origin)
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2, 3))
         let completed = tracker.holdElapsed()
         #expect(completed)
         #expect(tracker.phase == .completed)
     }
 
     @Test func doesNotCompleteWithTwoFingers() {
-        var tracker = trackerWithTwoFingers()
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2))
         let completed = tracker.holdElapsed()
         #expect(!completed)
         #expect(tracker.phase == .waiting)
     }
 
-    @Test func movingFartherThanAllowedFails() {
-        var tracker = trackerWithTwoFingers()
-        tracker.touchDown(3, at: Self.origin)
-        tracker.touchMoved(2, to: CGPoint(x: 100, y: 111))
-        #expect(tracker.phase == .failed)
-        let completed = tracker.holdElapsed()
-        #expect(!completed)
+    @Test func completesOnlyOnce() {
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2, 3))
+        let first = tracker.holdElapsed()
+        let second = tracker.holdElapsed()
+        #expect(first)
+        #expect(!second)
     }
 
     @Test func smallMovementIsAllowed() {
-        var tracker = trackerWithTwoFingers()
-        tracker.touchDown(3, at: Self.origin)
-        tracker.touchMoved(1, to: CGPoint(x: 106, y: 106))
-        #expect(tracker.phase == .holding)
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2, 3))
+        var moved = touches(1, 2, 3)
+        moved[1] = CGPoint(x: 106, y: 106)
+        let action = tracker.update(moved)
         let completed = tracker.holdElapsed()
+        #expect(action == .none)
         #expect(completed)
     }
 
-    /// The distance counts from where the finger came down, so slow drift adds up.
-    @Test func driftAddsUp() {
-        var tracker = trackerWithTwoFingers()
-        tracker.touchDown(3, at: Self.origin)
-        for step in 1 ... 5 {
-            tracker.touchMoved(3, to: CGPoint(x: 100 + CGFloat(step * 3), y: 100))
-        }
-        #expect(tracker.phase == .failed)
+    @Test func movingFartherThanAllowedStartsTheTimeOver() {
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2, 3))
+        var moved = touches(1, 2, 3)
+        moved[2] = CGPoint(x: 100, y: 111)
+        let action = tracker.update(moved)
+        #expect(action == .startHold)
+        #expect(tracker.phase == .holding)
     }
 
-    @Test func liftingAFingerEarlyFails() {
-        var tracker = trackerWithTwoFingers()
-        tracker.touchDown(3, at: Self.origin)
-        tracker.touchUp(3)
-        #expect(tracker.phase == .failed)
+    /// The distance counts from where the hold started, so slow drift adds up.
+    @Test func driftAddsUp() {
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2, 3))
+        var actions: [Tracker.Action] = []
+        for step in 1 ... 5 {
+            var moved = touches(1, 2, 3)
+            moved[3] = CGPoint(x: 100 + CGFloat(step * 3), y: 100)
+            actions.append(tracker.update(moved))
+        }
+        #expect(actions == [.none, .none, .none, .startHold, .none])
+    }
+
+    @Test func liftingAFingerCancelsTheHold() {
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2, 3))
+        let action = tracker.update(touches(1, 2))
         let completed = tracker.holdElapsed()
+        #expect(action == .cancelHold)
         #expect(!completed)
     }
 
-    @Test func aFourthFingerFails() {
-        var tracker = trackerWithTwoFingers()
-        tracker.touchDown(3, at: Self.origin)
-        let started = tracker.touchDown(4, at: Self.origin)
-        #expect(!started)
-        #expect(tracker.phase == .failed)
+    @Test func aFingerThatLandsAgainStartsANewHold() {
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2, 3))
+        _ = tracker.update(touches(1, 2))
+        let action = tracker.update(touches(1, 2, 4))
+        let completed = tracker.holdElapsed()
+        #expect(action == .startHold)
+        #expect(completed)
     }
 
-    @Test func liftingAFingerBeforeTheThirdLandsKeepsWaiting() {
-        var tracker = trackerWithTwoFingers()
-        tracker.touchUp(2)
-        #expect(tracker.phase == .waiting)
-        tracker.touchDown(3, at: Self.origin)
-        #expect(tracker.phase == .waiting)
-        tracker.touchDown(4, at: Self.origin)
-        #expect(tracker.phase == .holding)
+    /// Another finger is the same hold with another finger.
+    @Test func aFourthFingerStartsTheTimeOver() {
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2, 3))
+        let action = tracker.update(touches(1, 2, 3, 4))
+        let completed = tracker.holdElapsed()
+        #expect(action == .startHold)
+        #expect(completed)
+    }
+
+    @Test func aFingerReplacedAtOnceStartsTheTimeOver() {
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2, 3))
+        let action = tracker.update(touches(1, 2, 4))
+        #expect(action == .startHold)
+    }
+
+    /// The fingers stay on the screen after the hold took; that must not start another.
+    @Test func doesNothingMoreUntilTheFingersLift() {
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2, 3))
+        _ = tracker.holdElapsed()
+        let stillDown = tracker.update(touches(1, 2, 3))
+        let lifted = tracker.update(touches(1, 2))
+        let again = tracker.update(touches(1, 2, 3))
+        #expect(stillDown == .none)
+        #expect(lifted == .none)
+        #expect(again == .startHold)
     }
 
     @Test func resetStartsOver() {
-        var tracker = trackerWithTwoFingers()
-        tracker.touchDown(3, at: Self.origin)
-        tracker.touchMoved(3, to: CGPoint(x: 300, y: 300))
+        var tracker = tracker()
+        _ = tracker.update(touches(1, 2, 3))
         tracker.reset()
         #expect(tracker.phase == .waiting)
-        tracker.touchDown(7, at: Self.origin)
-        tracker.touchDown(8, at: Self.origin)
-        let started = tracker.touchDown(9, at: Self.origin)
-        #expect(started)
-    }
-
-    @Test func movementOfAnUnknownTouchIsIgnored() {
-        var tracker = trackerWithTwoFingers()
-        tracker.touchDown(3, at: Self.origin)
-        tracker.touchMoved(99, to: CGPoint(x: 900, y: 900))
-        #expect(tracker.phase == .holding)
+        let action = tracker.update(touches(7, 8, 9))
+        #expect(action == .startHold)
     }
 }

@@ -47,6 +47,10 @@ final class AdministrationAccessUITests: XCTestCase {
         header.activityIndicators.firstMatch
     }
 
+    private var accountEntry: XCUIElement {
+        app.descendants(matching: .any).matching(identifier: "MainUIEntry-account").firstMatch
+    }
+
     override func setUp() async throws {
         try await super.setUp()
         continueAfterFailure = false
@@ -142,10 +146,6 @@ final class AdministrationAccessUITests: XCTestCase {
     }
 
     // MARK: - Entries and state
-
-    private var accountEntry: XCUIElement {
-        app.descendants(matching: .any).matching(identifier: "MainUIEntry-account").firstMatch
-    }
 
     /// Opens or closes Administration. Its state is kept per home, so it may already be either.
     private func setAdministration(open: Bool) {

@@ -99,6 +99,34 @@ final class HiddenBarsUITests: XCTestCase {
         waitUntilGone(menuButton, timeout: 5)
     }
 
+    /// While the bars are hidden, a dot for each finger shows where the status bar was. The test
+    /// says how many fingers are down, since XCUITest cannot hold any.
+    func testIndicatorShowsTheFingersWhileTheBarsAreHidden() {
+        app.launchEnvironment["UITestHoldFingers"] = "2"
+        app.launch()
+
+        waitForBars("hidden")
+        let indicator = app.descendants(matching: .any).matching(identifier: "ThreeFingerHoldIndicator").firstMatch
+        XCTAssertTrue(indicator.waitForExistence(timeout: 5), "The indicator should show while the bars are hidden")
+        XCTAssertEqual(indicator.value as? String, "2", "It should count the fingers that are down")
+        XCTAssertLessThan(indicator.frame.minY, 80, "It belongs where the status bar was, at the top")
+        XCTAssertGreaterThan(indicator.frame.minX, app.frame.midX, "It stays in the right corner, out of the page's content")
+    }
+
+    func testIndicatorIsGoneWhileTheBarsAreShown() {
+        app.launchEnvironment["UITestHoldFingers"] = "3"
+        // Long enough to look for the indicator first: every query of the UI takes a moment.
+        app.launchEnvironment["UITestRevealBarsAfter"] = "8"
+        app.launchEnvironment["UITestBarRevealSeconds"] = "8"
+        app.launch()
+
+        waitForBars("hidden")
+        let indicator = app.descendants(matching: .any).matching(identifier: "ThreeFingerHoldIndicator").firstMatch
+        XCTAssertTrue(indicator.waitForExistence(timeout: 5))
+        waitForBars("shown", timeout: 20)
+        XCTAssertFalse(indicator.exists, "With the bars shown there is nothing to ask for")
+    }
+
     /// Guided Access is iOS's own kiosk mode, with its own way out: the bars are hidden without
     /// the setting, and the reveal does nothing.
     func testGuidedAccessHidesTheBarsAndTheRevealDoesNothing() {

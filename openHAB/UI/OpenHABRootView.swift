@@ -268,6 +268,8 @@ struct OpenHABRootView: View {
     @State private var crashService = CrashReportService()
     @State private var menuData = MenuDataService()
     @State private var barVisibility = BarVisibility(revealDuration: BarVisibility.launchRevealDuration)
+    /// The fingers down, for the dots shown while the bars are hidden.
+    @State private var holdProgress = ThreeFingerHoldProgress()
 
     #if DEBUG
     @State private var uiTestRevealScheduled = false
@@ -296,7 +298,16 @@ struct OpenHABRootView: View {
         .statusBarHidden(barVisibility.isHidden)
         // Enabled while the setting hides the bars, so holding three fingers always shows them,
         // except under Guided Access.
-        .background(ThreeFingerHoldInstaller(isEnabled: barVisibility.allowsReveal) { barVisibility.reveal() })
+        .onThreeFingerHold(isEnabled: barVisibility.allowsReveal, progress: holdProgress) { barVisibility.reveal() }
+        // Where the status bar was, so the person holding knows how many fingers are counted.
+        // In the corner, to stay out of the page's content.
+        .overlay(alignment: .topTrailing) {
+            if barVisibility.isHidden {
+                ThreeFingerHoldIndicator(progress: holdProgress)
+                    .padding(.top, 6)
+                    .padding(.trailing, 12)
+            }
+        }
         .task { await loadBarSetting() }
         .task { await followGuidedAccess() }
         .task { await followAssistiveTechnology(UIAccessibility.voiceOverStatusDidChangeNotification) }
@@ -347,6 +358,11 @@ struct OpenHABRootView: View {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         ToastService.shared.show(title: title, message: message, actions: actions)
                     }
+                }
+                // UI tests cannot put fingers on the screen, so they say how many are down.
+                if let fingers = env["UITestHoldFingers"].flatMap(Int.init) {
+                    holdProgress.fingers = fingers
+                    holdProgress.isHolding = env["UITestHoldHolding"] != nil
                 }
                 if env["UITestNotifications"] != nil {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
