@@ -301,11 +301,10 @@ struct OpenHABRootView: View {
         .onThreeFingerHold(isEnabled: barVisibility.allowsReveal, progress: holdProgress) { barVisibility.reveal() }
         // Where the status bar was, so the person holding knows how many fingers are counted.
         // In the corner, to stay out of the page's content.
-        .overlay(alignment: .topTrailing) {
+        .overlay {
             if barVisibility.isHidden {
                 ThreeFingerHoldIndicator(progress: holdProgress)
-                    .padding(.top, 6)
-                    .padding(.trailing, 12)
+                    .inTopTrailingCorner()
             }
         }
         .task { await loadBarSetting() }

@@ -24,6 +24,9 @@ import SwiftUI
 // - Black with a white rim, so it can be seen on a dark page as well as on a light one.
 // - It cannot be touched and is out of the way of the page: a few points of height in the top
 //   right corner, not the middle.
+// - It sits at the very top, beside a camera cutout or the Dynamic Island where there is one, and
+//   not below the top safe area, which is the page's. How far down that is follows the safe area
+//   (`TopTrailingCorner`) rather than a list of devices.
 
 /// What the hold is doing right now. Written by `ThreeFingerHoldRecognizer`, read by the indicator.
 @MainActor @Observable
@@ -37,10 +40,40 @@ final class ThreeFingerHoldProgress {
     var isHolding = false
 }
 
+/// Puts the view at the very top right of the screen, in the height of the status bar's content:
+/// beside the camera cutout or the Dynamic Island, not under it, and clear of a rounded corner or
+/// the hinge of the iPhone Duo, which the safe area's side inset covers.
+private struct TopTrailingCorner: ViewModifier {
+    func body(content: Content) -> some View {
+        GeometryReader { proxy in
+            // The safe area is read by a view that ignores it, so it is still the real one.
+            let top = proxy.safeAreaInsets.top
+            content
+                // The centre of the cutout's band; without a cutout there is no band, just the edge.
+                .padding(.top, max(Self.topInset, top / 2 - ThreeFingerHoldIndicator.dotSize / 2))
+                .padding(.trailing, proxy.safeAreaInsets.trailing + Self.cornerInset)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+    }
+
+    /// Between the dots and the top edge when there is no cutout band to centre them in.
+    private static var topInset: CGFloat {
+        8
+    }
+
+    /// Between the dots and the side edge: the display's rounded corner cuts about this much off
+    /// at this height, and the dots must stay clear of it.
+    private static var cornerInset: CGFloat {
+        28
+    }
+}
+
 /// One dot for each finger down, moving into one while the hold runs.
 struct ThreeFingerHoldIndicator: View {
+    static let dotSize: CGFloat = 8
     private static let dotCount = ThreeFingerHoldTracker<Int>.requiredTouches
-    private static let dotSize: CGFloat = 8
     private static let spacing: CGFloat = 16
 
     let progress: ThreeFingerHoldProgress
@@ -68,5 +101,12 @@ struct ThreeFingerHoldIndicator: View {
         .accessibilityIdentifier("ThreeFingerHoldIndicator")
         .accessibilityLabel("Fingers on the screen")
         .accessibilityValue("\(count)")
+    }
+}
+
+extension View {
+    /// At the very top right of the screen, where the status bar's content is. See `TopTrailingCorner`.
+    func inTopTrailingCorner() -> some View {
+        modifier(TopTrailingCorner())
     }
 }
