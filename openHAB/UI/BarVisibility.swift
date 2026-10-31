@@ -24,6 +24,9 @@ import SwiftUI
 // - Under Guided Access the bars are hidden whatever the setting says, and the gesture is off:
 //   the way out is the system's own, triple-clicking the side button, which asks for the
 //   passcode that the person who set the device up chose.
+// - A page made without a navbar (`hideNavbar`, Main UI's kiosk mode) hides the bars as well. The
+//   page's author chose it, so the person at the device may not know how to get out, and a toast
+//   tells them once.
 // - The bars are also shown while there is nothing to look at but an error (`needsBars`: no
 //   connection, or the page has not loaded), because the connection indicator is in the bar.
 // - One model for the whole app, read through the environment, so Main UI, tiles and every
@@ -59,6 +62,8 @@ final class BarVisibility {
 
     /// The app setting: hide the bars unless something asks for them.
     var hidesBars = false
+    /// The Main UI page on screen was made without a navbar. Set by the view that shows it.
+    var pageHidesBars = false
     /// The device is locked to the app by Guided Access, iOS's own kiosk mode.
     var isInGuidedAccess = false
     /// Something is wrong or still loading, and the bar carries the indicator for it.
@@ -66,15 +71,21 @@ final class BarVisibility {
     /// The menu is open, so the bar it came from has to stay.
     var menuIsOpen = false
     private(set) var isRevealed = false
+    private var hasGivenExitHint = false
 
     var isHidden: Bool {
         guard !needsBars, !menuIsOpen else { return false }
-        return isInGuidedAccess || (hidesBars && !isRevealed)
+        return isInGuidedAccess || (wantsBarsHidden && !isRevealed)
+    }
+
+    /// The setting or the page asks for hidden bars; Guided Access is dealt with apart.
+    private var wantsBarsHidden: Bool {
+        hidesBars || pageHidesBars
     }
 
     /// Whether holding three fingers does anything. Guided Access has its own way out.
     var allowsReveal: Bool {
-        hidesBars && !isInGuidedAccess
+        wantsBarsHidden && !isInGuidedAccess
     }
 
     private let revealDuration: Duration
@@ -101,6 +112,12 @@ final class BarVisibility {
             }
             expire()
         }
+    }
+
+    /// True the first time it is asked, so the way out is explained once and not on every page.
+    func takeExitHint() -> Bool {
+        defer { hasGivenExitHint = true }
+        return !hasGivenExitHint
     }
 
     /// The end of a reveal. Separate from the timer so that it can be tested directly.

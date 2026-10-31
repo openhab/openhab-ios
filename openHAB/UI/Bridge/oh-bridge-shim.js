@@ -450,6 +450,8 @@
     var state = readNavbar(navbar)
     if (covered) state.hidden = true
     if (covered || cardOpen()) state.covered = true
+    // A page made without a navbar (hideNavbar, kiosk mode), not one whose navbar scrolled away.
+    if (!covered && readyPageWithoutNavbar()) state.noNavbar = true
     var json = JSON.stringify(state)
     if (json === lastNavbarJSON) return
     lastNavbarJSON = json

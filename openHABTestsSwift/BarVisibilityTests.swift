@@ -104,4 +104,31 @@ struct BarVisibilityTests {
         bars.needsBars = true
         #expect(!bars.isHidden)
     }
+
+    @Test func aPageWithoutNavbarHidesTheBarsWithoutTheSetting() {
+        let bars = model(hidesBars: false)
+        bars.pageHidesBars = true
+        #expect(bars.isHidden)
+        #expect(bars.allowsReveal)
+    }
+
+    @Test func theGestureBringsBackTheBarsOfAPageWithoutNavbar() {
+        let bars = model(hidesBars: false)
+        bars.pageHidesBars = true
+        bars.reveal()
+        #expect(!bars.isHidden)
+    }
+
+    @Test func leavingThePageShowsTheBarsAgain() {
+        let bars = model(hidesBars: false)
+        bars.pageHidesBars = true
+        bars.pageHidesBars = false
+        #expect(!bars.isHidden)
+    }
+
+    @Test func theWayOutIsExplainedOnce() {
+        let bars = model(hidesBars: false)
+        #expect(bars.takeExitHint())
+        #expect(!bars.takeExitHint())
+    }
 }

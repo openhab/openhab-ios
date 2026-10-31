@@ -8814,6 +8814,40 @@
         }
       }
     },
+    "Navigation Bar Hidden" : {
+      "comment" : "Title of a toast that says the page hid the navigation bar.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navigationsleiste ausgeblendet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navigation Bar Hidden"
+          }
+        }
+      }
+    },
+    "Touch the screen with three fingers and hold to show it for a few seconds." : {
+      "comment" : "Message of that toast: how to show the navigation bar again.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Den Bildschirm mit drei Fingern berühren und halten, um sie für einige Sekunden einzublenden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch the screen with three fingers and hold to show it for a few seconds."
+          }
+        }
+      }
+    },
     "Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold." : {
       "comment" : "Footer under the toggle that hides the bars; explains how to show them again.",
       "localizations" : {

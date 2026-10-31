@@ -305,12 +305,15 @@ struct OpenHABRootView: View {
         .onChange(of: barsAreNeeded, initial: true) { _, needed in barVisibility.needsBars = needed }
         // swiftformat:disable indent
         #if DEBUG
-        // UI tests cannot hold three fingers, so this does what the gesture does a while after the bars first hide.
-        .onChange(of: barVisibility.isHidden) { _, hidden in
-            guard hidden, !uiTestRevealScheduled,
+        // UI tests cannot hold three fingers, so this does what the gesture does a while after the bars
+        // have been hidden for good. Not at once: they are hidden for a moment before the page needs them.
+        .task(id: barVisibility.isHidden) {
+            guard barVisibility.isHidden, !uiTestRevealScheduled,
                   let delay = ProcessInfo.processInfo.environment["UITestRevealBarsAfter"].flatMap(Double.init) else { return }
+            try? await Task.sleep(for: .seconds(1 + delay))
+            guard !Task.isCancelled else { return }
             uiTestRevealScheduled = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { barVisibility.reveal() }
+            barVisibility.reveal()
         }
         #endif
         // swiftformat:enable indent
@@ -464,6 +467,11 @@ struct OpenHABRootView: View {
             }
             Text(String(webViewModel.navbar.actions.count))
                 .accessibilityIdentifier("UITestReport-navbarItemCount")
+                .frame(width: 0, height: 0)
+                .opacity(0)
+                .allowsHitTesting(false)
+            Text(uiTestRevealScheduled ? "yes" : "no")
+                .accessibilityIdentifier("UITestReport-barsRevealed")
                 .frame(width: 0, height: 0)
                 .opacity(0)
                 .allowsHitTesting(false)

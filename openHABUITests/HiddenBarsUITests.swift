@@ -19,6 +19,15 @@ import XCTest
 /// gesture's rules are covered by `ThreeFingerHoldTrackerTests`.
 @MainActor
 final class HiddenBarsUITests: XCTestCase {
+    /// A page made without a navbar, as Main UI renders one with `hideNavbar`.
+    private static let kioskPageHTML = """
+    <!DOCTYPE html><html>
+    <head><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'></head>
+    <body><div id='app' class='framework7-root'><div class='view view-main'><div class='page page-current'>
+    <div class='page-content'><button aria-label='UITest Hidden Bars Page'>kiosk</button></div>
+    </div></div></div></body></html>
+    """
+
     private static let pageHTML = """
     <!DOCTYPE html><html>
     <head><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'></head>
@@ -73,16 +82,20 @@ final class HiddenBarsUITests: XCTestCase {
     /// The reveal shows the menu button again and takes it away after the reveal time.
     func testRevealShowsTheMenuButtonForAWhile() {
         app.launchEnvironment["UITestRevealBarsAfter"] = "2"
+        // Long enough for a test to see it: every query of the UI takes a moment.
+        app.launchEnvironment["UITestBarRevealSeconds"] = "8"
         app.launch()
 
         let menuButton = app.buttons["HamburgerButton"]
-        waitForBars("hidden")
-        waitUntilGone(menuButton, timeout: 5)
+        // Queries of the UI take a moment each, and the bar is back for a limited time: ask as little as possible.
+        let revealed = expectation(
+            for: NSPredicate(format: "label == %@", "yes"),
+            evaluatedWith: app.staticTexts["UITestReport-barsRevealed"]
+        )
+        wait(for: [revealed], timeout: 30)
+        XCTAssertTrue(menuButton.waitForExistence(timeout: 3), "The reveal should bring the menu button back")
 
-        waitForBars("shown", timeout: 5)
-        XCTAssertTrue(menuButton.waitForExistence(timeout: 5), "The reveal should bring the menu button back")
-
-        waitForBars("hidden", timeout: 8)
+        waitForBars("hidden", timeout: 12)
         waitUntilGone(menuButton, timeout: 5)
     }
 
@@ -99,5 +112,19 @@ final class HiddenBarsUITests: XCTestCase {
         waitUntilGone(menuButton, timeout: 10)
 
         XCTAssertFalse(menuButton.waitForExistence(timeout: 6), "The reveal must not bring the bar back")
+    }
+
+    /// A page without a navbar hides the bars without the setting, and a toast says how to get them back.
+    func testPageWithoutNavbarHidesTheBarsAndExplainsTheWayBack() {
+        app.launchEnvironment["UITestHideBars"] = nil
+        app.launchEnvironment["UITestInjectHTML"] = Data(Self.kioskPageHTML.utf8).base64EncodedString()
+        app.launch()
+
+        waitForBars("hidden")
+        waitUntilGone(app.buttons["HamburgerButton"], timeout: 5)
+        XCTAssertTrue(
+            app.staticTexts["Navigation Bar Hidden"].waitForExistence(timeout: 5),
+            "A toast should say how to show the navigation bar again"
+        )
     }
 }
