@@ -37,13 +37,16 @@ struct AppSettingsView: View, SettingsSheetView {
                 }
             }
 
+            Section(header: Text("User Interface")) {
+                Toggle("Show Search Field in Sitemaps", isOn: $current.showSearchField)
+            }
+
+            // Own section so the footer explanation visibly belongs to this toggle only
             Section(
-                header: Text("User Interface"),
                 footer: Text("Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold. They stay shown while VoiceOver or Switch Control is on.")
             ) {
                 Toggle("Hide Status and Navigation Bar", isOn: $current.hideStatusBar)
                     .accessibilityIdentifier("HideBarsToggle")
-                Toggle("Show Search Field in Sitemaps", isOn: $current.showSearchField)
             }
 
             Section(header: Text("Security")) {
