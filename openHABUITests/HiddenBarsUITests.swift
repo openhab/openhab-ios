@@ -44,18 +44,29 @@ final class HiddenBarsUITests: XCTestCase {
         try await super.tearDown()
     }
 
+    /// What the app reports about its bars: "hidden" or "shown". The menu button alone cannot
+    /// tell a bar that has not been hidden yet from one that has come back.
+    private func waitForBars(_ state: String, timeout: TimeInterval = 10) {
+        let report = app.staticTexts["UITestReport-barsHidden"]
+        let reached = expectation(for: NSPredicate(format: "label == %@", state), evaluatedWith: report)
+        wait(for: [reached], timeout: timeout)
+    }
+
+    private func waitForPage() {
+        let page = app.webViews.firstMatch.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "UITest Hidden Bars Page")).firstMatch
+        XCTAssertTrue(page.waitForExistence(timeout: 10), "The page should load")
+    }
+
     private func waitUntilGone(_ element: XCUIElement, timeout: TimeInterval) {
         let gone = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: element)
         wait(for: [gone], timeout: timeout)
     }
 
-    /// The bars are shown while the page loads, as a safety net, and go once it has.
+    /// The menu button is gone once the page has loaded.
     func testMenuButtonIsHiddenOnceThePageHasLoaded() {
         app.launch()
-        let page = app.webViews.firstMatch.descendants(matching: .any)
-            .matching(NSPredicate(format: "label == %@", "UITest Hidden Bars Page")).firstMatch
-        XCTAssertTrue(page.waitForExistence(timeout: 10))
-
+        waitForPage()
         waitUntilGone(app.buttons["HamburgerButton"], timeout: 10)
     }
 
@@ -65,10 +76,28 @@ final class HiddenBarsUITests: XCTestCase {
         app.launch()
 
         let menuButton = app.buttons["HamburgerButton"]
-        XCTAssertTrue(menuButton.waitForExistence(timeout: 10), "The bar is shown while the page loads")
+        waitForBars("hidden")
+        waitUntilGone(menuButton, timeout: 5)
+
+        waitForBars("shown", timeout: 5)
+        XCTAssertTrue(menuButton.waitForExistence(timeout: 5), "The reveal should bring the menu button back")
+
+        waitForBars("hidden", timeout: 8)
+        waitUntilGone(menuButton, timeout: 5)
+    }
+
+    /// Guided Access is iOS's own kiosk mode, with its own way out: the bars are hidden without
+    /// the setting, and the reveal does nothing.
+    func testGuidedAccessHidesTheBarsAndTheRevealDoesNothing() {
+        app.launchEnvironment["UITestHideBars"] = nil
+        app.launchEnvironment["UITestGuidedAccess"] = "1"
+        app.launchEnvironment["UITestRevealBarsAfter"] = "2"
+        app.launch()
+
+        waitForPage()
+        let menuButton = app.buttons["HamburgerButton"]
         waitUntilGone(menuButton, timeout: 10)
 
-        XCTAssertTrue(menuButton.waitForExistence(timeout: 10), "The reveal should bring the menu button back")
-        waitUntilGone(menuButton, timeout: 6)
+        XCTAssertFalse(menuButton.waitForExistence(timeout: 6), "The reveal must not bring the bar back")
     }
 }

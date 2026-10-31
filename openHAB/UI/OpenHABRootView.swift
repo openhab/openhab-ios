@@ -292,9 +292,11 @@ struct OpenHABRootView: View {
         }
         .environment(\.barVisibility, barVisibility)
         .statusBarHidden(barVisibility.isHidden)
-        // Enabled while the setting hides the bars, so holding three fingers always shows them.
-        .background(ThreeFingerHoldInstaller(isEnabled: barVisibility.hidesBars) { barVisibility.reveal() })
+        // Enabled while the setting hides the bars, so holding three fingers always shows them,
+        // except under Guided Access.
+        .background(ThreeFingerHoldInstaller(isEnabled: barVisibility.allowsReveal) { barVisibility.reveal() })
         .task { await loadBarSetting() }
+        .task { await followGuidedAccess() }
         // The switch in the iOS Settings app may have changed while the app was in the background.
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
@@ -465,6 +467,11 @@ struct OpenHABRootView: View {
                 .frame(width: 0, height: 0)
                 .opacity(0)
                 .allowsHitTesting(false)
+            Text(barVisibility.isHidden ? "hidden" : "shown")
+                .accessibilityIdentifier("UITestReport-barsHidden")
+                .frame(width: 0, height: 0)
+                .opacity(0)
+                .allowsHitTesting(false)
         }
         #endif
         // swiftformat:enable indent
@@ -528,6 +535,15 @@ private extension OpenHABRootView {
         }
         #endif
         barVisibility.hidesBars = hides
+    }
+
+    /// Guided Access hides the bars as well, see `BarVisibility`.
+    func followGuidedAccess() async {
+        barVisibility.isInGuidedAccess = BarVisibility.isGuidedAccessEnabled
+        let changes = NotificationCenter.default.notifications(named: UIAccessibility.guidedAccessStatusDidChangeNotification)
+        for await _ in changes {
+            barVisibility.isInGuidedAccess = BarVisibility.isGuidedAccessEnabled
+        }
     }
 
     func switchToSavedView() async {

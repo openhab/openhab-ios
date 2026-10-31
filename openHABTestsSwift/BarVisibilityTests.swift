@@ -76,4 +76,32 @@ struct BarVisibilityTests {
         bars.needsBars = false
         #expect(bars.isHidden)
     }
+
+    @Test func guidedAccessHidesTheBarsWithoutTheSetting() {
+        let bars = model(hidesBars: false)
+        bars.isInGuidedAccess = true
+        #expect(bars.isHidden)
+    }
+
+    @Test func guidedAccessTurnsTheGestureOff() {
+        let bars = model()
+        #expect(bars.allowsReveal)
+        bars.isInGuidedAccess = true
+        #expect(!bars.allowsReveal)
+        bars.reveal()
+        #expect(bars.isHidden)
+    }
+
+    @Test func theGestureDoesNothingWithoutTheSetting() {
+        let bars = model(hidesBars: false)
+        #expect(!bars.allowsReveal)
+    }
+
+    /// Guided Access must not hide the indicator of an error either.
+    @Test func guidedAccessStillShowsTheBarsForAnError() {
+        let bars = model()
+        bars.isInGuidedAccess = true
+        bars.needsBars = true
+        #expect(!bars.isHidden)
+    }
 }

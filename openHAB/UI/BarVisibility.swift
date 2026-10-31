@@ -21,6 +21,9 @@ import SwiftUI
 // DECISIONS
 // - Hidden bars must never leave the user stuck. Holding three fingers on the screen shows them
 //   again for a few seconds (`ThreeFingerHoldRecognizer`), and they stay while the menu is open.
+// - Under Guided Access the bars are hidden whatever the setting says, and the gesture is off:
+//   the way out is the system's own, triple-clicking the side button, which asks for the
+//   passcode that the person who set the device up chose.
 // - The bars are also shown while there is nothing to look at but an error (`needsBars`: no
 //   connection, or the page has not loaded), because the connection indicator is in the bar.
 // - One model for the whole app, read through the environment, so Main UI, tiles and every
@@ -42,8 +45,22 @@ final class BarVisibility {
         return defaultRevealDuration
     }
 
+    /// Whether the device is under Guided Access. A UI test decides for itself.
+    @MainActor
+    static var isGuidedAccessEnabled: Bool {
+        #if DEBUG
+        let env = ProcessInfo.processInfo.environment
+        if env["UITest"] != nil {
+            return env["UITestGuidedAccess"] != nil
+        }
+        #endif
+        return UIAccessibility.isGuidedAccessEnabled
+    }
+
     /// The app setting: hide the bars unless something asks for them.
     var hidesBars = false
+    /// The device is locked to the app by Guided Access, iOS's own kiosk mode.
+    var isInGuidedAccess = false
     /// Something is wrong or still loading, and the bar carries the indicator for it.
     var needsBars = false
     /// The menu is open, so the bar it came from has to stay.
@@ -51,7 +68,13 @@ final class BarVisibility {
     private(set) var isRevealed = false
 
     var isHidden: Bool {
-        hidesBars && !isRevealed && !needsBars && !menuIsOpen
+        guard !needsBars, !menuIsOpen else { return false }
+        return isInGuidedAccess || (hidesBars && !isRevealed)
+    }
+
+    /// Whether holding three fingers does anything. Guided Access has its own way out.
+    var allowsReveal: Bool {
+        hidesBars && !isInGuidedAccess
     }
 
     private let revealDuration: Duration
@@ -67,6 +90,7 @@ final class BarVisibility {
 
     /// Shows the bars for `revealDuration`. Revealing again starts the time over.
     func reveal() {
+        guard allowsReveal else { return }
         revealTask?.cancel()
         isRevealed = true
         revealTask = Task { [sleep, revealDuration] in
