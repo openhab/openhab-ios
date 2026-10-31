@@ -181,10 +181,17 @@ import SwiftUI
 //      `toolbarVerticalEdge` or `axisBehavior`, but the build confirmed they exist in the SDK;
 //      their runtime behavior is unverified.
 //    - Whether a toolbar `Label` with a mapped SF Symbol is accepted in the vertical strip.
-//    - The existing UI tests (`MainUILayoutUITests`, `WebMenuUITests`, `ToolbarMenuUITests`)
+//    - The existing UI tests (`MainUILayoutUITests`, `AdministrationAccessUITests`, `ToolbarMenuUITests`)
 //      were written for the custom bar and have not been run against the native one. The
 //      accessibility identifiers `HamburgerButton` and `NavbarProxyButton-<name>` are kept;
 //      `MainMenuBar` is not, since the system bar has no container of that name.
+//
+// 13. A PAGE WITHOUT A NAVBAR HIDES THE BAR
+//    - A Main UI page with `hideNavbar` (kiosk mode) sends `navbar.state` with `noNavbar`. The system
+//      bar would stay on screen as an empty grey bar with the menu button, so `BarVisibility` hides
+//      it, as it does for the app setting. See the decisions there for the way back.
+//    - The page is only taken for one without a navbar once that has held for a moment: while Main UI
+//      changes pages, the new one may be on screen before its navbar is.
 //
 // ============================================================================================
 
@@ -217,6 +224,7 @@ private struct MainUINavigationContent: View {
     /// DECISION: this, not `userInterfaceIdiom` or orientation, decides how toolbar items are
     /// arranged, as Apple asks apps not to branch on the idiom.
     @Environment(\.barIsVertical) private var barIsVertical
+    @Environment(\.barVisibility) private var barVisibility
     @State private var safeArea = EdgeInsets()
     @State private var reportedLayout = MainUILayout.zero
     @State private var lastVisibleTopInset: CGFloat = 0
@@ -232,6 +240,11 @@ private struct MainUINavigationContent: View {
 
     private var isTile: Bool {
         tileTitle != nil
+    }
+
+    /// Main UI made this page without a navbar (`hideNavbar`). A tile has no bridge to say so.
+    private var pageHasNoNavbar: Bool {
+        !isTile && webViewModel.navbar.noNavbar == true
     }
 
     /// A tile has no bridge, so the page's navbar (possibly left over from Main UI) is ignored.
@@ -266,10 +279,14 @@ private struct MainUINavigationContent: View {
         .navigationTitle(tileTitle ?? (navbar.titleInContent ? "" : navbar.title))
         .toolbarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
-        .toolbarVisibility(navbar.hidden ? .hidden : .visible, for: .navigationBar)
+        // The page hides its navbar on scroll; the app hides it for good with the setting.
+        .toolbarVisibility(navbar.hidden || barVisibility?.isHidden == true ? .hidden : .visible, for: .navigationBar)
         .animation(.default, value: navbar.hidden)
+        .animation(.default, value: barVisibility?.isHidden)
         .opaqueBarBeforeLiquidGlass()
         .toolbar { toolbarContent }
+        .task(id: pageHasNoNavbar) { await followPageWithoutNavbar() }
+        .onDisappear { barVisibility?.pageHidesBars = false }
     }
 
     // MARK: Toolbar
@@ -319,6 +336,15 @@ private struct MainUINavigationContent: View {
             .verticalPreferred()
         }
 
+        pageActionsContent
+
+        // The last trailing item of a horizontal bar.
+        AppMenuToolbarContent(slot: .horizontalTrailing)
+    }
+
+    /// The page's own actions, apart from the rest of `toolbarContent` so neither takes long to type-check.
+    @ToolbarContentBuilder
+    private var pageActionsContent: some ToolbarContent {
         // Actions with an icon. The system moves the lowest priority items into the overflow
         // menu when space runs out, which replaces the hand-built "..." popover.
         ForEach(iconActions) { action in
@@ -352,9 +378,6 @@ private struct MainUINavigationContent: View {
                 }
             }
         }
-
-        // The last trailing item of a horizontal bar.
-        AppMenuToolbarContent(slot: .horizontalTrailing)
     }
 
     /// The page's icon on a horizontal bar; on a vertical bar a symbol plus a title, which that
@@ -377,6 +400,19 @@ private struct MainUINavigationContent: View {
         guard layout != reportedLayout else { return }
         reportedLayout = layout
         webViewModel.setSystemBarLayout(layout.bridgeLayout)
+    }
+
+    /// Tells `BarVisibility` whether the page wants the bars hidden, and explains the way back once.
+    private func followPageWithoutNavbar() async {
+        let hides = pageHasNoNavbar
+        try? await Task.sleep(for: .milliseconds(300))
+        guard !Task.isCancelled, let bars = barVisibility else { return }
+        bars.pageHidesBars = hides
+        guard hides, bars.takeExitHint() else { return }
+        ToastService.shared.show(
+            title: String(localized: "Navigation Bar Hidden"),
+            message: String(localized: "Touch the screen with three fingers and hold to show it for a few seconds.")
+        )
     }
 }
 

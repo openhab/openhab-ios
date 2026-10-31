@@ -38,8 +38,15 @@ struct AppSettingsView: View, SettingsSheetView {
             }
 
             Section(header: Text("User Interface")) {
-                Toggle("Hide Status Bar", isOn: $current.hideStatusBar)
                 Toggle("Show Search Field in Sitemaps", isOn: $current.showSearchField)
+            }
+
+            // Own section so the footer explanation visibly belongs to this toggle only
+            Section(
+                footer: Text("Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold. They stay shown while VoiceOver or Switch Control is on.")
+            ) {
+                Toggle("Hide Status and Navigation Bar", isOn: $current.hideStatusBar)
+                    .accessibilityIdentifier("HideBarsToggle")
             }
 
             Section(header: Text("Security")) {
@@ -90,6 +97,7 @@ struct AppSettingsView: View, SettingsSheetView {
         await Preferences.shared.setIdleOff(current.idleOff)
         await Preferences.shared.setSendCrashReports(current.sendCrashReports)
         await Preferences.shared.setHideStatusBar(current.hideStatusBar)
+        HideBarsSystemSetting.write(current.hideStatusBar)
         let showSearchField = current.showSearchField
         let sitemapDiagnosticsLogging = settingsSitemapDiagnosticsLogging
         await Preferences.shared.modifyApplicationPreferences { prefs in

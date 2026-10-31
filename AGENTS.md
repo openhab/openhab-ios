@@ -1,5 +1,8 @@
 # openHAB iOS Development Guide
 
+## Editing files
+Prefer the Xcode MCP tools (`XcodeRead`, `XcodeUpdate`, `XcodeWrite`, `XcodeMV`, `XcodeRM`, `XcodeGrep`, `XcodeGlob`) over `Edit`, `Write`, `mv`, `rm`, shell scripts or `sed` when the Xcode MCP is available. They work on the project structure, so renames, moves and deletions keep the project file in sync, and Xcode sees every change at once. Fall back to the other tools only for files outside the project (e.g. `AGENTS.md`, `.agents/`, CI config) or when the Xcode MCP is not available.
+
 ## Build/Test Commands
 Prefer the Xcode MCP tools (`BuildProject`, `RunSomeTests`, `RunAllTests`, `RunProject`, `GetBuildLog`) over `xcodebuild`. Fall back to the command line below only when the Xcode MCP is not available.
 - Pick the scheme with `XcodeSwitchScheme`: `openHABTestsSwift` for unit tests, `openHABUITests` for UI tests, `openHAB` to run the app. Check `activeDestinationDisplayTitle` in its answer: it can pick a physical device. Switch to a simulator with `XcodeSwitchRunDestination` before running anything

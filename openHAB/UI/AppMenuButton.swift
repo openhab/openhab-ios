@@ -232,6 +232,7 @@ private struct PopoverRoomReader: UIViewControllerRepresentable {
 struct AppMenuButton: View {
     let configuration: AppMenuConfiguration
     @State private var isPresented = false
+    @Environment(\.barVisibility) private var barVisibility
     /// What `PopoverRoomReader` measured, once the popover is up.
     @State private var menuRoom: CGFloat?
 
@@ -242,6 +243,8 @@ struct AppMenuButton: View {
         )
         .accessibilityIdentifier("HamburgerButton")
         .onChange(of: isPresented) { _, presented in
+            // The bars stay while the menu is open, even if they are hidden otherwise.
+            barVisibility?.menuIsOpen = presented
             // The next time it opens may be on another display or in another orientation.
             if !presented {
                 menuRoom = nil

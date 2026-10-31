@@ -264,8 +264,17 @@ private struct InAppToastBanner: View {
 struct OpenHABRootView: View {
     @StateObject private var networkService = NetworkConnectionService()
     @Environment(NotificationActionService.self) private var notificationService
+    @Environment(\.scenePhase) private var scenePhase
     @State private var crashService = CrashReportService()
     @State private var menuData = MenuDataService()
+    @State private var barVisibility = BarVisibility(revealDuration: BarVisibility.launchRevealDuration)
+    /// The fingers down, for the dots shown while the bars are hidden.
+    @State private var holdProgress = ThreeFingerHoldProgress()
+
+    #if DEBUG
+    @State private var uiTestRevealScheduled = false
+    #endif
+
     @StateObject private var webViewModel = OpenHABWebViewModel()
     @State private var currentContent: TargetController = .webview
     @State private var currentViewTitle = ""
@@ -276,167 +285,232 @@ struct OpenHABRootView: View {
     /// What was showing when the user started signing in, for the way back if they cancel.
     @State private var contentBeforeLogin: TargetController?
 
-    var body: some View {
+    /// The content with everything that hides and shows the bars, apart from the rest of `body` so
+    /// that neither takes long to type-check.
+    private var contentWithBars: some View {
         ZStack(alignment: .bottom) {
             contentView
                 .environment(\.appMenu, appMenuConfiguration)
             // A sibling above the content rather than an overlay of the navigation container.
             InAppToastBanner(service: ToastService.shared)
         }
-        .onAppear {
-            webViewModel.onLoginCancelled = { route in finishCancelledLogin(route: route) }
-            #if DEBUG
-            let env = ProcessInfo.processInfo.environment
-            if env["UITest"] != nil {
-                Task {
-                    await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.demomode = true }
-                }
-            }
-            if let title = env["UITestToastTitle"],
-               let message = env["UITestToastMessage"] {
-                let actions: [NotificationActionItem] = if let actionsJSON = env["UITestToastActions"],
-                                                           let data = actionsJSON.data(using: .utf8),
-                                                           let items = try? JSONDecoder().decode([NotificationActionItem].self, from: data) {
-                    items
-                } else {
-                    []
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    ToastService.shared.show(title: title, message: message, actions: actions)
-                }
-            }
-            if env["UITestNotifications"] != nil {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    showNotifications = true
-                }
-            }
-            if env["UITestWebViewMode"] != nil {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    currentContent = .webview
-                }
-                if let encoded = env["UITestInjectHTML"],
-                   let data = Data(base64Encoded: encoded),
-                   let html = String(data: data, encoding: .utf8) {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        Task { await webViewModel.loadHTMLString(html) }
-                    }
-                }
-            }
-            if let json = env["UITestWebViewNavbarItems"],
-               let data = json.data(using: .utf8),
-               let raw = try? JSONDecoder().decode([[String: String]].self, from: data) {
-                let actions = raw.compactMap { dict -> OHBridgeNavbarAction? in
-                    guard let label = dict["label"] else { return nil }
-                    return OHBridgeNavbarAction(id: dict["id"] ?? label, label: label, icon: nil, disabled: nil)
-                }
-                webViewModel.lockUITestContent()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                    webViewModel.setUITestNavbar(OHBridgeNavbarState(
-                        title: "", titleInContent: false, hidden: false, back: nil, leading: actions, trailing: []
-                    ))
-                }
-            }
-            if env["UITestWebAuth"] == "pending" {
-                webViewModel.setUITestAuthPending()
-            } else if let json = env["UITestWebAuth"],
-                      let auth = try? JSONDecoder().decode(OHBridgeAuthState.self, from: Data(json.utf8)) {
-                webViewModel.setUITestAuth(auth)
-            }
-            if let json = env["UITestServer"],
-               let server = UITestServerFixture(json: json) {
-                menuData.injectForUITest(server: server.server, pages: server.menuPages, sitemaps: server.menuSitemaps)
-            }
-            #endif
-            ImageDownloader.default.authenticationChallengeResponder = networkService
-            notificationService.onPendingWebViewNavigation = { [weak weakWebViewModel = webViewModel] in
-                weakWebViewModel?.markPendingExplicitNavigation()
-            }
-            Task { await switchToSavedView() }
-        }
-        // `initial: true` also delivers a command published before this view appeared,
-        // as the `@Published` subscription used to. `handleNavigationCommand` resets the
-        // command to nil, so the same command arriving again is still a change.
-        .onChange(of: notificationService.navigationCommand, initial: true) { _, command in
-            guard let command else { return }
-            handleNavigationCommand(command)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
-            menuData.clearAndReload()
-            webViewModel.reloadView()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
-            menuData.clearForHomeSwitch()
-            // Reset synchronously with the menu clear so a stale currentContent from the
-            // previous home can't coincidentally match a same-named row once the new
-            // home's sitemaps/pages arrive, before switchToSavedView() corrects it below.
-            currentContent = .webview
-            Task { await switchToSavedView() }
-            // Reconcile the web view with the new home: loads if the active connection
-            // already belongs to it (e.g. between two demo homes), otherwise blanks and
-            // waits for the tracker to connect the new home.
-            webViewModel.syncActiveConnection()
-        }
-        .task {
-            var previousConnection: ConnectionInfo?
-            for await state in await NetworkTracker.shared.stateStream() {
-                guard state.activeConnection != previousConnection else { continue }
-                previousConnection = state.activeConnection
-                activeNetworkConnection = state.activeConnection
+        .environment(\.barVisibility, barVisibility)
+        .statusBarHidden(barVisibility.isHidden)
+        // Enabled while the setting hides the bars, so holding three fingers always shows them,
+        // except under Guided Access.
+        .onThreeFingerHold(isEnabled: barVisibility.allowsReveal, progress: holdProgress) { barVisibility.reveal() }
+        // Where the status bar was, so the person holding knows how many fingers are counted.
+        // In the corner, to stay out of the page's content.
+        .overlay(alignment: .topTrailing) {
+            if barVisibility.isHidden {
+                ThreeFingerHoldIndicator(progress: holdProgress)
+                    .padding(.top, 6)
+                    .padding(.trailing, 12)
             }
         }
-        .task {
-            for await prefs in await Preferences.shared.currentHomePreferencesStream {
-                cachedHomePrefs = prefs
-            }
+        .task { await loadBarSetting() }
+        .task { await followGuidedAccess() }
+        .task { await followAssistiveTechnology(UIAccessibility.voiceOverStatusDidChangeNotification) }
+        .task { await followAssistiveTechnology(UIAccessibility.switchControlStatusDidChangeNotification) }
+        // The switch in the iOS Settings app may have changed while the app was in the background.
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            Task { await loadBarSetting() }
         }
-        .sheet(isPresented: $showNotifications) {
-            NavigationView { NotificationsView() }
-        }
-        .alert(
-            networkService.certificateAlert?.title ?? "",
-            isPresented: Binding(
-                get: { networkService.certificateAlert != nil },
-                // Defer to the next run loop tick: SwiftUI invokes this setter synchronously
-                // while dismissing the alert, and mutating the @Published property inline
-                // triggers "Publishing changes from within view updates is not allowed."
-                set: {
-                    if !$0 {
-                        DispatchQueue.main.async { networkService.certificateAlert = nil }
-                    }
-                }
-            )
-        ) {
-            Button("Always") { networkService.certificateAlertAction(.permitAlways) }
-            Button("Once") { networkService.certificateAlertAction(.permitOnce) }
-            Button("Deny", role: .cancel) { networkService.certificateAlertAction(.deny) }
-        } message: {
-            Text(networkService.certificateAlert?.message ?? "")
-        }
-        .task { await crashService.checkForPreviousCrash() }
-        .alert("Crash Report", isPresented: $crashService.crashReportAlert) {
-            Button("Send") { crashService.enableCrashReporting() }
-            Button("Don't Send", role: .cancel) { crashService.deleteCrashReports() }
-        } message: {
-            Text("The app crashed during the previous session. Would you like to send a crash report?")
-        }
-        // SwiftFormat miscomputes indentation for a closure wrapped in #if/#endif with --ifdef no-indent.
+        .onChange(of: barsAreNeeded, initial: true) { _, needed in barVisibility.needsBars = needed }
         // swiftformat:disable indent
         #if DEBUG
-        .overlay {
-            ForEach(Array(webViewModel.uiTestReports.keys.sorted()), id: \.self) { key in
-                Text(webViewModel.uiTestReports[key] ?? "")
-                    .accessibilityIdentifier("UITestReport-\(key)")
+        // UI tests cannot hold three fingers, so this does what the gesture does a while after the bars
+        // have been hidden for good. Not at once: they are hidden for a moment before the page needs them.
+        .task(id: barVisibility.isHidden) {
+            guard barVisibility.isHidden, !uiTestRevealScheduled,
+                  let delay = ProcessInfo.processInfo.environment["UITestRevealBarsAfter"].flatMap(Double.init) else { return }
+            try? await Task.sleep(for: .seconds(1 + delay))
+            guard !Task.isCancelled else { return }
+            uiTestRevealScheduled = true
+            barVisibility.reveal()
+        }
+        #endif
+        // swiftformat:enable indent
+    }
+
+    /// What happens as the view appears and as notifications and navigation commands arrive.
+    private var contentWithLifecycle: some View {
+        contentWithBars
+            .onAppear {
+                webViewModel.onLoginCancelled = { route in finishCancelledLogin(route: route) }
+                #if DEBUG
+                let env = ProcessInfo.processInfo.environment
+                if env["UITest"] != nil {
+                    Task {
+                        await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.demomode = true }
+                    }
+                }
+                if let title = env["UITestToastTitle"],
+                   let message = env["UITestToastMessage"] {
+                    let actions: [NotificationActionItem] = if let actionsJSON = env["UITestToastActions"],
+                                                               let data = actionsJSON.data(using: .utf8),
+                                                               let items = try? JSONDecoder().decode([NotificationActionItem].self, from: data) {
+                        items
+                    } else {
+                        []
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        ToastService.shared.show(title: title, message: message, actions: actions)
+                    }
+                }
+                // UI tests cannot put fingers on the screen, so they say how many are down.
+                if let fingers = env["UITestHoldFingers"].flatMap(Int.init) {
+                    holdProgress.fingers = fingers
+                    holdProgress.isHolding = env["UITestHoldHolding"] != nil
+                }
+                if env["UITestNotifications"] != nil {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showNotifications = true
+                    }
+                }
+                if env["UITestWebViewMode"] != nil {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        currentContent = .webview
+                    }
+                    if let encoded = env["UITestInjectHTML"],
+                       let data = Data(base64Encoded: encoded),
+                       let html = String(data: data, encoding: .utf8) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            Task { await webViewModel.loadHTMLString(html) }
+                        }
+                    }
+                }
+                if let json = env["UITestWebViewNavbarItems"],
+                   let data = json.data(using: .utf8),
+                   let raw = try? JSONDecoder().decode([[String: String]].self, from: data) {
+                    let actions = raw.compactMap { dict -> OHBridgeNavbarAction? in
+                        guard let label = dict["label"] else { return nil }
+                        return OHBridgeNavbarAction(id: dict["id"] ?? label, label: label, icon: nil, disabled: nil)
+                    }
+                    webViewModel.lockUITestContent()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        webViewModel.setUITestNavbar(OHBridgeNavbarState(
+                            title: "", titleInContent: false, hidden: false, back: nil, leading: actions, trailing: []
+                        ))
+                    }
+                }
+                if env["UITestWebAuth"] == "pending" {
+                    webViewModel.setUITestAuthPending()
+                } else if let json = env["UITestWebAuth"],
+                          let auth = try? JSONDecoder().decode(OHBridgeAuthState.self, from: Data(json.utf8)) {
+                    webViewModel.setUITestAuth(auth)
+                }
+                if let json = env["UITestServer"],
+                   let server = UITestServerFixture(json: json) {
+                    menuData.injectForUITest(server: server.server, pages: server.menuPages, sitemaps: server.menuSitemaps)
+                }
+                #endif
+                ImageDownloader.default.authenticationChallengeResponder = networkService
+                notificationService.onPendingWebViewNavigation = { [weak weakWebViewModel = webViewModel] in
+                    weakWebViewModel?.markPendingExplicitNavigation()
+                }
+                Task { await switchToSavedView() }
+            }
+            // `initial: true` also delivers a command published before this view appeared,
+            // as the `@Published` subscription used to. `handleNavigationCommand` resets the
+            // command to nil, so the same command arriving again is still a change.
+            .onChange(of: notificationService.navigationCommand, initial: true) { _, command in
+                guard let command else { return }
+                handleNavigationCommand(command)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
+                Task { await loadBarSetting() }
+                menuData.clearAndReload()
+                webViewModel.reloadView()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .homeDidSwitch)) { _ in
+                menuData.clearForHomeSwitch()
+                // Reset synchronously with the menu clear so a stale currentContent from the
+                // previous home can't coincidentally match a same-named row once the new
+                // home's sitemaps/pages arrive, before switchToSavedView() corrects it below.
+                currentContent = .webview
+                Task { await switchToSavedView() }
+                // Reconcile the web view with the new home: loads if the active connection
+                // already belongs to it (e.g. between two demo homes), otherwise blanks and
+                // waits for the tracker to connect the new home.
+                webViewModel.syncActiveConnection()
+            }
+    }
+
+    var body: some View {
+        contentWithLifecycle
+            .task {
+                var previousConnection: ConnectionInfo?
+                for await state in await NetworkTracker.shared.stateStream() {
+                    guard state.activeConnection != previousConnection else { continue }
+                    previousConnection = state.activeConnection
+                    activeNetworkConnection = state.activeConnection
+                }
+            }
+            .task {
+                for await prefs in await Preferences.shared.currentHomePreferencesStream {
+                    cachedHomePrefs = prefs
+                }
+            }
+            .sheet(isPresented: $showNotifications) {
+                NavigationView { NotificationsView() }
+            }
+            .alert(
+                networkService.certificateAlert?.title ?? "",
+                isPresented: Binding(
+                    get: { networkService.certificateAlert != nil },
+                    // Defer to the next run loop tick: SwiftUI invokes this setter synchronously
+                    // while dismissing the alert, and mutating the @Published property inline
+                    // triggers "Publishing changes from within view updates is not allowed."
+                    set: {
+                        if !$0 {
+                            DispatchQueue.main.async { networkService.certificateAlert = nil }
+                        }
+                    }
+                )
+            ) {
+                Button("Always") { networkService.certificateAlertAction(.permitAlways) }
+                Button("Once") { networkService.certificateAlertAction(.permitOnce) }
+                Button("Deny", role: .cancel) { networkService.certificateAlertAction(.deny) }
+            } message: {
+                Text(networkService.certificateAlert?.message ?? "")
+            }
+            .task { await crashService.checkForPreviousCrash() }
+            .alert("Crash Report", isPresented: $crashService.crashReportAlert) {
+                Button("Send") { crashService.enableCrashReporting() }
+                Button("Don't Send", role: .cancel) { crashService.deleteCrashReports() }
+            } message: {
+                Text("The app crashed during the previous session. Would you like to send a crash report?")
+            }
+            // SwiftFormat miscomputes indentation for a closure wrapped in #if/#endif with --ifdef no-indent.
+            // swiftformat:disable indent
+            #if DEBUG
+            .overlay {
+                ForEach(Array(webViewModel.uiTestReports.keys.sorted()), id: \.self) { key in
+                    Text(webViewModel.uiTestReports[key] ?? "")
+                        .accessibilityIdentifier("UITestReport-\(key)")
+                        .frame(width: 0, height: 0)
+                        .opacity(0)
+                        .allowsHitTesting(false)
+                }
+                Text(String(webViewModel.navbar.actions.count))
+                    .accessibilityIdentifier("UITestReport-navbarItemCount")
+                    .frame(width: 0, height: 0)
+                    .opacity(0)
+                    .allowsHitTesting(false)
+                Text(uiTestRevealScheduled ? "yes" : "no")
+                    .accessibilityIdentifier("UITestReport-barsRevealed")
+                    .frame(width: 0, height: 0)
+                    .opacity(0)
+                    .allowsHitTesting(false)
+                Text(barVisibility.isHidden ? "hidden" : "shown")
+                    .accessibilityIdentifier("UITestReport-barsHidden")
                     .frame(width: 0, height: 0)
                     .opacity(0)
                     .allowsHitTesting(false)
             }
-            Text(String(webViewModel.navbar.actions.count))
-                .accessibilityIdentifier("UITestReport-navbarItemCount")
-                .frame(width: 0, height: 0)
-                .opacity(0)
-                .allowsHitTesting(false)
-        }
-        #endif
+            #endif
         // swiftformat:enable indent
     }
 }
@@ -459,6 +533,16 @@ private extension OpenHABRootView {
         }
     }
 
+    /// Hidden bars stay shown while the screen has nothing but an error or a spinner, since
+    /// the indicator for it is in the bar.
+    var barsAreNeeded: Bool {
+        guard activeNetworkConnection != nil else { return true }
+        switch currentContent {
+        case .webview, .mainUIPage: return !webViewModel.hasLoadedContent
+        default: return false
+        }
+    }
+
     /// What the app menu shows, for every screen with a navigation bar. See `AppMenu.swift`.
     var appMenuConfiguration: AppMenuConfiguration {
         AppMenuConfiguration(
@@ -477,6 +561,35 @@ private extension OpenHABRootView {
             activeConnection: activeNetworkConnection,
             tileTitle: tileTitle
         ) { reloadCurrentContent() }
+    }
+
+    /// The "Hide Status Bar" setting, which hides the navigation bar as well. See `BarVisibility`.
+    func loadBarSetting() async {
+        var hides = await HideBarsSystemSetting.sync()
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["UITestHideBars"] != nil {
+            hides = true
+        }
+        #endif
+        barVisibility.hidesBars = hides
+    }
+
+    /// Guided Access hides the bars as well, see `BarVisibility`.
+    func followGuidedAccess() async {
+        barVisibility.isInGuidedAccess = BarVisibility.isGuidedAccessEnabled
+        let changes = NotificationCenter.default.notifications(named: UIAccessibility.guidedAccessStatusDidChangeNotification)
+        for await _ in changes {
+            barVisibility.isInGuidedAccess = BarVisibility.isGuidedAccessEnabled
+        }
+    }
+
+    /// VoiceOver and Switch Control show the bars, see `BarVisibility`. One of them turning off while the other
+    /// is on is handled by reading both whenever either changes.
+    func followAssistiveTechnology(_ name: Notification.Name) async {
+        barVisibility.isAssistiveTechnologyActive = BarVisibility.isAssistiveTechnologyRunning
+        for await _ in NotificationCenter.default.notifications(named: name) {
+            barVisibility.isAssistiveTechnologyActive = BarVisibility.isAssistiveTechnologyRunning
+        }
     }
 
     func switchToSavedView() async {
