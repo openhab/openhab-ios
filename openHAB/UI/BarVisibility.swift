@@ -35,6 +35,16 @@ import SwiftUI
 // - One model for the whole app, read through the environment, so Main UI, tiles and every
 //   sitemap page hide and show together.
 
+private struct AppHiddenNavigationBar: ViewModifier {
+    @Environment(\.barVisibility) private var bars
+
+    func body(content: Content) -> some View {
+        content
+            .toolbarVisibility(bars?.isHidden == true ? .hidden : .visible, for: .navigationBar)
+            .animation(.default, value: bars?.isHidden)
+    }
+}
+
 /// Whether the status bar and the navigation bar are hidden right now.
 @MainActor @Observable
 final class BarVisibility {
@@ -153,15 +163,5 @@ extension View {
     /// Hides the navigation bar of the enclosing `NavigationStack` while the app hides its bars.
     func hidesNavigationBarWithApp() -> some View {
         modifier(AppHiddenNavigationBar())
-    }
-}
-
-private struct AppHiddenNavigationBar: ViewModifier {
-    @Environment(\.barVisibility) private var bars
-
-    func body(content: Content) -> some View {
-        content
-            .toolbarVisibility(bars?.isHidden == true ? .hidden : .visible, for: .navigationBar)
-            .animation(.default, value: bars?.isHidden)
     }
 }

@@ -25,6 +25,9 @@ import UIKit
 //   simultaneously by default, the scroll view's pan gives way. The hold itself is only a timer.
 // - It is attached to the window, not the web view, so it does not depend on the web view's own
 //   recognizers or on which view is hit.
+// - Each finger may drift 40 pt from where it landed. Three fingers held flat on a phone are far
+//   less steady than one finger in a long press (10 pt), and a stricter limit cancelled the hold
+//   silently on a real device. A scroll or swipe still moves far more than that.
 // - The rules (three touches, no movement, none lifted early) are in `ThreeFingerHoldTracker`,
 //   which knows nothing about UIKit, so they can be tested without touches.
 
@@ -49,7 +52,7 @@ struct ThreeFingerHoldTracker<ID: Hashable> {
     private(set) var phase = Phase.waiting
     private var origins: [ID: CGPoint] = [:]
 
-    init(allowableMovement: CGFloat = 12) {
+    init(allowableMovement: CGFloat = 40) {
         self.allowableMovement = allowableMovement
     }
 
@@ -97,6 +100,57 @@ struct ThreeFingerHoldTracker<ID: Hashable> {
         origins = [:]
     }
 }
+
+// MARK: - SwiftUI
+
+/// Attaches a `ThreeFingerHoldRecognizer` to the window the view is in. Use it as a background.
+struct ThreeFingerHoldInstaller: UIViewRepresentable {
+    @MainActor
+    final class Coordinator: NSObject {
+        var onHold: () -> Void = {}
+        lazy var recognizer = ThreeFingerHoldRecognizer(target: self, action: #selector(held(_:)))
+
+        @objc private func held(_ recognizer: ThreeFingerHoldRecognizer) {
+            guard recognizer.state == .ended else { return }
+            onHold()
+        }
+    }
+
+    /// Moves the recognizer to the window as it is added to it, and off again when it leaves.
+    final class InstallerView: UIView {
+        weak var coordinator: Coordinator?
+        private weak var installedIn: UIWindow?
+
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            guard let coordinator else { return }
+            installedIn?.removeGestureRecognizer(coordinator.recognizer)
+            installedIn = window
+            window?.addGestureRecognizer(coordinator.recognizer)
+        }
+    }
+
+    var isEnabled: Bool
+    var onHold: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    func makeUIView(context: Context) -> InstallerView {
+        let view = InstallerView()
+        view.isUserInteractionEnabled = false
+        view.coordinator = context.coordinator
+        return view
+    }
+
+    func updateUIView(_ view: InstallerView, context: Context) {
+        context.coordinator.onHold = onHold
+        context.coordinator.recognizer.isEnabled = isEnabled
+    }
+}
+
+// MARK: - UIKit
 
 /// Recognizes three fingers held still for `holdDuration`. See the decisions above.
 final class ThreeFingerHoldRecognizer: UIGestureRecognizer {
@@ -178,54 +232,5 @@ final class ThreeFingerHoldRecognizer: UIGestureRecognizer {
         default:
             break
         }
-    }
-}
-
-// MARK: - SwiftUI
-
-/// Attaches a `ThreeFingerHoldRecognizer` to the window the view is in. Use it as a background.
-struct ThreeFingerHoldInstaller: UIViewRepresentable {
-    @MainActor
-    final class Coordinator: NSObject {
-        var onHold: () -> Void = {}
-        lazy var recognizer = ThreeFingerHoldRecognizer(target: self, action: #selector(held(_:)))
-
-        @objc private func held(_ recognizer: ThreeFingerHoldRecognizer) {
-            guard recognizer.state == .ended else { return }
-            onHold()
-        }
-    }
-
-    /// Moves the recognizer to the window as it is added to it, and off again when it leaves.
-    final class InstallerView: UIView {
-        weak var coordinator: Coordinator?
-        private weak var installedIn: UIWindow?
-
-        override func didMoveToWindow() {
-            super.didMoveToWindow()
-            guard let coordinator else { return }
-            installedIn?.removeGestureRecognizer(coordinator.recognizer)
-            installedIn = window
-            window?.addGestureRecognizer(coordinator.recognizer)
-        }
-    }
-
-    var isEnabled: Bool
-    var onHold: () -> Void
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-
-    func makeUIView(context: Context) -> InstallerView {
-        let view = InstallerView()
-        view.isUserInteractionEnabled = false
-        view.coordinator = context.coordinator
-        return view
-    }
-
-    func updateUIView(_ view: InstallerView, context: Context) {
-        context.coordinator.onHold = onHold
-        context.coordinator.recognizer.isEnabled = isEnabled
     }
 }

@@ -181,7 +181,7 @@ import SwiftUI
 //      `toolbarVerticalEdge` or `axisBehavior`, but the build confirmed they exist in the SDK;
 //      their runtime behavior is unverified.
 //    - Whether a toolbar `Label` with a mapped SF Symbol is accepted in the vertical strip.
-//    - The existing UI tests (`MainUILayoutUITests`, `WebMenuUITests`, `ToolbarMenuUITests`)
+//    - The existing UI tests (`MainUILayoutUITests`, `AdministrationAccessUITests`, `ToolbarMenuUITests`)
 //      were written for the custom bar and have not been run against the native one. The
 //      accessibility identifiers `HamburgerButton` and `NavbarProxyButton-<name>` are kept;
 //      `MainMenuBar` is not, since the system bar has no container of that name.
@@ -336,6 +336,15 @@ private struct MainUINavigationContent: View {
             .verticalPreferred()
         }
 
+        pageActionsContent
+
+        // The last trailing item of a horizontal bar.
+        AppMenuToolbarContent(slot: .horizontalTrailing)
+    }
+
+    /// The page's own actions, apart from the rest of `toolbarContent` so neither takes long to type-check.
+    @ToolbarContentBuilder
+    private var pageActionsContent: some ToolbarContent {
         // Actions with an icon. The system moves the lowest priority items into the overflow
         // menu when space runs out, which replaces the hand-built "..." popover.
         ForEach(iconActions) { action in
@@ -369,9 +378,6 @@ private struct MainUINavigationContent: View {
                 }
             }
         }
-
-        // The last trailing item of a horizontal bar.
-        AppMenuToolbarContent(slot: .horizontalTrailing)
     }
 
     /// The page's icon on a horizontal bar; on a vertical bar a symbol plus a title, which that

@@ -68,16 +68,16 @@ struct UITestServerFixture: Decodable {
 @MainActor
 @Observable
 class MenuDataService {
-    var sitemaps: [OpenHABSitemap] = []
-    var uiTiles: [OpenHABUiTile] = []
-    var uiPages: [OpenHABUIPage] = []
-    /// What `GET /rest/` said about the server. Nil until it has, and again after a home switch.
-    var server: MainUIServer?
     /// What the menu loads. Each part has its own task, so a slow one does not hold back the others.
     private enum LoadPart: CaseIterable {
         case server, sitemaps, tiles, pages
     }
 
+    var sitemaps: [OpenHABSitemap] = []
+    var uiTiles: [OpenHABUiTile] = []
+    var uiPages: [OpenHABUIPage] = []
+    /// What `GET /rest/` said about the server. Nil until it has, and again after a home switch.
+    var server: MainUIServer?
     /// The loads in progress, at most one per part: starting a load cancels the one before it.
     private var loadTasks: [LoadPart: Task<Void, Never>] = [:]
     /// `true` while any part is loading.
