@@ -8848,19 +8848,19 @@
         }
       }
     },
-    "Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold." : {
+    "Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold. They stay shown while VoiceOver or Switch Control is on." : {
       "comment" : "Footer under the toggle that hides the bars; explains how to show them again.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Blendet die Statusleiste, die Navigationsleiste und die Menü-Schaltfläche aus. Um sie für einige Sekunden einzublenden, den Bildschirm mit drei Fingern berühren und halten."
+            "value" : "Blendet die Statusleiste, die Navigationsleiste und die Menü-Schaltfläche aus. Um sie für einige Sekunden einzublenden, den Bildschirm mit drei Fingern berühren und halten. Sie bleiben sichtbar, solange VoiceOver oder die Schaltersteuerung eingeschaltet ist."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold."
+            "value" : "Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold. They stay shown while VoiceOver or Switch Control is on."
           }
         }
       }

@@ -39,7 +39,7 @@ struct AppSettingsView: View, SettingsSheetView {
 
             Section(
                 header: Text("User Interface"),
-                footer: Text("Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold.")
+                footer: Text("Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold. They stay shown while VoiceOver or Switch Control is on.")
             ) {
                 Toggle("Hide Status and Navigation Bar", isOn: $current.hideStatusBar)
                     .accessibilityIdentifier("HideBarsToggle")

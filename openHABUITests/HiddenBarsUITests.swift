@@ -127,4 +127,18 @@ final class HiddenBarsUITests: XCTestCase {
             "A toast should say how to show the navigation bar again"
         )
     }
+
+    /// With VoiceOver or Switch Control on, the bars stay, whatever the setting and the page say.
+    func testAssistiveTechnologyKeepsTheBars() {
+        app.launchEnvironment["UITestAssistiveTechnology"] = "1"
+        app.launch()
+
+        waitForPage()
+        let menuButton = app.buttons["HamburgerButton"]
+        XCTAssertTrue(menuButton.waitForExistence(timeout: 5), "The menu button should be shown")
+        // The bars would have hidden by now, as in the other tests.
+        sleep(4)
+        XCTAssertTrue(menuButton.exists, "The menu button should still be shown")
+        XCTAssertEqual(app.staticTexts["UITestReport-barsHidden"].label, "shown")
+    }
 }

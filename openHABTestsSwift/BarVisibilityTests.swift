@@ -131,4 +131,37 @@ struct BarVisibilityTests {
         #expect(bars.takeExitHint())
         #expect(!bars.takeExitHint())
     }
+
+    @Test func nothingIsHiddenWhileAssistiveTechnologyIsOn() {
+        let bars = model()
+        bars.isAssistiveTechnologyActive = true
+        #expect(!bars.isHidden)
+    }
+
+    @Test func theBarsOfAPageWithoutNavbarStayWithAssistiveTechnology() {
+        let bars = model(hidesBars: false)
+        bars.pageHidesBars = true
+        bars.isAssistiveTechnologyActive = true
+        #expect(!bars.isHidden)
+    }
+
+    @Test func assistiveTechnologyBeatsGuidedAccess() {
+        let bars = model(hidesBars: false)
+        bars.isInGuidedAccess = true
+        bars.isAssistiveTechnologyActive = true
+        #expect(!bars.isHidden)
+    }
+
+    @Test func theBarsHideAgainWhenAssistiveTechnologyTurnsOff() {
+        let bars = model()
+        bars.isAssistiveTechnologyActive = true
+        bars.isAssistiveTechnologyActive = false
+        #expect(bars.isHidden)
+    }
+
+    @Test func theGestureIsOffWithAssistiveTechnology() {
+        let bars = model()
+        bars.isAssistiveTechnologyActive = true
+        #expect(!bars.allowsReveal)
+    }
 }

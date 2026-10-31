@@ -24,6 +24,9 @@ import SwiftUI
 // - Under Guided Access the bars are hidden whatever the setting says, and the gesture is off:
 //   the way out is the system's own, triple-clicking the side button, which asks for the
 //   passcode that the person who set the device up chose.
+// - Nothing is hidden while VoiceOver or Switch Control is on. Neither can hold three fingers on the
+//   screen (VoiceOver takes the touches for its own gestures), and a person who uses them needs the
+//   menu button and the connection indicator in the bar more than a clear page.
 // - A page made without a navbar (`hideNavbar`, Main UI's kiosk mode) hides the bars as well. The
 //   page's author chose it, so the person at the device may not know how to get out, and a toast
 //   tells them once.
@@ -60,10 +63,24 @@ final class BarVisibility {
         return UIAccessibility.isGuidedAccessEnabled
     }
 
+    /// Whether VoiceOver or Switch Control is on. A UI test decides for itself.
+    @MainActor
+    static var isAssistiveTechnologyRunning: Bool {
+        #if DEBUG
+        let env = ProcessInfo.processInfo.environment
+        if env["UITest"] != nil {
+            return env["UITestAssistiveTechnology"] != nil
+        }
+        #endif
+        return UIAccessibility.isVoiceOverRunning || UIAccessibility.isSwitchControlRunning
+    }
+
     /// The app setting: hide the bars unless something asks for them.
     var hidesBars = false
     /// The Main UI page on screen was made without a navbar. Set by the view that shows it.
     var pageHidesBars = false
+    /// VoiceOver or Switch Control is on, so nothing is hidden.
+    var isAssistiveTechnologyActive = false
     /// The device is locked to the app by Guided Access, iOS's own kiosk mode.
     var isInGuidedAccess = false
     /// Something is wrong or still loading, and the bar carries the indicator for it.
@@ -74,7 +91,7 @@ final class BarVisibility {
     private var hasGivenExitHint = false
 
     var isHidden: Bool {
-        guard !needsBars, !menuIsOpen else { return false }
+        guard !needsBars, !menuIsOpen, !isAssistiveTechnologyActive else { return false }
         return isInGuidedAccess || (wantsBarsHidden && !isRevealed)
     }
 
@@ -85,7 +102,7 @@ final class BarVisibility {
 
     /// Whether holding three fingers does anything. Guided Access has its own way out.
     var allowsReveal: Bool {
-        wantsBarsHidden && !isInGuidedAccess
+        wantsBarsHidden && !isInGuidedAccess && !isAssistiveTechnologyActive
     }
 
     private let revealDuration: Duration

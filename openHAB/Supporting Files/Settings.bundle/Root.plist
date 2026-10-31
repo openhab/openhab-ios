@@ -12,7 +12,7 @@
 			<key>Title</key>
 			<string>User Interface</string>
 			<key>FooterText</key>
-			<string>Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold.</string>
+			<string>Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold. They stay shown while VoiceOver or Switch Control is on.</string>
 		</dict>
 		<dict>
 			<key>Type</key>

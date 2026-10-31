@@ -297,6 +297,8 @@ struct OpenHABRootView: View {
         .background(ThreeFingerHoldInstaller(isEnabled: barVisibility.allowsReveal) { barVisibility.reveal() })
         .task { await loadBarSetting() }
         .task { await followGuidedAccess() }
+        .task { await followAssistiveTechnology(UIAccessibility.voiceOverStatusDidChangeNotification) }
+        .task { await followAssistiveTechnology(UIAccessibility.switchControlStatusDidChangeNotification) }
         // The switch in the iOS Settings app may have changed while the app was in the background.
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
@@ -551,6 +553,15 @@ private extension OpenHABRootView {
         let changes = NotificationCenter.default.notifications(named: UIAccessibility.guidedAccessStatusDidChangeNotification)
         for await _ in changes {
             barVisibility.isInGuidedAccess = BarVisibility.isGuidedAccessEnabled
+        }
+    }
+
+    /// VoiceOver and Switch Control show the bars, see `BarVisibility`. One of them turning off while the other
+    /// is on is handled by reading both whenever either changes.
+    func followAssistiveTechnology(_ name: Notification.Name) async {
+        barVisibility.isAssistiveTechnologyActive = BarVisibility.isAssistiveTechnologyRunning
+        for await _ in NotificationCenter.default.notifications(named: name) {
+            barVisibility.isAssistiveTechnologyActive = BarVisibility.isAssistiveTechnologyRunning
         }
     }
 
