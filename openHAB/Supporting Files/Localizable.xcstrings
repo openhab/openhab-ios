@@ -8293,6 +8293,48 @@
             "state" : "translated",
             "value" : "Fingers on the screen"
           }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Dedos en la pantalla"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Sormet näytöllä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Doigts sur l’écran"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Dita sullo schermo"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Fingre på skjermen"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Vingers op het scherm"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Пальцы на экране"
+          }
         }
       }
     },
@@ -8828,6 +8870,48 @@
             "state" : "translated",
             "value" : "Hide Status and Navigation Bar"
           }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Ocultar barra de estado y de navegación"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Piilota tilarivi ja navigointipalkki"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Masquer la barre d’état et de navigation"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Nascondi barra di stato e di navigazione"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Skjul status- og navigasjonslinje"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Status- en navigatiebalk verbergen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Скрыть строку состояния и панель навигации"
+          }
         }
       }
     },
@@ -8844,6 +8928,48 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold. They stay shown while VoiceOver or Switch Control is on."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Oculta la barra de estado, la barra de navegación y el botón de menú. Para mostrarlos unos segundos, toca la pantalla con tres dedos y mantén pulsado. Permanecen visibles mientras VoiceOver o Control por botón estén activados."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Piilottaa tilarivin, navigointipalkin ja valikkopainikkeen. Näytä ne muutaman sekunnin ajan koskettamalla näyttöä kolmella sormella ja pitämällä. Ne pysyvät näkyvissä, kun VoiceOver tai Kytkinohjaus on käytössä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Masque la barre d’état, la barre de navigation et le bouton de menu. Pour les afficher quelques secondes, touchez l’écran avec trois doigts et maintenez. Ils restent affichés tant que VoiceOver ou le Contrôle de sélection est activé."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Nasconde la barra di stato, la barra di navigazione e il pulsante del menu. Per mostrarli per qualche secondo, tocca lo schermo con tre dita e tieni premuto. Restano visibili finché VoiceOver o Controllo switch è attivo."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Skjuler statuslinjen, navigasjonslinjen og menyknappen. Trykk på skjermen med tre fingre og hold for å vise dem i noen sekunder. De forblir synlige så lenge VoiceOver eller Bryterkontroll er på."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Verbergt de statusbalk, de navigatiebalk en de menuknop. Raak het scherm met drie vingers aan en houd vast om ze enkele seconden te tonen. Ze blijven zichtbaar zolang VoiceOver of Schakelbediening aan staat."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Скрывает строку состояния, панель навигации и кнопку меню. Чтобы показать их на несколько секунд, коснитесь экрана тремя пальцами и удерживайте. Они остаются видимыми, пока включён VoiceOver или «Управление переключателями»."
           }
         }
       }
@@ -11901,6 +12027,48 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Navigation Bar Hidden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Barra de navegación oculta"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Navigointipalkki piilotettu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Barre de navigation masquée"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Barra di navigazione nascosta"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Navigasjonslinje skjult"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Navigatiebalk verborgen"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Панель навигации скрыта"
           }
         }
       }
@@ -23122,6 +23290,48 @@
             "state" : "translated",
             "value" : "Touch the screen with three fingers and hold to show it for a few seconds."
           }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Toca la pantalla con tres dedos y mantén pulsado para mostrarla unos segundos."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Näytä navigointipalkki muutaman sekunnin ajan koskettamalla näyttöä kolmella sormella ja pitämällä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Touchez l’écran avec trois doigts et maintenez pour l’afficher quelques secondes."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Tocca lo schermo con tre dita e tieni premuto per mostrarla per qualche secondo."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Trykk på skjermen med tre fingre og hold for å vise den i noen sekunder."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Raak het scherm met drie vingers aan en houd vast om de navigatiebalk enkele seconden te tonen."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Коснитесь экрана тремя пальцами и удерживайте, чтобы показать панель на несколько секунд."
+          }
         }
       }
     },
@@ -24469,5 +24679,5 @@
       }
     }
   },
-  "version" : "1.1"
+  "version" : "1.3"
 }
