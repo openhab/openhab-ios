@@ -94,6 +94,7 @@ struct AppSettingsView: View, SettingsSheetView {
         await Preferences.shared.setIdleOff(current.idleOff)
         await Preferences.shared.setSendCrashReports(current.sendCrashReports)
         await Preferences.shared.setHideStatusBar(current.hideStatusBar)
+        HideBarsSystemSetting.write(current.hideStatusBar)
         let showSearchField = current.showSearchField
         let sitemapDiagnosticsLogging = settingsSitemapDiagnosticsLogging
         await Preferences.shared.modifyApplicationPreferences { prefs in

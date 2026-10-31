@@ -264,6 +264,7 @@ private struct InAppToastBanner: View {
 struct OpenHABRootView: View {
     @StateObject private var networkService = NetworkConnectionService()
     @Environment(NotificationActionService.self) private var notificationService
+    @Environment(\.scenePhase) private var scenePhase
     @State private var crashService = CrashReportService()
     @State private var menuData = MenuDataService()
     @State private var barVisibility = BarVisibility(revealDuration: BarVisibility.launchRevealDuration)
@@ -294,6 +295,11 @@ struct OpenHABRootView: View {
         // Enabled while the setting hides the bars, so holding three fingers always shows them.
         .background(ThreeFingerHoldInstaller(isEnabled: barVisibility.hidesBars) { barVisibility.reveal() })
         .task { await loadBarSetting() }
+        // The switch in the iOS Settings app may have changed while the app was in the background.
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            Task { await loadBarSetting() }
+        }
         .onChange(of: barsAreNeeded, initial: true) { _, needed in barVisibility.needsBars = needed }
         // swiftformat:disable indent
         #if DEBUG
@@ -493,17 +499,6 @@ private extension OpenHABRootView {
         }
     }
 
-    /// The "Hide Status Bar" setting, which hides the navigation bar as well. See `BarVisibility`.
-    func loadBarSetting() async {
-        var hides = await Preferences.shared.hideStatusBar
-        #if DEBUG
-        if ProcessInfo.processInfo.environment["UITestHideBars"] != nil {
-            hides = true
-        }
-        #endif
-        barVisibility.hidesBars = hides
-    }
-
     /// What the app menu shows, for every screen with a navigation bar. See `AppMenu.swift`.
     var appMenuConfiguration: AppMenuConfiguration {
         AppMenuConfiguration(
@@ -522,6 +517,17 @@ private extension OpenHABRootView {
             activeConnection: activeNetworkConnection,
             tileTitle: tileTitle
         ) { reloadCurrentContent() }
+    }
+
+    /// The "Hide Status Bar" setting, which hides the navigation bar as well. See `BarVisibility`.
+    func loadBarSetting() async {
+        var hides = await HideBarsSystemSetting.sync()
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["UITestHideBars"] != nil {
+            hides = true
+        }
+        #endif
+        barVisibility.hidesBars = hides
     }
 
     func switchToSavedView() async {
