@@ -44,6 +44,17 @@ final class ThreeFingerHoldProgress {
 /// beside the camera cutout or the Dynamic Island, not under it, and clear of a rounded corner or
 /// the hinge of the iPhone Duo, which the safe area's side inset covers.
 private struct TopTrailingCorner: ViewModifier {
+    /// Between the dots and the top edge when there is no cutout band to centre them in.
+    private static var topInset: CGFloat {
+        8
+    }
+
+    /// Between the dots and the side edge: the display's rounded corner cuts about this much off
+    /// at this height, and the dots must stay clear of it.
+    private static var cornerInset: CGFloat {
+        28
+    }
+
     func body(content: Content) -> some View {
         GeometryReader { proxy in
             // The safe area is read by a view that ignores it, so it is still the real one.
@@ -56,17 +67,6 @@ private struct TopTrailingCorner: ViewModifier {
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
-    }
-
-    /// Between the dots and the top edge when there is no cutout band to centre them in.
-    private static var topInset: CGFloat {
-        8
-    }
-
-    /// Between the dots and the side edge: the display's rounded corner cuts about this much off
-    /// at this height, and the dots must stay clear of it.
-    private static var cornerInset: CGFloat {
-        28
     }
 }
 
