@@ -1,7 +1,9 @@
 # openHAB iOS Development Guide
 
-## Editing files
-Prefer the Xcode MCP tools (`XcodeRead`, `XcodeUpdate`, `XcodeWrite`, `XcodeMV`, `XcodeRM`, `XcodeGrep`, `XcodeGlob`) over `Edit`, `Write`, `mv`, `rm`, shell scripts or `sed` when the Xcode MCP is available. They work on the project structure, so renames, moves and deletions keep the project file in sync, and Xcode sees every change at once. Fall back to the other tools only for files outside the project (e.g. `AGENTS.md`, `.agents/`, CI config) or when the Xcode MCP is not available.
+## Use the Xcode MCP for everything it can do
+When the Xcode MCP is available, use its tools for everything they can do, in place of any other tool: reading, searching, editing, moving and deleting files (`XcodeRead`, `XcodeGrep`, `XcodeGlob`, `XcodeLS`, `XcodeUpdate`, `XcodeWrite`, `XcodeMV`, `XcodeRM`), string catalogs (`StringCatalogRead`, `StringCatalogEdit`), building, testing, running and debugging. Do not use `Read`, `Edit`, `Write`, `cat`, `grep`, `sed`, `mv`, `rm`, `xcodebuild` or a script for something an Xcode tool does. They work on the project structure, so renames, moves and deletions keep the project file in sync, and Xcode sees every change at once.
+
+Use other tools only for what the Xcode MCP cannot do (`git`, `swiftlint`, `swiftformat`, files that are not in the Xcode project, such as CI config; check with `XcodeGlob` before assuming a file is outside it, since `AGENTS.md` is in it), or when the Xcode MCP is not available. If unsure whether an Xcode tool can do it, look for one first (`ToolSearch`).
 
 ## Build/Test Commands
 Prefer the Xcode MCP tools (`BuildProject`, `RunSomeTests`, `RunAllTests`, `RunProject`, `GetBuildLog`) over `xcodebuild`. Fall back to the command line below only when the Xcode MCP is not available.
