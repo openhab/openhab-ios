@@ -306,7 +306,7 @@ struct OpenHABRootView: View {
         .overlay {
             if barVisibility.isNavigationBarHidden {
                 ThreeFingerHoldIndicator(progress: holdProgress)
-                    .inTopTrailingCorner()
+                    .inTopTrailingCorner(belowStatusBar: !hidesStatusBar)
             }
         }
         .task { await loadBarSetting() }

@@ -16,7 +16,8 @@ import SwiftUI
 
 //
 // While the bars are hidden, nothing on the screen tells that three fingers are down, or that
-// the hold has taken. This shows one dot per finger in the place of the status bar. Held with
+// the hold has taken. This shows one dot per finger in the place of the status bar, or just below
+// it while the "Hide Status Bar" setting leaves it shown. Held with
 // three, they move together into one over the hold time, which ends with the bars coming back.
 //
 // DECISIONS
@@ -42,7 +43,8 @@ final class ThreeFingerHoldProgress {
 
 /// Puts the view at the very top right of the screen, in the height of the status bar's content:
 /// beside the camera cutout or the Dynamic Island, not under it, and clear of a rounded corner or
-/// the hinge of the iPhone Duo, which the safe area's side inset covers.
+/// the hinge of the iPhone Duo, which the safe area's side inset covers. While the status bar is
+/// shown, the view goes below it instead, so that it covers nothing of the status bar.
 private struct TopTrailingCorner: ViewModifier {
     /// Between the dots and the top edge when there is no cutout band to centre them in.
     private static var topInset: CGFloat {
@@ -55,17 +57,23 @@ private struct TopTrailingCorner: ViewModifier {
         28
     }
 
+    let belowStatusBar: Bool
+
     func body(content: Content) -> some View {
+        // The safe area is read here, by a view that respects it, and used inside, by one that does not.
         GeometryReader { proxy in
-            // The safe area is read by a view that ignores it, so it is still the real one.
             let top = proxy.safeAreaInsets.top
+            // The centre of the cutout's band; without a cutout there is no band, just the edge.
+            // A shown status bar is part of the top safe area, so its bottom edge is the top inset.
+            let topPadding = belowStatusBar
+                ? top + Self.topInset
+                : max(Self.topInset, top / 2 - ThreeFingerHoldIndicator.dotSize / 2)
             content
-                // The centre of the cutout's band; without a cutout there is no band, just the edge.
-                .padding(.top, max(Self.topInset, top / 2 - ThreeFingerHoldIndicator.dotSize / 2))
+                .padding(.top, topPadding)
                 .padding(.trailing, proxy.safeAreaInsets.trailing + Self.cornerInset)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .ignoresSafeArea()
         }
-        .ignoresSafeArea()
         .allowsHitTesting(false)
     }
 }
@@ -105,8 +113,9 @@ struct ThreeFingerHoldIndicator: View {
 }
 
 extension View {
-    /// At the very top right of the screen, where the status bar's content is. See `TopTrailingCorner`.
-    func inTopTrailingCorner() -> some View {
-        modifier(TopTrailingCorner())
+    /// At the very top right of the screen, where the status bar's content is, or below the status
+    /// bar when `belowStatusBar`. See `TopTrailingCorner`.
+    func inTopTrailingCorner(belowStatusBar: Bool) -> some View {
+        modifier(TopTrailingCorner(belowStatusBar: belowStatusBar))
     }
 }

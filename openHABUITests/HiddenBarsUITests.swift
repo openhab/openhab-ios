@@ -113,6 +113,25 @@ final class HiddenBarsUITests: XCTestCase {
         XCTAssertGreaterThan(indicator.frame.minX, app.frame.midX, "It stays in the right corner, out of the page's content")
     }
 
+    /// With the status bar shown the dots go below it, with the status bar hidden into its place.
+    func testIndicatorGoesBelowAShownStatusBar() {
+        app.launchEnvironment["UITestHoldFingers"] = "3"
+        app.launch()
+        waitForBars("hidden")
+        waitForStatusBar("shown")
+        let indicator = app.descendants(matching: .any).matching(identifier: "ThreeFingerHoldIndicator").firstMatch
+        XCTAssertTrue(indicator.waitForExistence(timeout: 5))
+        let belowStatusBar = indicator.frame.minY
+        app.terminate()
+
+        app.launchEnvironment["UITestHideStatusBar"] = "1"
+        app.launch()
+        waitForBars("hidden")
+        waitForStatusBar("hidden")
+        XCTAssertTrue(indicator.waitForExistence(timeout: 5))
+        XCTAssertLessThan(indicator.frame.minY, belowStatusBar, "Without a status bar the dots belong higher")
+    }
+
     func testIndicatorIsGoneWhileTheBarsAreShown() {
         app.launchEnvironment["UITestHoldFingers"] = "3"
         // Long enough to look for the indicator first: every query of the UI takes a moment.
