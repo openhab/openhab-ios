@@ -12,15 +12,15 @@
 			<key>Title</key>
 			<string>User Interface</string>
 			<key>FooterText</key>
-			<string>Hides the status bar, the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold. They stay shown while VoiceOver or Switch Control is on.</string>
+			<string>Hides the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold. They stay shown while VoiceOver or Switch Control is on.</string>
 		</dict>
 		<dict>
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>Hide Status and Navigation Bar</string>
+			<string>Hide Navigation Bar</string>
 			<key>Key</key>
-			<string>hide_bars_preference</string>
+			<string>hide_navigation_bar_preference</string>
 			<key>DefaultValue</key>
 			<false/>
 		</dict>

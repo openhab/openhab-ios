@@ -11,7 +11,7 @@
 
 import XCTest
 
-/// The "Hide Status and Navigation Bar" setting: the bars are gone, and holding three fingers
+/// The "Hide Navigation Bar" setting: the navigation bar is gone, and holding three fingers
 /// brings them back for a while.
 ///
 /// XCUITest cannot hold three fingers on the screen, so `UITestRevealBarsAfter` runs the same
@@ -125,6 +125,35 @@ final class HiddenBarsUITests: XCTestCase {
         XCTAssertTrue(indicator.waitForExistence(timeout: 5))
         waitForBars("shown", timeout: 20)
         XCTAssertFalse(indicator.exists, "With the bars shown there is nothing to ask for")
+    }
+
+    private func waitForStatusBar(_ state: String, timeout: TimeInterval = 10) {
+        let report = app.staticTexts["UITestReport-statusBarHidden"]
+        let reached = expectation(for: NSPredicate(format: "label == %@", state), evaluatedWith: report)
+        wait(for: [reached], timeout: timeout)
+    }
+
+    /// The status bar has a setting of its own: hiding the navigation bar leaves it alone.
+    func testHidingTheNavigationBarLeavesTheStatusBar() {
+        app.launch()
+
+        waitForBars("hidden")
+        waitForStatusBar("shown")
+    }
+
+    /// Hiding the status bar leaves the navigation bar and its menu button alone.
+    func testHidingTheStatusBarLeavesTheNavigationBar() {
+        app.launchEnvironment["UITestHideBars"] = nil
+        app.launchEnvironment["UITestHideStatusBar"] = "1"
+        app.launch()
+
+        waitForPage()
+        waitForStatusBar("hidden")
+        XCTAssertTrue(app.buttons["HamburgerButton"].waitForExistence(timeout: 5), "The menu button should be shown")
+        // The navigation bar would have hidden by now if the setting had reached it.
+        sleep(4)
+        XCTAssertTrue(app.buttons["HamburgerButton"].exists, "The menu button should still be shown")
+        XCTAssertEqual(app.staticTexts["UITestReport-barsHidden"].label, "shown")
     }
 
     /// Guided Access is iOS's own kiosk mode, with its own way out: the bars are hidden without

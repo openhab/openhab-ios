@@ -270,6 +270,8 @@ struct OpenHABRootView: View {
     @State private var barVisibility = BarVisibility(revealDuration: BarVisibility.launchRevealDuration)
     /// The fingers down, for the dots shown while the bars are hidden.
     @State private var holdProgress = ThreeFingerHoldProgress()
+    /// The "Hide Status Bar" setting.
+    @State private var hidesStatusBar = false
 
     #if DEBUG
     @State private var uiTestRevealScheduled = false
@@ -295,14 +297,14 @@ struct OpenHABRootView: View {
             InAppToastBanner(service: ToastService.shared)
         }
         .environment(\.barVisibility, barVisibility)
-        .statusBarHidden(barVisibility.isHidden)
-        // Enabled while the setting hides the bars, so holding three fingers always shows them,
+        .statusBarHidden(hidesStatusBar)
+        // Enabled while the navigation bar is meant to be hidden, so holding three fingers always shows it,
         // except under Guided Access.
         .onThreeFingerHold(isEnabled: barVisibility.allowsReveal, progress: holdProgress) { barVisibility.reveal() }
-        // Where the status bar was, so the person holding knows how many fingers are counted.
+        // Near where the status bar is, so the person holding knows how many fingers are counted.
         // In the corner, to stay out of the page's content.
         .overlay {
-            if barVisibility.isHidden {
+            if barVisibility.isNavigationBarHidden {
                 ThreeFingerHoldIndicator(progress: holdProgress)
                     .inTopTrailingCorner()
             }
@@ -321,8 +323,8 @@ struct OpenHABRootView: View {
         #if DEBUG
         // UI tests cannot hold three fingers, so this does what the gesture does a while after the bars
         // have been hidden for good. Not at once: they are hidden for a moment before the page needs them.
-        .task(id: barVisibility.isHidden) {
-            guard barVisibility.isHidden, !uiTestRevealScheduled,
+        .task(id: barVisibility.isNavigationBarHidden) {
+            guard barVisibility.isNavigationBarHidden, !uiTestRevealScheduled,
                   let delay = ProcessInfo.processInfo.environment["UITestRevealBarsAfter"].flatMap(Double.init) else { return }
             try? await Task.sleep(for: .seconds(1 + delay))
             guard !Task.isCancelled else { return }
@@ -503,8 +505,14 @@ struct OpenHABRootView: View {
                     .frame(width: 0, height: 0)
                     .opacity(0)
                     .allowsHitTesting(false)
-                Text(barVisibility.isHidden ? "hidden" : "shown")
+                Text(barVisibility.isNavigationBarHidden ? "hidden" : "shown")
                     .accessibilityIdentifier("UITestReport-barsHidden")
+                    .frame(width: 0, height: 0)
+                    .opacity(0)
+                    .allowsHitTesting(false)
+                // What `statusBarHidden` is given: XCUITest cannot see the system's status bar.
+                Text(hidesStatusBar ? "hidden" : "shown")
+                    .accessibilityIdentifier("UITestReport-statusBarHidden")
                     .frame(width: 0, height: 0)
                     .opacity(0)
                     .allowsHitTesting(false)
@@ -562,15 +570,21 @@ private extension OpenHABRootView {
         ) { reloadCurrentContent() }
     }
 
-    /// The "Hide Status Bar" setting, which hides the navigation bar as well. See `BarVisibility`.
+    /// The "Hide Navigation Bar" and "Hide Status Bar" settings. See `BarVisibility`.
     func loadBarSetting() async {
-        var hides = await HideBarsSystemSetting.sync()
+        hidesStatusBar = await Preferences.shared.hideStatusBar
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["UITestHideStatusBar"] != nil {
+            hidesStatusBar = true
+        }
+        #endif
+        var hides = await HideNavigationBarSystemSetting.sync()
         #if DEBUG
         if ProcessInfo.processInfo.environment["UITestHideBars"] != nil {
             hides = true
         }
         #endif
-        barVisibility.hidesBars = hides
+        barVisibility.hidesNavigationBar = hides
     }
 
     /// Guided Access hides the bars as well, see `BarVisibility`.

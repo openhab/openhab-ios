@@ -13,31 +13,31 @@ import Foundation
 @testable import openHAB
 import Testing
 
-struct HideBarsSystemSettingTests {
+struct HideNavigationBarSystemSettingTests {
     @Test func theSettingsAppShowsTheAppValueBeforeItHasWrittenAnything() {
-        let resolution = HideBarsSystemSetting.resolve(app: true, system: nil)
+        let resolution = HideNavigationBarSystemSetting.resolve(app: true, system: nil)
         #expect(resolution == .init(value: true, updatesApp: false, updatesSystem: true))
     }
 
     @Test(arguments: [true, false])
     func nothingChangesWhenBothAgree(value: Bool) {
-        let resolution = HideBarsSystemSetting.resolve(app: value, system: value)
+        let resolution = HideNavigationBarSystemSetting.resolve(app: value, system: value)
         #expect(resolution == .init(value: value, updatesApp: false, updatesSystem: false))
     }
 
     @Test(arguments: [true, false])
     func aChangeInTheSettingsAppWins(system: Bool) {
-        let resolution = HideBarsSystemSetting.resolve(app: !system, system: system)
+        let resolution = HideNavigationBarSystemSetting.resolve(app: !system, system: system)
         #expect(resolution == .init(value: system, updatesApp: true, updatesSystem: false))
     }
 
     @Test func writeStoresTheValueUnderTheKeyOfTheBundle() throws {
-        let suite = "HideBarsSystemSettingTests-\(UUID().uuidString)"
+        let suite = "HideNavigationBarSystemSettingTests-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
 
-        HideBarsSystemSetting.write(true, to: defaults)
-        #expect(defaults.object(forKey: "hide_bars_preference") as? Bool == true)
+        HideNavigationBarSystemSetting.write(true, to: defaults)
+        #expect(defaults.object(forKey: "hide_navigation_bar_preference") as? Bool == true)
     }
 
     /// The key in the code and in the bundle must be the same, or the switch does nothing.
@@ -47,6 +47,6 @@ struct HideBarsSystemSettingTests {
         let plist = try #require(NSDictionary(contentsOf: plistURL))
         let specifiers = try #require(plist["PreferenceSpecifiers"] as? [[String: Any]])
         let keys = specifiers.compactMap { $0["Key"] as? String }
-        #expect(keys.contains(HideBarsSystemSetting.key))
+        #expect(keys.contains(HideNavigationBarSystemSetting.key))
     }
 }

@@ -280,9 +280,9 @@ private struct MainUINavigationContent: View {
         .toolbarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
         // The page hides its navbar on scroll; the app hides it for good with the setting.
-        .toolbarVisibility(navbar.hidden || barVisibility?.isHidden == true ? .hidden : .visible, for: .navigationBar)
+        .toolbarVisibility(navbar.hidden || barVisibility?.isNavigationBarHidden == true ? .hidden : .visible, for: .navigationBar)
         .animation(.default, value: navbar.hidden)
-        .animation(.default, value: barVisibility?.isHidden)
+        .animation(.default, value: barVisibility?.isNavigationBarHidden)
         .opaqueBarBeforeLiquidGlass()
         .toolbar { toolbarContent }
         .task(id: pageHasNoNavbar) { await followPageWithoutNavbar() }

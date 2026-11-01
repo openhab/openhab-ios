@@ -12,13 +12,13 @@
 import Foundation
 import OpenHABCore
 
-/// The "Hide Status and Navigation Bar" switch in the iOS Settings app (`Settings.bundle`), as a way
+/// The "Hide Navigation Bar" switch in the iOS Settings app (`Settings.bundle`), as a way
 /// out for a user who hid the bars and cannot get at the in-app setting.
 ///
 /// The Settings app writes to the app's standard defaults, while the app keeps its own settings in
 /// the app group's (`Preferences`), so the two are reconciled. A change in the app writes both,
 /// so a difference between them means the user changed the switch in the Settings app.
-enum HideBarsSystemSetting {
+enum HideNavigationBarSystemSetting {
     struct Resolution: Equatable {
         let value: Bool
         let updatesApp: Bool
@@ -26,7 +26,7 @@ enum HideBarsSystemSetting {
     }
 
     /// The key in `Settings.bundle/Root.plist`.
-    static let key = "hide_bars_preference"
+    static let key = "hide_navigation_bar_preference"
 
     /// `system` is nil until the Settings app or the app has written the switch once.
     static func resolve(app: Bool, system: Bool?) -> Resolution {
@@ -41,9 +41,9 @@ enum HideBarsSystemSetting {
 
     /// Brings the two in line and returns the value that holds now.
     static func sync(preferences: Preferences = .shared, defaults: UserDefaults = .standard) async -> Bool {
-        let resolution = await resolve(app: preferences.hideStatusBar, system: defaults.object(forKey: key) as? Bool)
+        let resolution = await resolve(app: preferences.hideNavigationBar, system: defaults.object(forKey: key) as? Bool)
         if resolution.updatesApp {
-            await preferences.setHideStatusBar(resolution.value)
+            await preferences.setHideNavigationBar(resolution.value)
         }
         if resolution.updatesSystem {
             defaults.set(resolution.value, forKey: key)

@@ -12,25 +12,26 @@
 import Observation
 import SwiftUI
 
-// MARK: - Hiding the bars
+// MARK: - Hiding the navigation bar
 
 //
-// The "Hide Status Bar" setting hides the status bar and the navigation bar with the menu button,
-// so a wall-mounted tablet or a dedicated phone shows nothing but the page (issue #1375).
+// The "Hide Navigation Bar" setting hides the navigation bar with the menu button, so a wall-mounted
+// tablet or a dedicated phone shows nothing but the page (issue #1375). The status bar has a setting
+// of its own, "Hide Status Bar": hiding it cannot leave anyone stuck, so it needs no way back.
 //
 // DECISIONS
-// - Hidden bars must never leave the user stuck. Holding three fingers on the screen shows them
-//   again for a few seconds (`ThreeFingerHoldRecognizer`), and they stay while the menu is open.
-// - Under Guided Access the bars are hidden whatever the setting says, and the gesture is off:
+// - A hidden navigation bar must never leave the user stuck. Holding three fingers on the screen shows
+//   it again for a few seconds (`ThreeFingerHoldRecognizer`), and it stays while the menu is open.
+// - Under Guided Access the navigation bar is hidden whatever the setting says, and the gesture is off:
 //   the way out is the system's own, triple-clicking the side button, which asks for the
 //   passcode that the person who set the device up chose.
 // - Nothing is hidden while VoiceOver or Switch Control is on. Neither can hold three fingers on the
 //   screen (VoiceOver takes the touches for its own gestures), and a person who uses them needs the
 //   menu button and the connection indicator in the bar more than a clear page.
-// - A page made without a navbar (`hideNavbar`, Main UI's kiosk mode) hides the bars as well. The
+// - A page made without a navbar (`hideNavbar`, Main UI's kiosk mode) hides the navigation bar as well. The
 //   page's author chose it, so the person at the device may not know how to get out, and a toast
 //   tells them once.
-// - The bars are also shown while there is nothing to look at but an error (`needsBars`: no
+// - The navigation bar is also shown while there is nothing to look at but an error (`needsBars`: no
 //   connection, or the page has not loaded), because the connection indicator is in the bar.
 // - One model for the whole app, read through the environment, so Main UI, tiles and every
 //   sitemap page hide and show together.
@@ -40,12 +41,12 @@ private struct AppHiddenNavigationBar: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .toolbarVisibility(bars?.isHidden == true ? .hidden : .visible, for: .navigationBar)
-            .animation(.default, value: bars?.isHidden)
+            .toolbarVisibility(bars?.isNavigationBarHidden == true ? .hidden : .visible, for: .navigationBar)
+            .animation(.default, value: bars?.isNavigationBarHidden)
     }
 }
 
-/// Whether the status bar and the navigation bar are hidden right now.
+/// Whether the navigation bar is hidden right now.
 @MainActor @Observable
 final class BarVisibility {
     /// How long a reveal lasts without another one.
@@ -85,8 +86,8 @@ final class BarVisibility {
         return UIAccessibility.isVoiceOverRunning || UIAccessibility.isSwitchControlRunning
     }
 
-    /// The app setting: hide the bars unless something asks for them.
-    var hidesBars = false
+    /// The app setting: hide the navigation bar unless something asks for it.
+    var hidesNavigationBar = false
     /// The Main UI page on screen was made without a navbar. Set by the view that shows it.
     var pageHidesBars = false
     /// VoiceOver or Switch Control is on, so nothing is hidden.
@@ -100,14 +101,14 @@ final class BarVisibility {
     private(set) var isRevealed = false
     private var hasGivenExitHint = false
 
-    var isHidden: Bool {
+    var isNavigationBarHidden: Bool {
         guard !needsBars, !menuIsOpen, !isAssistiveTechnologyActive else { return false }
         return isInGuidedAccess || (wantsBarsHidden && !isRevealed)
     }
 
-    /// The setting or the page asks for hidden bars; Guided Access is dealt with apart.
+    /// The setting or the page asks for a hidden navigation bar; Guided Access is dealt with apart.
     private var wantsBarsHidden: Bool {
-        hidesBars || pageHidesBars
+        hidesNavigationBar || pageHidesBars
     }
 
     /// Whether holding three fingers does anything. Guided Access has its own way out.
@@ -126,7 +127,7 @@ final class BarVisibility {
         self.sleep = sleep
     }
 
-    /// Shows the bars for `revealDuration`. Revealing again starts the time over.
+    /// Shows the navigation bar for `revealDuration`. Revealing again starts the time over.
     func reveal() {
         guard allowsReveal else { return }
         revealTask?.cancel()
@@ -160,7 +161,7 @@ extension EnvironmentValues {
 }
 
 extension View {
-    /// Hides the navigation bar of the enclosing `NavigationStack` while the app hides its bars.
+    /// Hides the navigation bar of the enclosing `NavigationStack` while the app hides it.
     func hidesNavigationBarWithApp() -> some View {
         modifier(AppHiddenNavigationBar())
     }
