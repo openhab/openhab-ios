@@ -31,14 +31,17 @@ private func makeVideoRowContent(_ config: VideoRowConfig) -> VideoRowContent {
 }
 
 private struct VideoRowContent: View {
+    /// Placeholder until the stream reports its real size; the sitemap carries no size information.
+    private static let defaultAspectRatio: CGFloat = 16.0 / 9.0
+
     let input: MediaRowInput
     @State private var player: AVPlayer?
     @State private var mjpegPlayer: SimpleMJPEGPlayer?
     @State private var mjpegImage: UIImage?
-    @State private var aspectRatio: CGFloat = 16.0 / 9.0
+    @State private var aspectRatio = Self.defaultAspectRatio
     @State private var isLoading = false
     @State private var currentStreamUrl: URL?
-    @State private var playerObserver: NSKeyValueObservation?
+    @State private var playerObservers: [NSKeyValueObservation] = []
 
     private let logger = Logger(subsystem: "org.openhab", category: "VideoRowView")
 
@@ -148,15 +151,14 @@ private struct VideoRowContent: View {
     private func setupMJPEG(url: URL) {
         mjpegPlayer = VideoStreamManager.shared.getOrCreateStream(
             for: url,
+            // Derive the ratio from every frame: a shared stream's first frame may predate this
+            // subscriber, and cameras may change resolution mid-stream
             onFrame: { image in
                 mjpegImage = image
+                updateAspectRatio(image.size)
                 if isLoading {
                     isLoading = false
                 }
-            },
-            onFirstFrame: { newAspectRatio in
-                aspectRatio = newAspectRatio
-                isLoading = false
             },
             onError: { [logger] error in
                 logger.debug("MJPEG stream error: \(error.localizedDescription)")
@@ -170,15 +172,11 @@ private struct VideoRowContent: View {
         player = AVPlayer(playerItem: playerItem)
 
         // Observe player readiness
-        playerObserver = playerItem.observe(\.status, options: [.new, .old]) { item, _ in
+        let statusObserver = playerItem.observe(\.status, options: [.new, .old]) { item, _ in
             Task { @MainActor in
                 switch item.status {
                 case .readyToPlay:
                     isLoading = false
-                    let size = item.presentationSize
-                    if size.height > 0 {
-                        aspectRatio = size.width / size.height
-                    }
                     // Auto-play when ready
                     player?.play()
                 case .failed:
@@ -189,11 +187,23 @@ private struct VideoRowContent: View {
                 }
             }
         }
+        // HLS often reports presentationSize as zero at readyToPlay and fills it in later
+        let sizeObserver = playerItem.observe(\.presentationSize, options: [.initial, .new]) { item, _ in
+            Task { @MainActor in
+                updateAspectRatio(item.presentationSize)
+            }
+        }
+        playerObservers = [statusObserver, sizeObserver]
+    }
+
+    private func updateAspectRatio(_ size: CGSize) {
+        guard let newAspectRatio = size.videoAspectRatio, newAspectRatio != aspectRatio else { return }
+        aspectRatio = newAspectRatio
     }
 
     private func cleanup() {
-        // Clean up HLS observer
-        playerObserver = nil
+        // Clean up HLS observers
+        playerObservers = []
 
         // Release MJPEG stream
         if let currentStreamUrl, isMJPEG {
@@ -207,6 +217,7 @@ private struct VideoRowContent: View {
         mjpegPlayer = nil
         mjpegImage = nil
         currentStreamUrl = nil
+        aspectRatio = Self.defaultAspectRatio
         isLoading = false
     }
 }
@@ -220,5 +231,13 @@ struct VideoRowView: View {
                 input: input
             )
         )
+    }
+}
+
+extension CGSize {
+    /// Width-to-height ratio, or `nil` while the size is still unknown (zero or degenerate).
+    var videoAspectRatio: CGFloat? {
+        guard width > 0, height > 0 else { return nil }
+        return width / height
     }
 }

@@ -25,12 +25,11 @@ final class VideoStreamManager {
 
     func getOrCreateStream(for url: URL,
                            onFrame: @escaping @MainActor (UIImage) -> Void,
-                           onFirstFrame: ((CGFloat) -> Void)?,
                            onError: ((any Error) -> Void)?) -> SimpleMJPEGPlayer {
         let key = url.absoluteString
 
         if let existingPlayer = activeStreams[key] {
-            existingPlayer.updateCallbacks(onFrame: onFrame, onFirstFrame: onFirstFrame, onError: onError)
+            existingPlayer.updateCallbacks(onFrame: onFrame, onError: onError)
             streamReferenceCounts[key] = (streamReferenceCounts[key] ?? 0) + 1
             // swiftformat:disable:next redundantSelf
             Logger.widgets.debug("Reusing existing stream for URL: \(key), refs: \(self.streamReferenceCounts[key] ?? 0)")
@@ -39,7 +38,6 @@ final class VideoStreamManager {
 
         let player = SimpleMJPEGPlayer()
         player.onFrame = onFrame
-        player.onFirstFrame = onFirstFrame
         player.onError = onError
 
         activeStreams[key] = player
