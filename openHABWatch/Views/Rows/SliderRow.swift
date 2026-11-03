@@ -19,6 +19,7 @@ struct SliderRow: View {
     let widget: OpenHABWidget
     let stateToken: String
     @Environment(AppSettings.self) var settings
+    @Environment(UserData.self) var pageData
     var fallbackSymbol: SFSymbol?
     @State private var pendingValue: Double?
     @State private var viewModel: WidgetRowViewModel
@@ -119,6 +120,11 @@ struct SliderRow: View {
         .onChange(of: stateToken, initial: false) { _, _ in
             viewModel.update(from: widget)
             pendingValue = nil
+        }
+        .onAppear {
+            commandSender.confirmationHandler = { message, proceed in
+                pageData.pendingCommandConfirmation = PendingCommandConfirmation(message: message, onConfirm: proceed)
+            }
         }
     }
 

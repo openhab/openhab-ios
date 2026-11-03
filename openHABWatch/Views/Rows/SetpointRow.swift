@@ -19,6 +19,7 @@ struct SetpointRow: View {
     let widget: OpenHABWidget
     let stateToken: String
     @Environment(AppSettings.self) var settings
+    @Environment(UserData.self) var pageData
     private let setpointService = SetPointService()
     private let logger = Logger(subsystem: "org.openhab.watch", category: "SetpointRow")
     @State private var viewModel: WidgetRowViewModel
@@ -94,6 +95,11 @@ struct SetpointRow: View {
         .onChange(of: stateToken, initial: false) { _, _ in
             viewModel.update(from: widget)
             localValue = nil
+        }
+        .onAppear {
+            commandSender.confirmationHandler = { message, proceed in
+                pageData.pendingCommandConfirmation = PendingCommandConfirmation(message: message, onConfirm: proceed)
+            }
         }
     }
 

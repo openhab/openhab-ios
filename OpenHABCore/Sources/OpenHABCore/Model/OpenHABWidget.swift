@@ -91,6 +91,10 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     @Published public var iconColor = ""
     @Published public var labelcolor = ""
     @Published public var valuecolor = ""
+    /// A confirmation prompt to show before sending a command from this widget, or nil if none
+    /// is required. Set server-side (openHAB core sitemap `confirmCmd`) and, like visibility/icon/
+    /// labelcolor, can change dynamically via SSE.
+    @Published public var commandConfirmMessage: String?
     public var service = ""
     @Published public var state = ""
     public var text = ""
@@ -169,7 +173,8 @@ public extension OpenHABWidget {
                      staticIcon: Bool? = nil,
                      unit: String? = nil,
                      pattern: String? = nil,
-                     yAxisDecimalPattern: String? = nil) {
+                     yAxisDecimalPattern: String? = nil,
+                     commandConfirmMessage: String? = nil) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -191,6 +196,7 @@ public extension OpenHABWidget {
         self.iconColor = iconColor ?? ""
         labelcolor = labelColor ?? ""
         valuecolor = valueColor ?? ""
+        self.commandConfirmMessage = commandConfirmMessage
         self.service = service ?? ""
         self.state = state ?? ""
         self.text = text ?? ""
@@ -316,6 +322,7 @@ public extension OpenHABWidget {
                 || event.enrichedItem != nil || event.labelcolor != nil
                 || event.valuecolor != nil || event.iconcolor != nil
                 || event.visibility != nil || event.labelSource != nil
+                || event.commandConfirmMessage != nil
             else { return .unchanged }
             if let label = event.label {
                 self.label = label
@@ -345,6 +352,9 @@ public extension OpenHABWidget {
                 if let iconcolor = event.iconcolor {
                     iconColor = iconcolor
                 }
+            }
+            if let commandConfirmMessage = event.commandConfirmMessage {
+                self.commandConfirmMessage = commandConfirmMessage
             }
             if let visibility = event.visibility {
                 self.visibility = visibility
@@ -414,7 +424,8 @@ extension OpenHABWidget {
             staticIcon: widget.staticIcon,
             unit: widget.unit,
             pattern: widget.pattern,
-            yAxisDecimalPattern: widget.yAxisDecimalPattern
+            yAxisDecimalPattern: widget.yAxisDecimalPattern,
+            commandConfirmMessage: widget.commandConfirmMessage
         )
     }
 }

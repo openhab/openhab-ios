@@ -22,6 +22,7 @@ public struct OpenHABSitemapWidgetEvent: Sendable {
     public let labelcolor: String?
     public let valuecolor: String?
     public let iconcolor: String?
+    public let commandConfirmMessage: String?
     public let visibility: Bool?
     public let state: String?
     public let enrichedItem: OpenHABItem?
@@ -37,6 +38,7 @@ public struct OpenHABSitemapWidgetEvent: Sendable {
                 labelcolor: String? = nil,
                 valuecolor: String? = nil,
                 iconcolor: String? = nil,
+                commandConfirmMessage: String? = nil,
                 visibility: Bool? = nil,
                 state: String? = nil,
                 enrichedItem: OpenHABItem? = nil,
@@ -51,6 +53,7 @@ public struct OpenHABSitemapWidgetEvent: Sendable {
         self.labelcolor = labelcolor
         self.valuecolor = valuecolor
         self.iconcolor = iconcolor
+        self.commandConfirmMessage = commandConfirmMessage
         self.visibility = visibility
         self.state = state
         self.enrichedItem = enrichedItem
@@ -70,6 +73,7 @@ public struct OpenHABSitemapWidgetEvent: Sendable {
             labelcolor: event.labelcolor,
             valuecolor: event.valuecolor,
             iconcolor: event.iconcolor,
+            commandConfirmMessage: event.commandConfirmMessage,
             visibility: event.visibility,
             state: event.state,
             enrichedItem: OpenHABItem(event.item),
