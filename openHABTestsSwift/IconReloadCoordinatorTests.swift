@@ -10,7 +10,9 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import Observation
 @testable import openHAB
+import Synchronization
 import Testing
 
 @MainActor
@@ -74,6 +76,24 @@ struct IconReloadCoordinatorTests {
         #expect(coord.reloadEpoch == 1)
         coord.didBecomeActive(now: t1.addingTimeInterval(IconReloadCoordinator.reloadThreshold + 10))
         #expect(coord.reloadEpoch == 1)
+    }
+
+    @Test("Views reading the epoch are told when a long background reloads the icons")
+    func reloadNotifiesObservers() {
+        let coord = IconReloadCoordinator(observeNotifications: false)
+        let t1 = Date.now
+        coord.didEnterBackground(now: t1)
+        let changed = Mutex(false)
+        withObservationTracking {
+            _ = coord.reloadEpoch
+        } onChange: {
+            changed.withLock { $0 = true }
+        }
+
+        coord.didBecomeActive(now: t1.addingTimeInterval(IconReloadCoordinator.reloadThreshold + 1))
+
+        let didChange = changed.withLock { $0 }
+        #expect(didChange)
     }
 
     @Test("Each long background increments epoch independently")

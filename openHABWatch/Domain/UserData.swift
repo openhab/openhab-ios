@@ -463,7 +463,7 @@ final class UserData {
         startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch, pageId: linkedPageId ?? "", force: force)
     }
 
-    /// Updates existing widget instances instead of replacing them to preserve @ObservedObject references
+    /// Updates existing widget instances instead of replacing them, so the rows keep observing them
     private func updateWidgets(with newWidgets: [OpenHABWidget]) {
         let existingWidgetsMap = Dictionary(uniqueKeysWithValues: widgets.map { ($0.widgetId, $0) })
 
@@ -474,8 +474,8 @@ final class UserData {
 
         for newWidget in newWidgets {
             if let existingWidget = existingWidgetsMap[newWidget.widgetId] {
-                // Update existing widget's properties in place — this triggers
-                // per-row re-renders via @ObservedObject without rebuilding the list
+                // Update existing widget's properties in place — this re-renders the rows
+                // that read them, through observation, without rebuilding the list
                 existingWidget.label = newWidget.label
                 existingWidget.type = newWidget.type
                 existingWidget.icon = newWidget.icon
