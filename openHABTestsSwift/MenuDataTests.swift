@@ -210,6 +210,42 @@ struct MenuDataTests {
         #expect(service.uiPages.count == 1)
     }
 
+    private func connectionState(_ url: String?, _ status: NetworkStatus = .connected) -> NetworkState {
+        let connection = url.map {
+            ConnectionInfo(configuration: ConnectionConfiguration(url: $0, username: "", password: "", supportsNotifications: false, priority: 0), version: 8)
+        }
+        return NetworkState(activeConnection: connection, status: status, nextRetryDate: nil, isNetworkAvailable: true)
+    }
+
+    @Test("fetches once per connection, not on every state the tracker reports")
+    func fetchesOncePerConnection() {
+        // A tracker with no connection, so the service starts no fetch of its own.
+        let service = MenuDataService(networkTracker: NetworkTracker())
+        let local = "http://192.168.2.10:8080"
+        // What a launch reports: found while connecting, connected, then the path monitor again.
+        let fetched = [
+            connectionState(local, .connecting), connectionState(local), connectionState(local)
+        ].map { service.connectionToFetch(for: $0)?.configuration.url }
+        #expect(fetched == [local, nil, nil])
+        #expect(service.isConnected)
+        // Another connection fetches.
+        #expect(service.connectionToFetch(for: connectionState("https://myopenhab.org"))?.configuration.url == "https://myopenhab.org")
+    }
+
+    @Test("fetches again after a connection loss and after a home switch")
+    func fetchesAgainAfterLossAndHomeSwitch() {
+        let service = MenuDataService(networkTracker: NetworkTracker())
+        let local = "http://192.168.2.10:8080"
+        _ = service.connectionToFetch(for: connectionState(local))
+        #expect(service.connectionToFetch(for: connectionState(nil, .connecting)) == nil)
+        #expect(!service.isConnected)
+        #expect(service.connectionToFetch(for: connectionState(local))?.configuration.url == local)
+
+        // A home on the same server still gets its own menu.
+        service.clearForHomeSwitch()
+        #expect(service.connectionToFetch(for: connectionState(local))?.configuration.url == local)
+    }
+
     @Test("clearForHomeSwitch empties collections")
     func clearForHomeSwitchResetsAll() {
         let service = MenuDataService()

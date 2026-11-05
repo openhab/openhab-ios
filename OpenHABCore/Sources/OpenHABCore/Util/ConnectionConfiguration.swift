@@ -134,6 +134,11 @@ public extension ConnectionConfiguration {
         "url: \(publicLogURL), priority: \(priority), cloud: \(isCloudConnection), usernameConfigured: \(!username.isEmpty)"
     }
 
+    /// Whether both a username and a password are set.
+    var hasCredentials: Bool {
+        !username.isEmpty && !password.isEmpty
+    }
+
     /// Whether this connection is to an openHAB Cloud instance.
     /// Currently determined by the "openHAB Cloud Service" user preference (`supportsNotifications`).
     var isCloudConnection: Bool {

@@ -93,8 +93,27 @@ enum WebRouteRestore {
         return Seed(history: kept.map(\.url), props: kept.map(\.props), url: last.url)
     }
 
+    /// Which page a load asks for and why, for the log. Paths only: no server address, and no
+    /// query or fragment, which can carry values.
+    static func logDescription(restore: Seed?, path: String?, defaultPath: String) -> String {
+        let defaultPage = pathOnly(defaultPath)
+        if let restore {
+            let skipped = defaultPage.isEmpty ? "" : ", default page \(defaultPage) skipped"
+            return "restoring \(restore.history.count) saved page(s), showing \(pathOnly(restore.url))\(skipped)"
+        }
+        if let path {
+            return "opening requested page \(pathOnly(path))"
+        }
+        return defaultPage.isEmpty ? "opening the front page" : "opening default page \(defaultPage)"
+    }
+
     static func isAdminPath(_ url: String) -> Bool {
-        let path = url.split(separator: "?", maxSplits: 1).first.map(String.init) ?? url
+        let path = pathOnly(url)
         return adminPrefixes.contains { path == $0 || path.hasPrefix($0 + "/") }
+    }
+
+    /// A route without its query and fragment.
+    static func pathOnly(_ route: String) -> String {
+        String(route.prefix { $0 != "?" && $0 != "#" })
     }
 }

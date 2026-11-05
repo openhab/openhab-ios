@@ -192,6 +192,7 @@ final class OHBridgeHost {
             Logger.viewController.error("OHBridge: unreadable message")
             return
         }
+        Logger.viewController.info("OHBridge: received \(header.type, privacy: .public)")
         do {
             switch header.type {
             case "reply":
