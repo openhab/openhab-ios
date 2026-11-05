@@ -34,17 +34,11 @@ private final class FakeServer: NSObject, WKURLSchemeHandler {
 
     /// The paths asked for, for a failure message.
     private(set) var served: [String] = []
-    private let page: String
-
-    init(page: String) {
-        self.page = page
-    }
 
     func webView(_ webView: WKWebView, start task: any WKURLSchemeTask) {
         guard let url = task.request.url else { return }
         served.append(url.path)
-        let (status, type, body): (Int, String, String) = switch url.path {
-        case "/": (200, "text/html", page)
+        let (status, type, body) = switch url.path {
         case "/rest/items": (200, "application/json", "[]")
         case "/rest/ui/components/ui:page": (200, "application/json", "{}")
         // The connection id, then one update. The stream then ends, which the page sees as an error.
@@ -115,7 +109,8 @@ private final class TimingPage {
 
     let collector = MarkCollector()
     let webView: WKWebView
-    private let server: FakeServer
+    private let page: String
+    private let server = FakeServer()
     private let navigation = NavigationRecorder()
 
     /// Everything known about the page, for a failure message.
@@ -133,15 +128,17 @@ private final class TimingPage {
         controller.addUserScript(WKUserScript(source: WebViewLoadTiming.script, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         let configuration = WKWebViewConfiguration()
         configuration.userContentController = controller
-        server = FakeServer(page: page)
         configuration.setURLSchemeHandler(server, forURLScheme: FakeServer.scheme)
         webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 390, height: 844), configuration: configuration)
         webView.navigationDelegate = navigation
+        self.page = page
     }
 
+    /// Loads the page as HTML at the fake server's address, so its requests still go there. Loading
+    /// the address itself never started on CI's simulator: no navigation step and no request to the
+    /// fake server within a minute, while the pages loaded as HTML in the other suites worked.
     func load() {
-        guard let url = URL(string: "\(FakeServer.scheme)://openhab/") else { return }
-        webView.load(URLRequest(url: url))
+        webView.loadHTMLString(page, baseURL: URL(string: "\(FakeServer.scheme)://openhab/"))
     }
 
     /// Waits until `count` marks named `event` have come in.
