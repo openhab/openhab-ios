@@ -109,7 +109,7 @@ public struct LogsViewer: View {
         let buildNumber = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown"
         let osVersion = ProcessInfo.processInfo.operatingSystemVersionString
         let modelIdentifier = Self.modelIdentifier()
-        let generated = Date.now.formatted(.iso8601.year().month().day().time(includingFractionalSeconds: false))
+        let generated = Date.now.formatted(.logTimestamp)
 
         return """
         openHAB iOS \(appVersion) (\(buildNumber))
@@ -149,19 +149,7 @@ public extension Logger {
         for entry in entries {
             try Task.checkCancellation()
             if let log = entry as? OSLogEntryLog {
-                let dateString = entry.date.formatted(
-                    .dateTime
-                        .year()
-                        .month(.twoDigits)
-                        .day(.twoDigits)
-                        .hour(.twoDigits(amPM: .omitted))
-                        .minute(.twoDigits)
-                        .second(.twoDigits)
-                        .locale(Locale(identifier: "en_US_POSIX"))
-                )
-                var attributedMessage = AttributedString(dateString)
-                attributedMessage.font = .headline
-
+                let dateString = entry.date.formatted(.logTimestamp)
                 logs.append("""
                 \(dateString): \
                 \(log.category):\(log.level.description): \
@@ -181,4 +169,13 @@ public extension Logger {
 
 #Preview {
     LogsViewer()
+}
+
+public extension FormatStyle where Self == Date.ISO8601FormatStyle {
+    /// ISO 8601 in local time with its offset and milliseconds, for the entries and the export
+    /// header alike: the steps of a load within one second can be told apart, and the time is
+    /// unambiguous wherever the log is read.
+    static var logTimestamp: Self {
+        .init(timeZoneSeparator: .colon, includingFractionalSeconds: true, timeZone: .current)
+    }
 }

@@ -90,6 +90,8 @@ public extension Logger {
 
     static let viewController = Logger(subsystem: subsystem, category: "viewController")
 
+    static let webViewLoad = Logger(subsystem: subsystem, category: "WebViewLoad")
+
     static let widgets = Logger(subsystem: subsystem, category: "Widgets")
 
     static let rtfTextView = Logger(subsystem: subsystem, category: "RTFTextView")

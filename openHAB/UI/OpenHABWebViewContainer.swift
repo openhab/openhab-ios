@@ -42,7 +42,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         /// The page's message handlers. `externalURL` stays outside the bridge: it is an iOS
         /// workaround for taps on custom-scheme links, not part of the protocol.
         private static var handlerNames: [String] {
-            var names = [OHBridge.messageHandlerName, "externalURL"]
+            var names = [OHBridge.messageHandlerName, "externalURL", WebViewLoadTiming.messageHandlerName]
             #if DEBUG
             names.append("ohUITest")
             #endif
@@ -105,14 +105,24 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
 
         // MARK: - WKScriptMessageHandler
 
-        nonisolated func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-            Task { @MainActor in
-                self.handleScriptMessage(message)
-            }
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            handleScriptMessage(message)
         }
 
         private func handleScriptMessage(_ message: WKScriptMessage) {
-            Logger.viewController.info("WKScriptMessage \(message.name)")
+            if message.name == WebViewLoadTiming.messageHandlerName {
+                // Only the page Main UI runs in; an iframe's requests say nothing about it.
+                guard message.frameInfo.isMainFrame,
+                      let event = WebViewLoadTimingEvent(body: message.body) else { return }
+                // Notice, not info: iOS drops info entries within a minute or so, long before
+                // a user exports the log for a slow start.
+                Logger.webViewLoad.notice("Main UI load: \(event.logLine, privacy: .public)")
+                return
+            }
+            // The bridge logs the type of each of its messages itself.
+            if message.name != OHBridge.messageHandlerName {
+                Logger.viewController.info("WKScriptMessage \(message.name, privacy: .public)")
+            }
             if message.name == "externalURL",
                let urlString = message.body as? String,
                let url = URL(string: urlString),

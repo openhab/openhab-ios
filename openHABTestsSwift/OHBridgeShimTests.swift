@@ -247,6 +247,23 @@ struct OHBridgeShimTests {
         #expect(address == "/page/kitchen")
     }
 
+    @Test("Marks for the load timing log when the restored page has opened, without its query")
+    func shimMarksRestore() async throws {
+        let page = ShimPage(
+            info: "{ features: ['routeRestore'], initialHistory: ['/', '/page/kitchen?token=secret#top'] }",
+            host: "window.__marks = []; window.OHLoadTiming = { mark: function (e, f) { __marks.push({ event: e, path: f.path, detail: f.detail }) } };"
+        )
+        page.load(ShimPage.sidebarHTML.replacingOccurrences(of: "</body>", with: """
+        <script>document.querySelector('.view-main').f7View = { router: {
+          history: ['/', '/page/kitchen?token=secret#top'], propsHistory: [], allowPageChange: true,
+          currentPageEl: { f7Page: { route: { url: '/page/kitchen?token=secret#top' } } },
+          findMatchingRoute: function (url) { return { route: { path: url } } }
+        } }</script></body>
+        """))
+        let mark = try await page.waitFor("JSON.stringify(window.__marks && __marks.length ? __marks[0] : null)")
+        #expect(mark == #"{"event":"routeRestore","path":"/page/kitchen","detail":"page open"}"#)
+    }
+
     @Test("A bar above the web view leaves no room on pages, and the app shows the title")
     func shimBarOutside() async throws {
         let page = ShimPage(info: "{ features: ['navbar'], layout: { insets: { top: 0, bottom: 0 }, navbarHeight: 0 } }")

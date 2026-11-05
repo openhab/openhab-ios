@@ -88,6 +88,11 @@ class MenuDataService {
     /// on each switch (consistent with sitemaps/pages behaviour).
     var hasSuccessfullyLoaded = false
 
+    /// The connection the tracker's stream last fetched for. The tracker reports every change,
+    /// so one connection arrives several times as it goes from connecting to connected; only
+    /// the first should fetch.
+    private var streamFetchedConnection: ConnectionInfo?
+
     #if DEBUG
     /// How often `reload()` ran, so a UI test can tell that a pull-to-refresh reloaded the menu.
     private(set) var reloadCount = 0
@@ -108,12 +113,11 @@ class MenuDataService {
         Task { [weak self] in
             for await state in await networkTracker.stateStream() {
                 guard let self else { break }
-                isConnected = state.activeConnection != nil
-                // Connection loss: retain the last-good snapshot — do NOT clear.
                 // New connection: fetch without wiping first so the menu stays
                 // populated until fresh data arrives.
-                guard let activeConnection = state.activeConnection else { continue }
-                await fetchData(activeConnection: activeConnection)
+                if let connection = connectionToFetch(for: state) {
+                    await fetchData(activeConnection: connection)
+                }
             }
         }
     }
@@ -152,6 +156,20 @@ class MenuDataService {
 
     #endif
 
+    /// Records `state` and returns the connection to fetch the menu from, or nil when there is
+    /// nothing new: no connection, or the one already fetched for.
+    func connectionToFetch(for state: NetworkState) -> ConnectionInfo? {
+        isConnected = state.activeConnection != nil
+        // Connection loss: retain the last-good snapshot, but fetch again on reconnect.
+        guard let connection = state.activeConnection else {
+            streamFetchedConnection = nil
+            return nil
+        }
+        guard connection != streamFetchedConnection else { return nil }
+        streamFetchedConnection = connection
+        return connection
+    }
+
     /// Clears all data immediately (use for user-initiated refresh or explicit resets).
     func clearAll() {
         #if DEBUG
@@ -179,6 +197,8 @@ class MenuDataService {
         server = nil
         hasSuccessfullyLoaded = false
         isConnected = false
+        // The new home may share the old one's server; its menu still has to be fetched.
+        streamFetchedConnection = nil
     }
 
     /// Returns the display label for a tile or page URL, or an empty string if not found.
