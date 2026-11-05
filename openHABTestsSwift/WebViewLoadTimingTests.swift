@@ -65,6 +65,10 @@ private final class FakeServer: NSObject, WKURLSchemeHandler {
 /// A web view with the timing script, as the app installs it.
 @MainActor
 private final class TimingPage {
+    /// How long a mark may take. Generous: on a busy CI runner the web content process alone can
+    /// take longer than ten seconds to start, and a wait ends as soon as its mark is in.
+    static let timeout: Duration = .seconds(60)
+
     let collector = MarkCollector()
     let webView: WKWebView
 
@@ -85,7 +89,8 @@ private final class TimingPage {
 
     /// Waits until `count` marks named `event` have come in.
     func waitForCount(of event: String, _ count: Int) async throws -> Bool {
-        for _ in 0 ..< 100 {
+        let deadline = ContinuousClock.now + Self.timeout
+        while ContinuousClock.now < deadline {
             if collector.events.count(where: { $0.event == event }) >= count {
                 return true
             }
@@ -97,7 +102,8 @@ private final class TimingPage {
 
     /// Waits until a mark matching `predicate` has come in.
     func waitForEvent(_ predicate: (WebViewLoadTimingEvent) -> Bool) async throws -> WebViewLoadTimingEvent? {
-        for _ in 0 ..< 100 {
+        let deadline = ContinuousClock.now + Self.timeout
+        while ContinuousClock.now < deadline {
             if let event = collector.events.first(where: predicate) {
                 return event
             }
