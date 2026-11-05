@@ -26,6 +26,12 @@ struct CommonUITests {
         #expect(Self.sample.formatted(style) == "2026-11-04T16:30:54.250Z")
     }
 
+    @Test("The Logs screen shows one more dot each step, up to five, then starts again")
+    func loadingDots() {
+        let dots = [0, 0.2, 0.6, 1.0, 1.4, 1.8, 2.2, 2.6, 4.2].map { LogsViewer.loadingDots(after: $0) }
+        #expect(dots == [".", ".", "..", "...", "....", ".....", ".", "..", "."])
+    }
+
     @Test func lowKelvinValue() {
         let color = componentsForColorTemperature(temperature: 1000)
         #expect(color.r.isApproximatelyEqual(to: 1.0, relativeTolerance: 0.01))
