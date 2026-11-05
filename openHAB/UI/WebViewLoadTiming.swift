@@ -263,4 +263,29 @@ enum WebViewLoadTiming {
       }
     })();
     """
+
+    /// One step of a web view navigation, for the log next to the page's own marks: they show
+    /// whether a slow start is spent before the page's first script or inside Main UI. Paths
+    /// only: no server address, and no query or fragment.
+    static func navigationLogLine(_ step: String, url: URL?) -> String {
+        guard let url else { return "navigation \(step)" }
+        let path = url.path(percentEncoded: true)
+        return "navigation \(step) \(path.isEmpty ? "/" : path)"
+    }
+
+    /// A failed navigation as a step: the error's domain and code only, its description can
+    /// contain the address.
+    static func failureStep(_ error: any Error) -> String {
+        let error = error as NSError
+        return "failed (\(error.domain) \(error.code))"
+    }
+
+    /// Which web view a load uses. A new one is a new website data store, which needs its own
+    /// web content and network processes, and they take a while to start.
+    static func webViewLogLine(isNew: Bool, isSwitch: Bool) -> String {
+        if isNew {
+            return "new web view for this home"
+        }
+        return isSwitch ? "switching to this home's web view" : "reusing the web view"
+    }
 }

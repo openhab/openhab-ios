@@ -182,6 +182,29 @@ struct WebViewLoadTimingTests {
         #expect(event?.path?.count == 200)
     }
 
+    @Test("Logs a navigation step by its path only", arguments: [
+        ("http://192.168.2.10:8080", "navigation started /"),
+        ("http://192.168.2.10:8080/overview/?token=secret#top", "navigation started /overview/"),
+        ("https://myopenhab.org/page/k%C3%BCche", "navigation started /page/k%C3%BCche"),
+        (nil, "navigation started")
+    ] as [(String?, String)])
+    func navigationLogLine(url: String?, expected: String) {
+        #expect(WebViewLoadTiming.navigationLogLine("started", url: url.flatMap(URL.init(string:))) == expected)
+    }
+
+    @Test("Logs a failed navigation without its address")
+    func failureStep() {
+        let error = URLError(.timedOut, userInfo: [NSURLErrorFailingURLStringErrorKey: "http://192.168.2.10:8080/?token=secret"])
+        #expect(WebViewLoadTiming.failureStep(error) == "failed (NSURLErrorDomain -1001)")
+    }
+
+    @Test("Logs whether a load needs a new web view")
+    func webViewLogLine() {
+        #expect(WebViewLoadTiming.webViewLogLine(isNew: true, isSwitch: true) == "new web view for this home")
+        #expect(WebViewLoadTiming.webViewLogLine(isNew: false, isSwitch: true) == "switching to this home's web view")
+        #expect(WebViewLoadTiming.webViewLogLine(isNew: false, isSwitch: false) == "reusing the web view")
+    }
+
     @Test("Logs which page a load asks for", arguments: [
         (
             WebRouteRestore.Seed(history: ["/", "/page/kitchen"], props: ["{}", "{}"], url: "/page/kitchen"),
