@@ -232,7 +232,8 @@ public actor NetworkTracker {
 
         let status = status // to prevent linter removing "self" in string interpolation
         guard status == .stopped || Set(connectionConfigurations) != Set(self.connectionConfigurations) else {
-            Logger.networkTracker.warning("NetworkTracker: Network tracking for these connections has already been started, current status: \(status.rawValue)")
+            // Callers start tracking whenever they need it; a repeat for the same connections is routine.
+            Logger.networkTracker.debug("NetworkTracker: tracking already running for these connections, status: \(status.rawValue, privacy: .public)")
             return
         }
 

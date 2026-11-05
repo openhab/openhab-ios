@@ -54,6 +54,13 @@
     } catch (e) {}
   }
 
+  // Marks for the app's load timing log, when the app installed it (WebViewLoadTiming.swift).
+  function timingMark(event, fields) {
+    try {
+      if (window.OHLoadTiming) window.OHLoadTiming.mark(event, fields)
+    } catch (e) {}
+  }
+
   function send(type, payload) {
     if (active) post({ type: type, payload: payload || {} })
   }
@@ -828,7 +835,7 @@
   function restoreProps(r) {
     var n = r.history.length
     var k = RESTORE.length
-    if (r.history[n - 1] !== RESTORE[k - 1]) return // not the pages we put back
+    if (r.history[n - 1] !== RESTORE[k - 1]) return false // not the pages we put back
     var list = []
     for (var i = 0; i < n; i++) {
       var p = {}
@@ -839,9 +846,9 @@
     }
     r.propsHistory = list
     var top = list[n - 1]
-    if (Object.keys(top).length) {
-      r.navigate(r.history[n - 1], { reloadCurrent: true, animate: false, browserHistory: false, props: top })
-    }
+    if (!Object.keys(top).length) return false
+    r.navigate(r.history[n - 1], { reloadCurrent: true, animate: false, browserHistory: false, props: top })
+    return true
   }
 
   // Framework7 ignores a navigation while another is still under way, so wait for Main UI to
@@ -854,11 +861,17 @@
       var ready = !!page && r.allowPageChange && page.route.url === RESTORE[RESTORE.length - 1]
       if (!ready && ++tries <= 100) return
       clearInterval(poll)
+      var reloaded = false
       if (ready) {
         try {
-          restoreProps(r)
+          reloaded = restoreProps(r)
         } catch (e) {}
       }
+      timingMark('routeRestore', {
+        // The log gets the path only: a query or fragment can carry values.
+        path: RESTORE[RESTORE.length - 1].split('#')[0].split('?')[0],
+        detail: !ready ? 'page did not open within 10 s' : reloaded ? 'page open, reopened with its props' : 'page open'
+      })
       restoring = false
       reportNav()
     }, 100)
