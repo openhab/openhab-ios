@@ -32,6 +32,8 @@ private final class MarkCollector: NSObject, WKScriptMessageHandler {
 private final class FakeServer: NSObject, WKURLSchemeHandler {
     static let scheme = "ohtest"
 
+    /// The paths asked for, for a failure message.
+    private(set) var served: [String] = []
     private let page: String
 
     init(page: String) {
@@ -40,6 +42,7 @@ private final class FakeServer: NSObject, WKURLSchemeHandler {
 
     func webView(_ webView: WKWebView, start task: any WKURLSchemeTask) {
         guard let url = task.request.url else { return }
+        served.append(url.path)
         let (status, type, body): (Int, String, String) = switch url.path {
         case "/": (200, "text/html", page)
         case "/rest/items": (200, "application/json", "[]")
@@ -62,6 +65,47 @@ private final class FakeServer: NSObject, WKURLSchemeHandler {
     func webView(_ webView: WKWebView, stop task: any WKURLSchemeTask) {}
 }
 
+/// What happened to the page's navigation, for a failure message: a page that never loads leaves
+/// no marks at all, which says nothing about why.
+@MainActor
+private final class NavigationRecorder: NSObject, WKNavigationDelegate {
+    private(set) var steps: [String] = []
+    private let start = ContinuousClock.now
+
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        record("started")
+    }
+
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        record("committed")
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        record("finished")
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+        record("failed before commit: \(describe(error))")
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
+        record("failed: \(describe(error))")
+    }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        record("web content process ended")
+    }
+
+    private func describe(_ error: any Error) -> String {
+        let error = error as NSError
+        return "\(error.domain) \(error.code) \(error.localizedDescription)"
+    }
+
+    private func record(_ step: String) {
+        steps.append("\(step) after \((ContinuousClock.now - start).formatted(.units(allowed: [.milliseconds])))")
+    }
+}
+
 /// A web view with the timing script, as the app installs it.
 @MainActor
 private final class TimingPage {
@@ -71,6 +115,17 @@ private final class TimingPage {
 
     let collector = MarkCollector()
     let webView: WKWebView
+    private let server: FakeServer
+    private let navigation = NavigationRecorder()
+
+    /// Everything known about the page, for a failure message.
+    var diagnosis: String {
+        """
+        marks: \(collector.events.map(\.event)); navigation: \(navigation.steps); \
+        served: \(server.served); isLoading: \(webView.isLoading), \
+        progress: \(webView.estimatedProgress), url: \(webView.url?.absoluteString ?? "none")
+        """
+    }
 
     init(page: String) {
         let controller = WKUserContentController()
@@ -78,8 +133,10 @@ private final class TimingPage {
         controller.addUserScript(WKUserScript(source: WebViewLoadTiming.script, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         let configuration = WKWebViewConfiguration()
         configuration.userContentController = controller
-        configuration.setURLSchemeHandler(FakeServer(page: page), forURLScheme: FakeServer.scheme)
+        server = FakeServer(page: page)
+        configuration.setURLSchemeHandler(server, forURLScheme: FakeServer.scheme)
         webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 390, height: 844), configuration: configuration)
+        webView.navigationDelegate = navigation
     }
 
     func load() {
@@ -96,8 +153,16 @@ private final class TimingPage {
             }
             try await Task.sleep(for: .milliseconds(100))
         }
-        Issue.record("timed out; got \(collector.events.map(\.event))")
+        timedOut()
         return false
+    }
+
+    /// Records the timeout with what the page did. Also on stderr: the CI log's formatter drops the
+    /// text of Swift Testing issues.
+    private func timedOut() {
+        let message = "WebViewLoadTimingTests timed out; \(diagnosis)"
+        FileHandle.standardError.write(Data((message + "\n").utf8))
+        Issue.record(Comment(rawValue: message))
     }
 
     /// Waits until a mark matching `predicate` has come in.
@@ -109,7 +174,7 @@ private final class TimingPage {
             }
             try await Task.sleep(for: .milliseconds(100))
         }
-        Issue.record("timed out; got \(collector.events.map(\.event))")
+        timedOut()
         return nil
     }
 }
