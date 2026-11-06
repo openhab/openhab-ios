@@ -204,12 +204,16 @@ private func makeTracker(service: MockOpenAPIService) -> NetworkTracker {
     )
 }
 
-/// Waits for the first state in `stream` satisfying `predicate`, or returns nil after `timeoutSeconds`.
+/// Waits for the first state in `stream` satisfying `predicate`, or returns nil after `timeout`.
 /// Used across NetworkTracker's Swift Testing suites in place of the XCTestExpectation/
 /// fulfillment(of:timeout:) pattern, which is an XCTestCase instance method and unavailable
 /// from a plain Swift Testing struct.
+///
+/// Every wait is for a state that comes, so the limit only matters when it doesn't. It is long
+/// because a CI runner can stall the test process: a few seconds ran out there (167 s for one
+/// test) while the state was still on its way, and the timer only has to wake once.
 private func firstState(in stream: AsyncStream<NetworkState>,
-                        timeoutSeconds: Double,
+                        timeout: Duration = .seconds(30),
                         where predicate: @escaping @Sendable (NetworkState) -> Bool) async -> NetworkState? {
     await withTaskGroup(of: NetworkState?.self) { group in
         group.addTask {
@@ -219,7 +223,7 @@ private func firstState(in stream: AsyncStream<NetworkState>,
             return nil
         }
         group.addTask {
-            try? await Task.sleep(for: .seconds(timeoutSeconds))
+            try? await Task.sleep(for: timeout)
             return nil
         }
         guard let firstCompleted = await group.next() else {
@@ -376,14 +380,14 @@ struct NetworkTrackerNetworkLossTests {
 
         await tracker.startTracking(connectionConfigurations: [defaultMockConfig])
         // The failing connection schedules a retry (sets nextRetryDate).
-        let retryScheduled = await firstState(in: stateStream, timeoutSeconds: 3.0) { $0.nextRetryDate != nil }
+        let retryScheduled = await firstState(in: stateStream) { $0.nextRetryDate != nil }
         #expect(retryScheduled != nil)
 
         // Once the path monitor is active, a network-down event must abandon that retry.
         await mockMonitor.waitForMonitoringToStart()
         await mockMonitor.simulateConnection(isConnected: false)
 
-        let networkUnavailable = await firstState(in: stateStream, timeoutSeconds: 3.0) {
+        let networkUnavailable = await firstState(in: stateStream) {
             !$0.isNetworkAvailable && $0.nextRetryDate == nil
         }
         #expect(networkUnavailable != nil)
@@ -414,7 +418,7 @@ struct NetworkTrackerConnectionLifecycleTests {
         await monitoringTask.value
         await mockMonitor.simulateConnection(isConnected: true)
 
-        let connected = await firstState(in: stateStream, timeoutSeconds: 2.0) { $0.status == .connected }
+        let connected = await firstState(in: stateStream) { $0.status == .connected }
         #expect(connected != nil)
         await networkTracker.stopTracking()
     }
@@ -427,11 +431,11 @@ struct NetworkTrackerConnectionLifecycleTests {
 
         await tracker.startTracking(connectionConfigurations: [defaultMockConfig])
 
-        let connecting = await firstState(in: stateStream, timeoutSeconds: 2.0) { $0.status == .connecting }
+        let connecting = await firstState(in: stateStream) { $0.status == .connecting }
         #expect(connecting != nil)
 
         // Continuing on the same stream guarantees this state was observed after .connecting.
-        let connected = await firstState(in: stateStream, timeoutSeconds: 2.0) { $0.status == .connected }
+        let connected = await firstState(in: stateStream) { $0.status == .connected }
         #expect(connected != nil)
 
         await tracker.stopTracking()
@@ -445,7 +449,7 @@ struct NetworkTrackerConnectionLifecycleTests {
 
         await tracker.startTracking(connectionConfigurations: [defaultMockConfig])
 
-        let retryScheduled = await firstState(in: stateStream, timeoutSeconds: 3.0) { $0.nextRetryDate != nil }
+        let retryScheduled = await firstState(in: stateStream) { $0.nextRetryDate != nil }
         #expect(retryScheduled != nil)
 
         await tracker.stopTracking()
@@ -458,7 +462,7 @@ struct NetworkTrackerConnectionLifecycleTests {
         let stateStream = await tracker.stateStream()
 
         await tracker.startTracking(connectionConfigurations: [defaultMockConfig])
-        let connected = await firstState(in: stateStream, timeoutSeconds: 2.0) { $0.status == .connected }
+        let connected = await firstState(in: stateStream) { $0.status == .connected }
         #expect(connected != nil)
 
         await tracker.stopTracking()
@@ -498,7 +502,7 @@ struct NetworkTrackerConnectionLifecycleTests {
         await mockMonitor.simulateConnection(isConnected: true)
 
         // Fallback must win within the grace window (1s) plus some headroom — well before the 5-second preferred delay.
-        let fallbackActive = await firstState(in: stateStream, timeoutSeconds: 3.0) {
+        let fallbackActive = await firstState(in: stateStream) {
             $0.activeConnection?.configuration.url == "http://fallback"
         }
         #expect(fallbackActive != nil)
