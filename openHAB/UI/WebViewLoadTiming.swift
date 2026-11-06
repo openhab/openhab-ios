@@ -65,7 +65,8 @@ struct WebViewLoadTimingEvent: Equatable {
 /// left nothing to go on.
 ///
 /// The script reports when the document starts and finishes, every REST call Main UI makes in
-/// its first minute, and each step of the item-state stream: opened, ready, first update. Times
+/// its first minute, and each step of the item-state stream: opened, ready, each chunk of data
+/// up to the first update, and the first update. Times
 /// are milliseconds since the page started loading. Queries are dropped, they can hold an access
 /// token.
 enum WebViewLoadTiming {
@@ -83,6 +84,8 @@ enum WebViewLoadTiming {
 
       var MAX_MESSAGES = 200
       var REST_WINDOW_MS = 60000
+      // Chunks logged per state stream before its first update; a stream stops being read there.
+      var MAX_CHUNKS = 20
       var sent = 0
 
       function now() {
@@ -108,7 +111,12 @@ enum WebViewLoadTiming {
       }
       window.OHLoadTiming = { mark: mark }
 
-      mark('documentStart', { path: location.pathname })
+      // A hidden page can be throttled by WebKit, so its visibility comes with the start and
+      // with every change in the first minute.
+      mark('documentStart', { path: location.pathname, detail: document.visibilityState })
+      document.addEventListener('visibilitychange', function () {
+        if (performance.now() < REST_WINDOW_MS) mark('visibility', { detail: document.visibilityState })
+      })
       document.addEventListener('DOMContentLoaded', function () {
         mark('domContentLoaded')
       })
@@ -194,6 +202,25 @@ enum WebViewLoadTiming {
         )
       }
 
+      // A block's event name, 'message' when it has none. Server keep-alives and other named
+      // events are not item states. Only names that look like names are logged, never data.
+      function eventName(block) {
+        var match = /^event:[ \\t]*(.*)$/m.exec(block)
+        if (!match) return /^data:/m.test(block) ? 'message' : 'comment'
+        var name = match[1].trim()
+        return /^[A-Za-z0-9_.-]{1,32}$/.test(name) ? name : 'other'
+      }
+
+      // e.g. '#2 58 bytes: ready' or '#3 512 bytes: message, message + partial'. Shows whether
+      // the first update arrives late on its own or held back behind other data.
+      function chunkDetail(index, bytes, blocks, rest) {
+        var names = []
+        for (var i = 0; i < blocks.length; i++) names.push(eventName(blocks[i]))
+        var detail = '#' + index + ' ' + bytes + ' bytes: ' + (names.length ? names.join(', ') : 'no complete event')
+        if (names.length && rest) detail += ' + partial'
+        return detail
+      }
+
       function readStatesBody(response) {
         var copy
         try {
@@ -206,6 +233,7 @@ enum WebViewLoadTiming {
         var decoder = new TextDecoder()
         var buffer = ''
         var ready = false
+        var chunks = 0
         function next() {
           reader.read().then(
             function (chunk) {
@@ -216,12 +244,17 @@ enum WebViewLoadTiming {
               buffer += decoder.decode(chunk.value, { stream: true })
               var blocks = buffer.split(/\\r?\\n\\r?\\n/)
               buffer = blocks.pop()
+              chunks++
+              if (chunks <= MAX_CHUNKS) {
+                mark('statesChunk', { detail: chunkDetail(chunks, chunk.value.length, blocks, buffer) })
+              }
               for (var i = 0; i < blocks.length; i++) {
-                if (/^event:\\s*ready\\s*$/m.test(blocks[i])) {
+                var name = eventName(blocks[i])
+                if (name === 'ready') {
                   if (!ready) mark('statesStreamReady')
                   ready = true
-                } else if (/^data:/m.test(blocks[i])) {
-                  mark('statesFirstUpdate')
+                } else if (name === 'message' && /^data:/m.test(blocks[i])) {
+                  mark('statesFirstUpdate', { detail: 'after ' + chunks + ' chunk(s), page ' + document.visibilityState })
                   reader.cancel().catch(function () {})
                   return
                 }

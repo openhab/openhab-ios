@@ -41,8 +41,9 @@ private final class FakeServer: NSObject, WKURLSchemeHandler {
         let (status, type, body) = switch url.path {
         case "/rest/items": (200, "application/json", "[]")
         case "/rest/ui/components/ui:page": (200, "application/json", "{}")
-        // The connection id, then one update. The stream then ends, which the page sees as an error.
-        case "/rest/events/states": (200, "text/event-stream", "event: ready\ndata: c1\n\ndata: {}\n\n")
+        // The connection id, a keep-alive, then one update. The stream then ends, which the page
+        // sees as an error.
+        case "/rest/events/states": (200, "text/event-stream", "event: ready\ndata: c1\n\nevent: alive\ndata: {}\n\ndata: {}\n\n")
         default: (404, "text/plain", "")
         }
         guard let response = HTTPURLResponse(url: url, statusCode: status, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": type]) else { return }
@@ -220,6 +221,14 @@ struct WebViewLoadTimingTests {
         for step in ["statesStreamOpen", "statesStreamReady", "statesFirstUpdate"] {
             #expect(try await page.waitForCount(of: step, 2), "\(step)")
         }
+        let chunks = page.collector.events.filter { $0.event == "statesChunk" }.compactMap(\.detail)
+        #expect(chunks.first?.hasPrefix("#1 ") == true, "\(chunks)")
+        #expect(chunks.joined(separator: "; ").contains("ready, alive, message"), "Each chunk names its events: \(chunks)")
+        #expect(!chunks.joined().contains("c1"), "Never the data")
+        let firstUpdate = page.collector.events.first { $0.event == "statesFirstUpdate" && $0.detail != nil }
+        #expect(firstUpdate?.detail?.hasPrefix("after 1 chunk(s), page ") == true, "A keep-alive is not an update: \(String(describing: firstUpdate?.detail))")
+        let start = page.collector.events.first { $0.event == "documentStart" }
+        #expect(["visible", "hidden"].contains(start?.detail), "The page's visibility at the start")
         let error = try await page.waitForEvent { $0.event == "statesStreamError" && $0.detail != "read failed" }
         #expect(error != nil, "A stream that ends is reported too")
         let dropped = try await page.waitForEvent { $0.event == "statesStreamError" && $0.detail == "read failed" }
