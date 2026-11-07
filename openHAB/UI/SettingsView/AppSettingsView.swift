@@ -18,6 +18,7 @@ struct AppSettingsView: View, SettingsSheetView {
         var idleOff = true
         var sendCrashReports = false
         var hideStatusBar = false
+        var hideNavigationBar = false
         var showSearchField = true
     }
 
@@ -40,6 +41,14 @@ struct AppSettingsView: View, SettingsSheetView {
             Section(header: Text("User Interface")) {
                 Toggle("Hide Status Bar", isOn: $current.hideStatusBar)
                 Toggle("Show Search Field in Sitemaps", isOn: $current.showSearchField)
+            }
+
+            // Own section so the footer explanation visibly belongs to this toggle only
+            Section(
+                footer: Text("Hides the navigation bar and the menu button. To show them for a few seconds, touch the screen with three fingers and hold. They stay shown while VoiceOver or Switch Control is on.")
+            ) {
+                Toggle("Hide Navigation Bar", isOn: $current.hideNavigationBar)
+                    .accessibilityIdentifier("HideNavigationBarToggle")
             }
 
             Section(header: Text("Security")) {
@@ -90,6 +99,8 @@ struct AppSettingsView: View, SettingsSheetView {
         await Preferences.shared.setIdleOff(current.idleOff)
         await Preferences.shared.setSendCrashReports(current.sendCrashReports)
         await Preferences.shared.setHideStatusBar(current.hideStatusBar)
+        await Preferences.shared.setHideNavigationBar(current.hideNavigationBar)
+        HideNavigationBarSystemSetting.write(current.hideNavigationBar)
         let showSearchField = current.showSearchField
         let sitemapDiagnosticsLogging = settingsSitemapDiagnosticsLogging
         await Preferences.shared.modifyApplicationPreferences { prefs in
@@ -105,6 +116,7 @@ extension AppSettingsView.AppSettingsSnapshot {
         idleOff = await preferences.idleOff
         sendCrashReports = await preferences.sendCrashReports
         hideStatusBar = await preferences.hideStatusBar
+        hideNavigationBar = await preferences.hideNavigationBar
         showSearchField = await (preferences.applicationPreferences).showSearchField
     }
 }

@@ -403,19 +403,15 @@ extension ToolbarMenu {
 
     @ViewBuilder
     private func mainUIMenu() -> some View {
-        // Hidden until the current home has had at least one successful fetch —
-        // consistent with how sitemaps/pages behave during the loading state.
-        if menuData.hasSuccessfullyLoaded {
-            let homeRoute = Self.mainUIHomeRoute
-            menuRow(
-                icon: AnyView(Image("openHABIcon").resizable()),
-                label: String(localized: "Home"),
-                accessibilityId: "Home"
-            ) {
-                select(.webview)
-            }
-            .background(currentRowBackground(currentMainUIRoute == homeRoute))
+        let homeRoute = Self.mainUIHomeRoute
+        menuRow(
+            icon: AnyView(Image("openHABIcon").resizable()),
+            label: String(localized: "Home"),
+            accessibilityId: "Home"
+        ) {
+            select(.webview)
         }
+        .background(currentRowBackground(currentMainUIRoute == homeRoute))
         if menuData.isLoading, menuData.uiPages.isEmpty {
             loadingRow(label: String(localized: "Pages"))
         } else {

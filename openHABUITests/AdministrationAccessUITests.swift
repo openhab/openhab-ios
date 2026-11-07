@@ -47,6 +47,10 @@ final class AdministrationAccessUITests: XCTestCase {
         header.activityIndicators.firstMatch
     }
 
+    private var accountEntry: XCUIElement {
+        app.descendants(matching: .any).matching(identifier: "MainUIEntry-account").firstMatch
+    }
+
     override func setUp() async throws {
         try await super.setUp()
         continueAfterFailure = false
@@ -139,6 +143,61 @@ final class AdministrationAccessUITests: XCTestCase {
         XCTAssertTrue(settingsEntry.waitForExistence(timeout: 4), "Without sign-in everybody is an administrator")
         XCTAssertFalse(spinner.exists)
         XCTAssertFalse(lock.exists)
+    }
+
+    // MARK: - Entries and state
+
+    /// Opens or closes Administration. Its state is kept per home, so it may already be either.
+    private func setAdministration(open: Bool) {
+        guard settingsEntry.waitForExistence(timeout: 2) != open else { return }
+        header.tap()
+        if open {
+            XCTAssertTrue(settingsEntry.waitForExistence(timeout: 2), "Opening Administration shows its entries")
+        } else {
+            XCTAssertTrue(settingsEntry.waitForNonExistence(timeout: 2), "Closing Administration hides its entries")
+        }
+    }
+
+    /// Starts the app again with the same launch environment, as after the user quit it.
+    private func relaunch() {
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(header.waitForExistence(timeout: 8), "Administration is in the menu after a restart")
+    }
+
+    func testAdministratorSeesTheSignedInAccount() {
+        launch(server: signInServer, auth: administrator, timeout: 600)
+        setAdministration(open: true)
+        // The administrator's entries push the account below the fold of a short menu.
+        let menu = app.scrollViews["ToolbarMenuScrollView"]
+        for _ in 0 ..< 3 where !accountEntry.exists {
+            menu.swipeUp()
+        }
+        XCTAssertTrue(accountEntry.exists, "The signed-in user's account is listed in Administration")
+    }
+
+    func testTappingTheLockSignsInAndClosesTheMenu() {
+        launch(server: signInServer, auth: signedOut, timeout: 600)
+        XCTAssertTrue(lock.waitForExistence(timeout: 4))
+        header.tap()
+        XCTAssertTrue(app.buttons["App Settings"].waitForNonExistence(timeout: 4), "Main UI signs in on its own page, so the menu closes")
+        XCTAssertFalse(settingsEntry.exists, "A locked Administration never opens")
+    }
+
+    func testAdministrationIsRemembered() {
+        launch(server: signInServer, auth: administrator, timeout: 600)
+        setAdministration(open: false)
+        setAdministration(open: true)
+
+        relaunch()
+        XCTAssertTrue(settingsEntry.waitForExistence(timeout: 4), "Administration stays open after a restart")
+
+        setAdministration(open: false)
+        relaunch()
+        XCTAssertFalse(settingsEntry.waitForExistence(timeout: 2), "Administration stays closed after a restart")
+
+        // The state outlives the test, and the others expect Administration open.
+        setAdministration(open: true)
     }
 
     // MARK: - On a sitemap

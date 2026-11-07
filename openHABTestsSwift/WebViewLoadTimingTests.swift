@@ -32,20 +32,18 @@ private final class MarkCollector: NSObject, WKScriptMessageHandler {
 private final class FakeServer: NSObject, WKURLSchemeHandler {
     static let scheme = "ohtest"
 
-    private let page: String
-
-    init(page: String) {
-        self.page = page
-    }
+    /// The paths asked for, for a failure message.
+    private(set) var served: [String] = []
 
     func webView(_ webView: WKWebView, start task: any WKURLSchemeTask) {
         guard let url = task.request.url else { return }
-        let (status, type, body): (Int, String, String) = switch url.path {
-        case "/": (200, "text/html", page)
+        served.append(url.path)
+        let (status, type, body) = switch url.path {
         case "/rest/items": (200, "application/json", "[]")
         case "/rest/ui/components/ui:page": (200, "application/json", "{}")
-        // The connection id, then one update. The stream then ends, which the page sees as an error.
-        case "/rest/events/states": (200, "text/event-stream", "event: ready\ndata: c1\n\ndata: {}\n\n")
+        // The connection id, a keep-alive, then one update. The stream then ends, which the page
+        // sees as an error.
+        case "/rest/events/states": (200, "text/event-stream", "event: ready\ndata: c1\n\nevent: alive\ndata: {}\n\ndata: {}\n\n")
         default: (404, "text/plain", "")
         }
         guard let response = HTTPURLResponse(url: url, statusCode: status, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": type]) else { return }
@@ -62,6 +60,47 @@ private final class FakeServer: NSObject, WKURLSchemeHandler {
     func webView(_ webView: WKWebView, stop task: any WKURLSchemeTask) {}
 }
 
+/// What happened to the page's navigation, for a failure message: a page that never loads leaves
+/// no marks at all, which says nothing about why.
+@MainActor
+private final class NavigationRecorder: NSObject, WKNavigationDelegate {
+    private(set) var steps: [String] = []
+    private let start = ContinuousClock.now
+
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        record("started")
+    }
+
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        record("committed")
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        record("finished")
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+        record("failed before commit: \(describe(error))")
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
+        record("failed: \(describe(error))")
+    }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        record("web content process ended")
+    }
+
+    private func describe(_ error: any Error) -> String {
+        let error = error as NSError
+        return "\(error.domain) \(error.code) \(error.localizedDescription)"
+    }
+
+    private func record(_ step: String) {
+        steps.append("\(step) after \((ContinuousClock.now - start).formatted(.units(allowed: [.milliseconds])))")
+    }
+}
+
 /// A web view with the timing script, as the app installs it.
 @MainActor
 private final class TimingPage {
@@ -71,6 +110,18 @@ private final class TimingPage {
 
     let collector = MarkCollector()
     let webView: WKWebView
+    private let page: String
+    private let server = FakeServer()
+    private let navigation = NavigationRecorder()
+
+    /// Everything known about the page, for a failure message.
+    var diagnosis: String {
+        """
+        marks: \(collector.events.map(\.event)); navigation: \(navigation.steps); \
+        served: \(server.served); isLoading: \(webView.isLoading), \
+        progress: \(webView.estimatedProgress), url: \(webView.url?.absoluteString ?? "none")
+        """
+    }
 
     init(page: String) {
         let controller = WKUserContentController()
@@ -78,13 +129,17 @@ private final class TimingPage {
         controller.addUserScript(WKUserScript(source: WebViewLoadTiming.script, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         let configuration = WKWebViewConfiguration()
         configuration.userContentController = controller
-        configuration.setURLSchemeHandler(FakeServer(page: page), forURLScheme: FakeServer.scheme)
+        configuration.setURLSchemeHandler(server, forURLScheme: FakeServer.scheme)
         webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 390, height: 844), configuration: configuration)
+        webView.navigationDelegate = navigation
+        self.page = page
     }
 
+    /// Loads the page as HTML at the fake server's address, so its requests still go there. Loading
+    /// the address itself never started on CI's simulator: no navigation step and no request to the
+    /// fake server within a minute, while the pages loaded as HTML in the other suites worked.
     func load() {
-        guard let url = URL(string: "\(FakeServer.scheme)://openhab/") else { return }
-        webView.load(URLRequest(url: url))
+        webView.loadHTMLString(page, baseURL: URL(string: "\(FakeServer.scheme)://openhab/"))
     }
 
     /// Waits until `count` marks named `event` have come in.
@@ -96,8 +151,16 @@ private final class TimingPage {
             }
             try await Task.sleep(for: .milliseconds(100))
         }
-        Issue.record("timed out; got \(collector.events.map(\.event))")
+        timedOut()
         return false
+    }
+
+    /// Records the timeout with what the page did. Also on stderr: the CI log's formatter drops the
+    /// text of Swift Testing issues.
+    private func timedOut() {
+        let message = "WebViewLoadTimingTests timed out; \(diagnosis)"
+        FileHandle.standardError.write(Data((message + "\n").utf8))
+        Issue.record(Comment(rawValue: message))
     }
 
     /// Waits until a mark matching `predicate` has come in.
@@ -109,7 +172,7 @@ private final class TimingPage {
             }
             try await Task.sleep(for: .milliseconds(100))
         }
-        Issue.record("timed out; got \(collector.events.map(\.event))")
+        timedOut()
         return nil
     }
 }
@@ -158,6 +221,14 @@ struct WebViewLoadTimingTests {
         for step in ["statesStreamOpen", "statesStreamReady", "statesFirstUpdate"] {
             #expect(try await page.waitForCount(of: step, 2), "\(step)")
         }
+        let chunks = page.collector.events.filter { $0.event == "statesChunk" }.compactMap(\.detail)
+        #expect(chunks.first?.hasPrefix("#1 ") == true, "\(chunks)")
+        #expect(chunks.joined(separator: "; ").contains("ready, alive, message"), "Each chunk names its events: \(chunks)")
+        #expect(!chunks.joined().contains("c1"), "Never the data")
+        let firstUpdate = page.collector.events.first { $0.event == "statesFirstUpdate" && $0.detail != nil }
+        #expect(firstUpdate?.detail?.hasPrefix("after 1 chunk(s), page ") == true, "A keep-alive is not an update: \(String(describing: firstUpdate?.detail))")
+        let start = page.collector.events.first { $0.event == "documentStart" }
+        #expect(["visible", "hidden"].contains(start?.detail), "The page's visibility at the start")
         let error = try await page.waitForEvent { $0.event == "statesStreamError" && $0.detail != "read failed" }
         #expect(error != nil, "A stream that ends is reported too")
         let dropped = try await page.waitForEvent { $0.event == "statesStreamError" && $0.detail == "read failed" }
@@ -186,6 +257,29 @@ struct WebViewLoadTimingTests {
     func capsLength() {
         let event = WebViewLoadTimingEvent(body: ["event": "x", "ms": NSNumber(value: 0), "path": String(repeating: "a", count: 1000)] as [String: Any])
         #expect(event?.path?.count == 200)
+    }
+
+    @Test("Logs a navigation step by its path only", arguments: [
+        ("http://192.168.2.10:8080", "navigation started /"),
+        ("http://192.168.2.10:8080/overview/?token=secret#top", "navigation started /overview/"),
+        ("https://myopenhab.org/page/k%C3%BCche", "navigation started /page/k%C3%BCche"),
+        (nil, "navigation started")
+    ] as [(String?, String)])
+    func navigationLogLine(url: String?, expected: String) {
+        #expect(WebViewLoadTiming.navigationLogLine("started", url: url.flatMap(URL.init(string:))) == expected)
+    }
+
+    @Test("Logs a failed navigation without its address")
+    func failureStep() {
+        let error = URLError(.timedOut, userInfo: [NSURLErrorFailingURLStringErrorKey: "http://192.168.2.10:8080/?token=secret"])
+        #expect(WebViewLoadTiming.failureStep(error) == "failed (NSURLErrorDomain -1001)")
+    }
+
+    @Test("Logs whether a load needs a new web view")
+    func webViewLogLine() {
+        #expect(WebViewLoadTiming.webViewLogLine(isNew: true, isSwitch: true) == "new web view for this home")
+        #expect(WebViewLoadTiming.webViewLogLine(isNew: false, isSwitch: true) == "switching to this home's web view")
+        #expect(WebViewLoadTiming.webViewLogLine(isNew: false, isSwitch: false) == "reusing the web view")
     }
 
     @Test("Logs which page a load asks for", arguments: [

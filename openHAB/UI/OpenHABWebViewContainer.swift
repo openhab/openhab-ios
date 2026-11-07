@@ -154,6 +154,9 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
             guard let url = navigationAction.request.url else { return .allow }
             Logger.viewController.info("decidePolicyFor - url: \(url.absoluteString)")
+            if navigationAction.targetFrame?.isMainFrame == true {
+                logNavigation("requested", url: url)
+            }
             if !url.isNativeWebURL {
                 // JS-triggered custom-scheme navigations (e.g. window.location = 'shortcuts://...')
                 // arrive here; anchor taps are caught by the injected JS handler first.
@@ -206,6 +209,9 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
             if let response = navigationResponse.response as? HTTPURLResponse {
                 Logger.viewController.info("navigationResponse: \(response.statusCode)")
+                if navigationResponse.isForMainFrame {
+                    logNavigation("response \(response.statusCode)", url: response.url)
+                }
                 if response.statusCode >= 400 {
                     viewModel.isLoading = true
                     return .cancel
@@ -216,16 +222,19 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
 
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation?) {
             Logger.viewController.info("didStartProvisionalNavigation - webView.url: \(String(describing: webView.url?.description))")
+            logNavigation("started", url: webView.url)
             viewModel.isLoading = true
             viewModel.handleNavigationStart()
         }
 
         func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+            logNavigation("committed", url: webView.url)
             viewModel.bridge.recordCommit(navigation, url: webView.url)
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {
             Logger.viewController.error("didFail - webView.url: \(String(describing: webView.url?.description))")
+            logNavigation(WebViewLoadTiming.failureStep(error), url: webView.url)
             if let urlError = error as? URLError, urlError.code == .cancelled {
                 return
             }
@@ -234,6 +243,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             Logger.viewController.info("didFinish - webView.url: \(String(describing: webView.url?.description))")
+            logNavigation("finished", url: webView.url)
             viewModel.handleDidFinish()
         }
 
@@ -258,11 +268,18 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
 
         func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
             Logger.viewController.warning("webViewWebContentProcessDidTerminate - reloading view")
+            logNavigation("stopped (web content process ended)", url: webView.url)
             viewModel.reloadView()
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+            logNavigation(WebViewLoadTiming.failureStep(error), url: webView.url)
             viewModel.reloadView()
+        }
+
+        /// Notice, like the page's marks, so the steps are still there when the user exports the log.
+        private func logNavigation(_ step: String, url: URL?) {
+            Logger.webViewLoad.notice("Main UI load: \(WebViewLoadTiming.navigationLogLine(step, url: url), privacy: .public)")
         }
 
         // MARK: - WKUIDelegate
