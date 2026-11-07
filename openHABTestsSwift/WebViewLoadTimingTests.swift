@@ -135,11 +135,23 @@ private final class TimingPage {
         self.page = page
     }
 
-    /// Loads the page as HTML at the fake server's address, so its requests still go there. Loading
-    /// the address itself never started on CI's simulator: no navigation step and no request to the
-    /// fake server within a minute, while the pages loaded as HTML in the other suites worked.
-    func load() {
+    /// Loads the page as HTML at the fake server's address, so its requests still go there, and
+    /// waits until it has loaded.
+    ///
+    /// The wait asks the page instead of watching the clock. A CI simulator can stall the web
+    /// content process for minutes before the page starts: in one run every web view test took
+    /// ten minutes. The shim tests, which ask the page, passed; this one, counting a minute per
+    /// mark, ran out before its page had started. Asking waits as long as the process does.
+    func load() async {
         webView.loadHTMLString(page, baseURL: URL(string: "\(FakeServer.scheme)://openhab/"))
+        let loaded = "String(location.protocol === '\(FakeServer.scheme):' && document.readyState === 'complete')"
+        for _ in 0 ..< 600 {
+            if await (try? webView.evaluateJavaScript(loaded)) as? String == "true" {
+                return
+            }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        timedOut()
     }
 
     /// Waits until `count` marks named `event` have come in.
@@ -197,7 +209,7 @@ struct WebViewLoadTimingTests {
           fetch('/rest/events/states?drop').then(function (r) { return r.text() }).catch(function () {});
         </script></body></html>
         """)
-        page.load()
+        await page.load()
 
         _ = try await page.waitForEvent { $0.event == "load" }
         let names = page.collector.events.map(\.event)
