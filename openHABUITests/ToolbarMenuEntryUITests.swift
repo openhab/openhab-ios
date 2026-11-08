@@ -69,7 +69,7 @@ final class ToolbarMenuEntryUITests: XCTestCase {
         app.useEnglishLocale()
         app.launchEnvironment["UITest"] = "1"
         app.launchEnvironment["UITestServer"] = server
-        app.launchEnvironment["UITestMenuNotifications"] = "1"
+        app.launchEnvironment["UITestNotifications"] = "1"
     }
 
     override func tearDown() async throws {
@@ -123,7 +123,6 @@ final class ToolbarMenuEntryUITests: XCTestCase {
 
         let changed = expectation(for: NSPredicate { _, _ in self.screen != before }, evaluatedWith: nil)
         let result = XCTWaiter().wait(for: [changed], timeout: 10)
-        print("MEASURE \(name) before=\(before) after=\(screen)") // TEMPORARY
         XCTAssertEqual(
             result, .completed,
             "Choosing '\(name)' showed nothing new: the screen is still \(before)"
@@ -132,9 +131,44 @@ final class ToolbarMenuEntryUITests: XCTestCase {
 
     // MARK: - Entries
 
+    /// The notifications open over the menu, which stays, like the settings.
     func testNotificationsEntryShowsSomething() {
         launch()
-        choose(notificationsRow, named: "Notifications")
+        choose(notificationsRow, named: "Notifications", leavesMenu: false)
+    }
+
+    private func openNotifications() {
+        launch()
+        app.buttons["HamburgerButton"].tap()
+        XCTAssertTrue(notificationsRow.waitForExistence(timeout: 20), "Notifications is in the menu")
+        notificationsRow.tap()
+        XCTAssertTrue(app.staticTexts["UITest Front Door Alert"].waitForExistence(timeout: 10), "The notifications show")
+    }
+
+    /// Closing the notifications leaves the menu where it was.
+    func testClosingTheNotificationsKeepsTheMenu() {
+        openNotifications()
+
+        app.buttons["Back"].tap()
+
+        let closed = expectation(
+            for: NSPredicate(format: "exists == false"),
+            evaluatedWith: app.staticTexts["UITest Front Door Alert"]
+        )
+        wait(for: [closed], timeout: 5)
+        XCTAssertTrue(menuIsOpen.waitForExistence(timeout: 5), "The menu stays open behind the notifications")
+    }
+
+    /// Choosing a notification action takes the user elsewhere, so the menu goes too.
+    func testChoosingANotificationActionClosesTheMenu() {
+        openNotifications()
+
+        app.staticTexts["UITest Front Door Alert"].press(forDuration: 1)
+        app.buttons["Open Camera"].tap()
+
+        let closed = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: menuIsOpen)
+        wait(for: [closed], timeout: 5)
+        XCTAssertFalse(app.staticTexts["UITest Front Door Alert"].exists, "The notifications are gone")
     }
 
     func testSitemapEntryShowsSomething() {
