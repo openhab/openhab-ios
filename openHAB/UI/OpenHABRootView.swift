@@ -526,8 +526,6 @@ private extension OpenHABRootView {
                 .id("\(name)-\(state.navigationPath.last?.pageLink ?? "")-\(sitemapResetID)")
         case .tile:
             nativeBarContent(tileTitle: currentViewTitle)
-        case .browser:
-            preconditionFailure("Modal/transient targets must never become currentContent")
         }
     }
 
@@ -622,8 +620,8 @@ private extension OpenHABRootView {
                 if let url = URL(string: url) {
                     webViewModel.loadTilePage(url)
                 }
-            default:
-                break // modal/transient targets never reach switchContent
+            case .mainUIPage:
+                break // Not passed to this function: `showMainUI` sets Main UI pages itself
             }
         } else {
             let wasShowingTile = switch currentContent {
@@ -644,8 +642,8 @@ private extension OpenHABRootView {
                 if let url = URL(string: url) {
                     webViewModel.loadTilePage(url)
                 }
-            default:
-                break // modal/transient targets never reach switchContent
+            case .mainUIPage:
+                break // Not passed to this function: `showMainUI` sets Main UI pages itself
             }
 
             if !(cachedHomePrefs?.demomode ?? false) {
@@ -654,7 +652,7 @@ private extension OpenHABRootView {
                 case .webview: viewName = "web"
                 case .sitemap: viewName = "sitemap"
                 case .tile: viewName = "web" // treat tile as web for persistence
-                default: return // modal/transient targets never reach switchContent
+                case .mainUIPage: return // Not passed to this function: `showMainUI` sets Main UI pages itself
                 }
                 let capturedViewName = viewName
                 Task {
@@ -697,10 +695,6 @@ private extension OpenHABRootView {
         case let .tile(urlString):
             currentViewTitle = menuData.label(forURL: urlString)
             switchToTile(urlString)
-        case let .browser(urlString):
-            if let url = URL(string: urlString) {
-                SafariPresenter.present(url, entersReaderIfAvailable: true)
-            }
         }
     }
 
@@ -806,8 +800,6 @@ private extension OpenHABRootView {
             }
         case .sitemap:
             sitemapResetID = UUID()
-        case .browser:
-            break
         }
     }
 }

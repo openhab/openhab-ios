@@ -25,7 +25,6 @@ enum TargetController: Equatable {
     /// returns to this page rather than the MainUI root.
     case mainUIPage(String)
     case sitemap(String, navigationState: SitemapNavigationState = .ready([]))
-    case browser(String)
     case tile(String)
 }
 
@@ -193,7 +192,7 @@ struct ToolbarMenu: View {
         switch currentContent {
         case .webview: Self.mainUIHomeRoute
         case let .mainUIPage(route): route
-        case .sitemap, .browser, .tile: nil
+        case .sitemap, .tile: nil
         }
     }
 
