@@ -281,7 +281,6 @@ struct OpenHABRootView: View {
     @State private var currentContent: TargetController = .webview
     @State private var currentViewTitle = ""
     @State private var activeNetworkConnection: ConnectionInfo? = MainActorNetworkTracker.shared.activeConnection
-    @State private var showNotifications = false
     @State private var sitemapResetID = UUID()
     @State private var cachedHomePrefs: HomePreferences?
     /// What was showing when the user started signing in, for the way back if they cancel.
@@ -364,11 +363,6 @@ struct OpenHABRootView: View {
                 if let fingers = env["UITestHoldFingers"].flatMap(Int.init) {
                     holdProgress.fingers = fingers
                     holdProgress.isHolding = env["UITestHoldHolding"] != nil
-                }
-                if env["UITestNotifications"] != nil {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        showNotifications = true
-                    }
                 }
                 if env["UITestWebViewMode"] != nil {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -454,9 +448,6 @@ struct OpenHABRootView: View {
                     cachedHomePrefs = prefs
                 }
             }
-            .sheet(isPresented: $showNotifications) {
-                NavigationView { NotificationsView() }
-            }
             .alert(
                 networkService.certificateAlert?.title ?? "",
                 isPresented: Binding(
@@ -535,7 +526,7 @@ private extension OpenHABRootView {
                 .id("\(name)-\(state.navigationPath.last?.pageLink ?? "")-\(sitemapResetID)")
         case .tile:
             nativeBarContent(tileTitle: currentViewTitle)
-        case .notifications, .browser:
+        case .browser:
             preconditionFailure("Modal/transient targets must never become currentContent")
         }
     }
@@ -703,8 +694,6 @@ private extension OpenHABRootView {
                 await Preferences.shared.modifyActiveHome { @Sendable prefs in prefs.defaultSitemap = capturedName }
             }
             switchContent(to: .sitemap(name))
-        case .notifications:
-            showNotifications = true
         case let .tile(urlString):
             currentViewTitle = menuData.label(forURL: urlString)
             switchToTile(urlString)
@@ -817,7 +806,7 @@ private extension OpenHABRootView {
             }
         case .sitemap:
             sitemapResetID = UUID()
-        case .notifications, .browser:
+        case .browser:
             break
         }
     }

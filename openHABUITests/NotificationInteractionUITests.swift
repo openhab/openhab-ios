@@ -66,9 +66,16 @@ final class NotificationInteractionUITests: XCTestCase {
         app.launch()
     }
 
+    /// Opens the list the way a user does, from the menu. `UITestNotifications` puts the entry in
+    /// the menu and fills the list.
     private func launchWithNotificationList() {
         app.launchEnvironment["UITestNotifications"] = "1"
         app.launch()
+
+        let menuButton = app.buttons["HamburgerButton"]
+        XCTAssertTrue(menuButton.waitForExistence(timeout: 10), "The menu button is there")
+        menuButton.tap()
+        waitForButton("Notifications", timeout: 5).tap()
     }
 
     // MARK: - Toast action button tests
@@ -130,7 +137,7 @@ final class NotificationInteractionUITests: XCTestCase {
     func testNotificationRowWithActionsShowsButton() {
         launchWithNotificationList()
 
-        // Notifications sheet is auto-opened after 0.5 s; wait for mock data to load
+        // Wait for the mock data to load
         let alertText = waitFor("UITest Front Door Alert")
         alertText.press(forDuration: 1)
         let button = waitForButton("Open Camera")

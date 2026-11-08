@@ -181,6 +181,9 @@ struct NotificationsView<Tracker: NetworkTracking>: View {
     var networkTracker: Tracker
     @State var notifications: [OpenHABNotification] = []
     let loadNotifications: NotificationLoader
+    /// Runs when the user chooses a notification or one of its actions, but not when they just
+    /// close the list.
+    var onActionChosen: () -> Void = {}
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -188,6 +191,7 @@ struct NotificationsView<Tracker: NetworkTracking>: View {
             if let connection = networkTracker.activeConnection {
                 NotificationRow(notification: notification, connection: connection) { action in
                     executeAction(action, cloudUserId: notification.cloudUserId)
+                    onActionChosen()
                     dismiss()
                 }
                 .listRowBackground(Color.clear)
@@ -238,7 +242,8 @@ struct NotificationsView<Tracker: NetworkTracking>: View {
 }
 
 extension NotificationsView where Tracker == MainActorNetworkTracker {
-    init(notifications: [OpenHABNotification] = []) {
+    init(notifications: [OpenHABNotification] = [], onActionChosen: @escaping () -> Void = {}) {
+        self.onActionChosen = onActionChosen
         #if DEBUG
         if ProcessInfo.processInfo.environment["UITestNotifications"] != nil {
             networkTracker = MainActorNetworkTracker.shared
