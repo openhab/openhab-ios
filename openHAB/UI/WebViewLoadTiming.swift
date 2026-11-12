@@ -66,9 +66,10 @@ struct WebViewLoadTimingEvent: Equatable {
 ///
 /// The script reports when the document starts and finishes, every REST call Main UI makes in
 /// its first minute, and each step of the item-state stream: opened, ready, each chunk of data
-/// up to the first update, and the first update. Times
-/// are milliseconds since the page started loading. Queries are dropped, they can hold an access
-/// token.
+/// up to the first update, and the first update. It also reports the protocol the first REST
+/// call came over: over HTTP/2, WebKit can hold the end of a large state event until the next
+/// data arrives, seconds later. Times are milliseconds since the page started
+/// loading. Queries are dropped, they can hold an access token.
 enum WebViewLoadTiming {
     /// The message handler the script posts to.
     static let messageHandlerName = "loadTiming"
@@ -126,6 +127,31 @@ enum WebViewLoadTiming {
 
       var STATES = /\\/rest\\/events\\/states\\/?$/
       var REST = /\\/rest\\//
+
+      // Over HTTP/2, WebKit can hold the end of a large state event until more data arrives on
+      // the stream, seconds later (#1380). The first REST call that names its protocol shows
+      // which one the item-state stream's connection uses.
+      function protocolOf(entry) {
+        var protocol = entry.nextHopProtocol
+        return /^[A-Za-z0-9._\\/-]{1,16}$/.test(protocol) ? protocol : 'other'
+      }
+
+      if (window.PerformanceObserver) {
+        try {
+          var restProtocol = new PerformanceObserver(function (list) {
+            var entries = list.getEntries()
+            for (var i = 0; i < entries.length; i++) {
+              var path = pathOf(entries[i].name)
+              if (REST.test(path) && entries[i].nextHopProtocol) {
+                mark('protocol', { path: path, detail: protocolOf(entries[i]) })
+                restProtocol.disconnect()
+                return
+              }
+            }
+          })
+          restProtocol.observe({ type: 'resource', buffered: true })
+        } catch (e) {}
+      }
 
       function isEarlyRest(path) {
         return REST.test(path) && performance.now() < REST_WINDOW_MS

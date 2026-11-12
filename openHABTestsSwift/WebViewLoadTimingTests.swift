@@ -123,9 +123,14 @@ private final class TimingPage {
         """
     }
 
-    init(page: String) {
+    /// - Parameter before: a script that runs ahead of the timing script, e.g. to stand in for
+    ///   what WebKit only fills in for a real network connection.
+    init(page: String, before: String? = nil) {
         let controller = WKUserContentController()
         controller.add(collector, name: WebViewLoadTiming.messageHandlerName)
+        if let before {
+            controller.addUserScript(WKUserScript(source: before, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        }
         controller.addUserScript(WKUserScript(source: WebViewLoadTiming.script, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         let configuration = WKWebViewConfiguration()
         configuration.userContentController = controller
@@ -208,6 +213,23 @@ struct WebViewLoadTimingTests {
           fetch('/rest/events/states?accessToken=secret').then(function (r) { return r.text() }).then(function (body) { window.__fetchedStates = body });
           fetch('/rest/events/states?drop').then(function (r) { return r.text() }).catch(function () {});
         </script></body></html>
+        """, before: """
+        // The fake server is no network connection, so WebKit names no protocol: these entries
+        // are what a real one reports.
+        window.PerformanceObserver = function (callback) {
+          this.observe = function () {
+            var list = { getEntries: function () {
+              return [
+                { name: location.origin + '/images/logo.png', nextHopProtocol: 'h2' },
+                { name: location.origin + '/rest/items?accessToken=secret', nextHopProtocol: '' },
+                { name: location.origin + '/rest/tags?accessToken=secret', nextHopProtocol: 'h2' },
+                { name: location.origin + '/rest/ui/tiles', nextHopProtocol: 'http/1.1' }
+              ]
+            } }
+            setTimeout(function () { callback(list) }, 0)
+          }
+          this.disconnect = function () {}
+        }
         """)
         await page.load()
 
@@ -217,6 +239,10 @@ struct WebViewLoadTimingTests {
         let domReady = try #require(names.firstIndex(of: "domContentLoaded"))
         let loaded = try #require(names.firstIndex(of: "load"))
         #expect(domReady < loaded)
+        _ = try await page.waitForEvent { $0.event == "protocol" }
+        let protocols = page.collector.events.filter { $0.event == "protocol" }
+        #expect(protocols.map(\.path) == ["/rest/tags"], "Only the first REST call that names its protocol, without its query")
+        #expect(protocols.first?.detail == "h2")
 
         let xhr = try await page.waitForEvent { $0.event == "rest" && $0.path == "/rest/items" }
         #expect(xhr?.method == "GET")
