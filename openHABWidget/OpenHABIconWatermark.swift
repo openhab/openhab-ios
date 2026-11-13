@@ -28,15 +28,15 @@ struct OpenHABIconWatermark: View {
 
 /// Returns an SF Symbol icon for the given openHAB item type
 func itemTypeIcon(for type: OpenHABItem.ItemType?) -> SFSymbol {
-    guard let type else { return .circleFill }
     switch type {
-    case .switchItem: return .power
-    case .color: return .paintpalette
-    case .dimmer: return .lightMax
-    case .number: return .number
-    case .stringItem: return .textformat
-    case .contact: return .doorLeftHandOpen
-    case .rollershutter: return .blindsVerticalClosed
-    default: return .circleFill
+    case nil: .circleFill
+    case .switchItem: .power
+    case .color: .paintpalette
+    case .dimmer: .lightMax
+    case .number: .number
+    case .stringItem: .textformat
+    case .contact: .doorLeftHandOpen
+    case .rollershutter: .blindsVerticalClosed
+    default: .circleFill
     }
 }

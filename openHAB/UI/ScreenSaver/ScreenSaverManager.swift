@@ -201,9 +201,8 @@ final class ScreenSaverManager: NSObject {
     }
 
     private func restoreBrightnessIfNeeded() {
-        guard let original = previousBrightness else { return }
+        guard let original = previousBrightness.take() else { return }
         screen?.brightness = original
-        previousBrightness = nil
     }
 
     /// This is used fo testing the screen saver in the Settings view (before settings are saved)

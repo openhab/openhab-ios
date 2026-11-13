@@ -665,8 +665,7 @@ extension SitemapPageViewModel {
         // of origin. Checking only .initialPoll was insufficient because the loader emits
         // .initialFetch(nil) when the server returns no page, skipping updateUI entirely;
         // the next update arrives as .longPolling and the destination was never consumed.
-        if let nav = pendingLinkedPageNavigation {
-            pendingLinkedPageNavigation = nil
+        if let nav = pendingLinkedPageNavigation.take() {
             navigationPath.append(nav)
         }
 
