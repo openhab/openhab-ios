@@ -20,7 +20,7 @@ struct SettingsSheetTests {
     @Test("Clean snapshot equals itself — isDirty should be false")
     func cleanSnapshotIsNotDirty() {
         let snap = AppSettingsView.AppSettingsSnapshot(
-            idleOff: true, sendCrashReports: false, hideStatusBar: false, showSearchField: true
+            idleOff: true, sendCrashReports: false, hideStatusBar: false, hideNavigationBar: false, showSearchField: true
         )
         #expect(snap == snap)
     }
@@ -28,7 +28,7 @@ struct SettingsSheetTests {
     @Test("Any changed field produces an unequal snapshot — isDirty should become true")
     func changedFieldMarksDirty() {
         let initial = AppSettingsView.AppSettingsSnapshot(
-            idleOff: true, sendCrashReports: false, hideStatusBar: false, showSearchField: true
+            idleOff: true, sendCrashReports: false, hideStatusBar: false, hideNavigationBar: false, showSearchField: true
         )
         var modified = initial
         modified.idleOff = false
@@ -38,7 +38,7 @@ struct SettingsSheetTests {
     @Test("Multiple changed fields are all detected")
     func multipleChangesAllDetected() {
         let initial = AppSettingsView.AppSettingsSnapshot(
-            idleOff: false, sendCrashReports: false, hideStatusBar: false, showSearchField: true
+            idleOff: false, sendCrashReports: false, hideStatusBar: false, hideNavigationBar: false, showSearchField: true
         )
         var current = initial
         current.hideStatusBar = true
@@ -49,7 +49,7 @@ struct SettingsSheetTests {
     @Test("Reverting to initial snapshot clears dirty state")
     func revertRestoresCleanState() {
         let initial = AppSettingsView.AppSettingsSnapshot(
-            idleOff: false, sendCrashReports: true, hideStatusBar: true, showSearchField: false
+            idleOff: false, sendCrashReports: true, hideStatusBar: true, hideNavigationBar: false, showSearchField: false
         )
         var current = initial
         current.idleOff = true

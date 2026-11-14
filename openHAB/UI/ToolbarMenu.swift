@@ -25,8 +25,6 @@ enum TargetController: Equatable {
     /// returns to this page rather than the MainUI root.
     case mainUIPage(String)
     case sitemap(String, navigationState: SitemapNavigationState = .ready([]))
-    case notifications
-    case browser(String)
     case tile(String)
 }
 
@@ -169,6 +167,7 @@ struct ToolbarMenu: View {
     @State private var homeDetailsCollapsed = false
     @State private var showAppSettings = false
     @State private var showCurrentHomeSettings = false
+    @State private var showNotifications = false
     @State private var sitemapForWatch: String?
     @State private var sitemapForCarPlay: String?
     @State private var cachedHomePrefs: HomePreferences?
@@ -193,7 +192,7 @@ struct ToolbarMenu: View {
         switch currentContent {
         case .webview: Self.mainUIHomeRoute
         case let .mainUIPage(route): route
-        case .sitemap, .notifications, .browser, .tile: nil
+        case .sitemap, .tile: nil
         }
     }
 
@@ -232,6 +231,11 @@ struct ToolbarMenu: View {
                     HomeSettingsView()
                 }
             }
+            .sheet(isPresented: $showNotifications) {
+                // Closing the notifications leaves the menu as it was. Choosing one of their actions
+                // takes the user elsewhere, so the menu closes, and the sheet that hangs off it.
+                NavigationView { NotificationsView { isPresented = false } }
+            }
             .task {
                 for await prefs in await Preferences.shared.currentHomePreferencesStream {
                     cachedHomePrefs = prefs
@@ -244,6 +248,18 @@ extension ToolbarMenu {
     /// What the user can do in Main UI. Nil until the server's endpoints are known.
     private var access: MainUIAccess? {
         MainUIAccess(server: menuData.server, status: authStatus)
+    }
+
+    /// Notifications need a connection that supports them. UI tests run in demo mode, which has
+    /// none, so they ask for the entry with `UITestNotifications`, which also gives it notifications.
+    private var showsNotificationsEntry: Bool {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["UITestNotifications"] != nil {
+            return true
+        }
+        #endif
+        guard let cachedHomePrefs else { return false }
+        return Preferences.getNotificationConnection(of: cachedHomePrefs) != nil
     }
 
     /// The menu lives in a popover that stays open while a settings sheet shows, since closing it
@@ -356,9 +372,10 @@ extension ToolbarMenu {
         systemRow(symbol: .gear, label: String(localized: "App Settings")) {
             showAppSettings = true
         }
-        if let prefs = cachedHomePrefs,
-           Preferences.getNotificationConnection(of: prefs) != nil {
-            systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) { select(.notifications) }
+        if showsNotificationsEntry {
+            systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) {
+                showNotifications = true
+            }
         }
         mainUIEntryRow(MainUIMenu.aboutEntry)
     }
@@ -403,19 +420,15 @@ extension ToolbarMenu {
 
     @ViewBuilder
     private func mainUIMenu() -> some View {
-        // Hidden until the current home has had at least one successful fetch —
-        // consistent with how sitemaps/pages behave during the loading state.
-        if menuData.hasSuccessfullyLoaded {
-            let homeRoute = Self.mainUIHomeRoute
-            menuRow(
-                icon: AnyView(Image("openHABIcon").resizable()),
-                label: String(localized: "Home"),
-                accessibilityId: "Home"
-            ) {
-                select(.webview)
-            }
-            .background(currentRowBackground(currentMainUIRoute == homeRoute))
+        let homeRoute = Self.mainUIHomeRoute
+        menuRow(
+            icon: AnyView(Image("openHABIcon").resizable()),
+            label: String(localized: "Home"),
+            accessibilityId: "Home"
+        ) {
+            select(.webview)
         }
+        .background(currentRowBackground(currentMainUIRoute == homeRoute))
         if menuData.isLoading, menuData.uiPages.isEmpty {
             loadingRow(label: String(localized: "Pages"))
         } else {

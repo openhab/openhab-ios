@@ -2,7 +2,145 @@
 
 ## [Unreleased]
 
+- refactor(menu): remove the unused browser target
+- test(menu): choosing a menu entry shows something
+- fix(menu): open the notifications from inside the menu
+- test(webview): wait for the timing page by asking it, not the clock
+- committed version bump: 3.4.40 (338)
+- build: update Firebase to 13.1.1
+- build: update fastlane to 2.241.2
+- test(network): give the NetworkTracker state waits time on a busy CI runner
+- feat(logging): log each chunk of the item-state stream up to the first update
+- committed version bump: 3.4.39 (337)
+- test(logging): load the timing test page as HTML at the fake server
+- ci: keep the test result bundle when the unit tests fail
+- test(logging): say why the load timing page did not load
+- test(logging): give the load timing page test time on a busy CI runner
+- fix(logs): keep the app responsive while the Logs screen loads (#1382)
+- feat(logging): log the web view's navigation steps for slow Main UI starts (#1380)
+- feat(logging): log how long Main UI takes to show item states (#1380) (#1381)
+- committed version bump: 3.4.38 (336)
+- committed version bump: 3.4.36 (335)
+- docs(agents): use the Xcode MCP for everything it can do
+- fix(bars): put the finger dots below a shown status bar
+- feat(bars): hide the status bar and the navigation bar with separate settings
+- chore(bars): order the corner modifier's properties before its method
+- chore(l10n): translate the hide bars strings into the other languages
+- fix(bars): put the finger dots at the very top of the screen
+- feat(bars): show how many fingers are counted while the bars are hidden
+- fix(bars): allow more drift in the three-finger hold, fix lint warnings, port the web menu UI tests
+- fix(bars): give the hide bars setting its own section so the explanation belongs to it
+- feat(bars): never hide the bars while VoiceOver or Switch Control is on
+- feat(bars): hide the bars on a page made without a navbar and explain the way back
+- feat(bars): hide the bars under Guided Access and turn off the reveal gesture
+- feat(bars): expose the hide bars setting in the iOS Settings app
+- feat(bars): hide status and navigation bar with the app setting, show them with three fingers
+- docs(menu): list the branches and PRs that touch Combine or AsyncAlgorithms
+- test(menu): note the tests to restore and add menu smoke tests
+- fix(menu): load again only when the connection target changes
+- fix(menu): load menu data in cancellable per-part tasks
 
+- build: update Firebase to 13.1.1
+- build: update fastlane to 2.241.2
+- test(network): give the NetworkTracker state waits time on a busy CI runner
+- feat(logging): log each chunk of the item-state stream up to the first update
+- committed version bump: 3.4.39 (337)
+- test(logging): load the timing test page as HTML at the fake server
+- ci: keep the test result bundle when the unit tests fail
+- test(logging): say why the load timing page did not load
+- test(logging): give the load timing page test time on a busy CI runner
+- fix(logs): keep the app responsive while the Logs screen loads (#1382)
+- feat(logging): log the web view's navigation steps for slow Main UI starts (#1380)
+- feat(logging): log how long Main UI takes to show item states (#1380) (#1381)
+- committed version bump: 3.4.38 (336)
+- committed version bump: 3.4.36 (335)
+- docs(agents): use the Xcode MCP for everything it can do
+- fix(bars): put the finger dots below a shown status bar
+- feat(bars): hide the status bar and the navigation bar with separate settings
+- chore(bars): order the corner modifier's properties before its method
+- chore(l10n): translate the hide bars strings into the other languages
+- fix(bars): put the finger dots at the very top of the screen
+- feat(bars): show how many fingers are counted while the bars are hidden
+- fix(bars): allow more drift in the three-finger hold, fix lint warnings, port the web menu UI tests
+- fix(bars): give the hide bars setting its own section so the explanation belongs to it
+- feat(bars): never hide the bars while VoiceOver or Switch Control is on
+- feat(bars): hide the bars on a page made without a navbar and explain the way back
+- feat(bars): hide the bars under Guided Access and turn off the reveal gesture
+- feat(bars): expose the hide bars setting in the iOS Settings app
+- feat(bars): hide status and navigation bar with the app setting, show them with three fingers
+- docs(menu): list the branches and PRs that touch Combine or AsyncAlgorithms
+- test(menu): note the tests to restore and add menu smoke tests
+- fix(menu): load again only when the connection target changes
+- fix(menu): load menu data in cancellable per-part tasks
+
+- test(logging): load the timing test page as HTML at the fake server
+- ci: keep the test result bundle when the unit tests fail
+- test(logging): say why the load timing page did not load
+- test(logging): give the load timing page test time on a busy CI runner
+- fix(logs): keep the app responsive while the Logs screen loads (#1382)
+- feat(logging): log the web view's navigation steps for slow Main UI starts (#1380)
+- feat(logging): log how long Main UI takes to show item states (#1380) (#1381)
+- committed version bump: 3.4.38 (336)
+- committed version bump: 3.4.36 (335)
+- docs(agents): use the Xcode MCP for everything it can do
+- fix(bars): put the finger dots below a shown status bar
+- feat(bars): hide the status bar and the navigation bar with separate settings
+- chore(bars): order the corner modifier's properties before its method
+- chore(l10n): translate the hide bars strings into the other languages
+- fix(bars): put the finger dots at the very top of the screen
+- feat(bars): show how many fingers are counted while the bars are hidden
+- fix(bars): allow more drift in the three-finger hold, fix lint warnings, port the web menu UI tests
+- fix(bars): give the hide bars setting its own section so the explanation belongs to it
+- feat(bars): never hide the bars while VoiceOver or Switch Control is on
+- feat(bars): hide the bars on a page made without a navbar and explain the way back
+- feat(bars): hide the bars under Guided Access and turn off the reveal gesture
+- feat(bars): expose the hide bars setting in the iOS Settings app
+- feat(bars): hide status and navigation bar with the app setting, show them with three fingers
+- docs(menu): list the branches and PRs that touch Combine or AsyncAlgorithms
+- test(menu): note the tests to restore and add menu smoke tests
+- fix(menu): load again only when the connection target changes
+- fix(menu): load menu data in cancellable per-part tasks
+
+- committed version bump: 3.4.36 (335)
+- docs(agents): use the Xcode MCP for everything it can do
+- fix(bars): put the finger dots below a shown status bar
+- feat(bars): hide the status bar and the navigation bar with separate settings
+- chore(bars): order the corner modifier's properties before its method
+- chore(l10n): translate the hide bars strings into the other languages
+- fix(bars): put the finger dots at the very top of the screen
+- feat(bars): show how many fingers are counted while the bars are hidden
+- fix(bars): allow more drift in the three-finger hold, fix lint warnings, port the web menu UI tests
+- fix(bars): give the hide bars setting its own section so the explanation belongs to it
+- feat(bars): never hide the bars while VoiceOver or Switch Control is on
+- feat(bars): hide the bars on a page made without a navbar and explain the way back
+- feat(bars): hide the bars under Guided Access and turn off the reveal gesture
+- feat(bars): expose the hide bars setting in the iOS Settings app
+- feat(bars): hide status and navigation bar with the app setting, show them with three fingers
+- docs(menu): list the branches and PRs that touch Combine or AsyncAlgorithms
+- test(menu): note the tests to restore and add menu smoke tests
+- fix(menu): load again only when the connection target changes
+- fix(menu): load menu data in cancellable per-part tasks
+
+- docs(agents): use the Xcode MCP for everything it can do
+- fix(bars): put the finger dots below a shown status bar
+- feat(bars): hide the status bar and the navigation bar with separate settings
+- committed version bump: 3.4.37 (334)
+- chore(bars): order the corner modifier's properties before its method
+- chore(l10n): translate the hide bars strings into the other languages
+- fix(bars): put the finger dots at the very top of the screen
+- feat(bars): show how many fingers are counted while the bars are hidden
+- fix(bars): allow more drift in the three-finger hold, fix lint warnings, port the web menu UI tests
+- fix(bars): give the hide bars setting its own section so the explanation belongs to it
+- feat(bars): never hide the bars while VoiceOver or Switch Control is on
+- feat(bars): hide the bars on a page made without a navbar and explain the way back
+- feat(bars): hide the bars under Guided Access and turn off the reveal gesture
+- feat(bars): expose the hide bars setting in the iOS Settings app
+- feat(bars): hide status and navigation bar with the app setting, show them with three fingers
+- committed version bump: 3.4.36 (333)
+- docs(menu): list the branches and PRs that touch Combine or AsyncAlgorithms
+- test(menu): note the tests to restore and add menu smoke tests
+- fix(menu): load again only when the connection target changes
+- fix(menu): load menu data in cancellable per-part tasks
 
 ## [Version 3.4.36, Build 333] - 2026-10-29Z
 

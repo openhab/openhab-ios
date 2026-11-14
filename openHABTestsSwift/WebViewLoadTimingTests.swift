@@ -32,20 +32,18 @@ private final class MarkCollector: NSObject, WKScriptMessageHandler {
 private final class FakeServer: NSObject, WKURLSchemeHandler {
     static let scheme = "ohtest"
 
-    private let page: String
-
-    init(page: String) {
-        self.page = page
-    }
+    /// The paths asked for, for a failure message.
+    private(set) var served: [String] = []
 
     func webView(_ webView: WKWebView, start task: any WKURLSchemeTask) {
         guard let url = task.request.url else { return }
-        let (status, type, body): (Int, String, String) = switch url.path {
-        case "/": (200, "text/html", page)
+        served.append(url.path)
+        let (status, type, body) = switch url.path {
         case "/rest/items": (200, "application/json", "[]")
         case "/rest/ui/components/ui:page": (200, "application/json", "{}")
-        // The connection id, then one update. The stream then ends, which the page sees as an error.
-        case "/rest/events/states": (200, "text/event-stream", "event: ready\ndata: c1\n\ndata: {}\n\n")
+        // The connection id, a keep-alive, then one update. The stream then ends, which the page
+        // sees as an error.
+        case "/rest/events/states": (200, "text/event-stream", "event: ready\ndata: c1\n\nevent: alive\ndata: {}\n\ndata: {}\n\n")
         default: (404, "text/plain", "")
         }
         guard let response = HTTPURLResponse(url: url, statusCode: status, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": type]) else { return }
@@ -62,6 +60,47 @@ private final class FakeServer: NSObject, WKURLSchemeHandler {
     func webView(_ webView: WKWebView, stop task: any WKURLSchemeTask) {}
 }
 
+/// What happened to the page's navigation, for a failure message: a page that never loads leaves
+/// no marks at all, which says nothing about why.
+@MainActor
+private final class NavigationRecorder: NSObject, WKNavigationDelegate {
+    private(set) var steps: [String] = []
+    private let start = ContinuousClock.now
+
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        record("started")
+    }
+
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        record("committed")
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        record("finished")
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+        record("failed before commit: \(describe(error))")
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
+        record("failed: \(describe(error))")
+    }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        record("web content process ended")
+    }
+
+    private func describe(_ error: any Error) -> String {
+        let error = error as NSError
+        return "\(error.domain) \(error.code) \(error.localizedDescription)"
+    }
+
+    private func record(_ step: String) {
+        steps.append("\(step) after \((ContinuousClock.now - start).formatted(.units(allowed: [.milliseconds])))")
+    }
+}
+
 /// A web view with the timing script, as the app installs it.
 @MainActor
 private final class TimingPage {
@@ -71,20 +110,53 @@ private final class TimingPage {
 
     let collector = MarkCollector()
     let webView: WKWebView
+    private let page: String
+    private let server = FakeServer()
+    private let navigation = NavigationRecorder()
 
-    init(page: String) {
+    /// Everything known about the page, for a failure message.
+    var diagnosis: String {
+        """
+        marks: \(collector.events.map(\.event)); navigation: \(navigation.steps); \
+        served: \(server.served); isLoading: \(webView.isLoading), \
+        progress: \(webView.estimatedProgress), url: \(webView.url?.absoluteString ?? "none")
+        """
+    }
+
+    /// - Parameter before: a script that runs ahead of the timing script, e.g. to stand in for
+    ///   what WebKit only fills in for a real network connection.
+    init(page: String, before: String? = nil) {
         let controller = WKUserContentController()
         controller.add(collector, name: WebViewLoadTiming.messageHandlerName)
+        if let before {
+            controller.addUserScript(WKUserScript(source: before, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        }
         controller.addUserScript(WKUserScript(source: WebViewLoadTiming.script, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         let configuration = WKWebViewConfiguration()
         configuration.userContentController = controller
-        configuration.setURLSchemeHandler(FakeServer(page: page), forURLScheme: FakeServer.scheme)
+        configuration.setURLSchemeHandler(server, forURLScheme: FakeServer.scheme)
         webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 390, height: 844), configuration: configuration)
+        webView.navigationDelegate = navigation
+        self.page = page
     }
 
-    func load() {
-        guard let url = URL(string: "\(FakeServer.scheme)://openhab/") else { return }
-        webView.load(URLRequest(url: url))
+    /// Loads the page as HTML at the fake server's address, so its requests still go there, and
+    /// waits until it has loaded.
+    ///
+    /// The wait asks the page instead of watching the clock. A CI simulator can stall the web
+    /// content process for minutes before the page starts: in one run every web view test took
+    /// ten minutes. The shim tests, which ask the page, passed; this one, counting a minute per
+    /// mark, ran out before its page had started. Asking waits as long as the process does.
+    func load() async {
+        webView.loadHTMLString(page, baseURL: URL(string: "\(FakeServer.scheme)://openhab/"))
+        let loaded = "String(location.protocol === '\(FakeServer.scheme):' && document.readyState === 'complete')"
+        for _ in 0 ..< 600 {
+            if await (try? webView.evaluateJavaScript(loaded)) as? String == "true" {
+                return
+            }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        timedOut()
     }
 
     /// Waits until `count` marks named `event` have come in.
@@ -96,8 +168,16 @@ private final class TimingPage {
             }
             try await Task.sleep(for: .milliseconds(100))
         }
-        Issue.record("timed out; got \(collector.events.map(\.event))")
+        timedOut()
         return false
+    }
+
+    /// Records the timeout with what the page did. Also on stderr: the CI log's formatter drops the
+    /// text of Swift Testing issues.
+    private func timedOut() {
+        let message = "WebViewLoadTimingTests timed out; \(diagnosis)"
+        FileHandle.standardError.write(Data((message + "\n").utf8))
+        Issue.record(Comment(rawValue: message))
     }
 
     /// Waits until a mark matching `predicate` has come in.
@@ -109,7 +189,7 @@ private final class TimingPage {
             }
             try await Task.sleep(for: .milliseconds(100))
         }
-        Issue.record("timed out; got \(collector.events.map(\.event))")
+        timedOut()
         return nil
     }
 }
@@ -133,8 +213,25 @@ struct WebViewLoadTimingTests {
           fetch('/rest/events/states?accessToken=secret').then(function (r) { return r.text() }).then(function (body) { window.__fetchedStates = body });
           fetch('/rest/events/states?drop').then(function (r) { return r.text() }).catch(function () {});
         </script></body></html>
+        """, before: """
+        // The fake server is no network connection, so WebKit names no protocol: these entries
+        // are what a real one reports.
+        window.PerformanceObserver = function (callback) {
+          this.observe = function () {
+            var list = { getEntries: function () {
+              return [
+                { name: location.origin + '/images/logo.png', nextHopProtocol: 'h2' },
+                { name: location.origin + '/rest/items?accessToken=secret', nextHopProtocol: '' },
+                { name: location.origin + '/rest/tags?accessToken=secret', nextHopProtocol: 'h2' },
+                { name: location.origin + '/rest/ui/tiles', nextHopProtocol: 'http/1.1' }
+              ]
+            } }
+            setTimeout(function () { callback(list) }, 0)
+          }
+          this.disconnect = function () {}
+        }
         """)
-        page.load()
+        await page.load()
 
         _ = try await page.waitForEvent { $0.event == "load" }
         let names = page.collector.events.map(\.event)
@@ -142,6 +239,10 @@ struct WebViewLoadTimingTests {
         let domReady = try #require(names.firstIndex(of: "domContentLoaded"))
         let loaded = try #require(names.firstIndex(of: "load"))
         #expect(domReady < loaded)
+        _ = try await page.waitForEvent { $0.event == "protocol" }
+        let protocols = page.collector.events.filter { $0.event == "protocol" }
+        #expect(protocols.map(\.path) == ["/rest/tags"], "Only the first REST call that names its protocol, without its query")
+        #expect(protocols.first?.detail == "h2")
 
         let xhr = try await page.waitForEvent { $0.event == "rest" && $0.path == "/rest/items" }
         #expect(xhr?.method == "GET")
@@ -158,6 +259,14 @@ struct WebViewLoadTimingTests {
         for step in ["statesStreamOpen", "statesStreamReady", "statesFirstUpdate"] {
             #expect(try await page.waitForCount(of: step, 2), "\(step)")
         }
+        let chunks = page.collector.events.filter { $0.event == "statesChunk" }.compactMap(\.detail)
+        #expect(chunks.first?.hasPrefix("#1 ") == true, "\(chunks)")
+        #expect(chunks.joined(separator: "; ").contains("ready, alive, message"), "Each chunk names its events: \(chunks)")
+        #expect(!chunks.joined().contains("c1"), "Never the data")
+        let firstUpdate = page.collector.events.first { $0.event == "statesFirstUpdate" && $0.detail != nil }
+        #expect(firstUpdate?.detail?.hasPrefix("after 1 chunk(s), page ") == true, "A keep-alive is not an update: \(String(describing: firstUpdate?.detail))")
+        let start = page.collector.events.first { $0.event == "documentStart" }
+        #expect(["visible", "hidden"].contains(start?.detail), "The page's visibility at the start")
         let error = try await page.waitForEvent { $0.event == "statesStreamError" && $0.detail != "read failed" }
         #expect(error != nil, "A stream that ends is reported too")
         let dropped = try await page.waitForEvent { $0.event == "statesStreamError" && $0.detail == "read failed" }
@@ -186,6 +295,29 @@ struct WebViewLoadTimingTests {
     func capsLength() {
         let event = WebViewLoadTimingEvent(body: ["event": "x", "ms": NSNumber(value: 0), "path": String(repeating: "a", count: 1000)] as [String: Any])
         #expect(event?.path?.count == 200)
+    }
+
+    @Test("Logs a navigation step by its path only", arguments: [
+        ("http://192.168.2.10:8080", "navigation started /"),
+        ("http://192.168.2.10:8080/overview/?token=secret#top", "navigation started /overview/"),
+        ("https://myopenhab.org/page/k%C3%BCche", "navigation started /page/k%C3%BCche"),
+        (nil, "navigation started")
+    ] as [(String?, String)])
+    func navigationLogLine(url: String?, expected: String) {
+        #expect(WebViewLoadTiming.navigationLogLine("started", url: url.flatMap(URL.init(string:))) == expected)
+    }
+
+    @Test("Logs a failed navigation without its address")
+    func failureStep() {
+        let error = URLError(.timedOut, userInfo: [NSURLErrorFailingURLStringErrorKey: "http://192.168.2.10:8080/?token=secret"])
+        #expect(WebViewLoadTiming.failureStep(error) == "failed (NSURLErrorDomain -1001)")
+    }
+
+    @Test("Logs whether a load needs a new web view")
+    func webViewLogLine() {
+        #expect(WebViewLoadTiming.webViewLogLine(isNew: true, isSwitch: true) == "new web view for this home")
+        #expect(WebViewLoadTiming.webViewLogLine(isNew: false, isSwitch: true) == "switching to this home's web view")
+        #expect(WebViewLoadTiming.webViewLogLine(isNew: false, isSwitch: false) == "reusing the web view")
     }
 
     @Test("Logs which page a load asks for", arguments: [

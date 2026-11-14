@@ -57,6 +57,7 @@ struct SitemapPageView: View {
             .navigationTitle(viewModel.pageTitle)
             .navigationBarTitleDisplayMode(.large)
             .toolbar { toolbarContent }
+            .hidesNavigationBarWithApp()
             .alert("Error", isPresented: errorAlertPresented, actions: {
                 Button("OK", role: .cancel) {}
             }, message: {

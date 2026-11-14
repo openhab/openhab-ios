@@ -424,6 +424,9 @@ public actor Preferences {
     @UserDefault("hideStatusBar", defaultValue: false)
     public var hideStatusBar: Bool
 
+    @UserDefault("hideNavigationBar", defaultValue: false)
+    public var hideNavigationBar: Bool
+
     @UserDefault("currentWebViewPath", defaultValue: "")
     public var currentWebViewPath: String
 
@@ -748,6 +751,10 @@ public extension Preferences {
 
     func setHideStatusBar(_ value: Bool) {
         hideStatusBar = value
+    }
+
+    func setHideNavigationBar(_ value: Bool) {
+        hideNavigationBar = value
     }
 
     func setCurrentWebViewPath(_ value: String) {
