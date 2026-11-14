@@ -46,6 +46,45 @@ final class ToolbarMenuUITests: XCTestCase {
         XCTAssertTrue(sitemapsHeader.isHittable, "Sitemaps header should be interactable once the menu has loaded")
     }
 
+    /// The menu opens from its button while the home is still loading, so the user can switch to
+    /// another home or page when loading is slow or stuck.
+    func testMenuOpensWhileTheHomeIsLoading() {
+        app.launchEnvironment["UITestOpenMenu"] = nil
+        app.launch()
+
+        let menuButton = app.buttons["HamburgerButton"]
+        XCTAssertTrue(menuButton.waitForExistence(timeout: 5), "The menu button should show while loading")
+        XCTAssertTrue(menuButton.isHittable, "The menu button should be tappable while loading")
+        menuButton.tap()
+
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "The menu should open while the home is loading")
+    }
+
+    /// The menu opens again after the user picked a home in it, which swaps the screen behind the
+    /// menu button while the menu closes.
+    func testMenuReopensAfterPickingAHome() {
+        app.launch()
+
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
+        let homesHeader = app.buttons.matching(NSPredicate(format: "label BEGINSWITH[c] 'Homes'")).firstMatch
+        XCTAssertTrue(homesHeader.waitForExistence(timeout: 20), "Homes header should be present")
+        homesHeader.tap()
+
+        // The home rows are static texts of their own; the header's label is inside its button.
+        let homeRow = app.staticTexts.matching(NSPredicate(format: "label == 'Home#1'")).allElementsBoundByIndex
+            .first { $0.isHittable && !homesHeader.frame.contains($0.frame) }
+        XCTAssertNotNil(homeRow, "The home list should show the home")
+        homeRow?.tap()
+
+        let closed = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: appSettingsRow)
+        wait(for: [closed], timeout: 5)
+
+        let menuButton = app.buttons["HamburgerButton"]
+        XCTAssertTrue(menuButton.waitForExistence(timeout: 5), "The menu button should be back")
+        menuButton.tap()
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "The menu should open again after the home switch")
+    }
+
     /// A tap outside the popover closes it.
     func testTapOutsideClosesTheMenu() {
         app.launch()

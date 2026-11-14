@@ -283,7 +283,10 @@ class OpenHABWebViewModel: ObservableObject {
 
         let isCloudConnection = activeConfig.isCloudConnection
         let homeId = currentPrefs.id
+        let isNewWebView = views[homeId] == nil
         let newWebview = getOrCreateWebView(for: homeId, isCloudConnection: isCloudConnection)
+        let webViewLine = WebViewLoadTiming.webViewLogLine(isNew: isNewWebView, isSwitch: newWebview !== webView)
+        Logger.webViewLoad.notice("Main UI load: \(webViewLine, privacy: .public)")
         // The home is known now, so the sign-in can be looked up for it.
         refreshAuthTracking()
         if newWebview !== webView {

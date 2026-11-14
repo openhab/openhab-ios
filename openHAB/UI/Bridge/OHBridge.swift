@@ -200,6 +200,8 @@ struct OHBridgeNavbarState: Decodable, Equatable {
     let hidden: Bool
     /// Hidden because a card, popup or search covers the page, not because the page scrolled.
     var covered: Bool?
+    /// The page has no navbar at all (`hideNavbar`, e.g. in kiosk mode), as opposed to one that scrolled away.
+    var noNavbar: Bool?
     let back: Back?
     let leading: [OHBridgeNavbarAction]
     let trailing: [OHBridgeNavbarAction]

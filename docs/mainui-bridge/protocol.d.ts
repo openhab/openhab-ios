@@ -174,6 +174,8 @@ interface NavbarState {
   titleInContent: boolean
   /** The bar should be out of sight: the page scrolled it away, or a popup, expanded card or search covers it. */
   hidden: boolean
+  /** Sent only when true: the page was made without a navbar (`hideNavbar`, kiosk mode). The app may hide its bar too. */
+  noNavbar?: boolean
   /** null when there is nothing to go back to. */
   back: { label?: string } | null
   leading: NavbarAction[]
