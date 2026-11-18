@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [Version 3.4.42, Build 340] - 2026-11-18Z
+
+- Cleaning up CHANGELOG.md
+- refactor: use Swift optionals' built-in sugar (#1383)
+- chore(deps): bump addressable from 2.9.0 to 2.9.1 (#1384)
+- Hide status and navigation bar setting (fixes burger menu with hideNavbar) (#1379)
+- test(network): give the NetworkTracker state waits time on a busy CI runner
+- test(logging): give the load timing page test time on a busy CI runner
+- fix(logs): keep the app responsive while the Logs screen loads (#1382)
+- feat(logging): log how long Main UI takes to show item states (#1380) (#1381)
+
 - refactor(menu): remove the unused browser target
 - test(menu): choosing a menu entry shows something
 - fix(menu): open the notifications from inside the menu
