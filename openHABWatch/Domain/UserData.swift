@@ -33,6 +33,7 @@ final class UserData {
     var showCertificateAlert = false
     var certificateErrorDescription = ""
     var isLoadingSitemap = false
+    var pendingCommandConfirmation: PendingCommandConfirmation?
 
     // Cache last successful widgets to prevent empty state during reconnections
     private var cachedWidgets: [OpenHABWidget] = []
