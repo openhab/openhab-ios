@@ -53,6 +53,15 @@ private final class ShimPage {
     </body></html>
     """
 
+    /// A page made with `hideNavbar`: Main UI renders no navbar for it.
+    static let noNavbarHTML = """
+    <!DOCTYPE html><html><body>
+    <div id="app" class="framework7-root">
+      <div class="view view-main"><div class="page page-current"><div class="page-content"><p>Kiosk</p></div></div></div>
+    </div>
+    </body></html>
+    """
+
     /// Framework7's router as far as the shim uses it. `/` only redirects. Closing a modal and going
     /// back are recorded in `__closed` and `__back`.
     static let fakeRouter = """
@@ -245,6 +254,36 @@ struct OHBridgeShimTests {
         page.load(ShimPage.sidebarHTML)
         let address = try await page.waitFor("document.getElementById('app') ? location.pathname + location.search : 'null'")
         #expect(address == "/page/kitchen")
+    }
+
+    @Test("A page made without a navbar says so, one with a navbar does not")
+    func shimReportsPageWithoutNavbar() async throws {
+        let withoutNavbar = ShimPage()
+        withoutNavbar.load(ShimPage.noNavbarHTML)
+        let json = try await withoutNavbar.waitFor("JSON.stringify((__posted.filter(function (m) { return m.type === 'navbar.state' }).pop() || {}).payload || null)")
+        #expect(try JSONDecoder().decode(OHBridgeNavbarState.self, from: Data(json.utf8)).noNavbar == true)
+
+        let withNavbar = ShimPage()
+        withNavbar.load(ShimPage.navbarHTML)
+        let other = try await withNavbar.waitFor("JSON.stringify((__posted.filter(function (m) { return m.type === 'navbar.state' }).pop() || {}).payload || null)")
+        #expect(try JSONDecoder().decode(OHBridgeNavbarState.self, from: Data(other.utf8)).noNavbar == nil)
+    }
+
+    @Test("Marks for the load timing log when the restored page has opened, without its query")
+    func shimMarksRestore() async throws {
+        let page = ShimPage(
+            info: "{ features: ['routeRestore'], initialHistory: ['/', '/page/kitchen?token=secret#top'] }",
+            host: "window.__marks = []; window.OHLoadTiming = { mark: function (e, f) { __marks.push({ event: e, path: f.path, detail: f.detail }) } };"
+        )
+        page.load(ShimPage.sidebarHTML.replacingOccurrences(of: "</body>", with: """
+        <script>document.querySelector('.view-main').f7View = { router: {
+          history: ['/', '/page/kitchen?token=secret#top'], propsHistory: [], allowPageChange: true,
+          currentPageEl: { f7Page: { route: { url: '/page/kitchen?token=secret#top' } } },
+          findMatchingRoute: function (url) { return { route: { path: url } } }
+        } }</script></body>
+        """))
+        let mark = try await page.waitFor("JSON.stringify(window.__marks && __marks.length ? __marks[0] : null)")
+        #expect(mark == #"{"event":"routeRestore","path":"/page/kitchen","detail":"page open"}"#)
     }
 
     @Test("A bar above the web view leaves no room on pages, and the app shows the title")

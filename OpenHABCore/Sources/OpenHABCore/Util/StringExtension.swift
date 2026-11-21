@@ -212,10 +212,6 @@ public extension String? {
             ""
         }
     }
-
-    var isNilOrEmpty: Bool {
-        self == nil || self!.isEmpty
-    }
 }
 
 public extension String {

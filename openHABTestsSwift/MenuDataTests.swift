@@ -169,12 +169,6 @@ struct MenuDataTests {
 
     // MARK: - State machine
 
-    @Test("hasSuccessfullyLoaded is false on init")
-    func initialLoadGateIsFalse() {
-        let service = MenuDataService()
-        #expect(service.hasSuccessfullyLoaded == false)
-    }
-
     @Test("clearAll empties all collections")
     func clearAllEmptiesCollections() {
         let service = MenuDataService()
@@ -185,15 +179,6 @@ struct MenuDataTests {
         #expect(service.sitemaps.isEmpty)
         #expect(service.uiTiles.isEmpty)
         #expect(service.uiPages.isEmpty)
-    }
-
-    @Test("clearAll does not reset hasSuccessfullyLoaded")
-    func clearAllKeepsLoadGate() {
-        let service = MenuDataService()
-        service.hasSuccessfullyLoaded = true
-        service.clearAll()
-        // clearAll is for clearAndReload, not home switch — gate should stay true
-        #expect(service.hasSuccessfullyLoaded == true)
     }
 
     @Test("reload without an active connection keeps the current snapshot")
@@ -225,61 +210,50 @@ struct MenuDataTests {
         #expect(service.uiPages.count == 1)
     }
 
-    @Test("isLoading stays on until the last of overlapping fetches ends")
-    func overlappingFetchesKeepLoading() async {
-        // A tracker with no connection, so the service starts no fetch of its own.
-        let service = MenuDataService(networkTracker: NetworkTracker())
-        let (first, endFirst) = AsyncStream<Void>.makeStream()
-        let (second, endSecond) = AsyncStream<Void>.makeStream()
-        let firstFetch = Task { await service.whileLoading { for await _ in first {} } }
-        let secondFetch = Task { await service.whileLoading { for await _ in second {} } }
-        while service.fetchesInFlight < 2 {
-            await Task.yield()
+    private func connectionState(_ url: String?, _ status: NetworkStatus = .connected) -> NetworkState {
+        let connection = url.map {
+            ConnectionInfo(configuration: ConnectionConfiguration(url: $0, username: "", password: "", supportsNotifications: false, priority: 0), version: 8)
         }
-
-        endFirst.finish()
-        await firstFetch.value
-        #expect(service.isLoading)
-
-        endSecond.finish()
-        await secondFetch.value
-        #expect(!service.isLoading)
+        return NetworkState(activeConnection: connection, status: status, nextRetryDate: nil, isNetworkAvailable: true)
     }
 
-    @Test("a cancelled pull-to-refresh does not cancel the reload it started")
-    func cancelledRefreshDoesNotCancelTheReload() async {
+    @Test("fetches once per connection, not on every state the tracker reports")
+    func fetchesOncePerConnection() {
         // A tracker with no connection, so the service starts no fetch of its own.
         let service = MenuDataService(networkTracker: NetworkTracker())
-        let (started, signalStarted) = AsyncStream<Void>.makeStream()
-        let (proceed, signalProceed) = AsyncStream<Void>.makeStream()
-        var reloadWasCancelled: Bool?
-        let refresh = Task {
-            await service.refresh {
-                signalStarted.finish()
-                for await _ in proceed {}
-                reloadWasCancelled = Task.isCancelled
-            }
-        }
-        for await _ in started {}
-
-        // SwiftUI cancels the refresh task, here while the reload is still running.
-        refresh.cancel()
-        signalProceed.finish()
-        await refresh.value
-
-        #expect(reloadWasCancelled == false)
+        let local = "http://192.168.2.10:8080"
+        // What a launch reports: found while connecting, connected, then the path monitor again.
+        let fetched = [
+            connectionState(local, .connecting), connectionState(local), connectionState(local)
+        ].map { service.connectionToFetch(for: $0)?.configuration.url }
+        #expect(fetched == [local, nil, nil])
+        #expect(service.isConnected)
+        // Another connection fetches.
+        #expect(service.connectionToFetch(for: connectionState("https://myopenhab.org"))?.configuration.url == "https://myopenhab.org")
     }
 
-    @Test("clearForHomeSwitch empties collections and resets load gate")
+    @Test("fetches again after a connection loss and after a home switch")
+    func fetchesAgainAfterLossAndHomeSwitch() {
+        let service = MenuDataService(networkTracker: NetworkTracker())
+        let local = "http://192.168.2.10:8080"
+        _ = service.connectionToFetch(for: connectionState(local))
+        #expect(service.connectionToFetch(for: connectionState(nil, .connecting)) == nil)
+        #expect(!service.isConnected)
+        #expect(service.connectionToFetch(for: connectionState(local))?.configuration.url == local)
+
+        // A home on the same server still gets its own menu.
+        service.clearForHomeSwitch()
+        #expect(service.connectionToFetch(for: connectionState(local))?.configuration.url == local)
+    }
+
+    @Test("clearForHomeSwitch empties collections")
     func clearForHomeSwitchResetsAll() {
         let service = MenuDataService()
         service.sitemaps = [makeSitemap(name: "a", label: "A")]
-        service.hasSuccessfullyLoaded = true
         service.clearForHomeSwitch()
         #expect(service.sitemaps.isEmpty)
         #expect(service.uiTiles.isEmpty)
         #expect(service.uiPages.isEmpty)
-        #expect(service.hasSuccessfullyLoaded == false)
     }
 
     // MARK: - Helpers
